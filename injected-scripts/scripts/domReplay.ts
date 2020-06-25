@@ -1,6 +1,6 @@
 // NOTE: do not use node dependencies
 
-import { INodeData, IDomChangeEvent } from './interfaces/IDomChangeEvent';
+import { INodeData, IDomChangeEvent } from '../interfaces/IDomChangeEvent';
 
 const idMap = new Map<number, Node>();
 

@@ -12,6 +12,7 @@
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "@secret-agent/shared-session-state": "^0.2.8",
+    "@secret-agent/injected-scripts": "^0.2.8",
     "command-line-args": "^5.1.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",

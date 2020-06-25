@@ -1,3 +1,3 @@
-import IExecJsPathResult from '../lib/page-scripts/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 
 export default IExecJsPathResult;

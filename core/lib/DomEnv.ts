@@ -8,9 +8,9 @@ import FrameTracker from './FrameTracker';
 import Log from '@secret-agent/shared-logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
-import IElementRect from './page-scripts/interfaces/IElementRect';
-import IExecJsPathResult from './page-scripts/interfaces/IExecJsPathResult';
-import IAttachedState from './page-scripts/interfaces/IAttachedStateCopy';
+import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
+import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
@@ -152,5 +152,12 @@ const typesonRegistryScript = fs.readFileSync(
   require.resolve('typeson-registry/dist/presets/builtin.js'),
   'utf8',
 );
-const domStorageScript = fs.readFileSync(`${__dirname}/page-scripts/build/domStorage.js`, 'utf8');
-const jsPathScript = fs.readFileSync(`${__dirname}/page-scripts/build/jsPath.js`, 'utf8');
+
+const domStorageScript = fs.readFileSync(
+  require.resolve(`@secret-agent/injected-scripts/dist/scripts/domStorage.js`),
+  'utf8',
+);
+const jsPathScript = fs.readFileSync(
+  require.resolve(`@secret-agent/injected-scripts/dist/scripts/jsPath.js`),
+  'utf8',
+);

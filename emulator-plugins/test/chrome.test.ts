@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/shared-testing/helpers';
-import getOverrideScript from '../shared/page-scripts';
+import getOverrideScript from '../shared/injected-scripts';
 import inspectScript from './inspectHierarchy';
 import ChromeJson from '../emulate-chrome-80/chrome.json';
 import { inspect } from 'util';

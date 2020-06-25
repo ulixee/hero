@@ -1,7 +1,7 @@
-import IElementRect from './interfaces/IElementRect';
-import INodeTracker from './interfaces/INodeTracker';
-import IAttachedState from './interfaces/IAttachedStateCopy';
-import IExecJsPathResult from './interfaces/IExecJsPathResult';
+import IElementRect from '../interfaces/IElementRect';
+import INodeTracker from '../interfaces/INodeTracker';
+import IAttachedState from '../interfaces/IAttachedStateCopy';
+import IExecJsPathResult from '../interfaces/IExecJsPathResult';
 
 declare type TSON = any;
 

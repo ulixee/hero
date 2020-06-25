@@ -1,5 +1,5 @@
 import inspectHierarchy from './inspectHierarchy';
-import { proxyFunction } from '../shared/page-scripts/utils';
+import { proxyFunction } from '../shared/injected-scripts/utils';
 import { inspect } from 'util';
 
 const debug = process.env.DEBUG || false;

@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 
 const domReplayScript = fs.readFileSync(
-  require.resolve('../page-scripts/build/domReplay.js'),
+  require.resolve('@secret-agent/injected-scripts/dist/scripts/domReplay.js'),
   'utf8',
 );
 

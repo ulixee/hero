@@ -1,4 +1,4 @@
-import getOverrideScript from '../shared/page-scripts';
+import getOverrideScript from '../shared/injected-scripts';
 import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
 import parseNavigatorPlugins from '../shared/parseNavigatorPlugins';
 import { platform } from 'os';

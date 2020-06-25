@@ -18,9 +18,9 @@ import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import UserProfile from './lib/UserProfile';
-import IExecJsPathResult from './lib/page-scripts/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from './lib/page-scripts/interfaces/IAttachedStateCopy';
+import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
 
 export { GlobalPool, Window, Session, LocationTrigger };
 

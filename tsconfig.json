@@ -2,39 +2,37 @@
   "compileOnSave": true,
   "compilerOptions": {
     "incremental": true,
-    "target": "es2018",
+    "target": "ES2018",
     "module": "commonjs",
-    "lib": ["es2018", "dom"],
+    "lib": ["es2018", "dom", "dom.iterable", "scripthost"],
     "noImplicitAny": false,
     "inlineSourceMap": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "outDir": ".",
+    "outDir": "./build",
     "preserveSymlinks": false,
     "experimentalDecorators": true
   },
+  "baseUrl": ".",
   "references": [
     {
-      "path": "shared/session-state/page-scripts"
+      "path": "injected-scripts/tsconfig.json"
     },
     {
-      "path": "core/lib/page-scripts"
-    },
-    {
-      "path": "website"
+      "path": "website/tsconfig.json"
     }
   ],
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "**/*.json"],
   "exclude": [
     "node_modules",
     "*.js",
     "**/dist",
     "**/build",
     "**/built",
-    "website",
     "replay",
-    "**/page-scripts"
+    "website",
+    "injected-scripts"
   ]
 }

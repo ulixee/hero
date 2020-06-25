@@ -1,4 +1,4 @@
-import getOverrideScript from '../shared/page-scripts';
+import getOverrideScript from '../shared/injected-scripts';
 import codecs from './codecs.json';
 import navigator from './navigator.json';
 import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';

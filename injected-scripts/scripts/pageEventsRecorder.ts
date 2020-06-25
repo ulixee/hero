@@ -1,9 +1,9 @@
 // NOTE: do not use node dependencies
 
-import { IDomChangeEvent, INodeData } from './interfaces/IDomChangeEvent';
-import { IMouseEvent } from './interfaces/IMouseEvent';
-import { IFocusEvent } from './interfaces/IFocusEvent';
-import { IScrollEvent } from './interfaces/IScrollEvent';
+import { IDomChangeEvent, INodeData } from '../interfaces/IDomChangeEvent';
+import { IMouseEvent } from '../interfaces/IMouseEvent';
+import { IFocusEvent } from '../interfaces/IFocusEvent';
+import { IScrollEvent } from '../interfaces/IScrollEvent';
 
 // exporting a type is ok. Don't export variables or will blow up the page
 export type PageRecorderResultSet = [

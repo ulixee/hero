@@ -16,7 +16,7 @@ import { AllowedNames } from '@secret-agent/commons/AllowedNames';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
 import * as Url from 'url';
-import IElementRect from './page-scripts/interfaces/IElementRect';
+import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import Interactor from './Interactor';
 import LocationTracker from './LocationTracker';
 import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
@@ -29,7 +29,7 @@ import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElemen
 import FrameTracker from './FrameTracker';
 import WindowEvents, { IWindowEventParams } from './WindowEvents';
 import { EmulatorPlugin } from '@secret-agent/emulators';
-import IExecJsPathResult from './page-scripts/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import DomEnv from './DomEnv';
 

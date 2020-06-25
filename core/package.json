@@ -14,6 +14,7 @@
     "@secret-agent/shared-logger": "^0.2.8",
     "@secret-agent/shared-session-state": "^0.2.8",
     "@secret-agent/mitm": "^0.2.8",
+    "@secret-agent/injected-scripts": "^0.2.8",
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.37",
     "puppeteer": "~2.1.1",

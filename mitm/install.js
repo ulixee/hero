@@ -1,12 +1,12 @@
-import * as https from 'https';
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as os from 'os';
-import { createHash } from 'crypto';
-import { gunzipSync } from 'zlib';
+const { execSync } = require('child_process');
+const https = require('https');
+const fs = require('fs');
+const os = require('os');
+const { createHash } = require('crypto');
+const { gunzipSync } = require('zlib');
 
 const fileHost =
-  process.env.SA_CONNECT_LIBRARY_HOST ?? 'https://storage.googleapis.com/secret-agent';
+  process.env.SA_CONNECT_LIBRARY_HOST || 'https://storage.googleapis.com/secret-agent';
 
 (async function install() {
   const goVersionNeeded = getGoVersionNeeded();
@@ -37,7 +37,7 @@ You can install go ${goVersionNeeded} and run "go build" from the mitm/socket di
   console.log('Downloading Secret Agent connect library from %s (md5=%s)', filepath, checksum);
   const zippedFile = await download(filepath);
 
-  const downloadMd5 = getFileMd5(zippedFile, checksum);
+  const downloadMd5 = getFileMd5(zippedFile);
   if (downloadMd5 !== checksum) {
     console.log('WARN!! Checksum failed for the Secret Agent connect library', {
       checksum,
@@ -58,7 +58,7 @@ You can install go ${goVersionNeeded} and run "go build" from the mitm/socket di
 })();
 
 function buildFilename() {
-  let platform: string = os.platform();
+  let platform = os.platform();
   let arch = os.arch();
   let fileExt = 'gz';
   if (arch === 'x64') {
@@ -73,49 +73,51 @@ function buildFilename() {
   return `connect_${platform}_${arch}.${fileExt}`;
 }
 
-async function download(filepath: string) {
-  return new Promise<Buffer>((resolve, reject) => {
-    const req = https.get(filepath, async res => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return download(res.headers.location)
-          .then(resolve)
-          .catch(reject);
-      }
-
-      try {
-        const buffer: Buffer[] = [];
-        for await (const chunk of res) {
-          buffer.push(chunk);
+async function download(filepath) {
+  return (
+    new Promise() <
+    Buffer >
+    ((resolve, reject) => {
+      const req = https.get(filepath, async res => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          return download(res.headers.location)
+            .then(resolve)
+            .catch(reject);
         }
-        const output = Buffer.concat(buffer);
-        resolve(output);
-      } catch (err) {
+
+        try {
+          const buffer = [];
+          for await (const chunk of res) {
+            buffer.push(chunk);
+          }
+          const output = Buffer.concat(buffer);
+          resolve(output);
+        } catch (err) {
+          reject(err);
+        }
+      });
+      req.on('error', err => {
+        console.log('ERROR downloading needed Secret Agent connect library', err);
         reject(err);
-      }
-    });
-    req.on('error', err => {
-      console.log('ERROR downloading needed Secret Agent connect library', err);
-      reject(err);
-    });
-  });
+      });
+    })
+  );
 }
 
-function getFileMd5(file: Buffer, checksum: string) {
+function getFileMd5(file) {
   return createHash('md5')
     .update(file)
     .digest()
     .toString('hex');
 }
 
-function getSourceChecksum(filename: string) {
+function getSourceChecksum(filename) {
   const checksum = fs.readFileSync(`${__dirname}/socket/.checksum`, 'utf8');
   const version = checksum.match(/VERSION=(.+)/)[1];
 
-  const expectedMd5 = checksum
-    .split('\n')
-    .find(x => x.startsWith(filename))
-    ?.split('=')
-    .pop();
+  const match = checksum.split('\n').find(x => x.startsWith(filename));
+
+  const expectedMd5 = match ? match.split('=').pop() : undefined;
 
   if (!expectedMd5) {
     return {
@@ -150,7 +152,7 @@ function getGoVersionNeeded() {
   return goMatch[1];
 }
 
-function isGoVersionInstalled(wantedVersion: string) {
+function isGoVersionInstalled(wantedVersion) {
   const goVersionNeeded = wantedVersion.split('.');
   try {
     const goVersion = execSync('go version', { encoding: 'utf8' });

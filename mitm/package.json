@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node install.js",
-    "build-install": "tsc install.ts && yarn build",
+    "build-install": "npm run build",
     "postinstall": "npm run build"
   },
   "author": "",

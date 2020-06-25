@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["DOM", "DOM.Iterable", "ES2018"],
+    "declaration": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "composite": true,
+    "removeComments": true
+  },
+  "include": ["interfaces/*.ts", "scripts/*.ts"],
+  "exclude": ["node_modules"]
+}

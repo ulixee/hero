@@ -1,4 +1,4 @@
-import { IDomChangeEvent } from '../page-scripts/interfaces/IDomChangeEvent';
+import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 

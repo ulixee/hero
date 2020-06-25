@@ -1,5 +1,5 @@
-import { IDomStorageForOrigin, IStorageEntry } from './interfaces/IDomStorage';
-import { IIndexedDB } from './interfaces/IIndexedDB';
+import { IDomStorageForOrigin, IStorageEntry } from '../interfaces/IDomStorage';
+import { IIndexedDB } from '../interfaces/IIndexedDB';
 
 declare type TSON = any;
 

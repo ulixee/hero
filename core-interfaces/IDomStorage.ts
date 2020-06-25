@@ -1,12 +1,12 @@
 import IDomStorage, {
   IDomStorageForOrigin,
   IStorageEntry,
-} from '@secret-agent/core/lib/page-scripts/interfaces/IDomStorage';
+} from '@secret-agent/injected-scripts/interfaces/IDomStorage';
 import {
   IIndexedDB,
   IObjectStore,
   IObjectStoreIndex,
-} from '@secret-agent/core/lib/page-scripts/interfaces/IIndexedDB';
+} from '@secret-agent/injected-scripts/interfaces/IIndexedDB';
 
 export default IDomStorage;
 

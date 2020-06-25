@@ -6,7 +6,7 @@ import DomChangesTable, {
 } from '@secret-agent/shared-session-state/models/DomChangesTable';
 import { IPageRecord } from '@secret-agent/shared-session-state/models/PagesTable';
 import { ISessionRecord } from '@secret-agent/shared-session-state/models/SessionTable';
-import { IDomChangeEvent } from '../page-scripts/interfaces/IDomChangeEvent';
+import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 
 export default class SessionLoader {
   public ticks: IMajorTick[] = [];

@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/shared-testing/helpers';
-import getOverrideScript from '../shared/page-scripts';
+import getOverrideScript from '../shared/injected-scripts';
 import inspectScript from './inspectHierarchy';
 import navigatorJson from '../emulate-chrome-80/navigator.json';
 import chrome80Dom from './chrome80DomProperties.json';
