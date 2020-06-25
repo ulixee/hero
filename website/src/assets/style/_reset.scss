@@ -1,0 +1,23 @@
+@mixin reset-ol {
+  list-style-type: none;
+  list-style-position: outside;
+  text-indent: 0;
+  padding-left: 0;
+  margin: 0;
+  line-height: inherit;
+  & > li {
+    margin: 0;
+  }
+}
+
+@mixin reset-ul {
+  list-style-type: none;
+  list-style-position: outside;
+  text-indent: 0;
+  padding-left: 0;
+  margin: 0;
+  line-height: inherit;
+  & > li {
+    margin: 0;
+  }
+}

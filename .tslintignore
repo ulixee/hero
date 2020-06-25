@@ -1,0 +1,11 @@
+node_modules
+deploy
+deploy-scripts
+migrations
+coverage
+publish/**
+protos
+dist
+*.js
+devenv
+**/protos/*.d.ts

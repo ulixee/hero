@@ -1,0 +1,40 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "incremental": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "lib": ["es2018", "dom"],
+    "noImplicitAny": false,
+    "inlineSourceMap": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": ".",
+    "preserveSymlinks": false,
+    "experimentalDecorators": true
+  },
+  "references": [
+    {
+      "path": "shared/session-state/page-scripts"
+    },
+    {
+      "path": "core/lib/page-scripts"
+    },
+    {
+      "path": "website"
+    }
+  ],
+  "include": ["**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "*.js",
+    "**/dist",
+    "**/build",
+    "**/built",
+    "website",
+    "replay",
+    "**/page-scripts"
+  ]
+}

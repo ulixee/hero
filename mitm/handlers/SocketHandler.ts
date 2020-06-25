@@ -1,0 +1,70 @@
+import RequestSession from './RequestSession';
+import { RequestOptions } from 'https';
+import { ClientRequestArgs, IncomingMessage } from 'http';
+import Log from '@secret-agent/shared-logger';
+import SocketConnectDriver from '../lib/SocketConnectDriver';
+import { url } from 'inspector';
+
+const { log } = Log(module);
+
+export default class SocketHandler {
+  public static async connect(
+    isSSL: boolean,
+    session: RequestSession,
+    requestOptions: ClientRequestArgs,
+    isWebsocket: boolean = false,
+  ) {
+    const connectResult = await this.createConnection(session, requestOptions, isSSL, isWebsocket);
+    requestOptions.createConnection = () => connectResult.socket;
+    requestOptions.agent = null;
+
+    return connectResult;
+  }
+
+  public static async createConnection(
+    session: RequestSession,
+    options: RequestOptions,
+    isSSL: boolean,
+    isWebsocket: boolean = false,
+  ) {
+    if (process.env.MITM_ALLOW_INSECURE) {
+      (options as RequestOptions).rejectUnauthorized = false;
+    }
+
+    const tlsProfileId = session.delegate.tlsProfileId;
+    const connectDriver = new SocketConnectDriver({
+      host: options.host,
+      port: String(options.port),
+      isSsl: isSSL,
+      servername: options.servername || options.host,
+      rejectUnauthorized: options.rejectUnauthorized,
+      clientHelloId: tlsProfileId,
+    });
+
+    if (isWebsocket) {
+      connectDriver.connectOpts.keepAlive = true;
+    }
+
+    const tcpVars = session.delegate.tcpVars;
+    if (tcpVars) connectDriver.setTcpSettings(tcpVars);
+
+    const proxyUrl = await session?.getUpstreamProxyUrl();
+    if (proxyUrl) connectDriver.setProxy(proxyUrl);
+
+    session.socketConnects.push(connectDriver);
+    await connectDriver.connect();
+
+    connectDriver.on('close', SocketHandler.removeSocketConnect.bind(this, session, connectDriver));
+
+    if (isWebsocket) {
+      connectDriver.socket.setNoDelay(true);
+      connectDriver.socket.setTimeout(0);
+    }
+    return connectDriver;
+  }
+
+  private static removeSocketConnect(session: RequestSession, socket: SocketConnectDriver) {
+    const idx = session.socketConnects.indexOf(socket);
+    if (idx >= 0) session.socketConnects.splice(idx, 1);
+  }
+}

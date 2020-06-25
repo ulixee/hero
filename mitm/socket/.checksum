@@ -1,0 +1,8 @@
+VERSION=2
+HASH=MD5
+connect_windows_x86_64.exe.gz=9818aa3e08dd42d4f83b99d397e3cef8
+connect_windows_i386.exe.gz=2d1dec8610e3cee0d83907d27721516c
+connect_darwin_x86_64.gz=ba3d00fe3a16c7313821684d6bfd866d
+connect_linux_x86_64.gz=4a812bc462cd46179fe5bf1d8181221e
+connect_linux_arm64.gz=a847b8b2991405d4bd4959cabef2422a
+connect_linux_i386.gz=14dd7657be23530393db61a2cf12838a

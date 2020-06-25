@@ -1,0 +1,19 @@
+{
+  "name": "@secret-agent/emulators",
+  "version": "0.2.8",
+  "description": "Emulators for various browsers",
+  "main": "index.js",
+  "scripts": {
+    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "user-agents": "^1.0.559",
+    "useragent": "^2.3.0"
+  },
+  "devDependencies": {
+    "axios": "^0.19.2",
+    "csv-parser": "^2.3.2"
+  }
+}

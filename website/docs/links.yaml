@@ -1,0 +1,39 @@
+- title: Overview
+  items:
+    - Introduction
+#    - How to Use It
+    - Basic concepts
+    - Configuration
+
+- title: Basic Interfaces
+  items:
+    - SecretAgent
+    - Browser
+    - User
+    - Interactions
+    - AwaitedDOM
+    - DetachedDOM
+
+- title: Advanced
+  items:
+    - Emulators
+    - Humanoids
+    - UserProfile
+    - UpstreamProxy
+    - Resource
+    - ResourceRequest
+    - ResourceResponse
+    - WebsocketResource
+    - Remote
+    - Session
+    - SessionReplay
+- title: Contribute
+  items:
+    - How to contribute
+    - Code of conduct
+
+- title: Help
+  items:
+    - Prerequisites
+    - How to upgrade
+    - Troubleshooting

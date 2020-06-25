@@ -1,0 +1,17 @@
+{
+  "name": "@secret-agent/humanoid-basic",
+  "version": "0.2.8",
+  "description": "Very basic humanoid for SecretAgent",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/runtime-corejs3": "^7.9.2",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "babel-loader": "^8.1.0",
+    "source-map-loader": "^0.2.4",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}

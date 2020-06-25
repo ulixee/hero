@@ -1,0 +1,4 @@
+**/*.ts
+**/node_modules
+.cache
+.http-mitm-proxy

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "esnext",
+    "target": "es2018",
+    "moduleResolution": "node",
+    "inlineSourceMap": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "~frontend/*": ["frontend/*"],
+      "~backend/*": ["backend/*"],
+      "~shared/*": ["shared/*"]
+    },
+    "types": ["@types/node", "@nuxt/types", "@types/chrome"]
+  },
+  "exclude": ["./tmp-files/**/*.ts", "dist", "node_modules"]
+}

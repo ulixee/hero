@@ -1,0 +1,41 @@
+.text-center {
+  text-align: center;
+}
+
+.no-wrap {
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  display: inline-block;
+}
+
+.mb {
+  margin-bottom: var(--space)!important;
+}
+
+.mb-x2 {
+  margin-bottom: var(--space-x2)!important;
+}
+
+
+.pb {
+  padding-bottom: var(--space)!important;
+}
+
+.ml {
+  margin-left: 10px!important;
+}
+
+
+.show-for-small {
+  display: none;
+}
+
+@media screen and (max-width: 850px) {
+  .hide-for-small {
+    display: none!important;
+  }
+
+  .show-for-small {
+    display: inherit;
+  }
+}

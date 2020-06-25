@@ -1,0 +1,114 @@
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-400-Book.otf);
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-400-BookItalic.otf);
+  font-weight: 400;
+  font-display: swap;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-500-Medium.otf);
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-500-MediumItalic.otf);
+  font-weight: 500;
+  font-display: swap;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-600-Semi.otf);
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-600-SemiItalic.otf);
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Jost;
+  src: local('Jost'), url(../fonts/Jost-700-Bold.otf);
+  font-weight: 700;
+  font-display: swap;
+}
+
+
+
+/* Smaller text for mobile */
+@media screen and (max-width: 550px) {
+  html {
+    font-size: 100%!important;
+  }
+}
+
+.lead {
+  font-size: 1.2rem;
+}
+
+.small {
+  font-size: 0.8em;
+}
+
+strong {
+  font-weight: 500;
+}
+
+
+
+h5 {
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: .5px;
+}
+
+.primary-color {
+  color: var(--primary-color);
+}
+
+p {
+  letter-spacing: -.15px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+li {
+  letter-spacing: -.15px;
+}
+
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+
+h1, h2, h3 {
+  small {
+    font-weight: normal;
+    opacity: .8;
+    margin: 0 1rem;
+  }
+}

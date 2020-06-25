@@ -1,0 +1,277 @@
+{
+  "os": "windows_7_0",
+  "removals": [
+    "window.Navigator.prototype.bluetooth",
+    "window.navigator.bluetooth",
+    "window.BluetoothUUID",
+    "window.Bluetooth",
+    "window.BluetoothCharacteristicProperties",
+    "window.BluetoothDevice",
+    "window.BluetoothRemoteGATTCharacteristic",
+    "window.BluetoothRemoteGATTDescriptor",
+    "window.BluetoothRemoteGATTServer",
+    "window.BluetoothRemoteGATTService"
+  ],
+  "additions": [
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import",
+      "prevProperty": "integrity",
+      "property": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get import() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      }
+    },
+    {
+      "path": "window.Notification.prototype",
+      "propertyName": "image",
+      "prevProperty": "close",
+      "property": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get image() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "chrome",
+      "prevProperty": "Atomics",
+      "property": {
+        "_flags": "ce",
+        "_type": "string",
+        "_value": "I am chrome"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "VideoPlaybackQuality",
+      "prevProperty": "OffscreenCanvasRenderingContext2D",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "VideoPlaybackQuality"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": ["Object.prototype"],
+          "creationTime": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get creationTime() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "totalVideoFrames": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get totalVideoFrames() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "droppedVideoFrames": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get droppedVideoFrames() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "corruptedVideoFrames": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get corruptedVideoFrames() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "VideoPlaybackQuality"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function VideoPlaybackQuality() { [native code] }",
+        "_flags": "cw"
+      }
+    }
+  ],
+  "order": [
+    {
+      "path": "window",
+      "propertyName": "FormData",
+      "throughProperty": "ErrorEvent",
+      "prevProperty": "HTMLAllCollection"
+    },
+    {
+      "path": "window",
+      "propertyName": "onformdata",
+      "throughProperty": "onformdata",
+      "prevProperty": "XSLTProcessor"
+    },
+    {
+      "path": "window",
+      "propertyName": "WebAssembly",
+      "throughProperty": "WebAssembly",
+      "prevProperty": "chrome"
+    },
+    {
+      "path": "window",
+      "propertyName": "ElementInternals",
+      "throughProperty": "ElementInternals",
+      "prevProperty": "WebAssembly"
+    },
+    {
+      "path": "window",
+      "propertyName": "FormDataEvent",
+      "throughProperty": "FormDataEvent",
+      "prevProperty": "ElementInternals"
+    },
+    {
+      "path": "window",
+      "propertyName": "Element",
+      "throughProperty": "onfocus",
+      "prevProperty": "ErrorEvent"
+    },
+    {
+      "path": "window",
+      "propertyName": "oninput",
+      "throughProperty": "Atomics",
+      "prevProperty": "onfocus"
+    },
+    {
+      "path": "window",
+      "propertyName": "onpointerrawupdate",
+      "throughProperty": "PERSISTENT",
+      "prevProperty": "onformdata"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "onformdata",
+      "throughProperty": "onformdata",
+      "prevProperty": "featurePolicy"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "ELEMENT_NODE",
+      "throughProperty": "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC",
+      "prevProperty": "Symbol(Symbol.unscopables)"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "oninput",
+      "throughProperty": "evaluate",
+      "prevProperty": "onfocus"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "onpointerrawupdate",
+      "throughProperty": "exitPictureInPicture",
+      "prevProperty": "onformdata"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "part",
+      "throughProperty": "part",
+      "prevProperty": "slot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "setPointerCapture",
+      "throughProperty": "hasPointerCapture",
+      "prevProperty": "onwebkitfullscreenerror"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "ELEMENT_NODE",
+      "throughProperty": "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC",
+      "prevProperty": "Symbol(Symbol.unscopables)"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "attributes",
+      "throughProperty": "shadowRoot",
+      "prevProperty": "part"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "hasAttributes",
+      "throughProperty": "removeAttributeNS",
+      "prevProperty": "hasPointerCapture"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "hasAttribute",
+      "throughProperty": "hasAttributeNS",
+      "prevProperty": "removeAttributeNS"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "toggleAttribute",
+      "throughProperty": "toggleAttribute",
+      "prevProperty": "hasAttributeNS"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getAttributeNode",
+      "throughProperty": "removeAttributeNode",
+      "prevProperty": "toggleAttribute"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "closest",
+      "throughProperty": "webkitMatchesSelector",
+      "prevProperty": "removeAttributeNode"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "attachShadow",
+      "throughProperty": "attachShadow",
+      "prevProperty": "webkitMatchesSelector"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getElementsByTagName",
+      "throughProperty": "insertAdjacentText",
+      "prevProperty": "attachShadow"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "registerProtocolHandler",
+      "throughProperty": "unregisterProtocolHandler",
+      "prevProperty": "permissions"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "deviceMemory",
+      "throughProperty": "webkitGetUserMedia",
+      "prevProperty": "unregisterProtocolHandler"
+    }
+  ],
+  "changes": [
+    {
+      "path": "window.Navigator.prototype.registerProtocolHandler.name",
+      "propertyName": "_value",
+      "property": "registerProtocolHandler"
+    },
+    {
+      "path": "window.Navigator.prototype.registerProtocolHandler",
+      "propertyName": "_function",
+      "property": "function registerProtocolHandler() { [native code] }"
+    }
+  ]
+}

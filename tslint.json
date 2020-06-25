@@ -1,0 +1,61 @@
+{
+  "defaultSeverity": "error",
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "tslint:recommended",
+    "tslint-config-airbnb",
+    "tslint-config-prettier",
+    "tslint-plugin-prettier"
+  ],
+  "plugins": ["prettier"],
+  "jsRules": {},
+  "linterOptions": {
+    "exclude": ["node_modules", "protos", "build"]
+  },
+  "rules": {
+    "prettier": true,
+    "interface-name": true,
+    "max-classes-per-file": true,
+    "space-before-function-paren": false,
+    "object-literal-sort-keys": false,
+    "no-console": {
+      "severity": "warning",
+      "options": ["log", "time", "timeEnd"]
+    },
+    "no-empty-interface": false,
+    "no-namespace": false,
+    "no-shadowed-variable": [
+      true,
+      {
+        "temporalDeadZone": false
+      }
+    ],
+    "no-parameter-reassignment": false,
+    "array-type": false,
+    "import-name": false,
+    "import-blacklist": [true, "protos"],
+    "no-floating-promises": true,
+    "no-bitwise": false,
+    "no-return-await": false,
+    "ordered-imports": false,
+    "object-literal-shorthand": false,
+    "object-shorthand-properties-first": false,
+    "no-var-requires": false,
+    "member-ordering": [true, { "order": "instance-sandwich" }],
+    "no-switch-case-fall-through": true,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "function-name": [
+      true,
+      {
+        "method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+        "private-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+        "protected-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+        "static-method-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$",
+        "function-regex": "^\\*?\\[?[a-zA-Z][\\w\\d\\.]*\\]?$"
+      }
+    ]
+  }
+}

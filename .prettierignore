@@ -1,0 +1,4 @@
+deploy-scripts
+deploy
+**/protos/index.js
+shared/types/index.d.ts

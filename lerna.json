@@ -1,0 +1,6 @@
+{
+  "packages": ["browser", "shared/*"],
+  "version": "0.2.8",
+  "npmClient": "yarn",
+  "useWorkspaces": true
+}

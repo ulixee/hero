@@ -1,0 +1,15 @@
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+  position: fixed;
+  right:0;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0);
+  transition: background-color 2s;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.sidebar:hover::-webkit-scrollbar-thumb {
+  background:	var(--bg-teritary);
+}

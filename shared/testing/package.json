@@ -1,0 +1,29 @@
+{
+  "name": "@secret-agent/shared-testing",
+  "version": "0.2.8",
+  "description": "Helpers and stubs for testing",
+  "main": "index.js",
+  "private": true,
+  "author": "Data Liberation Foundation",
+  "contributors": [
+    "Caleb Clark",
+    "Blake Byrnes"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "@secret-agent/commons": "^0.2.8",
+    "@secret-agent/shared-logger": "^0.2.8",
+    "http-proxy-agent": "^3.0.0",
+    "https-proxy-agent": "https://github.com/calebjclark/node-https-proxy-agent.git",
+    "koa": "^2.11.0"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.11.3",
+    "@types/koa__router": "^8.0.2"
+  },
+  "keywords": []
+}

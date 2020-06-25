@@ -1,0 +1,23 @@
+{
+  "name": "@secret-agent/mitm",
+  "version": "0.2.8",
+  "description": "Man-in-the-middle proxy to fix chrome request/response",
+  "main": "index.js",
+  "scripts": {
+    "build": "node install.js",
+    "build-install": "tsc install.ts && yarn build",
+    "postinstall": "npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@secret-agent/commons": "^0.2.8",
+    "node-forge": "^0.9.1"
+  },
+  "devDependencies": {
+    "@types/node-forge": "^0.9.3",
+    "@types/ws": "^7.2.4",
+    "ws": "^7.3.0",
+    "proxy": "^1.0.1"
+  }
+}

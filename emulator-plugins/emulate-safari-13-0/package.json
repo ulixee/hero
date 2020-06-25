@@ -1,0 +1,15 @@
+{
+  "name": "@secret-agent/emulate-safari-13-0",
+  "version": "0.2.8",
+  "description": "EmulatorPlugin for Apple Safari version 13",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "tough-cookie": "^4.0.0"
+  },
+  "devDependencies": {
+    "source-map-loader": "^0.2.4",
+    "@types/tough-cookie": "^4.0.0"
+  }
+}

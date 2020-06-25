@@ -1,0 +1,46 @@
+@mixin baseStyle {
+  body {
+    user-select: none;
+    cursor: default;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    overflow: hidden;
+    font-family: system-ui, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+};
+
+@mixin centerIcon($size: contain) {
+  @if $size == 'contain' {
+    background-size: $size;
+  } @else {
+    background-size: $size * 1px;
+  }
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+@mixin noButtons($width: 6px, $color: rgba(0, 0, 0, 0.38), $hoverColor: rgba(0, 0, 0, 0.54)) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+  &::-webkit-scrollbar-button {
+    width: 0px;
+    height: 0px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $color;
+    border: 0px none #ffffff;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: $hoverColor;
+  }
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}

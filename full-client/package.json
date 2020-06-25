@@ -1,0 +1,19 @@
+{
+  "name": "@secret-agent/full-client",
+  "version": "0.2.8",
+  "description": "The web browser build for scraping",
+  "author": "Data Liberation Foundation",
+  "contributors": [
+    "Caleb Clark",
+    "Blake Byrnes"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@secret-agent/client": "^0.2.8",
+    "@secret-agent/core": "^0.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.11"
+  }
+}

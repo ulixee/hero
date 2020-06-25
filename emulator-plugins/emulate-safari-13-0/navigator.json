@@ -1,0 +1,442 @@
+{
+  "os": "mac_os_x_10_15",
+  "navigator": {
+    "_protos": ["Navigator.prototype", "Object.prototype"],
+    "plugins": {
+      "0": {
+        "0": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "application/pdf"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "pdf"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "Portable Document Format"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "1": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "text/pdf"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "pdf"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "Portable Document Format"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "2": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "application/postscript"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "ps"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "PostScript"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "_protos": ["Plugin.prototype", "Object.prototype"],
+        "name": {
+          "_type": "string",
+          "_value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_type": "string",
+          "_value": ""
+        },
+        "description": {
+          "_type": "string",
+          "_value": ""
+        },
+        "length": {
+          "_type": "number",
+          "_value": 3
+        },
+        "_type": "object",
+        "_flags": "ce",
+        "_value": "[object Plugin]"
+      },
+      "_protos": ["PluginArray.prototype", "Object.prototype"],
+      "WebKit built-in PDF": {
+        "0": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "application/pdf"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "pdf"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "Portable Document Format"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "1": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "text/pdf"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "pdf"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "Portable Document Format"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "2": {
+          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_type": "string",
+            "_value": "application/postscript"
+          },
+          "suffixes": {
+            "_type": "string",
+            "_value": "ps"
+          },
+          "description": {
+            "_type": "string",
+            "_value": "PostScript"
+          },
+          "_type": "object",
+          "_flags": "ce",
+          "_value": "[object MimeType]"
+        },
+        "_protos": ["Plugin.prototype", "Object.prototype"],
+        "name": {
+          "_type": "string",
+          "_value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_type": "string",
+          "_value": ""
+        },
+        "description": {
+          "_type": "string",
+          "_value": ""
+        },
+        "length": {
+          "_type": "number",
+          "_value": 3
+        },
+        "_type": "object",
+        "_flags": "c",
+        "_value": "[object Plugin]"
+      },
+      "length": {
+        "_type": "number",
+        "_value": 1
+      },
+      "_type": "object"
+    },
+    "mimeTypes": {
+      "0": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "application/pdf"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "pdf"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "Portable Document Format"
+        },
+        "_type": "object",
+        "_flags": "ce",
+        "_value": "[object MimeType]"
+      },
+      "1": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "text/pdf"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "pdf"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "Portable Document Format"
+        },
+        "_type": "object",
+        "_flags": "ce",
+        "_value": "[object MimeType]"
+      },
+      "2": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "application/postscript"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "ps"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "PostScript"
+        },
+        "_type": "object",
+        "_flags": "ce",
+        "_value": "[object MimeType]"
+      },
+      "_protos": ["MimeTypeArray.prototype", "Object.prototype"],
+      "application/pdf": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "application/pdf"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "pdf"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "Portable Document Format"
+        },
+        "_type": "object",
+        "_flags": "c",
+        "_value": "[object MimeType]"
+      },
+      "text/pdf": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "text/pdf"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "pdf"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "Portable Document Format"
+        },
+        "_type": "object",
+        "_flags": "c",
+        "_value": "[object MimeType]"
+      },
+      "application/postscript": {
+        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_type": "string",
+          "_value": "application/postscript"
+        },
+        "suffixes": {
+          "_type": "string",
+          "_value": "ps"
+        },
+        "description": {
+          "_type": "string",
+          "_value": "PostScript"
+        },
+        "_type": "object",
+        "_flags": "c",
+        "_value": "[object MimeType]"
+      },
+      "length": {
+        "_type": "number",
+        "_value": 3
+      },
+      "_type": "object"
+    },
+    "cookieEnabled": {
+      "_type": "boolean",
+      "_value": true
+    },
+    "credentials": {
+      "_protos": ["CredentialsContainer.prototype", "Object.prototype"],
+      "_type": "object"
+    },
+    "geolocation": {
+      "_protos": ["Object.prototype", "Object.prototype"],
+      "getCurrentPosition": {
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "getCurrentPosition"
+        },
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "_func": "function getCurrentPosition() {\n    [native code]\n}"
+      },
+      "watchPosition": {
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "watchPosition"
+        },
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "_func": "function watchPosition() {\n    [native code]\n}"
+      },
+      "clearWatch": {
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "clearWatch"
+        },
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "_func": "function clearWatch() {\n    [native code]\n}"
+      },
+      "_type": "object"
+    },
+    "mediaCapabilities": {
+      "_protos": ["MediaCapabilities.prototype", "Object.prototype"],
+      "_type": "object"
+    },
+    "mediaDevices": {
+      "_protos": ["MediaDevices.prototype", "EventTarget.prototype", "Object.prototype"],
+      "ondevicechange": {
+        "_type": "object",
+        "_value": null
+      },
+      "_type": "object"
+    },
+    "webdriver": {
+      "_type": "boolean",
+      "_value": true
+    },
+    "maxTouchPoints": {
+      "_type": "number",
+      "_value": 0
+    },
+    "appCodeName": {
+      "_type": "string",
+      "_value": "Mozilla"
+    },
+    "appName": {
+      "_type": "string",
+      "_value": "Netscape"
+    },
+    "appVersion": {
+      "_type": "string",
+      "_value": "5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.2 Safari/605.1.15"
+    },
+    "platform": {
+      "_type": "string",
+      "_value": "MacIntel"
+    },
+    "product": {
+      "_type": "string",
+      "_value": "Gecko"
+    },
+    "productSub": {
+      "_type": "string",
+      "_value": "20030107"
+    },
+    "userAgent": {
+      "_type": "string",
+      "_value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.2 Safari/605.1.15"
+    },
+    "vendor": {
+      "_type": "string",
+      "_value": "Apple Computer, Inc."
+    },
+    "vendorSub": {
+      "_type": "string",
+      "_value": ""
+    },
+    "language": {
+      "_type": "string",
+      "_value": "en-US"
+    },
+    "languages": {
+      "0": {
+        "_type": "string",
+        "_flags": "e",
+        "_value": "en-US"
+      },
+      "_protos": ["Array.prototype", "Object.prototype"],
+      "isFrozen": true,
+      "isSealed": true,
+      "length": {
+        "_type": "number",
+        "_flags": "",
+        "_value": 1
+      },
+      "_type": "array",
+      "_value": "en-US"
+    },
+    "onLine": {
+      "_type": "boolean",
+      "_value": true
+    },
+    "serviceWorker": {
+      "_protos": ["ServiceWorkerContainer.prototype", "EventTarget.prototype", "Object.prototype"],
+      "controller": {
+        "_type": "object",
+        "_value": null
+      },
+      "ready": {
+        "_value": "Promise",
+        "_type": "object"
+      },
+      "oncontrollerchange": {
+        "_type": "object",
+        "_value": null
+      },
+      "onmessage": {
+        "_type": "object",
+        "_value": null
+      },
+      "onmessageerror": {
+        "_type": "object",
+        "_value": null
+      },
+      "_type": "object"
+    },
+    "_type": "object",
+    "_flags": "ce",
+    "_get": "function navigator() {\n    [native code]\n}",
+    "_getToStringToString": "function toString() {\n    [native code]\n}"
+  }
+}

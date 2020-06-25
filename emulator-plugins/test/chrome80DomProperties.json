@@ -1,0 +1,303 @@
+{
+  "MimeType": {
+    "length": {
+      "_type": "number",
+      "_flags": "c",
+      "_value": 0
+    },
+    "name": {
+      "_type": "string",
+      "_flags": "c",
+      "_value": "MimeType"
+    },
+    "arguments": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "caller": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "prototype": {
+      "_protos": ["Object.prototype"],
+      "type": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get type() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "suffixes": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get suffixes() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "description": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get description() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "enabledPlugin": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get enabledPlugin() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "Symbol(Symbol.toStringTag)": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": "MimeType"
+      },
+      "_type": "object",
+      "_flags": ""
+    },
+    "new()": "TypeError: Illegal constructor",
+    "_function": "function MimeType() { [native code] }",
+    "_flags": "cw"
+  },
+  "MimeTypeArray": {
+    "length": {
+      "_type": "number",
+      "_flags": "c",
+      "_value": 0
+    },
+    "name": {
+      "_type": "string",
+      "_flags": "c",
+      "_value": "MimeTypeArray"
+    },
+    "arguments": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "caller": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "prototype": {
+      "_protos": ["Object.prototype"],
+      "length": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get length() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "item": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "item"
+        },
+        "_function": "function item() { [native code] }",
+        "_flags": "cew"
+      },
+      "namedItem": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "namedItem"
+        },
+        "_function": "function namedItem() { [native code] }",
+        "_flags": "cew"
+      },
+      "Symbol(Symbol.toStringTag)": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": "MimeTypeArray"
+      },
+      "Symbol(Symbol.iterator)": "REF: window.Array.prototype.values",
+      "_type": "object",
+      "_flags": ""
+    },
+    "new()": "TypeError: Illegal constructor",
+    "_function": "function MimeTypeArray() { [native code] }",
+    "_flags": "cw"
+  },
+  "Plugin": {
+    "length": {
+      "_type": "number",
+      "_flags": "c",
+      "_value": 0
+    },
+    "name": {
+      "_type": "string",
+      "_flags": "c",
+      "_value": "Plugin"
+    },
+    "arguments": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "caller": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "prototype": {
+      "_protos": ["Object.prototype"],
+      "name": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get name() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "filename": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get filename() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "description": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get description() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "length": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get length() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "item": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "item"
+        },
+        "_function": "function item() { [native code] }",
+        "_flags": "cew"
+      },
+      "namedItem": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "namedItem"
+        },
+        "_function": "function namedItem() { [native code] }",
+        "_flags": "cew"
+      },
+      "Symbol(Symbol.toStringTag)": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": "Plugin"
+      },
+      "Symbol(Symbol.iterator)": "REF: window.Array.prototype.values",
+      "_type": "object",
+      "_flags": ""
+    },
+    "new()": "TypeError: Illegal constructor",
+    "_function": "function Plugin() { [native code] }",
+    "_flags": "cw"
+  },
+  "PluginArray": {
+    "length": {
+      "_type": "number",
+      "_flags": "c",
+      "_value": 0
+    },
+    "name": {
+      "_type": "string",
+      "_flags": "c",
+      "_value": "PluginArray"
+    },
+    "arguments": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "caller": {
+      "_type": "object",
+      "_flags": "",
+      "_value": null
+    },
+    "prototype": {
+      "_protos": ["Object.prototype"],
+      "length": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get length() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      },
+      "item": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "item"
+        },
+        "_function": "function item() { [native code] }",
+        "_flags": "cew"
+      },
+      "namedItem": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "namedItem"
+        },
+        "_function": "function namedItem() { [native code] }",
+        "_flags": "cew"
+      },
+      "refresh": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "refresh"
+        },
+        "_function": "function refresh() { [native code] }",
+        "_flags": "cew"
+      },
+      "Symbol(Symbol.toStringTag)": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": "PluginArray"
+      },
+      "Symbol(Symbol.iterator)": "REF: window.Array.prototype.values",
+      "_type": "object",
+      "_flags": ""
+    },
+    "new()": "TypeError: Illegal constructor",
+    "_function": "function PluginArray() { [native code] }",
+    "_flags": "cw"
+  }
+}

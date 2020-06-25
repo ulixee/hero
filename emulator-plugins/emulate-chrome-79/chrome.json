@@ -1,0 +1,267 @@
+{
+  "os": "mac_os_x_10_13",
+  "chrome": {
+    "_protos": ["Object.prototype"],
+    "loadTimes": {
+      "length": {
+        "_type": "number",
+        "_flags": "c",
+        "_value": 0
+      },
+      "name": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": ""
+      },
+      "arguments": {
+        "_type": "object",
+        "_flags": "",
+        "_value": null
+      },
+      "caller": {
+        "_type": "object",
+        "_flags": "",
+        "_value": null
+      },
+      "prototype": {
+        "_protos": ["Object.prototype"],
+        "_type": "object",
+        "_flags": "w"
+      },
+      "new()": {
+        "_protos": ["Object.prototype"],
+        "requestTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.527
+        },
+        "startLoadTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.527
+        },
+        "commitLoadTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.641
+        },
+        "finishDocumentLoadTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.901
+        },
+        "finishLoadTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.925
+        },
+        "firstPaintTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565.959
+        },
+        "firstPaintAfterLoadTime": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 0
+        },
+        "navigationType": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "Other"
+        },
+        "wasFetchedViaSpdy": {
+          "_type": "boolean",
+          "_flags": "cew",
+          "_value": false
+        },
+        "wasNpnNegotiated": {
+          "_type": "boolean",
+          "_flags": "cew",
+          "_value": true
+        },
+        "npnNegotiatedProtocol": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "http/1.1"
+        },
+        "wasAlternateProtocolAvailable": {
+          "_type": "boolean",
+          "_flags": "cew",
+          "_value": false
+        },
+        "connectionInfo": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "http/1.1"
+        }
+      },
+      "_function": "function () { [native code] }",
+      "_flags": "cew"
+    },
+    "csi": {
+      "length": {
+        "_type": "number",
+        "_flags": "c",
+        "_value": 0
+      },
+      "name": {
+        "_type": "string",
+        "_flags": "c",
+        "_value": ""
+      },
+      "arguments": {
+        "_type": "object",
+        "_flags": "",
+        "_value": null
+      },
+      "caller": {
+        "_type": "object",
+        "_flags": "",
+        "_value": null
+      },
+      "prototype": {
+        "_protos": ["Object.prototype"],
+        "_type": "object",
+        "_flags": "w"
+      },
+      "new()": {
+        "_protos": ["Object.prototype"],
+        "startE": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565527
+        },
+        "onloadT": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 1588541565901
+        },
+        "pageT": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 6210.324
+        },
+        "tran": {
+          "_type": "number",
+          "_flags": "cew",
+          "_value": 15
+        }
+      },
+      "_function": "function () { [native code] }",
+      "_flags": "cew"
+    },
+    "app": {
+      "_protos": ["Object.prototype"],
+      "isInstalled": {
+        "_type": "boolean",
+        "_flags": "cew",
+        "_value": false
+      },
+      "getDetails": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "getDetails"
+        },
+        "_function": "function getDetails() { [native code] }",
+        "_invocation": null,
+        "_flags": "cew"
+      },
+      "getIsInstalled": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "getIsInstalled"
+        },
+        "_function": "function getIsInstalled() { [native code] }",
+        "_invocation": false,
+        "_flags": "cew"
+      },
+      "installState": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "installState"
+        },
+        "_function": "function installState() { [native code] }",
+        "_flags": "cew"
+      },
+      "runningState": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "runningState"
+        },
+        "_function": "function runningState() { [native code] }",
+        "_invocation": "cannot_run",
+        "_flags": "cew"
+      },
+      "InstallState": {
+        "_protos": ["Object.prototype"],
+        "DISABLED": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "disabled"
+        },
+        "INSTALLED": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "installed"
+        },
+        "NOT_INSTALLED": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "not_installed"
+        },
+        "_type": "object",
+        "_flags": "cew"
+      },
+      "RunningState": {
+        "_protos": ["Object.prototype"],
+        "CANNOT_RUN": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "cannot_run"
+        },
+        "READY_TO_RUN": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "ready_to_run"
+        },
+        "RUNNING": {
+          "_type": "string",
+          "_flags": "cew",
+          "_value": "running"
+        },
+        "_type": "object",
+        "_flags": "cew"
+      },
+      "_type": "object",
+      "_flags": "cew"
+    },
+    "_type": "object",
+    "_flags": "ew"
+  },
+  "prevProperty": "Atomics"
+}

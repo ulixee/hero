@@ -1,0 +1,11 @@
+{
+  "name": "@secret-agent/emulate-chrome-78",
+  "version": "0.2.8",
+  "description": "EmulatorPlugin for Google Chrome version 78",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "source-map-loader": "^0.2.4"
+  }
+}
