@@ -8,7 +8,7 @@ BasicLayout.Home
         And it has powerful auto-replay functionality that lets you create and debug scripts in record setting time.
       a.button(href="/docs") Get Started
 
-    .awards
+    //.awards
       .box Ranked #1 Headless Browser by the Bot Blocking Analyzer (psst... we created it)
 </template>
 

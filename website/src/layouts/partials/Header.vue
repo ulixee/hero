@@ -3,7 +3,7 @@
     .header-inner.container.flex.gap-30
       Logo
       Nav.flex-fit
-      SearchForm
+      //SearchForm
       nav.header-actions.flex
         a(aria-label="Twitter" href="//twitter.com/secret-agent" rel="noopener noreferrer" target="_blank" title="Follow us on Twitter")
           twitter-logo
