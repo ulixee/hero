@@ -1,7 +1,7 @@
 module.exports = {
   titleTemplate: 'SecretAgent - The Web Browser Built for Scraping',
   siteUrl: 'https://secretagent.dev',
-  pathPrefix: '/secret-agent',
+  pathPrefix: '/',
   templates: {},
   chainWebpack: config => {
     const svgRule = config.module.rule('svg');
