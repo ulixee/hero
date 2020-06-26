@@ -5,7 +5,7 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
 import { SerializableOrJSHandle } from 'puppeteer';
 import FrameTracker from './FrameTracker';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
@@ -154,10 +154,10 @@ const typesonRegistryScript = fs.readFileSync(
 );
 
 const domStorageScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/dist/scripts/domStorage.js`),
+  require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),
   'utf8',
 );
 const jsPathScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/dist/scripts/jsPath.js`),
+  require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
   'utf8',
 );

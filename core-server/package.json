@@ -11,13 +11,12 @@
   "private": true,
   "dependencies": {
     "@secret-agent/core": "^0.2.8",
-    "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/shared-logger": "^0.2.8"
+    "@secret-agent/commons": "^0.2.8"
   },
   "devDependencies": {
     "@secret-agent/shared-testing": "^0.2.8",
     "@secret-agent/remote-client": "^0.2.8",
-    "@types/node": "^12.7.11",
-    "ua-parser-js": "^0.7.20"
+    "json-socket": "^0.3.0",
+    "@types/node": "^12.7.11"
   }
 }

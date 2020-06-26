@@ -2,7 +2,7 @@ import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
 import OriginType from '@secret-agent/commons/interfaces/OriginType';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

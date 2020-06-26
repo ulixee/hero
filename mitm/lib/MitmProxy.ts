@@ -8,7 +8,7 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import Queue from '@secret-agent/commons/Queue';
 import MitmRequestHandler from './MitmRequestHandler';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import HttpResponseCache from './HttpResponseCache';
 import RequestSession from '../handlers/RequestSession';
 

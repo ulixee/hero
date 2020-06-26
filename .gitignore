@@ -27,7 +27,7 @@ tsconfig.tsbuildinfo
 
 emulators/data/DOM-*.json
 !/emulator-plugins/shared/injected-scripts/*.js
-!/emulator-plugins/test/inspectHierarchy.js
+!/emulator-plugins/shared/test/inspectHierarchy.js
 /emulator-plugins/shared/injected-scripts/index.js
 
 

@@ -1,6 +1,6 @@
 import uuid from 'uuid/v1';
 import puppeteer from 'puppeteer';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import Window from './Window';
 import ChromeCore from './ChromeCore';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';

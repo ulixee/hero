@@ -1,9 +1,8 @@
 import RequestSession from './RequestSession';
 import { RequestOptions } from 'https';
-import { ClientRequestArgs, IncomingMessage } from 'http';
-import Log from '@secret-agent/shared-logger';
+import { ClientRequestArgs } from 'http';
+import Log from '@secret-agent/commons/Logger';
 import SocketConnectDriver from '../lib/SocketConnectDriver';
-import { url } from 'inspector';
 
 const { log } = Log(module);
 

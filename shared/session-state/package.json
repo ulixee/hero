@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/shared-logger": "^0.2.8",
     "@secret-agent/core-interfaces": "^0.2.8",
     "@secret-agent/injected-scripts": "^0.2.8",
     "better-sqlite3": "^7.0.1"

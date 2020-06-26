@@ -12,7 +12,7 @@ import RequestSession from '../handlers/RequestSession';
 import SocketHandler from '../handlers/SocketHandler';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import CookieHandler from '../handlers/CookieHandler';
 import { URL } from 'url';
 import http2Request from './http2Request';

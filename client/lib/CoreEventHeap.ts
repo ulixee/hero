@@ -2,7 +2,7 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import CoreClient from './CoreClient';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

@@ -1,5 +1,5 @@
 import uuid from 'uuid/v1';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import puppeteer from 'puppeteer';
 import IWindowOptions from '@secret-agent/core-interfaces/IWindowOptions';
 import Session from './Session';

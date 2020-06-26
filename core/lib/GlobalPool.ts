@@ -1,7 +1,7 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import ChromeCore from './ChromeCore';
 import Session from './Session';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';

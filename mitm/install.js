@@ -8,7 +8,22 @@ const { gunzipSync } = require('zlib');
 const fileHost =
   process.env.SA_CONNECT_LIBRARY_HOST || 'https://storage.googleapis.com/secret-agent';
 
+const outDir = `${process.env.SA_CONNECT_OUTPUT_DIR || __dirname}/socket`;
+
 (async function install() {
+  let programName = 'connect';
+  const filename = buildFilename();
+  if (filename.endsWith('.exe.gz')) {
+    programName += '.exe';
+  }
+
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+  if (fs.existsSync(`${outDir}/${programName}`)) {
+    return;
+  }
+
   const goVersionNeeded = getGoVersionNeeded();
   const isGoInstalled = isGoVersionInstalled(goVersionNeeded);
   console.log('Is go installed? %s, %s', goVersionNeeded, isGoInstalled);
@@ -22,7 +37,6 @@ const fileHost =
     }
   }
 
-  const filename = buildFilename();
   const { version, checksum } = getSourceChecksum(filename);
   const filepath = `${fileHost}/v${version}/${filename}`;
 
@@ -44,11 +58,6 @@ You can install go ${goVersionNeeded} and run "go build" from the mitm/socket di
       downloadMd5,
     });
     process.exit(1);
-  }
-
-  let programName = 'connect';
-  if (filename.endsWith('.exe.gz')) {
-    programName += '.exe';
   }
 
   const file = gunzipSync(zippedFile);
@@ -74,34 +83,30 @@ function buildFilename() {
 }
 
 async function download(filepath) {
-  return (
-    new Promise() <
-    Buffer >
-    ((resolve, reject) => {
-      const req = https.get(filepath, async res => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          return download(res.headers.location)
-            .then(resolve)
-            .catch(reject);
-        }
+  return new Promise((resolve, reject) => {
+    const req = https.get(filepath, async res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return download(res.headers.location)
+          .then(resolve)
+          .catch(reject);
+      }
 
-        try {
-          const buffer = [];
-          for await (const chunk of res) {
-            buffer.push(chunk);
-          }
-          const output = Buffer.concat(buffer);
-          resolve(output);
-        } catch (err) {
-          reject(err);
+      try {
+        const buffer = [];
+        for await (const chunk of res) {
+          buffer.push(chunk);
         }
-      });
-      req.on('error', err => {
-        console.log('ERROR downloading needed Secret Agent connect library', err);
+        const output = Buffer.concat(buffer);
+        resolve(output);
+      } catch (err) {
         reject(err);
-      });
-    })
-  );
+      }
+    });
+    req.on('error', err => {
+      console.log('ERROR downloading needed Secret Agent connect library', err);
+      reject(err);
+    });
+  });
 }
 
 function getFileMd5(file) {

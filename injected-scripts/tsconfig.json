@@ -5,10 +5,12 @@
     "declaration": true,
     "skipLibCheck": true,
     "rootDir": ".",
-    "outDir": "./dist",
+    "outDir": "../build/injected-scripts",
     "composite": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
     "removeComments": true
   },
-  "include": ["interfaces/*.ts", "scripts/*.ts"],
+  "include": ["./interfaces/*.ts", "./scripts/*.ts", "./package.json"],
   "exclude": ["node_modules"]
 }

@@ -6,6 +6,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "source-map-loader": "^0.2.4"
+    "@secret-agent/emulators": "^0.2.8",
+    "@secret-agent/commons": "^0.2.8"
   }
 }

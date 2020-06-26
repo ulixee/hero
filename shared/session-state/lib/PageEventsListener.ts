@@ -1,12 +1,12 @@
 import fs from 'fs';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import IDevtoolsClient from '@secret-agent/core/interfaces/IDevtoolsClient';
 import { PageRecorderResultSet } from '@secret-agent/injected-scripts/scripts/pageEventsRecorder';
 import FrameTracker from '@secret-agent/core/lib/FrameTracker';
 import DomEnv from '@secret-agent/core/lib/DomEnv';
 
 const domObserver = fs.readFileSync(
-  require.resolve('@secret-agent/injected-scripts/dist/scripts/pageEventsRecorder.js'),
+  require.resolve('@secret-agent/injected-scripts/scripts/pageEventsRecorder.js'),
   'utf8',
 );
 

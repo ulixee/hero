@@ -1,4 +1,4 @@
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 const { log } = Log(module);
