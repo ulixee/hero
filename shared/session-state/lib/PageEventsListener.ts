@@ -6,7 +6,7 @@ import FrameTracker from '@secret-agent/core/lib/FrameTracker';
 import DomEnv from '@secret-agent/core/lib/DomEnv';
 
 const domObserver = fs.readFileSync(
-  require.resolve('@secret-agent/injected-scripts/dist/scripts/pageEventsRecorder.js'),
+  require.resolve('@secret-agent/injected-scripts/scripts/pageEventsRecorder.js'),
   'utf8',
 );
 

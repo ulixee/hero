@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "../build/replay",
     "module": "esnext",
     "target": "es2018",
     "moduleResolution": "node",
+    "composite": true,
     "inlineSourceMap": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,

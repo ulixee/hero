@@ -4,8 +4,8 @@ export default function config({ usingBuild }: any = {}) {
   return {
     mode: 'spa',
     srcDir: usingBuild ? null : 'frontend',
-    buildDir: usingBuild ? 'frontend' : 'dist/frontend',
-    generate: { dir: 'dist/static' },
+    buildDir: usingBuild ? 'frontend' : '../build/replay/frontend',
+    generate: { dir: '../build/replay/static' },
     css: ['frontend/assets/style/main.css'],
     loading: false,
     loadingIndicator: false,

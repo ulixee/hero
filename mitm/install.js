@@ -8,13 +8,19 @@ const { gunzipSync } = require('zlib');
 const fileHost =
   process.env.SA_CONNECT_LIBRARY_HOST || 'https://storage.googleapis.com/secret-agent';
 
+const outDir = `${process.env.SA_CONNECT_OUTPUT_DIR || __dirname}/socket`;
+
 (async function install() {
   let programName = 'connect';
   const filename = buildFilename();
   if (filename.endsWith('.exe.gz')) {
     programName += '.exe';
   }
-  if (fs.existsSync(`${__dirname}/socket/${programName}`)) {
+
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+  if (fs.existsSync(`${outDir}/${programName}`)) {
     return;
   }
 

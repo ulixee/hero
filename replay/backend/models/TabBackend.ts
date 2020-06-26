@@ -10,12 +10,7 @@ import { INTERNAL_BASE_URL } from '~shared/constants/files';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import ReplayApi from '~backend/ReplayApi';
 
-const isDev = !app.getAppPath().match(/\/dist\/backend$/);
-const domReplayerScript = Path.join(
-  app.getAppPath(),
-  isDev ? 'dist' : '..',
-  'injected-scripts/domReplayer.js',
-);
+const domReplayerScript = Path.join(app.getAppPath(), '..', 'injected-scripts/domReplayer.js');
 
 interface IAddressBarOptions {
   location?: ITabLocation;

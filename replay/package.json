@@ -7,13 +7,13 @@
   ],
   "description": "A browser for visually replaying your scraper scripts",
   "version": "0.2.8",
-  "main": "dist/backend",
+  "main": "backend",
   "build": {
     "appId": "com.example.app",
     "files": [
       {
-        "from": "dist",
-        "to": "dist",
+        "from": "../build/replay",
+        "to": "../build/replay",
         "filter": [
           "backend/**/*",
           "frontend/**/*"
@@ -30,12 +30,11 @@
   "scripts": {
     "build:frontend": "nuxt-ts build",
     "build:backend": "tsc -p tsconfig.backend.json && yarn build:backend-paths",
-    "build:backend-paths": "tscpaths -p tsconfig.backend.json -s ./ -o ./dist",
-    "build:dist": "yarn build:frontend && yarn build:backend && yarn logs:reset",
+    "build:backend-paths": "tscpaths -p tsconfig.backend.json -s ./ -o ../build/replay",
+    "build:dist": "yarn build:frontend && yarn build:backend && yarn logs:reset && cp package.json ../build/replay",
     "build:pack": "yarn build:dist && electron-builder",
-    "build:copy": "yarn build:dist && cp -R ./dist ../build/replay",
     "build": "yarn build:dist",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ../build/replay",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"cross-env NODE_ENV=development electron .\" \"nuxt-ts dev\"",
     "start:backend": "NODE_ENV=development electron .",
     "start:frontend": "nuxt-ts start",

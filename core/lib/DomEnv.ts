@@ -154,10 +154,10 @@ const typesonRegistryScript = fs.readFileSync(
 );
 
 const domStorageScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/dist/scripts/domStorage.js`),
+  require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),
   'utf8',
 );
 const jsPathScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/dist/scripts/jsPath.js`),
+  require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
   'utf8',
 );

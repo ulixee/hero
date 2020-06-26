@@ -23,10 +23,17 @@
     },
     {
       "path": "website/tsconfig.json"
+    },
+    {
+      "path": "replay/tsconfig.json"
+    },
+    {
+      "path": "replay/tsconfig.backend.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", "**/yarn.lock"],
   "exclude": [
+    "**/tsconfig*.json",
     "node_modules",
     "**/dist",
     "**/build",
