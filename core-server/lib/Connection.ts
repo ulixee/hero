@@ -4,7 +4,7 @@ import IEventPayload from '@secret-agent/remote-interfaces/IEventPayload';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Core from '@secret-agent/core';
 import CoreServer from '../index';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

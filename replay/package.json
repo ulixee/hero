@@ -33,6 +33,7 @@
     "build:backend-paths": "tscpaths -p tsconfig.backend.json -s ./ -o ./dist",
     "build:dist": "yarn build:frontend && yarn build:backend && yarn logs:reset",
     "build:pack": "yarn build:dist && electron-builder",
+    "build:copy": "yarn build:dist && cp -R ./dist ../build/replay",
     "build": "yarn build:dist",
     "clean": "rm -rf ./dist",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"cross-env NODE_ENV=development electron .\" \"nuxt-ts dev\"",

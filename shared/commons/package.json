@@ -1,17 +1,11 @@
 {
   "name": "@secret-agent/commons",
   "version": "0.2.8",
-  "description": "Common utilities including crypto, network, logging, and others",
+  "description": "Common utilities for Secret Agent",
   "main": "index.js",
-  "scripts": {
-    "genkeys": "tsc --build && node -e 'require(\"./index.js\").genKeypairs()'"
-  },
+  "scripts": {},
   "publishConfig": {
     "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gitlab.com/DataLiberationFoundation/ulixee.git"
   },
   "author": "Data Liberation Foundation",
   "contributors": [
@@ -19,14 +13,6 @@
     "Blake Byrnes"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://gitlab.com/DataLiberationFoundation/ulixee/issues"
-  },
-  "homepage": "https://gitlab.com/DataLiberationFoundation/ulixee#README",
-  "engines": {
-    "node": ">=10.0.0"
-  },
   "dependencies": {},
-  "keywords": [],
-  "gitHead": "241a56cb83a736d66b978d550cf789db86b4dcfb"
+  "keywords": []
 }

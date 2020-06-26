@@ -6,7 +6,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "@secret-agent/emulators": "^0.2.8",
+    "@secret-agent/commons": "^0.2.8",
+    "@secret-agent/core-interfaces": "^0.2.8"
   },
   "devDependencies": {
     "source-map-loader": "^0.2.4",

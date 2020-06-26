@@ -2,7 +2,7 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 import Url, { URL } from 'url';
 import querystring from 'querystring';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import http, { IncomingMessage } from 'http';
 import https from 'https';
 import { createPromise } from '@secret-agent/commons/utils';

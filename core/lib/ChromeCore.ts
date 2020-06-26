@@ -1,4 +1,4 @@
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import puppeteer, { LaunchOptions } from 'puppeteer';
 import Session from './Session';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';

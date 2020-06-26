@@ -9,6 +9,6 @@
     "composite": true,
     "removeComments": true
   },
-  "include": ["interfaces/*.ts", "scripts/*.ts"],
+  "include": ["interfaces/*.ts", "scripts/*.ts", "*.json"],
   "exclude": ["node_modules"]
 }

@@ -11,7 +11,6 @@
   "private": true,
   "dependencies": {
     "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/shared-logger": "^0.2.8",
     "@secret-agent/shared-session-state": "^0.2.8",
     "@secret-agent/mitm": "^0.2.8",
     "@secret-agent/injected-scripts": "^0.2.8",
@@ -28,7 +27,6 @@
     "@types/puppeteer": "~2.0.1",
     "awaited-dom": "^1.0.4",
     "devtools-protocol": "^0.0.772852",
-    "http-proxy-agent": "^2.1.0",
-    "ua-parser-js": "^0.7.20"
+    "http-proxy-agent": "^2.1.0"
   }
 }

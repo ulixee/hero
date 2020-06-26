@@ -6,7 +6,7 @@ import Chrome79 from '@secret-agent/emulate-chrome-79';
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Safari13_0 from '@secret-agent/emulate-safari-13-0';
 import Browsers from './data/browsers.json';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

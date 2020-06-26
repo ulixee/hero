@@ -1,6 +1,6 @@
 import HttpResponseCache from '../lib/HttpResponseCache';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

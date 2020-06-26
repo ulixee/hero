@@ -3,7 +3,7 @@ import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import Window from './Window';
 import IDomStorage, { IDomStorageForOrigin } from '@secret-agent/core-interfaces/IDomStorage';
 import Protocol from 'devtools-protocol';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import { exceptionDetailsToError } from './Utils';
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { URL } from 'url';

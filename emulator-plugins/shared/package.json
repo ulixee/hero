@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/remote-client",
+  "name": "@secret-agent/emulator-plugins-shared",
   "version": "0.2.8",
   "description": "SecretAgent client that runs remotely",
   "author": "Data Liberation Foundation",
@@ -10,10 +10,10 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@secret-agent/commons": "^0.2.8"
+    "@secret-agent/commons": "^0.2.8",
+    "@secret-agent/emulators": "^0.2.8"
   },
   "devDependencies": {
-    "@secret-agent/shared-testing": "^0.2.8",
-    "@types/node": "^12.7.11"
+    "@secret-agent/shared-testing": "^0.2.8"
   }
 }

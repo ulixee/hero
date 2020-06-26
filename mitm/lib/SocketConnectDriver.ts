@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as net from 'net';
 import { promises as fs, unlink } from 'fs';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';

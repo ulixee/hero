@@ -1,4 +1,4 @@
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { ConsoleMessage } from 'puppeteer';

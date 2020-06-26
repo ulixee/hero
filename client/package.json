@@ -12,7 +12,6 @@
   "dependencies": {
     "@secret-agent/commons": "^0.2.8",
     "@secret-agent/core-interfaces": "^0.2.8",
-    "@secret-agent/shared-logger": "^0.2.8",
     "awaited-dom": "^1.0.4",
     "uuid": "^8.1.0"
   },

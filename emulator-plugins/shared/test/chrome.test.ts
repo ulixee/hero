@@ -1,8 +1,8 @@
 import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/shared-testing/helpers';
-import getOverrideScript from '../shared/injected-scripts';
+import getOverrideScript from '../injected-scripts';
 import inspectScript from './inspectHierarchy';
-import ChromeJson from '../emulate-chrome-80/chrome.json';
+import ChromeJson from '../../emulate-chrome-80/chrome.json';
 import { inspect } from 'util';
 
 const { chrome, prevProperty } = ChromeJson as any;

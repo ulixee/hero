@@ -1,6 +1,6 @@
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { IncomingMessage } from 'http';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 export default class HeadersHandler {

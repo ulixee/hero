@@ -2,7 +2,7 @@ import { promises as FS } from 'fs';
 import path from 'path';
 import Forge from 'node-forge';
 import pki = Forge.pki;
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

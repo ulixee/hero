@@ -7,7 +7,7 @@ import SessionsDb from './lib/SessionsDb';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import PageEventsListener from './lib/PageEventsListener';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import { IFrameRecord } from './models/FramesTable';

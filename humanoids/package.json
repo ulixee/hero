@@ -8,8 +8,5 @@
   },
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "user-agents": "^1.0.468",
-    "useragent": "^2.3.0"
-  }
+  "dependencies": {}
 }

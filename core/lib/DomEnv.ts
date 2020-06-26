@@ -5,7 +5,7 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
 import { SerializableOrJSHandle } from 'puppeteer';
 import FrameTracker from './FrameTracker';
-import Log from '@secret-agent/shared-logger';
+import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';

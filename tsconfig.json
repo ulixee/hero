@@ -4,13 +4,14 @@
     "incremental": true,
     "target": "ES2018",
     "module": "commonjs",
-    "lib": ["es2018", "dom", "dom.iterable", "scripthost"],
+    "lib": ["es2018"],
     "noImplicitAny": false,
     "inlineSourceMap": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "allowJs": true,
     "outDir": "./build",
     "preserveSymlinks": false,
     "experimentalDecorators": true
@@ -24,10 +25,9 @@
       "path": "website/tsconfig.json"
     }
   ],
-  "include": ["**/*.ts", "**/*.json"],
+  "include": ["**/*.ts", "**/*.js", "**/*.json", "**/yarn.lock"],
   "exclude": [
     "node_modules",
-    "*.js",
     "**/dist",
     "**/build",
     "**/built",

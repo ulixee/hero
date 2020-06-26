@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/shared-testing/helpers';
-import getOverrideScript from '../shared/injected-scripts';
+import getOverrideScript from '../injected-scripts';
 import inspectScript from './inspectHierarchy';
 import PolyfillChrome from './polyfill.json';
 import PolyfillChromeBt from './polyfill.bluetooth.json';
