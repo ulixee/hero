@@ -3,9 +3,6 @@
   "version": "0.2.8",
   "description": "EmulatorPlugin for Google Chrome version 80",
   "main": "index.js",
-  "author": "",
-  "license": "MIT",
-  "scripts": {},
   "devDependencies": {
     "@secret-agent/emulators": "^0.2.8",
     "@secret-agent/commons": "^0.2.8"

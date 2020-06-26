@@ -3,10 +3,5 @@
   "version": "0.2.8",
   "description": "Mouse and keyboard movements with human-like interactions",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "MIT",
   "dependencies": {}
 }

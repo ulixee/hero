@@ -1,12 +1,5 @@
 {
   "name": "@secret-agent/injected-scripts",
   "version": "0.2.8",
-  "description": "Various scripts that are injected into the DOM",
-  "private": true,
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT"
+  "description": "Various scripts that are injected into the DOM"
 }

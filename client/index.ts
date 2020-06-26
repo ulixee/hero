@@ -22,7 +22,10 @@ const DefaultOptions = {
   defaultUserProfile: {},
 };
 
-export function SecretAgentClientGenerator() {
+export function SecretAgentClientGenerator(): {
+  SecretAgent: ISecretAgent;
+  coreClient: CoreClient;
+} {
   const coreClient = new CoreClient();
 
   @SecretAgentStatics

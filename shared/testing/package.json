@@ -4,14 +4,8 @@
   "description": "Helpers and stubs for testing",
   "main": "index.js",
   "private": true,
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=12.0.0"
   },
   "dependencies": {
     "@koa/router": "^8.0.8",
@@ -23,6 +17,5 @@
   "devDependencies": {
     "@types/koa": "^2.11.3",
     "@types/koa__router": "^8.0.2"
-  },
-  "keywords": []
+  }
 }

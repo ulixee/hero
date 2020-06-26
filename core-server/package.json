@@ -2,13 +2,6 @@
   "name": "@secret-agent/core-server",
   "version": "0.2.8",
   "description": "Server framework for running SecretAgent remotely",
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "private": true,
   "dependencies": {
     "@secret-agent/core": "^0.2.8",
     "@secret-agent/commons": "^0.2.8"

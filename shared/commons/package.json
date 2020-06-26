@@ -2,17 +2,5 @@
   "name": "@secret-agent/commons",
   "version": "0.2.8",
   "description": "Common utilities for Secret Agent",
-  "main": "index.js",
-  "scripts": {},
-  "publishConfig": {
-    "access": "public"
-  },
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "dependencies": {},
-  "keywords": []
+  "main": "index.js"
 }

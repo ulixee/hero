@@ -1,6 +1,7 @@
 {
   "name": "@secret-agent/replay",
   "author": "Data Liberation Foundation",
+  "private": true,
   "contributors": [
     "Caleb Clark",
     "Blake Byrnes"

@@ -9,8 +9,6 @@
     "build-install": "npm run build",
     "postinstall": "npm run build"
   },
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "@secret-agent/commons": "^0.2.8",
     "node-forge": "^0.9.1"

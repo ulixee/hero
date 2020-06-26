@@ -6,8 +6,7 @@
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
     "test": "NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
-    "updateUseragent": "node node_modules/useragent/bin/update.js",
-    "postinstall": "yarn workspace @secret-agent/mitm build-install && yarn updateUseragent"
+    "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "author": "Data Liberation Foundation",
@@ -53,7 +52,6 @@
       "replay",
       "replay-api",
       "shared/*",
-      "shared/session-state",
       "website"
     ]
   },

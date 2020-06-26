@@ -1,14 +1,7 @@
 {
   "name": "@secret-agent/replay-api",
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
   "description": "The backend API for Replay",
   "version": "0.2.8",
-  "scripts": {},
-  "license": "MIT",
   "dependencies": {
     "@koa/cors": "^2.2.1",
     "@secret-agent/shared-session-state": "^0.2.8",
@@ -17,6 +10,5 @@
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
     "koa-router": "^7.4.0"
-  },
-  "devDependencies": {}
+  }
 }

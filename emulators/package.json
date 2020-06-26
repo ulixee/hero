@@ -4,10 +4,9 @@
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {
-    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'"
+    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'",
+    "postinstall": "node -e 'require(\"useragent/bin/update.js\")'"
   },
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "user-agents": "^1.0.559",
     "useragent": "^2.3.0"

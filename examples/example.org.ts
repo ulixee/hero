@@ -1,7 +1,7 @@
 import SecretAgent from '@secret-agent/full-client';
 
 async function run() {
-  const browser = await SecretAgent.createBrowser({ name: 'example.org' });
+  const browser = await SecretAgent.createBrowser({ sessionName: 'example.org' });
   await browser.goto('https://example.org/');
   await browser.waitForAllContentLoaded();
 

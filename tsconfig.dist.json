@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./build-dist"
+  },
+  "baseUrl": ".",
+  "references": [
+    {
+      "path": "injected-scripts/tsconfig.dist.json"
+    }
+  ],
+  "include": ["**/*.ts", "**/*.js", "**/*.json"],
+  "exclude": [
+    "*jest*",
+    "**/tsconfig*.json",
+    "**/test",
+    "node_modules",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "build",
+    "build-dist",
+    "replay",
+    "examples",
+    "website",
+    "injected-scripts"
+  ]
+}
