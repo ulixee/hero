@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/mitm",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,13 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "@secret-agent/commons": "^0.2.8",
+    "@secret-agent/commons": "^1.0.0-alpha.0",
     "node-forge": "^0.9.1"
   },
   "devDependencies": {
     "@types/node-forge": "^0.9.3",
     "@types/ws": "^7.2.4",
-    "ws": "^7.3.0",
-    "proxy": "^1.0.1"
+    "proxy": "^1.0.1",
+    "ws": "^7.3.0"
   }
 }

@@ -1,5 +1,5 @@
 {
   "name": "@secret-agent/injected-scripts",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Various scripts that are injected into the DOM"
 }

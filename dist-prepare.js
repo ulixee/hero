@@ -13,6 +13,9 @@ const defaults = {
   engines: {
     node: '>=10.3.0',
   },
+  publishConfig: {
+    access: 'public',
+  },
 };
 
 const licensePath = `${__dirname}/LICENSE.md`;
@@ -22,7 +25,7 @@ function processPackageJson(packagePath) {
   let overridesJson = {};
   if (fs.existsSync(`${packagePath}/package.dist.json`)) {
     overridesJson = JSON.parse(fs.readFileSync(`${packagePath}/package.dist.json`, 'utf8'));
-    console.log('Has package.json overrides',packagePath, overridesJson);
+    console.log('Has package.json overrides', packagePath, overridesJson);
     fs.unlinkSync(`${packagePath}/package.dist.json`);
   }
 
@@ -42,7 +45,7 @@ function processPackageJson(packagePath) {
     scripts: overridesJson.scripts,
     dependencies: overridesJson.description || packageJson.dependencies,
   };
-  
+
   // check if index exists
   if (!finalPackageJson.files && !finalPackageJson.main) {
     if (fs.existsSync(`${packagePath}/index.js`)) {

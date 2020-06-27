@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/commons",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Common utilities for Secret Agent",
   "main": "index.js"
 }

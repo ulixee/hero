@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulators",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {

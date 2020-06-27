@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/full-client",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "The Web Browser Built for Scraping",
   "dependencies": {
-    "@secret-agent/client": "^0.2.8",
-    "@secret-agent/core": "^0.2.8"
+    "@secret-agent/client": "^1.0.0-alpha.0",
+    "@secret-agent/core": "^1.0.0-alpha.0"
   },
   "devDependencies": {
     "@types/node": "^12.7.11"

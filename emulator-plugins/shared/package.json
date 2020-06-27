@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/emulator-plugins-shared",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "SecretAgent client that runs remotely",
   "dependencies": {
-    "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/emulators": "^0.2.8"
+    "@secret-agent/commons": "^1.0.0-alpha.0",
+    "@secret-agent/emulators": "^1.0.0-alpha.0"
   },
   "devDependencies": {
-    "@secret-agent/shared-testing": "^0.2.8"
+    "@secret-agent/shared-testing": "^1.0.0-alpha.0"
   }
 }
