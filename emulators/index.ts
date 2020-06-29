@@ -10,6 +10,8 @@ import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 
+const DEFAULT_EMULATOR_ID = Chrome80.emulatorId;
+
 export default class Emulators {
   private static readonly pluginsById: { [emulatorId: string]: IEmulatorPluginStatics } = {};
   private static readonly pluginUsagePct: { [emulatorId: string]: number } = {};
@@ -34,7 +36,19 @@ export default class Emulators {
   }
 
   public static get(emulatorId: string) {
-    return new this.pluginsById[emulatorId]();
+    if (!emulatorId) {
+      return new this.pluginsById[DEFAULT_EMULATOR_ID]();
+    }
+    if (emulatorId === 'random') {
+      return this.getRandom();
+    }
+
+    const fromShortId = `@secret-agent/emulate-${emulatorId}`;
+    const SelectedPlugin = this.pluginsById[emulatorId] || this.pluginsById[fromShortId]; // tslint:disable-line:variable-name
+    if (!SelectedPlugin) {
+      throw new Error(`Emulator could not be found: ${emulatorId}`);
+    }
+    return new SelectedPlugin();
   }
 
   public static getRandom(): EmulatorPlugin {

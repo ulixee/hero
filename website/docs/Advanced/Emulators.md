@@ -40,19 +40,21 @@ We've included a few emulator plugins to get you started. These plugins are pre-
 
 <p class="show-table-header"></p>
 
-| Name                          | ID                        |
-| ----------------------------- | ------------------------- |
-| Safari 13 for Mac             | safari-13-for-mac         |
-| Chrome 79 for Windows and Mac | chrome-79-for-win-and-mac |
-| Chrome 80 for Windows and Mac | chrome-80-for-win-and-mac |
+| Name        | NPM Package Name                  | Short ID    |
+| ----------- | --------------------------------- | ----------- |
+| Safari 13   | @secret-agent/emulate-safari-13   | safari-13   | 
+| Chrome 79   | @secret-agent/emulate-chrome-79   | chrome-79   |
+| Chrome 80   | @secret-agent/emulate-chrome-80   | chrome-80   |
 
-To use a specific emulator, pass your chosen ID into `createBrowser`:
+Note: You can use the full NPM Package Name or Short ID to reference the emulator you want when calling `SecretAgent.createBrowser`.
+
+For example, here's how to use chrome-79:
 
 ```js
 const SecretAgent = 'secret-agent';
 
 (async () => {
-  const browser = await SecretAgent.createBrowser({ emulatorId: 'chrome79' });
+  const browser = await SecretAgent.createBrowser({ emulatorId: 'chrome-79' });
 })();
 ```
 
