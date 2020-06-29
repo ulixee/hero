@@ -14,10 +14,12 @@ tsconfig.tsbuildinfo
 .idea/
 
 .cache-test
+/build-dist/
 
 *.js
 
 !jest-*.js
+!dist-prepare.js
 
 /mitm/socket/connect
 !mitm/install.js

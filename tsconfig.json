@@ -8,6 +8,7 @@
     "noImplicitAny": false,
     "inlineSourceMap": true,
     "esModuleInterop": true,
+    "declaration": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
@@ -22,22 +23,20 @@
       "path": "injected-scripts/tsconfig.json"
     },
     {
-      "path": "website/tsconfig.json"
-    },
-    {
       "path": "replay/tsconfig.json"
     },
     {
       "path": "replay/tsconfig.backend.json"
     }
   ],
-  "include": ["**/*.ts", "**/*.js", "**/*.json", "**/yarn.lock"],
+  "include": ["**/*.ts", "**/*.js", "**/*.json"],
   "exclude": [
     "**/tsconfig*.json",
     "node_modules",
     "**/dist",
     "**/build",
-    "**/built",
+    "build",
+    "build-dist",
     "replay",
     "website",
     "injected-scripts"

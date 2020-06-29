@@ -1,28 +1,18 @@
 {
   "name": "@secret-agent/shared-session-state",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Library to capture and store Secret Agent sessions",
   "main": "index.js",
-  "private": true,
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=10.0.0"
-  },
   "dependencies": {
-    "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/core-interfaces": "^0.2.8",
-    "@secret-agent/injected-scripts": "^0.2.8",
+    "@secret-agent/commons": "^1.0.0-alpha.0",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.0",
+    "@secret-agent/injected-scripts": "^1.0.0-alpha.0",
     "better-sqlite3": "^7.0.1"
   },
   "devDependencies": {
-    "koa": "^2.11.0",
     "@koa/router": "^8.0.8",
-    "@types/better-sqlite3": "^5.4.0"
+    "@types/better-sqlite3": "^5.4.0",
+    "koa": "^2.11.0"
   },
   "keywords": []
 }

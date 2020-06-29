@@ -143,21 +143,21 @@ export default class SessionLoader {
   }
 }
 
-interface IDomChangeGroup {
+export interface IDomChangeGroup {
   timestamp: string;
   commandId: number;
   urlOrigin: string;
   changes: IDomChangeRecord[];
 }
 
-interface IPaintEvent {
+export interface IPaintEvent {
   timestamp: string;
   commandId: number;
   urlOrigin: string;
   changeEvents: IDomChangeEvent[];
 }
 
-interface IMajorTick {
+export interface IMajorTick {
   type: 'command';
   commandId: number;
   timestamp: Date;
@@ -166,7 +166,7 @@ interface IMajorTick {
   minorTicks: IMinorTick[];
 }
 
-interface IMinorTick {
+export interface IMinorTick {
   type: 'paint' | 'mouse' | 'page';
   paintEventIdx?: number;
   pageIdx?: number;

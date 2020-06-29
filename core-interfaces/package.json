@@ -1,16 +1,9 @@
 {
   "name": "@secret-agent/core-interfaces",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "Core interfaces used by SecretAgent",
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "private": true,
   "dependencies": {
-    "@secret-agent/injected-scripts": "^0.2.8"
+    "@secret-agent/injected-scripts": "^1.0.0-alpha.0"
   },
   "devDependencies": {
     "@types/node": "^12.7.11",

@@ -1,12 +1,13 @@
 {
   "name": "@secret-agent/replay",
   "author": "Data Liberation Foundation",
+  "private": true,
   "contributors": [
     "Caleb Clark",
     "Blake Byrnes"
   ],
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "main": "backend",
   "build": {
     "appId": "com.example.app",

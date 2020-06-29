@@ -1,21 +1,14 @@
 {
   "name": "@secret-agent/remote-interfaces",
-  "version": "0.2.8",
+  "version": "1.0.0-alpha.0",
   "description": "SecretAgent helper library for remote packages",
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "private": true,
   "dependencies": {
-    "@secret-agent/commons": "^0.2.8",
-    "@secret-agent/core": "^0.2.8"
+    "@secret-agent/commons": "^1.0.0-alpha.0",
+    "@secret-agent/core": "^1.0.0-alpha.0"
   },
   "devDependencies": {
     "@secret-agent/core": "^0.2.8",
-    "@secret-agent/shared-testing": "^0.2.8",
+    "@secret-agent/shared-testing": "^1.0.0-alpha.0",
     "@types/node": "^12.7.11"
   }
 }

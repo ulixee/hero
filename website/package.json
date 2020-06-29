@@ -1,6 +1,7 @@
 {
   "name": "@secret-agent/website",
-  "version": "0.1.1",
+  "version": "1.0.0-alpha.0",
+  "private": true,
   "scripts": {
     "start": "gridsome develop",
     "build": "gridsome build",
@@ -13,23 +14,23 @@
     "@gridsome/vue-remark": "^0.2.1",
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
-    "remark-slug": "git://github.com/ulixee/remark-slug.git",
     "docsearch.js": "^2.6.3",
     "gridsome": "^0.7.12",
     "json2md": "^1.7.0",
     "lodash.kebabcase": "^4.1.1",
     "moment": "^2.24.0",
+    "remark-slug": "git://github.com/ulixee/remark-slug.git",
     "typography": "^0.16.19",
     "vue-prismjs": "^1.2.0",
     "vue-property-decorator": "^8.3.0"
   },
   "devDependencies": {
-    "sharp": "^0.23.2",
     "gridsome-plugin-pug": "^0.0.3",
     "gridsome-plugin-typescript": "git://github.com/calebjclark/gridsome-plugin-typescript.git",
     "node-sass": "^4.12.0",
     "pug": "^2.0.3",
     "sass-loader": "^8.0.0",
+    "sharp": "^0.23.2",
     "ts-loader": "^6.2.1",
     "vue-svg-loader": "^0.12.0"
   },
