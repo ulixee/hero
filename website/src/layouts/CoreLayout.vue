@@ -1,9 +1,8 @@
-<template>
-  <div id="app">
-    <Header />
-    <slot />
-    <Footer v-if="footer !== false" />
-  </div>
+<template lang="pug">
+#app
+  Header
+  slot
+  Footer(v-if="footer !== false")
 </template>
 
 <script>

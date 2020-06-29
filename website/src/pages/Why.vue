@@ -33,7 +33,7 @@ BasicLayout.Why
         <a href="https://gs.statcounter.com/browser-version-market-share/desktop/worldwide/">top 3</a> most popular browsers are ready to plug-in.
 
 
-      h2 Writing Scraper Scripts is Still too Complicated
+      h2 Writing Scraper Scripts Is Too Complicated
 
       p.
         Puppeteer was a big improvement in interacting with modern websites, but introduced a subtle mess: the browser is a

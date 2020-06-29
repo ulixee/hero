@@ -25,6 +25,7 @@
   a {
     text-decoration: none;
     color: currentColor;
+    white-space: nowrap;
     &:hover {
       color: var(--primary-color);
       .logo__svg path {
@@ -43,7 +44,8 @@
 
   .logo__name {
     opacity: 0.85;
-    margin-left: 7px;
+    margin-left: 10px;
+    margin-right: 30px;
     font-weight: 900;
     line-height: 25px;
   }

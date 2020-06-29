@@ -5,9 +5,10 @@
   "scripts": {
     "start": "gridsome develop",
     "build": "gridsome build",
-    "deploy": "firebase deploy --only hosting",
     "develop": "gridsome develop",
-    "explore": "gridsome explore"
+    "explore": "gridsome explore",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d ../build-dist/website"
   },
   "dependencies": {
     "@gridsome/remark-prismjs": "^0.3.0",
@@ -15,6 +16,7 @@
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
     "docsearch.js": "^2.6.3",
+    "gh-pages": "^3.1.0",
     "gridsome": "^0.7.12",
     "json2md": "^1.7.0",
     "lodash.kebabcase": "^4.1.1",

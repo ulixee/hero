@@ -12,7 +12,7 @@
     - User
     - Interactions
     - AwaitedDOM
-    - DetachedDOM
+    #- DetachedDOM
 
 - title: Advanced
   items:
