@@ -8,7 +8,7 @@
     "develop": "gridsome develop",
     "explore": "gridsome explore",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d ../build-dist/website"
   },
   "dependencies": {
     "@gridsome/remark-prismjs": "^0.3.0",

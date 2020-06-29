@@ -3,9 +3,9 @@
     .header-inner.container.flex.gap-30
       Logo
       Nav.flex-fit
-      //SearchForm
+      SearchForm
       nav.header-actions.flex
-        a(aria-label="Twitter" href="//twitter.com/secret-agent" rel="noopener noreferrer" target="_blank" title="Follow us on Twitter")
+        a(aria-label="Twitter" href="//twitter.com/SecretAgentDev" rel="noopener noreferrer" target="_blank" title="Follow us on Twitter")
           twitter-logo
         a(aria-label="Discord" href="//discord.gg/ydycFGU" rel="noopener noreferrer" class="hide-for-small" target="_blank" title="Join our discord")
           discord-logo
@@ -16,11 +16,9 @@
           .dropdown
             a(href="//github.com/ulixee/secret-agent" rel="noopener noreferrer" target="_blank")
               | Repository
-            a(href="//github.com/ulixee/secret-agent/blob/master/gridsome/CHANGELOG.md" rel="noopener noreferrer" target="_blank")
-              | Changelog
             a(href="//github.com/ulixee/secret-agent/issues" rel="noopener noreferrer" target="_blank")
               | Issues
-            a(href="//github.com/ulixee/secret-agent/projects/2" rel="noopener noreferrer" target="_blank")
+            a(href="//github.com/ulixee/secret-agent/projects/1" rel="noopener noreferrer" target="_blank")
               | Roadmap
 </template>
 

@@ -40,6 +40,10 @@ const SecretAgent = require('secret-agent');
 
 Browse the [full API docs](https://secretagent.dev/docs).
 
+## Contributing
+
+We'd love your help in making SecretAgent a better tool. Please don't hesitate to send a pull request.
+
 ## License
 
 [MIT](LICENSE.md)

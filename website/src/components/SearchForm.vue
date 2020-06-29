@@ -33,9 +33,9 @@
 
         import('docsearch.js').then(({ default: docsearch }) => {
           docsearch({
-            indexName: 'gridsome',
+            indexName: 'secretagent',
             inputSelector: `#${this.id}-input`,
-            apiKey: 'a7400a3a94b256c5283cb05efb860fc1',
+            apiKey: 'b975ccd9d9a93db63dd14f8d0baee5eb',
             debug: process.env.NODE_ENV === 'development'
           });
 
@@ -57,6 +57,8 @@
     font-size: 0.9rem;
     flex: 1;
     width: 100%;
+    position: relative;
+    top: 1px;
 
     label {
       display: flex;

@@ -5,11 +5,11 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "noImplicitReturns": true,
-    "outDir": "../build/website",
+    "outDir": "../build-dist/website",
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
+    "sourceMap": false,
+    "declarationMap": false,
     "strict": true,
-    "composite": true,
     "lib": ["es2018", "dom"]
   },
   "include": ["./src/**/*"]

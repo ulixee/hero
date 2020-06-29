@@ -8,7 +8,7 @@ coverage
 .DS_Store
 dist
 build/
-/website/built
+website/.cache
 tsconfig.tsbuildinfo
 
 .idea/
