@@ -3,7 +3,7 @@ import { Helpers } from '@secret-agent/shared-testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
-import Safari13 from '@secret-agent/emulate-safari-13-0';
+import Safari13 from '@secret-agent/emulate-safari-13';
 
 let koaServer;
 beforeAll(async () => {

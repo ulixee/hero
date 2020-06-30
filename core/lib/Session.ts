@@ -31,7 +31,7 @@ export default class Session {
     public chromeCore: ChromeCore,
     readonly options: ICreateSessionOptions,
   ) {
-    this.emulator = options.emulatorId ? Emulators.get(options.emulatorId) : Emulators.getRandom();
+    this.emulator = Emulators.get(options.emulatorId);
     if (options.userProfile) {
       this.emulator.setUserProfile(options.userProfile);
     }

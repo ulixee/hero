@@ -44,7 +44,7 @@ Creates a new sandboxed browser instance with [unique user session and fingerpri
 
 - options `object` Accepts any of the following:
   - name `string`. This is used to generate a unique sessionName.
-  - emulatorId `string`. Emulates a specific browser version.
+  - emulatorId `string` defaults to `chrome-80`. Emulates a specific browser version.
   - humanoidId `string`. Drives human-like mouse/keyboard movements.
   - renderingOptions `string[]`. Controls browser functionality.
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
