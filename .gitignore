@@ -6,32 +6,19 @@ lerna-debug.log
 
 coverage
 .DS_Store
-dist
-build/
-website/.cache
 tsconfig.tsbuildinfo
 
 .idea/
 
 .cache-test
+
+/build/
 /build-dist/
 
-*.js
-
-!jest-*.js
-!dist-prepare.js
-
 /mitm/socket/connect
-!mitm/install.js
 /mitm/socket/build/
-/.mitm-ca
-/**/.mitm-ca
 
 emulators/data/DOM-*.json
-!/emulator-plugins/shared/injected-scripts/*.js
-!/emulator-plugins/shared/test/inspectHierarchy.js
-/emulator-plugins/shared/injected-scripts/index.js
 
-
+/.mitm-ca
 /.sessions
-/**/.sessions
