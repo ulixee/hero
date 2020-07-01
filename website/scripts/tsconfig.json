@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": false,
+    "declarationMap": false,
+    "strict": true,
+    "esModuleInterop": true,
+    "lib": ["es2018"]
+  }
+}
+

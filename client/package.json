@@ -5,7 +5,7 @@
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.0",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.0",
-    "awaited-dom": "^1.0.4",
+    "awaited-dom": "^1.0.10",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
