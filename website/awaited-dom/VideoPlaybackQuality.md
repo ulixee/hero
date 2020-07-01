@@ -1,4 +1,4 @@
-# VideoPlaybackQuality
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> VideoPlaybackQuality
 
 ## Properties
 
@@ -19,7 +19,3 @@ Needs content.
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

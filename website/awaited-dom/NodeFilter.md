@@ -1,14 +1,13 @@
-# NodeFilter
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NodeFilter
 
 <div class='overview'>A <strong><code>NodeFilter</code></strong> interface represents an object used to filter the nodes in a <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> or <a href="/en-US/docs/Web/API/TreeWalker" title="The TreeWalker object represents the nodes of a document subtree and a position within them."><code>TreeWalker</code></a>. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter.</div>
-
-## Properties
 
 ## Methods
 
 ### .acceptNode*(...args)* <div class="specs"><i>W3C</i></div> {#acceptNode}
 
-Returns an <code>unsigned short</code> that will be used to tell if a given <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> must be accepted or not by the <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> or <a href="/en-US/docs/Web/API/TreeWalker" title="The TreeWalker object represents the nodes of a document subtree and a position within them."><code>TreeWalker</code></a> iteration algorithm. This method is expected to be written by the user of a <code>NodeFilter</code>. Possible return values are:
+Returns an <code>unsigned short</code> that will be used to tell if a given <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> must be accepted or not by the <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> or <a href="/en-US/docs/Web/API/TreeWalker" title="The TreeWalker object represents the nodes of a document subtree and a position within them."><code>TreeWalker</code></a> iteration algorithm. This method is expected to be written by the user of a <code>NodeFilter
+</code>. Possible return values are:
 	<table class="standard-table">
 		<tbody>
 			<tr>
@@ -37,5 +36,3 @@ Returns an <code>unsigned short</code> that will be used to tell if a given <a h
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

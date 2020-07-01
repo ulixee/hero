@@ -1,6 +1,4 @@
-# AnimationEffect
-
-## Properties
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> AnimationEffect
 
 ## Methods
 
@@ -36,5 +34,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

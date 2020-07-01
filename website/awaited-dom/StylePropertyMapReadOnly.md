@@ -1,4 +1,4 @@
-# StylePropertyMapReadOnly
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> StylePropertyMapReadOnly
 
 ## Properties
 
@@ -86,5 +86,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

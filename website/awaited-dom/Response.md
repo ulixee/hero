@@ -1,4 +1,4 @@
-# Response
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Response
 
 <div class='overview'><span class="seoSummary">The <strong><code>Response</code></strong> interface of the <a href="/en-US/docs/Web/API/Fetch_API">Fetch API</a> represents the response to a request.</span></div>
 
@@ -8,13 +8,15 @@
 
 ### .headers <div class="specs"><i>W3C</i></div> {#headers}
 
-The <a href="/en-US/docs/Web/API/Headers"><code>Headers</code></a> object associated with the response.
+The <a href="/en-US/docs/Web/API/Headers"><code>Headers</code>
+</a> object associated with the response.
 
 #### **Type**: `null`
 
 ### .ok <div class="specs"><i>W3C</i></div> {#ok}
 
-A boolean indicating whether the response was successful (status in the range <code>200</code>–<code>299</code>) or not.
+A boolean indicating whether the response was successful (status in the range <code>200</code>–<code>299
+</code>) or not.
 
 #### **Type**: `null`
 
@@ -26,19 +28,22 @@ Indicates whether or not the response is the result of a redirect (that is, its 
 
 ### .status <div class="specs"><i>W3C</i></div> {#status}
 
-The status code of the response. (This will be <code>200</code> for a success).
+The status code of the response. (This will be <code>200
+</code> for a success).
 
 #### **Type**: `null`
 
 ### .statusText <div class="specs"><i>W3C</i></div> {#statusText}
 
-The status message corresponding to the status code. (e.g., <code>OK</code> for <code>200</code>).
+The status message corresponding to the status code. (e.g., <code>OK</code> for <code>200
+</code>).
 
 #### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
-The type of the response (e.g., <code>basic</code>, <code>cors</code>).
+The type of the response (e.g., <code>basic</code>, <code>cors
+</code>).
 
 #### **Type**: `null`
 
@@ -52,7 +57,8 @@ The URL of the response.
 
 ### .clone*(...args)* <div class="specs"><i>W3C</i></div> {#clone}
 
-Creates a clone of a <code>Response</code> object.
+Creates a clone of a <code>Response
+</code> object.
 
 #### **Arguments**:
 
@@ -63,7 +69,8 @@ Creates a clone of a <code>Response</code> object.
 
 ### .error*(...args)* <div class="specs"><i>W3C</i></div> {#error}
 
-Returns a new <code>Response</code> object associated with a network error.
+Returns a new <code>Response
+</code> object associated with a network error.
 
 #### **Arguments**:
 
@@ -82,5 +89,3 @@ Creates a new response with a different URL.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

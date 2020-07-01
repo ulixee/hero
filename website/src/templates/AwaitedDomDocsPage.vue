@@ -1,6 +1,19 @@
 <template lang="pug">
 CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
   .container.flex.flex-align-top
+    .sidebar
+      template(v-if="links" v-for="(group, i1) in links")
+        h3.menu-item(:key="`title-${i1}`") {{ group.title }}
+        template(v-for="(item, i2) in group.items")
+          template(v-if="item.items")
+            h4.menu-item(:key="`title-${i1}-${i2}`") {{item.title}}
+            template(v-for="(itm, i3) in item.items")
+              g-link.menu-item.menu-link(:exact="itm.link == '/docs/'" :to="itm.link" :key="`link-${i1}-${i2}-${i3}`")
+                | {{ itm.title }}
+          template(v-else)
+            g-link.menu-item.menu-link(:exact="item.link == '/docs/'" :to="item.link" :key="`link-${i1}-${i2}`")
+              | {{ item.title }}
+
     Section.doc-content.flex-fit(container="base")
       VueRemarkContent(class="post mb")
       p
@@ -33,8 +46,11 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
 </page-query>
 
 <script lang="ts">
-  import { Vue, Component, Watch } from 'vue-property-decorator';
+  import { Vue, Component } from 'vue-property-decorator';
   import GithubLogo from '~/assets/logos/github.svg';
+  import generateLinks from "../lib/generateLinks";
+
+  const links = generateLinks();
 
   @Component({
     metaInfo() {
@@ -51,6 +67,7 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
   export default class AwaitedDomPage extends Vue {
     public $page: any;
     public $route: any;
+    public links: any[] = links;
 
     private get subtitles() {
       // Remove h1, h4, h5, h6 titles
@@ -69,6 +86,18 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
       if ((path.match(new RegExp('/', 'g')) || []).length == 1) path = path + '/README';
       return `https://github.com/ulixee/secret-agent/blob/master/website${path}.md`;
     }
+
+    private get items() {
+      const items = [];
+      for (const group of this.links) {
+        items.push({ title: group.title, link: group.link });
+        for (const item of group.items) {
+          items.push({ title: item.title, link: item.link });
+          if (item.items) items.push(...item.items);
+        }
+      }
+      return items;
+    }
   }
 </script>
 
@@ -76,10 +105,29 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
   @import "../assets/style/reset";
 
   .AwaitedDomPage {
-    .container-base {
-      max-width: 880px;
-      margin-left: 0;
-      padding-left: 0;
+    h1 {
+      a:nth-child(2) {
+        &:before {
+          display: none;
+        }
+        display: inline-block;
+        float: none;
+        width: auto;
+        margin-left: 0;
+        opacity: 1;
+        font-size: 1em;
+        text-decoration: none;
+        top: 0;
+        color: rgba(0,0,0,0.6);
+        padding-right: 10px;
+        &:hover {
+          color: var(--primary-color-dark)
+        }
+      }
+      span {
+        opacity: 0.3;
+        font-weight: 100;
+      }
     }
     ul.methods, ul.properties {
       @include reset-ul();

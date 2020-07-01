@@ -1,4 +1,4 @@
-# HTMLFrameElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLFrameElement
 
 ## Properties
 
@@ -61,7 +61,3 @@ Needs content.
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

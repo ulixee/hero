@@ -1,4 +1,4 @@
-# TextTrackCueList
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> TextTrackCueList
 
 ## Properties
 
@@ -20,5 +20,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

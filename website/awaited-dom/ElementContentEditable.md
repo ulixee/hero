@@ -1,4 +1,4 @@
-# ElementContentEditable
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ElementContentEditable
 
 ## Properties
 
@@ -13,7 +13,3 @@ Needs content.
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

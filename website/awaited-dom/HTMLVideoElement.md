@@ -1,4 +1,4 @@
-# HTMLVideoElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLVideoElement
 
 <div class='overview'>The <strong><code>HTMLVideoElement</code></strong> interface provides special properties and methods for manipulating video objects. It also inherits properties and methods of <a href="/en-US/docs/Web/API/HTMLMediaElement" title="The HTMLMediaElement interface adds to HTMLElement the properties and methods needed to support basic media-related capabilities that are common to audio and video."><code>HTMLMediaElement</code></a> and <a href="/en-US/docs/Web/API/HTMLElement" title="The HTMLElement interface represents any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it."><code>HTMLElement</code></a>.</div>
 
@@ -8,13 +8,15 @@
 
 ### .height <div class="specs"><i>W3C</i></div> {#height}
 
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-height">height</a></code> HTML attribute, which specifies the height of the display area, in CSS pixels.
+Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-height">height</a>
+</code> HTML attribute, which specifies the height of the display area, in CSS pixels.
 
 #### **Type**: `null`
 
 ### .poster <div class="specs"><i>W3C</i></div> {#poster}
 
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-poster">poster</a></code> HTML attribute, which specifies an image to show while no video data is available.
+Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-poster">poster</a>
+</code> HTML attribute, which specifies an image to show while no video data is available.
 
 #### **Type**: `null`
 
@@ -32,7 +34,8 @@ Returns an unsigned integer value indicating the intrinsic width of the resource
 
 ### .width <div class="specs"><i>W3C</i></div> {#width}
 
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-width">width</a></code> HTML attribute, which specifies the width of the display area, in CSS pixels.
+Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-width">width</a>
+</code> HTML attribute, which specifies the width of the display area, in CSS pixels.
 
 #### **Type**: `null`
 
@@ -40,7 +43,8 @@ Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String
 
 ### .getVideoPlaybackQuality*(...args)* <div class="specs"><i>W3C</i></div> {#getVideoPlaybackQuality}
 
-Returns a <a href="/en-US/docs/Web/API/VideoPlaybackQuality" title="A VideoPlaybackQuality object is returned by the HTMLVideoElement.getVideoPlaybackQuality() method and contains metrics that can be used to determine the playback quality of a video."><code>VideoPlaybackQuality</code></a> object that contains the current playback metrics. This information includes things like the number of dropped or corrupted frames, as well as the total number of frames.
+Returns a <a href="/en-US/docs/Web/API/VideoPlaybackQuality" title="A VideoPlaybackQuality object is returned by the HTMLVideoElement.getVideoPlaybackQuality() method and contains metrics that can be used to determine the playback quality of a video."><code>VideoPlaybackQuality</code>
+</a> object that contains the current playback metrics. This information includes things like the number of dropped or corrupted frames, as well as the total number of frames.
 
 #### **Arguments**:
 
@@ -48,5 +52,3 @@ Returns a <a href="/en-US/docs/Web/API/VideoPlaybackQuality" title="A VideoPlayb
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

@@ -1,4 +1,4 @@
-# MediaError
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> MediaError
 
 <div class='overview'><span class="seoSummary">The <code><strong>MediaError</strong></code> interface represents an error which occurred while handling media in an HTML media element based on <a href="/en-US/docs/Web/API/HTMLMediaElement" title="The HTMLMediaElement interface adds to HTMLElement the properties and methods needed to support basic media-related capabilities that are common to audio and video."><code>HTMLMediaElement</code></a>, such as <a href="/en-US/docs/Web/HTML/Element/audio" title="The HTML <audio> element is used to embed sound content in documents. It may contain one or more audio sources, represented using the src attribute or the <source> element:&nbsp;the browser will choose the most suitable one. It can also be the destination for streamed media, using a MediaStream."><code>&lt;audio&gt;</code></a> or <a href="/en-US/docs/Web/HTML/Element/video" title="The&nbsp;HTML Video element&nbsp;(<video>) embeds a media player which supports video playback into the document.&nbsp;You can use&nbsp;<video>&nbsp;for audio content as well, but the <audio> element may provide a more appropriate user experience."><code>&lt;video&gt;</code></a>.</span></div>
 
@@ -8,7 +8,8 @@
 
 ### .code <div class="specs"><i>W3C</i></div> {#code}
 
-A number which represents the general type of error that occurred, as follows: <table class="standard-table">
+A number which represents the general type of error that occurred, as follows: 
+<table class="standard-table">
  <thead>
   <tr>
    <th scope="col">Name</th>
@@ -44,10 +45,7 @@ A number which represents the general type of error that occurred, as follows: <
 
 ### .message <div class="specs"><i>W3C</i></div> {#message}
 
-A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> object containing a human-readable string which provides <em>specific diagnostic information</em> to help the reader understand the error condition which occurred; specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong. This text and its format is not defined by the specification and will vary from one <a class="glossaryLink" href="/en-US/docs/Glossary/user_agent" title="user agent: A user agent is a computer program representing a person, for example, a browser in a Web context.">user agent</a> to another. If no diagnostics are available, or no explanation can be provided, this value is an empty string (<code>""</code>).
+A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> object containing a human-readable string which provides <em>specific diagnostic information</em> to help the reader understand the error condition which occurred; specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong. This text and its format is not defined by the specification and will vary from one <a class="glossaryLink" href="/en-US/docs/Glossary/user_agent" title="user agent: A user agent is a computer program representing a person, for example, a browser in a Web context.">user agent</a> to another. If no diagnostics are available, or no explanation can be provided, this value is an empty string (<code>""
+</code>).
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

@@ -1,4 +1,4 @@
-# DocumentAndElementEventHandlers
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> DocumentAndElementEventHandlers
 
 ## Properties
 
@@ -19,7 +19,3 @@ Needs content.
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

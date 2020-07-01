@@ -1,6 +1,4 @@
-# MediaKeys
-
-## Properties
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> MediaKeys
 
 ## Methods
 
@@ -25,5 +23,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

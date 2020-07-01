@@ -1,4 +1,4 @@
-# SVGNumber
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SVGNumber
 
 <div class='overview'>The <strong><code>SVGNumber</code></strong> interface corresponds to the <a href="/en-US/docs/Web/CSS/number" title="The <number> CSS data type represents a number, being either an integer or a number with a fractional component."><code>&lt;number&gt;</code></a> basic data type.</div>
 
@@ -13,7 +13,3 @@ A float representing the number.
  
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

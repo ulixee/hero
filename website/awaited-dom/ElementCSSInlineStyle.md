@@ -1,4 +1,4 @@
-# ElementCSSInlineStyle
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ElementCSSInlineStyle
 
 ## Properties
 
@@ -7,7 +7,3 @@
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

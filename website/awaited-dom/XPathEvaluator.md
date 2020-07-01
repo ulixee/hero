@@ -1,7 +1,1 @@
-# XPathEvaluator
-
-## Properties
-
-## Methods
-
-## Events
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> XPathEvaluator

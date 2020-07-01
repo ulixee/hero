@@ -1,4 +1,4 @@
-# HTMLOrSVGElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLOrSVGElement
 
 ## Properties
 
@@ -43,5 +43,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

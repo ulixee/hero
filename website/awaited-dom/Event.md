@@ -1,4 +1,4 @@
-# Event
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Event
 
 <div class='overview'><span class="seoSummary">The <code><strong>Event</strong></code> interface represents an event which takes place in the DOM.</span></div>
 
@@ -24,7 +24,8 @@ A boolean indicating whether the event is cancelable.
 
 ### .cancelBubble <div class="specs"><i>W3C</i></div> {#cancelBubble}
 
-A historical alias to <a href="/en-US/docs/Web/API/Event/stopPropagation" title="The stopPropagation() method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases."><code>Event.stopPropagation()</code></a>. Setting its value to <code>true</code> before returning from an event handler prevents propagation of the event.
+A historical alias to <a href="/en-US/docs/Web/API/Event/stopPropagation" title="The stopPropagation() method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases."><code>Event.stopPropagation()</code></a>. Setting its value to <code>true
+</code> before returning from an event handler prevents propagation of the event.
 
 #### **Type**: `null`
 
@@ -36,13 +37,15 @@ A boolean indicating whether or not the event can bubble across the boundary bet
 
 ### .currentTarget <div class="specs"><i>W3C</i></div> {#currentTarget}
 
-A reference to the currently registered target for the event. This is the object to which the event is currently slated to be sent. It's possible this has been changed along the way through <em>retargeting</em>.
+A reference to the currently registered target for the event. This is the object to which the event is currently slated to be sent. It's possible this has been changed along the way through <em>retargeting
+</em>.
 
 #### **Type**: `null`
 
 ### .defaultPrevented <div class="specs"><i>W3C</i></div> {#defaultPrevented}
 
-Indicates whether or not the call to <a href="/en-US/docs/Web/API/Event/preventDefault" title="The Event interface's preventDefault() method tells the user agent that if the event does not get explicitly handled, its default action should not be taken as it normally would be."><code>event.preventDefault()</code></a> canceled the event.
+Indicates whether or not the call to <a href="/en-US/docs/Web/API/Event/preventDefault" title="The Event interface's preventDefault() method tells the user agent that if the event does not get explicitly handled, its default action should not be taken as it normally would be."><code>event.preventDefault()</code>
+</a> canceled the event.
 
 #### **Type**: `null`
 
@@ -54,7 +57,8 @@ Indicates which phase of the event flow is being processed.
 
 ### .isTrusted <div class="specs"><i>W3C</i></div> {#isTrusted}
 
-Indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, like <a href="/en-US/docs/Web/API/Event/initEvent" title="The Event.initEvent() method is used to initialize the value of an event created using Document.createEvent()."><code>Event.initEvent</code></a>).
+Indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, like <a href="/en-US/docs/Web/API/Event/initEvent" title="The Event.initEvent() method is used to initialize the value of an event created using Document.createEvent()."><code>Event.initEvent</code>
+</a>).
 
 #### **Type**: `null`
 
@@ -66,7 +70,8 @@ A reference to the target to which the event was originally dispatched.
 
 ### .timeStamp <div class="specs"><i>W3C</i></div> {#timeStamp}
 
-The time at which the event was created&nbsp;(in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a <a href="/en-US/docs/Web/API/DOMHighResTimeStamp" title="The DOMHighResTimeStamp type is a double and is used to store a time value in milliseconds."><code>DOMHighResTimeStamp</code></a> instead.
+The time at which the event was created&nbsp;(in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a <a href="/en-US/docs/Web/API/DOMHighResTimeStamp" title="The DOMHighResTimeStamp type is a double and is used to store a time value in milliseconds."><code>DOMHighResTimeStamp</code>
+</a> instead.
 
 #### **Type**: `null`
 
@@ -80,7 +85,8 @@ The name of the event. Case-insensitive.
 
 ### .composedPath*(...args)* <div class="specs"><i>W3C</i></div> {#composedPath}
 
-Returns the event’s path (objects on which listeners will be invoked). This does not include nodes in shadow trees if the shadow root was created with its <a href="/en-US/docs/Web/API/ShadowRoot/mode" title="The mode property of the ShadowRoot specifies its mode — either open or closed. This defines whether or not the shadow root's internal features are accessible from JavaScript."><code>ShadowRoot.mode</code></a> closed.
+Returns the event’s path (objects on which listeners will be invoked). This does not include nodes in shadow trees if the shadow root was created with its <a href="/en-US/docs/Web/API/ShadowRoot/mode" title="The mode property of the ShadowRoot specifies its mode — either open or closed. This defines whether or not the shadow root's internal features are accessible from JavaScript."><code>ShadowRoot.mode</code>
+</a> closed.
 
 #### **Arguments**:
 
@@ -132,5 +138,3 @@ Stops the propagation of events further along in the DOM.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

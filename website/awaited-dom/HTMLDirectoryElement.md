@@ -1,4 +1,4 @@
-# HTMLDirectoryElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLDirectoryElement
 
 ## Properties
 
@@ -7,7 +7,3 @@
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

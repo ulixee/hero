@@ -1,4 +1,4 @@
-# HTMLCollectionBase
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLCollectionBase
 
 ## Properties
 
@@ -20,5 +20,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

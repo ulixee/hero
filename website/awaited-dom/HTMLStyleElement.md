@@ -1,4 +1,4 @@
-# HTMLStyleElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLStyleElement
 
 <div class='overview'>The <strong><code>HTMLStyleElement</code></strong> interface represents a <a href="/en-US/docs/Web/HTML/Element/style" title="The HTML <style> element contains style information for a document, or part of a document."><code>&lt;style&gt;</code></a> element. It inherits properties and methods from its parent, <a href="/en-US/docs/Web/API/HTMLElement" title="The HTMLElement interface represents any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it."><code>HTMLElement</code></a>, and from <a href="/en-US/docs/Web/API/LinkStyle" title="The LinkStyle interface provides access to the associated CSS style sheet of a node."><code>LinkStyle</code></a>.</div>
 
@@ -8,16 +8,14 @@
 
 ### .media <div class="specs"><i>W3C</i></div> {#media}
 
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the intended destination medium for style information.
+Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code>
+</a> representing the intended destination medium for style information.
 
 #### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the type of style being applied by this statement.
+Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code>
+</a> representing the type of style being applied by this statement.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

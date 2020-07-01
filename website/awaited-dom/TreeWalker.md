@@ -1,4 +1,4 @@
-# TreeWalker
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> TreeWalker
 
 <div class='overview'>The <strong><code>TreeWalker</code></strong> object represents the nodes of a document subtree and a position within them.</div>
 
@@ -8,25 +8,29 @@
 
 ### .currentNode <div class="specs"><i>W3C</i></div> {#currentNode}
 
-Is the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> on which the <code>TreeWalker</code> is currently pointing at.
+Is the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> on which the <code>TreeWalker
+</code> is currently pointing at.
 
 #### **Type**: `null`
 
 ### .filter <div class="specs"><i>W3C</i></div> {#filter}
 
-Returns a <a href="/en-US/docs/Web/API/NodeFilter" title="A NodeFilter interface represents an object used to filter the nodes in a NodeIterator or TreeWalker. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter."><code>NodeFilter</code></a> used to select the relevant nodes.
+Returns a <a href="/en-US/docs/Web/API/NodeFilter" title="A NodeFilter interface represents an object used to filter the nodes in a NodeIterator or TreeWalker. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter."><code>NodeFilter</code>
+</a> used to select the relevant nodes.
 
 #### **Type**: `null`
 
 ### .root <div class="specs"><i>W3C</i></div> {#root}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the root node as specified when the <code>TreeWalker</code> was created.
+Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the root node as specified when the <code>TreeWalker
+</code> was created.
 
 #### **Type**: `null`
 
 ### .whatToShow <div class="specs"><i>W3C</i></div> {#whatToShow}
 
-Returns an <code>unsigned long</code> being a bitmask made of constants describing the types of <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> that must&nbsp;be presented. Non-matching nodes are skipped, but their children may be included, if relevant. The possible values are:
+Returns an <code>unsigned long</code> being a bitmask made of constants describing the types of <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a> that must&nbsp;be presented. Non-matching nodes are skipped, but their children may be included, if relevant. The possible values are:
  <table class="standard-table">
   <tbody>
    <tr>
@@ -109,7 +113,8 @@ Returns an <code>unsigned long</code> being a bitmask made of constants describi
 
 ### .firstChild*(...args)* <div class="specs"><i>W3C</i></div> {#firstChild}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the first <em>visible</em> child of the current node, and returns the found child. It also moves the current node to this child. If no such child exists, returns <code>null</code> and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the first <em>visible</em> child of the current node, and returns the found child. It also moves the current node to this child. If no such child exists, returns <code>null
+</code> and the current node is not changed.
 
 #### **Arguments**:
 
@@ -120,7 +125,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .lastChild*(...args)* <div class="specs"><i>W3C</i></div> {#lastChild}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the last <em>visible</em> child of the current node, and returns the found child. It also moves the current node to this child. If no such child exists, <code>null</code>&nbsp;is returned and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the last <em>visible</em> child of the current node, and returns the found child. It also moves the current node to this child. If no such child exists, <code>null
+</code>&nbsp;is returned and the current node is not changed.
 
 #### **Arguments**:
 
@@ -131,7 +137,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .nextNode*(...args)* <div class="specs"><i>W3C</i></div> {#nextNode}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the next <em>visible</em> node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, returns <code>null</code> and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the next <em>visible</em> node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, returns <code>null
+</code> and the current node is not changed.
 
 #### **Arguments**:
 
@@ -142,7 +149,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .nextSibling*(...args)* <div class="specs"><i>W3C</i></div> {#nextSibling}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to its next sibling, if any, and returns the found sibling. If there is no such node, <code>null</code>&nbsp;is returned and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to its next sibling, if any, and returns the found sibling. If there is no such node, <code>null
+</code>&nbsp;is returned and the current node is not changed.
 
 #### **Arguments**:
 
@@ -153,7 +161,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .parentNode*(...args)* <div class="specs"><i>W3C</i></div> {#parentNode}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the first <em>visible</em> ancestor node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, or if it is before that the <em>root</em><em> node</em> defined at the object construction, returns <code>null</code> and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the first <em>visible</em> ancestor node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, or if it is before that the <em>root</em><em> node</em> defined at the object construction, returns <code>null
+</code> and the current node is not changed.
 
 #### **Arguments**:
 
@@ -164,7 +173,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .previousNode*(...args)* <div class="specs"><i>W3C</i></div> {#previousNode}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the previous <em>visible</em> node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, or if it is before that the <em>root</em><em> node</em> defined at the object construction, returns <code>null</code> and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to the previous <em>visible</em> node in the document order, and returns the found node. It also moves the current node to this one. If no such node exists, or if it is before that the <em>root</em><em> node</em> defined at the object construction, returns <code>null
+</code> and the current node is not changed.
 
 #### **Arguments**:
 
@@ -175,7 +185,8 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
 
 ### .previousSibling*(...args)* <div class="specs"><i>W3C</i></div> {#previousSibling}
 
-Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to its previous sibling, if any, and returns the found sibling. If there is no such node, return <code>null</code> and the current node is not changed.
+Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to its previous sibling, if any, and returns the found sibling. If there is no such node, return <code>null
+</code> and the current node is not changed.
 
 #### **Arguments**:
 
@@ -183,5 +194,3 @@ Moves the current <a href="/en-US/docs/Web/API/Node" title="Node is an interface
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

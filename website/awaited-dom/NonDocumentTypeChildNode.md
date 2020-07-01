@@ -1,4 +1,4 @@
-# NonDocumentTypeChildNode
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NonDocumentTypeChildNode
 
 <div class='overview'>The <code><strong>NonDocumentTypeChildNode</strong></code> interface contains methods that are particular to <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> objects that can have a parent, but not suitable for <a href="/en-US/docs/Web/API/DocumentType" title="The DocumentType interface represents a Node containing a doctype."><code>DocumentType</code></a>.</div>
 
@@ -8,16 +8,14 @@
 
 ### .nextElementSibling <div class="specs"><i>W3C</i></div> {#nextElementSibling}
 
-Returns the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> immediately following this node in its parent's children list, or <code>null</code> if there is no <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> in the list following this node.
+Returns the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> immediately following this node in its parent's children list, or <code>null</code> if there is no <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code>
+</a> in the list following this node.
 
 #### **Type**: `null`
 
 ### .previousElementSibling <div class="specs"><i>W3C</i></div> {#previousElementSibling}
 
-Returns the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> immediately prior to this node in its parent's children list, or <code>null</code> if there is no <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> in the list prior to this node.
+Returns the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> immediately prior to this node in its parent's children list, or <code>null</code> if there is no <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code>
+</a> in the list prior to this node.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

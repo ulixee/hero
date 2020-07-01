@@ -1,116 +1,55 @@
-# SuperHTMLElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> SuperHTMLElement
 
 <div class='overview'>The <strong><code>HTMLElement</code></strong> interface represents any <a href="/en-US/docs/Web/HTML" title="/en-US/docs/Web/HTML">HTML</a> element. Some elements directly implement this interface, while others implement it via an interface that inherits it.</div>
 
-## Properties
-
-### .accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
-
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the access key assigned to the element.
-
-#### **Type**: `null`
-
-### .autoCapitalize <div class="specs"><i>W3C</i></div> {#autoCapitalize}
-
-Needs content.
-
-#### **Type**: `null`
-
-### .dir <div class="specs"><i>W3C</i></div> {#dir}
-
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>, reflecting the <code>dir</code> global attribute, representing the directionality of the element. Possible values are <code>"ltr"</code>, <code>"rtl"</code>, and <code>"auto"</code>.
-
-#### **Type**: `null`
-
-### .draggable <div class="specs"><i>W3C</i></div> {#draggable}
-
-Is a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a> indicating if the element can be dragged.
-
-#### **Type**: `null`
-
-### .hidden <div class="specs"><i>W3C</i></div> {#hidden}
-
-Is a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a> indicating if the element is hidden or not.
-
-#### **Type**: `null`
-
-### .inert <div class="specs"><i>W3C</i></div> {#inert}
-
-Is a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a> indicating whether the user agent must act as though the given node is absent for the purposes of user interaction events, in-page text searches ("find in page"), and text selection.
-
-#### **Type**: `null`
-
-### .innerText <div class="specs"><i>W3C</i></div> {#innerText}
-
-Represents the "rendered" text content of a node and its descendants. As a getter, it approximates the text the user would get if they highlighted the contents of the element with the cursor and then copied it to the clipboard.
-
-#### **Type**: `null`
-
-### .lang <div class="specs"><i>W3C</i></div> {#lang}
-
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the language of an element's attributes, text, and element contents.
-
-#### **Type**: `null`
-
-### .offsetHeight <div class="specs"><i>W3C</i></div> {#offsetHeight}
-
-Returns a <code>double</code> containing the height of an element, relative to the layout.
-
-#### **Type**: `null`
-
-### .offsetLeft <div class="specs"><i>W3C</i></div> {#offsetLeft}
-
-Returns a <code>double</code>, the distance from this element's left border to its <code>offsetParent</code>'s left border.
-
-#### **Type**: `null`
-
-### .offsetParent <div class="specs"><i>W3C</i></div> {#offsetParent}
-
-Returns a <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> that is the element from which all offset calculations are currently computed.
-
-#### **Type**: `null`
-
-### .offsetTop <div class="specs"><i>W3C</i></div> {#offsetTop}
-
-Returns a <code>double</code>, the distance from this element's top border to its <code>offsetParent</code>'s top border.
-
-#### **Type**: `null`
-
-### .offsetWidth <div class="specs"><i>W3C</i></div> {#offsetWidth}
-
-Returns a <code>double</code> containing the width of an element, relative to the layout.
-
-#### **Type**: `null`
-
-### .spellcheck <div class="specs"><i>W3C</i></div> {#spellcheck}
-
-Is a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a> that controls <a href="/en-US/docs/HTML/Controlling_spell_checking_in_HTML_forms" title="en/Controlling_spell_checking_in_HTML_forms">spell-checking</a>. It is present on all HTML elements, though it doesn't have an effect on all of them.
-
-#### **Type**: `null`
-
-### .title <div class="specs"><i>W3C</i></div> {#title}
-
-Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the text that appears in a popup box when mouse is over the element.
-
-#### **Type**: `null`
-
-### .translate <div class="specs"><i>W3C</i></div> {#translate}
-
-Is a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a> representing the translation.
-
-#### **Type**: `null`
-
-## Methods
-
-### .click*(...args)* <div class="specs"><i>W3C</i></div> {#click}
-
-Sends a mouse click event to the element.
-
-#### **Arguments**:
+## Dependencies
 
 
- - none
+SuperHTMLElement implements all the properties and methods of the following classes:
 
-#### **Returns**: `Promise<void>`
-
-## Events
+ |   |   | 
+ | --- | --- | 
+ | [Animatable](./animatable) | [ChildNode](./child-node)
+[DocumentAndElementEventHandlers](./document-and-element-event-handlers) | [Element](./element)
+[ElementContentEditable](./element-content-editable) | [ElementCSSInlineStyle](./element-css-inline-style)
+[EventTarget](./event-target) | [GlobalEventHandlers](./global-event-handlers)
+[HTMLAnchorElement](./html-anchor-element) | [HTMLAreaElement](./html-area-element)
+[HTMLAudioElement](./html-audio-element) | [HTMLBaseElement](./html-base-element)
+[HTMLBodyElement](./html-body-element) | [HTMLBRElement](./htmlbr-element)
+[HTMLButtonElement](./html-button-element) | [HTMLCanvasElement](./html-canvas-element)
+[HTMLDataElement](./html-data-element) | [HTMLDataListElement](./html-data-list-element)
+[HTMLDetailsElement](./html-details-element) | [HTMLDialogElement](./html-dialog-element)
+[HTMLDirectoryElement](./html-directory-element) | [HTMLDivElement](./html-div-element)
+[HTMLDListElement](./htmld-list-element) | [HTMLElement](./html-element)
+[HTMLEmbedElement](./html-embed-element) | [HTMLFieldSetElement](./html-field-set-element)
+[HTMLFontElement](./html-font-element) | [HTMLFormElement](./html-form-element)
+[HTMLFrameElement](./html-frame-element) | [HTMLFrameSetElement](./html-frame-set-element)
+[HTMLHeadElement](./html-head-element) | [HTMLHeadingElement](./html-heading-element)
+[HTMLHRElement](./htmlhr-element) | [HTMLHtmlElement](./html-html-element)
+[HTMLHyperlinkElementUtils](./html-hyperlink-element-utils) | [HTMLIFrameElement](./htmli-frame-element)
+[HTMLImageElement](./html-image-element) | [HTMLInputElement](./html-input-element)
+[HTMLLabelElement](./html-label-element) | [HTMLLegendElement](./html-legend-element)
+[HTMLLIElement](./htmlli-element) | [HTMLLinkElement](./html-link-element)
+[HTMLMapElement](./html-map-element) | [HTMLMarqueeElement](./html-marquee-element)
+[HTMLMediaElement](./html-media-element) | [HTMLMenuElement](./html-menu-element)
+[HTMLMetaElement](./html-meta-element) | [HTMLMeterElement](./html-meter-element)
+[HTMLModElement](./html-mod-element) | [HTMLObjectElement](./html-object-element)
+[HTMLOListElement](./htmlo-list-element) | [HTMLOptGroupElement](./html-opt-group-element)
+[HTMLOptionElement](./html-option-element) | [HTMLOrSVGElement](./html-or-svg-element)
+[HTMLOutputElement](./html-output-element) | [HTMLParagraphElement](./html-paragraph-element)
+[HTMLParamElement](./html-param-element) | [HTMLPictureElement](./html-picture-element)
+[HTMLPreElement](./html-pre-element) | [HTMLProgressElement](./html-progress-element)
+[HTMLQuoteElement](./html-quote-element) | [HTMLScriptElement](./html-script-element)
+[HTMLSelectElement](./html-select-element) | [HTMLSlotElement](./html-slot-element)
+[HTMLSourceElement](./html-source-element) | [HTMLSpanElement](./html-span-element)
+[HTMLStyleElement](./html-style-element) | [HTMLTableCaptionElement](./html-table-caption-element)
+[HTMLTableCellElement](./html-table-cell-element) | [HTMLTableColElement](./html-table-col-element)
+[HTMLTableElement](./html-table-element) | [HTMLTableRowElement](./html-table-row-element)
+[HTMLTableSectionElement](./html-table-section-element) | [HTMLTemplateElement](./html-template-element)
+[HTMLTextAreaElement](./html-text-area-element) | [HTMLTimeElement](./html-time-element)
+[HTMLTitleElement](./html-title-element) | [HTMLTrackElement](./html-track-element)
+[HTMLUListElement](./htmlu-list-element) | [HTMLUnknownElement](./html-unknown-element)
+[HTMLVideoElement](./html-video-element) | [LinkStyle](./link-style)
+[Node](./node) | [NonDocumentTypeChildNode](./non-document-type-child-node)
+[ParentNode](./parent-node) | [Slotable](./slotable)
+[WindowEventHandlers](./window-event-handlers) |  | 

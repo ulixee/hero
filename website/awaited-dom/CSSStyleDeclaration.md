@@ -1,4 +1,4 @@
-# CSSStyleDeclaration
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSStyleDeclaration
 
 <div class='overview'>The <strong><code>CSSStyleDeclaration</code></strong> interface represents an object that is a CSS declaration block, and exposes style information and various style-related methods and properties.</div>
 
@@ -20,13 +20,15 @@ Textual representation of the declaration block. Setting this attribute changes 
 
 ### .length <div class="specs"><i>W3C</i></div> {#length}
 
-The number of properties. See the <a href="/en-US/docs/Web/API/CSSStyleDeclaration/item" title="The CSSStyleDeclaration.item() method interface returns a CSS property name from a CSSStyleDeclaration by index"><code>item()</code></a> method below.
+The number of properties. See the <a href="/en-US/docs/Web/API/CSSStyleDeclaration/item" title="The CSSStyleDeclaration.item() method interface returns a CSS property name from a CSSStyleDeclaration by index"><code>item()</code>
+</a> method below.
 
 #### **Type**: `null`
 
 ### .parentRule <div class="specs"><i>W3C</i></div> {#parentRule}
 
-The containing <a href="/en-US/docs/Web/API/CSSRule" title="The CSSRule interface represents a single CSS rule. There are several types of rules, listed in the Type constants section below."><code>CSSRule</code></a>.
+The containing <a href="/en-US/docs/Web/API/CSSRule" title="The CSSRule interface represents a single CSS rule. There are several types of rules, listed in the Type constants section below."><code>CSSRule</code>
+</a>.
 
 #### **Type**: `null`
 
@@ -86,5 +88,3 @@ Modifies an existing CSS property or creates a new CSS property in the declarati
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

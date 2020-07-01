@@ -1,6 +1,4 @@
-# XPathEvaluatorBase
-
-## Properties
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> XPathEvaluatorBase
 
 ## Methods
 
@@ -36,5 +34,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

@@ -12,8 +12,10 @@ interface IDoc {
   category: string;
   tags: string;
   overview: string;
+  dependencies: any[];
   properties: any[];
   methods: any[];
+  events: any[];
 }
 
 json2md.converters.html = input => input;
@@ -36,28 +38,19 @@ docs.forEach((doc: IDoc) => {
   saveDoc(doc, filepath);
 });
 
-const tableHeader = ['|   |   |', '|---|---|'];
 let awaitedDOMBase = Fs.readFileSync(awaitedDOMBasePath, 'utf-8');
 
 Object.keys(docsByTag).forEach(tag => {
-  const placementToken = `[INTERFACES:${tag}`;
+  const placementToken = `[INTERFACES:${tag}]`;
   if (!awaitedDOMBase.includes(placementToken)) return;
 
-  const cells: string[] = [];
-  docsByTag[tag].forEach(doc => {
-    cells.push(`[${doc.name}](/docs/awaited-dom/${decamelize(doc.name, '-')})`);
+  const linksTable = extractLinksTable(docsByTag[tag], (doc: IDoc) => {
+    return [doc.name, `/docs/awaited-dom/${decamelize(doc.name, '-')}`];
   });
 
-  const tableRows: string[] = [...tableHeader];
-
-  while (cells.length) {
-    const row = cells.splice(0, 2);
-    if (row.length < 2) row.push('');
-    const tableRow = row.join(' | ');
-    tableRows.push(`| ${tableRow} |`);
-  }
-
-  awaitedDOMBase = awaitedDOMBase.replace(placementToken, tableRows.join('\n'));
+  const markup = [{ table: linksTable }];
+  const markdown = json2md(markup);
+  awaitedDOMBase = awaitedDOMBase.replace(placementToken, markdown);
 });
 
 Fs.writeFileSync(awaitedDOMIndexPath1, awaitedDOMBase);
@@ -66,36 +59,72 @@ Fs.writeFileSync(awaitedDOMIndexPath2, awaitedDOMBase);
 // SAVE DOC
 
 function saveDoc(doc: IDoc, filePath: string) {
-  const markup: any[] = [{ h1: doc.name }];
+  const markup: any[] = [{ h1: `[AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> ${doc.name}` }];
 
   JSON.parse(doc.overview || '[]').forEach((overview: any) => {
     markup.push({ html: `<div class='overview'>${overview}</div>` });
   });
 
-  {
+  if (doc.tags.includes('Super') && doc.dependencies.length) {
+    markup.push({ h2: 'Dependencies' });
+    markup.push({
+      p: `${doc.name} implements all the properties and methods of the following classes:`,
+    });
+    const linksTable = extractLinksTable(doc.dependencies, (dep: any) => {
+      return [dep.name, `./${decamelize(dep.name, '-')}`];
+    });
+    markup.push({ table: linksTable });
+  }
+
+  if (doc.properties.length) {
     markup.push({ h2: 'Properties' });
     const properties: string[] = [];
     doc.properties.forEach(p => {
       markup.push({ h3: `.${p.name} <div class="specs"><i>W3C</i></div> {#${p.name}}` });
-      markup.push({ html: (p.overview || 'Needs content.').replace(/\n\n/g, '\n') });
+      markup.push({ html: cleanupHTML(p.overview || 'Needs content.') });
       markup.push({ h4: `**Type**: \`null\`` });
     });
   }
 
-  {
+  if (doc.methods.length) {
     markup.push({ h2: 'Methods' });
     doc.methods.forEach(m => {
       markup.push({ h3: `.${m.name}*(...args)* <div class="specs"><i>W3C</i></div> {#${m.name}}` });
-      markup.push({ html: (m.overview || 'Needs content.').replace(/\n\n/g, '\n') });
+      markup.push({ html: cleanupHTML(m.overview || 'Needs content.') });
       markup.push({ h4: `**Arguments**:` });
       markup.push({ ul: ['none'] });
       markup.push({ h4: '**Returns**: `Promise<void>`' });
     });
   }
 
-  markup.push({ h2: 'Events' });
+  if (doc.events) {
+    markup.push({ h2: 'Events' });
+  }
 
   const markdown = json2md(markup);
   Fs.writeFileSync(filePath, markdown);
   console.log(`Saved ${filePath}`);
+}
+
+function cleanupHTML(html: string) {
+  html = html.replace(/^([^\n]+)</, '$1\n<');
+  return html.replace(/\n\n/g, '\n');
+}
+
+function extractLinksTable(records: any[], extractLinkFn: (record: any) => [string, string]) {
+  const cells: string[] = [];
+
+  records.forEach(record => {
+    const [linkName, linkHref] = extractLinkFn(record);
+    cells.push(`[${linkName}](${linkHref})`);
+  });
+
+  const rows: string[][] = [];
+  while (cells.length) {
+    const row = cells.splice(0, 2);
+    if (row.length < 2) row.push('');
+    rows.push(row);
+  }
+
+  return { headers: [' ', ' '], rows };
 }

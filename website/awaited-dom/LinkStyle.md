@@ -1,4 +1,4 @@
-# LinkStyle
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> LinkStyle
 
 <div class='overview'>The <code><strong>LinkStyle</strong></code> interface provides access to the <em>associated CSS style sheet</em> of a node.</div>
 
@@ -8,10 +8,7 @@
 
 ### .sheet <div class="specs"><i>W3C</i></div> {#sheet}
 
-Returns the <a href="/en-US/docs/Web/API/CSSStyleSheet" title="The CSSStyleSheet interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet."><code>CSSStyleSheet</code></a> object associated with the given element, or <code>null</code> if there is none.
+Returns the <a href="/en-US/docs/Web/API/CSSStyleSheet" title="The CSSStyleSheet interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet."><code>CSSStyleSheet</code></a> object associated with the given element, or <code>null
+</code> if there is none.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events
