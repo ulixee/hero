@@ -1,4 +1,4 @@
-# AbstractRange
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> AbstractRange
 
 <div class='overview'><span class="seoSummary">The <strong><code>AbstractRange</code></strong>&nbsp;abstract interface is the base class upon which all <a class="glossaryLink" href="/en-US/docs/Glossary/DOM" title="DOM: The DOM (Document Object Model) is an API that represents and interacts with any HTML or XML document. The DOM is a document model loaded in the browser and representing the document as a node tree, where each node represents part of the document (e.g. an element, text string, or comment).">DOM</a> range types are defined. A&nbsp;<strong>range</strong>&nbsp;is an object that indicates the start and end points of a section of content&nbsp;within the document.</span></div>
 
@@ -8,34 +8,35 @@
 
 ### .collapsed <div class="specs"><i>W3C</i></div> {#collapsed}
 
-A Boolean value which is&nbsp;<code>true</code>&nbsp;if the range is&nbsp;<strong>collapsed</strong>. A collapsed range is one whose start position and end position are the same, resulting in a zero-character-long range.
+A Boolean value which is&nbsp;<code>true</code>&nbsp;if the range is&nbsp;<strong>collapsed
+</strong>. A collapsed range is one whose start position and end position are the same, resulting in a zero-character-long range.
 
 #### **Type**: `null`
 
 ### .endContainer <div class="specs"><i>W3C</i></div> {#endContainer}
 
-The DOM <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the end of the range, as specified by the <code>endOffset</code>&nbsp;property,&nbsp;is located.
+The DOM <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the end of the range, as specified by the <code>endOffset
+</code>&nbsp;property,&nbsp;is located.
 
 #### **Type**: `null`
 
 ### .endOffset <div class="specs"><i>W3C</i></div> {#endOffset}
 
-An integer value indicating the offset, in characters, from the beginning of the node's contents to the beginning of the range represented by the range object. This value must be less than the length of the <code>endContainer</code>&nbsp;node.
+An integer value indicating the offset, in characters, from the beginning of the node's contents to the beginning of the range represented by the range object. This value must be less than the length of the <code>endContainer
+</code>&nbsp;node.
 
 #### **Type**: `null`
 
 ### .startContainer <div class="specs"><i>W3C</i></div> {#startContainer}
 
-The DOM <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the beginning of the range, as specified by the <code>startOffset</code>&nbsp;property,&nbsp;is located.
+The DOM <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the beginning of the range, as specified by the <code>startOffset
+</code>&nbsp;property,&nbsp;is located.
 
 #### **Type**: `null`
 
 ### .startOffset <div class="specs"><i>W3C</i></div> {#startOffset}
 
-An integer value indicating the offset, in characters, from the beginning of the node's contents to the last character&nbsp;of the contents referred to&nbsp;&nbsp;by the range object. This value must be less than the length of the node indicated in&nbsp;<code>startContainer</code>.
+An integer value indicating the offset, in characters, from the beginning of the node's contents to the last character&nbsp;of the contents referred to&nbsp;&nbsp;by the range object. This value must be less than the length of the node indicated in&nbsp;<code>startContainer
+</code>.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

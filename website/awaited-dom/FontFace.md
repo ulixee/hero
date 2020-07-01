@@ -1,4 +1,4 @@
-# FontFace
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> FontFace
 
 ## Properties
 
@@ -80,5 +80,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

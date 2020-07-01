@@ -1,4 +1,4 @@
-# MediaKeySession
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> MediaKeySession
 
 ## Properties
 
@@ -94,5 +94,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

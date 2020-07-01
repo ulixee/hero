@@ -1,4 +1,4 @@
-# File
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> File
 
 <div class='overview'>The <strong><code>File</code></strong> interface provides information about files and allows JavaScript in a web page to access their content.</div>
 
@@ -18,10 +18,7 @@ Returns the last modified time of the file, in millisecond since the UNIX epoch 
 
 ### .name <div class="specs"><i>W3C</i></div> {#name}
 
-Returns the name of the file referenced by the <code>File</code> object.
+Returns the name of the file referenced by the <code>File
+</code> object.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

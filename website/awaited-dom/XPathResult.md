@@ -1,4 +1,4 @@
-# XPathResult
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> XPathResult
 
 ## Properties
 
@@ -67,5 +67,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

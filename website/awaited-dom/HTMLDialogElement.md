@@ -1,4 +1,4 @@
-# HTMLDialogElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLDialogElement
 
 <div class='overview'><strong>This is an <a href="/en-US/docs/MDN/Contribute/Guidelines/Conventions_definitions#Experimental">experimental technology</a></strong><br>Check the <a href="#Browser_compatibility">Browser compatibility table</a> carefully before using this in production.</div>
 
@@ -6,13 +6,15 @@
 
 ### .open <div class="specs"><i>W3C</i></div> {#open}
 
-A <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/dialog#attr-open">open</a></code> HTML attribute, indicating whether the dialog is available for interaction.
+A <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/dialog#attr-open">open</a>
+</code> HTML attribute, indicating whether the dialog is available for interaction.
 
 #### **Type**: `null`
 
 ### .returnValue <div class="specs"><i>W3C</i></div> {#returnValue}
 
-A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that sets or returns the return value for the dialog.
+A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code>
+</a> that sets or returns the return value for the dialog.
 
 #### **Type**: `null`
 
@@ -20,7 +22,8 @@ A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. A
 
 ### .close*(...args)* <div class="specs"><i>W3C</i></div> {#close}
 
-Closes the dialog. An optional <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> may be passed as an argument, updating the <code>returnValue</code> of the the dialog.
+Closes the dialog. An optional <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> may be passed as an argument, updating the <code>returnValue
+</code> of the the dialog.
 
 #### **Arguments**:
 
@@ -50,5 +53,3 @@ Displays the dialog as a modal, over the top of any other dialogs that might be 
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

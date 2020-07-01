@@ -1,4 +1,4 @@
-# Text
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Text
 
 <div class='overview'><span class="seoSummary">The <strong><code>Text</code></strong> interface represents the textual content of <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> or <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a>. </span></div>
 
@@ -10,7 +10,8 @@
 
 ### .wholeText <div class="specs"><i>W3C</i></div> {#wholeText}
 
-Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the text of all <code>Text</code> nodes logically adjacent to this <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>, concatenated in document order.
+Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the text of all <code>Text</code> nodes logically adjacent to this <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>, concatenated in document order.
 
 #### **Type**: `null`
 
@@ -26,5 +27,3 @@ Breaks the node into two nodes at a specified offset.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

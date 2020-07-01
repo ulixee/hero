@@ -48,7 +48,7 @@ module.exports = {
         baseDir: './awaited-dom',
         pathPrefix: '/docs/awaited-dom',
         typeName: 'AwaitedDom',
-        template: './src/templates/AwaitedDomPage.vue',
+        template: './src/templates/AwaitedDomDocsPage.vue',
         plugins: ['@gridsome/remark-prismjs'],
         remark: {
           autolinkHeadings: {

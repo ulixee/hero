@@ -1,4 +1,4 @@
-# EventTarget
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> EventTarget
 
 <div class='overview'><strong><code>EventTarget</code></strong> is a DOM interface implemented by objects that can receive events and may have listeners for them.</div>
 
@@ -6,13 +6,12 @@
 
 <div class='overview'>Many event targets (including elements, documents, and windows) also support setting <a href="/en-US/docs/Web/Guide/DOM/Events/Event_handlers">event handlers</a> via <code>on<em>event</em></code> properties and attributes.</div>
 
-## Properties
-
 ## Methods
 
 ### .addEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#addEventListener}
 
-Registers an event handler of a specific event type on the <code>EventTarget</code>.
+Registers an event handler of a specific event type on the <code>EventTarget
+</code>.
 
 #### **Arguments**:
 
@@ -23,7 +22,8 @@ Registers an event handler of a specific event type on the <code>EventTarget</co
 
 ### .dispatchEvent*(...args)* <div class="specs"><i>W3C</i></div> {#dispatchEvent}
 
-Dispatches an event to this <code>EventTarget</code>.
+Dispatches an event to this <code>EventTarget
+</code>.
 
 #### **Arguments**:
 
@@ -34,7 +34,8 @@ Dispatches an event to this <code>EventTarget</code>.
 
 ### .removeEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#removeEventListener}
 
-Removes an event listener from the <code>EventTarget</code>.
+Removes an event listener from the <code>EventTarget
+</code>.
 
 #### **Arguments**:
 
@@ -42,5 +43,3 @@ Removes an event listener from the <code>EventTarget</code>.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

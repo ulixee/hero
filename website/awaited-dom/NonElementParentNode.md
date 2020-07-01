@@ -1,6 +1,4 @@
-# NonElementParentNode
-
-## Properties
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NonElementParentNode
 
 ## Methods
 
@@ -14,5 +12,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

@@ -1,4 +1,4 @@
-# Request
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Request
 
 ## Properties
 
@@ -104,5 +104,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

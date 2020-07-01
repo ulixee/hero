@@ -1,4 +1,4 @@
-# FontFaceSetLoadEvent
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> FontFaceSetLoadEvent
 
 ## Properties
 
@@ -7,7 +7,3 @@
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

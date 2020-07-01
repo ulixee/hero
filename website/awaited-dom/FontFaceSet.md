@@ -1,4 +1,4 @@
-# FontFaceSet
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> FontFaceSet
 
 ## Properties
 
@@ -99,5 +99,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

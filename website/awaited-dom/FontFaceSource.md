@@ -1,4 +1,4 @@
-# FontFaceSource
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> FontFaceSource
 
 ## Properties
 
@@ -7,7 +7,3 @@
 Needs content.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

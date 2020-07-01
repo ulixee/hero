@@ -1,4 +1,4 @@
-# HTMLMarqueeElement
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> HTMLMarqueeElement
 
 <div class='overview'><strong>Draft</strong><br>
     This page is not complete.</div>
@@ -7,7 +7,8 @@
 
 ### .behavior <div class="specs"><i>W3C</i></div> {#behavior}
 
-Sets how the text is scrolled within the marquee. Possible values are <code>scroll</code>, <code>slide</code> and <code>alternate</code>. If no value is specified, the default value is <code>scroll</code>.
+Sets how the text is scrolled within the marquee. Possible values are <code>scroll</code>, <code>slide</code> and <code>alternate</code>. If no value is specified, the default value is <code>scroll
+</code>.
 
 #### **Type**: `null`
 
@@ -19,7 +20,8 @@ Sets the background color through color name or hexadecimal value.
 
 ### .direction <div class="specs"><i>W3C</i></div> {#direction}
 
-Sets the direction of the scrolling within the marquee. Possible values are <code>left</code>, <code>right</code>, <code>up</code> and <code>down</code>. If no value is specified, the default value is <code>left</code>.
+Sets the direction of the scrolling within the marquee. Possible values are <code>left</code>, <code>right</code>, <code>up</code> and <code>down</code>. If no value is specified, the default value is <code>left
+</code>.
 
 #### **Type**: `null`
 
@@ -43,13 +45,15 @@ Sets the amount of scrolling at each interval in pixels. The default value is 6.
 
 ### .scrollDelay <div class="specs"><i>W3C</i></div> {#scrollDelay}
 
-Sets the interval between each scroll movement in milliseconds. The default value is 85. Note that any value smaller than 60 is ignored and the value 60 is used instead, unless <code>trueSpeed</code> is <code>true</code>.
+Sets the interval between each scroll movement in milliseconds. The default value is 85. Note that any value smaller than 60 is ignored and the value 60 is used instead, unless <code>trueSpeed</code> is <code>true
+</code>.
 
 #### **Type**: `null`
 
 ### .trueSpeed <div class="specs"><i>W3C</i></div> {#trueSpeed}
 
-By default, <code>scrollDelay</code> values lower than 60 are ignored. If <code>trueSpeed</code> is <code>true</code>, then those values are not ignored.
+By default, <code>scrollDelay</code> values lower than 60 are ignored. If <code>trueSpeed</code> is <code>true
+</code>, then those values are not ignored.
 
 #### **Type**: `null`
 
@@ -64,7 +68,3 @@ Sets the vertical margin.
 Sets the width in pixels or percentage value.
 
 #### **Type**: `null`
-
-## Methods
-
-## Events

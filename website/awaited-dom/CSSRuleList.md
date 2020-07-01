@@ -1,4 +1,4 @@
-# CSSRuleList
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSRuleList
 
 <div class='overview'>A <code>CSSRuleList</code> is an (indirect-modify only) array-like object containing an ordered collection of <code><a href="/en/DOM/cssRule" title="en/DOM/cssRule">CSSRule</a></code> objects.</div>
 
@@ -22,5 +22,3 @@ Returns the specific node at the given zero-based index into the list. Returns n
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

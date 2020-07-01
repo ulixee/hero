@@ -1,4 +1,4 @@
-# CSSStyleSheet
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> CSSStyleSheet
 
 <div class='overview'><span class="seoSummary">The <strong><code>CSSStyleSheet</code></strong> interface represents a single <a href="/en-US/docs/Web/CSS">CSS</a> stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet.</span> It inherits properties and methods from its parent, <a href="/en-US/docs/Web/API/StyleSheet" title="An object implementing the StyleSheet interface represents a single style sheet. CSS style sheets will further implement the more specialized CSSStyleSheet interface."><code>StyleSheet</code></a>.</div>
 
@@ -21,7 +21,8 @@
 
 ### .ownerRule <div class="specs"><i>W3C</i></div> {#ownerRule}
 
-If this stylesheet is imported into the document using an <a href="/en-US/docs/Web/CSS/@import" title="The @import CSS at-rule is used to import style rules from other style sheets. These rules must precede all other types of rules, except @charset rules; as it is not a nested statement, @import cannot be used inside conditional group at-rules."><code>@import</code></a> rule, the <code>ownerRule</code> property returns the corresponding <a class="new" href="/en-US/docs/Web/API/CSSImportRule" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>CSSImportRule</code></a>; otherwise, this property's value is <code>null</code>.
+If this stylesheet is imported into the document using an <a href="/en-US/docs/Web/CSS/@import" title="The @import CSS at-rule is used to import style rules from other style sheets. These rules must precede all other types of rules, except @charset rules; as it is not a nested statement, @import cannot be used inside conditional group at-rules."><code>@import</code></a> rule, the <code>ownerRule</code> property returns the corresponding <a class="new" href="/en-US/docs/Web/API/CSSImportRule" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>CSSImportRule</code></a>; otherwise, this property's value is <code>null
+</code>.
 
 #### **Type**: `null`
 
@@ -48,5 +49,3 @@ Inserts a new rule at the specified position in the stylesheet, given the textua
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

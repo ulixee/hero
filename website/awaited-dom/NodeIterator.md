@@ -1,4 +1,4 @@
-# NodeIterator
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> NodeIterator
 
 <div class='overview'><span class="seoSummary">The <strong><code>NodeIterator</code></strong> interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order.</span></div>
 
@@ -6,25 +6,29 @@
 
 ### .filter <div class="specs"><i>W3C</i></div> {#filter}
 
-Returns a <a href="/en-US/docs/Web/API/NodeFilter" title="A NodeFilter interface represents an object used to filter the nodes in a NodeIterator or TreeWalker. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter."><code>NodeFilter</code></a> used to select the relevant nodes.
+Returns a <a href="/en-US/docs/Web/API/NodeFilter" title="A NodeFilter interface represents an object used to filter the nodes in a NodeIterator or TreeWalker. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter."><code>NodeFilter</code>
+</a> used to select the relevant nodes.
 
 #### **Type**: `null`
 
 ### .pointerBeforeReferenceNode <div class="specs"><i>W3C</i></div> {#pointerBeforeReferenceNode}
 
-Returns a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> flag that indicates whether the <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> is anchored before, the flag being <code>true</code>, or after, the flag being <code>false</code>, the anchor node.
+Returns a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> flag that indicates whether the <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> is anchored before, the flag being <code>true</code>, or after, the flag being <code>false
+</code>, the anchor node.
 
 #### **Type**: `null`
 
 ### .referenceNode <div class="specs"><i>W3C</i></div> {#referenceNode}
 
-Returns the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to which the iterator is anchored.
+Returns the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a> to which the iterator is anchored.
 
 #### **Type**: `null`
 
 ### .root <div class="specs"><i>W3C</i></div> {#root}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the root node as specified when the <code>NodeIterator</code> was created.
+Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the root node as specified when the <code>NodeIterator
+</code> was created.
 
 #### **Type**: `null`
 
@@ -117,7 +121,8 @@ Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from wh
 
 ### .detach*(...args)* <div class="specs"><i>W3C</i></div> {#detach}
 
-This operation is a no-op. It doesn't do anything. Previously it was telling the engine that the <code>NodeIterator</code> was no more used, but this is now useless.
+This operation is a no-op. It doesn't do anything. Previously it was telling the engine that the <code>NodeIterator
+</code> was no more used, but this is now useless.
 
 #### **Arguments**:
 
@@ -128,7 +133,8 @@ This operation is a no-op. It doesn't do anything. Previously it was telling the
 
 ### .nextNode*(...args)* <div class="specs"><i>W3C</i></div> {#nextNode}
 
-Returns the next <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null</code> if there are none.
+Returns the next <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null
+</code> if there are none.
 
 #### **Arguments**:
 
@@ -139,7 +145,8 @@ Returns the next <a href="/en-US/docs/Web/API/Node" title="Node is an interface 
 
 ### .previousNode*(...args)* <div class="specs"><i>W3C</i></div> {#previousNode}
 
-Returns the previous <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null</code> if there are none.
+Returns the previous <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null
+</code> if there are none.
 
 #### **Arguments**:
 
@@ -147,5 +154,3 @@ Returns the previous <a href="/en-US/docs/Web/API/Node" title="Node is an interf
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

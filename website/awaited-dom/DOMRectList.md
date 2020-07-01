@@ -1,4 +1,4 @@
-# DOMRectList
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> DOMRectList
 
 ## Properties
 
@@ -20,5 +20,3 @@ Needs content.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events

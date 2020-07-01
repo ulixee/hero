@@ -1,4 +1,4 @@
-# Range
+# [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Range
 
 <div class='overview'>The <strong><code>Range</code></strong> interface represents a fragment of a document that can contain nodes and parts of text nodes.</div>
 
@@ -10,7 +10,8 @@
 
 ### .commonAncestorContainer <div class="specs"><i>W3C</i></div> {#commonAncestorContainer}
 
-Returns the deepest <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> that contains the <code>startContainer</code> and <code>endContainer</code> nodes.
+Returns the deepest <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> that contains the <code>startContainer</code> and <code>endContainer
+</code> nodes.
 
 #### **Type**: `null`
 
@@ -18,7 +19,8 @@ Returns the deepest <a href="/en-US/docs/Web/API/Node" title="Node is an interfa
 
 ### .cloneContents*(...args)* <div class="specs"><i>W3C</i></div> {#cloneContents}
 
-Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code></a> copying the nodes of a <code>Range</code>.
+Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code></a> copying the nodes of a <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -29,7 +31,8 @@ Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFrag
 
 ### .cloneRange*(...args)* <div class="specs"><i>W3C</i></div> {#cloneRange}
 
-Returns a <code>Range</code> object with boundary points identical to the cloned <code>Range</code>.
+Returns a <code>Range</code> object with boundary points identical to the cloned <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -40,7 +43,8 @@ Returns a <code>Range</code> object with boundary points identical to the cloned
 
 ### .collapse*(...args)* <div class="specs"><i>W3C</i></div> {#collapse}
 
-Collapses the <code>Range</code> to one of its boundary points.
+Collapses the <code>Range
+</code> to one of its boundary points.
 
 #### **Arguments**:
 
@@ -51,7 +55,8 @@ Collapses the <code>Range</code> to one of its boundary points.
 
 ### .compareBoundaryPoints*(...args)* <div class="specs"><i>W3C</i></div> {#compareBoundaryPoints}
 
-Compares the boundary points of the <code>Range</code> with another <code>Range</code>.
+Compares the boundary points of the <code>Range</code> with another <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -62,7 +67,8 @@ Compares the boundary points of the <code>Range</code> with another <code>Range<
 
 ### .comparePoint*(...args)* <div class="specs"><i>W3C</i></div> {#comparePoint}
 
-Returns -1, 0, or 1 indicating whether the point occurs before, inside, or after the <code>Range</code>.
+Returns -1, 0, or 1 indicating whether the point occurs before, inside, or after the <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -73,7 +79,8 @@ Returns -1, 0, or 1 indicating whether the point occurs before, inside, or after
 
 ### .createContextualFragment*(...args)* <div class="specs"><i>W3C</i></div> {#createContextualFragment}
 
-Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code></a> created from a given string of code.
+Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code>
+</a> created from a given string of code.
 
 #### **Arguments**:
 
@@ -84,7 +91,8 @@ Returns a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFrag
 
 ### .deleteContents*(...args)* <div class="specs"><i>W3C</i></div> {#deleteContents}
 
-Removes the contents of a <code>Range</code> from the <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code></a>.
+Removes the contents of a <code>Range</code> from the <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code>
+</a>.
 
 #### **Arguments**:
 
@@ -95,7 +103,8 @@ Removes the contents of a <code>Range</code> from the <a href="/en-US/docs/Web/A
 
 ### .detach*(...args)* <div class="specs"><i>W3C</i></div> {#detach}
 
-Releases the <code>Range</code> from use to improve performance.
+Releases the <code>Range
+</code> from use to improve performance.
 
 #### **Arguments**:
 
@@ -106,7 +115,8 @@ Releases the <code>Range</code> from use to improve performance.
 
 ### .extractContents*(...args)* <div class="specs"><i>W3C</i></div> {#extractContents}
 
-Moves contents of a <code>Range</code> from the document tree into a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code></a>.
+Moves contents of a <code>Range</code> from the document tree into a <a href="/en-US/docs/Web/API/DocumentFragment" title="The DocumentFragment interface represents a minimal document object that has no parent. It is used as a lightweight version of Document that stores a segment of a document structure comprised of nodes just like a standard document."><code>DocumentFragment</code>
+</a>.
 
 #### **Arguments**:
 
@@ -117,7 +127,8 @@ Moves contents of a <code>Range</code> from the document tree into a <a href="/e
 
 ### .getBoundingClientRect*(...args)* <div class="specs"><i>W3C</i></div> {#getBoundingClientRect}
 
-Returns a <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represents a rectangle."><code>DOMRect</code></a> object which bounds the entire contents of the <code>Range</code>; this would be the union of all the rectangles returned by <a href="/en-US/docs/Web/API/Range/getClientRects" title="The Range.getClientRects() method returns a list of DOMRect objects representing the area of the screen occupied by the range. This is created by aggregating the results of calls to Element.getClientRects() for all the elements in the range."><code>range.getClientRects()</code></a>.
+Returns a <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represents a rectangle."><code>DOMRect</code></a> object which bounds the entire contents of the <code>Range</code>; this would be the union of all the rectangles returned by <a href="/en-US/docs/Web/API/Range/getClientRects" title="The Range.getClientRects() method returns a list of DOMRect objects representing the area of the screen occupied by the range. This is created by aggregating the results of calls to Element.getClientRects() for all the elements in the range."><code>range.getClientRects()</code>
+</a>.
 
 #### **Arguments**:
 
@@ -128,7 +139,8 @@ Returns a <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represents a re
 
 ### .getClientRects*(...args)* <div class="specs"><i>W3C</i></div> {#getClientRects}
 
-Returns a list of <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represents a rectangle."><code>DOMRect</code></a> objects that aggregates the results of <a href="/en-US/docs/Web/API/Element/getClientRects" title="The getClientRects() method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client."><code>Element.getClientRects()</code></a> for all the elements in the <code>Range</code>.
+Returns a list of <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represents a rectangle."><code>DOMRect</code></a> objects that aggregates the results of <a href="/en-US/docs/Web/API/Element/getClientRects" title="The getClientRects() method of the Element interface returns a collection of DOMRect objects that indicate the bounding rectangles for each CSS border box in a client."><code>Element.getClientRects()</code></a> for all the elements in the <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -139,7 +151,8 @@ Returns a list of <a href="/en-US/docs/Web/API/DOMRect" title="A DOMRect represe
 
 ### .insertNode*(...args)* <div class="specs"><i>W3C</i></div> {#insertNode}
 
-Insert a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> at the start of a <code>Range</code>.
+Insert a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> at the start of a <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -150,7 +163,8 @@ Insert a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from whi
 
 ### .intersectsNode*(...args)* <div class="specs"><i>W3C</i></div> {#intersectsNode}
 
-Returns a <code>boolean</code> indicating whether the given node intersects the <code>Range</code>.
+Returns a <code>boolean</code> indicating whether the given node intersects the <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -161,7 +175,8 @@ Returns a <code>boolean</code> indicating whether the given node intersects the 
 
 ### .isPointInRange*(...args)* <div class="specs"><i>W3C</i></div> {#isPointInRange}
 
-Returns a <code>boolean</code> indicating whether the given point is in the <code>Range</code>.
+Returns a <code>boolean</code> indicating whether the given point is in the <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -172,7 +187,8 @@ Returns a <code>boolean</code> indicating whether the given point is in the <cod
 
 ### .selectNode*(...args)* <div class="specs"><i>W3C</i></div> {#selectNode}
 
-Sets the <code>Range</code> to contain the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> and its contents.
+Sets the <code>Range</code> to contain the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a> and its contents.
 
 #### **Arguments**:
 
@@ -183,7 +199,8 @@ Sets the <code>Range</code> to contain the <a href="/en-US/docs/Web/API/Node" ti
 
 ### .selectNodeContents*(...args)* <div class="specs"><i>W3C</i></div> {#selectNodeContents}
 
-Sets the <code>Range</code> to contain the contents of a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Sets the <code>Range</code> to contain the contents of a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -194,7 +211,8 @@ Sets the <code>Range</code> to contain the contents of a <a href="/en-US/docs/We
 
 ### .setEnd*(...args)* <div class="specs"><i>W3C</i></div> {#setEnd}
 
-Sets the end position of a <code>Range</code>.
+Sets the end position of a <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -205,7 +223,8 @@ Sets the end position of a <code>Range</code>.
 
 ### .setEndAfter*(...args)* <div class="specs"><i>W3C</i></div> {#setEndAfter}
 
-Sets the end position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Sets the end position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -216,7 +235,8 @@ Sets the end position of a <code>Range</code> relative to another <a href="/en-U
 
 ### .setEndBefore*(...args)* <div class="specs"><i>W3C</i></div> {#setEndBefore}
 
-Sets the end position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Sets the end position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -227,7 +247,8 @@ Sets the end position of a <code>Range</code> relative to another <a href="/en-U
 
 ### .setStart*(...args)* <div class="specs"><i>W3C</i></div> {#setStart}
 
-Sets the start position of a <code>Range</code>.
+Sets the start position of a <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -238,7 +259,8 @@ Sets the start position of a <code>Range</code>.
 
 ### .setStartAfter*(...args)* <div class="specs"><i>W3C</i></div> {#setStartAfter}
 
-Sets the start position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Sets the start position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -249,7 +271,8 @@ Sets the start position of a <code>Range</code> relative to another <a href="/en
 
 ### .setStartBefore*(...args)* <div class="specs"><i>W3C</i></div> {#setStartBefore}
 
-Sets the start position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Sets the start position of a <code>Range</code> relative to another <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -260,7 +283,8 @@ Sets the start position of a <code>Range</code> relative to another <a href="/en
 
 ### .surroundContents*(...args)* <div class="specs"><i>W3C</i></div> {#surroundContents}
 
-Moves content of a <code>Range</code> into a new <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>.
+Moves content of a <code>Range</code> into a new <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code>
+</a>.
 
 #### **Arguments**:
 
@@ -271,7 +295,8 @@ Moves content of a <code>Range</code> into a new <a href="/en-US/docs/Web/API/No
 
 ### .toString*(...args)* <div class="specs"><i>W3C</i></div> {#toString}
 
-Returns the text of the <code>Range</code>.
+Returns the text of the <code>Range
+</code>.
 
 #### **Arguments**:
 
@@ -279,5 +304,3 @@ Returns the text of the <code>Range</code>.
  - none
 
 #### **Returns**: `Promise<void>`
-
-## Events
