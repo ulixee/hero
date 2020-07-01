@@ -8,19 +8,19 @@
 
 A <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/track#attr-default">default</a></code>&nbsp; attribute,&nbsp;indicating&nbsp;that the track is to be enabled if the user's preferences do not indicate that another track would be more appropriate.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .kind <div class="specs"><i>W3C</i></div> {#kind}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/track#attr-kind">kind</a></code>&nbsp;HTML attribute,&nbsp;indicating&nbsp;how the text track is meant to be used. Possible values are: <code>subtitles</code>, <code>captions</code>, <code>descriptions</code>, <code>chapters</code>, or <code>metadata</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .label <div class="specs"><i>W3C</i></div> {#label}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the&nbsp;<code><a href="/en-US/docs/Web/HTML/Element/track#attr-label">label</a></code>&nbsp;HTML attribute,&nbsp;indicating&nbsp;a user-readable title for the track.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .readyState <div class="specs"><i>W3C</i></div> {#readyState}
 
@@ -56,25 +56,25 @@ Returns&nbsp; an <code>unsigned short</code> that show the readiness state of th
  </table>
  
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .src <div class="specs"><i>W3C</i></div> {#src}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the&nbsp;<code><a href="/en-US/docs/Web/HTML/Element/track#attr-src">src</a></code>&nbsp;HTML attribute, indicating the address of the text track data.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .srclang <div class="specs"><i>W3C</i></div> {#srclang}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the&nbsp;<code><a href="/en-US/docs/Web/HTML/Element/track#attr-srclang">srclang</a></code>&nbsp;HTML attribute,&nbsp;indicating the language of the text track data.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .track <div class="specs"><i>W3C</i></div> {#track}
 
 Returns <a href="/en-US/docs/Web/API/TextTrack" title="This interface also inherits properties from EventTarget."><code>TextTrack</code></a> is the track element's text track data.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

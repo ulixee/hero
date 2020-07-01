@@ -8,11 +8,11 @@
 
 Returns the number of items in the collection.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the specific node at the given zero-based index into the list. Returns null if the index is out of range.
 
@@ -21,6 +21,6 @@ Returns the specific node at the given zero-based index into the list. Returns n
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

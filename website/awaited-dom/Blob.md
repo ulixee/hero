@@ -10,17 +10,17 @@
 
 The size, in bytes, of the data contained in the <code>Blob</code> object.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 A string indicating the MIME&nbsp;type of the data contained in the <code>Blob</code>. If the type is unknown, this string is empty.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .arrayBuffer*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
+### .arrayBuffer*(...args)* <div class="specs"><i>W3C</i></div> {#arrayBuffer}
 
 Returns a promise that resolves with an <a href="/en-US/docs/Web/API/ArrayBuffer" title="The documentation about this has not yet been written; please consider contributing!"><code>ArrayBuffer</code></a> containing the entire contents of the <code>Blob</code> as binary data.
 
@@ -29,9 +29,9 @@ Returns a promise that resolves with an <a href="/en-US/docs/Web/API/ArrayBuffer
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .slice*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#slice}
+### .slice*(...args)* <div class="specs"><i>W3C</i></div> {#slice}
 
 Returns a new <code>Blob</code> object containing the data in the specified range of bytes of the blob on which it's called.
 
@@ -40,9 +40,9 @@ Returns a new <code>Blob</code> object containing the data in the specified rang
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .stream*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#stream}
+### .stream*(...args)* <div class="specs"><i>W3C</i></div> {#stream}
 
 Returns a <a href="/en-US/docs/Web/API/ReadableStream" title="The ReadableStream interface of the&nbsp;Streams API&nbsp;represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object."><code>ReadableStream</code></a> that can be used to read the contents of the <code>Blob</code>.
 
@@ -51,9 +51,9 @@ Returns a <a href="/en-US/docs/Web/API/ReadableStream" title="The ReadableStream
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .text*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#text}
+### .text*(...args)* <div class="specs"><i>W3C</i></div> {#text}
 
 Returns a promise that resolves with a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the entire contents of the <code>Blob</code> interpreted as UTF-8 text.
 
@@ -62,6 +62,6 @@ Returns a promise that resolves with a <a href="/en-US/docs/Web/API/USVString" t
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

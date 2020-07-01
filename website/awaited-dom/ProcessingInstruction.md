@@ -10,7 +10,7 @@
 
 A name identifying the application to which the instruction is targeted,
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

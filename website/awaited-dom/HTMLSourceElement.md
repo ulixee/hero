@@ -8,13 +8,13 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/source#attr-media">media</a></code> HTML attribute, containing the intended type of the media resource.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .sizes <div class="specs"><i>W3C</i></div> {#sizes}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing&nbsp;image sizes between breakpoints
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .src <div class="specs"><i>W3C</i></div> {#src}
 
@@ -22,19 +22,19 @@ Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String
  <div class="note"><strong>Note</strong>: If the&nbsp;<code>src</code>&nbsp;property is updated (along with any siblings), the parent&nbsp;<a href="/en-US/docs/Web/API/HTMLMediaElement" title="The HTMLMediaElement interface adds to HTMLElement the properties and methods needed to support basic media-related capabilities that are common to audio and video."><code>HTMLMediaElement</code></a>'s&nbsp;<code>load</code> method should be called when done, since&nbsp;<code>&lt;source&gt;</code>&nbsp;elements are not re-scanned automatically.</div>
  
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .srcset <div class="specs"><i>W3C</i></div> {#srcset}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/source#attr-srcset">srcset</a></code> HTML attribute, containing a list of candidate images, separated by a comma (<code>',', U+002C COMMA</code>). A candidate image is a URL followed by a <code>'w'</code> with the width of the images, or an <code>'x'</code> followed by the pixel density.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/source#attr-type">type</a></code> HTML attribute, containing the type of the media resource.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

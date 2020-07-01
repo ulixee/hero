@@ -6,11 +6,11 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Needs content.
 
@@ -19,6 +19,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

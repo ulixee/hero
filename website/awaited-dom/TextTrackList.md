@@ -10,29 +10,29 @@
 
 The number of tracks in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onaddtrack <div class="specs"><i>W3C</i></div> {#onaddtrack}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/addtrack" title="/en-US/docs/Web/Events/addtrack">addtrack</a></code> event is fired, indicating that a new text track has been added to the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onchange <div class="specs"><i>W3C</i></div> {#onchange}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/change" title="/en-US/docs/Web/Events/change">change</a></code> event occurs.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onremovetrack <div class="specs"><i>W3C</i></div> {#onremovetrack}
 
 An event handler to call when the <code><a href="/en-US/docs/Web/Events/removetrack" title="/en-US/docs/Web/Events/removetrack">removetrack</a></code> event is sent, indicating that a text track has been removed from the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getTrackById*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getTrackById}
+### .getTrackById*(...args)* <div class="specs"><i>W3C</i></div> {#getTrackById}
 
 Returns the <a href="/en-US/docs/Web/API/TextTrack" title="This interface also inherits properties from EventTarget."><code>TextTrack</code></a> found within the <code>TextTrackList</code> whose <a class="new" href="/en-US/docs/Web/API/TextTrack/id" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>id</code></a> matches the specified string. If no match is found, <code>null</code> is returned.
 
@@ -41,6 +41,6 @@ Returns the <a href="/en-US/docs/Web/API/TextTrack" title="This interface also i
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

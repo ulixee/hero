@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .append*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#append}
+### .append*(...args)* <div class="specs"><i>W3C</i></div> {#append}
 
 Needs content.
 
@@ -13,20 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .clear*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#clear}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .delete*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#delete}
+### .clear*(...args)* <div class="specs"><i>W3C</i></div> {#clear}
 
 Needs content.
 
@@ -35,9 +24,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .set*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#set}
+### .delete*(...args)* <div class="specs"><i>W3C</i></div> {#delete}
 
 Needs content.
 
@@ -46,6 +35,17 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .set*(...args)* <div class="specs"><i>W3C</i></div> {#set}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

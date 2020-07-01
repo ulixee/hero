@@ -6,7 +6,7 @@
 
 ## Methods
 
-### .parseFromString*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#parseFromString}
+### .parseFromString*(...args)* <div class="specs"><i>W3C</i></div> {#parseFromString}
 
 Parse XML from a string
 
@@ -15,6 +15,6 @@ Parse XML from a string
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

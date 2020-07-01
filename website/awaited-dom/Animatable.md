@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .animate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#animate}
+### .animate*(...args)* <div class="specs"><i>W3C</i></div> {#animate}
 
 Needs content.
 
@@ -13,9 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getAnimations*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getAnimations}
+### .getAnimations*(...args)* <div class="specs"><i>W3C</i></div> {#getAnimations}
 
 Needs content.
 
@@ -24,6 +24,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

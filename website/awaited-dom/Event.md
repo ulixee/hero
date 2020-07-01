@@ -14,71 +14,71 @@
 
 A boolean indicating whether or not the event bubbles up through the DOM.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .cancelable <div class="specs"><i>W3C</i></div> {#cancelable}
 
 A boolean indicating whether the event is cancelable.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .cancelBubble <div class="specs"><i>W3C</i></div> {#cancelBubble}
 
 A historical alias to <a href="/en-US/docs/Web/API/Event/stopPropagation" title="The stopPropagation() method of the Event interface prevents further propagation of the current event in the capturing and bubbling phases."><code>Event.stopPropagation()</code></a>. Setting its value to <code>true</code> before returning from an event handler prevents propagation of the event.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .composed <div class="specs"><i>W3C</i></div> {#composed}
 
 A boolean indicating whether or not the event can bubble across the boundary between the shadow DOM and the regular DOM.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .currentTarget <div class="specs"><i>W3C</i></div> {#currentTarget}
 
 A reference to the currently registered target for the event. This is the object to which the event is currently slated to be sent. It's possible this has been changed along the way through <em>retargeting</em>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .defaultPrevented <div class="specs"><i>W3C</i></div> {#defaultPrevented}
 
 Indicates whether or not the call to <a href="/en-US/docs/Web/API/Event/preventDefault" title="The Event interface's preventDefault() method tells the user agent that if the event does not get explicitly handled, its default action should not be taken as it normally would be."><code>event.preventDefault()</code></a> canceled the event.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .eventPhase <div class="specs"><i>W3C</i></div> {#eventPhase}
 
 Indicates which phase of the event flow is being processed.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .isTrusted <div class="specs"><i>W3C</i></div> {#isTrusted}
 
 Indicates whether or not the event was initiated by the browser (after a user click, for instance) or by a script (using an event creation method, like <a href="/en-US/docs/Web/API/Event/initEvent" title="The Event.initEvent() method is used to initialize the value of an event created using Document.createEvent()."><code>Event.initEvent</code></a>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .target <div class="specs"><i>W3C</i></div> {#target}
 
 A reference to the target to which the event was originally dispatched.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .timeStamp <div class="specs"><i>W3C</i></div> {#timeStamp}
 
 The time at which the event was created&nbsp;(in milliseconds). By specification, this value is time since epoch—but in reality, browsers' definitions vary. In addition, work is underway to change this to be a <a href="/en-US/docs/Web/API/DOMHighResTimeStamp" title="The DOMHighResTimeStamp type is a double and is used to store a time value in milliseconds."><code>DOMHighResTimeStamp</code></a> instead.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 The name of the event. Case-insensitive.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .composedPath*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#composedPath}
+### .composedPath*(...args)* <div class="specs"><i>W3C</i></div> {#composedPath}
 
 Returns the event’s path (objects on which listeners will be invoked). This does not include nodes in shadow trees if the shadow root was created with its <a href="/en-US/docs/Web/API/ShadowRoot/mode" title="The mode property of the ShadowRoot specifies its mode — either open or closed. This defines whether or not the shadow root's internal features are accessible from JavaScript."><code>ShadowRoot.mode</code></a> closed.
 
@@ -87,9 +87,9 @@ Returns the event’s path (objects on which listeners will be invoked). This do
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .initEvent*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#initEvent}
+### .initEvent*(...args)* <div class="specs"><i>W3C</i></div> {#initEvent}
 
 Initializes the value of an Event created. If the event has already been dispatched, this method does nothing.
 
@@ -98,9 +98,9 @@ Initializes the value of an Event created. If the event has already been dispatc
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .preventDefault*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#preventDefault}
+### .preventDefault*(...args)* <div class="specs"><i>W3C</i></div> {#preventDefault}
 
 Cancels the event (if it is cancelable).
 
@@ -109,9 +109,9 @@ Cancels the event (if it is cancelable).
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .stopImmediatePropagation*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#stopImmediatePropagation}
+### .stopImmediatePropagation*(...args)* <div class="specs"><i>W3C</i></div> {#stopImmediatePropagation}
 
 For this particular event, prevent all other listeners from being called. This includes listeners attached to the same element as well as those attached to elements that will be traversed later (during the capture phase, for instance).
 
@@ -120,9 +120,9 @@ For this particular event, prevent all other listeners from being called. This i
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .stopPropagation*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#stopPropagation}
+### .stopPropagation*(...args)* <div class="specs"><i>W3C</i></div> {#stopPropagation}
 
 Stops the propagation of events further along in the DOM.
 
@@ -131,6 +131,6 @@ Stops the propagation of events further along in the DOM.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

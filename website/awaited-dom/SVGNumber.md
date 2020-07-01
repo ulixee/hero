@@ -12,7 +12,7 @@ A float representing the number.
  <p class="note">Note: If the <code>SVGNumber</code> is read-only, a <a href="/en-US/docs/Web/API/DOMException" title="The DOMException interface represents an abnormal event (called an exception) which occurs as a result of calling a method or accessing a property of a web API."><code>DOMException</code></a> with the code NO_MODIFICATION_ALLOWED_ERR is raised on an attempt to change the value.</p>
  
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

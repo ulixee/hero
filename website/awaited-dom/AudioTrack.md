@@ -8,31 +8,31 @@
 
 A Boolean value which controls whether or not the audio track's sound is enabled. Setting this value to <code>false</code> mutes the track's audio.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .id <div class="specs"><i>W3C</i></div> {#id}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> which uniquely identifies the track within the media. This ID can be used to locate a specific track within an audio track list by calling <a href="/en-US/docs/Web/API/AudioTrackList/getTrackById" title="The AudioTrackList method getTrackById() returns the first AudioTrack object from the track list whose id matches the specified string."><code>AudioTrackList.getTrackById()</code></a>. The ID can also be used as the fragment part of the URL if the media supports seeking by media fragment per the <a class="external" href="https://www.w3.org/TR/media-frags/" rel="noopener">Media Fragments URI specification</a>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .kind <div class="specs"><i>W3C</i></div> {#kind}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> specifying the category into which the track falls. For example, the main audio track would have a <code>kind</code> of <code>"main"</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .label <div class="specs"><i>W3C</i></div> {#label}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> providing a human-readable label for the track. For example, an audio commentary track for a movie might have a <code>label</code> of <code>"Commentary with director John Q. Public and actors John Doe and Jane Eod."</code> This string is empty if no label is provided.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .language <div class="specs"><i>W3C</i></div> {#language}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> specifying the audio track's primary language, or an empty string if unknown. The language is specified as a BCP 47 (<a class="external" href="https://tools.ietf.org/html/rfc5646" rel="noopener">RFC 5646</a>) language code, such as <code>"en-US"</code> or <code>"pt-BR"</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

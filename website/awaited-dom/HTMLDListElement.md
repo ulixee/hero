@@ -8,7 +8,7 @@
 
 Is a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> indicating that spacing between list items should be reduced.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -6,95 +6,95 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .credentials <div class="specs"><i>W3C</i></div> {#credentials}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .destination <div class="specs"><i>W3C</i></div> {#destination}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .headers <div class="specs"><i>W3C</i></div> {#headers}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .integrity <div class="specs"><i>W3C</i></div> {#integrity}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .isHistoryNavigation <div class="specs"><i>W3C</i></div> {#isHistoryNavigation}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .isReloadNavigation <div class="specs"><i>W3C</i></div> {#isReloadNavigation}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .keepalive <div class="specs"><i>W3C</i></div> {#keepalive}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .method <div class="specs"><i>W3C</i></div> {#method}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .mode <div class="specs"><i>W3C</i></div> {#mode}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .redirect <div class="specs"><i>W3C</i></div> {#redirect}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .referrer <div class="specs"><i>W3C</i></div> {#referrer}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .signal <div class="specs"><i>W3C</i></div> {#signal}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .url <div class="specs"><i>W3C</i></div> {#url}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .clone*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#clone}
+### .clone*(...args)* <div class="specs"><i>W3C</i></div> {#clone}
 
 Needs content.
 
@@ -103,6 +103,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

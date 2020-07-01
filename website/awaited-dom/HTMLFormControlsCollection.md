@@ -8,7 +8,7 @@
 
 ## Methods
 
-### .namedItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#namedItem}
+### .namedItem*(...args)* <div class="specs"><i>W3C</i></div> {#namedItem}
 
 Returns the <a href="/en-US/docs/Web/API/RadioNodeList" title="The RadioNodeList interface represents a collection of radio elements in a <form> or a <fieldset> element."><code>RadioNodeList</code></a> or the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> in the collection whose <code>name</code> or <code>id</code> matches&nbsp;the specified name, or <code>null</code> if no nodes match. Note that this version of <code>namedItem()</code> hide the one inherited from <a href="/en-US/docs/Web/API/HTMLCollection" title="The HTMLCollection interface represents a generic collection (array-like object similar to arguments) of elements (in document order) and offers methods and properties for selecting from the list."><code>HTMLCollection</code></a>. Like that one, in JavaScript, using the array bracket syntax with a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" title="The String global object is a constructor for strings or a sequence of characters."><code>String</code></a>, like <code><em>collection</em>["value"]</code> is equivalent to <code><em>collection</em>.namedItem("value")</code>.
 
@@ -17,6 +17,6 @@ Returns the <a href="/en-US/docs/Web/API/RadioNodeList" title="The RadioNodeList
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

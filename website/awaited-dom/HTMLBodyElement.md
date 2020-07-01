@@ -8,37 +8,37 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the color of active hyperlinks.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .background <div class="specs"><i>W3C</i></div> {#background}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the description of the location of the background image resource. Note that this is not an URI, though some older version of some browsers do expect it.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .bgColor <div class="specs"><i>W3C</i></div> {#bgColor}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the background color for the document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .link <div class="specs"><i>W3C</i></div> {#link}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the color of unvisited links.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .text <div class="specs"><i>W3C</i></div> {#text}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the foreground color of text.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .vLink <div class="specs"><i>W3C</i></div> {#vLink}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that represents the color of visited links.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

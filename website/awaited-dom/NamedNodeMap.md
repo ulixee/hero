@@ -10,11 +10,11 @@
 
 Returns the amount of objects in the map.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getNamedItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getNamedItem}
+### .getNamedItem*(...args)* <div class="specs"><i>W3C</i></div> {#getNamedItem}
 
 Returns a <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a>, corresponding to the given name.
 
@@ -23,9 +23,9 @@ Returns a <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represent
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getNamedItemNS*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getNamedItemNS}
+### .getNamedItemNS*(...args)* <div class="specs"><i>W3C</i></div> {#getNamedItemNS}
 
 Returns a <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> identified by a namespace and related local name.
 
@@ -34,9 +34,9 @@ Returns a <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represent
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> at the given index, or <code>null</code> if the index is higher or equal to the number of nodes.
 
@@ -45,9 +45,9 @@ Returns the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represe
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeNamedItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeNamedItem}
+### .removeNamedItem*(...args)* <div class="specs"><i>W3C</i></div> {#removeNamedItem}
 
 Removes the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> identified by the given map.
 
@@ -56,9 +56,9 @@ Removes the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represe
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeNamedItemNS*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeNamedItemNS}
+### .removeNamedItemNS*(...args)* <div class="specs"><i>W3C</i></div> {#removeNamedItemNS}
 
 Removes the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> identified by the given namespace and related local name.
 
@@ -67,9 +67,9 @@ Removes the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represe
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setNamedItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setNamedItem}
+### .setNamedItem*(...args)* <div class="specs"><i>W3C</i></div> {#setNamedItem}
 
 Replaces, or adds, the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> identified in the map by the given name.
 
@@ -78,9 +78,9 @@ Replaces, or adds, the <a href="/en-US/docs/Web/API/Attr" title="The Attr interf
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setNamedItemNS*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setNamedItemNS}
+### .setNamedItemNS*(...args)* <div class="specs"><i>W3C</i></div> {#setNamedItemNS}
 
 Replaces, or adds, the <a href="/en-US/docs/Web/API/Attr" title="The Attr interface represents one of a DOM element's attributes as an object. In most DOM methods, you will directly retrieve the attribute as a string (e.g., Element.getAttribute()), but certain functions (e.g., Element.getAttributeNode()) or means of iterating return Attr types."><code>Attr</code></a> identified in the map by the given namespace and related local name.
 
@@ -89,6 +89,6 @@ Replaces, or adds, the <a href="/en-US/docs/Web/API/Attr" title="The Attr interf
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

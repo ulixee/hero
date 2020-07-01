@@ -8,25 +8,25 @@
 
 Returns <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code></a> containing the list of <a href="/en-US/docs/Web/HTML/Element/label" title="The HTML <label> element represents a caption for an item in a user interface."><code>&lt;label&gt;</code></a> elements that are labels for this element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .max <div class="specs"><i>W3C</i></div> {#max}
 
 Is a <code>double</code> value reflecting the content attribute of the same name, limited to numbers greater than zero. Its default value is <code>1.0</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .position <div class="specs"><i>W3C</i></div> {#position}
 
 Returns a <code>double</code> value returning the result of dividing the current value (<code>value</code>) by the maximum value (<code>max</code>); if the progress bar is an indeterminate progress bar, it returns <code>-1</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .value <div class="specs"><i>W3C</i></div> {#value}
 
 Is a <code>double</code> value that reflects the current value; if the progress bar is an indeterminate progress bar, it returns <code>0</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -8,43 +8,43 @@
 
 A <code>double</code> representing the value of the high boundary, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-high">high</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .labels <div class="specs"><i>W3C</i></div> {#labels}
 
 A <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code></a> of <a href="/en-US/docs/Web/HTML/Element/label" title="The HTML <label> element represents a caption for an item in a user interface."><code>&lt;label&gt;</code></a> elements that are associated with the element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .low <div class="specs"><i>W3C</i></div> {#low}
 
 A <code>double</code> representing the value of the low boundary, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-low">low</a></code>attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .max <div class="specs"><i>W3C</i></div> {#max}
 
 A <code>double</code> representing the maximum value, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-max">max</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .min <div class="specs"><i>W3C</i></div> {#min}
 
 A <code>double</code> representing the minimum value, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-min">min</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .optimum <div class="specs"><i>W3C</i></div> {#optimum}
 
 A <code>double</code> representing the optimum, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-optimum">optimum</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .value <div class="specs"><i>W3C</i></div> {#value}
 
 A <code>double</code> representing the currrent value, reflecting the <code><a href="/en-US/docs/Web/HTML/Element/meter#attr-value">value</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

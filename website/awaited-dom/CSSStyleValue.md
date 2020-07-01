@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .parse*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#parse}
+### .parse*(...args)* <div class="specs"><i>W3C</i></div> {#parse}
 
 Needs content.
 
@@ -13,20 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .parseAll*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#parseAll}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .toString*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#toString}
+### .parseAll*(...args)* <div class="specs"><i>W3C</i></div> {#parseAll}
 
 Needs content.
 
@@ -35,6 +24,17 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .toString*(...args)* <div class="specs"><i>W3C</i></div> {#toString}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

@@ -8,11 +8,11 @@
 
 Returns the number of items in the collection.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the specific node at the given zero-based <code>index</code> into the list. Returns <code>null</code> if the <code>index</code> is out of range.
 
@@ -21,9 +21,9 @@ Returns the specific node at the given zero-based <code>index</code> into the li
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .namedItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#namedItem}
+### .namedItem*(...args)* <div class="specs"><i>W3C</i></div> {#namedItem}
 
 Returns the specific node whose ID or, as a fallback, name matches the string specified by <code>name</code>. Matching by name is only done as a last resort, only in HTML, and only if the referenced element supports the <code>name</code> attribute. Returns <code>null</code> if no node exists by the given name.
 
@@ -32,6 +32,6 @@ Returns the specific node whose ID or, as a fallback, name matches the string sp
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

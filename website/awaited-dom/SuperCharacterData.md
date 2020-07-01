@@ -8,17 +8,17 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the textual data contained in this object.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .length <div class="specs"><i>W3C</i></div> {#length}
 
 Returns an <code>unsigned long</code> representing the size of the string contained in <code>CharacterData.data</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .appendData*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#appendData}
+### .appendData*(...args)* <div class="specs"><i>W3C</i></div> {#appendData}
 
 Appends the given <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> to the <code>CharacterData.data</code> string; when this method returns, <code>data</code> contains the concatenated <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>.
 
@@ -27,9 +27,9 @@ Appends the given <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a 
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .deleteData*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#deleteData}
+### .deleteData*(...args)* <div class="specs"><i>W3C</i></div> {#deleteData}
 
 Removes the specified amount of characters, starting at the specified offset, from the <code>CharacterData.data</code> string; when this method returns, <code>data</code> contains the shortened <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>.
 
@@ -38,9 +38,9 @@ Removes the specified amount of characters, starting at the specified offset, fr
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .insertData*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#insertData}
+### .insertData*(...args)* <div class="specs"><i>W3C</i></div> {#insertData}
 
 Inserts the specified characters, at the specified offset, in the <code>CharacterData.data</code> string; when this method returns, <code>data</code> contains the modified <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>.
 
@@ -49,9 +49,9 @@ Inserts the specified characters, at the specified offset, in the <code>Characte
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .replaceData*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#replaceData}
+### .replaceData*(...args)* <div class="specs"><i>W3C</i></div> {#replaceData}
 
 Replaces the specified amount of characters, starting at the specified offset, with the specified <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>; when this method returns, <code>data</code> contains the modified <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>.
 
@@ -60,9 +60,9 @@ Replaces the specified amount of characters, starting at the specified offset, w
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .substringData*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#substringData}
+### .substringData*(...args)* <div class="specs"><i>W3C</i></div> {#substringData}
 
 Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the part of <code>CharacterData.data</code> of the specified length and starting at the specified offset.
 
@@ -71,6 +71,6 @@ Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 S
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

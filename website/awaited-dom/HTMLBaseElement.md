@@ -8,13 +8,13 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/base#attr-href">href</a></code> HTML attribute, containing a base URL for relative URLs in the document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .target <div class="specs"><i>W3C</i></div> {#target}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/base#attr-target">target</a></code> HTML attribute, containing a default target browsing context or frame for elements that do not have a target reference specified.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

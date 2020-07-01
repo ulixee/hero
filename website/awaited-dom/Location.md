@@ -8,59 +8,59 @@
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing a <code>'#'</code> followed by the fragment identifier of the URL.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .host <div class="specs"><i>W3C</i></div> {#host}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the host, that is the <em>hostname</em>, a <code>':'</code>, and the <em>port</em> of the URL.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .hostname <div class="specs"><i>W3C</i></div> {#hostname}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the domain of the URL.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .href <div class="specs"><i>W3C</i></div> {#href}
 
 Is a stringifier that returns a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the entire URL. If changed, the associated document navigates to the new page. It can be set from a different origin than the associated document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .origin <div class="specs"><i>W3C</i></div> {#origin}
 
 Returns a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the canonical form of the origin of the specific location.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .pathname <div class="specs"><i>W3C</i></div> {#pathname}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing an initial <code>'/'</code> followed by the path of the URL.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .port <div class="specs"><i>W3C</i></div> {#port}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the port number of the URL.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .protocol <div class="specs"><i>W3C</i></div> {#protocol}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the protocol scheme of the URL, including the final <code>':'</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .search <div class="specs"><i>W3C</i></div> {#search}
 
 Is a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing a <code>'?'</code> followed by the parameters or "querystring" of the URL. Modern browsers provide <a href="/en-US/docs/Web/API/URLSearchParams/get#Example">URLSearchParams</a> and <a href="/en-US/docs/Web/API/URL/searchParams#Example">URL.searchParams</a> to make it easy to parse out the parameters from the querystring.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .assign*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#assign}
+### .assign*(...args)* <div class="specs"><i>W3C</i></div> {#assign}
 
 Loads the resource at the URL provided in parameter.
 
@@ -69,9 +69,9 @@ Loads the resource at the URL provided in parameter.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .reload*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#reload}
+### .reload*(...args)* <div class="specs"><i>W3C</i></div> {#reload}
 
 Reloads the resource from the current URL. Its optional unique parameter is a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a>, which, when it is <code>true</code>, causes the page to always be reloaded from the server. If it is <code>false</code> or not specified, the browser may reload the page from its cache.
 
@@ -80,9 +80,9 @@ Reloads the resource from the current URL. Its optional unique parameter is a <a
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .replace*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#replace}
+### .replace*(...args)* <div class="specs"><i>W3C</i></div> {#replace}
 
 Replaces the current resource with the one at the provided URL. The difference from the <code>assign()</code> method is that after using <code>replace()</code> the current page will not be saved in session <a href="/en-US/docs/Web/API/History" title="The History interface allows&nbsp;manipulation of&nbsp;the browser session history, that is the pages visited in the tab or frame that the current page is loaded in."><code>History</code></a>, meaning the user won't be able to use the <em>back</em> button to navigate to it.
 
@@ -91,9 +91,9 @@ Replaces the current resource with the one at the provided URL. The difference f
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .toString*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#toString}
+### .toString*(...args)* <div class="specs"><i>W3C</i></div> {#toString}
 
 Returns a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds to the set of all possible sequences of unicode scalar values. USVString maps to a String when returned in JavaScript; it's generally only used for APIs that perform text processing and need a string of unicode scalar values to operate on. USVString is equivalent to DOMString except for not allowing unpaired surrogate codepoints. Unpaired surrogate codepoints present in USVString are converted by the browser to Unicode 'replacement character' U+FFFD, (�)."><code>USVString</code></a> containing the whole URL. It is a synonym for <a href="/en-US/docs/Web/API/HTMLHyperlinkElementUtils/href" title="The HTMLHyperlinkElementUtils.href property is a stringifier that returns a USVString containing the whole URL, and allows the href to be updated."><code>HTMLHyperlinkElementUtils.href</code></a>, though it can't be used to modify the value.
 
@@ -102,6 +102,6 @@ Returns a <a href="/en-US/docs/Web/API/USVString" title="USVString corresponds t
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

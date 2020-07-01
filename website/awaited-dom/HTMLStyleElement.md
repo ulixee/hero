@@ -10,13 +10,13 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the intended destination medium for style information.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the type of style being applied by this statement.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

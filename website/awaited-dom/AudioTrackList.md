@@ -10,29 +10,29 @@
 
 The number of tracks in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onaddtrack <div class="specs"><i>W3C</i></div> {#onaddtrack}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/addtrack" title="/en-US/docs/Web/Events/addtrack">addtrack</a></code> event is fired, indicating that a new audio track has been added to the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onchange <div class="specs"><i>W3C</i></div> {#onchange}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/change" title="/en-US/docs/Web/Events/change">change</a></code> event occurs. This occurs when one or more tracks have been enabled or disabled by their <a href="/en-US/docs/Web/API/AudioTrack/enabled" title="The AudioTrack property enabled specifies whether or not the described audio track is currently enabled for use. If the track is disabled by setting enabled to false, the track is muted and does not produce audio."><code>enabled</code></a> flag being changed.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onremovetrack <div class="specs"><i>W3C</i></div> {#onremovetrack}
 
 An event handler to call when the <code><a href="/en-US/docs/Web/Events/removetrack" title="/en-US/docs/Web/Events/removetrack">removetrack</a></code> event is sent, indicating that an audio track has been removed from the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getTrackById*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getTrackById}
+### .getTrackById*(...args)* <div class="specs"><i>W3C</i></div> {#getTrackById}
 
 Returns the <a href="/en-US/docs/Web/API/AudioTrack" title="The AudioTrack interface represents a single audio track from one of the HTML media elements, <audio> or <video>. "><code>AudioTrack</code></a> found within the <code>AudioTrackList</code> whose <a href="/en-US/docs/Web/API/AudioTrack/id" title="The id property contains a string which uniquely identifies the track represented by the AudioTrack."><code>id</code></a> matches the specified string. If no match is found, <code>null</code> is returned.
 
@@ -41,6 +41,6 @@ Returns the <a href="/en-US/docs/Web/API/AudioTrack" title="The AudioTrack inter
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

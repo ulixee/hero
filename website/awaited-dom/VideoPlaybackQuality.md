@@ -6,19 +6,19 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .droppedVideoFrames <div class="specs"><i>W3C</i></div> {#droppedVideoFrames}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .totalVideoFrames <div class="specs"><i>W3C</i></div> {#totalVideoFrames}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -8,13 +8,13 @@
 
 Alignment relative to the form set
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .form <div class="specs"><i>W3C</i></div> {#form}
 
 <p>The form that this legend belongs to. If the legend has a fieldset element as its parent, then this attribute returns the same value as the <strong>form</strong> attribute on the parent fieldset element. Otherwise, it returns null.</p>
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

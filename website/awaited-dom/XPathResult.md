@@ -6,47 +6,47 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .invalidIteratorState <div class="specs"><i>W3C</i></div> {#invalidIteratorState}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .numberValue <div class="specs"><i>W3C</i></div> {#numberValue}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .resultType <div class="specs"><i>W3C</i></div> {#resultType}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .singleNodeValue <div class="specs"><i>W3C</i></div> {#singleNodeValue}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .snapshotLength <div class="specs"><i>W3C</i></div> {#snapshotLength}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .stringValue <div class="specs"><i>W3C</i></div> {#stringValue}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .iterateNext*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#iterateNext}
+### .iterateNext*(...args)* <div class="specs"><i>W3C</i></div> {#iterateNext}
 
 Needs content.
 
@@ -55,9 +55,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .snapshotItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#snapshotItem}
+### .snapshotItem*(...args)* <div class="specs"><i>W3C</i></div> {#snapshotItem}
 
 Needs content.
 
@@ -66,6 +66,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

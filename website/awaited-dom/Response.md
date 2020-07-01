@@ -10,47 +10,47 @@
 
 The <a href="/en-US/docs/Web/API/Headers"><code>Headers</code></a> object associated with the response.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .ok <div class="specs"><i>W3C</i></div> {#ok}
 
 A boolean indicating whether the response was successful (status in the range <code>200</code>–<code>299</code>) or not.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .redirected <div class="specs"><i>W3C</i></div> {#redirected}
 
 Indicates whether or not the response is the result of a redirect (that is, its URL list has more than one entry).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .status <div class="specs"><i>W3C</i></div> {#status}
 
 The status code of the response. (This will be <code>200</code> for a success).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .statusText <div class="specs"><i>W3C</i></div> {#statusText}
 
 The status message corresponding to the status code. (e.g., <code>OK</code> for <code>200</code>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 The type of the response (e.g., <code>basic</code>, <code>cors</code>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .url <div class="specs"><i>W3C</i></div> {#url}
 
 The URL of the response.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .clone*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#clone}
+### .clone*(...args)* <div class="specs"><i>W3C</i></div> {#clone}
 
 Creates a clone of a <code>Response</code> object.
 
@@ -59,9 +59,9 @@ Creates a clone of a <code>Response</code> object.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .error*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#error}
+### .error*(...args)* <div class="specs"><i>W3C</i></div> {#error}
 
 Returns a new <code>Response</code> object associated with a network error.
 
@@ -70,9 +70,9 @@ Returns a new <code>Response</code> object associated with a network error.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .redirect*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#redirect}
+### .redirect*(...args)* <div class="specs"><i>W3C</i></div> {#redirect}
 
 Creates a new response with a different URL.
 
@@ -81,6 +81,6 @@ Creates a new response with a different URL.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

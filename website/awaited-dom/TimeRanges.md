@@ -12,11 +12,11 @@
 
 Returns an <code>unsigned long</code> representing the number of time ranges represented by the time range object.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .end*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#end}
+### .end*(...args)* <div class="specs"><i>W3C</i></div> {#end}
 
 Returns the time for the end of the specified range.
 
@@ -25,9 +25,9 @@ Returns the time for the end of the specified range.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .start*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#start}
+### .start*(...args)* <div class="specs"><i>W3C</i></div> {#start}
 
 Returns the time for the start of the range with the specified index.
 
@@ -36,6 +36,6 @@ Returns the time for the start of the range with the specified index.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

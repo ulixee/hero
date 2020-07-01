@@ -10,7 +10,7 @@
 
 Returns the <a href="/en-US/docs/Web/API/CSSStyleSheet" title="The CSSStyleSheet interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet."><code>CSSStyleSheet</code></a> object associated with the given element, or <code>null</code> if there is none.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

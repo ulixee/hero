@@ -8,19 +8,19 @@
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the local part of the qualified name of the attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .name <div class="specs"><i>W3C</i></div> {#name}
 
 The attribute's name.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .namespaceURI <div class="specs"><i>W3C</i></div> {#namespaceURI}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the namespace URI of the attribute, or <code>null</code> if there is no namespace.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .ownerElement <div class="specs"><i>W3C</i></div> {#ownerElement}
 
@@ -33,25 +33,25 @@ A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. A
  </div>
  
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .prefix <div class="specs"><i>W3C</i></div> {#prefix}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the namespace prefix of the attribute, or <code>null</code> if no prefix is specified.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .specified <div class="specs"><i>W3C</i></div> {#specified}
 
 This property always returns <code>true</code>. Originally, it returned <code>true </code>if the attribute was explicitly specified in the source code or by a script, and <code>false</code> if its value came from the default one defined in the document's <acronym title="Document Type Definition">DTD</acronym>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .value <div class="specs"><i>W3C</i></div> {#value}
 
 The attribute's value.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

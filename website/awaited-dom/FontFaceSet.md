@@ -6,35 +6,35 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onloadingdone <div class="specs"><i>W3C</i></div> {#onloadingdone}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onloadingerror <div class="specs"><i>W3C</i></div> {#onloadingerror}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .ready <div class="specs"><i>W3C</i></div> {#ready}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .status <div class="specs"><i>W3C</i></div> {#status}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .add*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#add}
+### .add*(...args)* <div class="specs"><i>W3C</i></div> {#add}
 
 Needs content.
 
@@ -43,20 +43,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .check*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#check}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .clear*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#clear}
+### .check*(...args)* <div class="specs"><i>W3C</i></div> {#check}
 
 Needs content.
 
@@ -65,20 +54,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .delete*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#delete}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .forEach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#forEach}
+### .clear*(...args)* <div class="specs"><i>W3C</i></div> {#clear}
 
 Needs content.
 
@@ -87,9 +65,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .load*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#load}
+### .delete*(...args)* <div class="specs"><i>W3C</i></div> {#delete}
 
 Needs content.
 
@@ -98,6 +76,28 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
+
+### .load*(...args)* <div class="specs"><i>W3C</i></div> {#load}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

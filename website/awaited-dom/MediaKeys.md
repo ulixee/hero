@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .createSession*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#createSession}
+### .createSession*(...args)* <div class="specs"><i>W3C</i></div> {#createSession}
 
 Needs content.
 
@@ -13,9 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setServerCertificate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setServerCertificate}
+### .setServerCertificate*(...args)* <div class="specs"><i>W3C</i></div> {#setServerCertificate}
 
 Needs content.
 
@@ -24,6 +24,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

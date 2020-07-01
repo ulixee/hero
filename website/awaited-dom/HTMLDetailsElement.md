@@ -8,7 +8,7 @@
 
 Is a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>boolean</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/details#attr-open">open</a></code> HTML attribute, indicating whether or not the element’s contents (not counting the <a href="/en-US/docs/Web/HTML/Element/summary" title="The HTML Disclosure Summary element (<summary>) element specifies a summary, caption, or legend for a <details> element's disclosure box."><code>&lt;summary&gt;</code></a>) is to be shown to the user.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

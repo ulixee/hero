@@ -6,23 +6,23 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .nonce <div class="specs"><i>W3C</i></div> {#nonce}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .tabIndex <div class="specs"><i>W3C</i></div> {#tabIndex}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .blur*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#blur}
+### .blur*(...args)* <div class="specs"><i>W3C</i></div> {#blur}
 
 Needs content.
 
@@ -31,9 +31,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .focus*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#focus}
+### .focus*(...args)* <div class="specs"><i>W3C</i></div> {#focus}
 
 Needs content.
 
@@ -42,6 +42,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

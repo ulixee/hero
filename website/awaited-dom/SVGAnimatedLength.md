@@ -8,13 +8,13 @@
 
 If the given attribute or property is being animated, contains the current animated value of the attribute or property. If the given attribute or property is not currently being animated, contains the same value as <code>baseVal</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .baseVal <div class="specs"><i>W3C</i></div> {#baseVal}
 
 The base value of the given attribute before applying any animations.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

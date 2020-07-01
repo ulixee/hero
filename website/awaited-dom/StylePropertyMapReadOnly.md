@@ -6,11 +6,11 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .entries*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#entries}
+### .entries*(...args)* <div class="specs"><i>W3C</i></div> {#entries}
 
 Needs content.
 
@@ -19,20 +19,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .forEach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#forEach}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .get*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#get}
+### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
 
 Needs content.
 
@@ -41,20 +30,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getAll*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getAll}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .has*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#has}
+### .get*(...args)* <div class="specs"><i>W3C</i></div> {#get}
 
 Needs content.
 
@@ -63,20 +41,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .keys*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#keys}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .values*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#values}
+### .getAll*(...args)* <div class="specs"><i>W3C</i></div> {#getAll}
 
 Needs content.
 
@@ -85,6 +52,39 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .has*(...args)* <div class="specs"><i>W3C</i></div> {#has}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
+
+### .keys*(...args)* <div class="specs"><i>W3C</i></div> {#keys}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
+
+### .values*(...args)* <div class="specs"><i>W3C</i></div> {#values}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

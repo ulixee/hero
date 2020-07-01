@@ -8,17 +8,17 @@
 
 Is an <code>integer</code> representing the number of objects stored in the object.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .value <div class="specs"><i>W3C</i></div> {#value}
 
 A stringifier property that returns the value of the list as a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .add*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#add}
+### .add*(...args)* <div class="specs"><i>W3C</i></div> {#add}
 
 Adds the specified&nbsp;<code><var>token</var></code>(s) to the list.
 
@@ -27,9 +27,9 @@ Adds the specified&nbsp;<code><var>token</var></code>(s) to the list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .contains*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#contains}
+### .contains*(...args)* <div class="specs"><i>W3C</i></div> {#contains}
 
 Returns <code>true</code> if the list contains the given <code><var>token</var></code>, otherwise <code>false</code>.
 
@@ -38,9 +38,9 @@ Returns <code>true</code> if the list contains the given <code><var>token</var><
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .entries*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#entries}
+### .entries*(...args)* <div class="specs"><i>W3C</i></div> {#entries}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a>, allowing you to go through all key/value pairs contained in this object.
 
@@ -49,9 +49,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .forEach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#forEach}
+### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
 
 Executes a provided <code><var>callback</var></code> function once per <code>DOMTokenList</code> element.
 
@@ -60,9 +60,9 @@ Executes a provided <code><var>callback</var></code> function once per <code>DOM
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns the item in the list by its <code><var>index</var></code>, or <code>undefined</code> if <code><var>index</var></code> is greater than or equal to the list's <code>length</code>.
 
@@ -71,9 +71,9 @@ Returns the item in the list by its <code><var>index</var></code>, or <code>unde
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .keys*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#keys}
+### .keys*(...args)* <div class="specs"><i>W3C</i></div> {#keys}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a>, allowing you to go through all keys of the key/value pairs contained in this object.
 
@@ -82,9 +82,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .remove*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#remove}
+### .remove*(...args)* <div class="specs"><i>W3C</i></div> {#remove}
 
 Removes the specified <code><var>token</var></code>(s) from the list.
 
@@ -93,9 +93,9 @@ Removes the specified <code><var>token</var></code>(s) from the list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .replace*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#replace}
+### .replace*(...args)* <div class="specs"><i>W3C</i></div> {#replace}
 
 Replaces&nbsp;<code><var>token</var></code> with&nbsp;<code><var>newToken</var></code>.
 
@@ -104,9 +104,9 @@ Replaces&nbsp;<code><var>token</var></code> with&nbsp;<code><var>newToken</var><
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .supports*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#supports}
+### .supports*(...args)* <div class="specs"><i>W3C</i></div> {#supports}
 
 Returns <code>true</code> if a given <code><var>token</var></code> is in the associated attribute's supported tokens.
 
@@ -115,9 +115,9 @@ Returns <code>true</code> if a given <code><var>token</var></code> is in the ass
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .toggle*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#toggle}
+### .toggle*(...args)* <div class="specs"><i>W3C</i></div> {#toggle}
 
 Removes&nbsp;<code><var>token</var></code> from the list if it exists, or adds <code><var>token</var></code> to the list if it doesn't. Returns a boolean indicating whether <code><var>token</var></code> is in the list after the operation.
 
@@ -126,9 +126,9 @@ Removes&nbsp;<code><var>token</var></code> from the list if it exists, or adds <
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .values*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#values}
+### .values*(...args)* <div class="specs"><i>W3C</i></div> {#values}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a>, allowing you to go through all values of the key/value pairs contained in this object.
 
@@ -137,6 +137,6 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

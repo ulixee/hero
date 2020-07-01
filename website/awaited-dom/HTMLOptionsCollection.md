@@ -8,17 +8,17 @@
 
 As optionally allowed by the spec, this property isn't read-only. You can either remove options from the end by lowering the value, or add blank options at the end by raising the value. Mozilla allows this, while other implementations could potentially throw a <a href="/en-US/docs/DOM/DOMException" title="DOM/DOMException">DOMException</a>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .selectedIndex <div class="specs"><i>W3C</i></div> {#selectedIndex}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .add*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#add}
+### .add*(...args)* <div class="specs"><i>W3C</i></div> {#add}
 
 Inserts element before the node given by before.
 
@@ -27,9 +27,9 @@ Inserts element before the node given by before.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .remove*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#remove}
+### .remove*(...args)* <div class="specs"><i>W3C</i></div> {#remove}
 
 Removes the item with index index from the collection.
 
@@ -38,6 +38,6 @@ Removes the item with index index from the collection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

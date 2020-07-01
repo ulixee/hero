@@ -8,37 +8,37 @@
 
 Indicates the horizontal alignment of the cell data in the column.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .ch <div class="specs"><i>W3C</i></div> {#ch}
 
 Alignment character for cell data.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .chOff <div class="specs"><i>W3C</i></div> {#chOff}
 
 Offset for the alignment character.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .span <div class="specs"><i>W3C</i></div> {#span}
 
 Reflects the <code><a href="/en-US/docs/Web/HTML/Element/col#attr-span">span</a></code> HTML&nbsp;attribute, indicating the number of columns to apply this object's attributes to. Must be a positive integer.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .vAlign <div class="specs"><i>W3C</i></div> {#vAlign}
 
 Indicates the vertical alignment of the cell data in the column.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .width <div class="specs"><i>W3C</i></div> {#width}
 
 Default column width.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

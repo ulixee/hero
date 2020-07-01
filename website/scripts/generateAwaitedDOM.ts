@@ -78,18 +78,18 @@ function saveDoc(doc: IDoc, filePath: string) {
     doc.properties.forEach(p => {
       markup.push({ h3: `.${p.name} <div class="specs"><i>W3C</i></div> {#${p.name}}` });
       markup.push({ html: (p.overview || 'Needs content.').replace(/\n\n/g, '\n') });
-      markup.push({ h4: `**Type**: \`SuperDocument\`` });
+      markup.push({ h4: `**Type**: \`null\`` });
     });
   }
 
   {
     markup.push({ h2: 'Methods' });
     doc.methods.forEach(m => {
-      markup.push({ h3: `.${m.name}*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#${m.name}}` });
+      markup.push({ h3: `.${m.name}*(...args)* <div class="specs"><i>W3C</i></div> {#${m.name}}` });
       markup.push({ html: (m.overview || 'Needs content.').replace(/\n\n/g, '\n') });
       markup.push({ h4: `**Arguments**:` });
       markup.push({ ul: ['none'] });
-      markup.push({ h4: '**Returns**: `Promise<Response>`' });
+      markup.push({ h4: '**Returns**: `Promise<void>`' });
     });
   }
 

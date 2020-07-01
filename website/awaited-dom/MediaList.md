@@ -8,17 +8,17 @@
 
 Returns the number of media queries in the <code>MediaList</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .mediaText <div class="specs"><i>W3C</i></div> {#mediaText}
 
 A stringifier that returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the <code>MediaList</code> as text, and also allows you to set a new <code>MediaList</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .appendMedium*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#appendMedium}
+### .appendMedium*(...args)* <div class="specs"><i>W3C</i></div> {#appendMedium}
 
 Adds a media query to the <code>MediaList</code>.
 
@@ -27,9 +27,9 @@ Adds a media query to the <code>MediaList</code>.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .deleteMedium*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#deleteMedium}
+### .deleteMedium*(...args)* <div class="specs"><i>W3C</i></div> {#deleteMedium}
 
 Removes a media query from the <code>MediaList</code>.
 
@@ -38,9 +38,9 @@ Removes a media query from the <code>MediaList</code>.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 A getter that returns a <a href="/en-US/docs/Web/API/CSSOMString" title="CSSOMString is used to denote string data in CSSOM specifications and can refer to either DOMString or USVString. When a specification says CSSOMString, it depends on the browser vendors to choose whether to use DOMString or USVString. While browser implementations that use UTF-8 internally to represent strings in memory can use USVString when the specification says CSSOMString, implementations that already represent strings as 16-bit sequences might choose to use DOMString instead."><code>CSSOMString</code></a> representing a media query as text, given the media query's index value inside the <code>MediaList</code>.
 
@@ -49,6 +49,6 @@ A getter that returns a <a href="/en-US/docs/Web/API/CSSOMString" title="CSSOMSt
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

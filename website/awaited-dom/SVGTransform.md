@@ -12,7 +12,7 @@ A convenience attribute for <code>SVG_TRANSFORM_ROTATE</code>, <code>SVG_TRANSFO
     <br>
     For <code>SVG_TRANSFORM_MATRIX</code>, <code>SVG_TRANSFORM_TRANSLATE</code> and <code>SVG_TRANSFORM_SCALE</code>, <code>angle</code> will be zero.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .matrix <div class="specs"><i>W3C</i></div> {#matrix}
 
@@ -25,17 +25,17 @@ A convenience attribute for <code>SVG_TRANSFORM_ROTATE</code>, <code>SVG_TRANSFO
      <li>For <code>SVG_TRANSFORM_ROTATE</code>, a, b, c, d, e and f together represent the matrix which will result in the given rotation. When the rotation is around the center point (0, 0), e and f will be zero.</li>
     </ul>
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 The type of the value as specified by one of the SVG_TRANSFORM_* constants defined on this interface.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .setMatrix*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setMatrix}
+### .setMatrix*(...args)* <div class="specs"><i>W3C</i></div> {#setMatrix}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_MATRIX</code>, with parameter matrix defining the new transformation. Note that the values from the parameter <code>matrix</code> are copied.</p>
     <p><strong>Exceptions:</strong></p>
@@ -48,9 +48,9 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setRotate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setRotate}
+### .setRotate*(...args)* <div class="specs"><i>W3C</i></div> {#setRotate}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_ROTATE</code>, with parameter <code>angle</code> defining the rotation angle and parameters <code>cx</code> and <code>cy</code> defining the optional center of rotation.</p>
     <p><strong>Exceptions:</strong></p>
@@ -63,9 +63,9 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setScale*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setScale}
+### .setScale*(...args)* <div class="specs"><i>W3C</i></div> {#setScale}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_SCALE</code>, with parameters <code>sx</code> and <code>sy</code> defining the scale amounts.</p>
     <p><strong>Exceptions:</strong></p>
@@ -78,9 +78,9 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setSkewX*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setSkewX}
+### .setSkewX*(...args)* <div class="specs"><i>W3C</i></div> {#setSkewX}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_SKEWX</code>, with parameter <code>angle</code> defining the amount of skew.</p>
     <p><strong>Exceptions:</strong></p>
@@ -93,9 +93,9 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setSkewY*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setSkewY}
+### .setSkewY*(...args)* <div class="specs"><i>W3C</i></div> {#setSkewY}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_SKEWY</code>, with parameter <code>angle</code> defining the amount of skew.</p>
     <p><strong>Exceptions:</strong></p>
@@ -108,9 +108,9 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setTranslate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setTranslate}
+### .setTranslate*(...args)* <div class="specs"><i>W3C</i></div> {#setTranslate}
 
 <p>Sets the transform type to <code>SVG_TRANSFORM_TRANSLATE</code>, with parameters <code>tx</code> and <code>ty</code> defining the translation amounts.</p>
     <p><strong>Exceptions:</strong></p>
@@ -123,6 +123,6 @@ The type of the value as specified by one of the SVG_TRANSFORM_* constants defin
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

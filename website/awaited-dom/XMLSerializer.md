@@ -6,7 +6,7 @@
 
 ## Methods
 
-### .serializeToString*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#serializeToString}
+### .serializeToString*(...args)* <div class="specs"><i>W3C</i></div> {#serializeToString}
 
 Returns the serialized subtree of a string.
 
@@ -15,6 +15,6 @@ Returns the serialized subtree of a string.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

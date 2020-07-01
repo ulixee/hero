@@ -8,47 +8,47 @@
 
 Returns the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the selection begins. Can return <code>null</code> if selection never existed in the document (e.g., an iframe that was never clicked on).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .anchorOffset <div class="specs"><i>W3C</i></div> {#anchorOffset}
 
 Returns a number representing the offset of the selection's anchor within the <code>anchorNode</code>. If <code>anchorNode</code> is a text node, this is the number of characters within anchorNode preceding the anchor. If <code>anchorNode</code> is an element, this is the number of child nodes of the <code>anchorNode</code> preceding the anchor.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .focusNode <div class="specs"><i>W3C</i></div> {#focusNode}
 
 Returns the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in which the selection ends. Can return <code>null</code> if selection never existed in the document (for example, in an <code>iframe</code> that was never clicked on).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .focusOffset <div class="specs"><i>W3C</i></div> {#focusOffset}
 
 Returns a number representing the offset of the selection's anchor within the <code>focusNode</code>. If <code>focusNode</code> is a text node, this is the number of characters within <code>focusNode</code> preceding the focus. If <code>focusNode</code> is an element, this is the number of child nodes of the <code>focusNode</code> preceding the focus.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .isCollapsed <div class="specs"><i>W3C</i></div> {#isCollapsed}
 
 Returns a Boolean indicating whether the selection's start and end points are at the same position.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .rangeCount <div class="specs"><i>W3C</i></div> {#rangeCount}
 
 Returns the number of ranges in the selection.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> describing the type of the current selection.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .addRange*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#addRange}
+### .addRange*(...args)* <div class="specs"><i>W3C</i></div> {#addRange}
 
 A <a href="/en-US/docs/Web/API/Range" title="The Range interface represents a fragment of a document that can contain nodes and parts of text nodes."><code>Range</code></a> object that will be added to the selection.
 
@@ -57,9 +57,9 @@ A <a href="/en-US/docs/Web/API/Range" title="The Range interface represents a fr
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .collapse*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#collapse}
+### .collapse*(...args)* <div class="specs"><i>W3C</i></div> {#collapse}
 
 Collapses the current selection to a single point.
 
@@ -68,9 +68,9 @@ Collapses the current selection to a single point.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .collapseToEnd*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#collapseToEnd}
+### .collapseToEnd*(...args)* <div class="specs"><i>W3C</i></div> {#collapseToEnd}
 
 Collapses the selection to the end of the last range in the selection.
 
@@ -79,9 +79,9 @@ Collapses the selection to the end of the last range in the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .collapseToStart*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#collapseToStart}
+### .collapseToStart*(...args)* <div class="specs"><i>W3C</i></div> {#collapseToStart}
 
 Collapses the selection to the start of the first range in the selection.
 
@@ -90,9 +90,9 @@ Collapses the selection to the start of the first range in the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .containsNode*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#containsNode}
+### .containsNode*(...args)* <div class="specs"><i>W3C</i></div> {#containsNode}
 
 Indicates if a certain node is part of the selection.
 
@@ -101,9 +101,9 @@ Indicates if a certain node is part of the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .deleteFromDocument*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#deleteFromDocument}
+### .deleteFromDocument*(...args)* <div class="specs"><i>W3C</i></div> {#deleteFromDocument}
 
 Deletes the selection's content from the document.
 
@@ -112,9 +112,9 @@ Deletes the selection's content from the document.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .empty*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#empty}
+### .empty*(...args)* <div class="specs"><i>W3C</i></div> {#empty}
 
 Removes all ranges from the selection. This is an alias for <code>removeAllRanges()</code> — See <a href="/en-US/docs/Web/API/Selection/removeAllRanges" title="The Selection.removeAllRanges() method removes all ranges from the selection, leaving the anchorNode and focusNode properties equal to null and leaving nothing selected."><code>Selection.removeAllRanges()</code></a> for more details.
 
@@ -123,9 +123,9 @@ Removes all ranges from the selection. This is an alias for <code>removeAllRange
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .extend*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#extend}
+### .extend*(...args)* <div class="specs"><i>W3C</i></div> {#extend}
 
 Moves the focus of the selection to a specified point.
 
@@ -134,9 +134,9 @@ Moves the focus of the selection to a specified point.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getRangeAt*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getRangeAt}
+### .getRangeAt*(...args)* <div class="specs"><i>W3C</i></div> {#getRangeAt}
 
 Returns a <a href="/en-US/docs/Web/API/Range" title="The Range interface represents a fragment of a document that can contain nodes and parts of text nodes."><code>Range</code></a> object representing one of the ranges currently selected.
 
@@ -145,9 +145,9 @@ Returns a <a href="/en-US/docs/Web/API/Range" title="The Range interface represe
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .modify*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#modify}
+### .modify*(...args)* <div class="specs"><i>W3C</i></div> {#modify}
 
 Changes the current selection.
 
@@ -156,9 +156,9 @@ Changes the current selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeAllRanges*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeAllRanges}
+### .removeAllRanges*(...args)* <div class="specs"><i>W3C</i></div> {#removeAllRanges}
 
 Removes all ranges from the selection.
 
@@ -167,9 +167,9 @@ Removes all ranges from the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeRange*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeRange}
+### .removeRange*(...args)* <div class="specs"><i>W3C</i></div> {#removeRange}
 
 Removes a range from the selection.
 
@@ -178,9 +178,9 @@ Removes a range from the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .selectAllChildren*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#selectAllChildren}
+### .selectAllChildren*(...args)* <div class="specs"><i>W3C</i></div> {#selectAllChildren}
 
 Adds all the children of the specified node to the selection.
 
@@ -189,9 +189,9 @@ Adds all the children of the specified node to the selection.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setBaseAndExtent*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setBaseAndExtent}
+### .setBaseAndExtent*(...args)* <div class="specs"><i>W3C</i></div> {#setBaseAndExtent}
 
 Sets the selection to be a range including all or parts of two specified DOM nodes, and any content located between them.
 
@@ -200,9 +200,9 @@ Sets the selection to be a range including all or parts of two specified DOM nod
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setPosition*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setPosition}
+### .setPosition*(...args)* <div class="specs"><i>W3C</i></div> {#setPosition}
 
 Collapses the current selection to a single point. This is an alias for <code>collapse()</code> — See <a href="/en-US/docs/Web/API/Selection/collapse" title="The Selection.collapse() method collapses the current selection to a single point. The document is not modified. If the content is focused and editable, the caret will blink there."><code>Selection.collapse()</code></a> for more details.
 
@@ -211,9 +211,9 @@ Collapses the current selection to a single point. This is an alias for <code>co
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .toString*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#toString}
+### .toString*(...args)* <div class="specs"><i>W3C</i></div> {#toString}
 
 Returns a string currently being represented by the selection object, i.e. the currently selected text.
 
@@ -222,6 +222,6 @@ Returns a string currently being represented by the selection object, i.e. the c
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

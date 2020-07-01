@@ -8,19 +8,19 @@
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>, eg <code>"html"</code> for <code>&lt;!DOCTYPE HTML&gt;</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .publicId <div class="specs"><i>W3C</i></div> {#publicId}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>, eg <code>"-//W3C//DTD HTML 4.01//EN"</code>, empty string for HTML5.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .systemId <div class="specs"><i>W3C</i></div> {#systemId}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a>, eg <code>"http://www.w3.org/TR/html4/strict.dtd"</code>, empty string for HTML5.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

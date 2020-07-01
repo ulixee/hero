@@ -10,29 +10,29 @@
 
 The cssFloat attribute can be set for elements that generate boxes that are not absolutely positioned. The cssFloat attribute corresponds to the float Cascading Style Sheets (CSS) property. Getting this attribute is equivalent to calling the getProperty method. Setting this attribute is equivalent to calling the setProperty method.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .cssText <div class="specs"><i>W3C</i></div> {#cssText}
 
 Textual representation of the declaration block. Setting this attribute changes the style.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .length <div class="specs"><i>W3C</i></div> {#length}
 
 The number of properties. See the <a href="/en-US/docs/Web/API/CSSStyleDeclaration/item" title="The CSSStyleDeclaration.item() method interface returns a CSS property name from a CSSStyleDeclaration by index"><code>item()</code></a> method below.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .parentRule <div class="specs"><i>W3C</i></div> {#parentRule}
 
 The containing <a href="/en-US/docs/Web/API/CSSRule" title="The CSSRule interface represents a single CSS rule. There are several types of rules, listed in the Type constants section below."><code>CSSRule</code></a>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getPropertyPriority*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getPropertyPriority}
+### .getPropertyPriority*(...args)* <div class="specs"><i>W3C</i></div> {#getPropertyPriority}
 
 Returns the optional priority, "important".
 
@@ -41,9 +41,9 @@ Returns the optional priority, "important".
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getPropertyValue*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getPropertyValue}
+### .getPropertyValue*(...args)* <div class="specs"><i>W3C</i></div> {#getPropertyValue}
 
 Returns the property value given a property name.
 
@@ -52,9 +52,9 @@ Returns the property value given a property name.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns a property name.
 
@@ -63,9 +63,9 @@ Returns a property name.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeProperty*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeProperty}
+### .removeProperty*(...args)* <div class="specs"><i>W3C</i></div> {#removeProperty}
 
 Removes a property from the CSS declaration block.
 
@@ -74,9 +74,9 @@ Removes a property from the CSS declaration block.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .setProperty*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#setProperty}
+### .setProperty*(...args)* <div class="specs"><i>W3C</i></div> {#setProperty}
 
 Modifies an existing CSS property or creates a new CSS property in the declaration block.
 
@@ -85,6 +85,6 @@ Modifies an existing CSS property or creates a new CSS property in the declarati
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

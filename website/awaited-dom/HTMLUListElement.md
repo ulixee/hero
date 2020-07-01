@@ -8,13 +8,13 @@
 
 Is a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> indicating that spacing between list items should be reduced. This property reflects the <code><a href="/en-US/docs/Web/HTML/Element/ul#attr-compact">compact</a></code> attribute only, it doesn't consider the <a href="/en-US/docs/Web/CSS/line-height" title="The line-height CSS property sets the height of a line box. It's commonly used to set the distance between lines of text."><code>line-height</code></a> CSS property used for that behavior in modern pages.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> value reflecting the <code><a href="/en-US/docs/Web/HTML/Element/ul#attr-type">type</a></code> and defining the kind of marker to be used to display. The values are browser dependent and have never been standardized.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -8,25 +8,25 @@
 
 Gets or sets the value of meta-data property.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .httpEquiv <div class="specs"><i>W3C</i></div> {#httpEquiv}
 
 Gets or sets the name of an HTTP&nbsp;response header to define for a document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .name <div class="specs"><i>W3C</i></div> {#name}
 
 Gets or sets the name of a meta-data property to define for a document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .scheme <div class="specs"><i>W3C</i></div> {#scheme}
 
 Gets or sets the name of a scheme used to interpret the value of a meta-data property.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

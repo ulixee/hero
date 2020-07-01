@@ -6,61 +6,61 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .contentWindow <div class="specs"><i>W3C</i></div> {#contentWindow}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .frameBorder <div class="specs"><i>W3C</i></div> {#frameBorder}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .longDesc <div class="specs"><i>W3C</i></div> {#longDesc}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .marginHeight <div class="specs"><i>W3C</i></div> {#marginHeight}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .marginWidth <div class="specs"><i>W3C</i></div> {#marginWidth}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .name <div class="specs"><i>W3C</i></div> {#name}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .noResize <div class="specs"><i>W3C</i></div> {#noResize}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .scrolling <div class="specs"><i>W3C</i></div> {#scrolling}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .src <div class="specs"><i>W3C</i></div> {#src}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .allowedFeatures*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#allowedFeatures}
+### .allowedFeatures*(...args)* <div class="specs"><i>W3C</i></div> {#allowedFeatures}
 
 Needs content.
 
@@ -13,20 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .allowsFeature*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#allowsFeature}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .features*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#features}
+### .allowsFeature*(...args)* <div class="specs"><i>W3C</i></div> {#allowsFeature}
 
 Needs content.
 
@@ -35,9 +24,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getAllowlistForFeature*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getAllowlistForFeature}
+### .features*(...args)* <div class="specs"><i>W3C</i></div> {#features}
 
 Needs content.
 
@@ -46,6 +35,17 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .getAllowlistForFeature*(...args)* <div class="specs"><i>W3C</i></div> {#getAllowlistForFeature}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

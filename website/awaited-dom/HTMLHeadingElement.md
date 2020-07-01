@@ -8,7 +8,7 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing an enumerated attribute indicating alignment of the heading with respect to the surrounding context.&nbsp;The possible values are&nbsp;<code>"left"</code>,&nbsp;<code>"right"</code>,&nbsp;<code>"justify"</code>, and&nbsp;<code>"center"</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

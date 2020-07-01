@@ -8,31 +8,31 @@
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> which can be used on <code>&lt;th&gt;</code> elements (not on <a href="/en-US/docs/Web/HTML/Element/td" title="The HTML <td> element defines a cell of a table that contains data. It participates in the table model."><code>&lt;td&gt;</code></a>), specifying an alternative label for the header cell.. This alternate label can be used in other contexts, such as when describing the headers that apply to a data cell. This is used to offer a shorter term for use by screen readers in particular, and is a valuable accessibility tool. Usually the value of <code>abbr</code> is an abbreviation or acronym, but can be any text that's appropriate contextually.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .cellIndex <div class="specs"><i>W3C</i></div> {#cellIndex}
 
 A long integer representing the cell's position in the <a class="new" href="/en-US/docs/Web/API/HTMLTableRowElement/cells" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>cells</code></a> collection of the <a href="/en-US/docs/Web/HTML/Element/tr" title="The HTML <tr> element defines a row of cells in a table. The row's cells can then be established using a mix of <td> (data cell) and <th> (header cell) elements."><code>&lt;tr&gt;</code></a> the cell is contained within. If the cell doesn't belong to a <code>&lt;tr&gt;</code>, it returns <code>-1</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .colSpan <div class="specs"><i>W3C</i></div> {#colSpan}
 
 An unsigned long integer indicating the number of columns this cell must span; this lets the cell occupy space across multiple columns of the table. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/td#attr-colspan">colspan</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .headers <div class="specs"><i>W3C</i></div> {#headers}
 
 Is a <a class="new" href="/en-US/docs/Web/API/DOMSettableTokenList" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>DOMSettableTokenList</code></a> describing a list of <code>id</code> of <a href="/en-US/docs/Web/HTML/Element/th" title="The HTML <th> element defines a cell as header of a group of table cells. The exact nature of this group is defined by the scope and headers attributes."><code>&lt;th&gt;</code></a> elements that represents headers associated with the cell. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/td#attr-headers">headers</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .rowSpan <div class="specs"><i>W3C</i></div> {#rowSpan}
 
 An unsigned long integer indicating the number of rows this cell must span; this lets a cell occupy space across multiple rows of the table. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/td#attr-rowspan">rowspan</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .scope <div class="specs"><i>W3C</i></div> {#scope}
 
@@ -51,7 +51,7 @@ A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. A
 	</dl>
 	
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

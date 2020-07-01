@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .evaluate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#evaluate}
+### .evaluate*(...args)* <div class="specs"><i>W3C</i></div> {#evaluate}
 
 Needs content.
 
@@ -13,6 +13,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

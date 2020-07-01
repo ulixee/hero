@@ -8,25 +8,25 @@
 
 Returns a <a href="/en-US/docs/Web/API/NodeFilter" title="A NodeFilter interface represents an object used to filter the nodes in a NodeIterator or TreeWalker. They don't know anything about the DOM or how to traverse nodes; they just know how to evaluate a single node against the provided filter."><code>NodeFilter</code></a> used to select the relevant nodes.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .pointerBeforeReferenceNode <div class="specs"><i>W3C</i></div> {#pointerBeforeReferenceNode}
 
 Returns a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> flag that indicates whether the <a href="/en-US/docs/Web/API/NodeIterator" title="The NodeIterator interface represents an iterator over the members of a list of the nodes in a subtree of the DOM. The nodes will be returned in document order."><code>NodeIterator</code></a> is anchored before, the flag being <code>true</code>, or after, the flag being <code>false</code>, the anchor node.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .referenceNode <div class="specs"><i>W3C</i></div> {#referenceNode}
 
 Returns the <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> to which the iterator is anchored.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .root <div class="specs"><i>W3C</i></div> {#root}
 
 Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the root node as specified when the <code>NodeIterator</code> was created.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .whatToShow <div class="specs"><i>W3C</i></div> {#whatToShow}
 
@@ -111,11 +111,11 @@ Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from wh
 	</table>
 	
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .detach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#detach}
+### .detach*(...args)* <div class="specs"><i>W3C</i></div> {#detach}
 
 This operation is a no-op. It doesn't do anything. Previously it was telling the engine that the <code>NodeIterator</code> was no more used, but this is now useless.
 
@@ -124,9 +124,9 @@ This operation is a no-op. It doesn't do anything. Previously it was telling the
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .nextNode*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#nextNode}
+### .nextNode*(...args)* <div class="specs"><i>W3C</i></div> {#nextNode}
 
 Returns the next <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null</code> if there are none.
 
@@ -135,9 +135,9 @@ Returns the next <a href="/en-US/docs/Web/API/Node" title="Node is an interface 
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .previousNode*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#previousNode}
+### .previousNode*(...args)* <div class="specs"><i>W3C</i></div> {#previousNode}
 
 Returns the previous <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> in the document, or <code>null</code> if there are none.
 
@@ -146,6 +146,6 @@ Returns the previous <a href="/en-US/docs/Web/API/Node" title="Node is an interf
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .getElementById*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getElementById}
+### .getElementById*(...args)* <div class="specs"><i>W3C</i></div> {#getElementById}
 
 Needs content.
 
@@ -13,6 +13,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

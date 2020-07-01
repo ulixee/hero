@@ -17,17 +17,17 @@
  <p>To add or remove items in <code>cssRules</code>, use the&nbsp;<code>CSSStyleSheet</code>'s <a href="/en-US/docs/Web/API/CSSStyleSheet/insertRule" title="The CSSStyleSheet.insertRule() method inserts a new CSS rule into the current style sheet, with some restrictions."><code>insertRule()</code></a> and <a href="/en-US/docs/Web/API/CSSStyleSheet/deleteRule" title="The CSSStyleSheet method deleteRule() removes a rule from the stylesheet object."><code>deleteRule()</code></a> methods.</p>
  
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .ownerRule <div class="specs"><i>W3C</i></div> {#ownerRule}
 
 If this stylesheet is imported into the document using an <a href="/en-US/docs/Web/CSS/@import" title="The @import CSS at-rule is used to import style rules from other style sheets. These rules must precede all other types of rules, except @charset rules; as it is not a nested statement, @import cannot be used inside conditional group at-rules."><code>@import</code></a> rule, the <code>ownerRule</code> property returns the corresponding <a class="new" href="/en-US/docs/Web/API/CSSImportRule" rel="nofollow" title="The documentation about this has not yet been written; please consider contributing!"><code>CSSImportRule</code></a>; otherwise, this property's value is <code>null</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .deleteRule*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#deleteRule}
+### .deleteRule*(...args)* <div class="specs"><i>W3C</i></div> {#deleteRule}
 
 Deletes the rule at the specified index into the stylesheet's rule list.
 
@@ -36,9 +36,9 @@ Deletes the rule at the specified index into the stylesheet's rule list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .insertRule*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#insertRule}
+### .insertRule*(...args)* <div class="specs"><i>W3C</i></div> {#insertRule}
 
 Inserts a new rule at the specified position in the stylesheet, given the textual representation of the rule.
 
@@ -47,6 +47,6 @@ Inserts a new rule at the specified position in the stylesheet, given the textua
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

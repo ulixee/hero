@@ -8,53 +8,53 @@
 
 Returns the bottom coordinate value of the <code>DOMRect</code> (usually the same as y + height).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .height <div class="specs"><i>W3C</i></div> {#height}
 
 The height of the <code>DOMRect</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .left <div class="specs"><i>W3C</i></div> {#left}
 
 Returns the left coordinate value of the <code>DOMRect</code> (usually the same as <code>x</code>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .right <div class="specs"><i>W3C</i></div> {#right}
 
 Returns the right coordinate value of the <code>DOMRect</code> (usually the same as <code>x + width</code>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .top <div class="specs"><i>W3C</i></div> {#top}
 
 Returns the top coordinate value of the <code>DOMRect</code> (usually the same as <code>y</code>.)
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .width <div class="specs"><i>W3C</i></div> {#width}
 
 The width of the <code>DOMRect</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .x <div class="specs"><i>W3C</i></div> {#x}
 
 The x coordinate of the <code>DOMRect</code>'s origin.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .y <div class="specs"><i>W3C</i></div> {#y}
 
 The y coordinate of the <code>DOMRect</code>'s origin.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .fromRect*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fromRect}
+### .fromRect*(...args)* <div class="specs"><i>W3C</i></div> {#fromRect}
 
 Creates a new <code>DOMRect</code>&nbsp;object with a given location and dimensions.
 
@@ -63,6 +63,6 @@ Creates a new <code>DOMRect</code>&nbsp;object with a given location and dimensi
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

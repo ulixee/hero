@@ -8,43 +8,43 @@
 
 A <code>double</code> that represents the video time that the cue will stop being displayed, in seconds.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .id <div class="specs"><i>W3C</i></div> {#id}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that identifies the cue.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onenter <div class="specs"><i>W3C</i></div> {#onenter}
 
 The event handler for the <code><a class="new" href="/en-US/docs/Web/Events/enter" rel="nofollow" title="/en-US/docs/Web/Events/enter">enter</a></code> event.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onexit <div class="specs"><i>W3C</i></div> {#onexit}
 
 The event handler for the <code><a class="new" href="/en-US/docs/Web/Events/exit" rel="nofollow" title="/en-US/docs/Web/Events/exit">exit</a></code> event.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .pauseOnExit <div class="specs"><i>W3C</i></div> {#pauseOnExit}
 
 A <code>boolean</code> for whether the video will pause when this cue stops being displayed.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .startTime <div class="specs"><i>W3C</i></div> {#startTime}
 
 A <code>double</code> that represents the video time that the cue will start being displayed, in seconds.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .track <div class="specs"><i>W3C</i></div> {#track}
 
 The <a href="/en-US/docs/Web/API/TextTrack" title="This interface also inherits properties from EventTarget."><code>TextTrack</code></a> that this cue belongs to, or <code>null</code> if it doesn't belong to any.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

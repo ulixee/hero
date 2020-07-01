@@ -18,62 +18,62 @@
     <p>The <code>defer</code> attribute may be specified with the <code>async</code> attribute, so legacy browsers that only support <code>defer</code> (and not <code>async</code>) fall back to the <code>defer</code> behavior instead of the default blocking behavior.</p>
     <div class="note"><strong>Note:</strong> The exact processing details for these attributes are complex, involving many different aspects of HTML, and therefore are scattered throughout the specification. <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/scripting-1.html#prepare-a-script" rel="noopener">These algorithms</a> describe the core ideas, but they rely on the parsing rules for <a href="/en-US/docs/Web/HTML/Element/script" title="The HTML <script> element is used to embed or reference executable code; this is typically used to embed or refer to JavaScript code."><code>&lt;script&gt;</code></a>&nbsp;<a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptTag" rel="noopener">start</a> and <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptEndTag" rel="noopener">end</a> tags in HTML, <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptForeignEndTag" rel="noopener">in foreign content</a>, and <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/the-xhtml-syntax.html#scriptTagXML" rel="noopener">in XML</a>; the rules for the <a href="/en-US/docs/DOM/document.write"><code>document.write()</code></a> method; the handling of <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/webappapis.html#scripting" rel="noopener">scripting</a>; and so on.</div>
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .charset <div class="specs"><i>W3C</i></div> {#charset}
 
 Represents the character encoding of an external script. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/script#attr-charset">charset</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .crossOrigin <div class="specs"><i>W3C</i></div> {#crossOrigin}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <a href="/en-US/docs/Web/HTML/CORS_settings_attributes">CORS setting</a> for the script element. For scripts from other <a href="/en-US/docs/Glossary/Origin">origins</a>, this controls if error information will be exposed.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .defer <div class="specs"><i>W3C</i></div> {#defer}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .event <div class="specs"><i>W3C</i></div> {#event}
 
 An old, quirky way of registering event handlers on elements in an HTML document.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .noModule <div class="specs"><i>W3C</i></div> {#noModule}
 
 This Boolean property stops the script's execution in browsers that support<a class="external" href="https://hacks.mozilla.org/2015/08/es6-in-depth-modules/" rel="noopener"> ES2015 modules</a> — used to run fallback scripts in older browsers that do <em>not</em> support JavaScript modules.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/script#attr-referrerpolicy">referrerpolicy</a></code> HTML attribute indicating which referrer to use when fetching the script, and fetches done by that script.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .src <div class="specs"><i>W3C</i></div> {#src}
 
 Gets and sets the URL of an external script. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/script#attr-src">src</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .text <div class="specs"><i>W3C</i></div> {#text}
 
 <p>The IDL attribute <code>text</code> joins and returns the contents of all <a href="/en-US/docs/DOM/Text"><code>Text</code> nodes</a> inside the <a href="/en-US/docs/Web/HTML/Element/script" title="The HTML <script> element is used to embed or reference executable code; this is typically used to embed or refer to JavaScript code."><code>&lt;script&gt;</code></a> element (ignoring other nodes like comments) in tree order. On setting, it acts the same way as the <a href="/en-US/docs/DOM/Node.textContent"><code>textContent</code></a> IDL attribute.</p>
     <div class="note"><strong>Note:</strong> When inserted using the <a href="/en-US/docs/DOM/document.write"><code>document.write()</code></a> method, <a href="/en-US/docs/Web/HTML/Element/script" title="The HTML <script> element is used to embed or reference executable code; this is typically used to embed or refer to JavaScript code."><code>&lt;script&gt;</code></a> elements execute (typically synchronously), but when inserted using <a href="/en-US/docs/DOM/element.innerHTML"><code>innerHTML</code></a> or <a href="/en-US/docs/DOM/element.outerHTML"><code>outerHTML</code></a>, they do not execute at all.</div>
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Represents the MIME type of the script. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/script#attr-type">type</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

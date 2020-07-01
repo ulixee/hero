@@ -10,25 +10,25 @@
 
 Returns a boolean that indicates whether delegatesFocus was set when the shadow was attached (see <a href="/en-US/docs/Web/API/Element/attachShadow" title="The Element.attachShadow() method attaches a shadow DOM tree to the specified element and returns a reference to its ShadowRoot."><code>Element.attachShadow()</code></a>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .host <div class="specs"><i>W3C</i></div> {#host}
 
 Returns a reference to the DOM element the <code>ShadowRoot</code>&nbsp;is attached to.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .innerHTML <div class="specs"><i>W3C</i></div> {#innerHTML}
 
 Sets or returns a reference to the DOM tree inside the <code>ShadowRoot</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .mode <div class="specs"><i>W3C</i></div> {#mode}
 
 The mode of the <code>ShadowRoot</code> — either <code>open</code> or <code>closed</code>. This defines whether or not the shadow root's internal features are accessible from JavaScript.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

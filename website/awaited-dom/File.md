@@ -14,13 +14,13 @@
 
 Returns the last modified time of the file, in millisecond since the UNIX epoch (January 1st, 1970 at Midnight).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .name <div class="specs"><i>W3C</i></div> {#name}
 
 Returns the name of the file referenced by the <code>File</code> object.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

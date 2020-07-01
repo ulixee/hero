@@ -8,13 +8,13 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/del#attr-cite">cite</a></code> HTML attribute, containing a URI of a resource explaining the change.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .dateTime <div class="specs"><i>W3C</i></div> {#dateTime}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/del#attr-datetime">datetime</a></code> HTML attribute, containing a date-and-time string representing a timestamp for the change.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

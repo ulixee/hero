@@ -10,35 +10,35 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-height">height</a></code> HTML attribute, which specifies the height of the display area, in CSS pixels.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .poster <div class="specs"><i>W3C</i></div> {#poster}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-poster">poster</a></code> HTML attribute, which specifies an image to show while no video data is available.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .videoHeight <div class="specs"><i>W3C</i></div> {#videoHeight}
 
 Returns an unsigned integer value indicating the intrinsic height of the resource in CSS pixels, or 0 if no media is available yet.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .videoWidth <div class="specs"><i>W3C</i></div> {#videoWidth}
 
 Returns an unsigned integer value indicating the intrinsic width of the resource in CSS pixels, or 0 if no media is available yet.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .width <div class="specs"><i>W3C</i></div> {#width}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that reflects the <code><a href="/en-US/docs/Web/HTML/Element/video#attr-width">width</a></code> HTML attribute, which specifies the width of the display area, in CSS pixels.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getVideoPlaybackQuality*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getVideoPlaybackQuality}
+### .getVideoPlaybackQuality*(...args)* <div class="specs"><i>W3C</i></div> {#getVideoPlaybackQuality}
 
 Returns a <a href="/en-US/docs/Web/API/VideoPlaybackQuality" title="A VideoPlaybackQuality object is returned by the HTMLVideoElement.getVideoPlaybackQuality() method and contains metrics that can be used to determine the playback quality of a video."><code>VideoPlaybackQuality</code></a> object that contains the current playback metrics. This information includes things like the number of dropped or corrupted frames, as well as the total number of frames.
 
@@ -47,6 +47,6 @@ Returns a <a href="/en-US/docs/Web/API/VideoPlaybackQuality" title="A VideoPlayb
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

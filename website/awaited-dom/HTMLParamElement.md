@@ -8,25 +8,25 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the name of the parameter. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/param#attr-name">name</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the type of the parameter when <code>valueType</code> has the <code>"ref"</code> value. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/param#attr-type">type</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .value <div class="specs"><i>W3C</i></div> {#value}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the value associated to the parameter. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/param#attr-value">value</a></code> attribute.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .valueType <div class="specs"><i>W3C</i></div> {#valueType}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the type of the <code>value</code>. It reflects the <code><a href="/en-US/docs/Web/HTML/Element/param#attr-<code>valuetype</code>"><code>valuetype</code></a></code> attribute and has one of the values: <code>"data"</code>, <code>"ref"</code>, or <code>"object"</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -12,11 +12,11 @@
 
 Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the text of all <code>Text</code> nodes logically adjacent to this <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a>, concatenated in document order.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .splitText*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#splitText}
+### .splitText*(...args)* <div class="specs"><i>W3C</i></div> {#splitText}
 
 Breaks the node into two nodes at a specified offset.
 
@@ -25,6 +25,6 @@ Breaks the node into two nodes at a specified offset.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

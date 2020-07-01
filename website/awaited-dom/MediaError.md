@@ -8,8 +8,7 @@
 
 ### .code <div class="specs"><i>W3C</i></div> {#code}
 
-A number which represents the general type of error that occurred, as follows: 
-<table class="standard-table">
+A number which represents the general type of error that occurred, as follows: <table class="standard-table">
  <thead>
   <tr>
    <th scope="col">Name</th>
@@ -41,13 +40,13 @@ A number which represents the general type of error that occurred, as follows:
  </tbody>
 </table>
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .message <div class="specs"><i>W3C</i></div> {#message}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> object containing a human-readable string which provides <em>specific diagnostic information</em> to help the reader understand the error condition which occurred; specifically, it isn't simply a summary of what the error code means, but actual diagnostic information to help in understanding what exactly went wrong. This text and its format is not defined by the specification and will vary from one <a class="glossaryLink" href="/en-US/docs/Glossary/user_agent" title="user agent: A user agent is a computer program representing a person, for example, a browser in a Web context.">user agent</a> to another. If no diagnostics are available, or no explanation can be provided, this value is an empty string (<code>""</code>).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

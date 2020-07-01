@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .createExpression*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#createExpression}
+### .createExpression*(...args)* <div class="specs"><i>W3C</i></div> {#createExpression}
 
 Needs content.
 
@@ -13,20 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .createNSResolver*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#createNSResolver}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .evaluate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#evaluate}
+### .createNSResolver*(...args)* <div class="specs"><i>W3C</i></div> {#createNSResolver}
 
 Needs content.
 
@@ -35,6 +24,17 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .evaluate*(...args)* <div class="specs"><i>W3C</i></div> {#evaluate}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

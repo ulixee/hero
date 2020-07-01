@@ -10,17 +10,17 @@
 
 The number of items in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .numberOfItems <div class="specs"><i>W3C</i></div> {#numberOfItems}
 
 The number of items in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .appendItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#appendItem}
+### .appendItem*(...args)* <div class="specs"><i>W3C</i></div> {#appendItem}
 
 <p>Inserts a new item at the end of the list. If <code>newItem</code> is already in a list, it is removed from its previous list before it is inserted into this list. The inserted item is the item itself and not a copy.</p>
     <p><strong>Exceptions:</strong></p>
@@ -33,9 +33,9 @@ The number of items in the list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .clear*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#clear}
+### .clear*(...args)* <div class="specs"><i>W3C</i></div> {#clear}
 
 <p>Clears all existing current items from the list, with the result being an empty list.</p>
     <p><strong>Exceptions:</strong></p>
@@ -48,9 +48,9 @@ The number of items in the list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .consolidate*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#consolidate}
+### .consolidate*(...args)* <div class="specs"><i>W3C</i></div> {#consolidate}
 
 <p>Consolidates the list of separate <code>SVGTransform</code> objects by multiplying the equivalent transformation matrices together to result in a list consisting of a single <code>SVGTransform</code> object of type <code>SVG_TRANSFORM_MATRIX</code>. The consolidation operation creates new <code>SVGTransform</code> object as the first and only item in the list. The returned item is the item itself and not a copy. Any changes made to the item are immediately reflected in the list.</p>
     <p><strong>Exceptions:</strong></p>
@@ -63,9 +63,9 @@ The number of items in the list.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .createSVGTransformFromMatrix*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#createSVGTransformFromMatrix}
+### .createSVGTransformFromMatrix*(...args)* <div class="specs"><i>W3C</i></div> {#createSVGTransformFromMatrix}
 
 Creates an <code>SVGTransform</code> object which is initialized to transform of type <code>SVG_TRANSFORM_MATRIX</code> and whose values are the given matrix. The values from the parameter matrix are copied, the matrix parameter is not adopted as <code>SVGTransform::matrix</code>.
 
@@ -74,9 +74,9 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getItem}
+### .getItem*(...args)* <div class="specs"><i>W3C</i></div> {#getItem}
 
 <p>Returns the specified item from the list. The returned item is the item itself and not a copy. Any changes made to the item are immediately reflected in the list. The first item is number&nbsp;0.</p>
     <p><strong>Exceptions:</strong></p>
@@ -89,9 +89,9 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .initialize*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#initialize}
+### .initialize*(...args)* <div class="specs"><i>W3C</i></div> {#initialize}
 
 <p>Clears all existing current items from the list and re-initializes the list to hold the single item specified by the parameter. If the inserted item is already in a list, it is removed from its previous list before it is inserted into this list. The inserted item is the item itself and not a copy. The return value is the item inserted into the list.</p>
     <p><strong>Exceptions:</strong></p>
@@ -104,9 +104,9 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .insertItemBefore*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#insertItemBefore}
+### .insertItemBefore*(...args)* <div class="specs"><i>W3C</i></div> {#insertItemBefore}
 
 <p>Inserts a new item into the list at the specified position. The first item is number 0. If <code>newItem</code> is already in a list, it is removed from its previous list before it is inserted into this list. The inserted item is the item itself and not a copy. If the item is already in this list, note that the index of the item to insert before is before the removal of the item. If the <code>index</code> is equal to 0, then the new item is inserted at the front of the list. If the index is greater than or equal to <code>numberOfItems</code>, then the new item is appended to the end of the list.</p>
     <p><strong>Exceptions:</strong></p>
@@ -119,9 +119,9 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeItem}
+### .removeItem*(...args)* <div class="specs"><i>W3C</i></div> {#removeItem}
 
 <p>Removes an existing item from the list.</p>
     <p><strong>Exceptions:</strong></p>
@@ -135,9 +135,9 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .replaceItem*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#replaceItem}
+### .replaceItem*(...args)* <div class="specs"><i>W3C</i></div> {#replaceItem}
 
 <p>Replaces an existing item in the list with a new item. If <code>newItem</code> is already in a list, it is removed from its previous list before it is inserted into this list. The inserted item is the item itself and not a copy. If the item is already in this list, note that the index of the item to replace is before the removal of the item.</p>
     <p><strong>Exceptions:</strong></p>
@@ -151,6 +151,6 @@ Creates an <code>SVGTransform</code> object which is initialized to transform of
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

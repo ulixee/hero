@@ -10,35 +10,35 @@
 
 The number of tracks in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onaddtrack <div class="specs"><i>W3C</i></div> {#onaddtrack}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/addtrack" title="/en-US/docs/Web/Events/addtrack">addtrack</a></code> event is fired, indicating that a new video track has been added to the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onchange <div class="specs"><i>W3C</i></div> {#onchange}
 
 An event handler to be called when the <code><a href="/en-US/docs/Web/Events/change" title="/en-US/docs/Web/Events/change">change</a></code> event occurs —&nbsp;that is, when the value of the <a href="/en-US/docs/Web/API/VideoTrack/selected" title="The VideoTrack property selected controls whether or not a particular video track is active."><code>selected</code></a> property for a track has changed, due to the track being made active or inactive.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onremovetrack <div class="specs"><i>W3C</i></div> {#onremovetrack}
 
 An event handler to call when the <code><a href="/en-US/docs/Web/Events/removetrack" title="/en-US/docs/Web/Events/removetrack">removetrack</a></code> event is sent, indicating that a video track has been removed from the media element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .selectedIndex <div class="specs"><i>W3C</i></div> {#selectedIndex}
 
 The index of the currently selected track, if any, or <code>−1</code> otherwise.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getTrackById*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getTrackById}
+### .getTrackById*(...args)* <div class="specs"><i>W3C</i></div> {#getTrackById}
 
 Returns the <a href="/en-US/docs/Web/API/VideoTrack" title="The VideoTrack interface represents a single video track from a <video> element."><code>VideoTrack</code></a> found within the <code>VideoTrackList</code> whose <a href="/en-US/docs/Web/API/VideoTrack/id" title="The id property contains a string which uniquely identifies the track represented by the VideoTrack."><code>id</code></a> matches the specified string. If no match is found, <code>null</code> is returned.
 
@@ -47,6 +47,6 @@ Returns the <a href="/en-US/docs/Web/API/VideoTrack" title="The VideoTrack inter
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

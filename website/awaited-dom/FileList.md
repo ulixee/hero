@@ -8,11 +8,11 @@
 
 A read-only value indicating the number of files in the list.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns a <a href="/en-US/docs/DOM/File" title="DOM/File"><code>File</code></a> object representing the file at the specified index in the file list.
 
@@ -21,6 +21,6 @@ Returns a <a href="/en-US/docs/DOM/File" title="DOM/File"><code>File</code></a> 
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

@@ -8,7 +8,7 @@
 
 Is a <code>long</code> value reflecting the obsolete <code><a href="/en-US/docs/Web/HTML/Element/pre#attr-width">width</a></code> attribute, containing a fixed-size length for the <a href="/en-US/docs/Web/HTML/Element/pre" title="The HTML <pre> element represents preformatted text which is to be presented exactly as written in the HTML file."><code>&lt;pre&gt;</code></a> element.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

@@ -8,11 +8,11 @@
 
 The number of nodes in the <code>NodeList</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .entries*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#entries}
+### .entries*(...args)* <div class="specs"><i>W3C</i></div> {#entries}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a>, allowing code to go through all key/value pairs contained in the collection. (In this case, the keys are numbers starting from <code>0</code> and the values are nodes.)
 
@@ -21,9 +21,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .forEach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#forEach}
+### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
 
 Executes a provided function once per <code>NodeList</code> element, passing the element as an argument to the function.
 
@@ -32,9 +32,9 @@ Executes a provided function once per <code>NodeList</code> element, passing the
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .item*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#item}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
 Returns an item in the list by its index, or <code>null</code> if the index is out-of-bounds.
 
@@ -43,9 +43,9 @@ Returns an item in the list by its index, or <code>null</code> if the index is o
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .keys*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#keys}
+### .keys*(...args)* <div class="specs"><i>W3C</i></div> {#keys}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a>, allowing code to go through all the keys of the key/value pairs contained in the collection. (In this case, the keys are numbers starting from <code>0</code>.)
 
@@ -54,9 +54,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .values*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#values}
+### .values*(...args)* <div class="specs"><i>W3C</i></div> {#values}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" title="A couple of additions to ECMAScript 2015 aren't new built-ins or syntax, but protocols. These protocols can be implemented by any object respecting some conventions."><code>iterator</code></a> allowing code to go through all values (nodes) of the key/value pairs contained in the collection.
 
@@ -65,6 +65,6 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

@@ -4,7 +4,7 @@
 
 ## Methods
 
-### .getComputedTiming*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getComputedTiming}
+### .getComputedTiming*(...args)* <div class="specs"><i>W3C</i></div> {#getComputedTiming}
 
 Needs content.
 
@@ -13,20 +13,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .getTiming*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getTiming}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .updateTiming*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#updateTiming}
+### .getTiming*(...args)* <div class="specs"><i>W3C</i></div> {#getTiming}
 
 Needs content.
 
@@ -35,6 +24,17 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .updateTiming*(...args)* <div class="specs"><i>W3C</i></div> {#updateTiming}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

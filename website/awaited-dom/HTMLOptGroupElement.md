@@ -8,13 +8,13 @@
 
 Is a <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>boolean</code></a> representing whether or not the whole list of children <a href="/en-US/docs/Web/HTML/Element/option" title="The HTML <option> element is used to define an item contained in a <select>, an <optgroup>, or a <datalist>&nbsp;element. As such,&nbsp;<option>&nbsp;can represent menu items in popups and other lists of items in an HTML document."><code>&lt;option&gt;</code></a> is disabled (true) or not (false).
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .label <div class="specs"><i>W3C</i></div> {#label}
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the label for the group.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

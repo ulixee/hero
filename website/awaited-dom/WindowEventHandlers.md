@@ -8,73 +8,73 @@
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/afterprint" title="/en-US/docs/Web/Events/afterprint">afterprint</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onbeforeprint <div class="specs"><i>W3C</i></div> {#onbeforeprint}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/beforeprint" title="/en-US/docs/Web/Events/beforeprint">beforeprint</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onbeforeunload <div class="specs"><i>W3C</i></div> {#onbeforeunload}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/beforeunload" title="/en-US/docs/Web/Events/beforeunload">beforeunload</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onhashchange <div class="specs"><i>W3C</i></div> {#onhashchange}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/hashchange" title="/en-US/docs/Web/Events/hashchange">hashchange</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onlanguagechange <div class="specs"><i>W3C</i></div> {#onlanguagechange}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/languagechange" title="/en-US/docs/Web/Events/languagechange">languagechange</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onmessage <div class="specs"><i>W3C</i></div> {#onmessage}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/message" title="/en-US/docs/Web/Events/message">message</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onmessageerror <div class="specs"><i>W3C</i></div> {#onmessageerror}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/MessageError" title="/en-US/docs/Web/Events/MessageError">MessageError</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onpopstate <div class="specs"><i>W3C</i></div> {#onpopstate}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/popstate" title="/en-US/docs/Web/Events/popstate">popstate</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onrejectionhandled <div class="specs"><i>W3C</i></div> {#onrejectionhandled}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/rejectionhandled" title="/en-US/docs/Web/Events/rejectionhandled">rejectionhandled</a></code> event is raised, indicating that a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" title="The Promise object represents the eventual completion (or failure) of an asynchronous operation, and its resulting value."><code>Promise</code></a> was rejected and the rejection has been handled.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onstorage <div class="specs"><i>W3C</i></div> {#onstorage}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/storage" title="/en-US/docs/Web/Events/storage">storage</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onunhandledrejection <div class="specs"><i>W3C</i></div> {#onunhandledrejection}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/unhandledrejection" title="/en-US/docs/Web/Events/unhandledrejection">unhandledrejection</a></code> event is raised, indicating that a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise" title="The Promise object represents the eventual completion (or failure) of an asynchronous operation, and its resulting value."><code>Promise</code></a> was rejected but the rejection was not handled.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onunload <div class="specs"><i>W3C</i></div> {#onunload}
 
 Is an <a href="/en-US/docs/Web/API/EventHandler" title="REDIRECT DOM event handlers"><code>EventHandler</code></a> representing the code to be called when the <code><a href="/en-US/docs/Web/Events/unload" title="/en-US/docs/Web/Events/unload">unload</a></code> event is raised.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

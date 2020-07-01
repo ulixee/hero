@@ -6,11 +6,11 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .getCueById*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#getCueById}
+### .getCueById*(...args)* <div class="specs"><i>W3C</i></div> {#getCueById}
 
 Needs content.
 
@@ -19,6 +19,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

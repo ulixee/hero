@@ -6,7 +6,7 @@
 
 ## Methods
 
-### .handleEvent*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#handleEvent}
+### .handleEvent*(...args)* <div class="specs"><i>W3C</i></div> {#handleEvent}
 
 A function that is called whenever an event of the specified type occurs.
 
@@ -15,6 +15,6 @@ A function that is called whenever an event of the specified type occurs.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

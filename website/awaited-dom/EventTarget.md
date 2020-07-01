@@ -10,7 +10,7 @@
 
 ## Methods
 
-### .addEventListener*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#addEventListener}
+### .addEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#addEventListener}
 
 Registers an event handler of a specific event type on the <code>EventTarget</code>.
 
@@ -19,9 +19,9 @@ Registers an event handler of a specific event type on the <code>EventTarget</co
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .dispatchEvent*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#dispatchEvent}
+### .dispatchEvent*(...args)* <div class="specs"><i>W3C</i></div> {#dispatchEvent}
 
 Dispatches an event to this <code>EventTarget</code>.
 
@@ -30,9 +30,9 @@ Dispatches an event to this <code>EventTarget</code>.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .removeEventListener*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#removeEventListener}
+### .removeEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#removeEventListener}
 
 Removes an event listener from the <code>EventTarget</code>.
 
@@ -41,6 +41,6 @@ Removes an event listener from the <code>EventTarget</code>.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

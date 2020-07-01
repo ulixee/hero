@@ -8,17 +8,17 @@
 
 A <a href="/en-US/docs/Web/API/Boolean" title="REDIRECT Boolean [en-US]"><code>Boolean</code></a> reflecting the <code><a href="/en-US/docs/Web/HTML/Element/dialog#attr-open">open</a></code> HTML attribute, indicating whether the dialog is available for interaction.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .returnValue <div class="specs"><i>W3C</i></div> {#returnValue}
 
 A <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> that sets or returns the return value for the dialog.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .close*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#close}
+### .close*(...args)* <div class="specs"><i>W3C</i></div> {#close}
 
 Closes the dialog. An optional <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> may be passed as an argument, updating the <code>returnValue</code> of the the dialog.
 
@@ -27,9 +27,9 @@ Closes the dialog. An optional <a href="/en-US/docs/Web/API/DOMString" title="DO
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .show*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#show}
+### .show*(...args)* <div class="specs"><i>W3C</i></div> {#show}
 
 Displays the dialog modelessly, i.e. still allowing interaction with content outside of the dialog.
 
@@ -38,9 +38,9 @@ Displays the dialog modelessly, i.e. still allowing interaction with content out
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .showModal*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#showModal}
+### .showModal*(...args)* <div class="specs"><i>W3C</i></div> {#showModal}
 
 Displays the dialog as a modal, over the top of any other dialogs that might be present. Interaction outside the dialog is blocked.
 
@@ -49,6 +49,6 @@ Displays the dialog as a modal, over the top of any other dialogs that might be 
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

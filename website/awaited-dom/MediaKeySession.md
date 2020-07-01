@@ -6,41 +6,41 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .expiration <div class="specs"><i>W3C</i></div> {#expiration}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .keyStatuses <div class="specs"><i>W3C</i></div> {#keyStatuses}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onkeystatuseschange <div class="specs"><i>W3C</i></div> {#onkeystatuseschange}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .onmessage <div class="specs"><i>W3C</i></div> {#onmessage}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .sessionId <div class="specs"><i>W3C</i></div> {#sessionId}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .close*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#close}
+### .close*(...args)* <div class="specs"><i>W3C</i></div> {#close}
 
 Needs content.
 
@@ -49,20 +49,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .generateRequest*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#generateRequest}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .load*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#load}
+### .generateRequest*(...args)* <div class="specs"><i>W3C</i></div> {#generateRequest}
 
 Needs content.
 
@@ -71,20 +60,9 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .remove*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#remove}
-
-Needs content.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<Response>`
-
-### .update*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#update}
+### .load*(...args)* <div class="specs"><i>W3C</i></div> {#load}
 
 Needs content.
 
@@ -93,6 +71,28 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
+
+### .remove*(...args)* <div class="specs"><i>W3C</i></div> {#remove}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
+
+### .update*(...args)* <div class="specs"><i>W3C</i></div> {#update}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>`
 
 ## Events

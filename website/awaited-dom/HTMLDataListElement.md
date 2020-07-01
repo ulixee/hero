@@ -8,7 +8,7 @@
 
 Is a <a href="/en-US/docs/Web/API/HTMLCollection" title="The HTMLCollection interface represents a generic collection (array-like object similar to arguments) of elements (in document order) and offers methods and properties for selecting from the list."><code>HTMLCollection</code></a> representing a collection of the contained option elements.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

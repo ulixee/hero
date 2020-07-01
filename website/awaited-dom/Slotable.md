@@ -8,7 +8,7 @@
 
 Returns the <a href="/en-US/docs/Web/HTML/Element/slot" title="The HTML <slot> element—part of the Web Components technology suite—is a placeholder inside a web component that you can fill with your own markup, which lets you create separate DOM trees and present them together."><code>&lt;slot&gt;</code></a> the node is inserted in.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

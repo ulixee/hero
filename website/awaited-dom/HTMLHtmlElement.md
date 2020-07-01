@@ -10,7 +10,7 @@
 
 Is a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the version of the HTML Document Type Definition (DTD) that governs this document. This property should not be used any more as it is non-conforming. Simply omit it.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 

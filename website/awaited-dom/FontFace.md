@@ -6,71 +6,71 @@
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .family <div class="specs"><i>W3C</i></div> {#family}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .featureSettings <div class="specs"><i>W3C</i></div> {#featureSettings}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .loaded <div class="specs"><i>W3C</i></div> {#loaded}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .status <div class="specs"><i>W3C</i></div> {#status}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .stretch <div class="specs"><i>W3C</i></div> {#stretch}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .style <div class="specs"><i>W3C</i></div> {#style}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .unicodeRange <div class="specs"><i>W3C</i></div> {#unicodeRange}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .variant <div class="specs"><i>W3C</i></div> {#variant}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .variationSettings <div class="specs"><i>W3C</i></div> {#variationSettings}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ### .weight <div class="specs"><i>W3C</i></div> {#weight}
 
 Needs content.
 
-#### **Type**: `SuperDocument`
+#### **Type**: `null`
 
 ## Methods
 
-### .load*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#load}
+### .load*(...args)* <div class="specs"><i>W3C</i></div> {#load}
 
 Needs content.
 
@@ -79,6 +79,6 @@ Needs content.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events

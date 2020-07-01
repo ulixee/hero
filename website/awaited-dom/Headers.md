@@ -14,7 +14,7 @@
 
 ## Methods
 
-### .append*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#append}
+### .append*(...args)* <div class="specs"><i>W3C</i></div> {#append}
 
 Appends a new value onto an existing header inside a <code>Headers</code> object, or adds the header if it does not already exist.
 
@@ -23,9 +23,9 @@ Appends a new value onto an existing header inside a <code>Headers</code> object
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .delete*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#delete}
+### .delete*(...args)* <div class="specs"><i>W3C</i></div> {#delete}
 
 Deletes a header from a <code>Headers</code> object.
 
@@ -34,9 +34,9 @@ Deletes a header from a <code>Headers</code> object.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .entries*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#entries}
+### .entries*(...args)* <div class="specs"><i>W3C</i></div> {#entries}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><code>iterator</code></a> allowing to go through all key/value pairs contained in this object.
 
@@ -45,9 +45,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><c
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .forEach*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#forEach}
+### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
 
 Executes a provided function once for each array element.
 
@@ -56,9 +56,9 @@ Executes a provided function once for each array element.
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .get*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#get}
+### .get*(...args)* <div class="specs"><i>W3C</i></div> {#get}
 
 Returns a <a href="/en-US/docs/Web/API/ByteString"><code>ByteString</code></a> sequence of all the values of a header within a <code>Headers</code> object with a given name.
 
@@ -67,9 +67,9 @@ Returns a <a href="/en-US/docs/Web/API/ByteString"><code>ByteString</code></a> s
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .has*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#has}
+### .has*(...args)* <div class="specs"><i>W3C</i></div> {#has}
 
 Returns a boolean stating whether a <code>Headers</code> object contains a certain header.
 
@@ -78,9 +78,9 @@ Returns a boolean stating whether a <code>Headers</code> object contains a certa
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .keys*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#keys}
+### .keys*(...args)* <div class="specs"><i>W3C</i></div> {#keys}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><code>iterator</code></a> allowing you to go through all keys of the key/value pairs contained in this object.
 
@@ -89,9 +89,9 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><c
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .set*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#set}
+### .set*(...args)* <div class="specs"><i>W3C</i></div> {#set}
 
 Sets a new value for an existing header inside a <code>Headers</code> object, or adds the header if it does not already exist.
 
@@ -100,9 +100,9 @@ Sets a new value for an existing header inside a <code>Headers</code> object, or
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
-### .values*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#values}
+### .values*(...args)* <div class="specs"><i>W3C</i></div> {#values}
 
 Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><code>iterator</code></a> allowing you to go through all values of the key/value pairs contained in this object.
 
@@ -111,6 +111,6 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols"><c
 
  - none
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: `Promise<void>`
 
 ## Events
