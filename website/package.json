@@ -16,9 +16,7 @@
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
     "docsearch.js": "^2.6.3",
-    "gh-pages": "^3.1.0",
     "gridsome": "^0.7.12",
-    "json2md": "^1.7.0",
     "lodash.kebabcase": "^4.1.1",
     "moment": "^2.24.0",
     "remark-slug": "git://github.com/ulixee/remark-slug.git",
@@ -27,8 +25,12 @@
     "vue-property-decorator": "^8.3.0"
   },
   "devDependencies": {
+    "@types/pluralize": "^0.0.29",
+    "decamelize": "^4.0.0",
+    "gh-pages": "^3.1.0",
     "gridsome-plugin-pug": "^0.0.3",
     "gridsome-plugin-typescript": "git://github.com/calebjclark/gridsome-plugin-typescript.git",
+    "json2md": "^1.7.0",
     "node-sass": "^4.12.0",
     "pug": "^2.0.3",
     "sass-loader": "^8.0.0",
