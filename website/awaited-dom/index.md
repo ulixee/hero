@@ -23,8 +23,8 @@ Supers give you access to all properties and methods of dependent classes.
 
  |   |   | 
  | --- | --- | 
- | [DocumentFragment](/docs/awaited-dom/document-fragment) | [HTMLDocument](/docs/awaited-dom/html-document)
-[XMLDocument](/docs/awaited-dom/xml-document) |  | 
+ | [Document](/docs/awaited-dom/document) | [DocumentFragment](/docs/awaited-dom/document-fragment)
+[HTMLDocument](/docs/awaited-dom/html-document) | [XMLDocument](/docs/awaited-dom/xml-document) | 
 
 
 ## Node Interfaces
@@ -32,8 +32,7 @@ Supers give you access to all properties and methods of dependent classes.
  |   |   | 
  | --- | --- | 
  | [Comment](/docs/awaited-dom/comment) | [Element](/docs/awaited-dom/element)
-[HTMLElement](/docs/awaited-dom/html-element) | [Node](/docs/awaited-dom/node)
-[Text](/docs/awaited-dom/text) |  | 
+[Node](/docs/awaited-dom/node) | [Text](/docs/awaited-dom/text) | 
 
 
 ## HTML Elements
@@ -84,4 +83,20 @@ Supers give you access to all properties and methods of dependent classes.
  | --- | --- | 
  | [SVGElement](/docs/awaited-dom/svg-element) | [SVGGraphicsElement](/docs/awaited-dom/svg-graphics-element)
 [SVGSVGElement](/docs/awaited-dom/svgsvg-element) | [SVGTitleElement](/docs/awaited-dom/svg-title-element) | 
+
+
+## Array-like Interfaces
+
+ |   |   | 
+ | --- | --- | 
+ | [HTMLCollection](/docs/awaited-dom/html-collection) | [HTMLOptionsCollection](/docs/awaited-dom/html-options-collection)
+[NodeList](/docs/awaited-dom/node-list) | [RadioNodeList](/docs/awaited-dom/radio-node-list) | 
+
+
+## Miscellaneous Interfaces
+
+ |   |   | 
+ | --- | --- | 
+ | [Attr](/docs/awaited-dom/attr) | [CharacterData](/docs/awaited-dom/character-data)
+[EventTarget](/docs/awaited-dom/event-target) |  | 
 

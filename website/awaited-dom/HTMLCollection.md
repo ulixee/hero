@@ -8,7 +8,13 @@
 
 Returns the number of items in the collection.
 
-#### **Type**: `null`
+#### **Type**: `number`
+
+### .length <div class="specs"><i>W3C</i></div> {#length}
+
+Needs content.
+
+#### **Type**: `number`
 
 ## Methods
 
@@ -22,7 +28,7 @@ Returns the specific node at the given zero-based <code>index</code> into the li
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
 
 ### .namedItem*(...args)* <div class="specs"><i>W3C</i></div> {#namedItem}
 
@@ -34,4 +40,15 @@ Returns the specific node whose ID or, as a fallback, name matches the string sp
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
+
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true

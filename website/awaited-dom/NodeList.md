@@ -9,7 +9,7 @@
 The number of nodes in the <code>NodeList
 </code>.
 
-#### **Type**: `null`
+#### **Type**: `number`
 
 ## Methods
 
@@ -23,7 +23,7 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
 
 ### .forEach*(...args)* <div class="specs"><i>W3C</i></div> {#forEach}
 
@@ -35,7 +35,7 @@ Executes a provided function once per <code>NodeList
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
 
 ### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
@@ -47,7 +47,7 @@ Returns an item in the list by its index, or <code>null
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
 
 ### .keys*(...args)* <div class="specs"><i>W3C</i></div> {#keys}
 
@@ -59,7 +59,7 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
 
 ### .values*(...args)* <div class="specs"><i>W3C</i></div> {#values}
 
@@ -71,4 +71,4 @@ Returns an <a href="/en-US/docs/Web/JavaScript/Reference/Iteration_protocols" ti
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true

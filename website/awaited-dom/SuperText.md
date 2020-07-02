@@ -14,6 +14,5 @@ SuperText implements all the properties and methods of the following classes:
  |   |   | 
  | --- | --- | 
  | [CDATASection](./cdata-section) | [CharacterData](./character-data)
-[ChildNode](./child-node) | [EventTarget](./event-target)
-[Node](./node) | [NonDocumentTypeChildNode](./non-document-type-child-node)
-[Slotable](./slotable) | [Text](./text) | 
+[EventTarget](./event-target) | [Node](./node)
+[Text](./text) |  | 

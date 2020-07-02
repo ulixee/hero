@@ -9,9 +9,6 @@ SuperDocument implements all the properties and methods of the following classes
 
  |   |   | 
  | --- | --- | 
- | [Document](./document) | [DocumentAndElementEventHandlers](./document-and-element-event-handlers)
-[DocumentOrShadowRoot](./document-or-shadow-root) | [EventTarget](./event-target)
-[FontFaceSource](./font-face-source) | [GlobalEventHandlers](./global-event-handlers)
+ | [Document](./document) | [EventTarget](./event-target)
 [HTMLDocument](./html-document) | [Node](./node)
-[NonElementParentNode](./non-element-parent-node) | [ParentNode](./parent-node)
-[XMLDocument](./xml-document) | [XPathEvaluatorBase](./x-path-evaluator-base) | 
+[XMLDocument](./xml-document) |  | 
