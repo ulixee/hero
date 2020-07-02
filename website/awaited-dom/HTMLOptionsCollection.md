@@ -6,37 +6,54 @@
 
 ### .length <div class="specs"><i>W3C</i></div> {#length}
 
-As optionally allowed by the spec, this property isn't read-only. You can either remove options from the end by lowering the value, or add blank options at the end by raising the value. Mozilla allows this, while other implementations could potentially throw a <a href="/en-US/docs/DOM/DOMException" title="DOM/DOMException">DOMException
-</a>.
+Returns the number of items in the collection.
 
-#### **Type**: `null`
+#### **Type**: `number`
 
-### .selectedIndex <div class="specs"><i>W3C</i></div> {#selectedIndex}
+### .length <div class="specs"><i>W3C</i></div> {#length}
 
 Needs content.
 
-#### **Type**: `null`
+#### **Type**: `number`
 
 ## Methods
 
-### .add*(...args)* <div class="specs"><i>W3C</i></div> {#add}
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
 
-Inserts element before the node given by before.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>`
-
-### .remove*(...args)* <div class="specs"><i>W3C</i></div> {#remove}
-
-Removes the item with index index from the collection.
+Returns the specific node at the given zero-based <code>index</code> into the list. Returns <code>null</code> if the <code>index
+</code> is out of range.
 
 #### **Arguments**:
 
 
  - none
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `Promise<void>` true
+
+### .namedItem*(...args)* <div class="specs"><i>W3C</i></div> {#namedItem}
+
+Returns the specific node whose ID or, as a fallback, name matches the string specified by <code>name</code>. Matching by name is only done as a last resort, only in HTML, and only if the referenced element supports the <code>name</code> attribute. Returns <code>null
+</code> if no node exists by the given name.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true
+
+### .item*(...args)* <div class="specs"><i>W3C</i></div> {#item}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true
+
+## Unimplemented Specs
+
+
+This class has 2 unimplemented properties and 2 unimplemented methods.

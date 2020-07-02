@@ -26,7 +26,7 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
         h3 On this page
         ul.menu-item.submenu(v-if="subtitles.length")
           li.submenu__item(:class="'submenu__item-depth-' + subtitle.depth" v-for="subtitle in subtitles" :key="subtitle.value")
-            a.submenu__link(:href="subtitle.anchor") {{ subtitle.value }}
+            a.submenu__link(:href="subtitle.anchor") {{ subtitle.value.replace(' W3C', '') }}
 </template>
 
 <page-query>

@@ -6,40 +6,7 @@
 
 <div class='overview'>Many event targets (including elements, documents, and windows) also support setting <a href="/en-US/docs/Web/Guide/DOM/Events/Event_handlers">event handlers</a> via <code>on<em>event</em></code> properties and attributes.</div>
 
-## Methods
-
-### .addEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#addEventListener}
-
-Registers an event handler of a specific event type on the <code>EventTarget
-</code>.
-
-#### **Arguments**:
+## Unimplemented Specs
 
 
- - none
-
-#### **Returns**: `Promise<void>`
-
-### .dispatchEvent*(...args)* <div class="specs"><i>W3C</i></div> {#dispatchEvent}
-
-Dispatches an event to this <code>EventTarget
-</code>.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>`
-
-### .removeEventListener*(...args)* <div class="specs"><i>W3C</i></div> {#removeEventListener}
-
-Removes an event listener from the <code>EventTarget
-</code>.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>`
+This class has 0 unimplemented properties and 3 unimplemented methods.

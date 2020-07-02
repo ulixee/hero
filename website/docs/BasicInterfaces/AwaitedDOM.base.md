@@ -28,3 +28,11 @@ Supers give you access to all properties and methods of dependent classes.
 ## SVG Elements
 
 [INTERFACES:SVGElement]
+
+## Array-like Interfaces
+
+[INTERFACES:ArrayLike]
+
+## Miscellaneous Interfaces
+
+[INTERFACES:Miscellaneous]

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "gridsome develop",
     "build": "gridsome build",
-    "create-awaited-dom-docs": "cd ./scripts && ./generateAwaitedDOM.ts",
+    "build-docs": "cd ./scripts && ./generateAwaitedDOM.ts",
     "develop": "gridsome develop",
     "explore": "gridsome explore",
     "predeploy": "npm run build",
