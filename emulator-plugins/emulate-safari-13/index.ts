@@ -3,8 +3,8 @@ import { URL } from 'url';
 import pkg from './package.json';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
 import headerProfiles from './headers.json';
-import modifyHeaders from '../shared/modifyHeaders';
-import tcpVars from '../shared/tcpVars';
+import modifyHeaders from '@secret-agent/emulator-plugins-shared/modifyHeaders';
+import tcpVars from '@secret-agent/emulator-plugins-shared/tcpVars';
 import {
   canonicalDomain,
   Cookie,
@@ -19,13 +19,15 @@ import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import pageOverrides from './pageOverrides';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import { pickRandom } from '@secret-agent/emulators/lib/Utils';
+import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
 
 @EmulatorPluginStatics
 export default class Safari13 extends EmulatorPlugin {
   public static emulatorId = pkg.name;
   public static browser = 'Safari 13.0';
   public static chromiumEngines = [80];
-  public static agents = UserAgents.getList({
+  protected static agents = UserAgents.getList({
     deviceCategory: 'desktop',
     vendor: 'Apple Computer, Inc.',
     family: 'Safari',
@@ -33,6 +35,7 @@ export default class Safari13 extends EmulatorPlugin {
     versionMinor: 0,
   });
 
+  public readonly userAgent: IUserAgent;
   public delegate: IHttpRequestModifierDelegate;
 
   public cookieJar: CookieJar;
@@ -40,6 +43,7 @@ export default class Safari13 extends EmulatorPlugin {
   public sitesWithUserInteraction: string[] = [];
   // This Flag Should be enabled once double agent deciphers patch level changes
   public enableNov2019ITPSupport = false;
+
   public enableFeb2020ITPSupport = false;
 
   public cookiesPendingSiteInteraction: {
@@ -50,14 +54,15 @@ export default class Safari13 extends EmulatorPlugin {
     [site: string]: IResolvablePromise;
   } = {};
 
-  constructor(os?: { family: string; major: string; minor?: string }) {
-    super(EmulatorPlugin.pickRandomUseragent(Safari13.agents, os));
+  constructor(userAgent?: IUserAgent) {
+    super();
 
+    this.userAgent = userAgent ?? pickRandom(Safari13.agents);
     this.cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
     this.delegate = {
       modifyHeadersBeforeSend: modifyHeaders.bind(this, this.userAgent, headerProfiles),
       tlsProfileId: 'Safari13',
-      tcpVars: tcpVars(os),
+      tcpVars: tcpVars(this.userAgent.os),
       getCookieHeader: this.getCookieHeader.bind(this),
       setCookie: this.setCookie.bind(this),
       documentHasUserActivity: this.documentHasUserActivity.bind(this),
