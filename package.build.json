@@ -1,26 +1,10 @@
 {
-  "name": "secret-agent",
-  "version": "0.2.8",
+  "name": "@secret-agent/monorepo",
   "private": true,
-  "description": "The Web Browser Built for Scraping",
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
     "test": "NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
     "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
-  },
-  "repository": "git@github.com:ulixee/secret-agent.git",
-  "author": "Data Liberation Foundation",
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ulixee/secret-agent/issues"
-  },
-  "homepage": "https://secretagent.dev",
-  "engines": {
-    "node": ">=12.0.0"
   },
   "devDependencies": {
     "jest": "^25.3.0",
@@ -28,10 +12,8 @@
     "jest-junit": "^6.3.0",
     "jest-summary-reporter": "^0.0.2",
     "lerna": "^3.4.3",
-    "request": "^2.88.2",
     "rimraf": "^3.0.0",
-    "source-map-support": "^0.5.16",
-    "yamlparser": "0.0.x"
+    "source-map-support": "^0.5.16"
   },
   "workspaces": {
     "packages": [
@@ -45,7 +27,6 @@
       "humanoid-plugins/*",
       "injected-scripts",
       "mitm",
-      "noderdom",
       "core-server",
       "remote-client",
       "remote-interfaces",

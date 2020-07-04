@@ -254,8 +254,6 @@ export default class MitmProxy {
     conn.on('finish', () => socket.destroy());
     socket.on('close', () => conn.end());
 
-    conn.setNoDelay(true);
-    conn.setTimeout(0);
     if (head.length) socket.unshift(head);
 
     socket.pipe(conn);

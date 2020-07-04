@@ -7,7 +7,7 @@
     "Blake Byrnes"
   ],
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "main": "backend",
   "build": {
     "appId": "com.example.app",
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build:frontend": "nuxt-ts build",
-    "build:backend": "tsc -p tsconfig.backend.json && yarn build:backend-paths",
+    "build:backend": "tsc -b tsconfig.backend.json && yarn build:backend-paths",
     "build:backend-paths": "tscpaths -p tsconfig.backend.json -s ./ -o ../build/replay",
     "build:dist": "yarn build:frontend && yarn build:backend && yarn logs:reset && cp package.json ../build/replay",
     "build:pack": "yarn build:dist && electron-builder",

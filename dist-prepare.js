@@ -61,7 +61,7 @@ function processPackageJson(packagePath) {
 
 function processDir(path) {
   for (const dirname of fs.readdirSync(path)) {
-    if (dirname === 'node_modules') break;
+    if (dirname === 'node_modules' || dirname.startsWith('.')) break;
     const fullpath = `${path}/${dirname}`;
     if (fs.existsSync(`${fullpath}/package.json`)) {
       processPackageJson(fullpath);

@@ -49,7 +49,7 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 WORKDIR /app/secret-agent
 
-COPY . /app/secret-agent/
+COPY ./build-dist /app/secret-agent/
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
@@ -61,7 +61,6 @@ RUN cd /app/secret-agent && yarn \
     && mkdir -p /home/sagent/Downloads \
     && chown -R sagent:sagent /home/sagent \
     && chown -R sagent:sagent /app
-
 
 # Add below to run as unprivileged user.
 ## USER sagent

@@ -1,4 +1,8 @@
+build
+website
+replay
 **/*.ts
 **/node_modules
-.cache
-.http-mitm-proxy
+.sessions
+.mitm-ca
+**socket/connect

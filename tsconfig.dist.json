@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./build-dist"
+    "outDir": "./build-dist",
+    "sourceMap": true,
+    "inlineSourceMap": false
   },
   "baseUrl": ".",
   "references": [

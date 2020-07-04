@@ -1,9 +1,9 @@
-import uuid from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 import ChildProcess from 'child_process';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 
 export default class ScriptInstance {
-  public readonly id: string = uuid();
+  public readonly id: string = uuidv1();
   public readonly entrypoint: string = process.argv[1];
   public readonly startDate: string = new Date().toISOString();
   private sessionNameCountByName: { [name: string]: number } = {};
