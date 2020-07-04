@@ -5,6 +5,7 @@
     "declaration": true,
     "skipLibCheck": true,
     "rootDir": ".",
+    "sourceMap": true,
     "outDir": "../build/injected-scripts",
     "composite": true,
     "resolveJsonModule": true,

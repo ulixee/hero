@@ -1,7 +1,8 @@
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import Protocol from 'devtools-protocol';
-import { IResolvablePromise } from '@secret-agent/commons/utils';
 import { exceptionDetailsToError } from './Utils';
+import DomEnv from './DomEnv';
+import Log from '@secret-agent/commons/Logger';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import Frame = Protocol.Page.Frame;
@@ -9,24 +10,27 @@ import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
 import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
 import ExecutionContextDestroyedEvent = Protocol.Runtime.ExecutionContextDestroyedEvent;
 import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
+import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+
+const { log } = Log(module);
 
 export default class FrameTracker {
   public frames: { [id: string]: IFrame } = {};
-
   public get mainFrameId() {
     return Array.from(this.attachedFrameIds).find(id => !this.frames[id].parentId);
   }
 
+  private isClosing = false;
   private attachedFrameIds = new Set<string>();
-  private frameContexts: {
-    [id: string]: {
-      worldName: string;
-      isActive: boolean;
-      executionId?: number;
-      waitForPromises: IResolvablePromise[];
-    }[];
-  } = {};
+  private activeContexts = new Set<number>();
+  private executionContexts: IFrameContext[] = [];
   private devtoolsClient: IDevtoolsClient;
+
+  private pendingContextPromises: {
+    frameId: string;
+    worldName: string;
+    promise: IResolvablePromise<IFrameContext>;
+  }[] = [];
 
   constructor(devtoolsClient: IDevtoolsClient) {
     this.devtoolsClient = devtoolsClient;
@@ -35,10 +39,14 @@ export default class FrameTracker {
   public async init() {
     await this.devtoolsClient.send('Page.enable');
     const framesResponse = await this.devtoolsClient.send('Page.getFrameTree');
-    this.recurseFrameTree(framesResponse.frameTree);
+    await this.recurseFrameTree(framesResponse.frameTree);
     this.devtoolsClient.on('Page.frameNavigated', this.onFrameNavigated.bind(this));
     this.devtoolsClient.on('Page.frameDetached', this.onFrameDetached.bind(this));
     this.devtoolsClient.on('Page.frameAttached', this.onFrameAttached.bind(this));
+    this.devtoolsClient.on(
+      'Runtime.executionContextsCleared',
+      this.onExecutionContextsCleared.bind(this),
+    );
     this.devtoolsClient.on(
       'Runtime.executionContextDestroyed',
       this.onExecutionContextDestroyed.bind(this),
@@ -53,9 +61,7 @@ export default class FrameTracker {
     const origins: { origin: string; executionId: number }[] = [];
     for (const frame of Object.values(this.frames)) {
       if (this.attachedFrameIds.has(frame.id) && frame.hasNavigated) {
-        const executionContextId = this.frameContexts[frame.id].find(
-          x => x.worldName === worldName && x.isActive,
-        )?.executionId;
+        const executionContextId = this.getActiveContext(worldName, frame.id)?.executionContextId;
         origins.push({
           origin: frame.securityOrigin,
           executionId: executionContextId,
@@ -65,16 +71,19 @@ export default class FrameTracker {
     return origins;
   }
 
-  public getActiveContext(worldName: string, frameId: string) {
-    return this.frameContexts[frameId].find(x => x.worldName === worldName && x.isActive);
+  public getActiveContext(worldName: string, frameId: string): IFrameContext | undefined {
+    return this.executionContexts.find(
+      x =>
+        x.worldName === worldName &&
+        x.frameId === frameId &&
+        this.activeContexts.has(x.executionContextId),
+    );
   }
 
   public getFrameIdForExecutionContext(executionContextId: number) {
-    for (const [frameId, contexts] of Object.entries(this.frameContexts)) {
-      for (const context of contexts) {
-        if (context.executionId === executionContextId) {
-          return frameId;
-        }
+    for (const context of this.executionContexts) {
+      if (context.executionContextId === executionContextId) {
+        return context.frameId;
       }
     }
   }
@@ -87,7 +96,7 @@ export default class FrameTracker {
       activeFrameIds.map(async frameId => {
         try {
           results[frameId] = {
-            value: await this.runInFrame(expression, frameId, worldName),
+            value: await this.runInFrameWorld(expression, frameId, worldName),
           };
         } catch (err) {
           results[frameId] = { error: new Error('Could not execute expression') };
@@ -97,57 +106,62 @@ export default class FrameTracker {
     return results;
   }
 
-  public async runInFrame(expression: string, frameId: string, worldName: string) {
-    const context = this.frameContexts[frameId].find(x => x.isActive && worldName === x.worldName);
-    if (!context) {
-      throw new Error(
-        'Unable to run page script - no context established in frame for isolated world',
-      );
-    }
-
-    const frameChanges = await this.devtoolsClient.send('Runtime.evaluate', {
+  public async runInFrameWorld<T>(expression: string, frameId: string, worldName: string) {
+    const context = await this.waitForActiveContext(worldName, frameId);
+    const result = await this.devtoolsClient.send('Runtime.evaluate', {
       expression,
-      contextId: context.executionId,
+      contextId: context.executionContextId,
       returnByValue: true,
       awaitPromise: true,
     });
-    if (frameChanges.exceptionDetails) {
-      throw exceptionDetailsToError(frameChanges.exceptionDetails);
+    if (result.exceptionDetails) {
+      throw exceptionDetailsToError(result.exceptionDetails);
     }
-    if (frameChanges.result?.value) {
-      return frameChanges.result?.value;
+    if (result.result?.value) {
+      return result.result?.value as T;
+    }
+  }
+
+  public async waitForActiveContext(worldName: string, frameId: string): Promise<IFrameContext> {
+    const existing = this.getActiveContext(worldName, frameId);
+    if (existing) return existing;
+    const resolvable = createPromise<IFrameContext>();
+    this.pendingContextPromises.push({
+      worldName,
+      frameId,
+      promise: resolvable,
+    });
+    return resolvable.promise;
+  }
+
+  public close() {
+    this.isClosing = true;
+    for (const promise of this.pendingContextPromises) {
+      promise.promise.reject(new Error('Session closing'));
     }
   }
 
   private onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
-    for (const [_, contexts] of Object.entries(this.frameContexts)) {
-      for (const context of contexts) {
-        if (context.executionId === event.executionContextId) {
-          context.isActive = false;
-          return;
-        }
-      }
-    }
+    this.activeContexts.delete(event.executionContextId);
+  }
+
+  private onExecutionContextsCleared() {
+    this.activeContexts.clear();
   }
 
   private onExecutionContextCreated(event: ExecutionContextCreatedEvent) {
     const { context } = event;
     const frameId = context.auxData.frameId as string;
-    this.frameContexts[frameId] = this.frameContexts[frameId] || [];
 
-    this.frameContexts[frameId].push({
-      isActive: true,
-      executionId: context.id,
-      worldName: context.name,
-      waitForPromises: [],
-    });
+    this.addActiveContext(frameId, context.id, context.name);
   }
 
-  private onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
+  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
     const frame = navigatedEvent.frame as IFrame;
     frame.hasNavigated = true;
     this.frames[frame.id] = frame;
-    this.frameContexts[frame.id] = this.frameContexts[frame.id] || [];
+
+    await this.createIsolatedWorld(frame.id);
   }
 
   private onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
@@ -155,23 +169,73 @@ export default class FrameTracker {
     this.attachedFrameIds.delete(frameId);
   }
 
-  private onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
+  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
     const { frameId } = frameAttachedEvent;
+
     this.attachedFrameIds.add(frameId);
+    await this.createIsolatedWorld(frameId);
   }
 
-  private recurseFrameTree(frameTree: FrameTree) {
+  private async recurseFrameTree(frameTree: FrameTree) {
     const { frame, childFrames } = frameTree;
     this.frames[frame.id] = frame;
     this.attachedFrameIds.add(frame.id);
 
+    await this.createIsolatedWorld(frame.id);
+
     if (!childFrames) return;
     for (const childFrame of childFrames) {
-      this.recurseFrameTree(childFrame);
+      await this.recurseFrameTree(childFrame);
+    }
+  }
+
+  private async createIsolatedWorld(frameId: string) {
+    try {
+      const isolatedWorld = await this.devtoolsClient.send('Page.createIsolatedWorld', {
+        frameId,
+        worldName: DomEnv.installedDomWorldName,
+        // param is misspelled in protocol
+        grantUniveralAccess: true,
+      });
+      this.addActiveContext(
+        frameId,
+        isolatedWorld.executionContextId,
+        DomEnv.installedDomWorldName,
+      );
+    } catch (err) {
+      log.warn('Failed to create isolated world.', err);
+    }
+  }
+
+  private addActiveContext(frameId: string, executionContextId: number, worldName: string) {
+    this.activeContexts.add(executionContextId);
+    let context = this.executionContexts.find(x => x.executionContextId === executionContextId);
+    if (!context) {
+      context = {
+        frameId,
+        executionContextId,
+        worldName,
+      };
+      this.executionContexts.push(context);
+    }
+
+    const pendingContextPromises = this.pendingContextPromises;
+    this.pendingContextPromises = [];
+    for (const pending of pendingContextPromises) {
+      if (pending.frameId === frameId && pending.worldName === worldName) {
+        pending.promise.resolve(context);
+      } else {
+        this.pendingContextPromises.push(pending);
+      }
     }
   }
 }
 
 interface IFrame extends Frame {
   hasNavigated?: boolean;
+}
+interface IFrameContext {
+  frameId: string;
+  worldName: string;
+  executionContextId: number;
 }

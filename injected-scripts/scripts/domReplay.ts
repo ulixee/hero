@@ -31,7 +31,7 @@ window.applyDomChanges = function(changes: IDomChangeEvent[]) {
     const parent = getNode(data.parentNodeId);
     if (!parent && (change[1] === 'added' || change[1] === 'removed')) {
       // tslint:disable-next-line:no-console
-      console.log('WARN: parent node id not found', data);
+      console.log('WARN: parent node id not found', JSON.stringify(data, null, 2));
       continue;
     }
 

@@ -1,16 +1,17 @@
 {
   "name": "@secret-agent/shared-session-state",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "description": "Library to capture and store Secret Agent sessions",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.0",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.0",
-    "@secret-agent/injected-scripts": "^1.0.0-alpha.0",
+    "@secret-agent/commons": "^1.0.0-alpha.2",
+    "@secret-agent/injected-scripts": "^1.0.0-alpha.2",
+    "@secret-agent/mitm": "^1.0.0-alpha.2",
     "better-sqlite3": "^7.0.1"
   },
   "devDependencies": {
     "@koa/router": "^8.0.8",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.2",
     "@types/better-sqlite3": "^5.4.0",
     "koa": "^2.11.0"
   },

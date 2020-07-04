@@ -31,9 +31,17 @@ export default class PageEventsListener {
   }
 
   public async listen() {
+    // add binding to every new context automatically
+    await this.devtoolsClient.send('Runtime.addBinding', {
+      name: runtimeFunction,
+    });
     await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
       source: `(function(runtimeFunction) { \n\n ${domObserver.toString()} \n\n })('${runtimeFunction}');`,
       worldName: DomEnv.installedDomWorldName,
+    });
+    // delete binding from every context also
+    await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `delete window.${runtimeFunction}`,
     });
 
     await this.devtoolsClient.on(
@@ -55,22 +63,6 @@ export default class PageEventsListener {
         await this.onResults(frameId, ...result);
       },
     );
-
-    await this.devtoolsClient.on('Runtime.executionContextCreated', async ctx => {
-      if (ctx.context.name !== DomEnv.installedDomWorldName) return;
-      const contextId = ctx.context.id;
-
-      process.nextTick(async id => {
-        await this.devtoolsClient.send('Runtime.addBinding', {
-          name: runtimeFunction,
-          contextId: id,
-        });
-
-        if (this.onNewContext) {
-          await this.onNewContext(id);
-        }
-      }, contextId);
-    });
   }
 
   public async setCommandIdForPage(commandId: number) {

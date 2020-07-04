@@ -1,4 +1,4 @@
-import uuid from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 import puppeteer from 'puppeteer';
 import Log from '@secret-agent/commons/Logger';
 import Window from './Window';
@@ -15,7 +15,7 @@ import UserProfile from './UserProfile';
 const { log } = Log(module);
 
 export default class Session {
-  public readonly id: string = uuid();
+  public readonly id: string = uuidv1();
   public readonly baseDir: string;
   public window: Window;
   public emulator: EmulatorPlugin;

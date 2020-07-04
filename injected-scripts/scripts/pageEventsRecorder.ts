@@ -13,16 +13,17 @@ export type PageRecorderResultSet = [
   IScrollEvent[],
 ];
 
+// @ts-ignore
+const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) => void;
+// @ts-ignore
+delete window[runtimeFunction];
+
 function upload(records: PageRecorderResultSet) {
-  // @ts-ignore
-  if (runtimeFunction in window) {
-    try {
-      // @ts-ignore
-      window[runtimeFunction](JSON.stringify(records));
-      return true;
-    } catch (err) {
-      console.log(err);
-    }
+  try {
+    eventsCallback(JSON.stringify(records));
+    return true;
+  } catch (err) {
+    console.log(`ERROR calling page recorder callback: ${String(err)}`, err);
   }
   return false;
 }
@@ -198,15 +199,19 @@ class PageEventsRecorder {
     const stamp = new Date().toISOString();
 
     this.checkForPropertyChanges(stamp);
-    const addedNodes: Node[] = mutations
-      .map(x => Array.from(x.addedNodes))
-      .reduce((a, b) => a.concat(b), []);
+    const addedNodes: Node[] = [];
+    for (const mutation of mutations) {
+      for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+        addedNodes.push(mutation.addedNodes[i]);
+      }
+    }
 
     for (const mutation of mutations) {
       switch (mutation.type) {
         case 'childList':
           let isFirstRemoved = true;
-          for (const node of Array.from(mutation.removedNodes)) {
+          for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
+            const node = mutation.removedNodes[i];
             const serial = this.serializeNode(node);
             serial.parentNodeId = nodeTracker.getId(mutation.target);
             serial.previousSiblingId = nodeTracker.getId(
@@ -219,7 +224,8 @@ class PageEventsRecorder {
           // A batch of changes includes changes in a set of nodes.
           // Since we're flattening, only the first one should be added after the mutation sibling.
           let isFirstAdded = true;
-          for (const node of Array.from(mutation.addedNodes)) {
+          for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+            const node = mutation.addedNodes[i];
             const serial = this.serializeNode(node);
             serial.parentNodeId = nodeTracker.getId(mutation.target);
             serial.previousSiblingId = nodeTracker.getId(
@@ -231,7 +237,9 @@ class PageEventsRecorder {
 
           // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
           // individually so we need to extract child nodes into flat hierarchy
-          for (const node of addedNodes) {
+
+          for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+            const node = mutation.addedNodes[i];
             const children = this.serializeChildren(node, addedNodes);
             for (const childData of children) {
               changes.push([currentCommandId, 'added', childData, stamp]);
@@ -261,7 +269,8 @@ class PageEventsRecorder {
 
   private serializeChildren(node: Node, addedNodes: Node[]) {
     const serialized: INodeData[] = [];
-    for (const child of Array.from(node.childNodes)) {
+    for (let i = 0, length = node.childNodes.length; i < length; i += 1) {
+      const child = node.childNodes[i];
       if (!nodeTracker.has(child) && !addedNodes.includes(child)) {
         const serial = this.serializeNode(child);
         serial.parentNodeId = nodeTracker.getId(child.parentElement);
@@ -298,7 +307,8 @@ class PageEventsRecorder {
         data.tagName = element.tagName;
         if (element.attributes.length) {
           data.attributes = {};
-          for (const attr of Array.from(element.attributes)) {
+          for (let i = 0, length = element.attributes.length; i < length; i += 1) {
+            const attr = element.attributes[i];
             data.attributes[attr.name] = attr.value;
           }
         }

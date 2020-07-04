@@ -1,4 +1,4 @@
-import uuid from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import puppeteer from 'puppeteer';
 import IWindowOptions from '@secret-agent/core-interfaces/IWindowOptions';
@@ -36,7 +36,7 @@ import DomEnv from './DomEnv';
 const { log } = Log(module);
 
 export default class Window {
-  public readonly id: string = uuid();
+  public readonly id: string = uuidv1();
   public readonly session: Session;
   public readonly sessionState: SessionState;
   public readonly locationTracker: LocationTracker;
@@ -85,10 +85,9 @@ export default class Window {
     // tslint:disable-next-line:no-this-assignment
     const { devtoolsClient } = this;
     await Window.installEmulator(devtoolsClient, this.session.emulator);
-    await this.frameTracker.init();
     // must be installed before window scripts
     await this.sessionState.listenForPageEvents(devtoolsClient, this.frameTracker);
-    this.events.listen();
+    await this.events.listen();
     await this.domEnv.install();
   }
 
@@ -268,6 +267,11 @@ export default class Window {
     this.session.requestMitmProxySession?.recordDocumentUserActivity(documentUrl);
   }
 
+  public async getLocationHref() {
+    await this.waitForLoad('READY');
+    return this.domEnv.locationHref();
+  }
+
   public async getPageCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
     return (await this.puppPage.cookies()).map(
@@ -282,6 +286,8 @@ export default class Window {
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
+    this.frameTracker.close();
+    this.domEnv.close();
     log.info('WindowClosing', { windowId: this.id, sessionId: this.session.id });
     try {
       // clear any pending timeouts
@@ -372,8 +378,8 @@ export default class Window {
         } catch (err) {
           jsonValue = null;
         }
-        timer.throwIfExpired('Timeout waiting for element to be visible');
-        await new Promise(setImmediate);
+        timer.throwIfExpired(`Timeout waiting for element ${jsPath} to be visible`);
+        await new Promise(resolve => setTimeout(resolve, 50));
       } while (!jsonValue);
     } finally {
       timer.clear();
@@ -419,6 +425,7 @@ export default class Window {
     await puppPage.setExtraHTTPHeaders(session.requestMitmProxySession.getTrackingHeaders());
 
     const window = new Window(sessionState, puppPage, session);
+    await window.frameTracker.init();
     log.info('CreatedWindow', null, logid);
     return window;
   }
