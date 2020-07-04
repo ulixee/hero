@@ -17,8 +17,6 @@ import CookieHandler from '../handlers/CookieHandler';
 import { URL } from 'url';
 import http2Request from './http2Request';
 import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
-import MitmProxyResponseFilter from './MitmProxyResponseFilter';
-import MitmRequestCopyStream from './MitmRequestCopyStream';
 import * as net from 'net';
 import RequestEmitter from '../handlers/RequestEmitter';
 import https from 'https';
@@ -56,13 +54,14 @@ export default class MitmRequestHandler {
         return;
       }
 
-      const serverRequestStream = new MitmRequestCopyStream(
-        ctx.proxyToServerRequest,
-        ctx,
-        this.handleError.bind(this, 'ON_REQUEST_DATA_ERROR'),
-      );
-      clientRequest.pipe(serverRequestStream);
       clientRequest.resume();
+      const data: Buffer[] = [];
+      for await (const chunk of clientRequest) {
+        data.push(chunk);
+        await new Promise(resolve => ctx.proxyToServerRequest.write(chunk, resolve));
+      }
+      await new Promise(resolve => ctx.proxyToServerRequest.end(resolve));
+      ctx.postData = Buffer.concat(data);
     } catch (err) {
       this.handleError('ON_REQUEST_ERROR', ctx, err);
     }
@@ -78,6 +77,7 @@ export default class MitmRequestHandler {
     clientSocket.pause();
 
     const ctx = this.createContext('ws', isSSL, upgradeRequest);
+    ctx.resourceType = 'Websocket';
 
     try {
       clientSocket.on(
@@ -165,7 +165,6 @@ export default class MitmRequestHandler {
       'error',
       this.handleError.bind(this, 'SERVER_TO_PROXY_RESPONSE_ERROR', ctx),
     );
-    serverToProxyResponse.pause();
 
     try {
       HeadersHandler.restorePreflightHeader(ctx);
@@ -183,19 +182,29 @@ export default class MitmRequestHandler {
     }
     await CookieHandler.readServerResponseCookies(ctx);
 
-    if (ctx.proxyToClientResponse) {
-      ctx.proxyToClientResponse.writeHead(
-        serverToProxyResponse.statusCode,
-        filterAndCanonizeHeaders(serverToProxyResponse.rawHeaders),
-      );
-      const filter = new MitmProxyResponseFilter(
-        ctx.proxyToClientResponse,
-        ctx,
-        this.handleError.bind(this, 'ON_RESPONSE_DATA_ERROR'),
-      );
-      serverToProxyResponse.pipe(filter);
+    if (!ctx.proxyToClientResponse) return;
+
+    ctx.proxyToClientResponse.writeHead(
+      serverToProxyResponse.statusCode,
+      filterAndCanonizeHeaders(serverToProxyResponse.rawHeaders),
+    );
+
+    for await (const chunk of serverToProxyResponse) {
+      const data = ctx.cacheHandler.onResponseData(ctx, chunk as Buffer);
+      if (data) {
+        await new Promise(resolve => ctx.proxyToClientResponse.write(data, resolve));
+      }
     }
-    serverToProxyResponse.resume();
+
+    if (ctx.cacheHandler.shouldServeCachedData) {
+      await new Promise(resolve =>
+        ctx.proxyToClientResponse.write(ctx.cacheHandler.cacheData, resolve),
+      );
+    }
+
+    await new Promise(resolve => ctx.proxyToClientResponse.end(resolve));
+    ctx.cacheHandler.onResponseEnd(ctx);
+    RequestEmitter.emitHttpResponse(ctx, ctx.cacheHandler.buffer);
   }
 
   private createContext(
@@ -238,6 +247,7 @@ export default class MitmRequestHandler {
   }
 
   private async makeProxyToServerRequest(ctx: IMitmRequestContext, isUpgrade: boolean) {
+    let session: RequestSession;
     try {
       ctx.clientToProxyRequest.on(
         'error',
@@ -245,12 +255,12 @@ export default class MitmRequestHandler {
       );
 
       const requestSettings = ctx.proxyToServerRequestSettings;
-      const session = (ctx.requestSession = await RequestSession.getSession(
+      session = ctx.requestSession = await RequestSession.getSession(
         requestSettings.headers,
         requestSettings.method,
         isUpgrade,
         isUpgrade ? 10e3 : undefined,
-      ));
+      );
 
       if (!session) {
         log.error('Mitm.RequestHandler:NoSessionForRequest', {
@@ -272,10 +282,6 @@ export default class MitmRequestHandler {
       if (BlockHandler.shouldBlockRequest(session, ctx)) {
         // already wrote reply
         return;
-      }
-
-      if (isUpgrade) {
-        ctx.resourceType = 'Websocket';
       }
 
       await HeadersHandler.waitForResource(ctx);
@@ -321,6 +327,9 @@ export default class MitmRequestHandler {
 
       return connectResult;
     } catch (err) {
+      if (session?.isClosing) {
+        return;
+      }
       this.handleError('PROXY_TO_SERVER_REQUEST_ERROR', ctx, err);
     }
   }

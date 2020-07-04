@@ -1,3 +1,7 @@
+import Protocol from 'devtools-protocol';
+import Network = Protocol.Network;
+import DevtoolsResourceType = Network.ResourceType;
+
 type ResourceType =
   | 'Document'
   | 'Redirect'
@@ -19,29 +23,16 @@ type ResourceType =
   | 'CSP Violation Report'
   | 'Other';
 
-const chromeResourceTypes: { [chromeType: string]: ResourceType } = {
-  Document: 'Document',
-  Redirect: 'Redirect',
-  Ico: 'Ico',
-  Preflight: 'Preflight',
-  Script: 'Script',
-  Stylesheet: 'Stylesheet',
-  Xhr: 'Xhr',
-  Fetch: 'Fetch',
-  Image: 'Image',
-  Media: 'Media',
-  Font: 'Font',
-  TextTrack: 'Text Track',
-  EventSource: 'Event Source',
-  Manifest: 'Manifest',
-  SignedExchange: 'Signed Exchange',
-  Ping: 'Ping',
-  CSPViolationReport: 'CSP Violation Report',
-  Other: 'Other',
-};
+const chromeResourceConversions = new Map<DevtoolsResourceType, ResourceType>([
+  ['XHR', 'Xhr'],
+  ['TextTrack', 'Text Track'],
+  ['EventSource', 'Event Source'],
+  ['SignedExchange', 'Signed Exchange'],
+  ['CSPViolationReport', 'CSP Violation Report'],
+]);
 
-export function getResourceTypeForChromeValue(resourceType: string): ResourceType {
-  return chromeResourceTypes[resourceType];
+export function getResourceTypeForChromeValue(resourceType: DevtoolsResourceType): ResourceType {
+  return chromeResourceConversions.get(resourceType) ?? (resourceType as ResourceType);
 }
 
 export default ResourceType;

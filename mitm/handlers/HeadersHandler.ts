@@ -6,7 +6,6 @@ const { log } = Log(module);
 export default class HeadersHandler {
   public static async waitForResource(ctx: IMitmRequestContext) {
     const session = ctx.requestSession;
-    if (!session || !session.delegate?.modifyHeadersBeforeSend) return;
 
     const requestSettings = ctx.proxyToServerRequestSettings;
 

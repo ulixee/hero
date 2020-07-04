@@ -77,7 +77,7 @@ describe('basic MitM tests', () => {
     await session.close();
   });
 
-  it('should send https request through upstream proxy', async () => {
+  it('should send an https request through upstream proxy', async () => {
     const httpServer = await Helpers.runHttpServer();
     const mitmServer = await MitmServer.start(9001);
     Helpers.onClose(() => mitmServer.close());
@@ -98,6 +98,38 @@ describe('basic MitM tests', () => {
     await Helpers.httpGet('https://dataliberationfoundation.org', proxyHost, headers).catch();
 
     expect(upstreamProxyConnected).toBeTruthy();
+  });
+
+  it('should support http calls through the mitm', async () => {
+    const server = http
+      .createServer((req, res) => {
+        return res.end('Ok');
+      })
+      .listen(0)
+      .unref();
+    Helpers.onClose(
+      () =>
+        new Promise(resolve => {
+          server.close(() => resolve());
+        }),
+    );
+
+    const serverPort = (server.address() as AddressInfo).port;
+
+    const mitmServer = await MitmServer.start(9003);
+    Helpers.onClose(() => mitmServer.close());
+    const proxyHost = `http://localhost:${mitmServer.port}`;
+
+    const session = new RequestSession('1', 'any agent', null);
+
+    const headers = session.getTrackingHeaders();
+    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
+
+    const res = await Helpers.httpGet(`http://localhost:${serverPort}`, proxyHost, headers);
+    expect(res).toBe('Ok');
+
+    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+    await session.close();
   });
 
   it('should intercept requests', async () => {
@@ -223,6 +255,44 @@ describe('basic MitM tests', () => {
     expect(session.requests[0].postData).toBeTruthy();
     expect(session.requests[0].postData.toString()).toBe(
       JSON.stringify({ gotData: true, isCompressed: 'no' }),
+    );
+
+    await httpServer.close();
+    await mitmServer.close();
+  });
+
+  it('should support large post data', async () => {
+    const httpServer = await Helpers.runHttpServer();
+    const mitmServer = await MitmServer.start(9004);
+    Helpers.needsClosing.push(mitmServer);
+    const proxyHost = `http://localhost:${mitmServer.port}`;
+
+    const session = new RequestSession('3', 'any agent', null);
+
+    const headers = session.getTrackingHeaders();
+    const buffers: Buffer[] = [];
+    const copyBuffer = Buffer.from('ASDGASDFASDWERWER@#$%#$%#$%#$%#DSFSFGDBSDFGD$%^$%^$%');
+    for (let i = 0; i <= 10e4; i += 1) {
+      buffers.push(copyBuffer);
+    }
+
+    const largeBuffer = Buffer.concat(buffers);
+
+    await Helpers.httpRequest(
+      `${httpServer.url}page2`,
+      'POST',
+      proxyHost,
+      {
+        ...headers,
+        'content-type': 'application/json',
+      },
+      null,
+      Buffer.from(JSON.stringify({ largeBuffer: largeBuffer.toString('hex') })),
+    );
+
+    expect(session.requests).toHaveLength(1);
+    expect(session.requests[0].postData.toString()).toBe(
+      JSON.stringify({ largeBuffer: largeBuffer.toString('hex') }),
     );
 
     await httpServer.close();
