@@ -243,7 +243,6 @@ export default class MitmProxy {
       const c = net.connect(
         {
           port: port,
-          allowHalfOpen: true,
         },
         () => resolve(c),
       );
@@ -251,14 +250,13 @@ export default class MitmProxy {
 
     conn.on('error', this.onSocketError.bind(this, 'PROXY_TO_PROXY_SOCKET'));
     // create a tunnel between the two hosts
-    conn.on('finish', () => socket.destroy());
+    conn.on('close', () => socket.destroy());
     socket.on('close', () => conn.end());
-
-    if (head.length) socket.unshift(head);
 
     socket.pipe(conn);
     conn.pipe(socket);
     socket.resume();
+    if (head.length) socket.unshift(head);
   }
 
   private async addHttpsContext(hostname: string) {

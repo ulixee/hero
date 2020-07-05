@@ -140,11 +140,9 @@ export default class MitmRequestHandler {
     if (serverResponse.statusCode === 101) {
       clientSocket.setNoDelay(true);
       clientSocket.setTimeout(0);
-      if (clientHead.length) clientSocket.unshift(clientHead);
 
       serverSocket.setNoDelay(true);
       serverSocket.setTimeout(0);
-      if (serverHead.length > 0) serverSocket.unshift(serverHead);
     }
 
     serverSocket.pipe(clientSocket);
@@ -152,6 +150,9 @@ export default class MitmRequestHandler {
 
     serverSocket.resume();
     clientSocket.resume();
+    if (serverHead.length > 0) serverSocket.unshift(serverHead);
+    if (clientHead.length > 0) clientSocket.unshift(clientHead);
+
     RequestEmitter.emitHttpResponse(ctx, ctx.cacheHandler.buffer);
   }
 

@@ -24,5 +24,5 @@ function buildExecutionScript(script: string, args?: any) {
     (function(args) {
       ${script}
     })(${JSON.stringify(args)});
-})()`;
+})()`.replace(/\/\/# sourceMap.+/g, '');
 }

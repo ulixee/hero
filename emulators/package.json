@@ -15,7 +15,8 @@
     "user-agents": "^1.0.559",
     "useragent": "^2.3.0",
     "yamlparser": "0.0.x",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
     "@secret-agent/core-interfaces": "^1.0.0-alpha.2",
