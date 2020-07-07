@@ -13,15 +13,22 @@ export default function getOverrideScript(name: string, args?: any): IPageOverri
   }
   if (shouldCache) cache[name] = script;
   return {
-    script: buildExecutionScript(script, args),
+    script: buildExecutionScript(name, script, args),
   };
 }
 
-function buildExecutionScript(script: string, args?: any) {
-  return `(function() {
+function buildExecutionScript(name: string, script: string, args?: any) {
+  return `(async function newDocumentScript_${name}() {
     ${utilsScript}
+   
+    // documentElement is not loaded  
+    if ('${name}' === 'polyfill') {  
+      while (!document.documentElement) {
+          await new Promise(resolve => setTimeout(resolve, 10));
+      }
+    }
     
-    (function(args) {
+    (function ${name}(args) {
       ${script}
     })(${JSON.stringify(args)});
 })()`.replace(/\/\/# sourceMap.+/g, '');

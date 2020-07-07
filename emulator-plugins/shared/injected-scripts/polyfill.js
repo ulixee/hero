@@ -23,12 +23,7 @@ for (const addition of args.additions) {
     );
   } catch (err) {
     console.log(
-      'ERROR adding order polyfill ' +
-        addition.path +
-        '.' +
-        addition.propertyName +
-        '\n' +
-        err.stack,
+      'ERROR adding polyfill ' + addition.path + '.' + addition.propertyName + '\n' + err.stack,
     );
   }
 }
@@ -50,7 +45,7 @@ for (const change of args.changes) {
     const parts = getParentAndProperty(change.path);
     const property = parts.property;
     const parent = parts.parent;
-    const descriptor = Object.getOwnPropertyDescriptor(parent, property);
+    const descriptor = getDescriptorInHierarchy(parent, property);
 
     if (change.propertyName === '_value') {
       descriptor.value = change.property;
@@ -71,21 +66,32 @@ for (const change of args.changes) {
   }
 }
 
-for (const { propertyName, prevProperty, throughProperty, path } of args.order) {
-  try {
-    if (!path.includes('.prototype')) {
-      reorderOnWindow(path);
-      continue;
+function reorder() {
+  for (const { propertyName, prevProperty, throughProperty, path } of args.order) {
+    try {
+      if (!path.includes('.prototype')) {
+        reorderOnWindow(path, propertyName, prevProperty, throughProperty);
+        continue;
+      }
+      reorderDescriptor(path, propertyName, prevProperty, throughProperty);
+    } catch (err) {
+      console.log(
+        'ERROR adding order polyfill ' + path + '->' + propertyName + '\n' + err.toString(),
+      );
     }
-    reorderDescriptor(path, propertyName, prevProperty, throughProperty);
-  } catch (err) {
-    console.log(
-      'ERROR adding order polyfill ' + path + '->' + propertyName + '\n' + err.toString(),
-    );
   }
 }
 
-function reorderOnWindow(objectPath) {
+function isReadyToRun(delay = 0) {
+  if (document.documentElement) {
+    return reorder();
+  }
+  setTimeout(isReadyToRun, delay, 10);
+}
+
+isReadyToRun();
+
+function reorderOnWindow(objectPath, propertyName, prevProperty, throughProperty) {
   const getOwnPropertyDescriptorsToString = Object.getOwnPropertyDescriptors.toString();
   Object.getOwnPropertyDescriptors = new Proxy(Object.getOwnPropertyDescriptors, {
     apply(target, thisArg, argArray) {

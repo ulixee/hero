@@ -36,7 +36,7 @@ export default class PageEventsListener {
       name: runtimeFunction,
     });
     await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: `(function(runtimeFunction) { \n\n ${domObserver.toString()} \n\n })('${runtimeFunction}');`,
+      source: `(function installPageEventsListener(runtimeFunction) { \n\n ${domObserver.toString()} \n\n })('${runtimeFunction}');`,
       worldName: DomEnv.installedDomWorldName,
     });
     // delete binding from every context also

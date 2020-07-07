@@ -60,7 +60,8 @@ RUN cd /app/secret-agent && yarn \
     && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
     && mkdir -p /home/sagent/Downloads \
     && chown -R sagent:sagent /home/sagent \
-    && chown -R sagent:sagent /app
+    && chown -R sagent:sagent /app/secret-agent \
+    && chown -R sagent:sagent /app/secret-agent/node_modules
 
 # Add below to run as unprivileged user.
 ## USER sagent

@@ -264,7 +264,11 @@ export default class SessionState {
   }
 
   public captureLog(frameId: string, type: string, message: string, location?: string) {
-    log.info('Window.console', { type, message });
+    if (message.includes('Error: ') || message.startsWith('ERROR')) {
+      log.error('Window.error', message);
+    } else {
+      log.info('Window.console', { type, message });
+    }
     this.db.logs.insert(frameId, type, message, new Date(), location);
   }
 

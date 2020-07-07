@@ -34,7 +34,7 @@ export default class DomEnv {
     if (this.isInstalled) return;
     this.isInstalled = true;
     await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: `(() => {
+      source: `(function installDomEnv() {
 ${typesonScript};
 ${typesonRegistryScript};
 const TSON = new Typeson().register(Typeson.presets.builtin);
@@ -59,7 +59,7 @@ ${domStorageScript}
   public execNonIsolatedExpression<T>(expression: string, propertiesToExtract?: string[]) {
     return this.runFn<{ value: T; type: string }>(
       'getJsValue',
-      `(async function() {
+      `(async function execNonIsolatedExpression() {
   const value = await ${expression};
   
   let type = typeof value;
