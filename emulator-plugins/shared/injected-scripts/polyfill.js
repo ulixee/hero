@@ -8,13 +8,13 @@ for (const remove of args.removals) {
 }
 
 for (const addition of args.additions) {
-  if (addition.propertyName === 'getVideoPlaybackQuality') {
-    addition.property['_value()'] = function() {
-      return Promise.resolve([]);
-    };
-  }
-
   try {
+    if (addition.propertyName === 'getVideoPlaybackQuality') {
+      addition.property['_value()'] = function() {
+        return Promise.resolve([]);
+      };
+    }
+
     addDescriptorAfterProperty(
       addition.path,
       addition.prevProperty,
@@ -23,12 +23,7 @@ for (const addition of args.additions) {
     );
   } catch (err) {
     console.log(
-      'ERROR adding order polyfill ' +
-        addition.path +
-        '.' +
-        addition.propertyName +
-        '\n' +
-        err.stack,
+      'ERROR adding polyfill ' + addition.path + '.' + addition.propertyName + '\n' + err.stack,
     );
   }
 }
@@ -46,11 +41,11 @@ for (const change of args.changes) {
       nativeToStringFunctionString = change.property;
       continue;
     }
-    
+
     const parts = getParentAndProperty(change.path);
     const property = parts.property;
     const parent = parts.parent;
-    const descriptor = Object.getOwnPropertyDescriptor(parent, property);
+    const descriptor = getDescriptorInHierarchy(parent, property);
 
     if (change.propertyName === '_value') {
       descriptor.value = change.property;
@@ -65,65 +60,80 @@ for (const change of args.changes) {
       definedFuncs.set(descriptor.set, change.property);
     }
   } catch (err) {
-    console.log('ERROR changing prop ' + change.path + '.' + change.propertyName + '\n' + err.stack);
+    console.log(
+      'ERROR changing prop ' + change.path + '.' + change.propertyName + '\n' + err.stack,
+    );
   }
 }
 
-for (const { propertyName, prevProperty, throughProperty, path } of args.order) {
-  try {
-    if (!path.includes('.prototype')) {
-      const objectPath = path;
-
-      const getOwnPropertyDescriptorsToString = Object.getOwnPropertyDescriptors.toString();
-      Object.getOwnPropertyDescriptors = new Proxy(Object.getOwnPropertyDescriptors, {
-        apply(target, thisArg, argArray) {
-          const descriptors = Reflect.apply(...arguments);
-          const objectAtPath = getObjectAtPath(objectPath);
-          if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
-            const keys = Object.keys(descriptors);
-            adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
-            const finalDescriptors = {};
-            for (const key of keys) {
-              finalDescriptors[key] = descriptors[key];
-            }
-            return finalDescriptors;
-          }
-          return descriptors;
-        },
-      });
-      definedFuncs.set(Object.getOwnPropertyDescriptors, getOwnPropertyDescriptorsToString);
-
-      const getOwnPropertyNamesToString = Object.getOwnPropertyNames.toString();
-      Object.getOwnPropertyNames = new Proxy(Object.getOwnPropertyNames, {
-        apply(target, thisArg, argArray) {
-          const objectAtPath = getObjectAtPath(objectPath);
-          const keys = Reflect.apply(...arguments);
-          if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
-            adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
-          }
-          return keys;
-        },
-      });
-      definedFuncs.set(Object.getOwnPropertyNames, getOwnPropertyNamesToString);
-
-      const keysToString = Object.keys.toString();
-      Object.keys = new Proxy(Object.keys, {
-        apply(target, thisArg, argArray) {
-          const keys = Reflect.apply(...arguments);
-          const objectAtPath = getObjectAtPath(objectPath);
-          if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
-            adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
-          }
-          return keys;
-        },
-      });
-      definedFuncs.set(Object.keys, keysToString);
-      continue;
+function reorder() {
+  for (const { propertyName, prevProperty, throughProperty, path } of args.order) {
+    try {
+      if (!path.includes('.prototype')) {
+        reorderOnWindow(path, propertyName, prevProperty, throughProperty);
+        continue;
+      }
+      reorderDescriptor(path, propertyName, prevProperty, throughProperty);
+    } catch (err) {
+      console.log(
+        'ERROR adding order polyfill ' + path + '->' + propertyName + '\n' + err.toString(),
+      );
     }
-    reorderDescriptor(path, propertyName, prevProperty, throughProperty);
-  } catch (err) {
-    console.log(
-      'ERROR adding order polyfill ' + path + '->' + propertyName + '\n' + err.toString(),
-    );
   }
+}
+
+function isReadyToRun(delay = 0) {
+  if (document.documentElement) {
+    return reorder();
+  }
+  setTimeout(isReadyToRun, delay, 10);
+}
+
+isReadyToRun();
+
+function reorderOnWindow(objectPath, propertyName, prevProperty, throughProperty) {
+  const getOwnPropertyDescriptorsToString = Object.getOwnPropertyDescriptors.toString();
+  Object.getOwnPropertyDescriptors = new Proxy(Object.getOwnPropertyDescriptors, {
+    apply(target, thisArg, argArray) {
+      const descriptors = Reflect.apply(...arguments);
+      const objectAtPath = getObjectAtPath(objectPath);
+      if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
+        const keys = Object.keys(descriptors);
+        adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+        const finalDescriptors = {};
+        for (const key of keys) {
+          finalDescriptors[key] = descriptors[key];
+        }
+        return finalDescriptors;
+      }
+      return descriptors;
+    },
+  });
+  definedFuncs.set(Object.getOwnPropertyDescriptors, getOwnPropertyDescriptorsToString);
+
+  const getOwnPropertyNamesToString = Object.getOwnPropertyNames.toString();
+  Object.getOwnPropertyNames = new Proxy(Object.getOwnPropertyNames, {
+    apply(target, thisArg, argArray) {
+      const objectAtPath = getObjectAtPath(objectPath);
+      const keys = Reflect.apply(...arguments);
+      if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
+        adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+      }
+      return keys;
+    },
+  });
+  definedFuncs.set(Object.getOwnPropertyNames, getOwnPropertyNamesToString);
+
+  const keysToString = Object.keys.toString();
+  Object.keys = new Proxy(Object.keys, {
+    apply(target, thisArg, argArray) {
+      const keys = Reflect.apply(...arguments);
+      const objectAtPath = getObjectAtPath(objectPath);
+      if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
+        adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
+      }
+      return keys;
+    },
+  });
+  definedFuncs.set(Object.keys, keysToString);
 }

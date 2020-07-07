@@ -1,14 +1,15 @@
 {
   "name": "@secret-agent/core-server",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.2",
   "description": "Server framework for running SecretAgent remotely",
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.0",
-    "@secret-agent/core": "^1.0.0-alpha.0"
+    "@secret-agent/commons": "^1.0.0-alpha.2",
+    "@secret-agent/core": "^1.0.0-alpha.2"
   },
   "devDependencies": {
-    "@secret-agent/remote-client": "^1.0.0-alpha.0",
-    "@secret-agent/shared-testing": "^1.0.0-alpha.0",
+    "@secret-agent/remote-client": "^1.0.0-alpha.2",
+    "@secret-agent/remote-interfaces": "^1.0.0-alpha.2",
+    "@secret-agent/shared-testing": "^1.0.0-alpha.2",
     "@types/node": "^12.7.11",
     "json-socket": "^0.3.0"
   }

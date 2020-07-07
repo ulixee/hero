@@ -47,7 +47,7 @@ export function createPromise<T = any>(
       clearTimeout(response.timeout);
       reject(err);
     };
-    if (timeoutMillis) {
+    if (timeoutMillis !== undefined) {
       response.timeout = setTimeout(() => response.reject(error), timeoutMillis).unref();
     }
   });

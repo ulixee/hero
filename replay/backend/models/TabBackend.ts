@@ -1,7 +1,7 @@
 import { BrowserView, app } from 'electron';
 import { URL } from 'url';
 import * as Path from 'path';
-import uuid from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 import * as http from 'http';
 import Window from './Window';
 import generateContextMenu from '../menus/generateContextMenu';
@@ -40,7 +40,7 @@ export default class TabBackend {
         contextIsolation: false,
         javascript: true,
         enableRemoteModule: true,
-        partition: uuid(),
+        partition: uuidv1(),
         nativeWindowOpen: true,
         webSecurity: true,
         // sandbox: true, // ToDo: turn this back on for snapshots

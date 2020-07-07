@@ -14,6 +14,7 @@ import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedS
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
+const SA_NOT_INSTALLED = 'SA_SCRIPT_NOT_INSTALLED';
 
 export default class DomEnv {
   public static installedDomWorldName = '__sa_world__';
@@ -22,6 +23,7 @@ export default class DomEnv {
   private frameTracker: FrameTracker;
   private devtoolsClient: IDevtoolsClient;
   private isInstalled = false;
+  private isClosed = false;
 
   constructor(frameTracker: FrameTracker, devtoolsClient: IDevtoolsClient) {
     this.frameTracker = frameTracker;
@@ -32,8 +34,7 @@ export default class DomEnv {
     if (this.isInstalled) return;
     this.isInstalled = true;
     await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: `
-(() => {
+      source: `(function installDomEnv() {
 ${typesonScript};
 ${typesonRegistryScript};
 const TSON = new Typeson().register(Typeson.presets.builtin);
@@ -46,15 +47,19 @@ window.SecretAgent = {
 };
 
 ${domStorageScript}
-})()`,
+})();`,
       worldName: DomEnv.installedDomWorldName,
     });
+  }
+
+  public close() {
+    this.isClosed = true;
   }
 
   public execNonIsolatedExpression<T>(expression: string, propertiesToExtract?: string[]) {
     return this.runFn<{ value: T; type: string }>(
       'getJsValue',
-      `(async function() {
+      `(async function execNonIsolatedExpression() {
   const value = await ${expression};
   
   let type = typeof value;
@@ -67,7 +72,7 @@ ${domStorageScript}
     type,
   });
 
-})(${propertiesToExtract ?? [].join(',')})`,
+})(${propertiesToExtract ?? [].join(',')});`,
       '',
     );
   }
@@ -120,38 +125,57 @@ ${domStorageScript}
     );
   }
 
+  public locationHref() {
+    return this.frameTracker.runInFrameWorld<string>(
+      'location.href',
+      this.frameTracker.mainFrameId,
+      '',
+    );
+  }
+
   private async runIsolatedFn<T>(fnName: string, ...args: SerializableOrJSHandle[]) {
-    const serializedFn = `${fnName}(${args
+    const callFn = `${fnName}(${args
       .map(x => {
         if (!x) return 'undefined';
         return JSON.stringify(x);
       })
       .join(', ')})`;
+    const serializedFn = `'SecretAgent' in window ? ${callFn} : '${SA_NOT_INSTALLED}';`;
     return this.runFn<T>(fnName, serializedFn, DomEnv.installedDomWorldName);
   }
 
-  private async runFn<T>(fnName: string, serializedFn: string, worldName: string) {
-    const unparsedResult = await this.frameTracker.runInFrame(
+  private async runFn<T>(fnName: string, serializedFn: string, worldName: string, retries = 10) {
+    const unparsedResult = await this.frameTracker.runInFrameWorld(
       serializedFn,
       this.frameTracker.mainFrameId,
       worldName,
     );
-    if (unparsedResult) {
-      const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
-      if (result?.error) {
-        log.error(fnName, result);
-        throw new Error(result.error);
-      }
+
+    if (unparsedResult === SA_NOT_INSTALLED) {
+      if (retries === 0 || this.isClosed) throw new Error('Injected scripts not installed.');
+      log.warn('Injected scripts not installed yet. Retrying', {
+        fnName,
+        frames: this.frameTracker.frames,
+        frameId: this.frameTracker.mainFrameId,
+      });
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return this.runFn(fnName, serializedFn, worldName, (retries -= 1));
+    }
+
+    const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
+    if (result?.error) {
+      log.error(fnName, result);
+      throw new Error(result.error);
+    } else {
       return result as T;
     }
   }
 }
 
 const typesonScript = fs.readFileSync(require.resolve('typeson/dist/typeson.min.js'), 'utf8');
-const typesonRegistryScript = fs.readFileSync(
-  require.resolve('typeson-registry/dist/presets/builtin.js'),
-  'utf8',
-);
+const typesonRegistryScript = fs
+  .readFileSync(require.resolve('typeson-registry/dist/presets/builtin.js'), 'utf8')
+  .replace(/\/\/# sourceMappingURL=.+\.map/g, '');
 
 const domStorageScript = fs.readFileSync(
   require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),

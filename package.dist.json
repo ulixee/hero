@@ -1,19 +1,13 @@
 {
   "name": "@secret-agent/monorepo",
+  "version": "1.0.0-alpha.2",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start:website": "yarn workspace @secret-agent/website start",
-    "test": "NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
     "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "devDependencies": {
-    "jest": "^25.3.0",
-    "jest-environment-node": "^25.3.0",
-    "jest-junit": "^6.3.0",
-    "jest-summary-reporter": "^0.0.2",
     "lerna": "^3.4.3",
-    "rimraf": "^3.0.0",
     "source-map-support": "^0.5.16"
   },
   "workspaces": {
@@ -33,12 +27,10 @@
       "remote-interfaces",
       "replay",
       "replay-api",
-      "shared/*",
-      "website"
+      "shared/*"
     ]
   },
   "resolutions": {
-    "remark-slug": "git://github.com/ulixee/remark-slug.git",
     "tough-cookie": "^4.0.0"
   }
 }

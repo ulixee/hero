@@ -1,11 +1,8 @@
 import { Helpers } from '@secret-agent/shared-testing';
 import SecretAgent from '../index';
 import { GlobalPool } from '@secret-agent/core';
-import http from 'http';
-import Url from 'url';
-import { reservePort } from '@secret-agent/shared-testing/helpers';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import { Command, IInteraction } from '@secret-agent/client/interfaces/IInteractions';
+import { Command } from '@secret-agent/client/interfaces/IInteractions';
 
 beforeAll(async () => {
   GlobalPool.maxActiveSessionCount = 3;
@@ -21,6 +18,8 @@ describe('basic Interact tests', () => {
     const url = httpServer.url;
 
     const browser = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser);
+
     await browser.goto(`${url}page1`);
     await browser.document.querySelector('#input').focus();
     await browser.waitForMillis(3000);
@@ -42,6 +41,7 @@ describe('basic Interact tests', () => {
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     const browser1 = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser1);
     {
       // #1
       await browser1.goto(httpServer.url);
@@ -49,6 +49,7 @@ describe('basic Interact tests', () => {
     }
 
     const browser2 = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser2);
     {
       // #2
       await browser2.goto(httpServer.url);
@@ -56,6 +57,7 @@ describe('basic Interact tests', () => {
     }
 
     const browser3 = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser3);
     {
       // #3
       await browser3.goto(httpServer.url);
@@ -68,6 +70,7 @@ describe('basic Interact tests', () => {
       expect(GlobalPool.activeSessionCount).toBe(3);
       await browser1.close();
       const browser4 = await browser4Promise;
+      Helpers.needsClosing.push(browser4);
 
       // should give straight to this waiting promise
       expect(GlobalPool.activeSessionCount).toBe(3);
@@ -85,7 +88,7 @@ describe('basic Interact tests', () => {
 
   it('should clean up cookies between runs', async () => {
     const browser1 = await SecretAgent.createBrowser();
-
+    Helpers.needsClosing.push(browser1);
     {
       const httpServer = await Helpers.runHttpServer('ulixee=test1');
       const url = httpServer.url;
@@ -114,6 +117,7 @@ describe('basic Interact tests', () => {
     {
       // should be able to get a second agent out of the pool
       const browser2 = await SecretAgent.createBrowser();
+      Helpers.needsClosing.push(browser2);
       const httpServer = await Helpers.runHttpServer('ulixee3=test3');
       const url = httpServer.url;
       await browser2.goto(url);
@@ -146,6 +150,7 @@ describe('basic Interact tests', () => {
     });
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
     const browser = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser);
     await browser.goto(`${koaServer.baseUrl}/page1`);
     await browser.waitForAllContentLoaded();
     const readyLink = browser.document.querySelector('a.ready');
@@ -168,6 +173,7 @@ describe('basic Interact tests', () => {
       `;
     });
     const browser = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser);
     await browser.goto(`${koaServer.baseUrl}/keys`);
     await browser.waitForAllContentLoaded();
     const textarea = browser.document.querySelector('textarea');
@@ -187,6 +193,7 @@ describe('basic Interact tests', () => {
     );
 
     expect(await textarea.value).toBe('T');
+    await browser.close();
   });
 });
 

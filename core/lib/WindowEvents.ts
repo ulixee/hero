@@ -51,9 +51,9 @@ export default class WindowEvents {
     this.listenToErrors();
   }
 
-  public listen() {
+  public async listen() {
     this.listenToMitm();
-    this.listenToDevtoolsEvents();
+    await this.listenToDevtoolsEvents();
   }
 
   public on<K extends keyof IWindowEventParams>(
@@ -84,9 +84,12 @@ export default class WindowEvents {
     requestSession.on('response', this.onMitmRequestResponse.bind(this));
   }
 
-  private listenToDevtoolsEvents() {
+  private async listenToDevtoolsEvents() {
     const devtoolsClient = this.devtoolsClient;
 
+    await devtoolsClient.send('Network.enable', {
+      maxPostDataSize: 0,
+    });
     devtoolsClient.on(
       'Network.webSocketWillSendHandshakeRequest',
       this.onWebsocketHandshake.bind(this),

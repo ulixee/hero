@@ -65,9 +65,7 @@ export default class CoreClientSession {
   }
 
   public async getUrl(): Promise<string> {
-    return await this.commandQueue
-      .run<IExecJsPathResult<string>>('execJsPath', ['location', 'href'])
-      .then(x => x.value);
+    return await this.commandQueue.run<string>('getLocationHref');
   }
 
   public async goto(href: string): Promise<IResourceMeta> {

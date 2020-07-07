@@ -59,15 +59,18 @@ describe('basic Session Replay tests', () => {
     const ticks = sessionLoader.ticks;
     expect(ticks).toHaveLength(8);
 
-    const urls = sessionLoader.pages;
-    expect(urls).toHaveLength(2);
-    expect(urls[0].url).toBe(`${koaServer.baseUrl}/test1`);
+    const pages = sessionLoader.pages;
+    expect(pages).toHaveLength(2);
+    expect(pages[0].url).toBe(`${koaServer.baseUrl}/test1`);
 
     const firstCommand = sessionLoader.getCommand(ticks[0].commandId);
     expect(firstCommand.name).toBe('goto');
     expect(ticks[1].label).toBe('waitForLoad');
-    expect(ticks[1].minorTicks).toHaveLength(1);
-    const paintEvents = sessionLoader.fetchPaintEventsSlice(ticks[1].minorTicks[0].paintEventIdx);
+
+    expect(ticks[0].minorTicks).toHaveLength(2);
+    const paintEvents = sessionLoader.fetchPaintEventsSlice(
+      ticks[0].minorTicks.find(x => x.type === 'paint').paintEventIdx,
+    );
     expect(paintEvents[0].changeEvents).toHaveLength(13);
   });
 });

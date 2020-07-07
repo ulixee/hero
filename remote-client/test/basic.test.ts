@@ -1,4 +1,4 @@
-import RemoteClient from '@secret-agent/remote-client';
+import RemoteClient from '../index';
 
 describe('basic browser remote tests', () => {
   it('should goto and waitForLocation', async () => {

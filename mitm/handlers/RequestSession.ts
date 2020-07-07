@@ -12,6 +12,8 @@ import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpReso
 import { URL } from 'url';
 import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import Protocol from 'devtools-protocol';
+import Network = Protocol.Network;
 
 interface IRequestUpgradeLookup {
   sessionId: string;
@@ -27,6 +29,7 @@ export default class RequestSession {
 
   public delegate: IHttpRequestModifierDelegate = {};
 
+  public isClosing = false;
   public blockImages: boolean = false;
   public blockUrls: string[] = [];
   public blockResponseHandlerFn?: (
@@ -123,7 +126,7 @@ export default class RequestSession {
     browserRequestId: string;
     url: string;
     method: string;
-    resourceType: string;
+    resourceType: Network.ResourceType;
     hasUserGesture: boolean;
     documentUrl: string;
     isUserNavigation: boolean;
@@ -159,18 +162,13 @@ export default class RequestSession {
     }
 
     const key = headersKey.join(',');
-    if (RequestSession.requestUpgradeSessionLookup[key]) {
-      RequestSession.requestUpgradeSessionLookup[key].resolve({
-        sessionId: this.sessionId,
-        browserRequestId,
-      });
-    } else {
+    if (!RequestSession.requestUpgradeSessionLookup[key]) {
       RequestSession.requestUpgradeSessionLookup[key] = createPromise<IRequestUpgradeLookup>();
-      RequestSession.requestUpgradeSessionLookup[key].resolve({
-        sessionId: this.sessionId,
-        browserRequestId,
-      });
     }
+    RequestSession.requestUpgradeSessionLookup[key].resolve({
+      sessionId: this.sessionId,
+      browserRequestId,
+    });
   }
 
   public async getUpstreamProxyUrl() {
@@ -184,6 +182,7 @@ export default class RequestSession {
   }
 
   public async close() {
+    this.isClosing = true;
     delete RequestSession.sessions[this.sessionId];
     for (const headersKey of Object.keys(RequestSession.requestUpgradeSessionLookup)) {
       const wsSession = RequestSession.requestUpgradeSessionLookup[headersKey];
@@ -304,12 +303,13 @@ export default class RequestSession {
       headersKey.push(`${key}=${headers[key]}`);
     }
     const key = headersKey.join(',');
-    if (RequestSession.requestUpgradeSessionLookup[key]) {
-      return RequestSession.requestUpgradeSessionLookup[key].promise;
+    if (!RequestSession.requestUpgradeSessionLookup[key]) {
+      RequestSession.requestUpgradeSessionLookup[key] = createPromise<IRequestUpgradeLookup>(
+        timeout,
+      );
     }
-    const promise = createPromise<IRequestUpgradeLookup>(timeout);
-    RequestSession.requestUpgradeSessionLookup[key] = promise;
-    return promise.promise;
+
+    return RequestSession.requestUpgradeSessionLookup[key].promise;
   }
 }
 

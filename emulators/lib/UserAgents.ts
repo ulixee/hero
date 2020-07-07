@@ -9,6 +9,13 @@ interface IFilterOptions {
   family: string;
   versionMajor: number;
   versionMinor?: number;
+  operatingSystems?: IOperatingSystemFilter[];
+}
+
+interface IOperatingSystemFilter {
+  family: 'Ubuntu' | 'Linux' | 'Windows' | 'Mac OS X';
+  versionMajor?: string;
+  versionMinor?: string;
 }
 
 export default class UserAgents {
@@ -27,8 +34,9 @@ export default class UserAgents {
   public static findOne(filter: IFilterOptions): IUserAgent {
     for (const record of records) {
       const agent = lookup(record.userAgent);
-      if (this.matchesFilter(filter, agent)) {
-        return UserAgents.convertAgent(agent, record);
+      const userAgent = this.convertAgent(agent, record);
+      if (this.matchesFilter(filter, userAgent)) {
+        return userAgent;
       }
     }
     return null;
@@ -43,7 +51,7 @@ export default class UserAgents {
       deviceCategory: string;
       weight?: number;
     },
-  ) {
+  ): IUserAgent {
     const os = agent.os;
     return {
       platform: record.platform,
@@ -69,15 +77,33 @@ export default class UserAgents {
     if (filter.deviceCategory !== userAgent.deviceCategory) {
       return false;
     }
+
     if (filter.family !== userAgent.family) {
       return false;
     }
+
     if (filter.vendor && filter.vendor !== userAgent.vendor) {
       return false;
     }
-    if (filter.versionMinor !== undefined) {
-      return filter.versionMinor === userAgent.version.minor;
+
+    if (filter.versionMinor !== undefined && filter.versionMinor !== userAgent.version.minor) {
+      return false;
     }
-    return filter.versionMajor === userAgent.version.major;
+
+    if (filter.versionMajor !== undefined && filter.versionMajor !== userAgent.version.major) {
+      return false;
+    }
+
+    if (filter.operatingSystems) {
+      const hasMatch = filter.operatingSystems.find(x => {
+        if (x.family !== userAgent.os.family) return false;
+        if (x.versionMajor !== undefined && userAgent.os.major !== x.versionMajor) return false;
+        if (x.versionMinor !== undefined && userAgent.os.minor !== x.versionMinor) return false;
+        return true;
+      });
+      if (!hasMatch) return false;
+    }
+
+    return true;
   }
 }

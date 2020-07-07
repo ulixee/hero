@@ -16,9 +16,9 @@ describe('basic LocationTracker tests', () => {
     const meta = await Core.createSession();
     const core = Core.byWindowId[meta.windowId];
     await core.goto(unformattedUrl);
-    const formattedUrl = await core.execJsPath(['location', 'href']);
+    const formattedUrl = await core.getLocationHref();
 
-    expect(formattedUrl.value).toBe(`${unformattedUrl}/`);
+    expect(formattedUrl).toBe(`${unformattedUrl}/`);
 
     await core.close();
   });
@@ -90,10 +90,10 @@ describe('basic LocationTracker tests', () => {
     await core.goto(startingUrl);
     await core.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await core.execJsPath(['location', 'href']);
+    const currentUrl = await core.getLocationHref();
     const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
-    expect(currentUrl.value).toBe(navigateToUrl);
+    expect(currentUrl).toBe(navigateToUrl);
     expect(locationStatusHistory).toMatchObject([
       'change',
       'HttpRequested',
@@ -132,10 +132,10 @@ describe('basic LocationTracker tests', () => {
 
     await core.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await core.execJsPath(['location', 'href']);
+    const currentUrl = await core.getLocationHref();
     const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
-    expect(currentUrl.value).toBe(navigateToUrl);
+    expect(currentUrl).toBe(navigateToUrl);
     expect(locationStatusHistory).toMatchObject([
       'change',
       'HttpRequested',
@@ -176,10 +176,10 @@ describe('basic LocationTracker tests', () => {
 
     await core.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await core.execJsPath(['location', 'href']);
+    const currentUrl = await core.getLocationHref();
     const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
-    expect(currentUrl.value).toBe(navigateToUrl);
+    expect(currentUrl).toBe(navigateToUrl);
     expect(locationStatusHistory).toMatchObject([
       'change',
       'HttpRequested',
@@ -227,10 +227,10 @@ describe('basic LocationTracker tests', () => {
 
     await core.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await core.execJsPath(['location', 'href']);
+    const currentUrl = await core.getLocationHref();
     const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
-    expect(currentUrl.value).toBe(navigateToUrl);
+    expect(currentUrl).toBe(navigateToUrl);
     expect(locationStatusHistory).toMatchObject([
       'change',
       'HttpRequested',
@@ -278,8 +278,8 @@ setTimeout(function() {
       navigateToUrl,
     ]);
 
-    const currentUrl = await core.execJsPath(['location', 'href']);
-    expect(currentUrl.value).toBe(window.sessionState.pages.top.finalUrl);
+    const currentUrl = await core.getLocationHref();
+    expect(currentUrl).toBe(window.sessionState.pages.top.finalUrl);
 
     await core.close();
     runWaitForCbsSpy.mockRestore();

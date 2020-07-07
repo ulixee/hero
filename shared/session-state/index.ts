@@ -158,9 +158,11 @@ export default class SessionState {
   ) {
     const resourceId = this.browserRequestIdToResourceId[browserRequestId];
     if (!resourceId) {
-      throw new Error(
-        `Websocket Message broadcast for unknown request id: (browserRequestId: ${browserRequestId})`,
-      );
+      log.error(`Websocket Message broadcast for unknown request id`, {
+        browserRequestId,
+        message,
+      });
+      return;
     }
 
     const resourceMessage = {
@@ -262,7 +264,11 @@ export default class SessionState {
   }
 
   public captureLog(frameId: string, type: string, message: string, location?: string) {
-    log.info('Window.console', { type, message });
+    if (message.includes('Error: ') || message.startsWith('ERROR')) {
+      log.error('Window.error', message);
+    } else {
+      log.info('Window.console', { type, message });
+    }
     this.db.logs.insert(frameId, type, message, new Date(), location);
   }
 
@@ -290,7 +296,7 @@ export default class SessionState {
     );
   }
 
-  private async onPageEvents(
+  private onPageEvents(
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
@@ -314,22 +320,22 @@ export default class SessionState {
 
     for (const domChange of domChanges) {
       if (domChange[0] === -1) domChange[0] = startCommandId;
-      await this.db.domChanges.insert(frameId, domChange);
+      this.db.domChanges.insert(frameId, domChange);
     }
 
     for (const mouseEvent of mouseEvents) {
       if (mouseEvent[0] === -1) mouseEvent[0] = startCommandId;
-      await this.db.mouseEvents.insert(mouseEvent);
+      this.db.mouseEvents.insert(mouseEvent);
     }
 
     for (const focusEvent of focusEvents) {
       if (focusEvent[0] === -1) focusEvent[0] = startCommandId;
-      await this.db.focusEvents.insert(focusEvent);
+      this.db.focusEvents.insert(focusEvent);
     }
 
     for (const scrollEvent of scrollEvents) {
       if (scrollEvent[0] === -1) scrollEvent[0] = startCommandId;
-      await this.db.scrollEvents.insert(scrollEvent);
+      this.db.scrollEvents.insert(scrollEvent);
     }
   }
 }

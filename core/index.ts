@@ -1,4 +1,4 @@
-import uuid from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 import GlobalPool from './lib/GlobalPool';
 import Window from './lib/Window';
 import Session from './lib/Session';
@@ -91,6 +91,10 @@ export default class Core implements ICore {
     return this.window.runCommand<IExecJsPathResult<T>>('execJsPath', jsPath, propertiesToExtract);
   }
 
+  public async getLocationHref() {
+    return this.window.runCommand<string>('getLocationHref');
+  }
+
   public async interact(...interactionGroups: IInteractionGroups) {
     await this.window.runCommand('interact', interactionGroups);
   }
@@ -124,7 +128,7 @@ export default class Core implements ICore {
   }
 
   public async addEventListener(jsPath: IJsPath | null, type: string, options?: any) {
-    const id = uuid();
+    const id = uuidv1();
     const listener: IListenerObject = { id, type, jsPath };
     this.eventListenersById[id] = listener;
     if (jsPath) {

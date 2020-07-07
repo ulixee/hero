@@ -7,9 +7,9 @@ import Log from '@secret-agent/commons/Logger';
 import { exceptionDetailsToError } from './Utils';
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { URL } from 'url';
+import DomEnv from './DomEnv';
 import SetCookiesRequest = Protocol.Network.SetCookiesRequest;
 import CookieParam = Protocol.Network.CookieParam;
-import DomEnv from './DomEnv';
 
 const { log } = Log(module);
 
@@ -86,22 +86,12 @@ export default class UserProfile {
     if (fromProfile?.storage && Object.keys(fromProfile.storage).length) {
       // prime each page
       for (const origin of Object.keys(fromProfile.storage)) {
-        const executionContextId = new Promise<number>(resolve => {
-          const waitForContext = event => {
-            if (event.context.name === UserProfile.installedWorld) {
-              devtoolsClient.off('Runtime.executionContextCreated', waitForContext);
-              resolve(event.context.id);
-            }
-          };
-          devtoolsClient.on('Runtime.executionContextCreated', waitForContext);
-        });
         await window.setBrowserOrigin(origin);
-        await devtoolsClient.send('Runtime.evaluate', {
-          expression: `window.restoreUserStorage(${JSON.stringify(fromProfile.storage[origin])})`,
-          awaitPromise: true,
-          contextId: await executionContextId,
-          returnByValue: true,
-        });
+        await window.frameTracker.runInFrameWorld(
+          `window.restoreUserStorage(${JSON.stringify(fromProfile.storage[origin])})`,
+          window.frameTracker.mainFrameId,
+          UserProfile.installedWorld,
+        );
       }
       // reset browser to start page
       await window.setBrowserOrigin('about:blank');

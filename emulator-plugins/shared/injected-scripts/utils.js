@@ -184,37 +184,11 @@ function proxyDescriptors(obj, props) {
       }
 
       overrides.push(key);
-
       if (override.get) {
-        const toString = descriptor.get.toString();
-        descriptor.get = new Proxy(descriptor.get, {
-          apply(target, thisArg, argArray) {
-            if (thisArg === obj) {
-              const result = override.get(...arguments);
-              if (result !== nativeKey) return result;
-            }
-            return Reflect.apply(...arguments);
-          },
-        });
-        definedFuncs.set(descriptor.get, toString);
-        Object.defineProperty(proto, key, descriptor);
+        overrideGet(obj, proto, key, descriptor, override);
       }
-
       if (override.func) {
-        if (typeof proto[key] !== 'function') {
-          throw new Error("Trying to override function that's not a function! - " + key);
-        }
-        const toString = proto[key].toString();
-        proto[key] = new Proxy(proto[key], {
-          apply(target, thisArg, argArray) {
-            if (override.global || thisArg === obj) {
-              const result = override.func(...arguments);
-              if (result !== nativeKey) return result;
-            }
-            return Reflect.apply(...arguments);
-          },
-        });
-        definedFuncs.set(proto[key], toString);
+        overrideFunction(obj, proto, key, descriptor, override);
       }
     }
     if (overrides.length === propLength) break;
@@ -222,6 +196,38 @@ function proxyDescriptors(obj, props) {
   }
 
   return overrides;
+}
+
+function overrideGet(obj, proto, key, descriptor, override) {
+  const toString = descriptor.get.toString();
+  descriptor.get = new Proxy(descriptor.get, {
+    apply(target, thisArg, argArray) {
+      if (thisArg === obj) {
+        const result = override.get(...arguments);
+        if (result !== nativeKey) return result;
+      }
+      return Reflect.apply(...arguments);
+    },
+  });
+  definedFuncs.set(descriptor.get, toString);
+  Object.defineProperty(proto, key, descriptor);
+}
+
+function overrideFunction(obj, proto, key, descriptor, override) {
+  if (typeof proto[key] !== 'function') {
+    throw new Error("Trying to override function that's not a function! - " + key);
+  }
+  const toString = proto[key].toString();
+  proto[key] = new Proxy(proto[key], {
+    apply(target, thisArg, argArray) {
+      if (override.global || thisArg === obj) {
+        const result = override.func(...arguments);
+        if (result !== nativeKey) return result;
+      }
+      return Reflect.apply(...arguments);
+    },
+  });
+  definedFuncs.set(proto[key], toString);
 }
 
 function getDescriptorInHierarchy(obj, prop) {
@@ -256,7 +262,7 @@ function breakdownPath(path, propsToLeave) {
     if (next.startsWith('Symbol.')) next = Symbol.for(next);
     obj = obj[next];
     if (!obj) {
-      throw new Error('Property not found -> ' + path);
+      throw new Error('Property not found -> ' + path + ' at ' + next);
     }
   }
   return { parent: obj, remainder: parts };
@@ -311,6 +317,10 @@ function adjustKeyOrder(keys, propertyName, prevProperty, throughProperty) {
 
 function addDescriptorAfterProperty(path, prevProperty, propertyName, descriptor) {
   const owner = getObjectAtPath(path);
+  if (!owner) {
+    console.log('ERROR: Parent for property descriptor not found: ' + path + ' -> ' + propertyName);
+    return;
+  }
   const descriptors = Object.getOwnPropertyDescriptors(owner);
   // if already exists, don't add again
   if (!!descriptors[propertyName]) {
