@@ -9,7 +9,7 @@ import {
   LocationStatus,
 } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import SessionState from '@secret-agent/shared-session-state';
+import SessionState from '@secret-agent/session-state';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { AllowedNames } from '@secret-agent/commons/AllowedNames';

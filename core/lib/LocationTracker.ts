@@ -8,7 +8,7 @@ import {
   PipelineStatus,
 } from '@secret-agent/core-interfaces/Location';
 
-import SessionState from '@secret-agent/shared-session-state';
+import SessionState from '@secret-agent/session-state';
 import IPage, { NavigationReason } from '@secret-agent/core-interfaces/IPage';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 

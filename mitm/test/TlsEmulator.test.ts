@@ -1,4 +1,4 @@
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import SocketConnectDriver from '../lib/SocketConnectDriver';
 import * as fs from 'fs';
 import * as https from 'https';

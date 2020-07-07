@@ -1,4 +1,4 @@
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import SecretAgent from '../index';
 import { GlobalPool } from '@secret-agent/core';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';

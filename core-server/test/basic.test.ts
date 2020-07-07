@@ -1,6 +1,6 @@
 import CoreServer from '../index';
 import RemoteClient from '@secret-agent/remote-client';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 
 let httpServer;
 

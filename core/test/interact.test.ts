@@ -1,4 +1,4 @@
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import Core from '../index';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 

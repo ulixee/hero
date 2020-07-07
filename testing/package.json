@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/shared-testing",
+  "name": "@secret-agent/testing",
   "version": "1.0.0-alpha.3",
   "description": "Helpers and stubs for testing",
   "main": "index.js",

@@ -33,6 +33,7 @@
       "remote-interfaces",
       "replay",
       "replay-api",
+      "testing",
       "session-state",
       "commons",
       "website"

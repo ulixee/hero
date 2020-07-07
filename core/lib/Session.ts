@@ -5,7 +5,7 @@ import Window from './Window';
 import ChromeCore from './ChromeCore';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
-import SessionState from '@secret-agent/shared-session-state';
+import SessionState from '@secret-agent/session-state';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession from '@secret-agent/mitm/handlers/RequestSession';

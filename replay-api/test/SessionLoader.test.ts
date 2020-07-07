@@ -1,8 +1,8 @@
 import Core from '@secret-agent/core';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import SessionLoader from '../lib/SessionLoader';
-import SessionDb from '@secret-agent/shared-session-state/lib/SessionDb';
+import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 
 let koaServer;
 beforeAll(async () => {

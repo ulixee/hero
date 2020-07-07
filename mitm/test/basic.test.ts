@@ -1,6 +1,6 @@
 import http from 'http';
 import MitmServer from '../lib/MitmProxy';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import RequestSession from '../handlers/RequestSession';
 import HttpProxyAgent from 'http-proxy-agent';
 import MitmRequestHandler from '../lib/MitmRequestHandler';

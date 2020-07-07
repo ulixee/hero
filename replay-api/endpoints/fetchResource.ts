@@ -1,4 +1,4 @@
-import SessionDb from '@secret-agent/shared-session-state/lib/SessionDb';
+import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import SessionLoader from '../lib/SessionLoader';
 import IContext from '../interfaces/IContext';
 

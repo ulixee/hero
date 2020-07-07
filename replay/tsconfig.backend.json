@@ -10,5 +10,6 @@
     "shared",
     "*.ts",
     "frontend/constants"
-  ]
+  ],
+  "exclude": ["./tmp-files/**/*.ts", "dist", "node_modules", "**/node_modules"]
 }

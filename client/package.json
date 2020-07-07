@@ -9,7 +9,7 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@secret-agent/shared-testing": "^1.0.0-alpha.3",
+    "@secret-agent/testing": "^1.0.0-alpha.3",
     "@types/node": "^12.7.11"
   }
 }
