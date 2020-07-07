@@ -1,6 +1,6 @@
 import * as Path from 'path';
-import SessionDb from '@secret-agent/shared-session-state/lib/SessionDb';
-import SessionsDb from '@secret-agent/shared-session-state/lib/SessionsDb';
+import SessionDb from '@secret-agent/session-state/lib/SessionDb';
+import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import SessionLoader from '../lib/SessionLoader';
 import IContext from '../interfaces/IContext';
 

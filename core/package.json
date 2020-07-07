@@ -9,7 +9,7 @@
     "@secret-agent/humanoids": "^1.0.0-alpha.3",
     "@secret-agent/injected-scripts": "^1.0.0-alpha.3",
     "@secret-agent/mitm": "^1.0.0-alpha.3",
-    "@secret-agent/shared-session-state": "^1.0.0-alpha.3",
+    "@secret-agent/session-state": "^1.0.0-alpha.3",
     "awaited-dom": "^1.1.3",
     "moment": "^2.24.0",
     "puppeteer": "~2.1.1",
@@ -18,7 +18,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@secret-agent/shared-testing": "^1.0.0-alpha.3",
+    "@secret-agent/testing": "^1.0.0-alpha.3",
     "@types/node": "^12.7.11",
     "@types/puppeteer": "~2.0.1",
     "devtools-protocol": "^0.0.772852",

@@ -19,6 +19,7 @@ const defaults = {
 };
 
 const licensePath = `${__dirname}/LICENSE.md`;
+const readmePath = `${__dirname}/README.md`;
 
 function processPackageJson(packagePath) {
   const packageJson = JSON.parse(fs.readFileSync(`${packagePath}/package.json`, 'utf8'));
@@ -54,6 +55,10 @@ function processPackageJson(packagePath) {
   }
   if (finalPackageJson.main && !finalPackageJson.types) {
     finalPackageJson.types = finalPackageJson.main.replace('.js', '.d.ts');
+  }
+
+  if (finalPackageJson.name === 'secret-agent') {
+    fs.copyFileSync(readmePath, `${packagePath}/README.md`);
   }
 
   fs.writeFileSync(`${packagePath}/package.json`, JSON.stringify(finalPackageJson, null, 2));

@@ -27,7 +27,8 @@
       "remote-interfaces",
       "replay",
       "replay-api",
-      "shared/*"
+      "session-state",
+      "commons"
     ]
   },
   "resolutions": {

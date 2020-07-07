@@ -32,7 +32,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.1 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/shared-session-state
+**Note:** Version bump only for package @secret-agent/session-state
 
 
 
@@ -40,4 +40,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.0 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/shared-session-state
+**Note:** Version bump only for package @secret-agent/session-state

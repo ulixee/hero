@@ -15,7 +15,8 @@ module.exports = {
     'mitm/**/*.{js}',
     'remote-client/**/*.{js}',
     'replay-api/**/*.{js}',
-    'shared/**/*.{js}',
+    'session-state/**/*.{js}',
+    'commons/**/*.{js}',
   ],
   coveragePathIgnorePatterns: ['index.js'],
   modulePathIgnorePatterns: ['config'],
@@ -40,7 +41,8 @@ module.exports = {
     'mitm/',
     'remote-client/',
     'replay-api/',
-    'shared/',
+    'session-state/',
+    'commons/',
   ],
   moduleDirectories: [
     'node_modules',
@@ -53,6 +55,7 @@ module.exports = {
     'mitm/node_modules',
     'remote-client/node_modules',
     'replay-api/**/node_modules',
-    'shared/**/node_modules',
+    'session-state/**/node_modules',
+    'commons/**/node_modules',
   ],
 };

@@ -1,5 +1,5 @@
 import SecretAgent from '../index';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 
 let koaServer;
 beforeAll(async () => {

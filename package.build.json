@@ -33,7 +33,9 @@
       "remote-interfaces",
       "replay",
       "replay-api",
-      "shared/*",
+      "testing",
+      "session-state",
+      "commons",
       "website"
     ]
   },

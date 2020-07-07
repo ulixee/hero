@@ -22,3 +22,4 @@ emulators/data/DOM-*.json
 
 /.mitm-ca
 /.sessions
+.gh

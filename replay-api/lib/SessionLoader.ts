@@ -1,11 +1,11 @@
 import { URL } from 'url';
-import SessionDb from '@secret-agent/shared-session-state/lib/SessionDb';
+import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import DomChangesTable, {
   IDomChangeRecord,
-} from '@secret-agent/shared-session-state/models/DomChangesTable';
-import { IPageRecord } from '@secret-agent/shared-session-state/models/PagesTable';
-import { ISessionRecord } from '@secret-agent/shared-session-state/models/SessionTable';
+} from '@secret-agent/session-state/models/DomChangesTable';
+import { IPageRecord } from '@secret-agent/session-state/models/PagesTable';
+import { ISessionRecord } from '@secret-agent/session-state/models/SessionTable';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 
 export default class SessionLoader {

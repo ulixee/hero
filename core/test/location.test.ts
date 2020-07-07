@@ -1,4 +1,4 @@
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import Core from '../index';
 import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import LocationTracker from '../lib/LocationTracker';

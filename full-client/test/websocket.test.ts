@@ -1,5 +1,5 @@
 import SecretAgent from '../index';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import MitmServer from '@secret-agent/mitm/lib/MitmProxy';
 import { createPromise } from '@secret-agent/commons/utils';
 import WebSocket from 'ws';

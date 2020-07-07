@@ -1,5 +1,5 @@
 import SecretAgent from '../index';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 
 let koaServer;

@@ -1,5 +1,5 @@
 import Core, { Window } from '@secret-agent/core';
-import { Helpers } from '@secret-agent/shared-testing';
+import { Helpers } from '@secret-agent/testing';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
