@@ -1,19 +1,19 @@
 {
   "name": "@secret-agent/replay-api",
   "description": "The backend API for Replay",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "dependencies": {
     "@koa/cors": "^2.2.1",
-    "@secret-agent/injected-scripts": "^1.0.0-alpha.2",
-    "@secret-agent/shared-session-state": "^1.0.0-alpha.2",
+    "@secret-agent/injected-scripts": "^1.0.0-alpha.3",
+    "@secret-agent/shared-session-state": "^1.0.0-alpha.3",
     "command-line-args": "^5.1.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
     "koa-router": "^7.4.0"
   },
   "devDependencies": {
-    "@secret-agent/core": "^1.0.0-alpha.2",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.2",
-    "@secret-agent/shared-testing": "^1.0.0-alpha.2"
+    "@secret-agent/core": "^1.0.0-alpha.3",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.3",
+    "@secret-agent/shared-testing": "^1.0.0-alpha.3"
   }
 }
