@@ -1,7 +1,7 @@
 import Core from '../index';
-import { Helpers } from '../../shared/testing';
+import { Helpers } from '../../testing';
 import DomEnv from '../lib/DomEnv';
-import { ITestKoaServer } from '../../shared/testing/helpers';
+import { ITestKoaServer } from '@secret-agent/shared-testing/helpers';
 import { InteractionCommand } from '../../core-interfaces/IInteractions';
 import { LocationStatus } from '../../core-interfaces/Location';
 
