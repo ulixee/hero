@@ -1,5 +1,6 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
+import Rectangle = Electron.Rectangle;
 
 interface IOptions {
   name: string;
@@ -82,17 +83,19 @@ export default class BaseOverlay {
       width: rect.width || this.bounds.width || 0,
       x: rect.x || this.bounds.x || 0,
       y: rect.y || this.bounds.y || 0,
+      right: rect.right,
     };
     newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(newRect) : newRect);
 
     if (this.visible) {
-      this.browserView.setBounds(newRect as any);
+      this.browserView.setBounds(newRect as Rectangle);
     }
   }
 
   public show(
     browserWindow: BrowserWindow,
     options: { focus?: boolean; waitForLoad?: boolean; rect?: IRectangle },
+    ...args: any[]
   ) {
     if (!this.isInitialized) {
       this.initialize();
@@ -103,10 +106,12 @@ export default class BaseOverlay {
 
       clearTimeout(this.timeout);
 
+      if (args.length) this.webContents.send('show-args', ...args);
       browserWindow.webContents.send('overlay-visibility-change', this.name, true);
 
       const callback = () => {
         if (this.visible) {
+          this.rearrange(rect);
           if (focus) {
             this.webContents.focus();
           }

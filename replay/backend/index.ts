@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { app } from 'electron';
 import { platform } from 'os';
 import log from 'electron-log';

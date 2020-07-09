@@ -51,5 +51,6 @@ export default async function fetchSessionMeta(ctx: IContext) {
     relatedSessions: relatedSessions,
     pages: sessionLoader.pages,
     ticks: sessionLoader.ticks,
+    commandResults: sessionLoader.commandResults,
   };
 }

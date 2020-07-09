@@ -35,9 +35,9 @@
     "build:dist": "yarn build:frontend && yarn build:backend && yarn logs:reset && cp package.json ../build/replay",
     "build:pack": "yarn build:dist && electron-builder",
     "build": "yarn build:dist",
-    "clean": "rm -rf ../build/replay",
-    "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"cross-env NODE_ENV=development electron .\" \"nuxt-ts dev\"",
-    "start:backend": "NODE_ENV=development electron .",
+    "clean": "rm -rf ../build/replay/static && tsc -b --clean tsconfig.backend.json && tsc -b --clean tsconfig.json",
+    "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"cross-env NODE_ENV=development electron ../build/replay\" \"nuxt-ts dev\"",
+    "start:backend": "NODE_ENV=development electron ../build/replay",
     "start:frontend": "nuxt-ts start",
     "logs": "touch ~/Library/Logs/@secret-agent/replay/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay/main.log",
     "logs:reset": "touch ~/Library/Logs/@secret-agent/replay/main.log && rm ~/Library/Logs/@secret-agent/replay/main.log"
@@ -59,7 +59,8 @@
     "nuxt-start": "^2.12.2",
     "vue-slider-component": "^3.1.5",
     "vue-styled-components": "^1.5.1",
-    "wait-on": "^5.0.0"
+    "wait-on": "^5.0.0",
+    "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@babel/runtime-corejs2": "^7.9.6",

@@ -1,5 +1,5 @@
 process.env.ENVIRONMENT = process.env.ENVIRONMENT || 'development';
-
+import 'source-map-support/register';
 import * as http from 'http';
 import commandLineArgs from 'command-line-args';
 import server from './server';

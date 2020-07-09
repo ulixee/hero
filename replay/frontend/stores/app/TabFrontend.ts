@@ -5,8 +5,9 @@ import { closeWindow } from '../../pages/app/utils/windows';
 import { animateTab } from '../../pages/app/utils/tabs';
 import ITabLocation from '~shared/interfaces/ITabLocation';
 import ITabMeta from '~shared/interfaces/ITabMeta';
-import ISaSession from '~shared/interfaces/ISaSession';
+import ISaSession, { ITick } from '~shared/interfaces/ISaSession';
 import store from '../app';
+import ICommandResult from '~shared/interfaces/ICommandResult';
 
 export default class TabFrontend {
   @observable
@@ -24,6 +25,9 @@ export default class TabFrontend {
   @observable
   public loading = true;
 
+  @observable
+  public currentTickValue = 0;
+
   public width = 0;
   public left = 0;
 
@@ -34,24 +38,17 @@ export default class TabFrontend {
 
   public marginLeft = 0;
 
-  @computed
-  public get ticksByValue(): any {
-    const ticksByValue: any = {};
-    if (!this.saSession) return ticksByValue;
-    for (const tick of store.saSession.ticks) {
-      ticksByValue[tick.playbarOffsetPercent] = tick;
-    }
-    return ticksByValue;
-  }
+  @observable
+  public marks: number[] = [];
+
+  @observable
+  public ticksByValue: { [value: number]: ITick } = {};
+
+  public commandResults: { [commandId: number]: ICommandResult } = {};
 
   @computed
-  public get marks(): number[] {
-    const marks = [0];
-    if (!this.saSession) return marks;
-    for (const tick of this.saSession.ticks) {
-      marks.push(tick.playbarOffsetPercent);
-    }
-    return marks;
+  public get currentTick(): ITick {
+    return this.ticksByValue[this.currentTickValue];
   }
 
   @computed
@@ -106,6 +103,26 @@ export default class TabFrontend {
         this.select();
       });
     }
+  }
+
+  public updateSession(session: ISaSession) {
+    this.saSession = session;
+
+    const marks = [0];
+    const ticksByValue = {};
+    const commandResults = {};
+    if (this.saSession) {
+      for (const tick of this.saSession.ticks) {
+        marks.push(tick.playbarOffsetPercent);
+        ticksByValue[tick.playbarOffsetPercent] = tick;
+      }
+      for (const result of this.saSession.commandResults) {
+        commandResults[result.commandId] = result;
+      }
+    }
+    this.ticksByValue = ticksByValue;
+    this.marks = marks;
+    this.commandResults = commandResults;
   }
 
   @action

@@ -49,7 +49,7 @@ export interface IHistoryRecord {
   dataLocation: string;
   sessionName: string;
   scriptInstanceId: string;
-  scriptEntrypoint: number;
+  scriptEntrypoint: string;
   firstAccessedAt: string;
   lastAccessedAt: string;
 }

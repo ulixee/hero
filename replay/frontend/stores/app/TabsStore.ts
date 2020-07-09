@@ -99,15 +99,18 @@ export default class TabsStore {
       this.getTabById(id)?.close();
     });
 
-    ipcRenderer.on('tab:updated', (e, { id, location, saSession }) => {
+    ipcRenderer.on('tab:updated', (e, { id, location, saSession, currentTickValue }) => {
       const tab = this.getTabById(id);
       if (!tab) return;
       if (location) {
         tab.location = location;
-        tab.saSession = null;
+        tab.updateSession(null);
       } else if (saSession) {
         tab.location = null;
-        tab.saSession = saSession;
+        tab.updateSession(saSession);
+      }
+      if (currentTickValue !== undefined) {
+        tab.currentTickValue = currentTickValue;
       }
     });
 

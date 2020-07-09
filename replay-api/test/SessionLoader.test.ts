@@ -65,13 +65,15 @@ describe('basic Session Replay tests', () => {
 
     const firstCommand = sessionLoader.getCommand(ticks[0].commandId);
     expect(firstCommand.name).toBe('goto');
-    expect(ticks[1].label).toBe('waitForLoad');
+    expect(ticks[1].label).toBe('waitForLoad("AllContentLoaded")');
 
-    expect(ticks[0].minorTicks).toHaveLength(2);
+    expect(ticks[0].minorTicks).toHaveLength(3);
     const paintEvents = sessionLoader.fetchPaintEventsSlice(
       ticks[0].minorTicks.find(x => x.type === 'paint').paintEventIdx,
     );
-    expect(paintEvents[0].changeEvents).toHaveLength(13);
+    // 1 is just the new document
+    expect(paintEvents[0].changeEvents).toHaveLength(1);
+    expect(paintEvents[1].changeEvents).toHaveLength(13);
   });
 });
 

@@ -20,6 +20,7 @@ export const ICON_NUMBER = require('~frontend/assets/icons/number.svg');
 export const ICON_LOCK = require('~frontend/assets/icons/lock.svg');
 
 export const ICON_PLAY = require('~frontend/assets/icons/play.svg');
+export const ICON_PAUSE = require('~frontend/assets/icons/pause.svg');
 export const ICON_HOME = require('~frontend/assets/icons/home.svg');
 export const ICON_REFRESH = require('~frontend/assets/icons/refresh.svg');
 export const ICON_DASHBOARD = require('~frontend/assets/icons/dashboard.svg');

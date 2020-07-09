@@ -173,6 +173,11 @@ export default class Application {
       this.overlayManager.toggle(name, browserWindow, rect);
     });
 
+    ipcMain.on('overlay:show', (e, name, rect, ...args) => {
+      const browserWindow = Application.instance.windowManager.current.browserWindow;
+      this.overlayManager.show(name, browserWindow, rect, ...args);
+    });
+
     ipcMain.on('overlay:hide', (e, webContentsId) => {
       this.overlayManager.getByWebContentsId(webContentsId).hide();
     });
@@ -197,9 +202,14 @@ export default class Application {
       await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId, useCurrentTab);
     });
 
-    ipcMain.on('replay-paint-event', (e, paintEventIdx) => {
+    ipcMain.on('on-tick', (e, tickValue) => {
       const { tabManager } = Application.instance.windowManager.current;
-      tabManager.selected.replayPaintEvent(paintEventIdx);
+      tabManager.selected.onTick(tickValue);
+    });
+
+    ipcMain.on('on-tick-hover', (e, containerRect, tickValue) => {
+      const { tabManager } = Application.instance.windowManager.current;
+      tabManager.selected.onTickHover(containerRect, tickValue);
     });
 
     // SETTINGS

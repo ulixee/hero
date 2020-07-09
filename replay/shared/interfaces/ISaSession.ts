@@ -1,13 +1,35 @@
+import ICommandResult from './ICommandResult';
+
 export default interface ISaSession {
   id: string;
+  name: string;
+  viewportWidth: number;
+  viewportHeight: number;
+  deviceScaleFactor: number;
+  startDate: string;
+  closeDate: string;
   scriptEntrypoint: string;
   scriptInstanceId: string;
-  relatedScriptInstances: any[];
+  relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];
   ticks: ITick[];
-  pages: any[];
+  pages: { id: string; url: string }[];
+  commandResults: ICommandResult[];
+  relatedSessions: { id: string; name: string }[];
 }
 
-interface ITick {
+export interface ITick {
+  type: string;
   playbarOffsetPercent: number;
-  minorTicks: any[];
+  commandId: number;
+  label: string;
+  timestamp: Date;
+  minorTicks: IMinorTick[];
+}
+
+export interface IMinorTick {
+  type: string;
+  playbarOffsetPercent: number;
+  timestamp: Date;
+  paintEventIdx?: number;
+  pageIdx?: number;
 }

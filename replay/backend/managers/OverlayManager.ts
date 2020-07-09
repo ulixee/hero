@@ -7,6 +7,7 @@ import ScriptInstancesMenu from '../overlays/ScriptInstancesMenu';
 import SessionsMenu from '../overlays/SessionsMenu';
 import SessionUrlsMenu from '../overlays/SessionUrlsMenu';
 import IRectangle from '~shared/interfaces/IRectangle';
+import CommandOverlay from '../overlays/CommandOverlay';
 
 export default class OverlayManager {
   private overlays: BaseOverlay[] = [];
@@ -18,10 +19,11 @@ export default class OverlayManager {
     this.overlays.push(new ScriptInstancesMenu());
     this.overlays.push(new SessionsMenu());
     this.overlays.push(new SessionUrlsMenu());
+    this.overlays.push(new CommandOverlay());
   }
 
-  public show(name: string, browserWindow: BrowserWindow, rect: IRectangle) {
-    this.getByName(name).show(browserWindow, { rect });
+  public show(name: string, browserWindow: BrowserWindow, rect: IRectangle, ...args: any[]) {
+    this.getByName(name).show(browserWindow, { rect }, ...args);
   }
 
   public toggle(name: string, browserWindow: BrowserWindow, rect: IRectangle) {

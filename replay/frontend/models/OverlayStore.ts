@@ -21,6 +21,9 @@ export class OverlayStore {
   @observable
   public visible = false;
 
+  protected args: any;
+  protected onShowArgs?: (...args: any[]) => void;
+
   private _windowId = -1;
 
   private readonly persistent: boolean = false;
@@ -46,6 +49,11 @@ export class OverlayStore {
         this.hide();
       });
     }
+
+    ipcRenderer.on('show-args', (event, ...args: any[]) => {
+      this.args = args;
+      if (this.onShowArgs) this.onShowArgs(...args);
+    });
 
     ipcRenderer.on('update-settings', (e, settings: ISettings) => {
       this.settings = { ...this.settings, ...settings };

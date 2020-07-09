@@ -6,14 +6,15 @@
     "@koa/cors": "^2.2.1",
     "@secret-agent/injected-scripts": "^1.0.0-alpha.3",
     "@secret-agent/session-state": "^1.0.0-alpha.3",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.3",
     "command-line-args": "^5.1.1",
     "koa": "^2.11.0",
     "koa-body": "^4.1.1",
-    "koa-router": "^7.4.0"
+    "koa-router": "^7.4.0",
+    "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@secret-agent/core": "^1.0.0-alpha.3",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.3",
     "@secret-agent/testing": "^1.0.0-alpha.3"
   }
 }
