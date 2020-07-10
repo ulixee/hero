@@ -1,14 +1,21 @@
-// tslint:disable-next-line
-import type { CommandId, ISOTimestamp } from './GenericTypes';
+export default interface IPaintEvent {
+  timestamp: string;
+  commandId: number;
+  urlOrigin: string;
+  changeEvents: IDomChangeEvent[];
+}
 
-export type IDomChangeEvent = [
+type CommandId = number;
+type ISOTimestamp = string;
+
+type IDomChangeEvent = [
   CommandId,
   'newDocument' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
   INodeData,
   ISOTimestamp,
 ];
 
-export interface INodeData {
+interface INodeData {
   id: number;
   nodeType?: number;
   textContent?: string;

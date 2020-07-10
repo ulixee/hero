@@ -2,6 +2,7 @@ import decodeBuffer from '../lib/decodeBuffer';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 
 export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -59,19 +60,19 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   }
 
   public async getResourceByUrl(url: string) {
-    const sql = `select responseData, responseEncoding, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
+    const sql = `select type, responseData, responseEncoding, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
     const record = this.db.prepare(sql).get(url);
     if (!record) return null;
 
     const data = await decodeBuffer(record.responseData, record.responseEncoding);
     const headers = JSON.parse(record.responseHeaders);
-    return { data, headers };
+    return { data, type: record.type as ResourceType, headers };
   }
 }
 
 export interface IResourcesRecord {
   id: number;
-  type: string;
+  type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;
   redirectedToUrl?: string;

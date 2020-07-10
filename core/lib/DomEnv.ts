@@ -11,6 +11,7 @@ import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
+import { IPathStep } from '@secret-agent/injected-scripts/scripts/jsPath';
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
@@ -165,10 +166,25 @@ ${domStorageScript}
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
     if (result?.error) {
       log.error(fnName, result);
-      throw new Error(result.error);
+      throw new DomEnvError(result.error, result.pathState);
     } else {
       return result as T;
     }
+  }
+}
+
+export class DomEnvError extends Error {
+  private readonly pathState: { step: IPathStep; index: number };
+  constructor(message: string, pathState: { step: IPathStep; index: number }) {
+    super(message);
+    this.pathState = pathState;
+  }
+
+  public toJSON() {
+    return {
+      message: this.message,
+      pathState: this.pathState,
+    };
   }
 }
 

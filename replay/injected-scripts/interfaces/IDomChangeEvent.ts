@@ -3,7 +3,7 @@ import type { CommandId, ISOTimestamp } from './GenericTypes';
 
 export type IDomChangeEvent = [
   CommandId,
-  'added' | 'removed' | 'text' | 'attribute' | 'property',
+  'newDocument' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
   INodeData,
   ISOTimestamp,
 ];
@@ -15,7 +15,6 @@ export interface INodeData {
   tagName?: string;
   previousSiblingId?: number;
   parentNodeId?: number;
-  value?: string;
   attributes?: { [key: string]: string };
   properties?: { [key: string]: string | boolean | number };
 }

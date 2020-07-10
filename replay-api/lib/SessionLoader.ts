@@ -7,9 +7,12 @@ import DomChangesTable, {
 import { IPageRecord } from '@secret-agent/session-state/models/PagesTable';
 import { ISessionRecord } from '@secret-agent/session-state/models/SessionTable';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
+import { IJsPath } from '@secret-agent/injected-scripts/scripts/jsPath';
+import DomEnv from '@secret-agent/core/lib/DomEnv';
 
 export default class SessionLoader {
   public ticks: IMajorTick[] = [];
+  public readonly commandResults: ICommandResult[] = [];
   private readonly sessionDb: SessionDb;
 
   private readonly pageRecords: IPageRecord[];
@@ -34,6 +37,7 @@ export default class SessionLoader {
 
     this.assembleDomChangeGroups();
     this.assembleTicks();
+    this.assembleCommandResults();
   }
 
   public fetchPaintEventsSlice(fromPaintEventIdx: number, toPaintEventIdx?: number) {
@@ -50,6 +54,10 @@ export default class SessionLoader {
     return paintEvents;
   }
 
+  public fetchCommands() {
+    return this.commands;
+  }
+
   public async fetchResource(url: string, commandId: string) {
     return await this.sessionDb.resources.getResourceByUrl(url);
   }
@@ -63,6 +71,66 @@ export default class SessionLoader {
       id: x.id,
       url: x.finalUrl ?? x.requestedUrl,
     }));
+  }
+
+  private assembleCommandResults() {
+    for (const meta of this.commands) {
+      const duration = meta.endDate
+        ? new Date(meta.endDate).getTime() - new Date(meta.startDate).getTime()
+        : null;
+
+      const command: ICommandResult = {
+        commandId: meta.id,
+        duration,
+        isError: false,
+        result: null,
+      };
+      this.commandResults.push(command);
+
+      if (meta.result) {
+        const result = JSON.parse(meta.result);
+
+        command.result = result;
+        if (meta.resultType === 'Object') {
+          const resultType = typeof result.value;
+          if (
+            resultType === 'string' ||
+            resultType === 'number' ||
+            resultType === 'boolean' ||
+            resultType === 'undefined'
+          ) {
+            command.result = result.value;
+          }
+
+          if (result.attachedState) {
+            command.resultNodeIds = [result.attachedState.id];
+            command.resultNodeType = result.attachedState.type;
+            if (result.attachedState.iterableItems) {
+              command.result = result.attachedState.iterableItems;
+            }
+            if (result.attachedState.iterableIds) {
+              command.resultNodeIds = result.attachedState.iterableIds;
+            }
+          }
+        }
+
+        if (meta.resultType.toLowerCase().includes('error')) {
+          command.isError = true;
+          command.result = result.message;
+          if (result.pathState) {
+            const { step, index } = result.pathState;
+            command.failedJsPathStepIndex = index;
+            command.failedJsPathStep = Array.isArray(step)
+              ? `${step[0]}(${step.slice(1).map(x => JSON.stringify(x))})`
+              : step;
+          }
+        }
+      }
+      // we have shell objects occasionally coming back. hide from ui
+      if (meta.args?.includes(DomEnv.getAttachedStateFnName)) {
+        command.result = undefined;
+      }
+    }
   }
 
   private assembleDomChangeGroups() {
@@ -98,7 +166,7 @@ export default class SessionLoader {
       const majorTick = {
         type: 'command',
         commandId: command.id,
-        label: command.name,
+        label: formatCommand(command),
         timestamp: date,
         playbarOffsetPercent: this.getPlaybarOffset(date),
         minorTicks: [],
@@ -143,6 +211,32 @@ export default class SessionLoader {
   }
 }
 
+function formatCommand(command: ICommandMeta) {
+  if (!command.args) {
+    return `${command.name}()`;
+  }
+  const args = JSON.parse(command.args);
+  if (command.name === 'execJsPath') {
+    const jsPath = (args[0] as IJsPath)
+      .map((x, i) => {
+        if (i === 0 && typeof x === 'number') {
+          return 'prev';
+        }
+        if (Array.isArray(x)) {
+          if (x[0] === DomEnv.getAttachedStateFnName) return;
+          return `${x[0]}(${x.slice(1).map(y => JSON.stringify(y))})`;
+        }
+        return x;
+      })
+      .filter(Boolean);
+
+    if (!jsPath.length) return `${args.map(JSON.stringify)}`;
+
+    return `${jsPath.join('.')}`;
+  }
+  return `${command.name}(${args.map(JSON.stringify)})`;
+}
+
 export interface IDomChangeGroup {
   timestamp: string;
   commandId: number;
@@ -162,6 +256,7 @@ export interface IMajorTick {
   commandId: number;
   timestamp: Date;
   playbarOffsetPercent: number;
+  durationMs: number;
   label: string;
   minorTicks: IMinorTick[];
 }
@@ -172,4 +267,15 @@ export interface IMinorTick {
   pageIdx?: number;
   playbarOffsetPercent: number;
   timestamp: Date;
+}
+
+export interface ICommandResult {
+  commandId: number;
+  duration: number;
+  isError: boolean;
+  result: any;
+  resultNodeIds?: number[];
+  resultNodeType?: string;
+  failedJsPathStepIndex?: number;
+  failedJsPathStep?: string;
 }

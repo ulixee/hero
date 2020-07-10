@@ -1,5 +1,5 @@
-import { remote, ipcRenderer } from 'electron';
-import { observable, computed } from 'mobx';
+import { ipcRenderer, remote } from 'electron';
+import { computed, observable } from 'mobx';
 import { getTheme } from '~shared/utils/themes';
 import TabsStore from './app/TabsStore';
 import AddTabStore from './app/AddTabStore';
@@ -16,18 +16,28 @@ export class AppStore {
   }
 
   @computed
-  public get location() {
-    return this.tabs.selectedTab?.location;
-  }
-
-  @computed
   public get saSession() {
     return this.tabs.selectedTab?.saSession;
   }
 
   @computed
+  public get location() {
+    return this.tabs.selectedTab?.location;
+  }
+
+  @computed
   public get ticksByValue() {
     return this.tabs.selectedTab?.ticksByValue;
+  }
+
+  @computed
+  public get ticks() {
+    return this.tabs.selectedTab?.saSession.ticks;
+  }
+
+  @computed
+  public get selectedTab() {
+    return this.tabs.selectedTab;
   }
 
   @computed

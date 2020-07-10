@@ -68,7 +68,10 @@ const nodeTracker = new NodeTracker();
 window.nodeTracker = nodeTracker;
 
 class PageEventsRecorder {
-  private domChanges: IDomChangeEvent[] = [];
+  private domChanges: IDomChangeEvent[] = [
+    // preload with a document
+    [-1, 'newDocument', { id: -1, textContent: window.location.href }, new Date().toISOString()],
+  ];
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];

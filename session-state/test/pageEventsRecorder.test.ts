@@ -35,7 +35,8 @@ describe('basic Page Recorder tests', () => {
     // @ts-ignore
     const commandId = core.window.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(7);
+    expect(changesAfterLoad[frameId]).toHaveLength(8);
+    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
     await core.waitForElement(['document', ['querySelector', 'a']]);
 
@@ -70,7 +71,8 @@ function removeMe() {
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(10);
+    expect(changesAfterLoad[frameId]).toHaveLength(11);
+    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
     const loadCommand = core.lastCommandId;
 
     await core.waitForElement(['document', ['querySelector', 'a']]);
@@ -118,7 +120,8 @@ function sort() {
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(28);
+    expect(changesAfterLoad[frameId]).toHaveLength(29);
+    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
     const loadCommand = core.lastCommandId;
 
     await core.waitForElement(['document', ['querySelector', 'a']]);
@@ -164,7 +167,8 @@ function sort() {
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(13);
+    expect(changesAfterLoad[frameId]).toHaveLength(14);
+    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
     const loadCommand = core.lastCommandId;
 
     await core.waitForElement(['document', ['querySelector', 'a']]);

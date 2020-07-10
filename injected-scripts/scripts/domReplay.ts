@@ -19,6 +19,10 @@ const preserveElements = ['HTML', 'HEAD', 'BODY'];
 // tslint:disable-next-line:only-arrow-functions
 window.applyDomChanges = function(changes: IDomChangeEvent[]) {
   for (const change of changes) {
+    if (change[1] === 'newDocument') {
+      continue;
+    }
+
     const data = change[2];
 
     if (preserveElements.includes(data.tagName)) {

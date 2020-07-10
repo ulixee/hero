@@ -24,8 +24,6 @@ import FrameTracker from '@secret-agent/core/lib/FrameTracker';
 
 const { log } = Log(module);
 
-// ToDo: need to add mouse events
-
 export default class SessionState {
   public emitter: EventEmitter;
   public readonly commands: ICommandMeta[] = [];
@@ -117,13 +115,19 @@ export default class SessionState {
   public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta) {
     this.commands.push(commandMeta);
 
+    let result: T;
     try {
       await this.pageEventsListener.setCommandIdForPage(commandMeta.id);
 
       commandMeta.startDate = new Date().toISOString();
-      return await commandFn();
+      result = await commandFn();
+      return result;
+    } catch (err) {
+      result = err;
+      throw err;
     } finally {
       commandMeta.endDate = new Date().toISOString();
+      commandMeta.result = result;
       this.db.commands.insert(commandMeta);
     }
   }

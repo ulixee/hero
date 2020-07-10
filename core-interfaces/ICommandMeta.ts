@@ -5,4 +5,6 @@ export default interface ICommandMeta {
   args?: string;
   startDate: string;
   endDate?: string;
+  result?: any;
+  resultType?: string;
 }

@@ -20,6 +20,8 @@ export default abstract class BaseDb<T> {
   }
 
   public persist() {
-    Fs.writeFileSync(this.path, JSON.stringify(this.allData, null, 2));
+    // don't overwrite existing file in case we bail half way through
+    Fs.writeFileSync(`${this.path}.tmp`, JSON.stringify(this.allData, null, 2));
+    Fs.renameSync(`${this.path}.tmp`, this.path);
   }
 }

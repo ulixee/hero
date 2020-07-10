@@ -75,13 +75,13 @@ export default class TabManager extends EventEmitter {
     const tab = this.byId.get(id);
     if (!tab) return;
 
-    this.selectedId = id;
-
     if (this.selected) {
-      this.window.browserWindow.removeBrowserView(this.selected.browserView);
+      this.selected.removeFromWindow();
     }
 
-    this.window.browserWindow.addBrowserView(tab.browserView);
+    this.selectedId = id;
+
+    tab.addToWindow();
     this.window.webContents.focus();
     this.window.updateTitle();
 
@@ -105,10 +105,8 @@ export default class TabManager extends EventEmitter {
       width,
       height: this.fullscreen ? height : height - toolbarContentHeight,
     };
-    if (newBounds !== tab.bounds) {
-      tab.browserView.setBounds(newBounds);
-      tab.bounds = newBounds;
-    }
+
+    tab.fixBounds(newBounds);
   }
 
   public destroy(id: number) {
