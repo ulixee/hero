@@ -114,6 +114,12 @@ export default class TabsStore {
       }
     });
 
+    ipcRenderer.on('tab:page-url', (e, { id, url }) => {
+      const tab = this.getTabById(id);
+      if (!tab) return;
+      tab.currentUrl = url;
+    });
+
     ipcRenderer.on('tab:updated-loading', (e, tabId, isLoading) => {
       const tab = this.getTabById(tabId);
       if (tab) {

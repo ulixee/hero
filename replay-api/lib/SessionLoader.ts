@@ -1,4 +1,3 @@
-import { URL } from 'url';
 import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import DomChangesTable, {
@@ -7,28 +6,38 @@ import DomChangesTable, {
 import { IPageRecord } from '@secret-agent/session-state/models/PagesTable';
 import { ISessionRecord } from '@secret-agent/session-state/models/SessionTable';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import { IJsPath } from '@secret-agent/injected-scripts/scripts/jsPath';
 import DomEnv from '@secret-agent/core/lib/DomEnv';
+import { IMouseEventRecord } from '@secret-agent/session-state/models/MouseEventsTable';
+import { IScrollRecord } from '../../session-state/models/ScrollEventsTable';
+import { IFocusRecord } from '../../session-state/models/FocusEventsTable';
+import { IInteractionGroup } from '../../core-interfaces/IInteractions';
+import { getKeyboardChar } from '../../core-interfaces/IKeyboardLayoutUS';
 
 export default class SessionLoader {
   public ticks: IMajorTick[] = [];
   public readonly commandResults: ICommandResult[] = [];
-  private readonly sessionDb: SessionDb;
+  public readonly mouseEvents: IMouseEventRecord[];
+  public readonly scrollEvents: IScrollRecord[];
+  public readonly focusEvents: IFocusRecord[];
 
+  private readonly sessionDb: SessionDb;
   private readonly pageRecords: IPageRecord[];
   private readonly commands: ICommandMeta[];
   private readonly session: ISessionRecord;
 
   private readonly domChangeGroups: IDomChangeGroup[] = [];
   private originTime: Date;
-  private closeTime: Date;
 
+  private closeTime: Date;
   private readonly playbarMillis: number;
 
   constructor(sessionDb: SessionDb) {
     this.sessionDb = sessionDb;
     this.pageRecords = this.sessionDb.pages.all();
     this.commands = this.sessionDb.commands.all();
+    this.mouseEvents = this.sessionDb.mouseEvents.all();
+    this.scrollEvents = this.sessionDb.scrollEvents.all();
+    this.focusEvents = this.sessionDb.focusEvents.all();
     this.session = this.sessionDb.session.get();
 
     this.originTime = new Date(this.session.startDate);
@@ -40,24 +49,6 @@ export default class SessionLoader {
     this.assembleCommandResults();
   }
 
-  public fetchPaintEventsSlice(fromPaintEventIdx: number, toPaintEventIdx?: number) {
-    const domChangeGroups = this.domChangeGroups.slice(fromPaintEventIdx, toPaintEventIdx);
-    const paintEvents: IPaintEvent[] = [];
-    for (const domChangeGroup of domChangeGroups) {
-      paintEvents.push({
-        timestamp: domChangeGroup.timestamp,
-        commandId: domChangeGroup.commandId,
-        urlOrigin: domChangeGroup.urlOrigin,
-        changeEvents: domChangeGroup.changes.map(x => DomChangesTable.toDomChangeEvent(x)),
-      });
-    }
-    return paintEvents;
-  }
-
-  public fetchCommands() {
-    return this.commands;
-  }
-
   public async fetchResource(url: string, commandId: string) {
     return await this.sessionDb.resources.getResourceByUrl(url);
   }
@@ -66,9 +57,22 @@ export default class SessionLoader {
     return this.commands.find(x => x.id === tickId);
   }
 
+  public get paintEvents() {
+    const paintEvents: IPaintEvent[] = [];
+    for (const domChangeGroup of this.domChangeGroups) {
+      paintEvents.push({
+        timestamp: domChangeGroup.timestamp,
+        commandId: domChangeGroup.commandId,
+        changeEvents: domChangeGroup.changes.map(x => DomChangesTable.toDomChangeEvent(x)),
+      });
+    }
+    return paintEvents;
+  }
+
   public get pages() {
     return this.pageRecords.map(x => ({
       id: x.id,
+      commandId: x.startCommandId,
       url: x.finalUrl ?? x.requestedUrl,
     }));
   }
@@ -135,23 +139,15 @@ export default class SessionLoader {
 
   private assembleDomChangeGroups() {
     const domChanges = this.sessionDb.domChanges.all();
-    const pagesByFrameId: { [k: string]: IPageRecord } = {};
-    this.pageRecords.forEach(page => {
-      pagesByFrameId[page.frameId] = page;
-    });
-
     let domChangeGroup: IDomChangeGroup = null;
     for (const change of domChanges) {
       if (
         domChangeGroup?.timestamp !== change.timestamp ||
         domChangeGroup?.commandId !== change.commandId
       ) {
-        const page = pagesByFrameId[change.frameId];
-        const url = new URL(page.finalUrl ?? page.requestedUrl);
         domChangeGroup = {
           timestamp: change.timestamp,
           commandId: change.commandId,
-          urlOrigin: url.origin,
           changes: [],
         };
         this.domChangeGroups.push(domChangeGroup);
@@ -161,6 +157,16 @@ export default class SessionLoader {
   }
 
   private assembleTicks() {
+    this.ticks.push({
+      label: 'Load',
+      commandId: -1,
+      minorTicks: [],
+      type: 'load',
+      durationMs: 0,
+      timestamp: new Date(this.session.startDate),
+      playbarOffsetPercent: 0,
+    });
+
     for (const command of this.commands) {
       const date = new Date(command.startDate);
       const majorTick = {
@@ -185,10 +191,49 @@ export default class SessionLoader {
           });
         }
       }
+
+      for (let i = 0; i < this.mouseEvents.length; i += 1) {
+        const mouseEventRecord = this.mouseEvents[i];
+        if (mouseEventRecord.commandId === command.id) {
+          const timestamp = new Date(mouseEventRecord.timestamp);
+          majorTick.minorTicks.push({
+            type: 'mouse',
+            mouseEventIdx: i,
+            playbarOffsetPercent: this.getPlaybarOffset(timestamp),
+            timestamp,
+          });
+        }
+      }
+
+      for (let i = 0; i < this.focusEvents.length; i += 1) {
+        const record = this.focusEvents[i];
+        if (record.commandId === command.id) {
+          const timestamp = new Date(record.timestamp);
+          majorTick.minorTicks.push({
+            type: 'focus',
+            focusEventIdx: i,
+            playbarOffsetPercent: this.getPlaybarOffset(timestamp),
+            timestamp,
+          });
+        }
+      }
+
+      for (let i = 0; i < this.scrollEvents.length; i += 1) {
+        const record = this.scrollEvents[i];
+        if (record.commandId === command.id) {
+          const timestamp = new Date(record.timestamp);
+          majorTick.minorTicks.push({
+            type: 'scroll',
+            scrollEventIdx: i,
+            playbarOffsetPercent: this.getPlaybarOffset(timestamp),
+            timestamp,
+          });
+        }
+      }
+
       for (let i = 0; i < this.pageRecords.length; i += 1) {
         const page = this.pageRecords[i];
         if (page.startCommandId === command.id) {
-          majorTick.minorTicks.push();
           const timestamp = new Date(page.initiatedTime);
           majorTick.minorTicks.push({
             type: 'page',
@@ -197,11 +242,11 @@ export default class SessionLoader {
             timestamp,
           });
         }
-
-        majorTick.minorTicks.sort((a, b) => {
-          return a.playbarOffsetPercent - b.playbarOffsetPercent;
-        });
       }
+
+      majorTick.minorTicks.sort((a, b) => {
+        return a.playbarOffsetPercent - b.playbarOffsetPercent;
+      });
     }
   }
 
@@ -211,48 +256,101 @@ export default class SessionLoader {
   }
 }
 
+function formatJsPath(path: any) {
+  const jsPath = path
+    .map((x, i) => {
+      if (i === 0 && typeof x === 'number') {
+        return 'prev';
+      }
+      if (Array.isArray(x)) {
+        if (x[0] === DomEnv.getAttachedStateFnName) return;
+        return `${x[0]}(${x.slice(1).map(y => JSON.stringify(y))})`;
+      }
+      return x;
+    })
+    .filter(Boolean);
+
+  if (!jsPath.length) return `${path.map(JSON.stringify)}`;
+
+  return `${jsPath.join('.')}`;
+}
+
 function formatCommand(command: ICommandMeta) {
   if (!command.args) {
     return `${command.name}()`;
   }
   const args = JSON.parse(command.args);
   if (command.name === 'execJsPath') {
-    const jsPath = (args[0] as IJsPath)
-      .map((x, i) => {
-        if (i === 0 && typeof x === 'number') {
-          return 'prev';
-        }
-        if (Array.isArray(x)) {
-          if (x[0] === DomEnv.getAttachedStateFnName) return;
-          return `${x[0]}(${x.slice(1).map(y => JSON.stringify(y))})`;
-        }
-        return x;
-      })
-      .filter(Boolean);
-
-    if (!jsPath.length) return `${args.map(JSON.stringify)}`;
-
-    return `${jsPath.join('.')}`;
+    return formatJsPath(args[0]);
   }
+  if (command.name === 'interact') {
+    const interacts = args[0].map((x: IInteractionGroup) => {
+      return x
+        .map(y => {
+          const extras: any = {};
+          for (const [key, value] of Object.entries(y)) {
+            if (
+              key === 'mouseSteps' ||
+              key === 'mouseButton' ||
+              key === 'keyboardDelayBetween' ||
+              key === 'delayMillis'
+            ) {
+              extras[key] = value;
+            }
+          }
+          let pathString = '';
+          const path = y.mousePosition ?? y.delayElement ?? y.delayNode;
+          if (path) {
+            // mouse path
+            if (path.length === 2 && typeof path[0] === 'number' && typeof path[1] === 'number') {
+              pathString = path.join(',');
+            } else {
+              pathString = formatJsPath(path);
+            }
+          } else if (y.keyboardCommands) {
+            pathString = y.keyboardCommands
+              .map(keys => {
+                const [keyCommand] = Object.keys(keys);
+                if (keyCommand === 'string') return `"${keys[keyCommand]}"`;
+
+                const keyChar = getKeyboardChar(keys[keyCommand]);
+                if (keyCommand === 'keyPress') return `press: '${keyChar}'`;
+                if (keyCommand === 'up') return `up: '${keyChar}'`;
+                if (keyCommand === 'down') return `down: '${keyChar}'`;
+              })
+              .join(', ');
+          }
+
+          const extrasString = Object.keys(extras).length
+            ? `, ${JSON.stringify(extras, null, 2)}`
+            : '';
+          return `${y.command}( ${pathString}${extrasString} )`;
+        })
+        .join(', ');
+    });
+    return interacts.join(';\n');
+  }
+  if (command.name === 'waitForElement') {
+    return `waitForElement( ${formatJsPath(args[0])} )`;
+  }
+
   return `${command.name}(${args.map(JSON.stringify)})`;
 }
 
 export interface IDomChangeGroup {
   timestamp: string;
   commandId: number;
-  urlOrigin: string;
   changes: IDomChangeRecord[];
 }
 
 export interface IPaintEvent {
   timestamp: string;
   commandId: number;
-  urlOrigin: string;
   changeEvents: IDomChangeEvent[];
 }
 
 export interface IMajorTick {
-  type: 'command';
+  type: 'command' | 'load';
   commandId: number;
   timestamp: Date;
   playbarOffsetPercent: number;
@@ -262,9 +360,12 @@ export interface IMajorTick {
 }
 
 export interface IMinorTick {
-  type: 'paint' | 'mouse' | 'page';
+  type: 'paint' | 'mouse' | 'page' | 'scroll' | 'focus';
   paintEventIdx?: number;
   pageIdx?: number;
+  mouseEventIdx?: number;
+  focusEventIdx?: number;
+  scrollEventIdx?: number;
   playbarOffsetPercent: number;
   timestamp: Date;
 }

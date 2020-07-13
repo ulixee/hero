@@ -1,11 +1,12 @@
 import * as Path from 'path';
-import { app, ipcMain, Menu, dialog } from 'electron';
+import { app, dialog, ipcMain, Menu } from 'electron';
 import WindowManager from './managers/WindowManager';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
 import { loadNuxt } from 'nuxt-start';
 import ReplayApi from './ReplayApi';
 import storage from './storage';
+import ipcRenderer = Electron.ipcRenderer;
 
 export default class Application {
   public static instance = new Application();
@@ -202,6 +203,12 @@ export default class Application {
       await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId, useCurrentTab);
     });
 
+    ipcMain.on('navigate-to-session-page', async (e, page: { id: string; url: string }) => {
+      const { tabManager } = Application.instance.windowManager.current;
+      const offset = tabManager.selected.replayApi.getPageOffset(page);
+      tabManager.selected.changeTickOffset(offset);
+    });
+
     ipcMain.on('on-tick', (e, tickValue) => {
       const { tabManager } = Application.instance.windowManager.current;
       tabManager.selected.onTick(tickValue);
@@ -248,7 +255,15 @@ export default class Application {
     ipcMain.handle('fetch-script-instances', () => {
       const tabManager = this.windowManager.current.tabManager;
       const replayApi = tabManager.byId.get(tabManager.selectedId).replayApi;
-      return replayApi.saSession.relatedScriptInstances;
+      return replayApi.saSession.relatedScriptInstances.map(x => {
+        return {
+          ...x,
+          scriptInstanceId: x.id,
+          isActive: replayApi.saSession.scriptInstanceId === x.id,
+          dataLocation: replayApi.dataLocation,
+          sessionName: replayApi.saSession.name,
+        };
+      });
     });
 
     ipcMain.handle('fetch-sessions', () => {
@@ -260,7 +275,12 @@ export default class Application {
     ipcMain.handle('fetch-session-pages', () => {
       const tabManager = this.windowManager.current.tabManager;
       const replayApi = tabManager.byId.get(tabManager.selectedId).replayApi;
-      return replayApi.saSession.pages;
+      return replayApi.saSession.pages.map(x => {
+        return {
+          ...x,
+          isActive: replayApi.urlOrigin === x.url || `${replayApi.urlOrigin}/` === x.url,
+        };
+      });
     });
   }
 }

@@ -17,8 +17,12 @@ async function run() {
   const results = [];
 
   const stories = await browser.document.querySelectorAll('.athing');
+  let lastStory;
   for (const story of stories) {
     const extraElem = await story.nextElementSibling;
+    await browser.interact({
+      move: story,
+    });
 
     const titleElem = await story.querySelector('a.storylink');
 
@@ -39,6 +43,14 @@ async function run() {
       contributor = '';
     }
 
+    const links = [...(await extraElem.querySelectorAll('.subtext > a'))];
+    const commentsLink = links[links.length - 1];
+    const commentText = await commentsLink.textContent;
+    const commentCount = commentText.includes('comment')
+      ? parseInt(commentText.trim().match(/(\d+)\s/)[0], 10)
+      : 0;
+
+    lastStory = commentsLink;
     const url = await titleElem.getAttribute('href');
 
     results.push({
@@ -47,10 +59,23 @@ async function run() {
       score,
       age,
       url,
+      commentCount,
       contributor: {
         id: contributor,
         username: contributor,
       },
+    });
+  }
+
+  if (lastStory) {
+    await browser.click(lastStory);
+    await browser.waitForLocation('change');
+    await browser.waitForElement(browser.document.querySelector('textarea'));
+    await browser.click(browser.document.querySelector('textarea'));
+    await browser.type('Hackernews!');
+    const comments = [...(await browser.document.querySelectorAll('.commtext'))];
+    await browser.interact({
+      move: comments[comments.length - 1],
     });
   }
 

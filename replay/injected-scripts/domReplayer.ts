@@ -2,21 +2,21 @@
 
 import { ipcRenderer } from 'electron';
 import { INodeData, IDomChangeEvent } from './interfaces/IDomChangeEvent';
+import { IFocusRecord, IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
-ipcRenderer.on('reset-dom', event => {
-  resetDom();
-});
-
-ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds) => {
+ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scrollEvent) => {
   if (changeEvents) applyDomChanges(changeEvents);
-  highlightNodes(resultNodeIds);
+  if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
+  if (mouseEvent) updateMouse(mouseEvent);
+  if (scrollEvent) updateScroll(scrollEvent);
 });
 
 function resetDom() {
   idMap.clear();
+  window.scrollTo({ top: 0 });
   document.documentElement.innerHTML = '';
 }
 
@@ -154,6 +154,7 @@ showMoreDown.innerHTML = overflowBar;
 
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
+let lastHighlightNodes: number[] = [];
 
 function buildHover() {
   const hoverNode = document.createElement('div');
@@ -168,6 +169,8 @@ function buildHover() {
 }
 
 function highlightNodes(nodeIds: number[]) {
+  if (lastHighlightNodes?.toString() === nodeIds?.toString()) return;
+  lastHighlightNodes = nodeIds;
   const length = nodeIds ? nodeIds.length : 0;
   try {
     minHighlightTop = 10e3;
@@ -191,9 +194,7 @@ function highlightNodes(nodeIds: number[]) {
       if (bounds.y > maxHighlightTop) maxHighlightTop = bounds.y;
       if (bounds.y + bounds.height < minHighlightTop) minHighlightTop = bounds.y + bounds.height;
 
-      if (!hoverNode.parentElement) {
-        document.body.appendChild(hoverNode);
-      }
+      document.body.appendChild(hoverNode);
     }
 
     checkOverflows();
@@ -220,3 +221,72 @@ function checkOverflows() {
 }
 
 document.addEventListener('scroll', () => checkOverflows());
+
+/////// mouse ///////
+const box = document.createElement('sa-mouse-pointer');
+const styleElement = document.createElement('style');
+styleElement.innerHTML = `
+  sa-mouse-pointer {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    z-index: 10000;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background: rgba(0,0,0,.4);
+    border: 1px solid white;
+    border-radius: 10px;
+    margin: -10px 0 0 -10px;
+    padding: 0;
+    transition: background .2s, border-radius .2s, border-color .2s;
+  }
+  sa-mouse-pointer.button-1 {
+    transition: none;
+    background: rgba(0,0,0,0.9);
+  }
+  sa-mouse-pointer.button-2 {
+    transition: none;
+    border-color: rgba(0,0,255,0.9);
+  }
+  sa-mouse-pointer.button-3 {
+    transition: none;
+    border-radius: 4px;
+  }
+  sa-mouse-pointer.button-4 {
+    transition: none;
+    border-color: rgba(255,0,0,0.9);
+  }
+  sa-mouse-pointer.button-5 {
+    transition: none;
+    border-color: rgba(0,255,0,0.9);
+  }
+`;
+
+let isMouseInstalled = false;
+function updateMouse(mouseEvent: IMouseEvent) {
+  if (isMouseInstalled === false) {
+    isMouseInstalled = true;
+    document.head.appendChild(styleElement);
+    document.body.appendChild(box);
+  }
+  if (mouseEvent.pageX !== undefined) {
+    box.style.left = `${mouseEvent.pageX}px`;
+    box.style.top = `${mouseEvent.pageY}px`;
+  }
+  if (mouseEvent.buttons !== undefined) {
+    for (let i = 0; i < 5; i += 1) {
+      box.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
+    }
+  }
+}
+
+//// other events /////
+
+function updateScroll(scrollEvent: IScrollRecord) {
+  window.scroll({
+    behavior: 'auto',
+    top: scrollEvent.scrollY,
+    left: scrollEvent.scrollX,
+  });
+}

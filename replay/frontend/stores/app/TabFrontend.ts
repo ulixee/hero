@@ -1,13 +1,12 @@
 import { ipcRenderer } from 'electron';
-import { observable, computed, action } from 'mobx';
-import { TABS_PADDING, TAB_ANIMATION_DURATION, TAB_MIN_WIDTH, TAB_MAX_WIDTH } from './constants';
+import { action, computed, observable } from 'mobx';
+import { TAB_ANIMATION_DURATION, TAB_MAX_WIDTH, TAB_MIN_WIDTH, TABS_PADDING } from './constants';
 import { closeWindow } from '../../pages/app/utils/windows';
 import { animateTab } from '../../pages/app/utils/tabs';
 import ITabLocation from '~shared/interfaces/ITabLocation';
 import ITabMeta from '~shared/interfaces/ITabMeta';
-import ISaSession, { ITick } from '~shared/interfaces/ISaSession';
+import ISaSession from '~shared/interfaces/ISaSession';
 import store from '../app';
-import ICommandResult from '~shared/interfaces/ICommandResult';
 
 export default class TabFrontend {
   @observable
@@ -28,6 +27,9 @@ export default class TabFrontend {
   @observable
   public currentTickValue = 0;
 
+  @observable
+  public currentUrl = 'Loading';
+
   public width = 0;
   public left = 0;
 
@@ -42,14 +44,7 @@ export default class TabFrontend {
   public marks: number[] = [];
 
   @observable
-  public ticksByValue: { [value: number]: ITick } = {};
-
-  public commandResults: { [commandId: number]: ICommandResult } = {};
-
-  @computed
-  public get currentTick(): ITick {
-    return this.ticksByValue[this.currentTickValue];
-  }
+  public markIndicators: { [mark: number]: { isError: boolean } } = {};
 
   @computed
   public get favicon() {
@@ -108,21 +103,20 @@ export default class TabFrontend {
   public updateSession(session: ISaSession) {
     this.saSession = session;
 
-    const marks = [0];
-    const ticksByValue = {};
-    const commandResults = {};
+    const marks = [];
+    const markIndicators = {};
     if (this.saSession) {
       for (const tick of this.saSession.ticks) {
         marks.push(tick.playbarOffsetPercent);
-        ticksByValue[tick.playbarOffsetPercent] = tick;
-      }
-      for (const result of this.saSession.commandResults) {
-        commandResults[result.commandId] = result;
+        markIndicators[tick.playbarOffsetPercent] = { isError: false };
+        const result = this.saSession.commandResults.find(x => x.commandId === tick.commandId);
+        if (result?.isError) {
+          markIndicators[tick.playbarOffsetPercent].isError = true;
+        }
       }
     }
-    this.ticksByValue = ticksByValue;
     this.marks = marks;
-    this.commandResults = commandResults;
+    this.markIndicators = markIndicators;
   }
 
   @action

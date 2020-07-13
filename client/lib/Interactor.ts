@@ -74,6 +74,7 @@ function convertToCoreMousePosition(mousePosition: IMousePosition): ICoreMousePo
     return mousePosition;
   }
   const { awaitedPath } = getState<ISuperElement, { awaitedPath: AwaitedPath }>(mousePosition);
+  if (!awaitedPath) throw new Error(`Element not found -> ${mousePosition}`);
   return awaitedPath.toJSON();
 }
 

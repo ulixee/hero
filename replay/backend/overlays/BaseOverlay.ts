@@ -106,7 +106,7 @@ export default class BaseOverlay {
 
       clearTimeout(this.timeout);
 
-      if (args.length) this.webContents.send('show-args', ...args);
+      this.webContents.send('will-show', ...args);
       browserWindow.webContents.send('overlay-visibility-change', this.name, true);
 
       const callback = () => {

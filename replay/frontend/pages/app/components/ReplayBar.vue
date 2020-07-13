@@ -7,7 +7,7 @@
     span.label Stop
     Icon(:src="ICON_PAUSE" :size="14")
   .slider-wrapper(v-if="store.marks.length" ref="sliderWrapper")
-    VueSlider(ref="slider" tooltip="none" :marks="store.marks" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
+    VueSlider(ref="slider" tooltip="none" :marks="store.marks" :interval="0.1" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
         @mousemove.native="showCommandOverlay")
         template(v-slot:mark="{ pos, value }" )
             .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{error:tickHasCommandResultError(value), hovered:isHovered(value)}")
@@ -62,6 +62,7 @@ export default class ReplayBar extends Vue {
     this.interval = setInterval(() => {
       if (this.store.selectedTab.currentTickValue + 0.1 > 100) {
         this.store.selectedTab.currentTickValue = 100;
+        this.pause();
       } else {
         this.store.selectedTab.currentTickValue += 0.1;
       }
@@ -74,13 +75,8 @@ export default class ReplayBar extends Vue {
   }
 
   private tickHasCommandResultError(mark: number) {
-    const command = this.store.ticksByValue[mark];
-    if (!command) return;
-    const result = this.store.selectedTab.commandResults[command.commandId];
-    if (result) {
-      return result.isError;
-    }
-    return false;
+    const indicators = this.store.markIndicators[mark];
+    return indicators?.isError === true;
   }
 
   private showCommandOverlay(e: MouseEvent) {
@@ -102,6 +98,7 @@ export default class ReplayBar extends Vue {
   }
 
   private onValueChange(value: number) {
+    // this is called when someone clicks, so pause the playback
     this.pause();
     ipcRenderer.send('on-tick', value);
   }

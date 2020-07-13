@@ -1,7 +1,6 @@
 export default interface IPaintEvent {
   timestamp: string;
   commandId: number;
-  urlOrigin: string;
   changeEvents: IDomChangeEvent[];
 }
 

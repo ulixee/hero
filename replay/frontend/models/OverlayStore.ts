@@ -50,7 +50,8 @@ export class OverlayStore {
       });
     }
 
-    ipcRenderer.on('show-args', (event, ...args: any[]) => {
+    ipcRenderer.on('will-show', (event, ...args: any[]) => {
+      this.visible = true;
       this.args = args;
       if (this.onShowArgs) this.onShowArgs(...args);
     });

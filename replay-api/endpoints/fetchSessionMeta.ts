@@ -1,8 +1,9 @@
 import * as Path from 'path';
 import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
-import SessionLoader from '../lib/SessionLoader';
+import SessionLoader, { IPaintEvent } from '../lib/SessionLoader';
 import IContext from '../interfaces/IContext';
+import DomChangesTable from '../../session-state/models/DomChangesTable';
 
 const readonlyAndFileMustExist = { readonly: true, fileMustExist: true };
 
@@ -51,6 +52,10 @@ export default async function fetchSessionMeta(ctx: IContext) {
     relatedSessions: relatedSessions,
     pages: sessionLoader.pages,
     ticks: sessionLoader.ticks,
+    paintEvents: sessionLoader.paintEvents,
+    mouseEvents: sessionLoader.mouseEvents,
+    scrollEvents: sessionLoader.scrollEvents,
+    focusEvents: sessionLoader.focusEvents,
     commandResults: sessionLoader.commandResults,
   };
 }

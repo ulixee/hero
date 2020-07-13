@@ -2,7 +2,6 @@ import IContext from '../interfaces/IContext';
 
 const endpoints: { [name: string]: (ctx: any, next: any) => any } = {
   fetchSessionMeta: loadEndpoint('fetchSessionMeta'),
-  fetchPaintEvents: loadEndpoint('fetchPaintEvents'),
   fetchResource: loadEndpoint('fetchResource'),
 };
 

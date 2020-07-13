@@ -2,7 +2,6 @@ process.env.ENVIRONMENT = process.env.ENVIRONMENT || 'development';
 
 import Koa from 'koa';
 import Router from 'koa-router';
-import body from 'koa-body';
 import cors from '@koa/cors';
 
 import middleware from './middleware';
@@ -18,7 +17,6 @@ const isTest = process.env.ENVIRONMENT === 'test';
 // ////////////////////////////////////////////////////////////////////////////////////////
 
 router.get('/sessionMeta', endpoints.fetchSessionMeta);
-router.get('/paintEvents', endpoints.fetchPaintEvents);
 router.get('/resource', endpoints.fetchResource);
 
 // ////////////////////////////////////////////////////////////////////////////////////////
