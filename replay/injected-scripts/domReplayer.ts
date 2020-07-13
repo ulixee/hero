@@ -16,6 +16,7 @@ ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scr
 
 function resetDom() {
   idMap.clear();
+  isMouseInstalled = false;
   window.scrollTo({ top: 0 });
   document.documentElement.innerHTML = '';
 }

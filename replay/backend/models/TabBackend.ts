@@ -86,6 +86,7 @@ export default class TabBackend {
 
     if (this.replayApi) {
       this.replayApi.removeAllListeners('session:updated');
+      this.replayApi.isActive = false;
     }
 
     const tabUpdateParams: any = { id: this.id, currentTickValue: 0 };

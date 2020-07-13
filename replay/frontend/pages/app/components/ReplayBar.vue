@@ -35,10 +35,19 @@ export default class ReplayBar extends Vue {
   private readonly ICON_PLAY = ICON_PLAY;
   private readonly ICON_PAUSE = ICON_PAUSE;
   private store = store;
-
-  private isPlaying = false;
   private hoveredValue: string = '';
-  private interval: number;
+
+  private get isPlaying() {
+    return this.store.selectedTab.isPlaying;
+  }
+
+  private play() {
+    this.store.selectedTab.startPlayback();
+  }
+
+  private pause() {
+    this.store.selectedTab.pausePlayback();
+  }
 
   @NoCache
   private get cssVars() {
@@ -46,28 +55,6 @@ export default class ReplayBar extends Vue {
       '--toolbarHeight': `${TOOLBAR_HEIGHT}px`,
       '--toolbarBackgroundColor': store.theme.toolbarBackgroundColor,
     };
-  }
-
-  private pause() {
-    this.isPlaying = false;
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = undefined;
-    }
-  }
-
-  private play() {
-    this.isPlaying = true;
-    clearInterval(this.interval);
-    this.interval = setInterval(() => {
-      if (this.store.selectedTab.currentTickValue + 0.1 > 100) {
-        this.store.selectedTab.currentTickValue = 100;
-        this.pause();
-      } else {
-        this.store.selectedTab.currentTickValue += 0.1;
-      }
-      ipcRenderer.send('on-tick', this.store.selectedTab.currentTickValue);
-    }, 20) as any;
   }
 
   private isHovered(value: number) {
@@ -118,7 +105,7 @@ export default class ReplayBar extends Vue {
   }
 
   private beforeDestroy() {
-    clearInterval(this.interval);
+    this.pause();
   }
 }
 </script>

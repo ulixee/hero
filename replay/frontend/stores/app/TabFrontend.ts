@@ -44,7 +44,12 @@ export default class TabFrontend {
   public marks: number[] = [];
 
   @observable
+  public isPlaying = false;
+
+  @observable
   public markIndicators: { [mark: number]: { isError: boolean } } = {};
+
+  private interval: number;
 
   @computed
   public get favicon() {
@@ -96,11 +101,35 @@ export default class TabFrontend {
     if (active) {
       requestAnimationFrame(() => {
         this.select();
+        if (saSession && this.location === 'Replay') this.startPlayback();
       });
     }
   }
 
+  public pausePlayback() {
+    this.isPlaying = false;
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
+  }
+
+  public startPlayback() {
+    this.isPlaying = true;
+    clearInterval(this.interval);
+    this.interval = setInterval(() => {
+      if (this.currentTickValue + 0.1 > 100) {
+        this.currentTickValue = 100;
+        this.pausePlayback();
+      } else {
+        this.currentTickValue += 0.1;
+      }
+      ipcRenderer.send('on-tick', this.currentTickValue);
+    }, 20) as any;
+  }
+
   public updateSession(session: ISaSession) {
+    const startSessionMillis = this.saSession?.durationMillis;
     this.saSession = session;
 
     const marks = [];
@@ -117,6 +146,21 @@ export default class TabFrontend {
     }
     this.marks = marks;
     this.markIndicators = markIndicators;
+    if (startSessionMillis && this.currentTickValue) {
+      console.log(
+        this.currentTickValue,
+        startSessionMillis,
+        session.durationMillis,
+        startSessionMillis / session.durationMillis,
+      );
+      if (session.durationMillis < startSessionMillis) {
+        this.currentTickValue =
+          this.currentTickValue * (session.durationMillis / startSessionMillis);
+      } else {
+        this.currentTickValue =
+          this.currentTickValue * (startSessionMillis / session.durationMillis);
+      }
+    }
   }
 
   @action
@@ -182,6 +226,7 @@ export default class TabFrontend {
 
   @action
   public close() {
+    this.pausePlayback();
     const selected = store.tabs.selectedTabId === this.id;
 
     ipcRenderer.send('tab:destroy', this.id);
@@ -229,6 +274,7 @@ export default class TabFrontend {
   }
 
   public async reload(): Promise<any> {
+    this.pausePlayback();
     return await ipcRenderer.invoke('tab:reload', this.id);
   }
 }

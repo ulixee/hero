@@ -7,7 +7,10 @@ import { IPageRecord } from '@secret-agent/session-state/models/PagesTable';
 import { ISessionRecord } from '@secret-agent/session-state/models/SessionTable';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import DomEnv from '@secret-agent/core/lib/DomEnv';
-import { IMouseEventRecord } from '@secret-agent/session-state/models/MouseEventsTable';
+import {
+  IMouseEventRecord,
+  MouseEventType,
+} from '@secret-agent/session-state/models/MouseEventsTable';
 import { IScrollRecord } from '../../session-state/models/ScrollEventsTable';
 import { IFocusRecord } from '../../session-state/models/FocusEventsTable';
 import { IInteractionGroup } from '../../core-interfaces/IInteractions';
@@ -19,32 +22,40 @@ export default class SessionLoader {
   public readonly mouseEvents: IMouseEventRecord[];
   public readonly scrollEvents: IScrollRecord[];
   public readonly focusEvents: IFocusRecord[];
+  public readonly durationMillis: number;
 
   private readonly sessionDb: SessionDb;
   private readonly pageRecords: IPageRecord[];
   private readonly commands: ICommandMeta[];
+
   private readonly session: ISessionRecord;
-
   private readonly domChangeGroups: IDomChangeGroup[] = [];
-  private originTime: Date;
-
-  private closeTime: Date;
-  private readonly playbarMillis: number;
+  private startTime: Date;
+  private closeTime?: Date;
 
   constructor(sessionDb: SessionDb) {
     this.sessionDb = sessionDb;
     this.pageRecords = this.sessionDb.pages.all();
     this.commands = this.sessionDb.commands.all();
-    this.mouseEvents = this.sessionDb.mouseEvents.all();
+    this.mouseEvents = this.sessionDb.mouseEvents.allEvents([
+      MouseEventType.MOVE,
+      MouseEventType.DOWN,
+      MouseEventType.UP,
+    ]);
     this.scrollEvents = this.sessionDb.scrollEvents.all();
     this.focusEvents = this.sessionDb.focusEvents.all();
     this.session = this.sessionDb.session.get();
-
-    this.originTime = new Date(this.session.startDate);
-    this.closeTime = new Date(this.session.closeDate);
-    this.playbarMillis = this.closeTime.getTime() - this.originTime.getTime();
-
     this.assembleDomChangeGroups();
+
+    this.startTime = new Date(this.session.startDate);
+    this.closeTime = this.session.closeDate ? new Date(this.session.closeDate) : null;
+    if (this.closeTime) {
+      this.durationMillis = this.closeTime.getTime() - this.startTime.getTime();
+    } else {
+      // add 10 seconds to end time
+      this.durationMillis = new Date().getTime() + 10e3 - this.startTime.getTime();
+    }
+
     this.assembleTicks();
     this.assembleCommandResults();
   }
@@ -251,8 +262,8 @@ export default class SessionLoader {
   }
 
   private getPlaybarOffset(timestamp: Date) {
-    const millis = timestamp.getTime() - this.originTime.getTime();
-    return Math.floor((1000 * millis) / this.playbarMillis) / 10;
+    const millis = timestamp.getTime() - this.startTime.getTime();
+    return Math.floor((1000 * millis) / this.durationMillis) / 10;
   }
 }
 
@@ -335,6 +346,11 @@ function formatCommand(command: ICommandMeta) {
   }
 
   return `${command.name}(${args.map(JSON.stringify)})`;
+}
+
+function last<T>(arr: T[]): T {
+  if (arr && arr.length) return arr[arr.length - 1];
+  return null;
 }
 
 export interface IDomChangeGroup {

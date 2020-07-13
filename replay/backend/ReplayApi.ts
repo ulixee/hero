@@ -16,6 +16,7 @@ export default class ReplayApi extends EventEmitter {
   public readonly dataLocation: string;
   public readonly sessionId: string;
   public urlOrigin: string;
+  public isActive = true;
 
   private currentTickIdx = 0;
   private currentPlaybarOffsetPct = 0;
@@ -25,8 +26,6 @@ export default class ReplayApi extends EventEmitter {
   private paintEvents: IPaintEvent[] = [];
   private paintEventsLoadedIndex = -1;
 
-  private loadAttempts = 5;
-
   constructor(dataLocation, saSession: ISaSession) {
     super();
     this.dataLocation = dataLocation;
@@ -35,6 +34,7 @@ export default class ReplayApi extends EventEmitter {
 
     this.paintEvents = saSession.paintEvents ?? [];
     delete saSession.paintEvents;
+    this.setFirstOrigin();
 
     if (!this.saSession.closeDate) {
       setTimeout(() => this.updateSaSession(), 1000);
@@ -52,10 +52,10 @@ export default class ReplayApi extends EventEmitter {
     Object.assign(this.saSession, response.data.data);
     this.paintEvents = this.saSession.paintEvents ?? [];
     delete this.saSession.paintEvents;
+    this.setFirstOrigin();
     this.emit('session:updated', this.saSession);
 
-    this.loadAttempts -= 1;
-    if (!this.saSession.closeDate && this.loadAttempts >= 0) {
+    if (!this.saSession.closeDate && this.isActive) {
       setTimeout(() => this.updateSaSession(), 1000);
     }
   }
@@ -90,16 +90,16 @@ export default class ReplayApi extends EventEmitter {
     // if going forward, load next ticks
     if (playbarOffset > this.currentPlaybarOffsetPct) {
       for (let i = this.currentTickIdx; i < ticks.length; i += 1) {
+        if (ticks[i].playbarOffsetPercent >= playbarOffset) break;
         newTick = ticks[i];
         newTickIdx = i;
-        if (newTick.playbarOffsetPercent >= playbarOffset) break;
       }
       if (!newTick) return;
     } else {
       for (let i = this.currentTickIdx; i >= 0; i -= 1) {
         newTick = ticks[i];
         newTickIdx = i;
-        if (newTick.playbarOffsetPercent < playbarOffset) break;
+        if (newTick.playbarOffsetPercent <= playbarOffset) break;
       }
     }
 
@@ -161,21 +161,32 @@ export default class ReplayApi extends EventEmitter {
     return [paintEvents, nodesToHighlight, mouseEvent, scrollEvent];
   }
 
+  private setFirstOrigin() {
+    for (const paintEvent of this.paintEvents) {
+      if (paintEvent.changeEvents[0][1] === 'newDocument') {
+        this.urlOrigin = new URL(paintEvent.changeEvents[0][2].textContent).href;
+      }
+    }
+  }
+
   private findLastMinorTickEvent(
     tickIdx: number,
     playbarOffset: number,
     property: keyof IMinorTick,
   ) {
     let newEventIdx = -1;
-    for (let i = tickIdx; i >= 0; i -= 1) {
+    for (let i = tickIdx + 1; i >= 0; i -= 1) {
       const tick = this.saSession.ticks[i];
+      if (!tick) continue;
       if (tick.commandId < this.currentDocumentLoadCommandId) break;
 
       const isNewDocumentTick = tick.commandId === this.currentDocumentLoadCommandId;
       for (let minorIdx = tick.minorTicks.length - 1; minorIdx >= 0; minorIdx -= 1) {
         const minor = tick.minorTicks[minorIdx];
         // if we're on current index, see if we've gone past the markers
-        if (i === tickIdx && minor.playbarOffsetPercent > playbarOffset) continue;
+        if (i === tickIdx && minor.playbarOffsetPercent > playbarOffset) {
+          continue;
+        }
 
         const value = minor[property] as number;
         if (value !== undefined && value > newEventIdx) {

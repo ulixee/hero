@@ -9,6 +9,7 @@ export default interface ISaSession {
   deviceScaleFactor: number;
   startDate: string;
   closeDate: string;
+  durationMillis: number;
   scriptEntrypoint: string;
   scriptInstanceId: string;
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];

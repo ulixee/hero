@@ -1,8 +1,7 @@
-import { observable, action, computed } from 'mobx';
+import { action, computed, observable } from 'mobx';
 import TabFrontend from './TabFrontend';
 import { TAB_ANIMATION_DURATION, TABS_PADDING } from './constants';
 import { ipcRenderer } from 'electron';
-import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import { AppStore } from '../app';

@@ -16,9 +16,12 @@ async function run() {
 
   const results = [];
 
+  await browser.waitForMillis(2e3);
+
   const stories = await browser.document.querySelectorAll('.athing');
   let lastStory;
   for (const story of stories) {
+    await browser.waitForMillis(1e3);
     const extraElem = await story.nextElementSibling;
     await browser.interact({
       move: story,

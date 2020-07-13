@@ -17,7 +17,8 @@ export default class ScriptInstanceMenu extends Vue {
   private store = store;
 
   private navigateToHistory(item) {
-    ipcRenderer.send(`navigate-to-history`, item, true);
+    const { dataLocation, sessionName, scriptInstanceId } = item;
+    ipcRenderer.send(`navigate-to-history`, { dataLocation, scriptInstanceId, sessionName }, true);
     store.hide();
   }
   @NoCache
