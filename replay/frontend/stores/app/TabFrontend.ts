@@ -74,6 +74,14 @@ export default class TabFrontend {
   }
 
   @computed
+  public get isScriptLocation() {
+    if (!this.location) {
+      return true;
+    }
+    return false;
+  }
+
+  @computed
   public get isSelected() {
     return store.tabs.selectedTabId === this.id;
   }

@@ -188,11 +188,13 @@ export default class SessionLoader {
         playbarOffsetPercent: this.getPlaybarOffset(date),
         minorTicks: [],
       } as IMajorTick;
+
       if (
         this.ticks.length &&
-        this.ticks[this.ticks.length - 1].playbarOffsetPercent === majorTick.playbarOffsetPercent
+        this.ticks[this.ticks.length - 1].playbarOffsetPercent >= majorTick.playbarOffsetPercent
       ) {
-        majorTick.playbarOffsetPercent += 0.01;
+        majorTick.playbarOffsetPercent =
+          this.ticks[this.ticks.length - 1].playbarOffsetPercent + 0.01;
       }
       this.ticks.push(majorTick);
 

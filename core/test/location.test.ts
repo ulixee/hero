@@ -270,12 +270,14 @@ setTimeout(function() {
     await core.goto(startingUrl);
 
     await core.waitForLoad(LocationStatus.AllContentLoaded);
+    await core.waitForMillis(50);
     // @ts-ignore
     const window = core.window;
-    expect(window.sessionState.pages.history).toHaveLength(2);
+    expect(window.sessionState.pages.history).toHaveLength(3);
     expect(window.sessionState.pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
       startingUrl,
       navigateToUrl,
+      startingUrl,
     ]);
 
     const currentUrl = await core.getLocationHref();

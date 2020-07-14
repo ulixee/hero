@@ -170,7 +170,6 @@ function buildHover() {
 }
 
 function highlightNodes(nodeIds: number[]) {
-  if (lastHighlightNodes?.toString() === nodeIds?.toString()) return;
   lastHighlightNodes = nodeIds;
   const length = nodeIds ? nodeIds.length : 0;
   try {

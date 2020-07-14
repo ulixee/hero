@@ -61,23 +61,13 @@ export default class ReplayBar extends Vue {
     return this.hoveredValue === String(value);
   }
 
-  private tickHasCommandResultError(mark: number) {
-    const indicators = this.store.markIndicators[mark];
-    return indicators?.isError === true;
-  }
-
   private onHoverPlaybar(e: MouseEvent) {
     const sliderRef = this.$refs.slider as VueSlider;
     sliderRef.setScale();
     // @ts-ignore
     const pos = sliderRef.getPosByEvent(e);
 
-    const closest = this.closestTick(pos);
-    this.showCommandOverlay(closest);
-  }
-
-  private showCommandOverlay(tick: ITick) {
-    const sliderRef = this.$refs.slider as VueSlider;
+    const tick = this.closestTick(pos);
     const playbarOffsetPercent = tick.playbarOffsetPercent;
     this.hoveredValue = String(playbarOffsetPercent);
 
@@ -96,6 +86,9 @@ export default class ReplayBar extends Vue {
 
   private closestTick(pos: number) {
     let closest: ITick = store.ticks[0];
+    if (pos > store.ticks[store.ticks.length - 1].playbarOffsetPercent) {
+      return store.ticks[store.ticks.length - 1];
+    }
     let closestOffset = 100;
     for (const tick of store.ticks) {
       const offset = Math.abs(tick.playbarOffsetPercent - pos);

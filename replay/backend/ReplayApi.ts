@@ -14,9 +14,10 @@ const API_HOST = 'http://localhost:1212';
 export default class ReplayApi extends EventEmitter {
   public readonly saSession: ISaSession;
   public readonly dataLocation: string;
-  public readonly sessionId: string;
+  public sessionId: string;
   public urlOrigin: string;
   public isActive = true;
+  public apiHost: string;
 
   private currentTickIdx = 0;
   private currentPlaybarOffsetPct = 0;
@@ -26,19 +27,20 @@ export default class ReplayApi extends EventEmitter {
   private paintEvents: IPaintEvent[] = [];
   private paintEventsLoadedIndex = -1;
 
-  constructor(dataLocation, saSession: ISaSession) {
+  constructor(
+    apiHost: string,
+    dataLocation: string,
+    sessionName: string,
+    scriptInstanceId: string,
+  ) {
     super();
+    this.apiHost = apiHost;
     this.dataLocation = dataLocation;
-    this.sessionId = saSession.id;
-    this.saSession = saSession;
-
-    this.paintEvents = saSession.paintEvents ?? [];
-    delete saSession.paintEvents;
-    this.setFirstOrigin();
-
-    if (!this.saSession.closeDate) {
-      setTimeout(() => this.updateSaSession(), 1000);
-    }
+    this.saSession = {
+      dataLocation,
+      name: sessionName,
+      scriptInstanceId,
+    } as any;
   }
 
   public async updateSaSession() {
@@ -47,11 +49,14 @@ export default class ReplayApi extends EventEmitter {
       name: this.saSession.name,
       scriptInstanceId: this.saSession.scriptInstanceId,
     };
-    console.log(`GET ${API_HOST}/sessionMeta`, params);
-    const response = await axios.get(`${API_HOST}/sessionMeta`, { params });
+    console.log(`GET ${this.apiHost}/sessionMeta`, params);
+    const response = await axios.get(`${this.apiHost}/sessionMeta`, { params });
     Object.assign(this.saSession, response.data.data);
+    this.sessionId = this.saSession.id;
+
     this.paintEvents = this.saSession.paintEvents ?? [];
     delete this.saSession.paintEvents;
+
     this.setFirstOrigin();
     this.emit('session:updated', this.saSession);
 
@@ -66,7 +71,7 @@ export default class ReplayApi extends EventEmitter {
       dataLocation: this.dataLocation,
       url: url,
     };
-    const resourceUrl = new URL('/resource', API_HOST);
+    const resourceUrl = new URL('/resource', this.apiHost);
     for (const [key, val] of Object.entries(params)) {
       resourceUrl.searchParams.append(key, val);
     }
@@ -85,10 +90,15 @@ export default class ReplayApi extends EventEmitter {
     const ticks = this.saSession.ticks;
     if (this.currentPlaybarOffsetPct === playbarOffset) return;
 
+    const lastTick = ticks[ticks.length - 1];
     let newTick = ticks[this.currentTickIdx];
     let newTickIdx = 0;
     // if going forward, load next ticks
     if (playbarOffset > this.currentPlaybarOffsetPct) {
+      if (playbarOffset >= lastTick?.playbarOffsetPercent) {
+        newTick = lastTick;
+        newTickIdx = ticks.length - 1;
+      }
       for (let i = this.currentTickIdx; i < ticks.length; i += 1) {
         if (ticks[i].playbarOffsetPercent >= playbarOffset) break;
         newTick = ticks[i];
@@ -242,15 +252,11 @@ export default class ReplayApi extends EventEmitter {
     return null;
   }
 
-  public static async connect(dataLocation, sessionName, scriptInstanceId) {
-    const params = {
-      dataLocation,
-      name: sessionName,
-      scriptInstanceId,
-    };
-    console.log(`GET ${API_HOST}/sessionMeta`, params);
-    const response = await axios.get(`${API_HOST}/sessionMeta`, { params });
-    return new ReplayApi(dataLocation, response.data.data);
+  public static async connect(dataLocation: string, sessionName: string, scriptInstanceId: string) {
+    const api = new ReplayApi(API_HOST, dataLocation, sessionName, scriptInstanceId);
+    console.log(`CONNECTED TO REPLAY API: [${API_HOST}]`);
+    await api.updateSaSession();
+    return api;
   }
 }
 

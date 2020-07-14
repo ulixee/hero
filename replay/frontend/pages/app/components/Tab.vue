@@ -12,7 +12,7 @@
     .tab-content
       Preloader(v-if="tab.loading" :color="store.theme.accentColor" :thickness="6" :size="16" indeterminate style="minWidth: 16px")
       .tab-icon(v-if="!tab.loading && tab.favicon")
-      .tab-title {{tab.title}}
+      .tab-title(:class="{ script: tab.isScriptLocation }") {{tab.title}}
       .tab-close(@mousedown="onCloseMouseDown" @click="removeTab")
 </template>
 
@@ -265,6 +265,9 @@ export default class Tab extends TabProps {
     flex: 1;
     margin-left: var(--tabTitleMarginLeft);
     color: var(--tabTitleColor);
+    &.script {
+      direction: rtl;
+    }
     .location {
       text-transform: capitalize;
     }
