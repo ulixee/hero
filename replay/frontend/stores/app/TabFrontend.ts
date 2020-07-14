@@ -147,12 +147,6 @@ export default class TabFrontend {
     this.marks = marks;
     this.markIndicators = markIndicators;
     if (startSessionMillis && this.currentTickValue) {
-      console.log(
-        this.currentTickValue,
-        startSessionMillis,
-        session.durationMillis,
-        startSessionMillis / session.durationMillis,
-      );
       if (session.durationMillis < startSessionMillis) {
         this.currentTickValue =
           this.currentTickValue * (session.durationMillis / startSessionMillis);

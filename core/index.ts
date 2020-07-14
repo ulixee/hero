@@ -21,6 +21,7 @@ import UserProfile from './lib/UserProfile';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
+import Signals = NodeJS.Signals;
 
 export { GlobalPool, Window, Session, LocationTrigger };
 
@@ -238,9 +239,24 @@ export default class Core implements ICore {
     return { sessionId: session.id, sessionsDataLocation: session.baseDir, windowId: window.id };
   }
 
+  public static async closeSessions(windowIds?: string[]) {
+    const toClose = windowIds?.length
+      ? windowIds.map(x => Core.byWindowId[x])
+      : Object.values(Core.byWindowId);
+    await Promise.all(toClose.map(x => x?.close()));
+  }
+
   public static async shutdown() {
-    await Promise.all(Object.values(this.byWindowId).map(x => x.close()));
+    await Core.closeSessions();
     await GlobalPool.close();
   }
 }
+
+['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+  process.once(name as Signals, async () => {
+    await Core.shutdown();
+    process.exit(0);
+  });
+});
+
 type IAttachedId = number;

@@ -293,7 +293,7 @@ export default class Window {
       // clear any pending timeouts
       this.waitTimeouts.forEach(x => {
         clearTimeout(x.timeout);
-        x.reject(new Error('Closing session'));
+        x.reject(new Error('Terminated command because session closing'));
       });
       await this.session.close();
       const page = this.puppPage;

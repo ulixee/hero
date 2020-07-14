@@ -7,7 +7,7 @@
                 span.value {{store.commandResult.duration}} ms
             .result(v-if="store.commandResult.result")
                 span.label result:
-                span.value {{store.commandResult.result}}
+                span.value(:class="{error:store.commandResult.isError}") {{store.commandResult.result}}
 
 </template>
 
@@ -56,6 +56,12 @@ export default class CommandOverlay extends Vue {
       color: #3c3c3c;
       font-style: italic;
       margin-right: 5px;
+    }
+    .value {
+      &.error {
+        font-style: italic;
+        color: #717171;
+      }
     }
   }
 }

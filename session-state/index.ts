@@ -277,17 +277,20 @@ export default class SessionState {
   }
 
   public async saveBeforeWindowClose() {
-    await this.flush();
-    this.db.session.update(this.sessionId, {
-      closeDate: new Date(),
-      viewport: this.viewport,
-    });
-    this.db.close();
+    try {
+      await this.flush();
+    } finally {
+      this.db.session.update(this.sessionId, {
+        closeDate: new Date(),
+        viewport: this.viewport,
+      });
+      this.db.close();
+    }
   }
 
   public async flush() {
     await this.pageEventsListener?.flush();
-    await this.db.flush();
+    this.db.flush();
   }
 
   public async getPageDomChanges(pages: IPage[], flush: boolean = false, sinceCommandId?: number) {

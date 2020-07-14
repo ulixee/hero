@@ -12,6 +12,7 @@ import ISecretAgent, {
   ISecretAgentConfigureOptions,
   SecretAgentStatics,
 } from './interfaces/ISecretAgent';
+import Signals = NodeJS.Signals;
 
 // tslint:disable:variable-name
 const DefaultOptions = {
@@ -53,9 +54,8 @@ export function SecretAgentClientGenerator(): {
     }
   }
 
-  ['beforeExit', 'exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
-    // @ts-ignore
-    process.once(name, async () => await SecretAgent.shutdown());
+  ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+    process.once(name as Signals, async () => await SecretAgent.shutdown());
   });
 
   return { SecretAgent, coreClient };

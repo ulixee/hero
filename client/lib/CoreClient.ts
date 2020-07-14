@@ -29,10 +29,13 @@ export default class CoreClient {
   }
 
   public async shutdown(): Promise<void> {
-    await this.commandQueue.run<void>('shutdown');
-    Object.keys(this.sessionsByWindowId).forEach(
-      windowId => delete this.sessionsByWindowId[windowId],
-    );
+    const windowIds = Object.keys(this.sessionsByWindowId);
+    if (windowIds.length) {
+      await this.commandQueue.run<void>('closeSessions', windowIds);
+    }
+    for (const windowId of windowIds) {
+      delete this.sessionsByWindowId[windowId];
+    }
   }
 
   public async start(options?: IConfigureOptions): Promise<void> {

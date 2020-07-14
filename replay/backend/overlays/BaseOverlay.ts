@@ -84,6 +84,7 @@ export default class BaseOverlay {
       x: rect.x || this.bounds.x || 0,
       y: rect.y || this.bounds.y || 0,
       right: rect.right,
+      left: rect.left,
     };
     newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(newRect) : newRect);
 

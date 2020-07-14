@@ -57,6 +57,9 @@ export default class ChromeCore {
             // Use proxy for localhost URLs
             '--proxy-bypass-list=<-loopback>',
           ],
+          handleSIGHUP: false,
+          handleSIGINT: false,
+          handleSIGTERM: false,
         };
         const argsToSkip = ['--disable-popup-blocking', 'about:blank'];
 

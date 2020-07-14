@@ -10,13 +10,7 @@ async function run() {
   console.log('\n-- PRINTING location.href ---------');
   console.log(await browser.url);
 
-  const html = await browser.document.documentElement.outerHTML;
-  console.log('-- PRINTING outerHTML ---------------');
-  console.log(html);
-
   const results = [];
-
-  await browser.waitForMillis(2e3);
 
   const stories = await browser.document.querySelectorAll('.athing');
   let lastStory;

@@ -255,7 +255,9 @@ class ObjectAtPath {
   public lookup() {
     let currentObject: any = window;
     if (this.jsPath[0] === 'window') this.jsPath.shift();
+    this.lookupStepIndex = 0;
     for (const step of this.jsPath) {
+      this.lookupStep = step;
       if (Array.isArray(step)) {
         const [methodName, ...args] = step;
         currentObject = runMethod(currentObject, methodName, this.lookupStepIndex, args);
@@ -266,7 +268,6 @@ class ObjectAtPath {
       } else {
         throw new Error('unknown JsPathStep');
       }
-      this.lookupStep = step;
       this.lookupStepIndex += 1;
     }
 

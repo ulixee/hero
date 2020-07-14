@@ -8,9 +8,9 @@
     Icon(:src="ICON_PAUSE" :size="14")
   .slider-wrapper(v-if="store.marks.length" ref="sliderWrapper")
     VueSlider(ref="slider" tooltip="none" :marks="store.marks" :interval="0.1" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
-        @mousemove.native="showCommandOverlay")
+        @mousemove.native="onHoverPlaybar")
         template(v-slot:mark="{ pos, value }" )
-            .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{error:tickHasCommandResultError(value), hovered:isHovered(value)}")
+            .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{hovered:isHovered(value)}")
                 .vue-slider-mark-step
   .results
     | Results
@@ -66,15 +66,19 @@ export default class ReplayBar extends Vue {
     return indicators?.isError === true;
   }
 
-  private showCommandOverlay(e: MouseEvent) {
+  private onHoverPlaybar(e: MouseEvent) {
     const sliderRef = this.$refs.slider as VueSlider;
     sliderRef.setScale();
     // @ts-ignore
     const pos = sliderRef.getPosByEvent(e);
 
     const closest = this.closestTick(pos);
+    this.showCommandOverlay(closest);
+  }
 
-    const playbarOffsetPercent = closest.playbarOffsetPercent;
+  private showCommandOverlay(tick: ITick) {
+    const sliderRef = this.$refs.slider as VueSlider;
+    const playbarOffsetPercent = tick.playbarOffsetPercent;
     this.hoveredValue = String(playbarOffsetPercent);
 
     const containerRect = sliderRef.$refs.container.getBoundingClientRect().toJSON();
@@ -138,7 +142,12 @@ export default class ReplayBar extends Vue {
 
   .vue-slider-mark {
     &.error {
-      background-color: #710000;
+      .vue-slider-mark-step {
+        background-color: #9a0000;
+        margin-top: -150%;
+        height: 400%;
+        width: 4px;
+      }
     }
     .vue-slider-mark-step {
       height: 300%;

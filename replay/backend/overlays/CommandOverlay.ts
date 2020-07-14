@@ -13,10 +13,15 @@ export default class CommandOverlay extends BaseOverlay {
         if (x + width > bounds.right + 50) {
           x = bounds.right + 50 - width;
         }
+        if (bounds.left !== undefined) {
+          if (x < bounds.left - 50) {
+            x = bounds.left - 50;
+          }
+        }
 
         return {
           width,
-          height: 250,
+          height: 200,
           x,
           y: bounds.y + bounds.height,
         };
