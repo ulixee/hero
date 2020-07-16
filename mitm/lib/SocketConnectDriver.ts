@@ -20,7 +20,7 @@ export default class SocketConnectDriver {
   private child: ChildProcess;
   private emitter = new EventEmitter();
 
-  constructor(readonly connectOpts: IGoTlsSocketConnectOpts) {
+  constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     this.socketPath = `/tmp/sa-mitm-${(counter += 1)}.sock`;
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
@@ -53,7 +53,7 @@ export default class SocketConnectDriver {
 
   public onListening() {
     const socket = (this.socket = net.connect(this.socketPath));
-    socket.on('error', err => log.error('SocketConnectDriver.SocketError', err));
+    socket.on('error', err => log.error(this.sessionId, 'SocketConnectDriver.SocketError', err));
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
@@ -83,7 +83,7 @@ export default class SocketConnectDriver {
 
     child.on('error', err => {
       promise.reject(err);
-      log.error('SocketConnectDriver.ChildConnectError', err);
+      log.error(this.sessionId, 'SocketConnectDriver.ChildConnectError', err);
       this.close();
     });
 
@@ -139,14 +139,14 @@ export default class SocketConnectDriver {
         if (matches?.length) {
           this.alpn = matches[1];
         }
-      } else {
-        log.info('SocketHandler.onData', { message });
+      } else if (message) {
+        log.info(this.sessionId, 'SocketHandler.onData', { message });
       }
     }
   }
 
   private onChildProcessStderr(message: string) {
-    log.warn(`SocketConnectDriver.Error => ${message}`);
+    log.warn(this.sessionId, `SocketConnectDriver.Error => ${message}`);
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||

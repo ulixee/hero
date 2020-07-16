@@ -59,12 +59,14 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
     return await decodeBuffer(responseData, responseEncoding);
   }
 
-  public async getResourceByUrl(url: string) {
+  public async getResourceByUrl(url: string, decodeBody = true) {
     const sql = `select type, responseData, responseEncoding, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
     const record = this.db.prepare(sql).get(url);
     if (!record) return null;
 
-    const data = await decodeBuffer(record.responseData, record.responseEncoding);
+    const data = decodeBody
+      ? await decodeBuffer(record.responseData, record.responseEncoding)
+      : record.responseData;
     const headers = JSON.parse(record.responseHeaders);
     return { data, type: record.type as ResourceType, headers };
   }

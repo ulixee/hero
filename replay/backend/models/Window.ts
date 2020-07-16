@@ -39,7 +39,9 @@ export default class Window {
     this.bindListenersToWindow();
 
     this.browserWindow.loadURL('http://localhost:3000/app');
+    // if (process.env.NODE_ENV === 'development') {
     this.webContents.openDevTools({ mode: 'detach' });
+    // }
   }
 
   public get id() {

@@ -34,7 +34,6 @@ export default class Icon extends IconProps {
   private get cssVars() {
     const toolbarLightForeground = store.theme.toolbarLightForeground;
     return {
-      '--height': `${TOOLBAR_BUTTON_HEIGHT}px`,
       '--backgroundImage': `url(${this.src})`,
       '--buttonIconSize': `${this.size}px`,
       '--buttonIconOpacity': `${this.disabled ? 0.25 : this.opacity}`,
@@ -47,13 +46,13 @@ export default class Icon extends IconProps {
 <style lang="scss">
 .Icon {
   width: var(--buttonIconSize);
-  min-height: var(--buttonIconSize);
+  height: var(--buttonIconSize);
   display: inline-block;
   will-change: background-image;
   transition: 0.15s background-image;
   backface-visibility: hidden;
   background-image: var(--backgroundImage);
-  background-size: var(--buttonIconSize);
+  background-size: var(--buttonIconBackgroundSize);
   background-repeat: no-repeat;
   opacity: var(--buttonIconOpacity);
   filter: var(--buttonIconFilter);

@@ -11,10 +11,11 @@ import {
   IMouseEventRecord,
   MouseEventType,
 } from '@secret-agent/session-state/models/MouseEventsTable';
-import { IScrollRecord } from '../../session-state/models/ScrollEventsTable';
-import { IFocusRecord } from '../../session-state/models/FocusEventsTable';
-import { IInteractionGroup } from '../../core-interfaces/IInteractions';
-import { getKeyboardChar } from '../../core-interfaces/IKeyboardLayoutUS';
+import { IScrollRecord } from '@secret-agent/session-state/models/ScrollEventsTable';
+import { IFocusRecord } from '@secret-agent/session-state/models/FocusEventsTable';
+import { IInteractionGroup } from '@secret-agent/core-interfaces/IInteractions';
+import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import moment from 'moment';
 
 export default class SessionLoader {
   public ticks: IMajorTick[] = [];
@@ -23,15 +24,17 @@ export default class SessionLoader {
   public readonly scrollEvents: IScrollRecord[];
   public readonly focusEvents: IFocusRecord[];
   public readonly durationMillis: number;
+  public unresponsiveSeconds = 0;
+  public hasRecentErrors: boolean;
 
   private readonly sessionDb: SessionDb;
   private readonly pageRecords: IPageRecord[];
-  private readonly commands: ICommandMeta[];
 
+  private readonly commands: ICommandMeta[];
   private readonly session: ISessionRecord;
   private readonly domChangeGroups: IDomChangeGroup[] = [];
-  private startTime: Date;
-  private closeTime?: Date;
+  private readonly startTime: Date;
+  private readonly closeTime?: Date;
 
   constructor(sessionDb: SessionDb) {
     this.sessionDb = sessionDb;
@@ -58,10 +61,11 @@ export default class SessionLoader {
 
     this.assembleTicks();
     this.assembleCommandResults();
+    this.checkForHungScript();
   }
 
   public async fetchResource(url: string, commandId: string) {
-    return await this.sessionDb.resources.getResourceByUrl(url);
+    return await this.sessionDb.resources.getResourceByUrl(url, false);
   }
 
   public getCommand(tickId: number) {
@@ -86,6 +90,36 @@ export default class SessionLoader {
       commandId: x.startCommandId,
       url: x.finalUrl ?? x.requestedUrl,
     }));
+  }
+
+  private checkForHungScript() {
+    if (!!this.closeTime) return;
+
+    const lastCommand = last(this.commands);
+    if (!lastCommand) return;
+
+    const latestPage = last(this.pageRecords);
+
+    let lastSuccessDate = latestPage.allContentLoadedTime ?? latestPage.initiatedTime;
+    // check if second to last command worked
+    if (this.commands.length > 2) {
+      const secondToLastCommand = this.commands[this.commands.length - 2];
+      if (
+        latestPage.allContentLoadedTime &&
+        secondToLastCommand.endDate > lastSuccessDate &&
+        !secondToLastCommand.resultType?.includes('Error')
+      ) {
+        lastSuccessDate = secondToLastCommand.endDate;
+      }
+    }
+    this.hasRecentErrors = this.sessionDb.sessionLogs
+      .allErrors()
+      .some(x => x.timestamp >= lastSuccessDate);
+
+    this.unresponsiveSeconds = moment().diff(
+      lastCommand.endDate ?? lastCommand.startDate,
+      'seconds',
+    );
   }
 
   private assembleCommandResults() {

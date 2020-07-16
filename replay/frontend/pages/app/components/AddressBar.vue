@@ -156,28 +156,34 @@ export default class AddressBar extends Vue {
     box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.1);
 
     .section {
+        cursor: pointer;
       flex: 1;
       position: relative;
       height: 100%;
-      margin-left: 5px;
-      margin-top: 10px;
+      box-sizing: border-box;
+      padding-top: 6px;
+      padding-right: 5px;
+      margin-top: 0;
       font-size: 13px;
       white-space: nowrap;
       min-width: 100px;
       overflow: hidden;
+      border-left: 1px solid rgba(0, 0, 0, 0.1);
+      padding-left: 10px;
       .text {
+        cursor: pointer;
         pointer-events: none;
         display: inline-block;
         padding-left: 5px;
+        line-height: 16px;
+        vertical-align: top;
       }
       .Icon {
         pointer-events: none;
+        margin-top: 1px;
       }
-      border-left: 1px solid rgba(0, 0, 0, 0.1);
-      padding-left: 10px;
       &:first-child {
         border-left: none;
-        padding-left: 3px;
       }
       &:hover {
         background: rgba(0, 0, 0, 0.05);
@@ -202,6 +208,8 @@ export default class AddressBar extends Vue {
 
     .name-section {
       .brand {
+        padding: 1px 3px;
+        margin-top: -1px;
         background: rgba(0, 0, 0, 0.1);
         display: inline-block;
       }

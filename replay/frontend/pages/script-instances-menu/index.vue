@@ -46,6 +46,7 @@ export default class ScriptInstanceMenu extends Vue {
     padding-left: 10px;
   }
   li {
+    cursor: pointer;
     &:hover {
       background-color: #eeeeee;
     }

@@ -94,14 +94,21 @@ export default class TabBackend {
       tabUpdateParams.location = location;
       location = location === InternalLocations.NewTab ? InternalLocations.Home : location;
       this.location = location as InternalLocations;
-      this.webContents.loadURL(`${INTERNAL_BASE_URL}/${location.toLowerCase()}`);
+      this.webContents
+        .loadURL(`${INTERNAL_BASE_URL}/${location.toLowerCase()}`)
+        .then(x => this.send('clicks:enable', true));
       this.replayApi = null;
+      this.webContents.closeDevTools();
     } else {
       this.location = InternalLocations.Replay;
+      this.window.webContents.session.clearCache();
       tabUpdateParams.saSession = replayApi.saSession;
-      this.webContents.loadURL(`http://localhost:3333/${InternalLocations.Replay.toLowerCase()}`);
+      this.webContents
+        .loadURL(`http://localhost:3333/${InternalLocations.Replay.toLowerCase()}`)
+        .then(x => this.send('clicks:enable', false));
       this.replayApi = replayApi;
       this.replayApi.on('session:updated', this.updateTabSession.bind(this));
+      this.webContents.openDevTools({ mode: 'detach' });
     }
 
     this.window.sendToRenderer('tab:updated', tabUpdateParams);
@@ -176,6 +183,20 @@ export default class TabBackend {
       saSession: this.replayApi.saSession,
     };
     this.window.sendToRenderer('tab:updated', tabUpdateParam);
+
+    if (this.replayApi.saSession.unresponsiveSeconds >= 5) {
+      Application.instance.overlayManager.show(
+        'message-overlay',
+        this.window.browserWindow,
+        this.window.browserWindow.getContentBounds(),
+        {
+          title: 'Did your script hang?',
+          message: `The last update was ${this.replayApi.saSession.unresponsiveSeconds} seconds ago.`,
+        },
+      );
+    } else {
+      Application.instance.overlayManager.getByName('message-overlay').hide();
+    }
   }
 
   private bindProxy() {

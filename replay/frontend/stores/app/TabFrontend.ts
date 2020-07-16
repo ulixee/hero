@@ -46,9 +46,6 @@ export default class TabFrontend {
   @observable
   public isPlaying = false;
 
-  @observable
-  public markIndicators: { [mark: number]: { isError: boolean } } = {};
-
   private interval: number;
 
   @computed
@@ -109,7 +106,7 @@ export default class TabFrontend {
     if (active) {
       requestAnimationFrame(() => {
         this.select();
-        if (saSession && this.location === 'Replay') this.startPlayback();
+        if (saSession) this.startPlayback();
       });
     }
   }
@@ -141,19 +138,15 @@ export default class TabFrontend {
     this.saSession = session;
 
     const marks = [];
-    const markIndicators = {};
     if (this.saSession) {
       for (const tick of this.saSession.ticks) {
         marks.push(tick.playbarOffsetPercent);
-        markIndicators[tick.playbarOffsetPercent] = { isError: false };
-        const result = this.saSession.commandResults.find(x => x.commandId === tick.commandId);
-        if (result?.isError) {
-          markIndicators[tick.playbarOffsetPercent].isError = true;
-        }
       }
+    } else {
+      this.currentTickValue = 0;
     }
     this.marks = marks;
-    this.markIndicators = markIndicators;
+
     if (startSessionMillis && this.currentTickValue) {
       if (session.durationMillis < startSessionMillis) {
         this.currentTickValue =

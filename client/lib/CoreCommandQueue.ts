@@ -29,8 +29,9 @@ export default class CoreCommandQueue {
       command,
       meta: this.meta,
       args,
+      stack: new Error().stack.replace('Error:', ''),
     });
-    this.processQueue().catch(error => log.error(error));
+    this.processQueue().catch(error => log.error(this.meta?.sessionId, 'CommandRunError', error));
     return promise;
   }
 
@@ -55,6 +56,7 @@ export default class CoreCommandQueue {
           }
           item.resolve(data);
         } catch (error) {
+          error.stack += `\n----------${item.stack}`;
           item.reject(error);
         }
         // force next loop so promises don't simulate synchronous-ity when local core
@@ -72,4 +74,5 @@ interface IItem {
   command: string;
   meta: ISessionMeta | null;
   args: any[];
+  stack: string;
 }

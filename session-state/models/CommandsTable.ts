@@ -5,16 +5,21 @@ import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
 export default class CommandsTable extends BaseTable<ICommandMeta> {
   private readonly getQuery: Statement;
   constructor(readonly db: SqliteDatabase) {
-    super(db, 'Commands', [
-      ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
-      ['frameId', 'INTEGER'],
-      ['name', 'TEXT'],
-      ['result', 'TEXT'],
-      ['resultType', 'TEXT'],
-      ['startDate', 'TEXT'],
-      ['endDate', 'TEXT'],
-      ['args', 'TEXT'],
-    ]);
+    super(
+      db,
+      'Commands',
+      [
+        ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['frameId', 'INTEGER'],
+        ['name', 'TEXT'],
+        ['result', 'TEXT'],
+        ['resultType', 'TEXT'],
+        ['startDate', 'TEXT'],
+        ['endDate', 'TEXT'],
+        ['args', 'TEXT'],
+      ],
+      true,
+    );
     this.getQuery = db.prepare(`select * from ${this.tableName} where id = ? limit 1`);
   }
 

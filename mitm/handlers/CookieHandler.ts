@@ -26,7 +26,7 @@ export default class CookieHandler {
       try {
         await session.delegate.setCookie(setCookie, ctx, ctx.serverToProxyResponse.statusCode);
       } catch (err) {
-        log.warn('Could not set cookie', err);
+        log.warn(ctx.requestSession.sessionId, 'Could not set cookie', err);
       }
     }
   }

@@ -16,15 +16,18 @@ const runtimeFunction = '__saPageListenerCallback';
 
 export default class PageEventsListener {
   public onNewContext?: (contextId: number) => Promise<any>;
+  private readonly sessionId: string;
   private readonly devtoolsClient: IDevtoolsClient;
   private readonly frameTracker: FrameTracker;
   private readonly onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>;
 
   constructor(
+    sessionId: string,
     devtoolsClient: IDevtoolsClient,
     frameTracker: FrameTracker,
     onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>,
   ) {
+    this.sessionId = sessionId;
     this.devtoolsClient = devtoolsClient;
     this.frameTracker = frameTracker;
     this.onResults = onResults;
@@ -50,7 +53,7 @@ export default class PageEventsListener {
         if (name !== runtimeFunction) return;
         const frameId = this.frameTracker.getFrameIdForExecutionContext(executionContextId);
         if (!frameId) {
-          log.warn('PageEventsListener.bindingCalledBeforeExecutionTracked', {
+          log.warn(this.sessionId, 'PageEventsListener.bindingCalledBeforeExecutionTracked', {
             executionContextId,
             name,
             payload,
@@ -79,7 +82,7 @@ export default class PageEventsListener {
         contextId,
         returnByValue: true,
       })
-      .catch(err => log.warn('NewContext.setCommandIdError', err));
+      .catch(err => log.warn(this.sessionId, 'NewContext.setCommandIdError', err));
   }
 
   public async flush() {

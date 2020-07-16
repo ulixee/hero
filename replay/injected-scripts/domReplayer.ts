@@ -19,14 +19,21 @@ function resetDom() {
   isMouseInstalled = false;
   window.scrollTo({ top: 0 });
   document.documentElement.innerHTML = '';
+  document.head.appendChild(styleElement);
 }
 
+let areClicksActive = false;
 function handleOnClick(e: any) {
+  if (areClicksActive) return true;
   e.preventDefault();
   e.stopPropagation();
   return false;
 }
 document.addEventListener('click', handleOnClick, true);
+
+ipcRenderer.on('clicks:enable', (e, shouldEnable) => {
+  areClicksActive = shouldEnable;
+});
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
@@ -133,24 +140,82 @@ function deserializeNode(data: INodeData, parent?: Element): Node {
 
 //////// DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
 
-const highlightElements: HTMLDivElement[] = [];
+const styleElement = document.createElement('style');
+styleElement.innerHTML = `
+  sa-mouse-pointer {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    z-index: 10000;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    background: rgba(0,0,0,.4);
+    border: 1px solid white;
+    border-radius: 10px;
+    margin: -10px 0 0 -10px;
+    padding: 0;
+    transition: background .2s, border-radius .2s, border-color .2s;
+  }
+  sa-mouse-pointer.button-1 {
+    transition: none;
+    background: rgba(0,0,0,0.9);
+  }
+  sa-mouse-pointer.button-2 {
+    transition: none;
+    border-color: rgba(0,0,255,0.9);
+  }
+  sa-mouse-pointer.button-3 {
+    transition: none;
+    border-radius: 4px;
+  }
+  sa-mouse-pointer.button-4 {
+    transition: none;
+    border-color: rgba(255,0,0,0.9);
+  }
+  sa-mouse-pointer.button-5 {
+    transition: none;
+    border-color: rgba(0,255,0,0.9);
+  }
+  
+  sa-overflow-bar {
+    width: 500px;
+    background-color:#3498db;
+    margin:0 auto; 
+    height: 100%;
+    box-shadow: 3px 0 0 0 #3498db;
+    display:block;
+  }
+  
+  sa-overflow {
+    display:block;
+    width:100%; 
+    height:8px; 
+    position:fixed;
+    pointer-events: none;
+  }
+  
+  sa-highlight {
+    z-index:10000;
+    position:absolute;
+    box-shadow: 1px 1px 3px 0 #3498db;
+    border-radius:3px;
+    border:1px solid #3498db;
+    padding:5px;
+    pointer-events: none;
+  }
+`;
 
-const overflowBar = `<div style="width: 500px;background-color:#3498db;margin:0 auto; height: 100%;box-shadow: 3px 0 0 0 #3498db;">&nbsp;</div>`;
+const highlightElements: any[] = [];
 
-const showMoreUp = document.createElement('div');
-showMoreUp.setAttribute('id', 'sa-more-up');
-showMoreUp.setAttribute(
-  'style',
-  'width:100%; height:8px; position:fixed; top:0;pointer-events: none;',
-);
+const overflowBar = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
+
+const showMoreUp = document.createElement('sa-overflow');
+showMoreUp.setAttribute('style', 'top:0;');
 showMoreUp.innerHTML = overflowBar;
 
-const showMoreDown = document.createElement('div');
-showMoreDown.setAttribute('id', 'sa-more-down');
-showMoreDown.setAttribute(
-  'style',
-  'width:100%; height:8px; position:fixed; bottom:0;pointer-events: none;',
-);
+const showMoreDown = document.createElement('sa-overflow');
+showMoreDown.setAttribute('style', 'bottom:0;');
 showMoreDown.innerHTML = overflowBar;
 
 let maxHighlightTop = -1;
@@ -158,12 +223,7 @@ let minHighlightTop = 10e3;
 let lastHighlightNodes: number[] = [];
 
 function buildHover() {
-  const hoverNode = document.createElement('div');
-  hoverNode.setAttribute('class', 'sa-highlight');
-  hoverNode.setAttribute(
-    'style',
-    'z-index:10000;position:absolute;box-shadow: 1px 1px 3px 0 #3498db;border-radius:3px;border:1px solid #3498db;padding:5px;pointer-events: none;',
-  );
+  const hoverNode = document.createElement('sa-highlight');
   highlightElements.push(hoverNode);
   document.body.appendChild(hoverNode);
   return hoverNode;
@@ -224,50 +284,11 @@ document.addEventListener('scroll', () => checkOverflows());
 
 /////// mouse ///////
 const box = document.createElement('sa-mouse-pointer');
-const styleElement = document.createElement('style');
-styleElement.innerHTML = `
-  sa-mouse-pointer {
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    z-index: 10000;
-    left: 0;
-    width: 20px;
-    height: 20px;
-    background: rgba(0,0,0,.4);
-    border: 1px solid white;
-    border-radius: 10px;
-    margin: -10px 0 0 -10px;
-    padding: 0;
-    transition: background .2s, border-radius .2s, border-color .2s;
-  }
-  sa-mouse-pointer.button-1 {
-    transition: none;
-    background: rgba(0,0,0,0.9);
-  }
-  sa-mouse-pointer.button-2 {
-    transition: none;
-    border-color: rgba(0,0,255,0.9);
-  }
-  sa-mouse-pointer.button-3 {
-    transition: none;
-    border-radius: 4px;
-  }
-  sa-mouse-pointer.button-4 {
-    transition: none;
-    border-color: rgba(255,0,0,0.9);
-  }
-  sa-mouse-pointer.button-5 {
-    transition: none;
-    border-color: rgba(0,255,0,0.9);
-  }
-`;
 
 let isMouseInstalled = false;
 function updateMouse(mouseEvent: IMouseEvent) {
   if (isMouseInstalled === false) {
     isMouseInstalled = true;
-    document.head.appendChild(styleElement);
     document.body.appendChild(box);
   }
   if (mouseEvent.pageX !== undefined) {

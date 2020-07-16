@@ -4,6 +4,8 @@ import IPaintEvent from '~shared/interfaces/IPaintEvent';
 export default interface ISaSession {
   id: string;
   name: string;
+  unresponsiveSeconds: number;
+  hasRecentErrors: boolean;
   viewportWidth: number;
   viewportHeight: number;
   deviceScaleFactor: number;

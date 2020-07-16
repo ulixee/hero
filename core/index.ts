@@ -22,7 +22,9 @@ import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJs
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
 import Signals = NodeJS.Signals;
+import Log from '../commons/Logger';
 
+const { log } = Log(module);
 export { GlobalPool, Window, Session, LocationTrigger };
 
 interface IListenerObject {
@@ -110,7 +112,7 @@ export default class Core implements ICore {
 
   public async exportUserProfile() {
     const origins = this.window.frameTracker.getSecurityOrigins(UserProfile.installedWorld);
-    return await UserProfile.export(this.window.devtoolsClient, origins);
+    return await UserProfile.export(this.session.id, this.window.devtoolsClient, origins);
   }
 
   public async fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
@@ -239,15 +241,18 @@ export default class Core implements ICore {
     return { sessionId: session.id, sessionsDataLocation: session.baseDir, windowId: window.id };
   }
 
-  public static async closeSessions(windowIds?: string[]) {
+  public static async disconnect(windowIds?: string[], clientError?: Error) {
+    if (clientError) log.error(null, 'UnhandledClientError', clientError);
+
     const toClose = windowIds?.length
       ? windowIds.map(x => Core.byWindowId[x])
       : Object.values(Core.byWindowId);
+
     await Promise.all(toClose.map(x => x?.close()));
   }
 
-  public static async shutdown() {
-    await Core.closeSessions();
+  public static async shutdown(fatalError?: Error) {
+    await Core.disconnect(null, fatalError);
     await GlobalPool.close();
   }
 }
@@ -257,6 +262,15 @@ export default class Core implements ICore {
     await Core.shutdown();
     process.exit(0);
   });
+});
+
+process.on('uncaughtException', async (error: Error) => {
+  await Core.shutdown(error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', async (error: Error) => {
+  await Core.shutdown(error);
 });
 
 type IAttachedId = number;

@@ -31,7 +31,7 @@ export default class SocketHandler {
     }
 
     const tlsProfileId = session.delegate.tlsProfileId;
-    const connectDriver = new SocketConnectDriver({
+    const connectDriver = new SocketConnectDriver(session.sessionId, {
       host: options.host,
       port: String(options.port),
       isSsl: isSSL,

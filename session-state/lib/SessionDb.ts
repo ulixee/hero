@@ -5,12 +5,13 @@ import CommandsTable from '../models/CommandsTable';
 import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 import PagesTable from '../models/PagesTable';
 import FramesTable from '../models/FramesTable';
-import LogsTable from '../models/LogsTable';
+import PageLogsTable from '../models/PageLogsTable';
 import BaseTable from './BaseTable';
 import SessionTable from '../models/SessionTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
+import SessionLogsTable from '../models/SessionLogsTable';
 
 interface IDbOptions {
   readonly?: boolean;
@@ -25,7 +26,8 @@ export default class SessionDb {
   public readonly resources: ResourcesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
-  public readonly logs: LogsTable;
+  public readonly pageLogs: PageLogsTable;
+  public readonly sessionLogs: SessionLogsTable;
   public readonly session: SessionTable;
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
@@ -50,11 +52,12 @@ export default class SessionDb {
     this.resources = new ResourcesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
-    this.logs = new LogsTable(this.db);
+    this.pageLogs = new PageLogsTable(this.db);
     this.session = new SessionTable(this.db);
     this.mouseEvents = new MouseEventsTable(this.db);
     this.focusEvents = new FocusEventsTable(this.db);
     this.scrollEvents = new ScrollEventsTable(this.db);
+    this.sessionLogs = new SessionLogsTable(this.db);
 
     this.tables.push(
       this.commands,
@@ -63,11 +66,12 @@ export default class SessionDb {
       this.resources,
       this.websocketMessages,
       this.domChanges,
-      this.logs,
+      this.pageLogs,
       this.session,
       this.mouseEvents,
       this.focusEvents,
       this.scrollEvents,
+      this.sessionLogs,
     );
 
     if (!readonly) {

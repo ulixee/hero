@@ -1,4 +1,4 @@
-import { promises as FS } from 'fs';
+import fs, { promises as FS } from 'fs';
 import path from 'path';
 import Forge from 'node-forge';
 import pki = Forge.pki;
@@ -58,10 +58,23 @@ export default class CertificateAuthority {
       FS.writeFile(`${this.keysFolder}/${hostFilename}.key`, keyPrivatePem),
       FS.writeFile(`${this.keysFolder}/${hostFilename}.public.key`, keyPublicPem),
     ]).catch(err => {
-      log.error('ERROR saving key files', err);
+      log.error(null, 'CertificateSaveError', err);
     });
     // returns synchronously even before files get written to disk
     return { cert: certPem, key: keyPrivatePem };
+  }
+
+  public async getCertificateKeys(hostname: string) {
+    const keyFilePath = `${this.keysFolder}/${hostname}.key`;
+    const certFilePath = `${this.certsFolder}/${hostname}.pem`;
+    if (fs.existsSync(keyFilePath)) {
+      const certPromises = [FS.readFile(keyFilePath), FS.readFile(certFilePath)];
+      return Promise.all(certPromises);
+    }
+
+    const hosts = [hostname];
+    const certs = await this.generateServerCertificateKeys(hosts);
+    return [certs.key, certs.cert];
   }
 
   private randomSerialNumber() {

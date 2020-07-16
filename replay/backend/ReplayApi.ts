@@ -51,13 +51,13 @@ export default class ReplayApi extends EventEmitter {
     };
     console.log(`GET ${this.apiHost}/sessionMeta`, params);
     const response = await axios.get(`${this.apiHost}/sessionMeta`, { params });
-    Object.assign(this.saSession, response.data.data);
+    Object.assign(this.saSession, response.data);
     this.sessionId = this.saSession.id;
 
     this.paintEvents = this.saSession.paintEvents ?? [];
     delete this.saSession.paintEvents;
 
-    this.setFirstOrigin();
+    if (!this.urlOrigin) this.setFirstOrigin();
     this.emit('session:updated', this.saSession);
 
     if (!this.saSession.closeDate && this.isActive) {

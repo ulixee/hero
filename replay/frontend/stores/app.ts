@@ -46,11 +46,6 @@ export class AppStore {
   }
 
   @computed
-  public get markIndicators() {
-    return this.tabs.selectedTab?.markIndicators;
-  }
-
-  @computed
   public get hasSaSession() {
     if (!this.tabs.selectedTab) return false;
     return !!this.tabs.selectedTab.saSession;

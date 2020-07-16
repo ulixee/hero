@@ -231,8 +231,8 @@ export default class Application {
 
     // MISC
 
-    ipcMain.on('open-file', () => {
-      dialog.showOpenDialogSync({
+    ipcMain.on('open-file', async () => {
+      const result = await dialog.showOpenDialog({
         properties: ['openFile'],
         filters: [
           { name: 'All Files', extensions: ['js', 'ts', 'db'] },
@@ -241,6 +241,9 @@ export default class Application {
           { name: 'Typescript', extensions: ['ts'] },
         ],
       });
+      if (result.filePaths.length) {
+        // TODO: recurse to sessions directory for this script
+      }
     });
 
     ipcMain.on('find-in-page', () => {

@@ -27,6 +27,7 @@ export default class Emulators {
 
     if (!usagePct) {
       log.warn(
+        null,
         "Browser plugin doesn't have a usage percent in the wild!",
         EmulatorPluginImpl.emulatorId,
       );

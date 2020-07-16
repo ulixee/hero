@@ -40,7 +40,7 @@ export default class GlobalPool {
       throw new Error('GlobalPool is already started');
     }
     if (!this.chromeCore) {
-      log.info('StartingGlobalPool');
+      log.info(null, 'StartingGlobalPool');
       this.mitmServer = await MitmServer.start(this.localProxyPortStart);
       this.chromeCore = new ChromeCore();
       await this.chromeCore.start(this.mitmServer.port);
@@ -51,7 +51,7 @@ export default class GlobalPool {
 
   public static async createSession(options: ICreateSessionOptions) {
     await this.start();
-    log.info('AcquiringChrome', {
+    log.info(null, 'AcquiringChrome', {
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
       maxActiveSessionCount: this.maxActiveSessionCount,
@@ -74,7 +74,7 @@ export default class GlobalPool {
     const wasTransferred = this.resolveWaitingConnection();
     await session.close();
     if (wasTransferred) {
-      log.info('ReleasingChrome', {
+      log.info(null, 'ReleasingChrome', {
         activeSessionCount: this.activeSessionCount,
         waitingForAvailability: this.waitingForAvailability.length,
       });
@@ -82,7 +82,7 @@ export default class GlobalPool {
   }
 
   public static async close() {
-    log.info('InitiatingGlobalPoolShutdown');
+    const logId = log.info(null, 'InitiatingGlobalPoolShutdown');
 
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new Error('Shutting down'));
@@ -97,6 +97,8 @@ export default class GlobalPool {
     this.chromeCore = null;
     this.mitmServer = null;
     this._isStarted = false;
+
+    log.stats(null, 'CompletedGlobalPoolShutdown', null, logId);
   }
 
   private static async createSessionNow(
@@ -124,7 +126,7 @@ export default class GlobalPool {
     }
     const { options, promise } = this.waitingForAvailability.shift();
     this.createSessionNow(options).then(session => promise.resolve(session));
-    log.info('TransferredChromeToWaitingAcquirer');
+    log.info(null, 'TransferredChromeToWaitingAcquirer');
     return true;
   }
 

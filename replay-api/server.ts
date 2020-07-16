@@ -1,44 +1,33 @@
+// tslint:disable:no-console
 process.env.ENVIRONMENT = process.env.ENVIRONMENT || 'development';
 
-import Koa from 'koa';
-import Router from 'koa-router';
-import cors from '@koa/cors';
-
-import middleware from './middleware';
-import endpoints from './endpoints';
-
-////////////////////////////////////////////////////////////////////////////////////////
-
-const koa = middleware(new Koa());
-const router = new Router();
+import http from 'http';
+import fetchResource from './endpoints/fetchResource';
+import fetchSessionMeta from './endpoints/fetchSessionMeta';
 
 const isTest = process.env.ENVIRONMENT === 'test';
 
-// ////////////////////////////////////////////////////////////////////////////////////////
-
-router.get('/sessionMeta', endpoints.fetchSessionMeta);
-router.get('/resource', endpoints.fetchResource);
-
-// ////////////////////////////////////////////////////////////////////////////////////////
-
-koa.use(cors());
-koa.use((ctx, next) => {
-  if (!isTest && ctx.method !== 'OPTIONS') {
-    // tslint:disable-next-line:no-console
-    console.log(`${ctx.method.padEnd(7)} -> ${ctx.path}`);
+export default async (req: http.IncomingMessage, res: http.ServerResponse) => {
+  if (!isTest && req.method !== 'OPTIONS') {
+    console.log(`${req.method.padEnd(7)} -> ${req.url}`);
   }
-  return next();
-});
+  try {
+    if (req.url.match(/\/sessionMeta/)) {
+      return await fetchSessionMeta(req, res);
+    }
 
-koa.use(router.routes());
-koa.use(async (ctx, next) => {
-  ctx.status = 404;
-  ctx.body = 'Not Found';
-  // tslint:disable-next-line:no-console
-  if (!isTest) console.log(`${ctx.method.padEnd(7)} -> ${ctx.path} (404 MISSING)`);
-  next();
-});
+    if (req.url.match(/\/resource/)) {
+      return await fetchResource(req, res);
+    }
 
-////////////////////////////////////////////////////////////////////////////////////////
-
-export default koa;
+    res.writeHead(404);
+    res.end('Not Found');
+    if (!isTest) console.log(`${req.method.padEnd(7)} -> ${req.url} (404 MISSING)`);
+  } catch (error) {
+    res.writeHead(500, {
+      'content-type': 'application/json',
+    });
+    res.end(JSON.stringify({ message: 'There as been an internal server error.', error }));
+    if (!isTest) console.log(`${req.method.padEnd(7)} -> ${req.url} (500 ${error})`);
+  }
+};

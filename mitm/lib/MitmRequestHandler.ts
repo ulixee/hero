@@ -264,7 +264,7 @@ export default class MitmRequestHandler {
       );
 
       if (!session) {
-        log.error('Mitm.RequestHandler:NoSessionForRequest', {
+        log.error(session.sessionId, 'Mitm.RequestHandler:NoSessionForRequest', {
           url: ctx.url,
           headers: ctx.clientToProxyRequest.headers,
           method: ctx.clientToProxyRequest.method,
@@ -288,11 +288,11 @@ export default class MitmRequestHandler {
       await HeadersHandler.waitForResource(ctx);
       await CookieHandler.setProxyToServerCookies(ctx);
 
-      log.info(`Mitm.handleRequest`, {
+      log.info(session.sessionId, `Mitm.handleRequest`, {
         url: ctx.url,
         hasSession: !!session,
         isSSL: ctx.isSSL,
-        isUpgrade,
+        isHttpUpgrade: isUpgrade,
       });
       ctx.cacheHandler?.onRequest(ctx);
 

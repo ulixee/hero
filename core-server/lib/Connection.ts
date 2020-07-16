@@ -30,9 +30,13 @@ export default class CoreServerConnection {
     const { messageId, command, meta, args } = payload;
     if (meta) {
       const core = Core.byWindowId[meta.windowId];
-      this.runCommand(messageId, core, command, args).catch(error => log.error(error));
+      this.runCommand(messageId, core, command, args).catch(error =>
+        log.error(meta.sessionId, 'RunCommandError', error),
+      );
     } else {
-      this.runCommand(messageId, Core, command, args).catch(error => log.error(error));
+      this.runCommand(messageId, Core, command, args).catch(error =>
+        log.error(null, 'RunCommandError', error),
+      );
     }
   }
 

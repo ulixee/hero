@@ -47,7 +47,7 @@ describe('document tests', () => {
       [expect.any(Object), 'execJsPath', [[...jsPath, [DomEnv.getAttachedStateFnName, undefined]]]],
       [expect.any(Object), 'execJsPath', [[1, 'tagName']]],
       [expect.any(Object), 'close', []],
-      [null, 'closeSessions', [['window-id']]],
+      [null, 'disconnect', [['window-id'], undefined]],
     ]);
     expect(browser.sessionId).toBe('session-id');
   });

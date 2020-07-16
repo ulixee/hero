@@ -40,6 +40,8 @@
 
   .SessionsMenu {
     @include overlayStyle();
-
+    li {
+      cursor: pointer;
+    }
   }
 </style>

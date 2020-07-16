@@ -1,30 +1,53 @@
 import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import SessionLoader from '../lib/SessionLoader';
-import IContext from '../interfaces/IContext';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import { IncomingMessage, ServerResponse } from 'http';
+import { parse } from 'url';
 
 const readonlyAndFileMustExist = { readonly: true, fileMustExist: true };
 
 const resourceWhitelist: ResourceType[] = ['Ico', 'Image', 'Media', 'Font', 'Stylesheet'];
 
-export default async function fetchResource(ctx: IContext) {
-  const { dataLocation, sessionId, commandId, url } = ctx.query;
+export default async function fetchResource(req: IncomingMessage, res: ServerResponse) {
+  const reqUrl = parse(req.headers.host + req.url, true);
+  const { dataLocation, sessionId, commandId, url } = reqUrl.query;
 
-  const sessionDb = new SessionDb(dataLocation, sessionId, readonlyAndFileMustExist);
+  const sessionDb = new SessionDb(
+    dataLocation as string,
+    sessionId as string,
+    readonlyAndFileMustExist,
+  );
   const sessionLoader = new SessionLoader(sessionDb);
 
   console.log('Fetching resource', url);
 
-  const resource = await sessionLoader.fetchResource(url, commandId);
-  if (resource) {
-    const { data, headers } = resource;
-    ctx.response.type = headers['Content-Type'];
-    if (!resourceWhitelist.includes(resource.type)) {
-      return `
+  const resource = await sessionLoader.fetchResource(url as string, commandId as string);
+  if (!resource) {
+    res.writeHead(404);
+    res.end('Resource not found');
+    return;
+  }
+
+  if (!resourceWhitelist.includes(resource.type)) {
+    res.writeHead(200, {
+      'Cache-Control': 'public, max-age=500',
+      'Content-Type': resource.headers['Content-Type'] ?? resource.headers['content-type'],
+    });
+
+    if (resource.type === 'Script') {
+      res.end(mockScript);
+    } else {
+      res.end();
+    }
+
+    return;
+  }
+
+  res.writeHead(200, resource.headers);
+  res.end(resource.data);
+}
+
+const mockScript = `
 (function() { 
   let script = "Blocked for Replay";
 })();`;
-    }
-    return data;
-  }
-}

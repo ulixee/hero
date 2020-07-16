@@ -283,6 +283,7 @@ class ObjectAtPath {
       pathState: {
         step: this.lookupStep,
         index: this.lookupStepIndex,
+        path: this.jsPath,
       },
     });
   }

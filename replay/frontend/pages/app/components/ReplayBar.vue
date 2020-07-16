@@ -121,6 +121,7 @@ export default class ReplayBar extends Vue {
   background-color: var(--toolbarBackgroundColor);
 
   .start {
+    cursor: pointer;
     .label {
       margin-right: 5px;
       vertical-align: top;
@@ -131,6 +132,10 @@ export default class ReplayBar extends Vue {
   .vue-slider-mark:first-child .vue-slider-mark-step,
   .vue-slider-mark:last-child .vue-slider-mark-step {
     display: block;
+  }
+
+  .vue-slider {
+    cursor: pointer;
   }
 
   .vue-slider-mark {

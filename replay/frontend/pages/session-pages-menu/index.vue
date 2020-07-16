@@ -47,6 +47,7 @@ export default class SessionPagesMenu extends Vue {
     padding-left: 10px;
   }
   li.page {
+    cursor: pointer;
     &:hover {
       background-color: #eeeeee;
     }

@@ -28,10 +28,10 @@ export default class CoreClient {
     return coreClientSession;
   }
 
-  public async shutdown(): Promise<void> {
+  public async shutdown(error?: Error): Promise<void> {
     const windowIds = Object.keys(this.sessionsByWindowId);
-    if (windowIds.length) {
-      await this.commandQueue.run<void>('closeSessions', windowIds);
+    if (windowIds.length || error) {
+      await this.commandQueue.run<void>('disconnect', windowIds, error);
     }
     for (const windowId of windowIds) {
       delete this.sessionsByWindowId[windowId];

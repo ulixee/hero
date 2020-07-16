@@ -38,7 +38,7 @@ describe('basic SecretAgent tests', () => {
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
       [null, 'createSession'],
-      [null, 'closeSessions'],
+      [null, 'disconnect'],
     ]);
   });
 });
