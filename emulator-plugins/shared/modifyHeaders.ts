@@ -9,6 +9,7 @@ const { log } = Log(module);
 export default function modifyHeaders(
   userAgent: IUserAgent,
   headerProfiles: IResourceHeaderDefaults,
+  sessionId: string,
   resourceType: ResourceType,
   secureDomain: boolean,
   method: string,
@@ -16,6 +17,7 @@ export default function modifyHeaders(
   headers: { [name: string]: string },
 ) {
   const defaultOrder = getOrderAndDefaults(
+    sessionId,
     headerProfiles,
     resourceType,
     secureDomain,
@@ -92,6 +94,7 @@ export default function modifyHeaders(
 }
 
 function getOrderAndDefaults(
+  sessionId: string,
   headerProfiles: IResourceHeaderDefaults,
   resourceType: ResourceType,
   secureDomain: boolean,
@@ -126,7 +129,7 @@ function getOrderAndDefaults(
   }
 
   if (!defaultOrder) {
-    log.error('Headers.NotFound', { resourceType, secureDomain, method, originType });
+    log.error('Headers.NotFound', { sessionId, resourceType, secureDomain, method, originType });
     return null;
   }
 

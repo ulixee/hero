@@ -8,6 +8,7 @@ import SessionsMenu from '../overlays/SessionsMenu';
 import SessionUrlsMenu from '../overlays/SessionUrlsMenu';
 import IRectangle from '~shared/interfaces/IRectangle';
 import CommandOverlay from '../overlays/CommandOverlay';
+import MessageOverlay from '../overlays/MessageOverlay';
 
 export default class OverlayManager {
   private overlays: BaseOverlay[] = [];
@@ -20,6 +21,7 @@ export default class OverlayManager {
     this.overlays.push(new SessionsMenu());
     this.overlays.push(new SessionUrlsMenu());
     this.overlays.push(new CommandOverlay());
+    this.overlays.push(new MessageOverlay());
   }
 
   public show(name: string, browserWindow: BrowserWindow, rect: IRectangle, ...args: any[]) {

@@ -7,7 +7,7 @@ import SessionsDb from './lib/SessionsDb';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
-import Log from '@secret-agent/commons/Logger';
+import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
 import PageEventsListener from './lib/PageEventsListener';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import { IFrameRecord } from './models/FramesTable';
@@ -47,6 +47,8 @@ export default class SessionState {
   private resourceIdCounter = 0;
   private websocketMessageIdCounter = 0;
   private pageEventsListener: PageEventsListener;
+
+  private readonly logSubscriptionId: number;
 
   private websocketListeners: {
     [resourceId: string]: ((msg: IWebsocketResourceMessage) => any)[];
@@ -97,10 +99,13 @@ export default class SessionState {
         listener(msg);
       }
     });
+
+    this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
   public async listenForPageEvents(devtoolsClient: IDevtoolsClient, frameTracker: FrameTracker) {
     this.pageEventsListener = new PageEventsListener(
+      this.sessionId,
       devtoolsClient,
       frameTracker,
       this.onPageEvents.bind(this),
@@ -118,8 +123,9 @@ export default class SessionState {
     let result: T;
     try {
       await this.pageEventsListener.setCommandIdForPage(commandMeta.id);
-
       commandMeta.startDate = new Date().toISOString();
+      this.db.commands.insert(commandMeta);
+
       result = await commandFn();
       return result;
     } catch (err) {
@@ -128,6 +134,7 @@ export default class SessionState {
     } finally {
       commandMeta.endDate = new Date().toISOString();
       commandMeta.result = result;
+      // NOTE: second insert on purpose -- it will do an update
       this.db.commands.insert(commandMeta);
     }
   }
@@ -162,7 +169,8 @@ export default class SessionState {
   ) {
     const resourceId = this.browserRequestIdToResourceId[browserRequestId];
     if (!resourceId) {
-      log.error(`Websocket Message broadcast for unknown request id`, {
+      log.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
+        sessionId: this.sessionId,
         browserRequestId,
         message,
       });
@@ -262,32 +270,44 @@ export default class SessionState {
     this.db.frames.insert(frame);
   }
 
-  public captureError(frameId: string, source: string, error) {
-    log.error('Window.error', { source, error });
-    this.db.logs.insert(frameId, source, error.stack ?? String(error), new Date());
+  public captureError(frameId: string, source: string, error: Error) {
+    log.error('Window.error', { sessionId: this.sessionId, source, error });
+    this.db.pageLogs.insert(frameId, source, error.stack ?? String(error), new Date());
   }
 
-  public captureLog(frameId: string, type: string, message: string, location?: string) {
+  public captureLog(frameId: string, consoleType: string, message: string, location?: string) {
     if (message.includes('Error: ') || message.startsWith('ERROR')) {
-      log.error('Window.error', message);
+      log.error('Window.error', { sessionId: this.sessionId, message });
     } else {
-      log.info('Window.console', { type, message });
+      log.info('Window.console', { sessionId: this.sessionId, message });
     }
-    this.db.logs.insert(frameId, type, message, new Date(), location);
+    this.db.pageLogs.insert(frameId, consoleType, message, new Date(), location);
+  }
+
+  public onLogEvent(entry: ILogEntry) {
+    if (entry.sessionId === this.sessionId || !entry.sessionId) {
+      if (entry.action === 'Window.runCommand') entry.data = { id: entry.data.id };
+      if (entry.action === 'Window.ranCommand') entry.data = null;
+      this.db.sessionLogs.insert(entry);
+    }
   }
 
   public async saveBeforeWindowClose() {
-    await this.flush();
-    this.db.session.update(this.sessionId, {
-      closeDate: new Date(),
-      viewport: this.viewport,
-    });
-    this.db.close();
+    try {
+      await this.flush();
+    } finally {
+      this.db.session.update(this.sessionId, {
+        closeDate: new Date(),
+        viewport: this.viewport,
+      });
+      this.db.close();
+      LogEvents.unsubscribe(this.logSubscriptionId);
+    }
   }
 
   public async flush() {
     await this.pageEventsListener?.flush();
-    await this.db.flush();
+    this.db.flush();
   }
 
   public async getPageDomChanges(pages: IPage[], flush: boolean = false, sinceCommandId?: number) {

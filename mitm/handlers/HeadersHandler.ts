@@ -21,7 +21,11 @@ export default class HeadersHandler {
       );
 
       if (!resource.resourceType) {
-        log.error('HeadersHandler.ErrorGettingResourceType', { resource, url: ctx.url });
+        log.error('HeadersHandler.ErrorGettingResourceType', {
+          sessionId: ctx.requestSession.sessionId,
+          resource,
+          url: ctx.url,
+        });
         throw Error('No resource type found for resource');
       }
       ctx.browserRequestId = resource.browserRequestId;
@@ -44,6 +48,7 @@ export default class HeadersHandler {
     if (!session || !session.delegate?.modifyHeadersBeforeSend) return;
 
     const updatedHeaders = session.delegate.modifyHeadersBeforeSend(
+      session.sessionId,
       ctx.resourceType,
       ctx.isSSL,
       request.method,

@@ -147,7 +147,9 @@ export default class WindowEvents {
 
   private onMitmRequestResponse(responseEvent: IRequestSessionResponseEvent) {
     const { request, requestTime, wasCached, body, response } = responseEvent;
+    const sessionId = this.window.session.id;
     log.info('Chrome.Response', {
+      sessionId,
       url: request.url,
       method: request.method,
       wasCached,
@@ -241,7 +243,7 @@ export default class WindowEvents {
 
   // in-page navigation triggered (anchors and html5)
   private async onNavigatedWithinDocument(navigation: NavigatedWithinDocumentEvent) {
-    log.info('Page.navigatedWithinDocument', navigation);
+    log.info('Page.navigatedWithinDocument', { sessionId: this.window.session.id, navigation });
     const { url, frameId } = navigation;
     if (this.mainFrameId === frameId) {
       // set load state back to all loaded
@@ -259,7 +261,10 @@ export default class WindowEvents {
 
   // client-side frame navigations (form posts/gets, redirects/ page reloads)
   private async onFrameRequestedNavigation(frameNavigationRequest: FrameRequestedNavigationEvent) {
-    log.info('Page.frameRequestedNavigation', frameNavigationRequest);
+    log.info('Page.frameRequestedNavigation', {
+      sessionId: this.window.session.id,
+      frameNavigationRequest,
+    });
     // disposition options: currentTab, newTab, newWindow, download
     const { frameId, url, reason } = frameNavigationRequest;
     if (this.mainFrameId === frameId) {

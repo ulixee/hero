@@ -52,6 +52,7 @@ export default class GlobalPool {
   public static async createSession(options: ICreateSessionOptions) {
     await this.start();
     log.info('AcquiringChrome', {
+      sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
       maxActiveSessionCount: this.maxActiveSessionCount,
@@ -75,6 +76,7 @@ export default class GlobalPool {
     await session.close();
     if (wasTransferred) {
       log.info('ReleasingChrome', {
+        sessionId: null,
         activeSessionCount: this.activeSessionCount,
         waitingForAvailability: this.waitingForAvailability.length,
       });
@@ -82,7 +84,7 @@ export default class GlobalPool {
   }
 
   public static async close() {
-    log.info('InitiatingGlobalPoolShutdown');
+    const logId = log.info('InitiatingGlobalPoolShutdown');
 
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new Error('Shutting down'));
@@ -97,6 +99,8 @@ export default class GlobalPool {
     this.chromeCore = null;
     this.mitmServer = null;
     this._isStarted = false;
+
+    log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
   private static async createSessionNow(

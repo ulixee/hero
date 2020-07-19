@@ -1,13 +1,12 @@
 import { ipcRenderer } from 'electron';
-import { observable, computed, action } from 'mobx';
-import { TABS_PADDING, TAB_ANIMATION_DURATION, TAB_MIN_WIDTH, TAB_MAX_WIDTH } from './constants';
+import { action, computed, observable } from 'mobx';
+import { TAB_ANIMATION_DURATION, TAB_MAX_WIDTH, TAB_MIN_WIDTH, TABS_PADDING } from './constants';
 import { closeWindow } from '../../pages/app/utils/windows';
 import { animateTab } from '../../pages/app/utils/tabs';
 import ITabLocation from '~shared/interfaces/ITabLocation';
 import ITabMeta from '~shared/interfaces/ITabMeta';
-import ISaSession, { ITick } from '~shared/interfaces/ISaSession';
+import ISaSession from '~shared/interfaces/ISaSession';
 import store from '../app';
-import ICommandResult from '~shared/interfaces/ICommandResult';
 
 export default class TabFrontend {
   @observable
@@ -28,6 +27,9 @@ export default class TabFrontend {
   @observable
   public currentTickValue = 0;
 
+  @observable
+  public currentUrl = 'Loading';
+
   public width = 0;
   public left = 0;
 
@@ -42,14 +44,9 @@ export default class TabFrontend {
   public marks: number[] = [];
 
   @observable
-  public ticksByValue: { [value: number]: ITick } = {};
+  public isPlaying = false;
 
-  public commandResults: { [commandId: number]: ICommandResult } = {};
-
-  @computed
-  public get currentTick(): ITick {
-    return this.ticksByValue[this.currentTickValue];
-  }
+  private interval: number;
 
   @computed
   public get favicon() {
@@ -71,6 +68,14 @@ export default class TabFrontend {
       return this.location;
     }
     return this.saSession?.scriptEntrypoint;
+  }
+
+  @computed
+  public get isScriptLocation() {
+    if (!this.location) {
+      return true;
+    }
+    return false;
   }
 
   @computed
@@ -101,28 +106,56 @@ export default class TabFrontend {
     if (active) {
       requestAnimationFrame(() => {
         this.select();
+        if (saSession) this.startPlayback();
       });
     }
   }
 
+  public pausePlayback() {
+    this.isPlaying = false;
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
+  }
+
+  public startPlayback() {
+    this.isPlaying = true;
+    clearInterval(this.interval);
+    this.interval = setInterval(() => {
+      if (this.currentTickValue + 0.1 > 100) {
+        this.currentTickValue = 100;
+        this.pausePlayback();
+      } else {
+        this.currentTickValue += 0.1;
+      }
+      ipcRenderer.send('on-tick', this.currentTickValue);
+    }, 20) as any;
+  }
+
   public updateSession(session: ISaSession) {
+    const startSessionMillis = this.saSession?.durationMillis;
     this.saSession = session;
 
-    const marks = [0];
-    const ticksByValue = {};
-    const commandResults = {};
+    const marks = [];
     if (this.saSession) {
       for (const tick of this.saSession.ticks) {
         marks.push(tick.playbarOffsetPercent);
-        ticksByValue[tick.playbarOffsetPercent] = tick;
       }
-      for (const result of this.saSession.commandResults) {
-        commandResults[result.commandId] = result;
+    } else {
+      this.currentTickValue = 0;
+    }
+    this.marks = marks;
+
+    if (startSessionMillis && this.currentTickValue) {
+      if (session.durationMillis < startSessionMillis) {
+        this.currentTickValue =
+          this.currentTickValue * (session.durationMillis / startSessionMillis);
+      } else {
+        this.currentTickValue =
+          this.currentTickValue * (startSessionMillis / session.durationMillis);
       }
     }
-    this.ticksByValue = ticksByValue;
-    this.marks = marks;
-    this.commandResults = commandResults;
   }
 
   @action
@@ -188,6 +221,7 @@ export default class TabFrontend {
 
   @action
   public close() {
+    this.pausePlayback();
     const selected = store.tabs.selectedTabId === this.id;
 
     ipcRenderer.send('tab:destroy', this.id);
@@ -235,6 +269,7 @@ export default class TabFrontend {
   }
 
   public async reload(): Promise<any> {
+    this.pausePlayback();
     return await ipcRenderer.invoke('tab:reload', this.id);
   }
 }

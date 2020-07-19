@@ -18,7 +18,10 @@ export default class RemoteClient {
   private pendingMessages: PendingMessages = new PendingMessages();
 
   constructor() {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
+    const { SecretAgent, coreClient } = SecretAgentClientGenerator({
+      handleShutdownSignals: true,
+      captureUncaughtClientErrors: true,
+    });
     this.SecretAgent = SecretAgent;
     this.coreClient = coreClient;
     this.bindPipes();

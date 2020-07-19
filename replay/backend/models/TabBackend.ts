@@ -8,11 +8,8 @@ import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation
 import { INTERNAL_BASE_URL } from '~shared/constants/files';
 import ReplayApi from '~backend/ReplayApi';
 import IRectangle from '~shared/interfaces/IRectangle';
-import Rectangle = Electron.Rectangle;
 import Application from '~backend/Application';
-import ipcMain = Electron.ipcMain;
-import ICommandResult from '~shared/interfaces/ICommandResult';
-import { ITick } from '~shared/interfaces/ISaSession';
+import Rectangle = Electron.Rectangle;
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayer');
 
@@ -89,6 +86,7 @@ export default class TabBackend {
 
     if (this.replayApi) {
       this.replayApi.removeAllListeners('session:updated');
+      this.replayApi.isActive = false;
     }
 
     const tabUpdateParams: any = { id: this.id, currentTickValue: 0 };
@@ -96,51 +94,39 @@ export default class TabBackend {
       tabUpdateParams.location = location;
       location = location === InternalLocations.NewTab ? InternalLocations.Home : location;
       this.location = location as InternalLocations;
-      this.webContents.loadURL(`${INTERNAL_BASE_URL}/${location.toLowerCase()}`);
+      this.webContents
+        .loadURL(`${INTERNAL_BASE_URL}/${location.toLowerCase()}`)
+        .then(x => this.send('clicks:enable', true));
       this.replayApi = null;
+      this.webContents.closeDevTools();
     } else {
       this.location = InternalLocations.Replay;
+      this.window.webContents.session.clearCache();
       tabUpdateParams.saSession = replayApi.saSession;
-      this.webContents.loadURL(`http://localhost:3333/${InternalLocations.Replay.toLowerCase()}`);
+      this.webContents
+        .loadURL(`http://localhost:3333/${InternalLocations.Replay.toLowerCase()}`)
+        .then(x => this.send('clicks:enable', false));
       this.replayApi = replayApi;
       this.replayApi.on('session:updated', this.updateTabSession.bind(this));
+      this.webContents.openDevTools({ mode: 'detach' });
     }
 
     this.window.sendToRenderer('tab:updated', tabUpdateParams);
   }
 
+  public async changeTickOffset(offset: number) {
+    this.onTick(offset);
+    this.window.sendToRenderer('tab:updated', {
+      id: this.id,
+      currentTickValue: offset,
+    });
+  }
+
   public async onTick(tickValue: number) {
-    const ticks = this.replayApi.saSession.ticks;
-
-    let lastTick: ITick;
-    for (const tick of ticks) {
-      lastTick = tick;
-      if (tick.playbarOffsetPercent > tickValue) break;
-    }
-
-    if (!lastTick) return;
-
-    let lastPaintIndex: number;
-    const paintEventTicks = lastTick.minorTicks.map(t => t.paintEventIdx).filter(Boolean);
-    if (lastTick.minorTicks.length) {
-      lastPaintIndex = Math.max(...paintEventTicks);
-    } else {
-      const startIndex = ticks.indexOf(lastTick);
-
-      for (let i = startIndex; i >= 0; i -= 1) {
-        const tick = ticks[i];
-        const prevPaintEventTicks = tick.minorTicks.map(t => t.paintEventIdx).filter(Boolean);
-        if (prevPaintEventTicks.length) {
-          lastPaintIndex = Math.max(...prevPaintEventTicks);
-        }
-      }
-    }
-
-    const changeEvents =
-      lastPaintIndex === undefined ? null : await this.replayApi.setPaintIndex(lastPaintIndex);
-
-    const highlightNodeIds = this.findPreviousResultHighlight(lastTick.commandId);
-    this.send('dom:apply', changeEvents, highlightNodeIds);
+    const events = await this.replayApi.setTickValue(tickValue);
+    if (!events) return;
+    this.send('dom:apply', ...events);
+    this.window.sendToRenderer('tab:page-url', { url: this.replayApi.urlOrigin, id: this.id });
   }
 
   public async onTickHover(rect: IRectangle, tickValue: number) {
@@ -197,17 +183,19 @@ export default class TabBackend {
       saSession: this.replayApi.saSession,
     };
     this.window.sendToRenderer('tab:updated', tabUpdateParam);
-  }
 
-  private findPreviousResultHighlight(commandId: number) {
-    const commandIndex = this.replayApi.saSession.commandResults.findIndex(
-      x => x.commandId === commandId,
-    );
-    for (let i = commandIndex; i >= 0; i -= 1) {
-      const result = this.replayApi.saSession.commandResults[i];
-      if (result.resultNodeIds?.length) {
-        return result.resultNodeIds;
-      }
+    if (this.replayApi.saSession.unresponsiveSeconds >= 5) {
+      Application.instance.overlayManager.show(
+        'message-overlay',
+        this.window.browserWindow,
+        this.window.browserWindow.getContentBounds(),
+        {
+          title: 'Did your script hang?',
+          message: `The last update was ${this.replayApi.saSession.unresponsiveSeconds} seconds ago.`,
+        },
+      );
+    } else {
+      Application.instance.overlayManager.getByName('message-overlay').hide();
     }
   }
 
@@ -220,8 +208,12 @@ export default class TabBackend {
       } else if (parsedUrl.host === 'localhost:3333' && parsedUrl.pathname === '/replay') {
         callback({ url: 'http://localhost:3000/replay.html' });
       } else {
-        const cleanedUrl = request.url.replace('http://localhost:3333', this.replayApi.urlOrigin);
-        const resourceUrl = this.replayApi.resourceUrl(cleanedUrl);
+        const requestUrl = new URL(request.url);
+        const cleanedUrl = new URL(
+          requestUrl.pathname + requestUrl.search,
+          this.replayApi.urlOrigin,
+        );
+        const resourceUrl = this.replayApi.resourceUrl(cleanedUrl.href);
         callback({ url: resourceUrl });
       }
     });

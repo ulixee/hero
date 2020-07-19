@@ -25,8 +25,8 @@ export default class CookieHandler {
     for (const setCookie of ctx.serverToProxyResponse.headers['set-cookie'] ?? []) {
       try {
         await session.delegate.setCookie(setCookie, ctx, ctx.serverToProxyResponse.statusCode);
-      } catch (err) {
-        log.warn('Could not set cookie', err);
+      } catch (error) {
+        log.warn('Could not set cookie', { sessionId: ctx.requestSession.sessionId, error });
       }
     }
   }

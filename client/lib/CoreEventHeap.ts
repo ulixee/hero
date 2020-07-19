@@ -77,7 +77,7 @@ export default class CoreEventHeap {
     this.coreClient
       .pipeOutgoingCommand(this.meta, 'removeEventListener', [listenerId])
       .catch(error => {
-        log.error('removeEventListener Error: ', error);
+        log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
       });
     this.listenerFnById.delete(listenerId);
     this.listenerIdByHandle.delete(handle);

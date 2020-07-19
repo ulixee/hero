@@ -26,8 +26,8 @@ export class AppStore {
   }
 
   @computed
-  public get ticksByValue() {
-    return this.tabs.selectedTab?.ticksByValue;
+  public get pageUrl() {
+    return this.tabs.selectedTab?.currentUrl;
   }
 
   @computed

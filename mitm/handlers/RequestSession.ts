@@ -277,7 +277,7 @@ export default class RequestSession {
     return RequestSession.sessions[sessionId];
   }
 
-  private static getSessionId(headers: { [name: string]: string }, method: string) {
+  public static getSessionId(headers: { [name: string]: string }, method: string) {
     const keys = Object.keys(headers);
     const accessControlHeaders = Object.entries(headers).find(([key]) =>
       key.match(/access-control-request-headers/i),
@@ -294,7 +294,7 @@ export default class RequestSession {
     }
   }
 
-  private static async waitForWebsocketSessionId(
+  public static async waitForWebsocketSessionId(
     headers: { [name: string]: string },
     timeout: number,
   ) {

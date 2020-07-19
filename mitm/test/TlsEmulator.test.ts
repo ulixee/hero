@@ -63,7 +63,7 @@ test('should handle http2 requests', async () => {
 });
 
 test('should be able to hit google using a Chrome79 Emulator', async () => {
-  const tlsConnection = new SocketConnectDriver({
+  const tlsConnection = new SocketConnectDriver('1', {
     host: 'google.com',
     port: '443',
     clientHelloId: 'Chrome79',
@@ -86,7 +86,7 @@ test('should be able to hit google using a Chrome79 Emulator', async () => {
 });
 
 test('should be able to hit optimove using a Chrome79 Emulator', async () => {
-  const tlsConnection = new SocketConnectDriver({
+  const tlsConnection = new SocketConnectDriver('2', {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
@@ -112,7 +112,7 @@ test('should be able to hit optimove using a Chrome79 Emulator', async () => {
 
 // only test this manually
 test.skip('should be able to get scripts from unpkg using Chrome79 emulator', async () => {
-  const tlsConnection = new SocketConnectDriver({
+  const tlsConnection = new SocketConnectDriver('3', {
     host: 'unpkg.com',
     port: '443',
     clientHelloId: 'Chrome79',
@@ -152,7 +152,7 @@ test('should be able to send a request through a proxy', async () => {
   proxy.once('connect', connect);
 
   const serverPort = await createHttpsServer(() => htmlString);
-  const tlsConnection = new SocketConnectDriver({
+  const tlsConnection = new SocketConnectDriver('4', {
     host: 'localhost',
     port: String(serverPort),
     clientHelloId: 'Chrome79',
@@ -348,7 +348,7 @@ async function httpGetWithSocket(
 }
 
 function getTlsConnection(serverPort: number, clientHello = 'Chrome79') {
-  const tlsConnection = new SocketConnectDriver({
+  const tlsConnection = new SocketConnectDriver('5', {
     host: 'localhost',
     port: String(serverPort),
     clientHelloId: clientHello,

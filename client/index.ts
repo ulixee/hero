@@ -1,8 +1,8 @@
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import SetupAwaitedHandler from './lib/SetupAwaitedHandler';
 // run before any other imports
 SetupAwaitedHandler();
 
+import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import Browser, { createBrowser } from './lib/Browser';
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
 import ICreateBrowserOptions from './interfaces/ICreateBrowserOptions';
@@ -12,6 +12,7 @@ import ISecretAgent, {
   ISecretAgentConfigureOptions,
   SecretAgentStatics,
 } from './interfaces/ISecretAgent';
+import Signals = NodeJS.Signals;
 
 // tslint:disable:variable-name
 const DefaultOptions = {
@@ -22,7 +23,9 @@ const DefaultOptions = {
   defaultUserProfile: {},
 };
 
-export function SecretAgentClientGenerator(): {
+export function SecretAgentClientGenerator(
+  initArgs?: IClientInitArgs,
+): {
   SecretAgent: ISecretAgent;
   coreClient: CoreClient;
 } {
@@ -48,17 +51,38 @@ export function SecretAgentClientGenerator(): {
       await coreClient.start(options as IConfigureOptions);
     }
 
-    public static async shutdown() {
-      await coreClient.shutdown();
+    public static async shutdown(error?: Error) {
+      await coreClient.shutdown(error);
     }
   }
 
-  ['beforeExit', 'exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
-    // @ts-ignore
-    process.once(name, async () => await SecretAgent.shutdown());
-  });
+  if (initArgs?.handleShutdownSignals) {
+    ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+      process.once(name as Signals, async () => await SecretAgent.shutdown());
+    });
+  }
+
+  if (initArgs?.captureUncaughtClientErrors) {
+    process.on('uncaughtException', async (error: Error) => {
+      // keep core node behavior intact
+      process.stderr.write(`${error.stack}\n`);
+      await SecretAgent.shutdown(error);
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', async (error: Error) => {
+      // keep core node behavior intact
+      process.stderr.write(`${error.stack}\n`);
+      await SecretAgent.shutdown(error);
+    });
+  }
 
   return { SecretAgent, coreClient };
+}
+
+interface IClientInitArgs {
+  handleShutdownSignals: boolean;
+  captureUncaughtClientErrors: boolean;
 }
 
 export { LocationStatus, ISecretAgent };

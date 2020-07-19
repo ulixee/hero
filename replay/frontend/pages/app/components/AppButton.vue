@@ -91,6 +91,7 @@ export default class AppButton extends AppButtonProps {
       '--activeBackgroundColor': toggledBgColor,
       '--hoverBackgroundColor': this.toggled ? toggledBgColor : hoverBgColor,
       '--buttonIconSize': `${this.size}px`,
+      '--buttonIconBackgroundSize': `${this.size}px ${this.size}px`,
       '--buttonIconOpacity': `${this.disabled ? 0.25 : this.opacity}`,
       '--buttonIconFilter': this.autoInvert && toolbarLightForeground ? 'invert(100%)' : 'none',
       '--buttonBackgroundImage': `url(${this.icon})`,

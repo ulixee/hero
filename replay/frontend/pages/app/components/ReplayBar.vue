@@ -7,10 +7,10 @@
     span.label Stop
     Icon(:src="ICON_PAUSE" :size="14")
   .slider-wrapper(v-if="store.marks.length" ref="sliderWrapper")
-    VueSlider(ref="slider" tooltip="none" :marks="store.marks" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
-        @mousemove.native="showCommandOverlay")
+    VueSlider(ref="slider" tooltip="none" :marks="store.marks" :interval="0.1" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
+        @mousemove.native="onHoverPlaybar")
         template(v-slot:mark="{ pos, value }" )
-            .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{error:tickHasCommandResultError(value), hovered:isHovered(value)}")
+            .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{hovered:isHovered(value)}")
                 .vue-slider-mark-step
   .results
     | Results
@@ -35,10 +35,19 @@ export default class ReplayBar extends Vue {
   private readonly ICON_PLAY = ICON_PLAY;
   private readonly ICON_PAUSE = ICON_PAUSE;
   private store = store;
-
-  private isPlaying = false;
   private hoveredValue: string = '';
-  private interval: number;
+
+  private get isPlaying() {
+    return this.store.selectedTab.isPlaying;
+  }
+
+  private play() {
+    this.store.selectedTab.startPlayback();
+  }
+
+  private pause() {
+    this.store.selectedTab.pausePlayback();
+  }
 
   @NoCache
   private get cssVars() {
@@ -48,50 +57,18 @@ export default class ReplayBar extends Vue {
     };
   }
 
-  private pause() {
-    this.isPlaying = false;
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = undefined;
-    }
-  }
-
-  private play() {
-    this.isPlaying = true;
-    clearInterval(this.interval);
-    this.interval = setInterval(() => {
-      if (this.store.selectedTab.currentTickValue + 0.1 > 100) {
-        this.store.selectedTab.currentTickValue = 100;
-      } else {
-        this.store.selectedTab.currentTickValue += 0.1;
-      }
-      ipcRenderer.send('on-tick', this.store.selectedTab.currentTickValue);
-    }, 20) as any;
-  }
-
   private isHovered(value: number) {
     return this.hoveredValue === String(value);
   }
 
-  private tickHasCommandResultError(mark: number) {
-    const command = this.store.ticksByValue[mark];
-    if (!command) return;
-    const result = this.store.selectedTab.commandResults[command.commandId];
-    if (result) {
-      return result.isError;
-    }
-    return false;
-  }
-
-  private showCommandOverlay(e: MouseEvent) {
+  private onHoverPlaybar(e: MouseEvent) {
     const sliderRef = this.$refs.slider as VueSlider;
     sliderRef.setScale();
     // @ts-ignore
     const pos = sliderRef.getPosByEvent(e);
 
-    const closest = this.closestTick(pos);
-
-    const playbarOffsetPercent = closest.playbarOffsetPercent;
+    const tick = this.closestTick(pos);
+    const playbarOffsetPercent = tick.playbarOffsetPercent;
     this.hoveredValue = String(playbarOffsetPercent);
 
     const containerRect = sliderRef.$refs.container.getBoundingClientRect().toJSON();
@@ -102,12 +79,16 @@ export default class ReplayBar extends Vue {
   }
 
   private onValueChange(value: number) {
+    // this is called when someone clicks, so pause the playback
     this.pause();
     ipcRenderer.send('on-tick', value);
   }
 
   private closestTick(pos: number) {
     let closest: ITick = store.ticks[0];
+    if (pos > store.ticks[store.ticks.length - 1].playbarOffsetPercent) {
+      return store.ticks[store.ticks.length - 1];
+    }
     let closestOffset = 100;
     for (const tick of store.ticks) {
       const offset = Math.abs(tick.playbarOffsetPercent - pos);
@@ -121,7 +102,7 @@ export default class ReplayBar extends Vue {
   }
 
   private beforeDestroy() {
-    clearInterval(this.interval);
+    this.pause();
   }
 }
 </script>
@@ -140,6 +121,7 @@ export default class ReplayBar extends Vue {
   background-color: var(--toolbarBackgroundColor);
 
   .start {
+    cursor: pointer;
     .label {
       margin-right: 5px;
       vertical-align: top;
@@ -152,9 +134,18 @@ export default class ReplayBar extends Vue {
     display: block;
   }
 
+  .vue-slider {
+    cursor: pointer;
+  }
+
   .vue-slider-mark {
     &.error {
-      background-color: #710000;
+      .vue-slider-mark-step {
+        background-color: #9a0000;
+        margin-top: -150%;
+        height: 400%;
+        width: 4px;
+      }
     }
     .vue-slider-mark-step {
       height: 300%;

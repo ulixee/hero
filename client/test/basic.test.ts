@@ -16,7 +16,7 @@ describe('basic SecretAgent tests', () => {
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
       [null, 'start'],
       [null, 'configure'],
-      [null, 'shutdown'],
+      // no shutdown call if no browsers created
     ]);
   });
 
@@ -38,7 +38,7 @@ describe('basic SecretAgent tests', () => {
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
       [null, 'createSession'],
-      [null, 'shutdown'],
+      [null, 'disconnect'],
     ]);
   });
 });

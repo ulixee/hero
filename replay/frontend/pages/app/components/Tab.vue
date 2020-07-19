@@ -12,7 +12,7 @@
     .tab-content
       Preloader(v-if="tab.loading" :color="store.theme.accentColor" :thickness="6" :size="16" indeterminate style="minWidth: 16px")
       .tab-icon(v-if="!tab.loading && tab.favicon")
-      .tab-title {{tab.title}}
+      .tab-title(:class="{ script: tab.isScriptLocation }") {{tab.title}}
       .tab-close(@mousedown="onCloseMouseDown" @click="removeTab")
 </template>
 
@@ -185,7 +185,7 @@ export default class Tab extends TabProps {
       '--tabIconMinWidth': this.tab.favicon ? '16px' : 0,
       '--tabIconOpacity': this.tab.favicon ? 1 : 0,
       '--tabIconBackgroundImage': `url('${faviconImage}')`,
-      '--tabTitleMarginLeft': `${!this.tab.isIconSet ? 0 : 12}px`,
+      '--tabTitleMarginLeft': `${!this.tab.isIconSet ? 0 : 6}px`,
       '--tabTitleColor': this.tab.isSelected
         ? store.theme.tabSelectedTextColor
         : store.theme.tabTextColor,
@@ -245,8 +245,7 @@ export default class Tab extends TabProps {
   }
 
   .tab-icon {
-    height: 16px;
-    min-width: 16px;
+    height: var(--tabHeight);
     transition: 0.2s opacity, 0.2s min-width;
     @include centerIcon();
     min-width: var(--tabIconMinWidth);
@@ -260,11 +259,13 @@ export default class Tab extends TabProps {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: 0.2s margin-left;
-    margin-left: 8px;
     min-width: 0;
     flex: 1;
     margin-left: var(--tabTitleMarginLeft);
     color: var(--tabTitleColor);
+    &.script {
+      direction: rtl;
+    }
     .location {
       text-transform: capitalize;
     }

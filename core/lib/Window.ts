@@ -55,6 +55,10 @@ export default class Window {
     return this.sessionState.lastCommand?.id;
   }
 
+  public get sessionId() {
+    return this.session.id;
+  }
+
   public get navigationUrl(): string {
     return this.sessionState.pages.currentUrl;
   }
@@ -78,7 +82,7 @@ export default class Window {
     this.locationTracker = new LocationTracker(this.sessionState);
     this.events = new WindowEvents(this);
     this.frameTracker = new FrameTracker(this.devtoolsClient);
-    this.domEnv = new DomEnv(this.frameTracker, this.devtoolsClient);
+    this.domEnv = new DomEnv(this.sessionId, this.frameTracker, this.devtoolsClient);
   }
 
   public async start() {
@@ -182,12 +186,12 @@ export default class Window {
     } else {
       commandFn = this[functionName].bind(this, ...args);
     }
-    const id = log.info('Window.runCommand', commandMeta);
+    const id = log.info('Window.runCommand', { commandMeta, sessionId: this.sessionId });
     let result: T;
     try {
       result = await this.sessionState.runCommand<T>(commandFn, commandMeta);
     } finally {
-      log.stats('Window.ranCommand', { result }, id);
+      log.stats('Window.ranCommand', { sessionId: this.sessionId, result, parentLogId: id });
     }
     return result;
   }
@@ -288,12 +292,16 @@ export default class Window {
     this.isClosing = true;
     this.frameTracker.close();
     this.domEnv.close();
-    log.info('WindowClosing', { windowId: this.id, sessionId: this.session.id });
+
+    const logid = log.info('WindowClosing', {
+      windowId: this.id,
+      sessionId: this.session.id,
+    });
     try {
       // clear any pending timeouts
       this.waitTimeouts.forEach(x => {
         clearTimeout(x.timeout);
-        x.reject(new Error('Closing session'));
+        x.reject(new Error('Terminated command because session closing'));
       });
       await this.session.close();
       const page = this.puppPage;
@@ -309,8 +317,10 @@ export default class Window {
         error.message.includes('WebSocket is not open') === false &&
         error.message.includes('Connection closed') === false
       ) {
-        log.error('Error closing target', error);
+        log.error('WindowCloseError', { sessionId: this.sessionId, error });
       }
+    } finally {
+      log.stats('WindowClosed', { sessionId: this.sessionId, parentLogId: logid });
     }
   }
 
@@ -426,7 +436,7 @@ export default class Window {
 
     const window = new Window(sessionState, puppPage, session);
     await window.frameTracker.init();
-    log.info('CreatedWindow', null, logid);
+    log.info('CreatedWindow', { sessionId: session.id, parentLogId: logid });
     return window;
   }
 

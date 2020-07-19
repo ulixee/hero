@@ -57,19 +57,20 @@ describe('basic Session Replay tests', () => {
     const sessionDb = new SessionDb(baseDir, meta.sessionId, { readonly: true });
     const sessionLoader = new SessionLoader(sessionDb);
     const ticks = sessionLoader.ticks;
-    expect(ticks).toHaveLength(8);
+    // first tick is the "load" tick
+    expect(ticks).toHaveLength(9);
 
     const pages = sessionLoader.pages;
     expect(pages).toHaveLength(2);
     expect(pages[0].url).toBe(`${koaServer.baseUrl}/test1`);
 
-    const firstCommand = sessionLoader.getCommand(ticks[0].commandId);
+    const firstCommand = sessionLoader.getCommand(ticks[1].commandId);
     expect(firstCommand.name).toBe('goto');
-    expect(ticks[1].label).toBe('waitForLoad("AllContentLoaded")');
+    expect(ticks[2].label).toBe('waitForLoad("AllContentLoaded")');
 
-    expect(ticks[0].minorTicks).toHaveLength(3);
-    const paintEvents = sessionLoader.fetchPaintEventsSlice(
-      ticks[0].minorTicks.find(x => x.type === 'paint').paintEventIdx,
+    expect(ticks[1].minorTicks).toHaveLength(3);
+    const paintEvents = sessionLoader.paintEvents.slice(
+      ticks[1].minorTicks.find(x => x.type === 'paint').paintEventIdx,
     );
     // 1 is just the new document
     expect(paintEvents[0].changeEvents).toHaveLength(1);

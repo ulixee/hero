@@ -4,6 +4,7 @@ import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 
 export default interface IHttpRequestModifierDelegate {
   modifyHeadersBeforeSend?: (
+    sessionId: string,
     resourceType: ResourceType,
     secureDomain: boolean,
     method: string,

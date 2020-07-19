@@ -10,6 +10,7 @@ import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
 import Koa from 'koa';
 import KoaRouter from '@koa/router';
+import Core from '../core';
 
 const { log } = Log(module);
 
@@ -186,9 +187,10 @@ export function httpGet(
 export async function closeAll() {
   while (needsClosing.length) {
     const toClose = needsClosing.pop();
-    if (!toClose.close) log.warn(toClose);
+    if (!toClose.close) log.warn(null, toClose);
     await toClose.close();
   }
+  await Core.shutdown();
   log.flush();
 }
 

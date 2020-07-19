@@ -16,7 +16,7 @@
         .text {{1}} of {{store.saSession.relatedScriptInstances.length}}
       .page-section.section(@mousedown="showLocationOverlay($event, 'session-pages-menu')")
         Icon.lock(:src="ICON_LOCK" :size=16 iconStyle="transform: 'scale(-1,1)'")
-        .text {{pageUrl}}
+        .text {{store.pageUrl}}
     template(v-else-if="store.location")
       .name-section.section(@mousedown="showLocationOverlay($event, 'locations-menu')")
         .brand SecretAgent
@@ -50,10 +50,10 @@ import {
   ICON_NUMBER,
   ICON_LOCK,
   ICON_HOME,
-} from "~frontend/constants/icons";
+} from '~frontend/constants/icons';
 import store from '~frontend/stores/app';
 import NoCache from '~frontend/lib/NoCache';
-import ITabLocation, { InternalLocations } from "~shared/interfaces/ITabLocation";
+import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
 import { toJS } from 'mobx';
 
 @Observer
@@ -70,12 +70,6 @@ export default class AddressBar extends Vue {
   private readonly ICON_CLOCK = ICON_CLOCK;
   private readonly ICON_NUMBER = ICON_NUMBER;
   private readonly ICON_LOCK = ICON_LOCK;
-
-  @NoCache
-  private get pageUrl() {
-    const pages: any[] = this.store.saSession.pages;
-    return pages.length ? pages[0].url : '';
-  }
 
   @NoCache
   private get isHome() {
@@ -157,36 +151,42 @@ export default class AddressBar extends Vue {
     overflow: hidden;
     height: 30px;
     border-radius: 15px;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     background-color: var(--addressBarBackgroundColor);
     box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.1);
 
     .section {
+        cursor: pointer;
       flex: 1;
       position: relative;
       height: 100%;
-      margin-left: 5px;
-      margin-top: 10px;
+      box-sizing: border-box;
+      padding-top: 6px;
+      padding-right: 5px;
+      margin-top: 0;
       font-size: 13px;
       white-space: nowrap;
       min-width: 100px;
       overflow: hidden;
+      border-left: 1px solid rgba(0, 0, 0, 0.1);
+      padding-left: 10px;
       .text {
+        cursor: pointer;
         pointer-events: none;
         display: inline-block;
         padding-left: 5px;
+        line-height: 16px;
+        vertical-align: top;
       }
       .Icon {
         pointer-events: none;
+        margin-top: 1px;
       }
-      border-left: 1px solid rgba(0,0,0,0.1);
-      padding-left: 10px;
       &:first-child {
         border-left: none;
-        padding-left: 3px;
       }
       &:hover {
-        background: rgba(0,0,0,0.05);
+        background: rgba(0, 0, 0, 0.05);
       }
     }
     .script-section {
@@ -198,6 +198,7 @@ export default class AddressBar extends Vue {
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%;
+        direction: rtl;
       }
     }
     .url-section {
@@ -207,7 +208,9 @@ export default class AddressBar extends Vue {
 
     .name-section {
       .brand {
-        background: rgba(0,0,0,0.1);
+        padding: 1px 3px;
+        margin-top: -1px;
+        background: rgba(0, 0, 0, 0.1);
         display: inline-block;
       }
       text-transform: capitalize;

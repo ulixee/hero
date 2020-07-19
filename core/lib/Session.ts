@@ -44,7 +44,9 @@ export default class Session {
       options.scriptInstanceMeta,
     );
     this.initializePromise = this.initialize();
-    this.initializePromise.catch(error => log.error('Session.InitializeError', error));
+    this.initializePromise.catch(error =>
+      log.error('Session.InitializeError', { error, sessionId: this.id }),
+    );
     this.proxy = new MitmUpstreamProxy(this.id);
     this.requestMitmProxySession = new RequestSession(
       this.id,
@@ -75,7 +77,7 @@ export default class Session {
       try {
         await this.puppContext.close();
       } catch (error) {
-        log.error('ErrorClosingWindow', error);
+        log.error('ErrorClosingWindow', { error, sessionId: this.id });
       }
     }
   }

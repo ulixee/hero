@@ -37,7 +37,7 @@ export default class ChromeCore {
       let tickerInterval;
       let killTimer;
       try {
-        log.info('StartingChromeCore', { id: this.id });
+        log.info('StartingChromeCore', { id: this.id, sessionId: null });
 
         const options: LaunchOptions = {
           args: [
@@ -57,6 +57,9 @@ export default class ChromeCore {
             // Use proxy for localhost URLs
             '--proxy-bypass-list=<-loopback>',
           ],
+          handleSIGHUP: false,
+          handleSIGINT: false,
+          handleSIGTERM: false,
         };
         const argsToSkip = ['--disable-popup-blocking', 'about:blank'];
 
@@ -79,10 +82,14 @@ export default class ChromeCore {
           .filter(arg => !argsToSkip.includes(arg))
           .concat(options.args);
 
-        log.info('ChromeStarting', { path: options.executablePath, args: options.args });
+        log.info('ChromeStarting', {
+          path: options.executablePath,
+          args: options.args,
+          sessionId: null,
+        });
 
         tickerInterval = setInterval(
-          () => log.info('ChromeStillStarting', { id: this.id }),
+          () => log.info('ChromeStillStarting', { id: this.id, sessionId: null }),
           5000,
         ).unref();
         killTimer = setTimeout(
@@ -93,9 +100,9 @@ export default class ChromeCore {
 
         const pages = await puppBrowser.pages();
         await Promise.all(pages.map(async x => x.close())).catch(error => {
-          log.warn('error closing initial puppeteer browser page', error);
+          log.warn('Error closing initial chrome browser page', { error, sessionId: null });
         });
-        log.info('ChromeStarted', { id: this.id });
+        log.info('ChromeStarted', { id: this.id, sessionId: null });
         this.isStarted = true;
         resolve(puppBrowser);
       } catch (error) {
@@ -142,7 +149,7 @@ export default class ChromeCore {
         if (puppBrowser) await puppBrowser.close();
       }
     } catch (error) {
-      log.error('Error shutting down chrome', error);
+      log.error('ClosingChromeError', { sessionId: null, error });
     }
   }
 

@@ -2,15 +2,18 @@ import * as Path from 'path';
 import SessionDb from '@secret-agent/session-state/lib/SessionDb';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import SessionLoader from '../lib/SessionLoader';
-import IContext from '../interfaces/IContext';
+import { IncomingMessage, ServerResponse } from 'http';
+import * as url from 'url';
 
 const readonlyAndFileMustExist = { readonly: true, fileMustExist: true };
 
-export default async function fetchSessionMeta(ctx: IContext) {
-  const { dataLocation, id, name, scriptInstanceId } = ctx.query;
+export default async function fetchSessionMeta(req: IncomingMessage, res: ServerResponse) {
+  const reqUrl = url.parse(req.headers.host + req.url, true);
+  const { id, name, scriptInstanceId } = reqUrl.query;
+  const dataLocation = reqUrl.query.dataLocation as string;
   const relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[] = [];
   const relatedSessions: { id: string; name: string }[] = [];
-  const ext = Path.extname(dataLocation);
+  const ext = Path.extname(dataLocation as string);
   const dataLocationIsDb = ext === '.db';
 
   let sessionDb: SessionDb;
@@ -22,11 +25,14 @@ export default async function fetchSessionMeta(ctx: IContext) {
     sessionDb = new SessionDb(baseDir, sessionId, readonlyAndFileMustExist);
     sessionsDb = new SessionsDb(baseDir, readonlyAndFileMustExist);
   } else if (id) {
-    sessionDb = new SessionDb(dataLocation, id, readonlyAndFileMustExist);
+    sessionDb = new SessionDb(dataLocation, id as string, readonlyAndFileMustExist);
     sessionsDb = new SessionsDb(dataLocation, readonlyAndFileMustExist);
   } else {
-    sessionsDb = new SessionsDb(dataLocation);
-    const { id: sessionId } = sessionsDb.sessions.findByName(name, scriptInstanceId);
+    sessionsDb = new SessionsDb(dataLocation, readonlyAndFileMustExist);
+    const { id: sessionId } = sessionsDb.sessions.findByName(
+      name as string,
+      scriptInstanceId as string,
+    );
     sessionDb = new SessionDb(dataLocation, sessionId, readonlyAndFileMustExist);
   }
 
@@ -45,12 +51,24 @@ export default async function fetchSessionMeta(ctx: IContext) {
 
   const sessionLoader = new SessionLoader(sessionDb);
 
-  return {
-    ...session,
-    relatedScriptInstances: relatedScriptInstances,
-    relatedSessions: relatedSessions,
-    pages: sessionLoader.pages,
-    ticks: sessionLoader.ticks,
-    commandResults: sessionLoader.commandResults,
-  };
+  res.writeHead(200, {
+    'content-type': 'application/json',
+  });
+  res.end(
+    JSON.stringify({
+      ...session,
+      unresponsiveSeconds: sessionLoader.unresponsiveSeconds,
+      hasRecentErrors: sessionLoader.hasRecentErrors,
+      relatedScriptInstances: relatedScriptInstances,
+      relatedSessions: relatedSessions,
+      pages: sessionLoader.pages,
+      durationMillis: sessionLoader.durationMillis,
+      ticks: sessionLoader.ticks,
+      paintEvents: sessionLoader.paintEvents,
+      mouseEvents: sessionLoader.mouseEvents,
+      scrollEvents: sessionLoader.scrollEvents,
+      focusEvents: sessionLoader.focusEvents,
+      commandResults: sessionLoader.commandResults,
+    }),
+  );
 }

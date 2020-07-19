@@ -1,7 +1,7 @@
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 
-export default class LogsTable extends BaseTable<ILogRecord> {
+export default class PageLogsTable extends BaseTable<IPageLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'PageLogs', [
       ['frameId', 'TEXT'],
@@ -17,7 +17,7 @@ export default class LogsTable extends BaseTable<ILogRecord> {
   }
 }
 
-export interface ILogRecord {
+export interface IPageLogRecord {
   frameId: string;
   type: string;
   message: string;

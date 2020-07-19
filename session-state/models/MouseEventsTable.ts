@@ -48,6 +48,12 @@ export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
   public all() {
     return this.db.prepare(`select * from ${this.tableName}`).all() as IMouseEventRecord[];
   }
+
+  public allEvents(events: MouseEventType[]) {
+    return this.db
+      .prepare(`select * from ${this.tableName} where event in (${events.map(x => '?').join(',')})`)
+      .all(events) as IMouseEventRecord[];
+  }
 }
 
 export interface IMouseEventRecord {

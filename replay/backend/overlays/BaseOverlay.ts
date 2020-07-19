@@ -84,6 +84,7 @@ export default class BaseOverlay {
       x: rect.x || this.bounds.x || 0,
       y: rect.y || this.bounds.y || 0,
       right: rect.right,
+      left: rect.left,
     };
     newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(newRect) : newRect);
 
@@ -106,7 +107,7 @@ export default class BaseOverlay {
 
       clearTimeout(this.timeout);
 
-      if (args.length) this.webContents.send('show-args', ...args);
+      this.webContents.send('will-show', ...args);
       browserWindow.webContents.send('overlay-visibility-change', this.name, true);
 
       const callback = () => {

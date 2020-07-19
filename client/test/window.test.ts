@@ -22,7 +22,7 @@ describe('createBrowser tests', () => {
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
       [null, 'createSession'],
       [expect.any(Object), 'close'],
-      [null, 'shutdown'],
+      [null, 'disconnect'],
     ]);
     expect(browser.sessionId).toBe('session-id');
   });

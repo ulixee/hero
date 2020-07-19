@@ -16,9 +16,11 @@ const { log } = Log(module);
 export default class UserProfile {
   public static installedWorld = DomEnv.installedDomWorldName;
   private readonly devtoolsClient: IDevtoolsClient;
+  private readonly sessionId: string;
 
-  constructor(devtoolsClient: IDevtoolsClient) {
+  constructor(sessionId: string, devtoolsClient: IDevtoolsClient) {
     this.devtoolsClient = devtoolsClient;
+    this.sessionId = sessionId;
   }
 
   private async getStorageItems(securityOrigins: { origin: string; executionId: number }[]) {
@@ -45,7 +47,7 @@ export default class UserProfile {
     });
     if (record.exceptionDetails) {
       const error = exceptionDetailsToError(record.exceptionDetails);
-      log.warn('ReadDomStorage.Error', { error });
+      log.warn('ReadDomStorage.Error', { sessionId: this.sessionId, error });
       throw error;
     }
     return record.result?.value;
@@ -60,10 +62,11 @@ export default class UserProfile {
   }
 
   public static async export(
+    sessionId: string,
     devtoolsClient: IDevtoolsClient,
     origins: { origin: string; executionId: number }[],
   ) {
-    const instance = new UserProfile(devtoolsClient);
+    const instance = new UserProfile(sessionId, devtoolsClient);
     return {
       cookies: await this.getAllCookies(devtoolsClient),
       storage: await instance.getStorageItems(origins),

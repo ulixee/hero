@@ -21,14 +21,16 @@ export default class DomEnv {
   public static installedDomWorldName = '__sa_world__';
   public static getAttachedStateFnName = '__getSecretAgentNodeState__';
 
+  private readonly sessionId: string;
   private frameTracker: FrameTracker;
   private devtoolsClient: IDevtoolsClient;
   private isInstalled = false;
   private isClosed = false;
 
-  constructor(frameTracker: FrameTracker, devtoolsClient: IDevtoolsClient) {
+  constructor(sessionId: string, frameTracker: FrameTracker, devtoolsClient: IDevtoolsClient) {
     this.frameTracker = frameTracker;
     this.devtoolsClient = devtoolsClient;
+    this.sessionId = sessionId;
   }
 
   public async install() {
@@ -155,6 +157,7 @@ ${domStorageScript}
     if (unparsedResult === SA_NOT_INSTALLED) {
       if (retries === 0 || this.isClosed) throw new Error('Injected scripts not installed.');
       log.warn('Injected scripts not installed yet. Retrying', {
+        sessionId: this.sessionId,
         fnName,
         frames: this.frameTracker.frames,
         frameId: this.frameTracker.mainFrameId,
@@ -165,7 +168,7 @@ ${domStorageScript}
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
     if (result?.error) {
-      log.error(fnName, result);
+      log.error(fnName, { sessionId: this.sessionId, result });
       throw new DomEnvError(result.error, result.pathState);
     } else {
       return result as T;

@@ -22,7 +22,7 @@ const divider = Array(100)
   .join('');
 console.log(divider);
 
-const httpServer = http.createServer(server.callback());
+const httpServer = http.createServer(server);
 httpServer.listen(httpPort, () => {
   console.log(`${process.env.ENVIRONMENT.toUpperCase()} SERVER LISTENING on ${httpPort}`);
   console.log(divider);
