@@ -21,7 +21,8 @@ export default class HeadersHandler {
       );
 
       if (!resource.resourceType) {
-        log.error(ctx.requestSession.sessionId, 'HeadersHandler.ErrorGettingResourceType', {
+        log.error('HeadersHandler.ErrorGettingResourceType', {
+          sessionId: ctx.requestSession.sessionId,
           resource,
           url: ctx.url,
         });

@@ -40,7 +40,7 @@ export default class GlobalPool {
       throw new Error('GlobalPool is already started');
     }
     if (!this.chromeCore) {
-      log.info(null, 'StartingGlobalPool');
+      log.info('StartingGlobalPool');
       this.mitmServer = await MitmServer.start(this.localProxyPortStart);
       this.chromeCore = new ChromeCore();
       await this.chromeCore.start(this.mitmServer.port);
@@ -51,7 +51,8 @@ export default class GlobalPool {
 
   public static async createSession(options: ICreateSessionOptions) {
     await this.start();
-    log.info(null, 'AcquiringChrome', {
+    log.info('AcquiringChrome', {
+      sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
       maxActiveSessionCount: this.maxActiveSessionCount,
@@ -74,7 +75,8 @@ export default class GlobalPool {
     const wasTransferred = this.resolveWaitingConnection();
     await session.close();
     if (wasTransferred) {
-      log.info(null, 'ReleasingChrome', {
+      log.info('ReleasingChrome', {
+        sessionId: null,
         activeSessionCount: this.activeSessionCount,
         waitingForAvailability: this.waitingForAvailability.length,
       });
@@ -82,7 +84,7 @@ export default class GlobalPool {
   }
 
   public static async close() {
-    const logId = log.info(null, 'InitiatingGlobalPoolShutdown');
+    const logId = log.info('InitiatingGlobalPoolShutdown');
 
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new Error('Shutting down'));
@@ -98,7 +100,7 @@ export default class GlobalPool {
     this.mitmServer = null;
     this._isStarted = false;
 
-    log.stats(null, 'CompletedGlobalPoolShutdown', null, logId);
+    log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
   private static async createSessionNow(
@@ -126,7 +128,7 @@ export default class GlobalPool {
     }
     const { options, promise } = this.waitingForAvailability.shift();
     this.createSessionNow(options).then(session => promise.resolve(session));
-    log.info(null, 'TransferredChromeToWaitingAcquirer');
+    log.info('TransferredChromeToWaitingAcquirer');
     return true;
   }
 

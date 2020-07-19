@@ -57,8 +57,8 @@ export default class CertificateAuthority {
       FS.writeFile(`${this.certsFolder}/${hostFilename}.pem`, certPem),
       FS.writeFile(`${this.keysFolder}/${hostFilename}.key`, keyPrivatePem),
       FS.writeFile(`${this.keysFolder}/${hostFilename}.public.key`, keyPublicPem),
-    ]).catch(err => {
-      log.error(null, 'CertificateSaveError', err);
+    ]).catch(error => {
+      log.error('CertificateSaveError', { error, sessionId: null });
     });
     // returns synchronously even before files get written to disk
     return { cert: certPem, key: keyPrivatePem };

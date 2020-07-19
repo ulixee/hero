@@ -129,7 +129,7 @@ function getOrderAndDefaults(
   }
 
   if (!defaultOrder) {
-    log.error(sessionId, 'Headers.NotFound', { resourceType, secureDomain, method, originType });
+    log.error('Headers.NotFound', { sessionId, resourceType, secureDomain, method, originType });
     return null;
   }
 

@@ -47,7 +47,7 @@ export default class UserProfile {
     });
     if (record.exceptionDetails) {
       const error = exceptionDetailsToError(record.exceptionDetails);
-      log.warn(this.sessionId, 'ReadDomStorage.Error', { error });
+      log.warn('ReadDomStorage.Error', { sessionId: this.sessionId, error });
       throw error;
     }
     return record.result?.value;

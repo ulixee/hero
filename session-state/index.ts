@@ -169,7 +169,8 @@ export default class SessionState {
   ) {
     const resourceId = this.browserRequestIdToResourceId[browserRequestId];
     if (!resourceId) {
-      log.error(this.sessionId, `CaptureWebsocketMessageError.UnregisteredResource`, {
+      log.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
+        sessionId: this.sessionId,
         browserRequestId,
         message,
       });
@@ -270,15 +271,15 @@ export default class SessionState {
   }
 
   public captureError(frameId: string, source: string, error: Error) {
-    log.error(this.sessionId, 'Window.error', { source, error });
+    log.error('Window.error', { sessionId: this.sessionId, source, error });
     this.db.pageLogs.insert(frameId, source, error.stack ?? String(error), new Date());
   }
 
   public captureLog(frameId: string, consoleType: string, message: string, location?: string) {
     if (message.includes('Error: ') || message.startsWith('ERROR')) {
-      log.error(this.sessionId, 'Window.error', { message });
+      log.error('Window.error', { sessionId: this.sessionId, message });
     } else {
-      log.info(this.sessionId, 'Window.console', { message });
+      log.info('Window.console', { sessionId: this.sessionId, message });
     }
     this.db.pageLogs.insert(frameId, consoleType, message, new Date(), location);
   }

@@ -37,7 +37,7 @@ export default class ChromeCore {
       let tickerInterval;
       let killTimer;
       try {
-        log.info(null, 'StartingChromeCore', { id: this.id });
+        log.info('StartingChromeCore', { id: this.id, sessionId: null });
 
         const options: LaunchOptions = {
           args: [
@@ -82,10 +82,14 @@ export default class ChromeCore {
           .filter(arg => !argsToSkip.includes(arg))
           .concat(options.args);
 
-        log.info(null, 'ChromeStarting', { path: options.executablePath, args: options.args });
+        log.info('ChromeStarting', {
+          path: options.executablePath,
+          args: options.args,
+          sessionId: null,
+        });
 
         tickerInterval = setInterval(
-          () => log.info(null, 'ChromeStillStarting', { id: this.id }),
+          () => log.info('ChromeStillStarting', { id: this.id, sessionId: null }),
           5000,
         ).unref();
         killTimer = setTimeout(
@@ -96,9 +100,9 @@ export default class ChromeCore {
 
         const pages = await puppBrowser.pages();
         await Promise.all(pages.map(async x => x.close())).catch(error => {
-          log.warn('Error closing initial chrome browser page', error);
+          log.warn('Error closing initial chrome browser page', { error, sessionId: null });
         });
-        log.info(null, 'ChromeStarted', { id: this.id });
+        log.info('ChromeStarted', { id: this.id, sessionId: null });
         this.isStarted = true;
         resolve(puppBrowser);
       } catch (error) {
@@ -134,7 +138,7 @@ export default class ChromeCore {
   }
 
   public async close() {
-    log.info(null, 'ClosingChrome');
+    log.info('ClosingChrome');
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
     this.isStarted = false;
@@ -145,7 +149,7 @@ export default class ChromeCore {
         if (puppBrowser) await puppBrowser.close();
       }
     } catch (error) {
-      log.error(null, 'ClosingChromeError', error);
+      log.error('ClosingChromeError', { sessionId: null, error });
     }
   }
 

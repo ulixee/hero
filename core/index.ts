@@ -242,7 +242,7 @@ export default class Core implements ICore {
   }
 
   public static async disconnect(windowIds?: string[], clientError?: Error) {
-    if (clientError) log.error(null, 'UnhandledClientError', clientError);
+    if (clientError) log.error('UnhandledClientError', { clientError, sessionId: null });
 
     const toClose = windowIds?.length
       ? windowIds.map(x => Core.byWindowId[x])

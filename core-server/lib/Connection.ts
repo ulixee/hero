@@ -31,11 +31,11 @@ export default class CoreServerConnection {
     if (meta) {
       const core = Core.byWindowId[meta.windowId];
       this.runCommand(messageId, core, command, args).catch(error =>
-        log.error(meta.sessionId, 'RunCommandError', error),
+        log.error('RunCommandError', { sessionId: meta.sessionId, error }),
       );
     } else {
       this.runCommand(messageId, Core, command, args).catch(error =>
-        log.error(null, 'RunCommandError', error),
+        log.error('RunCommandError', { sessionId: null, error }),
       );
     }
   }

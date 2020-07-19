@@ -31,7 +31,9 @@ export default class CoreCommandQueue {
       args,
       stack: new Error().stack.replace('Error:', ''),
     });
-    this.processQueue().catch(error => log.error(this.meta?.sessionId, 'CommandRunError', error));
+    this.processQueue().catch(error =>
+      log.error('CommandRunError', { error, sessionId: this.meta?.sessionId }),
+    );
     return promise;
   }
 

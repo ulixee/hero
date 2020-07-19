@@ -9,41 +9,49 @@ class Log implements ILog {
     this.module = module ? extractPathFromModule(module) : '';
   }
 
-  public stats(sessionId: string, action: string, data?: any, parentLogId?: number) {
-    return this.log('stats', sessionId, action, data, parentLogId);
+  public stats(action: string, data?: ILogData) {
+    return this.log('stats', action, data);
   }
 
-  public info(sessionId: string, action: string, data?: any, parentLogId?: number) {
-    return this.log('info', sessionId, action, data, parentLogId);
+  public info(action: string, data?: ILogData) {
+    return this.log('info', action, data);
   }
 
-  public warn(sessionId: string, action: string, data?: any, parentLogId?: number) {
-    return this.log('warn', sessionId, action, data, parentLogId);
+  public warn(action: string, data?: ILogData) {
+    return this.log('warn', action, data);
   }
 
-  public error(sessionId: string, action: string, data?: any, parentLogId?: number) {
-    return this.log('error', sessionId, action, data, parentLogId);
+  public error(action: string, data?: ILogData) {
+    return this.log('error', action, data);
   }
 
   public flush() {
     // no-op
   }
 
-  private log(
-    level: LogLevel,
-    sessionId: string,
-    action: string,
-    data?: any,
-    parentLogId?: number,
-  ) {
+  private log(level: LogLevel, action: string, data?: ILogData) {
+    let logData: object;
+    let sessionId: string = null;
+    let parentId: number;
+    if (data) {
+      for (const [key, val] of Object.entries(data)) {
+        if (key === 'parentLogId') parentId = val;
+        else if (key === 'sessionId') sessionId = val;
+        else {
+          if (!logData) logData = {};
+          logData[key] = val;
+        }
+      }
+    }
+
     const id = (logId += 1);
     const entry = {
       id,
       sessionId,
-      parentId: parentLogId,
+      parentId,
       timestamp: new Date(),
       action,
-      data,
+      data: logData,
       level,
     };
     const printToConsole = logLevels.indexOf(level) >= this.logLevel;
@@ -116,11 +124,16 @@ interface ILogBuilder {
 
 export interface ILog {
   level: string;
-  stats(sessionId: string, action: string, data?: any, parentLogId?: number): number;
-  info(sessionId: string, action: string, data?: any, parentLogId?: number): number;
-  warn(sessionId: string, action: string, data?: any, parentLogId?: number): number;
-  error(sessionId: string, action: string, data?: any, parentLogId?: number): number;
+  stats<T extends ILogData>(action: string, data?: T): number;
+  info<T extends ILogData>(action: string, data?: T): number;
+  warn<T extends ILogData>(action: string, data?: T): number;
+  error<T extends ILogData>(action: string, data?: T): number;
   flush();
+}
+
+interface ILogData {
+  sessionId: string;
+  parentLogId?: number;
 }
 
 function extractPathFromModule(module: NodeModule) {

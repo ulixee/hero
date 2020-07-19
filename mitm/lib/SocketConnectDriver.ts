@@ -53,7 +53,9 @@ export default class SocketConnectDriver {
 
   public onListening() {
     const socket = (this.socket = net.connect(this.socketPath));
-    socket.on('error', err => log.error(this.sessionId, 'SocketConnectDriver.SocketError', err));
+    socket.on('error', err =>
+      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId }),
+    );
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
@@ -81,9 +83,9 @@ export default class SocketConnectDriver {
       }
     });
 
-    child.on('error', err => {
-      promise.reject(err);
-      log.error(this.sessionId, 'SocketConnectDriver.ChildConnectError', err);
+    child.on('error', error => {
+      promise.reject(error);
+      log.error('SocketConnectDriver.ChildConnectError', { sessionId: this.sessionId, error });
       this.close();
     });
 
@@ -140,13 +142,13 @@ export default class SocketConnectDriver {
           this.alpn = matches[1];
         }
       } else if (message) {
-        log.info(this.sessionId, 'SocketHandler.onData', { message });
+        log.info('SocketHandler.onData', { sessionId: this.sessionId, message });
       }
     }
   }
 
   private onChildProcessStderr(message: string) {
-    log.warn(this.sessionId, `SocketConnectDriver.Error => ${message}`);
+    log.warn(`SocketConnectDriver.Error => ${message}`, { sessionId: this.sessionId });
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||

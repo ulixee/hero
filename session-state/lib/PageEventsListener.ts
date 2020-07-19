@@ -53,7 +53,8 @@ export default class PageEventsListener {
         if (name !== runtimeFunction) return;
         const frameId = this.frameTracker.getFrameIdForExecutionContext(executionContextId);
         if (!frameId) {
-          log.warn(this.sessionId, 'PageEventsListener.bindingCalledBeforeExecutionTracked', {
+          log.warn('PageEventsListener.bindingCalledBeforeExecutionTracked', {
+            sessionId: this.sessionId,
             executionContextId,
             name,
             payload,
@@ -82,7 +83,9 @@ export default class PageEventsListener {
         contextId,
         returnByValue: true,
       })
-      .catch(err => log.warn(this.sessionId, 'NewContext.setCommandIdError', err));
+      .catch(error =>
+        log.warn('NewContext.setCommandIdError', { sessionId: this.sessionId, error }),
+      );
   }
 
   public async flush() {

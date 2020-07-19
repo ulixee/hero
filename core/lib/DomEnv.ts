@@ -156,7 +156,8 @@ ${domStorageScript}
 
     if (unparsedResult === SA_NOT_INSTALLED) {
       if (retries === 0 || this.isClosed) throw new Error('Injected scripts not installed.');
-      log.warn(this.sessionId, 'Injected scripts not installed yet. Retrying', {
+      log.warn('Injected scripts not installed yet. Retrying', {
+        sessionId: this.sessionId,
         fnName,
         frames: this.frameTracker.frames,
         frameId: this.frameTracker.mainFrameId,
@@ -167,7 +168,7 @@ ${domStorageScript}
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
     if (result?.error) {
-      log.error(this.sessionId, fnName, result);
+      log.error(fnName, { sessionId: this.sessionId, result });
       throw new DomEnvError(result.error, result.pathState);
     } else {
       return result as T;

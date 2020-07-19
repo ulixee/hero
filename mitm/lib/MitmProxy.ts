@@ -100,7 +100,8 @@ export default class MitmProxy {
       ctx.requestSession.emit('httpError', { request: ctx.clientToProxyRequest, error });
     }
     if (!(error as any)?.isLogged) {
-      log.error(ctx?.requestSession?.sessionId, 'MitmHttpError', {
+      log.error('MitmHttpError', {
+        sessionId: ctx?.requestSession?.sessionId,
         errorKind,
         error,
         url: ctx?.url,
@@ -127,7 +128,8 @@ export default class MitmProxy {
       await handler.handleRequest(isSecure, request, response);
     } catch (err) {
       const sessionId = RequestSession.getSessionId(request.headers as any, request.method);
-      log.error(sessionId, 'MitmHttpRequest.HandlerError', {
+      log.error('MitmHttpRequest.HandlerError', {
+        sessionId,
         isSecure,
         host: request.headers.host,
         url: request.url,
@@ -148,7 +150,8 @@ export default class MitmProxy {
           ctx.requestSession.emit('httpError', { request: ctx.clientToProxyRequest, error });
         }
         if (!(error as any)?.isLogged) {
-          log.error(ctx?.requestSession?.sessionId, 'Mitm WebSocket Error', {
+          log.error('Mitm WebSocket Error', {
+            sessionId: ctx?.requestSession?.sessionId,
             errorKind,
             error,
             url: ctx?.url,
@@ -157,28 +160,31 @@ export default class MitmProxy {
         socket.destroy(error);
       });
       await handler.handleUpgrade(isSecure, request, socket, head);
-    } catch (err) {
+    } catch (error) {
       const sessionLookup = await RequestSession.waitForWebsocketSessionId(
         parseRawHeaders(request.rawHeaders),
         10,
       ).catch();
 
-      log.error(sessionLookup?.sessionId, 'MitmHttpRequest.HandlerError', {
+      log.error('MitmHttpRequest.HandlerError', {
+        sessionId: sessionLookup?.sessionId,
         isSecure,
         host: request.headers.host,
         url: request.url,
-        err,
+        error,
       });
     }
   }
 
   private onConnectError(hostname: string, errorKind: string, error: Error) {
     if ((error as any).errno === 'ECONNRESET') {
-      log.info(null, `Got ECONNRESET on Proxy Connect, ignoring.`, {
+      log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
+        sessionId: null,
         hostname,
       });
     } else {
-      log.error(null, 'MitmHttpError', {
+      log.error('MitmHttpError', {
+        sessionId: null,
         errorKind,
         error,
         hostname,
@@ -282,7 +288,7 @@ async function startServer(
   }).catch(error => {
     if (error.code === 'EADDRINUSE' && shouldFindAvailablePort) {
       if (process.env.NODE_ENV !== 'test') {
-        log.warn(null, 'Mitm.startServer::PortUnavailable', options.port);
+        log.warn('Mitm.startServer::PortUnavailable', { sessionId: null, port: options.port });
       }
       options.port = 0;
       return startServer(server, options, false);
