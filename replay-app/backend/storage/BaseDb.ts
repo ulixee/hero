@@ -1,14 +1,12 @@
 import * as Fs from 'fs';
-import * as Path from 'path';
-
-const dbDir = Path.resolve(__dirname, '../../data');
-if (!Fs.existsSync(dbDir)) Fs.mkdirSync(dbDir);
+import { app } from 'electron';
 
 export default abstract class BaseDb<T> {
   protected readonly allData: T;
   private readonly path: string;
 
   protected constructor(readonly tableName: string, defaultData: T) {
+    const dbDir = app.getPath('userData');
     this.path = `${dbDir}/${tableName}.json`;
     if (Fs.existsSync(this.path)) {
       this.allData = JSON.parse(Fs.readFileSync(this.path, 'utf-8'));

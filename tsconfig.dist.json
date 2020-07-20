@@ -22,7 +22,7 @@
     "**/build",
     "build",
     "build-dist",
-    "replay",
+    "replay-app",
     "examples",
     "website",
     "injected-scripts"

@@ -25,10 +25,10 @@
       "path": "injected-scripts/tsconfig.json"
     },
     {
-      "path": "replay/tsconfig.json"
+      "path": "replay-app/tsconfig.json"
     },
     {
-      "path": "replay/tsconfig.backend.json"
+      "path": "replay-app/tsconfig.backend.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json"],
@@ -40,7 +40,7 @@
     "**/build",
     "build",
     "build-dist",
-    "replay",
+    "replay-app",
     "website",
     "injected-scripts"
   ]

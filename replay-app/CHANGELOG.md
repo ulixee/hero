@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2020-07-20)
 
-**Note:** Version bump only for package @secret-agent/humanoids
+**Note:** Version bump only for package @secret-agent/replay-app
 
 
 
@@ -24,10 +24,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.2 (2020-06-27)
 
-
-### Bug Fixes
-
-* missing dependencies ([67504f0](https://github.com/ulixee/secret-agent/commit/67504f0f070f35ded261ec3c9734d60422b75a96))
+**Note:** Version bump only for package @secret-agent/replay
 
 
 
@@ -35,7 +32,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.1 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/humanoids
+**Note:** Version bump only for package @secret-agent/replay
 
 
 
@@ -43,4 +40,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.0 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/humanoids
+**Note:** Version bump only for package @secret-agent/replay

@@ -1,17 +1,17 @@
 {
   "name": "@secret-agent/replay-api",
   "description": "The backend API for Replay",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "dependencies": {
-    "@secret-agent/injected-scripts": "^1.0.0-alpha.3",
-    "@secret-agent/session-state": "^1.0.0-alpha.3",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.3",
-    "@secret-agent/commons": "^1.0.0-alpha.3",
+    "@secret-agent/commons": "^1.0.0-alpha.4",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.4",
+    "@secret-agent/injected-scripts": "^1.0.0-alpha.4",
+    "@secret-agent/session-state": "^1.0.0-alpha.4",
     "command-line-args": "^5.1.1",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@secret-agent/core": "^1.0.0-alpha.3",
-    "@secret-agent/testing": "^1.0.0-alpha.3"
+    "@secret-agent/core": "^1.0.0-alpha.4",
+    "@secret-agent/testing": "^1.0.0-alpha.4"
   }
 }

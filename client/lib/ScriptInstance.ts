@@ -17,12 +17,12 @@ export default class ScriptInstance {
 
   public launchReplay(sessionName: string, sessionsDataLocation: string) {
     if (process.env.SA_SHOW_REPLAY === 'false') return;
-    const launch = require('@secret-agent/replay/launch').default;
+
+    const launch = require('@secret-agent/replay').default;
     launch({
       id: this.id,
       sessionsDataLocation,
       sessionName,
-      localApiStartPath: require.resolve('@secret-agent/replay-api/start'),
     });
   }
 

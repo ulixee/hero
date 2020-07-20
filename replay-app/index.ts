@@ -10,7 +10,7 @@ console.log(`Logging to ${log.transports.file.getFile().path}`);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-import Application from './Application';
+import Application from './backend/Application';
 
 (process.env as any).ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 

@@ -5,7 +5,6 @@ import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import ISaSession, { IMinorTick } from '~shared/interfaces/ISaSession';
 import { IDomChangeEvent } from '../injected-scripts/interfaces/IDomChangeEvent';
 import ChildProcess from 'child_process';
-import { createPromise } from '@secret-agent/commons/utils';
 
 const httpAgent = new Agent({ keepAlive: true });
 const axios = Axios.create({
@@ -273,18 +272,18 @@ export default class ReplayApi extends EventEmitter {
       windowsHide: true,
     });
 
-    const resolvable = createPromise();
-
     child.stdout.setEncoding('utf8');
-    child.stdout.on('data', msg => {
-      const match = msg.match(/REPLAY API SERVER LISTENING on \[(\d+)\]/);
-      if (match && match.length) {
-        resolvable.resolve(match[1]);
-      }
-      console.log(msg.trim());
+    const promise = await new Promise(resolve => {
+      child.stdout.on('data', msg => {
+        const match = msg.match(/REPLAY API SERVER LISTENING on \[(\d+)\]/);
+        if (match && match.length) {
+          resolve(match[1]);
+        }
+        console.log(msg.trim());
+      });
     });
 
-    this.localApiHost = `http://localhost:${await resolvable.promise}`;
+    this.localApiHost = `http://localhost:${await promise}`;
     return child;
   }
 }

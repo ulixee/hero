@@ -6,7 +6,7 @@
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
     "bump-version": "lerna version patch --no-git-tag-version",
-    "build": "yarn tsc && yarn workspace @secret-agent/replay build && cd build && yarn",
+    "build": "yarn tsc && yarn workspace @secret-agent/replay-app build && cd build && yarn",
     "build:copy": "copyfiles 'testing/html/**' 'yarn.lock' 'mitm/socket/**' 'mitm/socket/.checksum' 'mitm/test/certs/**' build && cp package.build.json build/package.json",
     "build:dist": "rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles 'mitm/socket/**' 'mitm/socket/.checksum' build-dist && node dist-prepare.js && cp package.dist.json build-dist/package.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
@@ -14,7 +14,7 @@
     "tsc-modules": "ln -sf node_modules build/node_modules",
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
-    "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay clean",
+    "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay-app clean",
     "test": "yarn tsc && cd build && yarn test"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
@@ -39,8 +39,8 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "^9.0.1",
-    "@commitlint/config-conventional": "^9.0.1",
+    "@commitlint/cli": "^9.1.1",
+    "@commitlint/config-conventional": "^9.1.1",
     "@types/jest": "^25.2.1",
     "@types/node": "^12.7.11",
     "copyfiles": "^2.3.0",
@@ -48,7 +48,7 @@
     "lerna": "^3.4.3",
     "lint-staged": "^10.2.11",
     "prettier": "^1.19.1",
-    "pretty-quick": "^1.8.0",
+    "pretty-quick": "^2.0.1",
     "source-map-support": "^0.5.16",
     "tslint": "^5.20.1",
     "tslint-config-airbnb": "^5.11.2",
@@ -75,6 +75,7 @@
       "remote-client",
       "remote-interfaces",
       "replay",
+      "replay-app",
       "replay-api",
       "session-state",
       "testing",

@@ -1,84 +1,15 @@
 {
   "name": "@secret-agent/replay",
-  "author": "Data Liberation Foundation",
-  "private": true,
-  "contributors": [
-    "Caleb Clark",
-    "Blake Byrnes"
-  ],
+  "version": "1.0.0-alpha.4",
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.0.0-alpha.3",
-  "main": "backend",
-  "build": {
-    "appId": "dev.secretagent.replay",
-    "productName": "SecretAgent Replay",
-    "mac": {
-      "target": "zip"
-    },
-    "win": {
-      "target": "zip"
-    },
-    "linux": {
-      "executableName": "libreplay",
-      "category": "Network",
-      "target": "zip"
-    },
-    "publish": [
-      "github"
-    ]
-  },
-  "scripts": {
-    "build:frontend": "nuxt-ts build",
-    "build:backend-paths": "tscpaths -p tsconfig.backend.json -s ./ -o ../build/replay",
-    "build:backend": "tsc -b tsconfig.backend.json && yarn build:backend-paths && cp package.json ../build/replay",
-    "build:icons": "electron-icon-builder -f --input=./frontend/static/AppIcon.appiconset/icon_512@2x.png --output=../build/replay/build",
-    "build:dist": "yarn build:frontend && yarn build:backend && yarn build:icons && yarn logs:reset",
-    "build:pack": "yarn build:dist && cd ../build/replay && yarn && electron-builder -mwl",
-    "build": "yarn build:dist",
-    "clean": "rm -rf ../build/replay/static && tsc -b --clean tsconfig.backend.json && tsc -b --clean tsconfig.json",
-    "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"nuxt-ts dev\"",
-    "start:backend": "NODE_ENV=development electron ../build/replay",
-    "start:frontend": "nuxt-ts start",
-    "logs": "touch ~/Library/Logs/@secret-agent/replay/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay/main.log",
-    "logs:reset": "touch ~/Library/Logs/@secret-agent/replay/main.log && rm ~/Library/Logs/@secret-agent/replay/main.log"
-  },
-  "license": "MIT",
   "dependencies": {
-    "animejs": "^3.2.0",
+    "@secret-agent/replay-api": "^1.0.0-alpha.4",
     "axios": "^0.19.2",
-    "electron-log": "^4.2.1",
-    "mobx": "^5.15.4",
-    "mobx-vue": "^2.0.10",
-    "electron": "^9.1.0",
-    "nuxt-class-component": "^1.3.0",
-    "nuxt-property-decorator": "^2.7.2",
-    "nuxt-start": "^2.13.3",
-    "source-map-support": "^0.5.19",
-    "vue-slider-component": "^3.2.2",
-    "vue-styled-components": "^1.5.1",
-    "@babel/runtime-corejs2": "^7.9.6",
-    "core-js": "2"
+    "progress": "^2.0.3",
+    "tar-fs": "^2.1.0"
   },
   "devDependencies": {
-    "@nuxt/typescript-build": "^0.6.6",
-    "@nuxt/typescript-runtime": "^0.4.6",
-    "@types/chrome": "^0.0.113",
-    "@types/electron": "^1.6.10",
-    "electron-icon-builder": "^1.0.2",
-    "@types/node": "^12.7.11",
-    "concurrently": "^5.2.0",
-    "cross-env": "^7.0.2",
-    "css-loader": "~3.5.3",
-    "devtron": "^1.4.0",
-    "electron-builder": "^22.6.0",
-    "node-sass": "^4.14.1",
-    "nuxt": "^2.13.3",
-    "vue": "^2.6.11",
-    "pug": "^2.0.4",
-    "pug-plain-loader": "^1.0.0",
-    "sass-loader": "^8.0.2",
-    "tscpaths": "^0.0.9",
-    "typescript": "~3.8.3"
+    "@secret-agent/replay-app": "^1.0.0-alpha.4"
   }
 }

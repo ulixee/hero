@@ -9,7 +9,7 @@
     "injected-scripts/**/*.ts",
     "shared/**/*.ts",
     "frontend/constants",
-    "launch.ts"
+    "index.ts"
   ],
   "exclude": ["./tmp-files/**/*.ts", "dist", "node_modules", "**/node_modules"]
 }
