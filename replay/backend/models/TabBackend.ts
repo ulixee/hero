@@ -5,7 +5,7 @@ import * as http from 'http';
 import Window from './Window';
 import generateContextMenu from '../menus/generateContextMenu';
 import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
-import { INTERNAL_BASE_URL } from '~shared/constants/files';
+import InternalServer from '~shared/constants/files';
 import ReplayApi from '~backend/ReplayApi';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Application from '~backend/Application';
@@ -95,7 +95,7 @@ export default class TabBackend {
       location = location === InternalLocations.NewTab ? InternalLocations.Home : location;
       this.location = location as InternalLocations;
       this.webContents
-        .loadURL(`${INTERNAL_BASE_URL}/${location.toLowerCase()}`)
+        .loadURL(`${InternalServer.url}/${location.toLowerCase()}`)
         .then(x => this.send('clicks:enable', true));
       this.replayApi = null;
       this.webContents.closeDevTools();
@@ -202,11 +202,11 @@ export default class TabBackend {
   private bindProxy() {
     const session = this.webContents.session;
     session.protocol.interceptHttpProtocol('http', (request, callback) => {
-      const parsedUrl = new URL(request.url, 'http://localhost:3000/');
-      if (parsedUrl.host === 'localhost:3000') {
+      const parsedUrl = new URL(request.url, InternalServer.url);
+      if (InternalServer.url.includes(parsedUrl.host)) {
         callback({ url: request.url });
       } else if (parsedUrl.host === 'localhost:3333' && parsedUrl.pathname === '/replay') {
-        callback({ url: 'http://localhost:3000/replay.html' });
+        callback({ url: `${InternalServer.url}/replay.html` });
       } else {
         const requestUrl = new URL(request.url);
         const cleanedUrl = new URL(

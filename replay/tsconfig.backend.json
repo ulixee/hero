@@ -7,9 +7,9 @@
     "backend/**/*.ts",
     "nuxt.config.ts",
     "injected-scripts/**/*.ts",
-    "shared",
-    "*.ts",
-    "frontend/constants"
+    "shared/**/*.ts",
+    "frontend/constants",
+    "launch.ts"
   ],
   "exclude": ["./tmp-files/**/*.ts", "dist", "node_modules", "**/node_modules"]
 }

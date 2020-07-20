@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import TabBackend from '../models/TabBackend';
 import Window from '../models/Window';
-import { INTERNAL_BASE_URL } from '~shared/constants/files';
+import InternalServer from '~shared/constants/files';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import { defaultTabOptions } from '~shared/constants/tabs';
 import ITabMeta from '~shared/interfaces/ITabMeta';
@@ -33,7 +33,7 @@ export default class TabManager extends EventEmitter {
   }
 
   public get settingsView() {
-    return Object.values(this.byId).find(r => r.url.startsWith(`${INTERNAL_BASE_URL}settings`));
+    return Object.values(this.byId).find(r => r.url.startsWith(`${InternalServer.url}/settings`));
   }
 
   public createTab(opts: ICreateTabOptions, isNext = false, notifyRenderer = true) {

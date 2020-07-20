@@ -1,5 +1,4 @@
 import { v1 as uuidv1 } from 'uuid';
-import ChildProcess from 'child_process';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 
 export default class ScriptInstance {
@@ -17,12 +16,14 @@ export default class ScriptInstance {
   }
 
   public launchReplay(sessionName: string, sessionsDataLocation: string) {
-    if (process.env.SA_SHOW_REPLAY !== 'true') return;
-    const electronPath = require.resolve('electron/cli.js');
-    const replayPath = require.resolve('@secret-agent/replay');
-    const args = [replayPath, sessionsDataLocation, sessionName, this.id, this.entrypoint];
-    const child = ChildProcess.spawn(electronPath, args, { detached: true, stdio: 'ignore' });
-    child.unref();
+    if (process.env.SA_SHOW_REPLAY === 'false') return;
+    const launch = require('@secret-agent/replay/launch').default;
+    launch({
+      id: this.id,
+      sessionsDataLocation,
+      sessionName,
+      localApiStartPath: require.resolve('@secret-agent/replay-api/start'),
+    });
   }
 
   public generateSessionName(name: string, shouldCleanName: boolean = true) {

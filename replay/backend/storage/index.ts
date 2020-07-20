@@ -18,7 +18,7 @@ class Storage {
     // for (const window of Application.instance.windowManager.list) {
     //   window.sendToRenderer('update-settings', settings);
     //   window.tabManager.byId.forEach(async v => {
-    //     if (v.webContents.getURL().startsWith(INTERNAL_BASE_URL)) {
+    //     if (v.webContents.getURL().startsWith(InternalServer.url)) {
     //       v.webContents.send('update-settings', settings);
     //     }
     //   });
@@ -52,6 +52,7 @@ class Storage {
   }
 
   public persistAll() {
+    console.log('Saving storage');
     this.settingsDb.persist();
     this.windowStateDb.persist();
     this.historyDb.persist();

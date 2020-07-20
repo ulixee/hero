@@ -6,12 +6,15 @@ import generateAppMenu from './menus/generateAppMenu';
 import { loadNuxt } from 'nuxt-start';
 import ReplayApi from './ReplayApi';
 import storage from './storage';
-import ipcRenderer = Electron.ipcRenderer;
+import { ChildProcess } from 'child_process';
+import InternalServer from '~shared/constants/files';
 
 export default class Application {
   public static instance = new Application();
   public overlayManager = new OverlayManager();
   public windowManager = new WindowManager();
+
+  private replayApiProcess: ChildProcess;
 
   public async start() {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -31,13 +34,15 @@ export default class Application {
     });
 
     app.on('quit', () => {
+      if (this.replayApiProcess) this.replayApiProcess.kill();
+
       storage.persistAll();
     });
 
     this.bindEventHandlers();
 
-    await app.whenReady();
     await this.startNuxt();
+    await app.whenReady();
     await this.overlayManager.start();
     await this.loadLocationFromArgv(process.argv);
 
@@ -56,17 +61,28 @@ export default class Application {
       configContext: { usingBuild: true },
       for: 'start',
     });
-    await nuxt.listen(3000);
+    const listener = await nuxt.listen(0);
+    InternalServer.url = listener.url;
   }
 
   private async loadLocationFromArgv(argv) {
     const args = argv.slice(2);
     if (!args.length) {
+      await this.startLocalApi();
       this.createWindowIfNeeded();
       return;
     }
-    const [dataLocation, sessionName, scriptInstanceId] = args;
+    const [dataLocation, sessionName, scriptInstanceId, replayApiPackagePath] = args;
+
+    await this.startLocalApi(replayApiPackagePath);
     await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId);
+  }
+
+  private async startLocalApi(replayApiPackagePath?: string) {
+    if (this.replayApiProcess) return;
+    this.replayApiProcess = await ReplayApi.start(
+      replayApiPackagePath ?? Path.resolve(__dirname, '../../replay-api/start'),
+    );
   }
 
   private createWindowIfNeeded() {

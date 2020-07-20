@@ -1,17 +1,24 @@
+import { AddressInfo } from 'net';
+
 process.env.ENVIRONMENT = process.env.ENVIRONMENT || 'development';
 import 'source-map-support/register';
 import * as http from 'http';
 import commandLineArgs from 'command-line-args';
 import server from './server';
 
+process.title = `SecretAgent-ReplayApi`;
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
-const isProduction = process.env.ENVIRONMENT === 'production';
+function log(message: string) {
+  // tslint:disable-next-line:no-console
+  console.log(message);
+}
 
 // DETERMINE PORTS //////////////////////////////////////////////////////////////////////
 
 const { httpPort } = (function setup() {
-  const options = commandLineArgs([{ name: 'port', type: String, defaultValue: 1212 }]);
+  const options = commandLineArgs([{ name: 'port', type: String, defaultValue: 0 }]);
   return { httpPort: options.port };
 })();
 
@@ -20,10 +27,11 @@ const { httpPort } = (function setup() {
 const divider = Array(100)
   .fill('-')
   .join('');
-console.log(divider);
+log(divider);
 
 const httpServer = http.createServer(server);
 httpServer.listen(httpPort, () => {
-  console.log(`${process.env.ENVIRONMENT.toUpperCase()} SERVER LISTENING on ${httpPort}`);
-  console.log(divider);
+  const port = (httpServer.address() as AddressInfo).port;
+  log(`${process.env.ENVIRONMENT.toUpperCase()} REPLAY API SERVER LISTENING on [${port}]
+${divider}`);
 });

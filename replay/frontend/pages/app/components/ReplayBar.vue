@@ -54,6 +54,7 @@ export default class ReplayBar extends Vue {
     return {
       '--toolbarHeight': `${TOOLBAR_HEIGHT}px`,
       '--toolbarBackgroundColor': store.theme.toolbarBackgroundColor,
+      '--toolbarBorderColor': store.theme.toolbarBottomLineBackgroundColor,
     };
   }
 
@@ -108,6 +109,8 @@ export default class ReplayBar extends Vue {
 </script>
 
 <style lang="scss">
+@import '../../../assets/style/common-mixins';
+
 .ReplayBar {
   margin: 0 7px;
   position: relative;
@@ -121,6 +124,10 @@ export default class ReplayBar extends Vue {
   background-color: var(--toolbarBackgroundColor);
 
   .start {
+    border: 1px solid var(--toolbarBorderColor);
+    border-radius: 4px;
+    padding: 4px 10px;
+
     cursor: pointer;
     .label {
       margin-right: 5px;

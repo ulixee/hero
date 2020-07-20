@@ -16,5 +16,6 @@
     },
     "types": ["@types/node", "@nuxt/types", "@types/chrome"]
   },
-  "exclude": ["./tmp-files/**/*.ts", "dist", "node_modules", "**/node_modules"]
+  "include": ["frontend", "shared"],
+  "exclude": ["./tmp-files/**/*.ts", "static", "dist", "node_modules", "**/node_modules"]
 }

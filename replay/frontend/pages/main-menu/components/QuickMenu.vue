@@ -39,7 +39,7 @@ import Vue from 'vue';
 import Component from 'nuxt-class-component';
 import store from '~frontend/stores/main-menu';
 import { ipcRenderer, remote } from 'electron';
-import { INTERNAL_BASE_URL } from '~shared/constants/files';
+
 import {
   ICON_FIRE,
   ICON_TOPMOST,

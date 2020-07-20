@@ -6,6 +6,7 @@
     "@secret-agent/injected-scripts": "^1.0.0-alpha.3",
     "@secret-agent/session-state": "^1.0.0-alpha.3",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.3",
+    "@secret-agent/commons": "^1.0.0-alpha.3",
     "command-line-args": "^5.1.1",
     "source-map-support": "^0.5.19"
   },

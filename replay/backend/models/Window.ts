@@ -4,6 +4,7 @@ import Application from '../Application';
 import TabManager from '../managers/TabManager';
 import ReplayApi from '~backend/ReplayApi';
 import storage from '../storage';
+import InternalServer from '~shared/constants/files';
 
 export default class Window {
   public browserWindow: BrowserWindow;
@@ -28,7 +29,7 @@ export default class Window {
         javascript: true,
         enableRemoteModule: true,
       },
-      icon: resolve(app.getAppPath(), 'frontend/static/logo.png'),
+      icon: resolve(app.getAppPath(), 'static/logo.png'),
       show: false,
     });
 
@@ -38,10 +39,10 @@ export default class Window {
 
     this.bindListenersToWindow();
 
-    this.browserWindow.loadURL('http://localhost:3000/app');
-    // if (process.env.NODE_ENV === 'development') {
-    this.webContents.openDevTools({ mode: 'detach' });
-    // }
+    this.browserWindow.loadURL(`${InternalServer.url}/app`);
+    if (process.env.NODE_ENV === 'development') {
+      this.webContents.openDevTools({ mode: 'detach' });
+    }
   }
 
   public get id() {

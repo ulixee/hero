@@ -4,14 +4,17 @@ import { Agent } from 'http';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import ISaSession, { IMinorTick } from '~shared/interfaces/ISaSession';
 import { IDomChangeEvent } from '../injected-scripts/interfaces/IDomChangeEvent';
+import ChildProcess from 'child_process';
+import { createPromise } from '@secret-agent/commons/utils';
 
 const httpAgent = new Agent({ keepAlive: true });
 const axios = Axios.create({
   httpAgent,
 });
-const API_HOST = 'http://localhost:1212';
 
 export default class ReplayApi extends EventEmitter {
+  private static localApiHost: string;
+
   public readonly saSession: ISaSession;
   public readonly dataLocation: string;
   public sessionId: string;
@@ -253,15 +256,35 @@ export default class ReplayApi extends EventEmitter {
   }
 
   public static async connect(dataLocation: string, sessionName: string, scriptInstanceId: string) {
-    const api = new ReplayApi(API_HOST, dataLocation, sessionName, scriptInstanceId);
-    console.log(`CONNECTED TO REPLAY API: [${API_HOST}]`);
+    const api = new ReplayApi(this.localApiHost, dataLocation, sessionName, scriptInstanceId);
+    console.log(`CONNECTED TO REPLAY API: [${this.localApiHost}]`);
     await api.updateSaSession();
     return api;
   }
-}
 
-// async function startLocal() {
-//   const args = [];
-//   const child = ChildProcess.spawn(pathOfReplayApi, args, { detached: true, stdio: 'ignore' });
-//   this.replayApiHost = '';
-// }
+  public static async start(replayApiPackagePath: string) {
+    if (this.localApiHost) return;
+
+    const args = [];
+    console.log('Launching replay api at %s', replayApiPackagePath);
+    const child = ChildProcess.spawn(`node ${replayApiPackagePath}`, args, {
+      stdio: ['ignore', 'pipe', 'inherit'],
+      shell: true,
+      windowsHide: true,
+    });
+
+    const resolvable = createPromise();
+
+    child.stdout.setEncoding('utf8');
+    child.stdout.on('data', msg => {
+      const match = msg.match(/REPLAY API SERVER LISTENING on \[(\d+)\]/);
+      if (match && match.length) {
+        resolvable.resolve(match[1]);
+      }
+      console.log(msg.trim());
+    });
+
+    this.localApiHost = `http://localhost:${await resolvable.promise}`;
+    return child;
+  }
+}
