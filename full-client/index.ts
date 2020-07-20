@@ -3,6 +3,8 @@ import Core from '@secret-agent/core';
 import { SecretAgentClientGenerator } from '@secret-agent/client';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 
+process.title = 'SecretAgent';
+
 // tslint:disable:variable-name
 const { SecretAgent, coreClient } = SecretAgentClientGenerator();
 

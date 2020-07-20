@@ -11,6 +11,8 @@ import PendingMessages from './lib/PendingMessages';
 
 export { ISecretAgent };
 
+process.title = 'SecretAgent-Remote';
+
 export default class RemoteClient {
   public SecretAgent: ISecretAgent;
   private sendToOutgoingFn: (payload: IRequestPayload) => void;

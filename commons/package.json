@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.3"
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.4"
   }
 }

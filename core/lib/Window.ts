@@ -186,7 +186,7 @@ export default class Window {
     } else {
       commandFn = this[functionName].bind(this, ...args);
     }
-    const id = log.info('Window.runCommand', { commandMeta, sessionId: this.sessionId });
+    const id = log.info('Window.runCommand', { ...commandMeta, sessionId: this.sessionId });
     let result: T;
     try {
       result = await this.sessionState.runCommand<T>(commandFn, commandMeta);

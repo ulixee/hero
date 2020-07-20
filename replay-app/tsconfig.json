@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "../build/replay-app",
+    "module": "esnext",
+    "target": "es2018",
+    "moduleResolution": "node",
+    "composite": true,
+    "inlineSourceMap": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "~frontend/*": ["frontend/*"],
+      "~backend/*": ["backend/*"],
+      "~shared/*": ["shared/*"]
+    },
+    "types": ["@types/node", "@nuxt/types", "@types/chrome"]
+  },
+  "include": ["frontend", "shared"],
+  "exclude": ["./tmp-files/**/*.ts", "static", "dist", "node_modules", "**/node_modules"]
+}
