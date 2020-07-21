@@ -10,6 +10,8 @@ tsconfig.tsbuildinfo
 
 .idea/
 
+**/.env
+
 .cache-test
 
 /build/

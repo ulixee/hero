@@ -61,12 +61,13 @@ function processPackageJson(packagePath) {
     fs.copyFileSync(readmePath, `${packagePath}/README.md`);
   }
 
+  console.log('writing', `${packagePath}/package.json`)
   fs.writeFileSync(`${packagePath}/package.json`, JSON.stringify(finalPackageJson, null, 2));
 }
 
 function processDir(path) {
   for (const dirname of fs.readdirSync(path)) {
-    if (dirname === 'node_modules' || dirname.startsWith('.')) break;
+    if (dirname === 'node_modules' || dirname.startsWith('.')) continue;
     const fullpath = `${path}/${dirname}`;
     if (fs.existsSync(`${fullpath}/package.json`)) {
       processPackageJson(fullpath);
