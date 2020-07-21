@@ -43,7 +43,9 @@ export default class SessionDb {
     const { readonly = false, fileMustExist = false } = dbOptions;
 
     this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
-    this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
+    if (!readonly) {
+      this.saveInterval = setInterval(this.flush.bind(this), 1e3).unref();
+    }
     this.readonly = readonly;
 
     this.commands = new CommandsTable(this.db);

@@ -1,5 +1,4 @@
 import SessionDb from '@secret-agent/session-state/lib/SessionDb';
-import SessionLoader from '../lib/SessionLoader';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import { IncomingMessage, ServerResponse } from 'http';
 import { parse } from 'url';
@@ -17,11 +16,10 @@ export default async function fetchResource(req: IncomingMessage, res: ServerRes
     sessionId as string,
     readonlyAndFileMustExist,
   );
-  const sessionLoader = new SessionLoader(sessionDb);
 
   console.log('Fetching resource', url);
 
-  const resource = await sessionLoader.fetchResource(url as string, commandId as string);
+  const resource = await sessionDb.resources.getResourceByUrl(url as string, false);
   if (!resource) {
     res.writeHead(404);
     res.end('Resource not found');

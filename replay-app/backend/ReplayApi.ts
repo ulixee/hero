@@ -51,8 +51,8 @@ export default class ReplayApi extends EventEmitter {
       name: this.saSession.name,
       scriptInstanceId: this.saSession.scriptInstanceId,
     };
-    console.log(`GET ${this.apiHost}/sessionMeta`, params);
     const response = await axios.get(`${this.apiHost}/sessionMeta`, { params });
+    console.log(`Updated ReplayApi.sessionMeta`, params);
     Object.assign(this.saSession, response.data);
     this.sessionId = this.saSession.id;
 
