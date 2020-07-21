@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/humanoid-basic",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Very basic humanoid for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/humanoids": "^1.0.0-alpha.4"
+    "@secret-agent/humanoids": "^1.0.0-alpha.5"
   },
   "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.4"
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.5"
   }
 }

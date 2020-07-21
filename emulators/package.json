@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulators",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {
@@ -8,10 +8,10 @@
     "postinstall": "node -e 'require(\"useragent/bin/update.js\")'"
   },
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.4",
-    "@secret-agent/emulate-chrome-79": "^1.0.0-alpha.4",
-    "@secret-agent/emulate-chrome-80": "^1.0.0-alpha.4",
-    "@secret-agent/emulate-safari-13": "^1.0.0-alpha.4",
+    "@secret-agent/commons": "^1.0.0-alpha.5",
+    "@secret-agent/emulate-chrome-79": "^1.0.0-alpha.5",
+    "@secret-agent/emulate-chrome-80": "^1.0.0-alpha.5",
+    "@secret-agent/emulate-safari-13": "^1.0.0-alpha.5",
     "request": "^2.88.2",
     "tough-cookie": "^4.0.0",
     "user-agents": "^1.0.559",
@@ -19,7 +19,7 @@
     "yamlparser": "0.0.x"
   },
   "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.4",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.5",
     "@types/useragent": "^2.1.1",
     "axios": "^0.19.2",
     "csv-parser": "^2.3.2"
