@@ -32,6 +32,7 @@
       "remote-client",
       "remote-interfaces",
       "replay",
+      "replay-app",
       "replay-api",
       "testing",
       "session-state",

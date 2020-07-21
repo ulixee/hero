@@ -56,16 +56,12 @@ export default class SessionLoader {
       this.durationMillis = this.closeTime.getTime() - this.startTime.getTime();
     } else {
       // add 10 seconds to end time
-      this.durationMillis = new Date().getTime() + 10e3 - this.startTime.getTime();
+      this.durationMillis = (new Date().getTime() - this.startTime.getTime()) * 1.25;
     }
 
     this.assembleTicks();
     this.assembleCommandResults();
     this.checkForHungScript();
-  }
-
-  public async fetchResource(url: string, commandId: string) {
-    return await this.sessionDb.resources.getResourceByUrl(url, false);
   }
 
   public getCommand(tickId: number) {
