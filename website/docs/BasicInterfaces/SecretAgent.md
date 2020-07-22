@@ -26,7 +26,7 @@ Update existing settings.
 - options `object` Accepts any of the following:
   - maxActiveSessionCount `number` defaults to `10`. Limit windows open at any given time.
   - localProxyPortStart `number` defaults to `10000`. Starting proxy port.
-  - sessionsDir `string` defaults to `/tmp`. Where session files are stored.
+  - sessionsDir `string` defaults to `os.tmpdir()`. Where session files are stored.
   - defaultRenderingOptions `string[]` defaults to `[All]`. Controls browser functionality.
   - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
 

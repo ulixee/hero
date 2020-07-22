@@ -12,13 +12,14 @@ import ISecretAgent, {
   ISecretAgentConfigureOptions,
   SecretAgentStatics,
 } from './interfaces/ISecretAgent';
+import os from 'os';
 import Signals = NodeJS.Signals;
 
 // tslint:disable:variable-name
 const DefaultOptions = {
   maxActiveSessionCount: 10,
   localProxyPortStart: 10e3,
-  sessionsDir: '/tmp',
+  sessionsDir: os.tmpdir(),
   defaultRenderingOptions: [RenderingOption.All],
   defaultUserProfile: {},
 };

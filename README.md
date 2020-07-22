@@ -13,7 +13,7 @@ Check out our [website for more details](https://secretagent.dev).
 ## Installation
 
 ```shell script
-npm i secret-agent
+npm i --save secret-agent
 ```
 
 or
@@ -33,7 +33,7 @@ const SecretAgent = require('secret-agent');
   const browser = await SecretAgent.createBrowser();
   await browser.goto('https://example.org');
   const title = await browser.document.querySelector('title').textContent;
-  const intro = await browser.document.querySelector('p:first-child').textContent;
+  const intro = await browser.document.querySelector('p').textContent;
   await browser.close();
 })();
 ```

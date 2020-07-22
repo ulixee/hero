@@ -19,6 +19,7 @@ tsconfig.tsbuildinfo
 
 /mitm/socket/connect
 /mitm/socket/build/
+/mitm/socket/.version
 
 emulators/data/DOM-*.json
 
