@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/session-state",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Library to capture and store Secret Agent sessions",
   "main": "index.js",
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.5",
     "@secret-agent/injected-scripts": "^1.0.0-alpha.5",
-    "@secret-agent/mitm": "^1.0.0-alpha.5",
+    "@secret-agent/mitm": "^1.0.0-alpha.6",
     "better-sqlite3": "^7.0.1"
   },
   "devDependencies": {

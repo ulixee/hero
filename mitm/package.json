@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/mitm",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
   "scripts": {
