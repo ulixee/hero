@@ -5,7 +5,7 @@
   "description": "The Web Browser Built for Scraping",
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
-    "bump-version": "lerna version prerelease --no-git-tag-version",
+    "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "yarn tsc && yarn workspace @secret-agent/replay-app build && cd build && yarn",
     "build:copy": "copyfiles 'testing/html/**' 'yarn.lock' 'mitm/socket/**' 'mitm/socket/.checksum' 'mitm/test/certs/**' build && cp package.build.json build/package.json",
     "build:dist": "rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles 'mitm/socket/*' 'mitm/socket/.checksum' -e 'mitm/socket/connect' '**/.gitignore' '**/.npmignore' build-dist && node dist-prepare.js && cp package.dist.json build-dist/package.json",
