@@ -32,4 +32,4 @@ Core.onEventFn = (meta: ISessionMeta, listenerId: string, ...args: any[]) => {
 
 // EXPORT SecretAgent //////////////////////////////////////////////////////////
 
-export default SecretAgent;
+export = SecretAgent;

@@ -6,6 +6,8 @@ import Axios from 'axios';
 import ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
+import * as os from 'os';
+import Path from 'path';
 
 if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
   process.exit(0);
@@ -32,7 +34,8 @@ if (isBinaryInstalled()) {
   );
   const length = parseInt(response.headers['content-length'], 10);
 
-  const output = Fs.createWriteStream('/tmp/SecretAgentReplay.tar.gz', { autoClose: true });
+  const tmpFile = Path.join(os.tmpdir(), 'SecretAgentReplay.tar.gz');
+  const output = Fs.createWriteStream(tmpFile, { autoClose: true });
 
   const bar = new ProgressBar(' Downloading SecretAgent Replay [:bar]  :percent :etas', {
     complete: '=',
@@ -46,7 +49,7 @@ if (isBinaryInstalled()) {
   }
 
   await new Promise(resolve => {
-    Fs.createReadStream('/tmp/SecretAgentReplay.tar.gz')
+    Fs.createReadStream(tmpFile)
       .pipe(createGunzip())
       .pipe(TarFs.extract(distDir))
       .on('finish', resolve);

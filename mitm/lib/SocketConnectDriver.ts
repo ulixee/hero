@@ -5,6 +5,7 @@ import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
+import Path from 'path';
 
 const { log } = Log(module);
 
@@ -21,7 +22,7 @@ export default class SocketConnectDriver {
   private emitter = new EventEmitter();
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
-    this.socketPath = `/tmp/sa-mitm-${(counter += 1)}.sock`;
+    this.socketPath = Path.join(os.tmpdir(), `sa-mitm-${(counter += 1)}.sock`);
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
 
@@ -126,7 +127,7 @@ export default class SocketConnectDriver {
   }
 
   private onChildProcessMessage(messages: string) {
-    for (const message of messages.split('\n')) {
+    for (const message of messages.split(/\r?\n/)) {
       if (message.startsWith('[DomainSocketPiper.Dialed]')) {
         const matches = message.match(/Remote: (.+), Local: (.+)/);
         if (matches?.length) {

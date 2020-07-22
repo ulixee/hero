@@ -2,6 +2,8 @@ import Log from '@secret-agent/commons/Logger';
 import puppeteer, { LaunchOptions } from 'puppeteer';
 import Session from './Session';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import os from 'os';
+import Path from 'path';
 
 const { log } = Log(module);
 
@@ -73,7 +75,7 @@ export default class ChromeCore {
         }
         options.ignoreDefaultArgs = true;
         options.ignoreHTTPSErrors = true;
-        options.userDataDir = '/tmp/core-engine';
+        options.userDataDir = Path.join(os.tmpdir(), 'core-engine');
         options.executablePath = process.env.CHROME_BIN || null;
         options.defaultViewport = null;
 

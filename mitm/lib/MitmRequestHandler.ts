@@ -43,7 +43,7 @@ export default class MitmRequestHandler {
       clientResponse.writeHead(400, {
         'Content-Type': 'text/html; charset=utf-8',
       });
-      clientResponse.end('Bad request: Host missing...', 'UTF-8');
+      clientResponse.end('Bad request: Host missing...');
       return;
     }
 

@@ -23,7 +23,7 @@ Instead of creating another complex puppeteer-like API that requires use of nest
 To use SecretAgent in your project, install it with npm or yarn:
 
 ```bash
-npm i secret-agent
+npm i --save secret-agent
 ```
 
 or
@@ -47,7 +47,7 @@ const SecretAgent = require('secret-agent');
   const browser = await SecretAgent.createBrowser();
   await browser.goto('https://example.org');
   const title = await browser.document.querySelector('title').textContent;
-  const intro = await browser.document.querySelector('p:first-child').textContent;
+  const intro = await browser.document.querySelector('p').textContent;
   await browser.close();
 })();
 ```

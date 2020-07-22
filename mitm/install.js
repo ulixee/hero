@@ -8,7 +8,7 @@ const { gunzipSync } = require('zlib');
 const fileHost =
   process.env.SA_CONNECT_LIBRARY_HOST || 'https://storage.googleapis.com/secret-agent';
 
-const outDir = `${process.env.SA_CONNECT_OUTPUT_DIR || __dirname}/socket`;
+const outDir = `${__dirname}/socket`;
 
 (async function install() {
   let programName = 'connect';
@@ -17,33 +17,23 @@ const outDir = `${process.env.SA_CONNECT_OUTPUT_DIR || __dirname}/socket`;
     programName += '.exe';
   }
 
-  if (!fs.existsSync(outDir)) {
-    fs.mkdirSync(outDir, { recursive: true });
-  }
-  if (fs.existsSync(`${outDir}/${programName}`)) {
-    return;
-  }
+  const { version, checksum } = getSourceChecksum(filename);
 
-  const goVersionNeeded = getGoVersionNeeded();
-  const isGoInstalled = isGoVersionInstalled(goVersionNeeded);
-  console.log('Is go installed? %s, %s', goVersionNeeded, isGoInstalled);
+  if (isInstalled(programName, version, checksum)) return;
 
-  if (isGoInstalled) {
-    const didSucceed = compile();
-    if (didSucceed) {
+  const filepath = `${fileHost}/v${version}/${filename}`;
+
+  if (!checksum) {
+    if (tryBuild()) {
+      saveVersion(version, checksum);
       console.log('Successfully compiled Secret Agent connect library');
       process.exit();
       return;
     }
-  }
 
-  const { version, checksum } = getSourceChecksum(filename);
-  const filepath = `${fileHost}/v${version}/${filename}`;
-
-  if (!checksum) {
     console.log(
       `The architecture file you need for the Secret Agent connect library is not available (${filepath}).\n\n
-You can install go ${goVersionNeeded} and run "go build" from the mitm/socket directory`,
+You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm/socket directory`,
     );
     process.exit(1);
   }
@@ -63,8 +53,32 @@ You can install go ${goVersionNeeded} and run "go build" from the mitm/socket di
   const file = gunzipSync(zippedFile);
 
   fs.writeFileSync(`${__dirname}/socket/${programName}`, file);
+  saveVersion(version, checksum);
   console.log('Successfully downloaded');
 })();
+
+function tryBuild() {
+  const goVersionNeeded = getGoVersionNeeded();
+  const isGoInstalled = isGoVersionInstalled(goVersionNeeded);
+  console.log('Is go installed? %s, %s', goVersionNeeded, isGoInstalled);
+
+  if (isGoInstalled) {
+    return compile();
+  }
+  return false;
+}
+
+function isInstalled(programName, version, checksum) {
+  if (fs.existsSync(`${outDir}/${programName}`) && fs.existsSync(`${outDir}/.version`)) {
+    const versionFile = fs.readFileSync(`${outDir}/.version`, 'utf8');
+    if (versionFile === `${version}=${checksum}`) return true;
+  }
+  return false;
+}
+
+function saveVersion(version, checksum) {
+  fs.writeFileSync(`${outDir}/.version`, `${version}=${checksum}`);
+}
 
 function buildFilename() {
   let platform = os.platform();
@@ -120,16 +134,12 @@ function getSourceChecksum(filename) {
   const checksum = fs.readFileSync(`${__dirname}/socket/.checksum`, 'utf8');
   const version = checksum.match(/VERSION=(.+)/)[1];
 
-  const match = checksum.split('\n').find(x => x.startsWith(filename));
+  const match = checksum.split(/\r?\n/).find(x => x.startsWith(filename));
 
   const expectedMd5 = match ? match.split('=').pop() : undefined;
 
   if (!expectedMd5) {
-    return {
-      version,
-      checksum: null,
-    };
-    process.exit(1);
+    throw new Error('Invalid checksum found for Secret Agent socket library');
   }
 
   return {
@@ -165,11 +175,8 @@ function isGoVersionInstalled(wantedVersion) {
     if (!version || !version.length) return false;
     if (version && version.length) {
       const versionParts = version[1].split('.');
-      for (let i = 0; i < goVersionNeeded.length; i += 1) {
-        if (versionParts[i] !== goVersionNeeded[i]) {
-          return false;
-        }
-      }
+      if (versionParts[0] !== goVersionNeeded[0]) return false;
+      if (parseInt(versionParts[1]) < parseInt(goVersionNeeded[1])) return false;
       return true;
     }
   } catch (err) {
