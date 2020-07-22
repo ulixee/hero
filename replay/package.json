@@ -5,6 +5,7 @@
   "description": "A browser for visually replaying your scraper scripts",
   "dependencies": {
     "@secret-agent/replay-api": "^1.0.0-alpha.5",
+    "@secret-agent/commons": "^1.0.0-alpha.5",
     "axios": "^0.19.2",
     "progress": "^2.0.3",
     "tar-fs": "^2.1.0"
