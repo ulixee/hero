@@ -4,7 +4,6 @@
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
   "scripts": {
-    "build:copy": "yarn build && cp -R socket ../build/mitm",
     "build": "node install.js",
     "build-install": "npm run build",
     "postinstall": "npm run build"

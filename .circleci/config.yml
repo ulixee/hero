@@ -1,18 +1,29 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
+  node: circleci/node@3.0.1
 jobs:
   build-and-test:
+    docker:
+      - image: circleci/node:12-browsers
     executor:
       name: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: yarn
-            - run: yarn build
-            - run: yarn test
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          name: Install JUnit coverage reporter
+          command: yarn add -W --dev jest-junit
+      - run:
+          name: Run tests with JUnit as reporter
+          command: yarn test --ci --reporters=default --reporters=jest-junit ../build
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      - store_test_results:
+          path: ./reports/junit/
+      - store_artifacts:
+          path: ./reports/junit
 workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+  build-and-test:
+    jobs:
+      - build-and-test

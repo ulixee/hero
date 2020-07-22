@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
-    "test": "SA_SHOW_REPLAY=false NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
+    "test": "cross-env SA_SHOW_REPLAY=false NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
     "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "devDependencies": {
@@ -14,7 +14,8 @@
     "jest-summary-reporter": "^0.0.2",
     "lerna": "^3.4.3",
     "rimraf": "^3.0.0",
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.16",
+    "cross-env": "^7.0.2"
   },
   "workspaces": {
     "packages": [
