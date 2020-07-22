@@ -1,5 +1,27 @@
 {
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "npmClient": "yarn",
+  "packages": [
+    "client",
+    "core",
+    "core-interfaces",
+    "emulators",
+    "emulator-plugins/*",
+    "full-client",
+    "humanoids",
+    "humanoid-plugins/*",
+    "injected-scripts",
+    "mitm",
+    "core-server",
+    "remote-client",
+    "remote-interfaces",
+    "replay",
+    "replay-app",
+    "replay-api",
+    "session-state",
+    "testing",
+    "commons",
+    "website"
+  ],
   "useWorkspaces": true
 }

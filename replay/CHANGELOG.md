@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.6](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2020-07-22)
+
+
+### Bug Fixes
+
+* packaging issues with mitm and replay ([520a912](https://github.com/ulixee/secret-agent/commit/520a912d50b935270b75f2d6ef1faf5fed796e85))
+
+
+
+
+
 # [1.0.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2020-07-21)
 
 **Note:** Version bump only for package @secret-agent/replay
