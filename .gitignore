@@ -17,7 +17,7 @@ tsconfig.tsbuildinfo
 /build/
 /build-dist/
 
-/mitm/socket/connect
+/mitm/socket/connect*
 /mitm/socket/build/
 /mitm/socket/.version
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	utls "github.com/ulixee/utls"
 )
@@ -14,16 +16,29 @@ func main() {
 	var connectArgs = ConnectArgs{}
 	var uTlsConn *utls.UConn
 
+	// also make a signals channel
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+
+    go func() {
+		_, err := fmt.Scanf("disconnect")
+		if err != nil {
+			panic(err)
+		}
+		sigc <- syscall.SIGINT
+	}()
+
+
 	json.Unmarshal([]byte(os.Args[2]), &connectArgs)
 
 	debug := connectArgs.Debug
+
 
 	domainSocketPiper := &DomainSocketPiper{
 		Path:  socketPath,
 		debug: connectArgs.Debug,
 	}
 
-	defer domainSocketPiper.Close()
 	if debug {
 		fmt.Printf("Serving at socket path %+s. ConnectArgs %#v\n", socketPath, connectArgs)
 	}
@@ -59,9 +74,9 @@ func main() {
 	fmt.Printf("[DomainSocketPiper.Connected] ALPN: %s\n", protocol)
 
 	if uTlsConn != nil {
-		domainSocketPiper.Pipe(uTlsConn)
+		domainSocketPiper.Pipe(uTlsConn, sigc)
 	} else {
-		domainSocketPiper.Pipe(dialConn)
+		domainSocketPiper.Pipe(dialConn, sigc)
 	}
 }
 

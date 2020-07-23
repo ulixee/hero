@@ -5,7 +5,6 @@ import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
-import Path from 'path';
 
 const { log } = Log(module);
 
@@ -22,7 +21,10 @@ export default class SocketConnectDriver {
   private emitter = new EventEmitter();
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
-    this.socketPath = Path.join(os.tmpdir(), `sa-mitm-${(counter += 1)}.sock`);
+    const id = (counter += 1);
+    this.socketPath =
+      os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-mitm-${id}.sock`;
+
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
 
@@ -54,9 +56,10 @@ export default class SocketConnectDriver {
 
   public onListening() {
     const socket = (this.socket = net.connect(this.socketPath));
-    socket.on('error', err =>
-      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId }),
-    );
+    socket.on('error', error => {
+      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId, error });
+      if ((error as any)?.code === 'ENOENT') this.close();
+    });
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
@@ -68,7 +71,7 @@ export default class SocketConnectDriver {
       `${__dirname}/../socket/connect${ext}`,
       [this.socketPath, JSON.stringify(this.connectOpts)],
       {
-        stdio: ['inherit', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'],
       },
     ));
     child.stdout.setEncoding('utf8');
@@ -110,9 +113,14 @@ export default class SocketConnectDriver {
   }
 
   private closeChild() {
-    if (!this.child) return;
-    this.child.kill('SIGINT');
-    delete this.child;
+    if (this.child.killed) return;
+    this.child.unref();
+    try {
+      this.child.stdin.write('disconnect');
+    } catch (err) {
+      // don't log epipes
+    }
+    this.child.kill();
   }
 
   private cleanupSocket() {
