@@ -47,6 +47,7 @@
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"nuxt-ts dev\"",
     "start:backend": "cross-env CLEAR_LOGS=true NODE_ENV=development electron ../build/replay-app",
     "start:frontend": "nuxt-ts start",
+    "start": "electron ../build/replay-app",
     "logs": "touch ~/Library/Logs/@secret-agent/replay-app/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay-app/main.log"
   },
   "license": "MIT",

@@ -99,6 +99,10 @@ export class AppStore {
 
     ipcRenderer.send('update-check');
   }
+
+  public closeWindow() {
+    ipcRenderer.send('window:close');
+  }
 }
 
 export default new AppStore();

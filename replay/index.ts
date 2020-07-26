@@ -18,7 +18,7 @@ export default function replay(launchArgs: IReplayLaunchArgs) {
     // see if we can launch from monorepo
     spawnArgs[0] = require.resolve('@secret-agent/replay-app');
 
-    spawn('node $(yarn bin electron)', spawnArgs, true);
+    spawn('yarn workspace @secret-agent/replay-app start', spawnArgs, true);
   } catch (err) {
     log.info('Replay app not found');
     return;

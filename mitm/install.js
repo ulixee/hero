@@ -140,7 +140,7 @@ function getFileChecksum(file) {
 }
 
 async function getSourceChecksum(filename) {
-  const buffer = await download(`${releasesAssetsUrl}/default.checksum`);
+  const buffer = await download(`${releasesAssetsUrl}/connect.checksum`);
 
   const checksum = buffer.toString('utf8');
 

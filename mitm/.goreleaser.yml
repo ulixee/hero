@@ -24,7 +24,7 @@ archives:
     files:
       - none*
 checksum:
-  name_template: '.checksum'
+  name_template: 'connect.checksum'
 snapshot:
   name_template: '{{ .Tag }}-snapshot'
 changelog:

@@ -4,7 +4,8 @@
     .tabs-container(@mouseenter="onMouseEnter" @mouseleave="onTabsMouseLeave" @wheel="onWheel" ref="container")
       Tab(v-for="tab of store.tabs.list" :key="tab.id" :tab="tab")
     AppButton.add-tab(@click="onAddTabClick" :icon="ICON_ADD" :buttonRef="r => (store.addTab.ref = r)")
-  //.windows-controls(v-if="platform !== 'darwin'") look at react-windows-controls
+  .window-controls(v-if="platform !== 'darwin'")
+    button#close-window(@click="onCloseWindow")
 </template>
 
 <script lang="ts">
@@ -21,7 +22,7 @@ import {
   DEFAULT_TITLEBAR_HEIGHT,
   TOOLBAR_BUTTON_WIDTH,
 } from '~shared/constants/design';
-import { ICON_ADD } from '~frontend/constants/icons';
+import { ICON_ADD, ICON_CLOSE } from '~frontend/constants/icons';
 import NoCache from '~frontend/lib/NoCache';
 
 let timeout: any;
@@ -31,6 +32,7 @@ let timeout: any;
 export default class TabBar extends Vue {
   private readonly store = store;
   private readonly ICON_ADD = ICON_ADD;
+  private platform = platform;
 
   onMouseEnter() {
     clearTimeout(timeout);
@@ -45,6 +47,10 @@ export default class TabBar extends Vue {
 
   onAddTabClick() {
     store.tabs.createTab();
+  }
+
+  onCloseWindow(){
+    this.store.closeWindow();
   }
 
   onWheel(e: any) {
@@ -70,16 +76,21 @@ export default class TabBar extends Vue {
       '--titlebarBackgroundColor': store.theme.titlebarBackgroundColor,
       '--titlebarHeight': `${DEFAULT_TITLEBAR_HEIGHT}px`,
       '--paddingLeft': (platform() === 'darwin' && !store.isFullscreen ? 78 : 4) + 'px',
+      '--dragRight': (platform() === 'darwin' ? 4 : 50) + 'px',
       '--addTabTop': `${store.theme.tabMarginTop + 2}px`,
       '--addTabMinWidth': `${ADD_TAB_BUTTON_WIDTH}px`,
       '--addTabHeight': `${ADD_TAB_BUTTON_HEIGHT}px`,
       '--tabsContainerWidth': `calc(100% - ${TOOLBAR_BUTTON_WIDTH}px)`,
+      '--tabCloseIcon': `url('${ICON_CLOSE}')`,
+      '--windowButtonsWidth': (platform() === 'darwin' ? 4 : 50) + 'px',
+      '--windowCloseFilter': store.theme.toolbarLightForeground ? 'invert(100%)' : 'none',
     };
   }
 }
 </script>
 
 <style lang="scss">
+@import '../../../assets/style/common-mixins';
 .TabBar {
   position: relative;
   z-index: 100;
@@ -98,7 +109,7 @@ export default class TabBar extends Vue {
     z-index: 0;
     top: 4px;
     left: 4px;
-    right: 4px;
+    right: var(--dragRight);
     bottom: 0px;
     -webkit-app-region: drag;
     content: '';
@@ -110,7 +121,7 @@ export default class TabBar extends Vue {
     position: relative;
     overflow: hidden;
     align-items: center;
-    margin-right: 32px;
+    margin-right: var(--windowButtonsWidth);
     display: flex;
     margin-left: 4px;
 
@@ -138,5 +149,30 @@ export default class TabBar extends Vue {
       }
     }
   }
+   .window-controls {
+      width: var(--windowButtonsWidth);
+      height: 100%;
+      position: absolute;
+      right: 0;
+      top:0;
+      z-index: 12;
+      -webkit-app-region: no-drag;
+
+      button#close-window {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        border: 0;
+        background-image: var(--tabCloseIcon);
+        background-color: transparent;
+        @include centerIcon(25);
+        filter: var(--windowCloseFilter);
+        outline:none;
+
+        &:hover {
+          background-color: #ff0000dd;
+        }
+      }
+    }
 }
 </style>

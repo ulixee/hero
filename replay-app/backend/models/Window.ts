@@ -1,4 +1,4 @@
-import { BrowserWindow, app } from 'electron';
+import { BrowserWindow, app, ipcMain } from 'electron';
 import { resolve } from 'path';
 import Application from '../Application';
 import TabManager from '../managers/TabManager';
@@ -155,7 +155,6 @@ export default class Window {
     this.windowState.isFullscreen = this.browserWindow.isFullScreen();
     storage.windowState = this.windowState;
     storage.persistAll();
-
     this.browserWindow.setBrowserView(null);
 
     Application.instance.overlayManager.destroy();
@@ -165,5 +164,8 @@ export default class Window {
     Application.instance.windowManager.list = Application.instance.windowManager.list.filter(
       x => x.browserWindow.id !== this.browserWindow.id,
     );
+    if (this.webContents.isDevToolsOpened) {
+      this.webContents.closeDevTools();
+    }
   }
 }
