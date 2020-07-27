@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/remote-client",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "description": "SecretAgent client that runs remotely",
   "dependencies": {
-    "@secret-agent/client": "^1.0.0-alpha.6",
+    "@secret-agent/client": "^1.0.0-alpha.7",
     "@secret-agent/commons": "^1.0.0-alpha.5"
   },
   "devDependencies": {

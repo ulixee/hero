@@ -8,24 +8,24 @@
   ],
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "main": "./index.js",
   "build": {
     "appId": "dev.secretagent.replay",
     "productName": "SecretAgentReplay",
     "mac": {
-      "target": "tar.gz",
-      "artifactName": "replay-${version}-${os}.tar.gz"
+      "target": "dir",
+      "artifactName": "replay-${version}-${os}${ext}"
     },
     "win": {
-      "target": "tar.gz",
-      "artifactName": "replay-${version}-${os}.tar.gz"
+      "target": "dir",
+      "artifactName": "replay-${version}-${os}${ext}"
     },
     "linux": {
       "executableName": "secretagentreplay",
       "category": "Network",
-      "target": "tar.gz",
-      "artifactName": "replay-${version}-${os}.tar.gz"
+      "target": "dir",
+      "artifactName": "replay-${version}-${os}${ext}"
     },
     "publish": [
       {
@@ -40,8 +40,8 @@
     "build:backend": "tsc -b tsconfig.backend.json && yarn build:backend-paths && shx cp package.json ../build/replay-app",
     "build:icons": "electron-icon-builder -f --input=./frontend/static/AppIcon.appiconset/icon_512@2x.png --output=../build/replay-app/build",
     "build:dist": "yarn build:frontend && yarn build:backend && yarn build:icons",
-    "build:pack": "yarn build:dist && cd ../build/replay-app && yarn && electron-builder -mwl",
     "build": "yarn build:dist",
+    "pack": " cd ../build/replay-app && electron-builder -mwl && pack.sh",
     "gh:publish": "yarn build:dist && cp .env ../build/replay-app && cd ../build/replay-app && yarn && export $(cat .env | xargs) && electron-builder -mwl -p=onTagOrDraft",
     "clean": "shx rm -rf ../build/replay-app/static && tsc -b --clean tsconfig.backend.json && tsc -b --clean tsconfig.json",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"nuxt-ts dev\"",

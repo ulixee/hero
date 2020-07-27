@@ -2,7 +2,7 @@
 
 import { ipcRenderer } from 'electron';
 import { INodeData, IDomChangeEvent } from './interfaces/IDomChangeEvent';
-import { IFocusRecord, IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
@@ -46,6 +46,14 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     if (preserveElements.includes(data.tagName)) {
       const elem = document.querySelector(data.tagName);
       idMap.set(data.id, elem);
+      continue;
+    }
+    if (data.nodeType === document.DOCUMENT_NODE) {
+      idMap.set(data.id, document);
+      continue;
+    }
+    if (data.nodeType === document.DOCUMENT_TYPE_NODE) {
+      idMap.set(data.id, document.doctype);
       continue;
     }
 
@@ -129,7 +137,7 @@ function deserializeNode(data: INodeData, parent?: Element): Node {
       break;
   }
 
-  if (!node) throw new Error('ouch');
+  if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
 
   idMap.set(data.id, node);
 
