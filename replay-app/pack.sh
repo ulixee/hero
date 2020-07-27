@@ -7,12 +7,23 @@ PACKAGE_VERSION=$(cat package.json \
 
 cd dist
 
-cd mac
-tar -czf "../replay-${PACKAGE_VERSION}-mac.tar.gz" SecretAgentReplay.app
-cd ..
+mkdir -p assets
 
-mv linux-unpacked "replay-${PACKAGE_VERSION}-linux"
-tar -czf "replay-${PACKAGE_VERSION}-linux.tar.gz" "replay-${PACKAGE_VERSION}-linux"
+if [ -d "./mac" ]; then
+  cd mac
+  echo "Packing mac"
+  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac.tar.gz" SecretAgentReplay.app
+  cd ..
+fi
 
-mv win-unpacked "replay-${PACKAGE_VERSION}-win"
-tar -czf "replay-${PACKAGE_VERSION}-win.tar.gz" "replay-${PACKAGE_VERSION}-win"
+if [ -d "./linux-unpacked" ]; then
+  echo "Packing linux"
+  mv linux-unpacked "replay-${PACKAGE_VERSION}-linux"
+  tar -czf "assets/replay-${PACKAGE_VERSION}-linux.tar.gz" "replay-${PACKAGE_VERSION}-linux"
+fi
+
+if [ -d "./win-unpacked" ]; then
+  echo "Packing windows"
+  mv win-unpacked "replay-${PACKAGE_VERSION}-win"
+  tar -czf "assets/replay-${PACKAGE_VERSION}-win.tar.gz" "replay-${PACKAGE_VERSION}-win"
+fi

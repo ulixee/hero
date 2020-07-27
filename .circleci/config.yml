@@ -1,6 +1,43 @@
 version: 2.1
 orbs:
   node: circleci/node@3.0.1
+
+step-save-cache: &step-save-cache
+  save_cache:
+    key: v1-sa-{{arch}}-{{ checksum "yarn.lock" }}
+    paths:
+      - node_modules
+      - core/node_modules
+      - core-interfaces/node_modules
+      - core-server/node_modules
+      - client/node_modules
+      - emulators/node_modules
+      - emulator-plugins/emulate-safari-13/node_modules
+      - full-client/node_modules
+      - mitm/node_modules
+      - mitm/socket/connect*
+      - remote-client/node_modules
+      - remote-interfaces/node_modules
+      - replay-app/node_modules
+      - replay-api/node_modules
+      - testing/node_modules
+      - session-state/node_modules
+      - build/node_modules
+      - build/core/node_modules
+      - build/core-interfaces/node_modules
+      - build/core-server/node_modules
+      - build/client/node_modules
+      - build/emulators/node_modules
+      - build/emulator-plugins/emulate-safari-13/node_modules
+      - build/full-client/node_modules
+      - build/mitm/node_modules
+      - build/mitm/socket/connect*
+      - build/remote-client/node_modules
+      - build/remote-interfaces/node_modules
+      - build/replay-app/node_modules
+      - build/replay-api/node_modules
+      - build/testing/node_modules
+
 jobs:
   build-and-test:
     docker:
@@ -10,31 +47,131 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v1-sa-{{ checksum "yarn.lock" }}
+          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
       - run:
-          name: Yarn install
+          name: Yarn Install
           command: yarn install --frozen-lockfile
-          working_directory: ~/project
       - run:
-          name: Compile ts
-          command: yarn build
-          working_directory: ~/project
-      - save_cache:
-          key: v1-sa-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/project/node_modules
-            - ~/project/*/node_modules
+          name: Compile Typescript
+          command: yarn build:ci
+      - *step-save-cache
       - run:
           name: Run tests with JUnit as reporter
-          command: yarn test --ci
+          command: yarn jest --ci --runInBand --reporters=default --reporters=jest-junit --testTimeout=10e3
           working_directory: ~/project/build
           environment:
             JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+            ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+            SA_SHOW_REPLAY: false
+            CACHE_DIR: .cache-test
+            NODE_ENV: test
       - store_test_results:
-          path: ./reports/junit/
+          path: build/reports/junit/
       - store_artifacts:
-          path: ./reports/junit
+          path: build/reports/junit
+
+  update-website:
+    docker:
+      - image: circleci/node:12
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn Install
+          command: yarn install --frozen-lockfile
+      - add_ssh_keys:
+          fingerprints:
+            - '3b:86:d4:57:4f:12:0b:ad:45:49:15:d4:90:c1:51:a2'
+      - run:
+          name: Update site
+          command: cd website && yarn deploy --message "[skip ci] Updates" --user "Circle Ci <ci@ulixee.org>"
+
+  build-replay-mac:
+    macos:
+      xcode: '10.2.0'
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Compile Typescript and Build Electron Webpages
+          command: cd ~/project/replay-app && yarn build
+      - run:
+          name: Yarn electron-build
+          command: cd ~/project/build/replay-app && yarn && pwd && yarn electron-builder -m --publish always
+      - run:
+          name: Pack distributions
+          command: cp ~/project/replay-app/pack.sh ~/project/build/replay-app && cd ~/project/build/replay-app && ./pack.sh
+      - store_artifacts:
+          path: ~/project/build/replay-app/dist/assets
+
+  build-replay-wl:
+    docker:
+      - image: electronuserland/builder:wine
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn Install
+          command: yarn install --frozen-lockfile
+      - run:
+          name: Compile Typescript and Build Electron Webpages
+          command: cd ~/project/replay-app && yarn build
+      - run:
+          name: Yarn electron-build
+          command: cd ~/project/build/replay-app && yarn && pwd && yarn electron-builder -wl --publish always
+      - run:
+          name: Pack distributions
+          command: cp ~/project/replay-app/pack.sh ~/project/build/replay-app && cd ~/project/build/replay-app && ./pack.sh
+      - store_artifacts:
+          path: ~/project/build/replay-app/dist/assets
+
+  build-connect:
+    docker:
+      - image: circleci/golang:1.14
+    steps:
+      - checkout
+      - run: cd ~/project/mitm curl -sL https://git.io/goreleaser | bash
+
 workflows:
+  version: 2
   build-and-test:
     jobs:
       - build-and-test
+  build-assets:
+    jobs:
+      - build-connect:
+          context: SecretAgent
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+      - build-replay-wl:
+          context: SecretAgent
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+      - build-replay-mac:
+          context: SecretAgent
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
+  update-website:
+    jobs:
+      - update-website:
+          filters:
+            branches:
+              only:
+                - master

@@ -19,17 +19,15 @@ Returns an array of cookie objects for this user.
 
 #### **Type**: `Promise<Cookie[]>`
 
-### user.history
+### user.storage
 
-The url history of the user
+The current session DOM storage items (IDomStorage has a `localStorage`, `sessionStorage`, `indexedDB`).
 
-#### **Type**: `string[]`
-
-### user.cache
-
-Resources that pre-populate a cache for this user
-
-#### **Type**: `Resource[]`
+#### **Type**: `{ [securityOrigin: string]: IDomStorage }`
+ - `IDomStorage`
+      - localStorage `[key,value][]`. Array of local storage key/value paris
+      - sessionStorage `[key,value][]`. Array of session storage key/value paris
+      - indexedDB `IndexedDb[]`. Array of IndexedDB databases with data
 
 ### user.lastCommandId
 
