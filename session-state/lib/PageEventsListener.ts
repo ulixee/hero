@@ -19,7 +19,7 @@ export default class PageEventsListener {
   private readonly sessionId: string;
   private readonly devtoolsClient: IDevtoolsClient;
   private readonly frameTracker: FrameTracker;
-  private readonly onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>;
+  private onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>;
 
   constructor(
     sessionId: string,
@@ -31,6 +31,7 @@ export default class PageEventsListener {
     this.devtoolsClient = devtoolsClient;
     this.frameTracker = frameTracker;
     this.onResults = onResults;
+    this.runtimeBindingCalled = this.runtimeBindingCalled.bind(this);
   }
 
   public async listen() {
@@ -47,26 +48,7 @@ export default class PageEventsListener {
       source: `delete window.${runtimeFunction}`,
     });
 
-    await this.devtoolsClient.on(
-      'Runtime.bindingCalled',
-      async ({ name, payload, executionContextId }) => {
-        if (name !== runtimeFunction) return;
-        const frameId = this.frameTracker.getFrameIdForExecutionContext(executionContextId);
-        if (!frameId) {
-          log.warn('PageEventsListener.bindingCalledBeforeExecutionTracked', {
-            sessionId: this.sessionId,
-            executionContextId,
-            name,
-            payload,
-          });
-          return;
-        }
-
-        const result = JSON.parse(payload) as PageRecorderResultSet;
-
-        await this.onResults(frameId, ...result);
-      },
-    );
+    await this.devtoolsClient.on('Runtime.bindingCalled', this.runtimeBindingCalled);
   }
 
   public async setCommandIdForPage(commandId: number) {
@@ -88,15 +70,38 @@ export default class PageEventsListener {
       );
   }
 
-  public async flush() {
+  public async flush(closeAfterFlush = false) {
     const results = await this.frameTracker.runInActiveFrames(
       `window.flushPageRecorder()`,
       DomEnv.installedDomWorldName,
     );
+    if (!this.onResults) return;
     for (const [frameId, result] of Object.entries(results)) {
       if (result.value) {
         await this.onResults(frameId, ...(result.value as PageRecorderResultSet));
       }
     }
+    if (closeAfterFlush) {
+      this.onResults = null;
+      this.devtoolsClient.off('Runtime.bindingCalled', this.runtimeBindingCalled);
+    }
+  }
+
+  private async runtimeBindingCalled({ name, payload, executionContextId }) {
+    if (name !== runtimeFunction) return;
+    const frameId = this.frameTracker.getFrameIdForExecutionContext(executionContextId);
+    if (!frameId) {
+      log.warn('PageEventsListener.bindingCalledBeforeExecutionTracked', {
+        sessionId: this.sessionId,
+        executionContextId,
+        name,
+        payload,
+      });
+      return;
+    }
+
+    const result = JSON.parse(payload) as PageRecorderResultSet;
+
+    await this.onResults(frameId, ...result);
   }
 }

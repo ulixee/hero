@@ -28,6 +28,13 @@ export default class SessionsDb {
     this.db = null;
   }
 
+  public static shutdown() {
+    for (const [key, db] of Object.entries(SessionsDb.dbByBaseDir)) {
+      db.close();
+      delete SessionsDb.dbByBaseDir[key];
+    }
+  }
+
   public static find(baseDir: string) {
     if (!this.dbByBaseDir[baseDir]) {
       this.dbByBaseDir[baseDir] = new SessionsDb(baseDir);

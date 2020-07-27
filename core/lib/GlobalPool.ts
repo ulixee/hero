@@ -6,6 +6,7 @@ import ChromeCore from './ChromeCore';
 import Session from './Session';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 
 const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
@@ -95,6 +96,7 @@ export default class GlobalPool {
     if (this.mitmServer) {
       await this.mitmServer.close();
     }
+    SessionsDb.shutdown();
     this.waitingForAvailability = [];
     this.chromeCore = null;
     this.mitmServer = null;

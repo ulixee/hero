@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
-    "test": "cross-env SA_SHOW_REPLAY=false NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand --no-cache",
+    "test": "cross-env SA_SHOW_REPLAY=false NODE_ENV=test CACHE_DIR=.cache-test jest --runInBand",
     "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "devDependencies": {

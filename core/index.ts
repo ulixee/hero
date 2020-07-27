@@ -255,22 +255,26 @@ export default class Core implements ICore {
     await Core.disconnect(null, fatalError);
     await GlobalPool.close();
   }
+
+  public static registerSignalHandlers() {
+    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+      process.once(name as Signals, async () => {
+        await Core.shutdown();
+        process.exit(0);
+      });
+    });
+
+    process.on('uncaughtException', async (error: Error) => {
+      await Core.shutdown(error);
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', async (error: Error) => {
+      await Core.shutdown(error);
+    });
+  }
 }
 
-['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
-  process.once(name as Signals, async () => {
-    await Core.shutdown();
-    process.exit(0);
-  });
-});
-
-process.on('uncaughtException', async (error: Error) => {
-  await Core.shutdown(error);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', async (error: Error) => {
-  await Core.shutdown(error);
-});
-
 type IAttachedId = number;
+
+if (process.env.NODE_ENV !== 'test') Core.registerSignalHandlers();

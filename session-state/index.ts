@@ -294,19 +294,20 @@ export default class SessionState {
 
   public async saveBeforeWindowClose() {
     try {
-      await this.flush();
+      await this.flush(true);
     } finally {
       this.db.session.update(this.sessionId, {
         closeDate: new Date(),
         viewport: this.viewport,
       });
-      this.db.close();
       LogEvents.unsubscribe(this.logSubscriptionId);
+      this.db.flush();
+      this.db.close();
     }
   }
 
-  public async flush() {
-    await this.pageEventsListener?.flush();
+  public async flush(isCloseEvent = false) {
+    await this.pageEventsListener?.flush(isCloseEvent);
     this.db.flush();
   }
 

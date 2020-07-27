@@ -323,9 +323,6 @@ describe('basic MitM tests', () => {
     await serverMessagePromise;
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy).not.toHaveBeenCalled();
-
-    await wsServer.close();
-    await mitmServer.close();
   });
 
   it('should intercept requests', async () => {

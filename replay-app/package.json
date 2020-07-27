@@ -43,7 +43,7 @@
     "build:pack": "yarn build:dist && cd ../build/replay-app && yarn && electron-builder -mwl",
     "build": "yarn build:dist",
     "gh:publish": "yarn build:dist && cp .env ../build/replay-app && cd ../build/replay-app && yarn && export $(cat .env | xargs) && electron-builder -mwl -p=onTagOrDraft",
-    "clean": "rm -rf ../build/replay-app/static && tsc -b --clean tsconfig.backend.json && tsc -b --clean tsconfig.json",
+    "clean": "shx rm -rf ../build/replay-app/static && tsc -b --clean tsconfig.backend.json && tsc -b --clean tsconfig.json",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"nuxt-ts dev\"",
     "start:backend": "cross-env CLEAR_LOGS=true NODE_ENV=development electron ../build/replay-app",
     "start:frontend": "nuxt-ts start",

@@ -7,8 +7,8 @@
     "start:website": "yarn workspace @secret-agent/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "yarn tsc && yarn workspace @secret-agent/replay-app build && cd build && yarn",
-    "build:copy": "copyfiles 'testing/html/**' 'yarn.lock' 'mitm/socket/**' 'mitm/socket/.*' 'mitm/test/certs/**' build && shx cp package.build.json build/package.json",
-    "build:dist": "rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles 'mitm/socket/*' 'mitm/socket/.checksum' -e 'mitm/socket/connect' '**/.gitignore' '**/.npmignore' build-dist && node dist-prepare.js && shx cp package.dist.json build-dist/package.json",
+    "build:copy": "copyfiles \"testing/html/**\" \"yarn.lock\" \"mitm/socket/**\" -a \"mitm/test/certs/**\" build && shx cp package.build.json build/package.json",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles \"mitm/socket/*\" \"mitm/socket/.checksum\" -e \"mitm/socket/connect\" \"**/.gitignore\" \"**/.npmignore\" build-dist && node dist-prepare.js && shx cp package.dist.json build-dist/package.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
     "tsc": "tsc -b tsconfig.json && yarn build:copy",
     "tsc-modules": "ln -sf node_modules build/node_modules",
@@ -88,12 +88,10 @@
   },
   "lint-staged": {
     "*.ts": [
-      "tslint --format verbose",
-      "git add"
+      "tslint --format verbose"
     ],
     "*.json": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   },
   "resolutions": {
