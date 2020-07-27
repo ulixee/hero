@@ -30,6 +30,7 @@ module.exports = {
         failuresOnly: true,
       },
     ],
+    'jest-junit'
   ],
   roots: [
     'client/',

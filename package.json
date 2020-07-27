@@ -15,8 +15,7 @@
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay-app clean",
-    "test": "yarn tsc && cd build && yarn test",
-    "test-ci": "cross-env SA_SHOW_REPLAY=false NODE_ENV=test CACHE_DIR=.cache-test jest --ci --runInBand --no-cache"
+    "test": "yarn tsc && cd build && yarn && yarn test"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "author": "Data Liberation Foundation",
@@ -42,8 +41,12 @@
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.1.1",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^26.0.5",
     "@types/node": "^12.7.11",
+    "jest": "^26.1.0",
+    "jest-summary-reporter": "^0.0.2",
+    "jest-environment-node": "^26.1.0",
+    "jest-junit": "^6.3.0",
     "copyfiles": "^2.3.0",
     "husky": "^4.2.5",
     "lerna": "^3.4.3",

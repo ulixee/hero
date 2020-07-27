@@ -8,10 +8,10 @@
     "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "devDependencies": {
-    "jest": "^25.3.0",
-    "jest-environment-node": "^25.3.0",
-    "jest-junit": "^6.3.0",
+    "jest": "^26.1.0",
     "jest-summary-reporter": "^0.0.2",
+    "jest-environment-node": "^26.1.0",
+    "jest-junit": "^6.3.0",
     "lerna": "^3.4.3",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.16",

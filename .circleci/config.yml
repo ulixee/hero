@@ -9,14 +9,25 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - node/install-packages:
-          pkg-manager: yarn
+      - restore_cache:
+          key: v1-sa-{{ checksum "yarn.lock" }}
       - run:
-          name: Install JUnit coverage reporter
-          command: yarn add -W --dev jest-junit
+          name: Yarn install
+          command: yarn install --frozen-lockfile
+          working_directory: ~/project
+      - run:
+          name: Compile ts
+          command: yarn build
+          working_directory: ~/project
+      - save_cache:
+          key: v1-sa-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/project/node_modules
+            - ~/project/*/node_modules
       - run:
           name: Run tests with JUnit as reporter
-          command: yarn test --ci --reporters=default --reporters=jest-junit ../build
+          command: yarn test --ci
+          working_directory: ~/project/build
           environment:
             JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
       - store_test_results:
