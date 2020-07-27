@@ -40,9 +40,9 @@ function getPlatformExecutable() {
     case 'freebsd':
     case 'openbsd':
     case 'linux':
-      return 'secretagentreplay';
+      return `replay-${version}-linux/secretagentreplay`;
     case 'win32':
-      return 'SecretAgentReplay.exe';
+      return `replay-${version}-win/SecretAgentReplay.exe`;
     default:
       throw new Error(`SecretAgent Replay builds are not available on platform: ${platform}`);
   }

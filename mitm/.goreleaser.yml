@@ -1,0 +1,33 @@
+dist: socket/build
+before:
+  hooks:
+    - cd socket && go mod download
+builds:
+  - id: 'connect'
+    binary: connect
+    dir: ./socket
+    goos:
+      - linux
+      - windows
+      - darwin
+    env:
+      - CGO_ENABLED=0
+archives:
+  - name_template: 'connect_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    replacements:
+      darwin: mac
+      linux: linux
+      windows: win
+      386: i386
+      amd64: x86_64
+    format: gz
+    files:
+      - none*
+checksum:
+  name_template: 'connect.checksum'
+snapshot:
+  name_template: '{{ .Tag }}-snapshot'
+changelog:
+  skip: true
+release:
+  prerelease: auto

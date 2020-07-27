@@ -5,7 +5,7 @@ import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
-import Path from 'path';
+import { v1 } from 'uuid';
 
 const { log } = Log(module);
 
@@ -17,12 +17,17 @@ export default class SocketConnectDriver {
   public remoteAddress: string;
   public localAddress: string;
 
+  private isClosing = false;
   private isConnected = false;
   private child: ChildProcess;
   private emitter = new EventEmitter();
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
-    this.socketPath = Path.join(os.tmpdir(), `sa-mitm-${(counter += 1)}.sock`);
+    const id = (counter += 1);
+    this.socketPath =
+      os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${v1()}` : `${os.tmpdir()}/sa-mitm-${id}.sock`;
+
+    if (connectOpts.debug === undefined) connectOpts.debug = log.level === 'stats';
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
 
@@ -47,6 +52,8 @@ export default class SocketConnectDriver {
   }
 
   public close() {
+    if (this.isClosing) return;
+    this.isClosing = true;
     this.emitter.emit('close');
     this.cleanupSocket();
     this.closeChild();
@@ -54,9 +61,10 @@ export default class SocketConnectDriver {
 
   public onListening() {
     const socket = (this.socket = net.connect(this.socketPath));
-    socket.on('error', err =>
-      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId }),
-    );
+    socket.on('error', error => {
+      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId, error });
+      if ((error as any)?.code === 'ENOENT') this.close();
+    });
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
@@ -68,7 +76,7 @@ export default class SocketConnectDriver {
       `${__dirname}/../socket/connect${ext}`,
       [this.socketPath, JSON.stringify(this.connectOpts)],
       {
-        stdio: ['inherit', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'],
       },
     ));
     child.stdout.setEncoding('utf8');
@@ -77,11 +85,7 @@ export default class SocketConnectDriver {
     const promise = createPromise(30e3);
     child.on('exit', code => {
       promise.reject(new Error('Socket process exited during connect'));
-      if (this.socket) {
-        this.socket.removeAllListeners();
-        this.socket.end();
-        this.cleanupSocket();
-      }
+      this.cleanupSocket();
     });
 
     child.on('error', error => {
@@ -110,15 +114,22 @@ export default class SocketConnectDriver {
   }
 
   private closeChild() {
-    if (!this.child) return;
-    this.child.kill('SIGINT');
-    delete this.child;
+    if (this.child.killed) return;
+    try {
+      this.child.stdin.write('disconnect');
+    } catch (err) {
+      // don't log epipes
+    }
+    if (os.platform() !== 'win32') {
+      this.child.kill();
+    }
+    this.child.unref();
   }
 
   private cleanupSocket() {
     if (!this.socket) return;
+    this.socket.end();
     unlink(this.socketPath, () => null);
-    this.socket.removeAllListeners();
     delete this.socket;
   }
 

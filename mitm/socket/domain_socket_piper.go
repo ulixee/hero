@@ -6,9 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/signal"
 	"sync/atomic"
-	"syscall"
 	"time"
 
 	tls "github.com/ulixee/utls"
@@ -27,15 +25,6 @@ type DomainSocketPiper struct {
 	debug           bool
 }
 
-func (piper *DomainSocketPiper) Listen() {
-	/// Create server on Unix socket path
-	ln, err := net.Listen("unix", piper.Path)
-	if err != nil {
-		log.Fatalf("DomainSocketPiper Listen error: %+v", err)
-	}
-	piper.listener = ln
-}
-
 func (piper *DomainSocketPiper) WaitForClient() {
 	// only read one
 	unixSocketClient, err := piper.listener.Accept()
@@ -46,14 +35,10 @@ func (piper *DomainSocketPiper) WaitForClient() {
 	piper.client = unixSocketClient
 }
 
-func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn) {
+func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 	piper.completeCounter = 0
 	localNotify := make(chan error, 1)  // close on signals
 	remoteNotify := make(chan error, 1) // close on signals
-
-	// also make a signals channel
-	sigc := make(chan os.Signal, 1)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	defer piper.Close()
 

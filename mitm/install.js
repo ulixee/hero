@@ -4,25 +4,28 @@ const fs = require('fs');
 const os = require('os');
 const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
-
-const fileHost =
-  process.env.SA_CONNECT_LIBRARY_HOST || 'https://storage.googleapis.com/secret-agent';
+const packageJson = require('./package');
 
 const outDir = `${__dirname}/socket`;
+const { version } = packageJson;
+const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/download/v${version}/`;
 
 (async function install() {
   let programName = 'connect';
-  const filename = buildFilename();
-  if (filename.endsWith('.exe.gz')) {
+  const filename = buildFilename(version);
+  if (os.platform() === 'win32') {
     programName += '.exe';
   }
 
-  const { version, checksum } = getSourceChecksum(filename);
+  const installed = getInstalledVersion();
+  if (installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
+    console.log('Latest SecretAgent connect library already installed');
+    return;
+  }
 
-  if (isInstalled(programName, version, checksum)) return;
-
-  const filepath = `${fileHost}/v${version}/${filename}`;
-
+  const checksum = await getSourceChecksum(filename);
+  const filepath = `${releasesAssetsUrl}/${filename}`;
+  
   if (!checksum) {
     if (tryBuild()) {
       saveVersion(version, checksum);
@@ -30,7 +33,9 @@ const outDir = `${__dirname}/socket`;
       process.exit();
       return;
     }
-
+    
+    const filepath = `${releasesAssetsUrl}/${filename}`;
+    const goVersionNeeded = getGoVersionNeeded();
     console.log(
       `The architecture file you need for the Secret Agent connect library is not available (${filepath}).\n\n
 You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm/socket directory`,
@@ -38,14 +43,14 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
     process.exit(1);
   }
 
-  console.log('Downloading Secret Agent connect library from %s (md5=%s)', filepath, checksum);
+  console.log('Downloading Secret Agent connect library from %s (checksum=%s)', filepath, checksum);
   const zippedFile = await download(filepath);
 
-  const downloadMd5 = getFileMd5(zippedFile);
-  if (downloadMd5 !== checksum) {
-    console.log('WARN!! Checksum failed for the Secret Agent connect library', {
+  const downloadedChecksum = getFileChecksum(zippedFile);
+  if (downloadedChecksum !== checksum) {
+    console.log('WARN!! Checksum mismatch for the Secret Agent connect library', {
       checksum,
-      downloadMd5,
+      downloadedChecksum,
     });
     process.exit(1);
   }
@@ -53,6 +58,7 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
   const file = gunzipSync(zippedFile);
 
   fs.writeFileSync(`${__dirname}/socket/${programName}`, file);
+  fs.chmodSync(`${__dirname}/socket/${programName}`, 0o755);
   saveVersion(version, checksum);
   console.log('Successfully downloaded');
 })();
@@ -68,32 +74,35 @@ function tryBuild() {
   return false;
 }
 
-function isInstalled(programName, version, checksum) {
-  if (fs.existsSync(`${outDir}/${programName}`) && fs.existsSync(`${outDir}/.version`)) {
-    const versionFile = fs.readFileSync(`${outDir}/.version`, 'utf8');
-    if (versionFile === `${version}=${checksum}`) return true;
+function getInstalledVersion() {
+  if (fs.existsSync(`${outDir}/.version`)) {
+    return fs.readFileSync(`${outDir}/.version`, 'utf8');
   }
-  return false;
+  return null;
+}
+
+function isBinaryInstalled(programName) {
+  return fs.existsSync(`${outDir}/${programName}`);
 }
 
 function saveVersion(version, checksum) {
   fs.writeFileSync(`${outDir}/.version`, `${version}=${checksum}`);
 }
 
-function buildFilename() {
+function buildFilename(version) {
   let platform = os.platform();
   let arch = os.arch();
-  let fileExt = 'gz';
-  if (arch === 'x64') {
-    arch = 'x86_64';
-  }
+  if (arch === 'x64') arch = 'x86_64';
+  if (arch === 'ia32') arch = '386';
 
   if (platform === 'win32') {
-    platform = 'windows';
-    fileExt = 'exe.gz';
+    platform = 'win';
+  }
+  if (platform === 'darwin') {
+    platform = 'mac';
   }
 
-  return `connect_${platform}_${arch}.${fileExt}`;
+  return `connect_${version}_${platform}_${arch}.gz`;
 }
 
 async function download(filepath) {
@@ -117,35 +126,33 @@ async function download(filepath) {
       }
     });
     req.on('error', err => {
-      console.log('ERROR downloading needed Secret Agent connect library', err);
+      console.log('ERROR downloading needed Secret Agent library %s', filepath, err);
       reject(err);
     });
   });
 }
 
-function getFileMd5(file) {
-  return createHash('md5')
+function getFileChecksum(file) {
+  return createHash('sha256')
     .update(file)
     .digest()
     .toString('hex');
 }
 
-function getSourceChecksum(filename) {
-  const checksum = fs.readFileSync(`${__dirname}/socket/.checksum`, 'utf8');
-  const version = checksum.match(/VERSION=(.+)/)[1];
+async function getSourceChecksum(filename) {
+  const buffer = await download(`${releasesAssetsUrl}/connect.checksum`);
 
-  const match = checksum.split(/\r?\n/).find(x => x.startsWith(filename));
+  const checksum = buffer.toString('utf8');
 
-  const expectedMd5 = match ? match.split('=').pop() : undefined;
+  const match = checksum.split(/\r?\n/).find(x => x.endsWith(filename));
 
-  if (!expectedMd5) {
+  const expectedChecksum = match ? match.split(/\s+/).shift() : undefined;
+
+  if (!expectedChecksum) {
     throw new Error('Invalid checksum found for Secret Agent socket library');
   }
 
-  return {
-    version,
-    checksum: expectedMd5,
-  };
+  return expectedChecksum;
 }
 
 function compile() {

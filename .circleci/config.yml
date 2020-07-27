@@ -1,0 +1,40 @@
+version: 2.1
+orbs:
+  node: circleci/node@3.0.1
+jobs:
+  build-and-test:
+    docker:
+      - image: circleci/node:12-browsers
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - restore_cache:
+          key: v1-sa-{{ checksum "yarn.lock" }}
+      - run:
+          name: Yarn install
+          command: yarn install --frozen-lockfile
+          working_directory: ~/project
+      - run:
+          name: Compile ts
+          command: yarn build
+          working_directory: ~/project
+      - save_cache:
+          key: v1-sa-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/project/node_modules
+            - ~/project/*/node_modules
+      - run:
+          name: Run tests with JUnit as reporter
+          command: yarn test --ci
+          working_directory: ~/project/build
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      - store_test_results:
+          path: ./reports/junit/
+      - store_artifacts:
+          path: ./reports/junit
+workflows:
+  build-and-test:
+    jobs:
+      - build-and-test

@@ -36,6 +36,8 @@ export default class MitmProxy {
   private readonly httpHost: string;
   private readonly httpsServer: https.Server;
 
+  private isClosing = false;
+
   private secureContexts: {
     [hostname: string]: Promise<void>;
   } = {};
@@ -86,6 +88,8 @@ export default class MitmProxy {
   }
 
   public async close() {
+    if (this.isClosing) return;
+    this.isClosing = true;
     await closeServer(this.httpServer);
     await closeServer(this.httpsServer);
 

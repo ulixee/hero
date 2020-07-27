@@ -373,7 +373,7 @@ async function startProxy() {
 }
 
 function trackClose(closable: { close: (...args: any[]) => any }) {
-  Helpers.onClose(() => new Promise(resolve => closable.close(() => resolve())));
+  Helpers.onClose(() => new Promise(resolve => closable.close(() => process.nextTick(resolve))));
 }
 
 async function readResponse(res: stream.Readable) {

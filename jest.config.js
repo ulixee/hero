@@ -1,6 +1,5 @@
 module.exports = {
   verbose: false,
-  setupFilesAfterEnv: ['./jest-each.js'],
   testMatch: ['**/test/*.test.js'],
   testEnvironment: 'node',
   collectCoverage: false,
@@ -20,6 +19,9 @@ module.exports = {
   ],
   coveragePathIgnorePatterns: ['index.js'],
   modulePathIgnorePatterns: ['config'],
+  globalTeardown: './jest.teardown.js',
+  globalSetup: './jest.setup.js',
+  testTimeout: 20e3,
   reporters: [
     'default',
     [
@@ -28,6 +30,7 @@ module.exports = {
         failuresOnly: true,
       },
     ],
+    'jest-junit'
   ],
   roots: [
     'client/',

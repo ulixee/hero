@@ -7,15 +7,15 @@
     "start:website": "yarn workspace @secret-agent/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "yarn tsc && yarn workspace @secret-agent/replay-app build && cd build && yarn",
-    "build:copy": "copyfiles 'testing/html/**' 'yarn.lock' 'mitm/socket/**' 'mitm/socket/.*' 'mitm/test/certs/**' build && cp package.build.json build/package.json",
-    "build:dist": "rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles 'mitm/socket/*' 'mitm/socket/.checksum' -e 'mitm/socket/connect' '**/.gitignore' '**/.npmignore' build-dist && node dist-prepare.js && cp package.dist.json build-dist/package.json",
+    "build:copy": "copyfiles \"testing/html/**\" \"yarn.lock\" \"mitm/socket/**\" -a \"mitm/test/certs/**\" build && shx cp package.build.json build/package.json",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && copyfiles \"mitm/socket/*\" \"mitm/socket/.checksum\" -e \"mitm/socket/connect\" \"**/.gitignore\" \"**/.npmignore\" build-dist && node dist-prepare.js && shx cp package.dist.json build-dist/package.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
     "tsc": "tsc -b tsconfig.json && yarn build:copy",
     "tsc-modules": "ln -sf node_modules build/node_modules",
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay-app clean",
-    "test": "yarn tsc && cd build && SA_SHOW_REPLAY=false yarn test"
+    "test": "yarn tsc && cd build && yarn && yarn test"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "author": "Data Liberation Foundation",
@@ -41,8 +41,12 @@
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.1.1",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^26.0.5",
     "@types/node": "^12.7.11",
+    "jest": "^26.1.0",
+    "jest-summary-reporter": "^0.0.2",
+    "jest-environment-node": "^26.1.0",
+    "jest-junit": "^6.3.0",
     "copyfiles": "^2.3.0",
     "husky": "^4.2.5",
     "lerna": "^3.4.3",
@@ -51,6 +55,8 @@
     "pretty-quick": "^2.0.1",
     "source-map-support": "^0.5.16",
     "tslint": "^5.20.1",
+    "cross-env": "^7.0.2",
+    "shx": "^0.3.2",
     "tslint-config-airbnb": "^5.11.2",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^8.0.1",
@@ -85,12 +91,10 @@
   },
   "lint-staged": {
     "*.ts": [
-      "tslint --format verbose",
-      "git add"
+      "tslint --format verbose"
     ],
     "*.json": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   },
   "resolutions": {
