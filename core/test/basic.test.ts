@@ -1,5 +1,7 @@
 import Core, { GlobalPool } from '../index';
 
+const shutdownSpy = jest.spyOn(Core, 'shutdown');
+
 describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {
     await Core.start();
@@ -19,6 +21,30 @@ describe('basic Core tests', () => {
     expect(GlobalPool.maxActiveSessionCount).toBe(2);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
+    await Core.shutdown();
+  });
+
+  it('shuts down if start not called manually', async () => {
+    // @ts-ignore
+    Core.autoShutdownMillis = 0;
+    shutdownSpy.mockClear();
+    const meta = await Core.createSession();
+    const core = Core.byWindowId[meta.windowId];
+    await core.close();
+    await new Promise(r => setTimeout(r, 50));
+    expect(shutdownSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('will not shutdown if start called and 0 sessions', async () => {
+    // @ts-ignore
+    Core.autoShutdownMillis = 0;
+    await Core.start();
+    shutdownSpy.mockClear();
+    const meta = await Core.createSession();
+    const core = Core.byWindowId[meta.windowId];
+    await core.close();
+    await new Promise(r => setTimeout(r, 50));
+    expect(shutdownSpy).toHaveBeenCalledTimes(0);
     await Core.shutdown();
   });
 });
