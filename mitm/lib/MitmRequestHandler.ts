@@ -58,9 +58,9 @@ export default class MitmRequestHandler {
       const data: Buffer[] = [];
       for await (const chunk of clientRequest) {
         data.push(chunk);
-        await new Promise(resolve => ctx.proxyToServerRequest.write(chunk, resolve));
+        ctx.proxyToServerRequest.write(chunk);
       }
-      await new Promise(resolve => ctx.proxyToServerRequest.end(resolve));
+      ctx.proxyToServerRequest.end();
       ctx.postData = Buffer.concat(data);
     } catch (err) {
       this.handleError('ON_REQUEST_ERROR', ctx, err);
@@ -265,7 +265,7 @@ export default class MitmRequestHandler {
 
       if (!session) {
         log.error('Mitm.RequestHandler:NoSessionForRequest', {
-          sessionId: session.sessionId,
+          sessionId: null,
           url: ctx.url,
           headers: ctx.clientToProxyRequest.headers,
           method: ctx.clientToProxyRequest.method,
@@ -275,6 +275,7 @@ export default class MitmRequestHandler {
         this.handleError('NO_SESSION_ID', ctx, err);
         return;
       }
+      if (session.isClosing) return;
 
       // track request
       session.trackResource(ctx);
@@ -301,12 +302,27 @@ export default class MitmRequestHandler {
       await HeadersHandler.modifyHeaders(ctx, ctx.clientToProxyRequest);
       cleanMitmHeaders(ctx.proxyToServerRequestSettings.headers);
 
-      const connectResult = await SocketHandler.connect(
-        ctx.isSSL,
-        session,
-        requestSettings,
-        isUpgrade,
-      );
+      const requestUrl = new URL(ctx.url);
+
+      // do one more check on the session before doing a connect
+      if (session.isClosing) return;
+
+      const http2Session = session.http2Sessions.find(x => {
+        if (x.origin === requestUrl.origin) return true;
+        return x.client.originSet?.includes(requestUrl.origin);
+      });
+
+      let connectResult: SocketConnectDriver = http2Session?.connect;
+      if (!connectResult || isUpgrade) {
+        connectResult = await SocketHandler.createConnection(
+          session,
+          requestSettings,
+          ctx.isSSL,
+          isUpgrade,
+        );
+        requestSettings.createConnection = () => connectResult.socket;
+        requestSettings.agent = null;
+      }
       ctx.isHttp2 = connectResult.isHttp2();
       ctx.localAddress = connectResult.localAddress;
       ctx.remoteAddress = connectResult.remoteAddress;
@@ -315,8 +331,10 @@ export default class MitmRequestHandler {
       if (ctx.isHttp2) {
         ctx.proxyToServerRequest = http2Request(
           requestSettings,
+          http2Session,
+          connectResult,
           session,
-          new URL(ctx.url),
+          requestUrl,
           responseCallback,
         );
       } else {

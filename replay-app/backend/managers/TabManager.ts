@@ -75,6 +75,8 @@ export default class TabManager extends EventEmitter {
     const tab = this.byId.get(id);
     if (!tab) return;
 
+    if (this.selectedId === id) return;
+
     if (this.selected) {
       this.selected.removeFromWindow();
     }

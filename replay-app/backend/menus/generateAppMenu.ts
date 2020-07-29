@@ -247,7 +247,9 @@ function createMenuItem(
     enabled,
     click: (menuItem: MenuItem, browserWindow: BrowserWindow) =>
       action(
-        Application.instance.windowManager.list.find(x => x.browserWindow.id === browserWindow.id),
+        Application.instance.windowManager.list.find(
+          x => x.browserWindow?.id === browserWindow?.id,
+        ),
         menuItem,
         key,
       ),

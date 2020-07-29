@@ -153,6 +153,7 @@ export default class SocketConnectDriver {
         if (matches?.length) {
           this.alpn = matches[1];
         }
+        log.stats('SocketHandler.Connected', { sessionId: this.sessionId, alpn: this.alpn });
       } else if (message) {
         log.info('SocketHandler.onData', { sessionId: this.sessionId, message });
       }

@@ -14,11 +14,9 @@ import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import Protocol from 'devtools-protocol';
 import Network = Protocol.Network;
+import Log from '../../commons/Logger';
 
-interface IRequestUpgradeLookup {
-  sessionId: string;
-  browserRequestId: string;
-}
+const { log } = Log(module);
 
 export default class RequestSession {
   public static sessions: { [sessionId: string]: RequestSession } = {};
@@ -36,7 +34,7 @@ export default class RequestSession {
     request: http.IncomingMessage,
     response: http.ServerResponse,
   ) => boolean;
-  public http2Sessions: { [authority: string]: ClientHttp2Session } = {};
+  public http2Sessions: IHttp2Session[] = [];
   public socketConnects: SocketConnectDriver[] = [];
   public requests: IHttpResourceLoadDetails[] = [];
 
@@ -183,7 +181,6 @@ export default class RequestSession {
 
   public async close() {
     this.isClosing = true;
-    delete RequestSession.sessions[this.sessionId];
     for (const headersKey of Object.keys(RequestSession.requestUpgradeSessionLookup)) {
       const wsSession = RequestSession.requestUpgradeSessionLookup[headersKey];
       if (wsSession.isResolved) {
@@ -193,14 +190,17 @@ export default class RequestSession {
         }
       }
     }
-    for (const session of Object.values(this.http2Sessions)) {
-      await new Promise(resolve => session.close(() => resolve()));
+
+    while (this.http2Sessions.length) {
+      const session = this.http2Sessions.shift();
+      await new Promise(resolve => session.client.close(() => resolve()));
     }
-    this.http2Sessions = {};
+
     while (this.socketConnects.length) {
-      const socket = this.socketConnects.pop();
+      const socket = this.socketConnects.shift();
       await socket.close();
     }
+    delete RequestSession.sessions[this.sessionId];
   }
 
   public shouldBlockRequest(url: string) {
@@ -213,6 +213,40 @@ export default class RequestSession {
       }
     }
     return false;
+  }
+
+  public trackH2Session(
+    authority: string,
+    client: ClientHttp2Session,
+    socketConnect: SocketConnectDriver,
+  ) {
+    client.on('goaway', args => {
+      log.info('Http2.goaway', {
+        sessionId: this.sessionId,
+        args,
+      });
+      this.closeH2Session(client);
+    });
+    client.on('close', () => {
+      log.info('Http2.close', {
+        sessionId: this.sessionId,
+      });
+      this.closeH2Session(client);
+    });
+    this.http2Sessions.push({
+      origin: authority,
+      client,
+      connect: socketConnect,
+    });
+  }
+
+  public closeH2Session(client: ClientHttp2Session) {
+    const index = this.http2Sessions.findIndex(x => client);
+    if (index < 0) return;
+
+    const [session] = this.http2Sessions.splice(index, 1);
+    client.close();
+    session.connect.close();
   }
 
   // function to override for
@@ -340,6 +374,12 @@ export interface IRequestSessionHttpErrorEvent {
   error: Error;
 }
 
+export interface IHttp2Session {
+  origin: string;
+  client: ClientHttp2Session;
+  connect: SocketConnectDriver;
+}
+
 const websocketHeadersForKey = [
   'Accept-Encoding',
   'Cache-Control',
@@ -363,4 +403,9 @@ interface IPendingResourceLoad {
   documentUrl?: string;
   hasUserGesture?: boolean;
   isUserNavigation?: boolean;
+}
+
+interface IRequestUpgradeLookup {
+  sessionId: string;
+  browserRequestId: string;
 }

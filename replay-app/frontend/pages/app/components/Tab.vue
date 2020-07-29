@@ -32,6 +32,7 @@ import {
   ICON_HISTORY,
 } from '~frontend/constants';
 import NoCache from '~frontend/lib/NoCache';
+import { TAB_MAX_WIDTH } from '~frontend/stores/app/constants';
 
 const ICONS = {
   Home: ICON_HOME,
@@ -182,6 +183,7 @@ export default class Tab extends TabProps {
       '--containerBoxShadow': this.tab.isSelected ? '0px 0px 6px 0px rgba(0,0,0,0.12)' : 'none',
       '--tabMarginTop': `${store.theme.tabMarginTop}px`,
       '--tabHeight': `${store.theme.tabHeight}px`,
+      '--tabDefaultWidth': `${TAB_MAX_WIDTH}px`,
       '--tabIconMinWidth': this.tab.favicon ? '16px' : 0,
       '--tabIconOpacity': this.tab.favicon ? 1 : 0,
       '--tabIconBackgroundImage': `url('${faviconImage}')`,
@@ -208,7 +210,7 @@ export default class Tab extends TabProps {
 .Tab {
   position: absolute;
   height: 100%;
-  width: 0;
+  width: var(--tabDefaultWidth);
   left: 0;
   will-change: width, transform;
   -webkit-app-region: no-drag;

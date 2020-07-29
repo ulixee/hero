@@ -7,19 +7,6 @@ import SocketConnectDriver from '../lib/SocketConnectDriver';
 const { log } = Log(module);
 
 export default class SocketHandler {
-  public static async connect(
-    isSSL: boolean,
-    session: RequestSession,
-    requestOptions: ClientRequestArgs,
-    isWebsocket: boolean = false,
-  ) {
-    const connectResult = await this.createConnection(session, requestOptions, isSSL, isWebsocket);
-    requestOptions.createConnection = () => connectResult.socket;
-    requestOptions.agent = null;
-
-    return connectResult;
-  }
-
   public static async createConnection(
     session: RequestSession,
     options: RequestOptions,

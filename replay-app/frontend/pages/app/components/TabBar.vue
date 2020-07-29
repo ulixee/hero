@@ -4,7 +4,7 @@
     .tabs-container(@mouseenter="onMouseEnter" @mouseleave="onTabsMouseLeave" @wheel="onWheel" ref="container")
       Tab(v-for="tab of store.tabs.list" :key="tab.id" :tab="tab")
     AppButton.add-tab(@click="onAddTabClick" :icon="ICON_ADD" :buttonRef="r => (store.addTab.ref = r)")
-  .window-controls(v-if="platform !== 'darwin'")
+  .window-controls(v-if="!isMac()")
     button#close-window(@click="onCloseWindow")
 </template>
 
@@ -12,7 +12,7 @@
 import Vue from 'vue';
 import Component from 'nuxt-class-component';
 import { Observer } from 'mobx-vue';
-import { platform } from 'os';
+import os from 'os';
 import store from '~frontend/stores/app';
 import Tab from '~frontend/pages/app/components/Tab.vue';
 import AppButton from '~frontend/pages/app/components/AppButton.vue';
@@ -32,10 +32,13 @@ let timeout: any;
 export default class TabBar extends Vue {
   private readonly store = store;
   private readonly ICON_ADD = ICON_ADD;
-  private platform = platform;
 
   onMouseEnter() {
     clearTimeout(timeout);
+  }
+
+  isMac() {
+    return os.platform() === 'darwin';
   }
 
   onTabsMouseLeave() {
@@ -49,7 +52,7 @@ export default class TabBar extends Vue {
     store.tabs.createTab();
   }
 
-  onCloseWindow(){
+  onCloseWindow() {
     this.store.closeWindow();
   }
 
@@ -75,14 +78,14 @@ export default class TabBar extends Vue {
     return {
       '--titlebarBackgroundColor': store.theme.titlebarBackgroundColor,
       '--titlebarHeight': `${DEFAULT_TITLEBAR_HEIGHT}px`,
-      '--paddingLeft': (platform() === 'darwin' && !store.isFullscreen ? 78 : 4) + 'px',
-      '--dragRight': (platform() === 'darwin' ? 4 : 50) + 'px',
+      '--paddingLeft': (this.isMac() && !store.isFullscreen ? 78 : 4) + 'px',
+      '--dragRight': (this.isMac() ? 4 : 50) + 'px',
       '--addTabTop': `${store.theme.tabMarginTop + 2}px`,
       '--addTabMinWidth': `${ADD_TAB_BUTTON_WIDTH}px`,
       '--addTabHeight': `${ADD_TAB_BUTTON_HEIGHT}px`,
       '--tabsContainerWidth': `calc(100% - ${TOOLBAR_BUTTON_WIDTH}px)`,
       '--tabCloseIcon': `url('${ICON_CLOSE}')`,
-      '--windowButtonsWidth': (platform() === 'darwin' ? 4 : 50) + 'px',
+      '--windowButtonsWidth': (this.isMac() ? 4 : 50) + 'px',
       '--windowCloseFilter': store.theme.toolbarLightForeground ? 'invert(100%)' : 'none',
     };
   }
@@ -149,30 +152,30 @@ export default class TabBar extends Vue {
       }
     }
   }
-   .window-controls {
-      width: var(--windowButtonsWidth);
+  .window-controls {
+    width: var(--windowButtonsWidth);
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 12;
+    -webkit-app-region: no-drag;
+
+    button#close-window {
       height: 100%;
-      position: absolute;
-      right: 0;
-      top:0;
-      z-index: 12;
-      -webkit-app-region: no-drag;
+      width: 100%;
+      margin: 0;
+      border: 0;
+      background-image: var(--tabCloseIcon);
+      background-color: transparent;
+      @include centerIcon(25);
+      filter: var(--windowCloseFilter);
+      outline: none;
 
-      button#close-window {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        border: 0;
-        background-image: var(--tabCloseIcon);
-        background-color: transparent;
-        @include centerIcon(25);
-        filter: var(--windowCloseFilter);
-        outline:none;
-
-        &:hover {
-          background-color: #ff0000dd;
-        }
+      &:hover {
+        background-color: #ff0000dd;
       }
     }
+  }
 }
 </style>

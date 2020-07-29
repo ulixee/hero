@@ -145,6 +145,7 @@ export default class TabsStore {
   }
 
   public getTabById(id: number) {
+    if (!this.list) return null;
     return this.list.find(x => x.id === id);
   }
 
@@ -315,11 +316,16 @@ export default class TabsStore {
 
     this.list.push(tabFrontend);
 
-    requestAnimationFrame(() => {
+    if (this.list.length === 0) {
       tabFrontend.setLeft(tabFrontend.getLeft(), false);
-      this.updateTabsBounds(true);
-      this.scrollToEnd(TAB_ANIMATION_DURATION);
-    });
+      this.updateTabsBounds(false);
+    } else {
+      requestAnimationFrame(() => {
+        tabFrontend.setLeft(tabFrontend.getLeft(), false);
+        this.updateTabsBounds(true);
+        this.scrollToEnd(TAB_ANIMATION_DURATION);
+      });
+    }
     return tabFrontend;
   }
 }

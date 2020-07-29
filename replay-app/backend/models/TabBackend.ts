@@ -83,6 +83,7 @@ export default class TabBackend {
     if (this.browserView.isDestroyed()) return;
 
     if (!isNewTab && this.window.tabManager.selectedId !== this.id) return;
+    if (isNewTab && !replayApi) location = InternalLocations.NewTab;
 
     if (this.replayApi) {
       this.replayApi.removeAllListeners('session:updated');
@@ -123,6 +124,7 @@ export default class TabBackend {
   }
 
   public async onTick(tickValue: number) {
+    if (!this.replayApi) return;
     const events = await this.replayApi.setTickValue(tickValue);
     if (!events) return;
     this.send('dom:apply', ...events);

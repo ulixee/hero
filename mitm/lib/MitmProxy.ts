@@ -35,6 +35,7 @@ export default class MitmProxy {
 
   private readonly httpHost: string;
   private readonly httpsServer: https.Server;
+  private readonly serverConnects: net.Socket[] = [];
 
   private isClosing = false;
 
@@ -50,12 +51,13 @@ export default class MitmProxy {
 
     this.sslCaDir = options.sslCaDir || path.resolve(process.cwd(), '.mitm-ca');
     this.httpServer = http.createServer();
-    this.httpServer.on('connect', this.handleHttpServerConnect.bind(this));
+    this.httpServer.on('connect', this.onHttpConnect.bind(this));
+    this.httpServer.on('clientError', this.onClientError.bind(this, false));
     this.httpServer.on('request', this.onHttpRequest.bind(this, false));
     this.httpServer.on('upgrade', this.onHttpUpgrade.bind(this, false));
 
     this.httpsServer = https.createServer();
-    this.httpsServer.on('clientError', this.handleHttpError.bind(this, 'HTTPS_CLIENT_ERROR', null));
+    this.httpsServer.on('clientError', this.onClientError.bind(this, true));
     this.httpsServer.on('request', this.onHttpRequest.bind(this, true));
     this.httpsServer.on('upgrade', this.onHttpUpgrade.bind(this, true));
   }
@@ -82,14 +84,18 @@ export default class MitmProxy {
     );
 
     // don't listen for errors until server already started
-    this.httpServer.on('error', this.handleHttpError.bind(this, 'HTTP_SERVER_ERROR', null));
-    this.httpsServer.on('error', this.handleHttpError.bind(this, 'HTTPS_SERVER_ERROR', null));
+    this.httpServer.on('error', this.onHttpError.bind(this, 'HTTP_SERVER_ERROR', null));
+    this.httpsServer.on('error', this.onHttpError.bind(this, 'HTTPS_SERVER_ERROR', null));
     return this;
   }
 
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
+    while (this.serverConnects.length) {
+      const connect = this.serverConnects.shift();
+      connect.destroy();
+    }
     await closeServer(this.httpServer);
     await closeServer(this.httpsServer);
 
@@ -99,12 +105,13 @@ export default class MitmProxy {
     return this;
   }
 
-  public handleHttpError(errorKind: string, ctx: IMitmRequestContext, error: Error) {
+  public onHttpError(errorKind: string, ctx: IMitmRequestContext, error: Error) {
     if (ctx?.requestSession) {
       ctx.requestSession.emit('httpError', { request: ctx.clientToProxyRequest, error });
     }
     if (!(error as any)?.isLogged) {
-      log.error('MitmHttpError', {
+      const logLevel = this.isClosing ? 'stats' : 'error';
+      log[logLevel]('MitmHttpError', {
         sessionId: ctx?.requestSession?.sessionId,
         errorKind,
         error,
@@ -119,26 +126,48 @@ export default class MitmProxy {
     }
   }
 
+  private onClientError(isSecure: boolean, error: Error, socket: net.Socket) {
+    if ((error as any).code === 'ECONNRESET' || !socket.writable) {
+      return;
+    }
+
+    log.error('MitmHttpError', {
+      sessionId: null,
+      errorKind: `HTTP${isSecure ? 's' : ''}_CLIENT_ERROR`,
+      error,
+      socketAddress: socket.address(),
+    });
+
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+  }
+
   private async onHttpRequest(
     isSecure: boolean,
     request: http.IncomingMessage,
     response: http.ServerResponse,
   ) {
     try {
-      const handler = new MitmRequestHandler(
-        MitmProxy.responseCache,
-        this.handleHttpError.bind(this),
-      );
+      const handler = new MitmRequestHandler(MitmProxy.responseCache, this.onHttpError.bind(this));
       await handler.handleRequest(isSecure, request, response);
     } catch (err) {
       const sessionId = RequestSession.getSessionId(request.headers as any, request.method);
-      log.error('MitmHttpRequest.HandlerError', {
+
+      let logLevel = 'error';
+      if (sessionId) {
+        const session = RequestSession.sessions[sessionId];
+        session?.emit('httpError', { request, error: err });
+
+        if (session?.isClosing) logLevel = 'stats';
+      }
+      log[logLevel]('MitmHttpRequest.HandlerError', {
         sessionId,
         isSecure,
         host: request.headers.host,
         url: request.url,
         err,
       });
+      response.writeHead(504, 'Proxy Error');
+      response.end(`${err}`);
     }
   }
 
@@ -170,37 +199,28 @@ export default class MitmProxy {
         10,
       ).catch();
 
-      log.error('MitmHttpRequest.HandlerError', {
+      let logLevel = 'error';
+      if (sessionLookup) {
+        const session = RequestSession.sessions[sessionLookup.sessionId];
+        session?.emit('httpError', {
+          request,
+          error,
+        });
+        if (session?.isClosing) logLevel = 'stats';
+      }
+      log[logLevel]('MitmHttpRequest.HandlerError', {
         sessionId: sessionLookup?.sessionId,
         isSecure,
         host: request.headers.host,
         url: request.url,
         error,
       });
+      socket.end('HTTP/1.1 504 Proxy Error\r\n\r\n');
     }
   }
 
-  private onConnectError(hostname: string, errorKind: string, error: Error) {
-    if ((error as any).errno === 'ECONNRESET') {
-      log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
-        sessionId: null,
-        hostname,
-      });
-    } else {
-      log.error('MitmHttpError', {
-        sessionId: null,
-        errorKind,
-        error,
-        hostname,
-      });
-    }
-  }
-
-  private async handleHttpServerConnect(
-    req: http.IncomingMessage,
-    socket: net.Socket,
-    head: Buffer,
-  ) {
+  private async onHttpConnect(req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
+    this.serverConnects.push(socket);
     socket.on('error', this.onConnectError.bind(this, req.url, 'CLIENT_TO_PROXY_CONNECT_ERROR'));
 
     socket.write('HTTP/1.1 200 Connection established\r\n\r\n');
@@ -235,6 +255,7 @@ export default class MitmProxy {
 
     proxyConnection.on('close', () => socket.destroy());
     socket.on('close', () => proxyConnection.end());
+    socket.on('end', this.removeSocketConnect.bind(this, socket));
 
     await new Promise(r => proxyConnection.once('connect', r));
 
@@ -242,7 +263,37 @@ export default class MitmProxy {
     socket.pipe(proxyConnection);
     proxyConnection.pipe(socket);
     socket.resume();
-    if (head.length) socket.unshift(head);
+
+    if (!socket.destroyed && head.length) socket.unshift(head);
+  }
+
+  private onConnectError(hostname: string, errorKind: string, error: Error) {
+    const errorCode = (error as any).errno ?? (error as any).code;
+    if (errorCode === 'ECONNRESET') {
+      log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
+        sessionId: null,
+        hostname,
+      });
+    } else if (errorCode === 'ERR_STREAM_UNSHIFT_AFTER_END_EVENT') {
+      log.info(`Got ERR_STREAM_UNSHIFT_AFTER_END_EVENT on Proxy Connect, ignoring.`, {
+        sessionId: null,
+        hostname,
+      });
+    } else {
+      const logLevel = this.isClosing ? 'stats' : 'error';
+      log[logLevel]('MitmConnectError', {
+        sessionId: null,
+        errorKind,
+        error,
+        hostname,
+      });
+    }
+  }
+
+  private removeSocketConnect(socket: net.Socket) {
+    const idx = this.serverConnects.indexOf(socket);
+    if (idx < 0) return;
+    this.serverConnects.splice(idx, 1);
   }
 
   private async addSecureContext(hostname: string) {

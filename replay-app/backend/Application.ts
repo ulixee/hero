@@ -65,8 +65,9 @@ export default class Application {
     InternalServer.url = listener.url;
   }
 
-  private async loadLocationFromArgv(argv) {
+  private async loadLocationFromArgv(argv: string[]) {
     const args = argv.slice(2);
+    console.log('Launched with args', argv);
     if (!args.length) {
       await this.startLocalApi();
       this.createWindowIfNeeded();
