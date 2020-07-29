@@ -75,6 +75,10 @@ export default class User {
     await getState(this).coreClientSession.waitForLoad(LocationStatus.AllContentLoaded);
   }
 
+  public async waitForLoad(status: LocationStatus): Promise<void> {
+    await getState(this).coreClientSession.waitForLoad(status);
+  }
+
   public async waitForResource(
     filter: IWaitForResourceFilter,
     options?: IWaitForResourceOptions,

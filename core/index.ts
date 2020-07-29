@@ -37,6 +37,9 @@ interface IListenerObject {
 export default class Core implements ICore {
   public static byWindowId: { [windowId: string]: Core } = {};
   public static onEventFn: (meta: ISessionMeta, listenerId: string, ...eventArgs: any[]) => void;
+  private static wasManuallyStarted = false;
+  private static autoShutdownMillis = 2e3;
+  private static autoShutdownTimer: NodeJS.Timer;
   private readonly session: Session;
   private readonly window: Window;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
@@ -179,6 +182,7 @@ export default class Core implements ICore {
     this.isClosing = true;
     await GlobalPool.closeSession(this.session);
     this.emitEvent('close');
+    Core.checkForAutoShutdown();
   }
 
   private bindResourceListeners(enable: boolean = true) {
@@ -223,6 +227,7 @@ export default class Core implements ICore {
   // STATIC /////////////////////////////////////
 
   public static async start(options?: IConfigureOptions) {
+    this.wasManuallyStarted = true;
     if (options) await this.configure(options);
     await GlobalPool.start();
   }
@@ -252,8 +257,10 @@ export default class Core implements ICore {
   }
 
   public static async shutdown(fatalError?: Error) {
+    clearTimeout(Core.autoShutdownTimer);
     await Core.disconnect(null, fatalError);
     await GlobalPool.close();
+    this.wasManuallyStarted = false;
   }
 
   public static registerSignalHandlers() {
@@ -271,6 +278,24 @@ export default class Core implements ICore {
 
     process.on('unhandledRejection', async (error: Error) => {
       await Core.shutdown(error);
+    });
+  }
+
+  private static checkForAutoShutdown() {
+    clearTimeout(Core.autoShutdownTimer);
+    if (Core.wasManuallyStarted || GlobalPool.activeSessionCount > 0) return;
+
+    Core.autoShutdownTimer = setTimeout(Core.shouldShutdown, Core.autoShutdownMillis).unref();
+  }
+
+  private static shouldShutdown() {
+    if (GlobalPool.activeSessionCount > 0) return;
+
+    Core.shutdown().catch(error => {
+      log.error('Core.autoShutdown', {
+        error,
+        sessionId: null,
+      });
     });
   }
 }

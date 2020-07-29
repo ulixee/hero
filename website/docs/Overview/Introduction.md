@@ -46,9 +46,15 @@ const SecretAgent = require('secret-agent');
 (async () => {
   const browser = await SecretAgent.createBrowser();
   await browser.goto('https://example.org');
-  const title = await browser.document.querySelector('title').textContent;
+  const title = await browser.document.title;
   const intro = await browser.document.querySelector('p').textContent;
   await browser.close();
+
+  console.log('Retrieved from https://example.org', {
+    title,
+    intro,
+  });
 })();
 ```
+
 As shown in the example above, window.document follows the standard DOM specification, but with a cool twist which we call the AwaitedDOM.
