@@ -9,7 +9,7 @@ const resourceWhitelist: ResourceType[] = ['Ico', 'Image', 'Media', 'Font', 'Sty
 
 export default async function fetchResource(req: IncomingMessage, res: ServerResponse) {
   const reqUrl = parse(req.headers.host + req.url, true);
-  const { dataLocation, sessionId, commandId, url } = reqUrl.query;
+  const { dataLocation, sessionId, url } = reqUrl.query;
 
   const sessionDb = new SessionDb(
     dataLocation as string,
@@ -17,12 +17,21 @@ export default async function fetchResource(req: IncomingMessage, res: ServerRes
     readonlyAndFileMustExist,
   );
 
-  console.log('Fetching resource', url);
+  console.log('Replay API: Fetching resource', url);
 
   const resource = await sessionDb.resources.getResourceByUrl(url as string, false);
   if (!resource) {
     res.writeHead(404);
     res.end('Resource not found');
+    return;
+  }
+
+  if (resource.type === 'Document') {
+    res.writeHead(200, {
+      'Cache-Control': 'public, max-age=500',
+      'Content-Type': resource.headers['Content-Type'] ?? resource.headers['content-type'],
+    });
+    res.end(`<html><head></head><body></body></html>`);
     return;
   }
 

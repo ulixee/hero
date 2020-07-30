@@ -9,7 +9,7 @@ type ISOTimestamp = string;
 
 type IDomChangeEvent = [
   CommandId,
-  'newDocument' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
+  'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
   INodeData,
   ISOTimestamp,
 ];

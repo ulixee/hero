@@ -1,5 +1,4 @@
 import { BrowserView } from 'electron';
-import { URL } from 'url';
 import { v1 as uuidv1 } from 'uuid';
 import * as http from 'http';
 import Window from './Window';
@@ -105,7 +104,7 @@ export default class TabBackend {
       this.window.webContents.session.clearCache();
       tabUpdateParams.saSession = replayApi.saSession;
       this.webContents
-        .loadURL(`http://localhost:3333/${InternalLocations.Replay.toLowerCase()}`)
+        .loadURL(replayApi.saSession.pages[0].url)
         .then(x => this.send('clicks:enable', false));
       this.replayApi = replayApi;
       this.replayApi.on('session:updated', this.updateTabSession.bind(this));
@@ -204,20 +203,16 @@ export default class TabBackend {
   private bindProxy() {
     const session = this.webContents.session;
     session.protocol.interceptHttpProtocol('http', (request, callback) => {
-      const parsedUrl = new URL(request.url, InternalServer.url);
-      if (InternalServer.url.includes(parsedUrl.host)) {
+      if (request.url.startsWith(InternalServer.url)) {
         callback({ url: request.url });
-      } else if (parsedUrl.host === 'localhost:3333' && parsedUrl.pathname === '/replay') {
-        callback({ url: `${InternalServer.url}/replay.html` });
       } else {
-        const requestUrl = new URL(request.url);
-        const cleanedUrl = new URL(
-          requestUrl.pathname + requestUrl.search,
-          this.replayApi.urlOrigin,
-        );
-        const resourceUrl = this.replayApi.resourceUrl(cleanedUrl.href);
+        const resourceUrl = this.replayApi.resourceUrl(request.url);
         callback({ url: resourceUrl });
       }
+    });
+    session.protocol.interceptHttpProtocol('https', (request, callback) => {
+      const resourceUrl = this.replayApi.resourceUrl(request.url);
+      callback({ url: resourceUrl });
     });
   }
 

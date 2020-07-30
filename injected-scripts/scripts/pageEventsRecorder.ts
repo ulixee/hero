@@ -75,6 +75,7 @@ class PageEventsRecorder {
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];
+  private location = window.location.href;
 
   private commandId = -1;
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
@@ -142,6 +143,20 @@ class PageEventsRecorder {
     this.scrollEvents.push([this.commandId, scrollX, scrollY, new Date().toISOString()]);
   }
 
+  public checkForLocationChange(changeTime?: string) {
+    const timestamp = changeTime || new Date().toISOString();
+    const currentLocation = window.location.href;
+    if (this.location !== currentLocation) {
+      this.location = currentLocation;
+      this.domChanges.push([
+        this.commandId,
+        'location',
+        { id: -1, textContent: currentLocation },
+        timestamp,
+      ]);
+    }
+  }
+
   public checkForPropertyChanges(changeTime?: string) {
     const timestamp = changeTime || new Date().toISOString();
     for (const [input, propertyMap] of this.propertyTrackingElements) {
@@ -201,6 +216,7 @@ class PageEventsRecorder {
     const currentCommandId = this.commandId;
     const stamp = new Date().toISOString();
 
+    this.checkForLocationChange(stamp);
     this.checkForPropertyChanges(stamp);
     const addedNodes: Node[] = [];
     for (const mutation of mutations) {

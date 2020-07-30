@@ -115,11 +115,13 @@ export default class ReplayApi extends EventEmitter {
       }
     }
 
+    let found = false;
     // find last page load event
     for (let i = this.paintEvents.length - 1; i >= 0; i -= 1) {
       const paintEvent = this.paintEvents[i];
       if (paintEvent.commandId > newTick.commandId) continue;
       if (paintEvent.changeEvents[0][1] === 'newDocument') {
+        found = true;
         this.currentDocumentLoadCommandId = paintEvent.commandId;
         this.currentDocumentLoadPaintIdx = i;
         this.urlOrigin = new URL(paintEvent.changeEvents[0][2].textContent).href;
@@ -128,6 +130,11 @@ export default class ReplayApi extends EventEmitter {
         }
         break;
       }
+    }
+    if (!found) {
+      this.currentDocumentLoadCommandId = 0;
+      this.currentDocumentLoadPaintIdx = 0;
+      this.setFirstOrigin();
     }
 
     const newPaintEventIdx = this.findLastMinorTickEvent(
@@ -219,7 +226,9 @@ export default class ReplayApi extends EventEmitter {
 
     if (paintEventIdx === -1) {
       this.paintEventsLoadedIndex = -1;
-      return [[-1, 'newDocument']];
+      return [
+        [-1, 'newDocument', { textContent: this.urlOrigin }, this.saSession.startDate],
+      ] as IDomChangeEvent[];
     }
 
     // don't reload the currently loaded index
@@ -227,8 +236,13 @@ export default class ReplayApi extends EventEmitter {
 
     // if going backwards, load back to the last new document load
     if (paintEventIdx < this.paintEventsLoadedIndex) {
-      startIndex = this.currentDocumentLoadPaintIdx;
+      if (this.currentDocumentLoadPaintIdx > startIndex) {
+        startIndex = 0;
+      } else {
+        startIndex = this.currentDocumentLoadPaintIdx;
+      }
     }
+    if (startIndex < 0) startIndex = 0;
 
     if (startIndex >= this.paintEvents.length) return;
 

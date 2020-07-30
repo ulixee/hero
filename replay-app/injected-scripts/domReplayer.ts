@@ -1,7 +1,7 @@
 // NOTE: do not use node dependencies
 
 import { ipcRenderer } from 'electron';
-import { INodeData, IDomChangeEvent } from './interfaces/IDomChangeEvent';
+import { IDomChangeEvent, INodeData } from './interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const idMap = new Map<number, Node>();
@@ -13,14 +13,6 @@ ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scr
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
 });
-
-function resetDom() {
-  idMap.clear();
-  isMouseInstalled = false;
-  window.scrollTo({ top: 0 });
-  document.documentElement.innerHTML = '';
-  document.head.appendChild(styleElement);
-}
 
 let areClicksActive = false;
 function handleOnClick(e: any) {
@@ -37,15 +29,31 @@ ipcRenderer.on('clicks:enable', (e, shouldEnable) => {
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
-    if (changeEvent[1] === 'newDocument') {
-      resetDom();
+    const [commandId, action, data] = changeEvent;
+    if (action === 'newDocument') {
+      if (location.href !== data.textContent) {
+        console.log(
+          'Document changed at command %s. New %s. Old %s',
+          commandId,
+          data.textContent,
+          window.location.href,
+        );
+        idMap.clear();
+        window.location.href = data.textContent;
+      }
       continue;
     }
 
-    const data = changeEvent[2];
+    if (action === 'location') {
+      console.log('Location changed', commandId, data);
+      window.history.replaceState({}, 'Replay', data.textContent);
+      return;
+    }
+
     if (preserveElements.includes(data.tagName)) {
       const elem = document.querySelector(data.tagName);
       idMap.set(data.id, elem);
+      if (data.tagName === 'HEAD') document.head.appendChild(styleElement);
       continue;
     }
     if (data.nodeType === document.DOCUMENT_NODE) {
@@ -59,13 +67,13 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
     const node = deserializeNode(data);
     const parent = getNode(data.parentNodeId);
-    if (!parent && (changeEvent[1] === 'added' || changeEvent[1] === 'removed')) {
+    if (!parent && (action === 'added' || action === 'removed')) {
       // tslint:disable-next-line:no-console
       console.log('WARN: parent node id not found', data);
       continue;
     }
 
-    switch (changeEvent[1]) {
+    switch (action) {
       case 'added':
         let next: Node;
         if (getNode(data.previousSiblingId)) {
