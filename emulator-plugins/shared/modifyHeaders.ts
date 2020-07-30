@@ -77,8 +77,11 @@ export default function modifyHeaders(
       lowerHeader.startsWith('mitm-') ||
       lowerHeader.startsWith('proxy-');
 
+    const shouldIncludeOrigin =
+      lowerHeader === 'origin' && lowerHeaders['sec-fetch-mode'] === 'cors';
+
     // if default order does not include this header, strip it
-    if (isDefaultHeader && lowerHeader !== 'cookie') continue;
+    if (isDefaultHeader && lowerHeader !== 'cookie' && !shouldIncludeOrigin) continue;
 
     // if past the end, reset the index to the last spot
     if (index >= headerlist.length) index = headerlist.length - 1;
