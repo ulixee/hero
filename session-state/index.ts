@@ -1,6 +1,9 @@
 import fs from 'fs';
 import { EventEmitter } from 'events';
-import { IRequestSessionResponseEvent } from '@secret-agent/mitm/handlers/RequestSession';
+import {
+  IRequestSessionRequestEvent,
+  IRequestSessionResponseEvent,
+} from '@secret-agent/mitm/handlers/RequestSession';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import SessionDb from './lib/SessionDb';
 import SessionsDb from './lib/SessionsDb';
@@ -44,7 +47,6 @@ export default class SessionState {
   private readonly resources: IResourceMeta[] = [];
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
   private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
-  private resourceIdCounter = 0;
   private websocketMessageIdCounter = 0;
   private pageEventsListener: PageEventsListener;
 
@@ -190,29 +192,23 @@ export default class SessionState {
     this.emitter.emit('websocket-message', resourceMessage);
   }
 
-  public captureResource(responseEvent: IRequestSessionResponseEvent): IResourceMeta {
+  public captureResource(
+    resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
+    isResponse: boolean,
+  ): IResourceMeta {
+    const { request, requestTime } = resourceEvent;
     const {
-      request,
       response,
-      resourceType,
       remoteAddress,
-      requestTime,
+      resourceType,
       body,
+      browserRequestId,
       redirectedToUrl,
-    } = responseEvent;
-    const responseHeaders: { [key: string]: string } = {};
-    for (let i = 0; i <= response.rawHeaders.length; i += 2) {
-      const name = response.rawHeaders[i];
-      const value = response.rawHeaders[i + 1];
-      if (name && value) {
-        if (responseHeaders[name]) responseHeaders[name] += `\n${value}`;
-        responseHeaders[name] = value;
-      }
-    }
+    } = resourceEvent as IRequestSessionResponseEvent;
 
     const meta = {
-      id: this.resourceIdCounter += 1,
-      url: response.url || request.url,
+      id: resourceEvent.id,
+      url: response?.url ?? request.url,
       receivedAtCommandId: this.lastCommand?.id,
       type: resourceType,
       isRedirect: !!redirectedToUrl,
@@ -223,22 +219,26 @@ export default class SessionState {
         method: request.method,
         postData: request.postData?.toString(),
       },
-      response: {
+    } as IResourceMeta;
+
+    if (response) {
+      meta.response = {
         url: response.url || request.url, // if response was aborted, won't have a url
         timestamp: response.responseTime.toISOString(),
-        headers: responseHeaders,
+        headers: response.headers,
         remoteAddress: remoteAddress,
         statusCode: response.statusCode,
         statusText: response.statusMessage,
-      },
-    } as IResourceMeta;
+      };
+    }
 
-    this.browserRequestIdToResourceId[responseEvent.browserRequestId] = meta.id;
+    this.db.resources.insert(meta, body, resourceEvent);
 
-    this.db.resources.insert(redirectedToUrl, meta, body);
-
-    this.resources.push(meta);
-    this.emitter.emit('resource', meta);
+    if (isResponse) {
+      this.browserRequestIdToResourceId[browserRequestId] = meta.id;
+      this.resources.push(meta);
+      this.emitter.emit('resource', meta);
+    }
     return meta;
   }
 

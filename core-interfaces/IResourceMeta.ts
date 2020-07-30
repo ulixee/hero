@@ -6,7 +6,7 @@ export default interface IResourceMeta {
   id: number;
   url: string;
   request: IResourceRequest;
-  response: IResourceResponse;
+  response?: IResourceResponse;
   type: ResourceType;
   isRedirect?: boolean;
   receivedAtCommandId?: number;

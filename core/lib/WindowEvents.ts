@@ -80,7 +80,10 @@ export default class WindowEvents {
     const requestSession = this.window.session.requestMitmProxySession;
     requestSession.on('httpError', () => this.emit('request-intercepted'));
 
-    requestSession.on('request', () => this.emit('request-intercepted'));
+    requestSession.on('request', event => {
+      const resource = this.sessionState.captureResource(event, false);
+      this.emit('request-intercepted');
+    });
     requestSession.on('response', this.onMitmRequestResponse.bind(this));
   }
 
@@ -158,7 +161,7 @@ export default class WindowEvents {
     });
 
     if (request.method !== 'OPTIONS') {
-      const resource = this.sessionState.captureResource(responseEvent);
+      const resource = this.sessionState.captureResource(responseEvent, true);
       if (resource.url === this.window.navigationUrl) {
         this.sessionState.pages.resourceLoadedForLocation(resource.id);
       }

@@ -284,6 +284,21 @@ export default class MitmRequestAgent {
       this.closeHttp2Session(client);
     });
 
+    client.on('altsvc', (alt, altOrigin, streamId) => {
+      log.warn('Http2.altsvc', {
+        sessionId: this.session.sessionId,
+        origin: altOrigin,
+        alt,
+      });
+    });
+
+    client.on('origin', origins => {
+      log.warn('Http2.origin', {
+        sessionId: this.session.sessionId,
+        origins,
+      });
+    });
+
     client.on('close', () => {
       log.info('Http2.close', {
         sessionId: this.session.sessionId,
@@ -315,6 +330,7 @@ export default class MitmRequestAgent {
     h2Headers[':path'] = url.pathname + url.search;
     h2Headers[':method'] = requestSettings.method;
     h2Headers[':scheme'] = 'https';
+
     for (const key of Object.keys(h2Headers)) {
       if (key.match(/connection/i) || key.match(/host/i)) {
         delete h2Headers[key];

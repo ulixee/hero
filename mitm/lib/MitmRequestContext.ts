@@ -6,8 +6,12 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import CacheHandler from '../handlers/CacheHandler';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import MitmSocket from '@secret-agent/mitm-socket';
+import { TLSSocket } from 'tls';
+import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
 
 export default class MitmRequestContext {
+  private static contextIdCounter = 0;
+
   public static create(
     cacheHandler: CacheHandler,
     protocol: 'ws' | 'http',
@@ -32,6 +36,7 @@ export default class MitmRequestContext {
 
     const headers = parseRawHeaders(clientRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
+      id: this.contextIdCounter += 1,
       isSSL: isSSL,
       isUpgrade: protocol === 'ws',
       isHttp2: false,
@@ -62,7 +67,7 @@ export default class MitmRequestContext {
     return ctx;
   }
 
-  public static toEmittedResponse(ctx: IMitmRequestContext) {
+  public static toEmittedResource(ctx: IMitmRequestContext): IRequestSessionResponseEvent {
     // broadcast session
     const request = {
       url: ctx.url,
@@ -73,6 +78,7 @@ export default class MitmRequestContext {
     } as IResourceRequest;
 
     return {
+      id: ctx.id,
       browserRequestId: ctx.browserRequestId,
       request,
       response: ctx.serverToProxyResponse,
@@ -81,6 +87,10 @@ export default class MitmRequestContext {
       remoteAddress: ctx.remoteAddress,
       requestTime: ctx.requestTime,
       body: ctx.cacheHandler.buffer,
+      localAddress: ctx.localAddress,
+      originalHeaders: parseRawHeaders(ctx.clientToProxyRequest.rawHeaders),
+      clientAlpn: (ctx.clientToProxyRequest.socket as TLSSocket)?.alpnProtocol ?? 'http/1.1',
+      serverAlpn: ctx.proxyToServerSocket?.alpn,
     };
   }
 

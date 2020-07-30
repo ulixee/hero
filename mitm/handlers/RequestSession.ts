@@ -13,6 +13,7 @@ import Log from '@secret-agent/commons/Logger';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import Network = Protocol.Network;
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 const { log } = Log(module);
 
@@ -285,20 +286,24 @@ interface IRequestSessionEvents {
   httpError: IRequestSessionHttpErrorEvent;
 }
 
-export interface IRequestSessionResponseEvent {
+export interface IRequestSessionResponseEvent extends IRequestSessionRequestEvent {
   browserRequestId: string;
-  request: IResourceRequest;
   response: IHttpOrH2Response;
   wasCached: boolean;
   resourceType: ResourceType;
   remoteAddress: string;
   body: Buffer;
-  requestTime: Date;
   redirectedToUrl?: string;
 }
 
 export interface IRequestSessionRequestEvent {
-  request: http.IncomingMessage;
+  id: number;
+  request: IResourceRequest;
+  serverAlpn: string;
+  clientAlpn: string;
+  originalHeaders: IResourceHeaders;
+  localAddress: string;
+  requestTime: Date;
 }
 
 export interface IRequestSessionHttpErrorEvent {

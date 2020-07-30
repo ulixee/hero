@@ -116,7 +116,8 @@ export default class MitmRequestHandler {
         this.handleError('NO_SESSION_ID', ctx, err);
         return;
       }
-      if (session.isClosing) return;
+
+      session.emit('request', MitmRequestContext.toEmittedResource(ctx));
 
       log.info(`Mitm.handleRequest`, {
         sessionId: session.sessionId,
@@ -125,10 +126,10 @@ export default class MitmRequestHandler {
         isSSL: ctx.isSSL,
         isHttpUpgrade: ctx.isUpgrade,
       });
+
+      if (session.isClosing) return;
       // track request
       session.trackResource(ctx);
-
-      session.emit('request', { request: ctx.clientToProxyRequest });
 
       if (BlockHandler.shouldBlockRequest(session, ctx)) {
         // already wrote reply
@@ -219,7 +220,7 @@ export default class MitmRequestHandler {
     if (serverHead.length > 0) serverSocket.unshift(serverHead);
     if (clientHead.length > 0) clientSocket.unshift(clientHead);
 
-    ctx.requestSession.emit('response', MitmRequestContext.toEmittedResponse(ctx));
+    ctx.requestSession.emit('response', MitmRequestContext.toEmittedResource(ctx));
   }
 
   private async httpResponseHandler(
@@ -269,7 +270,7 @@ export default class MitmRequestHandler {
 
     ctx.proxyToClientResponse.end();
     ctx.cacheHandler.onResponseEnd(ctx);
-    ctx.requestSession.emit('response', MitmRequestContext.toEmittedResponse(ctx));
+    ctx.requestSession.emit('response', MitmRequestContext.toEmittedResource(ctx));
 
     process.nextTick(agent => agent.freeSocket(ctx), ctx.requestSession.requestAgent);
   }

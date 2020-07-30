@@ -8,6 +8,7 @@ import IHttpOrH2Response from './IHttpOrH2Response';
 import MitmSocket from '@secret-agent/mitm-socket';
 
 export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
+  id: number;
   origin: string;
   clientToProxyRequest: http.IncomingMessage;
   proxyToServerRequestSettings: IMitmProxyToServerRequestSettings;
