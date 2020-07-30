@@ -12,6 +12,8 @@ export default interface IHttpRequestModifierDelegate {
     headers: { [name: string]: string },
   ) => { [key: string]: string };
 
+  maxConnectionsPerOrigin?: number;
+
   getCookieHeader?: (resource: IHttpResourceLoadDetails) => Promise<string>;
   setCookie?: (
     cookie: string,

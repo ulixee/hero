@@ -1,6 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
-import SocketConnectDriver from '../lib/SocketConnectDriver';
-import * as fs from 'fs';
+import MitmSocket from '../index';
 import * as https from 'https';
 import * as net from 'net';
 import { createPromise } from '@secret-agent/commons/utils';
@@ -16,30 +15,22 @@ afterEach(async () => {
 
 test('should be able to send a tls connection', async () => {
   const htmlString = 'Secure as anything!';
-  const serverPort = await createHttpsServer(() => htmlString);
+  const server = await Helpers.runHttpsServer((req, res) => {
+    return res.end(htmlString);
+  });
 
-  const tlsConnection = getTlsConnection(serverPort);
+  const tlsConnection = getTlsConnection(server.port);
   await tlsConnection.connect();
-  const httpResponse = await httpGetWithSocket(
-    `https://localhost:${serverPort}/any`,
-    {},
-    tlsConnection.socket,
-  );
+  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
 });
 
 test('should handle http2 requests', async () => {
   const h2ServerStarted = createPromise();
   const httpServer = http2
-    .createSecureServer(
-      {
-        key: fs.readFileSync(`${__dirname}/certs/key.pem`),
-        cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
-      },
-      (request, response) => {
-        response.end('I am h2');
-      },
-    )
+    .createSecureServer(Helpers.sslCerts(), (request, response) => {
+      response.end('I am h2');
+    })
     .listen(0, () => {
       h2ServerStarted.resolve();
     });
@@ -63,7 +54,7 @@ test('should handle http2 requests', async () => {
 });
 
 test('should be able to hit google using a Chrome79 Emulator', async () => {
-  const tlsConnection = new SocketConnectDriver('1', {
+  const tlsConnection = new MitmSocket('1', {
     host: 'google.com',
     port: '443',
     clientHelloId: 'Chrome79',
@@ -86,7 +77,7 @@ test('should be able to hit google using a Chrome79 Emulator', async () => {
 });
 
 test('should be able to hit optimove using a Chrome79 Emulator', async () => {
-  const tlsConnection = new SocketConnectDriver('2', {
+  const tlsConnection = new MitmSocket('2', {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
@@ -112,7 +103,7 @@ test('should be able to hit optimove using a Chrome79 Emulator', async () => {
 
 // only test this manually
 test.skip('should be able to get scripts from unpkg using Chrome79 emulator', async () => {
-  const tlsConnection = new SocketConnectDriver('3', {
+  const tlsConnection = new MitmSocket('3', {
     host: 'unpkg.com',
     port: '443',
     clientHelloId: 'Chrome79',
@@ -151,10 +142,10 @@ test('should be able to send a request through a proxy', async () => {
   const connect = jest.fn();
   proxy.once('connect', connect);
 
-  const serverPort = await createHttpsServer(() => htmlString);
-  const tlsConnection = new SocketConnectDriver('4', {
+  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
+  const tlsConnection = new MitmSocket('4', {
     host: 'localhost',
-    port: String(serverPort),
+    port: String(server.port),
     clientHelloId: 'Chrome79',
     servername: 'localhost',
     proxyUrl: `http://localhost:${proxyPort}`,
@@ -163,11 +154,7 @@ test('should be able to send a request through a proxy', async () => {
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect();
 
-  const httpResponse = await httpGetWithSocket(
-    `https://localhost:${serverPort}/any`,
-    {},
-    tlsConnection.socket,
-  );
+  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
   expect(connect).toHaveBeenCalledTimes(1);
 });
@@ -176,8 +163,8 @@ test('should be able to send a request through a secure proxy with auth', async 
   const htmlString = 'Proxy secure proxy echo echo';
   const password = `u:password`;
   const pass64 = Buffer.from(password).toString('base64');
-  const server = await startHttpsServer(() => htmlString);
-  const proxy = new Proxy(server);
+  const proxyServer = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
+  const proxy = new Proxy(proxyServer.server);
   proxy.authenticate = (
     req: http.IncomingMessage,
     cb: (req: http.IncomingMessage, success: boolean) => any,
@@ -192,27 +179,22 @@ test('should be able to send a request through a secure proxy with auth', async 
   const connect = jest.fn();
   proxy.once('connect', connect);
 
-  const serverPort = await createHttpsServer(() => htmlString);
-  const tlsConnection = getTlsConnection(serverPort);
-  tlsConnection.setProxy(`https://localhost:${getPort(server)}`, password);
+  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
+  const tlsConnection = getTlsConnection(server.port);
+  tlsConnection.setProxy(proxyServer.baseUrl, password);
 
   await tlsConnection.connect();
-  const httpResponse = await httpGetWithSocket(
-    `https://localhost:${serverPort}/any`,
-    {},
-    tlsConnection.socket,
-  );
+  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
   expect(connect).toHaveBeenCalledTimes(1);
 });
 
 test('should handle websockets', async () => {
   const htmlString = 'Secure as anything!';
-  const server = await startHttpsServer(() => htmlString);
-  const serverPort = getPort(server);
+  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
   const messageCount = 500;
 
-  const wsServer = new WebSocket.Server({ server });
+  const wsServer = new WebSocket.Server({ server: server.server });
   wsServer.on('connection', async (ws: WebSocket) => {
     for (let i = 0; i < messageCount; i += 1) {
       await new Promise(resolve =>
@@ -223,11 +205,11 @@ test('should handle websockets', async () => {
     }
   });
 
-  const tlsConnection = getTlsConnection(serverPort);
+  const tlsConnection = getTlsConnection(server.port);
   tlsConnection.connectOpts.keepAlive = true;
   await tlsConnection.connect();
 
-  const wsClient = new WebSocket(`wss://localhost:${serverPort}`, {
+  const wsClient = new WebSocket(`wss://localhost:${server.port}`, {
     rejectUnauthorized: false,
     createConnection: () => tlsConnection.socket,
   });
@@ -253,10 +235,10 @@ test('should handle websockets over proxies', async () => {
   const connect = jest.fn();
   proxy.once('connect', connect);
 
-  const server = await startHttpsServer(() => '');
-  const serverPort = getPort(server);
+  const server = await Helpers.runHttpsServer((req, res) => res.end(''));
+  const serverPort = server.port;
 
-  const wsServer = new WebSocket.Server({ server });
+  const wsServer = new WebSocket.Server({ server: server.server });
   wsServer.on('connection', async (ws: WebSocket) => {
     ws.send('ola');
   });
@@ -282,32 +264,15 @@ test('should handle websockets over proxies', async () => {
 });
 
 test('should handle upstream disconnects', async () => {
-  const options = {
-    key: fs.readFileSync(`${__dirname}/certs/key.pem`),
-    cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
-  };
+  const server = await Helpers.runHttpsServer((req, res) => {
+    res.connection.end();
+  });
 
-  const promise = createPromise();
-  const server = https
-    .createServer(options, (req, res) => {
-      res.connection.end();
-    })
-    .listen(0, () => promise.resolve());
-
-  trackClose(server);
-
-  await promise.promise;
-  const serverPort = getPort(server);
-
-  const tlsConnection = getTlsConnection(serverPort);
+  const tlsConnection = getTlsConnection(server.port);
   await tlsConnection.connect();
 
   try {
-    const httpResponse = await httpGetWithSocket(
-      `https://localhost:${serverPort}/any`,
-      {},
-      tlsConnection.socket,
-    );
+    const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
     expect(httpResponse).not.toBeTruthy();
   } catch (err) {
     expect(err).toBeTruthy();
@@ -333,6 +298,7 @@ async function httpGetWithSocket(
       url,
       {
         ...clientOptions,
+        agent: null,
         createConnection: () => socket,
       },
       async res => {
@@ -348,7 +314,7 @@ async function httpGetWithSocket(
 }
 
 function getTlsConnection(serverPort: number, clientHello = 'Chrome79') {
-  const tlsConnection = new SocketConnectDriver('5', {
+  const tlsConnection = new MitmSocket('5', {
     host: 'localhost',
     port: String(serverPort),
     clientHelloId: clientHello,
@@ -382,32 +348,4 @@ async function readResponse(res: stream.Readable) {
     buffer.push(data);
   }
   return Buffer.concat(buffer).toString();
-}
-
-async function startHttpsServer(onRequest: (req: http.IncomingMessage) => string) {
-  const options = {
-    key: fs.readFileSync(`${__dirname}/certs/key.pem`),
-    cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
-  };
-
-  const promise = createPromise();
-  const server = https
-    .createServer(options, (req, res1) => {
-      return res1.end(onRequest(req));
-    })
-    .listen(0, () => promise.resolve())
-    .unref();
-
-  trackClose(server);
-  await promise.promise;
-  return server;
-}
-
-function getPort(server: http.Server | https.Server) {
-  return (server.address() as net.AddressInfo).port;
-}
-
-async function createHttpsServer(onRequest: (req: http.IncomingMessage) => string) {
-  const server = await startHttpsServer(onRequest);
-  return getPort(server);
 }

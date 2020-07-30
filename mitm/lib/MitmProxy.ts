@@ -248,13 +248,16 @@ export default class MitmProxy {
     // NOTE: this probably can be optimized away for http
 
     const proxyConnection = net.connect(proxyToProxyPort);
-    proxyConnection.on(
-      'error',
-      this.onConnectError.bind(this, req.url, 'PROXY_TO_PROXY_CONNECT_ERROR'),
-    );
+    proxyConnection.on('error', error => {
+      this.onConnectError(req.url, 'PROXY_TO_PROXY_CONNECT_ERROR', error);
+      if (!socket.destroyed && socket.writable && socket.readable) {
+        socket.destroy(error);
+      }
+    });
 
+    proxyConnection.on('end', () => socket.destroy());
     proxyConnection.on('close', () => socket.destroy());
-    socket.on('close', () => proxyConnection.end());
+    socket.on('close', () => proxyConnection.destroy());
     socket.on('end', this.removeSocketConnect.bind(this, socket));
 
     await new Promise(r => proxyConnection.once('connect', r));
@@ -305,7 +308,7 @@ export default class MitmProxy {
     startingPort?: number,
     shouldFindAvailablePort = true,
   ): Promise<MitmProxy> {
-    const port = Number(startingPort) || 20000;
+    const port = startingPort ?? 20000;
     const proxy = new MitmProxy({ port, shouldFindAvailablePort });
     await proxy.listen();
     return proxy;

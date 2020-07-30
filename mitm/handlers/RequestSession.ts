@@ -3,18 +3,16 @@ import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import ResourceType, {
   getResourceTypeForChromeValue,
 } from '@secret-agent/core-interfaces/ResourceType';
-import OriginType, { isOriginType } from '@secret-agent/commons/interfaces/OriginType';
 import { EventEmitter } from 'events';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import { ClientHttp2Session } from 'http2';
-import SocketConnectDriver from '../lib/SocketConnectDriver';
 import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import { URL } from 'url';
 import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import Protocol from 'devtools-protocol';
+import Log from '@secret-agent/commons/Logger';
+import MitmRequestAgent from '../lib/MitmRequestAgent';
+import MitmRequestContext from '../lib/MitmRequestContext';
 import Network = Protocol.Network;
-import Log from '../../commons/Logger';
 
 const { log } = Log(module);
 
@@ -34,8 +32,7 @@ export default class RequestSession {
     request: http.IncomingMessage,
     response: http.ServerResponse,
   ) => boolean;
-  public http2Sessions: IHttp2Session[] = [];
-  public socketConnects: SocketConnectDriver[] = [];
+  public requestAgent: MitmRequestAgent;
   public requests: IHttpResourceLoadDetails[] = [];
 
   private readonly pendingResources: IPendingResourceLoad[] = [];
@@ -47,6 +44,7 @@ export default class RequestSession {
     readonly upstreamProxyUrlProvider: Promise<string>,
   ) {
     RequestSession.sessions[sessionId] = this;
+    this.requestAgent = new MitmRequestAgent(this);
   }
 
   public on<K extends keyof IRequestSessionEvents>(
@@ -90,7 +88,7 @@ export default class RequestSession {
     return {
       browserRequestId: resource.browserRequestId,
       resourceType: resource.resourceType,
-      originType: RequestSession.getOriginType(url, headers),
+      originType: MitmRequestContext.getOriginType(url, headers),
       hasUserGesture: resource.hasUserGesture,
       isUserNavigation: resource.isUserNavigation,
       documentUrl: resource.documentUrl,
@@ -191,15 +189,7 @@ export default class RequestSession {
       }
     }
 
-    while (this.http2Sessions.length) {
-      const session = this.http2Sessions.shift();
-      await new Promise(resolve => session.client.close(() => resolve()));
-    }
-
-    while (this.socketConnects.length) {
-      const socket = this.socketConnects.shift();
-      await socket.close();
-    }
+    await this.requestAgent.close();
     delete RequestSession.sessions[this.sessionId];
   }
 
@@ -213,40 +203,6 @@ export default class RequestSession {
       }
     }
     return false;
-  }
-
-  public trackH2Session(
-    authority: string,
-    client: ClientHttp2Session,
-    socketConnect: SocketConnectDriver,
-  ) {
-    client.on('goaway', args => {
-      log.info('Http2.goaway', {
-        sessionId: this.sessionId,
-        args,
-      });
-      this.closeH2Session(client);
-    });
-    client.on('close', () => {
-      log.info('Http2.close', {
-        sessionId: this.sessionId,
-      });
-      this.closeH2Session(client);
-    });
-    this.http2Sessions.push({
-      origin: authority,
-      client,
-      connect: socketConnect,
-    });
-  }
-
-  public closeH2Session(client: ClientHttp2Session) {
-    const index = this.http2Sessions.findIndex(x => client);
-    if (index < 0) return;
-
-    const [session] = this.http2Sessions.splice(index, 1);
-    client.close();
-    session.connect.close();
   }
 
   // function to override for
@@ -271,30 +227,6 @@ export default class RequestSession {
     for (const session of Object.values(RequestSession.sessions)) {
       await session.close();
     }
-  }
-
-  public static getOriginType(url: string, headers: { [name: string]: string }): OriginType {
-    if (isOriginType(headers['Sec-Fetch-Site'])) {
-      return headers['Sec-Fetch-Site'] as OriginType;
-    }
-
-    let origin = headers.Origin ?? headers.origin;
-    if (!origin) {
-      const referer = headers.Referer ?? headers.referer;
-      if (referer) origin = new URL(referer).origin;
-    }
-    let originType: OriginType = 'none';
-    if (origin) {
-      const urlOrigin = new URL(url).origin;
-      if (urlOrigin === origin) {
-        originType = 'same-origin';
-      } else if (urlOrigin.includes(origin) || origin.includes(urlOrigin)) {
-        originType = 'same-site';
-      } else {
-        originType = 'cross-site';
-      }
-    }
-    return originType;
   }
 
   public static async getSession(
@@ -372,12 +304,6 @@ export interface IRequestSessionRequestEvent {
 export interface IRequestSessionHttpErrorEvent {
   request: http.IncomingMessage;
   error: Error;
-}
-
-export interface IHttp2Session {
-  origin: string;
-  client: ClientHttp2Session;
-  connect: SocketConnectDriver;
 }
 
 const websocketHeadersForKey = [

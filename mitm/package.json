@@ -3,20 +3,17 @@
   "version": "1.0.0-alpha.7",
   "description": "Man-in-the-middle proxy to fix chrome request/response",
   "main": "index.js",
-  "scripts": {
-    "build": "node install.js",
-    "build-install": "npm run build",
-    "postinstall": "npm run build"
-  },
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.5",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.5",
+    "@secret-agent/mitm-socket": "^1.0.0-alpha.7",
     "node-forge": "^0.9.1"
   },
   "devDependencies": {
     "@secret-agent/testing": "^1.0.0-alpha.5",
     "@types/node-forge": "^0.9.3",
     "@types/ws": "^7.2.4",
+    "http-proxy-agent": "^4.0.1",
     "proxy": "^1.0.1",
     "ws": "^7.3.0"
   }
