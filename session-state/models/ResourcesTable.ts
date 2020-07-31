@@ -32,6 +32,8 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
         ['remoteAddress', 'TEXT'],
         ['statusCode', 'INTEGER'],
         ['statusMessage', 'TEXT'],
+        ['usedBrowserCache', 'INTEGER'],
+        ['didBlockResource', 'INTEGER'],
       ],
       true,
     );
@@ -46,6 +48,8 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       clientAlpn: string;
       serverAlpn: string;
       localAddress: string;
+      wasCached?: boolean;
+      didBlockResource: boolean;
     },
   ) {
     return this.pendingInserts.push([
@@ -70,6 +74,8 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       meta.response?.remoteAddress,
       meta.response?.statusCode,
       meta.response?.statusText,
+      extras.wasCached ? 1 : 0,
+      extras.didBlockResource ? 1 : 0,
     ]);
   }
 
@@ -118,4 +124,6 @@ export interface IResourcesRecord {
   remoteAddress: string;
   statusCode: number;
   statusMessage: string;
+  usedBrowserCache: boolean;
+  didBlockResource: boolean;
 }

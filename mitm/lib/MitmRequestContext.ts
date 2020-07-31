@@ -68,7 +68,6 @@ export default class MitmRequestContext {
   }
 
   public static toEmittedResource(ctx: IMitmRequestContext): IRequestSessionResponseEvent {
-    // broadcast session
     const request = {
       url: ctx.url,
       headers: ctx.proxyToServerRequestSettings.headers,
@@ -91,6 +90,7 @@ export default class MitmRequestContext {
       originalHeaders: parseRawHeaders(ctx.clientToProxyRequest.rawHeaders),
       clientAlpn: (ctx.clientToProxyRequest.socket as TLSSocket)?.alpnProtocol ?? 'http/1.1',
       serverAlpn: ctx.proxyToServerSocket?.alpn,
+      didBlockResource: ctx.didBlockResource,
     };
   }
 

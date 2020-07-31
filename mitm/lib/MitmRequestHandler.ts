@@ -117,6 +117,8 @@ export default class MitmRequestHandler {
         return;
       }
 
+      // track request
+      session.trackResource(ctx);
       session.emit('request', MitmRequestContext.toEmittedResource(ctx));
 
       log.info(`Mitm.handleRequest`, {
@@ -126,10 +128,6 @@ export default class MitmRequestHandler {
         isSSL: ctx.isSSL,
         isHttpUpgrade: ctx.isUpgrade,
       });
-
-      if (session.isClosing) return;
-      // track request
-      session.trackResource(ctx);
 
       if (BlockHandler.shouldBlockRequest(session, ctx)) {
         // already wrote reply

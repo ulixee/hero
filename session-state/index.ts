@@ -206,9 +206,28 @@ export default class SessionState {
       redirectedToUrl,
     } = resourceEvent as IRequestSessionResponseEvent;
 
+    const responseHeaders: { [key: string]: string | string[] } = {};
+    for (let i = 0; i <= response?.rawHeaders.length ?? 0; i += 2) {
+      const name = response.rawHeaders[i];
+      const value = response.rawHeaders[i + 1];
+      if (name && value) {
+        if (responseHeaders[name]) {
+          if (!Array.isArray(responseHeaders[name])) {
+            responseHeaders[name] = [responseHeaders[name] as string];
+          }
+          (responseHeaders[name] as string[]).push(value);
+        }
+        responseHeaders[name] = value;
+      }
+    }
+
+    if (browserRequestId) {
+      this.browserRequestIdToResourceId[browserRequestId] = resourceEvent.id;
+    }
+
     const meta = {
       id: resourceEvent.id,
-      url: response?.url ?? request.url,
+      url: request.url,
       receivedAtCommandId: this.lastCommand?.id,
       type: resourceType,
       isRedirect: !!redirectedToUrl,
@@ -222,10 +241,11 @@ export default class SessionState {
     } as IResourceMeta;
 
     if (response) {
+      if (response.url) meta.url = response.url;
       meta.response = {
         url: response.url || request.url, // if response was aborted, won't have a url
         timestamp: response.responseTime.toISOString(),
-        headers: response.headers,
+        headers: responseHeaders,
         remoteAddress: remoteAddress,
         statusCode: response.statusCode,
         statusText: response.statusMessage,
@@ -235,7 +255,6 @@ export default class SessionState {
     this.db.resources.insert(meta, body, resourceEvent);
 
     if (isResponse) {
-      this.browserRequestIdToResourceId[browserRequestId] = meta.id;
       this.resources.push(meta);
       this.emitter.emit('resource', meta);
     }

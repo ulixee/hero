@@ -160,8 +160,8 @@ export default class WindowEvents {
       bytes: body ? Buffer.byteLength(body) : -1,
     });
 
+    const resource = this.sessionState.captureResource(responseEvent, true);
     if (request.method !== 'OPTIONS') {
-      const resource = this.sessionState.captureResource(responseEvent, true);
       if (resource.url === this.window.navigationUrl) {
         this.sessionState.pages.resourceLoadedForLocation(resource.id);
       }

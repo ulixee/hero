@@ -301,6 +301,7 @@ export interface IRequestSessionRequestEvent {
   request: IResourceRequest;
   serverAlpn: string;
   clientAlpn: string;
+  didBlockResource: boolean;
   originalHeaders: IResourceHeaders;
   localAddress: string;
   requestTime: Date;
