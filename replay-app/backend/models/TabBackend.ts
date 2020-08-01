@@ -1,41 +1,19 @@
 import { BrowserView } from 'electron';
 import { v1 as uuidv1 } from 'uuid';
-import * as http from 'http';
 import Window from './Window';
 import generateContextMenu from '../menus/generateContextMenu';
-import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
-import InternalServer from '~shared/constants/files';
-import ReplayApi from '~backend/ReplayApi';
-import IRectangle from '~shared/interfaces/IRectangle';
-import Application from '~backend/Application';
 import Rectangle = Electron.Rectangle;
 
-const domReplayerScript = require.resolve('../../injected-scripts/domReplayer');
-
-interface IAddressBarOptions {
-  location?: ITabLocation;
-  replayApi?: ReplayApi;
-}
-
-export default class TabBackend {
+export default abstract class TabBackend {
   public browserView: BrowserView;
-  public replayApi: ReplayApi;
 
   public favicon = '';
-  public findInfo = {
-    occurrences: '0/0',
-    text: '',
-  };
-
+  protected readonly window: Window;
   private bounds: Rectangle;
-  private location: InternalLocations = InternalLocations.Home;
 
-  private readonly window: Window;
-
-  public constructor(window: Window, { location, replayApi }: IAddressBarOptions) {
+  protected constructor(window: Window, webPreferences: Electron.WebPreferences) {
     this.browserView = new BrowserView({
       webPreferences: {
-        preload: domReplayerScript,
         nodeIntegration: true,
         contextIsolation: false,
         javascript: true,
@@ -43,7 +21,8 @@ export default class TabBackend {
         partition: uuidv1(),
         nativeWindowOpen: true,
         webSecurity: true,
-        // sandbox: true, // ToDo: turn this back on for snapshots
+        sandbox: false,
+        ...webPreferences,
       },
     });
 
@@ -57,9 +36,7 @@ export default class TabBackend {
       vertical: false,
     });
 
-    this.bindProxy();
     this.bindListeners();
-    this.updateAddressBar({ location, replayApi }, true);
   }
 
   public get webContents() {
@@ -74,77 +51,8 @@ export default class TabBackend {
     return this.webContents.id;
   }
 
-  public get isSelected() {
-    return this.id === this.window.tabManager.selectedId;
-  }
-
-  public updateAddressBar({ location, replayApi }: IAddressBarOptions, isNewTab: boolean = false) {
-    if (this.browserView.isDestroyed()) return;
-
-    if (!isNewTab && this.window.tabManager.selectedId !== this.id) return;
-    if (isNewTab && !replayApi) location = InternalLocations.NewTab;
-
-    if (this.replayApi) {
-      this.replayApi.removeAllListeners('session:updated');
-      this.replayApi.isActive = false;
-    }
-
-    const tabUpdateParams: any = { id: this.id, currentTickValue: 0 };
-    if (location) {
-      tabUpdateParams.location = location;
-      location = location === InternalLocations.NewTab ? InternalLocations.Home : location;
-      this.location = location as InternalLocations;
-      this.webContents
-        .loadURL(`${InternalServer.url}/${location.toLowerCase()}`)
-        .then(x => this.send('clicks:enable', true));
-      this.replayApi = null;
-      this.webContents.closeDevTools();
-    } else {
-      this.location = InternalLocations.Replay;
-      this.window.webContents.session.clearCache();
-      tabUpdateParams.saSession = replayApi.saSession;
-      this.webContents
-        .loadURL(replayApi.saSession.pages[0].url)
-        .then(x => this.send('clicks:enable', false));
-      this.replayApi = replayApi;
-      this.replayApi.on('session:updated', this.updateTabSession.bind(this));
-      this.webContents.openDevTools({ mode: 'detach' });
-    }
-
-    this.window.sendToRenderer('tab:updated', tabUpdateParams);
-  }
-
-  public async changeTickOffset(offset: number) {
-    this.onTick(offset);
-    this.window.sendToRenderer('tab:updated', {
-      id: this.id,
-      currentTickValue: offset,
-    });
-  }
-
-  public async onTick(tickValue: number) {
-    if (!this.replayApi) return;
-    const events = await this.replayApi.setTickValue(tickValue);
-    if (!events) return;
-    this.send('dom:apply', ...events);
-    this.window.sendToRenderer('tab:page-url', { url: this.replayApi.urlOrigin, id: this.id });
-  }
-
-  public async onTickHover(rect: IRectangle, tickValue: number) {
-    const tick = this.replayApi.saSession.ticks.find(x => x.playbarOffsetPercent === tickValue);
-    if (!tick) return;
-
-    const commandLabel = tick.label;
-    const commandResult = this.replayApi.saSession.commandResults.find(
-      x => x.commandId === tick.commandId,
-    );
-    Application.instance.overlayManager.show(
-      'command-overlay',
-      this.window.browserWindow,
-      rect,
-      commandLabel,
-      commandResult,
-    );
+  public get isActiveTab() {
+    return this.id === this.window.selectedTabId;
   }
 
   public destroy() {
@@ -165,67 +73,10 @@ export default class TabBackend {
     }
   }
 
-  public send(channel: string, ...args: any[]) {
-    this.webContents.send(channel, ...args);
-  }
-
-  public addToWindow() {
-    this.window.browserWindow.addBrowserView(this.browserView);
-  }
-
-  public removeFromWindow() {
-    this.window.browserWindow.removeBrowserView(this.browserView);
-  }
-
-  private updateTabSession() {
-    if (!this.replayApi) return;
-    const tabUpdateParam = {
-      id: this.id,
-      saSession: this.replayApi.saSession,
-    };
-    this.window.sendToRenderer('tab:updated', tabUpdateParam);
-
-    if (this.replayApi.saSession.unresponsiveSeconds >= 5) {
-      Application.instance.overlayManager.show(
-        'message-overlay',
-        this.window.browserWindow,
-        this.window.browserWindow.getContentBounds(),
-        {
-          title: 'Did your script hang?',
-          message: `The last update was ${this.replayApi.saSession.unresponsiveSeconds} seconds ago.`,
-        },
-      );
-    } else {
-      Application.instance.overlayManager.getByName('message-overlay').hide();
-    }
-  }
-
-  private bindProxy() {
-    const session = this.webContents.session;
-    session.protocol.interceptHttpProtocol('http', (request, callback) => {
-      if (request.url.startsWith(InternalServer.url)) {
-        callback({ url: request.url });
-      } else {
-        const resourceUrl = this.replayApi.resourceUrl(request.url);
-        callback({ url: resourceUrl });
-      }
-    });
-    session.protocol.interceptHttpProtocol('https', (request, callback) => {
-      const resourceUrl = this.replayApi.resourceUrl(request.url);
-      callback({ url: resourceUrl });
-    });
-  }
-
   private bindListeners() {
     this.webContents.on('context-menu', (e, params) => {
       generateContextMenu(this.window, params, this.webContents).popup();
     });
-
-    // this.webContents.addListener('found-in-page', (e, result) => {
-    //   Application.instance.overlayManager
-    //     .getByName('find')
-    //     .browserView.webContents.send('found-in-page', result);
-    // });
 
     this.webContents.addListener('did-start-loading', () => {
       this.window.sendToRenderer('tab:updated-loading', this.id, true);

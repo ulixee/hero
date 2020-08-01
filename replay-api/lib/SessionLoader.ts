@@ -16,6 +16,7 @@ import { IFocusRecord } from '@secret-agent/session-state/models/FocusEventsTabl
 import { IInteractionGroup } from '@secret-agent/core-interfaces/IInteractions';
 import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import moment from 'moment';
+import { IFrameRecord } from '@secret-agent/session-state/models/FramesTable';
 
 export default class SessionLoader {
   public ticks: IMajorTick[] = [];
@@ -23,6 +24,7 @@ export default class SessionLoader {
   public readonly mouseEvents: IMouseEventRecord[];
   public readonly scrollEvents: IScrollRecord[];
   public readonly focusEvents: IFocusRecord[];
+  public readonly frames: IFrameRecord[];
   public readonly durationMillis: number;
   public unresponsiveSeconds = 0;
   public hasRecentErrors: boolean;
@@ -40,6 +42,7 @@ export default class SessionLoader {
     this.sessionDb = sessionDb;
     this.pageRecords = this.sessionDb.pages.all();
     this.commands = this.sessionDb.commands.all();
+    this.frames = this.sessionDb.frames.all();
     this.mouseEvents = this.sessionDb.mouseEvents.allEvents([
       MouseEventType.MOVE,
       MouseEventType.DOWN,
@@ -179,9 +182,11 @@ export default class SessionLoader {
   }
 
   private assembleDomChangeGroups() {
+    const parentFrameIds = new Set(this.frames.filter(x => !x.parentId).map(x => x.id));
     const domChanges = this.sessionDb.domChanges.all();
     let domChangeGroup: IDomChangeGroup = null;
     for (const change of domChanges) {
+      if (parentFrameIds.size && !parentFrameIds.has(change.frameId)) continue;
       if (
         domChangeGroup?.timestamp !== change.timestamp ||
         domChangeGroup?.commandId !== change.commandId

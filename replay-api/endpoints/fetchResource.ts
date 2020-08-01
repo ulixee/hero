@@ -25,11 +25,18 @@ export default async function fetchResource(req: IncomingMessage, res: ServerRes
     res.end('Resource not found');
     return;
   }
+  if (!resource.type) {
+    res.writeHead(400);
+    res.end('Resource not loaded');
+    return;
+  }
 
   if (resource.type === 'Document') {
     res.writeHead(200, {
       'Cache-Control': 'public, max-age=500',
       'Content-Type': resource.headers['Content-Type'] ?? resource.headers['content-type'],
+      'Content-Security-Policy':
+        "default-src *; navigate-to 'none'; style-src 'self' http://* https://* 'unsafe-inline'; script-src 'self' http://* https://*; font-src 'self' https://* data:;",
     });
     res.end(`<html><head></head><body></body></html>`);
     return;

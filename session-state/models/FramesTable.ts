@@ -19,6 +19,10 @@ export default class FramesTable extends BaseTable<IFrameRecord> {
       frame.createdTime,
     ]);
   }
+
+  public all() {
+    return this.db.prepare(`select * from ${this.tableName}`).all() as IFrameRecord[];
+  }
 }
 
 export interface IFrameRecord {

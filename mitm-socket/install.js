@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
-const packageJson = require('./package');
+const packageJson = require('./package.json');
 
 const outDir = `${__dirname}/dist`;
 
@@ -16,7 +16,7 @@ const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/downl
 
 // tslint:disable:no-console
 
-const forceBuild = process.env.SA_REBUILD_MITM_SOCKET ?? false;
+const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
 
 (async function install() {
   let programName = 'connect';
@@ -99,7 +99,7 @@ function saveVersion() {
 }
 
 function buildFilename() {
-  let platform = os.platform();
+  let platform = String(os.platform());
   let arch = os.arch();
   if (arch === 'x64') arch = 'x86_64';
   if (arch === 'ia32') arch = '386';
@@ -115,7 +115,7 @@ function buildFilename() {
 }
 
 async function download(filepath) {
-  return new Promise<Buffer>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const req = https.get(filepath, async res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return download(res.headers.location)

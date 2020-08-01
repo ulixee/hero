@@ -1,8 +1,8 @@
 <template lang="pug">
 .AppPage.Page(:style="cssVars")
   TabBar
-  AddressBar(v-if="store.hasSaSession || store.location")
-  ReplayBar(v-if="store.hasSaSession")
+  AddressBar
+  ReplayBar
 </template>
 
 <script lang="ts">

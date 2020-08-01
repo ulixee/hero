@@ -14,18 +14,13 @@ ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scr
   if (scrollEvent) updateScroll(scrollEvent);
 });
 
-let areClicksActive = false;
-function handleOnClick(e: any) {
-  if (areClicksActive) return true;
+function cancelEvent(e: Event) {
   e.preventDefault();
   e.stopPropagation();
   return false;
 }
-document.addEventListener('click', handleOnClick, true);
-
-ipcRenderer.on('clicks:enable', (e, shouldEnable) => {
-  areClicksActive = shouldEnable;
-});
+document.addEventListener('click', cancelEvent, true);
+document.addEventListener('submit', cancelEvent, true);
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
@@ -33,13 +28,22 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     if (action === 'newDocument') {
       if (location.href !== data.textContent) {
         console.log(
-          'Document changed at command %s. New %s. Old %s',
-          commandId,
+          'Document changed. (Command %s. %s ==> %s)',
+          commandId === -1 ? 'load' : commandId,
           data.textContent,
           window.location.href,
         );
-        idMap.clear();
-        window.location.href = data.textContent;
+        try {
+          idMap.clear();
+          isMouseInstalled = false;
+          window.scrollTo({ top: 0 });
+          document.documentElement.innerHTML = '';
+          document.head.appendChild(styleElement);
+          window.history.replaceState({}, 'Replay', data.textContent);
+        } catch (err) {
+          // if it's an origin change, we have to change page
+          window.location.href = data.textContent;
+        }
       }
       continue;
     }
@@ -52,6 +56,9 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
     if (preserveElements.includes(data.tagName)) {
       const elem = document.querySelector(data.tagName);
+      if (!elem) {
+        console.log('Preserved element doesnt exist!', data.tagName);
+      }
       idMap.set(data.id, elem);
       if (data.tagName === 'HEAD') document.head.appendChild(styleElement);
       continue;
@@ -65,35 +72,47 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       continue;
     }
 
-    const node = deserializeNode(data);
-    const parent = getNode(data.parentNodeId);
-    if (!parent && (action === 'added' || action === 'removed')) {
-      // tslint:disable-next-line:no-console
-      console.log('WARN: parent node id not found', data);
-      continue;
-    }
-
-    switch (action) {
-      case 'added':
-        let next: Node;
-        if (getNode(data.previousSiblingId)) {
-          next = getNode(data.previousSiblingId).nextSibling;
+    let node: Node;
+    let parentNode: Node;
+    try {
+      node = deserializeNode(data);
+      parentNode = getNode(data.parentNodeId);
+      if (!parentNode && (action === 'added' || action === 'removed')) {
+        // tslint:disable-next-line:no-console
+        console.log('WARN: parent node id not found', data);
+        continue;
+      }
+      if (node && preserveElements.includes((node as Element).tagName)) {
+        if (action === 'removed') {
+          console.log('WARN: script trying to remove preserved node', data);
+          continue;
         }
-        if (next) parent.insertBefore(node, next);
-        else parent.appendChild(node);
-        break;
-      case 'removed':
-        parent.removeChild(node);
-        break;
-      case 'attribute':
-        setNodeAttributes(node as Element, data);
-        break;
-      case 'property':
-        setNodeProperties(node as Element, data);
-        break;
-      case 'text':
-        deserializeNode(data).textContent = data.textContent;
-        break;
+      }
+
+      switch (action) {
+        case 'added':
+          let next: Node;
+          if (getNode(data.previousSiblingId)) {
+            next = getNode(data.previousSiblingId).nextSibling;
+          }
+          if (next) parentNode.insertBefore(node, next);
+          else parentNode.appendChild(node);
+          break;
+        case 'removed':
+          parentNode.removeChild(node);
+          break;
+        case 'attribute':
+          setNodeAttributes(node as Element, data);
+          break;
+        case 'property':
+          setNodeProperties(node as Element, data);
+          break;
+        case 'text':
+          deserializeNode(data).textContent = data.textContent;
+          break;
+      }
+    } catch (error) {
+      console.log('ERROR applying action', error, parentNode, node, data);
     }
   }
 }
