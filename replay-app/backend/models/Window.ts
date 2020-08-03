@@ -161,7 +161,7 @@ export default class Window {
     console.log('Creating Replay Tab (%s)', replayApi.apiHost);
     const tab = this.trackTab(new ReplayView(this, replayApi));
     const id = tab.id;
-    this.sendToRenderer('insert-tab', { id, active: true }, true);
+    this.sendToRenderer('insert-tab', { id, active: true, saSession: replayApi.saSession }, true);
   }
 
   public createAppTab(opts: ICreateTabOptions, isNext = false, notifyRenderer = true) {

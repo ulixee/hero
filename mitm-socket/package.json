@@ -4,7 +4,7 @@
   "description": "Man-in-the-middle socket library to emulate TLS and TCP settings",
   "main": "index.js",
   "scripts": {
-    "build": "ts-node install.ts",
+    "build": "node install.js",
     "build-install": "npm run build",
     "postinstall": "npm run build"
   },

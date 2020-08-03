@@ -123,10 +123,15 @@ export default class TabFrontend {
   public startPlayback() {
     this.isPlaying = true;
     clearInterval(this.interval);
-    this.interval = setInterval(this.playbackTick.bind(this), 20) as any;
+    let intervalTime = 50;
+    if (this.marks.length > 100) intervalTime = 20;
+    else if (this.marks.length < 5) intervalTime = 500;
+    this.interval = setInterval(this.playbackTick.bind(this), intervalTime) as any;
   }
 
   public updateSession(session: ISaSession) {
+    const isPlaying = this.isPlaying;
+    if (isPlaying) this.pausePlayback();
     const startSessionMillis = this.saSession?.durationMillis;
     this.saSession = session;
 
@@ -149,6 +154,7 @@ export default class TabFrontend {
           this.currentTickValue * (startSessionMillis / session.durationMillis);
       }
     }
+    if (isPlaying) this.startPlayback();
   }
 
   @action
@@ -270,12 +276,30 @@ export default class TabFrontend {
     if (this.isSelected === false) {
       return this.pausePlayback();
     }
-    if (this.currentTickValue + 0.1 > 100) {
-      this.currentTickValue = 100;
-      this.pausePlayback();
-    } else {
-      this.currentTickValue += 0.1;
+
+    let nextTickValue = this.currentTickValue;
+    for (const tick of this.saSession.ticks) {
+      // if a new major tick exists, go to it
+      if (tick.playbarOffsetPercent > this.currentTickValue) {
+        nextTickValue = tick.playbarOffsetPercent;
+        break;
+      }
+      // check for next minor tick
+      for (const minor of tick.minorTicks) {
+        if (minor.playbarOffsetPercent > this.currentTickValue) {
+          nextTickValue = minor.playbarOffsetPercent;
+          break;
+        }
+      }
+      if (nextTickValue > this.currentTickValue) break;
     }
+
+    if (nextTickValue === this.currentTickValue && this.saSession.closeDate) {
+      this.pausePlayback();
+    }
+
+    this.currentTickValue = nextTickValue;
+
     ipcRenderer.send('on-tick', this.currentTickValue);
   }
 }

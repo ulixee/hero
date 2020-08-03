@@ -3,6 +3,7 @@
 import { ipcRenderer } from 'electron';
 import { IDomChangeEvent, INodeData } from './interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { URL } from 'url';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
@@ -30,19 +31,21 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
         console.log(
           'Document changed. (Command %s. %s ==> %s)',
           commandId === -1 ? 'load' : commandId,
-          data.textContent,
           window.location.href,
+          data.textContent,
         );
-        try {
+        const newUrl = new URL(data.textContent);
+
+        if (location.origin === newUrl.origin) {
+          window.history.replaceState({}, 'Replay', data.textContent);
           idMap.clear();
           isMouseInstalled = false;
           window.scrollTo({ top: 0 });
           document.documentElement.innerHTML = '';
           document.head.appendChild(styleElement);
-          window.history.replaceState({}, 'Replay', data.textContent);
-        } catch (err) {
+        } else {
           // if it's an origin change, we have to change page
-          window.location.href = data.textContent;
+          location.href = newUrl.href;
         }
       }
       continue;
@@ -77,6 +80,9 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     try {
       node = deserializeNode(data);
       parentNode = getNode(data.parentNodeId);
+      if (data.parentNodeId === null && action === 'added') {
+        parentNode = document;
+      }
       if (!parentNode && (action === 'added' || action === 'removed')) {
         // tslint:disable-next-line:no-console
         console.log('WARN: parent node id not found', data);

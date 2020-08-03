@@ -21,7 +21,7 @@ export default class ReplayView extends TabBackend {
     this.load(replayApi, true, replaceTabId);
   }
 
-  public load(replayApi, isNewTab = false, replaceTabId?: number) {
+  public async load(replayApi, isNewTab = false, replaceTabId?: number) {
     if (this.browserView.isDestroyed()) return;
     if (!isNewTab && !this.isActiveTab) return;
 
@@ -32,10 +32,10 @@ export default class ReplayView extends TabBackend {
     this.replayApi = replayApi;
     this.replayApi.on('session:updated', this.updateTabSession.bind(this));
 
-    this.window.webContents.session.clearCache();
+    await this.window.webContents.session.clearCache();
     this.webContents.openDevTools({ mode: 'detach' });
 
-    this.webContents.loadURL(replayApi.saSession.pages[0].url);
+    await this.webContents.loadURL(replayApi.saSession.pages[0].url);
 
     this.window.sendToRenderer('tab:updated', {
       id: this.id,
@@ -102,9 +102,6 @@ export default class ReplayView extends TabBackend {
 
   private interceptHttpRequests() {
     const session = this.webContents.session;
-    this.webContents.addListener('will-navigate', (event, url) => {
-      event.preventDefault();
-    });
     session.protocol.interceptHttpProtocol('http', (request, callback) => {
       const resourceUrl = this.replayApi.resourceUrl(request.url);
       callback({ url: resourceUrl });

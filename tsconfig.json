@@ -14,7 +14,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "checkJs": true,
     "rootDir": ".",
     "outDir": "./build",
     "preserveSymlinks": false,
