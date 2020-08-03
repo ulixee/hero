@@ -9,44 +9,51 @@ const readonlyAndFileMustExist = { readonly: true, fileMustExist: true };
 
 export default async function fetchSessionMeta(req: IncomingMessage, res: ServerResponse) {
   const reqUrl = url.parse(req.headers.host + req.url, true);
-  const { id, name, scriptInstanceId } = reqUrl.query;
-  const dataLocation = reqUrl.query.dataLocation as string;
+  const { name, scriptInstanceId, scriptEntrypoint } = reqUrl.query;
+  let sessionId = reqUrl.query.id as string;
+  let dataLocation = reqUrl.query.dataLocation as string;
   const relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[] = [];
   const relatedSessions: { id: string; name: string }[] = [];
-  const ext = Path.extname(dataLocation as string);
-  const dataLocationIsDb = ext === '.db';
 
   let sessionDb: SessionDb;
   let sessionsDb: SessionsDb;
 
-  if (dataLocationIsDb) {
-    const baseDir = Path.dirname(dataLocation);
-    const sessionId = Path.basename(dataLocation, ext);
-    sessionDb = new SessionDb(baseDir, sessionId, readonlyAndFileMustExist);
-    sessionsDb = new SessionsDb(baseDir, readonlyAndFileMustExist);
-  } else if (id) {
-    sessionDb = new SessionDb(dataLocation, id as string, readonlyAndFileMustExist);
-    sessionsDb = new SessionsDb(dataLocation, readonlyAndFileMustExist);
-  } else {
-    sessionsDb = new SessionsDb(dataLocation, readonlyAndFileMustExist);
-    const { id: sessionId } = sessionsDb.sessions.findByName(
-      name as string,
-      scriptInstanceId as string,
-    );
-    sessionDb = new SessionDb(dataLocation, sessionId, readonlyAndFileMustExist);
+  const ext = Path.extname(dataLocation as string);
+  if (ext === '.db') {
+    sessionId = Path.basename(dataLocation, ext);
+    dataLocation = Path.dirname(dataLocation);
   }
+  console.log('opening sessions db', { dataLocation });
+  sessionsDb = new SessionsDb(dataLocation, readonlyAndFileMustExist);
+
+  if (!sessionId) {
+    if (name && scriptInstanceId) {
+      const sessionRecord = sessionsDb.sessions.findByName(
+        name as string,
+        scriptInstanceId as string,
+      );
+      sessionId = sessionRecord.id;
+    } else if (scriptEntrypoint) {
+      const sessionRecords = sessionsDb.sessions.findByScriptEntrypoint(scriptEntrypoint as string);
+      sessionId = sessionRecords[0].id;
+    }
+  }
+  console.log('opening session_ db', { dataLocation, sessionId });
+  sessionDb = new SessionDb(dataLocation, sessionId, readonlyAndFileMustExist);
 
   try {
     const session = sessionDb.session.get();
-    const otherSessions = sessionsDb.sessions.findByScriptEntrypoint(session.scriptEntrypoint);
-    for (const otherSession of otherSessions) {
-      relatedScriptInstances.push({
-        id: otherSession.scriptInstanceId,
-        startDate: otherSession.scriptStartDate,
-        defaultSessionId: otherSession.id,
-      });
-      if (otherSession.scriptInstanceId === session.scriptInstanceId) {
-        relatedSessions.push({ id: otherSession.id, name: otherSession.name });
+    if (sessionsDb) {
+      const otherSessions = sessionsDb.sessions.findByScriptEntrypoint(session.scriptEntrypoint);
+      for (const otherSession of otherSessions) {
+        relatedScriptInstances.push({
+          id: otherSession.scriptInstanceId,
+          startDate: otherSession.scriptStartDate,
+          defaultSessionId: otherSession.id,
+        });
+        if (otherSession.scriptInstanceId === session.scriptInstanceId) {
+          relatedSessions.push({ id: otherSession.id, name: otherSession.name });
+        }
       }
     }
 
@@ -58,6 +65,7 @@ export default async function fetchSessionMeta(req: IncomingMessage, res: Server
     res.end(
       JSON.stringify({
         ...session,
+        dataLocation,
         unresponsiveSeconds: sessionLoader.unresponsiveSeconds,
         hasRecentErrors: sessionLoader.hasRecentErrors,
         relatedScriptInstances: relatedScriptInstances,

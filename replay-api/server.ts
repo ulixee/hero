@@ -28,6 +28,6 @@ export default async (req: http.IncomingMessage, res: http.ServerResponse) => {
       'content-type': 'application/json',
     });
     res.end(JSON.stringify({ message: 'There as been an internal server error.', error }));
-    if (!isTest) console.log(`${req.method.padEnd(7)} -> ${req.url} (500 ${error})`);
+    if (!isTest) console.log(`${req.method.padEnd(7)} -> ${req.url} (500 ${error.stack})`);
   }
 };

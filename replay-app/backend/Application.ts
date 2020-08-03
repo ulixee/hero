@@ -8,6 +8,8 @@ import storage from './storage';
 import Window from './models/Window';
 import { ChildProcess } from 'child_process';
 import InternalServer from '~shared/constants/files';
+import * as Fs from 'fs';
+import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
 export default class Application {
   public static instance = new Application();
@@ -75,7 +77,7 @@ export default class Application {
     const [dataLocation, sessionName, scriptInstanceId, replayApiPackagePath] = args;
 
     await this.startLocalApi(replayApiPackagePath);
-    await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId);
+    await this.loadSessionReplay({ dataLocation, sessionName, scriptInstanceId });
   }
 
   private async startLocalApi(replayApiPackagePath?: string) {
@@ -91,17 +93,12 @@ export default class Application {
     }
   }
 
-  private async loadSessionReplay(
-    dataLocation: string,
-    sessionName: string,
-    scriptInstanceId: string,
-    useCurrentTab: boolean = false,
-  ) {
-    const replayApi = await ReplayApi.connect(dataLocation, sessionName, scriptInstanceId);
+  private async loadSessionReplay(replay: IReplayMeta, useCurrentTab = false) {
+    const replayApi = await ReplayApi.connect(replay);
     storage.addToHistory({
-      dataLocation,
-      sessionName,
-      scriptInstanceId,
+      dataLocation: replayApi.dataLocation,
+      sessionName: replayApi.saSession.name,
+      scriptInstanceId: replayApi.saSession.scriptInstanceId,
       scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
     });
     if (Window.list.filter(x => x !== null).length === 0) {
@@ -209,9 +206,8 @@ export default class Application {
       }
     });
 
-    ipcMain.on('navigate-to-history', async (e, item, useCurrentTab) => {
-      const { dataLocation, sessionName, scriptInstanceId } = item;
-      await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId, useCurrentTab);
+    ipcMain.on('navigate-to-history', async (e, replayMeta, useCurrentTab) => {
+      await this.loadSessionReplay(replayMeta, useCurrentTab);
     });
 
     ipcMain.on('navigate-to-session-page', async (e, page: { id: string; url: string }) => {
@@ -247,7 +243,7 @@ export default class Application {
 
     ipcMain.on('open-file', async () => {
       const result = await dialog.showOpenDialog({
-        properties: ['openFile'],
+        properties: ['openFile', 'showHiddenFiles'],
         filters: [
           { name: 'All Files', extensions: ['js', 'ts', 'db'] },
           { name: 'Session Database', extensions: ['db'] },
@@ -256,7 +252,24 @@ export default class Application {
         ],
       });
       if (result.filePaths.length) {
-        // TODO: recurse to sessions directory for this script
+        const [filename] = result.filePaths;
+        if (filename.endsWith('.db')) {
+          return this.loadSessionReplay({ dataLocation: filename }, true);
+        }
+        let sessionContainerDir = Path.dirname(filename);
+        while (Fs.existsSync(sessionContainerDir)) {
+          const sessionsDir = Fs.existsSync(`${sessionContainerDir}/.sessions`);
+          if (sessionsDir) {
+            return this.loadSessionReplay(
+              {
+                dataLocation: `${sessionContainerDir}/.sessions`,
+                scriptEntrypoint: filename,
+              },
+              true,
+            );
+          }
+          sessionContainerDir = Path.resolve(sessionContainerDir, '..');
+        }
       }
     });
 

@@ -5,6 +5,7 @@ import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import ISaSession, { IMinorTick } from '~shared/interfaces/ISaSession';
 import { IDomChangeEvent } from '../injected-scripts/interfaces/IDomChangeEvent';
 import ChildProcess from 'child_process';
+import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
 const httpAgent = new Agent({ keepAlive: true });
 const axios = Axios.create({
@@ -15,7 +16,7 @@ export default class ReplayApi extends EventEmitter {
   private static localApiHost: string;
 
   public readonly saSession: ISaSession;
-  public readonly dataLocation: string;
+  public dataLocation: string;
   public sessionId: string;
   public urlOrigin: string;
   public isActive = true;
@@ -29,19 +30,13 @@ export default class ReplayApi extends EventEmitter {
   private paintEvents: IPaintEvent[] = [];
   private paintEventsLoadedIndex = -1;
 
-  constructor(
-    apiHost: string,
-    dataLocation: string,
-    sessionName: string,
-    scriptInstanceId: string,
-  ) {
+  constructor(apiHost: string, replay: IReplayMeta) {
     super();
     this.apiHost = apiHost;
-    this.dataLocation = dataLocation;
+    this.dataLocation = replay.dataLocation;
     this.saSession = {
-      dataLocation,
-      name: sessionName,
-      scriptInstanceId,
+      ...replay,
+      name: replay.sessionName,
     } as any;
   }
 
@@ -50,11 +45,16 @@ export default class ReplayApi extends EventEmitter {
       dataLocation: this.dataLocation,
       name: this.saSession.name,
       scriptInstanceId: this.saSession.scriptInstanceId,
+      scriptEntrypoint: this.saSession.scriptEntrypoint,
     };
     const response = await axios.get(`${this.apiHost}/sessionMeta`, { params });
-    console.log(`Updated ReplayApi.sessionMeta`, params);
+    console.log(`Updated ReplayApi.sessionMeta`, params, {
+      sessionId: response.data.id,
+      dataLocation: response.data.dataLocation,
+    });
     Object.assign(this.saSession, response.data);
     this.sessionId = this.saSession.id;
+    this.dataLocation = response.data.dataLocation;
 
     this.paintEvents = this.saSession.paintEvents ?? [];
     delete this.saSession.paintEvents;
@@ -268,8 +268,8 @@ export default class ReplayApi extends EventEmitter {
     return null;
   }
 
-  public static async connect(dataLocation: string, sessionName: string, scriptInstanceId: string) {
-    const api = new ReplayApi(this.localApiHost, dataLocation, sessionName, scriptInstanceId);
+  public static async connect(replay: IReplayMeta) {
+    const api = new ReplayApi(this.localApiHost, replay);
     console.log(`CONNECTED TO REPLAY API: [${this.localApiHost}]`);
     await api.updateSaSession();
     return api;
