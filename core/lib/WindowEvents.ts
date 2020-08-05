@@ -149,7 +149,7 @@ export default class WindowEvents {
   private onMitmRequestResponse(responseEvent: IRequestSessionResponseEvent) {
     const { request, requestTime, wasCached, body, response } = responseEvent;
     const sessionId = this.window.session.id;
-    log.info('Chrome.Response', {
+    log.info('Http.Response', {
       sessionId,
       url: request.url,
       method: request.method,

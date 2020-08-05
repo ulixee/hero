@@ -10,6 +10,7 @@ export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
       ['timestamp', 'TEXT'],
       ['action', 'TEXT'],
       ['level', 'TEXT'],
+      ['module', 'TEXT'],
       ['isGlobal', 'INTEGER'],
       ['parentId', 'INTEGER'],
       ['data', 'TEXT'],
@@ -29,6 +30,7 @@ export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
       log.timestamp.toISOString(),
       log.action,
       log.level,
+      log.module,
       log.sessionId !== null ? 0 : 1,
       log.parentId,
       data,
@@ -47,6 +49,7 @@ export interface ISessionLogRecord {
   timestamp: string;
   action: string;
   level: string;
+  module: string;
   isGlobal?: boolean;
   parentId?: number;
   data?: any;

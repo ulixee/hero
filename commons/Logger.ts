@@ -45,7 +45,7 @@ class Log implements ILog {
     }
 
     const id = (logId += 1);
-    const entry = {
+    const entry: ILogEntry = {
       id,
       sessionId,
       parentId,
@@ -53,6 +53,7 @@ class Log implements ILog {
       action,
       data: logData,
       level,
+      module: this.module,
     };
     const printToConsole = logLevels.indexOf(level) >= this.logLevel;
     if (printToConsole) {
@@ -110,6 +111,7 @@ export interface ILogEntry {
   id: number;
   timestamp: Date;
   action: string;
+  module: string;
   sessionId?: string;
   parentId?: number;
   data?: any;

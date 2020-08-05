@@ -16,7 +16,7 @@ export default class ScriptInstance {
   }
 
   public launchReplay(sessionName: string, sessionsDataLocation: string) {
-    if (process.env.SA_SHOW_REPLAY === 'false') return;
+    if (process.env.SA_SHOW_REPLAY !== 'true') return;
 
     const launch = require('@secret-agent/replay').default;
     launch({

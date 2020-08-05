@@ -121,7 +121,7 @@ export default class MitmRequestHandler {
       session.trackResource(ctx);
       session.emit('request', MitmRequestContext.toEmittedResource(ctx));
 
-      log.info(`Mitm.handleRequest`, {
+      log.info(`Http.Request`, {
         sessionId: session.sessionId,
         url: ctx.url,
         hasSession: !!session,

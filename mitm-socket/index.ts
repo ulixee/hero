@@ -70,7 +70,13 @@ export default class MitmSocket {
   public onListening() {
     const socket = (this.socket = net.connect(this.socketPath));
     socket.on('error', error => {
-      log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId, error });
+      log.error('SocketConnectDriver.SocketError', {
+        sessionId: this.sessionId,
+        error,
+        socketPath: this.socketPath,
+        host: this.connectOpts?.host,
+        clientHello: this.connectOpts?.clientHelloId,
+      });
       if ((error as any)?.code === 'ENOENT') this.close();
       this.isConnected = false;
     });
@@ -98,7 +104,12 @@ export default class MitmSocket {
 
     child.on('error', error => {
       promise.reject(error);
-      log.error('SocketConnectDriver.ChildConnectError', { sessionId: this.sessionId, error });
+      log.error('SocketConnectDriver.ChildConnectError', {
+        sessionId: this.sessionId,
+        error,
+        host: this.connectOpts?.host,
+        clientHello: this.connectOpts?.clientHelloId,
+      });
       this.close();
     });
 
@@ -162,9 +173,19 @@ export default class MitmSocket {
         if (matches?.length) {
           this.alpn = matches[1];
         }
-        log.stats('SocketHandler.Connected', { sessionId: this.sessionId, alpn: this.alpn });
+        log.stats('SocketHandler.Connected', {
+          sessionId: this.sessionId,
+          alpn: this.alpn,
+          host: this.connectOpts?.host,
+          clientHello: this.connectOpts?.clientHelloId,
+        });
       } else if (message) {
-        log.info('SocketHandler.onData', { sessionId: this.sessionId, message });
+        log.info('SocketHandler.onData', {
+          sessionId: this.sessionId,
+          message,
+          host: this.connectOpts?.host,
+          clientHello: this.connectOpts?.clientHelloId,
+        });
       }
     }
   }

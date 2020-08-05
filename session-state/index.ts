@@ -291,7 +291,7 @@ export default class SessionState {
 
   public captureError(frameId: string, source: string, error: Error) {
     log.error('Window.error', { sessionId: this.sessionId, source, error });
-    this.db.pageLogs.insert(frameId, source, error.stack ?? String(error), new Date());
+    this.db.pageLogs.insert(frameId, source, error.stack || String(error), new Date());
   }
 
   public captureLog(frameId: string, consoleType: string, message: string, location?: string) {
