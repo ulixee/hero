@@ -86,7 +86,7 @@ jobs:
           command: yarn install --frozen-lockfile
       - run:
           name: Compile Typescript and Build Electron Webpages
-          command: cd ~/project/replay-app && yarn build && build:icons
+          command: cd ~/project/replay-app && yarn build && yarn build:icons
       - run:
           name: Yarn electron-build
           command: cd ~/project/build/replay-app && yarn && pwd && yarn electron-builder -m --publish always
@@ -108,7 +108,7 @@ jobs:
           command: yarn install --frozen-lockfile
       - run:
           name: Compile Typescript and Build Electron Webpages
-          command: cd ~/project/replay-app && yarn build && build:icons
+          command: cd ~/project/replay-app && yarn build && yarn build:icons
       - run:
           name: Yarn electron-build
           command: cd ~/project/build/replay-app && yarn && pwd && yarn electron-builder -wl --publish always
@@ -123,7 +123,7 @@ jobs:
       - image: circleci/golang:1.14
     steps:
       - checkout
-      - run: cd ~/project/mitm-socket curl -sL https://git.io/goreleaser | bash
+      - run: cd ~/project/mitm-socket && curl -sL https://git.io/goreleaser | bash
 
 workflows:
   version: 2
