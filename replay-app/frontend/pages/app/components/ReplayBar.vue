@@ -1,5 +1,5 @@
 <template lang="pug">
-.ReplayBar.Component(:style="cssVars")
+.ReplayBar.Component(:style="cssVars" v-if="store.hasSaSession")
   button.start(v-if="!isPlaying" @click.prevent="play")
     span.label Start
     Icon(:src="ICON_PLAY" :size="14")

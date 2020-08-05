@@ -3,7 +3,7 @@ import * as Path from 'path';
 import Url, { URL } from 'url';
 import querystring from 'querystring';
 import Log from '@secret-agent/commons/Logger';
-import http, { IncomingMessage } from 'http';
+import http, { IncomingMessage, RequestListener } from 'http';
 import https from 'https';
 import { createPromise } from '@secret-agent/commons/utils';
 import HttpProxyAgent from 'http-proxy-agent';
@@ -11,6 +11,9 @@ import HttpsProxyAgent from 'https-proxy-agent';
 import Koa from 'koa';
 import KoaRouter from '@koa/router';
 import Core from '../core';
+import * as fs from 'fs';
+import { Helpers } from './index';
+import { AddressInfo } from 'net';
 
 const { log } = Log(module);
 
@@ -61,6 +64,51 @@ export async function runKoaServer(): Promise<ITestKoaServer> {
   return router;
 }
 
+export function sslCerts() {
+  return {
+    key: fs.readFileSync(`${__dirname}/certs/key.pem`),
+    cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
+  };
+}
+
+export async function runHttpsServer(handler: RequestListener) {
+  const options = {
+    ...sslCerts(),
+  };
+
+  const server = https
+    .createServer(options, handler)
+    .listen(0)
+    .unref();
+  await new Promise(resolve => server.once('listening', resolve));
+
+  const port = (server.address() as AddressInfo).port;
+  const baseUrl = `https://localhost:${port}`;
+  const httpServer = {
+    isClosing: false,
+    on(eventName, fn) {
+      server.on(eventName, fn);
+    },
+    async close() {
+      if (httpServer.isClosing) {
+        return null;
+      }
+      httpServer.isClosing = true;
+      return new Promise(resolve => {
+        server.close(() => setTimeout(resolve, 10));
+      });
+    },
+    baseUrl,
+    url: `${baseUrl}/`,
+    port,
+    server,
+  };
+
+  needsClosing.push(httpServer);
+
+  return httpServer;
+}
+
 export async function runHttpServer(
   cookieValue?: string,
   onPost?: (data: string) => void,
@@ -109,7 +157,8 @@ export async function runHttpServer(
   server.listen(port);
 
   const baseUrl = `http://localhost:${port}`;
-  const httpServer: any = {
+  const httpServer = {
+    isClosing: false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },

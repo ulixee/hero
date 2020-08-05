@@ -81,7 +81,7 @@ export default class Window {
     this.interactor = new Interactor(this);
     this.locationTracker = new LocationTracker(this.sessionState);
     this.events = new WindowEvents(this);
-    this.frameTracker = new FrameTracker(this.devtoolsClient);
+    this.frameTracker = new FrameTracker(this.devtoolsClient, sessionState);
     this.domEnv = new DomEnv(this.sessionId, this.frameTracker, this.devtoolsClient);
   }
 

@@ -1,11 +1,10 @@
-dist: socket/build
 before:
   hooks:
-    - cd socket && go mod download
+    - cd lib && go mod download
 builds:
   - id: 'connect'
     binary: connect
-    dir: ./socket
+    dir: ./lib
     goos:
       - linux
       - windows

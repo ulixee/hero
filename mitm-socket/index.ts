@@ -9,8 +9,11 @@ import { v1 } from 'uuid';
 
 const { log } = Log(module);
 
+const ext = os.platform() === 'win32' ? '.exe' : '';
+const libPath = `${__dirname}/dist/connect${ext}`;
+
 let counter = 0;
-export default class SocketConnectDriver {
+export default class MitmSocket {
   public readonly socketPath: string;
   public alpn = 'http/1.1';
   public socket: net.Socket;
@@ -29,6 +32,11 @@ export default class SocketConnectDriver {
 
     if (connectOpts.debug === undefined) connectOpts.debug = log.level === 'stats';
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
+  }
+
+  public isReusable() {
+    if (!this.socket || this.isClosing || !this.isConnected) return false;
+    return this.socket.writable && !this.socket.destroyed;
   }
 
   public setProxy(url: string, auth?: string) {
@@ -64,6 +72,7 @@ export default class SocketConnectDriver {
     socket.on('error', error => {
       log.error('SocketConnectDriver.SocketError', { sessionId: this.sessionId, error });
       if ((error as any)?.code === 'ENOENT') this.close();
+      this.isConnected = false;
     });
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
@@ -71,9 +80,8 @@ export default class SocketConnectDriver {
 
   public async connect() {
     await this.cleanSocketPathIfNeeded();
-    const ext = os.platform() === 'win32' ? '.exe' : '';
     const child = (this.child = spawn(
-      `${__dirname}/../socket/connect${ext}`,
+      libPath,
       [this.socketPath, JSON.stringify(this.connectOpts)],
       {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -129,6 +137,7 @@ export default class SocketConnectDriver {
   private cleanupSocket() {
     if (!this.socket) return;
     this.socket.end();
+    this.isConnected = false;
     unlink(this.socketPath, () => null);
     delete this.socket;
   }
@@ -153,6 +162,7 @@ export default class SocketConnectDriver {
         if (matches?.length) {
           this.alpn = matches[1];
         }
+        log.stats('SocketHandler.Connected', { sessionId: this.sessionId, alpn: this.alpn });
       } else if (message) {
         log.info('SocketHandler.onData', { sessionId: this.sessionId, message });
       }
@@ -167,6 +177,9 @@ export default class SocketConnectDriver {
       message.includes('connection refused')
     ) {
       this.socket?.destroy(new Error(message));
+      this.close();
+    }
+    if (message.includes('DomainSocket -> EOF') && !this.connectOpts.keepAlive) {
       this.close();
     }
   }

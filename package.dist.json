@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "postinstall": "yarn workspace @secret-agent/mitm postinstall && yarn workspace @secret-agent/emulators postinstall"
+    "postinstall": "yarn workspace @secret-agent/mitm-socket postinstall && yarn workspace @secret-agent/emulators postinstall"
   },
   "devDependencies": {
     "lerna": "^3.4.3",
@@ -15,6 +15,7 @@
       "client",
       "core",
       "core-interfaces",
+      "core-server",
       "emulators",
       "emulator-plugins/*",
       "full-client",
@@ -22,7 +23,7 @@
       "humanoid-plugins/*",
       "injected-scripts",
       "mitm",
-      "core-server",
+      "mitm-socket",
       "remote-client",
       "remote-interfaces",
       "replay",

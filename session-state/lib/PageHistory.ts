@@ -52,6 +52,7 @@ export default class PageHistory {
     const prevTop = this.top;
     // if in-page, set the state to match current top
     if (reason === 'inPage') {
+      if (url === prevTop?.finalUrl) return;
       for (const [state, date] of prevTop?.stateChanges ?? []) {
         if (state === LocationStatus.DomContentLoaded) entry.stateChanges.set(state, new Date());
         if (state === LocationStatus.AllContentLoaded) entry.stateChanges.set(state, new Date());

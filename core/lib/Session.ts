@@ -68,9 +68,9 @@ export default class Session {
     this.isShuttingDown = true;
     // so named so you don't move this after window.close!
     await this.sessionState.saveBeforeWindowClose();
+    await this.window.close();
     await this.requestMitmProxySession.close();
     await this.proxy.close();
-    await this.window.close();
     this.chromeCore.cleanupSession(this.id);
 
     if (!this.chromeCore.isShuttingDown) {

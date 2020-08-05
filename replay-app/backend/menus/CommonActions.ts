@@ -1,9 +1,9 @@
 import { extname } from 'path';
 import { dialog } from 'electron';
-import Application from '../Application';
+import Window from '../models/Window';
 
 export const saveAs = async () => {
-  const { title, webContents } = Application.instance.windowManager.current.tabManager.selected;
+  const { title, webContents } = Window.current.selectedTab;
 
   const { canceled, filePath } = await dialog.showSaveDialog({
     defaultPath: title,
@@ -21,11 +21,11 @@ export const saveAs = async () => {
 };
 
 export const viewSource = async () => {
-  const { tabManager } = Application.instance.windowManager.current;
+  const window = Window.current;
   // tabManager.createTab({ url: `view-source:${tabManager.selected.url}`, active: true }, true);
 };
 
 export const printPage = () => {
-  const { webContents } = Application.instance.windowManager.current.tabManager.selected;
+  const { webContents } = Window.current.selectedTab;
   webContents.print();
 };

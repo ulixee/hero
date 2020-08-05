@@ -11,7 +11,7 @@ module.exports = {
     'emulator-plugins/**/*.{js}',
     'full-client/**/*.{js}',
     'humanoids/**/*.{js}',
-    'mitm/**/*.{js}',
+    'mitm*/**/*.{js}',
     'remote-client/**/*.{js}',
     'replay-api/**/*.{js}',
     'session-state/**/*.{js}',
@@ -21,7 +21,7 @@ module.exports = {
   modulePathIgnorePatterns: ['config'],
   globalTeardown: './jest.teardown.js',
   globalSetup: './jest.setup.js',
-  testTimeout: 20e3,
+  testTimeout: 10e3,
   reporters: [
     'default',
     [
@@ -30,7 +30,7 @@ module.exports = {
         failuresOnly: true,
       },
     ],
-    'jest-junit'
+    'jest-junit',
   ],
   roots: [
     'client/',
@@ -42,6 +42,7 @@ module.exports = {
     'humanoids/',
     'humanoid-plugins/',
     'mitm/',
+    'mitm-socket/',
     'remote-client/',
     'replay-api/',
     'session-state/',
@@ -56,6 +57,7 @@ module.exports = {
     'full-client/node_modules',
     'humanoids/node_modules',
     'mitm/node_modules',
+    'mitm-socket/node_modules',
     'remote-client/node_modules',
     'replay-api/**/node_modules',
     'session-state/**/node_modules',

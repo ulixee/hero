@@ -4,10 +4,8 @@ import { Helpers } from '@secret-agent/testing';
 import RequestSession from '../handlers/RequestSession';
 import HttpProxyAgent from 'http-proxy-agent';
 import MitmRequestHandler from '../lib/MitmRequestHandler';
-import * as https from 'https';
 import { AddressInfo } from 'net';
 import WebSocket from 'ws';
-import * as fs from 'fs';
 import { createPromise } from '@secret-agent/commons/utils';
 import HeadersHandler from '../handlers/HeadersHandler';
 
@@ -52,25 +50,9 @@ describe('basic MitM tests', () => {
   });
 
   it('should be able to man-in-the-middle an https request', async () => {
-    const options = {
-      key: fs.readFileSync(`${__dirname}/certs/key.pem`),
-      cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
-    };
-
-    const server = https
-      .createServer(options, (req, res1) => {
-        return res1.end('Secure as anything!');
-      })
-      .listen(0)
-      .unref();
-    Helpers.onClose(
-      () =>
-        new Promise(resolve => {
-          server.close(() => resolve());
-        }),
-    );
-
-    const serverPort = (server.address() as AddressInfo).port;
+    const server = await Helpers.runHttpsServer((req, res1) => {
+      return res1.end('Secure as anything!');
+    });
 
     const mitmServer = await MitmServer.start(9001);
     Helpers.onClose(() => mitmServer.close());
@@ -82,7 +64,7 @@ describe('basic MitM tests', () => {
     expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
 
     process.env.MITM_ALLOW_INSECURE = 'true';
-    const res = await Helpers.httpGet(`https://localhost:${serverPort}`, proxyHost, headers);
+    const res = await Helpers.httpGet(server.baseUrl, proxyHost, headers);
     expect(res.includes('Secure as anything!')).toBeTruthy();
     expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
     process.env.MITM_ALLOW_INSECURE = 'false';
@@ -298,7 +280,7 @@ describe('basic MitM tests', () => {
     });
 
     const wsClient = new WebSocket(`ws://localhost:${httpServer.port}`, {
-      agent: new HttpProxyAgent(`http://localhost:${mitmServer.port}`),
+      agent: HttpProxyAgent(`http://localhost:${mitmServer.port}`),
       headers: session.getTrackingHeaders(),
     });
 

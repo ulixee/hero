@@ -1,8 +1,7 @@
-import { Menu, webContents, app, BrowserWindow, MenuItem, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from 'electron';
 import { defaultTabOptions } from '~shared/constants/tabs';
-import { viewSource, saveAs, printPage } from './CommonActions';
+import { saveAs, viewSource } from './CommonActions';
 import Window from '../models/Window';
-import Application from '../Application';
 
 const isMac = process.platform === 'darwin';
 
@@ -32,14 +31,14 @@ export default function generateAppMenu() {
         ...createMenuItem(
           ['CmdOrCtrl+N'],
           () => {
-            Application.instance.windowManager.createWindow();
+            Window.create();
           },
           'New Window',
         ),
         ...createMenuItem(
           ['CmdOrCtrl+T'],
           window => {
-            window.tabManager.createTab(defaultTabOptions);
+            window.createAppTab(defaultTabOptions);
           },
           'New Tab',
         ),
@@ -66,7 +65,7 @@ export default function generateAppMenu() {
         ...createMenuItem(
           ['CmdOrCtrl+W', 'CmdOrCtrl+F4'],
           window => {
-            window.sendToRenderer('remove-tab', window.tabManager.selectedId);
+            window.sendToRenderer('remove-tab', window.selectedTabId);
           },
           'Close Tab',
         ),
@@ -117,7 +116,7 @@ export default function generateAppMenu() {
         // ...createMenuItem(
         //   ['CmdOrCtrl+F'],
         //   () => {
-        //     Application.instance.windowManager.current.sendToRenderer('find');
+        //     Window.current.sendToRenderer('find');
         //   },
         //   'Find in page',
         // ),
@@ -129,14 +128,14 @@ export default function generateAppMenu() {
         ...createMenuItem(
           ['CmdOrCtrl+R', 'F5'],
           () => {
-            Application.instance.windowManager.current.tabManager.selected.webContents.reload();
+            Window.current.selectedTab.webContents.reload();
           },
           'Reload',
         ),
         ...createMenuItem(
           ['CmdOrCtrl+Shift+R', 'Shift+F5'],
           () => {
-            Application.instance.windowManager.current.tabManager.selected.webContents.reloadIgnoringCache();
+            Window.current.selectedTab.webContents.reloadIgnoringCache();
           },
           'Reload ignoring cache',
         ),
@@ -157,7 +156,7 @@ export default function generateAppMenu() {
           ['CmdOrCtrl+Shift+I', 'CmdOrCtrl+Shift+J', 'F12'],
           () => {
             setTimeout(() => {
-              Application.instance.windowManager.current.tabManager.selected.webContents.toggleDevTools();
+              Window.current.selectedTab.webContents.toggleDevTools();
             }, 0);
           },
           'Developer Tools',
@@ -177,14 +176,14 @@ export default function generateAppMenu() {
         ...createMenuItem(
           isMac ? ['Cmd+Option+Right'] : ['Ctrl+Tab', 'Ctrl+PageDown'],
           () => {
-            Application.instance.windowManager.current.webContents.send('select-next-tab');
+            Window.current.webContents.send('select-next-tab');
           },
           'Select next tab',
         ),
         ...createMenuItem(
           isMac ? ['Cmd+Option+Left'] : ['Ctrl+Shift+Tab', 'Ctrl+PageUp'],
           () => {
-            Application.instance.windowManager.current.webContents.send('select-previous-tab');
+            Window.current.webContents.send('select-previous-tab');
           },
           'Select previous tab',
         ),
@@ -217,7 +216,7 @@ export default function generateAppMenu() {
     createMenuItem(
       Array.from({ length: 8 }, (v, k) => k + 1).map(i => `CmdOrCtrl+${i}`),
       (window, menuItem, i) => {
-        Application.instance.windowManager.current.webContents.send('select-tab-index', i);
+        Window.current.webContents.send('select-tab-index', i);
       },
     ),
   );
@@ -225,7 +224,7 @@ export default function generateAppMenu() {
   // Ctrl+9
   template[0].submenu = template[0].submenu.concat(
     createMenuItem(['CmdOrCtrl+9'], () => {
-      Application.instance.windowManager.current.webContents.send('select-last-tab');
+      Window.current.webContents.send('select-last-tab');
     }),
   );
 
@@ -247,7 +246,7 @@ function createMenuItem(
     enabled,
     click: (menuItem: MenuItem, browserWindow: BrowserWindow) =>
       action(
-        Application.instance.windowManager.list.find(x => x.browserWindow.id === browserWindow.id),
+        Window.list.find(x => x.browserWindow?.id === browserWindow?.id),
         menuItem,
         key,
       ),

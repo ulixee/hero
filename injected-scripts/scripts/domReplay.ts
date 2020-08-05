@@ -4,10 +4,6 @@ import { INodeData, IDomChangeEvent } from '../interfaces/IDomChangeEvent';
 
 const idMap = new Map<number, Node>();
 
-function getNode(id: number) {
-  return idMap.get(id);
-}
-
 // @ts-ignore
 // tslint:disable-next-line:only-arrow-functions
 window.setDocumentId = function(documentId: number) {
@@ -17,52 +13,105 @@ window.setDocumentId = function(documentId: number) {
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 // @ts-ignore
 // tslint:disable-next-line:only-arrow-functions
-window.applyDomChanges = function(changes: IDomChangeEvent[]) {
-  for (const change of changes) {
-    if (change[1] === 'newDocument') {
+window.applyDomChanges = function(changeEvents: IDomChangeEvent[]) {
+  for (const changeEvent of changeEvents) {
+    const [commandId, action, data] = changeEvent;
+    if (action === 'newDocument') {
+      if (location.href !== data.textContent) {
+        console.log(
+          'Document changed. (Command %s. %s ==> %s)',
+          commandId === -1 ? 'load' : commandId,
+          window.location.href,
+          data.textContent,
+        );
+        const newUrl = new URL(data.textContent);
+
+        if (location.origin === newUrl.origin) {
+          window.history.replaceState({}, 'Replay', data.textContent);
+          idMap.clear();
+          window.scrollTo({ top: 0 });
+          document.documentElement.innerHTML = '';
+        } else {
+          // if it's an origin change, we have to change page
+          location.href = newUrl.href;
+        }
+      }
       continue;
     }
 
-    const data = change[2];
+    if (action === 'location') {
+      console.log('Location changed', commandId, data);
+      window.history.replaceState({}, 'Replay', data.textContent);
+      return;
+    }
 
     if (preserveElements.includes(data.tagName)) {
       const elem = document.querySelector(data.tagName);
+      if (!elem) {
+        console.log('Preserved element doesnt exist!', data.tagName);
+      }
       idMap.set(data.id, elem);
       continue;
     }
-
-    const node = deserializeNode(data);
-    const parent = getNode(data.parentNodeId);
-    if (!parent && (change[1] === 'added' || change[1] === 'removed')) {
-      // tslint:disable-next-line:no-console
-      console.log('WARN: parent node id not found', JSON.stringify(data, null, 2));
+    if (data.nodeType === document.DOCUMENT_NODE) {
+      idMap.set(data.id, document);
+      continue;
+    }
+    if (data.nodeType === document.DOCUMENT_TYPE_NODE) {
+      idMap.set(data.id, document.doctype);
       continue;
     }
 
-    switch (change[1]) {
-      case 'added':
-        let next: Node;
-        if (getNode(data.previousSiblingId)) {
-          next = getNode(data.previousSiblingId).nextSibling;
+    let node: Node;
+    let parentNode: Node;
+    try {
+      node = deserializeNode(data);
+      parentNode = getNode(data.parentNodeId);
+      if (!parentNode && (action === 'added' || action === 'removed')) {
+        // tslint:disable-next-line:no-console
+        console.log('WARN: parent node id not found', data);
+        continue;
+      }
+      if (node && preserveElements.includes((node as Element).tagName)) {
+        if (action === 'removed') {
+          console.log('WARN: script trying to remove preserved node', data);
+          continue;
         }
-        if (next) parent.insertBefore(node, next);
-        else parent.appendChild(node);
-        break;
-      case 'removed':
-        parent.removeChild(node);
-        break;
-      case 'attribute':
-        setNodeAttributes(node as Element, data);
-        break;
-      case 'property':
-        setNodeProperties(node as Element, data);
-        break;
-      case 'text':
-        deserializeNode(data).textContent = data.textContent;
-        break;
+      }
+
+      switch (action) {
+        case 'added':
+          let next: Node;
+          if (getNode(data.previousSiblingId)) {
+            next = getNode(data.previousSiblingId).nextSibling;
+          }
+          if (next) parentNode.insertBefore(node, next);
+          else parentNode.appendChild(node);
+          break;
+        case 'removed':
+          parentNode.removeChild(node);
+          break;
+        case 'attribute':
+          setNodeAttributes(node as Element, data);
+          break;
+        case 'property':
+          setNodeProperties(node as Element, data);
+          break;
+        case 'text':
+          deserializeNode(data).textContent = data.textContent;
+          break;
+      }
+    } catch (error) {
+      console.log('ERROR applying action', error, parentNode, node, data);
     }
   }
 };
+
+// HELPER FUNCTIONS ////////////////////
+
+function getNode(id: number) {
+  return idMap.get(id);
+}
 
 function setNodeAttributes(node: Element, data: INodeData) {
   if (!data.attributes) return;
@@ -105,7 +154,7 @@ function deserializeNode(data: INodeData, parent?: Element): Node {
       break;
   }
 
-  if (!node) throw new Error('ouch');
+  if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
 
   idMap.set(data.id, node);
 

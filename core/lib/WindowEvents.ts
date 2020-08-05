@@ -11,7 +11,6 @@ import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
 import WebSocketFrameSentEvent = Protocol.Network.WebSocketFrameSentEvent;
 import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEvent;
 import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSendHandshakeRequestEvent;
-import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
 import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent;
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
@@ -80,7 +79,10 @@ export default class WindowEvents {
     const requestSession = this.window.session.requestMitmProxySession;
     requestSession.on('httpError', () => this.emit('request-intercepted'));
 
-    requestSession.on('request', () => this.emit('request-intercepted'));
+    requestSession.on('request', event => {
+      const resource = this.sessionState.captureResource(event, false);
+      this.emit('request-intercepted');
+    });
     requestSession.on('response', this.onMitmRequestResponse.bind(this));
   }
 
@@ -100,7 +102,6 @@ export default class WindowEvents {
     devtoolsClient.on('Network.requestWillBeSent', this.onNetworkRequestWillBeSent.bind(this));
     devtoolsClient.on('Network.responseReceived', this.onNetworkResponseReceived.bind(this));
 
-    devtoolsClient.on('Page.frameAttached', this.onFrameAttached.bind(this));
     devtoolsClient.on('Page.frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this));
 
     devtoolsClient.on('Page.navigatedWithinDocument', this.onNavigatedWithinDocument.bind(this));
@@ -157,8 +158,8 @@ export default class WindowEvents {
       bytes: body ? Buffer.byteLength(body) : -1,
     });
 
+    const resource = this.sessionState.captureResource(responseEvent, true);
     if (request.method !== 'OPTIONS') {
-      const resource = this.sessionState.captureResource(responseEvent);
       if (resource.url === this.window.navigationUrl) {
         this.sessionState.pages.resourceLoadedForLocation(resource.id);
       }
@@ -252,12 +253,6 @@ export default class WindowEvents {
   }
 
   /////// FRAMES  //////////////////////////////////////////////////////////////////////////////////
-
-  // Fired when frame has been attached to its parent.
-  private async onFrameAttached(frameAttached: FrameAttachedEvent) {
-    const { frameId, parentFrameId } = frameAttached;
-    this.sessionState.captureFrameCreated(frameId, parentFrameId);
-  }
 
   // client-side frame navigations (form posts/gets, redirects/ page reloads)
   private async onFrameRequestedNavigation(frameNavigationRequest: FrameRequestedNavigationEvent) {

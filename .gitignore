@@ -14,15 +14,12 @@ tsconfig.tsbuildinfo
 
 .cache-test
 
-/build/
+**/build/
 /build-dist/
-
-/mitm/socket/connect*
-/mitm/socket/build/
-/mitm/socket/.version
 
 emulators/data/DOM-*.json
 
 /.mitm-ca
 /.sessions
 .gh
+**/dist

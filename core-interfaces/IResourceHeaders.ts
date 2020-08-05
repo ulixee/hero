@@ -1,3 +1,3 @@
 export default interface IResourceHeaders {
-  [name: string]: string;
+  [name: string]: string | string[];
 }

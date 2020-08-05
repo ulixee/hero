@@ -3,6 +3,7 @@ import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 
 export default interface IHttpResourceLoadDetails {
   isSSL: boolean;
+  isUpgrade: boolean;
   isHttp2: boolean;
   remoteAddress?: string;
   localAddress?: string;

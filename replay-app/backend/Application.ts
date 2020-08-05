@@ -1,18 +1,19 @@
 import * as Path from 'path';
 import { app, dialog, ipcMain, Menu } from 'electron';
-import WindowManager from './managers/WindowManager';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
 import { loadNuxt } from 'nuxt-start';
 import ReplayApi from './ReplayApi';
 import storage from './storage';
+import Window from './models/Window';
 import { ChildProcess } from 'child_process';
 import InternalServer from '~shared/constants/files';
+import * as Fs from 'fs';
+import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
 export default class Application {
   public static instance = new Application();
   public overlayManager = new OverlayManager();
-  public windowManager = new WindowManager();
 
   private replayApiProcess: ChildProcess;
 
@@ -65,8 +66,9 @@ export default class Application {
     InternalServer.url = listener.url;
   }
 
-  private async loadLocationFromArgv(argv) {
+  private async loadLocationFromArgv(argv: string[]) {
     const args = argv.slice(2);
+    console.log('Launched with args', argv);
     if (!args.length) {
       await this.startLocalApi();
       this.createWindowIfNeeded();
@@ -75,7 +77,7 @@ export default class Application {
     const [dataLocation, sessionName, scriptInstanceId, replayApiPackagePath] = args;
 
     await this.startLocalApi(replayApiPackagePath);
-    await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId);
+    await this.loadSessionReplay({ dataLocation, sessionName, scriptInstanceId });
   }
 
   private async startLocalApi(replayApiPackagePath?: string) {
@@ -86,35 +88,30 @@ export default class Application {
   }
 
   private createWindowIfNeeded() {
-    if (this.windowManager.list.filter(x => x !== null).length === 0) {
-      this.windowManager.createWindow();
+    if (Window.list.filter(x => x !== null).length === 0) {
+      Window.create();
     }
   }
 
-  private async loadSessionReplay(
-    dataLocation: string,
-    sessionName: string,
-    scriptInstanceId: string,
-    useCurrentTab: boolean = false,
-  ) {
-    const replayApi = await ReplayApi.connect(dataLocation, sessionName, scriptInstanceId);
+  private async loadSessionReplay(replay: IReplayMeta, useCurrentTab = false) {
+    const replayApi = await ReplayApi.connect(replay);
     storage.addToHistory({
-      dataLocation,
-      sessionName,
-      scriptInstanceId,
+      dataLocation: replayApi.dataLocation,
+      sessionName: replayApi.saSession.name,
+      scriptInstanceId: replayApi.saSession.scriptInstanceId,
       scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
     });
-    if (this.windowManager.list.filter(x => x !== null).length === 0) {
-      this.windowManager.createWindow(replayApi);
+    if (Window.list.filter(x => x !== null).length === 0) {
+      Window.create(replayApi);
       return;
     }
 
     // ToDo: need to search windows/tabs for same session
-    const { tabManager } = Application.instance.windowManager.current;
+    const window = Window.current;
     if (useCurrentTab) {
-      tabManager.selected.updateAddressBar({ replayApi });
+      window.openReplayApi(replayApi);
     } else {
-      tabManager.createTab({ replayApi, active: true });
+      window.createReplayTab(replayApi);
     }
   }
 
@@ -124,16 +121,16 @@ export default class Application {
     // WINDOWS
 
     ipcMain.on('window:create', () => {
-      this.windowManager.createWindow();
+      Window.create();
     });
 
     ipcMain.on('window:focus', () => {
-      this.windowManager.current.browserWindow.focus();
-      this.windowManager.current.webContents.focus();
+      Window.current.browserWindow.focus();
+      Window.current.webContents.focus();
     });
 
     ipcMain.on('window:toggle-maximize', () => {
-      const window = this.windowManager.current;
+      const window = Window.current;
       if (window.browserWindow.isMaximized()) {
         window.browserWindow.unmaximize();
       } else {
@@ -142,56 +139,51 @@ export default class Application {
     });
 
     ipcMain.on('window:toggle-minimize', () => {
-      const window = this.windowManager.current;
+      const window = Window.current;
       window.browserWindow.minimize();
     });
 
     ipcMain.on('window:close', () => {
-      const window = this.windowManager.current;
+      const window = Window.current;
       window.browserWindow.close();
     });
 
     ipcMain.on('window:fix-dragging', () => {
-      const window = this.windowManager.current;
+      const window = Window.current;
       window.fixDragging();
     });
 
     // TABS
 
     ipcMain.handle('tab:create', (e, options, sendToRenderer) => {
-      const tabManager = this.windowManager.current.tabManager;
-      return tabManager.createTab(options, false, sendToRenderer);
+      return Window.current.createAppTab(options, false, sendToRenderer);
     });
 
     ipcMain.on('tab:print', (e, details) => {
-      const tabManager = this.windowManager.current.tabManager;
-      tabManager.byId.get(tabManager.selectedId).webContents.print();
+      Window.current.selectedTab.webContents.print();
     });
 
     ipcMain.handle('tab:select', (e, tabId: number) => {
-      const tabManager = this.windowManager.current.tabManager;
-      tabManager.select(tabId);
+      Window.current.selectedTabId = tabId;
     });
 
     ipcMain.on('tab:destroy', (e, tabId: number) => {
-      const tabManager = this.windowManager.current.tabManager;
-      tabManager.destroy(tabId);
+      Window.current.destroyTab(tabId);
     });
 
     ipcMain.on('tab:reload', (e, tabId: number) => {
-      const tabManager = this.windowManager.current.tabManager;
-      tabManager.byId.get(tabManager.selectedId).webContents.reload();
+      Window.current.selectedTab.webContents.reload();
     });
 
     // OVERLAYS
 
     ipcMain.on('overlay:toggle', (e, name, rect) => {
-      const browserWindow = Application.instance.windowManager.current.browserWindow;
+      const browserWindow = Window.current.browserWindow;
       this.overlayManager.toggle(name, browserWindow, rect);
     });
 
     ipcMain.on('overlay:show', (e, name, rect, ...args) => {
-      const browserWindow = Application.instance.windowManager.current.browserWindow;
+      const browserWindow = Window.current.browserWindow;
       this.overlayManager.show(name, browserWindow, rect, ...args);
     });
 
@@ -206,33 +198,35 @@ export default class Application {
     // GOTO
 
     ipcMain.on('navigate-to-location', (e, location, useCurrentTab) => {
-      const { tabManager } = Application.instance.windowManager.current;
+      const currentWindow = Window.current;
       if (useCurrentTab) {
-        tabManager.selected.updateAddressBar({ location });
+        currentWindow.openAppLocation(location);
       } else {
-        tabManager.createTab({ location, active: true });
+        currentWindow.createAppTab({ location, active: true });
       }
     });
 
-    ipcMain.on('navigate-to-history', async (e, item, useCurrentTab) => {
-      const { dataLocation, sessionName, scriptInstanceId } = item;
-      await this.loadSessionReplay(dataLocation, sessionName, scriptInstanceId, useCurrentTab);
+    ipcMain.on('navigate-to-history', async (e, replayMeta, useCurrentTab) => {
+      await this.loadSessionReplay(replayMeta, useCurrentTab);
     });
 
     ipcMain.on('navigate-to-session-page', async (e, page: { id: string; url: string }) => {
-      const { tabManager } = Application.instance.windowManager.current;
-      const offset = tabManager.selected.replayApi.getPageOffset(page);
-      tabManager.selected.changeTickOffset(offset);
+      const replayTab = Window.current?.selectedReplayTab;
+      if (!replayTab) return;
+      const offset = replayTab.replayApi.getPageOffset(page);
+      replayTab.changeTickOffset(offset);
     });
 
     ipcMain.on('on-tick', (e, tickValue) => {
-      const { tabManager } = Application.instance.windowManager.current;
-      tabManager.selected.onTick(tickValue);
+      const replayTab = Window.current?.selectedReplayTab;
+      if (!replayTab) return;
+      replayTab.onTick(tickValue);
     });
 
     ipcMain.on('on-tick-hover', (e, containerRect, tickValue) => {
-      const { tabManager } = Application.instance.windowManager.current;
-      tabManager.selected.onTickHover(containerRect, tickValue);
+      const replayTab = Window.current?.selectedReplayTab;
+      if (!replayTab) return;
+      replayTab.onTickHover(containerRect, tickValue);
     });
 
     // SETTINGS
@@ -249,7 +243,7 @@ export default class Application {
 
     ipcMain.on('open-file', async () => {
       const result = await dialog.showOpenDialog({
-        properties: ['openFile'],
+        properties: ['openFile', 'showHiddenFiles'],
         filters: [
           { name: 'All Files', extensions: ['js', 'ts', 'db'] },
           { name: 'Session Database', extensions: ['db'] },
@@ -258,12 +252,29 @@ export default class Application {
         ],
       });
       if (result.filePaths.length) {
-        // TODO: recurse to sessions directory for this script
+        const [filename] = result.filePaths;
+        if (filename.endsWith('.db')) {
+          return this.loadSessionReplay({ dataLocation: filename }, true);
+        }
+        let sessionContainerDir = Path.dirname(filename);
+        while (Fs.existsSync(sessionContainerDir)) {
+          const sessionsDir = Fs.existsSync(`${sessionContainerDir}/.sessions`);
+          if (sessionsDir) {
+            return this.loadSessionReplay(
+              {
+                dataLocation: `${sessionContainerDir}/.sessions`,
+                scriptEntrypoint: filename,
+              },
+              true,
+            );
+          }
+          sessionContainerDir = Path.resolve(sessionContainerDir, '..');
+        }
       }
     });
 
     ipcMain.on('find-in-page', () => {
-      const window = this.windowManager.current;
+      const window = Window.current;
       window.sendToRenderer('find');
     });
 
@@ -272,8 +283,10 @@ export default class Application {
     });
 
     ipcMain.handle('fetch-script-instances', () => {
-      const tabManager = this.windowManager.current.tabManager;
-      const replayApi = tabManager.byId.get(tabManager.selectedId).replayApi;
+      const replayTab = Window.current?.selectedReplayTab;
+      if (!replayTab) return;
+
+      const replayApi = replayTab.replayApi;
       return replayApi.saSession.relatedScriptInstances.map(x => {
         return {
           ...x,
@@ -286,14 +299,14 @@ export default class Application {
     });
 
     ipcMain.handle('fetch-sessions', () => {
-      const tabManager = this.windowManager.current.tabManager;
-      const replayApi = tabManager.byId.get(tabManager.selectedId).replayApi;
+      const replayApi = Window.current.selectedReplayTab?.replayApi;
+      if (!replayApi) return;
       return replayApi.saSession.relatedSessions;
     });
 
     ipcMain.handle('fetch-session-pages', () => {
-      const tabManager = this.windowManager.current.tabManager;
-      const replayApi = tabManager.byId.get(tabManager.selectedId).replayApi;
+      const replayApi = Window.current.selectedReplayTab?.replayApi;
+      if (!replayApi) return;
       return replayApi.saSession.pages.map(x => {
         return {
           ...x,

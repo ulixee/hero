@@ -1,8 +1,9 @@
 // NOTE: do not use node dependencies
 
 import { ipcRenderer } from 'electron';
-import { INodeData, IDomChangeEvent } from './interfaces/IDomChangeEvent';
+import { IDomChangeEvent, INodeData } from './interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { URL } from 'url';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
@@ -14,38 +15,55 @@ ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scr
   if (scrollEvent) updateScroll(scrollEvent);
 });
 
-function resetDom() {
-  idMap.clear();
-  isMouseInstalled = false;
-  window.scrollTo({ top: 0 });
-  document.documentElement.innerHTML = '';
-  document.head.appendChild(styleElement);
-}
-
-let areClicksActive = false;
-function handleOnClick(e: any) {
-  if (areClicksActive) return true;
+function cancelEvent(e: Event) {
   e.preventDefault();
   e.stopPropagation();
   return false;
 }
-document.addEventListener('click', handleOnClick, true);
-
-ipcRenderer.on('clicks:enable', (e, shouldEnable) => {
-  areClicksActive = shouldEnable;
-});
+document.addEventListener('click', cancelEvent, true);
+document.addEventListener('submit', cancelEvent, true);
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
-    if (changeEvent[1] === 'newDocument') {
-      resetDom();
+    const [commandId, action, data] = changeEvent;
+    if (action === 'newDocument') {
+      if (location.href !== data.textContent) {
+        console.log(
+          'Document changed. (Command %s. %s ==> %s)',
+          commandId === -1 ? 'load' : commandId,
+          window.location.href,
+          data.textContent,
+        );
+        const newUrl = new URL(data.textContent);
+
+        if (location.origin === newUrl.origin) {
+          window.history.replaceState({}, 'Replay', data.textContent);
+          idMap.clear();
+          isMouseInstalled = false;
+          window.scrollTo({ top: 0 });
+          document.documentElement.innerHTML = '';
+          document.head.appendChild(styleElement);
+        } else {
+          // if it's an origin change, we have to change page
+          location.href = newUrl.href;
+        }
+      }
       continue;
     }
 
-    const data = changeEvent[2];
+    if (action === 'location') {
+      console.log('Location changed', commandId, data);
+      window.history.replaceState({}, 'Replay', data.textContent);
+      return;
+    }
+
     if (preserveElements.includes(data.tagName)) {
       const elem = document.querySelector(data.tagName);
+      if (!elem) {
+        console.log('Preserved element doesnt exist!', data.tagName);
+      }
       idMap.set(data.id, elem);
+      if (data.tagName === 'HEAD') document.head.appendChild(styleElement);
       continue;
     }
     if (data.nodeType === document.DOCUMENT_NODE) {
@@ -57,35 +75,50 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       continue;
     }
 
-    const node = deserializeNode(data);
-    const parent = getNode(data.parentNodeId);
-    if (!parent && (changeEvent[1] === 'added' || changeEvent[1] === 'removed')) {
-      // tslint:disable-next-line:no-console
-      console.log('WARN: parent node id not found', data);
-      continue;
-    }
-
-    switch (changeEvent[1]) {
-      case 'added':
-        let next: Node;
-        if (getNode(data.previousSiblingId)) {
-          next = getNode(data.previousSiblingId).nextSibling;
+    let node: Node;
+    let parentNode: Node;
+    try {
+      node = deserializeNode(data);
+      parentNode = getNode(data.parentNodeId);
+      if (data.parentNodeId === null && action === 'added') {
+        parentNode = document;
+      }
+      if (!parentNode && (action === 'added' || action === 'removed')) {
+        // tslint:disable-next-line:no-console
+        console.log('WARN: parent node id not found', data);
+        continue;
+      }
+      if (node && preserveElements.includes((node as Element).tagName)) {
+        if (action === 'removed') {
+          console.log('WARN: script trying to remove preserved node', data);
+          continue;
         }
-        if (next) parent.insertBefore(node, next);
-        else parent.appendChild(node);
-        break;
-      case 'removed':
-        parent.removeChild(node);
-        break;
-      case 'attribute':
-        setNodeAttributes(node as Element, data);
-        break;
-      case 'property':
-        setNodeProperties(node as Element, data);
-        break;
-      case 'text':
-        deserializeNode(data).textContent = data.textContent;
-        break;
+      }
+
+      switch (action) {
+        case 'added':
+          let next: Node;
+          if (getNode(data.previousSiblingId)) {
+            next = getNode(data.previousSiblingId).nextSibling;
+          }
+          if (next) parentNode.insertBefore(node, next);
+          else parentNode.appendChild(node);
+          break;
+        case 'removed':
+          parentNode.removeChild(node);
+          break;
+        case 'attribute':
+          setNodeAttributes(node as Element, data);
+          break;
+        case 'property':
+          setNodeProperties(node as Element, data);
+          break;
+        case 'text':
+          deserializeNode(data).textContent = data.textContent;
+          break;
+      }
+    } catch (error) {
+      console.log('ERROR applying action', error, parentNode, node, data);
     }
   }
 }

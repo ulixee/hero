@@ -3,49 +3,79 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
-    super(db, 'Resources', [
-      ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
-      ['type', 'TEXT'],
-      ['receivedAtCommandId', 'INTEGER'],
-      ['seenAtCommandId', 'INTEGER'],
-      ['redirectedToUrl', 'TEXT'],
-      ['requestUrl', 'TEXT'],
-      ['requestHeaders', 'TEXT'],
-      ['requestTimestamp', 'TEXT'],
-      ['requestPostData', 'TEXT'],
-      ['responseUrl', 'TEXT'],
-      ['responseHeaders', 'TEXT'],
-      ['responseData', 'BLOB'],
-      ['responseEncoding', 'TEXT'],
-      ['responseTimestamp', 'TEXT'],
-      ['remoteAddress', 'TEXT'],
-      ['statusCode', 'INTEGER'],
-      ['statusMessage', 'TEXT'],
-    ]);
+    super(
+      db,
+      'Resources',
+      [
+        ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['type', 'TEXT'],
+        ['receivedAtCommandId', 'INTEGER'],
+        ['seenAtCommandId', 'INTEGER'],
+        ['redirectedToUrl', 'TEXT'],
+        ['requestUrl', 'TEXT'],
+        ['originalHeaders', 'TEXT'],
+        ['requestHeaders', 'TEXT'],
+        ['requestTimestamp', 'TEXT'],
+        ['requestPostData', 'TEXT'],
+        ['clientAlpn', 'TEXT'],
+        ['serverAlpn', 'TEXT'],
+        ['localAddress', 'TEXT'],
+        ['responseUrl', 'TEXT'],
+        ['responseHeaders', 'TEXT'],
+        ['responseData', 'BLOB'],
+        ['responseEncoding', 'TEXT'],
+        ['responseTimestamp', 'TEXT'],
+        ['remoteAddress', 'TEXT'],
+        ['statusCode', 'INTEGER'],
+        ['statusMessage', 'TEXT'],
+        ['usedBrowserCache', 'INTEGER'],
+        ['didBlockResource', 'INTEGER'],
+      ],
+      true,
+    );
   }
 
-  public insert(redirectedToUrl: string, meta: IResourceMeta, body: Buffer) {
+  public insert(
+    meta: IResourceMeta,
+    body: Buffer,
+    extras: {
+      redirectedToUrl?: string;
+      originalHeaders: IResourceHeaders;
+      clientAlpn: string;
+      serverAlpn: string;
+      localAddress: string;
+      wasCached?: boolean;
+      didBlockResource: boolean;
+    },
+  ) {
     return this.pendingInserts.push([
       meta.id,
       meta.type,
       meta.receivedAtCommandId,
       null,
-      redirectedToUrl,
+      extras.redirectedToUrl,
       meta.request.url,
+      JSON.stringify(extras.originalHeaders ?? {}),
       JSON.stringify(meta.request.headers ?? {}),
       meta.request.timestamp,
       meta.request.postData,
-      meta.response.url,
-      JSON.stringify(meta.response.headers ?? {}),
+      extras.clientAlpn,
+      extras.serverAlpn,
+      extras.localAddress,
+      meta.response?.url,
+      JSON.stringify(meta.response?.headers ?? {}),
       body,
-      meta.response.headers['Content-Encoding'] ?? meta.response.headers['content-encoding'],
-      meta.response.timestamp,
-      meta.response.remoteAddress,
-      meta.response.statusCode,
-      meta.response.statusText,
+      meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
+      meta.response?.timestamp,
+      meta.response?.remoteAddress,
+      meta.response?.statusCode,
+      meta.response?.statusText,
+      extras.wasCached ? 1 : 0,
+      extras.didBlockResource ? 1 : 0,
     ]);
   }
 
@@ -80,8 +110,12 @@ export interface IResourcesRecord {
   redirectedToUrl?: string;
   requestUrl: string;
   requestHeaders: string;
+  originalHeaders: string;
   requestTimestamp: string;
   requestPostData?: string;
+  clientAlpn: string;
+  serverAlpn: string;
+  localAddress: string;
   responseUrl: string;
   responseHeaders: string;
   responseData?: Buffer;
@@ -90,4 +124,6 @@ export interface IResourcesRecord {
   remoteAddress: string;
   statusCode: number;
   statusMessage: string;
+  usedBrowserCache: boolean;
+  didBlockResource: boolean;
 }

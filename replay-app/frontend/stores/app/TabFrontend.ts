@@ -30,7 +30,7 @@ export default class TabFrontend {
   @observable
   public currentUrl = 'Loading';
 
-  public width = 0;
+  public width = TAB_MAX_WIDTH;
   public left = 0;
 
   public isClosing = false;
@@ -104,10 +104,11 @@ export default class TabFrontend {
     this.saSession = saSession;
 
     if (active) {
-      requestAnimationFrame(() => {
-        this.select();
-        if (saSession) this.startPlayback();
-      });
+      this.select();
+      if (saSession) {
+        // @ts-ignore
+        window.requestIdleCallback(() => this.startPlayback());
+      }
     }
   }
 
@@ -122,18 +123,15 @@ export default class TabFrontend {
   public startPlayback() {
     this.isPlaying = true;
     clearInterval(this.interval);
-    this.interval = setInterval(() => {
-      if (this.currentTickValue + 0.1 > 100) {
-        this.currentTickValue = 100;
-        this.pausePlayback();
-      } else {
-        this.currentTickValue += 0.1;
-      }
-      ipcRenderer.send('on-tick', this.currentTickValue);
-    }, 20) as any;
+    let intervalTime = 50;
+    if (this.marks.length > 100) intervalTime = 20;
+    else if (this.marks.length < 5) intervalTime = 500;
+    this.interval = setInterval(this.playbackTick.bind(this), intervalTime) as any;
   }
 
   public updateSession(session: ISaSession) {
+    const isPlaying = this.isPlaying;
+    if (isPlaying) this.pausePlayback();
     const startSessionMillis = this.saSession?.durationMillis;
     this.saSession = session;
 
@@ -156,12 +154,13 @@ export default class TabFrontend {
           this.currentTickValue * (startSessionMillis / session.durationMillis);
       }
     }
+    if (isPlaying) this.startPlayback();
   }
 
   @action
   public async select() {
+    store.tabs.selectedTabId = this.id;
     if (!this.isClosing) {
-      store.tabs.selectedTabId = this.id;
       await ipcRenderer.invoke('tab:select', this.id);
     }
   }
@@ -244,7 +243,7 @@ export default class TabFrontend {
       store.tabs.removedTabs += 1;
     }
 
-    this.setWidth(0, true);
+    this.setWidth(TAB_MIN_WIDTH, true);
     store.tabs.setTabsLefts(true);
 
     if (selected) {
@@ -271,5 +270,36 @@ export default class TabFrontend {
   public async reload(): Promise<any> {
     this.pausePlayback();
     return await ipcRenderer.invoke('tab:reload', this.id);
+  }
+
+  private playbackTick() {
+    if (this.isSelected === false) {
+      return this.pausePlayback();
+    }
+
+    let nextTickValue = this.currentTickValue;
+    for (const tick of this.saSession.ticks) {
+      // if a new major tick exists, go to it
+      if (tick.playbarOffsetPercent > this.currentTickValue) {
+        nextTickValue = tick.playbarOffsetPercent;
+        break;
+      }
+      // check for next minor tick
+      for (const minor of tick.minorTicks) {
+        if (minor.playbarOffsetPercent > this.currentTickValue) {
+          nextTickValue = minor.playbarOffsetPercent;
+          break;
+        }
+      }
+      if (nextTickValue > this.currentTickValue) break;
+    }
+
+    if (nextTickValue === this.currentTickValue && this.saSession.closeDate) {
+      this.pausePlayback();
+    }
+
+    this.currentTickValue = nextTickValue;
+
+    ipcRenderer.send('on-tick', this.currentTickValue);
   }
 }

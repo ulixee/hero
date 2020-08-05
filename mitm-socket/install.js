@@ -4,41 +4,48 @@ const fs = require('fs');
 const os = require('os');
 const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
-const packageJson = require('./package');
+const packageJson = require('./package.json');
 
-const outDir = `${__dirname}/socket`;
+const outDir = `${__dirname}/dist`;
+
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir);
+}
 const { version } = packageJson;
 const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/download/v${version}/`;
 
+// tslint:disable:no-console
+
+const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
+
 (async function install() {
   let programName = 'connect';
-  const filename = buildFilename(version);
+  const filename = buildFilename();
   if (os.platform() === 'win32') {
     programName += '.exe';
   }
 
   const installed = getInstalledVersion();
-  if (installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
+  if (!forceBuild && installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
     console.log('Latest SecretAgent connect library already installed');
     return;
   }
 
   const checksum = await getSourceChecksum(filename);
   const filepath = `${releasesAssetsUrl}/${filename}`;
-  
+
   if (!checksum) {
-    if (tryBuild()) {
-      saveVersion(version, checksum);
+    if (tryBuild(programName)) {
+      saveVersion();
       console.log('Successfully compiled Secret Agent connect library');
       process.exit();
       return;
     }
-    
-    const filepath = `${releasesAssetsUrl}/${filename}`;
+
     const goVersionNeeded = getGoVersionNeeded();
     console.log(
       `The architecture file you need for the Secret Agent connect library is not available (${filepath}).\n\n
-You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm/socket directory`,
+You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/lib directory`,
     );
     process.exit(1);
   }
@@ -57,26 +64,28 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
 
   const file = gunzipSync(zippedFile);
 
-  fs.writeFileSync(`${__dirname}/socket/${programName}`, file);
-  fs.chmodSync(`${__dirname}/socket/${programName}`, 0o755);
-  saveVersion(version, checksum);
+  fs.writeFileSync(`${outDir}/${programName}`, file);
+  fs.chmodSync(`${outDir}/${programName}`, 0o755);
+  saveVersion();
   console.log('Successfully downloaded');
 })();
 
-function tryBuild() {
+function tryBuild(programName) {
   const goVersionNeeded = getGoVersionNeeded();
   const isGoInstalled = isGoVersionInstalled(goVersionNeeded);
   console.log('Is go installed? %s, %s', goVersionNeeded, isGoInstalled);
 
   if (isGoInstalled) {
-    return compile();
+    if (compile()) {
+      fs.renameSync(`${__dirname}/lib/${programName}`, `${outDir}/${programName}`);
+    }
   }
   return false;
 }
 
 function getInstalledVersion() {
-  if (fs.existsSync(`${outDir}/.version`)) {
-    return fs.readFileSync(`${outDir}/.version`, 'utf8');
+  if (fs.existsSync(`${outDir}/version`)) {
+    return fs.readFileSync(`${outDir}/version`, 'utf8');
   }
   return null;
 }
@@ -85,12 +94,12 @@ function isBinaryInstalled(programName) {
   return fs.existsSync(`${outDir}/${programName}`);
 }
 
-function saveVersion(version, checksum) {
-  fs.writeFileSync(`${outDir}/.version`, `${version}=${checksum}`);
+function saveVersion() {
+  fs.writeFileSync(`${outDir}/version`, version);
 }
 
-function buildFilename(version) {
-  let platform = os.platform();
+function buildFilename() {
+  let platform = String(os.platform());
   let arch = os.arch();
   if (arch === 'x64') arch = 'x86_64';
   if (arch === 'ia32') arch = '386';
@@ -140,6 +149,7 @@ function getFileChecksum(file) {
 }
 
 async function getSourceChecksum(filename) {
+  if (forceBuild) return null;
   const buffer = await download(`${releasesAssetsUrl}/connect.checksum`);
 
   const checksum = buffer.toString('utf8');
@@ -149,19 +159,21 @@ async function getSourceChecksum(filename) {
   const expectedChecksum = match ? match.split(/\s+/).shift() : undefined;
 
   if (!expectedChecksum) {
-    throw new Error('Invalid checksum found for Secret Agent socket library');
+    throw new Error('Invalid checksum found for Secret Agent MitmSocket library');
   }
 
   return expectedChecksum;
 }
 
+////////// GO BUILD ////////////////////////////////////////////////////////////////////////////////
+
 function compile() {
   try {
-    execSync('go build', { cwd: `${__dirname}/socket` });
+    execSync('go build', { cwd: `${__dirname}/lib` });
     return true;
   } catch (err) {
     console.log(
-      'Error compiling Secret Agent socket connect library.\n\nWill download instead.',
+      'Error compiling Secret Agent MitmSocket library.\n\nWill download instead.',
       err.message,
     );
     return false;
@@ -169,7 +181,7 @@ function compile() {
 }
 
 function getGoVersionNeeded() {
-  const goMod = fs.readFileSync(`${__dirname}/socket/go.mod`, 'utf8');
+  const goMod = fs.readFileSync(`${__dirname}/lib/go.mod`, 'utf8');
   const goMatch = goMod.match(/go ([\d.]+)/);
   return goMatch[1];
 }
@@ -177,13 +189,13 @@ function getGoVersionNeeded() {
 function isGoVersionInstalled(wantedVersion) {
   const goVersionNeeded = wantedVersion.split('.');
   try {
-    const goVersion = execSync('go version', { encoding: 'utf8' });
-    const version = goVersion.match(/go version go([\d.]+)\s\w+\/\w+/);
-    if (!version || !version.length) return false;
-    if (version && version.length) {
-      const versionParts = version[1].split('.');
+    const goVersionResult = execSync('go version', { encoding: 'utf8' });
+    const goVersion = goVersionResult.match(/go version go([\d.]+)\s\w+\/\w+/);
+    if (!goVersion || !goVersion.length) return false;
+    if (goVersion && goVersion.length) {
+      const versionParts = goVersion[1].split('.');
       if (versionParts[0] !== goVersionNeeded[0]) return false;
-      if (parseInt(versionParts[1]) < parseInt(goVersionNeeded[1])) return false;
+      if (parseInt(versionParts[1], 10) < parseInt(goVersionNeeded[1], 10)) return false;
       return true;
     }
   } catch (err) {

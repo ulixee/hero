@@ -11,6 +11,7 @@ import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
 import ExecutionContextDestroyedEvent = Protocol.Runtime.ExecutionContextDestroyedEvent;
 import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import SessionState from '@secret-agent/session-state';
 
 const { log } = Log(module);
 
@@ -25,6 +26,7 @@ export default class FrameTracker {
   private activeContexts = new Set<number>();
   private executionContexts: IFrameContext[] = [];
   private devtoolsClient: IDevtoolsClient;
+  private sessionState: SessionState;
 
   private pendingContextPromises: {
     frameId: string;
@@ -32,8 +34,9 @@ export default class FrameTracker {
     promise: IResolvablePromise<IFrameContext>;
   }[] = [];
 
-  constructor(devtoolsClient: IDevtoolsClient) {
+  constructor(devtoolsClient: IDevtoolsClient, sessionState: SessionState) {
     this.devtoolsClient = devtoolsClient;
+    this.sessionState = sessionState;
   }
 
   public async init() {
@@ -170,14 +173,17 @@ export default class FrameTracker {
   }
 
   private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
-    const { frameId } = frameAttachedEvent;
+    const { frameId, parentFrameId } = frameAttachedEvent;
 
+    this.recordFrame(frameId, parentFrameId);
     this.attachedFrameIds.add(frameId);
     await this.createIsolatedWorld(frameId);
   }
 
   private async recurseFrameTree(frameTree: FrameTree) {
     const { frame, childFrames } = frameTree;
+    this.recordFrame(frame.id, frame.parentId);
+
     this.frames[frame.id] = frame;
     this.attachedFrameIds.add(frame.id);
 
@@ -187,6 +193,11 @@ export default class FrameTracker {
     for (const childFrame of childFrames) {
       await this.recurseFrameTree(childFrame);
     }
+  }
+
+  private recordFrame(frameId: string, parentFrameId?: string) {
+    if (this.frames[frameId]) return;
+    this.sessionState.captureFrameCreated(frameId, parentFrameId);
   }
 
   private async createIsolatedWorld(frameId: string) {

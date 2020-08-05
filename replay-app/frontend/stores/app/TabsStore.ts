@@ -5,6 +5,7 @@ import { ipcRenderer } from 'electron';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import { AppStore } from '../app';
+import store from '~frontend/stores/app';
 
 export default class TabsStore {
   @observable
@@ -98,11 +99,19 @@ export default class TabsStore {
       this.getTabById(id)?.close();
     });
 
-    ipcRenderer.on('tab:updated', (e, { id, location, saSession, currentTickValue }) => {
+    ipcRenderer.on('tab:updated', (e, args) => {
+      const { id, location, saSession, currentTickValue, replaceTabId } = args;
+      console.log('Tab:updated', args);
+      if (replaceTabId) {
+        const origTab = this.getTabById(replaceTabId);
+        if (origTab) origTab.id = id;
+      }
       const tab = this.getTabById(id);
       if (!tab) return;
+
       if (location) {
         tab.location = location;
+        tab.currentTickValue = 0;
         tab.updateSession(null);
       } else if (saSession) {
         tab.location = null;
@@ -110,6 +119,10 @@ export default class TabsStore {
       }
       if (currentTickValue !== undefined) {
         tab.currentTickValue = currentTickValue;
+      }
+      if (replaceTabId) {
+        tab.select();
+        store.tabs.updateTabsBounds(false);
       }
     });
 
@@ -145,6 +158,7 @@ export default class TabsStore {
   }
 
   public getTabById(id: number) {
+    if (!this.list) return null;
     return this.list.find(x => x.id === id);
   }
 
@@ -315,11 +329,16 @@ export default class TabsStore {
 
     this.list.push(tabFrontend);
 
-    requestAnimationFrame(() => {
+    if (this.list.length === 0) {
       tabFrontend.setLeft(tabFrontend.getLeft(), false);
-      this.updateTabsBounds(true);
-      this.scrollToEnd(TAB_ANIMATION_DURATION);
-    });
+      this.updateTabsBounds(false);
+    } else {
+      requestAnimationFrame(() => {
+        tabFrontend.setLeft(tabFrontend.getLeft(), false);
+        this.updateTabsBounds(true);
+        this.scrollToEnd(TAB_ANIMATION_DURATION);
+      });
+    }
     return tabFrontend;
   }
 }

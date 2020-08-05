@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../build/replay-app",
+    "outDir": "../build/replay-app-frontend",
     "module": "esnext",
     "target": "es2018",
     "moduleResolution": "node",
@@ -18,5 +18,5 @@
     "types": ["@types/node", "@nuxt/types", "@types/chrome"]
   },
   "include": ["**/*.json", "frontend", "shared"],
-  "exclude": ["./tmp-files/**/*.ts", "static", "dist", "node_modules", "**/node_modules"]
+  "exclude": ["./tmp-files/**/*.ts", "backend", "static", "dist", "node_modules", "**/node_modules"]
 }

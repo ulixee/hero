@@ -4,7 +4,7 @@ export default function config({ usingBuild }: any = {}) {
   return {
     mode: 'spa',
     srcDir: usingBuild ? null : 'frontend',
-    buildDir: usingBuild ? 'frontend' : '../build/replay-app/frontend',
+    buildDir: usingBuild ? 'frontend' : '../build/replay-app-frontend/frontend',
     generate: { dir: '../build/replay-app/static' },
     css: ['frontend/assets/style/main.css'],
     loading: false,

@@ -4,11 +4,14 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 export default class BlockHandler {
   public static shouldBlockRequest(session: RequestSession, ctx: IMitmRequestContext) {
     if (!session) return false;
+    if (session.isClosing) return true;
 
     const shouldBlock =
       (session.blockImages && ctx.resourceType === 'Image') || session.shouldBlockRequest(ctx.url);
 
     if (!shouldBlock) return false;
+
+    ctx.didBlockResource = shouldBlock;
 
     let contentType = 'text/html';
     if (ctx.resourceType === 'Image') {

@@ -84,7 +84,7 @@ function removeMe() {
 
     const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
     const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(1);
+    expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('removed');
   });
 
@@ -134,13 +134,14 @@ function sort() {
     const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
     const [key] = Object.keys(changes);
     // 1 remove and 1 add for each
-    expect(changes[key]).toHaveLength(8);
+    expect(changes[key]).toHaveLength(9);
     expect(changes[key].filter(x => x[1] === 'removed')).toHaveLength(4);
 
     const elem3 = changesAfterLoad[frameId].find(x => x[2].attributes?.id === 'id-3');
     const elem1 = changesAfterLoad[frameId].find(x => x[2].attributes?.id === 'id-1');
 
-    const [lastChange] = changes[key].slice(-1);
+    const [lastChange, locationChange] = changes[key].slice(-2);
+    expect(locationChange[1]).toBe('location');
     expect(lastChange[1]).toBe('added');
     expect(lastChange[2].id).toBe(elem1[2].id);
     expect(lastChange[2].previousSiblingId).toBe(elem3[2].id);
@@ -180,7 +181,7 @@ function sort() {
 
     const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
     const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(1);
+    expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('attribute');
     expect(changes[key][0][2].attributes['new-attr']).toBe('1');
   });

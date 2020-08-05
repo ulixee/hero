@@ -1,19 +1,29 @@
-import { BrowserWindow, app, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { resolve } from 'path';
 import Application from '../Application';
-import TabManager from '../managers/TabManager';
 import ReplayApi from '~backend/ReplayApi';
 import storage from '../storage';
 import InternalServer from '~shared/constants/files';
+import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
+import { defaultTabOptions } from '~shared/constants/tabs';
+import ITabMeta from '~shared/interfaces/ITabMeta';
+import AppView from './AppView';
+import ReplayView from './ReplayView';
+import ITabLocation from '~shared/interfaces/ITabLocation';
 
 export default class Window {
+  public static list: Window[] = [];
+  public static current: Window;
+
+  public tabsById = new Map<number, AppView | ReplayView>();
+  public _selectedTabId = 0;
+  public _fullscreen = false;
   public browserWindow: BrowserWindow;
-  public tabManager: TabManager;
   public pendingReplayApi: ReplayApi;
 
   private readonly windowState: any = {};
 
-  public constructor(pendingReplayApi: ReplayApi) {
+  protected constructor(pendingReplayApi: ReplayApi) {
     this.pendingReplayApi = pendingReplayApi;
     this.browserWindow = new BrowserWindow({
       frame: false,
@@ -33,7 +43,6 @@ export default class Window {
       show: false,
     });
 
-    this.tabManager = new TabManager(this);
     this.loadSavedState();
     this.browserWindow.show();
 
@@ -45,12 +54,53 @@ export default class Window {
     }
   }
 
+  public get fullscreen() {
+    return this._fullscreen;
+  }
+
+  public set fullscreen(val: boolean) {
+    this._fullscreen = val;
+    this.fixBounds();
+  }
+
   public get id() {
     return this.browserWindow.id;
   }
 
   public get webContents() {
     return this.browserWindow.webContents;
+  }
+
+  public get selectedTab() {
+    return this.tabsById.get(this.selectedTabId);
+  }
+
+  public get selectedTabId() {
+    return this._selectedTabId;
+  }
+
+  public set selectedTabId(value: number) {
+    if (this._selectedTabId === value) return;
+
+    const tab = this.tabsById.get(value);
+    if (!tab) return;
+
+    if (this.selectedTab) {
+      this.browserWindow.removeBrowserView(this.selectedTab.browserView);
+    }
+    this._selectedTabId = value;
+
+    this.browserWindow.addBrowserView(tab.browserView);
+    this.webContents.focus();
+    this.updateTitle();
+
+    this.fixBounds();
+  }
+
+  public get selectedReplayTab() {
+    const selected = this.selectedTab;
+    if (selected instanceof ReplayView) return selected as ReplayView;
+    return null;
   }
 
   public fixDragging() {
@@ -66,28 +116,130 @@ export default class Window {
   }
 
   public updateTitle() {
-    const { title } = this.tabManager.selected;
+    const { title } = this.selectedTab;
     this.browserWindow.setTitle(title.trim() === '' ? app.name : `${title} - ${app.name}`);
+  }
+
+  public openAppLocation(location: ITabLocation) {
+    console.log(
+      'Navigating to %s. Will destroy current tab?',
+      location,
+      this.selectedTab instanceof ReplayView,
+    );
+    const selected = this.selectedTab;
+    let replaceTabId: number;
+    if (selected) {
+      if (selected instanceof AppView) {
+        return selected.loadLocation(location);
+      }
+      selected.webContents.closeDevTools();
+      replaceTabId = selected.id;
+    }
+
+    this.trackTab(new AppView(this, location, replaceTabId));
+  }
+
+  public openReplayApi(replayApi: ReplayApi) {
+    console.log(
+      'Navigating to Replay Api (%s). Will destroy current tab?',
+      replayApi.apiHost,
+      this.selectedTab instanceof AppView,
+    );
+    const selected = this.selectedTab;
+    let replaceTabId: number;
+    if (selected) {
+      if (selected instanceof ReplayView) {
+        return selected.load(replayApi);
+      }
+      replaceTabId = selected.id;
+    }
+
+    this.trackTab(new ReplayView(this, replayApi, replaceTabId));
+  }
+
+  public createReplayTab(replayApi: ReplayApi) {
+    console.log('Creating Replay Tab (%s)', replayApi.apiHost);
+    const tab = this.trackTab(new ReplayView(this, replayApi));
+    const id = tab.id;
+    this.sendToRenderer('insert-tab', { id, active: true, saSession: replayApi.saSession }, true);
+  }
+
+  public createAppTab(opts: ICreateTabOptions, isNext = false, notifyRenderer = true) {
+    if (this.pendingReplayApi) {
+      const replayApi = this.pendingReplayApi;
+      delete this.pendingReplayApi;
+      return this.createReplayTab(replayApi);
+    }
+
+    const { location, active, index } = opts ?? defaultTabOptions;
+    console.log('Creating App Tab (%s)', location);
+    const tab = this.trackTab(new AppView(this, location));
+    const id = tab.id;
+
+    const tabMeta: ITabMeta = { id, location, active, index };
+    if (notifyRenderer) {
+      this.sendToRenderer('insert-tab', { ...tabMeta }, isNext);
+    }
+    return tabMeta;
+  }
+
+  public async fixBounds() {
+    const tab = this.selectedTab;
+    if (!tab) return;
+
+    const { width, height } = this.browserWindow.getContentBounds();
+    const toolbarContentHeight = await this.webContents.executeJavaScript(
+      `document.body.offsetHeight`,
+    );
+
+    const newBounds = {
+      x: 0,
+      y: this.fullscreen ? 0 : toolbarContentHeight,
+      width,
+      height: this.fullscreen ? height : height - toolbarContentHeight,
+    };
+
+    tab.fixBounds(newBounds);
+  }
+
+  public destroyTab(id: number) {
+    const tab = this.tabsById.get(id);
+
+    this.tabsById.delete(id);
+
+    if (tab && !tab.browserView.isDestroyed()) {
+      this.browserWindow.removeBrowserView(tab.browserView);
+      tab.destroy();
+    }
+  }
+
+  private trackTab(tab: AppView | ReplayView) {
+    const id = tab.id;
+    this.tabsById.set(id, tab);
+    tab.webContents.once('destroyed', () => {
+      this.tabsById.delete(id);
+    });
+    return tab;
   }
 
   private bindListenersToWindow() {
     this.browserWindow.on('enter-full-screen', () => {
       this.sendToRenderer('fullscreen', true);
-      this.tabManager.fixBounds();
+      this.fixBounds();
     });
 
     this.browserWindow.on('leave-full-screen', () => {
       this.sendToRenderer('fullscreen', false);
-      this.tabManager.fixBounds();
+      this.fixBounds();
     });
 
     this.browserWindow.on('enter-html-full-screen', () => {
-      this.tabManager.fullscreen = true;
+      this.fullscreen = true;
       this.sendToRenderer('html-fullscreen', true);
     });
 
     this.browserWindow.on('leave-html-full-screen', () => {
-      this.tabManager.fullscreen = false;
+      this.fullscreen = false;
       this.sendToRenderer('html-fullscreen', false);
     });
 
@@ -96,12 +248,12 @@ export default class Window {
     });
 
     this.browserWindow.on('scroll-touch-end', () => {
-      this.tabManager.selected.send('scroll-touch-end');
+      this.selectedTab.webContents.send('scroll-touch-end');
       this.sendToRenderer('scroll-touch-end');
     });
 
     this.browserWindow.on('focus', () => {
-      Application.instance.windowManager.current = this;
+      Window.current = this;
     });
 
     // Update window bounds on resize and on move when window is not maximized.
@@ -121,6 +273,21 @@ export default class Window {
     this.browserWindow.on('restore', () => this.resize());
     this.browserWindow.on('unmaximize', () => this.resize());
     this.browserWindow.on('close', () => this.close());
+
+    // resize the BrowserView's height when the toolbar height changes
+    this.webContents.executeJavaScript(`
+        const {ipcRenderer} = require('electron');
+        const resizeObserver = new ResizeObserver(() => {
+          ipcRenderer.send('resize-height');
+        });
+        resizeObserver.observe(document.body);
+      `);
+
+    this.webContents.on('ipc-message', (e, message) => {
+      if (message === 'resize-height') {
+        this.fixBounds();
+      }
+    });
   }
 
   private loadSavedState() {
@@ -138,13 +305,7 @@ export default class Window {
   }
 
   private resize() {
-    setTimeout(() => {
-      if (process.platform === 'linux') {
-        this.tabManager.select(this.tabManager.selectedId);
-      } else {
-        this.tabManager.fixBounds();
-      }
-    }, 0);
+    setTimeout(() => this.fixBounds(), 0);
 
     this.webContents.send('tabs-resize');
     setTimeout(() => this.webContents.send('tabs-resize'), 500);
@@ -158,14 +319,16 @@ export default class Window {
     this.browserWindow.setBrowserView(null);
 
     Application.instance.overlayManager.destroy();
+    Object.values(this.tabsById).forEach(x => x.destroy());
 
-    this.tabManager.clear();
-
-    Application.instance.windowManager.list = Application.instance.windowManager.list.filter(
-      x => x.browserWindow.id !== this.browserWindow.id,
-    );
+    Window.list = Window.list.filter(x => x.browserWindow.id !== this.browserWindow.id);
     if (this.webContents.isDevToolsOpened) {
       this.webContents.closeDevTools();
     }
+  }
+
+  public static create(replayApi?: ReplayApi) {
+    const window = new Window(replayApi);
+    this.list.push(window);
   }
 }

@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "outDir": "../build/replay-app",
     "module": "commonjs"
   },
   "include": [
