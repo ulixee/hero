@@ -20,11 +20,11 @@
 import { ipcRenderer } from 'electron';
 import { Component, Vue } from 'vue-property-decorator';
 import { Observer } from 'mobx-vue';
-import Icon from '@/components/Icon.vue';
+import Icon from '~frontend/components/Icon.vue';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
-import { ICON_PLAY, ICON_PAUSE } from '@/constants/icons';
-import store from '@/stores/app';
-import NoCache from '@/lib/NoCache';
+import { ICON_PLAY, ICON_PAUSE } from '~frontend/constants/icons';
+import store from '~frontend/stores/app';
+import NoCache from '~frontend/lib/NoCache';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';
 import { ITick } from '~shared/interfaces/ISaSession';

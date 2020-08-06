@@ -40,7 +40,7 @@ import Component from 'vue-class-component';
 import { Observer } from 'mobx-vue';
 import { ipcRenderer } from 'electron';
 import AppButton from './AppButton.vue';
-import Icon from '@/components/Icon.vue';
+import Icon from '~frontend/components/Icon.vue';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import {
   ICON_MORE,
@@ -50,9 +50,9 @@ import {
   ICON_NUMBER,
   ICON_LOCK,
   ICON_HOME,
-} from '@/constants/icons';
-import store from '@/stores/app';
-import NoCache from '@/lib/NoCache';
+} from '~frontend/constants/icons';
+import store from '~frontend/stores/app';
+import NoCache from '~frontend/lib/NoCache';
 import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
 import { toJS } from 'mobx';
 

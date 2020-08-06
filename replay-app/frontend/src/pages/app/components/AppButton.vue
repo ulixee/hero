@@ -20,12 +20,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { transparency } from '@/constants/transparency';
-import { BLUE_500 } from '@/constants';
-import Preloader from '@/components/Preloader.vue';
+import { transparency } from '~frontend/constants/transparency';
+import { BLUE_500 } from '~frontend/constants';
+import Preloader from '~frontend/components/Preloader.vue';
 import { TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_HEIGHT } from '~shared/constants/design';
-import store from '@/stores/app';
-import NoCache from '@/lib/NoCache';
+import store from '~frontend/stores/app';
+import NoCache from '~frontend/lib/NoCache';
 
 const AppButtonProps = Vue.extend({
   props: {

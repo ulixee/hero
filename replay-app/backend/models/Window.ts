@@ -3,7 +3,6 @@ import { resolve } from 'path';
 import Application from '../Application';
 import ReplayApi from '~backend/ReplayApi';
 import storage from '../storage';
-import InternalServer from '~shared/constants/files';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import { defaultTabOptions } from '~shared/constants/tabs';
 import ITabMeta from '~shared/interfaces/ITabMeta';
@@ -189,7 +188,7 @@ export default class Window {
 
     const { width, height } = this.browserWindow.getContentBounds();
     const toolbarContentHeight = await this.webContents.executeJavaScript(
-      `document.body.offsetHeight`,
+      `document.querySelector('.AppPage').offsetHeight`,
     );
 
     const newBounds = {
@@ -280,7 +279,8 @@ export default class Window {
         const resizeObserver = new ResizeObserver(() => {
           ipcRenderer.send('resize-height');
         });
-        resizeObserver.observe(document.body);
+        const elem = document.querySelector('.AppPage');
+        resizeObserver.observe(elem);
       `);
 
     this.webContents.on('ipc-message', (e, message) => {

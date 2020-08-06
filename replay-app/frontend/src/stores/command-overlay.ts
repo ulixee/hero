@@ -1,5 +1,5 @@
 import { observable } from 'mobx';
-import { OverlayStore } from '@/models/OverlayStore';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 import ICommandResult from '~shared/interfaces/ICommandResult';
 
 export class Store extends OverlayStore {

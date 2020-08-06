@@ -3,7 +3,7 @@ import { computed, observable } from 'mobx';
 import { getTheme } from '~shared/utils/themes';
 import TabsStore from './app/TabsStore';
 import AddTabStore from './app/AddTabStore';
-import settings from '@/lib/settings';
+import settings from '~frontend/lib/settings';
 
 export class AppStore {
   public windowId = remote.getCurrentWindow().id;

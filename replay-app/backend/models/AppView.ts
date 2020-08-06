@@ -1,7 +1,7 @@
 import Window from './Window';
 import TabBackend from './TabBackend';
 import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
-import InternalServer from '~shared/constants/files';
+import Application from '~backend/Application';
 
 export default class AppView extends TabBackend {
   public location: InternalLocations;
@@ -20,9 +20,10 @@ export default class AppView extends TabBackend {
 
     const page = location === InternalLocations.NewTab ? 'home' : location.toLowerCase();
 
-    console.log('Loading app page', `${InternalServer.url}/${page}`);
+    const url = Application.instance.getPageUrl(page);
+    console.log('Loading app page', url);
 
-    this.webContents.loadURL(`${InternalServer.url}/${page}`);
+    this.webContents.loadURL(url);
 
     this.window.sendToRenderer('tab:updated', { id: this.id, location, replaceTabId });
   }

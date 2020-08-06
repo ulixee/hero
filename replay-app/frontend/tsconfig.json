@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../build/replay-app/frontend",
+    "outDir": "../../build/replay-app/static",
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
@@ -11,14 +11,17 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
     "composite": true,
-    "rootDir": "..",
     "baseUrl": "..",
+    "rootDir": "..",
     "paths": {
-      "@/*": ["frontend/src/*"],
+      "~frontend/*": ["frontend/src/*"],
       "~shared/*": ["shared/*"]
-    }
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["frontend/src", "shared"],
-  "exclude": ["static", "dist", "node_modules"]
+  "include": ["**/*.ts", "**/*.vue", "../shared/**/*.ts", "**/*.json"],
+  "exclude": ["node_modules","**/node_modules"]
 }

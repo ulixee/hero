@@ -11,8 +11,8 @@ import Component from 'vue-class-component';
 import TabBar from './components/TabBar.vue';
 import AddressBar from './components/AddressBar.vue';
 import ReplayBar from './components/ReplayBar.vue';
-import NoCache from '@/lib/NoCache';
-import store from '@/stores/app';
+import NoCache from '~frontend/lib/NoCache';
+import store from '~frontend/stores/app';
 
 @Component({ components: { TabBar, AddressBar, ReplayBar } })
 export default class AppPage extends Vue {

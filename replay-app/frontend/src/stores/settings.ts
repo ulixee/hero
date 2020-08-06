@@ -1,7 +1,7 @@
 import { remote } from 'electron';
 import { computed } from 'mobx';
 import { getTheme } from '~shared/utils/themes';
-import settings from '@/lib/settings';
+import settings from '~frontend/lib/settings';
 
 export class SettingsStore {
   public windowId = remote.getCurrentWindow().id;

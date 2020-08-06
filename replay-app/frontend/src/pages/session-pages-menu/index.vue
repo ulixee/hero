@@ -8,9 +8,9 @@ import { ipcRenderer } from "electron";
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '@/stores/session-pages-menu';
-import Icon from '@/components/Icon.vue';
-import NoCache from '@/lib/NoCache';
+import store from '~frontend/stores/session-pages-menu';
+import Icon from '~frontend/components/Icon.vue';
+import NoCache from '~frontend/lib/NoCache';
 import { ipcRenderer } from 'electron';
 
 @Component({ components: { Icon } })

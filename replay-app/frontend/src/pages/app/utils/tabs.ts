@@ -1,5 +1,5 @@
 import anime from 'animejs';
-import { TAB_ANIMATION_DURATION } from '@/stores/app/constants';
+import { TAB_ANIMATION_DURATION } from '~frontend/stores/app/constants';
 
 export const animateTab = (
   property: 'translateX' | 'width',

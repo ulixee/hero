@@ -21,17 +21,19 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Observer } from 'mobx-vue';
 import { remote } from 'electron';
-import Preloader from '@/components/Preloader.vue';
-import TabFrontend from '@/stores/app/TabFrontend';
-import store from '@/stores/app';
+import Preloader from '~frontend/components/Preloader.vue';
+import TabFrontend from '~frontend/stores/app/TabFrontend';
+import store from '~frontend/stores/app';
+import { TAB_MAX_WIDTH } from '~frontend/stores/app/constants';
+
 import {
   transparency,
   ICON_CLOSE,
   ICON_HOME,
   ICON_SETTINGS,
   ICON_HISTORY,
-} from '@/constants';
-import NoCache from '@/lib/NoCache';
+} from '~frontend/constants';
+import NoCache from '~frontend/lib/NoCache';
 
 const ICONS = {
   Home: ICON_HOME,

@@ -8,9 +8,9 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { ipcRenderer } from 'electron';
-import store from '@/stores/script-instances-menu';
-import Icon from '@/components/Icon.vue';
-import NoCache from '@/lib/NoCache';
+import store from '~frontend/stores/script-instances-menu';
+import Icon from '~frontend/components/Icon.vue';
+import NoCache from '~frontend/lib/NoCache';
 
 @Component({ components: { Icon } })
 export default class ScriptInstanceMenu extends Vue {

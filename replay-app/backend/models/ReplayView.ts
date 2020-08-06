@@ -4,6 +4,7 @@ import ReplayApi from '~backend/ReplayApi';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Application from '~backend/Application';
 import TabBackend from './TabBackend';
+import { v1 as uuidv1 } from 'uuid';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayer');
 
@@ -14,6 +15,7 @@ export default class ReplayView extends TabBackend {
     super(window, {
       preload: domReplayerScript,
       nodeIntegration: true,
+      partition: uuidv1(),
       contextIsolation: true,
       javascript: false,
     });

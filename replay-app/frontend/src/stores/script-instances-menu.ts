@@ -1,6 +1,6 @@
 import { ipcRenderer, remote } from 'electron';
 import { observable } from 'mobx';
-import { OverlayStore } from '@/models/OverlayStore';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 
 export class Store extends OverlayStore {
   @observable

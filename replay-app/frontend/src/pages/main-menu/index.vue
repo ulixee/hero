@@ -7,8 +7,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import QuickMenu from './components/QuickMenu.vue';
-import store from '@/stores/main-menu';
-import NoCache from '@/lib/NoCache';
+import store from '~frontend/stores/main-menu';
+import NoCache from '~frontend/lib/NoCache';
 
 @Component({ components: { QuickMenu } })
 export default class MainMenuScreen extends Vue {

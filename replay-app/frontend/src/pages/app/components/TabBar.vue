@@ -22,8 +22,8 @@ import {
   DEFAULT_TITLEBAR_HEIGHT,
   TOOLBAR_BUTTON_WIDTH,
 } from '~shared/constants/design';
-import { ICON_ADD } from '@/constants/icons';
-import NoCache from '@/lib/NoCache';
+import { ICON_ADD, ICON_CLOSE } from '~frontend/constants/icons';
+import NoCache from '~frontend/lib/NoCache';
 
 let timeout: any;
 

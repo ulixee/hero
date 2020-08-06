@@ -1,12 +1,6 @@
-import { BrowserView, app } from 'electron';
-import { URL } from 'url';
-import { v1 as uuidv1 } from 'uuid';
+import { BrowserView } from 'electron';
 import Window from './Window';
 import generateContextMenu from '../menus/generateContextMenu';
-import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
-import ReplayApi from '~backend/ReplayApi';
-import IRectangle from '~shared/interfaces/IRectangle';
-import Application from '~backend/Application';
 import Rectangle = Electron.Rectangle;
 
 export default abstract class TabBackend {
@@ -23,7 +17,6 @@ export default abstract class TabBackend {
         contextIsolation: false,
         javascript: true,
         enableRemoteModule: true,
-        partition: uuidv1(),
         nativeWindowOpen: true,
         webSecurity: true,
         sandbox: false,

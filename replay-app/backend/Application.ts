@@ -1,16 +1,12 @@
 import * as Path from 'path';
-import { app, dialog, ipcMain, Menu } from 'electron';
+import { app, dialog, ipcMain, Menu, protocol } from 'electron';
 import * as Fs from 'fs';
-import { app, protocol, dialog, ipcMain, Menu } from 'electron';
-import WindowManager from './managers/WindowManager';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
 import ReplayApi from './ReplayApi';
 import storage from './storage';
 import Window from './models/Window';
 import { ChildProcess } from 'child_process';
-import InternalServer from '~shared/constants/files';
-import * as Fs from 'fs';
 import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
 protocol.registerSchemesAsPrivileged([
@@ -59,7 +55,6 @@ export default class Application {
 
   public getPageUrl(page: string) {
     if (Application.devServerUrl) {
-      console.log('returining page url', new URL(page, Application.devServerUrl).href);
       return new URL(page, Application.devServerUrl).href;
     }
     return `app://./${page}.html`;
@@ -319,9 +314,7 @@ export default class Application {
     protocol.registerBufferProtocol('app', async (request, respond) => {
       let pathName = new URL(request.url).pathname;
       pathName = decodeURI(pathName); // Needed in case URL contains spaces
-      const filePath = Path.join(app.getAppPath(), 'pages', pathName);
-
-      console.log('getting protocol', request.url, filePath);
+      const filePath = Path.join(app.getAppPath(), 'frontend', pathName);
 
       try {
         const data = await Fs.promises.readFile(filePath);

@@ -15,8 +15,8 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { ipcRenderer } from 'electron';
-import store from '@/stores/command-overlay';
-import NoCache from '@/lib/NoCache';
+import store from '~frontend/stores/command-overlay';
+import NoCache from '~frontend/lib/NoCache';
 import { Observer } from 'mobx-vue';
 
 @Observer

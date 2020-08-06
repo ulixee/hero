@@ -20,10 +20,10 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { ipcRenderer } from 'electron';
-import store from '@/stores/locations-menu';
-import Icon from '@/components/Icon.vue';
-import NoCache from '@/lib/NoCache';
-import { ICON_HOME, ICON_SETTINGS, ICON_HISTORY } from '@/constants/icons';
+import store from '~frontend/stores/locations-menu';
+import Icon from '~frontend/components/Icon.vue';
+import NoCache from '~frontend/lib/NoCache';
+import { ICON_HOME, ICON_SETTINGS, ICON_HISTORY } from '~frontend/constants/icons';
 import ITabLocation from '~shared/interfaces/ITabLocation';
 
 @Component({ components: { Icon } })

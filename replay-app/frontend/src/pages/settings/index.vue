@@ -14,7 +14,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '@/stores/settings';
+import store from '~frontend/stores/settings';
 
 @Component({ components: {} })
 export default class SettingsPage extends Vue {

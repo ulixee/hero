@@ -15,9 +15,9 @@
   import moment from 'moment';
   import Vue from 'vue';
   import Component from 'vue-class-component';
-  import Icon from "@/components/Icon.vue";
-  import { ICON_CLOSE } from "@/constants";
-  import store from "@/stores/locations-menu";
+  import Icon from "~frontend/components/Icon.vue";
+  import { ICON_CLOSE } from "~frontend/constants";
+  import store from "~frontend/stores/locations-menu";
 
   interface IItem {
     id: string;

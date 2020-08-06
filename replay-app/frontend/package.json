@@ -1,0 +1,38 @@
+{
+  "name": "@secret-agent/replay-app-frontend",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "clean": "vue-cli-service clean",
+    "start": "vue-cli-service serve",
+    "dev": "vue-cli-service serve --mode=development"
+  },
+  "dependencies": {
+    "@babel/runtime-corejs3": "^7.11.2",
+    "animejs": "^3.2.0",
+    "core-js": "^3.6.5",
+    "mobx": "^5.15.4",
+    "mobx-vue": "^2.0.10",
+    "source-map-support": "^0.5.19",
+    "uuid": "^8.1.0",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.4",
+    "vue-property-decorator": "^9.0.0",
+    "vue-slider-component": "^3.2.2",
+    "vue-styled-components": "^1.5.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.2.3",
+    "@vue/cli-plugin-typescript": "^4.2.3",
+    "@vue/cli-service": "^4.2.3",
+    "concurrently": "^5.2.0",
+    "cross-env": "^7.0.2",
+    "css-loader": "~3.5.3",
+    "node-sass": "^4.14.1",
+    "pug": "^2.0.4",
+    "pug-plain-loader": "^1.0.0",
+    "sass-loader": "^8.0.2",
+    "shx": "^0.3.2",
+    "typescript": "~3.8.3"
+  }
+}

@@ -37,7 +37,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '@/stores/main-menu';
+import store from '~frontend/stores/main-menu';
 import { ipcRenderer, remote } from 'electron';
 
 import {
@@ -50,8 +50,8 @@ import {
   ICON_FIND,
   ICON_PRINT,
   ICON_ARROW_RIGHT,
-} from '@/constants/icons';
-import NoCache from '@/lib/NoCache';
+} from '~frontend/constants/icons';
+import NoCache from '~frontend/lib/NoCache';
 import ITabLocation from "~shared/interfaces/ITabLocation";
 
 @Component({ components: {} })

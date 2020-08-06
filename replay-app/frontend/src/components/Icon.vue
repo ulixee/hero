@@ -5,10 +5,10 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { transparency } from '@/constants/transparency';
+import { transparency } from '~frontend/constants/transparency';
 import { TOOLBAR_BUTTON_HEIGHT } from '~shared/constants/design';
 import store from '../models/BaseStore';
-import NoCache from '@/lib/NoCache';
+import NoCache from '~frontend/lib/NoCache';
 
 const IconProps = Vue.extend({
   props: {
