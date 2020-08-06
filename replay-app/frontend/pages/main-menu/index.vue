@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import QuickMenu from './components/QuickMenu.vue';
 import store from '~frontend/stores/main-menu';
 import NoCache from '~frontend/lib/NoCache';

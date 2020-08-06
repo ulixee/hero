@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import { ipcRenderer } from 'electron';
 import store from '~frontend/stores/script-instances-menu';
 import Icon from '~frontend/components/Icon.vue';

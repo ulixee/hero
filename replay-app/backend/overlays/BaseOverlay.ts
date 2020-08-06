@@ -1,7 +1,7 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
+import Application from '../Application';
 import Rectangle = Electron.Rectangle;
-import InternalServer from '~shared/constants/files';
 
 interface IOptions {
   name: string;
@@ -169,7 +169,7 @@ export default class BaseOverlay {
 
   private initialize() {
     this.isInitialized = true;
-    this.webContents.loadURL(`${InternalServer.url}/${this.name}`);
+    this.webContents.loadURL(Application.instance.getPageUrl(this.name));
   }
 }
 

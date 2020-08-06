@@ -48,7 +48,7 @@ export default class Window {
 
     this.bindListenersToWindow();
 
-    this.browserWindow.loadURL(`${InternalServer.url}/app`);
+    this.browserWindow.loadURL(Application.instance.getPageUrl('app'));
     if (process.env.NODE_ENV === 'development') {
       this.webContents.openDevTools({ mode: 'detach' });
     }

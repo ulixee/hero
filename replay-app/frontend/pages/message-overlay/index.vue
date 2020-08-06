@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import store from '~frontend/stores/message-overlay';
 import NoCache from '~frontend/lib/NoCache';
 import { Observer } from 'mobx-vue';

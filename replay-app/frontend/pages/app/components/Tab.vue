@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import { Observer } from 'mobx-vue';
 import { remote } from 'electron';
 import Preloader from '~frontend/components/Preloader.vue';

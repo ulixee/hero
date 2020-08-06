@@ -1,8 +1,10 @@
 import * as Path from 'path';
 import { app, dialog, ipcMain, Menu } from 'electron';
+import * as Fs from 'fs';
+import { app, protocol, dialog, ipcMain, Menu } from 'electron';
+import WindowManager from './managers/WindowManager';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
-import { loadNuxt } from 'nuxt-start';
 import ReplayApi from './ReplayApi';
 import storage from './storage';
 import Window from './models/Window';
@@ -11,8 +13,13 @@ import InternalServer from '~shared/constants/files';
 import * as Fs from 'fs';
 import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { secure: true, standard: true } },
+]);
+
 export default class Application {
   public static instance = new Application();
+  public static devServerUrl = process.env.WEBPACK_DEV_SERVER_URL;
   public overlayManager = new OverlayManager();
 
   private replayApiProcess: ChildProcess;
@@ -42,28 +49,20 @@ export default class Application {
 
     this.bindEventHandlers();
 
-    await this.startNuxt();
     await app.whenReady();
+    this.registerFileProtocol();
     await this.overlayManager.start();
     await this.loadLocationFromArgv(process.argv);
 
     Menu.setApplicationMenu(generateAppMenu());
   }
 
-  private async startNuxt() {
-    if (process.env.NODE_ENV === 'development') {
-      // wait a second for external development nuxt server to load
-      await new Promise(resolve => setTimeout(resolve, 2e3));
-      return;
+  public getPageUrl(page: string) {
+    if (Application.devServerUrl) {
+      console.log('returining page url', new URL(page, Application.devServerUrl).href);
+      return new URL(page, Application.devServerUrl).href;
     }
-    const nuxt = await loadNuxt({
-      rootDir: Path.join(__dirname, '../'),
-      configFile: 'nuxt.config',
-      configContext: { usingBuild: true },
-      for: 'start',
-    });
-    const listener = await nuxt.listen(0);
-    InternalServer.url = listener.url;
+    return `app://./${page}.html`;
   }
 
   private async loadLocationFromArgv(argv: string[]) {
@@ -313,6 +312,40 @@ export default class Application {
           isActive: replayApi.urlOrigin === x.url || `${replayApi.urlOrigin}/` === x.url,
         };
       });
+    });
+  }
+
+  private registerFileProtocol() {
+    protocol.registerBufferProtocol('app', async (request, respond) => {
+      let pathName = new URL(request.url).pathname;
+      pathName = decodeURI(pathName); // Needed in case URL contains spaces
+      const filePath = Path.join(app.getAppPath(), 'pages', pathName);
+
+      console.log('getting protocol', request.url, filePath);
+
+      try {
+        const data = await Fs.promises.readFile(filePath);
+        const extension = Path.extname(pathName).toLowerCase();
+        let mimeType = '';
+
+        if (extension === '.js') {
+          mimeType = 'text/javascript';
+        } else if (extension === '.html') {
+          mimeType = 'text/html';
+        } else if (extension === '.css') {
+          mimeType = 'text/css';
+        } else if (extension === '.svg' || extension === '.svgz') {
+          mimeType = 'image/svg+xml';
+        } else if (extension === '.json') {
+          mimeType = 'application/json';
+        }
+
+        respond({ mimeType, data });
+      } catch (error) {
+        if (error) {
+          console.error(`Failed to read ${pathName} on app protocol`, error);
+        }
+      }
     });
   }
 }

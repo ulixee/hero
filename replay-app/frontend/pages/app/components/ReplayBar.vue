@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { ipcRenderer } from 'electron';
-import { Component, Vue } from 'nuxt-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { Observer } from 'mobx-vue';
 import Icon from '~frontend/components/Icon.vue';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';

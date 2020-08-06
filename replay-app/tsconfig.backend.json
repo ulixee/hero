@@ -6,7 +6,7 @@
   },
   "include": [
     "backend/**/*.ts",
-    "nuxt.config.ts",
+    "vue.config.ts",
     "injected-scripts/**/*.ts",
     "shared/**/*.ts",
     "frontend/constants",

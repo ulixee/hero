@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import { BLUE_500 } from '~frontend/constants';
 
 const PreloaderProps = Vue.extend({

@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import { transparency } from '~frontend/constants/transparency';
 import { BLUE_500 } from '~frontend/constants';
 import Preloader from '~frontend/components/Preloader.vue';

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import TabBar from './components/TabBar.vue';
 import AddressBar from './components/AddressBar.vue';
 import ReplayBar from './components/ReplayBar.vue';

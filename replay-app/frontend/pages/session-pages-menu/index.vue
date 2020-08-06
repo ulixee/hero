@@ -7,7 +7,7 @@ import { ipcRenderer } from "electron";
 
 <script lang="ts">
 import Vue from 'vue';
-import Component from 'nuxt-class-component';
+import Component from 'vue-class-component';
 import store from '~frontend/stores/session-pages-menu';
 import Icon from '~frontend/components/Icon.vue';
 import NoCache from '~frontend/lib/NoCache';

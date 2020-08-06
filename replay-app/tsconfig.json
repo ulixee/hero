@@ -15,7 +15,7 @@
       "~backend/*": ["backend/*"],
       "~shared/*": ["shared/*"]
     },
-    "types": ["@types/node", "@nuxt/types", "@types/chrome"]
+    "types": ["@types/node", "@types/chrome"]
   },
   "include": ["**/*.json", "frontend", "shared"],
   "exclude": ["./tmp-files/**/*.ts", "backend", "static", "dist", "node_modules", "**/node_modules"]
