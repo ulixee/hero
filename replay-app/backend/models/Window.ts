@@ -39,7 +39,7 @@ export default class Window {
         javascript: true,
         enableRemoteModule: true,
       },
-      icon: resolve(app.getAppPath(), 'static/logo.png'),
+      icon: resolve(app.getAppPath(), 'logo.png'),
       show: false,
     });
 

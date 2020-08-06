@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "outDir": "../../build/replay-app/frontend",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": false,
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "composite": true,
+    "rootDir": "..",
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["frontend/src/*"],
+      "~shared/*": ["shared/*"]
+    }
+  },
+  "include": ["frontend/src", "shared"],
+  "exclude": ["static", "dist", "node_modules"]
+}
