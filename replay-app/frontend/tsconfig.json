@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "outDir": "../build/replay-app",
-    "module": "commonjs",
-    "target": "es2018",
+    "outDir": "../../build/replay-app/static",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
     "strict": false,
     "importHelpers": true,
@@ -14,20 +14,14 @@
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "composite": true,
-    "baseUrl": ".",
+    "baseUrl": "..",
+    "rootDir": "..",
     "paths": {
       "~frontend/*": ["frontend/src/*"],
-      "~backend/*": ["backend/*"],
       "~shared/*": ["shared/*"]
-    }
+    },
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": [
-    "backend/**/*.ts",
-    "vue.config.ts",
-    "injected-scripts/**/*.ts",
-    "shared/**/*.ts",
-    "frontend/src/constants",
-    "index.ts"
-  ],
-  "exclude": ["dist", "node_modules", "**/node_modules"]
+  "include": ["**/*.ts", "**/*.vue", "../shared/**/*.ts", "**/*.json"],
+  "exclude": ["node_modules","**/node_modules"]
 }

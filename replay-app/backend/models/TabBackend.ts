@@ -1,5 +1,4 @@
 import { BrowserView } from 'electron';
-import { v1 as uuidv1 } from 'uuid';
 import Window from './Window';
 import generateContextMenu from '../menus/generateContextMenu';
 import Rectangle = Electron.Rectangle;
@@ -18,7 +17,6 @@ export default abstract class TabBackend {
         contextIsolation: false,
         javascript: true,
         enableRemoteModule: true,
-        partition: uuidv1(),
         nativeWindowOpen: true,
         webSecurity: true,
         sandbox: false,

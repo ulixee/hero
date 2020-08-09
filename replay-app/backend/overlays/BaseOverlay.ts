@@ -1,7 +1,7 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Rectangle = Electron.Rectangle;
-import InternalServer from '~shared/constants/files';
+import Application from '~backend/Application';
 
 interface IOptions {
   name: string;
@@ -26,12 +26,8 @@ export default class BaseOverlay {
     height: 0,
   };
   private readonly calcBounds: (bounds: IRectangle) => IRectangle;
+  private readonly hideTimeout: number;
   private timeout: any;
-  private hideTimeout: number;
-
-  private isLoaded = false;
-  private isInitialized = false;
-  private showCallback: any = null;
 
   public constructor({
     name,
@@ -55,16 +51,7 @@ export default class BaseOverlay {
     this.hideTimeout = hideTimeout;
     this.name = name;
 
-    const { webContents } = this.browserView;
-
-    webContents.once('dom-ready', () => {
-      this.isLoaded = true;
-      if (this.showCallback) {
-        this.showCallback();
-        this.showCallback = null;
-      }
-    });
-
+    this.webContents.loadURL(Application.instance.getPageUrl(this.name));
     if (devtools) {
       this.webContents.openDevTools({ mode: 'detach' });
     }
@@ -99,9 +86,6 @@ export default class BaseOverlay {
     options: { focus?: boolean; waitForLoad?: boolean; rect?: IRectangle },
     ...args: any[]
   ) {
-    if (!this.isInitialized) {
-      this.initialize();
-    }
     const { focus = true, waitForLoad = true, rect } = options;
     return new Promise(resolve => {
       this.browserWindow = browserWindow;
@@ -130,11 +114,6 @@ export default class BaseOverlay {
 
         resolve();
       };
-
-      if (!this.isLoaded && waitForLoad) {
-        this.showCallback = callback;
-        return;
-      }
 
       callback();
     });
@@ -165,11 +144,6 @@ export default class BaseOverlay {
   public destroy() {
     this.browserView.destroy();
     this.browserView = null;
-  }
-
-  private initialize() {
-    this.isInitialized = true;
-    this.webContents.loadURL(`${InternalServer.url}/${this.name}`);
   }
 }
 

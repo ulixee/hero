@@ -86,6 +86,7 @@
       "remote-interfaces",
       "replay",
       "replay-app",
+      "replay-app/frontend",
       "replay-api",
       "session-state",
       "testing",

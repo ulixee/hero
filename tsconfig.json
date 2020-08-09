@@ -26,9 +26,6 @@
     },
     {
       "path": "replay-app/tsconfig.json"
-    },
-    {
-      "path": "replay-app/tsconfig.backend.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json"],
