@@ -1,9 +1,8 @@
 // NOTE: do not use node dependencies
 
 import { ipcRenderer } from 'electron';
-import { IDomChangeEvent, INodeData } from './interfaces/IDomChangeEvent';
+import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
-import { URL } from 'url';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
@@ -22,24 +21,27 @@ function cancelEvent(e: Event) {
 }
 document.addEventListener('click', cancelEvent, true);
 document.addEventListener('submit', cancelEvent, true);
+window.addEventListener('resize', () => {
+  if (lastHighlightNodes) highlightNodes(lastHighlightNodes);
+  if (lastMouseEvent) updateMouse(lastMouseEvent);
+});
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
-    const [commandId, action, data] = changeEvent;
+    const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
-      if (location.href !== data.textContent) {
+      if (location.href !== textContent || commandId === -1) {
         console.log(
           'Document changed. (Command %s. %s ==> %s)',
           commandId === -1 ? 'load' : commandId,
           window.location.href,
-          data.textContent,
+          textContent,
         );
-        const newUrl = new URL(data.textContent);
+        const newUrl = new URL(textContent);
 
         if (location.origin === newUrl.origin) {
-          window.history.replaceState({}, 'Replay', data.textContent);
+          window.history.replaceState({}, 'Replay', textContent);
           idMap.clear();
-          isMouseInstalled = false;
           window.scrollTo({ top: 0 });
           document.documentElement.innerHTML = '';
           document.head.appendChild(styleElement);
@@ -52,45 +54,46 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     }
 
     if (action === 'location') {
-      console.log('Location changed', commandId, data);
-      window.history.replaceState({}, 'Replay', data.textContent);
-      return;
+      console.log('Location changed', commandId, changeEvent);
+      window.history.replaceState({}, 'Replay', textContent);
+      continue;
     }
 
-    if (preserveElements.includes(data.tagName)) {
-      const elem = document.querySelector(data.tagName);
+    const { nodeType, parentNodeId, tagName } = changeEvent;
+    if (preserveElements.includes(tagName)) {
+      const elem = window.document.querySelector(tagName);
       if (!elem) {
-        console.log('Preserved element doesnt exist!', data.tagName);
+        console.log('Preserved element doesnt exist!', tagName);
       }
-      idMap.set(data.id, elem);
-      if (data.tagName === 'HEAD') document.head.appendChild(styleElement);
+      idMap.set(nodeId, elem);
+      if (tagName === 'HEAD') document.head.appendChild(styleElement);
       continue;
     }
-    if (data.nodeType === document.DOCUMENT_NODE) {
-      idMap.set(data.id, document);
+    if (nodeType === document.DOCUMENT_NODE) {
+      idMap.set(nodeId, document);
       continue;
     }
-    if (data.nodeType === document.DOCUMENT_TYPE_NODE) {
-      idMap.set(data.id, document.doctype);
+    if (nodeType === document.DOCUMENT_TYPE_NODE) {
+      idMap.set(nodeId, document.doctype);
       continue;
     }
 
     let node: Node;
     let parentNode: Node;
     try {
-      node = deserializeNode(data);
-      parentNode = getNode(data.parentNodeId);
-      if (data.parentNodeId === null && action === 'added') {
+      node = deserializeNode(changeEvent);
+      parentNode = getNode(parentNodeId);
+      if (!parentNode && !parentNodeId && action === 'added') {
         parentNode = document;
       }
       if (!parentNode && (action === 'added' || action === 'removed')) {
         // tslint:disable-next-line:no-console
-        console.log('WARN: parent node id not found', data);
+        console.log('WARN: parent node id not found', changeEvent);
         continue;
       }
       if (node && preserveElements.includes((node as Element).tagName)) {
         if (action === 'removed') {
-          console.log('WARN: script trying to remove preserved node', data);
+          console.log('WARN: script trying to remove preserved node', changeEvent);
           continue;
         }
       }
@@ -98,8 +101,8 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       switch (action) {
         case 'added':
           let next: Node;
-          if (getNode(data.previousSiblingId)) {
-            next = getNode(data.previousSiblingId).nextSibling;
+          if (getNode(changeEvent.previousSiblingId)) {
+            next = getNode(changeEvent.previousSiblingId).nextSibling;
           }
           if (next) parentNode.insertBefore(node, next);
           else parentNode.appendChild(node);
@@ -108,17 +111,17 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
           parentNode.removeChild(node);
           break;
         case 'attribute':
-          setNodeAttributes(node as Element, data);
+          setNodeAttributes(node as Element, changeEvent);
           break;
         case 'property':
-          setNodeProperties(node as Element, data);
+          setNodeProperties(node as Element, changeEvent);
           break;
         case 'text':
-          deserializeNode(data).textContent = data.textContent;
+          deserializeNode(changeEvent).textContent = textContent;
           break;
       }
     } catch (error) {
-      console.log('ERROR applying action', error, parentNode, node, data);
+      console.log('ERROR applying action', error, parentNode, node, changeEvent);
     }
   }
 }
@@ -129,24 +132,24 @@ function getNode(id: number) {
   return idMap.get(id);
 }
 
-function setNodeAttributes(node: Element, data: INodeData) {
+function setNodeAttributes(node: Element, data: IDomChangeEvent) {
   if (!data.attributes) return;
   for (const [name, value] of Object.entries(data.attributes)) {
     node.setAttribute(name, value);
   }
 }
 
-function setNodeProperties(node: Element, data: INodeData) {
+function setNodeProperties(node: Element, data: IDomChangeEvent) {
   if (!data.properties) return;
   for (const [name, value] of Object.entries(data.properties)) {
     node[name] = value;
   }
 }
 
-function deserializeNode(data: INodeData, parent?: Element): Node {
+function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
   if (data === null) return null;
 
-  let node = getNode(data.id);
+  let node = getNode(data.nodeId);
   if (node) return node;
 
   switch (data.nodeType) {
@@ -172,7 +175,7 @@ function deserializeNode(data: INodeData, parent?: Element): Node {
 
   if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
 
-  idMap.set(data.id, node);
+  idMap.set(data.nodeId, node);
 
   if (parent) parent.appendChild(node);
 
@@ -324,14 +327,12 @@ function checkOverflows() {
 document.addEventListener('scroll', () => checkOverflows());
 
 /////// mouse ///////
+let lastMouseEvent: IMouseEvent;
 const box = document.createElement('sa-mouse-pointer');
 
-let isMouseInstalled = false;
 function updateMouse(mouseEvent: IMouseEvent) {
-  if (isMouseInstalled === false) {
-    isMouseInstalled = true;
-    document.body.appendChild(box);
-  }
+  lastMouseEvent = mouseEvent;
+  document.body.appendChild(box);
   if (mouseEvent.pageX !== undefined) {
     box.style.left = `${mouseEvent.pageX}px`;
     box.style.top = `${mouseEvent.pageY}px`;

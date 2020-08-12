@@ -15,14 +15,21 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, sessionsDataLocation: string) {
+  public launchReplay(
+    sessionName: string,
+    sessionsDataLocation: string,
+    sessionId: string,
+    replayApiServer: string,
+  ) {
     if (process.env.SA_SHOW_REPLAY !== 'true') return;
 
     const launch = require('@secret-agent/replay').default;
     launch({
-      id: this.id,
+      scriptInstanceId: this.id,
       sessionsDataLocation,
       sessionName,
+      sessionId,
+      replayApiServer,
     });
   }
 

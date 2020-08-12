@@ -8,12 +8,16 @@ export class Store extends OverlayStore {
 
   @observable
   public updateAvailable = false;
+  public sessions: any[] = [];
 
   public constructor() {
     super();
     this.init();
     ipcRenderer.on('update-available', () => {
       this.updateAvailable = true;
+    });
+    ipcRenderer.on('will-show', async () => {
+      this.sessions = await ipcRenderer.invoke('fetch-sessions');
     });
   }
 

@@ -1,8 +1,8 @@
 export default interface ICommandWithResult {
   id: number;
   frameId: number;
-  name: string;
   label: string;
+  name: string;
   args?: string;
   startDate: string;
   endDate?: string;

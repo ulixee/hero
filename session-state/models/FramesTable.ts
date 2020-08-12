@@ -12,16 +12,12 @@ export default class FramesTable extends BaseTable<IFrameRecord> {
   }
 
   public insert(frame: IFrameRecord) {
-    return this.pendingInserts.push([
+    return this.queuePendingInsert([
       frame.id,
       frame.startCommandId,
       frame.parentId,
       frame.createdTime,
     ]);
-  }
-
-  public all() {
-    return this.db.prepare(`select * from ${this.tableName}`).all() as IFrameRecord[];
   }
 }
 

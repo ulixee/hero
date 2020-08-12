@@ -19,7 +19,6 @@ const SA_NOT_INSTALLED = 'SA_SCRIPT_NOT_INSTALLED';
 
 export default class DomEnv {
   public static installedDomWorldName = '__sa_world__';
-  public static getAttachedStateFnName = '__getSecretAgentNodeState__';
 
   private readonly sessionId: string;
   private frameTracker: FrameTracker;

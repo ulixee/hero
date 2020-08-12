@@ -28,6 +28,7 @@ import FrameTracker from '@secret-agent/core/lib/FrameTracker';
 const { log } = Log(module);
 
 export default class SessionState {
+  public static registry = new Map<string, SessionState>();
   public emitter: EventEmitter;
   public readonly commands: ICommandMeta[] = [];
   public get lastCommand() {
@@ -47,6 +48,8 @@ export default class SessionState {
   private readonly resources: IResourceMeta[] = [];
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
   private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
+  private lastErrorTime?: Date;
+  private closeDate?: Date;
   private websocketMessageIdCounter = 0;
   private pageEventsListener: PageEventsListener;
 
@@ -66,6 +69,7 @@ export default class SessionState {
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.scriptInstanceMeta = scriptInstanceMeta;
+    SessionState.registry.set(sessionId, this);
 
     fs.mkdirSync(sessionsDirectory, { recursive: true });
 
@@ -307,6 +311,9 @@ export default class SessionState {
     if (entry.sessionId === this.sessionId || !entry.sessionId) {
       if (entry.action === 'Window.runCommand') entry.data = { id: entry.data.id };
       if (entry.action === 'Window.ranCommand') entry.data = null;
+      if (entry.level === 'error') {
+        this.lastErrorTime = entry.timestamp;
+      }
       this.db.sessionLogs.insert(entry);
     }
   }
@@ -315,19 +322,52 @@ export default class SessionState {
     try {
       await this.flush(true);
     } finally {
+      this.closeDate = new Date();
       this.db.session.update(this.sessionId, {
-        closeDate: new Date(),
+        closeDate: this.closeDate,
         viewport: this.viewport,
       });
       LogEvents.unsubscribe(this.logSubscriptionId);
       this.db.flush();
       this.db.close();
+      SessionState.registry.delete(this.sessionId);
     }
   }
 
   public async flush(isCloseEvent = false) {
     await this.pageEventsListener?.flush(isCloseEvent);
     this.db.flush();
+  }
+
+  public checkForResponsive() {
+    const latestPage = this.pages.top;
+    const allContentLoaded = this.pages.top.stateChanges.get('AllContentLoaded');
+    let lastSuccessDate = allContentLoaded ?? latestPage.initiatedTime;
+    // check if second to last command worked
+    if (this.commands.length > 2) {
+      const secondToLastCommand = this.commands[this.commands.length - 2];
+      if (
+        allContentLoaded &&
+        secondToLastCommand.endDate > lastSuccessDate &&
+        !secondToLastCommand.resultType?.includes('Error')
+      ) {
+        lastSuccessDate = secondToLastCommand.endDate;
+      }
+    }
+
+    const hasRecentErrors = this.lastErrorTime >= lastSuccessDate;
+
+    const lastCommand = this.lastCommand;
+    let unresponsiveSeconds = 0;
+    if (lastCommand) {
+      const lastCommandDate = new Date(lastCommand.endDate ?? lastCommand.startDate).getTime();
+      unresponsiveSeconds = Math.floor((new Date().getTime() - lastCommandDate) / 1000);
+    }
+    return {
+      hasRecentErrors,
+      unresponsiveSeconds,
+      closeTime: this.closeDate,
+    };
   }
 
   public async getPageDomChanges(pages: IPage[], flush: boolean = false, sinceCommandId?: number) {
@@ -347,6 +387,13 @@ export default class SessionState {
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
   ) {
+    log.stats('State.onPageEvents', {
+      sessionId: this.sessionId,
+      dom: domChanges.length,
+      mouse: mouseEvents.length,
+      focusEvents: focusEvents.length,
+      scrollEvents: scrollEvents.length,
+    });
     const maxCommandId = domChanges.reduce((max, change) => {
       if (max > change[0]) return max;
       return change[0];

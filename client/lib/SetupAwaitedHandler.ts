@@ -4,7 +4,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Constructable from 'awaited-dom/base/Constructable';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
-import DomEnv from '@secret-agent/core/lib/DomEnv';
+import getAttachedStateFnName from '@secret-agent/core-interfaces/AttachedState';
 
 export default function run() {
   // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
@@ -57,7 +57,7 @@ export default function run() {
       const awaitedPath = state.awaitedPath as AwaitedPath;
       const { coreClientSession } = state.awaitedOptions as IAwaitedOptions;
       const result = await coreClientSession.execJsPath(
-        awaitedPath.addMethod(DomEnv.getAttachedStateFnName, properties).toJSON(),
+        awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON(),
       );
 
       return result?.attachedState as IAttachedState;

@@ -18,6 +18,7 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       ['attributes', 'TEXT'],
       ['properties', 'TEXT'],
     ]);
+    this.defaultSortOrder = 'timestamp ASC';
   }
 
   public insert(frameId: string, change: IDomChangeEvent) {
@@ -36,7 +37,7 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       nodeData.attributes ? JSON.stringify(nodeData.attributes) : undefined,
       nodeData.properties ? JSON.stringify(nodeData.properties) : undefined,
     ];
-    this.pendingInserts.push(record);
+    this.queuePendingInsert(record);
   }
 
   public getFrameChanges(frameIds: string[], sinceCommandId?: number) {
@@ -56,12 +57,6 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       records[record.frameId].push(DomChangesTable.toDomChangeEvent(record));
     }
     return records;
-  }
-
-  public all() {
-    return this.db
-      .prepare(`SELECT * FROM ${this.tableName} ORDER BY timestamp ASC`)
-      .all() as IDomChangeRecord[];
   }
 
   public static toDomChangeEvent(record: IDomChangeRecord): IDomChangeEvent {

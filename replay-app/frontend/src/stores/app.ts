@@ -32,23 +32,17 @@ export class AppStore {
 
   @computed
   public get ticks() {
-    return this.tabs.selectedTab?.saSession.ticks;
+    return this.tabs.selectedTab?.tickState?.ticks;
+  }
+
+  @computed
+  public get hasTicks() {
+    return !!this.saSession && !!this.tabs.selectedTab?.tickState?.ticks;
   }
 
   @computed
   public get selectedTab() {
     return this.tabs.selectedTab;
-  }
-
-  @computed
-  public get marks() {
-    return this.tabs.selectedTab?.marks;
-  }
-
-  @computed
-  public get hasSaSession() {
-    if (!this.tabs.selectedTab) return false;
-    return !!this.tabs.selectedTab.saSession;
   }
 
   @observable

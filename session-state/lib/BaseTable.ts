@@ -4,8 +4,15 @@ type SqliteTypes = 'INTEGER' | 'TEXT' | 'BLOB';
 type IRecord = (string | number | Buffer)[];
 
 export default abstract class BaseTable<T> {
-  protected pendingInserts: IRecord[] = [];
   protected readonly insertStatement: Statement;
+  protected defaultSortOrder?: string;
+  protected insertCallbackFn?: (records: T[]) => void;
+
+  private pendingInserts: IRecord[] = [];
+
+  private insertSubscriptionRecords: T[] = [];
+  private subscriptionThrottle: NodeJS.Timeout;
+  private lastSubscriptionPublishTime: Date;
 
   protected constructor(
     readonly db: SqliteDatabase,
@@ -23,6 +30,13 @@ export default abstract class BaseTable<T> {
     return this.pendingInserts.length;
   }
 
+  public subscribe(callbackFn: (records: T[]) => void) {
+    this.insertCallbackFn = callbackFn;
+    const pendingRecords = this.pendingInserts.map(x => this.insertToObject(x));
+    this.lastSubscriptionPublishTime = new Date();
+    process.nextTick(callbackFn, this.all().concat(pendingRecords));
+  }
+
   public flush() {
     const records = [...this.pendingInserts];
     this.pendingInserts.length = 0;
@@ -34,6 +48,17 @@ export default abstract class BaseTable<T> {
 
   public insertNow(record: IRecord) {
     this.insertStatement.run(...record);
+    this.addRecordToPublish(record);
+  }
+
+  public all() {
+    const sort = this.defaultSortOrder ? ` ORDER BY ${this.defaultSortOrder}` : '';
+    return this.db.prepare(`select * from ${this.tableName}${sort}`).all() as T[];
+  }
+
+  protected queuePendingInsert(record: IRecord) {
+    this.pendingInserts.push(record);
+    this.addRecordToPublish(record);
   }
 
   protected buildInsertStatement() {
@@ -45,6 +70,23 @@ export default abstract class BaseTable<T> {
     )}) VALUES (${params})`;
   }
 
+  private addRecordToPublish(record: IRecord) {
+    if (!this.insertCallbackFn) return;
+    this.insertSubscriptionRecords.push(this.insertToObject(record));
+    if (new Date().getTime() - this.lastSubscriptionPublishTime.getTime() > 500) {
+      return this.publishPendingRecords();
+    }
+    clearTimeout(this.subscriptionThrottle);
+    this.subscriptionThrottle = setTimeout(this.publishPendingRecords.bind(this), 100).unref();
+  }
+
+  private publishPendingRecords() {
+    const records = [...this.insertSubscriptionRecords];
+    this.insertSubscriptionRecords.length = 0;
+    this.lastSubscriptionPublishTime = new Date();
+    this.insertCallbackFn(records);
+  }
+
   private createTableStatement() {
     const definitions = this.columns.map(x => {
       let columnDef = `${x[0]} ${x[1]}`;
@@ -52,5 +94,13 @@ export default abstract class BaseTable<T> {
       return columnDef;
     });
     return `CREATE TABLE IF NOT EXISTS ${this.tableName} (${definitions})`;
+  }
+
+  private insertToObject(record: IRecord): T {
+    const result: any = {};
+    for (let i = 0; i < record.length; i += 1) {
+      result[this.columns[i][0]] = record[i];
+    }
+    return result as T;
   }
 }

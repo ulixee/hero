@@ -1,55 +1,27 @@
-import ICommandResult from './ICommandResult';
-import IPaintEvent from '~shared/interfaces/IPaintEvent';
-
 export default interface ISaSession {
   id: string;
   name: string;
-  unresponsiveSeconds: number;
-  hasRecentErrors: boolean;
+  dataLocation: string;
   viewportWidth: number;
   viewportHeight: number;
   deviceScaleFactor: number;
+  startOrigin: string;
   startDate: string;
-  closeDate: string;
-  durationMillis: number;
+  scriptStartDate: string;
+  closeDate?: string;
   scriptEntrypoint: string;
   scriptInstanceId: string;
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];
-  ticks: ITick[];
-  pages: { id: string; url: string; commandId: number }[];
-  paintEvents: IPaintEvent[];
-  mouseEvents: IMouseEvent[];
-  focusEvents: IFocusRecord[];
-  scrollEvents: IScrollRecord[];
-  commandResults: ICommandResult[];
   relatedSessions: { id: string; name: string }[];
 }
 
 export interface IMouseEvent {
+  commandId: number;
   pageX: number;
   pageY: number;
   buttons: number;
   event: number;
-}
-
-export interface ITick {
-  type: string;
-  playbarOffsetPercent: number;
-  commandId: number;
-  label: string;
-  timestamp: Date;
-  minorTicks: IMinorTick[];
-}
-
-export interface IMinorTick {
-  type: string;
-  playbarOffsetPercent: number;
-  timestamp: Date;
-  mouseEventIdx?: number;
-  paintEventIdx?: number;
-  scrollEventIdx?: number;
-  focusEventIdx?: number;
-  pageIdx?: number;
+  timestamp: string;
 }
 
 export interface IFocusRecord {

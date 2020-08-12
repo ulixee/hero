@@ -1,4 +1,4 @@
-import decodeBuffer from '../lib/decodeBuffer';
+import decodeBuffer from '@secret-agent/commons/decodeBuffer';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
@@ -52,7 +52,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       didBlockResource: boolean;
     },
   ) {
-    return this.pendingInserts.push([
+    return this.queuePendingInsert([
       meta.id,
       meta.type,
       meta.receivedAtCommandId,
@@ -90,7 +90,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   }
 
   public async getResourceByUrl(url: string, decodeBody = true) {
-    const sql = `select type, responseData, responseEncoding, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
+    const sql = `select type, responseData, responseEncoding, statusCode, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
     const record = this.db.prepare(sql).get(url);
     if (!record) return null;
 
@@ -98,7 +98,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       ? await decodeBuffer(record.responseData, record.responseEncoding)
       : record.responseData;
     const headers = JSON.parse(record.responseHeaders);
-    return { data, type: record.type as ResourceType, headers };
+    return { data, type: record.type as ResourceType, headers, statusCode: record.statusCode };
   }
 }
 

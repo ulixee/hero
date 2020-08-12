@@ -16,7 +16,7 @@ export default class WebsocketMessagesTable extends BaseTable<IWebsocketMessageR
   }
 
   public insert(lastCommandId: number, resourceMessage: IWebsocketResourceMessage) {
-    return this.pendingInserts.push([
+    return this.queuePendingInsert([
       resourceMessage.messageId,
       resourceMessage.resourceId,
       Buffer.from(resourceMessage.message),

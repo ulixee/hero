@@ -4,21 +4,16 @@ import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEve
 
 export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
   constructor(readonly db: SqliteDatabase) {
-    super(
-      db,
-      'MouseEvents',
-      [
-        ['event', 'INTEGER'],
-        ['commandId', 'INTEGER'],
-        ['pageX', 'INTEGER'],
-        ['pageY', 'INTEGER'],
-        ['buttons', 'INTEGER'],
-        ['targetNodeId', 'INTEGER'],
-        ['relatedTargetNodeId', 'INTEGER'],
-        ['timestamp', 'TEXT'],
-      ],
-      true,
-    );
+    super(db, 'MouseEvents', [
+      ['event', 'INTEGER'],
+      ['commandId', 'INTEGER'],
+      ['pageX', 'INTEGER'],
+      ['pageY', 'INTEGER'],
+      ['buttons', 'INTEGER'],
+      ['targetNodeId', 'INTEGER'],
+      ['relatedTargetNodeId', 'INTEGER'],
+      ['timestamp', 'TEXT'],
+    ]);
   }
 
   public insert(mouseEvent: IMouseEvent) {
@@ -42,17 +37,7 @@ export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
       relatedTargetNodeId,
       isoTimestamp,
     ];
-    this.pendingInserts.push(record);
-  }
-
-  public all() {
-    return this.db.prepare(`select * from ${this.tableName}`).all() as IMouseEventRecord[];
-  }
-
-  public allEvents(events: MouseEventType[]) {
-    return this.db
-      .prepare(`select * from ${this.tableName} where event in (${events.map(x => '?').join(',')})`)
-      .all(events) as IMouseEventRecord[];
+    this.queuePendingInsert(record);
   }
 }
 

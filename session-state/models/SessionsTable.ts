@@ -26,7 +26,7 @@ export default class SessionsTable extends BaseTable<ISessionRecord> {
   }
 
   public findByName(name: string, scriptInstanceId: string) {
-    const sql = `SELECT * FROM ${this.tableName} WHERE name=? AND scriptInstanceId=?`;
+    const sql = `SELECT * FROM ${this.tableName} WHERE name=? AND scriptInstanceId=? ORDER BY scriptStartDate DESC, startDate DESC LIMIT 1`;
     return this.db.prepare(sql).get([name, scriptInstanceId]) as ISessionRecord;
   }
 

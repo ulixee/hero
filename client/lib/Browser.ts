@@ -200,7 +200,7 @@ export async function createBrowser(
   };
   const coreClientSession = await coreClient.createSession(sessionOptions);
 
-  const { sessionsDataLocation } = coreClientSession;
-  scriptInstance.launchReplay(sessionName, sessionsDataLocation);
+  const { sessionsDataLocation, sessionId, replayApiServer } = coreClientSession;
+  scriptInstance.launchReplay(sessionName, sessionsDataLocation, sessionId, replayApiServer);
   return new Browser(coreClientSession, sessionName);
 }

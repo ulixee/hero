@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { resolve } from 'path';
 import Application from '../Application';
-import ReplayApi from '~backend/ReplayApi';
+import ReplayApi from '~backend/api';
 import storage from '../storage';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import { defaultTabOptions } from '~shared/constants/tabs';
@@ -330,5 +330,9 @@ export default class Window {
   public static create(replayApi?: ReplayApi) {
     const window = new Window(replayApi);
     this.list.push(window);
+  }
+
+  public static noneOpen() {
+    return this.list.filter(Boolean).length === 0;
   }
 }

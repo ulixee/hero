@@ -24,6 +24,7 @@ export default class PagesTable extends BaseTable<IPageRecord> {
       ],
       true,
     );
+    this.defaultSortOrder = 'initiatedTime ASC';
   }
 
   public insert(page: IPage) {
@@ -41,13 +42,13 @@ export default class PagesTable extends BaseTable<IPageRecord> {
       page.stateChanges.get(LocationStatus.DomContentLoaded)?.toISOString(),
       page.stateChanges.get(LocationStatus.AllContentLoaded)?.toISOString(),
     ];
-    this.pendingInserts.push(record);
+    this.queuePendingInsert(record);
   }
 
-  public all() {
+  public last() {
     return this.db
-      .prepare(`select * from ${this.tableName} order by initiatedTime asc`)
-      .all() as IPageRecord[];
+      .prepare(`select * from ${this.tableName} order by initiatedTime desc limit 1`)
+      .get() as IPageRecord;
   }
 }
 

@@ -4,11 +4,26 @@ import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 
-const apiPath = require.resolve('@secret-agent/replay-api/start');
+const apiPath = require.resolve('@secret-agent/session-state/api/start');
 
 export default function replay(launchArgs: IReplayLaunchArgs) {
-  const { sessionsDataLocation, sessionName, id } = launchArgs;
-  const spawnArgs = ['', sessionsDataLocation, sessionName, id, apiPath];
+  const {
+    replayApiServer,
+    sessionsDataLocation,
+    sessionName,
+    scriptInstanceId,
+    sessionId,
+  } = launchArgs;
+
+  const spawnArgs = [
+    '',
+    sessionsDataLocation,
+    sessionName,
+    scriptInstanceId,
+    sessionId,
+    replayApiServer,
+    apiPath,
+  ];
 
   if (isBinaryInstalled()) {
     return spawn(getBinaryPath(), spawnArgs);
@@ -37,8 +52,9 @@ function spawn(appPath: string, args: string[], needsShell: boolean = false) {
 }
 
 interface IReplayLaunchArgs {
-  localApiStartPath?: string;
+  replayApiServer: string;
   sessionsDataLocation: string;
   sessionName: string;
-  id: string;
+  sessionId: string;
+  scriptInstanceId: string;
 }

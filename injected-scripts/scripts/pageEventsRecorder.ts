@@ -20,7 +20,10 @@ delete window[runtimeFunction];
 
 function upload(records: PageRecorderResultSet) {
   try {
-    eventsCallback(JSON.stringify(records));
+    const total = records.reduce((tot, ent) => tot + ent.length, 0);
+    if (total > 0) {
+      eventsCallback(JSON.stringify(records));
+    }
     return true;
   } catch (err) {
     console.log(`ERROR calling page recorder callback: ${String(err)}`, err);
@@ -96,10 +99,10 @@ class PageEventsRecorder {
     const isUnset = this.commandId === -1;
     this.commandId = id;
 
-    if (!isUnset) return;
-
-    for (const change of this.domChanges) {
-      if (change[0] === -1) change[0] = this.commandId;
+    if (isUnset) {
+      for (const change of this.domChanges) {
+        if (change[0] === -1) change[0] = this.commandId;
+      }
     }
     this.uploadChanges();
   }
@@ -207,8 +210,6 @@ class PageEventsRecorder {
   private onMutation(mutations: MutationRecord[]) {
     const changes = this.convertMutationsToChanges(mutations);
     this.domChanges.push(...changes);
-
-    this.uploadChanges();
   }
 
   private convertMutationsToChanges(mutations: MutationRecord[]) {

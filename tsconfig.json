@@ -38,6 +38,7 @@
     "build",
     "build-dist",
     "replay-app",
+    "replay-app/injected-scripts",
     "website",
     "injected-scripts"
   ]

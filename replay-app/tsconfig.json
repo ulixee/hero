@@ -3,6 +3,7 @@
     "outDir": "../build/replay-app",
     "module": "commonjs",
     "target": "es2018",
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "moduleResolution": "node",
     "strict": false,
     "importHelpers": true,

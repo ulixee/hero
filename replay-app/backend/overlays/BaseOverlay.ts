@@ -8,7 +8,6 @@ interface IOptions {
   devtools?: boolean;
   bounds?: IRectangle;
   calcBounds?: (bounds: IRectangle) => IRectangle;
-  hideTimeout?: number;
   customHide?: boolean;
   webPreferences?: Electron.WebPreferences;
   onWindowBoundsUpdate?: () => void;
@@ -26,17 +25,8 @@ export default class BaseOverlay {
     height: 0,
   };
   private readonly calcBounds: (bounds: IRectangle) => IRectangle;
-  private readonly hideTimeout: number;
-  private timeout: any;
 
-  public constructor({
-    name,
-    bounds,
-    calcBounds,
-    hideTimeout,
-    webPreferences,
-    devtools,
-  }: IOptions) {
+  public constructor({ name, bounds, calcBounds, webPreferences, devtools }: IOptions) {
     this.browserView = new BrowserView({
       webPreferences: {
         nodeIntegration: true,
@@ -48,7 +38,6 @@ export default class BaseOverlay {
 
     this.bounds = { ...this.bounds, ...(bounds || {}) };
     this.calcBounds = calcBounds;
-    this.hideTimeout = hideTimeout;
     this.name = name;
 
     this.webContents.loadURL(Application.instance.getPageUrl(this.name));
@@ -83,40 +72,24 @@ export default class BaseOverlay {
 
   public show(
     browserWindow: BrowserWindow,
-    options: { focus?: boolean; waitForLoad?: boolean; rect?: IRectangle },
+    options: { focus?: boolean; rect?: IRectangle },
     ...args: any[]
   ) {
-    const { focus = true, waitForLoad = true, rect } = options;
-    return new Promise(resolve => {
-      this.browserWindow = browserWindow;
+    const { focus = true, rect } = options;
+    this.browserWindow = browserWindow;
 
-      clearTimeout(this.timeout);
+    this.webContents.send('will-show', ...args);
+    browserWindow.webContents.send('overlay-visibility-change', this.name, true);
 
-      this.webContents.send('will-show', ...args);
-      browserWindow.webContents.send('overlay-visibility-change', this.name, true);
+    if (!this.visible) {
+      browserWindow.addBrowserView(this.browserView);
+      this.visible = true;
+    }
 
-      const callback = () => {
-        if (this.visible) {
-          this.rearrange(rect);
-          if (focus) {
-            this.webContents.focus();
-          }
-          return;
-        }
-
-        this.visible = true;
-
-        browserWindow.addBrowserView(this.browserView);
-        this.rearrange(rect);
-        if (focus) {
-          this.webContents.focus();
-        }
-
-        resolve();
-      };
-
-      callback();
-    });
+    this.rearrange(rect);
+    if (focus) {
+      this.webContents.focus();
+    }
   }
 
   public send(channel: string, ...args: any[]) {
@@ -128,15 +101,8 @@ export default class BaseOverlay {
     if (!this.visible) return;
 
     this.browserWindow.webContents.send('overlay-visibility-change', this.name, false);
-    clearTimeout(this.timeout);
 
-    if (this.hideTimeout) {
-      this.timeout = setTimeout(() => {
-        this.browserWindow.removeBrowserView(this.browserView);
-      }, this.hideTimeout);
-    } else {
-      this.browserWindow.removeBrowserView(this.browserView);
-    }
+    this.browserWindow.removeBrowserView(this.browserView);
 
     this.visible = false;
   }
