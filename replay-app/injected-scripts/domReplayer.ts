@@ -1,26 +1,28 @@
 // NOTE: do not use node dependencies
 
-import { ipcRenderer } from 'electron';
 import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
-ipcRenderer.on('dom:apply', (event, changeEvents, resultNodeIds, mouseEvent, scrollEvent) => {
+// @ts-ignore
+window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
   if (changeEvents) applyDomChanges(changeEvents);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
-});
+};
 
 function cancelEvent(e: Event) {
   e.preventDefault();
   e.stopPropagation();
   return false;
 }
+
 document.addEventListener('click', cancelEvent, true);
 document.addEventListener('submit', cancelEvent, true);
+
 window.addEventListener('resize', () => {
   if (lastHighlightNodes) highlightNodes(lastHighlightNodes);
   if (lastMouseEvent) updateMouse(lastMouseEvent);
@@ -28,6 +30,7 @@ window.addEventListener('resize', () => {
 
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
+    // @ts-ignore
     const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
       if (location.href !== textContent || commandId === -1) {
@@ -44,7 +47,6 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
           idMap.clear();
           window.scrollTo({ top: 0 });
           document.documentElement.innerHTML = '';
-          document.head.appendChild(styleElement);
         } else {
           // if it's an origin change, we have to change page
           location.href = newUrl.href;
@@ -67,7 +69,6 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
         continue;
       }
       idMap.set(nodeId, elem);
-      if (tagName === 'HEAD') elem.appendChild(styleElement);
       continue;
     }
     if (nodeType === document.DOCUMENT_NODE) {
@@ -122,7 +123,7 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
           break;
       }
     } catch (error) {
-      console.log('ERROR applying action', error, parentNode, node, changeEvent);
+      console.log('ERROR applying action', error.stack, parentNode, node, changeEvent);
     }
   }
 }
@@ -270,6 +271,7 @@ let lastHighlightNodes: number[] = [];
 function buildHover() {
   const hoverNode = document.createElement('sa-highlight');
   highlightElements.push(hoverNode);
+  document.head.appendChild(styleElement);
   document.body.appendChild(hoverNode);
   return hoverNode;
 }
@@ -280,6 +282,7 @@ function highlightNodes(nodeIds: number[]) {
   try {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
+    document.head.appendChild(styleElement);
     for (let i = 0; i < length; i += 1) {
       const node = idMap.get(nodeIds[i]);
       const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];

@@ -72,6 +72,16 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       record.timestamp,
     ];
   }
+
+  public static toRecord(event: IDomChangeEvent) {
+    return {
+      commandId: event[0],
+      action: event[1],
+      ...event[2],
+      nodeId: event[2].id,
+      timestamp: event[3],
+    };
+  }
 }
 
 export interface IDomChangeRecord {

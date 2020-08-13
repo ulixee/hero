@@ -200,7 +200,12 @@ export async function createBrowser(
   };
   const coreClientSession = await coreClient.createSession(sessionOptions);
 
-  const { sessionsDataLocation, sessionId, replayApiServer } = coreClientSession;
-  scriptInstance.launchReplay(sessionName, sessionsDataLocation, sessionId, replayApiServer);
+  let showReplay = envShowReplay;
+  if (options.showReplay !== undefined) showReplay = options.showReplay;
+  if (showReplay) {
+    scriptInstance.launchReplay(sessionName, coreClientSession);
+  }
   return new Browser(coreClientSession, sessionName);
 }
+
+const envShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));

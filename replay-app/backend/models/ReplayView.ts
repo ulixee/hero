@@ -7,7 +7,7 @@ import TabBackend from './TabBackend';
 import { v1 as uuidv1 } from 'uuid';
 import ReplayState from '~backend/api/ReplayState';
 
-const domReplayerScript = require.resolve('../../injected-scripts/domReplayer');
+const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
 
 export default class ReplayView extends TabBackend {
   public replayApi: ReplayApi;

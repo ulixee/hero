@@ -8,8 +8,6 @@
     "strict": false,
     "importHelpers": true,
     "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "sourceMap": true,
     "skipDefaultLibCheck": true,

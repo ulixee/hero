@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import http2, { Http2Stream } from 'http2';
+import * as http2 from 'http2';
 import ISaSession from '~shared/interfaces/ISaSession';
 import { ChildProcess, spawn } from 'child_process';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
@@ -179,7 +179,7 @@ export default class ReplayApi extends EventEmitter {
   }
 }
 
-async function streamToJson<T>(stream: Http2Stream): Promise<T> {
+async function streamToJson<T>(stream: http2.Http2Stream): Promise<T> {
   const data: Buffer[] = [];
   for await (const chunk of stream) data.push(chunk);
   const json = Buffer.concat(data).toString('utf8');

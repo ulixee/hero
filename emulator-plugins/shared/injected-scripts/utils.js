@@ -18,7 +18,10 @@ function createError(message, type) {
   const error = new type(message);
   const stack = error.stack.split(/\r?\n/);
   for (let i = 0; i < stack.length; i += 1) {
-    if (stack[i].includes('__puppeteer_evaluation_script__')) {
+    if (
+      stack[i].includes('__puppeteer_evaluation_script__') ||
+      stack[i].includes('__secretagent_bootscript__')
+    ) {
       stack.length = i;
       break;
     }

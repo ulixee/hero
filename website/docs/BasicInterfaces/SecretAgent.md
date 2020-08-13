@@ -29,6 +29,7 @@ Update existing settings.
   - sessionsDir `string` defaults to `os.tmpdir()`. Where session files are stored.
   - defaultRenderingOptions `string[]` defaults to `[All]`. Controls browser functionality.
   - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
+  - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
 
 #### **Returns**: `Promise`
 

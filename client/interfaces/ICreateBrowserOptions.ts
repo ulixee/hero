@@ -3,4 +3,5 @@ import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionO
 export default interface ICreateBrowserOptions
   extends Partial<Omit<ICreateSessionOptions, 'scriptInstanceMeta'>> {
   name?: string;
+  showReplay?: boolean;
 }

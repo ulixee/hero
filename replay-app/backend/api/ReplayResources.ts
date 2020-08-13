@@ -1,6 +1,6 @@
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import { ClientHttp2Stream } from 'http2';
-import zlib from 'zlib';
+import * as zlib from 'zlib';
 import { Readable, PassThrough } from 'stream';
 
 export default class ReplayResources {
