@@ -7,34 +7,41 @@ function toSeconds(millis) {
 const loadTimeConversion = {
   requestTime() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return toSeconds(ntEntry.startTime + performance.timeOrigin);
+    const start = ntEntry ? ntEntry.startTime : 0;
+    return toSeconds(start + performance.timeOrigin);
   },
   startLoadTime() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return toSeconds(ntEntry.startTime + performance.timeOrigin);
+    const start = ntEntry ? ntEntry.startTime : 0;
+    return toSeconds(start + performance.timeOrigin);
   },
   commitLoadTime() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return toSeconds(ntEntry.responseStart + performance.timeOrigin);
+    const start = ntEntry ? ntEntry.responseStart : 0;
+    return toSeconds(start + performance.timeOrigin);
   },
   finishDocumentLoadTime() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return toSeconds(ntEntry.domContentLoadedEventEnd + performance.timeOrigin);
+    const start = ntEntry ? ntEntry.domContentLoadedEventEnd : 0;
+    return toSeconds(start + performance.timeOrigin);
   },
   finishLoadTime() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return toSeconds(ntEntry.loadEventEnd + performance.timeOrigin);
+    const start = ntEntry ? ntEntry.loadEventEnd : 0;
+    return toSeconds(start + performance.timeOrigin);
   },
   firstPaintTime() {
     let fpEntry = performance.getEntriesByType('paint')[0];
     if (!fpEntry) {
       const ntEntry = performance.getEntriesByType('navigation')[0];
-      fpEntry = { startTime: ntEntry.loadEventEnd + Math.random() * 85 };
+      const start = ntEntry ? ntEntry.loadEventEnd : 0;
+      fpEntry = { startTime: start + Math.random() * 85 };
     }
     return toSeconds(fpEntry.startTime + performance.timeOrigin);
   },
   navigationType() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
+    if (!ntEntry) return 'Other';
     switch (ntEntry.type) {
       case 'back_forward':
         return 'BackForward';
@@ -56,16 +63,19 @@ const loadTimeConversion = {
     // SPDY is deprecated in favor of HTTP/2, but this implementation returns
     // true for HTTP/2 or HTTP2+QUIC/39 as well.
     const ntEntry = performance.getEntriesByType('navigation')[0];
+    if (!ntEntry) return true;
     return ['h2', 'hq'].includes(ntEntry.nextHopProtocol);
   },
   wasNpnNegotiated() {
     // NPN is deprecated in favor of ALPN, but this implementation returns true
     // for HTTP/2 or HTTP2+QUIC/39 requests negotiated via ALPN.
     const ntEntry = performance.getEntriesByType('navigation')[0];
+    if (!ntEntry) return true;
     return ['h2', 'hq'].includes(ntEntry.nextHopProtocol);
   },
   connectionInfo() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
+    if (!ntEntry) return 'h2';
     return ntEntry.nextHopProtocol;
   },
 };

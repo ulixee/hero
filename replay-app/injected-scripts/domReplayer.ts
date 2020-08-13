@@ -64,9 +64,10 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       const elem = window.document.querySelector(tagName);
       if (!elem) {
         console.log('Preserved element doesnt exist!', tagName);
+        continue;
       }
       idMap.set(nodeId, elem);
-      if (tagName === 'HEAD') document.head.appendChild(styleElement);
+      if (tagName === 'HEAD') elem.appendChild(styleElement);
       continue;
     }
     if (nodeType === document.DOCUMENT_NODE) {

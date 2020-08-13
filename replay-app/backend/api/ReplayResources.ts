@@ -49,7 +49,7 @@ export default class ReplayResources {
 
     if (resource.type === 'Document') {
       return {
-        data: Readable.from([`<html><head></head><body></body></html>`]),
+        data: Readable.from([`<!DOCTYPE html><html><head></head><body></body></html>`]),
         headers: {
           ...headers,
           'Content-Security-Policy':
