@@ -23,7 +23,8 @@ beforeAll(() => {
     } as any;
   });
 });
-afterAll(() => Helpers.closeAll());
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 test('should create up to a max number of secure connections per origin', async () => {
   const remotePorts: number[] = [];
@@ -58,7 +59,6 @@ test('should create up to a max number of secure connections per origin', async 
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(2);
-  await Helpers.closeAll();
 });
 
 test('should create new connections as needed when no keepalive', async () => {
@@ -96,7 +96,6 @@ test('should create new connections as needed when no keepalive', async () => {
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(4);
-  await Helpers.closeAll();
 });
 
 test('it should not put upgrade connections in a pool', async () => {

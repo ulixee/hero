@@ -7,7 +7,8 @@ import { inspect } from 'util';
 
 const { chrome, prevProperty } = ChromeJson as any;
 
-afterEach(() => Helpers.closeAll());
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
 

@@ -9,6 +9,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Page Recorder tests', () => {
   it('detects added nodes', async () => {
@@ -526,9 +528,4 @@ describe('basic Form element tests', () => {
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === select.id)).toHaveLength(2);
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === opt2.id)).toHaveLength(2);
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

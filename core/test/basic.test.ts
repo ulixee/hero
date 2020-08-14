@@ -38,8 +38,9 @@ describe('basic Core tests', () => {
   it('will not shutdown if start called and 0 sessions', async () => {
     // @ts-ignore
     Core.autoShutdownMillis = 0;
-    await Core.start();
     shutdownSpy.mockClear();
+    await Core.start();
+    await Core.configure({ maxActiveSessionCount: 5 });
     const meta = await Core.createSession();
     const core = Core.byWindowId[meta.windowId];
     await core.close();

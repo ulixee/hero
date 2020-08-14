@@ -29,6 +29,8 @@ beforeAll(() => {
 beforeEach(() => {
   mocks.mitmRequestHandler.handleRequest.mockClear();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic MitM tests', () => {
   it('should send request through proxy', async () => {
@@ -355,5 +357,3 @@ describe('basic MitM tests', () => {
     await mitmServer.close();
   });
 });
-
-afterEach(async () => await Helpers.closeAll(), 20000);

@@ -10,6 +10,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 test('should handle opening a page', async () => {
   const meta = await Core.createSession();
@@ -95,9 +97,4 @@ test('should track navigations and redirects', async () => {
   expect(pageLink.value).toBe('Find Me');
 
   await core.close();
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

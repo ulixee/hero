@@ -6,6 +6,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Goto tests', () => {
   it('runs goto', async () => {
@@ -30,9 +32,4 @@ describe('basic Goto tests', () => {
     ]);
     expect(href.value).toBe('https://www.iana.org/domains/example');
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

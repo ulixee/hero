@@ -12,8 +12,10 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
-describe('basic Session Loader tests', () => {
+describe('basic Replay API tests', () => {
   it('should be able to subscribe to changes', async () => {
     koaServer.get('/test1', ctx => {
       ctx.body = `<body>
@@ -97,12 +99,7 @@ describe('basic Session Loader tests', () => {
     expect(paintEvents[0]).toHaveLength(1);
     expect(paintEvents[1]).toHaveLength(13);
 
-    await core.close();
-    api.close();
-  });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
+    await Core.shutdown(null, true);
+    api.destroy();
+  }, 20e3);
 });

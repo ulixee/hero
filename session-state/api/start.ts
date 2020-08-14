@@ -7,11 +7,11 @@ const nodeEnv = process.env.NODE_ENV ?? 'development';
 const divider = Array(100)
   .fill('-')
   .join('');
-
-const server = createReplayServer();
+const port = Number(process.env.SA_SESSION_API_PORT ?? 0);
 
 console.log(divider);
-server.listen(Number(process.env.SA_SESSION_API_PORT ?? 0)).then(address => {
-  console.log(`${nodeEnv.toUpperCase()} REPLAY API SERVER LISTENING on [${address.port}]`);
+
+createReplayServer(port).then(server => {
+  console.log(`${nodeEnv.toUpperCase()} REPLAY API SERVER LISTENING on [${server.port}]`);
   console.log(divider);
 });

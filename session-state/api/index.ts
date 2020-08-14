@@ -1,4 +1,3 @@
-import 'source-map-support/register';
 import * as http2 from 'http2';
 import SessionLoader from './SessionLoader';
 import SessionDb from '../lib/SessionDb';
@@ -8,7 +7,7 @@ import { AddressInfo } from 'net';
 
 const { log } = Logger(module);
 
-export function createReplayServer(): ISessionReplayServer {
+export async function createReplayServer(listenPort?: number): Promise<ISessionReplayServer> {
   const activeClients = new Set<http2.Http2ServerResponse>();
   const server = http2.createServer((req, res) => {
     activeClients.add(res);
@@ -32,9 +31,13 @@ export function createReplayServer(): ISessionReplayServer {
         sessionLoader.on(event, streamJson.bind(this, res, event));
       }
 
-      res.stream.on('close', () => {
+      res.on('close', () => {
         sessionLoader.removeAllListeners();
         activeClients.delete(res);
+        if (res.socket) {
+          res.socket.unref();
+          res.socket.destroy();
+        }
       });
 
       sessionLoader.on('ready', () => {
@@ -61,25 +64,19 @@ export function createReplayServer(): ISessionReplayServer {
     }
   });
 
+  const address = await new Promise<AddressInfo>(resolve =>
+    server.listen(listenPort, () => {
+      resolve(server.address() as AddressInfo);
+    }),
+  );
+
   return {
     close: closeServer.bind(this, server, activeClients),
     hasClients() {
       return activeClients.size > 0;
     },
-    async listen(listenPort: number) {
-      if (server.listening) {
-        return server.address() as AddressInfo;
-      }
-      return new Promise(resolve =>
-        server.listen(listenPort, () => {
-          resolve(server.address() as AddressInfo);
-        }),
-      );
-    },
-    url() {
-      const addressInfo = server.address() as AddressInfo;
-      return `http://127.0.0.1:${addressInfo.port}`;
-    },
+    url: `http://127.0.0.1:${address.port}`,
+    port: address.port,
   };
 }
 
@@ -91,15 +88,16 @@ async function closeServer(
   if (!waitForOpenConnections) {
     for (const client of activeClients) {
       client.end();
+      if (client.socket) {
+        client.socket.unref();
+        client.socket.destroy();
+      }
       client.stream.destroy();
     }
+    server.unref().close();
   } else {
-    while (activeClients.size) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
+    await new Promise(resolve => server.close(resolve));
   }
-
-  await new Promise(resolve => server.close(resolve));
 }
 
 function streamJson(res: http2.Http2ServerResponse, event: string, data: any) {

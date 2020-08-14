@@ -7,6 +7,8 @@ beforeAll(async () => {
   await SecretAgent.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('Fetch tests', () => {
   it('should be able to run a fetch from the browser', async () => {
@@ -93,9 +95,4 @@ describe('Fetch tests', () => {
   });
 
   it.todo('should be able to get a blob back');
-});
-
-afterAll(async () => {
-  await SecretAgent.shutdown();
-  await Helpers.closeAll();
 });

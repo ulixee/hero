@@ -7,6 +7,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('Core events tests', () => {
   it('receives close event when closed', async () => {
@@ -74,9 +76,4 @@ describe('Core events tests', () => {
     await Core.shutdown();
     delete Core.onEventFn;
   }, 10e3);
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

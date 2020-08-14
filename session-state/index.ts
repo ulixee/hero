@@ -341,17 +341,16 @@ export default class SessionState {
 
   public checkForResponsive() {
     const latestPage = this.pages.top;
-    const allContentLoaded = this.pages.top.stateChanges.get('AllContentLoaded');
-    let lastSuccessDate = allContentLoaded ?? latestPage.initiatedTime;
-    // check if second to last command worked
-    if (this.commands.length > 2) {
-      const secondToLastCommand = this.commands[this.commands.length - 2];
+    const allContentLoaded = this.pages.top?.stateChanges?.get('AllContentLoaded');
+    let lastSuccessDate = allContentLoaded ?? latestPage?.initiatedTime ?? this.createDate;
+    for (const command of this.commands) {
+      if (!command.endDate) continue;
       if (
         allContentLoaded &&
-        secondToLastCommand.endDate > lastSuccessDate &&
-        !secondToLastCommand.resultType?.includes('Error')
+        command.endDate > lastSuccessDate &&
+        !command.resultType?.includes('Error')
       ) {
-        lastSuccessDate = secondToLastCommand.endDate;
+        lastSuccessDate = command.endDate;
       }
     }
 

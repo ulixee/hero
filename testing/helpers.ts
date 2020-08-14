@@ -3,7 +3,7 @@ import * as Path from 'path';
 import Url, { URL } from 'url';
 import querystring from 'querystring';
 import Log from '@secret-agent/commons/Logger';
-import http, { IncomingMessage, RequestListener } from 'http';
+import http, { IncomingMessage, RequestListener, Server } from 'http';
 import https from 'https';
 import { createPromise } from '@secret-agent/commons/utils';
 import HttpProxyAgent from 'http-proxy-agent';
@@ -16,28 +16,33 @@ import * as http2 from 'http2';
 
 const { log } = Log(module);
 
-export const needsClosing = [];
-let lastPort = 4000;
+export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
 export interface ITestKoaServer extends KoaRouter {
   close: () => void;
   server: http.Server;
   koa: Koa;
   isClosing?: boolean;
+  onlyCloseOnFinal?: boolean;
   baseHost: string;
   baseUrl: string;
 }
 
-export async function runKoaServer(): Promise<ITestKoaServer> {
-  const port = reservePort();
+export async function runKoaServer(onlyCloseOnFinal: boolean = true): Promise<ITestKoaServer> {
   const koa = new Koa();
   const router = new KoaRouter() as ITestKoaServer;
   const exampleOrgPath = Path.join(__dirname, 'html', 'example.org.html');
   const exampleOrgHtml = Fs.readFileSync(exampleOrgPath, 'utf-8');
 
   koa.use(router.routes()).use(router.allowedMethods());
-  const server = koa.listen(port).unref();
-
+  const server = await new Promise<Server>(resolve => {
+    const koaServer = koa
+      .listen(() => {
+        resolve(koaServer);
+      })
+      .unref();
+  });
+  const port = (server.address() as AddressInfo).port;
   router.baseHost = `localhost:${port}`;
   router.baseUrl = `http://${router.baseHost}`;
 
@@ -56,6 +61,7 @@ export async function runKoaServer(): Promise<ITestKoaServer> {
       });
     });
   };
+  router.onlyCloseOnFinal = onlyCloseOnFinal;
   needsClosing.push(router);
   router.koa = koa;
   router.server = server;
@@ -113,7 +119,6 @@ export async function runHttpServer(
   onPost?: (data: string) => void,
   onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void,
 ) {
-  const port = reservePort();
   const server = http.createServer().unref();
   server.on('request', async (request, response) => {
     if (onRequest) onRequest(request.url, request.method, request.headers);
@@ -153,7 +158,9 @@ export async function runHttpServer(
     }
     response.end(`<html><head></head><body>${pageBody}</body></html>`);
   });
-  server.listen(port);
+  server.listen();
+  await new Promise(resolve => server.once('listening', resolve));
+  const port = (server.address() as AddressInfo).port;
 
   const baseUrl = `http://localhost:${port}`;
   const httpServer = {
@@ -239,30 +246,41 @@ export async function http2StreamToJson<T>(stream: http2.Http2Stream): Promise<T
   return JSON.parse(json);
 }
 
-export async function closeAll() {
-  while (needsClosing.length) {
-    const toClose = needsClosing.pop();
-    if (!toClose.close) log.warn(null, toClose);
-    await toClose.close();
-  }
-  await Core.shutdown();
-  log.flush();
+export async function afterEach() {
+  return closeAll(false);
+}
+
+export async function afterAll() {
+  await closeAll(true);
+  await Core.shutdown(null, true);
+}
+
+async function closeAll(isFinal = false) {
+  const closeList = [...needsClosing];
+  needsClosing.length = 0;
+
+  await Promise.all(
+    closeList.map(async (toClose, i) => {
+      if (!toClose.close) {
+        console.log('Error closing', { closeIndex: i });
+        return;
+      }
+      if (toClose.onlyCloseOnFinal && !isFinal) {
+        needsClosing.push(toClose);
+        return;
+      }
+
+      try {
+        await toClose.close();
+      } catch (err) {
+        console.log('Error shutting down', err);
+      }
+    }),
+  );
 }
 
 export function onClose(closeFn: () => Promise<any>) {
   needsClosing.push({ close: closeFn });
-}
-
-export function reservePort() {
-  return reservePorts(1)[0];
-}
-
-// local helper functions
-
-function reservePorts(count = 20) {
-  const minPort = (lastPort += 1); // eslint-disable-line no-multi-assign
-  const maxPort = (lastPort += count); // eslint-disable-line no-multi-assign
-  return [minPort, maxPort];
 }
 
 function extractPort(url: URL) {

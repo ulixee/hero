@@ -7,6 +7,8 @@ let httpServer;
 beforeAll(async () => {
   httpServer = await Helpers.runHttpServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic browser remote tests', () => {
   it('should goto and waitForLocation', async () => {
@@ -31,8 +33,4 @@ describe('basic browser remote tests', () => {
     await browser.close();
     await SecretAgent.shutdown();
   }, 10e3);
-});
-
-afterAll(async () => {
-  await Helpers.closeAll();
 });
