@@ -52,8 +52,6 @@ export default class ReplayResources {
         data: Readable.from([`<!DOCTYPE html><html><head></head><body></body></html>`]),
         headers: {
           ...headers,
-          'Content-Security-Policy':
-            "default-src *; navigate-to 'none'; style-src 'self' http://* https://* 'unsafe-inline'; script-src 'self' http://* https://*; font-src 'self' https://* data:;",
         },
         statusCode: 200,
       };

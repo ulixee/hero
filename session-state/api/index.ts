@@ -25,10 +25,10 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
 
       const sessionLoader = new SessionLoader(session.sessionDb, session.sessionState);
 
-      sessionLoader.on('resources', streamResources.bind(this, res));
+      sessionLoader.on('resources', http2PushResources.bind(this, res));
 
       for (const event of SessionLoader.eventStreams) {
-        sessionLoader.on(event, streamJson.bind(this, res, event));
+        sessionLoader.on(event, http2PushJson.bind(this, res, event));
       }
 
       res.on('close', () => {
@@ -41,7 +41,7 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
       });
 
       sessionLoader.on('ready', () => {
-        streamJson(res, 'session', {
+        http2PushJson(res, 'session', {
           ...sessionLoader.session,
           startOrigin: sessionLoader.startOrigin,
           dataLocation: session.dataLocation,
@@ -100,7 +100,7 @@ async function closeServer(
   }
 }
 
-function streamJson(res: http2.Http2ServerResponse, event: string, data: any) {
+function http2PushJson(res: http2.Http2ServerResponse, event: string, data: any) {
   if (res.stream.closed) return;
 
   const json = JSON.stringify(data, (_, value) => {
@@ -114,7 +114,7 @@ function streamJson(res: http2.Http2ServerResponse, event: string, data: any) {
   });
 }
 
-function streamResources(res: http2.Http2ServerResponse, resources: any[]) {
+function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
   if (res.stream.closed) return;
   for (const resource of resources) {
     const headers: any = {

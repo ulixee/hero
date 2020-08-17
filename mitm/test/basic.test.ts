@@ -35,7 +35,7 @@ afterEach(Helpers.afterEach);
 describe('basic MitM tests', () => {
   it('should send request through proxy', async () => {
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9001);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -56,7 +56,7 @@ describe('basic MitM tests', () => {
       return res1.end('Secure as anything!');
     });
 
-    const mitmServer = await MitmServer.start(9001);
+    const mitmServer = await MitmServer.start();
     Helpers.onClose(() => mitmServer.close());
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -75,7 +75,7 @@ describe('basic MitM tests', () => {
 
   it('should send an https request through upstream proxy', async () => {
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9001);
+    const mitmServer = await MitmServer.start();
     Helpers.onClose(() => mitmServer.close());
     const proxyHost = `http://localhost:${mitmServer.port}`;
     const upstreamProxyHost = httpServer.url.replace(/\/$/, '');
@@ -112,7 +112,7 @@ describe('basic MitM tests', () => {
 
     const serverPort = (server.address() as AddressInfo).port;
 
-    const mitmServer = await MitmServer.start(9003);
+    const mitmServer = await MitmServer.start();
     Helpers.onClose(() => mitmServer.close());
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -134,7 +134,7 @@ describe('basic MitM tests', () => {
       expect(method).toBe('GET');
       expect(Object.keys(headers1).filter(x => x.startsWith('mitm-'))).toHaveLength(0);
     });
-    const mitmServer = await MitmServer.start(9002);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -156,7 +156,7 @@ describe('basic MitM tests', () => {
       expect(Object.keys(headers1).filter(x => x.startsWith('mitm-'))).toHaveLength(0);
       expect(headers1['access-control-request-headers']).toEqual('X-Custom-Header');
     });
-    const mitmServer = await MitmServer.start(9003);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -181,7 +181,7 @@ describe('basic MitM tests', () => {
 
   it('should copy post data', async () => {
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9004);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -202,8 +202,8 @@ describe('basic MitM tests', () => {
     );
 
     expect(session.requests).toHaveLength(1);
-    expect(session.requests[0].postData).toBeTruthy();
-    expect(session.requests[0].postData.toString()).toBe(
+    expect(session.requests[0].requestPostData).toBeTruthy();
+    expect(session.requests[0].requestPostData.toString()).toBe(
       JSON.stringify({ gotData: true, isCompressed: 'no' }),
     );
 
@@ -213,7 +213,7 @@ describe('basic MitM tests', () => {
 
   it('should support large post data', async () => {
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9004);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -241,7 +241,7 @@ describe('basic MitM tests', () => {
     );
 
     expect(session.requests).toHaveLength(1);
-    expect(session.requests[0].postData.toString()).toBe(
+    expect(session.requests[0].requestPostData.toString()).toBe(
       JSON.stringify({ largeBuffer: largeBuffer.toString('hex') }),
     );
 
@@ -251,7 +251,7 @@ describe('basic MitM tests', () => {
 
   it('should modify websocket upgrade headers', async () => {
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9004);
+    const mitmServer = await MitmServer.start();
     const upgradeSpy = jest.spyOn(MitmRequestHandler.prototype, 'handleUpgrade');
     const requestSpy = jest.spyOn(MitmRequestHandler.prototype, 'handleRequest');
     Helpers.needsClosing.push(mitmServer);
@@ -312,7 +312,7 @@ describe('basic MitM tests', () => {
   it('should intercept requests', async () => {
     mocks.HeadersHandler.waitForResource.mockRestore();
     const httpServer = await Helpers.runHttpServer();
-    const mitmServer = await MitmServer.start(9001);
+    const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
@@ -334,7 +334,7 @@ describe('basic MitM tests', () => {
 
     const headers = session.getTrackingHeaders();
 
-    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, headers).catch();
+    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, headers);
 
     expect(result).toBeTruthy();
 
@@ -342,13 +342,13 @@ describe('basic MitM tests', () => {
     expect(onresponse).toHaveBeenCalledTimes(1);
 
     const [responseEvent] = onresponse.mock.calls[0];
-    const { request, response, wasCached, resourceType, remoteAddress, body } = responseEvent;
+    const { request, response, wasCached, resourceType, body } = responseEvent;
     expect(body).toBeInstanceOf(Buffer);
     expect(body.toString()).toBeTruthy();
     expect(response).toBeTruthy();
     expect(request.url).toBe(`${httpServer.url}page1`);
     expect(resourceType).toBe('Document');
-    expect(remoteAddress).toContain(httpServer.port);
+    expect(response.remoteAddress).toContain(httpServer.port);
     expect(wasCached).toBe(false);
     expect(onError).not.toHaveBeenCalled();
     mocks.HeadersHandler.waitForResource.mockImplementation(async () => ({} as any));

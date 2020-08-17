@@ -226,6 +226,8 @@ class PageEventsRecorder {
       }
     }
 
+    const attributeNodes = new Set();
+
     for (const mutation of mutations) {
       switch (mutation.type) {
         case 'childList':
@@ -268,8 +270,10 @@ class PageEventsRecorder {
           break;
 
         case 'attributes':
+          if (attributeNodes.has(mutation.target)) break;
           const attributeChange = this.serializeNode(mutation.target);
           if (!attributeChange.attributes) attributeChange.attributes = {};
+          attributeNodes.add(mutation.target);
           attributeChange.attributes[
             mutation.attributeName
           ] = (mutation.target as Element).getAttribute(mutation.attributeName);

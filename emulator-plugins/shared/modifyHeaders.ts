@@ -1,32 +1,21 @@
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
 import OriginType from '@secret-agent/commons/interfaces/OriginType';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import Log from '@secret-agent/commons/Logger';
+import { IResourceToModify } from '../../commons/interfaces/IHttpRequestModifierDelegate';
+import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
 
 const { log } = Log(module);
 
 export default function modifyHeaders(
   userAgent: IUserAgent,
   headerProfiles: IResourceHeaderDefaults,
-  sessionId: string,
-  resourceType: ResourceType,
-  secureDomain: boolean,
-  method: string,
-  originType: OriginType,
-  headers: { [name: string]: string },
+  resource: IResourceToModify,
 ) {
-  const defaultOrder = getOrderAndDefaults(
-    sessionId,
-    headerProfiles,
-    resourceType,
-    secureDomain,
-    method,
-    originType,
-    headers,
-  );
+  const defaultOrder = getOrderAndDefaults(headerProfiles, resource);
 
-  if (!defaultOrder) {
+  const { headers, lowerHeaders } = resource;
+  if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
     for (const [header, value] of Object.entries(headers)) {
       if (header.match(/user-agent/i) && value !== userAgent.raw) {
         headers[header] = value;
@@ -35,12 +24,7 @@ export default function modifyHeaders(
     return headers;
   }
 
-  const lowerHeaders: { [name: string]: string } = {};
-  for (const header of Object.keys(headers)) {
-    lowerHeaders[header.toLowerCase()] = headers[header];
-  }
-
-  const headerlist: [string, string][] = [];
+  const headerlist: [string, string | string[]][] = [];
   for (const headerName of defaultOrder.order) {
     const defaults = defaultOrder.defaults[headerName];
     let value = lowerHeaders[headerName.toLowerCase()];
@@ -50,7 +34,7 @@ export default function modifyHeaders(
       // keep given value
     } else if (defaults && defaults.length) {
       // trust that it's doing it's thing
-      if (!defaults.includes(value)) {
+      if (!defaults.includes(value as string)) {
         value = pickRandom(defaults);
       }
     }
@@ -90,26 +74,19 @@ export default function modifyHeaders(
     headerlist.splice(index, 0, [header, value]);
   }
 
-  const newHeaders = {};
+  const newHeaders: IResourceHeaders = {};
   for (const entry of headerlist) newHeaders[entry[0]] = entry[1];
 
   return newHeaders;
 }
 
-function getOrderAndDefaults(
-  sessionId: string,
-  headerProfiles: IResourceHeaderDefaults,
-  resourceType: ResourceType,
-  secureDomain: boolean,
-  method: string,
-  originType: OriginType,
-  headers: { [name: string]: string },
-) {
+function getOrderAndDefaults(headerProfiles: IResourceHeaderDefaults, resource: IResourceToModify) {
+  const { method, originType, headers, resourceType, isSSL, sessionId } = resource;
   let profiles = headerProfiles[resourceType];
   if (!profiles && resourceType === 'Websocket') profiles = headerProfiles['Websocket Upgrade'];
   if (!profiles) return null;
 
-  let defaultOrders = profiles.filter(x => x.secureDomain === secureDomain);
+  let defaultOrders = profiles.filter(x => x.secureDomain === isSSL);
 
   if (defaultOrders.length > 1) {
     const methodOrders = defaultOrders.filter(x => x.method.toLowerCase() === method.toLowerCase());
@@ -132,7 +109,7 @@ function getOrderAndDefaults(
   }
 
   if (!defaultOrder) {
-    log.error('Headers.NotFound', { sessionId, resourceType, secureDomain, method, originType });
+    log.error('Headers.NotFound', { sessionId, resourceType, isSSL, method, originType });
     return null;
   }
 

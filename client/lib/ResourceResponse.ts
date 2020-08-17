@@ -17,7 +17,7 @@ const propertyKeys: (keyof ResourceResponse)[] = [
   'timestamp',
   'remoteAddress',
   'statusCode',
-  'statusText',
+  'statusMessage',
   'data',
 ];
 
@@ -46,8 +46,8 @@ export default class ResourceResponse {
     return getResponseProperty(this, 'statusCode');
   }
 
-  public get statusText(): Promise<string> {
-    return getResponseProperty(this, 'statusText');
+  public get statusMessage(): Promise<string> {
+    return getResponseProperty(this, 'statusMessage');
   }
 
   public get data(): Promise<Buffer> {

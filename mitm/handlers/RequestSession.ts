@@ -6,14 +6,16 @@ import ResourceType, {
 import { EventEmitter } from 'events';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
 import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import Protocol from 'devtools-protocol';
 import Log from '@secret-agent/commons/Logger';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import MitmRequestContext from '../lib/MitmRequestContext';
-import Network = Protocol.Network;
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import * as http2 from 'http2';
+import { URL } from 'url';
+import Network = Protocol.Network;
+import IResourceResponse from '../../core-interfaces/IResourceResponse';
 
 const { log } = Log(module);
 
@@ -30,8 +32,8 @@ export default class RequestSession {
   public blockImages: boolean = false;
   public blockUrls: string[] = [];
   public blockResponseHandlerFn?: (
-    request: http.IncomingMessage,
-    response: http.ServerResponse,
+    request: http.IncomingMessage | http2.Http2ServerRequest,
+    response: http.ServerResponse | http2.Http2ServerResponse,
   ) => boolean;
   public requestAgent: MitmRequestAgent;
   public requests: IHttpResourceLoadDetails[] = [];
@@ -63,21 +65,17 @@ export default class RequestSession {
     return this.emitter.emit(eventType, event);
   }
 
-  public async getWebsocketUpgradeRequestId(headers: { [name: string]: string }) {
+  public async getWebsocketUpgradeRequestId(headers: IResourceHeaders) {
     const session = await RequestSession.waitForWebsocketSessionId(headers, 0);
     return session.browserRequestId;
   }
 
-  public async waitForBrowserResourceRequest(
-    url: string,
-    method: string,
-    headers: { [name: string]: string },
-  ) {
-    const resourceIdx = this.getResourceIndex(url, method);
+  public async waitForBrowserResourceRequest(url: URL, method: string, headers: IResourceHeaders) {
+    const resourceIdx = this.getResourceIndex(url.href, method);
     let resource = resourceIdx >= 0 ? this.pendingResources[resourceIdx] : null;
     if (!resource) {
       resource = {
-        url,
+        url: url.href,
         method,
         load: createPromise<IPendingResourceLoad>(),
       };
@@ -98,22 +96,22 @@ export default class RequestSession {
 
   public trackResource(resource: IHttpResourceLoadDetails) {
     this.requests.push(resource);
-    const redirect = this.requests.find(x => x.redirectedToUrl === resource.url);
+    const redirect = this.requests.find(x => x.redirectedToUrl === resource.url.href);
     resource.isFromRedirect = !!redirect;
     if (redirect) {
-      resource.previousUrl = redirect.url;
-      resource.firstRedirectingUrl = redirect.url;
+      resource.previousUrl = redirect.url.href;
+      resource.firstRedirectingUrl = redirect.url.href;
       if (redirect.isFromRedirect) {
         const seen = new Set();
         let prev = redirect;
         while (prev.isFromRedirect) {
-          prev = this.requests.find(x => x.redirectedToUrl === prev.url);
+          prev = this.requests.find(x => x.redirectedToUrl === prev.url.href);
           if (seen.has(prev)) break;
           seen.add(prev);
           if (!prev) break;
         }
         if (prev) {
-          resource.firstRedirectingUrl = prev.url;
+          resource.firstRedirectingUrl = prev.url.href;
         }
       }
     }
@@ -207,7 +205,10 @@ export default class RequestSession {
   }
 
   // function to override for
-  public blockHandler(request: http.IncomingMessage, response: http.ServerResponse) {
+  public blockHandler(
+    request: http.IncomingMessage | http2.Http2ServerRequest,
+    response: http.ServerResponse | http2.Http2ServerResponse,
+  ) {
     if (this.blockResponseHandlerFn) return this.blockResponseHandlerFn(request, response);
     return false;
   }
@@ -231,7 +232,7 @@ export default class RequestSession {
   }
 
   public static async getSession(
-    headers: { [name: string]: string },
+    headers: IResourceHeaders,
     method: string,
     isWebsocket: boolean = false,
     timeout = 10e3,
@@ -244,16 +245,15 @@ export default class RequestSession {
     return RequestSession.sessions[sessionId];
   }
 
-  public static getSessionId(headers: { [name: string]: string }, method: string) {
+  public static getSessionId(headers: IResourceHeaders, method: string) {
     const keys = Object.keys(headers);
     const accessControlHeaders = Object.entries(headers).find(([key]) =>
       key.match(/access-control-request-headers/i),
     );
     // preflight
     if (accessControlHeaders && method === 'OPTIONS') {
-      keys.push(...accessControlHeaders[1].split(','));
+      keys.push(...(accessControlHeaders[1] as string).split(','));
     }
-
     for (const key of keys) {
       if (key.startsWith(RequestSession.headerSessionIdPrefix)) {
         return key.replace(RequestSession.headerSessionIdPrefix, '');
@@ -261,10 +261,7 @@ export default class RequestSession {
     }
   }
 
-  public static async waitForWebsocketSessionId(
-    headers: { [name: string]: string },
-    timeout: number,
-  ) {
+  public static async waitForWebsocketSessionId(headers: IResourceHeaders, timeout: number) {
     const headersKey: string[] = [];
     for (const key of websocketHeadersForKey) {
       headersKey.push(`${key}=${headers[key]}`);
@@ -288,12 +285,12 @@ interface IRequestSessionEvents {
 
 export interface IRequestSessionResponseEvent extends IRequestSessionRequestEvent {
   browserRequestId: string;
-  response: IHttpOrH2Response;
+  response: IResourceResponse;
   wasCached: boolean;
   resourceType: ResourceType;
-  remoteAddress: string;
   body: Buffer;
   redirectedToUrl?: string;
+  executionMillis: number;
 }
 
 export interface IRequestSessionRequestEvent {
@@ -301,14 +298,15 @@ export interface IRequestSessionRequestEvent {
   request: IResourceRequest;
   serverAlpn: string;
   clientAlpn: string;
+  isHttp2Push: boolean;
   didBlockResource: boolean;
   originalHeaders: IResourceHeaders;
   localAddress: string;
-  requestTime: Date;
 }
 
 export interface IRequestSessionHttpErrorEvent {
-  request: http.IncomingMessage;
+  url: string;
+  method: string;
   error: Error;
 }
 

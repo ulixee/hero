@@ -59,8 +59,7 @@ describe('basic Full Client tests', () => {
     expect(await response.timestamp).toBeTruthy();
     expect(await response.remoteAddress).toBeTruthy();
     expect(await response.statusCode).toBe(200);
-    expect(await response.statusText).toBe('OK');
+    expect(await response.statusMessage).toBe('OK');
     expect(await response.text()).toMatch('<h1>Example Domain</h1>');
   });
 });
-

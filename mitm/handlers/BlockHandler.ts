@@ -1,13 +1,14 @@
-import RequestSession from './RequestSession';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 export default class BlockHandler {
-  public static shouldBlockRequest(session: RequestSession, ctx: IMitmRequestContext) {
+  public static shouldBlockRequest(ctx: IMitmRequestContext) {
+    const session = ctx.requestSession;
     if (!session) return false;
     if (session.isClosing) return true;
 
     const shouldBlock =
-      (session.blockImages && ctx.resourceType === 'Image') || session.shouldBlockRequest(ctx.url);
+      (session.blockImages && ctx.resourceType === 'Image') ||
+      session.shouldBlockRequest(ctx.url.href);
 
     if (!shouldBlock) return false;
 
@@ -15,7 +16,7 @@ export default class BlockHandler {
 
     let contentType = 'text/html';
     if (ctx.resourceType === 'Image') {
-      contentType = `image/${ctx.url.split('.').pop()}`;
+      contentType = `image/${ctx.url.pathname.split('.').pop()}`;
     }
 
     if (ctx.proxyToClientResponse) {

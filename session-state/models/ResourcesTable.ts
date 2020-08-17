@@ -17,8 +17,9 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
         ['seenAtCommandId', 'INTEGER'],
         ['redirectedToUrl', 'TEXT'],
         ['requestUrl', 'TEXT'],
-        ['originalHeaders', 'TEXT'],
+        ['requestOriginalHeaders', 'TEXT'],
         ['requestHeaders', 'TEXT'],
+        ['requestTrailers', 'TEXT'],
         ['requestTimestamp', 'TEXT'],
         ['requestPostData', 'TEXT'],
         ['clientAlpn', 'TEXT'],
@@ -26,6 +27,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
         ['localAddress', 'TEXT'],
         ['responseUrl', 'TEXT'],
         ['responseHeaders', 'TEXT'],
+        ['responseTrailers', 'TEXT'],
         ['responseData', 'BLOB'],
         ['responseEncoding', 'TEXT'],
         ['responseTimestamp', 'TEXT'],
@@ -34,6 +36,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
         ['statusMessage', 'TEXT'],
         ['usedBrowserCache', 'INTEGER'],
         ['didBlockResource', 'INTEGER'],
+        ['isHttp2Push', 'INTEGER'],
       ],
       true,
     );
@@ -50,6 +53,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       localAddress: string;
       wasCached?: boolean;
       didBlockResource: boolean;
+      isHttp2Push: boolean;
     },
   ) {
     return this.queuePendingInsert([
@@ -61,6 +65,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       meta.request.url,
       JSON.stringify(extras.originalHeaders ?? {}),
       JSON.stringify(meta.request.headers ?? {}),
+      JSON.stringify(meta.request.trailers ?? {}),
       meta.request.timestamp,
       meta.request.postData,
       extras.clientAlpn,
@@ -68,14 +73,16 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       extras.localAddress,
       meta.response?.url,
       meta.response ? JSON.stringify(meta.response.headers ?? {}) : undefined,
+      meta.response ? JSON.stringify(meta.response.trailers ?? {}) : undefined,
       meta.response ? body : undefined,
       meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
       meta.response?.timestamp,
       meta.response?.remoteAddress,
       meta.response?.statusCode,
-      meta.response?.statusText,
+      meta.response?.statusMessage,
       extras.wasCached ? 1 : 0,
       extras.didBlockResource ? 1 : 0,
+      extras.isHttp2Push ? 1 : 0,
     ]);
   }
 
@@ -109,8 +116,9 @@ export interface IResourcesRecord {
   seenAtCommandId: number;
   redirectedToUrl?: string;
   requestUrl: string;
+  requestOriginalHeaders: string;
   requestHeaders: string;
-  originalHeaders: string;
+  requestTrailers?: string;
   requestTimestamp: string;
   requestPostData?: string;
   clientAlpn: string;
@@ -118,6 +126,7 @@ export interface IResourcesRecord {
   localAddress: string;
   responseUrl: string;
   responseHeaders: string;
+  responseTrailers?: string;
   responseData?: Buffer;
   responseEncoding: string;
   responseTimestamp: string;
@@ -126,4 +135,5 @@ export interface IResourcesRecord {
   statusMessage: string;
   usedBrowserCache: boolean;
   didBlockResource: boolean;
+  isHttp2Push: boolean;
 }

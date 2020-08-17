@@ -15,6 +15,9 @@ import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
 import * as Path from 'path';
 import SessionState from '../index';
+import Log from '../../commons/Logger';
+
+const { log } = Log(module);
 
 interface IDbOptions {
   readonly?: boolean;
@@ -38,13 +41,14 @@ export default class SessionDb {
 
   private readonly batchInsert?: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
+  private readonly sessionId: string;
 
   private db: SqliteDatabase;
   private readonly tables: BaseTable<any>[] = [];
 
   constructor(baseDir: string, id: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
-
+    this.sessionId = id;
     this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
@@ -82,7 +86,15 @@ export default class SessionDb {
     if (!readonly) {
       this.batchInsert = this.db.transaction(() => {
         for (const table of this.tables) {
-          table.flush();
+          try {
+            table.flush();
+          } catch (error) {
+            log.error('SessionDb.flushError', {
+              sessionId: this.sessionId,
+              error,
+              table: table.tableName,
+            });
+          }
         }
       });
     }

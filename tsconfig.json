@@ -4,7 +4,10 @@
     "incremental": true,
     "target": "ES2018",
     "module": "commonjs",
-    "lib": ["es2018"],
+    "lib": [
+      "es2018",
+      "dom"
+    ],
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSourceMap": false,

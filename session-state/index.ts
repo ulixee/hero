@@ -200,30 +200,14 @@ export default class SessionState {
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
     isResponse: boolean,
   ): IResourceMeta {
-    const { request, requestTime } = resourceEvent;
+    const { request } = resourceEvent;
     const {
       response,
-      remoteAddress,
       resourceType,
       body,
       browserRequestId,
       redirectedToUrl,
     } = resourceEvent as IRequestSessionResponseEvent;
-
-    const responseHeaders: { [key: string]: string | string[] } = {};
-    for (let i = 0; i <= response?.rawHeaders.length ?? 0; i += 2) {
-      const name = response.rawHeaders[i];
-      const value = response.rawHeaders[i + 1];
-      if (name && value) {
-        if (responseHeaders[name]) {
-          if (!Array.isArray(responseHeaders[name])) {
-            responseHeaders[name] = [responseHeaders[name] as string];
-          }
-          (responseHeaders[name] as string[]).push(value);
-        }
-        responseHeaders[name] = value;
-      }
-    }
 
     if (browserRequestId) {
       this.browserRequestIdToResourceId[browserRequestId] = resourceEvent.id;
@@ -236,24 +220,15 @@ export default class SessionState {
       type: resourceType,
       isRedirect: !!redirectedToUrl,
       request: {
-        url: request.url,
-        timestamp: requestTime.toISOString(),
-        headers: request.headers,
-        method: request.method,
+        ...request,
         postData: request.postData?.toString(),
       },
     } as IResourceMeta;
 
-    if (response) {
+    if (isResponse && response?.statusCode) {
+      meta.response = response;
       if (response.url) meta.url = response.url;
-      meta.response = {
-        url: response.url || request.url, // if response was aborted, won't have a url
-        timestamp: response.responseTime.toISOString(),
-        headers: responseHeaders,
-        remoteAddress: remoteAddress,
-        statusCode: response.statusCode,
-        statusText: response.statusMessage,
-      };
+      else meta.response.url = request.url;
     }
 
     this.db.resources.insert(meta, body, resourceEvent);

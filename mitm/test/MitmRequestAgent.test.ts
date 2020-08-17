@@ -6,9 +6,6 @@ import MitmRequestAgent from '../lib/MitmRequestAgent';
 import { runHttpsServer } from '@secret-agent/testing/helpers';
 import WebSocket from 'ws';
 import HttpProxyAgent from 'http-proxy-agent';
-import { createPromise } from '../../commons/utils';
-import http2 from 'http2';
-import * as net from 'net';
 
 const mocks = {
   HeadersHandler: {
@@ -124,18 +121,10 @@ test('it should not put upgrade connections in a pool', async () => {
 });
 
 test('it should reuse http2 connections', async () => {
-  const h2ServerStarted = createPromise();
-  const httpServer = http2
-    .createSecureServer(Helpers.sslCerts(), (request, response) => {
-      response.end(request.url);
-    })
-    .listen(0, () => {
-      h2ServerStarted.resolve();
-    });
-  Helpers.onClose(() => new Promise(resolve => httpServer.close(resolve)));
-  await h2ServerStarted.promise;
-  const serverPort = (httpServer.address() as net.AddressInfo).port;
-  const baseUrl = `https://localhost:${serverPort}`;
+  const httpServer = await Helpers.runHttp2Server((request, response) => {
+    response.end(request.url);
+  });
+  const baseUrl = httpServer.baseUrl;
 
   const mitmServer = await startMitmServer();
   const mitmUrl = `http://localhost:${mitmServer.port}`;
@@ -146,6 +135,7 @@ test('it should reuse http2 connections', async () => {
 
   const headers = session.getTrackingHeaders();
 
+  process.env.MITM_ALLOW_INSECURE = 'true';
   const results = await Promise.all([
     Helpers.httpGet(`${baseUrl}/test1`, mitmUrl, headers),
     Helpers.httpGet(`${baseUrl}/test2`, mitmUrl, headers),
@@ -153,6 +143,7 @@ test('it should reuse http2 connections', async () => {
   ]);
   expect(results).toStrictEqual(['/test1', '/test2', '/test3']);
 
+  process.env.MITM_ALLOW_INSECURE = 'false';
   // not reusable, so should not be here
   expect(connectionsByOrigin[baseUrl].all.size).toBe(0);
   // @ts-ignore
@@ -160,7 +151,7 @@ test('it should reuse http2 connections', async () => {
 });
 
 async function startMitmServer() {
-  const mitmServer = await MitmServer.start(0);
+  const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
   return mitmServer;
 }

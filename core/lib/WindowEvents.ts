@@ -148,14 +148,14 @@ export default class WindowEvents {
   }
 
   private onMitmRequestResponse(responseEvent: IRequestSessionResponseEvent) {
-    const { request, requestTime, wasCached, body, response } = responseEvent;
+    const { request, wasCached, body } = responseEvent;
     const sessionId = this.window.session.id;
     log.info('Http.Response', {
       sessionId,
       url: request.url,
       method: request.method,
       wasCached,
-      executionMillis: response.responseTime.getTime() - requestTime.getTime(),
+      executionMillis: responseEvent.executionMillis,
       bytes: body ? Buffer.byteLength(body) : -1,
     });
 
@@ -287,7 +287,9 @@ export default class WindowEvents {
       .map(arg => {
         const objectId = arg.objectId;
         if (objectId) {
-          this.devtoolsClient.send('Runtime.releaseObject', { objectId }).catch();
+          this.devtoolsClient.send('Runtime.releaseObject', { objectId }).catch(err => {
+            // sometimes this dies, not a problem
+          });
           return arg.toString();
         }
         return arg.value;

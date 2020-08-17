@@ -1,5 +1,6 @@
 import Log from '@secret-agent/commons/Logger';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 const { log } = Log(module);
 
@@ -8,23 +9,26 @@ export default class CookieHandler {
     const session = ctx.requestSession;
     if (!session || !session.delegate?.getCookieHeader) return;
     // never send cookies to preflight requests
-    if (ctx.clientToProxyRequest.method === 'OPTIONS') return;
+    if (ctx.method === 'OPTIONS') return;
 
     const cookieHeader = await session.delegate.getCookieHeader(ctx);
-    setCookies(ctx.proxyToServerRequestSettings.headers, cookieHeader);
+    setCookies(ctx.requestHeaders, cookieHeader);
   }
 
   public static async readServerResponseCookies(ctx: IMitmRequestContext) {
     const session = ctx.requestSession;
     if (!session || !session.delegate?.setCookie) return;
 
-    if (ctx.resourceType === 'Document' && ctx.serverToProxyResponse.statusCode === 200) {
-      await session.delegate?.documentHasUserActivity(ctx.url);
+    if (ctx.resourceType === 'Document' && ctx.status === 200) {
+      await session.delegate?.documentHasUserActivity(ctx.url.href);
     }
 
-    for (const setCookie of ctx.serverToProxyResponse.headers['set-cookie'] ?? []) {
+    let cookies = ctx.responseHeaders['set-cookie'] ?? ctx.responseHeaders['Set-Cookie'] ?? [];
+    if (!Array.isArray(cookies)) cookies = [cookies];
+
+    for (const setCookie of cookies) {
       try {
-        await session.delegate.setCookie(setCookie, ctx, ctx.serverToProxyResponse.statusCode);
+        await session.delegate.setCookie(setCookie, ctx, ctx.status);
       } catch (error) {
         log.warn('Could not set cookie', { sessionId: ctx.requestSession.sessionId, error });
       }
@@ -32,7 +36,7 @@ export default class CookieHandler {
   }
 }
 
-function setCookies(headers: { [name: string]: string }, cookieHeader: string) {
+function setCookies(headers: IResourceHeaders, cookieHeader: string) {
   const existingCookies = (headers.Cookie ?? headers.cookie) || '';
   if (existingCookies !== cookieHeader) {
     if (cookieHeader) {

@@ -1,6 +1,6 @@
-import net, { ListenOptions, Socket } from 'net';
+import net, { Socket } from 'net';
 import http, { IncomingMessage } from 'http';
-import https from 'https';
+import http2 from 'http2';
 import path from 'path';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -29,12 +29,11 @@ export default class MitmProxy {
     return (this.httpServer.address() as net.AddressInfo)?.port;
   }
 
-  public get httpsPort() {
-    return (this.httpsServer.address() as net.AddressInfo)?.port;
+  public get http2Port() {
+    return (this.http2Server.address() as net.AddressInfo)?.port;
   }
 
-  private readonly httpHost: string;
-  private readonly httpsServer: https.Server;
+  private readonly http2Server: http2.Http2SecureServer;
   private readonly serverConnects: net.Socket[] = [];
 
   private isClosing = false;
@@ -47,7 +46,6 @@ export default class MitmProxy {
 
   constructor(options: IMitmProxyOptions) {
     this.options = options || {};
-    this.httpHost = options.host;
 
     this.sslCaDir = options.sslCaDir || path.resolve(process.cwd(), '.mitm-ca');
     this.httpServer = http.createServer();
@@ -56,36 +54,22 @@ export default class MitmProxy {
     this.httpServer.on('request', this.onHttpRequest.bind(this, false));
     this.httpServer.on('upgrade', this.onHttpUpgrade.bind(this, false));
 
-    this.httpsServer = https.createServer();
-    this.httpsServer.on('clientError', this.onClientError.bind(this, true));
-    this.httpsServer.on('request', this.onHttpRequest.bind(this, true));
-    this.httpsServer.on('upgrade', this.onHttpUpgrade.bind(this, true));
+    this.http2Server = http2.createSecureServer({ allowHTTP1: true });
+    this.http2Server.on('sessionError', this.onClientError.bind(this, true));
+    this.http2Server.on('request', this.onHttpRequest.bind(this, true));
+    this.http2Server.on('upgrade', this.onHttpUpgrade.bind(this, true));
   }
 
   public async listen() {
     this.ca = await CertificateAuthority.create(this.sslCaDir);
 
-    await startServer(
-      this.httpServer,
-      {
-        host: this.httpHost,
-        port: this.options.port ?? 8080,
-      },
-      this.options.shouldFindAvailablePort,
-    );
+    await startServer(this.httpServer, this.options.port ?? 0);
 
-    await startServer(
-      this.httpsServer,
-      {
-        host: this.httpHost,
-        port: this.options.httpsPort ?? 0,
-      },
-      this.options.shouldFindAvailablePort,
-    );
+    await startServer(this.http2Server);
 
     // don't listen for errors until server already started
     this.httpServer.on('error', this.onHttpError.bind(this, 'HTTP_SERVER_ERROR', null));
-    this.httpsServer.on('error', this.onHttpError.bind(this, 'HTTPS_SERVER_ERROR', null));
+    this.http2Server.on('error', this.onHttpError.bind(this, 'HTTP2_SERVER_ERROR', null));
     return this;
   }
 
@@ -97,7 +81,7 @@ export default class MitmProxy {
       connect.destroy();
     }
     await closeServer(this.httpServer);
-    await closeServer(this.httpsServer);
+    await closeServer(this.http2Server);
 
     delete this.secureContexts;
 
@@ -107,7 +91,7 @@ export default class MitmProxy {
 
   public onHttpError(errorKind: string, ctx: IMitmRequestContext, error: Error) {
     if (ctx?.requestSession) {
-      ctx.requestSession.emit('httpError', { request: ctx.clientToProxyRequest, error });
+      ctx.requestSession.emit('httpError', { url: ctx.url.href, method: ctx.method, error });
     }
     if (!(error as any)?.isLogged) {
       const logLevel = this.isClosing ? 'stats' : 'error';
@@ -115,11 +99,15 @@ export default class MitmProxy {
         sessionId: ctx?.requestSession?.sessionId,
         errorKind,
         error,
-        url: ctx?.url,
+        url: ctx?.url?.href,
       });
     }
     if (ctx?.proxyToClientResponse && !ctx.proxyToClientResponse.headersSent) {
-      ctx.proxyToClientResponse.writeHead(504, 'Proxy Error');
+      if (ctx.isClientHttp2) {
+        ctx.proxyToClientResponse.writeHead(504);
+      } else {
+        ctx.proxyToClientResponse.writeHead(504, 'Proxy Error');
+      }
     }
     if (ctx?.proxyToClientResponse && !ctx.proxyToClientResponse.finished) {
       ctx.proxyToClientResponse.end(`${errorKind}:${error}`, 'utf8');
@@ -143,8 +131,8 @@ export default class MitmProxy {
 
   private async onHttpRequest(
     isSecure: boolean,
-    request: http.IncomingMessage,
-    response: http.ServerResponse,
+    request: http2.Http2ServerRequest,
+    response: http2.Http2ServerResponse,
   ) {
     try {
       const handler = new MitmRequestHandler(MitmProxy.responseCache, this.onHttpError.bind(this));
@@ -155,7 +143,7 @@ export default class MitmProxy {
       let logLevel = 'error';
       if (sessionId) {
         const session = RequestSession.sessions[sessionId];
-        session?.emit('httpError', { request, error: err });
+        session?.emit('httpError', { url: request.url, method: request.method, error: err });
 
         if (session?.isClosing) logLevel = 'stats';
       }
@@ -166,7 +154,7 @@ export default class MitmProxy {
         url: request.url,
         err,
       });
-      response.writeHead(504, 'Proxy Error');
+      response.writeHead(504);
       response.end(`${err}`);
     }
   }
@@ -180,14 +168,14 @@ export default class MitmProxy {
     try {
       const handler = new MitmRequestHandler(MitmProxy.responseCache, (errorKind, ctx, error) => {
         if (ctx?.requestSession) {
-          ctx.requestSession.emit('httpError', { request: ctx.clientToProxyRequest, error });
+          ctx.requestSession.emit('httpError', { url: ctx.url.href, method: ctx.method, error });
         }
         if (!(error as any)?.isLogged) {
           log.error('Mitm WebSocket Error', {
             sessionId: ctx?.requestSession?.sessionId,
             errorKind,
             error,
-            url: ctx?.url,
+            url: ctx?.url?.href,
           });
         }
         socket.destroy(error);
@@ -203,7 +191,8 @@ export default class MitmProxy {
       if (sessionLookup) {
         const session = RequestSession.sessions[sessionLookup.sessionId];
         session?.emit('httpError', {
-          request,
+          url: request.url,
+          method: request.method,
           error,
         });
         if (session?.isClosing) logLevel = 'stats';
@@ -241,7 +230,7 @@ export default class MitmProxy {
         this.secureContexts[hostname] = this.addSecureContext(hostname);
       }
       await this.secureContexts[hostname];
-      proxyToProxyPort = this.httpsPort;
+      proxyToProxyPort = this.http2Port;
     }
 
     // for http, we are proxying to clear out the buffer (for websockets in particular)
@@ -301,15 +290,11 @@ export default class MitmProxy {
 
   private async addSecureContext(hostname: string) {
     const [key, cert] = await this.ca.getCertificateKeys(hostname);
-    this.httpsServer.addContext(hostname, { key, cert });
+    this.http2Server.addContext(hostname, { key, cert });
   }
 
-  public static async start(
-    startingPort?: number,
-    shouldFindAvailablePort = true,
-  ): Promise<MitmProxy> {
-    const port = startingPort ?? 20000;
-    const proxy = new MitmProxy({ port, shouldFindAvailablePort });
+  public static async start(startingPort?: number): Promise<MitmProxy> {
+    const proxy = new MitmProxy({ port: startingPort });
     await proxy.listen();
     return proxy;
   }
@@ -328,37 +313,22 @@ export default class MitmProxy {
   }
 }
 
-async function startServer(
-  server: http.Server,
-  options: ListenOptions,
-  shouldFindAvailablePort: boolean,
-) {
-  return await new Promise<number>((resolve, reject) => {
+async function startServer(server: http.Server | http2.Http2SecureServer, listenPort?: number) {
+  return new Promise<number>((resolve, reject) => {
     try {
       server.once('error', reject);
-      server.listen(options, () => {
+      server.listen(listenPort, () => {
         const port = (server.address() as net.AddressInfo).port;
         resolve(port);
       });
     } catch (err) {
       reject(err);
     }
-  }).catch(error => {
-    if (error.code === 'EADDRINUSE' && shouldFindAvailablePort) {
-      if (process.env.NODE_ENV !== 'test') {
-        log.warn('Mitm.startServer::PortUnavailable', { sessionId: null, port: options.port });
-      }
-      options.port = 0;
-      return startServer(server, options, false);
-    }
-    throw error;
   });
 }
 
-async function closeServer(server: http.Server) {
+async function closeServer(server: http.Server | http2.Http2SecureServer) {
   return new Promise(resolve => {
-    server.close(() => {
-      resolve();
-    });
+    server.close(() => resolve());
   });
 }
