@@ -83,6 +83,7 @@ export default class GlobalPool {
       promise.reject(new Error('Shutting down'));
     }
     this.waitingForAvailability.length = 0;
+    // tslint:disable-next-line:no-this-assignment
     const { chromeCore, mitmServer } = this;
     this.chromeCore = null;
     this.mitmServer = null;

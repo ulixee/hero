@@ -48,4 +48,17 @@ describe('basic Core tests', () => {
     expect(shutdownSpy).toHaveBeenCalledTimes(0);
     await Core.shutdown();
   });
+
+  it('will shutdown if start called, core disconnects and no open windows', async () => {
+    // @ts-ignore
+    Core.autoShutdownMillis = 0;
+    shutdownSpy.mockClear();
+    await Core.start();
+    await Core.configure({ maxActiveSessionCount: 5 });
+    const meta = await Core.createSession();
+    await Core.disconnect([meta.windowId]);
+    await new Promise(r => setTimeout(r, 50));
+    expect(shutdownSpy).toHaveBeenCalledTimes(1);
+    await Core.shutdown();
+  });
 });

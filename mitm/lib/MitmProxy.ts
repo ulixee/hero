@@ -236,7 +236,7 @@ export default class MitmProxy {
     // for http, we are proxying to clear out the buffer (for websockets in particular)
     // NOTE: this probably can be optimized away for http
 
-    const proxyConnection = net.connect(proxyToProxyPort);
+    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: true });
     proxyConnection.on('error', error => {
       this.onConnectError(req.url, 'PROXY_TO_PROXY_CONNECT_ERROR', error);
       if (!socket.destroyed && socket.writable && socket.readable) {
@@ -254,9 +254,8 @@ export default class MitmProxy {
     // create a tunnel back to the same proxy
     socket.pipe(proxyConnection);
     proxyConnection.pipe(socket);
+    if (head.length) socket.emit('data', head);
     socket.resume();
-
-    if (!socket.destroyed && head.length) socket.unshift(head);
   }
 
   private onConnectError(hostname: string, errorKind: string, error: Error) {
@@ -270,6 +269,7 @@ export default class MitmProxy {
       log.info(`Got ERR_STREAM_UNSHIFT_AFTER_END_EVENT on Proxy Connect, ignoring.`, {
         sessionId: null,
         hostname,
+        errorKind,
       });
     } else {
       const logLevel = this.isClosing ? 'stats' : 'error';

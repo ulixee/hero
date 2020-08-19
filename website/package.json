@@ -37,7 +37,8 @@
     "sass-loader": "^8.0.0",
     "sharp": "^0.23.2",
     "ts-loader": "^6.2.1",
-    "vue-svg-loader": "^0.12.0"
+    "vue-svg-loader": "^0.12.0",
+    "typescript": "~3.8.3"
   },
   "resolutions": {
     "remark-slug": "git://github.com/ulixee/remark-slug.git"

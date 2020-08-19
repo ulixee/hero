@@ -114,6 +114,9 @@ export default class WindowEvents {
 
   private listenToErrors() {
     const devtoolsClient = this.devtoolsClient;
+    this.window.puppPage.on('error', err => {
+      // this is the same error as Inspector.targetCrashed.
+    });
     devtoolsClient.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
     devtoolsClient.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
     devtoolsClient.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));

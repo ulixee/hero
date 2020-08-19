@@ -1,39 +1,39 @@
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import { ClientHttp2Stream } from 'http2';
 import * as zlib from 'zlib';
-import { Readable, PassThrough } from 'stream';
+import { PassThrough } from 'stream';
+import getResolvable from '~shared/utils/promise';
 
 export default class ReplayResources {
   private resources: {
-    [url: string]: IResolvablePromise<{
-      data: Buffer;
-      contentType: string;
-      encoding: string;
-      type: string;
-      statusCode: number;
-    }>;
+    [url: string]: {
+      resolve: (resource: IReplayResource) => void;
+      promise: Promise<IReplayResource>;
+    };
   } = {};
 
   public async onResource(
     http2Stream: ClientHttp2Stream,
     resourceMeta: {
       url: string;
-      contentType: string;
-      encoding: string;
+      headers: any;
       statusCode: number;
       type: string;
     },
   ) {
-    const { url, contentType, encoding, statusCode, type } = resourceMeta;
+    const { url, headers, statusCode, type } = resourceMeta;
     this.initResource(url);
 
     const data: Buffer[] = [];
     for await (const chunk of http2Stream) data.push(chunk);
 
+    const headerMap = new Map<string, string>();
+    for (const [k, v] of Object.entries(headers)) {
+      headerMap.set(k.toLowerCase(), v as string);
+    }
+
     this.resources[url].resolve({
       data: Buffer.concat(data),
-      contentType,
-      encoding,
+      headers: headerMap,
       statusCode,
       type,
     });
@@ -44,24 +44,21 @@ export default class ReplayResources {
     const resource = await this.resources[url].promise;
     const headers = {
       'Cache-Control': 'public, max-age=500',
-      'Content-Type': resource.contentType,
+      'Content-Type': resource.headers.get('content-type'),
     };
 
-    if (resource.type === 'Document') {
-      return {
-        data: Readable.from([`<!DOCTYPE html><html><head></head><body></body></html>`]),
-        headers: {
-          ...headers,
-        },
-        statusCode: 200,
-      };
-    }
-
     let readable = new PassThrough();
-    if (resource.encoding) {
-      readable = readable.pipe(getDecodeStream(resource.data, resource.encoding));
+    if (resource.type === 'Document') {
+      const csp = resource.headers.get('content-security-policy');
+      if (csp) headers['Content-Security-Policy'] = csp;
+      readable.end(`<!DOCTYPE html><html><head></head><body></body></html>`);
+    } else {
+      const encoding = resource.headers.get('content-encoding');
+      if (encoding) {
+        readable = readable.pipe(getDecodeStream(resource.data, encoding));
+      }
+      readable.end(resource.data);
     }
-    readable.end(resource.data);
     return {
       data: readable,
       headers,
@@ -70,7 +67,9 @@ export default class ReplayResources {
   }
 
   private initResource(url: string) {
-    if (!this.resources[url]) this.resources[url] = createPromise();
+    if (!this.resources[url]) {
+      this.resources[url] = getResolvable<IReplayResource>();
+    }
   }
 }
 
@@ -92,4 +91,11 @@ function getDecodeStream(buffer: Buffer, encoding: string) {
   if (encoding === 'br') {
     return zlib.createBrotliDecompress();
   }
+}
+
+interface IReplayResource {
+  data: Buffer;
+  headers: Map<string, string>;
+  type: string;
+  statusCode: number;
 }

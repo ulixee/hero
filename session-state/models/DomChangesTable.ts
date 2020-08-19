@@ -12,10 +12,12 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       ['nodeId', 'INTEGER'],
       ['nodeType', 'INTEGER'],
       ['tagName', 'TEXT'],
+      ['namespaceUri', 'TEXT'],
       ['textContent', 'TEXT'],
       ['previousSiblingId', 'INTEGER'],
       ['parentNodeId', 'INTEGER'],
       ['attributes', 'TEXT'],
+      ['attributeNamespaces', 'TEXT'],
       ['properties', 'TEXT'],
     ]);
     this.defaultSortOrder = 'timestamp ASC';
@@ -31,10 +33,12 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
       nodeData.id,
       nodeData.nodeType,
       nodeData.tagName,
+      nodeData.namespaceUri,
       nodeData.textContent,
       nodeData.previousSiblingId,
       nodeData.parentNodeId,
       nodeData.attributes ? JSON.stringify(nodeData.attributes) : undefined,
+      nodeData.attributeNamespaces ? JSON.stringify(nodeData.attributeNamespaces) : undefined,
       nodeData.properties ? JSON.stringify(nodeData.properties) : undefined,
     ];
     this.queuePendingInsert(record);
@@ -67,6 +71,9 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
         ...record,
         id: record.nodeId,
         attributes: record.attributes ? JSON.parse(record.attributes) : undefined,
+        attributeNamespaces: record.attributeNamespaces
+          ? JSON.parse(record.attributeNamespaces)
+          : undefined,
         properties: record.properties ? JSON.parse(record.properties) : undefined,
       },
       record.timestamp,
@@ -92,9 +99,11 @@ export interface IDomChangeRecord {
   action: string;
   nodeType: number;
   tagName: string;
+  namespaceUri: string;
   textContent: string;
   previousSiblingId: number;
   parentNodeId: number;
   attributes: string;
+  attributeNamespaces: string;
   properties: string;
 }

@@ -134,7 +134,13 @@ export default class MitmSocket {
   private closeChild() {
     if (this.child.killed) return;
     try {
-      this.child.stdin.write('disconnect');
+      // fix for node 13 throwing errors on closed sockets
+      this.child.stdin.on('error', err => {
+        // catch
+      });
+      this.child.stdin.write('disconnect', err => {
+        // don't log
+      });
     } catch (err) {
       // don't log epipes
     }

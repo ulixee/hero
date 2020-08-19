@@ -16,12 +16,15 @@ describe('basic Page Recorder tests', () => {
   it('detects added nodes', async () => {
     koaServer.get('/test1', ctx => {
       ctx.body = `<body>
+<a href="#" onclick="addMe()">I am a test</a>
 <script>
-    setTimeout(function() {
-      const elem = document.createElement('A');
-      elem.setAttribute('href', '/test2');
-      document.body.append(elem)
-    }, 100);
+function addMe() {
+  const elem = document.createElement('A');
+  elem.setAttribute('id', 'link2');
+  elem.setAttribute('href', '/test2');
+  document.body.append(elem);
+  return false;
+}
 </script>
 </body>`;
     });
@@ -37,16 +40,18 @@ describe('basic Page Recorder tests', () => {
     // @ts-ignore
     const commandId = core.window.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(8);
+    expect(changesAfterLoad[frameId]).toHaveLength(11);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
+    await core.interact([
+      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
+    ]);
 
-    await core.waitForMillis(100);
+    await core.waitForElement(['document', ['querySelector', 'a#link2']]);
 
     const changes = await state.getPageDomChanges(state.pages.history, true, commandId);
     const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(1);
+    expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('added');
     expect(changes[key][0][2].tagName).toBe('A');
   });

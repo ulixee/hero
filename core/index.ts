@@ -21,10 +21,11 @@ import UserProfile from './lib/UserProfile';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import Log from '../commons/Logger';
+import Log from '@secret-agent/commons/Logger';
 import { createReplayServer } from '@secret-agent/session-state/api';
-import ISessionReplayServer from '../session-state/interfaces/ISessionReplayServer';
+import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
 import Signals = NodeJS.Signals;
+import Queue from '@secret-agent/commons/Queue';
 
 const { log } = Log(module);
 const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
@@ -45,6 +46,7 @@ export default class Core implements ICore {
   private static autoShutdownMillis = 2e3;
   private static autoShutdownTimer: NodeJS.Timer;
   private static replayServer?: ISessionReplayServer;
+  private static startQueue = new Queue();
   private readonly session: Session;
   private readonly window: Window;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
@@ -232,13 +234,15 @@ export default class Core implements ICore {
   // STATIC /////////////////////////////////////
 
   public static async start(options?: IConfigureOptions) {
-    clearTimeout(this.autoShutdownTimer);
-    this.wasManuallyStarted = true;
-    if (options) await this.configure(options);
-    await GlobalPool.start();
-    if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
-      await this.startReplayServer(options.replayServerPort);
-    }
+    return this.startQueue.run(async () => {
+      clearTimeout(this.autoShutdownTimer);
+      this.wasManuallyStarted = true;
+      if (options) await this.configure(options);
+      await GlobalPool.start();
+      if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
+        await this.startReplayServer(options.replayServerPort);
+      }
+    });
   }
 
   public static async configure(options: IConfigureOptions) {
@@ -249,39 +253,55 @@ export default class Core implements ICore {
   }
 
   public static async createSession(options: ICreateSessionOptions = {}) {
-    clearTimeout(this.autoShutdownTimer);
-    const session = await GlobalPool.createSession(options);
-    if (shouldStartReplayServer) {
-      await this.startReplayServer();
-    }
-    const window = session.window;
-    this.byWindowId[window.id] = new Core(session);
-    return {
-      sessionId: session.id,
-      sessionsDataLocation: session.baseDir,
-      windowId: window.id,
-      replayApiServer: this.replayServer?.url,
-    };
+    return this.startQueue.run(async () => {
+      clearTimeout(this.autoShutdownTimer);
+      const session = await GlobalPool.createSession(options);
+      if (shouldStartReplayServer) {
+        await this.startReplayServer();
+      }
+      const window = session.window;
+      this.byWindowId[window.id] = new Core(session);
+      return {
+        sessionId: session.id,
+        sessionsDataLocation: session.baseDir,
+        windowId: window.id,
+        replayApiServer: this.replayServer?.url,
+      };
+    });
   }
 
   public static async disconnect(windowIds?: string[], clientError?: Error) {
-    if (clientError) log.error('UnhandledClientError', { clientError, sessionId: null });
+    return this.startQueue.run(async () => {
+      if (clientError) log.error('UnhandledClientError', { clientError, sessionId: null });
 
-    const toClose = windowIds?.length
-      ? windowIds.map(x => Core.byWindowId[x])
-      : Object.values(Core.byWindowId);
+      const promises: Promise<void>[] = [];
+      for (const key of windowIds ?? Object.keys(Core.byWindowId)) {
+        const core = Core.byWindowId[key];
+        delete Core.byWindowId[key];
+        promises.push(core.close());
+      }
 
-    await Promise.all(toClose.map(x => x?.close()));
+      await Promise.all(promises);
+
+      // if nothing open, check for shutdown
+      if (windowIds?.length && Object.keys(Core.byWindowId).length === 0) {
+        this.wasManuallyStarted = false;
+        this.checkForAutoShutdown();
+      }
+    });
   }
 
   public static async shutdown(fatalError?: Error, force = false) {
-    clearTimeout(Core.autoShutdownTimer);
-    const replayServer = this.replayServer;
-    this.replayServer = null;
-    this.wasManuallyStarted = false;
+    // runs own queue, don't put inside this loop
     await Core.disconnect(null, fatalError);
-    await GlobalPool.close();
-    await replayServer?.close(!force);
+    return this.startQueue.run(async () => {
+      log.info('Core.shutdown');
+      clearTimeout(Core.autoShutdownTimer);
+      const replayServer = this.replayServer;
+      this.replayServer = null;
+      this.wasManuallyStarted = false;
+      return Promise.all([GlobalPool.close(), replayServer?.close(!force)]);
+    });
   }
 
   public static registerSignalHandlers() {

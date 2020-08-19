@@ -5,8 +5,8 @@ import { ChildProcess, spawn } from 'child_process';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
 import ReplayState from '~backend/api/ReplayState';
-import { createPromise } from '@secret-agent/commons/utils';
 import * as Path from 'path';
+import getResolvable from '~shared/utils/promise';
 
 export default class ReplayApi extends EventEmitter {
   public static serverProcess: ChildProcess;
@@ -17,7 +17,7 @@ export default class ReplayApi extends EventEmitter {
   public readonly saSession: ISaSession;
   public apiHost: string;
   public state: ReplayState;
-  public isReady = createPromise();
+  public readonly isReady = getResolvable<void>();
 
   private readonly http2Session: http2.ClientHttp2Session;
 
@@ -34,6 +34,7 @@ export default class ReplayApi extends EventEmitter {
       id: replay.sessionId,
     } as any;
     this.state = new ReplayState();
+
     this.http2Session = http2.connect(apiHost, () => console.log('Reply API connected'));
 
     ReplayApi.sessions.add(this.http2Session);
@@ -50,17 +51,14 @@ export default class ReplayApi extends EventEmitter {
         return this.onSession(data);
       }
 
-      await this.isReady;
+      await this.isReady.promise;
 
       if (path === '/resource') {
-        const contentType = headers['content-type'];
-        const encoding = headers['content-encoding'];
         const type = headers['resource-type'] as string;
         const statusCode = parseInt((headers['resource-status-code'] as string) ?? '404', 10);
         await this.resources.onResource(stream, {
           url,
-          contentType,
-          encoding,
+          headers: JSON.parse(headers['resource-headers'] as string),
           statusCode,
           type,
         });
