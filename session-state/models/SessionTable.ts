@@ -57,6 +57,7 @@ export default class SessionTable extends BaseTable<ISessionRecord> {
     const fields = ['viewportWidth', 'viewportHeight', 'deviceScaleFactor', 'closeDate'];
     const sql = `UPDATE ${this.tableName} SET ${fields.map(n => `${n}=?`).join(', ')} WHERE id=?`;
     this.db.prepare(sql).run(...values);
+    if (this.insertCallbackFn) this.insertCallbackFn([]);
   }
 
   public get() {

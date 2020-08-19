@@ -100,7 +100,7 @@ export default class TabsStore {
     });
 
     ipcRenderer.on('tab:updated', (e, args) => {
-      const { id, location, saSession, currentTickValue, replaceTabId } = args;
+      const { id, location, saSession, currentTickValue, replaceTabId, tickState } = args;
       console.log('Tab:updated', args);
       if (replaceTabId) {
         const origTab = this.getTabById(replaceTabId);
@@ -113,16 +113,20 @@ export default class TabsStore {
         tab.location = location;
         tab.currentTickValue = 0;
         tab.updateSession(null);
+        tab.updateTicks(null);
       } else if (saSession) {
         tab.location = null;
         tab.updateSession(saSession);
       }
-      if (currentTickValue !== undefined) {
-        tab.currentTickValue = currentTickValue;
-      }
       if (replaceTabId) {
         tab.select();
         store.tabs.updateTabsBounds(false);
+      }
+      if (tickState) {
+        tab.updateTicks(tickState);
+      }
+      if (currentTickValue !== undefined) {
+        tab.currentTickValue = currentTickValue;
       }
     });
 
@@ -295,8 +299,6 @@ export default class TabsStore {
     if (this.isDragging) {
       const container = this.containerRef;
       const { tabStartX, mouseStartX, lastMouseX, lastScrollLeft } = this.appStore.tabs;
-
-      const boundingRect = container.getBoundingClientRect();
 
       if (Math.abs(e.pageX - mouseStartX) < 5) {
         return;

@@ -3,10 +3,9 @@ import { app, dialog, ipcMain, Menu, protocol } from 'electron';
 import * as Fs from 'fs';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
-import ReplayApi from './ReplayApi';
+import ReplayApi from './api';
 import storage from './storage';
 import Window from './models/Window';
-import { ChildProcess } from 'child_process';
 import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
 protocol.registerSchemesAsPrivileged([
@@ -17,8 +16,6 @@ export default class Application {
   public static instance = new Application();
   public static devServerUrl = process.env.WEBPACK_DEV_SERVER_URL;
   public overlayManager = new OverlayManager();
-
-  private replayApiProcess: ChildProcess;
 
   public async start() {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -38,7 +35,7 @@ export default class Application {
     });
 
     app.on('quit', () => {
-      if (this.replayApiProcess) this.replayApiProcess.kill();
+      ReplayApi.quit();
 
       storage.persistAll();
     });
@@ -64,40 +61,53 @@ export default class Application {
     const args = argv.slice(2);
     console.log('Launched with args', argv);
     if (!args.length) {
-      await this.startLocalApi();
-      this.createWindowIfNeeded();
-      return;
+      return this.createWindowIfNeeded();
     }
-    const [dataLocation, sessionName, scriptInstanceId, replayApiPackagePath] = args;
 
-    await this.startLocalApi(replayApiPackagePath);
-    await this.loadSessionReplay({ dataLocation, sessionName, scriptInstanceId });
-  }
+    const [
+      dataLocation,
+      sessionName,
+      scriptInstanceId,
+      sessionId,
+      sessionStateApi,
+      replayApiPackagePath,
+    ] = args;
 
-  private async startLocalApi(replayApiPackagePath?: string) {
-    if (this.replayApiProcess) return;
-    this.replayApiProcess = await ReplayApi.start(
-      replayApiPackagePath ?? Path.resolve(__dirname, '../../replay-api/start'),
-    );
+    ReplayApi.serverStartPath = replayApiPackagePath;
+
+    await this.loadSessionReplay({
+      dataLocation,
+      sessionName,
+      sessionId,
+      scriptInstanceId,
+      sessionStateApi,
+    });
   }
 
   private createWindowIfNeeded() {
-    if (Window.list.filter(x => x !== null).length === 0) {
+    if (Window.noneOpen()) {
       Window.create();
     }
   }
-
   private async loadSessionReplay(replay: IReplayMeta, useCurrentTab = false) {
-    const replayApi = await ReplayApi.connect(replay);
+    let replayApi: ReplayApi;
+    try {
+      replayApi = await ReplayApi.connect(replay);
+    } catch (err) {
+      console.log('ERROR launching replay', err);
+      dialog.showErrorBox('Whoops, something blew up loading this replay!', err.stack);
+      return;
+    }
+
     storage.addToHistory({
-      dataLocation: replayApi.dataLocation,
+      dataLocation: replayApi.saSession.dataLocation,
       sessionName: replayApi.saSession.name,
       scriptInstanceId: replayApi.saSession.scriptInstanceId,
       scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
     });
-    if (Window.list.filter(x => x !== null).length === 0) {
-      Window.create(replayApi);
-      return;
+
+    if (Window.noneOpen()) {
+      return Window.create(replayApi);
     }
 
     // ToDo: need to search windows/tabs for same session
@@ -204,17 +214,25 @@ export default class Application {
       await this.loadSessionReplay(replayMeta, useCurrentTab);
     });
 
-    ipcMain.on('navigate-to-session-page', async (e, page: { id: string; url: string }) => {
+    ipcMain.on('navigate-to-session-page', async (e, page: { id: number; url: string }) => {
       const replayTab = Window.current?.selectedReplayTab;
       if (!replayTab) return;
-      const offset = replayTab.replayApi.getPageOffset(page);
+      const offset = replayTab.replayApi.state.getPageOffset(page);
       replayTab.changeTickOffset(offset);
     });
 
+    let tickDebounce: NodeJS.Timeout;
     ipcMain.on('on-tick', (e, tickValue) => {
+      clearTimeout(tickDebounce);
       const replayTab = Window.current?.selectedReplayTab;
       if (!replayTab) return;
-      replayTab.onTick(tickValue);
+      tickDebounce = setTimeout((tab, val) => tab.onTick(val), 10, replayTab, tickValue);
+    });
+
+    ipcMain.handle('next-tick', () => {
+      const replayTab = Window.current?.selectedReplayTab;
+      if (!replayTab) return;
+      return replayTab.nextTick();
     });
 
     ipcMain.on('on-tick-hover', (e, containerRect, tickValue) => {
@@ -286,14 +304,14 @@ export default class Application {
           ...x,
           scriptInstanceId: x.id,
           isActive: replayApi.saSession.scriptInstanceId === x.id,
-          dataLocation: replayApi.dataLocation,
+          dataLocation: replayApi.saSession.dataLocation,
           sessionName: replayApi.saSession.name,
         };
       });
     });
 
     ipcMain.handle('fetch-sessions', () => {
-      const replayApi = Window.current.selectedReplayTab?.replayApi;
+      const replayApi = Window.current?.selectedReplayTab?.replayApi;
       if (!replayApi) return;
       return replayApi.saSession.relatedSessions;
     });
@@ -301,10 +319,11 @@ export default class Application {
     ipcMain.handle('fetch-session-pages', () => {
       const replayApi = Window.current.selectedReplayTab?.replayApi;
       if (!replayApi) return;
-      return replayApi.saSession.pages.map(x => {
+      return replayApi.state.pages.map(x => {
         return {
           ...x,
-          isActive: replayApi.urlOrigin === x.url || `${replayApi.urlOrigin}/` === x.url,
+          isActive:
+            replayApi.state.urlOrigin === x.url || `${replayApi.state.urlOrigin}/` === x.url,
         };
       });
     });

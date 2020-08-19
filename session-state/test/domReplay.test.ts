@@ -3,9 +3,10 @@ import { Helpers } from '@secret-agent/testing';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import DomChangesTable from '../models/DomChangesTable';
 
 const domReplayScript = fs.readFileSync(
-  require.resolve('@secret-agent/injected-scripts/scripts/domReplay.js'),
+  require.resolve('@secret-agent/replay-app/injected-scripts/domReplayer'),
   'utf8',
 );
 
@@ -82,9 +83,12 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const puppBrowser = await mirrorChrome.getBrowser();
     const mirrorPage = await puppBrowser.newPage();
-    mirrorPage.on('console', x => console.log(x.text()));
-    mirrorPage.on('pageerror', x => console.log(x));
-    await mirrorPage.evaluateOnNewDocument(domReplayScript);
+    const debug = false;
+    if (debug) {
+      mirrorPage.on('console', x => console.log(x.text()));
+      mirrorPage.on('pageerror', x => console.log(x));
+    }
+    await mirrorPage.evaluateOnNewDocument(`const exports = {};\n${domReplayScript}`);
     await mirrorPage.goto(`${koaServer.baseUrl}/empty`);
 
     const sourceHtml = await window.puppPage.content();
@@ -94,7 +98,9 @@ describe('basic Dom Replay tests', () => {
     {
       const pageChanges = await state.getPageDomChanges(state.pages.history, true);
       const [changes] = Object.values(pageChanges);
-      await mirrorPage.evaluate(`window.applyDomChanges(${JSON.stringify(changes)})`);
+      await mirrorPage.evaluate(
+        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+      );
     }
 
     const mirrorHtml = await mirrorPage.content();
@@ -118,7 +124,9 @@ describe('basic Dom Replay tests', () => {
       );
       lastCommandId = core.lastCommandId;
       const [changes] = Object.values(pageChangesByFrame);
-      await mirrorPage.evaluate(`window.applyDomChanges(${JSON.stringify(changes)})`);
+      await mirrorPage.evaluate(
+        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+      );
 
       const sourceHtmlNext = await window.puppPage.content();
       const mirrorHtmlNext = await mirrorPage.content();

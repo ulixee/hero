@@ -4,18 +4,13 @@ import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEve
 
 export default class FocusEventsTable extends BaseTable<IFocusRecord> {
   constructor(readonly db: SqliteDatabase) {
-    super(
-      db,
-      'FocusEvents',
-      [
-        ['event', 'INTEGER'],
-        ['commandId', 'INTEGER'],
-        ['targetNodeId', 'INTEGER'],
-        ['relatedTargetNodeId', 'INTEGER'],
-        ['timestamp', 'TEXT'],
-      ],
-      true,
-    );
+    super(db, 'FocusEvents', [
+      ['event', 'INTEGER'],
+      ['commandId', 'INTEGER'],
+      ['targetNodeId', 'INTEGER'],
+      ['relatedTargetNodeId', 'INTEGER'],
+      ['timestamp', 'TEXT'],
+    ]);
   }
 
   public insert(focusEvent: IFocusEvent) {
@@ -27,11 +22,7 @@ export default class FocusEventsTable extends BaseTable<IFocusRecord> {
       relatedTargetNodeId,
       timestamp,
     ];
-    this.pendingInserts.push(record);
-  }
-
-  public all() {
-    return this.db.prepare(`select * from ${this.tableName}`).all() as IFocusRecord[];
+    this.queuePendingInsert(record);
   }
 }
 

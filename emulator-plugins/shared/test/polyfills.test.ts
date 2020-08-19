@@ -5,12 +5,19 @@ import inspectScript from './inspectHierarchy';
 import PolyfillChrome from './polyfill.json';
 import PolyfillChromeBt from './polyfill.bluetooth.json';
 import { inspect } from 'util';
+import * as os from 'os';
 
 afterEach(() => Helpers.closeAll());
 
 const debug = process.env.DEBUG || false;
 
+// TODO: make polyfills non-os specific
+const platform = os.platform();
+const isPlatformSupported = platform === 'darwin' || platform === 'win32';
+
 test('it should be able to add polyfills', async () => {
+  if (!isPlatformSupported) return;
+
   const polyfills = PolyfillChrome as any;
   const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
   Helpers.onClose(() => puppBrowser.close());
@@ -126,6 +133,8 @@ test('it should be able to add polyfills', async () => {
 }, 60e3);
 
 test('it should be able to change prototype properties', async () => {
+  if (!isPlatformSupported) return;
+
   const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
@@ -176,6 +185,8 @@ test('it should be able to change prototype properties', async () => {
 });
 
 test('it should be able to change own properties', async () => {
+  if (!isPlatformSupported) return;
+
   const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
@@ -238,6 +249,8 @@ test('it should be able to change own properties', async () => {
 }, 10e3);
 
 test('it should be able to backfill the bluetooth stack', async () => {
+  if (!isPlatformSupported) return;
+
   const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();

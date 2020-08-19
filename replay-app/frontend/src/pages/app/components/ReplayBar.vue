@@ -1,13 +1,13 @@
 <template lang="pug">
-.ReplayBar.Component(:style="cssVars" v-if="store.hasSaSession")
+.ReplayBar.Component(:style="cssVars" v-if="store.hasTicks")
   button.start(v-if="!isPlaying" @click.prevent="play")
     span.label Start
     Icon(:src="ICON_PLAY" :size="14")
   button.start(v-if="isPlaying" @click.prevent="pause")
     span.label Stop
     Icon(:src="ICON_PAUSE" :size="14")
-  .slider-wrapper(v-if="store.marks.length" ref="sliderWrapper")
-    VueSlider(ref="slider" tooltip="none" :marks="store.marks" :interval="0.1" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
+  .slider-wrapper(v-if="store.ticks.length" ref="sliderWrapper")
+    VueSlider(ref="slider" tooltip="none" :marks="store.ticks" :interval="0.01" :duration="0" :min="0" :max="100" :dragOnClick="true" :hideLabel="true" v-model="store.selectedTab.currentTickValue" @change="onValueChange"
         @mousemove.native="onHoverPlaybar")
         template(v-slot:mark="{ pos, value }" )
             .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{hovered:isHovered(value)}")
@@ -27,7 +27,6 @@ import store from '~frontend/stores/app';
 import NoCache from '~frontend/lib/NoCache';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';
-import { ITick } from '~shared/interfaces/ISaSession';
 
 @Observer
 @Component({ components: { Icon, VueSlider } })
@@ -38,14 +37,17 @@ export default class ReplayBar extends Vue {
   private hoveredValue: string = '';
 
   private get isPlaying() {
-    return this.store.selectedTab.isPlaying;
+    if (!this.store.selectedTab) return false;
+    return this.store.selectedTab?.isPlaying;
   }
 
   private play() {
+    if (!this.store.selectedTab) return;
     this.store.selectedTab.startPlayback();
   }
 
   private pause() {
+    if (!this.store.selectedTab) return;
     this.store.selectedTab.pausePlayback();
   }
 
@@ -69,7 +71,7 @@ export default class ReplayBar extends Vue {
     const pos = sliderRef.getPosByEvent(e);
 
     const tick = this.closestTick(pos);
-    const playbarOffsetPercent = tick.playbarOffsetPercent;
+    const playbarOffsetPercent = tick;
     this.hoveredValue = String(playbarOffsetPercent);
 
     const containerRect = sliderRef.$refs.container.getBoundingClientRect().toJSON();
@@ -82,17 +84,17 @@ export default class ReplayBar extends Vue {
   private onValueChange(value: number) {
     // this is called when someone clicks, so pause the playback
     this.pause();
-    ipcRenderer.send('on-tick', value);
+    ipcRenderer.send('on-tick', value, true);
   }
 
   private closestTick(pos: number) {
-    let closest: ITick = store.ticks[0];
-    if (pos > store.ticks[store.ticks.length - 1].playbarOffsetPercent) {
+    let closest = store.ticks[0];
+    if (pos > store.ticks[store.ticks.length - 1]) {
       return store.ticks[store.ticks.length - 1];
     }
     let closestOffset = 100;
     for (const tick of store.ticks) {
-      const offset = Math.abs(tick.playbarOffsetPercent - pos);
+      const offset = Math.abs(tick - pos);
       if (offset < closestOffset) {
         closestOffset = offset;
         closest = tick;

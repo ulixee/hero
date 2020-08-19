@@ -11,9 +11,8 @@ import HttpsProxyAgent from 'https-proxy-agent';
 import Koa from 'koa';
 import KoaRouter from '@koa/router';
 import Core from '../core';
-import * as fs from 'fs';
-import { Helpers } from './index';
 import { AddressInfo } from 'net';
+import * as http2 from 'http2';
 
 const { log } = Log(module);
 
@@ -66,8 +65,8 @@ export async function runKoaServer(): Promise<ITestKoaServer> {
 
 export function sslCerts() {
   return {
-    key: fs.readFileSync(`${__dirname}/certs/key.pem`),
-    cert: fs.readFileSync(`${__dirname}/certs/cert.pem`),
+    key: Fs.readFileSync(`${__dirname}/certs/key.pem`),
+    cert: Fs.readFileSync(`${__dirname}/certs/cert.pem`),
   };
 }
 
@@ -231,6 +230,13 @@ export function httpGet(
   headers: { [name: string]: string } = {},
 ) {
   return httpRequest(urlStr, 'GET', proxyHost, headers);
+}
+
+export async function http2StreamToJson<T>(stream: http2.Http2Stream): Promise<T> {
+  const data: Buffer[] = [];
+  for await (const chunk of stream) data.push(chunk);
+  const json = Buffer.concat(data).toString('utf8');
+  return JSON.parse(json);
 }
 
 export async function closeAll() {

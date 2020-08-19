@@ -11,13 +11,10 @@ export default abstract class TabBackend {
   private bounds: Rectangle;
 
   protected constructor(window: Window, webPreferences: Electron.WebPreferences) {
+    this.window = window;
     this.browserView = new BrowserView({
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
         javascript: true,
-        enableRemoteModule: true,
-        nativeWindowOpen: true,
         webSecurity: true,
         sandbox: false,
         ...webPreferences,
@@ -25,15 +22,6 @@ export default abstract class TabBackend {
     });
 
     (this.webContents as any).windowId = window.browserWindow.id;
-
-    this.window = window;
-    this.browserView.setAutoResize({
-      width: true,
-      height: true,
-      horizontal: false,
-      vertical: false,
-    });
-
     this.bindListeners();
   }
 

@@ -1,5 +1,4 @@
-import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
-import BaseTable from './BaseTable';
+import Database, { Database as SqliteDatabase } from 'better-sqlite3';
 import SessionsTable from '../models/SessionsTable';
 
 interface IDbOptions {
@@ -11,14 +10,55 @@ export default class SessionsDb {
   private static dbByBaseDir: { [dir: string]: SessionsDb } = {};
   public readonly sessions: SessionsTable;
   public readonly readonly: boolean;
+  private readonly baseDir: string;
   private db: SqliteDatabase;
 
   constructor(baseDir: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
-
     this.db = new Database(`${baseDir}/sessions.db`, { readonly, fileMustExist });
+    this.baseDir = baseDir;
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
+  }
+
+  public findLatestSessionId(script: {
+    sessionName: string;
+    scriptInstanceId: string;
+    scriptEntrypoint?: string;
+  }) {
+    const { sessionName, scriptEntrypoint, scriptInstanceId } = script;
+    if (sessionName && scriptInstanceId) {
+      const sessionRecord = this.sessions.findByName(sessionName, scriptInstanceId);
+      return sessionRecord.id;
+    }
+    if (scriptEntrypoint) {
+      const sessionRecords = this.sessions.findByScriptEntrypoint(scriptEntrypoint);
+      return sessionRecords[0].id;
+    }
+  }
+
+  public findRelatedSessions(session: { scriptEntrypoint: string; scriptInstanceId: string }) {
+    const otherSessions = this.sessions.findByScriptEntrypoint(session.scriptEntrypoint);
+    const relatedScriptInstances: {
+      id: string;
+      startDate: string;
+      defaultSessionId: string;
+    }[] = [];
+    const relatedSessions: { id: string; name: string }[] = [];
+    for (const otherSession of otherSessions) {
+      relatedScriptInstances.push({
+        id: otherSession.scriptInstanceId,
+        startDate: otherSession.scriptStartDate,
+        defaultSessionId: otherSession.id,
+      });
+      if (otherSession.scriptInstanceId === session.scriptInstanceId) {
+        relatedSessions.push({ id: otherSession.id, name: otherSession.name });
+      }
+    }
+    return {
+      relatedSessions,
+      relatedScriptInstances,
+    };
   }
 
   public close() {
@@ -26,6 +66,7 @@ export default class SessionsDb {
       this.db.close();
     }
     this.db = null;
+    delete SessionsDb.dbByBaseDir[this.baseDir];
   }
 
   public static shutdown() {

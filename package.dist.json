@@ -27,7 +27,6 @@
       "remote-client",
       "remote-interfaces",
       "replay",
-      "replay-api",
       "session-state",
       "commons"
     ]

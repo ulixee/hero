@@ -40,6 +40,8 @@ export default class ScriptInstanceMenu extends Vue {
 @include overlayBaseStyle();
 
 .ScriptInstanceMenu {
+  height: 470px;
+  overflow: scroll;
   @include overlayStyle();
   ul {
     list-style: none;

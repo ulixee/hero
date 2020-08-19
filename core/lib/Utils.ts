@@ -1,6 +1,7 @@
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import ExceptionDetails = Protocol.Runtime.ExceptionDetails;
+import StackTrace = Protocol.Runtime.StackTrace;
 
 export function extractFileExtension(url: string, filetype: string) {
   const location = new URL(url);
@@ -15,13 +16,19 @@ export function exceptionDetailsToError(exceptionDetails: ExceptionDetails) {
   if (exceptionDetails.exception) {
     message = exceptionDetails.exception.description || exceptionDetails.exception.value;
   } else if (exceptionDetails.stackTrace) {
-    for (const callframe of exceptionDetails.stackTrace.callFrames) {
-      const location = `${callframe.url}:${callframe.lineNumber}:${callframe.columnNumber}`;
-      const functionName = callframe.functionName || '<anonymous>';
-      message += `\n    at ${functionName} (${location})`;
-    }
+    message += printStackTrace(exceptionDetails.stackTrace);
   }
   const error = new Error(message);
   error.stack = '';
   return error;
+}
+
+export function printStackTrace(stackTrace: StackTrace) {
+  let message = '';
+  for (const callframe of stackTrace.callFrames) {
+    const location = `${callframe.url}:${callframe.lineNumber}:${callframe.columnNumber}`;
+    const functionName = callframe.functionName || '<anonymous>';
+    message += `\n    at ${functionName} (${location})`;
+  }
+  return message;
 }

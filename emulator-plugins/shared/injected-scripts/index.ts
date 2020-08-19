@@ -31,5 +31,7 @@ function buildExecutionScript(name: string, script: string, args?: any) {
     (function ${name}(args) {
       ${script}
     })(${JSON.stringify(args)});
-})()`.replace(/\/\/# sourceMap.+/g, '');
+})()
+//# sourceURL=__secretagent_bootscript__
+`.replace(/\/\/# sourceMap.+/g, '');
 }

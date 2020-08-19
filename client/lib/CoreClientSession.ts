@@ -22,15 +22,20 @@ export default class CoreClientSession {
   public windowId: string;
   public sessionId: string;
   public sessionsDataLocation: string;
+  public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
   protected readonly meta: ISessionMeta;
   private coreClient: CoreClient;
 
-  constructor({ windowId, sessionId, sessionsDataLocation }: ISessionMeta, coreClient: CoreClient) {
+  constructor(
+    { windowId, sessionId, sessionsDataLocation, replayApiServer }: ISessionMeta,
+    coreClient: CoreClient,
+  ) {
     this.windowId = windowId;
     this.sessionId = sessionId;
     this.sessionsDataLocation = sessionsDataLocation;
+    this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
       windowId,

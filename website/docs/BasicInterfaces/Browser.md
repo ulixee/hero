@@ -123,6 +123,7 @@ Update existing configuration settings.
   - emulatorId `string`. Emulate a specific browser version.
   - humanoidId `string`. Create human-like mouse/keyboard movements.
   - renderingOptions `string[]`. Controls browser functionality.
+  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
 
 #### **Returns**: `Promise`
 

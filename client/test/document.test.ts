@@ -2,7 +2,7 @@
 import { SecretAgentClientGenerator } from '../index';
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
-import DomEnv from '@secret-agent/core/lib/DomEnv';
+import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 
 describe('document tests', () => {
   it('runs querySelector', async () => {
@@ -18,7 +18,7 @@ describe('document tests', () => {
       if (command === 'execJsPath') {
         const [jsPath] = args;
         const lastPath = jsPath[jsPath.length - 1];
-        if (lastPath && lastPath[0] === DomEnv.getAttachedStateFnName) {
+        if (lastPath && lastPath[0] === getAttachedStateFnName) {
           return {
             data: {
               value: null,
@@ -44,7 +44,7 @@ describe('document tests', () => {
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands).toMatchObject([
       [null, 'createSession', expect.any(Array)],
-      [expect.any(Object), 'execJsPath', [[...jsPath, [DomEnv.getAttachedStateFnName, undefined]]]],
+      [expect.any(Object), 'execJsPath', [[...jsPath, [getAttachedStateFnName, undefined]]]],
       [expect.any(Object), 'execJsPath', [[1, 'tagName']]],
       [expect.any(Object), 'close', []],
       [null, 'disconnect', [['window-id'], undefined]],

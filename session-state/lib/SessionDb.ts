@@ -12,6 +12,9 @@ import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
+import SessionsDb from './SessionsDb';
+import * as Path from 'path';
+import SessionState from '../index';
 
 interface IDbOptions {
   readonly?: boolean;
@@ -44,7 +47,7 @@ export default class SessionDb {
 
     this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
     if (!readonly) {
-      this.saveInterval = setInterval(this.flush.bind(this), 1e3).unref();
+      this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
     this.readonly = readonly;
 
@@ -110,5 +113,46 @@ export default class SessionDb {
 
   public flush() {
     if (this.batchInsert) this.batchInsert.immediate();
+  }
+
+  public static findWithRelated(scriptArgs: {
+    scriptInstanceId: string;
+    sessionName: string;
+    scriptEntrypoint: string;
+    dataLocation: string;
+    sessionId?: string;
+  }) {
+    let { dataLocation, sessionId } = scriptArgs;
+
+    const ext = Path.extname(dataLocation);
+    if (ext === '.db') {
+      sessionId = Path.basename(dataLocation, ext);
+      dataLocation = Path.dirname(dataLocation);
+    }
+
+    // NOTE: don't close db - it's from a shared cache
+    const sessionsDb = SessionsDb.find(dataLocation);
+    if (!sessionId) {
+      sessionId = sessionsDb.findLatestSessionId(scriptArgs);
+    }
+
+    const activeSession = SessionState.registry.get(sessionId);
+
+    const sessionDb =
+      activeSession?.db ??
+      new SessionDb(dataLocation, sessionId, {
+        readonly: true,
+        fileMustExist: true,
+      });
+
+    const session = sessionDb.session.get();
+    const related = sessionsDb.findRelatedSessions(session);
+
+    return {
+      ...related,
+      dataLocation,
+      sessionDb,
+      sessionState: activeSession,
+    };
   }
 }

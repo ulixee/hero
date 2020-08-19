@@ -1,7 +1,6 @@
 import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import { ILogEntry } from '../../commons/Logger';
-import { IScrollRecord } from './ScrollEventsTable';
 
 export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -25,7 +24,7 @@ export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
       };
     }
     const data = log.data ? JSON.stringify(log.data) : null;
-    return this.pendingInserts.push([
+    return this.queuePendingInsert([
       log.id,
       log.timestamp.toISOString(),
       log.action,
@@ -40,7 +39,7 @@ export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
   public allErrors() {
     return this.db
       .prepare(`select * from ${this.tableName} where level = 'error'`)
-      .all() as IScrollRecord[];
+      .all() as ISessionLogRecord[];
   }
 }
 

@@ -17,7 +17,6 @@
     "remote-interfaces",
     "replay",
     "replay-app",
-    "replay-api",
     "session-state",
     "testing",
     "commons",

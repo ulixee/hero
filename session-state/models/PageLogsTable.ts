@@ -13,7 +13,7 @@ export default class PageLogsTable extends BaseTable<IPageLogRecord> {
   }
 
   public insert(frameId: string, type: string, message: string, date: Date, location?: string) {
-    return this.pendingInserts.push([frameId, type, message, date.toISOString(), location]);
+    return this.queuePendingInsert([frameId, type, message, date.toISOString(), location]);
   }
 }
 

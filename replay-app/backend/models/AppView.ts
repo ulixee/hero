@@ -7,7 +7,10 @@ export default class AppView extends TabBackend {
   public location: InternalLocations;
 
   public constructor(window: Window, location: ITabLocation, replaceTabId?: number) {
-    super(window, {});
+    super(window, {
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    });
     this.loadLocation(location, true, replaceTabId);
   }
 

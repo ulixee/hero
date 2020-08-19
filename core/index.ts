@@ -21,10 +21,14 @@ import UserProfile from './lib/UserProfile';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import Signals = NodeJS.Signals;
 import Log from '../commons/Logger';
+import { createReplayServer } from '@secret-agent/session-state/api';
+import ISessionReplayServer from '../session-state/interfaces/ISessionReplayServer';
+import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
+const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
+
 export { GlobalPool, Window, Session, LocationTrigger };
 
 interface IListenerObject {
@@ -40,6 +44,7 @@ export default class Core implements ICore {
   private static wasManuallyStarted = false;
   private static autoShutdownMillis = 2e3;
   private static autoShutdownTimer: NodeJS.Timer;
+  private static replayServer?: ISessionReplayServer;
   private readonly session: Session;
   private readonly window: Window;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
@@ -230,6 +235,9 @@ export default class Core implements ICore {
     this.wasManuallyStarted = true;
     if (options) await this.configure(options);
     await GlobalPool.start();
+    if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
+      await this.startReplayServer(options.replayServerPort);
+    }
   }
 
   public static async configure(options: IConfigureOptions) {
@@ -241,9 +249,17 @@ export default class Core implements ICore {
 
   public static async createSession(options: ICreateSessionOptions = {}) {
     const session = await GlobalPool.createSession(options);
+    if (shouldStartReplayServer) {
+      await this.startReplayServer();
+    }
     const window = session.window;
     this.byWindowId[window.id] = new Core(session);
-    return { sessionId: session.id, sessionsDataLocation: session.baseDir, windowId: window.id };
+    return {
+      sessionId: session.id,
+      sessionsDataLocation: session.baseDir,
+      windowId: window.id,
+      replayApiServer: await this.replayServer?.url(),
+    };
   }
 
   public static async disconnect(windowIds?: string[], clientError?: Error) {
@@ -260,6 +276,7 @@ export default class Core implements ICore {
     clearTimeout(Core.autoShutdownTimer);
     await Core.disconnect(null, fatalError);
     await GlobalPool.close();
+    await this.replayServer?.close(true);
     this.wasManuallyStarted = false;
   }
 
@@ -279,6 +296,12 @@ export default class Core implements ICore {
     process.on('unhandledRejection', async (error: Error) => {
       await Core.shutdown(error);
     });
+  }
+
+  public static async startReplayServer(port?: number) {
+    if (this.replayServer) return;
+    this.replayServer = createReplayServer();
+    await this.replayServer.listen(port);
   }
 
   private static checkForAutoShutdown() {

@@ -1,5 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
+import CoreClientSession from './CoreClientSession';
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
@@ -15,14 +16,14 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, sessionsDataLocation: string) {
-    if (process.env.SA_SHOW_REPLAY !== 'true') return;
-
+  public launchReplay(sessionName: string, coreClientSession: CoreClientSession) {
     const launch = require('@secret-agent/replay').default;
     launch({
-      id: this.id,
-      sessionsDataLocation,
+      scriptInstanceId: this.id,
       sessionName,
+      sessionsDataLocation: coreClientSession.sessionsDataLocation,
+      replayApiServer: coreClientSession.replayApiServer,
+      sessionId: coreClientSession.sessionId,
     });
   }
 

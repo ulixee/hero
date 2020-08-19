@@ -7,6 +7,7 @@ import ITabLocation from '~shared/interfaces/ITabLocation';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import ISaSession from '~shared/interfaces/ISaSession';
 import store from '../app';
+import ITickState from '~shared/interfaces/ITickState';
 
 export default class TabFrontend {
   @observable
@@ -19,13 +20,16 @@ export default class TabFrontend {
   public saSession: ISaSession;
 
   @observable
+  public tickState: ITickState;
+
+  @observable
+  public currentTickValue = 0;
+
+  @observable
   public isDragging = false;
 
   @observable
   public loading = true;
-
-  @observable
-  public currentTickValue = 0;
 
   @observable
   public currentUrl = 'Loading';
@@ -39,9 +43,6 @@ export default class TabFrontend {
   public removeTimeout: any;
 
   public marginLeft = 0;
-
-  @observable
-  public marks: number[] = [];
 
   @observable
   public isPlaying = false;
@@ -124,37 +125,33 @@ export default class TabFrontend {
     this.isPlaying = true;
     clearInterval(this.interval);
     let intervalTime = 50;
-    if (this.marks.length > 100) intervalTime = 20;
-    else if (this.marks.length < 5) intervalTime = 500;
+    if (this.saSession.closeDate) {
+      if (this.tickState.ticks.length > 100) intervalTime = 20;
+      else if (this.tickState.ticks.length < 5) intervalTime = 500;
+    }
     this.interval = setInterval(this.playbackTick.bind(this), intervalTime) as any;
   }
 
-  public updateSession(session: ISaSession) {
-    const isPlaying = this.isPlaying;
-    if (isPlaying) this.pausePlayback();
-    const startSessionMillis = this.saSession?.durationMillis;
-    this.saSession = session;
-
-    const marks = [];
-    if (this.saSession) {
-      for (const tick of this.saSession.ticks) {
-        marks.push(tick.playbarOffsetPercent);
-      }
+  public updateTicks(state: ITickState) {
+    const startSessionMillis = this.tickState?.durationMillis;
+    if (state) {
+      this.tickState = state;
     } else {
       this.currentTickValue = 0;
     }
-    this.marks = marks;
 
     if (startSessionMillis && this.currentTickValue) {
-      if (session.durationMillis < startSessionMillis) {
-        this.currentTickValue =
-          this.currentTickValue * (session.durationMillis / startSessionMillis);
+      if (this.tickState.durationMillis < startSessionMillis) {
+        this.currentTickValue = this.currentTickValue * (state.durationMillis / startSessionMillis);
       } else {
-        this.currentTickValue =
-          this.currentTickValue * (startSessionMillis / session.durationMillis);
+        this.currentTickValue = this.currentTickValue * (startSessionMillis / state.durationMillis);
       }
     }
-    if (isPlaying) this.startPlayback();
+  }
+
+  public updateSession(session: ISaSession) {
+    this.saSession = session;
+    this.currentTickValue = 0;
   }
 
   @action
@@ -272,34 +269,11 @@ export default class TabFrontend {
     return await ipcRenderer.invoke('tab:reload', this.id);
   }
 
-  private playbackTick() {
+  private async playbackTick() {
     if (this.isSelected === false) {
       return this.pausePlayback();
     }
-
-    let nextTickValue = this.currentTickValue;
-    for (const tick of this.saSession.ticks) {
-      // if a new major tick exists, go to it
-      if (tick.playbarOffsetPercent > this.currentTickValue) {
-        nextTickValue = tick.playbarOffsetPercent;
-        break;
-      }
-      // check for next minor tick
-      for (const minor of tick.minorTicks) {
-        if (minor.playbarOffsetPercent > this.currentTickValue) {
-          nextTickValue = minor.playbarOffsetPercent;
-          break;
-        }
-      }
-      if (nextTickValue > this.currentTickValue) break;
-    }
-
-    if (nextTickValue === this.currentTickValue && this.saSession.closeDate) {
-      this.pausePlayback();
-    }
-
-    this.currentTickValue = nextTickValue;
-
-    ipcRenderer.send('on-tick', this.currentTickValue);
+    this.currentTickValue = await ipcRenderer.invoke('next-tick');
+    if (this.currentTickValue === 100) this.pausePlayback();
   }
 }

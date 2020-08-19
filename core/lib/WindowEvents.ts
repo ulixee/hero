@@ -1,12 +1,12 @@
 import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import { ConsoleMessage } from 'puppeteer';
 import { redirectCodes } from '@secret-agent/mitm/lib/MitmRequestHandler';
 import { Window } from '..';
 import { IRequestSessionResponseEvent } from '@secret-agent/mitm/handlers/RequestSession';
 import Protocol from 'devtools-protocol';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import { exceptionDetailsToError, printStackTrace } from './Utils';
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
 import WebSocketFrameSentEvent = Protocol.Network.WebSocketFrameSentEvent;
 import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEvent;
@@ -14,6 +14,8 @@ import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSe
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
 import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent;
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
+import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
+import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 
 const { log } = Log(module);
 
@@ -111,11 +113,10 @@ export default class WindowEvents {
   }
 
   private listenToErrors() {
-    const puppPage = this.window.puppPage;
-
-    puppPage.on('console', this.onConsoleLog.bind(this));
-    puppPage.on('error', this.onError.bind(this, false));
-    puppPage.on('pageerror', this.onError.bind(this, true));
+    const devtoolsClient = this.devtoolsClient;
+    devtoolsClient.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
+    devtoolsClient.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
+    devtoolsClient.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
@@ -269,18 +270,38 @@ export default class WindowEvents {
 
   /////// LOGGGING EVENTS //////////////////////////////////////////////////////////////////////////
 
-  private onConsoleLog(msg: ConsoleMessage) {
-    const location = msg.location()
-      ? `${msg.location().url} ${msg.location().lineNumber ?? '_'}:${msg.location().columnNumber ??
-          '_'}`
-      : undefined;
-    this.sessionState.captureLog(this.mainFrameId, msg.type(), msg.text(), location);
+  private onRuntimeException(msg: ExceptionThrownEvent) {
+    const error = exceptionDetailsToError(msg.exceptionDetails);
+    const frameId = this.window.frameTracker.getFrameIdForExecutionContext(
+      msg.exceptionDetails.executionContextId,
+    );
+    this.emit('pageerror', error);
+    this.sessionState.captureError(frameId, `events.pageerror`, error);
   }
 
-  private onError(isPageError: boolean, error: Error) {
-    const errorType = isPageError ? 'pageerror' : 'error';
-    this.emit(errorType, error);
-    this.sessionState.captureError(this.mainFrameId, `events.${errorType}`, error);
+  private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
+    const { executionContextId, args, stackTrace, type, context } = event;
+    const frameId = this.window.frameTracker.getFrameIdForExecutionContext(executionContextId);
+
+    const message = args
+      .map(arg => {
+        const objectId = arg.objectId;
+        if (objectId) {
+          this.devtoolsClient.send('Runtime.releaseObject', { objectId }).catch();
+          return arg.toString();
+        }
+        return arg.value;
+      })
+      .join(' ');
+
+    const location = `//#${context ?? 'nocontext'}${printStackTrace(stackTrace)}`;
+    this.sessionState.captureLog(frameId, type, message, location);
+  }
+
+  private onTargetCrashed() {
+    const error = new Error('Target Crashed');
+    this.emit('error', error);
+    this.sessionState.captureError(this.mainFrameId, `events.error`, error);
   }
 }
 

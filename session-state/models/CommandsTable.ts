@@ -21,10 +21,11 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
       true,
     );
     this.getQuery = db.prepare(`select * from ${this.tableName} where id = ? limit 1`);
+    this.defaultSortOrder = 'startDate ASC';
   }
 
   public insert(commandMeta: ICommandMeta) {
-    this.pendingInserts.push([
+    this.queuePendingInsert([
       commandMeta.id,
       commandMeta.frameId,
       commandMeta.name,
@@ -40,11 +41,5 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
 
   public get(id: number) {
     return this.getQuery.get(id) as ICommandMeta;
-  }
-
-  public all() {
-    return this.db
-      .prepare(`select * from ${this.tableName} order by startDate asc`)
-      .all() as ICommandMeta[];
   }
 }
