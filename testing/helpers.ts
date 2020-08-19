@@ -11,8 +11,9 @@ import HttpsProxyAgent from 'https-proxy-agent';
 import Koa from 'koa';
 import KoaRouter from '@koa/router';
 import Core from '../core';
-import { AddressInfo } from 'net';
+import * as net from 'net';
 import * as http2 from 'http2';
+import * as stream from 'stream';
 
 const { log } = Log(module);
 
@@ -42,7 +43,7 @@ export async function runKoaServer(onlyCloseOnFinal: boolean = true): Promise<IT
       })
       .unref();
   });
-  const port = (server.address() as AddressInfo).port;
+  const port = (server.address() as net.AddressInfo).port;
   router.baseHost = `localhost:${port}`;
   router.baseUrl = `http://${router.baseHost}`;
 
@@ -87,7 +88,7 @@ export async function runHttpsServer(handler: RequestListener) {
     .unref();
   await new Promise(resolve => server.once('listening', resolve));
 
-  const port = (server.address() as AddressInfo).port;
+  const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
   const httpServer = {
     isClosing: false,
@@ -160,7 +161,7 @@ export async function runHttpServer(
   });
   server.listen();
   await new Promise(resolve => server.once('listening', resolve));
-  const port = (server.address() as AddressInfo).port;
+  const port = (server.address() as net.AddressInfo).port;
 
   const baseUrl = `http://localhost:${port}`;
   const httpServer = {
@@ -211,9 +212,7 @@ export function httpRequest(
   };
 
   if (proxyHost) {
-    // tslint:disable-next-line:variable-name
-    const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
-    options.agent = new ProxyAgent(proxyHost);
+    options.agent = getProxyAgent(url, proxyHost);
   }
 
   const client = url.protocol === 'https:' ? https : http;
@@ -231,6 +230,12 @@ export function httpRequest(
   return promise;
 }
 
+export function getProxyAgent(url: URL, proxyHost: string) {
+  // tslint:disable-next-line:variable-name
+  const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
+  return new ProxyAgent(proxyHost);
+}
+
 export function httpGet(
   urlStr: string,
   proxyHost: string,
@@ -239,10 +244,66 @@ export function httpGet(
   return httpRequest(urlStr, 'GET', proxyHost, headers);
 }
 
-export async function http2StreamToJson<T>(stream: http2.Http2Stream): Promise<T> {
-  const data: Buffer[] = [];
-  for await (const chunk of stream) data.push(chunk);
-  const json = Buffer.concat(data).toString('utf8');
+export async function runHttp2Server(
+  handler: (request: http2.Http2ServerRequest, response: http2.Http2ServerResponse) => void,
+) {
+  const h2ServerStarted = createPromise();
+  const sessions = new Set<http2.ServerHttp2Session>();
+  const server = http2
+    .createSecureServer(sslCerts(), handler)
+    .unref()
+    .listen(0, () => {
+      h2ServerStarted.resolve();
+    });
+  server.on('session', session => {
+    sessions.add(session);
+  });
+  await h2ServerStarted.promise;
+  const port = (server.address() as net.AddressInfo).port;
+
+  const baseUrl = `https://localhost:${port}`;
+  const httpServer = {
+    isClosing: false,
+    on(eventName, fn) {
+      server.on(eventName, fn);
+    },
+    async close() {
+      if (httpServer.isClosing) {
+        return null;
+      }
+      httpServer.isClosing = true;
+      for (const session of sessions) {
+        session.socket.unref();
+        session.destroy();
+      }
+      return new Promise(resolve => {
+        server.close(() => setTimeout(resolve, 10));
+      });
+    },
+    baseUrl,
+    url: `${baseUrl}/`,
+    port,
+    server,
+  };
+  needsClosing.push(httpServer);
+  return httpServer;
+}
+
+export function getLogo() {
+  return Fs.readFileSync(`${__dirname}/html/img.png`);
+}
+
+export async function readableToBuffer(res: stream.Readable) {
+  const buffer: Buffer[] = [];
+  for await (const data of res) {
+    buffer.push(data);
+  }
+  return Buffer.concat(buffer);
+}
+
+export async function http2StreamToJson<T>(http2Stream: http2.Http2Stream): Promise<T> {
+  const buffer = await readableToBuffer(http2Stream);
+  const json = buffer.toString();
   return JSON.parse(json);
 }
 

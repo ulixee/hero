@@ -1,16 +1,10 @@
 import OriginType from './OriginType';
 import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 export default interface IHttpRequestModifierDelegate {
-  modifyHeadersBeforeSend?: (
-    sessionId: string,
-    resourceType: ResourceType,
-    secureDomain: boolean,
-    method: string,
-    originType: OriginType,
-    headers: { [name: string]: string },
-  ) => { [key: string]: string };
+  modifyHeadersBeforeSend?: (request: IResourceToModify) => { [key: string]: string };
 
   maxConnectionsPerOrigin?: number;
 
@@ -25,4 +19,16 @@ export default interface IHttpRequestModifierDelegate {
   tlsProfileId?: string;
 
   tcpVars?: { windowSize: number; ttl: number };
+}
+
+export interface IResourceToModify {
+  isServerHttp2: boolean;
+  isClientHttp2: boolean;
+  sessionId: string;
+  resourceType: ResourceType;
+  isSSL: boolean;
+  method: string;
+  originType: OriginType;
+  lowerHeaders: IResourceHeaders;
+  headers: IResourceHeaders;
 }

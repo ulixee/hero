@@ -1,15 +1,15 @@
 import MitmSocket from '@secret-agent/mitm-socket';
 import RequestSession from '../handlers/RequestSession';
-import http2, { ClientHttp2Session, IncomingHttpHeaders, IncomingHttpStatusHeader } from 'http2';
+import http2, { ClientHttp2Session } from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import https, { RequestOptions } from 'https';
 import http from 'http';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import { URL } from 'url';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import MitmRequestContext from './MitmRequestContext';
-import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import Queue from '@secret-agent/commons/Queue';
+import BlockHandler from '../handlers/BlockHandler';
+import HeadersHandler from '../handlers/HeadersHandler';
 
 const { log } = Log(module);
 
@@ -28,41 +28,48 @@ export default class MitmRequestAgent {
       session.delegate?.maxConnectionsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
-  public async request(ctx: IMitmRequestContext, responseCallback: (res: any) => any) {
-    const requestSettings = ctx.proxyToServerRequestSettings;
-
-    if (process.env.MITM_ALLOW_INSECURE === 'true') {
-      (requestSettings as any).rejectUnauthorized = false;
-    }
+  public async request(
+    ctx: IMitmRequestContext,
+    responseCallback: (res: NodeJS.ReadableStream) => any,
+  ) {
+    const url = ctx.url;
+    const requestSettings: https.RequestOptions = {
+      method: ctx.method,
+      path: url.pathname + url.search,
+      host: url.hostname,
+      port: url.port || (ctx.isSSL ? 443 : 80),
+      headers: ctx.requestHeaders,
+      rejectUnauthorized: process.env.MITM_ALLOW_INSECURE !== 'true',
+    };
 
     let mitmSocket = await this.getAvailableSocket(
-      ctx.origin,
+      ctx.url.origin,
       ctx.isSSL,
       ctx.isUpgrade,
       requestSettings,
     );
     if (!mitmSocket) {
-      mitmSocket = await this.waitForFreeSocket(ctx.origin);
+      mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
     }
     MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
 
     requestSettings.createConnection = () => mitmSocket.socket;
     requestSettings.agent = null;
 
-    if (ctx.isHttp2) {
-      return this.http2Request(requestSettings, mitmSocket, new URL(ctx.url), responseCallback);
+    if (ctx.isServerHttp2) {
+      HeadersHandler.prepareRequestHeadersForHttp2(ctx);
+      return this.http2Request(ctx, mitmSocket, responseCallback);
     }
 
-    const httpModule = ctx.isSSL ? https : http;
-    return httpModule.request(requestSettings, responseCallback);
+    return this.http1Request(ctx, requestSettings, responseCallback);
   }
 
   public async freeSocket(ctx: IMitmRequestContext) {
-    if (ctx.isUpgrade || ctx.isHttp2 || this.session.isClosing) {
+    if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
 
-    const pool = this.getSocketPoolByOrigin(ctx.origin);
+    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
 
     const socket = ctx.proxyToServerSocket;
     if (!socket.isReusable()) {
@@ -227,23 +234,108 @@ export default class MitmRequestAgent {
     });
   }
 
+  private http1Request(
+    ctx: IMitmRequestContext,
+    requestSettings: http.RequestOptions,
+    responseHandler: (response: NodeJS.ReadableStream) => any,
+  ) {
+    const httpModule = ctx.isSSL ? https : http;
+    return httpModule.request(requestSettings, response => {
+      MitmRequestContext.readHttp1Response(ctx, response);
+      responseHandler(response);
+    });
+  }
+
   ///////////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
   private http2Request(
-    requestSettings: https.RequestOptions,
+    ctx: IMitmRequestContext,
     connectResult: MitmSocket,
-    url: URL,
-    responseHandler: (response: IHttpOrH2Response) => any,
+    responseHandler: (response: NodeJS.ReadableStream) => any,
   ) {
-    const client = this.createHttp2Session(url.origin, connectResult);
-    const h2Headers = MitmRequestAgent.convertOutboundHttp2Headers(url, requestSettings);
-    const http2Stream = client.request(h2Headers);
-
+    const client = this.createHttp2Session(ctx, connectResult);
+    const http2Stream = client.request(ctx.requestHeaders, { waitForTrailers: true });
     http2Stream.once('response', (headers, flags) => {
-      const response = MitmRequestAgent.convertHttp2Response(http2Stream, headers);
-      responseHandler(response);
+      MitmRequestContext.readHttp2Response(ctx, headers);
+      responseHandler(http2Stream);
     });
+    http2Stream.on('push', this.onHttp2PushStream.bind(this, ctx, http2Stream));
+
     return http2Stream;
+  }
+
+  private onHttp2PushStream(
+    parentContext: IMitmRequestContext,
+    stream: http2.ClientHttp2Stream,
+    headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
+    flags: number,
+  ) {
+    const session = this.session;
+    const sessionId = session.sessionId;
+    log.info('Http2Client.pushReceived', { sessionId, headers, flags });
+
+    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, headers);
+    this.session.trackResource(pushContext);
+    this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
+
+    if (BlockHandler.shouldBlockRequest(pushContext)) {
+      this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
+      return stream.close(http2.constants.NGHTTP2_CANCEL);
+    }
+
+    pushContext.serverToProxyResponseStream = stream;
+    MitmRequestContext.readHttp2Response(pushContext, headers);
+
+    // emit request
+    if (!parentContext.isClientHttp2) {
+      log.warn('Http2Client.pushReceivedWithNonH2BrowserClient', {
+        sessionId,
+        path: headers[':path'],
+      });
+      return stream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
+    }
+
+    const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
+
+    clientToProxyRequest.stream.pushStream(headers, async (err, pushStream) => {
+      if (err) {
+        log.warn('Http2.PushStreamError', {
+          sessionId,
+          err,
+        });
+        return;
+      }
+
+      let trailers: http2.IncomingHttpHeaders;
+      stream.once('trailers', trailerHeaders => {
+        trailers = trailerHeaders;
+      });
+
+      pushStream.respond({ ':status': 200 }, { waitForTrailers: true });
+      pushStream.on('wantTrailers', async () => {
+        pushContext.responseTrailers = trailers;
+        pushStream.sendTrailers(pushContext.responseTrailers ?? {});
+      });
+      const cache = pushContext.cacheHandler;
+      cache.onHttp2PushStream();
+
+      for await (const chunk of stream) {
+        cache.onResponseData(chunk);
+        pushStream.write(chunk);
+      }
+      if (cache.shouldServeCachedData) {
+        pushStream.write(cache.cacheData);
+      }
+
+      pushStream.end();
+      cache.onResponseEnd();
+
+      await HeadersHandler.waitForResource(pushContext);
+      parentContext.requestSession.emit(
+        'response',
+        MitmRequestContext.toEmittedResource(pushContext),
+      );
+    });
   }
 
   private getHttp2Session(origin: string) {
@@ -253,22 +345,25 @@ export default class MitmRequestAgent {
     });
   }
 
-  private createHttp2Session(origin: string, mitmSocket: MitmSocket) {
+  private createHttp2Session(ctx: IMitmRequestContext, mitmSocket: MitmSocket) {
+    const origin = ctx.url.origin;
     const existing = this.getHttp2Session(origin);
     if (existing) return existing.client;
 
-    const client = http2.connect(origin, {
+    const proxyToServerH2Client = http2.connect(origin, {
       createConnection: () => mitmSocket.socket,
     });
 
-    client.on('remoteSettings', settings => {
+    proxyToServerH2Client.on('stream', this.onHttp2PushStream.bind(this, ctx));
+
+    proxyToServerH2Client.on('remoteSettings', settings => {
       log.info('Http2Client.remoteSettings', {
         sessionId: this.session.sessionId,
         settings,
       });
     });
 
-    client.on('frameError', (frameType: number, errorCode: number) => {
+    proxyToServerH2Client.on('frameError', (frameType: number, errorCode: number) => {
       log.warn('Http2Client.frameError', {
         sessionId: this.session.sessionId,
         frameType,
@@ -276,15 +371,15 @@ export default class MitmRequestAgent {
       });
     });
 
-    client.on('goaway', args => {
+    proxyToServerH2Client.on('goaway', args => {
       log.info('Http2.goaway', {
         sessionId: this.session.sessionId,
         args,
       });
-      this.closeHttp2Session(client);
+      this.closeHttp2Session(proxyToServerH2Client);
     });
 
-    client.on('altsvc', (alt, altOrigin, streamId) => {
+    proxyToServerH2Client.on('altsvc', (alt, altOrigin, streamId) => {
       log.warn('Http2.altsvc', {
         sessionId: this.session.sessionId,
         origin: altOrigin,
@@ -292,27 +387,27 @@ export default class MitmRequestAgent {
       });
     });
 
-    client.on('origin', origins => {
+    proxyToServerH2Client.on('origin', origins => {
       log.warn('Http2.origin', {
         sessionId: this.session.sessionId,
         origins,
       });
     });
 
-    client.on('close', () => {
+    proxyToServerH2Client.on('close', () => {
       log.info('Http2.close', {
         sessionId: this.session.sessionId,
       });
-      this.closeHttp2Session(client);
+      this.closeHttp2Session(proxyToServerH2Client);
     });
 
     this.http2Sessions.push({
       origin,
-      client,
+      client: proxyToServerH2Client,
       mitmSocket,
     });
 
-    return client;
+    return proxyToServerH2Client;
   }
 
   private closeHttp2Session(client: ClientHttp2Session) {
@@ -322,43 +417,6 @@ export default class MitmRequestAgent {
     const [session] = this.http2Sessions.splice(index, 1);
     client.close();
     session.mitmSocket.close();
-  }
-
-  private static convertOutboundHttp2Headers(url: URL, requestSettings: https.RequestOptions) {
-    const h2Headers = requestSettings.headers as http2.OutgoingHttpHeaders;
-    h2Headers[':authority'] = requestSettings.headers.host ?? requestSettings.headers.Host;
-    h2Headers[':path'] = url.pathname + url.search;
-    h2Headers[':method'] = requestSettings.method;
-    h2Headers[':scheme'] = 'https';
-
-    for (const key of Object.keys(h2Headers)) {
-      if (key.match(/connection/i) || key.match(/host/i)) {
-        delete h2Headers[key];
-      }
-    }
-    return h2Headers;
-  }
-
-  private static convertHttp2Response(
-    http2Stream: http2.ClientHttp2Stream,
-    headers: IncomingHttpHeaders & IncomingHttpStatusHeader,
-  ) {
-    const response = (http2Stream as unknown) as Partial<IHttpOrH2Response>;
-    response.headers = {};
-    response.rawHeaders = [];
-    for (const key of Object.keys(headers)) {
-      if (key[0] === ':') continue;
-      response.headers[key] = headers[key];
-      let value = headers[key];
-      if (!Array.isArray(value)) value = [value];
-      for (const val of value) {
-        response.rawHeaders.push(key, val);
-      }
-    }
-    response.method = headers[':method'];
-    response.statusCode = headers[':status'];
-
-    return response as IHttpOrH2Response;
   }
 }
 

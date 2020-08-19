@@ -1,11 +1,12 @@
 import HttpResponseCache from '../lib/HttpResponseCache';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import Log from '@secret-agent/commons/Logger';
+import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
 
 const { log } = Log(module);
 
 export default class CacheHandler {
-  public didUseArtificialCache = false;
+  public didProposeCachedResource = false;
   public shouldServeCachedData = false;
   private readonly data: Buffer[] = [];
 
@@ -18,22 +19,32 @@ export default class CacheHandler {
     return this.buffer;
   }
 
-  constructor(readonly responseCache: HttpResponseCache) {}
+  constructor(readonly responseCache: HttpResponseCache, readonly ctx: IMitmRequestContext) {}
 
-  public onRequest(ctx: IMitmRequestContext) {
-    const request = ctx.clientToProxyRequest;
+  public onRequest() {
+    const ctx = this.ctx;
     // only cache get (don't do preflight, post, etc)
-    if (request.method === 'GET') {
-      const cache = this.responseCache.get(ctx.url);
+    if (ctx.method === 'GET') {
+      const cache = this.responseCache.get(ctx.url.href);
 
       if (cache?.etag) {
-        ctx.proxyToServerRequestSettings.headers['If-None-Match'] = cache.etag;
-        this.didUseArtificialCache = true;
+        ctx.requestHeaders['If-None-Match'] = cache.etag;
+        this.didProposeCachedResource = true;
       }
     }
   }
 
-  public onResponseData(ctx: IMitmRequestContext, chunk: Buffer) {
+  public onHttp2PushStream() {
+    if (this.ctx.method === 'GET') {
+      const cached = this.responseCache.get(this.ctx.url.href);
+      if (cached) {
+        this.didProposeCachedResource = true;
+        this.useCached();
+      }
+    }
+  }
+
+  public onResponseData(chunk: Buffer) {
     let data = chunk;
     if (this.shouldServeCachedData) {
       data = null;
@@ -43,30 +54,47 @@ export default class CacheHandler {
     return data;
   }
 
-  public onResponseHeaders(ctx: IMitmRequestContext) {
-    if (this.didUseArtificialCache && ctx.serverToProxyResponse.statusCode === 304) {
-      const cached = this.responseCache.get(ctx.url);
-      if (cached.encoding) {
-        ctx.serverToProxyResponse.headers['content-encoding'] = cached.encoding;
-      }
-      delete ctx.serverToProxyResponse.headers['transfer-encoding'];
-      ctx.serverToProxyResponse.headers['content-length'] = String(
-        Buffer.byteLength(cached.file, 'utf8'),
-      );
-      ctx.serverToProxyResponse.statusCode = 200;
-      this.shouldServeCachedData = true;
-      this.data.push(cached.file);
+  public onResponseHeaders() {
+    if (this.didProposeCachedResource && this.ctx.status === 304) {
+      this.useCached();
+      this.ctx.status = 200;
     }
   }
 
-  public onResponseEnd(ctx: IMitmRequestContext) {
+  public onResponseEnd() {
+    const ctx = this.ctx;
     if (
-      ctx.serverToProxyResponse.method === 'GET' &&
-      !this.didUseArtificialCache &&
-      !ctx.didBlockResource
+      ctx.method === 'GET' &&
+      !this.didProposeCachedResource &&
+      !ctx.didBlockResource &&
+      this.data.length
     ) {
-      const resHeaders = ctx.serverToProxyResponse.headers;
-      this.responseCache.add(ctx.url, Buffer.concat(this.data), resHeaders);
+      const resHeaders = ctx.responseHeaders;
+      this.responseCache.add(ctx.url.href, Buffer.concat(this.data), resHeaders);
     }
+  }
+
+  private useCached() {
+    const ctx = this.ctx;
+    const cached = this.responseCache.get(ctx.url.href);
+    let isLowerKeys = false;
+    for (const key of Object.keys(ctx.responseHeaders)) {
+      if (key.toLowerCase() === key) isLowerKeys = true;
+      if (
+        key.match(/content-encoding/i) ||
+        key.match(/transfer-encoding/i) ||
+        key.match(/content-length/i)
+      ) {
+        delete ctx.responseHeaders[key];
+      }
+    }
+    if (cached.encoding) {
+      const key = isLowerKeys ? 'content-encoding' : 'Content-Encoding';
+      ctx.responseHeaders[key] = cached.encoding;
+    }
+    const lengthKey = isLowerKeys ? 'content-length' : 'Content-Length';
+    ctx.responseHeaders.headers[lengthKey] = String(Buffer.byteLength(cached.file, 'utf8'));
+    this.shouldServeCachedData = true;
+    this.data.push(cached.file);
   }
 }

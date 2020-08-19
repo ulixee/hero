@@ -69,11 +69,9 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
         continue;
       }
       idMap.set(nodeId, elem);
-      continue;
     }
     if (nodeType === document.DOCUMENT_NODE) {
       idMap.set(nodeId, document);
-      continue;
     }
     if (nodeType === document.DOCUMENT_TYPE_NODE) {
       idMap.set(nodeId, document.doctype);
@@ -96,6 +94,15 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       if (node && preserveElements.includes((node as Element).tagName)) {
         if (action === 'removed') {
           console.log('WARN: script trying to remove preserved node', changeEvent);
+          continue;
+        }
+        if (action === 'added') {
+          if (changeEvent.attributes) {
+            setNodeAttributes(node as any, changeEvent);
+          }
+          if (changeEvent.properties) {
+            setNodeProperties(node as any, changeEvent);
+          }
           continue;
         }
       }

@@ -1,16 +1,15 @@
-import { IncomingMessage, ServerResponse } from 'http';
+import * as http from 'http';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import { cleanMitmHeaders, filterAndCanonizeHeaders } from './Utils';
 import HttpResponseCache from './HttpResponseCache';
 import RequestSession from '../handlers/RequestSession';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 import Log from '@secret-agent/commons/Logger';
 import CookieHandler from '../handlers/CookieHandler';
-import IHttpOrH2Response from '../interfaces/IHttpOrH2Response';
 import * as net from 'net';
 import MitmRequestContext from './MitmRequestContext';
-import CacheHandler from '../handlers/CacheHandler';
+import * as http2 from 'http2';
+import { parseRawHeaders } from './Utils';
 
 const { log } = Log(module);
 
@@ -22,14 +21,13 @@ export default class MitmRequestHandler {
 
   public async handleRequest(
     isSSL: boolean,
-    clientRequest: IncomingMessage,
-    clientResponse: ServerResponse,
+    clientRequest: http.IncomingMessage | http2.Http2ServerRequest,
+    clientResponse: http.ServerResponse | http2.Http2ServerResponse,
   ) {
     clientRequest.pause();
 
-    const cacheHandler = new CacheHandler(this.responseCache);
     const ctx = MitmRequestContext.create(
-      cacheHandler,
+      this.responseCache,
       'http',
       isSSL,
       clientRequest,
@@ -49,8 +47,9 @@ export default class MitmRequestHandler {
         data.push(chunk);
         ctx.proxyToServerRequest.write(chunk);
       }
+      HeadersHandler.sendRequestTrailers(ctx);
       ctx.proxyToServerRequest.end();
-      ctx.postData = Buffer.concat(data);
+      ctx.requestPostData = Buffer.concat(data);
     } catch (err) {
       this.handleError('ON_REQUEST_ERROR', ctx, err);
     }
@@ -58,15 +57,14 @@ export default class MitmRequestHandler {
 
   public async handleUpgrade(
     isSSL: boolean,
-    upgradeRequest: IncomingMessage,
+    upgradeRequest: http.IncomingMessage,
     clientSocket: net.Socket,
     clientHead: Buffer,
   ) {
     // socket resumes in upgradeResponseHandler
     clientSocket.pause();
 
-    const cacheHandler = new CacheHandler(this.responseCache);
-    const ctx = MitmRequestContext.create(cacheHandler, 'ws', isSSL, upgradeRequest);
+    const ctx = MitmRequestContext.create(this.responseCache, 'ws', isSSL, upgradeRequest);
     if (!ctx) return;
 
     clientSocket.on(
@@ -96,20 +94,20 @@ export default class MitmRequestHandler {
         this.handleError.bind(this, 'CLIENT_TO_PROXY_REQUEST_ERROR', ctx),
       );
 
-      const requestSettings = ctx.proxyToServerRequestSettings;
-      session = ctx.requestSession = await RequestSession.getSession(
-        requestSettings.headers,
-        requestSettings.method,
+      session = await RequestSession.getSession(
+        ctx.requestHeaders,
+        ctx.method,
         ctx.isUpgrade,
         ctx.isUpgrade ? 10e3 : undefined,
       );
+      ctx.requestSession = session;
 
       if (!session) {
         log.error('Mitm.RequestHandler:NoSessionForRequest', {
           sessionId: null,
           url: ctx.url,
-          headers: ctx.clientToProxyRequest.headers,
-          method: ctx.clientToProxyRequest.method,
+          headers: ctx.requestOriginalHeaders,
+          method: ctx.method,
         });
         const err = new Error('No Session ID provided');
         (err as any).isLogged = true;
@@ -123,13 +121,13 @@ export default class MitmRequestHandler {
 
       log.info(`Http.Request`, {
         sessionId: session.sessionId,
-        url: ctx.url,
+        url: ctx.url.href,
         hasSession: !!session,
         isSSL: ctx.isSSL,
         isHttpUpgrade: ctx.isUpgrade,
       });
 
-      if (BlockHandler.shouldBlockRequest(session, ctx)) {
+      if (BlockHandler.shouldBlockRequest(ctx)) {
         // already wrote reply
         return;
       }
@@ -137,10 +135,9 @@ export default class MitmRequestHandler {
       await HeadersHandler.waitForResource(ctx);
       await CookieHandler.setProxyToServerCookies(ctx);
 
-      ctx.cacheHandler.onRequest(ctx);
+      ctx.cacheHandler.onRequest();
 
-      await HeadersHandler.modifyHeaders(ctx, ctx.clientToProxyRequest);
-      cleanMitmHeaders(ctx.proxyToServerRequestSettings.headers);
+      await HeadersHandler.modifyHeaders(ctx);
 
       // do one more check on the session before doing a connect
       if (session.isClosing) return;
@@ -167,13 +164,13 @@ export default class MitmRequestHandler {
     ctx: IMitmRequestContext,
     clientSocket: net.Socket,
     clientHead: Buffer,
-    serverResponse: IncomingMessage,
+    serverResponse: http.IncomingMessage,
     serverSocket: net.Socket,
     serverHead: Buffer,
   ) {
     serverSocket.pause();
-    ctx.serverToProxyResponse = serverResponse;
-    ctx.serverToProxyResponse.responseTime = new Date();
+    MitmRequestContext.readHttp1Response(ctx, serverResponse);
+    ctx.serverToProxyResponseStream = serverResponse;
 
     const socketConnection = ctx.proxyToServerSocket;
 
@@ -223,10 +220,10 @@ export default class MitmRequestHandler {
 
   private async httpResponseHandler(
     ctx: IMitmRequestContext,
-    serverToProxyResponse: IHttpOrH2Response,
+    serverToProxyResponse: http.IncomingMessage | http2.ClientHttp2Stream,
   ) {
-    serverToProxyResponse.responseTime = new Date();
-    ctx.serverToProxyResponse = serverToProxyResponse;
+    ctx.serverToProxyResponseStream = serverToProxyResponse;
+    ctx.responseTime = new Date();
     serverToProxyResponse.on(
       'error',
       this.handleError.bind(this, 'SERVER_TO_PROXY_RESPONSE_ERROR', ctx),
@@ -234,40 +231,50 @@ export default class MitmRequestHandler {
 
     try {
       HeadersHandler.restorePreflightHeader(ctx);
-      ctx.cacheHandler.onResponseHeaders(ctx);
+      ctx.cacheHandler.onResponseHeaders();
     } catch (err) {
       return this.handleError('ON_RESPONSE_HEADERS_HANDLER_ERROR', ctx, err);
     }
 
-    if (
-      ctx.requestSession &&
-      redirectCodes.has(serverToProxyResponse.statusCode) &&
-      serverToProxyResponse.headers.location
-    ) {
-      ctx.redirectedToUrl = serverToProxyResponse.headers.location;
+    if (redirectCodes.has(ctx.status)) {
+      const redirectLocation = ctx.responseHeaders.location || ctx.responseHeaders.Location;
+      if (redirectLocation) {
+        ctx.redirectedToUrl = redirectLocation as string;
+        ctx.responseUrl = ctx.redirectedToUrl;
+      }
     }
     await CookieHandler.readServerResponseCookies(ctx);
 
-    if (!ctx.proxyToClientResponse) return;
+    if (!ctx.proxyToClientResponse) {
+      log.warn('Error.NoProxyToClientResponse', { sessionId: ctx.requestSession.sessionId });
+      return;
+    }
 
-    ctx.proxyToClientResponse.writeHead(
-      serverToProxyResponse.statusCode,
-      filterAndCanonizeHeaders(serverToProxyResponse.rawHeaders),
-    );
+    ctx.proxyToClientResponse.writeHead(ctx.status, ctx.responseHeaders);
+
+    serverToProxyResponse.once('trailers', headers => {
+      ctx.responseTrailers = headers;
+    });
 
     for await (const chunk of serverToProxyResponse) {
-      const data = ctx.cacheHandler.onResponseData(ctx, chunk as Buffer);
+      const data = ctx.cacheHandler.onResponseData(chunk as Buffer);
       if (data) {
         ctx.proxyToClientResponse.write(data);
       }
     }
-
     if (ctx.cacheHandler.shouldServeCachedData) {
       ctx.proxyToClientResponse.write(ctx.cacheHandler.cacheData);
     }
 
+    if (serverToProxyResponse instanceof http.IncomingMessage) {
+      ctx.responseTrailers = parseRawHeaders(serverToProxyResponse.rawTrailers);
+    }
+    if (ctx.responseTrailers) {
+      ctx.proxyToClientResponse.addTrailers(ctx.responseTrailers);
+    }
     ctx.proxyToClientResponse.end();
-    ctx.cacheHandler.onResponseEnd(ctx);
+
+    ctx.cacheHandler.onResponseEnd();
     ctx.requestSession.emit('response', MitmRequestContext.toEmittedResource(ctx));
 
     process.nextTick(agent => agent.freeSocket(ctx), ctx.requestSession.requestAgent);

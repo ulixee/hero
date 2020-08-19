@@ -83,19 +83,22 @@ const loadTimeConversion = {
 const csiConversion = {
   startE() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return parseInt(ntEntry.startTime + performance.timeOrigin, 10);
+    const start = ntEntry ? ntEntry.loadEventEnd : 0;
+    return parseInt(start + performance.timeOrigin, 10);
   },
   onloadT() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
-    return parseInt(ntEntry.domContentLoadedEventEnd + performance.timeOrigin, 10);
+    const load = ntEntry ? ntEntry.domContentLoadedEventEnd : 0;
+    return parseInt(load + performance.timeOrigin, 10);
   },
   pageT() {
     return parseFloat(performance.now().toFixed(3));
   },
   tran() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
+    const type = ntEntry ? ntEntry.type : 'navigate';
     // https://chromium.googlesource.com/chromium/src.git/+/master/chrome/renderer/loadtimes_extension_bindings.cc
-    switch (ntEntry.type) {
+    switch (type) {
       case 'back_forward':
         return 6;
       case 'reload':

@@ -1,4 +1,5 @@
 import { IncomingHttpHeaders } from 'http';
+import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
 
 // TODO: implement max-age and last-modified cache control https://tools.ietf.org/id/draft-ietf-httpbis-cache-01.html
 export default class HttpResponseCache {
@@ -15,16 +16,34 @@ export default class HttpResponseCache {
     return entry;
   }
 
-  public add(url: string, file: Buffer, headers: IncomingHttpHeaders) {
-    const etag = headers.etag as string;
-    const encoding = headers['content-encoding'] as string;
-    const cacheControl = headers['cache-control'] as string;
-    const lastModified = headers['last-modified'] as string;
+  public add(url: string, file: Buffer, headers: IResourceHeaders) {
+    const resource = { file } as IResource;
+    for (const [key, value] of Object.entries(headers)) {
+      const lower = key.toLowerCase();
+      const val = value as string;
 
-    if (cacheControl.includes('no-store') || !etag) return;
+      if (lower === 'etag') {
+        resource.etag = val;
+      }
+      if (lower === 'content-encoding') {
+        resource.encoding = val;
+      }
+      if (lower === 'expires') {
+        resource.expires = val;
+      }
+      if (lower === 'last-modified') {
+        resource.lastModified = val;
+      }
+      if (lower === 'cache-control') {
+        resource.cacheControl = val;
+        if (resource.cacheControl.includes('no-store')) {
+          return;
+        }
+      }
+    }
+    if (!resource.etag) return;
 
-    const expires = headers.expires as string;
-    this.cache.set(url, { etag, file, encoding, expires, cacheControl, lastModified });
+    this.cache.set(url, resource);
     this.recordAccess(url);
     this.cleanCache();
   }

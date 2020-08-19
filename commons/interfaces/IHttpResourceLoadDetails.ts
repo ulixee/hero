@@ -1,16 +1,16 @@
 import OriginType from './OriginType';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import { URL } from 'url';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 export default interface IHttpResourceLoadDetails {
   isSSL: boolean;
   isUpgrade: boolean;
-  isHttp2: boolean;
+  isClientHttp2: boolean;
+  isServerHttp2: boolean;
+  isHttp2Push: boolean;
   remoteAddress?: string;
   localAddress?: string;
-  requestTime: Date;
-  url: string;
-  postData?: Buffer;
-  resourceType?: ResourceType;
   originType?: OriginType;
   hasUserGesture?: boolean;
   documentUrl?: string;
@@ -19,4 +19,22 @@ export default interface IHttpResourceLoadDetails {
   previousUrl?: string;
   firstRedirectingUrl?: string; // track back to first redirection
   redirectedToUrl?: string;
+  clientAlpn: string;
+
+  url: URL;
+  method: string;
+  requestTime: Date;
+  requestOriginalHeaders: IResourceHeaders;
+  requestLowerHeaders: IResourceHeaders;
+  requestHeaders: IResourceHeaders;
+  requestTrailers?: IResourceHeaders;
+  requestPostData?: Buffer;
+  status?: number;
+  statusMessage?: string;
+  responseUrl?: string;
+  responseOriginalHeaders?: IResourceHeaders;
+  responseHeaders?: IResourceHeaders;
+  responseTime?: Date;
+  responseTrailers?: IResourceHeaders;
+  resourceType?: ResourceType;
 }

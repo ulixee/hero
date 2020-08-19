@@ -90,7 +90,7 @@ export default class Safari13 extends EmulatorPlugin {
         });
       }
       for (const origin of originUrls) {
-        this.documentHasUserActivity(origin.href);
+        this.documentHasUserActivity(origin);
       }
     }
   }
@@ -116,8 +116,7 @@ export default class Safari13 extends EmulatorPlugin {
     });
   }
 
-  private documentHasUserActivity(documentUrl: string) {
-    const url = new URL(documentUrl);
+  private documentHasUserActivity(url: URL) {
     const hostname = canonicalDomain(url.hostname);
     if (!this.sitesWithUserInteraction.includes(hostname)) {
       this.sitesWithUserInteraction.push(hostname);
@@ -143,7 +142,7 @@ export default class Safari13 extends EmulatorPlugin {
 
   private async setCookie(cookiestring: string, resource: IHttpResourceLoadDetails) {
     const { url } = resource;
-    const interactUrl = new URL(url);
+    const interactUrl = url;
     const hostname = canonicalDomain(interactUrl.hostname);
     const cookie = Cookie.parse(cookiestring);
     const sameSiteContext = getSameSiteContext(resource);
@@ -158,14 +157,14 @@ export default class Safari13 extends EmulatorPlugin {
 
       if (this.enableNov2019ITPSupport) {
         this.cookiesPendingSiteInteraction[hostname].push({
-          sourceUrl: url,
+          sourceUrl: url.href,
           cookie,
           sameSiteContext,
         });
         return;
       }
     }
-    await this.cookieJar.setCookie(cookie, url, {
+    await this.cookieJar.setCookie(cookie, url.href, {
       sameSiteContext,
     } as any);
   }
@@ -175,7 +174,7 @@ export default class Safari13 extends EmulatorPlugin {
 
     let sameSiteContext = getSameSiteContext(resource);
     if (resource.isFromRedirect) {
-      const currentUrl = new URL(resource.url);
+      const currentUrl = resource.url;
       const previousDomain = new URL(resource.firstRedirectingUrl);
 
       if (getPublicSuffix(previousDomain.hostname) === getPublicSuffix(currentUrl.hostname)) {
@@ -183,7 +182,7 @@ export default class Safari13 extends EmulatorPlugin {
       }
     }
     await this.waitForDocumentCookiesLoaded(sourceDocumentUrl);
-    let cookies = await this.cookieJar.getCookies(url, {
+    let cookies = await this.cookieJar.getCookies(url.href, {
       sameSiteContext,
     } as any);
 

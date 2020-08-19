@@ -339,7 +339,7 @@ export default class Window {
         // need to set directly since passed in object is a copy
         this.sessionState.getResourceMeta(resourceMeta.id).seenAtCommandId = this.lastCommandId;
       }
-      if (resourceMeta.seenAtCommandId <= opts.sinceCommandId ?? -1) return;
+      if (resourceMeta.seenAtCommandId <= opts?.sinceCommandId ?? -1) return;
       if (filter.type && resourceMeta.type !== filter.type) return;
       if (resourceMeta.url && !resourceMeta.url.match(filter.url)) return;
       // if already included, skip

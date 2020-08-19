@@ -22,6 +22,12 @@ export default abstract class TabBackend {
     });
 
     (this.webContents as any).windowId = window.browserWindow.id;
+    this.browserView.setAutoResize({
+      width: true,
+      height: true,
+      horizontal: false,
+      vertical: false,
+    });
     this.bindListeners();
   }
 

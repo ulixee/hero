@@ -25,24 +25,15 @@ test('should be able to send a tls connection', async () => {
 });
 
 test('should handle http2 requests', async () => {
-  const h2ServerStarted = createPromise();
-  const httpServer = http2
-    .createSecureServer(Helpers.sslCerts(), (request, response) => {
-      response.end('I am h2');
-    })
-    .listen(0, () => {
-      h2ServerStarted.resolve();
-    });
-  Helpers.onClose(() => new Promise(resolve => httpServer.close(resolve)));
-  await h2ServerStarted.promise;
-  const serverPort = (httpServer.address() as net.AddressInfo).port;
-
-  const tlsConnection = getTlsConnection(serverPort);
+  const httpServer = await Helpers.runHttp2Server((request, response) => {
+    response.end('I am h2');
+  });
+  const tlsConnection = getTlsConnection(httpServer.port);
 
   await tlsConnection.connect();
   expect(tlsConnection.alpn).toBe('h2');
 
-  const client = http2.connect('https://www.google.com', {
+  const client = http2.connect('https://secretagent.dev', {
     createConnection: () => tlsConnection.socket,
   });
   Helpers.onClose(() => new Promise(resolve => client.close(resolve)));
@@ -342,9 +333,5 @@ function trackClose(closable: { close: (...args: any[]) => any }) {
 }
 
 async function readResponse(res: stream.Readable) {
-  const buffer: Buffer[] = [];
-  for await (const data of res) {
-    buffer.push(data);
-  }
-  return Buffer.concat(buffer).toString();
+  return (await Helpers.readableToBuffer(res)).toString();
 }

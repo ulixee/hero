@@ -13,7 +13,7 @@ let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to Global
 
 export default class GlobalPool {
   public static maxActiveSessionCount: number = 10;
-  public static localProxyPortStart: number = 10e3;
+  public static localProxyPortStart: number = 0;
 
   public static get activeSessionCount() {
     return this._activeSessionCount;
@@ -98,7 +98,9 @@ export default class GlobalPool {
   ): Promise<Session> {
     this._activeSessionCount += 1;
     try {
-      return await this.chromeCore.createSession(options);
+      const session = await this.chromeCore.createSession(options);
+      if (!session) this._activeSessionCount -= 1;
+      return session;
     } catch (err) {
       this._activeSessionCount -= 1;
 
