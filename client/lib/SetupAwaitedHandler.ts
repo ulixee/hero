@@ -4,7 +4,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Constructable from 'awaited-dom/base/Constructable';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/AttachedState';
+import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 
 export default function run() {
   // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM

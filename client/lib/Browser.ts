@@ -200,12 +200,15 @@ export async function createBrowser(
   };
   const coreClientSession = await coreClient.createSession(sessionOptions);
 
-  let showReplay = envShowReplay;
-  if (options.showReplay !== undefined) showReplay = options.showReplay;
+  let showReplay = true;
+  if (options.showReplay !== undefined) {
+    showReplay = options.showReplay;
+  } else if (process.env.SA_SHOW_REPLAY === 'false' || process.env.SA_SHOW_REPLAY === '0') {
+    showReplay = false;
+  }
+
   if (showReplay) {
     scriptInstance.launchReplay(sessionName, coreClientSession);
   }
   return new Browser(coreClientSession, sessionName);
 }
-
-const envShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));

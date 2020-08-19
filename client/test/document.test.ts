@@ -2,7 +2,7 @@
 import { SecretAgentClientGenerator } from '../index';
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/AttachedState';
+import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 
 describe('document tests', () => {
   it('runs querySelector', async () => {
