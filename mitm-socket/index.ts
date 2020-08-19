@@ -5,14 +5,13 @@ import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
-import { v1 } from 'uuid';
+import { v1 as uuid } from 'uuid';
 
 const { log } = Log(module);
 
 const ext = os.platform() === 'win32' ? '.exe' : '';
 const libPath = `${__dirname}/dist/connect${ext}`;
 
-let counter = 0;
 export default class MitmSocket {
   public readonly socketPath: string;
   public alpn = 'http/1.1';
@@ -26,9 +25,9 @@ export default class MitmSocket {
   private emitter = new EventEmitter();
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
-    const id = (counter += 1);
+    const id = uuid();
     this.socketPath =
-      os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${v1()}` : `${os.tmpdir()}/sa-mitm-${id}.sock`;
+      os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
 
     if (connectOpts.debug === undefined) connectOpts.debug = log.level === 'stats';
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;

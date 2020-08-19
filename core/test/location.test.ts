@@ -9,6 +9,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic LocationTracker tests', () => {
   it('handles unformatted urls', async () => {
@@ -286,9 +288,4 @@ setTimeout(function() {
     await core.close();
     runWaitForCbsSpy.mockRestore();
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

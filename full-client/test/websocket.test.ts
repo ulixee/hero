@@ -12,6 +12,9 @@ beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
 });
 
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
+
 describe('Websocket tests', () => {
   it('can wait for a websocket', async () => {
     const mitmServer = await MitmServer.start(9004);
@@ -82,9 +85,4 @@ describe('Websocket tests', () => {
 
     await browser.close();
   });
-});
-
-afterAll(async () => {
-  await Helpers.closeAll();
-  await SecretAgent.shutdown();
 });

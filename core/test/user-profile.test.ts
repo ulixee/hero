@@ -10,6 +10,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('UserProfile cookie tests', () => {
   it('should be able to save and restore cookies', async () => {
@@ -537,9 +539,4 @@ describe('UserProfile IndexedDb tests', () => {
     await core.close();
     await core2.close();
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

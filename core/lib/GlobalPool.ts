@@ -19,15 +19,10 @@ export default class GlobalPool {
     return this._activeSessionCount;
   }
 
-  public static get isStarted() {
-    return this._isStarted;
-  }
-
   public static get hasAvailability() {
     return this.activeSessionCount < GlobalPool.maxActiveSessionCount;
   }
 
-  private static _isStarted = false;
   private static _activeSessionCount = 0;
   private static chromeCore: ChromeCore;
   private static mitmServer: MitmServer;
@@ -37,9 +32,6 @@ export default class GlobalPool {
   }[] = [];
 
   public static async start() {
-    if (this.isStarted) {
-      throw new Error('GlobalPool is already started');
-    }
     if (!this.chromeCore) {
       log.info('StartingGlobalPool');
       this.mitmServer = await MitmServer.start(this.localProxyPortStart);
@@ -90,17 +82,12 @@ export default class GlobalPool {
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new Error('Shutting down'));
     }
-    if (this.chromeCore) {
-      await this.chromeCore.close();
-    }
-    if (this.mitmServer) {
-      await this.mitmServer.close();
-    }
-    SessionsDb.shutdown();
-    this.waitingForAvailability = [];
+    this.waitingForAvailability.length = 0;
+    const { chromeCore, mitmServer } = this;
     this.chromeCore = null;
     this.mitmServer = null;
-    this._isStarted = false;
+    SessionsDb.shutdown();
+    await Promise.all([chromeCore?.close(), mitmServer?.close()]);
 
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }

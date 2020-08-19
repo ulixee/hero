@@ -1,55 +1,76 @@
 version: 2.1
 orbs:
-  node: circleci/node@3.0.1
+  node: circleci/node@4.0.0
+  win: circleci/windows@2.4.0
 
 step-save-cache: &step-save-cache
   save_cache:
-    key: v1-sa-{{arch}}-{{ checksum "yarn.lock" }}
+    key: v2-sa-{{arch}}-{{ checksum "yarn.lock" }}
     paths:
-      - node_modules
-      - core/node_modules
-      - core-interfaces/node_modules
-      - core-server/node_modules
-      - client/node_modules
-      - emulators/node_modules
-      - emulator-plugins/emulate-safari-13/node_modules
-      - full-client/node_modules
-      - mitm/node_modules
-      - mitm-socket/dist
-      - remote-client/node_modules
-      - remote-interfaces/node_modules
-      - replay-app/node_modules
-      - replay-api/node_modules
-      - testing/node_modules
-      - session-state/node_modules
+      - ~/.cache/yarn
+
+step-run-tests: &step-run-tests
+  run:
+    name: Run tests with JUnit as reporter
+    command: yarn jest --ci --runInBand --reporters=default --reporters=jest-junit --testTimeout=10e3
+    working_directory: ~/project/build
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      SA_SHOW_REPLAY: false
+      CACHE_DIR: .sessions
+      NODE_ENV: test
+
+step-restore-cache: &step-restore-cache
+  restore_cache:
+    key: v2-sa-{{ arch }}-{{ checksum "yarn.lock" }}
+
+step-yarn: &step-yarn
+  run:
+    name: Yarn Install
+    command: yarn install --immutable
+    environment:
+      YARN_CACHE_DIR: ~/.cache/yarn
+      ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+      SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+
+step-ts: &step-ts
+  run:
+    name: Compile Typescript
+    command: yarn build:ci
+    environment:
+      YARN_CACHE_DIR: ~/.cache/yarn
+      ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+      SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
 jobs:
-  build-and-test:
+  test-linux:
     docker:
       - image: circleci/node:12-browsers
     executor:
       name: node/default
     steps:
       - checkout
-      - restore_cache:
-          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
-      - run:
-          name: Yarn Install
-          command: yarn install --frozen-lockfile
-      - run:
-          name: Compile Typescript
-          command: yarn build:ci
+      - *step-restore-cache
+      - *step-yarn
+      - *step-ts
       - *step-save-cache
-      - run:
-          name: Run tests with JUnit as reporter
-          command: yarn jest --ci --runInBand --reporters=default --reporters=jest-junit --testTimeout=10e3
-          working_directory: ~/project/build
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
-            ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-            SA_SHOW_REPLAY: false
-            CACHE_DIR: .cache-test
-            NODE_ENV: test
+      - *step-run-tests
+      - store_test_results:
+          path: build/reports/junit/
+      - store_artifacts:
+          path: build/reports/junit
+
+  test-win:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - checkout
+      - *step-restore-cache
+      - *step-yarn
+      - *step-ts
+      - *step-save-cache
+      - *step-run-tests
       - store_test_results:
           path: build/reports/junit/
       - store_artifacts:
@@ -62,11 +83,8 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - restore_cache:
-          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
-      - run:
-          name: Yarn Install
-          command: yarn install --frozen-lockfile
+      - *step-restore-cache
+      - *step-yarn
       - add_ssh_keys:
           fingerprints:
             - '3b:86:d4:57:4f:12:0b:ad:45:49:15:d4:90:c1:51:a2'
@@ -79,11 +97,8 @@ jobs:
       xcode: '10.2.0'
     steps:
       - checkout
-      - restore_cache:
-          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
-      - run:
-          name: Yarn Install
-          command: yarn install --frozen-lockfile
+      - *step-restore-cache
+      - *step-yarn
       - run:
           name: Compile Typescript and Build Electron Webpages
           command: cd ~/project/replay-app && yarn build && yarn build:icons
@@ -101,11 +116,8 @@ jobs:
       - image: electronuserland/builder:wine
     steps:
       - checkout
-      - restore_cache:
-          key: v1-sa-{{ arch }}-{{ checksum "yarn.lock" }}
-      - run:
-          name: Yarn Install
-          command: yarn install --frozen-lockfile
+      - *step-restore-cache
+      - *step-yarn
       - run:
           name: Compile Typescript and Build Electron Webpages
           command: cd ~/project/replay-app && yarn build && yarn build:icons
@@ -129,7 +141,8 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - build-and-test
+      - test-linux
+      - test-win
   build-assets:
     jobs:
       - build-mitm-socket:

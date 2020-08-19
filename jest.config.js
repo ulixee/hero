@@ -57,7 +57,6 @@ module.exports = {
     'mitm/node_modules',
     'mitm-socket/node_modules',
     'remote-client/node_modules',
-    'replay-api/**/node_modules',
     'session-state/**/node_modules',
     'commons/**/node_modules',
   ],

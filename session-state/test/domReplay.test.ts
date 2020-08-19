@@ -15,6 +15,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Dom Replay tests', () => {
   it('basic replay test', async () => {
@@ -133,9 +135,4 @@ describe('basic Dom Replay tests', () => {
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

@@ -6,7 +6,9 @@ import { Command } from '@secret-agent/client/interfaces/IInteractions';
 
 beforeAll(async () => {
   GlobalPool.maxActiveSessionCount = 3;
-}, 60000);
+});
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Interact tests', () => {
   it('should be able to go to a second page', async () => {
@@ -22,9 +24,9 @@ describe('basic Interact tests', () => {
 
     await browser.goto(`${url}page1`);
     await browser.document.querySelector('#input').focus();
-    await browser.waitForMillis(3000);
+    await browser.waitForMillis(50);
     await browser.interact({ type: text });
-    await browser.waitForMillis(2000);
+    await browser.waitForMillis(20);
     await browser.click(browser.document.querySelector('#submit-button'));
     await browser.waitForLocation('change');
     const html = await browser.document.documentElement.outerHTML;
@@ -132,10 +134,10 @@ describe('basic Interact tests', () => {
     }
 
     await browser1.close();
-  }, 20000);
+  }, 20e3);
 
   it('should be able to combine a waitForElementVisible and a click', async () => {
-    const koaServer = await Helpers.runKoaServer();
+    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/page1', ctx => {
       ctx.body = `
         <body>
@@ -164,7 +166,7 @@ describe('basic Interact tests', () => {
   });
 
   it('should be able to type various combinations of characters', async () => {
-    const koaServer = await Helpers.runKoaServer();
+    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/keys', ctx => {
       ctx.body = `
         <body>
@@ -196,8 +198,3 @@ describe('basic Interact tests', () => {
     await browser.close();
   });
 });
-
-afterEach(async () => await Helpers.closeAll(), 20000);
-afterAll(async () => {
-  await SecretAgent.shutdown();
-}, 30000);

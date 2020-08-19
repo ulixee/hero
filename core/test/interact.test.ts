@@ -7,6 +7,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Interaction tests', () => {
   it('executes basic click command', async () => {
@@ -124,9 +126,4 @@ describe('basic Interaction tests', () => {
 
     expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

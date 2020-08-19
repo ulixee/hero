@@ -2,6 +2,9 @@ import GlobalPool from '@secret-agent/core/lib/GlobalPool';
 import { UpstreamProxy } from '@secret-agent/mitm';
 import { Helpers } from '@secret-agent/testing';
 
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
+
 test('should be able to run multiple pages each with their own proxy', async () => {
   const acquireUpstreamProxyUrl = jest.spyOn<any, any>(UpstreamProxy.prototype, 'acquireProxyUrl');
 
@@ -26,5 +29,3 @@ test('should be able to run multiple pages each with their own proxy', async () 
     await GlobalPool.close();
   }
 }, 10000);
-
-afterEach(async () => await Helpers.closeAll(), 20000);

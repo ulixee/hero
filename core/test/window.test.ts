@@ -6,6 +6,8 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Window tests', () => {
   it('waits for an element', async () => {
@@ -61,9 +63,4 @@ describe('basic Window tests', () => {
       waitForVisible: true,
     });
   });
-});
-
-afterAll(async () => {
-  await Core.shutdown();
-  await Helpers.closeAll();
 });

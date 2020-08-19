@@ -7,6 +7,8 @@ beforeAll(async () => {
   await SecretAgent.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Full Client tests', () => {
   it('runs goto', async () => {
@@ -34,7 +36,7 @@ describe('basic Full Client tests', () => {
 
     const { request, response } = resource;
     expect(await request.headers).toMatchObject({
-      Host: 'localhost:4001',
+      Host: koaServer.baseHost,
       Connection: 'keep-alive',
       'Upgrade-Insecure-Requests': '1',
       'User-Agent': expect.any(String),
@@ -62,7 +64,3 @@ describe('basic Full Client tests', () => {
   });
 });
 
-afterAll(async () => {
-  await SecretAgent.shutdown();
-  await Helpers.closeAll();
-});

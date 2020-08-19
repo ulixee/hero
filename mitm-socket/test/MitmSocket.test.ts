@@ -9,9 +9,8 @@ import Proxy from 'proxy';
 import * as http from 'http';
 import WebSocket from 'ws';
 
-afterEach(async () => {
-  await Helpers.closeAll();
-});
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 test('should be able to send a tls connection', async () => {
   const htmlString = 'Secure as anything!';

@@ -232,6 +232,7 @@ export default class Core implements ICore {
   // STATIC /////////////////////////////////////
 
   public static async start(options?: IConfigureOptions) {
+    clearTimeout(this.autoShutdownTimer);
     this.wasManuallyStarted = true;
     if (options) await this.configure(options);
     await GlobalPool.start();
@@ -248,6 +249,7 @@ export default class Core implements ICore {
   }
 
   public static async createSession(options: ICreateSessionOptions = {}) {
+    clearTimeout(this.autoShutdownTimer);
     const session = await GlobalPool.createSession(options);
     if (shouldStartReplayServer) {
       await this.startReplayServer();
@@ -258,7 +260,7 @@ export default class Core implements ICore {
       sessionId: session.id,
       sessionsDataLocation: session.baseDir,
       windowId: window.id,
-      replayApiServer: await this.replayServer?.url(),
+      replayApiServer: this.replayServer?.url,
     };
   }
 
@@ -272,12 +274,14 @@ export default class Core implements ICore {
     await Promise.all(toClose.map(x => x?.close()));
   }
 
-  public static async shutdown(fatalError?: Error) {
+  public static async shutdown(fatalError?: Error, force = false) {
     clearTimeout(Core.autoShutdownTimer);
+    const replayServer = this.replayServer;
+    this.replayServer = null;
+    this.wasManuallyStarted = false;
     await Core.disconnect(null, fatalError);
     await GlobalPool.close();
-    await this.replayServer?.close(true);
-    this.wasManuallyStarted = false;
+    await replayServer?.close(!force);
   }
 
   public static registerSignalHandlers() {
@@ -300,19 +304,18 @@ export default class Core implements ICore {
 
   public static async startReplayServer(port?: number) {
     if (this.replayServer) return;
-    this.replayServer = createReplayServer();
-    await this.replayServer.listen(port);
+    this.replayServer = await createReplayServer(port);
   }
 
   private static checkForAutoShutdown() {
     clearTimeout(Core.autoShutdownTimer);
     if (Core.wasManuallyStarted || GlobalPool.activeSessionCount > 0) return;
 
-    Core.autoShutdownTimer = setTimeout(Core.shouldShutdown, Core.autoShutdownMillis).unref();
+    Core.autoShutdownTimer = setTimeout(Core.shouldShutdown.bind(this), Core.autoShutdownMillis);
   }
 
   private static shouldShutdown() {
-    if (GlobalPool.activeSessionCount > 0) return;
+    if (Core.wasManuallyStarted || GlobalPool.activeSessionCount > 0) return;
 
     Core.shutdown().catch(error => {
       log.error('Core.autoShutdown', {

@@ -1,12 +1,13 @@
 import SecretAgent from '../index';
 import { Helpers } from '@secret-agent/testing';
-import Core from '../../core';
 
 let koaServer;
 beforeAll(async () => {
   await SecretAgent.start();
   koaServer = await Helpers.runKoaServer();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic Document tests', () => {
   it('runs goto', async () => {
@@ -146,9 +147,4 @@ describe('basic Document tests', () => {
     expect(await updatedChild.getAttribute('id')).toBe('number2');
     await browser.close();
   });
-});
-
-afterAll(async () => {
-  await SecretAgent.shutdown();
-  await Helpers.closeAll();
 });

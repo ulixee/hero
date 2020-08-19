@@ -8,8 +8,5 @@
     "axios": "^0.19.2",
     "progress": "^2.0.3",
     "tar-fs": "^2.1.0"
-  },
-  "devDependencies": {
-    "@secret-agent/replay-app": "^1.0.0-alpha.8"
   }
 }

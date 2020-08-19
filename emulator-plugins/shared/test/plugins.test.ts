@@ -8,7 +8,8 @@ import { inspect } from 'util';
 
 const { navigator } = navigatorJson;
 
-afterEach(() => Helpers.closeAll());
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
 

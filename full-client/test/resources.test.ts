@@ -1,7 +1,5 @@
 import SecretAgent from '../index';
 import { Helpers } from '@secret-agent/testing';
-import { doc } from 'prettier';
-import { createPromise } from '@secret-agent/commons/utils';
 
 let koaServer;
 beforeAll(async () => {
@@ -26,6 +24,8 @@ beforeAll(async () => {
     };
   });
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
@@ -58,9 +58,4 @@ describe('basic resource tests', () => {
       expect(resources[0].url).toContain(`counter=${i}`);
     }
   });
-});
-
-afterAll(async () => {
-  await SecretAgent.shutdown();
-  await Helpers.closeAll();
 });

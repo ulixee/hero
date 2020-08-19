@@ -4,10 +4,12 @@ import { Helpers } from '@secret-agent/testing';
 beforeAll(async () => {
   await SecretAgent.start();
 });
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
 describe('basic waitForLocation change detections', () => {
   it('runs basic flow', async () => {
-    const koaServer = await Helpers.runKoaServer();
+    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/start', ctx => {
       ctx.body = `
         <body>
@@ -44,7 +46,7 @@ describe('basic waitForLocation change detections', () => {
   });
 
   it('should trigger a location change if location changed but also redirected', async () => {
-    const koaServer = await Helpers.runKoaServer();
+    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/page1', ctx => {
       ctx.body = `
         <body>
@@ -86,7 +88,7 @@ describe('basic waitForLocation change detections', () => {
   });
 
   it('should support 2 location changes', async () => {
-    const koaServer = await Helpers.runKoaServer();
+    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/page1', ctx => {
       ctx.body = `
         <body>
@@ -130,12 +132,4 @@ describe('basic waitForLocation change detections', () => {
     await browser.close();
     await koaServer.close();
   });
-});
-
-afterEach(async () => {
-  await Helpers.closeAll();
-});
-
-afterAll(async () => {
-  await SecretAgent.shutdown();
 });

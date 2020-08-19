@@ -35,6 +35,7 @@ export default class ChromeCore {
     if (this.puppBrowserPromise) {
       return;
     }
+    this.isShuttingDown = false;
     this.puppBrowserPromise = new Promise(async (resolve, reject) => {
       let tickerInterval;
       let killTimer;
