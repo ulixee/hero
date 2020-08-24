@@ -55,6 +55,9 @@ export default class SessionLoader extends EventEmitter {
         (change as any).isMainFrame =
           this.parentFrames.size === 0 || this.parentFrames.has(change.frameId);
         if (change.attributes) change.attributes = JSON.parse(change.attributes);
+        if (change.attributeNamespaces) {
+          change.attributeNamespaces = JSON.parse(change.attributeNamespaces);
+        }
         if (change.properties) change.properties = JSON.parse(change.properties);
       }
       if (changes.length) this.emit('dom-changes', changes);

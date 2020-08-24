@@ -42,7 +42,7 @@ export default class ReplayView extends TabBackend {
     await this.window.webContents.session.clearCache();
     this.webContents.openDevTools({ mode: 'detach', activate: false });
 
-    await this.replayApi.isReady;
+    await this.replayApi.isReady.promise;
     await this.webContents.loadURL(replayApi.state.startOrigin);
 
     this.window.sendToRenderer('tab:updated', {
@@ -101,7 +101,7 @@ export default class ReplayView extends TabBackend {
   }
 
   private async updateFrontendTicks() {
-    await this.replayApi.isReady;
+    await this.replayApi.isReady.promise;
     const tabUpdateParam = {
       id: this.id,
       tickState: this.state.getTickState(),

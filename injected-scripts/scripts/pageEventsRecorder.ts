@@ -45,6 +45,7 @@ class NodeTracker {
   }
 
   public track(node: Node) {
+    if (!node) return;
     if (this.nodeIds.has(node)) {
       return this.nodeIds.get(node);
     }
@@ -226,65 +227,66 @@ class PageEventsRecorder {
       }
     }
 
-    const attributeNodes = new Set();
-
     for (const mutation of mutations) {
-      switch (mutation.type) {
-        case 'childList':
-          let isFirstRemoved = true;
-          for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
-            const node = mutation.removedNodes[i];
-            const serial = this.serializeNode(node);
-            serial.parentNodeId = nodeTracker.getId(mutation.target);
-            serial.previousSiblingId = nodeTracker.getId(
-              isFirstRemoved ? mutation.previousSibling : node.previousSibling,
-            );
-            changes.push([currentCommandId, 'removed', serial, stamp]);
-            isFirstRemoved = false;
+      const { type, target } = mutation;
+
+      if (type === 'childList') {
+        let isFirstRemoved = true;
+        for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
+          const node = mutation.removedNodes[i];
+          const serial = this.serializeNode(node);
+          serial.parentNodeId = nodeTracker.getId(target);
+          serial.previousSiblingId = nodeTracker.getId(
+            isFirstRemoved ? mutation.previousSibling : node.previousSibling,
+          );
+          changes.push([currentCommandId, 'removed', serial, stamp]);
+          isFirstRemoved = false;
+        }
+
+        // A batch of changes includes changes in a set of nodes.
+        // Since we're flattening, only the first one should be added after the mutation sibling.
+        let isFirstAdded = true;
+        for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+          const node = mutation.addedNodes[i];
+          const serial = this.serializeNode(node);
+          serial.parentNodeId = nodeTracker.getId(target);
+          serial.previousSiblingId = nodeTracker.getId(
+            isFirstAdded ? mutation.previousSibling : node.previousSibling,
+          );
+          changes.push([currentCommandId, 'added', serial, stamp]);
+          isFirstAdded = false;
+        }
+
+        // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
+        // individually so we need to extract child nodes into flat hierarchy
+
+        for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+          const node = mutation.addedNodes[i];
+          const children = this.serializeChildren(node, addedNodes);
+          for (const childData of children) {
+            changes.push([currentCommandId, 'added', childData, stamp]);
           }
+        }
+      }
 
-          // A batch of changes includes changes in a set of nodes.
-          // Since we're flattening, only the first one should be added after the mutation sibling.
-          let isFirstAdded = true;
-          for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-            const node = mutation.addedNodes[i];
-            const serial = this.serializeNode(node);
-            serial.parentNodeId = nodeTracker.getId(mutation.target);
-            serial.previousSiblingId = nodeTracker.getId(
-              isFirstAdded ? mutation.previousSibling : node.previousSibling,
-            );
-            changes.push([currentCommandId, 'added', serial, stamp]);
-            isFirstAdded = false;
-          }
+      if (type === 'attributes') {
+        const attributeChange = this.serializeNode(target);
+        if (!attributeChange.attributes) attributeChange.attributes = {};
+        attributeChange.attributes[mutation.attributeName] = (target as Element).getAttributeNS(
+          mutation.attributeNamespace,
+          mutation.attributeName,
+        );
+        if (mutation.attributeNamespace && mutation.attributeNamespace !== '') {
+          if (!attributeChange.attributeNamespaces) attributeChange.attributeNamespaces = {};
+          attributeChange.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
+        }
+        changes.push([currentCommandId, 'attribute', attributeChange, stamp]);
+      }
 
-          // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
-          // individually so we need to extract child nodes into flat hierarchy
-
-          for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-            const node = mutation.addedNodes[i];
-            const children = this.serializeChildren(node, addedNodes);
-            for (const childData of children) {
-              changes.push([currentCommandId, 'added', childData, stamp]);
-            }
-          }
-          break;
-
-        case 'attributes':
-          if (attributeNodes.has(mutation.target)) break;
-          const attributeChange = this.serializeNode(mutation.target);
-          if (!attributeChange.attributes) attributeChange.attributes = {};
-          attributeNodes.add(mutation.target);
-          attributeChange.attributes[
-            mutation.attributeName
-          ] = (mutation.target as Element).getAttribute(mutation.attributeName);
-          changes.push([currentCommandId, 'attribute', attributeChange, stamp]);
-          break;
-
-        case 'characterData':
-          const textChange = this.serializeNode(mutation.target);
-          textChange.textContent = mutation.target.textContent;
-          changes.push([currentCommandId, 'text', textChange, stamp]);
-          break;
+      if (type === 'characterData') {
+        const textChange = this.serializeNode(target);
+        textChange.textContent = target.textContent;
+        changes.push([currentCommandId, 'text', textChange, stamp]);
       }
     }
 
@@ -329,11 +331,19 @@ class PageEventsRecorder {
       case Node.ELEMENT_NODE:
         const element = node as Element;
         data.tagName = element.tagName;
+        if (element.namespaceURI && element.namespaceURI !== defaultNamespaceUri) {
+          data.namespaceUri = element.namespaceURI;
+        }
+
         if (element.attributes.length) {
           data.attributes = {};
           for (let i = 0, length = element.attributes.length; i < length; i += 1) {
             const attr = element.attributes[i];
             data.attributes[attr.name] = attr.value;
+            if (attr.namespaceURI && attr.namespaceURI !== defaultNamespaceUri) {
+              if (!data.attributeNamespaces) data.attributeNamespaces = {};
+              data.attributeNamespaces[attr.name] = attr.namespaceURI;
+            }
           }
         }
 
@@ -355,6 +365,7 @@ class PageEventsRecorder {
   }
 }
 
+const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
 const propertiesToCheck = ['value', 'selected', 'checked'];
 
 const recorder = new PageEventsRecorder();

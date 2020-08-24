@@ -24,6 +24,7 @@ test('it should be able to add polyfills', async () => {
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
   const page = await puppBrowser.newPage();
+  page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
@@ -140,6 +141,7 @@ test('it should be able to change prototype properties', async () => {
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
   const page = await puppBrowser.newPage();
+  page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
@@ -192,6 +194,7 @@ test('it should be able to change own properties', async () => {
   Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
   const page = await puppBrowser.newPage();
+  page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));

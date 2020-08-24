@@ -19,6 +19,7 @@ test('it should override plugins in a browser window', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await puppBrowser.newPage();
 
+  page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));

@@ -121,11 +121,8 @@ function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
       'resource-url': resource.url,
       'resource-type': resource.type,
       'resource-status-code': resource.status,
-      'content-type': resource.headers['content-type'] ?? resource.headers['Content-Type'],
+      'resource-headers': JSON.stringify(resource.headers),
     };
-    if (resource.encoding) {
-      headers['content-encoding'] = resource.encoding;
-    }
     res.createPushResponse(
       {
         ':path': '/resource',

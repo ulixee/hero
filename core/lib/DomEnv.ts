@@ -3,7 +3,6 @@ import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import { SerializableOrJSHandle } from 'puppeteer';
 import FrameTracker from './FrameTracker';
 import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
@@ -135,7 +134,7 @@ ${domStorageScript}
     );
   }
 
-  private async runIsolatedFn<T>(fnName: string, ...args: SerializableOrJSHandle[]) {
+  private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
     const callFn = `${fnName}(${args
       .map(x => {
         if (!x) return 'undefined';
@@ -203,3 +202,8 @@ const jsPathScript = fs.readFileSync(
   require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
   'utf8',
 );
+
+type Serializable = number | string | boolean | null | Serializable[] | IJSONObject;
+interface IJSONObject {
+  [key: string]: Serializable;
+}

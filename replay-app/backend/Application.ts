@@ -25,11 +25,6 @@ export default class Application {
       return;
     }
 
-    app.on('activate', () => {
-      // triggered when clicking icon on OS taskbar
-      this.createWindowIfNeeded();
-    });
-
     app.on('second-instance', async (e, argv) => {
       await this.loadLocationFromArgv(argv);
     });
@@ -123,6 +118,11 @@ export default class Application {
     ipcMain.setMaxListeners(0);
 
     // WINDOWS
+
+    app.on('activate', () => {
+      // triggered when clicking icon on OS taskbar
+      this.createWindowIfNeeded();
+    });
 
     ipcMain.on('window:create', () => {
       Window.create();

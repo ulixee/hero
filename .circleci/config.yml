@@ -1,24 +1,6 @@
 version: 2.1
 orbs:
   node: circleci/node@4.0.0
-  win: circleci/windows@2.4.0
-
-step-save-cache: &step-save-cache
-  save_cache:
-    key: v2-sa-{{arch}}-{{ checksum "yarn.lock" }}
-    paths:
-      - ~/.cache/yarn
-
-step-run-tests: &step-run-tests
-  run:
-    name: Run tests with JUnit as reporter
-    command: yarn jest --ci --runInBand --reporters=default --reporters=jest-junit --testTimeout=10e3
-    working_directory: ~/project/build
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
-      SA_SHOW_REPLAY: false
-      CACHE_DIR: .sessions
-      NODE_ENV: test
 
 step-restore-cache: &step-restore-cache
   restore_cache:
@@ -33,49 +15,7 @@ step-yarn: &step-yarn
       ELECTRON_SKIP_BINARY_DOWNLOAD: 1
       SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
-step-ts: &step-ts
-  run:
-    name: Compile Typescript
-    command: yarn build:ci
-    environment:
-      YARN_CACHE_DIR: ~/.cache/yarn
-      ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-      SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
-
 jobs:
-  test-linux:
-    docker:
-      - image: circleci/node:12-browsers
-    executor:
-      name: node/default
-    steps:
-      - checkout
-      - *step-restore-cache
-      - *step-yarn
-      - *step-ts
-      - *step-save-cache
-      - *step-run-tests
-      - store_test_results:
-          path: build/reports/junit/
-      - store_artifacts:
-          path: build/reports/junit
-
-  test-win:
-    executor:
-      name: win/default
-      shell: powershell.exe
-    steps:
-      - checkout
-      - *step-restore-cache
-      - *step-yarn
-      - *step-ts
-      - *step-save-cache
-      - *step-run-tests
-      - store_test_results:
-          path: build/reports/junit/
-      - store_artifacts:
-          path: build/reports/junit
-
   update-website:
     docker:
       - image: circleci/node:12
@@ -130,28 +70,10 @@ jobs:
       - store_artifacts:
           path: ~/project/build/replay-app/dist/assets
 
-  build-mitm-socket:
-    docker:
-      - image: circleci/golang:1.14
-    steps:
-      - checkout
-      - run: cd ~/project/mitm-socket && curl -sL https://git.io/goreleaser | bash
-
 workflows:
   version: 2
-  build-and-test:
-    jobs:
-      - test-linux
-      - test-win
   build-assets:
     jobs:
-      - build-mitm-socket:
-          context: SecretAgent
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*(-.*)*/
       - build-replay-wl:
           context: SecretAgent
           filters:
@@ -166,10 +88,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /v[0-9]+(\.[0-9]+)*(-.*)*/
-  update-website:
-    jobs:
-      - update-website:
-          filters:
-            branches:
-              only:
-                - master

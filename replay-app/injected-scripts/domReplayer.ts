@@ -34,19 +34,25 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
       if (location.href !== textContent || commandId === -1) {
+        const newUrl = new URL(textContent);
         console.log(
-          'Document changed. (Command %s. %s ==> %s)',
+          'Document changed. (Command %s. %s ==> %s). Keep origin? %s',
           commandId === -1 ? 'load' : commandId,
           window.location.href,
           textContent,
+          location.origin === newUrl.origin,
         );
-        const newUrl = new URL(textContent);
 
         if (location.origin === newUrl.origin) {
           window.history.replaceState({}, 'Replay', textContent);
           idMap.clear();
           window.scrollTo({ top: 0 });
           document.documentElement.innerHTML = '';
+          while (document.documentElement.previousSibling) {
+            const prev = document.documentElement.previousSibling;
+            if (prev === document.doctype) break;
+            prev.remove();
+          }
         } else {
           // if it's an origin change, we have to change page
           location.href = newUrl.href;
@@ -103,6 +109,7 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
           if (changeEvent.properties) {
             setNodeProperties(node as any, changeEvent);
           }
+          (node as Element).innerHTML = '';
           continue;
         }
       }
@@ -110,11 +117,14 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       switch (action) {
         case 'added':
           let next: Node;
-          if (getNode(changeEvent.previousSiblingId)) {
+          if (!changeEvent.previousSiblingId) {
+            (parentNode as Element).prepend(node);
+          } else if (getNode(changeEvent.previousSiblingId)) {
             next = getNode(changeEvent.previousSiblingId).nextSibling;
+            if (next) parentNode.insertBefore(node, next);
+            else parentNode.appendChild(node);
           }
-          if (next) parentNode.insertBefore(node, next);
-          else parentNode.appendChild(node);
+
           break;
         case 'removed':
           parentNode.removeChild(node);
@@ -138,13 +148,15 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 // HELPER FUNCTIONS ////////////////////
 
 function getNode(id: number) {
+  if (id === null || id === undefined) return null;
   return idMap.get(id);
 }
 
 function setNodeAttributes(node: Element, data: IDomChangeEvent) {
   if (!data.attributes) return;
   for (const [name, value] of Object.entries(data.attributes)) {
-    node.setAttribute(name, value);
+    const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
+    node.setAttributeNS(ns, name, value);
   }
 }
 
@@ -172,7 +184,11 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
 
     case Node.ELEMENT_NODE:
       if (!node) {
-        node = document.createElement(data.tagName);
+        if (data.namespaceUri) {
+          node = document.createElementNS(data.namespaceUri, data.tagName);
+        } else {
+          node = document.createElement(data.tagName);
+        }
       }
       setNodeAttributes(node as Element, data);
       if (data.textContent) {
