@@ -23,11 +23,6 @@
       "path": "window.document.readyState",
       "propertyName": "_value",
       "property": "complete"
-    },
-    {
-      "path": "window.performance.timeOrigin",
-      "propertyName": "_value",
-      "property": 1596662091403.8
     }
   ]
 }
