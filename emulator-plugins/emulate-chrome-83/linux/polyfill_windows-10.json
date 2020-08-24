@@ -1,0 +1,809 @@
+{
+  "osKey": "windows-10",
+  "removals": [],
+  "additions": [
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "bluetooth",
+      "prevProperty": "presentation",
+      "property": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get bluetooth() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothUUID",
+      "prevProperty": "VideoPlaybackQuality",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothUUID"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "Object.prototype"
+          ],
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothUUID"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "getService": {
+          "length": {
+            "_type": "number",
+            "_flags": "c",
+            "_value": 1
+          },
+          "name": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "getService"
+          },
+          "_function": "function getService() { [native code] }",
+          "_flags": "cew"
+        },
+        "getCharacteristic": {
+          "length": {
+            "_type": "number",
+            "_flags": "c",
+            "_value": 1
+          },
+          "name": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "getCharacteristic"
+          },
+          "_function": "function getCharacteristic() { [native code] }",
+          "_flags": "cew"
+        },
+        "getDescriptor": {
+          "length": {
+            "_type": "number",
+            "_flags": "c",
+            "_value": 1
+          },
+          "name": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "getDescriptor"
+          },
+          "_function": "function getDescriptor() { [native code] }",
+          "_flags": "cew"
+        },
+        "canonicalUUID": {
+          "length": {
+            "_type": "number",
+            "_flags": "c",
+            "_value": 1
+          },
+          "name": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "canonicalUUID"
+          },
+          "_function": "function canonicalUUID() { [native code] }",
+          "_flags": "cew"
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothUUID() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "Bluetooth",
+      "prevProperty": "PublicKeyCredential",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "Bluetooth"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "getAvailability": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "requestDevice": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "Bluetooth"
+          }
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function Bluetooth() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothCharacteristicProperties",
+      "prevProperty": "Bluetooth",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothCharacteristicProperties"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "Object.prototype"
+          ],
+          "authenticatedSignedWrites": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get authenticatedSignedWrites() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "broadcast": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get broadcast() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "indicate": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get indicate() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "notify": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get notify() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "read": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get read() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "reliableWrite": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get reliableWrite() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "writableAuxiliaries": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get writableAuxiliaries() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "write": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get write() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "writeWithoutResponse": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get writeWithoutResponse() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothCharacteristicProperties"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothCharacteristicProperties() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothDevice",
+      "prevProperty": "BluetoothCharacteristicProperties",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothDevice"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "id": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get id() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "name": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get name() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "gatt": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get gatt() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "ongattserverdisconnected": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get ongattserverdisconnected() { [native code] }",
+            "_set": "function set ongattserverdisconnected() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }",
+            "_setToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothDevice"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothDevice() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTCharacteristic",
+      "prevProperty": "BluetoothDevice",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothRemoteGATTCharacteristic"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "uuid": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get uuid() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "value": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get value() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "properties": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get properties() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "service": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get service() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "oncharacteristicvaluechanged": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get oncharacteristicvaluechanged() { [native code] }",
+            "_set": "function set oncharacteristicvaluechanged() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }",
+            "_setToStringToString": "function toString() { [native code] }"
+          },
+          "getDescriptor": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 1
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "getDescriptors": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "readValue": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "writeValue": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 1
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "startNotifications": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "stopNotifications": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothRemoteGATTCharacteristic"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothRemoteGATTCharacteristic() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTDescriptor",
+      "prevProperty": "BluetoothRemoteGATTCharacteristic",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothRemoteGATTDescriptor"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "Object.prototype"
+          ],
+          "uuid": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get uuid() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "value": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get value() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "characteristic": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get characteristic() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "readValue": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "writeValue": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 1
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothRemoteGATTDescriptor"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothRemoteGATTDescriptor() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTServer",
+      "prevProperty": "BluetoothRemoteGATTDescriptor",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothRemoteGATTServer"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "Object.prototype"
+          ],
+          "connected": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get connected() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "device": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get device() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "connect": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "disconnect": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "getPrimaryService": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 1
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "getPrimaryServices": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothRemoteGATTServer"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothRemoteGATTServer() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BluetoothRemoteGATTService",
+      "prevProperty": "BluetoothRemoteGATTServer",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 0
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "BluetoothRemoteGATTService"
+        },
+        "arguments": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "caller": {
+          "_type": "object",
+          "_flags": "",
+          "_value": null
+        },
+        "prototype": {
+          "_protos": [
+            "Object.prototype"
+          ],
+          "isPrimary": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get isPrimary() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "uuid": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get uuid() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "device": {
+            "_flags": "ce",
+            "_accessException": "TypeError: Illegal invocation",
+            "_get": "function get device() { [native code] }",
+            "_getToStringToString": "function toString() { [native code] }"
+          },
+          "getCharacteristic": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 1
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "getCharacteristics": {
+            "length": {
+              "_type": "number",
+              "_flags": "c",
+              "_value": 0
+            },
+            "name": {
+              "_type": "string",
+              "_flags": "c",
+              "_value": ""
+            },
+            "_function": "function () { [native code] }",
+            "_flags": "cew"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_type": "string",
+            "_flags": "c",
+            "_value": "BluetoothRemoteGATTService"
+          },
+          "_type": "object",
+          "_flags": ""
+        },
+        "new()": "TypeError: Illegal constructor",
+        "_function": "function BluetoothRemoteGATTService() { [native code] }",
+        "_flags": "cw"
+      }
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "bluetooth",
+      "prevProperty": "presentation",
+      "property": {
+        "_protos": [
+          "Bluetooth.prototype",
+          "EventTarget.prototype",
+          "Object.prototype"
+        ],
+        "_type": "object"
+      }
+    }
+  ],
+  "order": [],
+  "changes": []
+}

@@ -1,7 +1,10 @@
 {
   "Document": [
     {
-      "originTypes": ["same-site", "cross-site"],
+      "originTypes": [
+        "same-site",
+        "cross-site"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -19,21 +22,41 @@
         "Accept-Language"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Upgrade-Insecure-Requests": ["1"],
-        "Sec-Fetch-Dest": ["document"],
+        "Connection": [
+          "keep-alive"
+        ],
+        "Upgrade-Insecure-Requests": [
+          "1"
+        ],
+        "Sec-Fetch-Dest": [
+          "document"
+        ],
         "Accept": [
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
         ],
-        "Sec-Fetch-Site": ["same-site", "cross-site"],
-        "Sec-Fetch-Mode": ["navigate"],
-        "Sec-Fetch-User": ["?1"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Sec-Fetch-Site": [
+          "same-site",
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "navigate"
+        ],
+        "Sec-Fetch-User": [
+          "?1"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin", "same-site", "cross-site"],
+      "originTypes": [
+        "same-origin",
+        "cross-site"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -52,21 +75,40 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Upgrade-Insecure-Requests": ["1"],
-        "Sec-Fetch-Dest": ["document"],
+        "Connection": [
+          "keep-alive"
+        ],
+        "Upgrade-Insecure-Requests": [
+          "1"
+        ],
+        "Sec-Fetch-Dest": [
+          "document"
+        ],
         "Accept": [
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
         ],
-        "Sec-Fetch-Site": ["same-origin", "same-site", "cross-site"],
-        "Sec-Fetch-Mode": ["navigate"],
-        "Sec-Fetch-User": ["?1"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Sec-Fetch-Site": [
+          "same-origin",
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "navigate"
+        ],
+        "Sec-Fetch-User": [
+          "?1"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["none"],
+      "originTypes": [
+        "none"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -80,17 +122,29 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Upgrade-Insecure-Requests": ["1"],
+        "Connection": [
+          "keep-alive"
+        ],
+        "Upgrade-Insecure-Requests": [
+          "1"
+        ],
         "Accept": [
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
         ],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin", "same-site", "cross-site"],
+      "originTypes": [
+        "same-origin",
+        "same-site",
+        "cross-site"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -105,19 +159,30 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Upgrade-Insecure-Requests": ["1"],
+        "Connection": [
+          "keep-alive"
+        ],
+        "Upgrade-Insecure-Requests": [
+          "1"
+        ],
         "Accept": [
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
         ],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
   "Script": [
     {
-      "originTypes": ["same-origin", "cross-site"],
+      "originTypes": [
+        "same-origin",
+        "cross-site"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -134,17 +199,35 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["script"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin", "cross-site"],
-        "Sec-Fetch-Mode": ["no-cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "script"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin",
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "no-cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -158,459 +241,26 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    }
-  ],
-  "Fetch": [
-    {
-      "originTypes": ["same-site", "cross-site"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Origin",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-site", "cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "User-Agent",
-        "Sec-Fetch-Dest",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Content-Type",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Content-Type",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "User-Agent",
-        "Content-Type",
-        "Sec-Fetch-Dest",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "User-Agent",
-        "Content-Type",
-        "Sec-Fetch-Dest",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-site", "cross-site"],
-      "secureDomain": false,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Origin",
-        "User-Agent",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": false,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "User-Agent",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": false,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "User-Agent",
-        "Content-Type",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": false,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "User-Agent",
-        "Content-Type",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
-      "secureDomain": false,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "Content-Type",
-        "User-Agent",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language",
-        "Cookie"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": false,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "User-Agent",
-        "Origin",
-        "Content-Type",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Origin",
-        "User-Agent",
-        "Sec-Fetch-Dest",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": false,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "User-Agent",
-        "Origin",
-        "Accept",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "Content-Type",
-        "User-Agent",
-        "Sec-Fetch-Dest",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "POST",
-      "order": [
-        "Host",
-        "Connection",
-        "Content-Length",
-        "Origin",
-        "Content-Type",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Accept",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
   "Ico": [
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -627,17 +277,33 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["image"],
-        "Accept": ["image/webp,image/apng,image/*,*/*;q=0.8"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["no-cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "image"
+        ],
+        "Accept": [
+          "image/webp,image/apng,image/*,*/*;q=0.8"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "no-cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -651,26 +317,78 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["image/webp,image/apng,image/*,*/*;q=0.8"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "image/webp,image/apng,image/*,*/*;q=0.8"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
-  "Xhr": [
+  "Fetch": [
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-site",
+        "cross-site"
+      ],
       "secureDomain": true,
-      "method": "POST",
+      "method": "GET",
       "order": [
         "Host",
         "Connection",
-        "Content-Length",
         "Origin",
         "Sec-Fetch-Dest",
         "User-Agent",
-        "content-type",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-site",
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "User-Agent",
+        "Sec-Fetch-Dest",
         "Accept",
         "Sec-Fetch-Site",
         "Sec-Fetch-Mode",
@@ -680,17 +398,33 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "POST",
       "order": [
@@ -710,23 +444,130 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
         "Host",
         "Connection",
+        "Sec-Fetch-Dest",
         "User-Agent",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "Sec-Fetch-Dest",
+        "User-Agent",
+        "Content-Type",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "User-Agent",
+        "Content-Type",
         "Sec-Fetch-Dest",
         "Accept",
         "Sec-Fetch-Site",
@@ -737,125 +578,141 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "cross-site"
+      ],
       "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "User-Agent",
+        "Content-Type",
+        "Sec-Fetch-Dest",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-site",
+        "cross-site"
+      ],
+      "secureDomain": false,
       "method": "GET",
       "order": [
         "Host",
         "Connection",
-        "Accept",
-        "Sec-Fetch-Dest",
+        "Origin",
         "User-Agent",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": false,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "User-Agent",
+        "Accept",
         "Referer",
         "Accept-Encoding",
         "Accept-Language",
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Sec-Fetch-Site": ["same-origin"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Accept",
-        "Origin",
-        "Sec-Fetch-Dest",
-        "User-Agent",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
+      "originTypes": [
+        "same-origin"
       ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Origin",
-        "User-Agent",
-        "Accept",
-        "Sec-Fetch-Dest",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["cross-site"],
-      "secureDomain": true,
-      "method": "GET",
-      "order": [
-        "Host",
-        "Connection",
-        "Origin",
-        "Accept",
-        "User-Agent",
-        "Sec-Fetch-Dest",
-        "Sec-Fetch-Site",
-        "Sec-Fetch-Mode",
-        "Referer",
-        "Accept-Encoding",
-        "Accept-Language"
-      ],
-      "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
-      }
-    },
-    {
-      "originTypes": ["same-origin"],
       "secureDomain": false,
       "method": "POST",
       "order": [
@@ -864,22 +721,564 @@
         "Content-Length",
         "Origin",
         "User-Agent",
+        "Content-Type",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": false,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "User-Agent",
+        "Content-Type",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "Content-Type",
+        "User-Agent",
+        "Sec-Fetch-Dest",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "User-Agent",
+        "Content-Type",
+        "Sec-Fetch-Dest",
+        "Origin",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": false,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "User-Agent",
+        "Origin",
+        "Content-Type",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": false,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "User-Agent",
+        "Origin",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    }
+  ],
+  "Xhr": [
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "Sec-Fetch-Dest",
+        "User-Agent",
         "content-type",
         "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
         "Referer",
         "Accept-Encoding",
         "Accept-Language",
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "Sec-Fetch-Dest",
+        "User-Agent",
+        "Content-Type",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "User-Agent",
+        "Sec-Fetch-Dest",
+        "Accept",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "Accept",
+        "Sec-Fetch-Dest",
+        "User-Agent",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Sec-Fetch-Site": [
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "Accept",
+        "Origin",
+        "Sec-Fetch-Dest",
+        "User-Agent",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "Origin",
+        "User-Agent",
+        "Accept",
+        "Sec-Fetch-Dest",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "cross-site"
+      ],
+      "secureDomain": true,
+      "method": "GET",
+      "order": [
+        "Host",
+        "Connection",
+        "User-Agent",
+        "Accept",
+        "Sec-Fetch-Dest",
+        "Origin",
+        "Sec-Fetch-Site",
+        "Sec-Fetch-Mode",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
+      "secureDomain": false,
+      "method": "POST",
+      "order": [
+        "Host",
+        "Connection",
+        "Content-Length",
+        "Origin",
+        "User-Agent",
+        "Content-Type",
+        "Accept",
+        "Referer",
+        "Accept-Encoding",
+        "Accept-Language",
+        "Cookie"
+      ],
+      "defaults": {
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
+      }
+    },
+    {
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -893,14 +1292,24 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["same-origin"],
+      "originTypes": [
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -914,14 +1323,24 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site"],
+      "originTypes": [
+        "cross-site"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -935,14 +1354,24 @@
         "Accept-Language"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site"],
+      "originTypes": [
+        "cross-site"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -956,16 +1385,27 @@
         "Accept-Language"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["application/json, text/plain, */*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "application/json, text/plain, */*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
   "Stylesheet": [
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -982,17 +1422,35 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["style"],
-        "Accept": ["text/css,*/*;q=0.1"],
-        "Sec-Fetch-Site": ["cross-site", "same-origin"],
-        "Sec-Fetch-Mode": ["no-cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "style"
+        ],
+        "Accept": [
+          "text/css,*/*;q=0.1"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site",
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "no-cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -1006,16 +1464,27 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["text/css,*/*;q=0.1"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "text/css,*/*;q=0.1"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
   "Image": [
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -1032,17 +1501,35 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["image"],
-        "Accept": ["image/webp,image/apng,image/*,*/*;q=0.8"],
-        "Sec-Fetch-Site": ["cross-site", "same-origin"],
-        "Sec-Fetch-Mode": ["no-cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "image"
+        ],
+        "Accept": [
+          "image/webp,image/apng,image/*,*/*;q=0.8"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site",
+          "same-origin"
+        ],
+        "Sec-Fetch-Mode": [
+          "no-cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -1056,16 +1543,27 @@
         "Cookie"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["image/webp,image/apng,image/*,*/*;q=0.8"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "image/webp,image/apng,image/*,*/*;q=0.8"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     }
   ],
   "Websocket Upgrade": [
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": true,
       "method": "GET",
       "order": [
@@ -1084,16 +1582,31 @@
         "Sec-WebSocket-Extensions"
       ],
       "defaults": {
-        "Connection": ["Upgrade"],
-        "Upgrade": ["websocket"],
-        "Sec-WebSocket-Version": ["13"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"],
-        "Sec-WebSocket-Extensions": ["permessage-deflate; client_max_window_bits"]
+        "Connection": [
+          "Upgrade"
+        ],
+        "Upgrade": [
+          "websocket"
+        ],
+        "Sec-WebSocket-Version": [
+          "13"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ],
+        "Sec-WebSocket-Extensions": [
+          "permessage-deflate; client_max_window_bits"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site", "same-origin"],
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -1112,18 +1625,54 @@
         "Sec-WebSocket-Extensions"
       ],
       "defaults": {
-        "Connection": ["Upgrade"],
-        "Upgrade": ["websocket"],
-        "Sec-WebSocket-Version": ["13"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"],
-        "Sec-WebSocket-Extensions": ["permessage-deflate; client_max_window_bits"]
+        "Connection": [
+          "Upgrade"
+        ],
+        "Upgrade": [
+          "websocket"
+        ],
+        "Sec-WebSocket-Version": [
+          "13"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ],
+        "Sec-WebSocket-Extensions": [
+          "permessage-deflate; client_max_window_bits"
+        ]
       }
+    }
+  ],
+  "Websocket Message": [
+    {
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
+      "secureDomain": true,
+      "method": null,
+      "order": [],
+      "defaults": {}
+    },
+    {
+      "originTypes": [
+        "cross-site",
+        "same-origin"
+      ],
+      "secureDomain": false,
+      "method": null,
+      "order": [],
+      "defaults": {}
     }
   ],
   "Preflight": [
     {
-      "originTypes": ["cross-site"],
+      "originTypes": [
+        "cross-site"
+      ],
       "secureDomain": true,
       "method": "OPTIONS",
       "order": [
@@ -1142,17 +1691,33 @@
         "Accept-Language"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Sec-Fetch-Dest": ["empty"],
-        "Accept": ["*/*"],
-        "Sec-Fetch-Site": ["cross-site"],
-        "Sec-Fetch-Mode": ["cors"],
-        "Accept-Encoding": ["gzip, deflate, br"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Sec-Fetch-Dest": [
+          "empty"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Sec-Fetch-Site": [
+          "cross-site"
+        ],
+        "Sec-Fetch-Mode": [
+          "cors"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate, br"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
     },
     {
-      "originTypes": ["cross-site"],
+      "originTypes": [
+        "cross-site"
+      ],
       "secureDomain": false,
       "method": "OPTIONS",
       "order": [
@@ -1168,27 +1733,19 @@
         "Accept-Language"
       ],
       "defaults": {
-        "Connection": ["keep-alive"],
-        "Accept": ["*/*"],
-        "Accept-Encoding": ["gzip, deflate"],
-        "Accept-Language": ["en-US,en;q=0.9"]
+        "Connection": [
+          "keep-alive"
+        ],
+        "Accept": [
+          "*/*"
+        ],
+        "Accept-Encoding": [
+          "gzip, deflate"
+        ],
+        "Accept-Language": [
+          "en-US,en;q=0.9"
+        ]
       }
-    }
-  ],
-  "Websocket Message": [
-    {
-      "originTypes": ["cross-site", "same-origin"],
-      "secureDomain": true,
-      "method": null,
-      "order": [],
-      "defaults": {}
-    },
-    {
-      "originTypes": ["cross-site", "same-origin"],
-      "secureDomain": false,
-      "method": null,
-      "order": [],
-      "defaults": {}
     }
   ]
 }

@@ -14,14 +14,13 @@ export default class Humanoids {
     this.pluginsByKey[EmulatorPlugin.key] = EmulatorPlugin;
   }
 
-  public static get(key: string) {
+  public static create(key: string) {
     return new this.pluginsByKey[key]();
   }
 
-  public static getRandom(): HumanoidPlugin {
-    const plugins = Object.values(this.pluginsByKey);
-    const plugin = Utils.pickRandom(plugins);
-    return new plugin();
+  public static getRandomId() {
+    const plugins = Object.keys(this.pluginsByKey);
+    return Utils.pickRandom(plugins);
   }
 }
 

@@ -80,12 +80,14 @@ export default class MitmProxy {
       const connect = this.serverConnects.shift();
       connect.destroy();
     }
-    await closeServer(this.httpServer);
-    await closeServer(this.http2Server);
-
     delete this.secureContexts;
 
-    await RequestSession.close();
+    await Promise.all([
+      closeServer(this.httpServer),
+      closeServer(this.http2Server),
+      RequestSession.close(),
+    ]);
+
     return this;
   }
 

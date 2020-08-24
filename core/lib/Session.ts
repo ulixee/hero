@@ -1,8 +1,7 @@
 import { v1 as uuidv1 } from 'uuid';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import Log from '@secret-agent/commons/Logger';
 import Window from './Window';
-import ChromeCore from './ChromeCore';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
@@ -11,41 +10,53 @@ import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession from '@secret-agent/mitm/handlers/RequestSession';
 import GlobalPool from './GlobalPool';
 import UserProfile from './UserProfile';
+import * as Os from 'os';
 
 const { log } = Log(module);
 
 export default class Session {
+  private static readonly byId: { [id: string]: Session } = {};
+
   public readonly id: string = uuidv1();
   public readonly baseDir: string;
-  public window: Window;
+  public window?: Window;
   public emulator: EmulatorPlugin;
   public humanoid: HumanoidPlugin;
   public proxy: MitmUpstreamProxy;
   public readonly requestMitmProxySession: RequestSession;
   public sessionState: SessionState;
-  private isShuttingDown: boolean = false;
-  private readonly initializePromise;
 
-  constructor(
-    public puppContext: puppeteer.BrowserContext,
-    public chromeCore: ChromeCore,
-    readonly options: ICreateSessionOptions,
-  ) {
-    this.emulator = Emulators.get(options.emulatorId);
+  private isShuttingDown: boolean = false;
+  private puppContext?: puppeteer.BrowserContext;
+
+  constructor(readonly options: ICreateSessionOptions) {
+    Session.byId[this.id] = this;
+    const emulatorId = Emulators.getId(options.emulatorId);
+    this.emulator = Emulators.create(emulatorId);
     if (options.userProfile) {
       this.emulator.setUserProfile(options.userProfile);
     }
-    this.humanoid = options.humanoidId ? Humanoids.get(options.humanoidId) : Humanoids.getRandom();
+    if (!this.emulator.canPolyfill) {
+      log.warn('Emulator.PolyfillNotSupported', {
+        sessionId: this.id,
+        emulatorId,
+        userAgent: this.emulator.userAgent,
+        runtimeOs: Os.platform(),
+      });
+    }
+
+    const humanoidId = options.humanoidId ?? Humanoids.getRandomId();
+    this.humanoid = Humanoids.create(humanoidId);
+
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
       this.baseDir,
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-    );
-    this.initializePromise = this.initialize();
-    this.initializePromise.catch(error =>
-      log.error('Session.InitializeError', { error, sessionId: this.id }),
+      emulatorId,
+      humanoidId,
+      this.emulator.canPolyfill,
     );
     this.proxy = new MitmUpstreamProxy(this.id);
     this.requestMitmProxySession = new RequestSession(
@@ -57,52 +68,37 @@ export default class Session {
     this.requestMitmProxySession.delegate = this.emulator.delegate;
   }
 
-  public isInitialized() {
-    return this.initializePromise;
-  }
-
   public async close() {
+    delete Session.byId[this.id];
     if (this.isShuttingDown) {
       return;
     }
     this.isShuttingDown = true;
     // so named so you don't move this after window.close!
     await this.sessionState.saveBeforeWindowClose();
-    await this.window.close();
+    await this.window?.close();
     await this.requestMitmProxySession.close();
     await this.proxy.close();
-    this.chromeCore.cleanupSession(this.id);
-
-    if (!this.chromeCore.isShuttingDown) {
-      try {
-        await this.puppContext.close();
-      } catch (error) {
-        log.error('ErrorClosingWindow', { error, sessionId: this.id });
-      }
+    try {
+      await this.puppContext?.close();
+    } catch (error) {
+      log.error('ErrorClosingWindow', { error, sessionId: this.id });
     }
   }
 
-  private async initialize() {
-    if (this.initializePromise) {
-      throw new Error('Session instance has already been initialized');
-    }
-
-    this.window = await Window.create(this.sessionState, this);
+  public async initialize(puppContext: puppeteer.BrowserContext) {
+    this.puppContext = puppContext;
+    const puppPage = await puppContext.newPage();
+    this.window = await Window.create(this.sessionState, this, puppPage);
 
     // install user profile before page boots up
     await UserProfile.install(this.options.userProfile, this.window);
 
     await this.window.start();
+    return this;
   }
 
-  public static async create(
-    puppBrowser: puppeteer.Browser,
-    chromeCore: ChromeCore,
-    options: ICreateSessionOptions,
-  ) {
-    const puppContext = await puppBrowser.createIncognitoBrowserContext();
-    const session = new Session(puppContext, chromeCore, options);
-    await session.isInitialized();
-    return session;
+  public static get(sessionId: string): Session {
+    return this.byId[sessionId];
   }
 }

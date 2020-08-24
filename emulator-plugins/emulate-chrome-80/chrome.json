@@ -1,7 +1,9 @@
 {
-  "os": "mac_os_x_10_13",
+  "osKey": "mac-os-x-10-11",
   "chrome": {
-    "_protos": ["Object.prototype"],
+    "_protos": [
+      "Object.prototype"
+    ],
     "loadTimes": {
       "length": {
         "_type": "number",
@@ -24,41 +26,45 @@
         "_value": null
       },
       "prototype": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "_type": "object",
         "_flags": "w"
       },
       "new()": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "requestTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.5
+          "_value": 1596662123.827
         },
         "startLoadTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.5
+          "_value": 1596662123.827
         },
         "commitLoadTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.644
+          "_value": 1596662123.93
         },
         "finishDocumentLoadTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.901
+          "_value": 1596662124.284
         },
         "finishLoadTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.937
+          "_value": 1596662124.333
         },
         "firstPaintTime": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522.989
+          "_value": 1596662124.334
         },
         "firstPaintAfterLoadTime": {
           "_type": "number",
@@ -121,26 +127,30 @@
         "_value": null
       },
       "prototype": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "_type": "object",
         "_flags": "w"
       },
       "new()": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "startE": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522500
+          "_value": 1596662123827
         },
         "onloadT": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 1588455522901
+          "_value": 1596662124284
         },
         "pageT": {
           "_type": "number",
           "_flags": "cew",
-          "_value": 5991.752
+          "_value": 4326.508
         },
         "tran": {
           "_type": "number",
@@ -152,7 +162,9 @@
       "_flags": "cew"
     },
     "app": {
-      "_protos": ["Object.prototype"],
+      "_protos": [
+        "Object.prototype"
+      ],
       "isInstalled": {
         "_type": "boolean",
         "_flags": "cew",
@@ -218,7 +230,9 @@
         "_flags": "cew"
       },
       "InstallState": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "DISABLED": {
           "_type": "string",
           "_flags": "cew",
@@ -238,7 +252,9 @@
         "_flags": "cew"
       },
       "RunningState": {
-        "_protos": ["Object.prototype"],
+        "_protos": [
+          "Object.prototype"
+        ],
         "CANNOT_RUN": {
           "_type": "string",
           "_flags": "cew",

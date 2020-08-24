@@ -3,6 +3,10 @@
   "version": "1.0.0-alpha.8",
   "description": "EmulatorPlugin for Google Chrome version 80",
   "main": "index.js",
+  "engine": {
+    "browser": "chromium",
+    "revision": "722234"
+  },
   "devDependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.8",
     "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.8",

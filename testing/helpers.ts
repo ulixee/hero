@@ -340,8 +340,8 @@ async function closeAll(isFinal = false) {
   );
 }
 
-export function onClose(closeFn: () => Promise<any>) {
-  needsClosing.push({ close: closeFn });
+export function onClose(closeFn: () => Promise<any>, onlyCloseOnFinal: boolean = false) {
+  needsClosing.push({ close: closeFn, onlyCloseOnFinal });
 }
 
 function extractPort(url: URL) {

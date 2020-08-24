@@ -1,0 +1,33 @@
+{
+  "osKey": "windows-7",
+  "removals": [
+    "window.HTMLLinkElement.prototype.import",
+    "window.Document.prototype.registerElement",
+    "window.Text.prototype.getDestinationInsertionPoints",
+    "window.Element.prototype.getDestinationInsertionPoints"
+  ],
+  "additions": [
+    {
+      "path": "window.document",
+      "propertyName": "currentScript",
+      "prevProperty": "scripts",
+      "property": {
+        "_type": "object",
+        "_value": null
+      }
+    }
+  ],
+  "order": [],
+  "changes": [
+    {
+      "path": "window.document.readyState",
+      "propertyName": "_value",
+      "property": "complete"
+    },
+    {
+      "path": "window.performance.timeOrigin",
+      "propertyName": "_value",
+      "property": 1596662091403.8
+    }
+  ]
+}

@@ -3,4 +3,5 @@ export default interface IConfigureOptions {
   localProxyPortStart?: number;
   replayServerPort?: number;
   sessionsDir?: string;
+  activeEmulatorIds?: string[];
 }

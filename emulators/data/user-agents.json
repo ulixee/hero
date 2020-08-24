@@ -72724,7 +72724,7 @@
   {
     "appName": "Netscape",
     "connection": {
-      "downlink": 1.7976931348623156e305,
+      "downlink": 1.7976931348623156e+305,
       "effectiveType": "4g",
       "rtt": 0
     },

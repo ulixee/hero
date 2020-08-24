@@ -10,6 +10,9 @@ export default class SessionTable extends BaseTable<ISessionRecord> {
       [
         ['id', 'TEXT'],
         ['name', 'TEXT'],
+        ['emulatorId', 'TEXT'],
+        ['humanoidId', 'TEXT'],
+        ['hasEmulatorPolyfills', 'INTEGER'],
         ['viewportWidth', 'INTEGER'],
         ['viewportHeight', 'INTEGER'],
         ['deviceScaleFactor', 'INTEGER'],
@@ -26,6 +29,9 @@ export default class SessionTable extends BaseTable<ISessionRecord> {
   public insert(
     id: string,
     name: string,
+    emulatorId: string,
+    humanoidId: string,
+    hasEmulatorPolyfills: boolean,
     startDate: Date,
     scriptInstanceId: string,
     scriptEntrypoint: string,
@@ -34,6 +40,9 @@ export default class SessionTable extends BaseTable<ISessionRecord> {
     const record = [
       id,
       name,
+      emulatorId,
+      humanoidId,
+      hasEmulatorPolyfills ? 1 : 0,
       null,
       null,
       null,
@@ -68,6 +77,9 @@ export default class SessionTable extends BaseTable<ISessionRecord> {
 export interface ISessionRecord {
   id: string;
   name: string;
+  emulatorId: string;
+  humanoidId: string;
+  hasEmulatorPolyfills: boolean;
   viewportWidth: number;
   viewportHeight: number;
   deviceScaleFactor: number;

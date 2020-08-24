@@ -1415,6 +1415,8 @@
         }
       ]
     },
-    "opSyses": ["Mac OS X 10.15"]
+    "opSyses": [
+      "Mac OS X 10.15"
+    ]
   }
 ]

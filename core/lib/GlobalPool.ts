@@ -7,14 +7,14 @@ import Session from './Session';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
+import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 
 const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
-  public static maxActiveSessionCount: number = 10;
-  public static localProxyPortStart: number = 0;
-
+  public static maxActiveSessionCount = 10;
+  public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
@@ -24,26 +24,29 @@ export default class GlobalPool {
   }
 
   private static _activeSessionCount = 0;
-  private static chromeCore: ChromeCore;
+  private static chromeCores: ChromeCore[] = [];
   private static mitmServer: MitmServer;
   private static waitingForAvailability: {
     options: ICreateSessionOptions;
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start() {
-    if (!this.chromeCore) {
-      log.info('StartingGlobalPool');
-      this.mitmServer = await MitmServer.start(this.localProxyPortStart);
-      this.chromeCore = new ChromeCore();
-      await this.chromeCore.start(this.mitmServer.port);
+  public static async start(emulatorIds: string[]) {
+    log.info('StartingGlobalPool', {
+      sessionId: null,
+      emulatorIds,
+    });
+    await this.startMitm();
+
+    for (const emulatorId of emulatorIds) {
+      const emulator = Emulators.create(emulatorId);
+      this.addChromeCore(emulator);
     }
-    await this.chromeCore.isReady();
+
     this.resolveWaitingConnection();
   }
 
   public static async createSession(options: ICreateSessionOptions) {
-    await this.start();
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
@@ -57,10 +60,6 @@ export default class GlobalPool {
       return resolvablePromise.promise;
     }
     return this.createSessionNow(options);
-  }
-
-  public static getSession(sessionId: string): Session {
-    return this.chromeCore.getSession(sessionId);
   }
 
   public static async closeSession(session: Session) {
@@ -83,31 +82,68 @@ export default class GlobalPool {
       promise.reject(new Error('Shutting down'));
     }
     this.waitingForAvailability.length = 0;
-    // tslint:disable-next-line:no-this-assignment
-    const { chromeCore, mitmServer } = this;
-    this.chromeCore = null;
-    this.mitmServer = null;
+    const closePromises: Promise<any>[] = [];
+    while (this.chromeCores.length) {
+      const core = this.chromeCores.shift();
+      closePromises.push(core.close());
+    }
+    if (this.mitmServer) {
+      closePromises.push(this.mitmServer.close());
+      this.mitmServer = null;
+    }
     SessionsDb.shutdown();
-    await Promise.all([chromeCore?.close(), mitmServer?.close()]);
-
+    await Promise.all(closePromises);
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+  }
+
+  private static addChromeCore(emulator: EmulatorPlugin) {
+    const existing = this.getChromeCore(emulator);
+    if (existing) return existing;
+
+    const core = new ChromeCore(emulator.engineExecutablePath);
+    this.chromeCores.push(core);
+    core.start(this.mitmServer.port);
+    return core;
+  }
+
+  private static getChromeCore(emulator?: EmulatorPlugin) {
+    if (!emulator) return this.chromeCores[0];
+    return this.chromeCores.find(x => x.executablePath === emulator.engineExecutablePath);
+  }
+
+  private static async startMitm() {
+    if (this.mitmServer) return;
+    this.mitmServer = await MitmServer.start(this.localProxyPortStart);
   }
 
   private static async createSessionNow(
     options: ICreateSessionOptions,
     isRetry = false,
   ): Promise<Session> {
+    await this.startMitm();
+
     this._activeSessionCount += 1;
+    let chromeCore: ChromeCore;
     try {
-      const session = await this.chromeCore.createSession(options);
-      if (!session) this._activeSessionCount -= 1;
-      return session;
+      const session = new Session(options);
+
+      chromeCore = this.getChromeCore(session.emulator);
+
+      if (!chromeCore) {
+        chromeCore = this.addChromeCore(session.emulator);
+      }
+      const context = await chromeCore.createContext();
+      return session.initialize(context);
     } catch (err) {
       this._activeSessionCount -= 1;
 
-      if (!isRetry && String(err).includes('WebSocket is not open: readyState 3 (CLOSED)')) {
-        await this.chromeCore.close();
-        await this.chromeCore.start(this.mitmServer.port);
+      if (
+        chromeCore &&
+        !isRetry &&
+        String(err).includes('WebSocket is not open: readyState 3 (CLOSED)')
+      ) {
+        await chromeCore.close();
+        await chromeCore.start(this.mitmServer.port);
         return this.createSessionNow(options, true);
       }
       throw err;

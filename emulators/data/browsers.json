@@ -1,38 +1,46 @@
 {
-  "fromMonthYear": "2020-03",
-  "toMonthYear": "2020-04",
-  "lastModified": "2020-04-15T21:52:31.026Z",
+  "fromMonthYear": "2020-07",
+  "toMonthYear": "2020-08",
+  "lastModified": "2020-08-21T20:12:15.971Z",
   "browsers": [
     {
-      "browser": "Chrome 80.0",
-      "usage": 46
+      "browser": "Chrome 84.0",
+      "usage": 31
     },
     {
-      "browser": "Safari 13.0",
-      "usage": 10
-    },
-    {
-      "browser": "Edge 18",
-      "usage": 7
-    },
-    {
-      "browser": "Chrome 79.0",
-      "usage": 4
-    },
-    {
-      "browser": "IE 11.0",
-      "usage": 4
-    },
-    {
-      "browser": "Firefox 74.0",
-      "usage": 4
-    },
-    {
-      "browser": "IE 9.0",
-      "usage": 2
+      "browser": "Chrome 83.0",
+      "usage": 17
     },
     {
       "browser": "Safari 13.1",
+      "usage": 12
+    },
+    {
+      "browser": "Edge 84",
+      "usage": 6
+    },
+    {
+      "browser": "IE 11.0",
+      "usage": 3
+    },
+    {
+      "browser": "Firefox 78.0",
+      "usage": 3
+    },
+    {
+      "browser": "Edge 83",
+      "usage": 2
+    },
+    {
+      "browser": "Firefox 79.0",
+      "usage": 3
+    },
+    {
+      "browser": "Edge 18",
+      "usage": 2
+    },
+    {
+      "browser": "IE 9.0",
       "usage": 2
     }
   ]

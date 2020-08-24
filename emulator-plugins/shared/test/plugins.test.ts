@@ -1,12 +1,22 @@
-import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/testing/helpers';
 import getOverrideScript from '../injected-scripts';
 import inspectScript from './inspectHierarchy';
-import navigatorJson from '../../emulate-chrome-80/navigator.json';
+import navigatorJson from '@secret-agent/emulate-chrome-80/navigator.json';
 import chrome80Dom from './chrome80DomProperties.json';
 import { inspect } from 'util';
+import ChromeCore from '@secret-agent/core/lib/ChromeCore';
+import Core from '@secret-agent/core';
+import Emulators from '@secret-agent/emulators';
 
 const { navigator } = navigatorJson;
+
+let chromeCore: ChromeCore;
+beforeAll(async () => {
+  const emulator = Emulators.create(Core.defaultEmulatorId);
+  chromeCore = new ChromeCore(emulator.engineExecutablePath);
+  Helpers.onClose(() => chromeCore.close(), true);
+  chromeCore.start();
+});
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -14,10 +24,11 @@ afterEach(Helpers.afterEach);
 const debug = process.env.DEBUG || false;
 
 test('it should override plugins in a browser window', async () => {
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
+
+  const context = await chromeCore.createContext();
+  Helpers.onClose(() => context.close());
+  const page = await context.newPage();
 
   page.on('error', console.log);
   page.on('pageerror', console.log);

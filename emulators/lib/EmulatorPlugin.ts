@@ -6,12 +6,14 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 export default abstract class EmulatorPlugin {
   public static emulatorId: string;
   public readonly userAgent: IUserAgent;
-
+  public abstract canPolyfill: boolean;
+  public abstract engineExecutablePath: string;
   public abstract delegate: IHttpRequestModifierDelegate;
+  protected userProfile: IUserProfile;
 
   public abstract async generatePageOverrides(): Promise<IPageOverride[]>;
 
   public setUserProfile(userProfile: IUserProfile) {
-    // no-op by default
+    this.userProfile = userProfile;
   }
 }

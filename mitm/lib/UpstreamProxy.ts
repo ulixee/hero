@@ -38,6 +38,8 @@ export default class UpstreamProxy {
   }
 
   public async close() {
+    if (!this._isReady) return;
+
     await this.isReady();
     if (this._proxyUrl) {
       await this.releaseProxyUrl();

@@ -1,7 +1,6 @@
 import getOverrideScript from './injected-scripts';
 import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
 import parseNavigatorPlugins from './parseNavigatorPlugins';
-import { platform } from 'os';
 
 export default function pageOverrides(
   args: {
@@ -16,28 +15,11 @@ export default function pageOverrides(
   data: {
     codecs: any;
     chrome: any;
-    defaultPolyfills: any;
-    windows7Polyfills: any;
-    windows10Polyfills: any;
+    polyfills: any;
     navigator: any;
   },
 ) {
-  const {
-    codecs,
-    chrome,
-    defaultPolyfills,
-    windows7Polyfills,
-    windows10Polyfills,
-    navigator,
-  } = data;
-  let polyfills: any = defaultPolyfills;
-  if (args.osFamily === 'Windows') {
-    if (args.osVersion === '10.0') {
-      polyfills = windows10Polyfills;
-    } else {
-      polyfills = windows7Polyfills;
-    }
-  }
+  const { codecs, chrome, polyfills, navigator } = data;
 
   const scripts: IPageOverride[] = [
     getOverrideScript('navigator', {
@@ -55,8 +37,7 @@ export default function pageOverrides(
     }),
   ];
 
-  // polyfills only work on linux!! meant to be deployed with docker
-  if (platform() === 'linux') {
+  if (polyfills) {
     scripts.push(getOverrideScript('polyfill', polyfills));
   }
 

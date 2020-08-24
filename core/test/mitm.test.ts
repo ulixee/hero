@@ -1,6 +1,7 @@
 import GlobalPool from '@secret-agent/core/lib/GlobalPool';
 import { UpstreamProxy } from '@secret-agent/mitm';
 import { Helpers } from '@secret-agent/testing';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -8,7 +9,7 @@ afterEach(Helpers.afterEach);
 test('should be able to run multiple pages each with their own proxy', async () => {
   const acquireUpstreamProxyUrl = jest.spyOn<any, any>(UpstreamProxy.prototype, 'acquireProxyUrl');
 
-  await GlobalPool.start();
+  await GlobalPool.start([Chrome83.emulatorId]);
   try {
     const httpServer = await Helpers.runHttpServer();
 

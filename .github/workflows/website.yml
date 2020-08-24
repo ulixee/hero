@@ -21,10 +21,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-website-
       - name: Install Dependencies
-        run: npm install
+        run: yarn install
         working-directory: ./website
       - name: Build Site
-        run: npm run build
+        run: yarn build
         working-directory: ./website
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
