@@ -7,8 +7,13 @@ const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
 // @ts-ignore
-window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
-  if (changeEvents) applyDomChanges(changeEvents);
+window.replayEvents = async function replayEvents(
+  changeEvents,
+  resultNodeIds,
+  mouseEvent,
+  scrollEvent,
+) {
+  if (changeEvents) await applyDomChanges(changeEvents);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
@@ -28,7 +33,12 @@ window.addEventListener('resize', () => {
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 });
 
-function applyDomChanges(changeEvents: IDomChangeEvent[]) {
+let onLoad: () => void;
+window.addEventListener('DOMContentLoaded', () => {
+  if (onLoad) onLoad();
+});
+
+async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
   for (const changeEvent of changeEvents) {
     // @ts-ignore
     const { nodeId, commandId, action, textContent } = changeEvent;
@@ -45,17 +55,21 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
         if (location.origin === newUrl.origin) {
           window.history.replaceState({}, 'Replay', textContent);
-          idMap.clear();
           window.scrollTo({ top: 0 });
           document.documentElement.innerHTML = '';
+          idMap.clear();
           while (document.documentElement.previousSibling) {
             const prev = document.documentElement.previousSibling;
             if (prev === document.doctype) break;
             prev.remove();
           }
         } else {
+          const p = new Promise(resolve => () => {
+            onLoad = resolve;
+          });
           // if it's an origin change, we have to change page
           location.href = newUrl.href;
+          await p;
         }
       }
       continue;
