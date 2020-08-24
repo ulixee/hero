@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
+    "build:dev": "vue-cli-service build --mode=development",
     "clean": "vue-cli-service clean",
     "start": "vue-cli-service serve",
     "dev": "vue-cli-service serve --mode=development"

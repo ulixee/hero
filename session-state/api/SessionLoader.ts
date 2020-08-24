@@ -8,10 +8,10 @@ import SessionState from '../index';
 
 export default class SessionLoader extends EventEmitter {
   public static eventStreams = [
+    'dom-changes',
     'mouse-events',
     'scroll-events',
     'focus-events',
-    'dom-changes',
     'frames',
     'commands',
     'script-state',
@@ -118,9 +118,6 @@ export default class SessionLoader extends EventEmitter {
       lastState.unresponsiveSeconds !== scriptState.unresponsiveSeconds
     ) {
       this.emit('script-state', scriptState);
-      if (scriptState.closeTime) {
-        setImmediate(() => this.emit('close'));
-      }
     }
   }
 }

@@ -48,7 +48,9 @@ export default class ReplayApi extends EventEmitter {
 
       if (path === '/session') {
         const data = await streamToJson<ISaSession>(stream);
-        return this.onSession(data);
+        this.onSession(data);
+        this.isReady.resolve();
+        return;
       }
 
       await this.isReady.promise;
@@ -120,7 +122,6 @@ export default class ReplayApi extends EventEmitter {
       dataLocation: data.dataLocation,
     });
     this.state.loadSession(this.saSession);
-    this.isReady.resolve();
   }
 
   public static quit() {

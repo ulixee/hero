@@ -10,6 +10,7 @@ import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import ITickState from '~shared/interfaces/ITickState';
 
 let pageCounter = 0;
+const loadWaitTime = 5e3;
 
 export default class ReplayState {
   public ticks: ReplayTick[] = [];
@@ -89,7 +90,13 @@ export default class ReplayState {
 
   public nextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
-    if (!!this.closeTime && this.currentTickIdx === this.ticks.length - 1) {
+    if (
+      this.closeTime &&
+      // give it a few seconds to get the rest of the data.
+      // TODO: figure out how to confirm via http2 that all data is sent
+      new Date().getTime() - this.closeTime.getTime() > loadWaitTime &&
+      this.currentTickIdx === this.ticks.length - 1
+    ) {
       this.currentPlaybarOffsetPct = 100;
     }
     return result;
@@ -168,6 +175,10 @@ export default class ReplayState {
 
     // need to wait for load
     if (!newTick) return;
+    if (!this.closeTime) {
+      // give ticks time to load. TODO: need a better strategy for this
+      if (new Date().getTime() - new Date(newTick.timestamp).getTime() < loadWaitTime) return;
+    }
 
     const playbarOffset = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
     this.currentTickIdx = newTickIdx;
@@ -309,15 +320,26 @@ export default class ReplayState {
   }
 
   private loadDomChanges(events: IDomChangeEvent[]) {
-    let last = this.paintEvents.length > 0 ? this.paintEvents[this.paintEvents.length - 1] : null;
+    let paintEvent: IPaintEvent;
     for (const event of events) {
       if (!event.isMainFrame) continue;
       const { commandId, action, textContent, timestamp } = event;
 
-      if (last?.timestamp === timestamp) {
-        last.changeEvents.push(event);
+      const lastPaintEvent = this.paintEvents.length
+        ? this.paintEvents[this.paintEvents.length - 1]
+        : null;
+      if (paintEvent?.timestamp !== timestamp) {
+        paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
+      }
+      if (paintEvent) {
+        // reset paint load if we backfilled
+        if (paintEvent !== lastPaintEvent) {
+          console.log('Adding to a previous paint bucket (events out of order)');
+          this.paintEventsLoadedIdx = -1;
+        }
+        paintEvent.changeEvents.push(event);
       } else {
-        last = {
+        paintEvent = {
           changeEvents: [event],
           timestamp,
           commandId,
@@ -336,7 +358,12 @@ export default class ReplayState {
           });
         }
 
-        this.paintEvents.push(last);
+        this.paintEvents.push(paintEvent);
+        if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
+          console.log('Need to resort paint events - received out of order');
+          this.paintEventsLoadedIdx = -1;
+        }
+
         this.ticks.push(tick);
       }
     }
