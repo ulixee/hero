@@ -1,4 +1,4 @@
-for (const remove of args.removals) {
+for (const remove of args.removals || []) {
   try {
     const parts = getParentAndProperty(remove);
     delete parts.parent[parts.property];
@@ -7,7 +7,7 @@ for (const remove of args.removals) {
   }
 }
 
-for (const addition of args.additions) {
+for (const addition of args.additions || []) {
   try {
     if (addition.propertyName === 'getVideoPlaybackQuality') {
       addition.property['_value()'] = function() {
@@ -28,7 +28,7 @@ for (const addition of args.additions) {
   }
 }
 
-for (const change of args.changes) {
+for (const change of args.changes || []) {
   try {
     if (change.propertyName === '_function') {
       const func = getObjectAtPath(change.path);
@@ -67,7 +67,7 @@ for (const change of args.changes) {
 }
 
 function reorder() {
-  for (const { propertyName, prevProperty, throughProperty, path } of args.order) {
+  for (const { propertyName, prevProperty, throughProperty, path } of args.order || []) {
     try {
       if (!path.includes('.prototype')) {
         reorderOnWindow(path, propertyName, prevProperty, throughProperty);
