@@ -1,0 +1,45 @@
+name: Replay
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Yarn install
+        run: yarn install
+        working-directory: ./replay-app
+
+      - name: Build
+        run: yarn build
+        working-directory: ./replay-app
+
+      - name: Electron Builder
+        run: yarn build:pack
+        working-directory: ./replay-app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -x
+          assets=()
+          for asset in ./build/replay-app/dist/assets/*; do
+            assets+=("-a" "$asset")
+          done
+          tag_name="${GITHUB_REF##*/}"
+          hub release edit "${assets[@]}" -m "" "$tag_name"

@@ -1,14 +1,14 @@
 {
   "name": "@secret-agent/remote-client",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "SecretAgent client that runs remotely",
   "dependencies": {
-    "@secret-agent/client": "^1.0.0-alpha.8",
-    "@secret-agent/commons": "^1.0.0-alpha.8"
+    "@secret-agent/client": "^1.0.0-alpha.9",
+    "@secret-agent/commons": "^1.0.0-alpha.9"
   },
   "devDependencies": {
-    "@secret-agent/remote-interfaces": "^1.0.0-alpha.8",
-    "@secret-agent/testing": "^1.0.0-alpha.8",
+    "@secret-agent/remote-interfaces": "^1.0.0-alpha.9",
+    "@secret-agent/testing": "^1.0.0-alpha.9",
     "@types/node": "^12.7.11"
   }
 }

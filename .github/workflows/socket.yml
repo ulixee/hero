@@ -20,7 +20,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist
-        working-directory: ./mitm-socket
+          args: release --rm-dist --debug
+          workdir: ${{ github.workspace }}/mitm-socket
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -8,7 +8,7 @@
   ],
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "main": "./index.js",
   "build": {
     "appId": "dev.secretagent.replay",
@@ -41,7 +41,7 @@
     "build:icons": "electron-icon-builder -f --input=./icon@2x.png --output=../build/replay-app/build",
     "build:dist": "yarn build:frontend && yarn build:backend",
     "build": "yarn build:dist",
-    "pack": "yarn build:icons && cd ../build/replay-app && electron-builder -mwl && pack.sh",
+    "build:pack": "yarn build:icons && shx cp pack.sh ../build/replay-app/pack.sh && cd ../build/replay-app && electron-builder -mwl && ./pack.sh",
     "clean": "rm -rf ../build/replay-app/static && tsc -b --clean tsconfig.json && tsc -b --clean frontend/tsconfig.json",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"cd frontend && yarn serve\"",
     "start:backend": "cross-env CLEAR_LOGS=true WEBPACK_DEV_SERVER_URL=http://localhost:8080 NODE_ENV=development electron ../build/replay-app",

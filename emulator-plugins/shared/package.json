@@ -1,15 +1,15 @@
 {
   "name": "@secret-agent/emulator-plugins-shared",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "description": "SecretAgent client that runs remotely",
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.8",
-    "@secret-agent/emulators": "^1.0.0-alpha.8",
-    "puppeteer-core": "^5.2.1",
-    "progress": "^2.0.1"
+    "@secret-agent/commons": "^1.0.0-alpha.9",
+    "@secret-agent/emulators": "^1.0.0-alpha.9",
+    "progress": "^2.0.1",
+    "puppeteer-core": "^5.2.1"
   },
   "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.8",
-    "@secret-agent/testing": "^1.0.0-alpha.8"
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.9",
+    "@secret-agent/testing": "^1.0.0-alpha.9"
   }
 }

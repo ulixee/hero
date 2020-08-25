@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/website",
-  "version": "1.0.0-alpha.8",
+  "version": "1.0.0-alpha.9",
   "private": true,
   "scripts": {
     "start": "gridsome develop",
@@ -37,8 +37,8 @@
     "sass-loader": "^8.0.0",
     "sharp": "^0.23.2",
     "ts-loader": "^6.2.1",
-    "vue-svg-loader": "^0.12.0",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "vue-svg-loader": "^0.12.0"
   },
   "resolutions": {
     "remark-slug": "git://github.com/ulixee/remark-slug.git"
