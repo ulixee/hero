@@ -11,7 +11,7 @@ import chromePageOverrides from '@secret-agent/emulator-plugins-shared/chromePag
 import { randomBytes } from 'crypto';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import readPolyfills from '../shared/readPolyfills';
+import readPolyfills from '@secret-agent/emulator-plugins-shared/readPolyfills';
 import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
 import defaultUseragents from './user-agents.json';
 

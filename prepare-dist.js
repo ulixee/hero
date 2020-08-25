@@ -45,6 +45,7 @@ function processPackageJson(packagePath) {
     ...defaults,
     scripts: overridesJson.scripts,
     dependencies: overridesJson.dependencies || packageJson.dependencies,
+    engine: packageJson.engine, // this is used by emulators
   };
 
   // check if index exists
@@ -61,7 +62,7 @@ function processPackageJson(packagePath) {
     fs.copyFileSync(readmePath, `${packagePath}/README.md`);
   }
 
-  console.log('writing', `${packagePath}/package.json`)
+  console.log('writing', `${packagePath}/package.json`);
   fs.writeFileSync(`${packagePath}/package.json`, JSON.stringify(finalPackageJson, null, 2));
 }
 

@@ -25,7 +25,7 @@ import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import EngineInstaller from '../shared/EngineInstaller';
+import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
 import defaultAgents from './user-agents.json';
 
 const engineExecutablePath =
