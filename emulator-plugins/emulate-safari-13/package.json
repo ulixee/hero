@@ -11,10 +11,10 @@
     "@secret-agent/commons": "^1.0.0-alpha.9",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.9",
     "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.9",
-    "@secret-agent/emulators": "^1.0.0-alpha.9",
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
+    "@secret-agent/emulators": "^1.0.0-alpha.9",
     "@types/tough-cookie": "^4.0.0",
     "source-map-loader": "^0.2.4"
   }

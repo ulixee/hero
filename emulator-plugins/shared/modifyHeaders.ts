@@ -2,8 +2,8 @@ import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
 import OriginType from '@secret-agent/commons/interfaces/OriginType';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import Log from '@secret-agent/commons/Logger';
-import { IResourceToModify } from '../../commons/interfaces/IHttpRequestModifierDelegate';
-import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
+import { IResourceToModify } from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 const { log } = Log(module);
 

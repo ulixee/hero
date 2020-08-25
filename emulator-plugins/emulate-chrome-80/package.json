@@ -7,9 +7,11 @@
     "browser": "chromium",
     "revision": "722234"
   },
+  "dependencies": {
+    "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.9"
+  },
   "devDependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.9",
-    "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.9",
     "@secret-agent/emulators": "^1.0.0-alpha.9"
   }
 }

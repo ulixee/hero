@@ -5,7 +5,7 @@ import MitmRequestHandler from '../lib/MitmRequestHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 import * as http2 from 'http2';
 import { URL } from 'url';
-import MitmSocket from '../../mitm-socket';
+import MitmSocket from '@secret-agent/mitm-socket';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import http from 'http';
 import { string } from 'prop-types';

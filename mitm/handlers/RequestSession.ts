@@ -15,7 +15,7 @@ import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import { URL } from 'url';
 import Network = Protocol.Network;
-import IResourceResponse from '../../core-interfaces/IResourceResponse';
+import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 
 const { log } = Log(module);
 

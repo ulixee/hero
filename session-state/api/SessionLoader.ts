@@ -3,7 +3,7 @@ import { MouseEventType } from '../models/MouseEventsTable';
 import { EventEmitter } from 'events';
 import { ISessionRecord } from '../models/SessionTable';
 import CommandFormatter from '../lib/CommandFormatter';
-import ResourceType from '../../core-interfaces/ResourceType';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import SessionState from '../index';
 
 export default class SessionLoader extends EventEmitter {

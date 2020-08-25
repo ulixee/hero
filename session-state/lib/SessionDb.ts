@@ -15,7 +15,7 @@ import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
 import * as Path from 'path';
 import SessionState from '../index';
-import Log from '../../commons/Logger';
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

@@ -9,10 +9,10 @@ import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
 import MitmSocket from '@secret-agent/mitm-socket';
 import OriginType, { isOriginType } from '@secret-agent/commons/interfaces/OriginType';
-import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import HttpResponseCache from './HttpResponseCache';
 import HeadersHandler from '../handlers/HeadersHandler';
-import IResourceResponse from '../../core-interfaces/IResourceResponse';
+import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;

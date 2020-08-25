@@ -1,5 +1,5 @@
 import { IncomingHttpHeaders } from 'http';
-import IResourceHeaders from '../../core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 // TODO: implement max-age and last-modified cache control https://tools.ietf.org/id/draft-ietf-httpbis-cache-01.html
 export default class HttpResponseCache {
