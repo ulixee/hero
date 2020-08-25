@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-chrome-83",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "EmulatorPlugin for Google Chrome version 83",
   "main": "index.js",
   "engine": {

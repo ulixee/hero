@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-safari-13",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "EmulatorPlugin for Apple Safari version 13.0",
   "main": "index.js",
   "engine": {

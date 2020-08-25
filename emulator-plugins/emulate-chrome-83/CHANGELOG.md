@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.11](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2020-08-25)
+
+
+### Bug Fixes
+
+* copy engine to deployed emulators ([98ea24c](https://github.com/ulixee/secret-agent/commit/98ea24ca25d0cebbc1b6f6d572134e63318ce941))
+
+
+
+
+
 # [1.0.0-alpha.10](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2020-08-25)
 
 

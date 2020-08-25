@@ -1,11 +1,11 @@
 {
   "name": "@secret-agent/core",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "The core browser API used to run SecretAgent",
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.10",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
-    "@secret-agent/emulate-chrome-83": "^1.0.0-alpha.10",
+    "@secret-agent/emulate-chrome-83": "^1.0.0-alpha.11",
     "@secret-agent/emulators": "^1.0.0-alpha.10",
     "@secret-agent/humanoids": "^1.0.0-alpha.10",
     "@secret-agent/injected-scripts": "^1.0.0-alpha.10",
