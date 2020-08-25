@@ -21,6 +21,9 @@ func EmulateTls(dialConn net.Conn, addr string, connectArgs ConnectArgs) *tls.UC
 	if connectArgs.ClientHelloId == "Safari13" {
 		helloID = tls.HelloCustom
 	}
+	if connectArgs.ClientHelloId == "Chrome83" {
+        helloID = tls.HelloChrome_83
+    }
 	tlsConfig := tls.Config{
 		ServerName:         connectArgs.Servername,
 		InsecureSkipVerify: !connectArgs.RejectUnauthorized,

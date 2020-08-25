@@ -69,20 +69,28 @@ describe('UserProfile cookie tests', () => {
       const meta = await Core.createSession();
       const core = Core.byWindowId[meta.windowId];
       // @ts-ignore
+      await core.window.devtoolsClient.send('Audits.enable');
+      // @ts-ignore
+      await core.window.devtoolsClient.on('Audits.issueAdded', console.log);
+      // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/cookie'];
+      session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie'];
       session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        response.setHeader('Set-Cookie', ['cross1=1', 'cross2=2']);
+        response.setHeader('Set-Cookie', [
+          'cross1=1; SameSite=None; Secure; HttpOnly',
+          'cross2=2; SameSite=None; Secure; HttpOnly',
+        ]);
         response.end(`<html><p>frame body</p></html>`);
         return true;
       };
       koaServer.get('/cross-cookie', ctx => {
         ctx.cookies.set('cookietest', 'mainsite');
-        ctx.body = `<body><h1>cross cookies page</h1><iframe src="http://dataliberationfoundation.org/cookie"/></body>`;
+        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie"/></body>`;
       });
 
       await core.goto(`${koaServer.baseUrl}/cross-cookie`);
       await core.waitForLoad('AllContentLoaded');
+
       profile = await core.exportUserProfile();
       expect(profile.cookies).toHaveLength(3);
       expect(profile.cookies[0].name).toBe('cookietest');
@@ -98,7 +106,7 @@ describe('UserProfile cookie tests', () => {
       const core = Core.byWindowId[meta.windowId];
       // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/cookie2'];
+      session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie2'];
       let dlfCookies = '';
       let sameCookies = '';
       session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
@@ -108,7 +116,7 @@ describe('UserProfile cookie tests', () => {
       };
       koaServer.get('/cross-cookie2', ctx => {
         sameCookies = ctx.cookies.get('cookietest');
-        ctx.body = `<body><h1>cross cookies page</h1><iframe src="http://dataliberationfoundation.org/cookie2"/></body>`;
+        ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
       });
       await core.goto(`${koaServer.baseUrl}/cross-cookie2`);
       await core.waitForLoad('AllContentLoaded');

@@ -51,7 +51,7 @@ WORKDIR /app/secret-agent
 
 COPY ./build-dist /app/secret-agent/
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
+ENV SA_SKIP_CHROMIUM_DOWNLOAD=1
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
 
 # Add user so we don't need --no-sandbox.

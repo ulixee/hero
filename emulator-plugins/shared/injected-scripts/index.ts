@@ -22,10 +22,13 @@ function buildExecutionScript(name: string, script: string, args?: any) {
     ${utilsScript}
    
     // documentElement is not loaded  
-    if ('${name}' === 'polyfill') {  
-      while (!document.documentElement) {
-          await new Promise(resolve => setTimeout(resolve, 10));
-      }
+    if ('${name}' === 'polyfill' && !document.documentElement) {
+      await new Promise(resolve => {
+        new MutationObserver((list, observer) => {
+          resolve();
+          observer.disconnect();
+        }).observe(document, {childList: true, subtree: true});
+      });
     }
     
     (function ${name}(args) {

@@ -1,7 +1,6 @@
 import { Agent, lookup } from 'useragent';
 import IUserAgent from '../interfaces/IUserAgent';
-
-const records = require('../data/user-agents.json');
+import records from '../data/user-agents.json';
 
 interface IFilterOptions {
   deviceCategory: string;
@@ -19,7 +18,7 @@ interface IOperatingSystemFilter {
 }
 
 export default class UserAgents {
-  public static getList(filter: IFilterOptions): IUserAgent[] {
+  public static getList(filter: IFilterOptions, defaultAgents: string[]): IUserAgent[] {
     const userAgents: { [key: string]: IUserAgent } = {};
     for (const record of records) {
       const agent = lookup(record.userAgent);
@@ -28,7 +27,43 @@ export default class UserAgents {
         userAgents[userAgent.raw] = userAgent;
       }
     }
+    for (const agent of defaultAgents) {
+      if (!userAgents[agent]) {
+        userAgents[agent] = this.convertDesktopAgent(agent);
+      }
+    }
     return Object.values(userAgents);
+  }
+
+  public static convertDesktopAgent(useragent: string): IUserAgent {
+    const agent = lookup(useragent);
+    let platform = 'MacIntel';
+    if (useragent.includes('Windows')) platform = 'Win32';
+    let vendor = 'Google Inc.';
+    if (agent.family === 'Safari') {
+      vendor = 'Apple Computer, Inc.';
+    }
+
+    let match: any = {};
+    for (const record of records) {
+      const recordAgent = lookup(record.userAgent);
+      // if same browser family and os, use this record
+      if (
+        agent.family === recordAgent.family &&
+        agent.os.family === recordAgent.os.family &&
+        agent.os.major === recordAgent.os.major
+      ) {
+        match = record;
+        break;
+      }
+    }
+
+    return this.convertAgent(agent, {
+      platform: match.platform ?? platform,
+      vendor: match.vendor ?? vendor,
+      userAgent: useragent,
+      deviceCategory: 'desktop',
+    });
   }
 
   public static findOne(filter: IFilterOptions): IUserAgent {

@@ -1,4 +1,8 @@
-import { EmulatorPlugin, EmulatorPluginStatics, UserAgents } from '@secret-agent/emulators';
+import Emulators, {
+  EmulatorPlugin,
+  EmulatorPluginStatics,
+  UserAgents,
+} from '@secret-agent/emulators';
 import { URL } from 'url';
 import pkg from './package.json';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
@@ -21,20 +25,33 @@ import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
+import EngineInstaller from '../shared/EngineInstaller';
+import defaultAgents from './user-agents.json';
+
+const engineExecutablePath =
+  process.env.CHROME_83_BIN ?? new EngineInstaller(pkg.engine).getExecutablePath();
 
 @EmulatorPluginStatics
 export default class Safari13 extends EmulatorPlugin {
   public static emulatorId = pkg.name;
-  public static browser = 'Safari 13.0';
-  public static chromiumEngines = [80];
-  protected static agents = UserAgents.getList({
-    deviceCategory: 'desktop',
-    vendor: 'Apple Computer, Inc.',
-    family: 'Safari',
-    versionMajor: 13,
-    versionMinor: 0,
-  });
+  public static statcounterBrowser = 'Safari 13.1';
+  public static engine = pkg.engine;
 
+  protected static agents = UserAgents.getList(
+    {
+      deviceCategory: 'desktop',
+      vendor: 'Apple Computer, Inc.',
+      family: 'Safari',
+      versionMajor: 13,
+      versionMinor: 1,
+    },
+    defaultAgents,
+  );
+
+  public get engineExecutablePath() {
+    return engineExecutablePath;
+  }
+  public canPolyfill = false;
   public readonly userAgent: IUserAgent;
   public delegate: IHttpRequestModifierDelegate;
 
@@ -70,6 +87,7 @@ export default class Safari13 extends EmulatorPlugin {
   }
 
   public setUserProfile(userProfile: IUserProfile) {
+    super.setUserProfile(userProfile);
     const cookies = userProfile.cookies;
     if (cookies) {
       const originUrls = (Object.keys(userProfile.storage ?? {}) ?? []).map(x => new URL(x));
@@ -262,6 +280,7 @@ export default class Safari13 extends EmulatorPlugin {
     return this.userAgent.version.minor >= minor && this.userAgent.version.patch >= patch;
   }
 }
+Emulators.load(Safari13);
 
 function getSameSiteContext(resource: IHttpResourceLoadDetails): SameSiteContext {
   const { hasUserGesture, originType } = resource;

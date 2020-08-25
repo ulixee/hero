@@ -78,13 +78,15 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const window: Window = core.window;
 
-    const mirrorChrome = new ChromeCore();
-    await mirrorChrome.start();
+    // @ts-ignore
+    const chromeCorePath = core.session.emulator.engineExecutablePath;
+    const mirrorChrome = new ChromeCore(chromeCorePath);
+    mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    // @ts-ignore
-    const puppBrowser = await mirrorChrome.getBrowser();
-    const mirrorPage = await puppBrowser.newPage();
+    const context = await mirrorChrome.createContext();
+    Helpers.onClose(() => context.close());
+    const mirrorPage = await context.newPage();
     const debug = false;
     if (debug) {
       mirrorPage.on('console', x => console.log(x.text()));

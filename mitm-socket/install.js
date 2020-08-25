@@ -28,7 +28,7 @@ const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
   const installed = getInstalledVersion();
   if (!forceBuild && installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
     console.log('Latest SecretAgent connect library already installed');
-    return;
+    process.exit();
   }
 
   const checksum = await getSourceChecksum(filename);
@@ -39,7 +39,6 @@ const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
       saveVersion();
       console.log('Successfully compiled Secret Agent connect library');
       process.exit();
-      return;
     }
 
     const goVersionNeeded = getGoVersionNeeded();
@@ -68,6 +67,7 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
   fs.chmodSync(`${outDir}/${programName}`, 0o755);
   saveVersion();
   console.log('Successfully downloaded');
+  process.exit();
 })();
 
 function tryBuild(programName) {

@@ -2,7 +2,11 @@
   {
     "profile": {
       "audioSupport": {
-        "recordingFormats": ["audio/webm", "audio/webm;codecs=opus", "audio/webm;codecs=pcm"],
+        "recordingFormats": [
+          "audio/webm",
+          "audio/webm;codecs=opus",
+          "audio/webm;codecs=pcm"
+        ],
         "probablyPlays": [
           "application/ogg;codecs=opus",
           "application/ogg;codecs=vorbis",
@@ -272,12 +276,19 @@
         }
       ]
     },
-    "opSyses": ["Mac OS X 10.13", "Mac OS X 10.14", "Mac OS X 10.15"]
+    "opSyses": [
+      "Mac OS X 10.14",
+      "Mac OS X 10.15"
+    ]
   },
   {
     "profile": {
       "audioSupport": {
-        "recordingFormats": ["audio/webm", "audio/webm;codecs=opus", "audio/webm;codecs=pcm"],
+        "recordingFormats": [
+          "audio/webm",
+          "audio/webm;codecs=opus",
+          "audio/webm;codecs=pcm"
+        ],
         "probablyPlays": [
           "application/ogg;codecs=opus",
           "application/ogg;codecs=vorbis",
@@ -537,6 +548,9 @@
         }
       ]
     },
-    "opSyses": ["Windows 10.0", "Windows 7.0"]
+    "opSyses": [
+      "Windows 10.0",
+      "Windows 7.0"
+    ]
   }
 ]

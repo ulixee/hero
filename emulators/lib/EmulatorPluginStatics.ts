@@ -3,8 +3,8 @@ import IUserAgent from '../interfaces/IUserAgent';
 
 export interface IEmulatorPluginStatics {
   emulatorId: string;
-  browser: string;
-  chromiumEngines: number[];
+  statcounterBrowser: string;
+  engine: { browser: string; revision: string };
   new (userAgent?: IUserAgent): EmulatorPlugin;
 }
 

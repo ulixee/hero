@@ -1,151 +1,198 @@
-import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/testing/helpers';
 import getOverrideScript from '../injected-scripts';
 import inspectScript from './inspectHierarchy';
-import PolyfillChrome from './polyfill.json';
 import PolyfillChromeBt from './polyfill.bluetooth.json';
 import { inspect } from 'util';
 import * as os from 'os';
+import ChromeCore from '@secret-agent/core/lib/ChromeCore';
+import Chrome80 from '@secret-agent/emulate-chrome-80';
+
+let chromeCore: ChromeCore;
+beforeAll(async () => {
+  const emulator = new Chrome80();
+  chromeCore = new ChromeCore(emulator.engineExecutablePath);
+  Helpers.onClose(() => chromeCore.close(), true);
+  chromeCore.start();
+});
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
 
-// TODO: make polyfills non-os specific
-const platform = os.platform();
-const isPlatformSupported = platform === 'darwin' || platform === 'win32';
-
 test('it should be able to add polyfills', async () => {
-  if (!isPlatformSupported) return;
-
-  const polyfills = PolyfillChrome as any;
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
+  const page = await createPage();
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
   page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
   }
 
-  await page.evaluateOnNewDocument(getOverrideScript('polyfill', polyfills).script);
+  const objectTestProperties = {
+    length: {
+      _type: 'number',
+      _flags: 'c',
+      _value: 0,
+    },
+    name: {
+      _type: 'string',
+      _flags: 'c',
+      _value: 'ObjectTest',
+    },
+    arguments: {
+      _type: 'object',
+      _flags: '',
+      _value: null,
+    },
+    caller: {
+      _type: 'object',
+      _flags: '',
+      _value: null,
+    },
+    prototype: {
+      _protos: ['Object.prototype'],
+      creationTime: {
+        _flags: 'ce',
+        _accessException: 'TypeError: Illegal invocation',
+        _get: 'function get creationTime() { [native code] }',
+        _getToStringToString: 'function toString() { [native code] }',
+      },
+      'Symbol(Symbol.toStringTag)': {
+        _type: 'string',
+        _flags: 'c',
+        _value: 'ObjectTest',
+      },
+      _type: 'object',
+      _flags: '',
+    },
+    'new()': 'TypeError: Illegal constructor',
+    _function: 'function ObjectTest() { [native code] }',
+    _flags: 'cw',
+  };
+  const chromeProperty = {
+    _flags: 'ce',
+    _type: 'string',
+    _value: 'I am chrome',
+  };
+  await page.evaluateOnNewDocument(
+    getOverrideScript('polyfill', {
+      additions: [
+        {
+          path: 'window',
+          propertyName: 'chrome',
+          prevProperty: 'Atomics',
+          property: chromeProperty,
+        },
+        {
+          path: 'window',
+          propertyName: 'ObjectTest',
+          prevProperty: 'chrome',
+          property: objectTestProperties,
+        },
+      ],
+      removals: [],
+      changes: [],
+      order: [],
+    }).script,
+  );
   await page.goto(httpServer.url);
 
-  const structure = JSON.parse(
+  const { window } = JSON.parse(
     (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
   );
 
-  function getFromStructure(path) {
-    const pathSplit = path.split('.');
-    let entry = structure;
-    for (const split of pathSplit) {
-      if (split) {
-        entry = entry[split];
-      }
-    }
-    return entry;
+  const windowKeys = Object.keys(window);
+  // test chrome property
+  if (debug) {
+    console.log('chrome', inspect(window.chrome, false, null, true));
   }
+  expect(window.chrome).toStrictEqual(chromeProperty);
+  expect(windowKeys.indexOf('chrome')).toBe(windowKeys.indexOf('Atomics') + 1);
 
-  for (const polyfill of polyfills.additions) {
-    const parent = getFromStructure(polyfill.path);
-
-    if (debug) {
-      console.log(polyfill.propertyName, inspect(parent[polyfill.propertyName], false, null, true));
-    }
-    expect(parent[polyfill.propertyName]).toStrictEqual(polyfill.property);
-    const keys = Object.keys(parent);
-    expect(keys.indexOf(polyfill.propertyName)).toBe(keys.indexOf(polyfill.prevProperty) + 1);
+  // test ObjectTest property
+  if (debug) {
+    console.log('ObjectTest', inspect(window.ObjectTest, false, null, true));
   }
+  expect(window.ObjectTest).toStrictEqual(objectTestProperties);
+  expect(windowKeys.indexOf('ObjectTest')).toBe(windowKeys.indexOf('chrome') + 1);
+});
 
-  for (const removal of polyfills.removals) {
-    const parentPath = removal.split('.');
-    const prop = parentPath.pop();
-    const parent = getFromStructure(parentPath.join('.'));
-    expect(parent).not.toHaveProperty(prop);
-  }
-
-  const func = structure.window.Navigator.prototype.registerProtocolHandler;
-  expect(func.name._value).toBe('registerProtocolHandler');
-  expect(func._function).toBe('function registerProtocolHandler() { [native code] }');
-
-  expect(Object.keys(structure.window.Navigator.prototype)).toStrictEqual([
-    '_protos',
-    'vendorSub',
-    'productSub',
-    'vendor',
-    'maxTouchPoints',
-    'hardwareConcurrency',
-    'cookieEnabled',
-    'appCodeName',
-    'appName',
-    'appVersion',
-    'platform',
-    'product',
-    'userAgent',
-    'language',
-    'languages',
-    'onLine',
-    'doNotTrack',
-    'geolocation',
-    'mediaCapabilities',
-    'connection',
-    'plugins',
-    'mimeTypes',
-    'webkitTemporaryStorage',
-    'webkitPersistentStorage',
-    'getBattery',
-    'sendBeacon',
-    'getGamepads',
-    'javaEnabled',
-    'vibrate',
-    'webdriver',
-    'userActivation',
-    'mediaSession',
-    'permissions',
-    'registerProtocolHandler',
-    'unregisterProtocolHandler',
-    'deviceMemory',
-    'clipboard',
-    'credentials',
-    'keyboard',
-    'locks',
-    'mediaDevices',
-    'serviceWorker',
-    'storage',
-    'presentation',
-    // 'bluetooth', this gets deleted
-    'usb',
-    'xr',
-    'requestMediaKeySystemAccess',
-    'getUserMedia',
-    'webkitGetUserMedia',
-    'requestMIDIAccess',
-    'Symbol(Symbol.toStringTag)',
-    '_type',
-    '_flags',
-  ]);
-  for (const order of polyfills.order) {
-    const keyOrder = Object.keys(getFromStructure(order.path)).filter(x => x[0] !== '_');
-    const index = keyOrder.indexOf(order.propertyName);
-    if (!order.prevProperty) expect(index).toBe(0);
-    else expect(keyOrder[index - 1]).toBe(order.prevProperty);
-  }
-}, 60e3);
-
-test('it should be able to change prototype properties', async () => {
-  if (!isPlatformSupported) return;
-
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
+test('it should be able to remove properties', async () => {
+  const page = await createPage();
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
   page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
   }
+
+  await page.evaluateOnNewDocument(
+    getOverrideScript('polyfill', {
+      additions: [],
+      removals: ['window.Atomics', 'window.Array.from'],
+      changes: [],
+      order: [],
+    }).script,
+  );
+  await page.goto(httpServer.url);
+
+  expect(await page.evaluate(`!!window.Atomics`)).not.toBeTruthy();
+  expect(await page.evaluate(`!!Array.from`)).not.toBeTruthy();
+});
+
+test('it should be able to change properties', async () => {
+  const page = await createPage();
+  const httpServer = await Helpers.runHttpServer();
+  page.on('error', console.log);
+  page.on('pageerror', console.log);
+  if (debug) {
+    page.on('console', log => console.log(log.text()));
+  }
+
+  await page.evaluateOnNewDocument(
+    getOverrideScript('polyfill', {
+      additions: [],
+      removals: [],
+      changes: [
+        {
+          path: 'window.Navigator.prototype.registerProtocolHandler.name',
+          propertyName: '_value',
+          property: 'notTheRightName',
+        },
+        {
+          path: 'window.Navigator.prototype.registerProtocolHandler',
+          propertyName: '_function',
+          property: 'function registerProtocolHandler() { [unnative code] }',
+        },
+      ],
+      order: [],
+    }).script,
+  );
+  await page.goto(httpServer.url);
+
+  const protocolToString = await page.evaluate(
+    `window.Navigator.prototype.registerProtocolHandler.toString()`,
+  );
+  const protocolName = await page.evaluate(
+    `window.Navigator.prototype.registerProtocolHandler.name`,
+  );
+
+  expect(protocolName).toBe('notTheRightName');
+  expect(protocolToString).toBe('function registerProtocolHandler() { [unnative code] }');
+});
+
+test('it should be able to change property order', async () => {
+  const httpServer = await Helpers.runHttpServer();
+  const page = await createPage();
+  page.on('error', console.log);
+  page.on('pageerror', console.log);
+  if (debug) {
+    page.on('console', log => console.log(log.text()));
+  }
+  const startNavigatorKeys = (await page.evaluate(
+    `Object.keys(window.Navigator.prototype)`,
+  )) as string[];
 
   await page.evaluateOnNewDocument(
     getOverrideScript('polyfill', {
@@ -155,80 +202,58 @@ test('it should be able to change prototype properties', async () => {
       order: [
         {
           path: 'window.Navigator.prototype',
-          propertyName: 'registerProtocolHandler',
-          throughProperty: 'unregisterProtocolHandler',
-          prevProperty: 'permissions',
+          propertyName: startNavigatorKeys[10],
+          throughProperty: startNavigatorKeys[12],
+          prevProperty: startNavigatorKeys[1],
         },
         {
           path: 'window.Navigator.prototype',
-          propertyName: 'deviceMemory',
-          throughProperty: 'webkitGetUserMedia',
-          prevProperty: 'unregisterProtocolHandler',
+          propertyName: startNavigatorKeys[18],
+          throughProperty: startNavigatorKeys[18],
+          prevProperty: startNavigatorKeys[12],
         },
       ],
     }).script,
   );
   await page.goto(httpServer.url);
 
-  const structure = JSON.parse(
-    (await page.evaluate(
-      `(${inspectScript.toString()})(window.Navigator.prototype, 'window.Navigator.prototype')`,
-    )) as any,
-  ).window;
+  const keyOrder = (await page.evaluate(`Object.keys(window.Navigator.prototype)`)) as string[];
 
-  const keyOrder = Object.keys(structure).filter(x => x[0] !== '_');
-  {
-    const index = keyOrder.indexOf('registerProtocolHandler');
-    expect(keyOrder[index - 1]).toBe('permissions');
-  }
-  {
-    const index = keyOrder.indexOf('deviceMemory');
-    expect(keyOrder[index - 1]).toBe('unregisterProtocolHandler');
-  }
+  const prop1Index = keyOrder.indexOf(startNavigatorKeys[10]);
+  expect(keyOrder[prop1Index - 1]).toBe(startNavigatorKeys[1]);
+
+  const prop2Index = keyOrder.indexOf(startNavigatorKeys[18]);
+  expect(keyOrder[prop2Index - 1]).toBe(startNavigatorKeys[12]);
 });
 
-test('it should be able to change own properties', async () => {
-  if (!isPlatformSupported) return;
-
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
+test('it should be able to change window property order', async () => {
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
+  const page = await createPage();
   page.on('error', console.log);
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
   }
+  const windowKeys = await page.evaluate(`Object.keys(window)`);
+
   const order = [
     {
       path: 'window',
-      propertyName: 'Element',
-      throughProperty: 'CustomElementRegistry',
-      prevProperty: 'ErrorEvent',
+      propertyName: windowKeys[10],
+      throughProperty: windowKeys[12],
+      prevProperty: windowKeys[1],
     },
     {
       path: 'window',
-      propertyName: 'ByteLengthQueuingStrategy',
-      throughProperty: 'ByteLengthQueuingStrategy',
-      prevProperty: 'isNaN',
+      propertyName: windowKeys[18],
+      throughProperty: windowKeys[18],
+      prevProperty: windowKeys[12],
     },
     {
       path: 'window',
-      propertyName: 'onformdata',
-      throughProperty: 'onformdata',
-      prevProperty: 'XSLTProcessor',
-    },
-    {
-      path: 'window',
-      propertyName: 'ontransitionend',
-      throughProperty: 'ontransitionend',
-      prevProperty: 'onsearch',
-    },
-    {
-      path: 'window',
-      propertyName: 'onafterprint',
-      throughProperty: 'createImageBitmap',
-      prevProperty: 'onselectionchange',
+      propertyName: windowKeys[25],
+      throughProperty: windowKeys[50],
+      prevProperty: windowKeys[23],
     },
   ];
   await page.evaluateOnNewDocument(
@@ -241,24 +266,28 @@ test('it should be able to change own properties', async () => {
   );
   await page.goto(httpServer.url);
 
-  const structure = JSON.parse(
-    (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
-  ).window;
+  const windowKeysAfter = (await page.evaluate(`Object.keys(window)`)) as string[];
 
-  const keyOrder = Object.keys(structure).filter(x => x[0] !== '_');
-  for (const entry of order) {
-    const index = keyOrder.indexOf(entry.propertyName);
-    expect(keyOrder[index - 1]).toBe(entry.prevProperty);
-  }
+  const prop1Index = windowKeysAfter.indexOf(windowKeys[10]);
+  expect(windowKeysAfter[prop1Index - 1]).toBe(windowKeys[1]);
+
+  const prop2Index = windowKeysAfter.indexOf(windowKeys[18]);
+  expect(windowKeysAfter[prop2Index - 1]).toBe(windowKeys[12]);
+
+  const prop3Index = windowKeysAfter.indexOf(windowKeys[25]);
+  expect(windowKeysAfter[prop3Index - 1]).toBe(windowKeys[23]);
+
+  expect(windowKeysAfter.indexOf(windowKeys[26])).toBe(prop3Index + 1);
+  expect(windowKeysAfter.indexOf(windowKeys[50])).toBe(prop3Index + 25);
 }, 10e3);
 
 test('it should be able to backfill the bluetooth stack', async () => {
+  const platform = os.platform();
+  const isPlatformSupported = platform === 'darwin' || platform === 'win32';
   if (!isPlatformSupported) return;
 
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
+  const page = await createPage();
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
@@ -303,3 +332,9 @@ test('it should be able to backfill the bluetooth stack', async () => {
     }
   }
 });
+
+async function createPage() {
+  const context = await chromeCore.createContext();
+  Helpers.onClose(() => context.close());
+  return context.newPage();
+}

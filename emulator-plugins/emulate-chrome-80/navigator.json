@@ -1,7 +1,10 @@
 {
-  "os": "mac_os_x_10_13",
+  "osKey": "mac-os-x-10-11",
   "navigator": {
-    "_protos": ["Navigator.prototype", "Object.prototype"],
+    "_protos": [
+      "Navigator.prototype",
+      "Object.prototype"
+    ],
     "vendorSub": {
       "_type": "string",
       "_value": ""
@@ -36,7 +39,7 @@
     },
     "appVersion": {
       "_type": "string",
-      "_value": "5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
+      "_value": "5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
     },
     "platform": {
       "_type": "string",
@@ -48,7 +51,7 @@
     },
     "userAgent": {
       "_type": "string",
-      "_value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
+      "_value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
     },
     "language": {
       "_type": "string",
@@ -65,7 +68,10 @@
         "_flags": "e",
         "_value": "en"
       },
-      "_protos": ["Array.prototype", "Object.prototype"],
+      "_protos": [
+        "Array.prototype",
+        "Object.prototype"
+      ],
       "isFrozen": true,
       "isSealed": true,
       "length": {
@@ -84,15 +90,25 @@
       "_value": null
     },
     "geolocation": {
-      "_protos": ["Geolocation.prototype", "Object.prototype"],
+      "_protos": [
+        "Geolocation.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "mediaCapabilities": {
-      "_protos": ["MediaCapabilities.prototype", "Object.prototype"],
+      "_protos": [
+        "MediaCapabilities.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "connection": {
-      "_protos": ["NetworkInformation.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "NetworkInformation.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "onchange": {
         "_type": "object",
         "_value": null
@@ -118,7 +134,10 @@
     "plugins": {
       "0": {
         "0": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-google-chrome-pdf"
@@ -135,9 +154,15 @@
           "_flags": "ce",
           "_value": "[object MimeType]"
         },
-        "_protos": ["Plugin.prototype", "Object.prototype"],
+        "_protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
         "application/x-google-chrome-pdf": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-google-chrome-pdf"
@@ -175,7 +200,10 @@
       },
       "1": {
         "0": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/pdf"
@@ -192,9 +220,15 @@
           "_flags": "ce",
           "_value": "[object MimeType]"
         },
-        "_protos": ["Plugin.prototype", "Object.prototype"],
+        "_protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
         "application/pdf": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/pdf"
@@ -232,7 +266,10 @@
       },
       "2": {
         "0": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-nacl"
@@ -250,7 +287,10 @@
           "_value": "[object MimeType]"
         },
         "1": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-pnacl"
@@ -267,9 +307,15 @@
           "_flags": "ce",
           "_value": "[object MimeType]"
         },
-        "_protos": ["Plugin.prototype", "Object.prototype"],
+        "_protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
         "application/x-nacl": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-nacl"
@@ -287,7 +333,10 @@
           "_value": "[object MimeType]"
         },
         "application/x-pnacl": {
-          "_protos": ["MimeType.prototype", "Object.prototype"],
+          "_protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
           "type": {
             "_type": "string",
             "_value": "application/x-pnacl"
@@ -323,7 +372,10 @@
         "_type": "object",
         "_flags": "ce"
       },
-      "_protos": ["PluginArray.prototype", "Object.prototype"],
+      "_protos": [
+        "PluginArray.prototype",
+        "Object.prototype"
+      ],
       "Chrome PDF Plugin": "REF: window.navigator.plugins.0",
       "Chrome PDF Viewer": "REF: window.navigator.plugins.1",
       "Native Client": "REF: window.navigator.plugins.2",
@@ -335,7 +387,10 @@
     },
     "mimeTypes": {
       "0": {
-        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "_protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
         "type": {
           "_type": "string",
           "_value": "application/pdf"
@@ -352,7 +407,10 @@
         "_flags": "ce"
       },
       "1": {
-        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "_protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
         "type": {
           "_type": "string",
           "_value": "application/x-google-chrome-pdf"
@@ -369,7 +427,10 @@
         "_flags": "ce"
       },
       "2": {
-        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "_protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
         "type": {
           "_type": "string",
           "_value": "application/x-nacl"
@@ -386,7 +447,10 @@
         "_flags": "ce"
       },
       "3": {
-        "_protos": ["MimeType.prototype", "Object.prototype"],
+        "_protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
         "type": {
           "_type": "string",
           "_value": "application/x-pnacl"
@@ -402,7 +466,10 @@
         "_type": "object",
         "_flags": "ce"
       },
-      "_protos": ["MimeTypeArray.prototype", "Object.prototype"],
+      "_protos": [
+        "MimeTypeArray.prototype",
+        "Object.prototype"
+      ],
       "application/pdf": "REF: window.navigator.mimeTypes.0",
       "application/x-google-chrome-pdf": "REF: window.navigator.mimeTypes.1",
       "application/x-nacl": "REF: window.navigator.mimeTypes.2",
@@ -414,11 +481,17 @@
       "_type": "object"
     },
     "webkitTemporaryStorage": {
-      "_protos": ["DeprecatedStorageQuota.prototype", "Object.prototype"],
+      "_protos": [
+        "DeprecatedStorageQuota.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "webkitPersistentStorage": {
-      "_protos": ["DeprecatedStorageQuota.prototype", "Object.prototype"],
+      "_protos": [
+        "DeprecatedStorageQuota.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "webdriver": {
@@ -426,7 +499,10 @@
       "_value": true
     },
     "userActivation": {
-      "_protos": ["UserActivation.prototype", "Object.prototype"],
+      "_protos": [
+        "UserActivation.prototype",
+        "Object.prototype"
+      ],
       "hasBeenActive": {
         "_type": "boolean",
         "_value": false
@@ -438,7 +514,10 @@
       "_type": "object"
     },
     "mediaSession": {
-      "_protos": ["MediaSession.prototype", "Object.prototype"],
+      "_protos": [
+        "MediaSession.prototype",
+        "Object.prototype"
+      ],
       "metadata": {
         "_type": "object",
         "_value": null
@@ -450,31 +529,51 @@
       "_type": "object"
     },
     "permissions": {
-      "_protos": ["Permissions.prototype", "Object.prototype"],
+      "_protos": [
+        "Permissions.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "deviceMemory": {
       "_type": "number",
-      "_value": 8
+      "_value": 4
     },
     "clipboard": {
-      "_protos": ["Clipboard.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "Clipboard.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "credentials": {
-      "_protos": ["CredentialsContainer.prototype", "Object.prototype"],
+      "_protos": [
+        "CredentialsContainer.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "keyboard": {
-      "_protos": ["Keyboard.prototype", "Object.prototype"],
+      "_protos": [
+        "Keyboard.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "locks": {
-      "_protos": ["LockManager.prototype", "Object.prototype"],
+      "_protos": [
+        "LockManager.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "mediaDevices": {
-      "_protos": ["MediaDevices.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "MediaDevices.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "ondevicechange": {
         "_type": "object",
         "_value": null
@@ -482,7 +581,11 @@
       "_type": "object"
     },
     "serviceWorker": {
-      "_protos": ["ServiceWorkerContainer.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "ServiceWorkerContainer.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "ready": {
         "_value": "Promise",
         "_type": "object"
@@ -506,11 +609,17 @@
       "_type": "object"
     },
     "storage": {
-      "_protos": ["StorageManager.prototype", "Object.prototype"],
+      "_protos": [
+        "StorageManager.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "presentation": {
-      "_protos": ["Presentation.prototype", "Object.prototype"],
+      "_protos": [
+        "Presentation.prototype",
+        "Object.prototype"
+      ],
       "receiver": {
         "_type": "object",
         "_value": null
@@ -522,11 +631,19 @@
       "_type": "object"
     },
     "bluetooth": {
-      "_protos": ["Bluetooth.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "Bluetooth.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "_type": "object"
     },
     "usb": {
-      "_protos": ["USB.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "USB.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "onconnect": {
         "_type": "object",
         "_value": null
@@ -538,7 +655,11 @@
       "_type": "object"
     },
     "xr": {
-      "_protos": ["XR.prototype", "EventTarget.prototype", "Object.prototype"],
+      "_protos": [
+        "XR.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
       "ondevicechange": {
         "_type": "object",
         "_value": null

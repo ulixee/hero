@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import IWindowOptions from '@secret-agent/core-interfaces/IWindowOptions';
 import Session from './Session';
 import {
@@ -428,9 +428,12 @@ export default class Window {
 
   // CREATE
 
-  public static async create(sessionState: SessionState, session: Session) {
+  public static async create(
+    sessionState: SessionState,
+    session: Session,
+    puppPage: puppeteer.Page,
+  ) {
     const logid = log.info('CreatingWindow', { sessionId: session.id });
-    const puppPage = await session.puppContext.newPage();
 
     await puppPage.setExtraHTTPHeaders(session.requestMitmProxySession.getTrackingHeaders());
 

@@ -3,6 +3,10 @@
   "version": "1.0.0-alpha.8",
   "description": "EmulatorPlugin for Apple Safari version 13.0",
   "main": "index.js",
+  "engine": {
+    "browser": "chromium",
+    "revision": "722234"
+  },
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.8",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.8",

@@ -1,22 +1,29 @@
-import puppeteer from 'puppeteer';
 import * as Helpers from '@secret-agent/testing/helpers';
 import getOverrideScript from '../injected-scripts';
 import inspectScript from './inspectHierarchy';
-import ChromeJson from '../../emulate-chrome-80/chrome.json';
+import ChromeJson from '@secret-agent/emulate-chrome-80/chrome.json';
 import { inspect } from 'util';
+import ChromeCore from '@secret-agent/core/lib/ChromeCore';
+import Emulators from '@secret-agent/emulators';
+import Core from '@secret-agent/core';
 
 const { chrome, prevProperty } = ChromeJson as any;
 
+let chromeCore: ChromeCore;
+beforeAll(async () => {
+  const emulator = Emulators.create(Core.defaultEmulatorId);
+  chromeCore = new ChromeCore(emulator.engineExecutablePath);
+  Helpers.onClose(() => chromeCore.close(), true);
+  chromeCore.start();
+});
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 const debug = process.env.DEBUG || false;
 
 test('it should mimic a chrome object', async () => {
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
+  const page = await createPage();
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
@@ -39,10 +46,8 @@ test('it should mimic a chrome object', async () => {
 }, 60e3);
 
 test('it should update loadtimes and csi values', async () => {
-  const puppBrowser = await puppeteer.launch({ headless: true, devtools: true });
-  Helpers.onClose(() => puppBrowser.close());
   const httpServer = await Helpers.runHttpServer();
-  const page = await puppBrowser.newPage();
+  const page = await createPage();
   page.on('pageerror', console.log);
   if (debug) {
     page.on('console', log => console.log(log.text()));
@@ -70,3 +75,9 @@ test('it should update loadtimes and csi values', async () => {
   expect(String(csi.onloadT).length).toBe(String(chrome.csi['new()'].onloadT._value).length);
   expect(Object.keys(csi)).toHaveLength(4);
 }, 60e3);
+
+async function createPage() {
+  const context = await chromeCore.createContext();
+  Helpers.onClose(() => context.close());
+  return context.newPage();
+}

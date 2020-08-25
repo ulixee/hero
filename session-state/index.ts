@@ -64,6 +64,9 @@ export default class SessionState {
     sessionId: string,
     sessionName: string | null,
     scriptInstanceMeta: IScriptInstanceMeta,
+    emulatorId: string,
+    humanoidId: string,
+    hasEmulatorPolyfills: boolean,
   ) {
     this.createDate = new Date();
     this.sessionId = sessionId;
@@ -92,6 +95,9 @@ export default class SessionState {
     this.db.session.insert(
       sessionId,
       sessionName,
+      emulatorId,
+      humanoidId,
+      hasEmulatorPolyfills,
       this.createDate,
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.entrypoint,

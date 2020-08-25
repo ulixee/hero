@@ -7,13 +7,13 @@
     "start:website": "yarn workspace @secret-agent/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "yarn tsc && yarn workspace @secret-agent/replay-app build:frontend && cd build && yarn",
-    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node dist-prepare.js && shx cp package.dist.json build-dist/package.json",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
-    "copy:build": "copyfiles \"testing/*/**\" \"yarn.lock\" \"mitm-socket/dist\" -a build && shx cp package.build.json build/package.json",
-    "copy:dist": "copyfiles \"mitm-socket/socket/*\" -e \"mitm-socket/socket/connect\" \"**/.gitignore\" \"**/.npmignore\" build-dist",
-    "tsc": "tsc -b tsconfig.json && yarn copy:build && yarn workspace @secret-agent/replay-app build:backend",
+    "copy:build": "copyfiles \"testing/*/**\" \"yarn.lock\" \"mitm-socket/dist/*\" -a build && shx cp package.build.json build/package.json",
+    "copy:dist": "copyfiles \"mitm-socket/lib/*\" -e \"mitm-socket/dist\" \"**/.gitignore\" \"**/.npmignore\" build-dist",
+    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @secret-agent/replay-app build:backend",
     "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay-app build:backend-paths\"",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay-app clean",
@@ -102,6 +102,7 @@
     ]
   },
   "resolutions": {
-    "remark-slug": "git://github.com/ulixee/remark-slug.git"
+    "remark-slug": "git://github.com/ulixee/remark-slug.git",
+    "tough-cookie": "^4.0.0"
   }
 }

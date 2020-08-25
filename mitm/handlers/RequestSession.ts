@@ -226,9 +226,7 @@ export default class RequestSession {
   }
 
   public static async close() {
-    for (const session of Object.values(RequestSession.sessions)) {
-      await session.close();
-    }
+    await Promise.all(Object.values(RequestSession.sessions).map(x => x.close()));
   }
 
   public static async getSession(

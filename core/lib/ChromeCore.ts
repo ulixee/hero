@@ -1,7 +1,5 @@
 import Log from '@secret-agent/commons/Logger';
-import puppeteer, { LaunchOptions } from 'puppeteer';
-import Session from './Session';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import puppeteer, { LaunchOptions } from 'puppeteer-core';
 import os from 'os';
 import Path from 'path';
 
@@ -14,14 +12,11 @@ export default class ChromeCore {
   public isStarted: boolean;
   public isShuttingDown: boolean;
   public readonly isShowingBrowser = !!process.env.SHOW_BROWSER;
+  public readonly executablePath: string;
   private puppBrowserPromise: Promise<puppeteer.Browser>;
-  private readonly sessionsById: { [id: string]: Session } = {};
 
-  public get activeSessions() {
-    return Object.keys(this.sessionsById).length;
-  }
-
-  constructor() {
+  constructor(chromePath: string) {
+    this.executablePath = chromePath;
     this.isStarted = false;
     this.isShuttingDown = false;
     this.id = puppBrowserCounter;
@@ -36,7 +31,7 @@ export default class ChromeCore {
       return;
     }
     this.isShuttingDown = false;
-    this.puppBrowserPromise = new Promise(async (resolve, reject) => {
+    this.puppBrowserPromise = new Promise<puppeteer.Browser>(async (resolve, reject) => {
       let tickerInterval;
       let killTimer;
       try {
@@ -77,7 +72,7 @@ export default class ChromeCore {
         options.ignoreDefaultArgs = true;
         options.ignoreHTTPSErrors = true;
         options.userDataDir = Path.join(os.tmpdir(), 'core-engine');
-        options.executablePath = process.env.CHROME_BIN || null;
+        options.executablePath = this.executablePath;
         options.defaultViewport = null;
 
         options.args = puppeteer
@@ -117,46 +112,28 @@ export default class ChromeCore {
     });
   }
 
-  public async isReady() {
-    await this.puppBrowserPromise;
-    return true;
-  }
-
-  public async createSession(ctxOptions: ICreateSessionOptions) {
-    const puppBrowser = await this.getBrowser();
+  public async createContext() {
+    const puppBrowser = await this.puppBrowserPromise;
     if (this.isShuttingDown) {
       return;
     }
-    const session = await Session.create(puppBrowser, this, ctxOptions);
-    this.sessionsById[session.id] = session;
-    return session;
-  }
-
-  public cleanupSession(sessionId: string) {
-    delete this.sessionsById[sessionId];
-  }
-
-  public getSession(sessionId: string): Session {
-    return this.sessionsById[sessionId];
+    return await puppBrowser.createIncognitoBrowserContext();
   }
 
   public async close() {
     log.info('ClosingChrome');
     if (this.isShuttingDown) return;
+    const browserPromise = this.puppBrowserPromise;
+
     this.isShuttingDown = true;
     this.isStarted = false;
+    this.puppBrowserPromise = null;
+
     try {
-      if (this.puppBrowserPromise) {
-        const puppBrowser = await this.getBrowser();
-        this.puppBrowserPromise = null;
-        if (puppBrowser) await puppBrowser.close();
-      }
+      const puppBrowser = await browserPromise;
+      if (puppBrowser) await puppBrowser.close();
     } catch (error) {
       log.error('ClosingChromeError', { sessionId: null, error });
     }
-  }
-
-  private async getBrowser() {
-    return this.puppBrowserPromise;
   }
 }

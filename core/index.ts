@@ -26,20 +26,17 @@ import { createReplayServer } from '@secret-agent/session-state/api';
 import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
 import Signals = NodeJS.Signals;
 import Queue from '@secret-agent/commons/Queue';
+import IListenerObject from './interfaces/IListenerObject';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
+import Emulators from '@secret-agent/emulators';
 
 const { log } = Log(module);
 const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
 export { GlobalPool, Window, Session, LocationTrigger };
 
-interface IListenerObject {
-  id: string;
-  type?: string;
-  jsPath?: IJsPath;
-  listenFn?: (...args) => void;
-}
-
 export default class Core implements ICore {
+  public static defaultEmulatorId = Chrome83.emulatorId;
   public static byWindowId: { [windowId: string]: Core } = {};
   public static onEventFn: (meta: ISessionMeta, listenerId: string, ...eventArgs: any[]) => void;
   private static wasManuallyStarted = false;
@@ -237,8 +234,12 @@ export default class Core implements ICore {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       this.wasManuallyStarted = true;
-      if (options) await this.configure(options);
-      await GlobalPool.start();
+      if (options) {
+        await this.configure(options);
+      }
+      if (!options?.activeEmulatorIds) {
+        await GlobalPool.start([Core.defaultEmulatorId]);
+      }
       if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
         await this.startReplayServer(options.replayServerPort);
       }
@@ -246,15 +247,17 @@ export default class Core implements ICore {
   }
 
   public static async configure(options: IConfigureOptions) {
-    const { maxActiveSessionCount, localProxyPortStart, sessionsDir } = options;
+    const { maxActiveSessionCount, localProxyPortStart, sessionsDir, activeEmulatorIds } = options;
     if (maxActiveSessionCount) GlobalPool.maxActiveSessionCount = options.maxActiveSessionCount;
     if (localProxyPortStart) GlobalPool.localProxyPortStart = options.localProxyPortStart;
     if (sessionsDir) GlobalPool.sessionsDir = options.sessionsDir;
+    if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);
   }
 
   public static async createSession(options: ICreateSessionOptions = {}) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
+      if (!Emulators.defaultEmulatorId) Emulators.defaultEmulatorId = Core.defaultEmulatorId;
       const session = await GlobalPool.createSession(options);
       if (shouldStartReplayServer) {
         await this.startReplayServer();

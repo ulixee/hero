@@ -6,22 +6,21 @@ import HumanoidSkipper from '@secret-agent/humanoid-skipper';
 type IHumanoidPlugin = new () => HumanoidPlugin;
 
 export default class Humanoids {
-  private static readonly pluginsByKey: { [key: string]: IHumanoidPlugin } = {};
+  private static readonly pluginsById: { [id: string]: IHumanoidPlugin } = {};
 
   // tslint:disable-next-line:variable-name
   public static load(EmulatorPlugin: IHumanoidPlugin) {
     // @ts-ignore
-    this.pluginsByKey[EmulatorPlugin.key] = EmulatorPlugin;
+    this.pluginsById[EmulatorPlugin.id] = EmulatorPlugin;
   }
 
-  public static get(key: string) {
-    return new this.pluginsByKey[key]();
+  public static create(id: string) {
+    return new this.pluginsById[id]();
   }
 
-  public static getRandom(): HumanoidPlugin {
-    const plugins = Object.values(this.pluginsByKey);
-    const plugin = Utils.pickRandom(plugins);
-    return new plugin();
+  public static getRandomId() {
+    const pluginIds = Object.keys(this.pluginsById);
+    return Utils.pickRandom(pluginIds);
   }
 }
 
