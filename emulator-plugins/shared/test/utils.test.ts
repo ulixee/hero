@@ -1,6 +1,6 @@
+import { inspect } from 'util';
 import inspectHierarchy from './inspectHierarchy';
 import { proxyFunction } from '../injected-scripts/utils';
-import { inspect } from 'util';
 
 const debug = process.env.DEBUG || false;
 

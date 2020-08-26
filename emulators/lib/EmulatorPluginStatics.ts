@@ -9,5 +9,5 @@ export interface IEmulatorPluginStatics {
 }
 
 // decorator for emulator plugins. hacky way to check the class implements statics we need
-// tslint:disable-next-line:no-empty
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function EmulatorPluginStatics(constructor: IEmulatorPluginStatics) {}

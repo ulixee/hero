@@ -1,34 +1,34 @@
-import IBrowser from '../interfaces/IBrowser';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { createSuperDocument } from 'awaited-dom/impl/create';
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import AwaitedEventTarget from './AwaitedEventTarget';
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
-import ICreateBrowserOptions from '../interfaces/ICreateBrowserOptions';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import CoreClient from './CoreClient';
-import CoreClientSession from './CoreClientSession';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import Resource, { createResource } from './Resource';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import Request from 'awaited-dom/impl/official-klasses/Request';
+import { bindFunctions } from '@secret-agent/commons/utils';
+import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
+import CoreClient from './CoreClient';
+import CoreClientSession from './CoreClientSession';
+import Resource, { createResource } from './Resource';
 import WebsocketResource from './WebsocketResource';
 import ScriptInstance from './ScriptInstance';
 import User, { createUser } from './User';
 import Fetcher, { createFetcher } from './Fetcher';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Request from 'awaited-dom/impl/official-klasses/Request';
-import { bindFunctions } from '@secret-agent/commons/utils';
+import ICreateBrowserOptions from '../interfaces/ICreateBrowserOptions';
+import AwaitedEventTarget from './AwaitedEventTarget';
+import IBrowser from '../interfaces/IBrowser';
 import RequestGenerator from './Request';
+import IWaitForResourceFilter from "../interfaces/IWaitForResourceFilter";
 
 const { getState, setState } = StateMachine<IBrowser, IState>();
 const scriptInstance = new ScriptInstance();
@@ -63,11 +63,11 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
     const awaitedPath = new AwaitedPath('document');
-    const awaitedOptions = { browser: this, coreClientSession: coreClientSession };
+    const awaitedOptions = { browser: this, coreClientSession };
 
     setState(this, {
-      coreClientSession: coreClientSession,
-      sessionName: sessionName,
+      coreClientSession,
+      sessionName,
       superDocument: createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions),
       user: createUser(this, coreClientSession),
       fetcher: createFetcher(this, coreClientSession),

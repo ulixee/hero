@@ -2,7 +2,6 @@ import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import puppeteer from 'puppeteer-core';
 import IWindowOptions from '@secret-agent/core-interfaces/IWindowOptions';
-import Session from './Session';
 import {
   ILocationStatus,
   ILocationTrigger,
@@ -11,27 +10,28 @@ import {
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import SessionState from '@secret-agent/session-state';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { AllowedNames } from '@secret-agent/commons/AllowedNames';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
 import * as Url from 'url';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
-import Interactor from './Interactor';
-import LocationTracker from './LocationTracker';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import Timer from '@secret-agent/commons/Timer';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { createPromise } from '@secret-agent/commons/utils';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import FrameTracker from './FrameTracker';
-import WindowEvents, { IWindowEventParams } from './WindowEvents';
 import { EmulatorPlugin } from '@secret-agent/emulators';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import WindowEvents, { IWindowEventParams } from './WindowEvents';
+import FrameTracker from './FrameTracker';
+import LocationTracker from './LocationTracker';
+import Interactor from './Interactor';
+import IDevtoolsClient from '../interfaces/IDevtoolsClient';
+import Session from './Session';
 import DomEnv from './DomEnv';
+import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 
 const { log } = Log(module);
 
@@ -48,7 +48,7 @@ export default class Window {
   private readonly events: WindowEvents;
   private readonly interactor: Interactor;
 
-  private isClosing: boolean = false;
+  private isClosing = false;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
 
   public get lastCommandId() {
@@ -146,7 +146,8 @@ export default class Window {
   }
 
   public async config(options: IWindowOptions) {
-    this.session.requestMitmProxySession.blockImages = false;
+    const blockImages = options?.renderingOptions?.includes('LoadImages') ?? false;
+    this.session.requestMitmProxySession.blockImages = blockImages;
     this.session.requestMitmProxySession.blockUrls = [];
   }
 
@@ -324,10 +325,7 @@ export default class Window {
     }
   }
 
-  public async waitForResource(
-    filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
-    opts?: IWaitForResourceOptions,
-  ) {
+  public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
     const timer = new Timer(opts?.timeoutMs ?? 60e3, this.waitTimeouts);
 
     const resourceMetas: IResourceMeta[] = [];
@@ -378,19 +376,23 @@ export default class Window {
     );
 
     try {
-      let jsonValue: IExecJsPathResult<boolean>;
+      let isFound = false;
       do {
         try {
-          jsonValue = await this.domEnv.isJsPathVisible(jsPath);
-          if (waitForVisible && jsonValue?.value !== true) {
-            jsonValue = null;
+          const jsonValue = await this.domEnv.isJsPathVisible(jsPath);
+          if (jsonValue) {
+            if (waitForVisible) {
+              isFound = jsonValue.value;
+            } else {
+              isFound = jsonValue.attachedState !== null;
+            }
           }
         } catch (err) {
-          jsonValue = null;
+          isFound = false;
         }
         timer.throwIfExpired(`Timeout waiting for element ${jsPath} to be visible`);
         await new Promise(resolve => setTimeout(resolve, 50));
-      } while (!jsonValue);
+      } while (!isFound);
     } finally {
       timer.clear();
     }
@@ -406,8 +408,7 @@ export default class Window {
 
   public async waitForMillis(millis: number): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const timeout = setTimeout(async () => {
-        if (this.isClosing) return resolve();
+      const timeout = setTimeout(() => {
         this.removeWaitTimeout(timeout);
         resolve();
       }, millis);
@@ -469,5 +470,5 @@ export default class Window {
   }
 }
 
-// tslint:disable-next-line:ban-types
+// eslint-disable-next-line @typescript-eslint/ban-types
 type WindowFunctionNames = AllowedNames<Window, Function>;

@@ -1,7 +1,7 @@
-import { remote, ipcRenderer } from 'electron';
-import { action, observable, computed } from 'mobx';
-import { getTheme } from '~shared/utils/themes';
-import ISettings from '~shared/interfaces/ISettings';
+import { ipcRenderer, remote } from "electron";
+import { computed, observable } from "mobx";
+import { getTheme } from "~shared/utils/themes";
+import ISettings from "~shared/interfaces/ISettings";
 
 export class BaseStore {
   @observable

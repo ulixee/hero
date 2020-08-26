@@ -1,6 +1,6 @@
-import Core from '../index';
 import { Helpers } from '@secret-agent/testing';
 import { LocationStatus } from '@secret-agent/client';
+import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {

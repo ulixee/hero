@@ -1,13 +1,13 @@
 export default function getResolvable<T>() {
-  let resolve: (obj: T) => any;
-  let reject: (err: Error) => any;
-  const promise = new Promise<T>((resolve1, reject1) => {
-    resolve = resolve1;
-    reject = reject1;
+  let resolveCb: (obj: T) => any;
+  let rejectCb: (err: Error) => any;
+  const promise = new Promise<T>((resolve, reject) => {
+    resolveCb = resolve;
+    rejectCb = reject;
   });
   return {
-    resolve,
-    reject,
+    resolve: resolveCb,
+    reject: rejectCb,
     promise,
   };
 }

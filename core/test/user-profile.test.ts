@@ -1,9 +1,9 @@
-import Core from '../index';
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
 import Safari13 from '@secret-agent/emulate-safari-13';
+import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {
@@ -71,6 +71,7 @@ describe('UserProfile cookie tests', () => {
       // @ts-ignore
       await core.window.devtoolsClient.send('Audits.enable');
       // @ts-ignore
+      // eslint-disable-next-line no-console
       await core.window.devtoolsClient.on('Audits.issueAdded', console.log);
       // @ts-ignore
       const session = core.session;
@@ -362,10 +363,7 @@ localStorage.setItem('cross', '1');
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/storage2'];
-      let dlfCookies = '';
-      let sameCookies = '';
       session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        dlfCookies = request.headers.cookie;
         response.end(`<html>
 <body>
 <script>
@@ -376,7 +374,6 @@ window.parent.postMessage({message: localStorage.getItem('cross')}, "${koaServer
         return true;
       };
       koaServer.get('/cross-storage2', ctx => {
-        sameCookies = ctx.cookies.get('cookietest');
         ctx.body = `<body>
 <div id="local"></div>
 <div id="cross"></div>
@@ -433,22 +430,30 @@ describe('UserProfile IndexedDb tests', () => {
       store1.createIndex('store1_index2', 'id', {
         unique: true,
       });
+      
+      
+      db.createObjectStore('store2');
+      function createStore2() {
+        const insertStore = db
+          .transaction('store2', 'readwrite')
+          .objectStore('store2');
+        insertStore.add(new Date(), '1');
+        insertStore.transaction.oncomplete = () => { 
+         document.body.classList.add('ready');
+        }
+      }
+      
       store1.transaction.oncomplete = function() {
         const insertStore = db
           .transaction('store1', 'readwrite')
           .objectStore('store1');
         insertStore.add({ id: 1, child: { name: 'Richard', age: new Date() }});
         insertStore.add({ id: 2, child: { name: 'Jill' } });
-      };
-      db.createObjectStore('store2').oncomplete = function() {
-        const insertStore = db
-          .transaction('store2', 'readwrite')
-          .objectStore('store2');
-        insertStore.add(new Date(), '1');
-        insertStore.transaction.oncomplete = function() {
-            document.body.classList.add('ready');
+        insertStore.transaction.oncomplete = () => {
+          createStore2();
         }
       };
+      
     }
 </script>
 </body>`;

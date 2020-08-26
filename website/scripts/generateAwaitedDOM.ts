@@ -4,8 +4,9 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 import json2md from 'json2md';
 import decamelize from 'decamelize';
+import rawDocs from 'awaited-dom/docs.json';
 
-const docs = require('awaited-dom/docs.json') as IDoc[];
+const docs = rawDocs as IDoc[];
 
 interface IDoc {
   name: string;
@@ -102,7 +103,7 @@ function saveDoc(doc: IDoc, filePath: string) {
       markup.push({ html: cleanupHTML(m.overview || 'Needs content.') });
       markup.push({ h4: `**Arguments**:` });
       markup.push({ ul: ['none'] });
-      markup.push({ h4: `**Returns**: \`Promise<void>\``});
+      markup.push({ h4: `**Returns**: \`Promise<void>\`` });
     }
   }
 

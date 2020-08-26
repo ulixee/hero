@@ -4,6 +4,7 @@ import { OverlayStore } from '~frontend/models/OverlayStore';
 export class Store extends OverlayStore {
   @observable
   public title: string;
+
   @observable
   public message: string;
 

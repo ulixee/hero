@@ -1,9 +1,9 @@
+import { EventEmitter } from 'events';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import SessionDb from '../lib/SessionDb';
 import { MouseEventType } from '../models/MouseEventsTable';
-import { EventEmitter } from 'events';
 import { ISessionRecord } from '../models/SessionTable';
 import CommandFormatter from '../lib/CommandFormatter';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import SessionState from '../index';
 
 export default class SessionLoader extends EventEmitter {
@@ -16,6 +16,7 @@ export default class SessionLoader extends EventEmitter {
     'commands',
     'script-state',
   ];
+
   public session: ISessionRecord;
   public startOrigin: string;
 

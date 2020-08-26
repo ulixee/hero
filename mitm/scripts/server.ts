@@ -1,7 +1,8 @@
 import { MitmProxy as MitmServer } from '../index';
 
 (async function run() {
-  const server = await MitmServer.start();
+  await MitmServer.start();
 })().catch(error => {
+  // eslint-disable-next-line no-console
   console.log('ERROR: ', error);
 });

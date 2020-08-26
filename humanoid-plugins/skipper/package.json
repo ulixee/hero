@@ -4,9 +4,7 @@
   "description": "Skip the humanoid for SecretAgent",
   "main": "index.js",
   "dependencies": {
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "@secret-agent/humanoids": "^1.0.0-alpha.10"
-  },
-  "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.10"
   }
 }

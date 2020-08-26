@@ -1,5 +1,4 @@
 import { Helpers } from '@secret-agent/testing';
-import MitmSocket from '../index';
 import * as https from 'https';
 import * as net from 'net';
 import { createPromise } from '@secret-agent/commons/utils';
@@ -8,6 +7,7 @@ import * as stream from 'stream';
 import Proxy from 'proxy';
 import * as http from 'http';
 import WebSocket from 'ws';
+import MitmSocket from '../index';
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -92,6 +92,7 @@ test('should be able to hit optimove using a Chrome79 Emulator', async () => {
 });
 
 // only test this manually
+// eslint-disable-next-line jest/no-disabled-tests
 test.skip('should be able to get scripts from unpkg using Chrome79 emulator', async () => {
   const tlsConnection = new MitmSocket('3', {
     host: 'unpkg.com',
@@ -217,6 +218,7 @@ test('should handle websockets', async () => {
     });
   });
   await messagePromise.promise;
+  expect(messages.length).toBe(messageCount);
 }, 35e3);
 
 test('should handle websockets over proxies', async () => {
@@ -261,12 +263,9 @@ test('should handle upstream disconnects', async () => {
   const tlsConnection = getTlsConnection(server.port);
   await tlsConnection.connect();
 
-  try {
-    const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
-    expect(httpResponse).not.toBeTruthy();
-  } catch (err) {
-    expect(err).toBeTruthy();
-  }
+  await expect(
+    httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket),
+  ).rejects.toThrow();
 });
 
 async function httpGetWithSocket(

@@ -1,4 +1,4 @@
-let nativeToStringFunctionString = Error.toString().replace(/Error/g, 'toString');
+const nativeToStringFunctionString = Error.toString().replace(/Error/g, 'toString');
 
 // when functions are re-bound to work around the loss of scope issue in chromium, they blow up their native toString
 const definedFuncs = new Map();
@@ -8,13 +8,16 @@ function createError(message, type) {
   if (!type) {
     const match = nativeErrorRegex.exec(message);
     if (match.length) {
-      message = message.replace(match[1] + ': ', '');
+      message = message.replace(`${match[1]  }: `, '');
       try {
         type = window[match[1]];
-      } catch (err) {}
+      } catch (err) {
+        // ignore
+      }
     }
   }
   if (!type) type = Error;
+  // eslint-disable-next-line new-cap
   const error = new type(message);
   const stack = error.stack.split(/\r?\n/);
   for (let i = 0; i < stack.length; i += 1) {
@@ -155,7 +158,7 @@ function buildDescriptor(entry) {
 const globalSymbols = {};
 for (const symbol of Reflect.ownKeys(Symbol)) {
   if (typeof Symbol[symbol] === 'symbol') {
-    globalSymbols['' + String(Symbol[symbol])] = Symbol[symbol];
+    globalSymbols[`${  String(Symbol[symbol])}`] = Symbol[symbol];
   }
 }
 
@@ -170,7 +173,7 @@ function proxyFunction(thisObject, functionName, replacementFunc) {
       },
     },
   });
-  if (!overrides.length) throw new Error('Could not override function ' + functionName);
+  if (!overrides.length) throw new Error(`Could not override function ${  functionName}`);
 }
 
 function proxyDescriptors(obj, props) {
@@ -204,7 +207,7 @@ function proxyDescriptors(obj, props) {
 function overrideGet(obj, proto, key, descriptor, override) {
   const toString = descriptor.get.toString();
   descriptor.get = new Proxy(descriptor.get, {
-    apply(target, thisArg, argArray) {
+    apply(target, thisArg) {
       if (thisArg === obj) {
         const result = override.get(...arguments);
         if (result !== nativeKey) return result;
@@ -218,11 +221,11 @@ function overrideGet(obj, proto, key, descriptor, override) {
 
 function overrideFunction(obj, proto, key, descriptor, override) {
   if (typeof proto[key] !== 'function') {
-    throw new Error("Trying to override function that's not a function! - " + key);
+    throw new Error(`Trying to override function that's not a function! - ${  key}`);
   }
   const toString = proto[key].toString();
   proto[key] = new Proxy(proto[key], {
-    apply(target, thisArg, argArray) {
+    apply(target, thisArg) {
       if (override.global || thisArg === obj) {
         const result = override.func(...arguments);
         if (result !== nativeKey) return result;
@@ -245,6 +248,7 @@ function getDescriptorInHierarchy(obj, prop) {
   return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getParentAndProperty(path) {
   const parts = breakdownPath(path, 1);
   if (!parts) return undefined;
@@ -265,7 +269,7 @@ function breakdownPath(path, propsToLeave) {
     if (next.startsWith('Symbol.')) next = Symbol.for(next);
     obj = obj[next];
     if (!obj) {
-      throw new Error('Property not found -> ' + path + ' at ' + next);
+      throw new Error(`Property not found -> ${  path  } at ${  next}`);
     }
   }
   return { parent: obj, remainder: parts };
@@ -277,25 +281,26 @@ function getObjectAtPath(path) {
   return parts.parent;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function reorderDescriptor(path, propertyName, prevProperty, throughProperty) {
   const owner = getObjectAtPath(path);
 
   const descriptor = Object.getOwnPropertyDescriptor(owner, propertyName);
   if (!descriptor) {
     console.log(
-      "Can't redefine a non-existent property descriptor: " + path + ' -> ' + propertyName,
+      `Can't redefine a non-existent property descriptor: ${  path  } -> ${  propertyName}`,
     );
     return;
   }
   const prevDescriptor = Object.getOwnPropertyDescriptor(owner, prevProperty);
   if (!prevDescriptor) {
     console.log(
-      "Can't redefine a non-existent prev property descriptor: " +
-        path +
-        ' -> ' +
-        propertyName +
-        ', prev =' +
-        prevProperty,
+      `Can't redefine a non-existent prev property descriptor: ${
+        path
+        } -> ${
+        propertyName
+        }, prev =${
+        prevProperty}`,
     );
     return;
   }
@@ -305,9 +310,9 @@ function reorderDescriptor(path, propertyName, prevProperty, throughProperty) {
   adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
 
   for (const key of keys) {
-    const descriptor = descriptors[key];
+    const keyDescriptor = descriptors[key];
     delete owner[key];
-    Object.defineProperty(owner, key, descriptor);
+    Object.defineProperty(owner, key, keyDescriptor);
   }
 }
 
@@ -318,16 +323,17 @@ function adjustKeyOrder(keys, propertyName, prevProperty, throughProperty) {
   keys.splice(keys.indexOf(prevProperty) + 1, 0, ...props);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function addDescriptorAfterProperty(path, prevProperty, propertyName, descriptor) {
   const owner = getObjectAtPath(path);
   if (!owner) {
-    console.log('ERROR: Parent for property descriptor not found: ' + path + ' -> ' + propertyName);
+    console.log(`ERROR: Parent for property descriptor not found: ${  path  } -> ${  propertyName}`);
     return;
   }
   const descriptors = Object.getOwnPropertyDescriptors(owner);
   // if already exists, don't add again
-  if (!!descriptors[propertyName]) {
-    console.log('Not re-adding descriptor for ' + propertyName);
+  if (descriptors[propertyName]) {
+    console.log(`Not re-adding descriptor for ${  propertyName}`);
     return;
   }
 
@@ -340,7 +346,7 @@ function addDescriptorAfterProperty(path, prevProperty, propertyName, descriptor
         },
       });
       if (!result.includes(propertyName))
-        throw new Error('Failed to override descriptor: ' + propertyName);
+        throw new Error(`Failed to override descriptor: ${  propertyName}`);
     } else {
       throw new Error("Can't override descriptor that doesnt have a getter");
     }

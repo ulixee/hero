@@ -1,6 +1,6 @@
-import gunzipData from './gunzip-data';
 import path from 'path';
-import { lookup } from 'useragent';
+import gunzipData from './gunzip-data';
+import UserAgent from '../lib/UserAgent';
 
 const inputFilename = require.resolve('user-agents/src/user-agents.json.gz');
 const outputFilename = path.resolve(__dirname, '../data/user-agents.json');
@@ -9,7 +9,7 @@ gunzipData(inputFilename, outputFilename, entry => {
   if (entry.deviceCategory !== 'desktop' || entry.platform.startsWith('Linux')) {
     return false;
   }
-  const agent = lookup(entry.userAgent);
+  const agent = new UserAgent(entry.userAgent);
   const os = agent.os.family;
   if (agent.family === 'Chrome') {
     if (os === 'Windows' && entry.platform !== 'Win32') {

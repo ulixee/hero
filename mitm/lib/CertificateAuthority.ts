@@ -1,8 +1,8 @@
 import fs, { promises as FS } from 'fs';
 import path from 'path';
 import Forge from 'node-forge';
-import pki = Forge.pki;
 import Log from '@secret-agent/commons/Logger';
+import pki = Forge.pki;
 
 const { log } = Log(module);
 
@@ -81,6 +81,7 @@ export default class CertificateAuthority {
     // generate random 16 bytes hex string
     let sn = '';
     for (let i = 0; i < 4; i += 1) {
+      // eslint-disable-next-line no-restricted-properties
       const randomHex = Math.floor(Math.random() * Math.pow(256, 4)).toString(16);
       sn += `00000000${randomHex}`.slice(-8);
     }

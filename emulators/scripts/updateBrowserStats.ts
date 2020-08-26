@@ -5,7 +5,7 @@ import fs from 'fs';
 
 const dataDir = `${__dirname}/../data/`;
 
-export default async function browserStats() {
+export default async function updateBrowserStats() {
   const query = {
     device_hidden: ['desktop'].join('+'),
     region_hidden: 'US',
@@ -13,8 +13,8 @@ export default async function browserStats() {
     'multi-device': true,
     csv: 1,
     fromMonthYear: moment()
-      .subtract(1, 'month')
-      .format('YYYY-MM'),
+    .subtract(1, 'month')
+    .format('YYYY-MM'),
     toMonthYear: moment().format('YYYY-MM'),
   };
 
@@ -37,15 +37,14 @@ export default async function browserStats() {
   }
 
   const averages = Object.entries(results)
-    .map(x => {
-      return {
-        browser: x[0],
-        usage: Math.round(x[1].reduce((a, b) => a + b, 0) / x[1].length),
-      };
-    })
-    .filter(x => x.usage > 1);
+  .map(x => {
+    return {
+      browser: x[0],
+      usage: Math.round(x[1].reduce((a, b) => a + b, 0) / x[1].length),
+    };
+  })
+  .filter(x => x.usage > 1);
 
-  console.log(averages);
   fs.writeFileSync(
     `${dataDir}browsers.json`,
     JSON.stringify(

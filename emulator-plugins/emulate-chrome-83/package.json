@@ -8,10 +8,8 @@
     "revision": "756035"
   },
   "dependencies": {
-    "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.10"
-  },
-  "devDependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.10",
+    "@secret-agent/emulator-plugins-shared": "^1.0.0-alpha.10",
     "@secret-agent/emulators": "^1.0.0-alpha.10"
   }
 }

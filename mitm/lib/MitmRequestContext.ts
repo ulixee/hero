@@ -1,18 +1,18 @@
 import { URL } from 'url';
 import http, { IncomingMessage, ServerResponse } from 'http';
-import { parseRawHeaders } from './Utils';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import CacheHandler from '../handlers/CacheHandler';
 import * as http2 from 'http2';
-import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
 import MitmSocket from '@secret-agent/mitm-socket';
 import OriginType, { isOriginType } from '@secret-agent/commons/interfaces/OriginType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import HttpResponseCache from './HttpResponseCache';
 import HeadersHandler from '../handlers/HeadersHandler';
-import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
+import CacheHandler from '../handlers/CacheHandler';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import { parseRawHeaders } from './Utils';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
@@ -34,7 +34,7 @@ export default class MitmRequestContext {
     const requestHeaders = parseRawHeaders(clientRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
       id: this.contextIdCounter += 1,
-      isSSL: isSSL,
+      isSSL,
       isUpgrade: protocol === 'ws',
       isClientHttp2: clientRequest instanceof http2.Http2ServerRequest,
       isServerHttp2: false,

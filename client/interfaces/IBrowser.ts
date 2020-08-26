@@ -2,14 +2,14 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
 import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IInteractions from './IInteractions';
-import Resource from '../lib/Resource';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import User from '../lib/User';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Request from 'awaited-dom/impl/official-klasses/Request';
+import User from '../lib/User';
+import Resource from '../lib/Resource';
+import IInteractions from './IInteractions';
+import IWaitForResourceFilter from './IWaitForResourceFilter';
 
 export default interface IBrowser {
   readonly document: SuperDocument;

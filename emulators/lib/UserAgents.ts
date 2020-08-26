@@ -1,6 +1,6 @@
-import { Agent, lookup } from 'useragent';
 import IUserAgent from '../interfaces/IUserAgent';
 import records from '../data/user-agents.json';
+import UserAgent from './UserAgent';
 
 interface IFilterOptions {
   deviceCategory: string;
@@ -21,7 +21,7 @@ export default class UserAgents {
   public static getList(filter: IFilterOptions, defaultAgents: string[]): IUserAgent[] {
     const userAgents: { [key: string]: IUserAgent } = {};
     for (const record of records) {
-      const agent = lookup(record.userAgent);
+      const agent = new UserAgent(record.userAgent);
       const userAgent = this.convertAgent(agent, record);
       if (this.matchesFilter(filter, userAgent)) {
         userAgents[userAgent.raw] = userAgent;
@@ -36,7 +36,7 @@ export default class UserAgents {
   }
 
   public static convertDesktopAgent(useragent: string): IUserAgent {
-    const agent = lookup(useragent);
+    const agent = new UserAgent(useragent);
     let platform = 'MacIntel';
     if (useragent.includes('Windows')) platform = 'Win32';
     let vendor = 'Google Inc.';
@@ -46,7 +46,7 @@ export default class UserAgents {
 
     let match: any = {};
     for (const record of records) {
-      const recordAgent = lookup(record.userAgent);
+      const recordAgent = new UserAgent(record.userAgent);
       // if same browser family and os, use this record
       if (
         agent.family === recordAgent.family &&
@@ -68,7 +68,7 @@ export default class UserAgents {
 
   public static findOne(filter: IFilterOptions): IUserAgent {
     for (const record of records) {
-      const agent = lookup(record.userAgent);
+      const agent = new UserAgent(record.userAgent);
       const userAgent = this.convertAgent(agent, record);
       if (this.matchesFilter(filter, userAgent)) {
         return userAgent;
@@ -78,7 +78,7 @@ export default class UserAgents {
   }
 
   public static convertAgent(
-    agent: Agent,
+    agent: UserAgent,
     record: {
       platform: string;
       vendor: string;
@@ -87,22 +87,20 @@ export default class UserAgents {
       weight?: number;
     },
   ): IUserAgent {
-    const os = agent.os;
+    const version = agent.version;
     return {
       platform: record.platform,
       family: agent.family,
       vendor: record.vendor,
       os: {
-        family: os.family,
-        major: os.major,
-        minor: os.minor,
+        ...agent.os,
       },
       raw: record.userAgent,
       deviceCategory: record.deviceCategory,
       version: {
-        major: Number(agent.major),
-        minor: Number(agent.minor),
-        patch: Number(agent.patch),
+        major: Number(version.major),
+        minor: Number(version.minor),
+        patch: Number(version.patch),
       },
       weight: record.weight,
     };

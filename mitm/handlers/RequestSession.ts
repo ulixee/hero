@@ -8,33 +8,32 @@ import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttp
 import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import Protocol from 'devtools-protocol';
-import Log from '@secret-agent/commons/Logger';
-import MitmRequestAgent from '../lib/MitmRequestAgent';
-import MitmRequestContext from '../lib/MitmRequestContext';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import { URL } from 'url';
-import Network = Protocol.Network;
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
-
-const { log } = Log(module);
+import MitmRequestContext from '../lib/MitmRequestContext';
+import MitmRequestAgent from '../lib/MitmRequestAgent';
+import Network = Protocol.Network;
 
 export default class RequestSession {
   public static sessions: { [sessionId: string]: RequestSession } = {};
   public static requestUpgradeSessionLookup: {
     [headersHash: string]: IResolvablePromise<IRequestUpgradeLookup>;
   } = {};
-  private static headerSessionIdPrefix: string = 'mitm-session-id-';
+
+  private static headerSessionIdPrefix = 'mitm-session-id-';
 
   public delegate: IHttpRequestModifierDelegate = {};
 
   public isClosing = false;
-  public blockImages: boolean = false;
+  public blockImages = false;
   public blockUrls: string[] = [];
   public blockResponseHandlerFn?: (
     request: http.IncomingMessage | http2.Http2ServerRequest,
     response: http.ServerResponse | http2.Http2ServerResponse,
   ) => boolean;
+
   public requestAgent: MitmRequestAgent;
   public requests: IHttpResourceLoadDetails[] = [];
 
@@ -103,9 +102,10 @@ export default class RequestSession {
       resource.firstRedirectingUrl = redirect.url.href;
       if (redirect.isFromRedirect) {
         const seen = new Set();
+        const findRequest = req => this.requests.find(x => x.redirectedToUrl === req.url.href);
         let prev = redirect;
         while (prev.isFromRedirect) {
-          prev = this.requests.find(x => x.redirectedToUrl === prev.url.href);
+          prev = findRequest(prev);
           if (seen.has(prev)) break;
           seen.add(prev);
           if (!prev) break;
@@ -232,7 +232,7 @@ export default class RequestSession {
   public static async getSession(
     headers: IResourceHeaders,
     method: string,
-    isWebsocket: boolean = false,
+    isWebsocket = false,
     timeout = 10e3,
   ) {
     let sessionId = RequestSession.getSessionId(headers, method);

@@ -1,8 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
-import SecretAgent from '../index';
 import { GlobalPool } from '@secret-agent/core';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
+import SecretAgent from '../index';
 
 beforeAll(async () => {
   GlobalPool.maxActiveSessionCount = 3;
@@ -44,42 +44,36 @@ describe('basic Interact tests', () => {
 
     const browser1 = await SecretAgent.createBrowser();
     Helpers.needsClosing.push(browser1);
-    {
-      // #1
-      await browser1.goto(httpServer.url);
-      expect(GlobalPool.activeSessionCount).toBe(1);
-    }
+    // #1
+    await browser1.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(1);
 
     const browser2 = await SecretAgent.createBrowser();
     Helpers.needsClosing.push(browser2);
-    {
-      // #2
-      await browser2.goto(httpServer.url);
-      expect(GlobalPool.activeSessionCount).toBe(2);
-    }
+
+    // #2
+    await browser2.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(2);
 
     const browser3 = await SecretAgent.createBrowser();
     Helpers.needsClosing.push(browser3);
-    {
-      // #3
-      await browser3.goto(httpServer.url);
-      expect(GlobalPool.activeSessionCount).toBe(3);
-    }
 
-    {
-      // #4
-      const browser4Promise = SecretAgent.createBrowser();
-      expect(GlobalPool.activeSessionCount).toBe(3);
-      await browser1.close();
-      const browser4 = await browser4Promise;
-      Helpers.needsClosing.push(browser4);
+    // #3
+    await browser3.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(3);
 
-      // should give straight to this waiting promise
-      expect(GlobalPool.activeSessionCount).toBe(3);
-      await browser4.goto(httpServer.url);
-      await browser4.close();
-      expect(GlobalPool.activeSessionCount).toBe(2);
-    }
+    // #4
+    const browser4Promise = SecretAgent.createBrowser();
+    expect(GlobalPool.activeSessionCount).toBe(3);
+    await browser1.close();
+    const browser4 = await browser4Promise;
+    Helpers.needsClosing.push(browser4);
+
+    // should give straight to this waiting promise
+    expect(GlobalPool.activeSessionCount).toBe(3);
+    await browser4.goto(httpServer.url);
+    await browser4.close();
+    expect(GlobalPool.activeSessionCount).toBe(2);
 
     await browser1.close();
     await browser2.close();

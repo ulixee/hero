@@ -17,6 +17,7 @@ export default class ScriptInstance {
   }
 
   public launchReplay(sessionName: string, coreClientSession: CoreClientSession) {
+    // eslint-disable-next-line global-require
     const launch = require('@secret-agent/replay').default;
     launch({
       scriptInstanceId: this.id,
@@ -27,7 +28,7 @@ export default class ScriptInstance {
     });
   }
 
-  public generateSessionName(name: string, shouldCleanName: boolean = true) {
+  public generateSessionName(name: string, shouldCleanName = true) {
     if (name && shouldCleanName) {
       name = cleanupSessionName(name);
     }

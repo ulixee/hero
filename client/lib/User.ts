@@ -1,23 +1,23 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import Interactor from './Interactor';
 import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import CoreClientSession from './CoreClientSession';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import Resource, { createResource } from './Resource';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import Timer from '@secret-agent/commons/Timer';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import WebsocketResource from './WebsocketResource';
-import Browser from './Browser';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
+import WebsocketResource from './WebsocketResource';
+import Browser from './Browser';
+import Resource, { createResource } from './Resource';
+import CoreClientSession from './CoreClientSession';
+import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
+import Interactor from './Interactor';
+import IWaitForResourceFilter from "../interfaces/IWaitForResourceFilter";
 
 const { getState, setState } = StateMachine<User, IState>();
 
@@ -33,8 +33,8 @@ export default class User {
   constructor(browser: Browser, coreClientSession: CoreClientSession) {
     initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
-      browser: browser,
-      coreClientSession: coreClientSession,
+      browser,
+      coreClientSession,
       interactor: new Interactor(this, coreClientSession),
     });
   }

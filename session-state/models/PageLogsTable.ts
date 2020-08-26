@@ -1,5 +1,5 @@
-import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
+import BaseTable from '../lib/BaseTable';
 
 export default class PageLogsTable extends BaseTable<IPageLogRecord> {
   constructor(readonly db: SqliteDatabase) {

@@ -10,14 +10,14 @@
 const createElementToString = Document.prototype.createElement.toString();
 
 Document.prototype.createElement = new Proxy(Document.prototype.createElement, {
-  apply: function(target, thisArg, args) {
+  apply() {
     const element = Reflect.apply(...arguments);
 
     if (!(element instanceof HTMLIFrameElement)) return element;
 
     let frameProxy;
     const windowProxy = new Proxy(window, {
-      get(target, key) {
+      get(_, key) {
         // iframe.contentWindow.self === window.top // must be false
         if (key === 'self') {
           return windowProxy;
@@ -32,7 +32,7 @@ Document.prototype.createElement = new Proxy(Document.prototype.createElement, {
 
     const elemToString = element.toString();
     frameProxy = new Proxy(element, {
-      get(target, prop, receiver) {
+      get(target, prop) {
         if (prop === 'contentWindow' && !target.contentWindow) {
           return windowProxy;
         }

@@ -1,11 +1,11 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import getOverrideScript from '../injected-scripts';
-import inspectScript from './inspectHierarchy';
 import ChromeJson from '@secret-agent/emulate-chrome-80/chrome.json';
 import { inspect } from 'util';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import Emulators from '@secret-agent/emulators';
 import Core from '@secret-agent/core';
+import inspectScript from './inspectHierarchy';
+import getOverrideScript from '../injected-scripts';
 
 const { chrome, prevProperty } = ChromeJson as any;
 

@@ -1,21 +1,18 @@
-import * as Fs from 'fs';
-import * as Path from 'path';
-import Url, { URL } from 'url';
-import querystring from 'querystring';
-import Log from '@secret-agent/commons/Logger';
-import http, { IncomingMessage, RequestListener, Server } from 'http';
-import https from 'https';
-import { createPromise } from '@secret-agent/commons/utils';
-import HttpProxyAgent from 'http-proxy-agent';
-import HttpsProxyAgent from 'https-proxy-agent';
-import Koa from 'koa';
-import KoaRouter from '@koa/router';
-import Core from '../core';
-import * as net from 'net';
-import * as http2 from 'http2';
-import * as stream from 'stream';
-
-const { log } = Log(module);
+import * as Fs from "fs";
+import * as Path from "path";
+import Url, { URL } from "url";
+import querystring from "querystring";
+import http, { IncomingMessage, RequestListener, Server } from "http";
+import https from "https";
+import { createPromise } from "@secret-agent/commons/utils";
+import HttpProxyAgent from "http-proxy-agent";
+import HttpsProxyAgent from "https-proxy-agent";
+import Koa from "koa";
+import KoaRouter from "@koa/router";
+import * as net from "net";
+import * as http2 from "http2";
+import * as stream from "stream";
+import Core from "../core";
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -29,7 +26,7 @@ export interface ITestKoaServer extends KoaRouter {
   baseUrl: string;
 }
 
-export async function runKoaServer(onlyCloseOnFinal: boolean = true): Promise<ITestKoaServer> {
+export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
   const koa = new Koa();
   const router = new KoaRouter() as ITestKoaServer;
   const exampleOrgPath = Path.join(__dirname, 'html', 'example.org.html');
@@ -47,7 +44,7 @@ export async function runKoaServer(onlyCloseOnFinal: boolean = true): Promise<IT
   router.baseHost = `localhost:${port}`;
   router.baseUrl = `http://${router.baseHost}`;
 
-  router.get('/', (ctx, next) => {
+  router.get('/', ctx => {
     ctx.body = exampleOrgHtml;
   });
 
@@ -233,7 +230,7 @@ export function httpRequest(
 export function getProxyAgent(url: URL, proxyHost: string) {
   // tslint:disable-next-line:variable-name
   const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
-  return new ProxyAgent(proxyHost);
+  return ProxyAgent(proxyHost);
 }
 
 export function httpGet(
@@ -323,6 +320,7 @@ async function closeAll(isFinal = false) {
   await Promise.all(
     closeList.map(async (toClose, i) => {
       if (!toClose.close) {
+        // eslint-disable-next-line no-console
         console.log('Error closing', { closeIndex: i });
         return;
       }
@@ -334,13 +332,14 @@ async function closeAll(isFinal = false) {
       try {
         await toClose.close();
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.log('Error shutting down', err);
       }
     }),
   );
 }
 
-export function onClose(closeFn: () => Promise<any>, onlyCloseOnFinal: boolean = false) {
+export function onClose(closeFn: () => Promise<any>, onlyCloseOnFinal = false) {
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
 }
 

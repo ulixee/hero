@@ -1,10 +1,10 @@
-import SecretAgent from '../index';
 import { Helpers } from '@secret-agent/testing';
 import MitmServer from '@secret-agent/mitm/lib/MitmProxy';
 import { createPromise } from '@secret-agent/commons/utils';
 import WebSocket from 'ws';
 import MitmRequestHandler from '@secret-agent/mitm/lib/MitmRequestHandler';
 import WebsocketResource from '@secret-agent/client/lib/WebsocketResource';
+import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {

@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 const buildDir = `${__dirname}/build`;
 
 function processPackageJson(packagePath) {

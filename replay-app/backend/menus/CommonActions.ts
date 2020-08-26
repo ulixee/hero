@@ -21,7 +21,7 @@ export const saveAs = async () => {
 };
 
 export const viewSource = async () => {
-  const window = Window.current;
+  // const window = Window.current;
   // tabManager.createTab({ url: `view-source:${tabManager.selected.url}`, active: true }, true);
 };
 

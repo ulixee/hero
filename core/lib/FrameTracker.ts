@@ -1,8 +1,10 @@
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import Protocol from 'devtools-protocol';
+import Log from '@secret-agent/commons/Logger';
+import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import SessionState from '@secret-agent/session-state';
+import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { exceptionDetailsToError } from './Utils';
 import DomEnv from './DomEnv';
-import Log from '@secret-agent/commons/Logger';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import Frame = Protocol.Page.Frame;
@@ -10,8 +12,6 @@ import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
 import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
 import ExecutionContextDestroyedEvent = Protocol.Runtime.ExecutionContextDestroyedEvent;
 import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import SessionState from '@secret-agent/session-state';
 
 const { log } = Log(module);
 

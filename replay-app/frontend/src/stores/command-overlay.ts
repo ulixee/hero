@@ -5,6 +5,7 @@ import ICommandWithResult from '~shared/interfaces/ICommandResult';
 export class Store extends OverlayStore {
   @observable
   public commandLabel: string;
+
   @observable
   private commandResult: ICommandWithResult;
 

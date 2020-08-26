@@ -6,11 +6,12 @@
     "experimentalDecorators": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "sourceMap": false,
     "declarationMap": false,
     "strict": true,
     "esModuleInterop": true,
     "lib": ["es2018"]
-  }
+  },
+  "include": ["generateAwaitedDOM.ts", ".eslintrc.js"]
 }
-

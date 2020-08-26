@@ -8,5 +8,7 @@ module.exports = async () => {
       execSync(`taskkill /t /f /im chrome.exe 2> nul`);
     }
     fs.rmdirSync(`${__dirname}/.cache-test`, { recursive: true });
-  } catch (err) {}
+  } catch (err) {
+    // ignore
+  }
 };

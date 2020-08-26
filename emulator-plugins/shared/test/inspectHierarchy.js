@@ -48,22 +48,22 @@ module.exports = async function inspect(obj, parentPath) {
   return JSON.stringify({ window: result, detached });
 
   async function extractPropsFromObject(obj, parentPath) {
-    let keys = [];
+    const keys = [];
     let symbols = [];
     try {
-      for (let key of Object.getOwnPropertyNames(obj)) {
+      for (const key of Object.getOwnPropertyNames(obj)) {
         if (!keys.includes(key)) keys.push(key);
       }
     } catch (err) {}
     try {
       symbols = Object.getOwnPropertySymbols(obj);
-      for (let key of symbols) {
+      for (const key of symbols) {
         if (!keys.includes(key)) keys.push(key);
       }
     } catch (err) {}
 
     try {
-      for (let key in obj) {
+      for (const key in obj) {
         if (!keys.includes(key)) keys.push(key);
       }
     } catch (err) {}
@@ -108,10 +108,10 @@ module.exports = async function inspect(obj, parentPath) {
       }
       if (key === 'constructor') continue;
 
-      const path = parentPath + '.' + String(key);
+      const path = `${parentPath  }.${  String(key)}`;
       if (path.endsWith('_GLOBAL_HOOK__')) continue;
 
-      const prop = '' + String(key);
+      const prop = `${  String(key)}`;
       if (
         path.startsWith('window.document') &&
         typeof key === 'string' &&
@@ -140,8 +140,8 @@ module.exports = async function inspect(obj, parentPath) {
       }
       if (hierarchyNav.has(path)) {
         newObj[prop] = hierarchyNav.get(path);
-        //const descriptor = await getDescriptor(obj, key);
-        //Object.assign(newObj[prop], descriptor);
+        // const descriptor = await getDescriptor(obj, key);
+        // Object.assign(newObj[prop], descriptor);
         continue;
       }
 
@@ -154,7 +154,7 @@ module.exports = async function inspect(obj, parentPath) {
         const isOwnProp = obj.hasOwnProperty && obj.hasOwnProperty(key);
         if (value && typeof value === 'string' && value.startsWith('REF:') && !isOwnProp) {
           // don't assign here
-          //console.log('skipping ref', value);
+          // console.log('skipping ref', value);
         } else {
           newObj[prop] = value;
         }
@@ -165,7 +165,7 @@ module.exports = async function inspect(obj, parentPath) {
     try {
       if (obj.prototype) {
         const instance = await new obj();
-        newObj['new()'] = await extractPropsFromObject(instance, parentPath + '.new()');
+        newObj['new()'] = await extractPropsFromObject(instance, `${parentPath  }.new()`);
       }
     } catch (err) {
       newObj['new()'] = err.toString();
@@ -178,21 +178,21 @@ module.exports = async function inspect(obj, parentPath) {
     let proto = obj;
     if (typeof proto === 'function') return hierarchy;
 
-    while (!!proto) {
+    while (proto) {
       proto = Object.getPrototypeOf(proto);
 
       if (!proto) break;
 
       try {
-        let name = getObjectName(proto);
+        const name = getObjectName(proto);
         hierarchy.push(name);
 
         if (loadedObjects.has(proto)) continue;
 
-        let path = 'window.' + name;
-        let topType = name.split('.').shift();
+        let path = `window.${  name}`;
+        const topType = name.split('.').shift();
         if (!(topType in window)) {
-          path = 'detached.' + name;
+          path = `detached.${  name}`;
         }
 
         if (!hierarchyNav.has(path)) {
@@ -214,7 +214,7 @@ module.exports = async function inspect(obj, parentPath) {
     }
 
     let accessException;
-    let value = await new Promise(async (resolve, reject) => {
+    const value = await new Promise(async (resolve, reject) => {
       let didResolve = false;
       // if you wait on a promise, it will hang!
       const t = setTimeout(() => reject('Likely a Promise'), 200);
@@ -239,7 +239,7 @@ module.exports = async function inspect(obj, parentPath) {
       (typeof value === 'function' || typeof value === 'object' || typeof value === 'symbol')
     ) {
       if (loadedObjects.has(value)) {
-        return 'REF: ' + loadedObjects.get(value);
+        return `REF: ${  loadedObjects.get(value)}`;
       }
       // safari will end up in an infinite loop since each plugin is a new object as your traverse
       if (path.includes('.navigator') && path.endsWith('.enabledPlugin')) {
@@ -256,7 +256,7 @@ module.exports = async function inspect(obj, parentPath) {
 
     if (!Object.keys(descriptor).length && !Object.keys(details).length) return undefined;
     const prop = Object.assign(details, descriptor);
-    if (prop._value === 'REF: ' + path) {
+    if (prop._value === `REF: ${  path}`) {
       prop._value = undefined;
     }
     return prop;
@@ -286,7 +286,7 @@ module.exports = async function inspect(obj, parentPath) {
       plainObject._invocation = functionDetails.invocation;
 
       return plainObject;
-    } else {
+    } 
       let value;
       try {
         value = objDesc.value;
@@ -317,7 +317,7 @@ module.exports = async function inspect(obj, parentPath) {
         _getToStringToString: objDesc.get ? objDesc.get.toString.toString() : undefined,
         _setToStringToString: objDesc.set ? objDesc.set.toString.toString() : undefined,
       };
-    }
+    
   }
 
   async function getFunctionDetails(value, obj, key, type, path) {
@@ -376,15 +376,15 @@ module.exports = async function inspect(obj, parentPath) {
     }
     try {
       if (value && typeof value === 'symbol') {
-        value = '' + String(value);
+        value = `${  String(value)}`;
       } else if (value && (value instanceof Promise || typeof value.then === 'function')) {
         value = 'Promise';
       } else if (value && typeof value === 'object') {
         if (loadedObjects.has(value)) {
-          return 'REF: ' + loadedObjects.get(value);
-        } else {
+          return `REF: ${  loadedObjects.get(value)}`;
+        } 
           value = String(value);
-        }
+        
       } else if (value && typeof value === 'string') {
         const url = '${ctx.url.href}';
         const host = '${ctx.url.host}';
@@ -408,7 +408,7 @@ module.exports = async function inspect(obj, parentPath) {
     if (obj === Object.prototype) return 'Object.prototype';
     try {
       if (typeof obj === 'symbol') {
-        return '' + String(obj);
+        return `${  String(obj)}`;
       }
     } catch (err) {}
     try {
@@ -439,7 +439,7 @@ module.exports = async function inspect(obj, parentPath) {
 
       if (!name) return;
 
-      return name + '.prototype';
+      return `${name  }.prototype`;
     } catch (err) {}
   }
 };

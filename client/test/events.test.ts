@@ -1,6 +1,6 @@
+import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { SecretAgentClientGenerator } from '../index';
 import Resource from '../lib/Resource';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 
 describe('events', () => {
   it('receives close event', async () => {

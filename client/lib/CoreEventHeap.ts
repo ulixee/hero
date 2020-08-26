@@ -1,8 +1,7 @@
-// tslint:disable:variable-name
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import CoreClient from './CoreClient';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import Log from '@secret-agent/commons/Logger';
+import { IJsPath } from "awaited-dom/base/AwaitedPath";
+import ISessionMeta from "@secret-agent/core-interfaces/ISessionMeta";
+import Log from "@secret-agent/commons/Logger";
+import CoreClient from "./CoreClient";
 
 const { log } = Log(module);
 
@@ -68,7 +67,6 @@ export default class CoreEventHeap {
     jsPath: IJsPath | null,
     type: string,
     listenerFn: (...args: any[]) => void,
-    options?,
   ) {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);

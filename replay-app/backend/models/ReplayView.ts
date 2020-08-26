@@ -1,10 +1,9 @@
-import * as http from 'http';
+import { v1 as uuidv1 } from 'uuid';
 import Window from './Window';
 import ReplayApi from '~backend/api';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Application from '~backend/Application';
 import TabBackend from './TabBackend';
-import { v1 as uuidv1 } from 'uuid';
 import ReplayState from '~backend/api/ReplayState';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');

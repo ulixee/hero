@@ -1,8 +1,8 @@
 import getOverrideScript from '@secret-agent/emulator-plugins-shared/injected-scripts';
+import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
+import { parseNavigatorPlugins } from '@secret-agent/emulator-plugins-shared';
 import codecs from './codecs.json';
 import navigator from './navigator.json';
-import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
-import parseNavigatorPlugins from '@secret-agent/emulator-plugins-shared/parseNavigatorPlugins';
 
 export default function pageOverrides(args: {
   osFamily: string;

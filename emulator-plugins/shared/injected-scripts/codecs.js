@@ -13,7 +13,7 @@ proxyFunction(HTMLMediaElement.prototype, 'canPlayType', (func, thisArg, type) =
 });
 
 function emulateRecordingCodecs(audioRecordingCodecs, videoRecordingCodecs) {
-  if (window['MediaRecorder']) {
+  if (window.MediaRecorder) {
     proxyFunction(MediaRecorder, 'isTypeSupported', (func, thisArg, type) => {
       if (type === undefined) return nativeKey;
       return audioRecordingCodecs.includes(type) || videoRecordingCodecs.includes(type);

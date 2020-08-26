@@ -1,5 +1,5 @@
 import zlib from 'zlib';
-import { createPromise } from '@secret-agent/commons/utils';
+import { createPromise } from './utils';
 
 export default async function decodeBuffer(buffer: Buffer, encoding: string): Promise<Buffer> {
   if (!buffer) return null;

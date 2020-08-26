@@ -46,13 +46,11 @@ export default class AwaitedEventTarget<T> {
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    {
-      const wrappedListener = (event: T[K]) => {
-        listenerFn.call(this, event);
-        this.removeEventListener(eventType, listenerFn, options);
-        return null;
-      };
-      return this.addEventListener(eventType, wrappedListener, options);
-    }
+    const wrappedListener = (event: T[K]) => {
+      listenerFn.call(this, event);
+      this.removeEventListener(eventType, listenerFn, options);
+      return null;
+    };
+    return this.addEventListener(eventType, wrappedListener, options);
   }
 }

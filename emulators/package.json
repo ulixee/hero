@@ -4,22 +4,19 @@
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {
-    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'",
-    "postinstall": "node -e 'require(\"useragent/bin/update.js\")'"
+    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'"
   },
   "dependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.10",
-    "request": "^2.88.2",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "tough-cookie": "^4.0.0",
-    "user-agents": "^1.0.559",
-    "useragent": "^2.3.0",
-    "yamlparser": "0.0.x"
+    "ua-parser-js": "^0.7.21",
+    "user-agents": "^1.0.559"
   },
   "devDependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
-    "@types/useragent": "^2.1.1",
+    "moment": "^2.27.0",
+    "@types/ua-parser-js": "^0.7.33",
     "axios": "^0.19.2",
-    "csv-parser": "^2.3.2",
-    "ts-node": "^9.0.0"
+    "csv-parser": "^2.3.2"
   }
 }

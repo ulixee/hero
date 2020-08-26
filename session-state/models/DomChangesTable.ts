@@ -1,6 +1,6 @@
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import BaseTable from '../lib/BaseTable';
 import { Database as SqliteDatabase } from 'better-sqlite3';
+import BaseTable from '../lib/BaseTable';
 
 export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -45,7 +45,7 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
   }
 
   public getFrameChanges(frameIds: string[], sinceCommandId?: number) {
-    const frameParams = frameIds.map(_ => '?').join(', ');
+    const frameParams = frameIds.map(() => '?').join(', ');
     const query = this.db.prepare(
       `select * from ${this.tableName} where frameId in (${frameParams}) and commandId > ?`,
     );

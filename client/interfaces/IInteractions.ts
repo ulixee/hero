@@ -1,9 +1,6 @@
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
-import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import {
-  IKeyboardKeyCode,
-  IKeyboardKeyCodes,
-} from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { ISuperElement, ISuperNode } from "awaited-dom/base/interfaces/super";
+import { IMousePositionXY } from "@secret-agent/core-interfaces/IInteractions";
+import { IKeyboardKeyCode } from "@secret-agent/core-interfaces/IKeyboardLayoutUS";
 
 export type IInteraction = ICommand | ICommandDetailed;
 type IInteractions = IInteraction[];

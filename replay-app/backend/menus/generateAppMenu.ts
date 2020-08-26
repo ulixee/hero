@@ -47,7 +47,7 @@ export default function generateAppMenu() {
         },
         ...createMenuItem(
           ['CmdOrCtrl+Shift+O'],
-          window => {
+          () => {
             ipcMain.emit('open-file');
           },
           'Open SecretAgent Script',
@@ -237,7 +237,7 @@ function createMenuItem(
   shortcuts: string[],
   action: (window: Window, menuItem: MenuItem, shortcutIndex: number) => void,
   label: string = null,
-  enabled: boolean = true,
+  enabled = true,
 ) {
   const result: any = shortcuts.map((shortcut, key) => ({
     accelerator: shortcut,

@@ -142,9 +142,9 @@ export default class TabFrontend {
 
     if (startSessionMillis && this.currentTickValue) {
       if (this.tickState.durationMillis < startSessionMillis) {
-        this.currentTickValue = this.currentTickValue * (state.durationMillis / startSessionMillis);
+        this.currentTickValue *= (state.durationMillis / startSessionMillis);
       } else {
-        this.currentTickValue = this.currentTickValue * (startSessionMillis / state.durationMillis);
+        this.currentTickValue *= (startSessionMillis / state.durationMillis);
       }
     }
   }

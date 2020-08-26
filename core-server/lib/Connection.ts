@@ -3,8 +3,8 @@ import IResponsePayload from '@secret-agent/remote-interfaces/IResponsePayload';
 import IEventPayload from '@secret-agent/remote-interfaces/IEventPayload';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Core from '@secret-agent/core';
-import CoreServer from '../index';
 import Log from '@secret-agent/commons/Logger';
+import CoreServer from '../index';
 
 const { log } = Log(module);
 

@@ -1,11 +1,10 @@
 // @ts-ignore
-import nodeCommon from '_http_common';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import Log from '@secret-agent/commons/Logger';
-import * as http from 'http';
-import { parseRawHeaders } from '../lib/Utils';
-import http2 from 'http2';
+import nodeCommon from "_http_common";
+import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import Log from "@secret-agent/commons/Logger";
+import * as http from "http";
+import { parseRawHeaders } from "../lib/Utils";
+import IMitmRequestContext from "../interfaces/IMitmRequestContext";
 
 const { log } = Log(module);
 export default class HeadersHandler {

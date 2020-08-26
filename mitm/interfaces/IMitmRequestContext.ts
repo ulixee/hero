@@ -1,9 +1,9 @@
 import * as http from 'http';
-import CacheHandler from '../handlers/CacheHandler';
-import RequestSession from '../handlers/RequestSession';
 import http2 from 'http2';
 import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
 import MitmSocket from '@secret-agent/mitm-socket';
+import RequestSession from '../handlers/RequestSession';
+import CacheHandler from '../handlers/CacheHandler';
 
 export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
   id: number;

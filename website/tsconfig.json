@@ -8,9 +8,11 @@
     "outDir": "../build-dist/website",
     "allowSyntheticDefaultImports": true,
     "sourceMap": false,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "declarationMap": false,
     "strict": true,
     "lib": ["es2018", "dom"]
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*", ".eslintrc.js"]
 }

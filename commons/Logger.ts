@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 let logId = 0;
 class Log implements ILog {
   public readonly level: string = process.env.DEBUG ? 'stats' : 'warn';
@@ -43,8 +44,8 @@ class Log implements ILog {
         }
       }
     }
-
-    const id = (logId += 1);
+    logId += 1;
+    const id = logId;
     const entry: ILogEntry = {
       id,
       sessionId,
@@ -57,6 +58,7 @@ class Log implements ILog {
     };
     const printToConsole = logLevels.indexOf(level) >= this.logLevel;
     if (printToConsole) {
+      // eslint-disable-next-line no-console
       console.log(
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} ${entry.action}`,
         ...[entry.data].filter(x => x !== undefined && x !== null),
@@ -91,7 +93,8 @@ class LogEvents {
   }
 
   public static subscribe(onLogFn: (log: ILogEntry) => any) {
-    const id = (idCounter += 1);
+    idCounter += 1;
+    const id = idCounter;
     LogEvents.subscriptions[id] = onLogFn;
     return id;
   }

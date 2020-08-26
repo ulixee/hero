@@ -19,9 +19,12 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
+    "@secret-agent/client": "^1.0.0-alpha.10",
+    "@secret-agent/core": "^1.0.0-alpha.10",
+    "@secret-agent/emulate-safari-13": "^1.0.0-alpha.10",
     "@secret-agent/testing": "^1.0.0-alpha.10",
     "@types/puppeteer-core": "^2.0.0",
     "devtools-protocol": "^0.0.799653",
-    "http-proxy-agent": "^2.1.0"
+    "http-proxy-agent": "^4.0.1"
   }
 }

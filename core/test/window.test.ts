@@ -1,5 +1,5 @@
-import Core from '../index';
 import { Helpers } from '@secret-agent/testing';
+import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {
@@ -26,7 +26,9 @@ describe('basic Window tests', () => {
     const core = Core.byWindowId[meta.windowId];
     await core.goto(`${koaServer.baseUrl}/test1`);
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
+    await expect(core.waitForElement(['document', ['querySelector', 'a']])).resolves.toBe(
+      undefined,
+    );
   });
 
   it('times out waiting for an element', async () => {
@@ -37,11 +39,9 @@ describe('basic Window tests', () => {
     const core = Core.byWindowId[meta.windowId];
     await core.goto(`${koaServer.baseUrl}/test2`);
 
-    try {
-      await core.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 });
-    } catch (err) {
-      expect(err.message).toBe('Timeout waiting for element to be visible');
-    }
+    await expect(
+      core.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 }),
+    ).rejects.toThrowError(/Timeout waiting for element .* to be visible/);
   });
 
   it('will wait for an element to be visible', async () => {
@@ -59,8 +59,10 @@ describe('basic Window tests', () => {
     const core = Core.byWindowId[meta.windowId];
     await core.goto(`${koaServer.baseUrl}/test3`);
 
-    await core.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
-      waitForVisible: true,
-    });
+    await expect(
+      core.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
+        waitForVisible: true,
+      }),
+    ).resolves.toBe(undefined);
   });
 });

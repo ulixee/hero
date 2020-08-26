@@ -2,10 +2,10 @@ import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { redirectCodes } from '@secret-agent/mitm/lib/MitmRequestHandler';
-import { Window } from '..';
 import { IRequestSessionResponseEvent } from '@secret-agent/mitm/handlers/RequestSession';
 import Protocol from 'devtools-protocol';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import { Window } from '..';
 import { exceptionDetailsToError, printStackTrace } from './Utils';
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
 import WebSocketFrameSentEvent = Protocol.Network.WebSocketFrameSentEvent;
@@ -82,7 +82,7 @@ export default class WindowEvents {
     requestSession.on('httpError', () => this.emit('request-intercepted'));
 
     requestSession.on('request', event => {
-      const resource = this.sessionState.captureResource(event, false);
+      this.sessionState.captureResource(event, false);
       this.emit('request-intercepted');
     });
     requestSession.on('response', this.onMitmRequestResponse.bind(this));
@@ -114,7 +114,7 @@ export default class WindowEvents {
 
   private listenToErrors() {
     const devtoolsClient = this.devtoolsClient;
-    this.window.puppPage.on('error', err => {
+    this.window.puppPage.on('error', () => {
       // this is the same error as Inspector.targetCrashed.
     });
     devtoolsClient.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
@@ -290,7 +290,7 @@ export default class WindowEvents {
       .map(arg => {
         const objectId = arg.objectId;
         if (objectId) {
-          this.devtoolsClient.send('Runtime.releaseObject', { objectId }).catch(err => {
+          this.devtoolsClient.send('Runtime.releaseObject', { objectId }).catch(() => {
             // sometimes this dies, not a problem
           });
           return arg.toString();

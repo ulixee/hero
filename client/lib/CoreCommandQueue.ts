@@ -8,8 +8,8 @@ const { log } = Log(module);
 export default class CoreCommandQueue {
   public type: 'queue' | 'heap' = 'queue';
   public items: IItem[] = [];
-  public lastCommandId: number = 0;
-  private isProcessing: boolean = false;
+  public lastCommandId = 0;
+  private isProcessing = false;
 
   constructor(
     private readonly meta: ISessionMeta | null,

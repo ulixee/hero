@@ -1,16 +1,16 @@
 import * as fs from 'fs';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import FrameTracker from './FrameTracker';
 import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import { IPathStep } from '@secret-agent/injected-scripts/scripts/jsPath';
+import FrameTracker from './FrameTracker';
+import IDevtoolsClient from '../interfaces/IDevtoolsClient';
+import DomEnvError from './DomEnvError';
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
@@ -145,7 +145,7 @@ ${domStorageScript}
     return this.runFn<T>(fnName, serializedFn, DomEnv.installedDomWorldName);
   }
 
-  private async runFn<T>(fnName: string, serializedFn: string, worldName: string, retries = 10) {
+  private async runFn<T>(fnName: string, serializedFn: string, worldName: string, retries = 10): Promise<T> {
     const unparsedResult = await this.frameTracker.runInFrameWorld(
       serializedFn,
       this.frameTracker.mainFrameId,
@@ -161,7 +161,7 @@ ${domStorageScript}
         frameId: this.frameTracker.mainFrameId,
       });
       await new Promise(resolve => setTimeout(resolve, 100));
-      return this.runFn(fnName, serializedFn, worldName, (retries -= 1));
+      return this.runFn<T>(fnName, serializedFn, worldName, retries - 1);
     }
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
@@ -171,21 +171,6 @@ ${domStorageScript}
     } else {
       return result as T;
     }
-  }
-}
-
-export class DomEnvError extends Error {
-  private readonly pathState: { step: IPathStep; index: number };
-  constructor(message: string, pathState: { step: IPathStep; index: number }) {
-    super(message);
-    this.pathState = pathState;
-  }
-
-  public toJSON() {
-    return {
-      message: this.message,
-      pathState: this.pathState,
-    };
   }
 }
 

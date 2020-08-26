@@ -2,11 +2,11 @@ import net, { Socket } from 'net';
 import http, { IncomingMessage } from 'http';
 import http2 from 'http2';
 import path from 'path';
+import Log from '@secret-agent/commons/Logger';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import MitmRequestHandler from './MitmRequestHandler';
-import Log from '@secret-agent/commons/Logger';
 import HttpResponseCache from './HttpResponseCache';
 import RequestSession from '../handlers/RequestSession';
 import { parseRawHeaders } from './Utils';
@@ -41,6 +41,7 @@ export default class MitmProxy {
   private secureContexts: {
     [hostname: string]: Promise<void>;
   } = {};
+
   private readonly sslCaDir: string;
   private ca: CertificateAuthority;
 
@@ -184,6 +185,7 @@ export default class MitmProxy {
       });
       await handler.handleUpgrade(isSecure, request, socket, head);
     } catch (error) {
+      // eslint-disable-next-line promise/valid-params
       const sessionLookup = await RequestSession.waitForWebsocketSessionId(
         parseRawHeaders(request.rawHeaders),
         10,
@@ -251,7 +253,7 @@ export default class MitmProxy {
     socket.on('close', () => proxyConnection.destroy());
     socket.on('end', this.removeSocketConnect.bind(this, socket));
 
-    await new Promise(r => proxyConnection.once('connect', r));
+    await new Promise(resolve => proxyConnection.once('connect', resolve));
 
     // create a tunnel back to the same proxy
     socket.pipe(proxyConnection);

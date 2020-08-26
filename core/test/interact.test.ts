@@ -1,6 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
-import Core from '../index';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {

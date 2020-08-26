@@ -43,34 +43,8 @@ async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     // @ts-ignore
     const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
-      if (location.href !== textContent || commandId === -1) {
-        const newUrl = new URL(textContent);
-        console.log(
-          'Document changed. (Command %s. %s ==> %s). Keep origin? %s',
-          commandId === -1 ? 'load' : commandId,
-          window.location.href,
-          textContent,
-          location.origin === newUrl.origin,
-        );
-
-        if (location.origin === newUrl.origin) {
-          window.history.replaceState({}, 'Replay', textContent);
-          window.scrollTo({ top: 0 });
-          document.documentElement.innerHTML = '';
-          idMap.clear();
-          while (document.documentElement.previousSibling) {
-            const prev = document.documentElement.previousSibling;
-            if (prev === document.doctype) break;
-            prev.remove();
-          }
-        } else {
-          const p = new Promise(resolve => () => {
-            onLoad = resolve;
-          });
-          // if it's an origin change, we have to change page
-          location.href = newUrl.href;
-          await p;
-        }
+      if (window.location.href !== textContent || commandId === -1) {
+        await resetLocation(textContent, commandId);
       }
       continue;
     }
@@ -161,6 +135,36 @@ async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
 // HELPER FUNCTIONS ////////////////////
 
+async function resetLocation(href: string, commandId: number) {
+  const newUrl = new URL(href);
+  console.log(
+    'Document changed. (Command %s. %s ==> %s). Keep origin? %s',
+    commandId === -1 ? 'load' : commandId,
+    window.location.href,
+    href,
+    window.location.origin === newUrl.origin,
+  );
+
+  if (window.location.origin === newUrl.origin) {
+    window.history.replaceState({}, 'Replay', href);
+    window.scrollTo({ top: 0 });
+    document.documentElement.innerHTML = '';
+    idMap.clear();
+    while (document.documentElement.previousSibling) {
+      const prev = document.documentElement.previousSibling;
+      if (prev === document.doctype) break;
+      prev.remove();
+    }
+    return;
+  }
+
+  const loadPromise = new Promise(resolve => () => {
+    onLoad = resolve;
+  });
+  // if it's an origin change, we have to change page
+  window.location.href = newUrl.href;
+  await loadPromise;
+}
 function getNode(id: number) {
   if (id === null || id === undefined) return null;
   return idMap.get(id);
@@ -221,7 +225,7 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
   return node;
 }
 
-//////// DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
+/////// / DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
 
 const styleElement = document.createElement('style');
 styleElement.innerHTML = `
@@ -385,7 +389,7 @@ function updateMouse(mouseEvent: IMouseEvent) {
   }
 }
 
-//// other events /////
+// // other events /////
 
 function updateScroll(scrollEvent: IScrollRecord) {
   window.scroll({

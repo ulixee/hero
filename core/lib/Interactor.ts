@@ -11,8 +11,8 @@ import {
 } from '@secret-agent/core-interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import Window from './Window';
 import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import Window from './Window';
 
 const commandsNeedingScroll = [
   InteractionCommand.click,

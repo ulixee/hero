@@ -1,6 +1,4 @@
+import install from '@secret-agent/emulator-plugins-shared/install';
 import pkg from './package.json';
-import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
 
-new EngineInstaller(pkg.engine).install().then(() => {
-  process.exit();
-});
+install(pkg.engine);

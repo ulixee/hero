@@ -89,7 +89,9 @@ describe('basic Dom Replay tests', () => {
     const mirrorPage = await context.newPage();
     const debug = false;
     if (debug) {
+      // eslint-disable-next-line no-console
       mirrorPage.on('console', x => console.log(x.text()));
+      // eslint-disable-next-line no-console
       mirrorPage.on('pageerror', x => console.log(x));
     }
     await mirrorPage.evaluateOnNewDocument(`const exports = {};\n${domReplayScript}`);

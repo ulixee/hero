@@ -4,21 +4,23 @@ import Emulators, {
   UserAgents,
 } from '@secret-agent/emulators';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import headerProfiles from './headers.json';
-import pkg from './package.json';
-import modifyHeaders from '@secret-agent/emulator-plugins-shared/modifyHeaders';
-import tcpVars from '@secret-agent/emulator-plugins-shared/tcpVars';
-import codecs from './codecs.json';
-import chrome from './chrome.json';
-import navigator from './navigator.json';
-import chromePageOverrides from '@secret-agent/emulator-plugins-shared/chromePageOverrides';
+import {
+  chromePageOverrides,
+  EngineInstaller,
+  modifyHeaders,
+  readPolyfills,
+  tcpVars,
+} from '@secret-agent/emulator-plugins-shared';
 import { randomBytes } from 'crypto';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import readPolyfills from '@secret-agent/emulator-plugins-shared/readPolyfills';
 import defaultAgents from './user-agents.json';
+import navigator from './navigator.json';
+import chrome from './chrome.json';
+import codecs from './codecs.json';
+import pkg from './package.json';
+import headerProfiles from './headers.json';
 
-import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
 const polyfills = readPolyfills(__dirname);
 const engineExecutablePath =
   process.env.CHROME_83_BIN ?? new EngineInstaller(pkg.engine).getExecutablePath();

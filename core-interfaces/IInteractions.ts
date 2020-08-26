@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from './IKeyboardLayoutUS';
 

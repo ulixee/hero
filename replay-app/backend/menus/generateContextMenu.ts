@@ -1,5 +1,5 @@
-import Window from '../models/Window';
 import { clipboard, nativeImage, Menu } from 'electron';
+import Window from '../models/Window';
 import { saveAs, viewSource, printPage } from './CommonActions';
 
 export default function generateContextMenu(

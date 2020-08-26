@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
 import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
+import BaseTable from '../lib/BaseTable';
 
 export default class FocusEventsTable extends BaseTable<IFocusRecord> {
   constructor(readonly db: SqliteDatabase) {

@@ -1,8 +1,8 @@
 import FetchRequest from 'awaited-dom/impl/official-klasses/Request';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import CoreClientSession from './CoreClientSession';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
+import CoreClientSession from './CoreClientSession';
 
 interface IState {
   awaitedPath: AwaitedPath;

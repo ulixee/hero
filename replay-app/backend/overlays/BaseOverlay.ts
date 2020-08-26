@@ -1,7 +1,7 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
-import Rectangle = Electron.Rectangle;
 import Application from '~backend/Application';
+import Rectangle = Electron.Rectangle;
 
 interface IOptions {
   name: string;
@@ -24,6 +24,7 @@ export default class BaseOverlay {
     width: 0,
     height: 0,
   };
+
   private readonly calcBounds: (bounds: IRectangle) => IRectangle;
 
   public constructor({ name, bounds, calcBounds, webPreferences, devtools }: IOptions) {
@@ -116,7 +117,7 @@ export default class BaseOverlay {
 export const roundifyRectangle = (rect: IRectangle): IRectangle => {
   const newRect: any = { ...rect };
   Object.keys(newRect).forEach(key => {
-    if (!isNaN(newRect[key])) newRect[key] = Math.round(newRect[key]);
+    if (!Number.isNaN(newRect[key])) newRect[key] = Math.round(newRect[key]);
   });
   return newRect;
 };

@@ -1,7 +1,7 @@
-import OriginType from './OriginType';
-import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import OriginType from './OriginType';
+import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 
 export default interface IHttpRequestModifierDelegate {
   modifyHeadersBeforeSend?: (request: IResourceToModify) => { [key: string]: string };

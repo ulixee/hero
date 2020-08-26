@@ -9,9 +9,19 @@ const divider = Array(100)
   .join('');
 const port = Number(process.env.SA_SESSION_API_PORT ?? 0);
 
-console.log(divider);
+function log(message: string) {
+  // eslint-disable-next-line  no-console
+  console.log(message);
+}
 
-createReplayServer(port).then(server => {
-  console.log(`${nodeEnv.toUpperCase()} REPLAY API SERVER LISTENING on [${server.port}]`);
-  console.log(divider);
-});
+log(divider);
+
+createReplayServer(port)
+  .then(server => {
+    log(`${nodeEnv.toUpperCase()} REPLAY API SERVER LISTENING on [${server.port}]`);
+    log(divider);
+    return null;
+  })
+  .catch(error => {
+    log(`${nodeEnv.toUpperCase()} ERROR starting replay api ${error}`);
+  });

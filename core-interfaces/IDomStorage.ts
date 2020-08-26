@@ -1,13 +1,15 @@
-import IDomStorage, {
-  IDomStorageForOrigin,
-  IStorageEntry,
-} from '@secret-agent/injected-scripts/interfaces/IDomStorage';
-import {
-  IIndexedDB,
-  IObjectStore,
-  IObjectStoreIndex,
-} from '@secret-agent/injected-scripts/interfaces/IIndexedDB';
+import { IIndexedDB, IObjectStore, IObjectStoreIndex } from './IIndexedDB';
 
-export default IDomStorage;
+export default interface IDomStorage {
+  [securityOrigin: string]: IDomStorageForOrigin;
+}
 
-export { IIndexedDB, IObjectStore, IObjectStoreIndex, IDomStorageForOrigin, IStorageEntry };
+export interface IDomStorageForOrigin {
+  localStorage: IStorageEntry[];
+  sessionStorage: IStorageEntry[];
+  indexedDB: IIndexedDB[];
+}
+
+export type IStorageEntry = string[];
+
+export { IIndexedDB, IObjectStore, IObjectStoreIndex };
