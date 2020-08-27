@@ -35,7 +35,7 @@ export default class MitmRequestHandler {
     );
     if (!ctx) return;
 
-    clientResponse.on('error', this.handleError.bind(this, 'PROXY_TO_CLIENT_RESPONSE_ERROR', ctx));
+    clientResponse.on('error', this.handleError.bind(this, 'ProxyToClient.ResponseError', ctx));
 
     try {
       const didSend = await this.makeProxyToServerRequest(ctx);
@@ -45,13 +45,15 @@ export default class MitmRequestHandler {
       const data: Buffer[] = [];
       for await (const chunk of clientRequest) {
         data.push(chunk);
-        ctx.proxyToServerRequest.write(chunk);
+        ctx.proxyToServerRequest.write(chunk, error => {
+          if (error) this.handleError('ProxyToServer.WriteError', ctx, error);
+        });
       }
       HeadersHandler.sendRequestTrailers(ctx);
       ctx.proxyToServerRequest.end();
       ctx.requestPostData = Buffer.concat(data);
     } catch (err) {
-      this.handleError('ON_REQUEST_ERROR', ctx, err);
+      this.handleError('ClientToProxy.HandlerError', ctx, err);
     }
   }
 
@@ -69,7 +71,7 @@ export default class MitmRequestHandler {
 
     clientSocket.on(
       'error',
-      this.handleError.bind(this, 'CLIENT_TO_PROXY_UPGRADE_SOCKET_ERROR', ctx),
+      this.handleError.bind(this, 'ClientToProxy.UpgradeSocketError', ctx),
     );
 
     try {
@@ -82,7 +84,7 @@ export default class MitmRequestHandler {
       );
       ctx.proxyToServerRequest.end();
     } catch (err) {
-      this.handleError('ON_UPGRADE_ERROR', ctx, err);
+      this.handleError('ClientToProxy.UpgradeHandlerError', ctx, err);
     }
   }
 
@@ -91,7 +93,7 @@ export default class MitmRequestHandler {
     try {
       ctx.clientToProxyRequest.on(
         'error',
-        this.handleError.bind(this, 'CLIENT_TO_PROXY_REQUEST_ERROR', ctx),
+        this.handleError.bind(this, 'ClientToProxy.RequestError', ctx),
       );
 
       session = await RequestSession.getSession(
@@ -111,7 +113,7 @@ export default class MitmRequestHandler {
         });
         const err = new Error('No Session ID provided');
         (err as any).isLogged = true;
-        this.handleError('NO_SESSION_ID', ctx, err);
+        this.handleError('ClientToProxy.NoSessionError', ctx, err);
         return;
       }
 
@@ -148,7 +150,7 @@ export default class MitmRequestHandler {
       );
       ctx.proxyToServerRequest.on(
         'error',
-        this.handleError.bind(this, 'PROXY_TO_SERVER_REQUEST_ERROR', ctx),
+        this.handleError.bind(this, 'ProxyToServer.RequestError', ctx),
       );
 
       return true;
@@ -156,7 +158,7 @@ export default class MitmRequestHandler {
       if (session?.isClosing) {
         return;
       }
-      this.handleError('PROXY_TO_SERVER_REQUEST_ERROR', ctx, err);
+      this.handleError('ProxyToServer.RequestHandlerError', ctx, err);
     }
   }
 
@@ -196,7 +198,7 @@ export default class MitmRequestHandler {
     }
     serverSocket.on(
       'error',
-      this.handleError.bind(this, 'SERVER_TO_PROXY_UPGRADE_SOCKET_ERROR', ctx),
+      this.handleError.bind(this, 'ServerToProxy.UPGRADE_SOCKET_ERROR', ctx),
     );
 
     if (serverResponse.statusCode === 101) {
@@ -226,14 +228,14 @@ export default class MitmRequestHandler {
     ctx.responseTime = new Date();
     serverToProxyResponse.on(
       'error',
-      this.handleError.bind(this, 'SERVER_TO_PROXY_RESPONSE_ERROR', ctx),
+      this.handleError.bind(this, 'ServerToProxy.ResponseError', ctx),
     );
 
     try {
       HeadersHandler.restorePreflightHeader(ctx);
       ctx.cacheHandler.onResponseHeaders();
     } catch (err) {
-      return this.handleError('ON_RESPONSE_HEADERS_HANDLER_ERROR', ctx, err);
+      return this.handleError('ServerToProxy.ResponseHeadersHandlerError', ctx, err);
     }
 
     if (redirectCodes.has(ctx.status)) {
@@ -259,11 +261,15 @@ export default class MitmRequestHandler {
     for await (const chunk of serverToProxyResponse) {
       const data = ctx.cacheHandler.onResponseData(chunk as Buffer);
       if (data) {
-        ctx.proxyToClientResponse.write(data);
+        ctx.proxyToClientResponse.write(data, error => {
+          if (error) this.handleError('ServerToProxy.WriteResponseError', ctx, error);
+        });
       }
     }
     if (ctx.cacheHandler.shouldServeCachedData) {
-      ctx.proxyToClientResponse.write(ctx.cacheHandler.cacheData);
+      ctx.proxyToClientResponse.write(ctx.cacheHandler.cacheData, error => {
+        if (error) this.handleError('ServerToProxy.WriteCachedResponseError', ctx, error);
+      });
     }
 
     if (serverToProxyResponse instanceof http.IncomingMessage) {

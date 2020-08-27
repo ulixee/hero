@@ -17,7 +17,11 @@ export default class ReplayApi extends EventEmitter {
   public readonly saSession: ISaSession;
   public apiHost: string;
   public state: ReplayState;
-  public readonly isReady = getResolvable<void>();
+  public get isReady() {
+    return this.readyResolvable.promise;
+  }
+
+  private readonly readyResolvable = getResolvable<void>();
 
   private readonly http2Session: http2.ClientHttp2Session;
 
@@ -49,11 +53,11 @@ export default class ReplayApi extends EventEmitter {
       if (path === '/session') {
         const data = await streamToJson<ISaSession>(stream);
         this.onSession(data);
-        this.isReady.resolve();
+        this.readyResolvable.resolve();
         return;
       }
 
-      await this.isReady.promise;
+      await this.isReady;
 
       if (path === '/resource') {
         const type = headers['resource-type'] as string;
@@ -83,7 +87,7 @@ export default class ReplayApi extends EventEmitter {
         const status = headers[':status'];
         if (status !== 200) {
           const data = await streamToJson<{ message: string }>(request);
-          this.isReady.reject(new Error(data.message ?? 'Unexpected Error'));
+          this.readyResolvable.reject(new Error(data.message ?? 'Unexpected Error'));
         }
       });
   }

@@ -36,6 +36,7 @@ window.addEventListener('resize', () => {
 let onLoad: () => void;
 window.addEventListener('DOMContentLoaded', () => {
   if (onLoad) onLoad();
+  document.head.appendChild(styleElement);
 });
 
 async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
@@ -149,6 +150,7 @@ async function resetLocation(href: string, commandId: number) {
     window.history.replaceState({}, 'Replay', href);
     window.scrollTo({ top: 0 });
     document.documentElement.innerHTML = '';
+    document.head.appendChild(styleElement);
     idMap.clear();
     while (document.documentElement.previousSibling) {
       const prev = document.documentElement.previousSibling;
@@ -174,7 +176,11 @@ function setNodeAttributes(node: Element, data: IDomChangeEvent) {
   if (!data.attributes) return;
   for (const [name, value] of Object.entries(data.attributes)) {
     const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
-    node.setAttributeNS(ns, name, value);
+    if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
+      node.setAttribute(name, value);
+    } else {
+      node.setAttributeNS(ns || null, name, value);
+    }
   }
 }
 
@@ -229,6 +235,9 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
 
 const styleElement = document.createElement('style');
 styleElement.innerHTML = `
+  noscript {
+    display:none
+  }
   sa-mouse-pointer {
     pointer-events: none;
     position: absolute;

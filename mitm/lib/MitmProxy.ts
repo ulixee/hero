@@ -98,11 +98,10 @@ export default class MitmProxy {
     }
     if (!(error as any)?.isLogged) {
       const logLevel = this.isClosing ? 'stats' : 'error';
-      log[logLevel]('MitmHttpError', {
-        sessionId: ctx?.requestSession?.sessionId,
-        errorKind,
+      log[logLevel](`Mitm.${errorKind}`, {
         error,
         url: ctx?.url?.href,
+        sessionId: ctx?.requestSession?.sessionId,
       });
     }
     if (ctx?.proxyToClientResponse && !ctx.proxyToClientResponse.headersSent) {
@@ -117,14 +116,13 @@ export default class MitmProxy {
     }
   }
 
-  private onClientError(isSecure: boolean, error: Error, socket: net.Socket) {
+  private onClientError(isHttp2: boolean, error: Error, socket: net.Socket) {
     if ((error as any).code === 'ECONNRESET' || !socket.writable) {
       return;
     }
-
-    log.error('MitmHttpError', {
+    const kind = isHttp2 ? 'Http2.SessionError' : 'Http2.ClientError';
+    log.error(`Mitm.${kind}`, {
       sessionId: null,
-      errorKind: `HTTP${isSecure ? 's' : ''}_CLIENT_ERROR`,
       error,
       socketAddress: socket.address(),
     });
@@ -214,7 +212,7 @@ export default class MitmProxy {
 
   private async onHttpConnect(req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
     this.serverConnects.push(socket);
-    socket.on('error', this.onConnectError.bind(this, req.url, 'CLIENT_TO_PROXY_CONNECT_ERROR'));
+    socket.on('error', this.onConnectError.bind(this, req.url, 'ClientToProxy.ConnectError'));
 
     socket.write('HTTP/1.1 200 Connection established\r\n\r\n');
     // we need first byte of data to detect if request is SSL encrypted
