@@ -1,5 +1,5 @@
-import HttpResponseCache from "../lib/HttpResponseCache";
-import IMitmRequestContext from "../interfaces/IMitmRequestContext";
+import HttpResponseCache from '../lib/HttpResponseCache';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 export default class CacheHandler {
   public didProposeCachedResource = false;
@@ -21,7 +21,7 @@ export default class CacheHandler {
     const ctx = this.ctx;
     // only cache get (don't do preflight, post, etc)
     if (ctx.method === 'GET') {
-      const cache = this.responseCache.get(ctx.url.href);
+      const cache = this.responseCache?.get(ctx.url.href);
 
       if (cache?.etag) {
         ctx.requestHeaders['If-None-Match'] = cache.etag;
@@ -32,7 +32,7 @@ export default class CacheHandler {
 
   public onHttp2PushStream() {
     if (this.ctx.method === 'GET') {
-      const cached = this.responseCache.get(this.ctx.url.href);
+      const cached = this.responseCache?.get(this.ctx.url.href);
       if (cached) {
         this.didProposeCachedResource = true;
         this.useCached();
@@ -66,30 +66,30 @@ export default class CacheHandler {
       this.data.length
     ) {
       const resHeaders = ctx.responseHeaders;
-      this.responseCache.add(ctx.url.href, Buffer.concat(this.data), resHeaders);
+      this.responseCache?.add(ctx.url.href, Buffer.concat(this.data), resHeaders);
     }
   }
 
   private useCached() {
-    const ctx = this.ctx;
-    const cached = this.responseCache.get(ctx.url.href);
+    const { responseHeaders, url } = this.ctx;
+    const cached = this.responseCache?.get(url.href);
     let isLowerKeys = false;
-    for (const key of Object.keys(ctx.responseHeaders)) {
+    for (const key of Object.keys(responseHeaders)) {
       if (key.toLowerCase() === key) isLowerKeys = true;
       if (
         key.match(/content-encoding/i) ||
         key.match(/transfer-encoding/i) ||
         key.match(/content-length/i)
       ) {
-        delete ctx.responseHeaders[key];
+        delete responseHeaders[key];
       }
     }
     if (cached.encoding) {
       const key = isLowerKeys ? 'content-encoding' : 'Content-Encoding';
-      ctx.responseHeaders[key] = cached.encoding;
+      responseHeaders[key] = cached.encoding;
     }
     const lengthKey = isLowerKeys ? 'content-length' : 'Content-Length';
-    ctx.responseHeaders.headers[lengthKey] = String(Buffer.byteLength(cached.file, 'utf8'));
+    responseHeaders.headers[lengthKey] = String(Buffer.byteLength(cached.file, 'utf8'));
     this.shouldServeCachedData = true;
     this.data.push(cached.file);
   }

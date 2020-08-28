@@ -62,23 +62,6 @@ export default class HeadersHandler {
     this.cleanRequestHeaders(ctx);
   }
 
-  public static restorePreflightHeader(ctx: IMitmRequestContext) {
-    const settingBeforeSend = ctx.requestLowerHeaders['access-control-request-headers'] as string;
-    if (ctx.method !== 'OPTIONS' || !settingBeforeSend) {
-      return;
-    }
-
-    for (const key of Object.keys(ctx.responseHeaders)) {
-      if (key.toLowerCase() === 'access-control-allow-headers') {
-        ctx.responseHeaders[key] = settingBeforeSend;
-        return;
-      }
-    }
-    const isLower = Object.keys(ctx.responseHeaders).some(x => x.toLowerCase() === x);
-    const key = isLower ? 'access-control-allow-headers' : 'Access-Control-Allow-Headers';
-    ctx.responseHeaders[key] = settingBeforeSend;
-  }
-
   public static cleanResponseHeaders(
     ctx: IMitmRequestContext,
     originalRawHeaders: IResourceHeaders,
@@ -167,13 +150,6 @@ export default class HeadersHandler {
       }
       if (/^proxy-/i.test(header) || /^mitm-/i.test(header)) {
         delete headers[header];
-      }
-      if (/^access-control-request-headers/i.test(header)) {
-        headers[header] = (headers[header] as string)
-          .split(',')
-          .filter(x => !x.match(/^mitm-/i) && !x.match(/^proxy-/i))
-          .join(',');
-        if (!headers[header]) delete headers[header];
       }
     }
   }

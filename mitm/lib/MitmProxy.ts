@@ -4,12 +4,10 @@ import http2 from 'http2';
 import path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import CertificateAuthority from './CertificateAuthority';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
-import MitmRequestHandler from './MitmRequestHandler';
-import HttpResponseCache from './HttpResponseCache';
+import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession from '../handlers/RequestSession';
-import { parseRawHeaders } from './Utils';
+import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 
 const { log } = Log(module);
 
@@ -17,10 +15,6 @@ const { log } = Log(module);
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
  */
 export default class MitmProxy {
-  public static responseCache = new HttpResponseCache();
-  public readonly options: IMitmProxyOptions;
-  public readonly httpServer: http.Server;
-
   public get port() {
     return this.httpPort;
   }
@@ -33,6 +27,8 @@ export default class MitmProxy {
     return (this.http2Server.address() as net.AddressInfo)?.port;
   }
 
+  private readonly options: IMitmProxyOptions;
+  private readonly httpServer: http.Server;
   private readonly http2Server: http2.Http2SecureServer;
   private readonly serverConnects: net.Socket[] = [];
 
@@ -69,8 +65,8 @@ export default class MitmProxy {
     await startServer(this.http2Server);
 
     // don't listen for errors until server already started
-    this.httpServer.on('error', this.onHttpError.bind(this, 'HTTP_SERVER_ERROR', null));
-    this.http2Server.on('error', this.onHttpError.bind(this, 'HTTP2_SERVER_ERROR', null));
+    this.httpServer.on('error', this.onGenericHttpError.bind(this, false));
+    this.http2Server.on('error', this.onGenericHttpError.bind(this, true));
     return this;
   }
 
@@ -92,28 +88,137 @@ export default class MitmProxy {
     return this;
   }
 
-  public onHttpError(errorKind: string, ctx: IMitmRequestContext, error: Error) {
-    if (ctx?.requestSession) {
-      ctx.requestSession.emit('httpError', { url: ctx.url.href, method: ctx.method, error });
+  private async onHttpRequest(
+    isSSL: boolean,
+    clientToProxyRequest: http2.Http2ServerRequest,
+    proxyToClientResponse: http2.Http2ServerResponse,
+  ) {
+    const sessionId = RequestSession.readSessionId(
+      clientToProxyRequest.headers,
+      clientToProxyRequest.socket.localPort,
+    );
+    if (!sessionId) {
+      return RequestSession.sendNeedsAuth(proxyToClientResponse.socket);
     }
-    if (!(error as any)?.isLogged) {
-      const logLevel = this.isClosing ? 'stats' : 'error';
-      log[logLevel](`Mitm.${errorKind}`, {
-        error,
-        url: ctx?.url?.href,
-        sessionId: ctx?.requestSession?.sessionId,
+
+    const requestSession = RequestSession.sessions[sessionId];
+    if (!requestSession) {
+      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+        sessionId,
+        isSSL,
+        host: clientToProxyRequest.headers.host,
+        url: clientToProxyRequest.url,
       });
+      proxyToClientResponse.writeHead(504);
+      return proxyToClientResponse.end();
     }
-    if (ctx?.proxyToClientResponse && !ctx.proxyToClientResponse.headersSent) {
-      if (ctx.isClientHttp2) {
-        ctx.proxyToClientResponse.writeHead(504);
-      } else {
-        ctx.proxyToClientResponse.writeHead(504, 'Proxy Error');
+
+    await HttpRequestHandler.onRequest({
+      isSSL,
+      requestSession,
+      clientToProxyRequest,
+      proxyToClientResponse,
+    });
+  }
+
+  private async onHttpUpgrade(
+    isSSL: boolean,
+    clientToProxyRequest: IncomingMessage,
+    socket: Socket,
+    head: Buffer,
+  ) {
+    // socket resumes in HttpUpgradeHandler.upgradeResponseHandler
+    socket.pause();
+    const sessionId = RequestSession.readSessionId(
+      clientToProxyRequest.headers,
+      clientToProxyRequest.socket.localPort,
+    );
+    if (!sessionId) {
+      return RequestSession.sendNeedsAuth(socket);
+    }
+    const requestSession = RequestSession.sessions[sessionId];
+
+    if (!requestSession) {
+      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+        sessionId,
+        isSSL,
+        host: clientToProxyRequest.headers.host,
+        url: clientToProxyRequest.url,
+      });
+      return socket.end('HTTP/1.1 504 Proxy Error\r\n\r\n');
+    }
+
+    await HttpUpgradeHandler.onUpgrade({
+      isSSL,
+      socket,
+      head,
+      requestSession,
+      clientToProxyRequest,
+    });
+  }
+
+  private async onHttpConnect(request: http.IncomingMessage, socket: net.Socket, head: Buffer) {
+    const sessionId = RequestSession.readSessionId(request.headers, request.socket.localPort);
+    if (!sessionId) {
+      return RequestSession.sendNeedsAuth(socket);
+    }
+    this.serverConnects.push(socket);
+    socket.on('error', this.onConnectError.bind(this, request.url, 'ClientToProxy.ConnectError'));
+
+    socket.write('HTTP/1.1 200 Connection established\r\n\r\n');
+    // we need first byte of data to detect if request is SSL encrypted
+    if (!head || head.length === 0) {
+      head = await new Promise<Buffer>(resolve => socket.once('data', resolve));
+    }
+
+    socket.pause();
+
+    let proxyToProxyPort = this.httpPort;
+    // for https we create a new connect back to the https server so we can have the proper cert and see the traffic
+    if (MitmProxy.isTlsByte(head)) {
+      // URL is in the form 'hostname:port'
+      const hostname = request.url.split(':', 2)[0];
+
+      if (!this.secureContexts[hostname]) {
+        this.secureContexts[hostname] = this.addSecureContext(hostname);
       }
+      await this.secureContexts[hostname];
+      proxyToProxyPort = this.http2Port;
     }
-    if (ctx?.proxyToClientResponse && !ctx.proxyToClientResponse.finished) {
-      ctx.proxyToClientResponse.end(`${errorKind}:${error}`, 'utf8');
-    }
+
+    // for http, we are proxying to clear out the buffer (for websockets in particular)
+    // NOTE: this probably can be optimized away for http
+
+    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: true });
+    proxyConnection.on('error', error => {
+      this.onConnectError(request.url, 'PROXY_TO_PROXY_CONNECT_ERROR', error);
+      if (!socket.destroyed && socket.writable && socket.readable) {
+        socket.destroy(error);
+      }
+    });
+
+    proxyConnection.on('end', () => socket.destroy());
+    proxyConnection.on('close', () => socket.destroy());
+    socket.on('close', () => proxyConnection.destroy());
+    socket.on('end', this.removeSocketConnect.bind(this, socket));
+
+    await new Promise(resolve => proxyConnection.once('connect', resolve));
+    RequestSession.registerProxySession(proxyConnection, sessionId);
+
+    // create a tunnel back to the same proxy
+    socket.pipe(proxyConnection).pipe(socket);
+    if (head.length) socket.emit('data', head);
+    socket.resume();
+  }
+
+  /////// ERROR HANDLING ///////////////////////////////////////////////////////
+
+  private onGenericHttpError(isHttp2: boolean, error: Error) {
+    const logLevel = this.isClosing ? 'stats' : 'error';
+    log[logLevel](`Mitm.Http${isHttp2 ? '2' : ''}ServerError`, {
+      sessionId: null,
+      error,
+    });
   }
 
   private onClientError(isHttp2: boolean, error: Error, socket: net.Socket) {
@@ -128,136 +233,6 @@ export default class MitmProxy {
     });
 
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-  }
-
-  private async onHttpRequest(
-    isSecure: boolean,
-    request: http2.Http2ServerRequest,
-    response: http2.Http2ServerResponse,
-  ) {
-    try {
-      const handler = new MitmRequestHandler(MitmProxy.responseCache, this.onHttpError.bind(this));
-      await handler.handleRequest(isSecure, request, response);
-    } catch (err) {
-      const sessionId = RequestSession.getSessionId(request.headers as any, request.method);
-
-      let logLevel = 'error';
-      if (sessionId) {
-        const session = RequestSession.sessions[sessionId];
-        session?.emit('httpError', { url: request.url, method: request.method, error: err });
-
-        if (session?.isClosing) logLevel = 'stats';
-      }
-      log[logLevel]('MitmHttpRequest.HandlerError', {
-        sessionId,
-        isSecure,
-        host: request.headers.host,
-        url: request.url,
-        err,
-      });
-      response.writeHead(504);
-      response.end(`${err}`);
-    }
-  }
-
-  private async onHttpUpgrade(
-    isSecure: boolean,
-    request: IncomingMessage,
-    socket: Socket,
-    head: Buffer,
-  ) {
-    try {
-      const handler = new MitmRequestHandler(MitmProxy.responseCache, (errorKind, ctx, error) => {
-        if (ctx?.requestSession) {
-          ctx.requestSession.emit('httpError', { url: ctx.url.href, method: ctx.method, error });
-        }
-        if (!(error as any)?.isLogged) {
-          log.error('Mitm WebSocket Error', {
-            sessionId: ctx?.requestSession?.sessionId,
-            errorKind,
-            error,
-            url: ctx?.url?.href,
-          });
-        }
-        socket.destroy(error);
-      });
-      await handler.handleUpgrade(isSecure, request, socket, head);
-    } catch (error) {
-      // eslint-disable-next-line promise/valid-params
-      const sessionLookup = await RequestSession.waitForWebsocketSessionId(
-        parseRawHeaders(request.rawHeaders),
-        10,
-      ).catch();
-
-      let logLevel = 'error';
-      if (sessionLookup) {
-        const session = RequestSession.sessions[sessionLookup.sessionId];
-        session?.emit('httpError', {
-          url: request.url,
-          method: request.method,
-          error,
-        });
-        if (session?.isClosing) logLevel = 'stats';
-      }
-      log[logLevel]('MitmHttpRequest.HandlerError', {
-        sessionId: sessionLookup?.sessionId,
-        isSecure,
-        host: request.headers.host,
-        url: request.url,
-        error,
-      });
-      socket.end('HTTP/1.1 504 Proxy Error\r\n\r\n');
-    }
-  }
-
-  private async onHttpConnect(req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
-    this.serverConnects.push(socket);
-    socket.on('error', this.onConnectError.bind(this, req.url, 'ClientToProxy.ConnectError'));
-
-    socket.write('HTTP/1.1 200 Connection established\r\n\r\n');
-    // we need first byte of data to detect if request is SSL encrypted
-    if (!head || head.length === 0) {
-      head = await new Promise<Buffer>(resolve => socket.once('data', resolve));
-    }
-
-    socket.pause();
-
-    let proxyToProxyPort = this.httpPort;
-    // for https we create a new connect back to the https server so we can have the proper cert and see the traffic
-    if (MitmProxy.isTlsByte(head)) {
-      // URL is in the form 'hostname:port'
-      const hostname = req.url.split(':', 2)[0];
-
-      if (!this.secureContexts[hostname]) {
-        this.secureContexts[hostname] = this.addSecureContext(hostname);
-      }
-      await this.secureContexts[hostname];
-      proxyToProxyPort = this.http2Port;
-    }
-
-    // for http, we are proxying to clear out the buffer (for websockets in particular)
-    // NOTE: this probably can be optimized away for http
-
-    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: true });
-    proxyConnection.on('error', error => {
-      this.onConnectError(req.url, 'PROXY_TO_PROXY_CONNECT_ERROR', error);
-      if (!socket.destroyed && socket.writable && socket.readable) {
-        socket.destroy(error);
-      }
-    });
-
-    proxyConnection.on('end', () => socket.destroy());
-    proxyConnection.on('close', () => socket.destroy());
-    socket.on('close', () => proxyConnection.destroy());
-    socket.on('end', this.removeSocketConnect.bind(this, socket));
-
-    await new Promise(resolve => proxyConnection.once('connect', resolve));
-
-    // create a tunnel back to the same proxy
-    socket.pipe(proxyConnection);
-    proxyConnection.pipe(socket);
-    if (head.length) socket.emit('data', head);
-    socket.resume();
   }
 
   private onConnectError(hostname: string, errorKind: string, error: Error) {
@@ -301,17 +276,9 @@ export default class MitmProxy {
     return proxy;
   }
 
-  /*
-   * Detect TLS from first bytes of data
-   * Inspired from https://gist.github.com/tg-x/835636
-   * used heuristic:
-   * - an incoming connection using SSLv3/TLSv1 records should start with 0x16
-   * - an incoming connection using SSLv2 records should start with the record size
-   *   and as the first record should not be very big we can expect 0x80 or 0x00 (the MSB is a flag)
-   * - everything else is considered to be unencrypted
-   */
   private static isTlsByte(buffer: Buffer) {
-    return buffer[0] === 0x16 || buffer[0] === 0x80 || buffer[0] === 0x00;
+    // check for clienthello byte
+    return buffer[0] === 0x16;
   }
 }
 

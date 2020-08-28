@@ -1,7 +1,7 @@
 import Log from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import { redirectCodes } from '@secret-agent/mitm/lib/MitmRequestHandler';
+import { redirectCodes } from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { IRequestSessionResponseEvent } from '@secret-agent/mitm/handlers/RequestSession';
 import Protocol from 'devtools-protocol';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
@@ -16,6 +16,7 @@ import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
+import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
 
 const { log } = Log(module);
 
@@ -101,6 +102,7 @@ export default class WindowEvents {
     devtoolsClient.on('Network.webSocketFrameReceived', this.onWebsocketFrame.bind(this, true));
     devtoolsClient.on('Network.webSocketFrameSent', this.onWebsocketFrame.bind(this, false));
 
+    devtoolsClient.on('Fetch.requestPaused', this.onFetchPaused.bind(this));
     devtoolsClient.on('Network.requestWillBeSent', this.onNetworkRequestWillBeSent.bind(this));
     devtoolsClient.on('Network.responseReceived', this.onNetworkResponseReceived.bind(this));
 
@@ -123,6 +125,23 @@ export default class WindowEvents {
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
+
+  private onFetchPaused(networkRequest: RequestPausedEvent) {
+    const { session } = this.window;
+    // requests from service workers (and others?) will never register with RequestWillBeSentEvent
+    // -- they don't have networkIds
+    if (!networkRequest.networkId) {
+      session.requestMitmProxySession.registerResource({
+        browserRequestId: networkRequest.requestId,
+        resourceType: networkRequest.resourceType,
+        url: networkRequest.request.url,
+        method: networkRequest.request.method,
+        hasUserGesture: false,
+        isUserNavigation: false,
+        documentUrl: networkRequest.request.headers.Referer,
+      });
+    }
+  }
 
   private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent) {
     const { session, puppPage, lastCommandId } = this.window;
@@ -157,6 +176,7 @@ export default class WindowEvents {
       sessionId,
       url: request.url,
       method: request.method,
+      headers: responseEvent.response?.headers,
       wasCached,
       executionMillis: responseEvent.executionMillis,
       bytes: body ? Buffer.byteLength(body) : -1,

@@ -20,6 +20,7 @@ beforeAll(() => {
     } as any;
   });
 });
+
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
@@ -37,13 +38,17 @@ test('should create up to a max number of secure connections per origin', async 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
 
-  const headers = session.getTrackingHeaders();
-  headers.connection = 'keep-alive';
+  const proxyCredentials = session.getProxyCredentials();
   process.env.MITM_ALLOW_INSECURE = 'true';
   const promises = [];
   for (let i = 0; i < 10; i += 1) {
     // eslint-disable-next-line jest/valid-expect-in-promise
-    const p = Helpers.httpGet(server.baseUrl, `http://localhost:${mitmServer.port}`, headers).then(
+    const p = Helpers.httpGet(
+      server.baseUrl,
+      `http://localhost:${mitmServer.port}`,
+      proxyCredentials,
+      { connection: 'keep-alive' },
+    ).then(
       // eslint-disable-next-line promise/always-return
       res => {
         expect(res).toBe('I am here');
@@ -74,12 +79,16 @@ test('should create new connections as needed when no keepalive', async () => {
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
 
-  const headers = session.getTrackingHeaders();
+  const proxyCredentials = session.getProxyCredentials();
   process.env.MITM_ALLOW_INSECURE = 'true';
   const promises = [];
   for (let i = 0; i < 4; i += 1) {
     // eslint-disable-next-line jest/valid-expect-in-promise
-    const p = Helpers.httpGet(server.baseUrl, `http://localhost:${mitmServer.port}`, headers).then(
+    const p = Helpers.httpGet(
+      server.baseUrl,
+      `http://localhost:${mitmServer.port}`,
+      proxyCredentials,
+    ).then(
       // eslint-disable-next-line promise/always-return
       res => {
         expect(res).toBe('here 2');
@@ -112,8 +121,11 @@ test('it should not put upgrade connections in a pool', async () => {
   });
 
   const wsClient = new WebSocket(`ws://localhost:${httpServer.port}`, {
-    agent: HttpProxyAgent(`http://localhost:${mitmServer.port}`),
-    headers: session.getTrackingHeaders(),
+    agent: HttpProxyAgent({
+      host: 'localhost',
+      port: mitmServer.port,
+      auth: session.getProxyCredentials(),
+    }),
   });
   Helpers.onClose(async () => wsClient.close());
 
@@ -137,13 +149,13 @@ test('it should reuse http2 connections', async () => {
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
 
-  const headers = session.getTrackingHeaders();
+  const proxyCredentials = session.getProxyCredentials();
 
   process.env.MITM_ALLOW_INSECURE = 'true';
   const results = await Promise.all([
-    Helpers.httpGet(`${baseUrl}/test1`, mitmUrl, headers),
-    Helpers.httpGet(`${baseUrl}/test2`, mitmUrl, headers),
-    Helpers.httpGet(`${baseUrl}/test3`, mitmUrl, headers),
+    Helpers.httpGet(`${baseUrl}/test1`, mitmUrl, proxyCredentials),
+    Helpers.httpGet(`${baseUrl}/test2`, mitmUrl, proxyCredentials),
+    Helpers.httpGet(`${baseUrl}/test3`, mitmUrl, proxyCredentials),
   ]);
   expect(results).toStrictEqual(['/test1', '/test2', '/test3']);
 
