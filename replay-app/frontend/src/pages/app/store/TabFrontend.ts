@@ -1,12 +1,12 @@
 import { ipcRenderer } from 'electron';
 import { action, computed, observable } from 'mobx';
 import { TAB_ANIMATION_DURATION, TAB_MAX_WIDTH, TAB_MIN_WIDTH, TABS_PADDING } from './constants';
-import { closeWindow } from '../../pages/app/utils/windows';
-import { animateTab } from '../../pages/app/utils/tabs';
+import { closeWindow } from '../utils/windows';
+import { animateTab } from '../utils/tabs';
 import ITabLocation from '~shared/interfaces/ITabLocation';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import ISaSession from '~shared/interfaces/ISaSession';
-import store from '../app';
+import store from '~frontend/pages/app/store';
 import ITickState from '~shared/interfaces/ITickState';
 
 export default class TabFrontend {
@@ -142,9 +142,9 @@ export default class TabFrontend {
 
     if (startSessionMillis && this.currentTickValue) {
       if (this.tickState.durationMillis < startSessionMillis) {
-        this.currentTickValue *= (state.durationMillis / startSessionMillis);
+        this.currentTickValue *= state.durationMillis / startSessionMillis;
       } else {
-        this.currentTickValue *= (startSessionMillis / state.durationMillis);
+        this.currentTickValue *= startSessionMillis / state.durationMillis;
       }
     }
   }

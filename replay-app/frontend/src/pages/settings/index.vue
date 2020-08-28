@@ -12,16 +12,24 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import store from '~frontend/stores/settings';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { remote } from "electron";
+import { getTheme } from "~shared/utils/themes";
+import settings from '~frontend/lib/settings';
 
 @Component({ components: {} })
 export default class SettingsPage extends Vue {
-  private theme = store.settings.themeAuto ? 'auto' : store.settings.theme;
+
+  public windowId = remote.getCurrentWindow().id;
 
   private onThemeChange($event: any) {
     console.log('onThemeChange');
+  }
+
+  public get theme() {
+    if (settings.themeAuto) return 'auto';
+    return getTheme(settings.theme);
   }
 }
 </script>

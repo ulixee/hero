@@ -1,5 +1,5 @@
-import { animateTab } from '../../pages/app/utils/tabs';
-import { AppStore } from '../app';
+import { animateTab } from '../utils/tabs';
+import { AppStore } from '~frontend/pages/app/store';
 
 export default class AddTabStore {
   public left = 0;

@@ -23,7 +23,7 @@ import { Observer } from 'mobx-vue';
 import Icon from '~frontend/components/Icon.vue';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import { ICON_PLAY, ICON_PAUSE } from '~frontend/constants/icons';
-import store from '~frontend/stores/app';
+import store from '~frontend/pages/app/store';
 import NoCache from '~frontend/lib/NoCache';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';

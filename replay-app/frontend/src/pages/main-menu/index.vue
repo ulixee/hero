@@ -7,23 +7,22 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import QuickMenu from './components/QuickMenu.vue';
-import store from '~frontend/stores/main-menu';
 import NoCache from '~frontend/lib/NoCache';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: { QuickMenu } })
 export default class MainMenuScreen extends Vue {
+  private store = new OverlayStore();
 
   @NoCache
   private get cssVars() {
-    return {
-      '--dropdownBackgroundColor': store.theme.dropdownBackgroundColor,
-    }
+    return this.store.cssVars;
   }
 }
 </script>
 
 <style lang="scss">
-@import "../../assets/style/overlay-mixins";
+@import '../../assets/style/overlay-mixins';
 @include overlayBaseStyle();
 
 .MainMenuScreen {

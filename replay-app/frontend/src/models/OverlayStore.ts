@@ -1,9 +1,8 @@
 import { ipcRenderer, remote } from 'electron';
-import { observable, computed } from 'mobx';
+import { computed, observable } from 'mobx';
 import { getTheme } from '~shared/utils/themes';
 import ISettings from '~shared/interfaces/ISettings';
 
-// tslint:disable-next-line:interface-name
 export declare interface OverlayStore {
   onUpdateTabInfo: (tabId: number, data: any) => void;
   onHide: (data: any) => void;
@@ -19,10 +18,21 @@ export class OverlayStore {
   }
 
   @observable
+  public alwaysOnTop = false;
+
+  @observable
   public visible = false;
 
-  protected args: any;
-  protected onShowArgs?: (...args: any[]) => void;
+  @computed
+  public get cssVars() {
+    const dialogLightForeground = this.theme.dialogLightForeground;
+    return {
+      '--dropdownBackgroundColor': this.theme.dropdownBackgroundColor,
+      '--menuItemHoverBackgroundColor': dialogLightForeground
+        ? 'rgba(255, 255, 255, 0.06)'
+        : 'rgba(0, 0, 0, 0.03)',
+    };
+  }
 
   private _windowId = -1;
 
@@ -40,6 +50,10 @@ export class OverlayStore {
       ...options,
     };
 
+    if (remote.getCurrentWindow()) {
+      this.alwaysOnTop = remote.getCurrentWindow().isAlwaysOnTop();
+    }
+
     if (!persistent) this.visible = true;
 
     this.persistent = persistent;
@@ -49,12 +63,6 @@ export class OverlayStore {
         this.hide();
       });
     }
-
-    ipcRenderer.on('will-show', (event, ...args: any[]) => {
-      this.visible = true;
-      this.args = args;
-      if (this.onShowArgs) this.onShowArgs(...args);
-    });
 
     ipcRenderer.on('update-settings', (e, settings: ISettings) => {
       this.settings = { ...this.settings, ...settings };

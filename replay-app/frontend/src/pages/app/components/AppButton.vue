@@ -24,7 +24,7 @@ import { transparency } from '~frontend/constants/transparency';
 import { BLUE_500 } from '~frontend/constants';
 import Preloader from '~frontend/components/Preloader.vue';
 import { TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_HEIGHT } from '~shared/constants/design';
-import store from '~frontend/stores/app';
+import store from '~frontend/pages/app/store';
 import NoCache from '~frontend/lib/NoCache';
 
 const AppButtonProps = Vue.extend({

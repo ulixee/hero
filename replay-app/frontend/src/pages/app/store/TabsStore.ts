@@ -4,8 +4,7 @@ import TabFrontend from './TabFrontend';
 import { TAB_ANIMATION_DURATION, TABS_PADDING } from './constants';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import ITabMeta from '~shared/interfaces/ITabMeta';
-import { AppStore } from '../app';
-import store from '~frontend/stores/app';
+import store, { AppStore } from '~frontend/pages/app/store';
 
 export default class TabsStore {
   @observable
