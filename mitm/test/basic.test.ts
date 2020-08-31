@@ -3,15 +3,17 @@ import { Helpers } from '@secret-agent/testing';
 import HttpProxyAgent from 'http-proxy-agent';
 import { AddressInfo } from 'net';
 import WebSocket from 'ws';
+import Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
-import MitmRequestHandler from '../lib/MitmRequestHandler';
+import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
+import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 
 const mocks = {
-  mitmRequestHandler: {
-    handleRequest: jest.spyOn<any, any>(MitmRequestHandler.prototype, 'handleRequest'),
+  httpRequestHandler: {
+    onRequest: jest.spyOn<any, any>(HttpRequestHandler.prototype, 'onRequest'),
   },
   HeadersHandler: {
     waitForResource: jest.spyOn(HeadersHandler, 'waitForResource'),
@@ -27,7 +29,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  mocks.mitmRequestHandler.handleRequest.mockClear();
+  mocks.httpRequestHandler.onRequest.mockClear();
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -41,12 +43,12 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession('1', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
+    const proxyCredentials = session.getProxyCredentials();
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
-    const res = await Helpers.httpGet(httpServer.url, proxyHost, headers);
+    const res = await Helpers.httpGet(httpServer.url, proxyHost, proxyCredentials);
     expect(res.includes('Hello')).toBeTruthy();
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
 
     await mitmServer.close();
   });
@@ -57,18 +59,18 @@ describe('basic MitM tests', () => {
     });
 
     const mitmServer = await MitmServer.start();
-    Helpers.onClose(() => mitmServer.close());
+    Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = new RequestSession('1', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
+    const proxyCredentials = session.getProxyCredentials();
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
     process.env.MITM_ALLOW_INSECURE = 'true';
-    const res = await Helpers.httpGet(server.baseUrl, proxyHost, headers);
+    const res = await Helpers.httpGet(server.baseUrl, proxyHost, proxyCredentials);
     expect(res.includes('Secure as anything!')).toBeTruthy();
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
     process.env.MITM_ALLOW_INSECURE = 'false';
     await session.close();
   });
@@ -76,7 +78,7 @@ describe('basic MitM tests', () => {
   it('should send an https request through upstream proxy', async () => {
     const httpServer = await Helpers.runHttpServer();
     const mitmServer = await MitmServer.start();
-    Helpers.onClose(() => mitmServer.close());
+    Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
     const upstreamProxyHost = httpServer.url.replace(/\/$/, '');
 
@@ -88,9 +90,13 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession('1', 'any agent', Promise.resolve(upstreamProxyHost));
 
-    const headers = session.getTrackingHeaders();
+    const proxyCredentials = session.getProxyCredentials();
 
-    await Helpers.httpGet('https://dataliberationfoundation.org', proxyHost, headers).catch();
+    await Helpers.httpGet(
+      'https://dataliberationfoundation.org',
+      proxyHost,
+      proxyCredentials,
+    ).catch();
 
     expect(upstreamProxyConnected).toBeTruthy();
   });
@@ -112,26 +118,31 @@ describe('basic MitM tests', () => {
     const serverPort = (server.address() as AddressInfo).port;
 
     const mitmServer = await MitmServer.start();
-    Helpers.onClose(() => mitmServer.close());
+    Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = new RequestSession('1', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
+    const proxyCredentials = session.getProxyCredentials();
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
-    const res = await Helpers.httpGet(`http://localhost:${serverPort}`, proxyHost, headers);
+    const res = await Helpers.httpGet(
+      `http://localhost:${serverPort}`,
+      proxyHost,
+      proxyCredentials,
+    );
     expect(res).toBe('Ok');
 
-    expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
     await session.close();
   });
 
-  it('should strip mitm headers', async () => {
+  it('should strip proxy headers', async () => {
     const httpServer = await Helpers.runHttpServer(null, null, (url, method, headers1) => {
       expect(url).toBe('/page1');
       expect(method).toBe('GET');
-      expect(Object.keys(headers1).filter(x => x.startsWith('mitm-'))).toHaveLength(0);
+      expect(Object.keys(headers1).filter(x => x.startsWith('proxy-'))).toHaveLength(0);
+      expect(headers1.last).toBe('1');
     });
     const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
@@ -139,39 +150,11 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession('2', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
-    headers.last = '1';
+    const proxyCredentials = session.getProxyCredentials();
 
-    await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, headers).catch();
-
-    await httpServer.close();
-    await mitmServer.close();
-  });
-
-  it('should strip preflight mitm headers', async () => {
-    const httpServer = await Helpers.runHttpServer(null, null, (url, method, headers1) => {
-      expect(url).toBe('/page1');
-      expect(method).toBe('OPTIONS');
-      expect(Object.keys(headers1).filter(x => x.startsWith('mitm-'))).toHaveLength(0);
-      expect(headers1['access-control-request-headers']).toEqual('X-Custom-Header');
-    });
-    const mitmServer = await MitmServer.start();
-    Helpers.needsClosing.push(mitmServer);
-    const proxyHost = `http://localhost:${mitmServer.port}`;
-
-    const session = new RequestSession('3', 'any agent', null);
-
-    const headers = session.getTrackingHeaders();
-    headers.Origin = httpServer.url;
-    headers['Access-Control-Request-Method'] = 'GET';
-    headers['Access-Control-Request-Headers'] =
-      'mitm-session-id-3,mitm-request-id-1,X-Custom-Header';
-
-    await Helpers.httpRequest(`${httpServer.url}page1`, 'OPTIONS', proxyHost, headers, res => {
-      // should return the actual headers back to the client
-      expect(res.headers['access-control-allow-headers']).toBe(
-        'mitm-session-id-3,mitm-request-id-1,X-Custom-Header',
-      );
+    await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials, {
+      'proxy-authorization': `Basic ${Buffer.from(proxyCredentials).toString('base64')}`,
+      last: '1',
     }).catch();
 
     await httpServer.close();
@@ -186,14 +169,14 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession('3', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
+    const proxyCredentials = session.getProxyCredentials();
 
     await Helpers.httpRequest(
       `${httpServer.url}page2`,
       'POST',
       proxyHost,
+      proxyCredentials,
       {
-        ...headers,
         'content-type': 'application/json',
       },
       null,
@@ -218,7 +201,7 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession('3', 'any agent', null);
 
-    const headers = session.getTrackingHeaders();
+    const proxyCredentials = session.getProxyCredentials();
     const buffers: Buffer[] = [];
     const copyBuffer = Buffer.from('ASDGASDFASDWERWER@#$%#$%#$%#$%#DSFSFGDBSDFGD$%^$%^$%');
     for (let i = 0; i <= 10e4; i += 1) {
@@ -231,8 +214,8 @@ describe('basic MitM tests', () => {
       `${httpServer.url}page2`,
       'POST',
       proxyHost,
+      proxyCredentials,
       {
-        ...headers,
         'content-type': 'application/json',
       },
       null,
@@ -251,8 +234,8 @@ describe('basic MitM tests', () => {
   it('should modify websocket upgrade headers', async () => {
     const httpServer = await Helpers.runHttpServer();
     const mitmServer = await MitmServer.start();
-    const upgradeSpy = jest.spyOn(MitmRequestHandler.prototype, 'handleUpgrade');
-    const requestSpy = jest.spyOn(MitmRequestHandler.prototype, 'handleRequest');
+    const upgradeSpy = jest.spyOn(HttpUpgradeHandler.prototype, 'onUpgrade');
+    const requestSpy = jest.spyOn(HttpRequestHandler.prototype, 'onRequest');
     Helpers.needsClosing.push(mitmServer);
 
     const serverMessages = [];
@@ -263,7 +246,7 @@ describe('basic MitM tests', () => {
     httpServer.server.on('upgrade', (request, socket, head) => {
       // ensure header is stripped
       expect(request.headers).toBeTruthy();
-      for (const key of Object.keys(session.getTrackingHeaders())) {
+      for (const key of Object.keys(session.getProxyCredentials())) {
         expect(request.headers).not.toHaveProperty(key);
       }
 
@@ -281,8 +264,10 @@ describe('basic MitM tests', () => {
     });
 
     const wsClient = new WebSocket(`ws://localhost:${httpServer.port}`, {
-      agent: HttpProxyAgent(`http://localhost:${mitmServer.port}`),
-      headers: session.getTrackingHeaders(),
+      agent: HttpProxyAgent({
+        ...Url.parse(`http://localhost:${mitmServer.port}`),
+        auth: session.getProxyCredentials(),
+      }),
     });
 
     Helpers.onClose(async () => wsClient.close());
@@ -331,9 +316,9 @@ describe('basic MitM tests', () => {
     session.on('response', onresponse);
     session.on('httpError', onError);
 
-    const headers = session.getTrackingHeaders();
+    const proxyCredentials = session.getProxyCredentials();
 
-    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, headers);
+    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
 
     expect(result).toBeTruthy();
 

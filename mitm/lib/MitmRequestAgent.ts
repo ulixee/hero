@@ -28,10 +28,7 @@ export default class MitmRequestAgent {
       session.delegate?.maxConnectionsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
-  public async request(
-    ctx: IMitmRequestContext,
-    responseCallback: (res: NodeJS.ReadableStream) => any,
-  ) {
+  public async request(ctx: IMitmRequestContext) {
     const url = ctx.url;
     const requestSettings: https.RequestOptions = {
       method: ctx.method,
@@ -58,10 +55,10 @@ export default class MitmRequestAgent {
 
     if (ctx.isServerHttp2) {
       HeadersHandler.prepareRequestHeadersForHttp2(ctx);
-      return this.http2Request(ctx, mitmSocket, responseCallback);
+      return this.http2Request(ctx, mitmSocket);
     }
 
-    return this.http1Request(ctx, requestSettings, responseCallback);
+    return this.http1Request(ctx, requestSettings);
   }
 
   public async freeSocket(ctx: IMitmRequestContext) {
@@ -71,7 +68,7 @@ export default class MitmRequestAgent {
 
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
 
-    const socket = ctx.proxyToServerSocket;
+    const socket = ctx.proxyToServerMitmSocket;
     if (!socket.isReusable()) {
       return socket.close();
     }
@@ -234,31 +231,16 @@ export default class MitmRequestAgent {
     });
   }
 
-  private http1Request(
-    ctx: IMitmRequestContext,
-    requestSettings: http.RequestOptions,
-    responseHandler: (response: NodeJS.ReadableStream) => any,
-  ) {
+  private http1Request(ctx: IMitmRequestContext, requestSettings: http.RequestOptions) {
     const httpModule = ctx.isSSL ? https : http;
-    return httpModule.request(requestSettings, response => {
-      MitmRequestContext.readHttp1Response(ctx, response);
-      responseHandler(response);
-    });
+    return httpModule.request(requestSettings);
   }
 
   /////// ////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
-  private http2Request(
-    ctx: IMitmRequestContext,
-    connectResult: MitmSocket,
-    responseHandler: (response: NodeJS.ReadableStream) => any,
-  ) {
+  private http2Request(ctx: IMitmRequestContext, connectResult: MitmSocket) {
     const client = this.createHttp2Session(ctx, connectResult);
     const http2Stream = client.request(ctx.requestHeaders, { waitForTrailers: true });
-    http2Stream.once('response', (headers) => {
-      MitmRequestContext.readHttp2Response(ctx, headers);
-      responseHandler(http2Stream);
-    });
     http2Stream.on('push', this.onHttp2PushStream.bind(this, ctx, http2Stream));
 
     return http2Stream;
@@ -283,8 +265,8 @@ export default class MitmRequestAgent {
       return stream.close(http2.constants.NGHTTP2_CANCEL);
     }
 
-    pushContext.serverToProxyResponseStream = stream;
-    MitmRequestContext.readHttp2Response(pushContext, headers);
+    pushContext.serverToProxyResponse = stream;
+    MitmRequestContext.readHttp2Response(pushContext, stream, headers);
 
     // emit request
     if (!parentContext.isClientHttp2) {

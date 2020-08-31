@@ -1,16 +1,16 @@
-import { Helpers } from "@secret-agent/testing";
-import * as http2 from "http2";
-import { URL } from "url";
-import MitmSocket from "@secret-agent/mitm-socket";
-import MitmServer from "../lib/MitmProxy";
-import RequestSession from "../handlers/RequestSession";
-import MitmRequestHandler from "../lib/MitmRequestHandler";
-import HeadersHandler from "../handlers/HeadersHandler";
-import MitmRequestContext from "../lib/MitmRequestContext";
+import { Helpers } from '@secret-agent/testing';
+import * as http2 from 'http2';
+import { URL } from 'url';
+import MitmSocket from '@secret-agent/mitm-socket';
+import MitmServer from '../lib/MitmProxy';
+import RequestSession from '../handlers/RequestSession';
+import HttpRequestHandler from '../handlers/HttpRequestHandler';
+import HeadersHandler from '../handlers/HeadersHandler';
+import MitmRequestContext from '../lib/MitmRequestContext';
 
 const mocks = {
-  mitmRequestHandler: {
-    handleRequest: jest.spyOn<any, any>(MitmRequestHandler.prototype, 'handleRequest'),
+  httpRequestHandler: {
+    onRequest: jest.spyOn<any, any>(HttpRequestHandler.prototype, 'onRequest'),
   },
   MitmRequestContext: {
     create: jest.spyOn(MitmRequestContext, 'create'),
@@ -30,7 +30,7 @@ beforeAll(() => {
 
 process.env.MITM_ALLOW_INSECURE = 'true';
 beforeEach(() => {
-  mocks.mitmRequestHandler.handleRequest.mockClear();
+  mocks.httpRequestHandler.onRequest.mockClear();
   mocks.MitmRequestContext.create.mockClear();
 });
 afterAll(Helpers.afterAll);
@@ -47,12 +47,12 @@ test('should be able to handle an http->http2 request', async () => {
 
   const session = new RequestSession('h2', 'any agent', null);
 
-  const headers = session.getTrackingHeaders();
-  expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(0);
+  const proxyCredentials = session.getProxyCredentials();
+  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
-  const res = await Helpers.httpGet(server.baseUrl, proxyHost, headers);
+  const res = await Helpers.httpGet(server.baseUrl, proxyHost, proxyCredentials);
   expect(res.includes('h2 secure as anything!')).toBeTruthy();
-  expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
   await session.close();
 });
 
@@ -63,18 +63,20 @@ test('should be able to handle an http2->http2 request', async () => {
 
   const session = new RequestSession('h2-to-h2', 'any agent', null);
   Helpers.needsClosing.push(session);
-  const headers = session.getTrackingHeaders();
+  const proxyCredentials = session.getProxyCredentials();
 
-  const client = await createH2Connection(session.sessionId, server.baseUrl);
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
 
-  const h2stream = client.request({ ':path': '/', ...headers });
+  const h2stream = client.request({
+    ':path': '/',
+  });
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('h2 secure as anything!');
 
-  expect(mocks.mitmRequestHandler.handleRequest).toBeCalledTimes(1);
+  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
   const call = mocks.MitmRequestContext.create.mock.calls[0];
-  expect(call[1]).toBe('http');
-  expect(call[3]).toBeInstanceOf(http2.Http2ServerRequest);
+  expect(call[0].isUpgrade).toBe(false);
+  expect(call[0].clientToProxyRequest).toBeInstanceOf(http2.Http2ServerRequest);
 });
 
 test('should support push streams', async () => {
@@ -100,14 +102,14 @@ test('should support push streams', async () => {
 
   const session = new RequestSession('h2', 'any agent', null);
   Helpers.needsClosing.push(session);
-  const headers = session.getTrackingHeaders();
+  const proxyCredentials = session.getProxyCredentials();
 
-  const client = await createH2Connection(session.sessionId, server.baseUrl);
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
   const pushes: string[] = [];
   client.on('stream', (stream, headers1) => {
     pushes.push(headers1[':path']);
   });
-  const h2stream = client.request({ ':path': '/', ...headers });
+  const h2stream = client.request({ ':path': '/' });
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('H2 response');
   expect(pushes.includes('/push1')).toBeTruthy();
@@ -130,8 +132,8 @@ test('should handle h2 client going to h1 request', async () => {
 
   const session = new RequestSession('h2-to-h1', 'any agent', null);
   Helpers.needsClosing.push(session);
-  const headers = session.getTrackingHeaders();
-  const client = await createH2Connection(session.sessionId, server.baseUrl);
+  const proxyCredentials = session.getProxyCredentials();
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
 
   client.on('error', err => {
     expect(err).not.toBeTruthy();
@@ -141,7 +143,6 @@ test('should handle h2 client going to h1 request', async () => {
     ':path': '/provided',
     ':method': 'GET',
     test: 'Im here',
-    ...headers,
   });
   const responseHeaders = await new Promise<
     http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader
@@ -168,18 +169,18 @@ test('should send trailers', async () => {
 
   const session = new RequestSession('trailers', 'any agent', null);
   Helpers.needsClosing.push(session);
-  const headers = session.getTrackingHeaders();
+  const proxyCredentials = session.getProxyCredentials();
 
-  const client = await createH2Connection(session.sessionId, server.baseUrl);
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
 
-  const h2stream = client.request({ ':path': '/', ...headers });
+  const h2stream = client.request({ ':path': '/' });
   const trailers = await new Promise(resolve => h2stream.once('trailers', resolve));
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('Trailin...');
   expect(trailers['mr-trailer']).toBe('1');
 });
 
-async function createH2Connection(sessionId: string, url: string) {
+async function createH2Connection(sessionId: string, url: string, proxyCredentials: string) {
   const hostUrl = new URL(url);
   const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
@@ -192,6 +193,7 @@ async function createH2Connection(sessionId: string, url: string) {
     clientHelloId: 'Chrome72',
     isSsl: url.startsWith('https'),
     proxyUrl: proxyHost,
+    proxyAuthBase64: Buffer.from(proxyCredentials).toString('base64'),
     rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());

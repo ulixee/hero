@@ -436,8 +436,6 @@ export default class Window {
   ) {
     const logid = log.info('CreatingWindow', { sessionId: session.id });
 
-    await puppPage.setExtraHTTPHeaders(session.requestMitmProxySession.getTrackingHeaders());
-
     const window = new Window(sessionState, puppPage, session);
     await window.frameTracker.init();
     log.info('CreatedWindow', { sessionId: session.id, parentLogId: logid });

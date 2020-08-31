@@ -12,17 +12,18 @@ import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import { URL } from 'url';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import net from 'net';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import Network = Protocol.Network;
 
 export default class RequestSession {
   public static sessions: { [sessionId: string]: RequestSession } = {};
-  public static requestUpgradeSessionLookup: {
-    [headersHash: string]: IResolvablePromise<IRequestUpgradeLookup>;
-  } = {};
+  public static proxyPortSessionIds: { [port: number]: string } = {};
 
-  private static headerSessionIdPrefix = 'mitm-session-id-';
+  public websocketBrowserResourceIds: {
+    [headersHash: string]: IResolvablePromise<string>;
+  } = {};
 
   public delegate: IHttpRequestModifierDelegate = {};
 
@@ -62,11 +63,6 @@ export default class RequestSession {
     event: IRequestSessionEvents[K],
   ) {
     return this.emitter.emit(eventType, event);
-  }
-
-  public async getWebsocketUpgradeRequestId(headers: IResourceHeaders) {
-    const session = await RequestSession.waitForWebsocketSessionId(headers, 0);
-    return session.browserRequestId;
   }
 
   public async waitForBrowserResourceRequest(url: URL, method: string, headers: IResourceHeaders) {
@@ -149,45 +145,16 @@ export default class RequestSession {
     resource.load.resolve(resource);
   }
 
-  // ugly workaround because chrome won't let me intercept http upgrades or add headers
-  public registerWebsocketHeaders(browserRequestId: string, headers: object) {
-    const headersKey = [];
-    for (const key of websocketHeadersForKey) {
-      headersKey.push(`${key}=${headers[key]}`);
-    }
-
-    const key = headersKey.join(',');
-    if (!RequestSession.requestUpgradeSessionLookup[key]) {
-      RequestSession.requestUpgradeSessionLookup[key] = createPromise<IRequestUpgradeLookup>();
-    }
-    RequestSession.requestUpgradeSessionLookup[key].resolve({
-      sessionId: this.sessionId,
-      browserRequestId,
-    });
-  }
-
   public async getUpstreamProxyUrl() {
     return this.upstreamProxyUrlProvider ? this.upstreamProxyUrlProvider : null;
   }
 
-  public getTrackingHeaders() {
-    return {
-      [`${RequestSession.headerSessionIdPrefix}${this.sessionId}`]: '1',
-    };
+  public getProxyCredentials(windowId = '') {
+    return `${windowId}:${this.sessionId}`;
   }
 
   public async close() {
     this.isClosing = true;
-    for (const headersKey of Object.keys(RequestSession.requestUpgradeSessionLookup)) {
-      const wsSession = RequestSession.requestUpgradeSessionLookup[headersKey];
-      if (wsSession.isResolved) {
-        const session = await wsSession.promise;
-        if (session.sessionId === this.sessionId) {
-          delete RequestSession.requestUpgradeSessionLookup[headersKey];
-        }
-      }
-    }
-
     await this.requestAgent.close();
     delete RequestSession.sessions[this.sessionId];
   }
@@ -219,6 +186,36 @@ export default class RequestSession {
     }
   }
 
+  /////// Websockets ///////////////////////////////////////////////////////////
+
+  public async getWebsocketUpgradeRequestId(headers: IResourceHeaders) {
+    const key = this.getWebsocketHeadersKey(headers);
+    if (!this.websocketBrowserResourceIds[key]) {
+      this.websocketBrowserResourceIds[key] = createPromise<string>(100);
+    }
+
+    return this.websocketBrowserResourceIds[key].promise;
+  }
+
+  public registerWebsocketHeaders(browserRequestId: string, headers: IResourceHeaders) {
+    const key = this.getWebsocketHeadersKey(headers);
+    if (!this.websocketBrowserResourceIds[key]) {
+      this.websocketBrowserResourceIds[key] = createPromise<string>();
+    }
+    this.websocketBrowserResourceIds[key].resolve(browserRequestId);
+  }
+
+  private getWebsocketHeadersKey(headers: IResourceHeaders) {
+    let websocketKey: string;
+    let host: string;
+    for (const key of Object.keys(headers)) {
+      const lowerKey = key.toLowerCase();
+      if (lowerKey === 'sec-websocket-key') websocketKey = headers[key] as string;
+      if (lowerKey === 'host') host = headers[key] as string;
+    }
+    return [host, websocketKey].join(',');
+  }
+
   private getResourceIndex(url: string, method: string) {
     return this.pendingResources.findIndex(x => {
       return x.url === url && x.method === method;
@@ -229,49 +226,30 @@ export default class RequestSession {
     await Promise.all(Object.values(RequestSession.sessions).map(x => x.close()));
   }
 
-  public static async getSession(
-    headers: IResourceHeaders,
-    method: string,
-    isWebsocket = false,
-    timeout = 10e3,
+  public static readSessionId(
+    requestHeaders: { [key: string]: string | string[] | undefined },
+    remotePort: number,
   ) {
-    let sessionId = RequestSession.getSessionId(headers, method);
-    if (!sessionId && isWebsocket) {
-      const result = await RequestSession.waitForWebsocketSessionId(headers, timeout);
-      sessionId = result.sessionId;
+    const authHeader = requestHeaders['proxy-authorization'] as string;
+    if (!authHeader) {
+      return RequestSession.proxyPortSessionIds[remotePort];
     }
-    return RequestSession.sessions[sessionId];
+
+    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64')
+      .toString()
+      .split(':');
+    return sessionId;
   }
 
-  public static getSessionId(headers: IResourceHeaders, method: string) {
-    const keys = Object.keys(headers);
-    const accessControlHeaders = Object.entries(headers).find(([key]) =>
-      key.match(/access-control-request-headers/i),
+  public static registerProxySession(socket: net.Socket, sessionId: string) {
+    this.proxyPortSessionIds[socket.remotePort] = sessionId;
+  }
+
+  public static sendNeedsAuth(socket: net.Socket) {
+    socket.end(
+      'HTTP/1.1 407 Proxy Authentication Required\r\n' +
+        'Proxy-Authenticate: Basic realm="sa"\r\n\r\n',
     );
-    // preflight
-    if (accessControlHeaders && method === 'OPTIONS') {
-      keys.push(...(accessControlHeaders[1] as string).split(','));
-    }
-    for (const key of keys) {
-      if (key.startsWith(RequestSession.headerSessionIdPrefix)) {
-        return key.replace(RequestSession.headerSessionIdPrefix, '');
-      }
-    }
-  }
-
-  public static async waitForWebsocketSessionId(headers: IResourceHeaders, timeout: number) {
-    const headersKey: string[] = [];
-    for (const key of websocketHeadersForKey) {
-      headersKey.push(`${key}=${headers[key]}`);
-    }
-    const key = headersKey.join(',');
-    if (!RequestSession.requestUpgradeSessionLookup[key]) {
-      RequestSession.requestUpgradeSessionLookup[key] = createPromise<IRequestUpgradeLookup>(
-        timeout,
-      );
-    }
-
-    return RequestSession.requestUpgradeSessionLookup[key].promise;
   }
 }
 
@@ -308,20 +286,6 @@ export interface IRequestSessionHttpErrorEvent {
   error: Error;
 }
 
-const websocketHeadersForKey = [
-  'Accept-Encoding',
-  'Cache-Control',
-  'Connection',
-  'Host',
-  'Origin',
-  'Pragma',
-  'Sec-WebSocket-Extensions',
-  'Sec-WebSocket-Key',
-  'Sec-WebSocket-Version',
-  'Upgrade',
-  'User-Agent',
-];
-
 interface IPendingResourceLoad {
   url: string;
   method: string;
@@ -331,9 +295,4 @@ interface IPendingResourceLoad {
   documentUrl?: string;
   hasUserGesture?: boolean;
   isUserNavigation?: boolean;
-}
-
-interface IRequestUpgradeLookup {
-  sessionId: string;
-  browserRequestId: string;
 }

@@ -89,7 +89,13 @@ export default class Session {
   public async initialize(puppContext: puppeteer.BrowserContext) {
     this.puppContext = puppContext;
     const puppPage = await puppContext.newPage();
+
     this.window = await Window.create(this.sessionState, this, puppPage);
+    // this responds to auth requests
+    await puppPage.authenticate({
+      username: this.window.id,
+      password: this.id,
+    });
 
     // install user profile before page boots up
     await UserProfile.install(this.options.userProfile, this.window);

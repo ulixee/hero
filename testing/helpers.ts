@@ -1,18 +1,18 @@
-import * as Fs from "fs";
-import * as Path from "path";
-import Url, { URL } from "url";
-import querystring from "querystring";
-import http, { IncomingMessage, RequestListener, Server } from "http";
-import https from "https";
-import { createPromise } from "@secret-agent/commons/utils";
-import HttpProxyAgent from "http-proxy-agent";
-import HttpsProxyAgent from "https-proxy-agent";
-import Koa from "koa";
-import KoaRouter from "@koa/router";
-import * as net from "net";
-import * as http2 from "http2";
-import * as stream from "stream";
-import Core from "../core";
+import * as Fs from 'fs';
+import * as Path from 'path';
+import Url, { URL } from 'url';
+import querystring from 'querystring';
+import http, { IncomingMessage, RequestListener, Server } from 'http';
+import https from 'https';
+import { createPromise } from '@secret-agent/commons/utils';
+import HttpProxyAgent from 'http-proxy-agent';
+import HttpsProxyAgent from 'https-proxy-agent';
+import Koa from 'koa';
+import KoaRouter from '@koa/router';
+import * as net from 'net';
+import * as http2 from 'http2';
+import * as stream from 'stream';
+import Core from '../core';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -190,6 +190,7 @@ export function httpRequest(
   urlStr: string,
   method: string,
   proxyHost: string,
+  proxyAuth?: string,
   headers: { [name: string]: string } = {},
   response?: (res: IncomingMessage) => any,
   postData?: Buffer,
@@ -209,7 +210,7 @@ export function httpRequest(
   };
 
   if (proxyHost) {
-    options.agent = getProxyAgent(url, proxyHost);
+    options.agent = getProxyAgent(url, proxyHost, proxyAuth);
   }
 
   const client = url.protocol === 'https:' ? https : http;
@@ -227,18 +228,20 @@ export function httpRequest(
   return promise;
 }
 
-export function getProxyAgent(url: URL, proxyHost: string) {
-  // tslint:disable-next-line:variable-name
+export function getProxyAgent(url: URL, proxyHost: string, auth?: string) {
   const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
-  return ProxyAgent(proxyHost);
+  const opts = Url.parse(proxyHost);
+  opts.auth = auth;
+  return ProxyAgent(opts);
 }
 
 export function httpGet(
   urlStr: string,
   proxyHost: string,
+  proxyAuth?: string,
   headers: { [name: string]: string } = {},
 ) {
-  return httpRequest(urlStr, 'GET', proxyHost, headers);
+  return httpRequest(urlStr, 'GET', proxyHost, proxyAuth, headers);
 }
 
 export async function runHttp2Server(

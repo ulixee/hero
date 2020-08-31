@@ -13,7 +13,7 @@ export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
   browserRequestId?: string;
   proxyToClientResponse?: http.ServerResponse | http2.Http2ServerResponse;
   proxyToServerRequest?: http.ClientRequest | http2.ClientHttp2Stream;
-  serverToProxyResponseStream?: NodeJS.ReadableStream;
+  serverToProxyResponse?: http.IncomingMessage | http2.ClientHttp2Stream;
   requestSession?: RequestSession;
-  proxyToServerSocket?: MitmSocket;
+  proxyToServerMitmSocket?: MitmSocket;
 }

@@ -23,6 +23,7 @@ export default class MitmSocket {
   private isConnected = false;
   private child: ChildProcess;
   private emitter = new EventEmitter();
+  private connectError?: string;
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     const id = uuid();
@@ -94,8 +95,8 @@ export default class MitmSocket {
     child.stderr.setEncoding('utf8');
 
     const promise = createPromise(30e3);
-    child.on('exit', code => {
-      promise.reject(new Error(`Socket process exited during connect "${code}"`));
+    child.on('exit', () => {
+      promise.reject(this.connectError ?? new Error(`Socket process exited during connect`));
       this.cleanupSocket();
     });
 
@@ -150,6 +151,7 @@ export default class MitmSocket {
 
   private cleanupSocket() {
     if (!this.socket) return;
+    if (this.connectError) this.socket.destroy(new Error(this.connectError));
     this.socket.end();
     this.isConnected = false;
     unlink(this.socketPath, () => null);
@@ -194,17 +196,17 @@ export default class MitmSocket {
   }
 
   private onChildProcessStderr(message: string) {
-    log.warn(`SocketConnectDriver.Error => ${message}`, { sessionId: this.sessionId });
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||
       message.includes('connection refused')
     ) {
-      this.socket?.destroy(new Error(message));
+      this.connectError = message.trim();
       this.close();
-    }
-    if (message.includes('DomainSocket -> EOF') && !this.connectOpts.keepAlive) {
+    } else if (message.includes('DomainSocket -> EOF') && !this.connectOpts.keepAlive) {
       this.close();
+    } else {
+      log.warn(`SocketConnectDriver.Error => ${message}`, { sessionId: this.sessionId });
     }
   }
 }

@@ -2,7 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import MitmServer from '@secret-agent/mitm/lib/MitmProxy';
 import { createPromise } from '@secret-agent/commons/utils';
 import WebSocket from 'ws';
-import MitmRequestHandler from '@secret-agent/mitm/lib/MitmRequestHandler';
+import HttpUpgradeHandler from '@secret-agent/mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@secret-agent/client/lib/WebsocketResource';
 import SecretAgent from '../index';
 
@@ -18,7 +18,7 @@ afterEach(Helpers.afterEach);
 describe('Websocket tests', () => {
   it('can wait for a websocket', async () => {
     const mitmServer = await MitmServer.start();
-    const upgradeSpy = jest.spyOn(MitmRequestHandler.prototype, 'handleUpgrade');
+    const upgradeSpy = jest.spyOn(HttpUpgradeHandler.prototype, 'onUpgrade');
     Helpers.needsClosing.push(mitmServer);
 
     const serverMessagePromise = createPromise();

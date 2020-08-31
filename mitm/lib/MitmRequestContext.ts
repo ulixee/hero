@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import http, { IncomingMessage, ServerResponse } from 'http';
+import http from 'http';
 import * as http2 from 'http2';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
@@ -18,37 +18,48 @@ export default class MitmRequestContext {
   private static contextIdCounter = 0;
 
   public static create(
+    params: Pick<
+      IMitmRequestContext,
+      'requestSession' | 'isSSL' | 'clientToProxyRequest' | 'proxyToClientResponse' | 'isUpgrade'
+    >,
     responseCache: HttpResponseCache,
-    protocol: 'ws' | 'http',
-    isSSL: boolean,
-    clientRequest: IncomingMessage | http2.Http2ServerRequest,
-    clientResponse?: ServerResponse | http2.Http2ServerResponse,
   ) {
+    const {
+      isSSL,
+      proxyToClientResponse,
+      clientToProxyRequest,
+      requestSession,
+      isUpgrade,
+    } = params;
+
+    const protocol = isUpgrade ? 'ws' : 'http';
     const expectedProtocol = `${protocol}${isSSL ? 's' : ''}:`;
-    const providedHost = clientRequest.headers.host ?? clientRequest.headers[':authority'] ?? '';
-    const url = new URL(clientRequest.url, `${expectedProtocol}//${providedHost}`);
+    const providedHost =
+      clientToProxyRequest.headers.host ?? clientToProxyRequest.headers[':authority'] ?? '';
+    const url = new URL(clientToProxyRequest.url, `${expectedProtocol}//${providedHost}`);
     if (url.protocol !== expectedProtocol) {
       url.protocol = expectedProtocol;
     }
 
-    const requestHeaders = parseRawHeaders(clientRequest.rawHeaders);
+    const requestHeaders = parseRawHeaders(clientToProxyRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
       id: this.contextIdCounter += 1,
       isSSL,
-      isUpgrade: protocol === 'ws',
-      isClientHttp2: clientRequest instanceof http2.Http2ServerRequest,
+      isUpgrade,
+      isClientHttp2: clientToProxyRequest instanceof http2.Http2ServerRequest,
       isServerHttp2: false,
       isHttp2Push: false,
-      method: clientRequest.method,
+      method: clientToProxyRequest.method,
       url,
+      requestSession,
       requestHeaders,
-      requestOriginalHeaders: parseRawHeaders(clientRequest.rawHeaders),
-      requestLowerHeaders: { ...clientRequest.headers },
-      clientToProxyRequest: clientRequest,
-      proxyToClientResponse: clientResponse,
+      requestOriginalHeaders: parseRawHeaders(clientToProxyRequest.rawHeaders),
+      requestLowerHeaders: { ...clientToProxyRequest.headers },
+      clientToProxyRequest,
+      proxyToClientResponse,
       requestTime: new Date(),
-      clientAlpn: (clientRequest.socket as TLSSocket)?.alpnProtocol || 'http/1.1',
-      documentUrl: clientRequest.headers.origin as string,
+      clientAlpn: (clientToProxyRequest.socket as TLSSocket)?.alpnProtocol || 'http/1.1',
+      documentUrl: clientToProxyRequest.headers.origin as string,
       originType: this.getOriginType(url, requestHeaders),
       didBlockResource: false,
       cacheHandler: null,
@@ -96,6 +107,7 @@ export default class MitmRequestContext {
       proxyToServerRequest: null,
       requestTime: new Date(),
       didBlockResource: false,
+      cacheHandler: null,
     } as IMitmRequestContext;
 
     ctx.cacheHandler = new CacheHandler(parentContext.cacheHandler.responseCache, ctx);
@@ -133,7 +145,7 @@ export default class MitmRequestContext {
       localAddress: ctx.localAddress,
       originalHeaders: ctx.requestOriginalHeaders,
       clientAlpn: ctx.clientAlpn,
-      serverAlpn: ctx.proxyToServerSocket?.alpn,
+      serverAlpn: ctx.proxyToServerMitmSocket?.alpn,
       didBlockResource: ctx.didBlockResource,
       executionMillis: (ctx.responseTime ?? new Date()).getTime() - ctx.requestTime.getTime(),
       isHttp2Push: ctx.isHttp2Push,
@@ -141,7 +153,7 @@ export default class MitmRequestContext {
   }
 
   public static assignMitmSocket(ctx: IMitmRequestContext, mitmSocket: MitmSocket) {
-    ctx.proxyToServerSocket = mitmSocket;
+    ctx.proxyToServerMitmSocket = mitmSocket;
     ctx.isServerHttp2 = mitmSocket.isHttp2();
     ctx.localAddress = mitmSocket.localAddress;
     ctx.remoteAddress = mitmSocket.remoteAddress;
@@ -177,17 +189,20 @@ export default class MitmRequestContext {
 
     ctx.responseUrl = response.url;
     ctx.responseTime = new Date();
+    ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = parseRawHeaders(response.rawHeaders);
     ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, ctx.responseOriginalHeaders);
   }
 
   public static readHttp2Response(
     ctx: IMitmRequestContext,
+    response: http2.ClientHttp2Stream,
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
   ) {
     ctx.status = headers[':status'];
     ctx.responseTime = new Date();
-    ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, headers);
+    ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = headers;
+    ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, headers);
   }
 }
