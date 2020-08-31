@@ -54,7 +54,7 @@ export default class Application {
 
   private async loadLocationFromArgv(argv: string[]) {
     const args = argv.slice(2);
-    console.log('Launched with args', argv);
+    console.log('Launched with args', argv.slice(2));
     if (!args.length) {
       return this.createWindowIfNeeded();
     }

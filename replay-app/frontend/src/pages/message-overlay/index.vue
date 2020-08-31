@@ -8,24 +8,27 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '~frontend/stores/message-overlay';
 import NoCache from '~frontend/lib/NoCache';
-import { Observer } from 'mobx-vue';
+import { OverlayStore } from '~frontend/models/OverlayStore';
+import { ipcRenderer } from 'electron';
 
-@Observer
 @Component
 export default class MessageOverlay extends Vue {
-  private store = store;
+  private store = new OverlayStore({ hideOnBlur: true, persistent: false });
+  public title: string;
+
+  public message: string;
 
   @NoCache
   private get cssVars() {
-    const dialogLightForeground = store.theme.dialogLightForeground;
-    return {
-      '--dropdownBackgroundColor': store.theme.dropdownBackgroundColor,
-      '--menuItemHoverBackgroundColor': dialogLightForeground
-        ? 'rgba(255, 255, 255, 0.06)'
-        : 'rgba(0, 0, 0, 0.03)',
-    };
+    return this.store.cssVars;
+  }
+
+  mounted() {
+    ipcRenderer.on('will-show', (_, arg: { message: string; title: string }) => {
+      this.message = arg.message;
+      this.title = arg.title;
+    });
   }
 }
 </script>

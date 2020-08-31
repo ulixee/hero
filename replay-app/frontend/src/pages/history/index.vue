@@ -11,15 +11,14 @@
 </template>
 
 <script lang="ts">
-  import { ipcRenderer } from 'electron';
-  import moment from 'moment';
-  import Vue from 'vue';
-  import Component from 'vue-class-component';
-  import Icon from "~frontend/components/Icon.vue";
-  import { ICON_CLOSE } from "~frontend/constants";
-  import store from "~frontend/stores/locations-menu";
+import { ipcRenderer } from "electron";
+import moment from "moment";
+import Vue from "vue";
+import Component from "vue-class-component";
+import Icon from "~frontend/components/Icon.vue";
+import { ICON_CLOSE } from "~frontend/constants";
 
-  interface IItem {
+interface IItem {
     id: string;
     sessionName: string,
     dataLocation: string,

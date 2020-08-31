@@ -12,7 +12,7 @@ import TabBar from './components/TabBar.vue';
 import AddressBar from './components/AddressBar.vue';
 import ReplayBar from './components/ReplayBar.vue';
 import NoCache from '~frontend/lib/NoCache';
-import store from '~frontend/stores/app';
+import store from '~frontend/pages/app/store';
 
 @Component({ components: { TabBar, AddressBar, ReplayBar } })
 export default class AppPage extends Vue {

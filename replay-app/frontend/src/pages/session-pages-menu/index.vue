@@ -2,35 +2,38 @@ import { ipcRenderer } from "electron";
 <template lang="pug">
   .SessionPagesMenu.Page(:style="cssVars")
     ul
-      li.page(v-for="page of store.pages" :class="{active:page.isActive}" @click="navigateToScriptPage(page)") {{page.url}}
+      li.page(v-for="page of pages" :class="{active:page.isActive}" @click="navigateToScriptPage(page)") {{page.url}}
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '~frontend/stores/session-pages-menu';
 import Icon from '~frontend/components/Icon.vue';
 import NoCache from '~frontend/lib/NoCache';
 import { ipcRenderer } from 'electron';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: { Icon } })
 export default class SessionPagesMenu extends Vue {
-  private store = store;
+  private store = new OverlayStore();
+  private pages: { id: string; url: string; isActive: boolean }[] = [];
 
   private navigateToScriptPage(page) {
     ipcRenderer.send(`navigate-to-session-page`, { id: page.id, url: page.url });
-    store.hide();
+    this.store.hide();
   }
 
   @NoCache
   private get cssVars() {
-    const dialogLightForeground = store.theme.dialogLightForeground;
-    return {
-      '--dropdownBackgroundColor': store.theme.dropdownBackgroundColor,
-      '--menuItemHoverBackgroundColor': dialogLightForeground
-        ? 'rgba(255, 255, 255, 0.06)'
-        : 'rgba(0, 0, 0, 0.03)',
-    };
+    return this.store.cssVars;
+  }
+
+  async mounted() {
+    this.pages = await ipcRenderer.invoke('fetch-session-pages');
+
+    ipcRenderer.on('will-show', async () => {
+      this.pages = await ipcRenderer.invoke('fetch-session-pages');
+    });
   }
 }
 </script>
@@ -42,19 +45,5 @@ export default class SessionPagesMenu extends Vue {
 
 .SessionPagesMenu {
   @include overlayStyle();
-  ul {
-    list-style: none;
-    padding-left: 10px;
-  }
-  li.page {
-    cursor: pointer;
-    &:hover {
-      background-color: #eeeeee;
-    }
-    padding: 5px;
-    &.active {
-      font-weight: bold;
-    }
-  }
 }
 </style>

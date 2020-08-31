@@ -22,9 +22,9 @@ import Component from 'vue-class-component';
 import { Observer } from 'mobx-vue';
 import { remote } from 'electron';
 import Preloader from '~frontend/components/Preloader.vue';
-import TabFrontend from '~frontend/stores/app/TabFrontend';
-import store from '~frontend/stores/app';
-import { TAB_MAX_WIDTH } from '~frontend/stores/app/constants';
+import TabFrontend from '~frontend/pages/app/store/TabFrontend';
+import store from '~frontend/pages/app/store';
+import { TAB_MAX_WIDTH } from '~frontend/pages/app/store/constants';
 
 import {
   transparency,

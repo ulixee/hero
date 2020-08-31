@@ -20,14 +20,15 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { ipcRenderer } from 'electron';
-import store from '~frontend/stores/locations-menu';
 import Icon from '~frontend/components/Icon.vue';
 import NoCache from '~frontend/lib/NoCache';
-import { ICON_HOME, ICON_SETTINGS, ICON_HISTORY } from '~frontend/constants/icons';
+import { ICON_HISTORY, ICON_HOME, ICON_SETTINGS } from '~frontend/constants/icons';
 import ITabLocation from '~shared/interfaces/ITabLocation';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: { Icon } })
 export default class LocationsMenuScreen extends Vue {
+  private store = new OverlayStore();
   private ICON_HOME = ICON_HOME;
   private ICON_SETTINGS = ICON_SETTINGS;
   private ICON_HISTORY = ICON_HISTORY;
@@ -35,27 +36,25 @@ export default class LocationsMenuScreen extends Vue {
 
   private gotoLocation(location: ITabLocation) {
     ipcRenderer.send(`navigate-to-location`, location, true);
-    store.hide();
+    this.store.hide();
   }
 
   private navigateToHistory(item) {
     ipcRenderer.send(`navigate-to-history`, item, true);
-    store.hide();
+    this.store.hide();
   }
 
   @NoCache
   private get cssVars() {
-    const dialogLightForeground = store.theme.dialogLightForeground;
-    return {
-      '--dropdownBackgroundColor': store.theme.dropdownBackgroundColor,
-      '--menuItemHoverBackgroundColor': dialogLightForeground
-        ? 'rgba(255, 255, 255, 0.06)'
-        : 'rgba(0, 0, 0, 0.03)',
-    };
+    return this.store.cssVars;
   }
 
   async mounted() {
     this.history = await ipcRenderer.invoke('fetch-history');
+
+    ipcRenderer.on('will-show', async () => {
+      this.history = await ipcRenderer.invoke('fetch-history');
+    });
   }
 }
 </script>
@@ -66,12 +65,16 @@ export default class LocationsMenuScreen extends Vue {
 @include overlayBaseStyle();
 
 .LocationsMenuScreen {
-  padding: 10px;
   @include overlayStyle();
+  h3 {
+    margin: 20px 10px 0;
+  }
   ul {
     @include reset-ul();
+    margin: 10px 0 0;
     li {
-        cursor: pointer;
+      padding-left: 10px;
+      margin: 0;
       .text {
         display: inline-block;
         line-height: 16px;
@@ -85,7 +88,6 @@ export default class LocationsMenuScreen extends Vue {
         background-size: contain;
         background-position: center;
       }
-      margin-top: 5px;
       &:hover {
         background-color: var(--menuItemHoverBackgroundColor);
       }

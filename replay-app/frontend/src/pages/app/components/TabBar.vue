@@ -13,7 +13,7 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Observer } from 'mobx-vue';
 import os from 'os';
-import store from '~frontend/stores/app';
+import store from '~frontend/pages/app/store';
 import Tab from '~frontend/pages/app/components/Tab.vue';
 import AppButton from '~frontend/pages/app/components/AppButton.vue';
 import {

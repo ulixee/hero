@@ -6,6 +6,9 @@ import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
+const domChangeList = [];
+
+console.log('DomReplayer loaded.');
 // @ts-ignore
 window.replayEvents = async function replayEvents(
   changeEvents,
@@ -13,7 +16,8 @@ window.replayEvents = async function replayEvents(
   mouseEvent,
   scrollEvent,
 ) {
-  if (changeEvents) await applyDomChanges(changeEvents);
+  await domContentLoaded;
+  if (changeEvents) applyDomChanges(changeEvents);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
@@ -33,19 +37,29 @@ window.addEventListener('resize', () => {
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 });
 
-let onLoad: () => void;
-window.addEventListener('DOMContentLoaded', () => {
-  if (onLoad) onLoad();
-  document.head.appendChild(styleElement);
+const domContentLoaded = new Promise(resolve => {
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded');
+    document.head.appendChild(styleElement);
+
+    resolve();
+  });
 });
 
-async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
-  for (const changeEvent of changeEvents) {
-    // @ts-ignore
+let isNavigating = false;
+
+function applyDomChanges(changeEvents: IDomChangeEvent[]) {
+  if (isNavigating) return;
+
+  domChangeList.push(...changeEvents);
+
+  while (domChangeList.length) {
+    const changeEvent = domChangeList.shift();
     const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
-      if (window.location.href !== textContent || commandId === -1) {
-        await resetLocation(textContent, commandId);
+      if (resetLocation(textContent, commandId)) {
+        domChangeList.length = 0;
+        return;
       }
       continue;
     }
@@ -82,12 +96,12 @@ async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
         parentNode = document;
       }
       if (!parentNode && (action === 'added' || action === 'removed')) {
-        // tslint:disable-next-line:no-console
         console.log('WARN: parent node id not found', changeEvent);
         continue;
       }
       if (node && preserveElements.includes((node as Element).tagName)) {
         if (action === 'removed') {
+          (node as Element).innerHTML = '';
           console.log('WARN: script trying to remove preserved node', changeEvent);
           continue;
         }
@@ -113,7 +127,6 @@ async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
             if (next) parentNode.insertBefore(node, next);
             else parentNode.appendChild(node);
           }
-
           break;
         case 'removed':
           parentNode.removeChild(node);
@@ -136,10 +149,13 @@ async function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
 // HELPER FUNCTIONS ////////////////////
 
-async function resetLocation(href: string, commandId: number) {
+function resetLocation(href: string, commandId: number) {
+  if (window.location.href === href && commandId !== -1) return false;
+  if (isNavigating) return false;
+
   const newUrl = new URL(href);
   console.log(
-    'Document changed. (Command %s. %s ==> %s). Keep origin? %s',
+    'Document changing. (Command %s. %s ==> %s). Keep origin? %s',
     commandId === -1 ? 'load' : commandId,
     window.location.href,
     href,
@@ -157,15 +173,13 @@ async function resetLocation(href: string, commandId: number) {
       if (prev === document.doctype) break;
       prev.remove();
     }
-    return;
+    return false;
   }
+  isNavigating = true;
 
-  const loadPromise = new Promise(resolve => () => {
-    onLoad = resolve;
-  });
   // if it's an origin change, we have to change page
   window.location.href = newUrl.href;
-  await loadPromise;
+  return true;
 }
 function getNode(id: number) {
   if (id === null || id === undefined) return null;

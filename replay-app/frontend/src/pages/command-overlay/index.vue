@@ -1,38 +1,42 @@
 <template lang="pug">
     .CommandOverlay.Page(:style="cssVars")
-        h4.title {{store.commandLabel}}
-        .resultBox
+        h4.title {{commandLabel}}
+        .resultBox(v-if="commandResult")
             .duration
                 span.label duration:
-                span.value {{store.commandResult.duration}} ms
-            .result(v-if="store.commandResult.result")
+                span.value {{commandResult.duration}} ms
+            .result(v-if="commandResult.result")
                 span.label result:
-                span.value(:class="{error:store.commandResult.isError}") {{store.commandResult.result}}
+                span.value(:class="{error:commandResult.isError}") {{commandResult.result}}
 
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { ipcRenderer } from 'electron';
-import store from '~frontend/stores/command-overlay';
-import NoCache from '~frontend/lib/NoCache';
-import { Observer } from 'mobx-vue';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { ipcRenderer } from "electron";
+import NoCache from "~frontend/lib/NoCache";
+import ICommandWithResult from "~shared/interfaces/ICommandResult";
+import { OverlayStore } from "~frontend/models/OverlayStore";
 
-@Observer
 @Component
 export default class CommandOverlay extends Vue {
-  private store = store;
+  public commandLabel: string = '';
+  private commandResult: ICommandWithResult = {} as any;
+
+  private store = new OverlayStore({ hideOnBlur: true, persistent: false });
 
   @NoCache
   private get cssVars() {
-    const dialogLightForeground = store.theme.dialogLightForeground;
-    return {
-      '--dropdownBackgroundColor': store.theme.dropdownBackgroundColor,
-      '--menuItemHoverBackgroundColor': dialogLightForeground
-        ? 'rgba(255, 255, 255, 0.06)'
-        : 'rgba(0, 0, 0, 0.03)',
-    };
+    return this.store.cssVars;
+  }
+
+  mounted() {
+    ipcRenderer.on('will-show', (_, commandLabel: string, commandResult: ICommandWithResult) => {
+      console.log(commandLabel, commandResult);
+      this.commandLabel = commandLabel;
+      this.commandResult = commandResult;
+    });
   }
 }
 </script>

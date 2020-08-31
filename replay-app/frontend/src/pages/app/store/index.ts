@@ -1,8 +1,8 @@
 import { ipcRenderer, remote } from 'electron';
 import { computed, observable } from 'mobx';
 import { getTheme } from '~shared/utils/themes';
-import TabsStore from './app/TabsStore';
-import AddTabStore from './app/AddTabStore';
+import TabsStore from '~frontend/pages/app/store/TabsStore';
+import AddTabStore from '~frontend/pages/app/store/AddTabStore';
 import settings from '~frontend/lib/settings';
 
 export class AppStore {

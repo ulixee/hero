@@ -13,7 +13,7 @@
         .text {{store.saSession.scriptStartDate}}
       .window-section.section(@mousedown="showLocationOverlay($event, 'sessions-menu')")
         Icon(:src="ICON_NUMBER" :size=16 iconStyle="transform: 'scale(-1,1)'")
-        .text {{1}} of {{store.saSession.relatedScriptInstances.length}}
+        .text {{1}} of {{store.saSession.relatedSessions.length}}
       .page-section.section(@mousedown="showLocationOverlay($event, 'session-pages-menu')")
         Icon.lock(:src="ICON_LOCK" :size=16 iconStyle="transform: 'scale(-1,1)'")
         .text {{store.pageUrl}}
@@ -51,10 +51,9 @@ import {
   ICON_LOCK,
   ICON_HOME,
 } from '~frontend/constants/icons';
-import store from '~frontend/stores/app';
+import store from '~frontend/pages/app/store';
 import NoCache from '~frontend/lib/NoCache';
 import ITabLocation, { InternalLocations } from '~shared/interfaces/ITabLocation';
-import { toJS } from 'mobx';
 
 @Observer
 @Component({ components: { AppButton, Icon } })

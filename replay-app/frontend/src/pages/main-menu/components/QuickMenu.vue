@@ -37,7 +37,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import store from '~frontend/stores/main-menu';
+
 import { ipcRenderer, remote } from 'electron';
 
 import {
@@ -52,10 +52,12 @@ import {
   ICON_ARROW_RIGHT,
 } from '~frontend/constants/icons';
 import NoCache from '~frontend/lib/NoCache';
-import ITabLocation from "~shared/interfaces/ITabLocation";
+import ITabLocation from '~shared/interfaces/ITabLocation';
+import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: {} })
 export default class QuickMenu extends Vue {
+  private store = new OverlayStore();
   private ICON_FIRE = ICON_FIRE;
   private ICON_TOPMOST = ICON_TOPMOST;
   private ICON_TAB = ICON_TAB;
@@ -77,17 +79,17 @@ export default class QuickMenu extends Vue {
 
   private onPrintClick() {
     ipcRenderer.send('tab:print', null);
-    store.hide();
+    this.store.hide();
   }
 
   private onFindInPageClick() {
     ipcRenderer.send('find-in-page');
-    store.hide();
+    this.store.hide();
   }
 
   private onAlwaysClick() {
-    store.alwaysOnTop = !store.alwaysOnTop;
-    remote.getCurrentWindow().setAlwaysOnTop(store.alwaysOnTop);
+    this.store.alwaysOnTop = !this.store.alwaysOnTop;
+    remote.getCurrentWindow().setAlwaysOnTop(this.store.alwaysOnTop);
   }
 
   private onNewWindowClick() {
@@ -96,7 +98,7 @@ export default class QuickMenu extends Vue {
 
   private createNewTab(location: ITabLocation) {
     ipcRenderer.send('tab:create', { location, active: true }, true);
-    store.hide();
+    this.store.hide();
   }
 
   private onUpdateClick() {
@@ -105,6 +107,7 @@ export default class QuickMenu extends Vue {
 
   @NoCache
   private get cssVars() {
+    const store = this.store;
     const dialogLightForeground = store.theme.dialogLightForeground;
     return {
       '--lineBackgroundColor': store.theme.dialogSeparatorColor,
