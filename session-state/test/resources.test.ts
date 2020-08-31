@@ -25,7 +25,7 @@ test('loads http2 resources', async () => {
       pushStream.end(Helpers.getLogo());
       pushStream.on('wantTrailers', () => pushStream.close());
     });
-    res.on('wantTrailers', args => () => {
+    res.on('wantTrailers', () => () => {
       res.stream.close();
     });
     res.end(`<html><body><img src="/img.png"/></body></html>`);

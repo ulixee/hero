@@ -1,7 +1,7 @@
-import HumanoidPlugin from './lib/HumanoidPlugin';
-import Utils from './lib/Utils';
 import HumanoidBasic from '@secret-agent/humanoid-basic';
 import HumanoidSkipper from '@secret-agent/humanoid-skipper';
+import HumanoidPlugin from './lib/HumanoidPlugin';
+import Utils from './lib/Utils';
 
 type IHumanoidPlugin = new () => HumanoidPlugin;
 

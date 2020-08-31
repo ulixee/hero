@@ -3,7 +3,7 @@ for (const remove of args.removals || []) {
     const parts = getParentAndProperty(remove);
     delete parts.parent[parts.property];
   } catch (err) {
-    console.log('ERROR deleting path ' + remove + '\n' + err.toString());
+    console.log(`ERROR deleting path ${  remove  }\n${  err.toString()}`);
   }
 }
 
@@ -23,7 +23,7 @@ for (const addition of args.additions || []) {
     );
   } catch (err) {
     console.log(
-      'ERROR adding polyfill ' + addition.path + '.' + addition.propertyName + '\n' + err.stack,
+      `ERROR adding polyfill ${  addition.path  }.${  addition.propertyName  }\n${  err.stack}`,
     );
   }
 }
@@ -61,7 +61,7 @@ for (const change of args.changes || []) {
     }
   } catch (err) {
     console.log(
-      'ERROR changing prop ' + change.path + '.' + change.propertyName + '\n' + err.stack,
+      `ERROR changing prop ${  change.path  }.${  change.propertyName  }\n${  err.stack}`,
     );
   }
 }
@@ -76,7 +76,7 @@ function reorder() {
       reorderDescriptor(path, propertyName, prevProperty, throughProperty);
     } catch (err) {
       console.log(
-        'ERROR adding order polyfill ' + path + '->' + propertyName + '\n' + err.toString(),
+        `ERROR adding order polyfill ${  path  }->${  propertyName  }\n${  err.toString()}`,
       );
     }
   }

@@ -1,13 +1,13 @@
 import MitmSocket from '@secret-agent/mitm-socket';
-import RequestSession from '../handlers/RequestSession';
 import http2, { ClientHttp2Session } from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import https, { RequestOptions } from 'https';
 import http from 'http';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import MitmRequestContext from './MitmRequestContext';
 import Queue from '@secret-agent/commons/Queue';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import MitmRequestContext from './MitmRequestContext';
+import RequestSession from '../handlers/RequestSession';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 
@@ -139,7 +139,7 @@ export default class MitmRequestAgent {
     return mitmSocket;
   }
 
-  ///////////////// Socket Connection Management ///////////////////////////////////////////////////
+  /////// ////////// Socket Connection Management ///////////////////////////////////////////////////
 
   private waitForFreeSocket(origin: string): Promise<MitmSocket> {
     const socketPool = this.getSocketPoolByOrigin(origin);
@@ -246,7 +246,7 @@ export default class MitmRequestAgent {
     });
   }
 
-  ///////////////// Http2 helpers //////////////////////////////////////////////////////////////////
+  /////// ////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
   private http2Request(
     ctx: IMitmRequestContext,
@@ -255,7 +255,7 @@ export default class MitmRequestAgent {
   ) {
     const client = this.createHttp2Session(ctx, connectResult);
     const http2Stream = client.request(ctx.requestHeaders, { waitForTrailers: true });
-    http2Stream.once('response', (headers, flags) => {
+    http2Stream.once('response', (headers) => {
       MitmRequestContext.readHttp2Response(ctx, headers);
       responseHandler(http2Stream);
     });
@@ -382,7 +382,7 @@ export default class MitmRequestAgent {
       this.closeHttp2Session(proxyToServerH2Client);
     });
 
-    proxyToServerH2Client.on('altsvc', (alt, altOrigin, streamId) => {
+    proxyToServerH2Client.on('altsvc', (alt, altOrigin) => {
       log.warn('Http2.altsvc', {
         sessionId: this.session.sessionId,
         origin,
@@ -417,7 +417,7 @@ export default class MitmRequestAgent {
   }
 
   private closeHttp2Session(client: ClientHttp2Session) {
-    const index = this.http2Sessions.findIndex(x => client);
+    const index = this.http2Sessions.findIndex(x => x.client === client);
     if (index < 0) return;
 
     const [session] = this.http2Sessions.splice(index, 1);

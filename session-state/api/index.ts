@@ -1,9 +1,9 @@
 import * as http2 from 'http2';
+import Logger from '@secret-agent/commons/Logger';
+import { AddressInfo } from 'net';
 import SessionLoader from './SessionLoader';
 import SessionDb from '../lib/SessionDb';
-import Logger from '@secret-agent/commons/Logger';
 import ISessionReplayServer from '../interfaces/ISessionReplayServer';
-import { AddressInfo } from 'net';
 
 const { log } = Logger(module);
 

@@ -4,19 +4,19 @@ import { ILocationStatus, ILocationTrigger } from '@secret-agent/core-interfaces
 import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import CoreEventHeap from './CoreEventHeap';
-import CoreCommandQueue from './CoreCommandQueue';
-import CoreClient from './CoreClient';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
+import CoreClient from './CoreClient';
+import CoreCommandQueue from './CoreCommandQueue';
+import CoreEventHeap from './CoreEventHeap';
+import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 
-/////////////////////////////////////////////////////
+/////// //////////////////////////////////////////////
 
 export default class CoreClientSession {
   public windowId: string;
@@ -133,9 +133,8 @@ export default class CoreClientSession {
     jsPath: IJsPath | null,
     eventType: string,
     listenerFn: (...args: any[]) => void,
-    options?,
   ): Promise<void> {
-    await this.eventHeap.removeListener(jsPath, eventType, listenerFn, options);
+    await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
   }
 
   public async close(): Promise<void> {

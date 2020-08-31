@@ -1,9 +1,9 @@
-import Core from '../index';
-import { Helpers } from '../../testing';
-import DomEnv from '../lib/DomEnv';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import Core from '../index';
+import { Helpers } from '../../testing';
+import DomEnv from '../lib/DomEnv';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {

@@ -52,11 +52,11 @@ const loadTimeConversion = {
       default:
         return 'Other';
     }
-    //case blink::kWebNavigationTypeLinkClicked:
+    // case blink::kWebNavigationTypeLinkClicked:
     //  return "LinkClicked";
-    //case blink::kWebNavigationTypeFormSubmitted:
+    // case blink::kWebNavigationTypeFormSubmitted:
     //  return "FormSubmitted";
-    //case blink::kWebNavigationTypeFormResubmitted:
+    // case blink::kWebNavigationTypeFormResubmitted:
     //  return "Resubmitted";
   },
   wasFetchedViaSpdy() {

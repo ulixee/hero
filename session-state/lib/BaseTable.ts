@@ -63,7 +63,7 @@ export default abstract class BaseTable<T> {
 
   protected buildInsertStatement() {
     const keys = this.columns.map(x => x[0]);
-    const params = keys.map(_ => '?').join(', ');
+    const params = keys.map(() => '?').join(', ');
     const insertOrReplace = this.insertOrReplace ? ' OR REPLACE' : '';
     return `INSERT${insertOrReplace} INTO ${this.tableName} (${keys.join(
       ', ',

@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import IElementRect from '../interfaces/IElementRect';
 import INodeTracker from '../interfaces/INodeTracker';
 import IAttachedState from '../interfaces/IAttachedStateCopy';
@@ -5,7 +6,7 @@ import IExecJsPathResult from '../interfaces/IExecJsPathResult';
 
 declare type TSON = any;
 
-/// COPIED FROM NODERDOM! DO NOT EDIT HERE
+// / COPIED FROM NODERDOM! DO NOT EDIT HERE
 export type IJsPath = IPathStep[];
 export type IPathStep = IPropertyName | IMethod | IAttachedId;
 type IPropertyName = string;
@@ -16,6 +17,7 @@ type IAttachedId = number;
 
 const stateLookup = '__getSecretAgentNodeState__';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class JsPath {
   public static async scrollIntoView(jsPath: IJsPath) {
     const element = new ObjectAtPath(jsPath).lookup().closestElement;
@@ -164,6 +166,7 @@ class JsPath {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Fetcher {
   public static createRequest(input: string | number, init?: RequestInit) {
     let requestOrUrl = input as string | Request;
@@ -188,14 +191,14 @@ class Fetcher {
   }
 }
 
-/// Object At Path Class //////
+// / Object At Path Class //////
 
 class ObjectAtPath {
   public objectAtPath: Node | any;
   public hasStateLoadRequest: boolean;
   private lookupStep: IPathStep;
   private lookupStepIndex = 0;
-  private stateProperties: string[] = [];
+  private readonly stateProperties: string[] = [];
 
   public get closestElement(): Element {
     if (!this.objectAtPath) return;
@@ -318,7 +321,7 @@ class ObjectAtPath {
   }
 }
 
-/// JS Path Helpers //////
+// / JS Path Helpers //////
 function isPrimitive(arg) {
   const type = typeof arg;
   return arg == null || (type !== 'object' && type !== 'function');
@@ -346,7 +349,7 @@ function isCustomType(object) {
 }
 
 function getPropertyAtPath<T>(path: string): T {
-  const parts = path.split(/Symbol\(([\w.]+)\)|(?:^|\.)(\w+)|\[(\d+)\]/).filter(Boolean);
+  const parts = path.split(/Symbol\(([\w.]+)\)|(?:^|\.)(\w+)|\[(\d+)]/).filter(Boolean);
   let obj: any = window;
   while (parts.length) {
     const next = parts.shift();
@@ -395,7 +398,7 @@ function isPromise(obj) {
   );
 }
 
-/// Node tracker //////
+// / Node tracker //////
 
 class NodeTracker {
   private static get instance(): INodeTracker {

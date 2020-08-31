@@ -31,7 +31,7 @@ describe('basic Core tests', () => {
     const meta = await Core.createSession();
     const core = Core.byWindowId[meta.windowId];
     await core.close();
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -44,7 +44,7 @@ describe('basic Core tests', () => {
     const meta = await Core.createSession();
     const core = Core.byWindowId[meta.windowId];
     await core.close();
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(0);
     await Core.shutdown();
   });
@@ -57,7 +57,7 @@ describe('basic Core tests', () => {
     await Core.configure({ maxActiveSessionCount: 5 });
     const meta = await Core.createSession();
     await Core.disconnect([meta.windowId]);
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
     await Core.shutdown();
   });

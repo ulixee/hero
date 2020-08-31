@@ -1,8 +1,8 @@
 import Core from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
-import { MouseEventType } from '../models/MouseEventsTable';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { MouseEventType } from '../models/MouseEventsTable';
 
 let koaServer;
 beforeAll(async () => {

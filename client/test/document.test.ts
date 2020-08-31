@@ -1,8 +1,13 @@
-// tslint:disable:variable-name
-import { SecretAgentClientGenerator } from '../index';
+// need to import this before the awaited stuff gets imported
+import '../lib/SetupAwaitedHandler';
+
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
+import { Helpers } from '@secret-agent/testing';
+import { SecretAgentClientGenerator } from '../index';
+
+afterAll(Helpers.afterAll);
 
 describe('document tests', () => {
   it('runs querySelector', async () => {
@@ -30,6 +35,8 @@ describe('document tests', () => {
     });
 
     const browser = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser);
+
     const element = browser.document.querySelector('h1');
     const jsPath = getElementState(element).awaitedPath.toJSON();
     expect(jsPath[0]).toBe('document');

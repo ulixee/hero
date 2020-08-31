@@ -1,12 +1,12 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import getOverrideScript from '../injected-scripts';
-import inspectScript from './inspectHierarchy';
 import navigatorJson from '@secret-agent/emulate-chrome-80/navigator.json';
-import chrome80Dom from './chrome80DomProperties.json';
 import { inspect } from 'util';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
+import chrome80Dom from './chrome80DomProperties.json';
+import inspectScript from './inspectHierarchy';
+import getOverrideScript from '../injected-scripts';
 
 const { navigator } = navigatorJson;
 

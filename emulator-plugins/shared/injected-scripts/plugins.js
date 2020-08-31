@@ -23,7 +23,7 @@ function installNamedNodeItems(nativeObj, list, prop) {
 }
 
 function createNamedNodeMap(protoClass, list, prop) {
-  let nativeObj = Object.create(protoClass);
+  const nativeObj = Object.create(protoClass);
 
   installNamedNodeItems(nativeObj, list, prop);
 
@@ -92,7 +92,7 @@ const pluginList = args.plugins.map(fakeP => {
   });
 
   plugin = new Proxy(plugin, {
-    get(target, p, receiver) {
+    get(target, p) {
       if (mimeProps.includes(p)) {
         let fakeMime = pluginMimes.find(x => x.type === p);
         if (new RegExp(/^\d+$/).test(String(p))) {

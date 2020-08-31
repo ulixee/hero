@@ -1,5 +1,5 @@
-import SecretAgent from '../index';
 import { Helpers } from '@secret-agent/testing';
+import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
@@ -111,6 +111,7 @@ describe('basic Document tests', () => {
         expect(child).not.toBeTruthy();
       }
     } catch (error) {
+      // eslint-disable-next-line jest/no-try-expect
       expect(String(error)).toMatch(/Please add an await/);
     }
 

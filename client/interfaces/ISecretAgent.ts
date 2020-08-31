@@ -1,8 +1,8 @@
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import Browser from '../lib/Browser';
 import { IRenderingOption } from '@secret-agent/core-interfaces/IWindowOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import Browser from '../lib/Browser';
 
 export interface ISecretAgentConfigureOptions extends IConfigureOptions {
   defaultRenderingOptions: IRenderingOption[];
@@ -17,5 +17,5 @@ export default interface ISecretAgent {
 }
 
 // hacky way to check the class implements statics we need
-// tslint:disable-next-line:no-empty
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function SecretAgentStatics(constructor: ISecretAgent) {}

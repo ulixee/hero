@@ -1,8 +1,8 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import CoreClientSession from './CoreClientSession';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import CoreClientSession from './CoreClientSession';
 
 const { getState, setState } = StateMachine<ResourceRequest, IState>();
 

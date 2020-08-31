@@ -1,9 +1,9 @@
+import Log from '@secret-agent/commons/Logger';
 import EmulatorPlugin from './lib/EmulatorPlugin';
 import EmulatorPluginStatics, { IEmulatorPluginStatics } from './lib/EmulatorPluginStatics';
 import Utils from './lib/Utils';
 import UserAgents from './lib/UserAgents';
 import Browsers from './data/browsers.json';
-import Log from '@secret-agent/commons/Logger';
 
 // tslint:disable:variable-name
 
@@ -41,9 +41,11 @@ export default class Emulators {
     if (!SelectedPlugin) {
       const fromShortId = `@secret-agent/emulate-${emulatorId}`;
       try {
+        // eslint-disable-next-line global-require,import/no-dynamic-require
         SelectedPlugin = require(fromShortId)?.default;
       } catch (err) {
         // try as full package name
+        // eslint-disable-next-line global-require,import/no-dynamic-require
         SelectedPlugin = require(emulatorId)?.default;
       }
       if (SelectedPlugin) Emulators.load(SelectedPlugin);

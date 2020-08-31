@@ -67,7 +67,8 @@ export default class MitmSocket {
   }
 
   public onListening() {
-    const socket = (this.socket = net.connect(this.socketPath));
+    const socket = net.connect(this.socketPath);
+    this.socket = socket;
     socket.on('error', error => {
       log.error('SocketConnectDriver.SocketError', {
         sessionId: this.sessionId,
@@ -85,19 +86,16 @@ export default class MitmSocket {
 
   public async connect() {
     await this.cleanSocketPathIfNeeded();
-    const child = (this.child = spawn(
-      libPath,
-      [this.socketPath, JSON.stringify(this.connectOpts)],
-      {
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    ));
+    const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    this.child = child;
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
 
     const promise = createPromise(30e3);
     child.on('exit', code => {
-      promise.reject(new Error('Socket process exited during connect'));
+      promise.reject(new Error(`Socket process exited during connect "${code}"`));
       this.cleanupSocket();
     });
 
@@ -135,10 +133,10 @@ export default class MitmSocket {
     if (this.child.killed) return;
     try {
       // fix for node 13 throwing errors on closed sockets
-      this.child.stdin.on('error', err => {
+      this.child.stdin.on('error', () => {
         // catch
       });
-      this.child.stdin.write('disconnect', err => {
+      this.child.stdin.write('disconnect', () => {
         // don't log
       });
     } catch (err) {
@@ -158,7 +156,7 @@ export default class MitmSocket {
     delete this.socket;
   }
 
-  private onSocketClose(event: string) {
+  private onSocketClose() {
     this.close();
   }
 

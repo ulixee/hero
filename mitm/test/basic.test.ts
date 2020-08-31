@@ -1,12 +1,12 @@
 import http from 'http';
-import MitmServer from '../lib/MitmProxy';
 import { Helpers } from '@secret-agent/testing';
-import RequestSession from '../handlers/RequestSession';
 import HttpProxyAgent from 'http-proxy-agent';
-import MitmRequestHandler from '../lib/MitmRequestHandler';
 import { AddressInfo } from 'net';
 import WebSocket from 'ws';
 import { createPromise } from '@secret-agent/commons/utils';
+import MitmRequestHandler from '../lib/MitmRequestHandler';
+import RequestSession from '../handlers/RequestSession';
+import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
 
 const mocks = {
@@ -19,7 +19,7 @@ const mocks = {
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async args => {
+  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;
@@ -90,7 +90,6 @@ describe('basic MitM tests', () => {
 
     const headers = session.getTrackingHeaders();
 
-    // tslint:disable-next-line:no-empty
     await Helpers.httpGet('https://dataliberationfoundation.org', proxyHost, headers).catch();
 
     expect(upstreamProxyConnected).toBeTruthy();

@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
 import * as http2 from 'http2';
-import ISaSession from '~shared/interfaces/ISaSession';
 import { ChildProcess, spawn } from 'child_process';
+import * as Path from 'path';
+import ISaSession from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
 import ReplayState from '~backend/api/ReplayState';
-import * as Path from 'path';
 import getResolvable from '~shared/utils/promise';
 
 export default class ReplayApi extends EventEmitter {

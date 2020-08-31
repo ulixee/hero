@@ -1,34 +1,30 @@
-import { v1 as uuidv1 } from 'uuid';
-import GlobalPool from './lib/GlobalPool';
-import Window from './lib/Window';
-import Session from './lib/Session';
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import {
-  ILocationStatus,
-  ILocationTrigger,
-  LocationTrigger,
-} from '@secret-agent/core-interfaces/Location';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ICore from '@secret-agent/core-interfaces/ICore';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IWaitForResourceFilter from '@secret-agent/core-interfaces/IWaitForResourceFilter';
-import UserProfile from './lib/UserProfile';
-import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import Log from '@secret-agent/commons/Logger';
-import { createReplayServer } from '@secret-agent/session-state/api';
-import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
+import { v1 as uuidv1 } from "uuid";
+import IConfigureOptions from "@secret-agent/core-interfaces/IConfigureOptions";
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import { ILocationStatus, ILocationTrigger, LocationTrigger } from "@secret-agent/core-interfaces/Location";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
+import { IInteractionGroups } from "@secret-agent/core-interfaces/IInteractions";
+import { IJsPath } from "awaited-dom/base/AwaitedPath";
+import ICore from "@secret-agent/core-interfaces/ICore";
+import ISessionMeta from "@secret-agent/core-interfaces/ISessionMeta";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import IAttachedState from "@secret-agent/injected-scripts/interfaces/IAttachedStateCopy";
+import Log from "@secret-agent/commons/Logger";
+import { createReplayServer } from "@secret-agent/session-state/api";
+import ISessionReplayServer from "@secret-agent/session-state/interfaces/ISessionReplayServer";
+import Queue from "@secret-agent/commons/Queue";
+import Chrome83 from "@secret-agent/emulate-chrome-83";
+import Emulators from "@secret-agent/emulators";
+import IListenerObject from "./interfaces/IListenerObject";
+import UserProfile from "./lib/UserProfile";
+import Session from "./lib/Session";
+import Window from "./lib/Window";
+import GlobalPool from "./lib/GlobalPool";
+import IResourceFilterProperties from "./interfaces/IResourceFilterProperties";
 import Signals = NodeJS.Signals;
-import Queue from '@secret-agent/commons/Queue';
-import IListenerObject from './interfaces/IListenerObject';
-import Chrome83 from '@secret-agent/emulate-chrome-83';
-import Emulators from '@secret-agent/emulators';
 
 const { log } = Log(module);
 const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
@@ -48,7 +44,7 @@ export default class Core implements ICore {
   private readonly window: Window;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
   private readonly eventListenerIdsByType: { [name: string]: Set<string> } = {};
-  private isClosing: boolean = false;
+  private isClosing = false;
 
   constructor(session: Session) {
     this.session = session;
@@ -67,10 +63,7 @@ export default class Core implements ICore {
     return this.window.runCommand<void>('goto', url);
   }
 
-  public async waitForResource(
-    filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
-    opts?: IWaitForResourceOptions,
-  ) {
+  public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
     return await this.window.runCommand('waitForResource', filter, opts);
   }
 
@@ -133,11 +126,12 @@ export default class Core implements ICore {
     return this.window.runCommand<IAttachedState>('createRequest', input, init);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async configure(options: ISessionOptions) {
     // ToDo: needs implementation
   }
 
-  public async addEventListener(jsPath: IJsPath | null, type: string, options?: any) {
+  public async addEventListener(jsPath: IJsPath | null, type: string) {
     const id = uuidv1();
     const listener: IListenerObject = { id, type, jsPath };
     this.eventListenersById[id] = listener;
@@ -189,7 +183,7 @@ export default class Core implements ICore {
     Core.checkForAutoShutdown();
   }
 
-  private bindResourceListeners(enable: boolean = true) {
+  private bindResourceListeners(enable = true) {
     const listenerFn = (...args) => {
       this.emitEvent('resource', ...args);
     };

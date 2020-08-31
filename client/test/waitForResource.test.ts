@@ -1,5 +1,5 @@
-import { SecretAgentClientGenerator } from '../index';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import { SecretAgentClientGenerator } from '../index';
 
 describe('waitForResource', () => {
   it('should break after finding one resource', async () => {
@@ -82,7 +82,7 @@ describe('waitForResource', () => {
     await SecretAgent.shutdown();
   });
 
-  it('should return multiple files if many match on one round trip', async () => {
+  it('should match multiple files by url', async () => {
     const { SecretAgent, coreClient } = SecretAgentClientGenerator();
 
     coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {

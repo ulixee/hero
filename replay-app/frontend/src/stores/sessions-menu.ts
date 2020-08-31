@@ -8,6 +8,7 @@ export class Store extends OverlayStore {
 
   @observable
   public updateAvailable = false;
+
   public sessions: any[] = [];
 
   public constructor() {

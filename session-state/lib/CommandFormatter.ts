@@ -47,6 +47,7 @@ export default class CommandFormatter {
                   if (keyCommand === 'keyPress') return `press: '${keyChar}'`;
                   if (keyCommand === 'up') return `up: '${keyChar}'`;
                   if (keyCommand === 'down') return `down: '${keyChar}'`;
+                  return '';
                 })
                 .join(', ');
             }

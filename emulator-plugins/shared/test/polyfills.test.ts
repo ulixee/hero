@@ -1,11 +1,11 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import getOverrideScript from '../injected-scripts';
-import inspectScript from './inspectHierarchy';
-import PolyfillChromeBt from './polyfill.bluetooth.json';
 import { inspect } from 'util';
 import * as os from 'os';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import Chrome80 from '@secret-agent/emulate-chrome-80';
+import PolyfillChromeBt from './polyfill.bluetooth.json';
+import inspectScript from './inspectHierarchy';
+import getOverrideScript from '../injected-scripts';
 
 let chromeCore: ChromeCore;
 beforeAll(async () => {

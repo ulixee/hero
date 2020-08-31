@@ -1,11 +1,11 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import CoreClientSession from './CoreClientSession';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import { createWebsocketResource } from './WebsocketResource';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 
 const { getState, setState } = StateMachine<Resource, IState>();
 

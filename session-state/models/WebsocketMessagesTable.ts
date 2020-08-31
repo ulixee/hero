@@ -1,6 +1,6 @@
+import { Database as SqliteDatabase } from 'better-sqlite3';
 import IWebsocketResourceMessage from '../interfaces/IWebsocketResourceMessage';
 import BaseTable from '../lib/BaseTable';
-import { Database as SqliteDatabase } from 'better-sqlite3';
 
 export default class WebsocketMessagesTable extends BaseTable<IWebsocketMessageRecord> {
   constructor(readonly db: SqliteDatabase) {

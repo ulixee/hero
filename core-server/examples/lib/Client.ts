@@ -19,7 +19,8 @@ export default class SecretAgentSocketClient {
   public close() {
     this.isOpen = false;
     return new Promise(resolve => {
-      this.netSocket.destroyed ? resolve() : this.netSocket.end(() => setTimeout(resolve, 0));
+      if (this.netSocket.destroyed) return resolve();
+      this.netSocket.end(() => setTimeout(resolve, 0));
     });
   }
 
@@ -30,7 +31,7 @@ export default class SecretAgentSocketClient {
       this.isOpen = true;
     });
 
-    this.netSocket.once('close', hadError => {
+    this.netSocket.once('close', () => {
       this.isOpen = false;
       this.netSocket.destroy();
     });

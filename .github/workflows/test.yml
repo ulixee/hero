@@ -7,7 +7,7 @@ on:
       - '!gh-pages'
 
 jobs:
-  build:
+  test:
     name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
 
     strategy:
@@ -57,3 +57,10 @@ jobs:
           SA_SHOW_REPLAY: false
           CACHE_DIR: .sessions
           NODE_ENV: test
+
+      - name: Coverage
+        run: npm -g install codecov && codecov
+        working-directory: ./build
+        if: ${{ matrix.node-version == '12' && matrix.os == 'ubuntu-latest' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

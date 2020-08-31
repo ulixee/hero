@@ -1,7 +1,7 @@
-import IUserAgent from '../interfaces/IUserAgent';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import IPageOverride from '../interfaces/IPageOverride';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IUserAgent from '../interfaces/IUserAgent';
+import IPageOverride from '../interfaces/IPageOverride';
 
 export default abstract class EmulatorPlugin {
   public static emulatorId: string;

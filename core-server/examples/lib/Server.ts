@@ -8,7 +8,7 @@ export default class SecretAgentSocketServer {
   private readonly coreServer: CoreServer = new CoreServer();
   private netServer: Net.Server;
   private netConnectionsById: { [id: string]: Net.Socket } = {};
-  private lastConnectionId: number = 0;
+  private lastConnectionId = 0;
 
   constructor(config: { ip?: string, port: number, proxyPort?: number }) {
     this.port = config.port;

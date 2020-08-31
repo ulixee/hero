@@ -5,12 +5,15 @@
   "dependencies": {
     "@secret-agent/client": "^1.0.0-alpha.10",
     "@secret-agent/core": "^1.0.0-alpha.11",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@secret-agent/commons": "^1.0.0-alpha.10",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
+    "@secret-agent/emulate-chrome-80": "^1.0.0-alpha.11",
+    "@secret-agent/mitm": "^1.0.0-alpha.10",
     "@secret-agent/testing": "^1.0.0-alpha.10",
-    "@types/node": "^12.7.11"
+    "@types/node": "^12.7.11",
+    "ws": "^7.3.1"
   }
 }

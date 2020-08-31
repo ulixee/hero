@@ -35,7 +35,6 @@ const typography = new Typography({
   ],
 });
 
-// tslint:disable-next-line:variable-name
 export default function(Vue, { head, router }) {
   Vue.component('CoreLayout', CoreLayout);
   Vue.component('BasicLayout', BasicLayout);

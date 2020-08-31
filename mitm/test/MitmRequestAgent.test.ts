@@ -1,11 +1,11 @@
 import { Helpers } from '@secret-agent/testing';
+import { runHttpsServer } from '@secret-agent/testing/helpers';
+import WebSocket from 'ws';
+import HttpProxyAgent from 'http-proxy-agent';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
-import { runHttpsServer } from '@secret-agent/testing/helpers';
-import WebSocket from 'ws';
-import HttpProxyAgent from 'http-proxy-agent';
 
 const mocks = {
   HeadersHandler: {
@@ -14,7 +14,7 @@ const mocks = {
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async args => {
+  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;
@@ -42,7 +42,9 @@ test('should create up to a max number of secure connections per origin', async 
   process.env.MITM_ALLOW_INSECURE = 'true';
   const promises = [];
   for (let i = 0; i < 10; i += 1) {
+    // eslint-disable-next-line jest/valid-expect-in-promise
     const p = Helpers.httpGet(server.baseUrl, `http://localhost:${mitmServer.port}`, headers).then(
+      // eslint-disable-next-line promise/always-return
       res => {
         expect(res).toBe('I am here');
       },
@@ -76,7 +78,9 @@ test('should create new connections as needed when no keepalive', async () => {
   process.env.MITM_ALLOW_INSECURE = 'true';
   const promises = [];
   for (let i = 0; i < 4; i += 1) {
+    // eslint-disable-next-line jest/valid-expect-in-promise
     const p = Helpers.httpGet(server.baseUrl, `http://localhost:${mitmServer.port}`, headers).then(
+      // eslint-disable-next-line promise/always-return
       res => {
         expect(res).toBe('here 2');
       },
@@ -113,7 +117,7 @@ test('it should not put upgrade connections in a pool', async () => {
   });
   Helpers.onClose(async () => wsClient.close());
 
-  await new Promise(r => wsClient.on('open', r));
+  await new Promise(resolve => wsClient.on('open', resolve));
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;

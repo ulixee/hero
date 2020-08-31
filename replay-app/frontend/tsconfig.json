@@ -22,6 +22,6 @@
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "include": ["**/*.ts", "**/*.vue", "../shared/**/*.ts", "**/*.json"],
-  "exclude": ["node_modules","**/node_modules"]
+  "include": ["**/*.ts", "**/*.vue", "../shared/**/*.ts", "**/*.json", "./.eslintrc.js"],
+  "exclude": ["node_modules", "**/node_modules"]
 }

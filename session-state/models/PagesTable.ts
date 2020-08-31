@@ -1,7 +1,7 @@
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
 import IPage from '@secret-agent/core-interfaces/IPage';
+import BaseTable from '../lib/BaseTable';
 
 export default class PagesTable extends BaseTable<IPageRecord> {
   constructor(readonly db: SqliteDatabase) {

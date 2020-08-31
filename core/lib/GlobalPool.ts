@@ -2,12 +2,12 @@ import * as Fs from 'fs';
 import * as Path from 'path';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
-import ChromeCore from './ChromeCore';
-import Session from './Session';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
+import Session from './Session';
+import ChromeCore from './ChromeCore';
 
 const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
@@ -155,7 +155,11 @@ export default class GlobalPool {
       return false;
     }
     const { options, promise } = this.waitingForAvailability.shift();
+
+    // NOTE: we want this to blow up if an exception occurs inside the promise
+    // eslint-disable-next-line promise/catch-or-return
     this.createSessionNow(options).then(session => promise.resolve(session));
+
     log.info('TransferredChromeToWaitingAcquirer');
     return true;
   }

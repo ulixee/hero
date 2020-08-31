@@ -2,9 +2,9 @@ import Core from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import * as http2 from 'http2';
-import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { http2StreamToJson } from '@secret-agent/testing/helpers';
 import { createPromise } from '@secret-agent/commons/utils';
+import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 
 let koaServer;

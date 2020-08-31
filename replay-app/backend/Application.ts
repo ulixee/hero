@@ -84,6 +84,7 @@ export default class Application {
       Window.create();
     }
   }
+
   private async loadSessionReplay(replay: IReplayMeta, useCurrentTab = false) {
     let replayApi: ReplayApi;
     try {
@@ -163,7 +164,7 @@ export default class Application {
       return Window.current.createAppTab(options, false, sendToRenderer);
     });
 
-    ipcMain.on('tab:print', (e, details) => {
+    ipcMain.on('tab:print', () => {
       Window.current.selectedTab.webContents.print();
     });
 
@@ -175,7 +176,7 @@ export default class Application {
       Window.current.destroyTab(tabId);
     });
 
-    ipcMain.on('tab:reload', (e, tabId: number) => {
+    ipcMain.on('tab:reload', () => {
       Window.current.selectedTab.webContents.reload();
     });
 

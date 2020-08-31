@@ -1,14 +1,12 @@
-import { Helpers } from '@secret-agent/testing';
-import MitmServer from '../lib/MitmProxy';
-import RequestSession from '../handlers/RequestSession';
-import MitmRequestHandler from '../lib/MitmRequestHandler';
-import HeadersHandler from '../handlers/HeadersHandler';
-import * as http2 from 'http2';
-import { URL } from 'url';
-import MitmSocket from '@secret-agent/mitm-socket';
-import MitmRequestContext from '../lib/MitmRequestContext';
-import http from 'http';
-import { string } from 'prop-types';
+import { Helpers } from "@secret-agent/testing";
+import * as http2 from "http2";
+import { URL } from "url";
+import MitmSocket from "@secret-agent/mitm-socket";
+import MitmServer from "../lib/MitmProxy";
+import RequestSession from "../handlers/RequestSession";
+import MitmRequestHandler from "../lib/MitmRequestHandler";
+import HeadersHandler from "../handlers/HeadersHandler";
+import MitmRequestContext from "../lib/MitmRequestContext";
 
 const mocks = {
   mitmRequestHandler: {
@@ -23,7 +21,7 @@ const mocks = {
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async args => {
+  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;
@@ -124,7 +122,7 @@ test('should handle h2 client going to h1 request', async () => {
       res.writeHead(200, {
         Connection: 'keep-alive',
         'Keep-Alive': 'timeout=5',
-        ['Cache-Control']: 'public',
+        'Cache-Control': 'public',
       });
       res.end('Gtg');
     }

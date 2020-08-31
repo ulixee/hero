@@ -4,10 +4,7 @@
     "incremental": true,
     "target": "ES2018",
     "module": "commonjs",
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "lib": ["es2018", "dom"],
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSourceMap": false,
@@ -31,7 +28,7 @@
       "path": "replay-app/tsconfig.json"
     }
   ],
-  "include": ["**/*.ts", "**/*.js", "**/*.json"],
+  "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
   "exclude": [
     "**/tsconfig*.json",
     "node_modules",

@@ -1,18 +1,24 @@
-import Emulators, { EmulatorPlugin, EmulatorPluginStatics, UserAgents } from '@secret-agent/emulators';
+import Emulators, {
+  EmulatorPlugin,
+  EmulatorPluginStatics,
+  UserAgents,
+} from '@secret-agent/emulators';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import headerProfiles from './headers.json';
-import pkg from './package.json';
-import modifyHeaders from '@secret-agent/emulator-plugins-shared/modifyHeaders';
-import tcpVars from '@secret-agent/emulator-plugins-shared/tcpVars';
-import codecs from './codecs.json';
-import chrome from './chrome.json';
-import navigator from './navigator.json';
-import chromePageOverrides from '@secret-agent/emulator-plugins-shared/chromePageOverrides';
+import {
+  chromePageOverrides,
+  EngineInstaller,
+  modifyHeaders,
+  readPolyfills,
+  tcpVars,
+} from '@secret-agent/emulator-plugins-shared';
 import { randomBytes } from 'crypto';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import readPolyfills from '@secret-agent/emulator-plugins-shared/readPolyfills';
-import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
+import navigator from './navigator.json';
+import chrome from './chrome.json';
+import codecs from './codecs.json';
+import pkg from './package.json';
+import headerProfiles from './headers.json';
 import defaultUseragents from './user-agents.json';
 
 const polyfills = readPolyfills(__dirname);

@@ -1,6 +1,6 @@
 import Log from '@secret-agent/commons/Logger';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 const { log } = Log(module);
 

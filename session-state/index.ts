@@ -5,17 +5,11 @@ import {
   IRequestSessionResponseEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
-import SessionDb from './lib/SessionDb';
-import SessionsDb from './lib/SessionsDb';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
 import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
-import PageEventsListener from './lib/PageEventsListener';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import { IFrameRecord } from './models/FramesTable';
 import IDevtoolsClient from '@secret-agent/core/interfaces/IDevtoolsClient';
-import PageHistory from './lib/PageHistory';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IPage from '@secret-agent/core-interfaces/IPage';
@@ -24,6 +18,12 @@ import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEve
 import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 import FrameTracker from '@secret-agent/core/lib/FrameTracker';
+import PageHistory from './lib/PageHistory';
+import { IFrameRecord } from './models/FramesTable';
+import PageEventsListener from './lib/PageEventsListener';
+import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
+import SessionsDb from './lib/SessionsDb';
+import SessionDb from './lib/SessionDb';
 
 const { log } = Log(module);
 
@@ -260,7 +260,7 @@ export default class SessionState {
     return this.resources.find(x => x.id === id);
   }
 
-  //////// FRAMES ///////
+  /////// / FRAMES ///////
 
   public captureFrameCreated(frameId: string, parentFrameId: string | null) {
     const frame = {
@@ -350,7 +350,7 @@ export default class SessionState {
     };
   }
 
-  public async getPageDomChanges(pages: IPage[], flush: boolean = false, sinceCommandId?: number) {
+  public async getPageDomChanges(pages: IPage[], flush = false, sinceCommandId?: number) {
     if (flush) {
       await this.flush();
     }

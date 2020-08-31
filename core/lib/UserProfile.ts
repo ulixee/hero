@@ -1,12 +1,12 @@
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import Window from './Window';
 import IDomStorage, { IDomStorageForOrigin } from '@secret-agent/core-interfaces/IDomStorage';
 import Protocol from 'devtools-protocol';
 import Log from '@secret-agent/commons/Logger';
+import { URL } from 'url';
 import { exceptionDetailsToError } from './Utils';
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
-import { URL } from 'url';
+import Window from './Window';
 import DomEnv from './DomEnv';
 import SetCookiesRequest = Protocol.Network.SetCookiesRequest;
 import CookieParam = Protocol.Network.CookieParam;
@@ -56,7 +56,7 @@ export default class UserProfile {
   private async getDatabaseNames(securityOrigin: string) {
     return this.devtoolsClient
       .send('IndexedDB.requestDatabaseNames', {
-        securityOrigin: securityOrigin,
+        securityOrigin,
       })
       .then(x => x.databaseNames);
   }

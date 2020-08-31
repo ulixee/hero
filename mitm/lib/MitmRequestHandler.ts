@@ -1,14 +1,14 @@
 import * as http from 'http';
+import Log from '@secret-agent/commons/Logger';
+import * as net from 'net';
+import * as http2 from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HttpResponseCache from './HttpResponseCache';
 import RequestSession from '../handlers/RequestSession';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
-import Log from '@secret-agent/commons/Logger';
 import CookieHandler from '../handlers/CookieHandler';
-import * as net from 'net';
 import MitmRequestContext from './MitmRequestContext';
-import * as http2 from 'http2';
 import { parseRawHeaders } from './Utils';
 
 const { log } = Log(module);

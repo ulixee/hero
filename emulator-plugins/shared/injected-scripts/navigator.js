@@ -3,7 +3,7 @@ delete Navigator.prototype.webdriver;
 const props = {};
 const languages = args.languages;
 if (languages) {
-  for (const i in languages) {
+  for (const i of languages) {
     Object.defineProperty(languages, i, {
       ...Object.getOwnPropertyDescriptor(languages, i),
       configurable: true,

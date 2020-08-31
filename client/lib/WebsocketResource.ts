@@ -1,13 +1,13 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import CoreClientSession from './CoreClientSession';
-import ResourceRequest, { createResourceRequest } from './ResourceRequest';
-import ResourceResponse, { createResourceResponse } from './ResourceResponse';
-import AwaitedEventTarget from './AwaitedEventTarget';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import CoreClientSession from './CoreClientSession';
+import ResourceRequest, { createResourceRequest } from './ResourceRequest';
+import ResourceResponse, { createResourceResponse } from './ResourceResponse';
+import AwaitedEventTarget from './AwaitedEventTarget';
 
 const { getState, setState } = StateMachine<WebsocketResource, IState>();
 

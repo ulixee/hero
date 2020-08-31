@@ -1,5 +1,6 @@
 // NOTE: do not use node dependencies
 
+// eslint-disable-next-line max-classes-per-file
 import { IDomChangeEvent, INodeData } from '../interfaces/IDomChangeEvent';
 import { IMouseEvent } from '../interfaces/IMouseEvent';
 import { IFocusEvent } from '../interfaces/IFocusEvent';
@@ -51,7 +52,8 @@ class NodeTracker {
     }
 
     recorder.extractChanges();
-    const id = (this.nextId += 1);
+    this.nextId += 1;
+    const id = this.nextId;
     this.nodeIds.set(node, id);
     return id;
   }
@@ -76,6 +78,7 @@ class PageEventsRecorder {
     // preload with a document
     [-1, 'newDocument', { id: -1, textContent: window.location.href }, new Date().toISOString()],
   ];
+
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];
@@ -314,7 +317,7 @@ class PageEventsRecorder {
 
     const id = nodeTracker.getId(node);
     if (id !== undefined) {
-      return { id: id };
+      return { id };
     }
 
     const data: INodeData = {
@@ -386,17 +389,17 @@ window.addEventListener('beforeunload', () => {
   recorder.disconnect();
 });
 
-document.addEventListener('input', e => recorder.checkForPropertyChanges(), {
+document.addEventListener('input', () => recorder.checkForPropertyChanges(), {
   capture: true,
   passive: true,
 });
 
-document.addEventListener('keydown', _ => recorder.checkForPropertyChanges(), {
+document.addEventListener('keydown', () => recorder.checkForPropertyChanges(), {
   capture: true,
   passive: true,
 });
 
-document.addEventListener('change', _ => recorder.checkForPropertyChanges(), {
+document.addEventListener('change', () => recorder.checkForPropertyChanges(), {
   capture: true,
   passive: true,
 });
@@ -436,7 +439,7 @@ document.addEventListener('focusout', e => recorder.trackFocus('out', e), {
   passive: true,
 });
 
-document.addEventListener('scroll', _ => recorder.trackScroll(window.scrollX, window.scrollY), {
+document.addEventListener('scroll', () => recorder.trackScroll(window.scrollX, window.scrollY), {
   capture: true,
   passive: true,
 });

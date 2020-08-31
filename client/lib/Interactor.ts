@@ -1,9 +1,3 @@
-import IInteractions, {
-  Command,
-  ICommand,
-  IInteraction,
-  IMousePosition,
-} from '../interfaces/IInteractions';
 import {
   IInteractionGroup,
   IInteractionGroups,
@@ -17,6 +11,12 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IKeyboardKeyCode } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import IInteractions, {
+  Command,
+  ICommand,
+  IInteraction,
+  IMousePosition,
+} from '../interfaces/IInteractions';
 import CoreClientSession from './CoreClientSession';
 import User from './User';
 
@@ -81,7 +81,7 @@ function convertToCoreMousePosition(mousePosition: IMousePosition): ICoreMousePo
 function convertInteractionToInteractionGroup(interaction: IInteraction): IInteractionGroup {
   const iGroup: IInteractionGroup = [];
 
-  Object.entries(interaction).map(([key, value]) => {
+  Object.entries(interaction).forEach(([key, value]) => {
     switch (key) {
       case Command.move: {
         const command = CoreCommand.move;

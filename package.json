@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/monorepo",
-  "version": "1.0.0-alpha.7",
+  "version": "1.0.0-alpha.11",
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {
@@ -17,7 +17,8 @@
     "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay-app build:backend-paths\"",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay-app clean",
-    "test": "yarn copy:build && cd build && yarn test"
+    "test": "yarn copy:build && cd build && yarn test",
+    "lint": "eslint --cache ./"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "author": "Data Liberation Foundation",
@@ -43,29 +44,32 @@
   "devDependencies": {
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.1.1",
-    "@types/jest": "^26.0.5",
+    "@types/jest": "^26.0.10",
     "@types/node": "^12.7.11",
-    "jest": "^26.1.0",
-    "jest-summary-reporter": "^0.0.2",
-    "jest-environment-node": "^26.1.0",
-    "jest-junit": "^6.3.0",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
     "copyfiles": "^2.3.0",
+    "cross-env": "^7.0.2",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-typescript": "^9.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-promise": "^4.2.1",
     "husky": "^4.2.5",
-    "lerna": "^3.4.3",
+    "jest": "^26.4.2",
+    "jest-environment-node": "^26.3.0",
+    "jest-summary-reporter": "^0.0.2",
+    "lerna": "^3.22.1",
     "lint-staged": "^10.2.11",
     "prettier": "^1.19.1",
     "pretty-quick": "^2.0.1",
-    "source-map-support": "^0.5.16",
-    "tslint": "^5.20.1",
-    "cross-env": "^7.0.2",
     "shx": "^0.3.2",
+    "source-map-support": "^0.5.16",
     "tsc-watch": "^4.2.9",
-    "tslint-config-airbnb": "^5.11.2",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-config-standard": "^8.0.1",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-microsoft-contrib": "^6.2.0",
-    "tslint-plugin-prettier": "^2.0.1",
     "typescript": "~3.8.3"
   },
   "workspaces": {
@@ -95,7 +99,7 @@
   },
   "lint-staged": {
     "*.ts": [
-      "tslint --format verbose"
+      "eslint --fix"
     ],
     "*.json": [
       "prettier --write"

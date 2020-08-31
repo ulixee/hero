@@ -1,4 +1,5 @@
 const fs = require('fs');
+
 const buildDistDir = `${__dirname}/build-dist`;
 
 const rootPackageJson = require('./package.json');

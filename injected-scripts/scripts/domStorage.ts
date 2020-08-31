@@ -1,5 +1,5 @@
-import { IDomStorageForOrigin, IStorageEntry } from '../interfaces/IDomStorage';
-import { IIndexedDB } from '../interfaces/IIndexedDB';
+import { IDomStorageForOrigin, IStorageEntry } from '@secret-agent/core-interfaces/IDomStorage';
+import { IIndexedDB } from '@secret-agent/core-interfaces/IIndexedDB';
 
 declare type TSON = any;
 
@@ -36,6 +36,7 @@ async function exportIndexedDbs(dbNames: string[]) {
       const objectStoreNames = Array.from(idbDatabase.objectStoreNames);
 
       const transaction = idbDatabase.transaction(objectStoreNames, 'readonly');
+      // eslint-disable-next-line promise/param-names
       const rejectPromise = new Promise<IIndexedDB>((_, reject) => (transaction.onerror = reject));
 
       const db: IIndexedDB = {
@@ -62,23 +63,32 @@ async function exportIndexedDbs(dbNames: string[]) {
           autoIncrement: store.autoIncrement,
         });
 
-        const allQuery = store.getAll();
-        db.data[objectStoreName] = await new Promise(queryResolve => {
-          allQuery.onsuccess = resultEvent => {
-            const results = (resultEvent.target as IDBRequest<any[]>).result;
-            // @ts-ignore
-            queryResolve(results.map(x => TSON.stringify(x)));
-          };
-          allQuery.onerror = errorEvent => {
-            console.log(`WARN: error extracting data! ${errorEvent}`);
-            queryResolve([]);
-          };
-        });
+        db.data[objectStoreName] = await readStoreData(store);
       }
-
       return Promise.race([db, rejectPromise]);
     }),
   );
+}
+
+async function readStoreData(store: IDBObjectStore) {
+  const data: string[] = [];
+  await new Promise(resolve => {
+    const cursorQuery = store.openCursor();
+    cursorQuery.onsuccess = event => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        const key = store.keyPath === null ? cursor.key : undefined;
+        const value = cursor.value;
+        // @ts-ignore
+        data.push(TSON.stringify({ key, value }));
+        cursor.continue();
+      } else {
+        resolve();
+      }
+    };
+    cursorQuery.onerror = () => resolve();
+  });
+  return data;
 }
 
 async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
@@ -128,7 +138,8 @@ async function restoreData(db: IDBDatabase, restoreDB: IIndexedDB) {
       .objectStore(objectStoreToRestore.name);
     for (const record of data) {
       // @ts-ignore
-      insertStore.add(TSON.parse(record));
+      const { key, value } = TSON.parse(record);
+      insertStore.add(value, key);
     }
     await new Promise((resolve, reject) => {
       insertStore.transaction.oncomplete = resolve;

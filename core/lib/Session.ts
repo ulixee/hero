@@ -1,16 +1,16 @@
 import { v1 as uuidv1 } from 'uuid';
 import puppeteer from 'puppeteer-core';
 import Log from '@secret-agent/commons/Logger';
-import Window from './Window';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession from '@secret-agent/mitm/handlers/RequestSession';
+import * as Os from 'os';
 import GlobalPool from './GlobalPool';
 import UserProfile from './UserProfile';
-import * as Os from 'os';
+import Window from './Window';
 
 const { log } = Log(module);
 
@@ -26,7 +26,7 @@ export default class Session {
   public readonly requestMitmProxySession: RequestSession;
   public sessionState: SessionState;
 
-  private isShuttingDown: boolean = false;
+  private isShuttingDown = false;
   private puppContext?: puppeteer.BrowserContext;
 
   constructor(readonly options: ICreateSessionOptions) {

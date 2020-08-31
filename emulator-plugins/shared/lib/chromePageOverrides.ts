@@ -1,5 +1,5 @@
-import getOverrideScript from './injected-scripts';
 import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
+import getOverrideScript from '../injected-scripts';
 import parseNavigatorPlugins from './parseNavigatorPlugins';
 
 export default function pageOverrides(

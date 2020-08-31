@@ -1,4 +1,6 @@
 import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
+import * as Path from 'path';
+import Log from '@secret-agent/commons/Logger';
 import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
@@ -13,9 +15,7 @@ import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
-import * as Path from 'path';
 import SessionState from '../index';
-import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 

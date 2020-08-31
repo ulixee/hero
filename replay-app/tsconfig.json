@@ -26,7 +26,8 @@
     "injected-scripts/**/*.ts",
     "shared/**/*.ts",
     "frontend/src/constants",
-    "index.ts"
+    "index.ts",
+    ".eslintrc.js"
   ],
   "exclude": ["dist", "node_modules", "**/node_modules"]
 }

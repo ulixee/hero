@@ -4,11 +4,8 @@ import Emulators, {
   UserAgents,
 } from '@secret-agent/emulators';
 import { URL } from 'url';
-import pkg from './package.json';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import headerProfiles from './headers.json';
-import modifyHeaders from '@secret-agent/emulator-plugins-shared/modifyHeaders';
-import tcpVars from '@secret-agent/emulator-plugins-shared/tcpVars';
+import { EngineInstaller, modifyHeaders, tcpVars } from '@secret-agent/emulator-plugins-shared';
 import {
   canonicalDomain,
   Cookie,
@@ -20,12 +17,13 @@ import {
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
 import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import pageOverrides from './pageOverrides';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import EngineInstaller from '@secret-agent/emulator-plugins-shared/EngineInstaller';
+import pageOverrides from './pageOverrides';
+import headerProfiles from './headers.json';
+import pkg from './package.json';
 import defaultAgents from './user-agents.json';
 
 const engineExecutablePath =
@@ -51,6 +49,7 @@ export default class Safari13 extends EmulatorPlugin {
   public get engineExecutablePath() {
     return engineExecutablePath;
   }
+
   public canPolyfill = false;
   public readonly userAgent: IUserAgent;
   public delegate: IHttpRequestModifierDelegate;
@@ -140,7 +139,8 @@ export default class Safari13 extends EmulatorPlugin {
       this.sitesWithUserInteraction.push(hostname);
       let documentLoaded = this.userInteractionTrigger[hostname];
       if (!documentLoaded) {
-        documentLoaded = this.userInteractionTrigger[hostname] = createPromise();
+        documentLoaded = createPromise();
+        this.userInteractionTrigger[hostname] = documentLoaded;
       }
 
       (async () => {
@@ -160,8 +160,7 @@ export default class Safari13 extends EmulatorPlugin {
 
   private async setCookie(cookiestring: string, resource: IHttpResourceLoadDetails) {
     const { url } = resource;
-    const interactUrl = url;
-    const hostname = canonicalDomain(interactUrl.hostname);
+    const hostname = canonicalDomain(url.hostname);
     const cookie = Cookie.parse(cookiestring);
     const sameSiteContext = getSameSiteContext(resource);
 
@@ -210,7 +209,7 @@ export default class Safari13 extends EmulatorPlugin {
 
     cookies = this.handleNov2019ITPUpdates(sourceDocumentUrl, sameSiteContext, cookies);
 
-    /***
+    /** *
      * TBD:
      * >> Safari 13.1
      * (https://webkit.org/blog/9661/preventing-tracking-prevention-tracking/)
@@ -276,7 +275,7 @@ export default class Safari13 extends EmulatorPlugin {
     return cookies;
   }
 
-  private isMinimumVersion(minor: number, patch: number = 0) {
+  private isMinimumVersion(minor: number, patch = 0) {
     return this.userAgent.version.minor >= minor && this.userAgent.version.patch >= patch;
   }
 }

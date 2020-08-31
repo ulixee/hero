@@ -5,9 +5,9 @@ import TarFs from 'tar-fs';
 import Axios from 'axios';
 import ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
-import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
 import * as os from 'os';
 import Path from 'path';
+import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
 
 if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
   process.exit(0);

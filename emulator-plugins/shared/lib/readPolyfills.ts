@@ -1,6 +1,7 @@
 import Os from 'os';
 import Fs from 'fs';
 import IPolyfillSet from '@secret-agent/emulators/interfaces/IPolyfillSet';
+
 const platform = Os.platform();
 
 export default function readPolyfills(dirname: string): IPolyfillSet | null {

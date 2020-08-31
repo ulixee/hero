@@ -1,18 +1,17 @@
-import SetupAwaitedHandler from './lib/SetupAwaitedHandler';
-// run before any other imports
-SetupAwaitedHandler();
+// setup must go first
+import './lib/SetupAwaitedHandler';
 
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import Browser, { createBrowser } from './lib/Browser';
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import ICreateBrowserOptions from './interfaces/ICreateBrowserOptions';
 import { RenderingOption } from '@secret-agent/core-interfaces/IWindowOptions';
+import os from 'os';
+import Browser, { createBrowser } from './lib/Browser';
+import ICreateBrowserOptions from './interfaces/ICreateBrowserOptions';
 import CoreClient from './lib/CoreClient';
 import ISecretAgent, {
   ISecretAgentConfigureOptions,
   SecretAgentStatics,
 } from './interfaces/ISecretAgent';
-import os from 'os';
 import Signals = NodeJS.Signals;
 
 // tslint:disable:variable-name
@@ -37,7 +36,7 @@ export function SecretAgentClientGenerator(
     private static options: ISecretAgentConfigureOptions = { ...DefaultOptions };
 
     public static async configure(options: Partial<ISecretAgentConfigureOptions>): Promise<void> {
-      this.options = Object.assign({}, DefaultOptions, this.options, options);
+      this.options = { ...DefaultOptions, ...this.options, ...options };
       await coreClient.configure(options as IConfigureOptions);
     }
 
@@ -48,7 +47,7 @@ export function SecretAgentClientGenerator(
     }
 
     public static async start(options: Partial<ISecretAgentConfigureOptions> = {}) {
-      this.options = Object.assign({}, DefaultOptions, this.options, options);
+      this.options = { ...DefaultOptions, ...this.options, ...options };
       await coreClient.start(options as IConfigureOptions);
     }
 

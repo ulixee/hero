@@ -96,7 +96,7 @@ export const overline = () => `
   text-transform: uppercase;
 `;
 
-export const maxLines = (count: number, lineHeight?: number) => `
+export const maxLines = (count: number) => `
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;

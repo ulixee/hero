@@ -1,7 +1,7 @@
 import { action, computed, observable } from 'mobx';
+import { ipcRenderer } from 'electron';
 import TabFrontend from './TabFrontend';
 import { TAB_ANIMATION_DURATION, TABS_PADDING } from './constants';
-import { ipcRenderer } from 'electron';
 import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
 import ITabMeta from '~shared/interfaces/ITabMeta';
 import { AppStore } from '../app';

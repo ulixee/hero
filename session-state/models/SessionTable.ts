@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
+import BaseTable from '../lib/BaseTable';
 
 export default class SessionTable extends BaseTable<ISessionRecord> {
   constructor(readonly db: SqliteDatabase) {

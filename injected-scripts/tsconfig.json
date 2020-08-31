@@ -12,6 +12,6 @@
     "moduleResolution": "node",
     "removeComments": true
   },
-  "include": ["./interfaces/*.ts", "./scripts/*.ts", "./package.json"],
+  "include": ["./interfaces/*.ts", "./scripts/*.ts", "./package.json", ".eslintrc.js"],
   "exclude": ["node_modules"]
 }

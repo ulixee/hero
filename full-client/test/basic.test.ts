@@ -1,6 +1,6 @@
-import SecretAgent from '../index';
 import { Helpers } from '@secret-agent/testing';
 import Chrome80 from '@secret-agent/emulate-chrome-80';
+import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
