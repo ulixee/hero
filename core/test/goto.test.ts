@@ -12,8 +12,8 @@ afterEach(Helpers.afterEach);
 describe('basic Goto tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     await core.goto(exampleUrl);
     const url = await core.execJsPath(['window', 'location', 'host']);

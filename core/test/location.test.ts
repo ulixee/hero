@@ -15,8 +15,8 @@ afterEach(Helpers.afterEach);
 describe('basic LocationTracker tests', () => {
   it('handles unformatted urls', async () => {
     const unformattedUrl = koaServer.baseUrl;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(unformattedUrl);
     const formattedUrl = await core.getLocationHref();
 
@@ -26,8 +26,8 @@ describe('basic LocationTracker tests', () => {
   });
 
   it('works without explicit waitForLocation', async () => {
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(koaServer.baseUrl);
 
     const elem = await core.execJsPath(
@@ -43,8 +43,8 @@ describe('basic LocationTracker tests', () => {
 
   it('handles page reloading itself', async () => {
     const startingUrl = `${koaServer.baseUrl}/reload`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     let hasReloaded = false;
     koaServer.get('/reload', ctx => {
@@ -81,8 +81,8 @@ describe('basic LocationTracker tests', () => {
   it('handles page that navigates to another url', async () => {
     const startingUrl = `${koaServer.baseUrl}/navigate`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/navigate', ctx => {
       ctx.body = `<body><script>window.location = '${navigateToUrl}'</script></body>`;
@@ -114,8 +114,8 @@ describe('basic LocationTracker tests', () => {
   it('handles submitting a form', async () => {
     const startingUrl = `${koaServer.baseUrl}/form`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/form', ctx => {
       ctx.body = `<body><form action="${navigateToUrl}" method="post"><input type="submit" id="button"></form></body>`;
@@ -158,8 +158,8 @@ describe('basic LocationTracker tests', () => {
   it('handles page that navigates via click', async () => {
     const startingUrl = `${koaServer.baseUrl}/click`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/click', ctx => {
       ctx.body = `<body><a href='${navigateToUrl}'>Clicker</a></body>`;
@@ -202,8 +202,8 @@ describe('basic LocationTracker tests', () => {
   it('handles an in-page navigation change', async () => {
     const startingUrl = `${koaServer.baseUrl}/inpage`;
     const navigateToUrl = `${koaServer.baseUrl}/inpage#location2`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/inpage', ctx => {
       ctx.body = `<body>
@@ -243,8 +243,8 @@ describe('basic LocationTracker tests', () => {
     ]);
 
     // @ts-ignore
-    const window = core.window;
-    expect(window.sessionState.pages.history).toHaveLength(2);
+    const tab = core.tab;
+    expect(tab.sessionState.pages.history).toHaveLength(2);
 
     await core.close();
     runWaitForCbsSpy.mockRestore();
@@ -253,8 +253,8 @@ describe('basic LocationTracker tests', () => {
   it('handles an in-page navigation change that happens before page load', async () => {
     const startingUrl = `${koaServer.baseUrl}/instant-hash`;
     const navigateToUrl = `${koaServer.baseUrl}/instant-hash#id=12343`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/instant-hash', ctx => {
       ctx.body = `<body>
@@ -274,16 +274,16 @@ setTimeout(function() {
     await core.waitForLoad(LocationStatus.AllContentLoaded);
     await core.waitForMillis(50);
     // @ts-ignore
-    const window = core.window;
-    expect(window.sessionState.pages.history).toHaveLength(3);
-    expect(window.sessionState.pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
+    const tab = core.tab;
+    expect(tab.sessionState.pages.history).toHaveLength(3);
+    expect(tab.sessionState.pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
       startingUrl,
       navigateToUrl,
       startingUrl,
     ]);
 
     const currentUrl = await core.getLocationHref();
-    expect(currentUrl).toBe(window.sessionState.pages.top.finalUrl);
+    expect(currentUrl).toBe(tab.sessionState.pages.top.finalUrl);
 
     await core.close();
     runWaitForCbsSpy.mockRestore();

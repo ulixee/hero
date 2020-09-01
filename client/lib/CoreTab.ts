@@ -15,109 +15,127 @@ import CoreClient from './CoreClient';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
+import { createResource } from './Resource';
 
-/////// //////////////////////////////////////////////
-
-export default class CoreClientSession {
-  public windowId: string;
+export default class CoreTab {
+  public tabId: string;
   public sessionId: string;
   public sessionsDataLocation: string;
   public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
   protected readonly meta: ISessionMeta;
-  private coreClient: CoreClient;
+  private readonly coreClient: CoreClient;
 
   constructor(
-    { windowId, sessionId, sessionsDataLocation, replayApiServer }: ISessionMeta,
+    { tabId, sessionId, sessionsDataLocation, replayApiServer }: ISessionMeta,
     coreClient: CoreClient,
   ) {
-    this.windowId = windowId;
+    this.tabId = tabId;
     this.sessionId = sessionId;
     this.sessionsDataLocation = sessionsDataLocation;
     this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
-      windowId,
+      tabId,
     };
     this.coreClient = coreClient;
     this.commandQueue = new CoreCommandQueue(this.meta, coreClient, coreClient.commandQueue);
     this.eventHeap = new CoreEventHeap(this.meta, coreClient);
+
+    if (!this.eventHeap.hasEventInterceptors('resource')) {
+      this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
+        return [createResource(resource, this)];
+      });
+    }
   }
 
   public async getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
-    return this.commandQueue.run<T>('getResourceProperty', id, propertyPath);
+    return this.commandQueue.run('getResourceProperty', id, propertyPath);
   }
 
   public async configure(options: ISessionOptions): Promise<void> {
-    await this.commandQueue.run<void>('configure', options);
+    await this.commandQueue.run('configure', options);
   }
 
   public async execJsPath<T = any>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
-    return await this.commandQueue.run<IExecJsPathResult<T>>('execJsPath', jsPath);
+    return await this.commandQueue.run('execJsPath', jsPath);
   }
 
-  public async getJsValue<T>(expression: string) {
-    return await this.commandQueue.run<{ value: T; type: string }>('getJsValue', expression);
+  public async getJsValue<T>(expression: string): Promise<{ value: T; type: string }> {
+    return await this.commandQueue.run('getJsValue', expression);
   }
 
   public async fetch(request: string | number, init?: IRequestInit): Promise<IAttachedState> {
-    return await this.commandQueue.run<IAttachedState>('fetch', request, init);
+    return await this.commandQueue.run('fetch', request, init);
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
-    return await this.commandQueue.run<IAttachedState>('createRequest', input, init);
+    return await this.commandQueue.run('createRequest', input, init);
   }
 
   public async getUrl(): Promise<string> {
-    return await this.commandQueue.run<string>('getLocationHref');
+    return await this.commandQueue.run('getLocationHref');
   }
 
   public async goto(href: string): Promise<IResourceMeta> {
-    return await this.commandQueue.run<IResourceMeta>('goto', href);
+    return await this.commandQueue.run('goto', href);
   }
 
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
-    await this.commandQueue.run<void>('interact', ...interactionGroups);
+    await this.commandQueue.run('interact', ...interactionGroups);
   }
 
   public async exportUserProfile(): Promise<IUserProfile> {
-    return await this.commandQueue.run<IUserProfile>('exportUserProfile');
+    return await this.commandQueue.run('exportUserProfile');
   }
 
   public async getPageCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run<ICookie[]>('getPageCookies');
+    return await this.commandQueue.run('getPageCookies');
   }
 
   public async getAllCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run<ICookie[]>('getAllCookies');
+    return await this.commandQueue.run('getAllCookies');
   }
 
   public async waitForResource(
     filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
     opts: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
-    return await this.commandQueue.run<IResourceMeta[]>('waitForResource', filter, opts);
+    return await this.commandQueue.run('waitForResource', filter, opts);
   }
 
   public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {
-    await this.commandQueue.run<void>('waitForElement', jsPath, opts);
+    await this.commandQueue.run('waitForElement', jsPath, opts);
   }
 
   public async waitForLoad(status: ILocationStatus): Promise<void> {
-    await this.commandQueue.run<void>('waitForLoad', status);
+    await this.commandQueue.run('waitForLoad', status);
   }
 
   public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    await this.commandQueue.run<void>('waitForLocation', trigger);
+    await this.commandQueue.run('waitForLocation', trigger);
   }
 
   public async waitForMillis(millis: number): Promise<void> {
-    await this.commandQueue.run<void>('waitForMillis', millis);
+    await this.commandQueue.run('waitForMillis', millis);
   }
 
   public async waitForWebSocket(url: string | RegExp): Promise<void> {
-    await this.commandQueue.run<void>('waitForWebSocket', url);
+    await this.commandQueue.run('waitForWebSocket', url);
+  }
+
+  public async waitForNewTab(): Promise<CoreTab> {
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab');
+    return new CoreTab(sessionMeta, this.coreClient);
+  }
+
+  public async focusTab(): Promise<void> {
+    await this.commandQueue.run('focusTab');
+  }
+
+  public async closeTab(): Promise<void> {
+    await this.commandQueue.run('closeTab');
   }
 
   public async addEventListener(
@@ -138,9 +156,9 @@ export default class CoreClientSession {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run<void>('close');
+    await this.commandQueue.run('close');
     process.nextTick(() => {
-      delete this.coreClient.sessionsByWindowId[this.meta.windowId];
+      delete this.coreClient.tabsById[this.meta.tabId];
     });
   }
 }

@@ -15,8 +15,8 @@ describe('Core events tests', () => {
     await Core.start();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
-    const { windowId } = await Core.createSession();
-    const core = Core.byWindowId[windowId];
+    const { tabId } = await Core.createTab();
+    const core = Core.byTabId[tabId];
     await core.addEventListener(null, 'close');
 
     await Core.shutdown();
@@ -31,8 +31,8 @@ describe('Core events tests', () => {
     await Core.start();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
-    const { windowId } = await Core.createSession();
-    const core = Core.byWindowId[windowId];
+    const { tabId } = await Core.createTab();
+    const core = Core.byTabId[tabId];
     await core.addEventListener(null, 'resource');
 
     koaServer.get('/page1', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
@@ -55,8 +55,8 @@ describe('Core events tests', () => {
     await Core.start();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
-    const { windowId } = await Core.createSession();
-    const core = Core.byWindowId[windowId];
+    const { tabId } = await Core.createTab();
+    const core = Core.byTabId[tabId];
     const { listenerId } = await core.addEventListener(null, 'resource');
 
     koaServer.get('/page1', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));

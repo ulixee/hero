@@ -1,51 +1,49 @@
-import { v1 as uuidv1 } from 'uuid';
-import Log from '@secret-agent/commons/Logger';
-import puppeteer from 'puppeteer-core';
-import IWindowOptions from '@secret-agent/core-interfaces/IWindowOptions';
-import {
-  ILocationStatus,
-  ILocationTrigger,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import SessionState from '@secret-agent/session-state';
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { AllowedNames } from '@secret-agent/commons/AllowedNames';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import * as Url from 'url';
-import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import Timer from '@secret-agent/commons/Timer';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import { createPromise } from '@secret-agent/commons/utils';
-import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import { EmulatorPlugin } from '@secret-agent/emulators';
-import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import WindowEvents, { IWindowEventParams } from './WindowEvents';
-import FrameTracker from './FrameTracker';
-import LocationTracker from './LocationTracker';
-import Interactor from './Interactor';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
-import Session from './Session';
-import DomEnv from './DomEnv';
-import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
+import { v1 as uuidv1 } from "uuid";
+import Log from "@secret-agent/commons/Logger";
+import puppeteer from "puppeteer-core";
+import ITabOptions from "@secret-agent/core-interfaces/ITabOptions";
+import { ILocationStatus, ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
+import { IJsPath } from "awaited-dom/base/AwaitedPath";
+import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
+import { AllowedNames } from "@secret-agent/commons/AllowedNames";
+import { ICookie } from "@secret-agent/core-interfaces/ICookie";
+import { IInteractionGroups, IMousePositionXY } from "@secret-agent/core-interfaces/IInteractions";
+import * as Url from "url";
+import IElementRect from "@secret-agent/injected-scripts/interfaces/IElementRect";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import Timer from "@secret-agent/commons/Timer";
+import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
+import { createPromise } from "@secret-agent/commons/utils";
+import TimeoutError from "@secret-agent/commons/interfaces/TimeoutError";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import { EmulatorPlugin } from "@secret-agent/emulators";
+import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import TabEvents, { ITabEventParams } from "./TabEvents";
+import FrameTracker from "./FrameTracker";
+import LocationTracker from "./LocationTracker";
+import Interactor from "./Interactor";
+import IDevtoolsClient from "../interfaces/IDevtoolsClient";
+import Session from "./Session";
+import DomEnv from "./DomEnv";
+import IResourceFilterProperties from "../interfaces/IResourceFilterProperties";
+import UserProfile from "./UserProfile";
 
 const { log } = Log(module);
 
-export default class Window {
-  public readonly id: string = uuidv1();
+export default class Tab {
+  public readonly id = uuidv1();
   public readonly session: Session;
-  public readonly sessionState: SessionState;
   public readonly locationTracker: LocationTracker;
   public readonly frameTracker: FrameTracker;
   public readonly domEnv: DomEnv;
+  public get sessionState() {
+    return this.session.sessionState;
+  }
 
   public puppPage: puppeteer.Page;
 
-  private readonly events: WindowEvents;
+  private readonly events: TabEvents;
   private readonly interactor: Interactor;
 
   private isClosing = false;
@@ -70,41 +68,33 @@ export default class Window {
   }
 
   private get mainFrameId() {
-    // @ts-ignore
-    return this.puppPage.mainFrame()?._id;
+    return this.frameTracker.mainFrameId;
   }
 
-  constructor(sessionState: SessionState, puppPage: puppeteer.Page, session: Session) {
+  constructor(session: Session, puppPage: puppeteer.Page) {
     this.session = session;
-    this.sessionState = sessionState;
     this.puppPage = puppPage;
+    this.puppPage.on('error', () => {
+      // prevent bubbled up errors. True errors caught in TabEvents
+      // -- same error as Inspector.targetCrashed
+    });
     this.interactor = new Interactor(this);
     this.locationTracker = new LocationTracker(this.sessionState);
-    this.events = new WindowEvents(this);
-    this.frameTracker = new FrameTracker(this.devtoolsClient, sessionState);
+    this.events = new TabEvents(this);
+    this.frameTracker = new FrameTracker(this.devtoolsClient, session.sessionState);
     this.domEnv = new DomEnv(this.sessionId, this.frameTracker, this.devtoolsClient);
-  }
-
-  public async start() {
-    // tslint:disable-next-line:no-this-assignment
-    const { devtoolsClient } = this;
-    await Window.installEmulator(devtoolsClient, this.session.emulator);
-    // must be installed before window scripts
-    await this.sessionState.listenForPageEvents(devtoolsClient, this.frameTracker);
-    await this.events.listen();
-    await this.domEnv.install();
   }
 
   public async setBrowserOrigin(origin: string) {
     const mitmSession = this.session.requestMitmProxySession;
     const originalBlockUrls = mitmSession.blockUrls;
-    const originalBlockImages = mitmSession.blockImages;
+    const originalBlockResourceTypes = [...mitmSession.blockResourceTypes];
     const originalBlockResponseHandlerFn = mitmSession.blockResponseHandlerFn;
     try {
       mitmSession.blockUrls = [origin];
-      mitmSession.blockImages = true;
+      mitmSession.blockResourceTypes = ['Image'];
       mitmSession.blockResponseHandlerFn = (request, response) => {
-        response.end(`<html><body>Empty</body></html>`);
+        response.end(`<html lang="en"><body>Empty</body></html>`);
         return true;
       };
       await this.puppPage.goto(origin, {
@@ -114,7 +104,7 @@ export default class Window {
       // restore originals
       mitmSession.blockUrls = originalBlockUrls;
       mitmSession.blockResponseHandlerFn = originalBlockResponseHandlerFn;
-      mitmSession.blockImages = originalBlockImages;
+      mitmSession.blockResourceTypes = originalBlockResourceTypes;
     }
   }
 
@@ -145,27 +135,50 @@ export default class Window {
     return propertyParent[property];
   }
 
-  public async config(options: IWindowOptions) {
-    const blockImages = options?.renderingOptions?.includes('LoadImages') ?? false;
-    this.session.requestMitmProxySession.blockImages = blockImages;
-    this.session.requestMitmProxySession.blockUrls = [];
+  public async config(options: ITabOptions) {
+    const mitmSession = this.session.requestMitmProxySession;
+    const blockedResources = mitmSession.blockResourceTypes;
+    const renderingOptions = options?.renderingOptions ?? [];
+    let disableJs = false;
+
+    if (renderingOptions.includes('All')) {
+      blockedResources.length = 0;
+    } else if (renderingOptions.includes('None')) {
+      blockedResources.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
+      disableJs = true;
+    } else {
+      if (!renderingOptions.includes('LoadImages')) {
+        blockedResources.push('Image');
+      }
+      if (!renderingOptions.includes('LoadCssResources')) {
+        blockedResources.push('Stylesheet');
+      }
+      if (!renderingOptions.includes('LoadJsResources')) {
+        blockedResources.push('Script');
+      }
+      if (!renderingOptions.includes('JsRuntime')) {
+        disableJs = true;
+      }
+    }
+    await this.devtoolsClient.send('Emulation.setScriptExecutionDisabled', disableJs);
+    mitmSession.blockUrls = [];
   }
 
-  public on<K extends keyof IWindowEventParams>(
+  public on<K extends keyof ITabEventParams>(
     eventType: K,
-    listenerFn: (this: this, event?: IWindowEventParams[K]) => any,
+    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
   ) {
     return this.events.on(eventType, listenerFn.bind(this));
   }
 
-  public once<K extends keyof IWindowEventParams>(
+  public once<K extends keyof ITabEventParams>(
     eventType: K,
-    listenerFn: (this: this, event?: IWindowEventParams[K]) => any,
+    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
   ) {
     return this.events.once(eventType, listenerFn.bind(this));
   }
 
-  public async runCommand<T>(functionName: WindowFunctionNames, ...args: any[]) {
+  public async runCommand<T>(functionName: TabFunctionNames, ...args: any[]) {
     const commandHistory = this.sessionState.commands;
 
     const commandMeta = {
@@ -187,12 +200,12 @@ export default class Window {
     } else {
       commandFn = this[functionName].bind(this, ...args);
     }
-    const id = log.info('Window.runCommand', { ...commandMeta, sessionId: this.sessionId });
+    const id = log.info('Tab.runCommand', { ...commandMeta, sessionId: this.sessionId });
     let result: T;
     try {
       result = await this.sessionState.runCommand<T>(commandFn, commandMeta);
     } finally {
-      log.stats('Window.ranCommand', { sessionId: this.sessionId, result, parentLogId: id });
+      log.stats('Tab.ranCommand', { sessionId: this.sessionId, result, parentLogId: id });
     }
     return result;
   }
@@ -279,7 +292,11 @@ export default class Window {
 
   public async getPageCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
-    return (await this.puppPage.cookies()).map(
+
+    const { cookies } = await this.devtoolsClient.send('Network.getCookies', {
+      urls: [this.navigationUrl],
+    });
+    return cookies.map(
       x =>
         ({
           ...x,
@@ -288,14 +305,18 @@ export default class Window {
     );
   }
 
+  public async focus() {
+    await this.devtoolsClient.send('Page.bringToFront');
+  }
+
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
     this.frameTracker.close();
     this.domEnv.close();
 
-    const logid = log.info('WindowClosing', {
-      windowId: this.id,
+    const logid = log.info('TabClosing', {
+      tabId: this.id,
       sessionId: this.session.id,
     });
     try {
@@ -304,24 +325,18 @@ export default class Window {
         clearTimeout(x.timeout);
         x.reject(new Error('Terminated command because session closing'));
       });
-      await this.session.close();
-      const page = this.puppPage;
-      delete this.puppPage;
-      if (page) {
-        await page.close({
-          runBeforeUnload: true,
-        });
-      }
+      // Tries to close page, running its beforeunload hooks, if any.
+      await this.devtoolsClient.send('Page.close');
     } catch (error) {
       if (
         error.message.includes('Target closed') === false &&
         error.message.includes('WebSocket is not open') === false &&
         error.message.includes('Connection closed') === false
       ) {
-        log.error('WindowCloseError', { sessionId: this.sessionId, error });
+        log.error('TabCloseError', { sessionId: this.sessionId, error });
       }
     } finally {
-      log.stats('WindowClosed', { sessionId: this.sessionId, parentLogId: logid });
+      log.stats('TabClosed', { sessionId: this.sessionId, parentLogId: logid });
     }
   }
 
@@ -429,17 +444,25 @@ export default class Window {
 
   // CREATE
 
-  public static async create(
-    sessionState: SessionState,
-    session: Session,
-    puppPage: puppeteer.Page,
-  ) {
-    const logid = log.info('CreatingWindow', { sessionId: session.id });
+  public static async create(session: Session) {
+    const logid = log.info('CreatingTab', { sessionId: session.id });
+    const puppPage = await session.newPage();
 
-    const window = new Window(sessionState, puppPage, session);
-    await window.frameTracker.init();
-    log.info('CreatedWindow', { sessionId: session.id, parentLogId: logid });
-    return window;
+    const tab = new Tab(session, puppPage);
+    await session.authenticate(tab.id, puppPage);
+    await tab.frameTracker.init();
+    const devtoolsClient = tab.devtoolsClient;
+
+    // install user profile before page boots up
+    await UserProfile.install(session.options.userProfile, tab);
+    await Tab.installEmulator(devtoolsClient, session.emulator);
+    // must be installed before tab scripts
+    await tab.sessionState.listenForPageEvents(devtoolsClient, tab.frameTracker);
+    await tab.events.listen();
+    await tab.domEnv.install();
+
+    log.info('Tab.create', { sessionId: session.id, parentLogId: logid });
+    return tab;
   }
 
   private static async installEmulator(devtoolsClient: IDevtoolsClient, emulator: EmulatorPlugin) {
@@ -469,4 +492,4 @@ export default class Window {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type WindowFunctionNames = AllowedNames<Window, Function>;
+type TabFunctionNames = AllowedNames<Tab, Function>;

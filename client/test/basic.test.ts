@@ -25,9 +25,9 @@ describe('basic SecretAgent tests', () => {
 
     coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -37,7 +37,7 @@ describe('basic SecretAgent tests', () => {
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
-      [null, 'createSession'],
+      [null, 'createTab'],
       [null, 'disconnect'],
     ]);
   });

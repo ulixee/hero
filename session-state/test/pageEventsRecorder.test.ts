@@ -28,17 +28,17 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
     await core.waitForLoad('DomContentLoaded');
 
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     // @ts-ignore
-    const commandId = core.window.lastCommandId;
+    const commandId = core.tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(11);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
@@ -69,12 +69,12 @@ function removeMe() {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test2`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
@@ -118,12 +118,12 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test3`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
@@ -166,12 +166,12 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test4`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
     const [frameId] = Object.keys(changesAfterLoad);
@@ -215,10 +215,10 @@ describe('basic Mouse Event tests', () => {
 
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.goto(`${koaServer.baseUrl}/mouse1`);
     await core.waitForLoad(LocationStatus.AllContentLoaded);
@@ -265,13 +265,13 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/input`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.interact([
       {
@@ -322,13 +322,13 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/textarea`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.interact([
       {
@@ -381,13 +381,13 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/cbox`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.interact([
       {
@@ -433,13 +433,13 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/radio`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.interact([
       {
@@ -489,13 +489,13 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/select`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.window.sessionState;
+    const state = core.tab.sessionState;
 
     await core.interact([
       {

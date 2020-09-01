@@ -3,6 +3,7 @@ import { UpstreamProxy } from '@secret-agent/mitm';
 import { Helpers } from '@secret-agent/testing';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
+import Tab from '../lib/Tab';
 
 const mocks = {
   MitmRequestContext: {
@@ -29,15 +30,17 @@ test('should be able to run multiple pages each with their own proxy', async () 
   const url1 = `${httpServer.url}page1`;
   const browserSession1 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession1);
-  await browserSession1.window.goto(url1);
-  await browserSession1.window.waitForMillis(100);
+  const tab1 = await Tab.create(browserSession1);
+  await tab1.goto(url1);
+  await tab1.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url1);
 
   const url2 = `${httpServer.url}page2`;
   const browserSession2 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession2);
-  await browserSession2.window.goto(url2);
-  await browserSession2.window.waitForMillis(100);
+  const tab2 = await Tab.create(browserSession2);
+  await tab2.goto(url2);
+  await tab2.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url2);
 });
 
@@ -79,7 +82,8 @@ xhr.send('<person><name>DLF</name></person>');
     `);
     return true;
   };
-  await session.window.goto(`http://dataliberationfoundation.org/postback`);
+  const tab = await Tab.create(session);
+  await tab.goto(`http://dataliberationfoundation.org/postback`);
   await expect(corsPromise).resolves.toBeTruthy();
   await expect(postPromise).resolves.toBeTruthy();
 
@@ -121,7 +125,8 @@ myWorker.postMessage('send');
   });
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
-  await session.window.goto(`${koa.baseUrl}/test`);
-  await session.window.waitForLoad('AllContentLoaded');
+  const tab = await Tab.create(session);
+  await tab.goto(`${koa.baseUrl}/test`);
+  await tab.waitForLoad('AllContentLoaded');
   await expect(serviceXhr).resolves.toBe('FromWorker');
 });

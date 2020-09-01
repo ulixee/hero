@@ -12,13 +12,19 @@ import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
 import FrameAttachedEvent = Protocol.Page.FrameAttachedEvent;
 import ExecutionContextDestroyedEvent = Protocol.Runtime.ExecutionContextDestroyedEvent;
 import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
+import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent;
 
 const { log } = Log(module);
 
 export default class FrameTracker {
   public frames: { [id: string]: IFrame } = {};
+
   public get mainFrameId() {
     return Array.from(this.attachedFrameIds).find(id => !this.frames[id].parentId);
+  }
+
+  public get mainFrame() {
+    return this.frames[this.mainFrameId];
   }
 
   private isClosing = false;
@@ -44,6 +50,10 @@ export default class FrameTracker {
     const framesResponse = await this.devtoolsClient.send('Page.getFrameTree');
     await this.recurseFrameTree(framesResponse.frameTree);
     this.devtoolsClient.on('Page.frameNavigated', this.onFrameNavigated.bind(this));
+    this.devtoolsClient.on(
+      'Page.navigatedWithinDocument',
+      this.onFrameNavigatedWithinDocument.bind(this),
+    );
     this.devtoolsClient.on('Page.frameDetached', this.onFrameDetached.bind(this));
     this.devtoolsClient.on('Page.frameAttached', this.onFrameAttached.bind(this));
     this.devtoolsClient.on(
@@ -165,6 +175,11 @@ export default class FrameTracker {
     this.frames[frame.id] = frame;
 
     await this.createIsolatedWorld(frame.id);
+  }
+
+  private async onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
+    const { frameId, url } = navigatedEvent;
+    if (this.frames[frameId]) this.frames[frameId].url = url;
   }
 
   private onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {

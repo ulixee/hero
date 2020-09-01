@@ -1,4 +1,5 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
+import { getTabSession } from './Tab';
 
 const { getState } = StateMachine<any, any>();
 
@@ -8,19 +9,20 @@ export default class AwaitedEventTarget<T> {
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    const { coreClientSession, awaitedPath } = getState(this);
+    const { activeTab, awaitedPath } = getState(this);
+    const coreTab = getTabSession(activeTab);
     const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
-    return coreClientSession.addEventListener(jsPath, eventType, listenerFn, options);
+    return coreTab.addEventListener(jsPath, eventType as string, listenerFn, options);
   }
 
   public removeEventListener<K extends keyof T>(
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
-    options?,
-  ): void {
-    const { coreClientSession, awaitedPath } = getState(this);
+  ): Promise<void> {
+    const { activeTab, awaitedPath } = getState(this);
+    const coreTab = getTabSession(activeTab);
     const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
-    return coreClientSession.removeEventListener(jsPath, eventType, listenerFn, options);
+    return coreTab.removeEventListener(jsPath, eventType as string, listenerFn);
   }
 
   // aliases
@@ -36,9 +38,8 @@ export default class AwaitedEventTarget<T> {
   public off<K extends keyof T>(
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
-    options?,
-  ): void {
-    return this.removeEventListener(eventType, listenerFn, options);
+  ): Promise<void> {
+    return this.removeEventListener(eventType, listenerFn);
   }
 
   public once<K extends keyof T>(
@@ -48,7 +49,7 @@ export default class AwaitedEventTarget<T> {
   ): Promise<void> {
     const wrappedListener = (event: T[K]) => {
       listenerFn.call(this, event);
-      this.removeEventListener(eventType, listenerFn, options);
+      this.removeEventListener(eventType, listenerFn);
       return null;
     };
     return this.addEventListener(eventType, wrappedListener, options);

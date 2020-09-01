@@ -1,5 +1,5 @@
 export default interface ISessionMeta {
-  windowId: string;
+  tabId: string;
   sessionId: string;
   sessionsDataLocation?: string;
   replayApiServer?: string;

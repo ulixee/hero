@@ -1,12 +1,12 @@
-import Log from '@secret-agent/commons/Logger';
-import { EventEmitter } from 'events';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import { redirectCodes } from '@secret-agent/mitm/handlers/HttpRequestHandler';
-import { IRequestSessionResponseEvent } from '@secret-agent/mitm/handlers/RequestSession';
-import Protocol from 'devtools-protocol';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import { Window } from '..';
-import { exceptionDetailsToError, printStackTrace } from './Utils';
+import Log from "@secret-agent/commons/Logger";
+import { EventEmitter } from "events";
+import { LocationStatus } from "@secret-agent/core-interfaces/Location";
+import { redirectCodes } from "@secret-agent/mitm/handlers/HttpRequestHandler";
+import { IRequestSessionResponseEvent } from "@secret-agent/mitm/handlers/RequestSession";
+import Protocol from "devtools-protocol";
+import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
+import { Tab } from "..";
+import { exceptionDetailsToError, printStackTrace } from "./Utils";
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
 import WebSocketFrameSentEvent = Protocol.Network.WebSocketFrameSentEvent;
 import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEvent;
@@ -20,36 +20,32 @@ import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
 
 const { log } = Log(module);
 
-export default class WindowEvents {
-  private readonly window: Window;
+export default class TabEvents {
+  private readonly tab: Tab;
   private emitter = new EventEmitter();
 
   private get sessionState() {
-    return this.window.sessionState;
+    return this.tab.sessionState;
   }
 
   private get devtoolsClient() {
-    return this.window.devtoolsClient;
+    return this.tab.devtoolsClient;
   }
 
   private get lastCommandId() {
-    return this.window.lastCommandId;
+    return this.tab.lastCommandId;
   }
 
   private get mainFrameId() {
-    const puppPage = this.window.puppPage;
-    if (!puppPage) return null;
-    // @ts-ignore
-    return puppPage.mainFrame()?._id as string;
+    return this.tab.frameTracker.mainFrameId;
   }
 
   private get pageUrl() {
-    const puppPage = this.window.puppPage;
-    if (puppPage) return puppPage.url();
+    return this.tab.frameTracker.mainFrame?.url;
   }
 
-  constructor(window: Window) {
-    this.window = window;
+  constructor(tab: Tab) {
+    this.tab = tab;
     this.listenToErrors();
   }
 
@@ -58,28 +54,28 @@ export default class WindowEvents {
     await this.listenToDevtoolsEvents();
   }
 
-  public on<K extends keyof IWindowEventParams>(
+  public on<K extends keyof ITabEventParams>(
     eventType: K,
-    listenerFn: (this: this, event?: IWindowEventParams[K]) => any,
+    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
   ) {
     this.emitter.on(eventType, listenerFn);
     return this;
   }
 
-  public once<K extends keyof IWindowEventParams>(
+  public once<K extends keyof ITabEventParams>(
     eventType: K,
-    listenerFn: (this: this, event?: IWindowEventParams[K]) => any,
+    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
   ) {
     this.emitter.once(eventType, listenerFn);
     return this;
   }
 
-  public emit<K extends keyof IWindowEventParams>(eventType: K, event?: IWindowEventParams[K]) {
+  public emit<K extends keyof ITabEventParams>(eventType: K, event?: ITabEventParams[K]) {
     return this.emitter.emit(eventType, event);
   }
 
   private listenToMitm() {
-    const requestSession = this.window.session.requestMitmProxySession;
+    const requestSession = this.tab.session.requestMitmProxySession;
     requestSession.on('httpError', () => this.emit('request-intercepted'));
 
     requestSession.on('request', event => {
@@ -116,9 +112,6 @@ export default class WindowEvents {
 
   private listenToErrors() {
     const devtoolsClient = this.devtoolsClient;
-    this.window.puppPage.on('error', () => {
-      // this is the same error as Inspector.targetCrashed.
-    });
     devtoolsClient.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
     devtoolsClient.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
     devtoolsClient.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
@@ -127,7 +120,7 @@ export default class WindowEvents {
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
 
   private onFetchPaused(networkRequest: RequestPausedEvent) {
-    const { session } = this.window;
+    const { session } = this.tab;
     // requests from service workers (and others?) will never register with RequestWillBeSentEvent
     // -- they don't have networkIds
     if (!networkRequest.networkId) {
@@ -144,7 +137,7 @@ export default class WindowEvents {
   }
 
   private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent) {
-    const { session, puppPage, lastCommandId } = this.window;
+    const { session, lastCommandId } = this.tab;
     session.requestMitmProxySession.registerResource({
       browserRequestId: networkRequest.requestId,
       resourceType: networkRequest.type,
@@ -159,7 +152,6 @@ export default class WindowEvents {
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
     // only track main frame for now
     if (isNavigation && networkRequest.frameId === this.mainFrameId) {
-      this.sessionState.viewport = puppPage.viewport();
       this.sessionState.pages.update(
         LocationStatus.HttpRequested,
         networkRequest.request.url,
@@ -171,7 +163,7 @@ export default class WindowEvents {
 
   private onMitmRequestResponse(responseEvent: IRequestSessionResponseEvent) {
     const { request, wasCached, body } = responseEvent;
-    const sessionId = this.window.session.id;
+    const sessionId = this.tab.session.id;
     log.info('Http.Response', {
       sessionId,
       url: request.url,
@@ -184,7 +176,7 @@ export default class WindowEvents {
 
     const resource = this.sessionState.captureResource(responseEvent, true);
     if (request.method !== 'OPTIONS') {
-      if (resource.url === this.window.navigationUrl) {
+      if (resource.url === this.tab.navigationUrl) {
         this.sessionState.pages.resourceLoadedForLocation(resource.id);
       }
       this.emit('request-intercepted', resource);
@@ -220,7 +212,7 @@ export default class WindowEvents {
           frameId,
           this.lastCommandId,
         );
-        this.window.recordUserActivity(this.window.navigationUrl);
+        this.tab.recordUserActivity(this.tab.navigationUrl);
       } catch (error) {
         this.sessionState.captureError(frameId, 'handleResponse', error);
       }
@@ -230,7 +222,7 @@ export default class WindowEvents {
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent) {
-    const requestSession = this.window.session.requestMitmProxySession;
+    const requestSession = this.tab.session.requestMitmProxySession;
     requestSession.registerWebsocketHeaders(handshake.requestId, handshake.request.headers);
   }
 
@@ -268,7 +260,7 @@ export default class WindowEvents {
 
   // in-page navigation triggered (anchors and html5)
   private async onNavigatedWithinDocument(navigation: NavigatedWithinDocumentEvent) {
-    log.info('Page.navigatedWithinDocument', { sessionId: this.window.session.id, ...navigation });
+    log.info('Page.navigatedWithinDocument', { sessionId: this.tab.session.id, ...navigation });
     const { url, frameId } = navigation;
     if (this.mainFrameId === frameId) {
       // set load state back to all loaded
@@ -281,7 +273,7 @@ export default class WindowEvents {
   // client-side frame navigations (form posts/gets, redirects/ page reloads)
   private async onFrameRequestedNavigation(frameNavigationRequest: FrameRequestedNavigationEvent) {
     log.info('Page.frameRequestedNavigation', {
-      sessionId: this.window.session.id,
+      sessionId: this.tab.session.id,
       ...frameNavigationRequest,
     });
     // disposition options: currentTab, newTab, newWindow, download
@@ -295,7 +287,7 @@ export default class WindowEvents {
 
   private onRuntimeException(msg: ExceptionThrownEvent) {
     const error = exceptionDetailsToError(msg.exceptionDetails);
-    const frameId = this.window.frameTracker.getFrameIdForExecutionContext(
+    const frameId = this.tab.frameTracker.getFrameIdForExecutionContext(
       msg.exceptionDetails.executionContextId,
     );
     this.emit('pageerror', error);
@@ -304,7 +296,7 @@ export default class WindowEvents {
 
   private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
     const { executionContextId, args, stackTrace, type, context } = event;
-    const frameId = this.window.frameTracker.getFrameIdForExecutionContext(executionContextId);
+    const frameId = this.tab.frameTracker.getFrameIdForExecutionContext(executionContextId);
 
     const message = args
       .map(arg => {
@@ -330,7 +322,7 @@ export default class WindowEvents {
   }
 }
 
-export interface IWindowEventParams {
+export interface ITabEventParams {
   load: undefined;
   domcontentloaded: undefined;
   'request-intercepted': IResourceMeta | undefined;

@@ -1,5 +1,5 @@
-import IWindowOptions from './IWindowOptions';
+import ITabOptions from './ITabOptions';
 
-export default interface ISessionOptions extends IWindowOptions {
+export default interface ISessionOptions extends ITabOptions {
   humanoidId?: string;
 }

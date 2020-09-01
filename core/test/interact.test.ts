@@ -25,8 +25,8 @@ describe('basic Interaction tests', () => {
       `;
     });
     const mouseUrl = `${koaServer.baseUrl}/mouse`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     // @ts-ignore
     const session = core.session;
     await core.goto(mouseUrl);
@@ -63,8 +63,8 @@ describe('basic Interaction tests', () => {
       `;
     });
     const inputUrl = `${koaServer.baseUrl}/input`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     await core.goto(inputUrl);
     await core.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
@@ -88,8 +88,8 @@ describe('basic Interaction tests', () => {
       `;
     });
     const inputUrl = `${koaServer.baseUrl}/unsafe`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     await core.goto(inputUrl);
     const input = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
@@ -113,8 +113,8 @@ describe('basic Interaction tests', () => {
       `;
     });
 
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/vars`);
     await core.waitForLoad('DomContentLoaded');
 

@@ -1,4 +1,4 @@
-import Core, { Window } from '@secret-agent/core';
+import Core, { Tab } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import * as fs from 'fs';
@@ -71,12 +71,12 @@ describe('basic Dom Replay tests', () => {
     koaServer.get('/empty', ctx => {
       ctx.body = `<html></html>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const window: Window = core.window;
+    const tab: Tab = core.tab;
 
     // @ts-ignore
     const chromeCorePath = core.session.emulator.engineExecutablePath;
@@ -97,9 +97,9 @@ describe('basic Dom Replay tests', () => {
     await mirrorPage.evaluateOnNewDocument(`const exports = {};\n${domReplayScript}`);
     await mirrorPage.goto(`${koaServer.baseUrl}/empty`);
 
-    const sourceHtml = await window.puppPage.content();
+    const sourceHtml = await tab.puppPage.content();
 
-    const state = window.sessionState;
+    const state = tab.sessionState;
 
     {
       const pageChanges = await state.getPageDomChanges(state.pages.history, true);
@@ -134,7 +134,7 @@ describe('basic Dom Replay tests', () => {
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
       );
 
-      const sourceHtmlNext = await window.puppPage.content();
+      const sourceHtmlNext = await tab.puppPage.content();
       const mirrorHtmlNext = await mirrorPage.content();
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }

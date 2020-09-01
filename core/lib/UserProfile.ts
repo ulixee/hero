@@ -6,7 +6,7 @@ import Log from '@secret-agent/commons/Logger';
 import { URL } from 'url';
 import { exceptionDetailsToError } from './Utils';
 import IDevtoolsClient from '../interfaces/IDevtoolsClient';
-import Window from './Window';
+import Tab from './Tab';
 import DomEnv from './DomEnv';
 import SetCookiesRequest = Protocol.Network.SetCookiesRequest;
 import CookieParam = Protocol.Network.CookieParam;
@@ -73,10 +73,11 @@ export default class UserProfile {
     } as IUserProfile;
   }
 
-  public static async install(fromProfile: IUserProfile, window: Window) {
-    const { devtoolsClient } = window;
+  public static async install(fromProfile: IUserProfile, tab: Tab) {
+    const { devtoolsClient } = tab;
 
-    await window.domEnv.install();
+    const parentLogId = log.info('UserProfile.install', { sessionId: tab.sessionId });
+    await tab.domEnv.install();
 
     if (fromProfile?.cookies) {
       await this.setCookies(
@@ -89,16 +90,17 @@ export default class UserProfile {
     if (fromProfile?.storage && Object.keys(fromProfile.storage).length) {
       // prime each page
       for (const origin of Object.keys(fromProfile.storage)) {
-        await window.setBrowserOrigin(origin);
-        await window.frameTracker.runInFrameWorld(
+        await tab.setBrowserOrigin(origin);
+        await tab.frameTracker.runInFrameWorld(
           `window.restoreUserStorage(${JSON.stringify(fromProfile.storage[origin])})`,
-          window.frameTracker.mainFrameId,
+          tab.frameTracker.mainFrameId,
           UserProfile.installedWorld,
         );
       }
       // reset browser to start page
-      await window.setBrowserOrigin('about:blank');
+      await tab.setBrowserOrigin('about:blank');
     }
+    log.info('UserProfile.installed', { sessionId: tab.sessionId, parentLogId });
     return this;
   }
 

@@ -15,9 +15,9 @@ describe('document tests', () => {
 
     coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string, args) => {
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
       if (command === 'execJsPath') {
@@ -50,11 +50,11 @@ describe('document tests', () => {
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands).toMatchObject([
-      [null, 'createSession', expect.any(Array)],
+      [null, 'createTab', expect.any(Array)],
       [expect.any(Object), 'execJsPath', [[...jsPath, [getAttachedStateFnName, undefined]]]],
       [expect.any(Object), 'execJsPath', [[1, 'tagName']]],
       [expect.any(Object), 'close', []],
-      [null, 'disconnect', [['window-id'], undefined]],
+      [null, 'disconnect', [['tab-id'], undefined]],
     ]);
     expect(browser.sessionId).toBe('session-id');
   });

@@ -1,7 +1,7 @@
-import CoreClientSession from '../lib/CoreClientSession';
+import CoreTab from '../lib/CoreTab';
 import Browser from '../lib/Browser';
 
 export default interface IAwaitedOptions {
   browser: Browser;
-  coreClientSession: CoreClientSession;
+  coreTab: CoreTab;
 }

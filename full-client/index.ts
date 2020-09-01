@@ -16,7 +16,7 @@ coreClient.pipeOutgoingCommand = async (
   args: any[],
 ) => {
   if (sessionMeta) {
-    const core = Core.byWindowId[sessionMeta.windowId];
+    const core = Core.byTabId[sessionMeta.tabId];
     const data = await core[command](...args);
     const commandId = core.lastCommandId;
     return { data, commandId };

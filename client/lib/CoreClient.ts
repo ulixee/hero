@@ -2,11 +2,11 @@ import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionO
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import CoreCommandQueue from './CoreCommandQueue';
-import CoreClientSession from './CoreClientSession';
+import CoreTab from './CoreTab';
 
 export default class CoreClient {
   public readonly commandQueue: CoreCommandQueue;
-  public readonly sessionsByWindowId: { [windowId: string]: CoreClientSession } = {};
+  public readonly tabsById: { [tabId: string]: CoreTab } = {};
   public pipeOutgoingCommand: (
     meta: ISessionMeta | null,
     command: string,
@@ -18,31 +18,31 @@ export default class CoreClient {
   }
 
   public async configure(options: IConfigureOptions): Promise<void> {
-    await this.commandQueue.run<void>('configure', options);
+    await this.commandQueue.run('configure', options);
   }
 
-  public async createSession(options: ICreateSessionOptions): Promise<CoreClientSession> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('createSession', options);
-    const coreClientSession = new CoreClientSession(sessionMeta, this);
-    this.sessionsByWindowId[sessionMeta.windowId] = coreClientSession;
-    return coreClientSession;
+  public async createTab(options: ICreateSessionOptions): Promise<CoreTab> {
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('createTab', options);
+    const coreTab = new CoreTab(sessionMeta, this);
+    this.tabsById[sessionMeta.tabId] = coreTab;
+    return coreTab;
   }
 
   public async shutdown(error?: Error): Promise<void> {
-    const windowIds = Object.keys(this.sessionsByWindowId);
-    if (windowIds.length || error) {
-      await this.commandQueue.run<void>('disconnect', windowIds, error);
+    const tabIds = Object.keys(this.tabsById);
+    if (tabIds.length || error) {
+      await this.commandQueue.run('disconnect', tabIds, error);
     }
-    for (const windowId of windowIds) {
-      delete this.sessionsByWindowId[windowId];
+    for (const tabId of tabIds) {
+      delete this.tabsById[tabId];
     }
   }
 
   public async start(options?: IConfigureOptions): Promise<void> {
-    await this.commandQueue.run<void>('start', options);
+    await this.commandQueue.run('start', options);
   }
 
   public pipeIncomingEvent(meta: ISessionMeta, listenerId: string, eventData: any): void {
-    this.sessionsByWindowId[meta.windowId].eventHeap.incomingEvent(meta, listenerId, eventData);
+    this.tabsById[meta.tabId].eventHeap.incomingEvent(meta, listenerId, eventData);
   }
 }

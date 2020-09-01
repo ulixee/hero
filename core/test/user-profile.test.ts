@@ -4,6 +4,7 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
 import Safari13 from '@secret-agent/emulate-safari-13';
 import Core from '../index';
+import Tab from '../lib/Tab';
 
 let koaServer;
 beforeAll(async () => {
@@ -15,8 +16,8 @@ afterEach(Helpers.afterEach);
 
 describe('UserProfile cookie tests', () => {
   it('should be able to save and restore cookies', async () => {
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/cookie', ctx => {
       ctx.cookies.set('cookietest', 'Is Set');
@@ -38,8 +39,8 @@ describe('UserProfile cookie tests', () => {
     expect(profile.cookies[0].value).toBe('Is Set');
 
     // try loading an empty session now to confirm cookies are gone without reloading
-    const meta2 = await Core.createSession();
-    const core2 = Core.byWindowId[meta2.windowId];
+    const meta2 = await Core.createTab();
+    const core2 = Core.byTabId[meta2.tabId];
     const core2Cookies = await core2.getUserCookies();
     expect(core2Cookies).toHaveLength(0);
 
@@ -47,10 +48,10 @@ describe('UserProfile cookie tests', () => {
     await core2.waitForLoad('AllContentLoaded');
     expect(cookie).not.toBeTruthy();
 
-    const meta3 = await Core.createSession({
+    const meta3 = await Core.createTab({
       userProfile: profile,
     });
-    const core3 = Core.byWindowId[meta3.windowId];
+    const core3 = Core.byTabId[meta3.tabId];
     const cookiesBefore = await core3.getUserCookies();
     expect(cookiesBefore).toHaveLength(1);
 
@@ -66,13 +67,13 @@ describe('UserProfile cookie tests', () => {
   it('should track cookies from other domains', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createSession();
-      const core = Core.byWindowId[meta.windowId];
+      const meta = await Core.createTab();
+      const core = Core.byTabId[meta.tabId];
       // @ts-ignore
-      await core.window.devtoolsClient.send('Audits.enable');
+      await core.tab.devtoolsClient.send('Audits.enable');
       // @ts-ignore
       // eslint-disable-next-line no-console
-      await core.window.devtoolsClient.on('Audits.issueAdded', console.log);
+      await core.tab.devtoolsClient.on('Audits.issueAdded', console.log);
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie'];
@@ -101,10 +102,10 @@ describe('UserProfile cookie tests', () => {
       await core.close();
     }
     {
-      const meta = await Core.createSession({
+      const meta = await Core.createTab({
         userProfile: profile,
       });
-      const core = Core.byWindowId[meta.windowId];
+      const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie2'];
@@ -131,10 +132,10 @@ describe('UserProfile cookie tests', () => {
   it('restores cookies for safari', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createSession({
+      const meta = await Core.createTab({
         emulatorId: Safari13.emulatorId,
       });
-      const core = Core.byWindowId[meta.windowId];
+      const core = Core.byTabId[meta.tabId];
       koaServer.get('/safari-cookie', ctx => {
         ctx.cookies.set('safari', 'cookie');
         ctx.body = `<body><h1>safari page</h1></body>`;
@@ -147,11 +148,11 @@ describe('UserProfile cookie tests', () => {
       await core.close();
     }
     {
-      const meta = await Core.createSession({
+      const meta = await Core.createTab({
         userProfile: profile,
         emulatorId: Safari13.emulatorId,
       });
-      const core = Core.byWindowId[meta.windowId];
+      const core = Core.byTabId[meta.tabId];
 
       let cookie = '';
       koaServer.get('/safari-cookie2', ctx => {
@@ -169,8 +170,8 @@ describe('UserProfile cookie tests', () => {
 
 describe('UserProfile Dom storage tests', () => {
   it('should be able to save and restore local/session storage', async () => {
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/local', ctx => {
       ctx.body = `<body>
@@ -215,10 +216,10 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(2);
     expect(profile.storage[koaServer.baseUrl]?.sessionStorage).toHaveLength(2);
 
-    const meta2 = await Core.createSession({
+    const meta2 = await Core.createTab({
       userProfile: profile,
     });
-    const core2 = Core.byWindowId[meta2.windowId];
+    const core2 = Core.byTabId[meta2.tabId];
 
     await core2.goto(`${koaServer.baseUrl}/localrestore`);
     await core2.waitForLoad('AllContentLoaded');
@@ -242,7 +243,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
 
   it('should not make requests to end sites during profile "install"', async () => {
     const mitmSpy = jest.spyOn(BlockHandler, 'shouldBlockRequest');
-    await Core.createSession({
+    await Core.createTab({
       userProfile: {
         cookies: [],
         storage: {
@@ -264,7 +265,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
   });
 
   it('should not override changed variables on a second page load in a domain', async () => {
-    const meta = await Core.createSession({
+    const meta = await Core.createTab({
       userProfile: {
         storage: {
           [koaServer.baseUrl]: {
@@ -276,7 +277,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
         cookies: [],
       },
     });
-    const core = Core.byWindowId[meta.windowId];
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/local-change-pre', ctx => {
       ctx.body = `<body>
@@ -324,8 +325,8 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
   it('should store cross domain domStorage items', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createSession();
-      const core = Core.byWindowId[meta.windowId];
+      const meta = await Core.createTab();
+      const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/storage'];
@@ -356,10 +357,10 @@ localStorage.setItem('cross', '1');
       await core.close();
     }
     {
-      const meta = await Core.createSession({
+      const meta = await Core.createTab({
         userProfile: profile,
       });
-      const core = Core.byWindowId[meta.windowId];
+      const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/storage2'];
@@ -410,8 +411,8 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
 
 describe('UserProfile IndexedDb tests', () => {
   it('should be able to save and restore an indexed db', async () => {
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     koaServer.get('/db', ctx => {
       ctx.body = `<body>
@@ -516,10 +517,10 @@ describe('UserProfile IndexedDb tests', () => {
     expect(db.objectStores[1].keyPath).not.toBeTruthy();
 
     expect(db.data.store1).toHaveLength(2);
-    const meta2 = await Core.createSession({
+    const meta2 = await Core.createTab({
       userProfile: profile,
     });
-    const core2 = Core.byWindowId[meta2.windowId];
+    const core2 = Core.byTabId[meta2.tabId];
 
     await core2.goto(`${koaServer.baseUrl}/dbrestore`);
     await core2.waitForLoad('AllContentLoaded');

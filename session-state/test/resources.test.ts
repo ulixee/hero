@@ -31,8 +31,8 @@ test('loads http2 resources', async () => {
     res.end(`<html><body><img src="/img.png"/></body></html>`);
   });
 
-  const meta = await Core.createSession();
-  const core = Core.byWindowId[meta.windowId];
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
   await core.goto(server.url);
   await core.waitForLoad('DomContentLoaded');
 

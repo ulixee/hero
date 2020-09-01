@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import CoreClientSession from './CoreClientSession';
+import CoreTab from './CoreTab';
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
@@ -16,15 +16,15 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreClientSession: CoreClientSession) {
+  public launchReplay(sessionName: string, coreTab: CoreTab) {
     // eslint-disable-next-line global-require
     const launch = require('@secret-agent/replay').default;
     launch({
       scriptInstanceId: this.id,
       sessionName,
-      sessionsDataLocation: coreClientSession.sessionsDataLocation,
-      replayApiServer: coreClientSession.replayApiServer,
-      sessionId: coreClientSession.sessionId,
+      sessionsDataLocation: coreTab.sessionsDataLocation,
+      replayApiServer: coreTab.replayApiServer,
+      sessionId: coreTab.sessionId,
     });
   }
 

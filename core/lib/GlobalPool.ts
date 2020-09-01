@@ -127,13 +127,12 @@ export default class GlobalPool {
     try {
       const session = new Session(options);
 
-      chromeCore = this.getChromeCore(session.emulator);
+      chromeCore = this.getChromeCore(session.emulator) ?? this.addChromeCore(session.emulator);
 
-      if (!chromeCore) {
-        chromeCore = this.addChromeCore(session.emulator);
-      }
-      const context = await chromeCore.createContext();
-      return session.initialize(context);
+      const browserContext = await chromeCore.createContext();
+
+      session.assignBrowser(browserContext);
+      return session;
     } catch (err) {
       this._activeSessionCount -= 1;
 

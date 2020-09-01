@@ -9,7 +9,7 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-describe('basic Window tests', () => {
+describe('basic Tab tests', () => {
   it('waits for an element', async () => {
     koaServer.get('/test1', ctx => {
       ctx.body = `<body>
@@ -22,8 +22,8 @@ describe('basic Window tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
 
     await expect(core.waitForElement(['document', ['querySelector', 'a']])).resolves.toBe(
@@ -35,8 +35,8 @@ describe('basic Window tests', () => {
     koaServer.get('/test2', ctx => {
       ctx.body = `<body><a>Nothing really here</a></body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test2`);
 
     await expect(
@@ -55,8 +55,8 @@ describe('basic Window tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test3`);
 
     await expect(

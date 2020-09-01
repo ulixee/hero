@@ -14,19 +14,19 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('should handle opening a page', async () => {
-  const meta = await Core.createSession();
-  const core = Core.byWindowId[meta.windowId];
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
   await core.goto(koaServer.baseUrl);
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
   // @ts-ignore
-  const window = core.window;
+  const tab = core.tab;
 
-  expect(window.frameTracker.getActiveContext('', window.frameTracker.mainFrameId)).toBeTruthy();
+  expect(tab.frameTracker.getActiveContext('', tab.frameTracker.mainFrameId)).toBeTruthy();
   expect(
-    window.frameTracker.getActiveContext(
+    tab.frameTracker.getActiveContext(
       DomEnv.installedDomWorldName,
-      window.frameTracker.mainFrameId,
+      tab.frameTracker.mainFrameId,
     ),
   ).toBeTruthy();
 
@@ -34,10 +34,10 @@ test('should handle opening a page', async () => {
 });
 
 test('should track navigations and redirects', async () => {
-  const meta = await Core.createSession();
-  const core = Core.byWindowId[meta.windowId];
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
   // @ts-ignore
-  const window = core.window;
+  const tab = core.tab;
   koaServer.get('/page1', ctx => {
     ctx.body = `
         <body>
@@ -76,16 +76,16 @@ test('should track navigations and redirects', async () => {
 
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
-  expect(window.frameTracker.getActiveContext('', window.frameTracker.mainFrameId)).toBeTruthy();
+  expect(tab.frameTracker.getActiveContext('', tab.frameTracker.mainFrameId)).toBeTruthy();
   expect(
-    window.frameTracker.getActiveContext(
+    tab.frameTracker.getActiveContext(
       DomEnv.installedDomWorldName,
-      window.frameTracker.mainFrameId,
+      tab.frameTracker.mainFrameId,
     ),
   ).toBeTruthy();
 
   // @ts-ignore
-  expect(window.frameTracker.activeContexts.size).toBe(3);
+  expect(tab.frameTracker.activeContexts.size).toBe(3);
 
   // make sure we can use the active context associated with the new window
   const pageLink = await core.execJsPath([

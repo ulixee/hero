@@ -10,8 +10,8 @@ describe('basic browser remote tests', () => {
     remoteClient.pipeOutgoing(payload => {
       payloads.push(payload);
       commandId += 1;
-      if (payload.command === 'createSession') {
-        const data = { sessionId: 'session-id', windowId: 'window-id' };
+      if (payload.command === 'createTab') {
+        const data = { sessionId: 'session-id', tabId: 'tab-id' };
         remoteClient.pipeIncoming({ responseId: payload.messageId, commandId, data });
       } else {
         remoteClient.pipeIncoming({ responseId: payload.messageId, commandId, data: {} });
@@ -24,6 +24,6 @@ describe('basic browser remote tests', () => {
     await browser.close();
 
     expect(sessionId).toBe('session-id');
-    expect(payloads.map(p => p.command)).toMatchObject(['createSession', 'goto', 'close']);
+    expect(payloads.map(p => p.command)).toMatchObject(['createTab', 'goto', 'close']);
   });
 });

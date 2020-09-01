@@ -5,20 +5,14 @@ import {
   IKeyboardCommand,
   IMousePosition as ICoreMousePosition,
   InteractionCommand as CoreCommand,
-  MouseButton,
-} from '@secret-agent/core-interfaces/IInteractions';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { IKeyboardKeyCode } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import IInteractions, {
-  Command,
-  ICommand,
-  IInteraction,
-  IMousePosition,
-} from '../interfaces/IInteractions';
-import CoreClientSession from './CoreClientSession';
-import User from './User';
+  MouseButton
+} from "@secret-agent/core-interfaces/IInteractions";
+import StateMachine from "awaited-dom/base/StateMachine";
+import { ISuperElement, ISuperNode } from "awaited-dom/base/interfaces/super";
+import AwaitedPath from "awaited-dom/base/AwaitedPath";
+import { IKeyboardKeyCode } from "@secret-agent/core-interfaces/IKeyboardLayoutUS";
+import IInteractions, { Command, ICommand, IInteraction, IMousePosition } from "../interfaces/IInteractions";
+import CoreTab from "./CoreTab";
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
@@ -39,17 +33,9 @@ const COMMAND_POS: { [k: string]: number } = {
 const MAX_COMMAND_POS = Object.keys(COMMAND_POS).length;
 
 export default class Interactor {
-  private browserUser: User;
-  private coreClientSession: CoreClientSession;
-
-  constructor(browserUser: User, coreClientSession: CoreClientSession) {
-    this.browserUser = browserUser;
-    this.coreClientSession = coreClientSession;
-  }
-
-  public async run(interactions: IInteractions) {
+  public static async run(coreTab: CoreTab, interactions: IInteractions) {
     const interactionGroups = convertToInteractionGroups(interactions);
-    await this.coreClientSession.interact(interactionGroups);
+    await coreTab.interact(interactionGroups);
   }
 }
 

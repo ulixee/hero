@@ -10,9 +10,9 @@ describe('waitForResource', () => {
       if (command === 'waitForResource') {
         return { data: [{ id: 1, url: '/test.js' } as IResourceMeta] };
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -38,9 +38,9 @@ describe('waitForResource', () => {
         }
         return { data: [] };
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -67,9 +67,9 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -95,9 +95,9 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -125,9 +125,9 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });
@@ -173,9 +173,9 @@ describe('waitForResource', () => {
           return { data: [{ id: 5, url: '/test5.js' } as IResourceMeta] };
         }
       }
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return {
-          data: { windowId: 'window-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
         };
       }
     });

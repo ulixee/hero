@@ -28,7 +28,7 @@ export default class RequestSession {
   public delegate: IHttpRequestModifierDelegate = {};
 
   public isClosing = false;
-  public blockImages = false;
+  public blockResourceTypes: ResourceType[] = [];
   public blockUrls: string[] = [];
   public blockResponseHandlerFn?: (
     request: http.IncomingMessage | http2.Http2ServerRequest,
@@ -149,8 +149,8 @@ export default class RequestSession {
     return this.upstreamProxyUrlProvider ? this.upstreamProxyUrlProvider : null;
   }
 
-  public getProxyCredentials(windowId = '') {
-    return `${windowId}:${this.sessionId}`;
+  public getProxyCredentials(tabId = '') {
+    return `${tabId}:${this.sessionId}`;
   }
 
   public async close() {

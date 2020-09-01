@@ -1,4 +1,4 @@
-export default interface IWindowOptions {
+export default interface ITabOptions {
   renderingOptions?: IRenderingOption[];
 }
 

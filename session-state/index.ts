@@ -299,7 +299,7 @@ export default class SessionState {
     }
   }
 
-  public async saveBeforeWindowClose() {
+  public async saveBeforeTabClose() {
     try {
       await this.flush(true);
     } finally {

@@ -20,7 +20,7 @@ describe('basic Full Client tests', () => {
     expect(url).toBe(koaServer.baseHost);
   });
 
-  it('runs goto with no window loaded', async () => {
+  it('runs goto with no document loaded', async () => {
     const browser = await SecretAgent.createBrowser();
     const url = await browser.document.location.host;
     expect(url).toBe(null);
@@ -28,11 +28,11 @@ describe('basic Full Client tests', () => {
 
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const window = await SecretAgent.createBrowser({
+    const browser = await SecretAgent.createBrowser({
       emulatorId: Chrome80.emulatorId,
     });
 
-    const resource = await window.goto(exampleUrl);
+    const resource = await browser.goto(exampleUrl);
 
     const { request, response } = resource;
     expect(await request.headers).toMatchObject({

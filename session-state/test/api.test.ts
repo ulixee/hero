@@ -32,7 +32,7 @@ describe('basic Replay API tests', () => {
       `;
     });
     await Core.startReplayServer();
-    const meta = await Core.createSession();
+    const meta = await Core.createTab();
 
     const api = http2.connect(meta.replayApiServer);
     const commandMap: { [id: string]: ICommandWithResult } = {};
@@ -64,7 +64,7 @@ describe('basic Replay API tests', () => {
       'data-location': meta.sessionsDataLocation,
       'session-id': meta.sessionId,
     });
-    const core = Core.byWindowId[meta.windowId];
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 100));
