@@ -5,7 +5,11 @@ import Emulators, {
 } from '@secret-agent/emulators';
 import { URL } from 'url';
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import { EngineInstaller, modifyHeaders, tcpVars } from '@secret-agent/emulator-plugins-shared';
+import {
+  getEngineExecutablePath,
+  modifyHeaders,
+  tcpVars,
+} from '@secret-agent/emulator-plugins-shared';
 import {
   canonicalDomain,
   Cookie,
@@ -26,8 +30,7 @@ import headerProfiles from './headers.json';
 import pkg from './package.json';
 import defaultAgents from './user-agents.json';
 
-const engineExecutablePath =
-  process.env.CHROME_83_BIN ?? new EngineInstaller(pkg.engine).getExecutablePath();
+const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
 
 @EmulatorPluginStatics
 export default class Safari13 extends EmulatorPlugin {

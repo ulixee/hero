@@ -1,29 +1,24 @@
-import Emulators, {
-  EmulatorPlugin,
-  EmulatorPluginStatics,
-  UserAgents,
-} from '@secret-agent/emulators';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import Emulators, { EmulatorPlugin, EmulatorPluginStatics, UserAgents } from "@secret-agent/emulators";
+import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
 import {
   chromePageOverrides,
-  EngineInstaller,
+  getEngineExecutablePath,
   modifyHeaders,
   readPolyfills,
-  tcpVars,
-} from '@secret-agent/emulator-plugins-shared';
-import { randomBytes } from 'crypto';
-import { pickRandom } from '@secret-agent/emulators/lib/Utils';
-import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
-import navigator from './navigator.json';
-import chrome from './chrome.json';
-import codecs from './codecs.json';
-import pkg from './package.json';
-import headerProfiles from './headers.json';
-import defaultUseragents from './user-agents.json';
+  tcpVars
+} from "@secret-agent/emulator-plugins-shared";
+import { randomBytes } from "crypto";
+import { pickRandom } from "@secret-agent/emulators/lib/Utils";
+import IUserAgent from "@secret-agent/emulators/interfaces/IUserAgent";
+import navigator from "./navigator.json";
+import chrome from "./chrome.json";
+import codecs from "./codecs.json";
+import pkg from "./package.json";
+import headerProfiles from "./headers.json";
+import defaultUseragents from "./user-agents.json";
 
 const polyfills = readPolyfills(__dirname);
-const engineExecutablePath =
-  process.env.CHROME_80_BIN ?? new EngineInstaller(pkg.engine).getExecutablePath();
+const engineExecutablePath = process.env.CHROME_80_BIN ?? getEngineExecutablePath(pkg.engine);
 
 @EmulatorPluginStatics
 export default class Chrome80 extends EmulatorPlugin {

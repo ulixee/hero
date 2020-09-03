@@ -24,19 +24,20 @@ const debug = process.env.DEBUG || false;
 test('it should mimic a chrome object', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('pageerror', console.log);
+  page.on('pageError', console.log);
   if (debug) {
-    page.on('console', log => console.log(log.text()));
+    page.on('consoleLog', log => console.log(log));
   }
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('chrome', {
       polyfill: {
         property: chrome,
         prevProperty,
       },
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
 
   const structure = JSON.parse(
     (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
@@ -48,11 +49,11 @@ test('it should mimic a chrome object', async () => {
 test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('pageerror', console.log);
+  page.on('pageError', console.log);
   if (debug) {
-    page.on('console', log => console.log(log.text()));
+    page.on('consoleLog', log => console.log(log));
   }
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('chrome', {
       updateLoadTimes: true,
       polyfill: {
@@ -60,8 +61,9 @@ test('it should update loadtimes and csi values', async () => {
         prevProperty,
       },
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
 
   const loadTimes = JSON.parse((await page.evaluate(`JSON.stringify(chrome.loadTimes())`)) as any);
   if (debug) console.log(inspect(loadTimes, false, null, true));

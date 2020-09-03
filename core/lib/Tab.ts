@@ -1,47 +1,50 @@
-import { v1 as uuidv1 } from "uuid";
-import Log from "@secret-agent/commons/Logger";
-import puppeteer from "puppeteer-core";
-import ITabOptions from "@secret-agent/core-interfaces/ITabOptions";
-import { ILocationStatus, ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
-import { IJsPath } from "awaited-dom/base/AwaitedPath";
-import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
-import { AllowedNames } from "@secret-agent/commons/AllowedNames";
-import { ICookie } from "@secret-agent/core-interfaces/ICookie";
-import { IInteractionGroups, IMousePositionXY } from "@secret-agent/core-interfaces/IInteractions";
-import * as Url from "url";
-import IElementRect from "@secret-agent/injected-scripts/interfaces/IElementRect";
-import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
-import Timer from "@secret-agent/commons/Timer";
-import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
-import { createPromise } from "@secret-agent/commons/utils";
-import TimeoutError from "@secret-agent/commons/interfaces/TimeoutError";
-import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
-import { EmulatorPlugin } from "@secret-agent/emulators";
-import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
-import { IRequestInit } from "awaited-dom/base/interfaces/official";
-import TabEvents, { ITabEventParams } from "./TabEvents";
-import FrameTracker from "./FrameTracker";
-import LocationTracker from "./LocationTracker";
-import Interactor from "./Interactor";
-import IDevtoolsClient from "../interfaces/IDevtoolsClient";
-import Session from "./Session";
-import DomEnv from "./DomEnv";
-import IResourceFilterProperties from "../interfaces/IResourceFilterProperties";
-import UserProfile from "./UserProfile";
+import { v1 as uuidv1 } from 'uuid';
+import Log from '@secret-agent/commons/Logger';
+import ITabOptions from '@secret-agent/core-interfaces/ITabOptions';
+import {
+  ILocationStatus,
+  ILocationTrigger,
+  LocationStatus,
+} from '@secret-agent/core-interfaces/Location';
+import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
+import { AllowedNames } from '@secret-agent/commons/AllowedNames';
+import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
+import * as Url from 'url';
+import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
+import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import Timer from '@secret-agent/commons/Timer';
+import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import { createPromise } from '@secret-agent/commons/utils';
+import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
+import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import { Page } from '@secret-agent/puppet-chrome/lib/Page';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import TabEvents, { ITabEventParams } from './TabEvents';
+import LocationTracker from './LocationTracker';
+import Interactor from './Interactor';
+import Session from './Session';
+import DomEnv from './DomEnv';
+import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
+import UserProfile from './UserProfile';
+import DomRecorder from './DomRecorder';
 
 const { log } = Log(module);
 
-export default class Tab {
+export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public readonly id = uuidv1();
   public readonly session: Session;
   public readonly locationTracker: LocationTracker;
-  public readonly frameTracker: FrameTracker;
+  public readonly domRecorder: DomRecorder;
   public readonly domEnv: DomEnv;
   public get sessionState() {
     return this.session.sessionState;
   }
 
-  public puppPage: puppeteer.Page;
+  public puppetPage: Page;
 
   private readonly events: TabEvents;
   private readonly interactor: Interactor;
@@ -61,28 +64,27 @@ export default class Tab {
     return this.sessionState.pages.currentUrl;
   }
 
-  public get devtoolsClient() {
-    // @ts-ignore
-    const devtoolsClient: IDevtoolsClient = this.puppPage._client;
-    return devtoolsClient;
+  public get mainFrameId() {
+    return this.puppetPage.mainFrameId;
   }
 
-  private get mainFrameId() {
-    return this.frameTracker.mainFrameId;
-  }
-
-  constructor(session: Session, puppPage: puppeteer.Page) {
+  constructor(session: Session, puppetPage: Page) {
+    super();
     this.session = session;
-    this.puppPage = puppPage;
-    this.puppPage.on('error', () => {
-      // prevent bubbled up errors. True errors caught in TabEvents
-      // -- same error as Inspector.targetCrashed
-    });
+    this.puppetPage = puppetPage;
     this.interactor = new Interactor(this);
     this.locationTracker = new LocationTracker(this.sessionState);
     this.events = new TabEvents(this);
-    this.frameTracker = new FrameTracker(this.devtoolsClient, session.sessionState);
-    this.domEnv = new DomEnv(this.sessionId, this.frameTracker, this.devtoolsClient);
+    this.domEnv = new DomEnv(this.sessionId, this.puppetPage.frames);
+    this.puppetPage.frames.on('frameCreated', ({ frame }) => {
+      this.sessionState.captureFrameCreated(frame.id, frame.parentId);
+    });
+    this.domRecorder = new DomRecorder(
+      session.id,
+      puppetPage,
+      this.sessionState.onPageEvents.bind(this.sessionState),
+    );
+    session.beforeClose = () => this.close();
   }
 
   public async setBrowserOrigin(origin: string) {
@@ -97,14 +99,33 @@ export default class Tab {
         response.end(`<html lang="en"><body>Empty</body></html>`);
         return true;
       };
-      await this.puppPage.goto(origin, {
-        waitUntil: 'load',
-      });
+      await this.puppetPage.navigate(origin);
     } finally {
       // restore originals
       mitmSession.blockUrls = originalBlockUrls;
       mitmSession.blockResponseHandlerFn = originalBlockResponseHandlerFn;
       mitmSession.blockResourceTypes = originalBlockResourceTypes;
+    }
+  }
+
+  public async installEmulator() {
+    const puppetPage = this.puppetPage;
+    const emulator = this.session.emulator;
+    await puppetPage.setUserAgent({
+      acceptLanguage: 'en-US,en',
+      userAgent: emulator.userAgent.raw,
+      platform: emulator.userAgent.platform,
+    });
+
+    const pageOverrides = await emulator.generatePageOverrides();
+    for (const pageOverride of pageOverrides) {
+      if (pageOverride.callbackWindowName) {
+        await puppetPage.frames.addPageCallback(pageOverride.callbackWindowName, payload => {
+          pageOverride.callback(JSON.parse(payload));
+        });
+      }
+      // overrides happen in main frame
+      await puppetPage.frames.addNewDocumentScript(pageOverride.script, false);
     }
   }
 
@@ -139,13 +160,13 @@ export default class Tab {
     const mitmSession = this.session.requestMitmProxySession;
     const blockedResources = mitmSession.blockResourceTypes;
     const renderingOptions = options?.renderingOptions ?? [];
-    let disableJs = false;
+    let enableJs = true;
 
     if (renderingOptions.includes('All')) {
       blockedResources.length = 0;
     } else if (renderingOptions.includes('None')) {
       blockedResources.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
-      disableJs = true;
+      enableJs = false;
     } else {
       if (!renderingOptions.includes('LoadImages')) {
         blockedResources.push('Image');
@@ -157,25 +178,11 @@ export default class Tab {
         blockedResources.push('Script');
       }
       if (!renderingOptions.includes('JsRuntime')) {
-        disableJs = true;
+        enableJs = false;
       }
     }
-    await this.devtoolsClient.send('Emulation.setScriptExecutionDisabled', disableJs);
+    await this.puppetPage.setJavaScriptEnabled(enableJs);
     mitmSession.blockUrls = [];
-  }
-
-  public on<K extends keyof ITabEventParams>(
-    eventType: K,
-    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
-  ) {
-    return this.events.on(eventType, listenerFn.bind(this));
-  }
-
-  public once<K extends keyof ITabEventParams>(
-    eventType: K,
-    listenerFn: (this: this, event?: ITabEventParams[K]) => any,
-  ) {
-    return this.events.once(eventType, listenerFn.bind(this));
   }
 
   public async runCommand<T>(functionName: TabFunctionNames, ...args: any[]) {
@@ -193,16 +200,13 @@ export default class Tab {
       : null;
 
     this.locationTracker.willRunCommand(commandMeta, previousCommand);
-
-    let commandFn: () => Promise<any>;
-    if (functionName in this) {
-      commandFn = this[functionName].bind(this, ...args);
-    } else {
-      commandFn = this[functionName].bind(this, ...args);
+    if (functionName !== 'goto') {
+      await this.domRecorder.setCommandIdForPage(commandMeta.id);
     }
     const id = log.info('Tab.runCommand', { ...commandMeta, sessionId: this.sessionId });
     let result: T;
     try {
+      const commandFn = this[functionName].bind(this, ...args);
       result = await this.sessionState.runCommand<T>(commandFn, commandMeta);
     } finally {
       log.stats('Tab.ranCommand', { sessionId: this.sessionId, result, parentLogId: id });
@@ -222,12 +226,7 @@ export default class Tab {
       this.lastCommandId,
     );
 
-    // NOTE: don't wait for goto because it waits for DOMLoaded. We want to let the user decide.
-    this.puppPage.goto(formattedUrl).catch(error => {
-      if (error.message !== 'Navigation failed because browser has disconnected!') {
-        throw error;
-      }
-    });
+    await this.puppetPage.navigate(formattedUrl);
 
     return this.locationTracker
       .waitForLocationResourceId()
@@ -292,27 +291,17 @@ export default class Tab {
 
   public async getPageCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
-
-    const { cookies } = await this.devtoolsClient.send('Network.getCookies', {
-      urls: [this.navigationUrl],
-    });
-    return cookies.map(
-      x =>
-        ({
-          ...x,
-          expires: String(x.expires),
-        } as ICookie),
-    );
+    return await this.puppetPage.getPageCookies();
   }
 
   public async focus() {
-    await this.devtoolsClient.send('Page.bringToFront');
+    await this.puppetPage.bringToFront();
   }
 
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
-    this.frameTracker.close();
+    await this.domRecorder.flush(true);
     this.domEnv.close();
 
     const logid = log.info('TabClosing', {
@@ -325,8 +314,7 @@ export default class Tab {
         clearTimeout(x.timeout);
         x.reject(new Error('Terminated command because session closing'));
       });
-      // Tries to close page, running its beforeunload hooks, if any.
-      await this.devtoolsClient.send('Page.close');
+      await this.puppetPage.close();
     } catch (error) {
       if (
         error.message.includes('Target closed') === false &&
@@ -446,48 +434,24 @@ export default class Tab {
 
   public static async create(session: Session) {
     const logid = log.info('CreatingTab', { sessionId: session.id });
-    const puppPage = await session.newPage();
+    const puppetPage = await session.newPage();
 
-    const tab = new Tab(session, puppPage);
-    await session.authenticate(tab.id, puppPage);
-    await tab.frameTracker.init();
-    const devtoolsClient = tab.devtoolsClient;
+    const tab = new Tab(session, puppetPage);
+    // this responds to auth requests
+    await puppetPage.authenticate({
+      username: tab.id,
+      password: session.id,
+    });
 
     // install user profile before page boots up
-    await UserProfile.install(session.options.userProfile, tab);
-    await Tab.installEmulator(devtoolsClient, session.emulator);
-    // must be installed before tab scripts
-    await tab.sessionState.listenForPageEvents(devtoolsClient, tab.frameTracker);
-    await tab.events.listen();
     await tab.domEnv.install();
+    await UserProfile.install(session.options.userProfile, tab);
+    await tab.installEmulator();
+    await tab.domRecorder.listen();
+    await tab.events.listen();
 
     log.info('Tab.create', { sessionId: session.id, parentLogId: logid });
     return tab;
-  }
-
-  private static async installEmulator(devtoolsClient: IDevtoolsClient, emulator: EmulatorPlugin) {
-    await devtoolsClient.send('Network.setUserAgentOverride', {
-      acceptLanguage: 'en-US,en',
-      userAgent: emulator.userAgent.raw,
-      platform: emulator.userAgent.platform,
-    });
-
-    const pageOverrides = await emulator.generatePageOverrides();
-    for (const pageOverride of pageOverrides) {
-      if (pageOverride.callbackWindowName) {
-        await devtoolsClient.send('Runtime.addBinding', {
-          name: pageOverride.callbackWindowName,
-        });
-        await devtoolsClient.on('Runtime.bindingCalled', async ({ name, payload }) => {
-          if (name === pageOverride.callbackWindowName) {
-            pageOverride.callback(JSON.parse(payload));
-          }
-        });
-      }
-      await devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
-        source: pageOverride.script,
-      });
-    }
   }
 }
 

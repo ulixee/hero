@@ -5,7 +5,7 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import { getRequestIdOrUrl } from './Request';
 import Browser from './Browser';
-import { getTabSession } from './Tab';
+import { getCoreTab } from './Tab';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 
 export default class Fetcher {
@@ -14,7 +14,7 @@ export default class Fetcher {
     input: Request | string,
     init?: IRequestInit,
   ): Promise<Response> {
-    const tabSession = getTabSession(browser.activeTab);
+    const tabSession = getCoreTab(browser.activeTab);
     const requestInput = await getRequestIdOrUrl(input);
     const attachedState = await tabSession.fetch(requestInput, init);
 

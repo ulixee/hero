@@ -1,5 +1,4 @@
 import { v1 as uuidv1 } from 'uuid';
-import puppeteer from 'puppeteer-core';
 import Log from '@secret-agent/commons/Logger';
 import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
@@ -8,6 +7,8 @@ import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
+import { Page } from '@secret-agent/puppet-chrome/lib/Page';
+import { BrowserContext } from '@secret-agent/puppet-chrome/lib/BrowserContext';
 import GlobalPool from './GlobalPool';
 
 const { log } = Log(module);
@@ -23,7 +24,9 @@ export default class Session {
   public readonly requestMitmProxySession: RequestSession;
   public sessionState: SessionState;
 
-  private puppContext?: puppeteer.BrowserContext;
+  public beforeClose?: () => Promise<any>;
+
+  private browserContext?: BrowserContext;
   private isShuttingDown = false;
 
   constructor(readonly options: ICreateTabOptions) {
@@ -65,37 +68,28 @@ export default class Session {
     this.requestMitmProxySession.delegate = this.emulator.delegate;
   }
 
-  public assignBrowser(context: puppeteer.BrowserContext) {
-    this.puppContext = context;
-  }
-
-  public async authenticate(tabId: string, puppPage: puppeteer.Page) {
-    // this responds to auth requests
-    await puppPage.authenticate({
-      username: tabId,
-      password: this.id,
-    });
+  public assignBrowserContext(context: BrowserContext) {
+    this.browserContext = context;
   }
 
   public async newPage() {
     if (this.isShuttingDown) {
       return;
     }
-    return await this.puppContext.newPage();
+    return await this.browserContext.newPage();
   }
 
   public async close() {
     delete Session.byId[this.id];
-    if (this.isShuttingDown) {
-      return;
-    }
+    if (this.isShuttingDown) return;
     this.isShuttingDown = true;
-    // so named so you don't move this after tab.close!
-    await this.sessionState.saveBeforeTabClose();
+
+    if (this.beforeClose) await this.beforeClose();
+    await this.sessionState.saveState();
     await this.requestMitmProxySession.close();
     await this.proxy.close();
     try {
-      await this.puppContext?.close();
+      await this.browserContext?.close();
     } catch (error) {
       log.error('ErrorClosingSession', { error, sessionId: this.id });
     }

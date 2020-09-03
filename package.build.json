@@ -28,6 +28,7 @@
       "humanoids",
       "humanoid-plugins/*",
       "injected-scripts",
+      "puppet-chrome",
       "mitm",
       "mitm-socket",
       "remote-client",

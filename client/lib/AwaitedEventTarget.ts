@@ -1,16 +1,21 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { getTabSession } from './Tab';
+import StateMachine from "awaited-dom/base/StateMachine";
+import AwaitedPath from "awaited-dom/base/AwaitedPath";
+import CoreTab from "./CoreTab";
+
+interface IAwaitedEventTargetState {
+  awaitedPath?: AwaitedPath;
+  coreTab: CoreTab;
+}
 
 const { getState } = StateMachine<any, any>();
 
-export default class AwaitedEventTarget<T> {
+export default class AwaitedEventTarget<T, IState extends IAwaitedEventTargetState> {
   public async addEventListener<K extends keyof T>(
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    const { activeTab, awaitedPath } = getState(this);
-    const coreTab = getTabSession(activeTab);
+    const { awaitedPath, coreTab } = getState<this, IState>(this);
     const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
     return coreTab.addEventListener(jsPath, eventType as string, listenerFn, options);
   }
@@ -19,8 +24,7 @@ export default class AwaitedEventTarget<T> {
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
   ): Promise<void> {
-    const { activeTab, awaitedPath } = getState(this);
-    const coreTab = getTabSession(activeTab);
+    const { awaitedPath, coreTab } = getState<this, IState>(this);
     const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
     return coreTab.removeEventListener(jsPath, eventType as string, listenerFn);
   }

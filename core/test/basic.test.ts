@@ -1,6 +1,9 @@
+import { Helpers } from '@secret-agent/testing/index';
 import Core, { GlobalPool } from '../index';
 
 const shutdownSpy = jest.spyOn(Core, 'shutdown');
+
+afterAll(Helpers.afterAll);
 
 describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {

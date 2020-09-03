@@ -28,7 +28,7 @@ import AwaitedEventTarget from './AwaitedEventTarget';
 import IBrowser from '../interfaces/IBrowser';
 import RequestGenerator from './Request';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { createTab, getTabSession } from './Tab';
+import Tab, { createTab, getCoreTab } from './Tab';
 
 const { getState, setState } = StateMachine<IBrowser, IState>();
 const scriptInstance = new ScriptInstance();
@@ -39,6 +39,7 @@ interface IState {
   sessionName: string;
   user: User;
   isClosing: boolean;
+  coreTab: CoreTab;
 }
 
 interface IEventType {
@@ -59,7 +60,7 @@ const propertyKeys: (keyof Browser)[] = [
   'Request',
 ];
 
-export default class Browser extends AwaitedEventTarget<IEventType> implements IBrowser {
+export default class Browser extends AwaitedEventTarget<IEventType, IState> implements IBrowser {
   constructor(coreTab: CoreTab, sessionName: string) {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
@@ -68,6 +69,9 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
     setState(this, {
       tabs: [activeTab],
       activeTab,
+      get coreTab() {
+        return getCoreTab(this.activeTab);
+      },
       sessionName,
       user: createUser(this),
       isClosing: false,
@@ -82,13 +86,13 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
 
   public get document(): SuperDocument {
     const awaitedPath = new AwaitedPath('document');
-    const coreTab = getTabSession(this.activeTab);
+    const coreTab = getCoreTab(this.activeTab);
     const awaitedOptions = { browser: this, coreTab };
     return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
   }
 
   public get Request(): typeof Request {
-    return RequestGenerator(getTabSession(this.activeTab));
+    return RequestGenerator(getCoreTab(this.activeTab));
   }
 
   public get user(): User {
@@ -101,7 +105,7 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
 
   public get sessionId(): string {
     const { activeTab } = getState(this);
-    const coreTab = getTabSession(activeTab);
+    const coreTab = getCoreTab(activeTab);
     return coreTab.sessionId;
   }
 
@@ -132,17 +136,17 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
     if (isClosing) return;
     setState(this, { isClosing: true });
 
-    const tabSession = getTabSession(activeTab);
+    const tabSession = getCoreTab(activeTab);
     await tabSession.close();
   }
 
   public async getJsValue(path: string): Promise<any> {
-    const clientTabSession = getTabSession(this.activeTab);
+    const clientTabSession = getCoreTab(this.activeTab);
     return clientTabSession.getJsValue(path);
   }
 
   public async configure(options: ISessionOptions): Promise<void> {
-    const clientTabSession = getTabSession(this.activeTab);
+    const clientTabSession = getCoreTab(this.activeTab);
     return clientTabSession.configure(options);
   }
 

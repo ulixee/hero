@@ -1,10 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
-import Safari13 from '@secret-agent/emulate-safari-13';
-import Core from '../index';
-import Tab from '../lib/Tab';
+import { Helpers } from "@secret-agent/testing";
+import { InteractionCommand } from "@secret-agent/core-interfaces/IInteractions";
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import BlockHandler from "@secret-agent/mitm/handlers/BlockHandler";
+import Safari13 from "@secret-agent/emulate-safari-13";
+import Core from "../index";
 
 let koaServer;
 beforeAll(async () => {
@@ -69,11 +68,6 @@ describe('UserProfile cookie tests', () => {
     {
       const meta = await Core.createTab();
       const core = Core.byTabId[meta.tabId];
-      // @ts-ignore
-      await core.tab.devtoolsClient.send('Audits.enable');
-      // @ts-ignore
-      // eslint-disable-next-line no-console
-      await core.tab.devtoolsClient.on('Audits.issueAdded', console.log);
       // @ts-ignore
       const session = core.session;
       session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie'];

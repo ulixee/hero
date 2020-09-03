@@ -9,7 +9,6 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import IDevtoolsClient from '@secret-agent/core/interfaces/IDevtoolsClient';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IPage from '@secret-agent/core-interfaces/IPage';
@@ -17,10 +16,8 @@ import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEve
 import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
 import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import FrameTracker from '@secret-agent/core/lib/FrameTracker';
 import PageHistory from './lib/PageHistory';
 import { IFrameRecord } from './models/FramesTable';
-import PageEventsListener from './lib/PageEventsListener';
 import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
 import SessionsDb from './lib/SessionsDb';
 import SessionDb from './lib/SessionDb';
@@ -51,7 +48,6 @@ export default class SessionState {
   private lastErrorTime?: Date;
   private closeDate?: Date;
   private websocketMessageIdCounter = 0;
-  private pageEventsListener: PageEventsListener;
 
   private readonly logSubscriptionId: number;
 
@@ -115,26 +111,11 @@ export default class SessionState {
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public async listenForPageEvents(devtoolsClient: IDevtoolsClient, frameTracker: FrameTracker) {
-    this.pageEventsListener = new PageEventsListener(
-      this.sessionId,
-      devtoolsClient,
-      frameTracker,
-      this.onPageEvents.bind(this),
-    );
-    this.pageEventsListener.onNewContext = contextId => {
-      if (!this.lastCommand) return;
-      return this.pageEventsListener.setCommandIdInContext(this.lastCommand.id, contextId);
-    };
-    await this.pageEventsListener.listen();
-  }
-
   public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta) {
     this.commands.push(commandMeta);
 
     let result: T;
     try {
-      await this.pageEventsListener.setCommandIdForPage(commandMeta.id);
       commandMeta.startDate = new Date().toISOString();
       this.db.commands.insert(commandMeta);
 
@@ -299,25 +280,16 @@ export default class SessionState {
     }
   }
 
-  public async saveBeforeTabClose() {
-    try {
-      await this.flush(true);
-    } finally {
-      this.closeDate = new Date();
-      this.db.session.update(this.sessionId, {
-        closeDate: this.closeDate,
-        viewport: this.viewport,
-      });
-      LogEvents.unsubscribe(this.logSubscriptionId);
-      this.db.flush();
-      this.db.close();
-      SessionState.registry.delete(this.sessionId);
-    }
-  }
-
-  public async flush(isCloseEvent = false) {
-    await this.pageEventsListener?.flush(isCloseEvent);
+  public async saveState() {
+    this.closeDate = new Date();
+    this.db.session.update(this.sessionId, {
+      closeDate: this.closeDate,
+      viewport: this.viewport,
+    });
+    LogEvents.unsubscribe(this.logSubscriptionId);
     this.db.flush();
+    this.db.close();
+    SessionState.registry.delete(this.sessionId);
   }
 
   public checkForResponsive() {
@@ -350,17 +322,14 @@ export default class SessionState {
     };
   }
 
-  public async getPageDomChanges(pages: IPage[], flush = false, sinceCommandId?: number) {
-    if (flush) {
-      await this.flush();
-    }
+  public async getPageDomChanges(pages: IPage[], sinceCommandId?: number) {
     return this.db.getDomChanges(
       pages.map(x => x.frameId),
       sinceCommandId,
     );
   }
 
-  private onPageEvents(
+  public onPageEvents(
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],

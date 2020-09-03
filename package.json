@@ -86,6 +86,7 @@
       "mitm",
       "mitm-socket",
       "core-server",
+      "puppet-chrome",
       "remote-client",
       "remote-interfaces",
       "replay",

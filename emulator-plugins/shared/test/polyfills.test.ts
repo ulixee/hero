@@ -23,10 +23,9 @@ const debug = process.env.DEBUG || false;
 test('it should be able to add polyfills', async () => {
   const page = await createPage();
   const httpServer = await Helpers.runHttpServer();
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
+  page.on('pageError', console.log);
   if (debug) {
-    page.on('console', log => console.log(log.text()));
+    page.on('consoleLog', log => console.log(log));
   }
 
   const objectTestProperties = {
@@ -75,7 +74,7 @@ test('it should be able to add polyfills', async () => {
     _type: 'string',
     _value: 'I am chrome',
   };
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('polyfill', {
       additions: [
         {
@@ -95,8 +94,10 @@ test('it should be able to add polyfills', async () => {
       changes: [],
       order: [],
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   const { window } = JSON.parse(
     (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
@@ -121,21 +122,18 @@ test('it should be able to add polyfills', async () => {
 test('it should be able to remove properties', async () => {
   const page = await createPage();
   const httpServer = await Helpers.runHttpServer();
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log.text()));
-  }
 
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('polyfill', {
       additions: [],
       removals: ['window.Atomics', 'window.Array.from'],
       changes: [],
       order: [],
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   expect(await page.evaluate(`!!window.Atomics`)).not.toBeTruthy();
   expect(await page.evaluate(`!!Array.from`)).not.toBeTruthy();
@@ -144,13 +142,8 @@ test('it should be able to remove properties', async () => {
 test('it should be able to change properties', async () => {
   const page = await createPage();
   const httpServer = await Helpers.runHttpServer();
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log.text()));
-  }
 
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('polyfill', {
       additions: [],
       removals: [],
@@ -168,8 +161,10 @@ test('it should be able to change properties', async () => {
       ],
       order: [],
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   const protocolToString = await page.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.toString()`,
@@ -185,16 +180,12 @@ test('it should be able to change properties', async () => {
 test('it should be able to change property order', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log.text()));
-  }
+
   const startNavigatorKeys = (await page.evaluate(
     `Object.keys(window.Navigator.prototype)`,
   )) as string[];
 
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('polyfill', {
       removals: [],
       additions: [],
@@ -214,8 +205,11 @@ test('it should be able to change property order', async () => {
         },
       ],
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await new Promise(setImmediate);
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   const keyOrder = (await page.evaluate(`Object.keys(window.Navigator.prototype)`)) as string[];
 
@@ -229,11 +223,6 @@ test('it should be able to change property order', async () => {
 test('it should be able to change window property order', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log.text()));
-  }
   const windowKeys = await page.evaluate(`Object.keys(window)`);
 
   const order = [
@@ -256,15 +245,17 @@ test('it should be able to change window property order', async () => {
       prevProperty: windowKeys[23],
     },
   ];
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('polyfill', {
       removals: [],
       additions: [],
       changes: [],
       order,
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   const windowKeysAfter = (await page.evaluate(`Object.keys(window)`)) as string[];
 
@@ -288,13 +279,13 @@ test('it should be able to backfill the bluetooth stack', async () => {
 
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('pageerror', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log.text()));
-  }
 
-  await page.evaluateOnNewDocument(getOverrideScript('polyfill', PolyfillChromeBt).script);
-  await page.goto(httpServer.url);
+  await page.frames.addNewDocumentScript(
+    getOverrideScript('polyfill', PolyfillChromeBt).script,
+    false,
+  );
+  await page.navigate(httpServer.url);
+  await new Promise(resolve => page.once('load', resolve));
 
   const structure = JSON.parse(
     (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
@@ -336,5 +327,10 @@ test('it should be able to backfill the bluetooth stack', async () => {
 async function createPage() {
   const context = await chromeCore.createContext();
   Helpers.onClose(() => context.close());
-  return context.newPage();
+  const page = await context.newPage();
+  page.on('pageError', console.log);
+  if (debug) {
+    page.on('consoleLog', log => console.log(log));
+  }
+  return page;
 }

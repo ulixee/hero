@@ -2,15 +2,15 @@ import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstan
 import StateMachine from 'awaited-dom/base/StateMachine';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import Timer from '@secret-agent/commons/Timer';
+import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
-import Timer from '../../commons/Timer';
-import IWaitForResourceOptions from '../../core-interfaces/IWaitForResourceOptions';
-import TimeoutError from '../../commons/interfaces/TimeoutError';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { getTabSession } from './Tab';
+import Tab, { getCoreTab } from './Tab';
 
 const { getState, setState } = StateMachine<Resource, IState>();
 
@@ -75,7 +75,7 @@ export default class Resource {
     filter: IWaitForResourceFilter,
     options: IWaitForResourceOptions,
   ): Promise<Resource[]> {
-    const coreTab = getTabSession(tab);
+    const coreTab = getCoreTab(tab);
     const resources: Resource[] = [];
 
     const idsSeen = new Set<number>();

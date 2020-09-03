@@ -1,6 +1,6 @@
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { IInteractionGroup } from '@secret-agent/core-interfaces/IInteractions';
-import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { getKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
@@ -43,7 +43,7 @@ export default class CommandFormatter {
                   const [keyCommand] = Object.keys(keys);
                   if (keyCommand === 'string') return `"${keys[keyCommand]}"`;
 
-                  const keyChar = getKeyboardChar(keys[keyCommand]);
+                  const keyChar = getKeyboardKey(keys[keyCommand]);
                   if (keyCommand === 'keyPress') return `press: '${keyChar}'`;
                   if (keyCommand === 'up') return `up: '${keyChar}'`;
                   if (keyCommand === 'down') return `down: '${keyChar}'`;

@@ -22,13 +22,8 @@ test('should handle opening a page', async () => {
   // @ts-ignore
   const tab = core.tab;
 
-  expect(tab.frameTracker.getActiveContext('', tab.frameTracker.mainFrameId)).toBeTruthy();
-  expect(
-    tab.frameTracker.getActiveContext(
-      DomEnv.installedDomWorldName,
-      tab.frameTracker.mainFrameId,
-    ),
-  ).toBeTruthy();
+  expect(tab.puppetPage.frames.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  expect(tab.puppetPage.frames.getActiveContext(tab.mainFrameId)).toBeTruthy();
 
   await core.close();
 });
@@ -76,16 +71,12 @@ test('should track navigations and redirects', async () => {
 
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
-  expect(tab.frameTracker.getActiveContext('', tab.frameTracker.mainFrameId)).toBeTruthy();
-  expect(
-    tab.frameTracker.getActiveContext(
-      DomEnv.installedDomWorldName,
-      tab.frameTracker.mainFrameId,
-    ),
-  ).toBeTruthy();
+  const frames = tab.puppetPage.frames;
+  expect(frames.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  expect(frames.getActiveContext(tab.mainFrameId)).toBeTruthy();
 
   // @ts-ignore
-  expect(tab.frameTracker.activeContexts.size).toBe(3);
+  expect(frames.activeContexts.size).toBe(2);
 
   // make sure we can use the active context associated with the new window
   const pageLink = await core.execJsPath([

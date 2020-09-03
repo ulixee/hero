@@ -63,7 +63,7 @@ export default class Tab {
 
 // CREATE
 
-export function getTabSession(tab: Tab): CoreTab {
+export function getCoreTab(tab: Tab): CoreTab {
   return getState(tab).coreTab;
 }
 

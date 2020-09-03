@@ -1,31 +1,16 @@
-import path from 'path';
 import * as os from 'os';
-import { BrowserFetcher } from 'puppeteer-core/lib/cjs/puppeteer/node/BrowserFetcher';
-import puppeteer from 'puppeteer-core/lib/cjs/puppeteer';
 import ProgressBar from 'progress';
+import { BrowserFetcher } from './BrowserFetcher';
+import { getInstallDirectory } from "./browserPaths";
 
 export default class EngineInstaller {
   constructor(readonly engine: { browser: string; revision: string }) {}
 
-  public getBrowserDirectory() {
-    return `${this.cacheDirectory()}/${this.engine.browser}-${this.engine.revision}`;
-  }
-
-  public getExecutablePath() {
-    const browserFetcher: BrowserFetcher = puppeteer.createBrowserFetcher({
-      product: 'chrome',
-      path: this.getBrowserDirectory(),
-    });
-    const revisionInfo = browserFetcher.revisionInfo(this.engine.revision);
-    return revisionInfo.executablePath;
-  }
-
   public async install() {
     if (this.shouldSkipDownload()) return;
 
-    const browserFetcher: BrowserFetcher = puppeteer.createBrowserFetcher({
-      product: 'chrome',
-      path: this.getBrowserDirectory(),
+    const browserFetcher: BrowserFetcher = new BrowserFetcher({
+      path: getInstallDirectory(this.engine.browser, this.engine.revision),
     });
 
     const revisionInfo = browserFetcher.revisionInfo(this.engine.revision);
@@ -70,21 +55,6 @@ export default class EngineInstaller {
       console.error(error);
       process.exit(1);
     }
-  }
-
-  public cacheDirectory() {
-    if (process.platform === 'linux') {
-      return process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
-    }
-
-    if (process.platform === 'darwin') {
-      return path.join(os.homedir(), 'Library', 'Caches');
-    }
-
-    if (process.platform === 'win32') {
-      return process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
-    }
-    throw new Error(`Unsupported platform: ${process.platform}`);
   }
 
   private shouldSkipDownload() {

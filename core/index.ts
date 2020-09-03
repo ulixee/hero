@@ -111,12 +111,11 @@ export default class Core implements ICore {
   }
 
   public async getUserCookies() {
-    return await UserProfile.getAllCookies(this.tab.devtoolsClient);
+    return await this.tab.puppetPage.getAllCookies();
   }
 
   public async exportUserProfile() {
-    const origins = this.tab.frameTracker.getSecurityOrigins(UserProfile.installedWorld);
-    return await UserProfile.export(this.session.id, this.tab.devtoolsClient, origins);
+    return await UserProfile.export(this.session.id, this.tab.puppetPage);
   }
 
   public async fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {

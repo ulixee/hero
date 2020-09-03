@@ -64,6 +64,7 @@ export default class GlobalPool {
 
   public static async closeSession(session: Session) {
     this._activeSessionCount -= 1;
+
     const wasTransferred = this.resolveWaitingConnection();
     await session.close();
     if (wasTransferred) {
@@ -131,7 +132,7 @@ export default class GlobalPool {
 
       const browserContext = await chromeCore.createContext();
 
-      session.assignBrowser(browserContext);
+      session.assignBrowserContext(browserContext);
       return session;
     } catch (err) {
       this._activeSessionCount -= 1;

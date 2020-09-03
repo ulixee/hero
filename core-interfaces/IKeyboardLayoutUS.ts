@@ -1,4 +1,3 @@
-// tslint:disable-next-line:variable-name
 export const KeyboardKeys = {
   '0': 0,
   '1': 1,
@@ -246,6 +245,7 @@ export const KeyboardKeys = {
   '~': 243,
   '{': 244,
   '}': 246,
+  '|': 220,
   '"': 247,
   SoftLeft: 248,
   SoftRight: 249,
@@ -256,10 +256,10 @@ export const KeyboardKeys = {
   VolumeUp: 254,
 } as const;
 
-export function getKeyboardChar(keyCode: IKeyboardKeyCode) {
-  for (const [char, code] of Object.entries(KeyboardKeys)) {
+export function getKeyboardKey(keyCode: IKeyboardKeyCode) {
+  for (const [key, code] of Object.entries(KeyboardKeys)) {
     if (code === keyCode) {
-      return char;
+      return key as IKeyboardKey;
     }
   }
 }

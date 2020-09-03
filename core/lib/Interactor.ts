@@ -11,7 +11,7 @@ import {
 } from '@secret-agent/core-interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { getKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import Tab from './Tab';
 
 const commandsNeedingScroll = [
@@ -24,11 +24,11 @@ export default class Interactor {
   private readonly tab: Tab;
 
   private get mouse() {
-    return this.tab.puppPage.mouse;
+    return this.tab.puppetPage.mouse;
   }
 
   private get keyboard() {
-    return this.tab.puppPage.keyboard;
+    return this.tab.puppetPage.keyboard;
   }
 
   constructor(tab: Tab) {
@@ -89,17 +89,17 @@ export default class Interactor {
         case InteractionCommand.type: {
           for (const keyboardCommand of interaction.keyboardCommands) {
             if ('keyCode' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyPress).keyCode);
-              await this.keyboard.press(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyPress).keyCode);
+              await this.keyboard.press(key);
             } else if ((keyboardCommand as IKeyboardString).string) {
               const delay = interaction.keyboardDelayBetween || 0;
               await this.keyboard.type((keyboardCommand as IKeyboardString).string, { delay });
             } else if ('up' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyboardUp).up);
-              await this.keyboard.up(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyboardUp).up);
+              await this.keyboard.up(key);
             } else if ('down' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyboardDown).down);
-              await this.keyboard.down(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyboardDown).down);
+              await this.keyboard.down(key);
             }
           }
           break;

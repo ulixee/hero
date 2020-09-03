@@ -1,10 +1,10 @@
 import net from 'net';
 import http from 'http';
+import Log from '@secret-agent/commons/Logger';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import CookieHandler from './CookieHandler';
 import BaseHttpHandler from './BaseHttpHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import Log from '../../commons/Logger';
 
 const { log } = Log(module);
 

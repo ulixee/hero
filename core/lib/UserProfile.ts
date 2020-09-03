@@ -1,100 +1,48 @@
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IDomStorage, { IDomStorageForOrigin } from '@secret-agent/core-interfaces/IDomStorage';
-import Protocol from 'devtools-protocol';
+import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
 import Log from '@secret-agent/commons/Logger';
-import { URL } from 'url';
-import { exceptionDetailsToError } from './Utils';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
+import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import Tab from './Tab';
-import DomEnv from './DomEnv';
-import SetCookiesRequest = Protocol.Network.SetCookiesRequest;
-import CookieParam = Protocol.Network.CookieParam;
 
 const { log } = Log(module);
 
 export default class UserProfile {
-  public static installedWorld = DomEnv.installedDomWorldName;
-  private readonly devtoolsClient: IDevtoolsClient;
-  private readonly sessionId: string;
+  public static async export(sessionId: string, page: Page) {
+    const origins = await page.frames.getSecurityOrigins();
+    const storage: IDomStorage = {};
 
-  constructor(sessionId: string, devtoolsClient: IDevtoolsClient) {
-    this.devtoolsClient = devtoolsClient;
-    this.sessionId = sessionId;
-  }
-
-  private async getStorageItems(securityOrigins: { origin: string; executionId: number }[]) {
-    const items: IDomStorage = {};
-    for (const securityOrigin of securityOrigins) {
-      const databaseNames = await this.getDatabaseNames(securityOrigin.origin);
-      items[securityOrigin.origin] = await this.readDomStorage(
-        databaseNames,
-        securityOrigin.executionId,
+    for (const { origin, frameId } of origins) {
+      const databaseNames = await page.getIndexedDbsForOrigin(origin);
+      const executionId = page.frames.getActiveContext(frameId, true);
+      storage[origin] = await page.frames.runInContext(
+        `window.exportDomStorage(${JSON.stringify(databaseNames)})`,
+        executionId.executionContextId,
       );
     }
-    return items;
-  }
+    const cookies = await page.getAllCookies();
 
-  private async readDomStorage(
-    databaseNames: string[],
-    executionContextId: number,
-  ): Promise<IDomStorageForOrigin> {
-    const record = await this.devtoolsClient.send('Runtime.evaluate', {
-      expression: `window.exportDomStorage(${JSON.stringify(databaseNames)})`,
-      awaitPromise: true,
-      contextId: executionContextId,
-      returnByValue: true,
-    });
-    if (record.exceptionDetails) {
-      const error = exceptionDetailsToError(record.exceptionDetails);
-      log.warn('ReadDomStorage.Error', { sessionId: this.sessionId, error });
-      throw error;
-    }
-    return record.result?.value;
-  }
-
-  private async getDatabaseNames(securityOrigin: string) {
-    return this.devtoolsClient
-      .send('IndexedDB.requestDatabaseNames', {
-        securityOrigin,
-      })
-      .then(x => x.databaseNames);
-  }
-
-  public static async export(
-    sessionId: string,
-    devtoolsClient: IDevtoolsClient,
-    origins: { origin: string; executionId: number }[],
-  ) {
-    const instance = new UserProfile(sessionId, devtoolsClient);
     return {
-      cookies: await this.getAllCookies(devtoolsClient),
-      storage: await instance.getStorageItems(origins),
+      cookies,
+      storage,
     } as IUserProfile;
   }
 
   public static async install(fromProfile: IUserProfile, tab: Tab) {
-    const { devtoolsClient } = tab;
+    const { puppetPage } = tab;
 
     const parentLogId = log.info('UserProfile.install', { sessionId: tab.sessionId });
-    await tab.domEnv.install();
 
     if (fromProfile?.cookies) {
-      await this.setCookies(
-        fromProfile.cookies,
-        devtoolsClient,
-        Object.keys(fromProfile?.storage ?? {}),
-      );
+      await puppetPage.setCookies(fromProfile.cookies, Object.keys(fromProfile?.storage ?? {}));
     }
 
     if (fromProfile?.storage && Object.keys(fromProfile.storage).length) {
       // prime each page
       for (const origin of Object.keys(fromProfile.storage)) {
         await tab.setBrowserOrigin(origin);
-        await tab.frameTracker.runInFrameWorld(
+        await puppetPage.frames.runInFrame(
           `window.restoreUserStorage(${JSON.stringify(fromProfile.storage[origin])})`,
-          tab.frameTracker.mainFrameId,
-          UserProfile.installedWorld,
+          puppetPage.mainFrameId,
         );
       }
       // reset browser to start page
@@ -102,41 +50,5 @@ export default class UserProfile {
     }
     log.info('UserProfile.installed', { sessionId: tab.sessionId, parentLogId });
     return this;
-  }
-
-  public static async getAllCookies(devtoolsClient: IDevtoolsClient) {
-    const cookieResponse = await devtoolsClient.send('Network.getAllCookies');
-    return cookieResponse.cookies.map(
-      x =>
-        ({
-          ...x,
-          expires: String(x.expires),
-        } as ICookie),
-    );
-  }
-
-  private static async setCookies(
-    cookies: ICookie[],
-    devtoolsClient: IDevtoolsClient,
-    origins: string[],
-  ) {
-    const originUrls = (origins ?? []).map(x => new URL(x));
-    const parsedCookies: CookieParam[] = [];
-    for (const cookie of cookies) {
-      const cookieToSend: CookieParam = {
-        ...cookie,
-        expires: cookie.expires ? parseInt(cookie.expires, 10) : null,
-      };
-      cookieToSend.url = `http${cookie.secure ? 's' : ''}://${cookie.domain}${cookie.path}`;
-      const match = originUrls.find(x => {
-        return x.hostname.endsWith(cookie.domain);
-      });
-      if (match) cookieToSend.url = match.href;
-
-      parsedCookies.push(cookieToSend);
-    }
-    return await devtoolsClient.send('Network.setCookies', {
-      cookies: parsedCookies,
-    } as SetCookiesRequest);
   }
 }

@@ -34,9 +34,11 @@ function addMe() {
     await core.waitForLoad('DomContentLoaded');
 
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
+    const state = tab.sessionState;
 
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
+    await tab.domRecorder.flush();
+    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
     // @ts-ignore
     const commandId = core.tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
@@ -49,7 +51,8 @@ function addMe() {
 
     await core.waitForElement(['document', ['querySelector', 'a#link2']]);
 
-    const changes = await state.getPageDomChanges(state.pages.history, true, commandId);
+    await tab.domRecorder.flush();
+    const changes = await state.getPageDomChanges(state.pages.history, commandId);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('added');
@@ -74,9 +77,11 @@ function removeMe() {
     await core.goto(`${koaServer.baseUrl}/test2`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
+    const state = tab.sessionState;
 
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
+    await tab.domRecorder.flush();
+    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(11);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
@@ -89,7 +94,8 @@ function removeMe() {
 
     await core.waitForMillis(100);
 
-    const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
+    await tab.domRecorder.flush();
+    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('removed');
@@ -123,9 +129,12 @@ function sort() {
     await core.goto(`${koaServer.baseUrl}/test3`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
 
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
+    const state = tab.sessionState;
+
+    await tab.domRecorder.flush();
+    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(29);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
@@ -138,7 +147,8 @@ function sort() {
 
     await core.waitForMillis(100);
 
-    const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
+    await tab.domRecorder.flush();
+    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
     const [key] = Object.keys(changes);
     // 1 remove and 1 add for each
     expect(changes[key]).toHaveLength(9);
@@ -171,9 +181,11 @@ function sort() {
     await core.goto(`${koaServer.baseUrl}/test4`);
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
+    const state = tab.sessionState;
 
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history, true);
+    await tab.domRecorder.flush();
+    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(14);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
@@ -186,7 +198,8 @@ function sort() {
 
     await core.waitForMillis(100);
 
-    const changes = await state.getPageDomChanges(state.pages.history, true, loadCommand);
+    await tab.domRecorder.flush();
+    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('attribute');
@@ -218,7 +231,8 @@ describe('basic Mouse Event tests', () => {
     const meta = await Core.createTab();
     const core = Core.byTabId[meta.tabId];
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
+    const state = tab.sessionState;
 
     await core.goto(`${koaServer.baseUrl}/mouse1`);
     await core.waitForLoad(LocationStatus.AllContentLoaded);
@@ -227,7 +241,8 @@ describe('basic Mouse Event tests', () => {
       { command: 'click', mousePosition: ['document', ['querySelector', 'BUTTON']] },
     ]);
 
-    await state.flush();
+    await tab.domRecorder.flush();
+    await state.db.flush();
     const mouseMoves = state.db.mouseEvents.all();
 
     expect(mouseMoves.filter(x => x.event === MouseEventType.MOVE)).toHaveLength(1);
@@ -239,7 +254,7 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    const changes = await state.getPageDomChanges(state.pages.history, true);
+    const changes = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changes);
     const linkNode = domChanges.find(x => x[2].tagName === 'BUTTON')[2];
 
@@ -271,7 +286,8 @@ describe('basic Form element tests', () => {
     await core.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
     // @ts-ignore
-    const state = core.tab.sessionState;
+    const tab = core.tab;
+    const state = tab.sessionState;
 
     await core.interact([
       {
@@ -296,8 +312,9 @@ describe('basic Form element tests', () => {
     const textValue2 = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await state.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history, true);
+    await state.db.flush();
+    await tab.domRecorder.flush();
+    const changesAfterType = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -353,8 +370,10 @@ describe('basic Form element tests', () => {
     const textValue2 = await core.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await state.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history, true);
+    // @ts-ignore
+    await core.tab.domRecorder.flush();
+    await state.db.flush();
+    const changesAfterType = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -405,8 +424,10 @@ describe('basic Form element tests', () => {
     const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(2);
 
-    await state.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history, true);
+    // @ts-ignore
+    await core.tab.domRecorder.flush();
+    await state.db.flush();
+    const changesAfterType = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -456,9 +477,11 @@ describe('basic Form element tests', () => {
     ]);
     const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
+    // @ts-ignore
+    await core.tab.domRecorder.flush();
 
-    await state.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history, true);
+    await state.db.flush();
+    const changesAfterType = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // 2 changes per radio change
@@ -516,9 +539,11 @@ describe('basic Form element tests', () => {
     ]);
     const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
+    // @ts-ignore
+    await core.tab.domRecorder.flush();
 
-    await state.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history, true);
+    await state.db.flush();
+    const changesAfterType = await state.getPageDomChanges(state.pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     const focusRecords = state.db.focusEvents.all();

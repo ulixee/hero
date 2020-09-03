@@ -18,7 +18,6 @@ describe('Core events tests', () => {
     const { tabId } = await Core.createTab();
     const core = Core.byTabId[tabId];
     await core.addEventListener(null, 'close');
-
     await Core.shutdown();
     await new Promise(resolve => setTimeout(resolve, 1000));
 

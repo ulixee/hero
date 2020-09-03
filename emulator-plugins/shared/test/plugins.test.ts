@@ -30,13 +30,11 @@ test('it should override plugins in a browser window', async () => {
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
 
-  page.on('error', console.log);
-  page.on('pageerror', console.log);
+  page.on('pageError', console.log);
   if (debug) {
-    page.on('console', log => console.log(log.text()));
+    page.on('consoleLog', log => console.log(log));
   }
-
-  await page.evaluateOnNewDocument(
+  await page.frames.addNewDocumentScript(
     getOverrideScript('plugins', {
       mimeTypes: [
         {
@@ -82,21 +80,16 @@ test('it should override plugins in a browser window', async () => {
         },
       ],
     }).script,
+    false,
   );
-  await page.goto(httpServer.url);
-  const hasPlugins = await page.evaluate(() => {
-    return 'plugins' in navigator && 'mimeTypes' in navigator;
-  });
+  await page.navigate(httpServer.url);
+  const hasPlugins = await page.evaluate(`'plugins' in navigator && 'mimeTypes' in navigator`);
   expect(hasPlugins).toBe(true);
 
-  const pluginCount = await page.evaluate(() => {
-    return navigator.plugins.length;
-  });
+  const pluginCount = await page.evaluate(`navigator.plugins.length`);
   expect(pluginCount).toBe(3);
 
-  const mimecount = await page.evaluate(() => {
-    return navigator.mimeTypes.length;
-  });
+  const mimecount = await page.evaluate(`navigator.mimeTypes.length`);
   expect(mimecount).toBe(4);
 
   const structure = JSON.parse(

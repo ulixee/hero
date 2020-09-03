@@ -9,6 +9,7 @@ module.exports = {
   testMatch: ['**/test/*.test.js'],
   testEnvironment: 'node',
   collectCoverage: false,
+  transform: {},
   collectCoverageFrom: workspaces.map(x => `${x}/**/*.js`),
   coveragePathIgnorePatterns: [
     'node_modules',

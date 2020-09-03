@@ -19,11 +19,15 @@ interface IState {
   awaitedPath: AwaitedPath;
 }
 
+interface IEventType {
+  message: IWebsocketMessage;
+}
+
 const propertyKeys: (keyof WebsocketResource)[] = ['url', 'request', 'response'];
 
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
-export default class WebsocketResource extends AwaitedEventTarget<{ message: IWebsocketMessage }> {
+export default class WebsocketResource extends AwaitedEventTarget<IEventType, IState> {
   constructor() {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
@@ -62,10 +66,7 @@ export default class WebsocketResource extends AwaitedEventTarget<{ message: IWe
   }
 }
 
-export function createWebsocketResource(
-  resourceMeta: IResourceMeta,
-  coreTab: CoreTab,
-) {
+export function createWebsocketResource(resourceMeta: IResourceMeta, coreTab: CoreTab) {
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);
   const response = createResourceResponse(coreTab, resourceMeta.id);

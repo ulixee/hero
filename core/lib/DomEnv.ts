@@ -8,8 +8,7 @@ import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import FrameTracker from './FrameTracker';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
+import Frames from '@secret-agent/puppet-chrome/lib/Frames';
 import DomEnvError from './DomEnvError';
 
 const { log } = Log(module);
@@ -17,25 +16,21 @@ const TSON = new Typeson().register(TypesonRegistry);
 const SA_NOT_INSTALLED = 'SA_SCRIPT_NOT_INSTALLED';
 
 export default class DomEnv {
-  public static installedDomWorldName = '__sa_world__';
-
   private readonly sessionId: string;
-  private frameTracker: FrameTracker;
-  private devtoolsClient: IDevtoolsClient;
+  private frames: Frames;
   private isInstalled = false;
   private isClosed = false;
 
-  constructor(sessionId: string, frameTracker: FrameTracker, devtoolsClient: IDevtoolsClient) {
-    this.frameTracker = frameTracker;
-    this.devtoolsClient = devtoolsClient;
+  constructor(sessionId: string, frames: Frames) {
+    this.frames = frames;
     this.sessionId = sessionId;
   }
 
   public async install() {
     if (this.isInstalled) return;
     this.isInstalled = true;
-    await this.devtoolsClient.send('Page.addScriptToEvaluateOnNewDocument', {
-      source: `(function installDomEnv() {
+    await this.frames.addNewDocumentScript(
+      `(function installDomEnv() {
 ${typesonScript};
 ${typesonRegistryScript};
 const TSON = new Typeson().register(Typeson.presets.builtin);
@@ -49,8 +44,7 @@ window.SecretAgent = {
 
 ${domStorageScript}
 })();`,
-      worldName: DomEnv.installedDomWorldName,
-    });
+    );
   }
 
   public close() {
@@ -74,7 +68,7 @@ ${domStorageScript}
   });
 
 })(${propertiesToExtract ?? [].join(',')});`,
-      '',
+      false,
     );
   }
 
@@ -127,11 +121,7 @@ ${domStorageScript}
   }
 
   public locationHref() {
-    return this.frameTracker.runInFrameWorld<string>(
-      'location.href',
-      this.frameTracker.mainFrameId,
-      '',
-    );
+    return this.frames.runInFrame<string>('location.href', this.frames.mainFrameId, false);
   }
 
   private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
@@ -142,14 +132,19 @@ ${domStorageScript}
       })
       .join(', ')})`;
     const serializedFn = `'SecretAgent' in window ? ${callFn} : '${SA_NOT_INSTALLED}';`;
-    return this.runFn<T>(fnName, serializedFn, DomEnv.installedDomWorldName);
+    return this.runFn<T>(fnName, serializedFn);
   }
 
-  private async runFn<T>(fnName: string, serializedFn: string, worldName: string, retries = 10): Promise<T> {
-    const unparsedResult = await this.frameTracker.runInFrameWorld(
+  private async runFn<T>(
+    fnName: string,
+    serializedFn: string,
+    runInIsolatedEnvironment = true,
+    retries = 10,
+  ): Promise<T> {
+    const unparsedResult = await this.frames.runInFrame(
       serializedFn,
-      this.frameTracker.mainFrameId,
-      worldName,
+      this.frames.mainFrameId,
+      runInIsolatedEnvironment,
     );
 
     if (unparsedResult === SA_NOT_INSTALLED) {
@@ -157,11 +152,11 @@ ${domStorageScript}
       log.warn('Injected scripts not installed yet. Retrying', {
         sessionId: this.sessionId,
         fnName,
-        frames: this.frameTracker.frames,
-        frameId: this.frameTracker.mainFrameId,
+        frames: this.frames.frames,
+        frameId: this.frames.mainFrameId,
       });
       await new Promise(resolve => setTimeout(resolve, 100));
-      return this.runFn<T>(fnName, serializedFn, worldName, retries - 1);
+      return this.runFn<T>(fnName, serializedFn, runInIsolatedEnvironment, retries - 1);
     }
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;

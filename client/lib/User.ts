@@ -14,7 +14,7 @@ import Resource, { createResource } from './Resource';
 import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
 import Interactor from './Interactor';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { createTab, getTabSession } from './Tab';
+import Tab, { createTab, getCoreTab } from './Tab';
 import CoreTab from './CoreTab';
 
 const { getState, setState } = StateMachine<User, IState>();
@@ -114,7 +114,7 @@ export default class User {
 
   public async waitForNewTab(): Promise<Tab> {
     const browser = getState(this).browser;
-    const coreClient = getTabSession(browser.activeTab);
+    const coreClient = getCoreTab(browser.activeTab);
     const coreTab = await coreClient.waitForNewTab();
     return createTab(browser, coreTab);
   }
@@ -132,5 +132,5 @@ export function createUser(browser: Browser): User {
 
 function getActiveTabSession(user: User) {
   const browser = getState(user).browser;
-  return getTabSession(browser.activeTab);
+  return getCoreTab(browser.activeTab);
 }

@@ -1,23 +1,19 @@
-import * as http from 'http';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import ResourceType, {
-  getResourceTypeForChromeValue,
-} from '@secret-agent/core-interfaces/ResourceType';
-import { EventEmitter } from 'events';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
-import Protocol from 'devtools-protocol';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import * as http2 from 'http2';
-import { URL } from 'url';
-import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
-import net from 'net';
-import MitmRequestContext from '../lib/MitmRequestContext';
-import MitmRequestAgent from '../lib/MitmRequestAgent';
-import Network = Protocol.Network;
+import * as http from "http";
+import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
+import ResourceType from "@secret-agent/core-interfaces/ResourceType";
+import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
+import IHttpResourceLoadDetails from "@secret-agent/commons/interfaces/IHttpResourceLoadDetails";
+import IResourceRequest from "@secret-agent/core-interfaces/IResourceRequest";
+import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import * as http2 from "http2";
+import { URL } from "url";
+import IResourceResponse from "@secret-agent/core-interfaces/IResourceResponse";
+import net from "net";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import MitmRequestContext from "../lib/MitmRequestContext";
+import MitmRequestAgent from "../lib/MitmRequestAgent";
 
-export default class RequestSession {
+export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
   public static sessions: { [sessionId: string]: RequestSession } = {};
   public static proxyPortSessionIds: { [port: number]: string } = {};
 
@@ -39,30 +35,15 @@ export default class RequestSession {
   public requests: IHttpResourceLoadDetails[] = [];
 
   private readonly pendingResources: IPendingResourceLoad[] = [];
-  private emitter = new EventEmitter();
 
   constructor(
     readonly sessionId: string,
     readonly useragent: string,
     readonly upstreamProxyUrlProvider: Promise<string>,
   ) {
+    super();
     RequestSession.sessions[sessionId] = this;
     this.requestAgent = new MitmRequestAgent(this);
-  }
-
-  public on<K extends keyof IRequestSessionEvents>(
-    eventType: K,
-    listenerFn: (this: this, event: IRequestSessionEvents[K]) => any,
-  ) {
-    this.emitter.on(eventType, listenerFn);
-    return this;
-  }
-
-  public emit<K extends keyof IRequestSessionEvents>(
-    eventType: K,
-    event: IRequestSessionEvents[K],
-  ) {
-    return this.emitter.emit(eventType, event);
   }
 
   public async waitForBrowserResourceRequest(url: URL, method: string, headers: IResourceHeaders) {
@@ -117,7 +98,7 @@ export default class RequestSession {
     browserRequestId: string;
     url: string;
     method: string;
-    resourceType: Network.ResourceType;
+    resourceType: ResourceType;
     hasUserGesture: boolean;
     documentUrl: string;
     isUserNavigation: boolean;
@@ -139,7 +120,7 @@ export default class RequestSession {
 
     resource.browserRequestId = params.browserRequestId;
     resource.documentUrl = params.documentUrl;
-    resource.resourceType = getResourceTypeForChromeValue(resourceType);
+    resource.resourceType = resourceType;
     resource.hasUserGesture = params.hasUserGesture;
     resource.isUserNavigation = params.isUserNavigation;
     resource.load.resolve(resource);
@@ -191,7 +172,7 @@ export default class RequestSession {
   public async getWebsocketUpgradeRequestId(headers: IResourceHeaders) {
     const key = this.getWebsocketHeadersKey(headers);
     if (!this.websocketBrowserResourceIds[key]) {
-      this.websocketBrowserResourceIds[key] = createPromise<string>(100);
+      this.websocketBrowserResourceIds[key] = createPromise<string>(30e3);
     }
 
     return this.websocketBrowserResourceIds[key].promise;
