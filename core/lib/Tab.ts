@@ -68,7 +68,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.puppetPage.mainFrameId;
   }
 
-  constructor(session: Session, puppetPage: Page) {
+  private constructor(session: Session, puppetPage: Page) {
     super();
     this.session = session;
     this.puppetPage = puppetPage;
@@ -111,7 +111,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async installEmulator() {
     const puppetPage = this.puppetPage;
     const emulator = this.session.emulator;
-    await puppetPage.setUserAgent({
+    await puppetPage.networkManager.setUserAgent({
       acceptLanguage: 'en-US,en',
       userAgent: emulator.userAgent.raw,
       platform: emulator.userAgent.platform,

@@ -13,6 +13,7 @@ import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEven
 import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSendHandshakeRequestEvent;
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
 import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
+import SetUserAgentOverrideRequest = Protocol.Emulation.SetUserAgentOverrideRequest;
 
 export interface Credentials {
   username: string;
@@ -21,9 +22,10 @@ export interface Credentials {
 
 export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
   cdpSession: CDPSession;
-
   credentials?: Credentials = null;
   attemptedAuthentications = new Set<string>();
+  agent?: SetUserAgentOverrideRequest;
+  parentManager?: NetworkManager;
 
   constructor(cdpSession: CDPSession) {
     super();
@@ -43,16 +45,26 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
     this.cdpSession.on('Network.responseReceived', this.onNetworkResponseReceived.bind(this));
   }
 
-  public async initialize(): Promise<void> {
+  public emit<K extends (keyof INetworkEvents & string) | (keyof INetworkEvents & symbol)>(
+    eventType: K,
+    event?: INetworkEvents[K],
+  ): boolean {
+    if (this.parentManager) {
+      this.parentManager.emit(eventType, event);
+    }
+    return super.emit(eventType, event);
+  }
+
+  public async initialize(parentManager?: NetworkManager): Promise<void> {
+    if (parentManager) {
+      this.credentials = parentManager.credentials;
+      this.agent = parentManager.agent;
+      this.parentManager = parentManager;
+    }
     await this.cdpSession.send('Network.enable', {
       maxPostDataSize: 0,
       maxResourceBufferSize: 0,
       maxTotalBufferSize: 0,
-    });
-
-    // default ignore
-    await this.cdpSession.send('Security.setIgnoreCertificateErrors', {
-      ignore: true,
     });
 
     await this.cdpSession.send('Fetch.enable', {
@@ -60,8 +72,13 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
     });
   }
 
-  public async authenticate(credentials?: Credentials): Promise<void> {
+  public setCredentials(credentials?: Credentials) {
     this.credentials = credentials;
+  }
+
+  public async setUserAgent(agent: SetUserAgentOverrideRequest) {
+    this.agent = agent;
+    await this.cdpSession.send('Network.setUserAgentOverride', agent);
   }
 
   private onAuthRequired(event: Protocol.Fetch.AuthRequiredEvent): void {

@@ -38,7 +38,7 @@ export default class ChromeCore {
     if (this.isShuttingDown) {
       return;
     }
-    return await browser.createIncognitoBrowserContext();
+    return await browser.newContext();
   }
 
   public async close() {

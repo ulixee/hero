@@ -1,8 +1,9 @@
-import Path from 'path';
-import os from 'os';
-import { ILaunchOptions } from './interfaces/ILaunchOptions';
-import { Browser } from './lib/Browser';
-import launchProcess from './process/launchProcess';
+import Path from "path";
+import os from "os";
+import { v1 as uuidv1 } from "uuid";
+import { ILaunchOptions } from "./interfaces/ILaunchOptions";
+import { Browser } from "./lib/Browser";
+import launchProcess from "./process/launchProcess";
 
 export default async function launch(options: ILaunchOptions): Promise<Browser> {
   const chromeArguments = [
@@ -61,15 +62,13 @@ export default async function launch(options: ILaunchOptions): Promise<Browser> 
     chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
   }
 
-  const temporaryUserDataDir = Path.join(os.tmpdir(), 'core-engine');
+  const temporaryUserDataDir = Path.join(os.tmpdir(), `sa-${uuidv1()}`);
   chromeArguments.push(`--user-data-dir=${temporaryUserDataDir}`);
 
   const { connection, close } = launchProcess(chromeArguments, temporaryUserDataDir, options);
 
   try {
-    const browser = await Browser.create(connection, close);
-    // TODO: do we need to wait for first target?
-    return browser;
+    return await Browser.create(connection, close);
   } catch (error) {
     close();
     throw error;

@@ -78,8 +78,6 @@ export default function launchProcess(
   } as ILaunchedProcess;
 
   function close() {
-    cleanup();
-
     if (launchedProcess.killed) return;
 
     try {
@@ -91,11 +89,11 @@ export default function launchProcess(
     } catch (error) {
       throw new Error(`${PROCESS_ERROR_EXPLANATION}\nError cause: ${error.stack}`);
     }
+    cleanup();
   }
 }
 
 interface ILaunchedProcess {
   connection: Connection;
-  kill: () => void;
   close: () => void;
 }

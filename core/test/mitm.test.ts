@@ -3,6 +3,7 @@ import { UpstreamProxy } from '@secret-agent/mitm';
 import { Helpers } from '@secret-agent/testing';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
+import { createPromise } from '@secret-agent/commons/utils';
 import Tab from '../lib/Tab';
 
 const mocks = {
@@ -129,4 +130,110 @@ myWorker.postMessage('send');
   await tab.goto(`${koa.baseUrl}/test`);
   await tab.waitForLoad('AllContentLoaded');
   await expect(serviceXhr).resolves.toBe('FromWorker');
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
+});
+
+test('should not see proxy headers in a service worker', async () => {
+  const xhrHeaders = createPromise();
+  const xhrHeadersFromWorker = createPromise();
+  const server = await Helpers.runHttpsServer(async (request, response) => {
+    const path = request.url;
+    if (path === '/worker.js') {
+      response.setHeader('content-type', 'application/javascript');
+      response.end(`
+self.addEventListener('fetch', event => {
+  event.respondWith(async function(){
+    return fetch(event.request.url, {
+      method: event.request.method,
+      credentials: 'include', 
+      headers: {
+        'Intercepted': true,
+        'original-proxy-auth': event.request.headers['proxy-authorization'] 
+      },
+      body: event.request.headers['proxy-authorization'] ? 'ProxyAuth' : 'LooksGoodFromPage'
+    });
+  }());
+});
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('message', event => {
+  if (event.data === 'activate-app') {
+    self.skipWaiting();
+    self.clients.claim();
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => client.postMessage("start-app"));
+    });
+    fetch('/xhr/2', {
+      method: 'POST',
+      body: 'FromWorker'
+    }).catch(err => {});
+  }
+});
+`);
+    }
+    if (path === '/service-worker') {
+      response.setHeader('Server-Worker-Allowed', '/xhr');
+      response.end(`<html lang="en"><body>
+<h1>I'm loaded</h1>
+<script>
+
+window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./worker.js');
+    navigator.serviceWorker.ready.then((reg) => {
+      if (reg.active) {
+        reg.active.postMessage("activate-app");
+      }
+    });
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data === 'start-app') {    
+        fetch('/xhr', {
+          method: 'POST',
+          body: 'FromPage'
+        });
+      }
+   });  
+  });
+
+</script>
+</body>
+</html>
+    `);
+    }
+
+    let body = '';
+    for await (const chunk of request) body += chunk;
+    if (path === '/xhr') {
+      xhrHeaders.resolve(request.headers);
+      expect(body).toBe('LooksGoodFromPage');
+      response.end('Cool');
+    }
+    if (path === '/xhr/2') {
+      xhrHeadersFromWorker.resolve(request.headers);
+      expect(body).toBe('FromWorker');
+      response.end('Got it');
+    }
+  });
+
+  process.env.MITM_ALLOW_INSECURE = 'true';
+  const session = await GlobalPool.createSession({});
+  Helpers.needsClosing.push(session);
+  const tab = await Tab.create(session);
+  await tab.goto(`${server.baseUrl}/service-worker`);
+  await tab.waitForLoad('AllContentLoaded');
+  const [originalHeaders, headersFromWorker] = await Promise.all([
+    xhrHeaders.promise,
+    xhrHeadersFromWorker.promise,
+  ]);
+  // check that both go through mitm
+  await expect(originalHeaders['proxy-authorization']).not.toBeTruthy();
+  await expect(headersFromWorker['proxy-authorization']).not.toBeTruthy();
+  await expect(originalHeaders['user-agent']).toBe(headersFromWorker['user-agent']);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
 });

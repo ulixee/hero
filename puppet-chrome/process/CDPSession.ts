@@ -5,7 +5,6 @@ import { assert } from '../lib/assert';
 import { Connection } from './Connection';
 import { IConnectionCallback } from '../interfaces/IConnectionCallback';
 import { debugError } from '../lib/Utils';
-import { TargetType } from '../lib/Target';
 
 /**
  * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
@@ -13,16 +12,23 @@ import { TargetType } from '../lib/Target';
  * https://chromedevtools.github.io/devtools-protocol/
  */
 export class CDPSession extends EventEmitter {
-  private connection: Connection;
+  public connection: Connection;
   private readonly sessionId: string;
-  private readonly targetType: TargetType;
+  private readonly rootSessionId: string;
+  private readonly targetType: string;
   private readonly pendingMessages: Map<number, IConnectionCallback> = new Map();
 
-  constructor(connection: Connection, targetType: TargetType, sessionId: string) {
+  constructor(
+    connection: Connection,
+    rootSessionId: string,
+    targetType: string,
+    sessionId: string,
+  ) {
     super();
     this.connection = connection;
     this.targetType = targetType;
     this.sessionId = sessionId;
+    this.rootSessionId = rootSessionId;
   }
 
   send<T extends keyof ProtocolMapping.Commands>(
@@ -40,8 +46,8 @@ export class CDPSession extends EventEmitter {
     // See the comment in Connection#send explaining why we do this.
     const params = paramArgs.length ? paramArgs[0] : undefined;
 
-    const id = this.connection.rawSend({
-      sessionId: this.sessionId,
+    const id = this.connection.sendMessage({
+      sessionId: this.sessionId || undefined,
       method,
       params: params || {},
     });
@@ -57,7 +63,9 @@ export class CDPSession extends EventEmitter {
       this.pendingMessages.delete(object.id);
       if (object.error) {
         callback.reject(createProtocolError(callback.error, callback.method, object));
-      } else callback.resolve(object.result);
+      } else {
+        callback.resolve(object.result);
+      }
     } else {
       assert(!object.id);
       this.emit(object.method, object.params);
@@ -74,7 +82,9 @@ export class CDPSession extends EventEmitter {
         `Session already detached. Most likely the ${this.targetType} has been closed.`,
       );
     }
-    await this.connection.send('Target.detachFromTarget', {
+    const rootSession = this.connection.getSession(this.rootSessionId);
+    if (!rootSession) throw new Error('Root session has been closed');
+    await rootSession.send('Target.detachFromTarget', {
       sessionId: this.sessionId,
     });
   }
@@ -84,7 +94,6 @@ export class CDPSession extends EventEmitter {
     await this.send('Runtime.releaseObject', { objectId: remoteObject.objectId }).catch(error => {
       // Exceptions might happen in case of a page been navigated or closed.
       // Swallow these since they are harmless and we don't leak anything in this case.
-      debugError(error);
     });
   }
 

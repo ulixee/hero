@@ -3,14 +3,20 @@ import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { CDPSession } from '../process/CDPSession';
 import { assert } from './assert';
-import { Target } from './Target';
 import { Credentials, NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
 import Mouse from './Mouse';
 import Touchscreen from './Touchscreen';
 import Frames, { IFrameEvents } from './Frames';
 import { ICookie } from '../interfaces/ICookie';
-import { exceptionDetailsToError, printStackTrace } from './Utils';
+import {
+  debugError,
+  exceptionDetailsToError,
+  printStackTrace,
+  valueFromRemoteObject,
+} from './Utils';
+import { BrowserContext } from './BrowserContext';
+import { Worker } from './Worker';
 import CookieParam = Protocol.Network.CookieParam;
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
@@ -20,11 +26,14 @@ export class Page extends TypedEventEmitter<IPageEvents> {
   public mouse: Mouse;
   public touchscreen: Touchscreen;
   public cdpSession: CDPSession;
-  public target: Target;
-  public isClosed = false;
+  public targetId: string;
+  public readonly browserContext: BrowserContext;
+  public readonly opener: Page | null;
 
+  public isClosed = false;
   public networkManager: NetworkManager;
   public frames: Frames;
+  public readonly isReady: Promise<void>;
 
   public get mainFrameId() {
     return this.frames.mainFrameId;
@@ -36,19 +45,29 @@ export class Page extends TypedEventEmitter<IPageEvents> {
 
   private javascriptEnabled = true;
 
-  constructor(cdpSession: CDPSession, target: Target) {
+  private workersById = new Map<string, Worker>();
+
+  constructor(
+    cdpSession: CDPSession,
+    targetId: string,
+    browserContext: BrowserContext,
+    opener: Page | null,
+  ) {
     super();
     this.cdpSession = cdpSession;
-    this.target = target;
+    this.targetId = targetId;
+    this.browserContext = browserContext;
     this.keyboard = new Keyboard(cdpSession);
     this.mouse = new Mouse(cdpSession, this.keyboard);
     this.touchscreen = new Touchscreen(cdpSession, this.keyboard);
     this.networkManager = new NetworkManager(cdpSession);
     this.frames = new Frames(cdpSession);
+    this.opener = opener;
 
     this.cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
     this.cdpSession.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
     this.cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
+    this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
 
     this.frames.on('frameCreated', this.emit.bind(this, 'frameCreated'));
     this.frames.on('frameNavigated', this.emit.bind(this, 'frameNavigated'));
@@ -59,7 +78,9 @@ export class Page extends TypedEventEmitter<IPageEvents> {
       this.emit('frameLifecycle', { frame, name });
     });
 
-    this.target.on('close', this.emit.bind(this, 'close'));
+    this.cdpSession.once('disconnected', this.emit.bind(this, 'close'));
+
+    this.isReady = this.initialize();
   }
 
   public onChildPage(page: Page) {
@@ -67,11 +88,7 @@ export class Page extends TypedEventEmitter<IPageEvents> {
   }
 
   async authenticate(credentials: Credentials): Promise<void> {
-    return this.networkManager.authenticate(credentials);
-  }
-
-  async setUserAgent(agent: { platform: string; userAgent: string; acceptLanguage: string }) {
-    await this.cdpSession.send('Network.setUserAgentOverride', agent);
+    return this.networkManager.setCredentials(credentials);
   }
 
   public async getPageCookies(): Promise<ICookie[]> {
@@ -126,6 +143,11 @@ export class Page extends TypedEventEmitter<IPageEvents> {
     });
   }
 
+  // some dialogs can't be handled in-page
+  public handleJavascriptDialog(accept: boolean, promptText?: string) {
+    return this.cdpSession.send('Page.handleJavaScriptDialog', { accept, promptText });
+  }
+
   async setJavaScriptEnabled(enabled: boolean): Promise<void> {
     if (this.javascriptEnabled === enabled) return;
     this.javascriptEnabled = enabled;
@@ -178,6 +200,10 @@ export class Page extends TypedEventEmitter<IPageEvents> {
     await this.cdpSession.send('Page.close');
   }
 
+  didClose() {
+    this.cdpSession.removeAllListeners();
+  }
+
   private async navigateToHistory(delta: number): Promise<void> {
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
@@ -191,10 +217,57 @@ export class Page extends TypedEventEmitter<IPageEvents> {
       this.frames.initialize(),
       this.cdpSession.send('Target.setAutoAttach', {
         autoAttach: true,
-        waitForDebuggerOnStart: false,
+        waitForDebuggerOnStart: true,
         flatten: true,
       }),
+      this.cdpSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
+
+    // after initialized, send self to emitters
+    this.browserContext.emit('page', this);
+    if (this.opener) {
+      await this.opener.isReady;
+      this.opener.emit('popup', { page: this });
+    }
+  }
+
+  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
+    const { sessionId, targetInfo, waitingForDebugger } = event;
+    const { url, type } = targetInfo;
+    const cdpSession = this.cdpSession.connection.getSession(sessionId);
+
+    // TODO: see if frames forced into same site still have issues here
+    // if (event.targetInfo.type === 'iframe') {
+    //   // Frame id equals target id.
+    //   const targetId = event.targetInfo.targetId;
+    //   const frame = this._page._frameManager.frame(targetId)!;
+    //   this._page._frameManager.removeChildFramesRecursively(frame);
+    //   const frameSession = new FrameSession(this._crPage, cdpSession, targetId, this);
+    //   this._crPage._sessions.set(targetId, frameSession);
+    //   frameSession._initialize(false).catch(e => e);
+    //   return;
+    // }
+    //
+
+    if (type === 'service_worker') {
+      const worker = new Worker(this.browserContext, cdpSession, url, type);
+      cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
+      worker.on('consoleLog', this.emit.bind(this, 'consoleLog'));
+      this.workersById.set(sessionId, worker);
+      worker.initialize(this.networkManager).catch(debugError);
+      return;
+    }
+
+    if (waitingForDebugger) {
+      return cdpSession
+        .send('Runtime.runIfWaitingForDebugger')
+        .catch(debugError)
+        .then(() =>
+          // detach from page session
+          this.cdpSession.send('Target.detachFromTarget', { sessionId: event.sessionId }),
+        )
+        .catch(debugError);
+    }
   }
 
   private onRuntimeException(msg: ExceptionThrownEvent) {
@@ -216,11 +289,7 @@ export class Page extends TypedEventEmitter<IPageEvents> {
       .map(arg => {
         this.cdpSession.disposeObject(arg);
 
-        const objectId = arg.objectId;
-        if (objectId) {
-          return arg.toString();
-        }
-        return arg.value;
+        return valueFromRemoteObject(arg);
       })
       .join(' ');
 
@@ -236,12 +305,6 @@ export class Page extends TypedEventEmitter<IPageEvents> {
 
   private onTargetCrashed() {
     this.emit('targetCrashed', { error: new Error('Target Crashed') });
-  }
-
-  public static async create(client: CDPSession, target: Target): Promise<Page> {
-    const page = new Page(client, target);
-    await page.initialize();
-    return page;
   }
 }
 

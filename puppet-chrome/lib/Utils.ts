@@ -17,6 +17,7 @@ import { Protocol } from 'devtools-protocol';
 import { debug } from '@secret-agent/commons/Debug';
 import ExceptionDetails = Protocol.Runtime.ExceptionDetails;
 import StackTrace = Protocol.Runtime.StackTrace;
+import ObjectPreview = Protocol.Runtime.ObjectPreview;
 
 export const debugError = debug('puppet-chrome:error');
 
@@ -40,4 +41,34 @@ export function printStackTrace(stackTrace: StackTrace) {
     message += `\n    at ${functionName} (${location})`;
   }
   return message;
+}
+
+export function valueFromRemoteObject(remoteObject: Protocol.Runtime.RemoteObject): any {
+  if (remoteObject.unserializableValue) {
+    if (remoteObject.type === 'bigint' && typeof BigInt !== 'undefined')
+      return BigInt(remoteObject.unserializableValue.replace('n', ''));
+    switch (remoteObject.unserializableValue) {
+      case '-0':
+        return -0;
+      case 'NaN':
+        return NaN;
+      case 'Infinity':
+        return Infinity;
+      case '-Infinity':
+        return -Infinity;
+      default:
+        throw new Error(`Unsupported unserializable value: ${remoteObject.unserializableValue}`);
+    }
+  }
+  if (remoteObject.type === 'object' && remoteObject.preview) {
+    return JSON.stringify(previewToObject(remoteObject.preview));
+  }
+  return remoteObject.value ?? remoteObject.description;
+}
+
+function previewToObject(preview: ObjectPreview) {
+  const subProps = preview.properties.map(
+    prop => `${prop.name} = ${prop.valuePreview ? previewToObject(prop.valuePreview) : prop.value}`,
+  );
+  return `${preview.description} (${subProps.join(', ')})`;
 }
