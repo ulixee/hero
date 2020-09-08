@@ -1,9 +1,9 @@
-import { Helpers } from "@secret-agent/testing";
-import { InteractionCommand } from "@secret-agent/core-interfaces/IInteractions";
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import BlockHandler from "@secret-agent/mitm/handlers/BlockHandler";
-import Safari13 from "@secret-agent/emulate-safari-13";
-import Core from "../index";
+import { Helpers } from '@secret-agent/testing';
+import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
+import Safari13 from '@secret-agent/emulate-safari-13';
+import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {
@@ -70,14 +70,17 @@ describe('UserProfile cookie tests', () => {
       const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie'];
-      session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        response.setHeader('Set-Cookie', [
-          'cross1=1; SameSite=None; Secure; HttpOnly',
-          'cross2=2; SameSite=None; Secure; HttpOnly',
-        ]);
-        response.end(`<html><p>frame body</p></html>`);
-        return true;
+      session.mitmRequestSession.blockedResources = {
+        urls: ['https://dataliberationfoundation.org/cookie'],
+        types: [],
+        handlerFn(request, response) {
+          response.setHeader('Set-Cookie', [
+            'cross1=1; SameSite=None; Secure; HttpOnly',
+            'cross2=2; SameSite=None; Secure; HttpOnly',
+          ]);
+          response.end(`<html><p>frame body</p></html>`);
+          return true;
+        },
       };
       koaServer.get('/cross-cookie', ctx => {
         ctx.cookies.set('cookietest', 'mainsite');
@@ -102,14 +105,18 @@ describe('UserProfile cookie tests', () => {
       const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['https://dataliberationfoundation.org/cookie2'];
+
+      session.mitmRequestSession.blockedResources = {
+        urls: ['https://dataliberationfoundation.org/cookie2'],
+        types: [],
+        handlerFn: (request, response) => {
+          dlfCookies = request.headers.cookie;
+          response.end(`<html><p>frame body</p></html>`);
+          return true;
+        },
+      };
       let dlfCookies = '';
       let sameCookies = '';
-      session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        dlfCookies = request.headers.cookie;
-        response.end(`<html><p>frame body</p></html>`);
-        return true;
-      };
       koaServer.get('/cross-cookie2', ctx => {
         sameCookies = ctx.cookies.get('cookietest');
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
@@ -323,15 +330,18 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/storage'];
-      session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        response.end(`<html><body><p>frame body</p>
+      session.mitmRequestSession.blockedResources = {
+        urls: ['http://dataliberationfoundation.org/storage'],
+        types: [],
+        handlerFn: (request, response) => {
+          response.end(`<html><body><p>frame body</p>
 <script>
 localStorage.setItem('cross', '1');
 </script>
 </body>
 </html>`);
-        return true;
+          return true;
+        },
       };
 
       koaServer.get('/cross-storage', ctx => {
@@ -357,16 +367,20 @@ localStorage.setItem('cross', '1');
       const core = Core.byTabId[meta.tabId];
       // @ts-ignore
       const session = core.session;
-      session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/storage2'];
-      session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-        response.end(`<html>
+
+      session.mitmRequestSession.blockedResources = {
+        urls: ['http://dataliberationfoundation.org/storage2'],
+        types: [],
+        handlerFn: (request, response) => {
+          response.end(`<html>
 <body>
 <script>
 window.parent.postMessage({message: localStorage.getItem('cross')}, "${koaServer.baseUrl}");
 </script>
 </body>
 </html>`);
-        return true;
+          return true;
+        },
       };
       koaServer.get('/cross-storage2', ctx => {
         ctx.body = `<body>

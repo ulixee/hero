@@ -1,17 +1,17 @@
-import * as http from "http";
-import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
-import ResourceType from "@secret-agent/core-interfaces/ResourceType";
-import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
-import IHttpResourceLoadDetails from "@secret-agent/commons/interfaces/IHttpResourceLoadDetails";
-import IResourceRequest from "@secret-agent/core-interfaces/IResourceRequest";
-import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
-import * as http2 from "http2";
-import { URL } from "url";
-import IResourceResponse from "@secret-agent/core-interfaces/IResourceResponse";
-import net from "net";
-import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import MitmRequestContext from "../lib/MitmRequestContext";
-import MitmRequestAgent from "../lib/MitmRequestAgent";
+import * as http from 'http';
+import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
+import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import * as http2 from 'http2';
+import { URL } from 'url';
+import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import net from 'net';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import MitmRequestContext from '../lib/MitmRequestContext';
+import MitmRequestAgent from '../lib/MitmRequestAgent';
 
 export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
   public static sessions: { [sessionId: string]: RequestSession } = {};
@@ -24,12 +24,17 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   public delegate: IHttpRequestModifierDelegate = {};
 
   public isClosing = false;
-  public blockResourceTypes: ResourceType[] = [];
-  public blockUrls: string[] = [];
-  public blockResponseHandlerFn?: (
-    request: http.IncomingMessage | http2.Http2ServerRequest,
-    response: http.ServerResponse | http2.Http2ServerResponse,
-  ) => boolean;
+  public blockedResources: {
+    types: ResourceType[];
+    urls: string[];
+    handlerFn?: (
+      request: http.IncomingMessage | http2.Http2ServerRequest,
+      response: http.ServerResponse | http2.Http2ServerResponse,
+    ) => boolean;
+  } = {
+    types: [],
+    urls: [],
+  };
 
   public requestAgent: MitmRequestAgent;
   public requests: IHttpResourceLoadDetails[] = [];
@@ -141,10 +146,10 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public shouldBlockRequest(url: string) {
-    if (!this.blockUrls) {
+    if (!this.blockedResources?.urls) {
       return false;
     }
-    for (const blockedUrlFragment of this.blockUrls) {
+    for (const blockedUrlFragment of this.blockedResources.urls) {
       if (url.includes(blockedUrlFragment)) {
         return true;
       }
@@ -157,7 +162,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     request: http.IncomingMessage | http2.Http2ServerRequest,
     response: http.ServerResponse | http2.Http2ServerResponse,
   ) {
-    if (this.blockResponseHandlerFn) return this.blockResponseHandlerFn(request, response);
+    if (this.blockedResources?.handlerFn) return this.blockedResources.handlerFn(request, response);
     return false;
   }
 

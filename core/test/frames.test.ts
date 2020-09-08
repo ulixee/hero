@@ -1,14 +1,14 @@
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { Helpers } from '@secret-agent/testing';
+import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import Core from '../index';
-import { Helpers } from '../../testing';
-import DomEnv from '../lib/DomEnv';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   await Core.start();
-  koaServer = await Helpers.runKoaServer();
+  koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -22,8 +22,12 @@ test('should handle opening a page', async () => {
   // @ts-ignore
   const tab = core.tab;
 
-  expect(tab.puppetPage.frames.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
-  expect(tab.puppetPage.frames.getActiveContext(tab.mainFrameId)).toBeTruthy();
+  const page = tab.puppetPage as Page;
+
+  // @ts-ignore
+  expect(page.framesManager.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  // @ts-ignore
+  expect(page.framesManager.getActiveContext(tab.mainFrameId)).toBeTruthy();
 
   await core.close();
 });
@@ -71,8 +75,11 @@ test('should track navigations and redirects', async () => {
 
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
-  const frames = tab.puppetPage.frames;
+  const page = tab.puppetPage as Page;
+  const frames = page.framesManager;
+  // @ts-ignore
   expect(frames.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  // @ts-ignore
   expect(frames.getActiveContext(tab.mainFrameId)).toBeTruthy();
 
   // @ts-ignore

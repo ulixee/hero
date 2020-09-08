@@ -33,11 +33,12 @@ export default class SessionState {
     return this.commands[this.commands.length - 1];
   }
 
+  public readonly sessionId: string;
+
   public viewport: IViewport;
   public readonly pages: PageHistory;
   public readonly db: SessionDb;
 
-  private readonly sessionId: string;
   private readonly sessionName: string;
   private readonly scriptInstanceMeta: IScriptInstanceMeta;
   private readonly createDate: Date;

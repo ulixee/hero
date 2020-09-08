@@ -1,14 +1,15 @@
-import { URL } from 'url';
 import Protocol from 'devtools-protocol';
+import { assert } from '@secret-agent/commons/utils';
+import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { CDPSession } from '../process/CDPSession';
-import { assert } from './assert';
-import { Credentials, NetworkManager } from './NetworkManager';
+import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import { URL } from 'url';
+import { CDPSession } from './CDPSession';
+import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
 import Mouse from './Mouse';
 import Touchscreen from './Touchscreen';
-import Frames, { IFrameEvents } from './Frames';
-import { ICookie } from '../interfaces/ICookie';
+import FramesManager from './FramesManager';
 import {
   debugError,
   exceptionDetailsToError,
@@ -17,35 +18,34 @@ import {
 } from './Utils';
 import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
-import CookieParam = Protocol.Network.CookieParam;
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
+import CookieParam = Protocol.Network.CookieParam;
 
-export class Page extends TypedEventEmitter<IPageEvents> {
+export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
   public mouse: Mouse;
   public touchscreen: Touchscreen;
-  public cdpSession: CDPSession;
-  public targetId: string;
+  public workersById = new Map<string, Worker>();
   public readonly browserContext: BrowserContext;
   public readonly opener: Page | null;
-
-  public isClosed = false;
   public networkManager: NetworkManager;
-  public frames: Frames;
+  public framesManager: FramesManager;
+
+  public initializeNewPage?: (page: IPuppetPage) => Promise<void>;
+
+  public cdpSession: CDPSession;
+  public targetId: string;
+  public isClosed = false;
   public readonly isReady: Promise<void>;
 
-  public get mainFrameId() {
-    return this.frames.mainFrameId;
+  public get mainFrame() {
+    return this.framesManager.main;
   }
 
-  public get url() {
-    return this.frames.main.url;
+  public get frames() {
+    return this.framesManager.activeFrames;
   }
-
-  private javascriptEnabled = true;
-
-  private workersById = new Map<string, Worker>();
 
   constructor(
     cdpSession: CDPSession,
@@ -60,8 +60,8 @@ export class Page extends TypedEventEmitter<IPageEvents> {
     this.keyboard = new Keyboard(cdpSession);
     this.mouse = new Mouse(cdpSession, this.keyboard);
     this.touchscreen = new Touchscreen(cdpSession, this.keyboard);
-    this.networkManager = new NetworkManager(cdpSession);
-    this.frames = new Frames(cdpSession);
+    this.networkManager = new NetworkManager(cdpSession, targetId);
+    this.framesManager = new FramesManager(cdpSession);
     this.opener = opener;
 
     this.cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
@@ -69,31 +69,46 @@ export class Page extends TypedEventEmitter<IPageEvents> {
     this.cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
     this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
 
-    this.frames.on('frameCreated', this.emit.bind(this, 'frameCreated'));
-    this.frames.on('frameNavigated', this.emit.bind(this, 'frameNavigated'));
-    this.frames.on('frameLifecycle', ({ frame, name }) => {
-      if (frame.id === this.mainFrameId && name === 'load') {
+    this.framesManager.on('frameLifecycle', ({ frame, name }) => {
+      if (name === 'load' && frame.id === this.mainFrame?.id) {
         this.emit('load');
       }
-      this.emit('frameLifecycle', { frame, name });
     });
+
+    for (const event of ['frameCreated', 'frameNavigated', 'frameLifecycle'] as const) {
+      this.framesManager.on(event, this.emit.bind(this, event));
+    }
+    for (const event of [
+      'navigationResponse',
+      'websocketFrame',
+      'websocketHandshake',
+      'resourceWillBeRequested',
+    ] as const) {
+      this.networkManager.on(event, this.emit.bind(this, event));
+    }
 
     this.cdpSession.once('disconnected', this.emit.bind(this, 'close'));
 
     this.isReady = this.initialize();
   }
 
-  public onChildPage(page: Page) {
-    this.emit('popup', { page });
+  async runInFrames<T>(script: string, isolatedEnvironment: boolean) {
+    return this.framesManager.runInActiveFrames(script, isolatedEnvironment);
   }
 
-  async authenticate(credentials: Credentials): Promise<void> {
-    return this.networkManager.setCredentials(credentials);
+  addNewDocumentScript(script: string, isolatedEnvironment: boolean) {
+    return this.framesManager.addNewDocumentScript(script, isolatedEnvironment);
   }
+
+  async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
+    return this.framesManager.addPageCallback(name, onCallback);
+  }
+
+  ///////   COOKIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async getPageCookies(): Promise<ICookie[]> {
     const { cookies } = await this.cdpSession.send('Network.getCookies', {
-      urls: [this.url],
+      urls: [this.mainFrame.url],
     });
     return cookies.map(
       x =>
@@ -113,13 +128,6 @@ export class Page extends TypedEventEmitter<IPageEvents> {
           expires: String(x.expires),
         } as ICookie),
     );
-  }
-
-  public async getIndexedDbsForOrigin(securityOrigin: string) {
-    const { databaseNames } = await this.cdpSession.send('IndexedDB.requestDatabaseNames', {
-      securityOrigin,
-    });
-    return databaseNames;
   }
 
   public async setCookies(cookies: ICookie[], origins: string[]) {
@@ -143,40 +151,47 @@ export class Page extends TypedEventEmitter<IPageEvents> {
     });
   }
 
+  public async getIndexedDbDatabaseNames() {
+    const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
+    for (const { origin, frameId } of this.framesManager.getSecurityOrigins()) {
+      const { databaseNames } = await this.cdpSession.send('IndexedDB.requestDatabaseNames', {
+        securityOrigin: origin,
+      });
+      dbs.push({ origin, frameId, databases: databaseNames });
+    }
+    return dbs;
+  }
+
   // some dialogs can't be handled in-page
   public handleJavascriptDialog(accept: boolean, promptText?: string) {
     return this.cdpSession.send('Page.handleJavaScriptDialog', { accept, promptText });
   }
 
   async setJavaScriptEnabled(enabled: boolean): Promise<void> {
-    if (this.javascriptEnabled === enabled) return;
-    this.javascriptEnabled = enabled;
     await this.cdpSession.send('Emulation.setScriptExecutionDisabled', {
       value: !enabled,
     });
   }
 
-  async evaluate(expression: string) {
-    return this.frames.runInFrame(expression, this.mainFrameId, false);
+  runInFrame<T>(frameId: string, script: string, isolatedEnvironment: boolean): Promise<T> {
+    return this.framesManager.runInFrame(frameId, script, isolatedEnvironment);
   }
 
-  async selectAll() {
-    // NOTE: might need more advanced handling https://github.com/GoogleChrome/puppeteer/issues/1313#issuecomment-480052880
-    await this.evaluate(`document.execCommand('selectall', false, null)`);
+  async evaluate(expression: string) {
+    return this.runInFrame(this.mainFrame.id, expression, false);
   }
 
   /////// NAVIGATION ///////
 
-  async navigate(url: string, options: { frameId?: string; referrer?: string } = {}) {
-    const frameId = options.frameId ?? this.mainFrameId;
+  async navigate(url: string, options: { referrer?: string } = {}) {
     const navigationResponse = await this.cdpSession.send('Page.navigate', {
       url,
       referrer: options.referrer,
-      frameId,
+      frameId: this.mainFrame.id,
     });
     if (navigationResponse.errorText) throw new Error(navigationResponse.errorText);
 
-    return this.frames.waitForFrame(navigationResponse, true);
+    return this.framesManager.waitForFrame(navigationResponse, true);
   }
 
   async goBack(): Promise<void> {
@@ -192,7 +207,7 @@ export class Page extends TypedEventEmitter<IPageEvents> {
   }
 
   async close(): Promise<void> {
-    await this.frames.close();
+    await this.framesManager.close();
     assert(
       this.cdpSession.isConnected(),
       'Protocol error: Connection closed. Most likely the page has been closed.',
@@ -213,47 +228,37 @@ export class Page extends TypedEventEmitter<IPageEvents> {
 
   private async initialize(): Promise<void> {
     await Promise.all([
-      this.networkManager.initialize(),
-      this.frames.initialize(),
+      this.networkManager.initialize(this.browserContext.emulation),
+      this.framesManager.initialize(),
       this.cdpSession.send('Target.setAutoAttach', {
         autoAttach: true,
         waitForDebuggerOnStart: true,
         flatten: true,
       }),
-      this.cdpSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
 
-    // after initialized, send self to emitters
-    this.browserContext.emit('page', this);
     if (this.opener) {
       await this.opener.isReady;
-      this.opener.emit('popup', { page: this });
+      if (this.opener.initializeNewPage) {
+        await this.opener.initializeNewPage(this);
+      }
     }
+
+    await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
+    // after initialized, send self to emitters
+    this.browserContext.emit('page', this);
   }
 
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { sessionId, targetInfo, waitingForDebugger } = event;
-    const { url, type } = targetInfo;
+
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
-    // TODO: see if frames forced into same site still have issues here
-    // if (event.targetInfo.type === 'iframe') {
-    //   // Frame id equals target id.
-    //   const targetId = event.targetInfo.targetId;
-    //   const frame = this._page._frameManager.frame(targetId)!;
-    //   this._page._frameManager.removeChildFramesRecursively(frame);
-    //   const frameSession = new FrameSession(this._crPage, cdpSession, targetId, this);
-    //   this._crPage._sessions.set(targetId, frameSession);
-    //   frameSession._initialize(false).catch(e => e);
-    //   return;
-    // }
-    //
-
-    if (type === 'service_worker') {
-      const worker = new Worker(this.browserContext, cdpSession, url, type);
+    if (targetInfo.type === 'service_worker') {
+      const worker = new Worker(this.browserContext, cdpSession, targetInfo);
       cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
       worker.on('consoleLog', this.emit.bind(this, 'consoleLog'));
-      this.workersById.set(sessionId, worker);
+      this.workersById.set(targetInfo.targetId, worker);
       worker.initialize(this.networkManager).catch(debugError);
       return;
     }
@@ -272,7 +277,7 @@ export class Page extends TypedEventEmitter<IPageEvents> {
 
   private onRuntimeException(msg: ExceptionThrownEvent) {
     const error = exceptionDetailsToError(msg.exceptionDetails);
-    const frameId = this.frames.getFrameIdForExecutionContext(
+    const frameId = this.framesManager.getFrameIdForExecutionContext(
       msg.exceptionDetails.executionContextId,
     );
     this.emit('pageError', {
@@ -283,7 +288,7 @@ export class Page extends TypedEventEmitter<IPageEvents> {
 
   private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
     const { executionContextId, args, stackTrace, type, context } = event;
-    const frameId = this.frames.getFrameIdForExecutionContext(executionContextId);
+    const frameId = this.framesManager.getFrameIdForExecutionContext(executionContextId);
 
     const message = args
       .map(arg => {
@@ -306,13 +311,4 @@ export class Page extends TypedEventEmitter<IPageEvents> {
   private onTargetCrashed() {
     this.emit('targetCrashed', { error: new Error('Target Crashed') });
   }
-}
-
-export interface IPageEvents extends IFrameEvents {
-  close: undefined;
-  load: undefined;
-  targetCrashed: { error: Error };
-  consoleLog: { frameId: string; type: string; message: string; location: string };
-  pageError: { frameId: string; error: Error };
-  popup: { page: Page };
 }

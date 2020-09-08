@@ -28,6 +28,20 @@ export default class CoreClient {
     return coreTab;
   }
 
+  public async getTabsForSession(sessionId: string): Promise<CoreTab[]> {
+    const tabSessions = await this.commandQueue.run<ISessionMeta[]>('getTabsForSession', sessionId);
+    const coreTabs: CoreTab[] = [];
+    for (const sessionMeta of tabSessions) {
+      let coreTab = this.tabsById[sessionMeta.tabId];
+      if (!coreTab) {
+        coreTab = new CoreTab(sessionMeta, this);
+        this.tabsById[sessionMeta.tabId] = coreTab;
+      }
+      coreTabs.push(coreTab);
+    }
+    return coreTabs;
+  }
+
   public async shutdown(error?: Error): Promise<void> {
     const tabIds = Object.keys(this.tabsById);
     if (tabIds.length || error) {

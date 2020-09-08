@@ -1,76 +1,78 @@
-import Path from "path";
-import os from "os";
-import { v1 as uuidv1 } from "uuid";
-import { ILaunchOptions } from "./interfaces/ILaunchOptions";
+import IPuppetBrowser from "@secret-agent/puppet/interfaces/IPuppetBrowser";
+import ILaunchedProcess from "@secret-agent/puppet/interfaces/ILaunchedProcess";
+import IPuppetLauncher from "@secret-agent/puppet/interfaces/IPuppetLauncher";
 import { Browser } from "./lib/Browser";
-import launchProcess from "./process/launchProcess";
+import { Connection } from "./lib/Connection";
 
-export default async function launch(options: ILaunchOptions): Promise<Browser> {
-  const chromeArguments = [
-    '--disable-background-networking',
-    '--enable-features=NetworkService,NetworkServiceInProcess',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--disable-breakpad',
-    '--disable-client-side-phishing-detection',
-    '--disable-component-extensions-with-background-pages',
-    '--disable-default-apps',
-    '--disable-dev-shm-usage',
-    '--disable-extensions',
-    '--disable-features=TranslateUI,site-per-process',
-    '--disable-hang-monitor',
-    '--disable-ipc-flooding-protection',
-    '--disable-prompt-on-repost',
-    '--disable-renderer-backgrounding',
-    '--disable-sync',
-    '--disable-gpu',
+const puppetLauncher: IPuppetLauncher = {
+  getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean }) {
+    const chromeArguments = [...defaultArgs];
+    if (!options.showBrowser) {
+      chromeArguments.push('--headless', '--hide-scrollbars', '--mute-audio');
+    } else {
+      chromeArguments.push('--auto-open-devtools-for-tabs');
+    }
 
-    '--force-color-profile=srgb',
-    '--use-gl=swiftshader-webgl',
-    '--use-gl=swiftshader',
-    '--use-gl=osmesa',
+    if (options.proxyPort !== undefined) {
+      chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
+    }
+    return chromeArguments;
+  },
+  async createPuppet(process: ILaunchedProcess): Promise<IPuppetBrowser> {
+    const { transport, close } = process;
+    try {
+      const connection = new Connection(transport);
+      return await Browser.create(connection, close);
+    } catch (error) {
+      close();
+      throw error;
+    }
+  },
+};
+export default puppetLauncher;
 
-    '--metrics-recording-only',
-    '--no-first-run',
+const defaultArgs = [
+  '--disable-background-networking',
+  '--enable-features=NetworkService,NetworkServiceInProcess',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-extensions-with-background-pages',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-extensions',
+  '--disable-features=TranslateUI,site-per-process',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-sync',
+  '--disable-gpu',
 
-    '--enable-automation',
-    '--remote-debugging-pipe',
+  '--force-color-profile=srgb',
+  '--use-gl=swiftshader-webgl',
+  '--use-gl=swiftshader',
+  '--use-gl=osmesa',
 
-    '--password-store=basic',
-    '--use-mock-keychain',
-    '--ignore-certificate-errors',
-    '--allow-running-insecure-content',
+  '--metrics-recording-only',
+  '--no-first-run',
 
-    '--lang=en-US,en;q=0.9',
-    '--window-size=1920,1080',
-    '--window-position=0,0',
+  '--enable-automation',
+  '--remote-debugging-pipe',
 
-    // don't leak private ip
-    '--force-webrtc-ip-handling-policy=default_public_interface_only',
-    // Use proxy for localhost URLs
-    '--proxy-bypass-list=<-loopback>',
-    '--no-startup-window',
-  ];
+  '--password-store=basic',
+  '--use-mock-keychain',
+  '--ignore-certificate-errors',
+  '--allow-running-insecure-content',
 
-  if (!options.showBrowser) {
-    chromeArguments.push('--headless', '--hide-scrollbars', '--mute-audio');
-  } else {
-    chromeArguments.push('--auto-open-devtools-for-tabs');
-  }
+  '--lang=en-US,en;q=0.9',
+  '--window-size=1920,1080',
+  '--window-position=0,0',
 
-  if (options.proxyPort !== undefined) {
-    chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
-  }
-
-  const temporaryUserDataDir = Path.join(os.tmpdir(), `sa-${uuidv1()}`);
-  chromeArguments.push(`--user-data-dir=${temporaryUserDataDir}`);
-
-  const { connection, close } = launchProcess(chromeArguments, temporaryUserDataDir, options);
-
-  try {
-    return await Browser.create(connection, close);
-  } catch (error) {
-    close();
-    throw error;
-  }
-}
+  // don't leak private ip
+  '--force-webrtc-ip-handling-policy=default_public_interface_only',
+  // Use proxy for localhost URLs
+  '--proxy-bypass-list=<-loopback>',
+  '--no-startup-window',
+];

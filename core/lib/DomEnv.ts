@@ -8,43 +8,59 @@ import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import Frames from '@secret-agent/puppet-chrome/lib/Frames';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import DomEnvError from './DomEnvError';
+import { Serializable } from '../interfaces/ISerializable';
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
 const SA_NOT_INSTALLED = 'SA_SCRIPT_NOT_INSTALLED';
 
-export default class DomEnv {
-  private readonly sessionId: string;
-  private frames: Frames;
-  private isInstalled = false;
-  private isClosed = false;
+const pageScripts = {
+  typeson: fs.readFileSync(require.resolve('typeson/dist/typeson.min.js'), 'utf8'),
+  typesonRegistry: fs
+    .readFileSync(require.resolve('typeson-registry/dist/presets/builtin.js'), 'utf8')
+    .replace(/\/\/# sourceMappingURL=.+\.map/g, ''),
+  domStorage: fs.readFileSync(
+    require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),
+    'utf8',
+  ),
+  jsPath: fs.readFileSync(
+    require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
+    'utf8',
+  ),
+};
 
-  constructor(sessionId: string, frames: Frames) {
-    this.frames = frames;
-    this.sessionId = sessionId;
-  }
-
-  public async install() {
-    if (this.isInstalled) return;
-    this.isInstalled = true;
-    await this.frames.addNewDocumentScript(
-      `(function installDomEnv() {
-${typesonScript};
-${typesonRegistryScript};
+const domEnvScript = `(function installDomEnv() {
+${pageScripts.typeson};
+${pageScripts.typesonRegistry};
 const TSON = new Typeson().register(Typeson.presets.builtin);
 
-${jsPathScript};
+${pageScripts.jsPath};
 
 window.SecretAgent = {
   JsPath,
   Fetcher,
 };
 
-${domStorageScript}
-})();`,
-    );
+${pageScripts.domStorage}
+})();`;
+
+export default class DomEnv {
+  private readonly sessionId: string;
+  private puppetPage: IPuppetPage;
+  private isInstalled = false;
+  private isClosed = false;
+
+  constructor(sessionId: string, puppetPage: IPuppetPage) {
+    this.puppetPage = puppetPage;
+    this.sessionId = sessionId;
+  }
+
+  public async install() {
+    if (this.isInstalled) return;
+    this.isInstalled = true;
+    await this.puppetPage.addNewDocumentScript(domEnvScript, true);
   }
 
   public close() {
@@ -121,7 +137,7 @@ ${domStorageScript}
   }
 
   public locationHref() {
-    return this.frames.runInFrame<string>('location.href', this.frames.mainFrameId, false);
+    return this.puppetPage.mainFrame.run<string>('location.href', false);
   }
 
   private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
@@ -141,9 +157,8 @@ ${domStorageScript}
     runInIsolatedEnvironment = true,
     retries = 10,
   ): Promise<T> {
-    const unparsedResult = await this.frames.runInFrame(
+    const unparsedResult = await this.puppetPage.mainFrame.run(
       serializedFn,
-      this.frames.mainFrameId,
       runInIsolatedEnvironment,
     );
 
@@ -152,8 +167,8 @@ ${domStorageScript}
       log.warn('Injected scripts not installed yet. Retrying', {
         sessionId: this.sessionId,
         fnName,
-        frames: this.frames.frames,
-        frameId: this.frames.mainFrameId,
+        frames: this.puppetPage.frames,
+        frameId: this.puppetPage.mainFrame.id,
       });
       await new Promise(resolve => setTimeout(resolve, 100));
       return this.runFn<T>(fnName, serializedFn, runInIsolatedEnvironment, retries - 1);
@@ -167,23 +182,4 @@ ${domStorageScript}
       return result as T;
     }
   }
-}
-
-const typesonScript = fs.readFileSync(require.resolve('typeson/dist/typeson.min.js'), 'utf8');
-const typesonRegistryScript = fs
-  .readFileSync(require.resolve('typeson-registry/dist/presets/builtin.js'), 'utf8')
-  .replace(/\/\/# sourceMappingURL=.+\.map/g, '');
-
-const domStorageScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),
-  'utf8',
-);
-const jsPathScript = fs.readFileSync(
-  require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
-  'utf8',
-);
-
-type Serializable = number | string | boolean | null | Serializable[] | IJSONObject;
-interface IJSONObject {
-  [key: string]: Serializable;
 }

@@ -6,8 +6,8 @@ import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
+import Puppet from '@secret-agent/puppet';
 import Session from './Session';
-import ChromeCore from './ChromeCore';
 
 const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
@@ -24,7 +24,7 @@ export default class GlobalPool {
   }
 
   private static _activeSessionCount = 0;
-  private static chromeCores: ChromeCore[] = [];
+  private static puppets: Puppet[] = [];
   private static mitmServer: MitmServer;
   private static waitingForAvailability: {
     options: ICreateSessionOptions;
@@ -40,7 +40,7 @@ export default class GlobalPool {
 
     for (const emulatorId of emulatorIds) {
       const emulator = Emulators.create(emulatorId);
-      this.addChromeCore(emulator);
+      this.addPuppet(emulator);
     }
 
     this.resolveWaitingConnection();
@@ -84,9 +84,9 @@ export default class GlobalPool {
     }
     this.waitingForAvailability.length = 0;
     const closePromises: Promise<any>[] = [];
-    while (this.chromeCores.length) {
-      const core = this.chromeCores.shift();
-      closePromises.push(core.close());
+    while (this.puppets.length) {
+      const puppetBrowser = this.puppets.shift();
+      closePromises.push(puppetBrowser.close());
     }
     if (this.mitmServer) {
       closePromises.push(this.mitmServer.close());
@@ -97,19 +97,22 @@ export default class GlobalPool {
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
-  private static addChromeCore(emulator: EmulatorPlugin) {
-    const existing = this.getChromeCore(emulator);
+  private static addPuppet(emulator: EmulatorPlugin) {
+    const existing = this.getPuppet(emulator);
     if (existing) return existing;
 
-    const core = new ChromeCore(emulator.engineExecutablePath);
-    this.chromeCores.push(core);
-    core.start(this.mitmServer.port);
-    return core;
+    const puppet = new Puppet(emulator);
+    this.puppets.push(puppet);
+
+    const showBrowser = !!process.env.SHOW_BROWSER;
+    const showBrowserLogs = !!process.env.DEBUG;
+    puppet.start(this.mitmServer.port, showBrowser, showBrowserLogs);
+    return puppet;
   }
 
-  private static getChromeCore(emulator?: EmulatorPlugin) {
-    if (!emulator) return this.chromeCores[0];
-    return this.chromeCores.find(x => x.executablePath === emulator.engineExecutablePath);
+  private static getPuppet(emulator?: EmulatorPlugin) {
+    if (!emulator) return this.puppets[0];
+    return this.puppets.find(x => x.executablePath === emulator.engineExecutablePath);
   }
 
   private static async startMitm() {
@@ -124,26 +127,26 @@ export default class GlobalPool {
     await this.startMitm();
 
     this._activeSessionCount += 1;
-    let chromeCore: ChromeCore;
+    let puppet: Puppet;
     try {
       const session = new Session(options);
 
-      chromeCore = this.getChromeCore(session.emulator) ?? this.addChromeCore(session.emulator);
+      puppet = this.getPuppet(session.emulator) ?? this.addPuppet(session.emulator);
 
-      const browserContext = await chromeCore.createContext();
+      const browserContext = await puppet.newContext(session.getBrowserEmulation());
+      await session.initialize(browserContext);
 
-      session.assignBrowserContext(browserContext);
       return session;
     } catch (err) {
       this._activeSessionCount -= 1;
 
       if (
-        chromeCore &&
+        puppet &&
         !isRetry &&
         String(err).includes('WebSocket is not open: readyState 3 (CLOSED)')
       ) {
-        await chromeCore.close();
-        await chromeCore.start(this.mitmServer.port);
+        await puppet.close();
+        await puppet.start(this.mitmServer.port);
         return this.createSessionNow(options, true);
       }
       throw err;

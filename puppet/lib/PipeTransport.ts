@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 import * as EventUtils from '@secret-agent/commons/EventUtils';
-import { debugError } from '../lib/Utils';
+import { debug } from '@secret-agent/commons/Debug';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
+
+const debugError = debug('puppet:error');
 
 export class PipeTransport implements IConnectionTransport {
   pipeWrite: NodeJS.WritableStream;

@@ -11,6 +11,7 @@
     "humanoids",
     "humanoid-plugins/*",
     "injected-scripts",
+    "puppet",
     "puppet-chrome",
     "mitm",
     "core-server",

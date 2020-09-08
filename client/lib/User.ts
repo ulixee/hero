@@ -1,21 +1,12 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import WebsocketResource from './WebsocketResource';
 import Browser from './Browser';
-import Resource, { createResource } from './Resource';
 import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
 import Interactor from './Interactor';
-import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { createTab, getCoreTab } from './Tab';
-import CoreTab from './CoreTab';
+import Tab, { getCoreTab } from './Tab';
 
 const { getState, setState } = StateMachine<User, IState>();
 
@@ -48,12 +39,6 @@ export default class User {
 
   // METHODS
 
-  public async goto(href: string) {
-    const activeTab = getActiveTabSession(this);
-    const resource = await activeTab.goto(href);
-    return createResource(resource, activeTab);
-  }
-
   public async click(mousePosition: IMousePosition) {
     const activeTab = getActiveTabSession(this);
     await Interactor.run(activeTab, [{ click: mousePosition }]);
@@ -72,51 +57,8 @@ export default class User {
     );
   }
 
-  public async waitForAllContentLoaded(): Promise<void> {
-    await getActiveTabSession(this).waitForLoad(LocationStatus.AllContentLoaded);
-  }
-
-  public async waitForLoad(status: LocationStatus): Promise<void> {
-    await getActiveTabSession(this).waitForLoad(status);
-  }
-
-  public async waitForResource(
-    filter: IWaitForResourceFilter,
-    options?: IWaitForResourceOptions,
-  ): Promise<(Resource | WebsocketResource)[]> {
-    const browser = getState(this).browser;
-    return Resource.waitFor(browser.activeTab, filter, options);
-  }
-
-  public async waitForElement(
-    element: ISuperElement,
-    options?: IWaitForElementOptions,
-  ): Promise<void> {
-    const { awaitedPath } = getState<ISuperElement, { awaitedPath: AwaitedPath }>(element);
-    await getActiveTabSession(this).waitForElement(awaitedPath.toJSON(), options);
-  }
-
-  public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    await getActiveTabSession(this).waitForLocation(trigger);
-  }
-
-  public async waitForMillis(millis: number): Promise<void> {
-    await getActiveTabSession(this).waitForMillis(millis);
-  }
-
-  public async waitForWebSocket(url: string | RegExp): Promise<void> {
-    await getActiveTabSession(this).waitForWebSocket(url);
-  }
-
   public async exportProfile(): Promise<IUserProfile> {
     return await getActiveTabSession(this).exportUserProfile();
-  }
-
-  public async waitForNewTab(): Promise<Tab> {
-    const browser = getState(this).browser;
-    const coreClient = getCoreTab(browser.activeTab);
-    const coreTab = await coreClient.waitForNewTab();
-    return createTab(browser, coreTab);
   }
 
   public async focusTab(tab: Tab) {

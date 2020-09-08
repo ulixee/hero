@@ -1,4 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
+import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import Core from '../index';
 
 let koaServer;
@@ -64,5 +65,41 @@ describe('basic Tab tests', () => {
         waitForVisible: true,
       }),
     ).resolves.toBe(undefined);
+  });
+
+  it('can wait for another tab', async () => {
+    let useragent1: string;
+    let useragent2: string;
+    koaServer.get('/test3', ctx => {
+      useragent1 = ctx.get('user-agent');
+      ctx.body = `<body>
+<a target="_blank" href="/test4">Nothing really here</a>
+</body>`;
+    });
+    koaServer.get('/test4', ctx => {
+      useragent2 = ctx.get('user-agent');
+      ctx.body = `<body><h1 id="newTabHeader">You are here</h1></body>`;
+    });
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(`${koaServer.baseUrl}/test3`);
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    // @ts-ignore
+    const session = core.session;
+
+    const newTab = await core.waitForNewTab();
+    const newTabCore = Core.byTabId[newTab.tabId];
+    expect(newTab).toBeTruthy();
+    expect(session.tabs).toHaveLength(2);
+    await newTabCore.waitForLoad('AllContentLoaded');
+    const header = await newTabCore.execJsPath(['document', ['querySelector', '#newTabHeader'], 'textContent']);
+    expect(header.value).toBe('You are here');
+    expect(useragent1).toBe(useragent2);
   });
 });

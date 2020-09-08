@@ -3,10 +3,10 @@ import Log from '@secret-agent/commons/Logger';
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { NavigationReason } from '@secret-agent/core-interfaces/IPage';
 import { URL } from 'url';
+import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
 import { debugError, exceptionDetailsToError } from './Utils';
-import { CDPSession } from '../process/CDPSession';
+import { CDPSession } from './CDPSession';
 import { IFrame } from '../interfaces/IFrame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
@@ -25,7 +25,7 @@ const { log } = Log(module);
 const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
 
-export default class Frames extends TypedEventEmitter<IFrameEvents> {
+export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
   public frames: { [id: string]: IFrame } = {};
 
   public get mainFrameId() {
@@ -34,6 +34,10 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
 
   public get main() {
     return this.frames[this.mainFrameId];
+  }
+
+  public get activeFrames() {
+    return Array.from(this.attachedFrameIds).map(x => this.frames[x]);
   }
 
   private isClosing = false;
@@ -127,16 +131,6 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
     await frame.frameLoading.promise;
   }
 
-  public getActiveContext(frameId: string, isolatedContext = false): IFrameContext | undefined {
-    const worldName = isolatedContext ? ISOLATED_WORLD : '';
-    return this.executionContexts.find(
-      x =>
-        x.worldName === worldName &&
-        x.frameId === frameId &&
-        this.activeContexts.has(x.executionContextId),
-    );
-  }
-
   public getFrameIdForExecutionContext(executionContextId: number) {
     for (const context of this.executionContexts) {
       if (context.executionContextId === executionContextId) {
@@ -155,7 +149,7 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
       activeFrameIds.map(async frameId => {
         try {
           results[frameId] = {
-            value: await this.runInFrame(expression, frameId, runIsolated),
+            value: await this.runInFrame(frameId, expression, runIsolated),
           };
         } catch (err) {
           results[frameId] = { error: new Error('Could not execute expression') };
@@ -165,7 +159,7 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
     return results;
   }
 
-  public async runInFrame<T>(expression: string, frameId: string, runIsolated = true) {
+  public async runInFrame<T>(frameId: string, expression: string, runIsolated = true) {
     const context = await this.waitForActiveContext(frameId, runIsolated);
     return this.runInContext<T>(expression, context.executionContextId);
   }
@@ -192,7 +186,17 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
 
-  public async runInContext<T>(expression: string, contextId: number) {
+  private getActiveContext(frameId: string, isolatedContext = false): IFrameContext | undefined {
+    const worldName = isolatedContext ? ISOLATED_WORLD : '';
+    return this.executionContexts.find(
+      x =>
+        x.worldName === worldName &&
+        x.frameId === frameId &&
+        this.activeContexts.has(x.executionContextId),
+    );
+  }
+
+  private async runInContext<T>(expression: string, contextId: number) {
     const result = await this.cdpSession.send('Runtime.evaluate', {
       expression,
       contextId,
@@ -358,6 +362,7 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
       lifecycleEvents: {},
       frameLoading: createPromise(),
       hasNavigated: !!newFrame.url,
+      run: this.runInFrame.bind(this, newFrame.id),
     };
     this.frames[frame.id] = frame;
     this.emit('frameCreated', { frame });
@@ -400,13 +405,6 @@ export default class Frames extends TypedEventEmitter<IFrameEvents> {
       }
     }
   }
-}
-
-export interface IFrameEvents {
-  frameCreated: { frame: IFrame };
-  frameLifecycle: { frame: IFrame; name: string };
-  frameNavigated: { frame: IFrame; navigatedInDocument?: boolean };
-  frameRequestedNavigation: { frame: IFrame; url: string; reason: NavigationReason };
 }
 
 interface IFrameContext {

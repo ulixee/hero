@@ -1,8 +1,8 @@
 import Core, { Tab } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
-import ChromeCore from '@secret-agent/core/lib/ChromeCore';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import Puppet from '@secret-agent/puppet';
 import DomChangesTable from '../models/DomChangesTable';
 
 const domReplayScript = fs.readFileSync(
@@ -86,24 +86,26 @@ describe('basic Dom Replay tests', () => {
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
     const tab: Tab = core.tab;
-
     // @ts-ignore
-    const chromeCorePath = core.session.emulator.engineExecutablePath;
-    const mirrorChrome = new ChromeCore(chromeCorePath);
+    const session = core.session;
+
+    const mirrorChrome = new Puppet(session.emulator);
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const context = await mirrorChrome.createContext();
+    const context = await mirrorChrome.newContext(session.getBrowserEmulation());
     const mirrorPage = await context.newPage();
     const debug = false;
     if (debug) {
+      // eslint-disable-next-line no-console
       mirrorPage.on('pageError', console.log);
+      // eslint-disable-next-line no-console
       mirrorPage.on('consoleLog', log => console.log(log));
     }
-    await mirrorPage.frames.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
+    await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
 
-    const sourceHtml = await tab.puppetPage.evaluate(getContentScript);
+    const sourceHtml = await tab.puppetPage.mainFrame.run(getContentScript, false);
 
     const state = tab.sessionState;
 
@@ -111,12 +113,13 @@ describe('basic Dom Replay tests', () => {
       await tab.domRecorder.flush();
       const pageChanges = await state.getPageDomChanges(state.pages.history);
       const [changes] = Object.values(pageChanges);
-      await mirrorPage.evaluate(
+      await mirrorPage.mainFrame.run(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+        false,
       );
     }
 
-    const mirrorHtml = await mirrorPage.evaluate(getContentScript);
+    const mirrorHtml = await mirrorPage.mainFrame.run(getContentScript, false);
     expect(mirrorHtml).toBe(sourceHtml);
 
     let lastCommandId = core.lastCommandId;
@@ -134,12 +137,13 @@ describe('basic Dom Replay tests', () => {
       const pageChangesByFrame = await state.getPageDomChanges(state.pages.history, lastCommandId);
       lastCommandId = core.lastCommandId;
       const [changes] = Object.values(pageChangesByFrame);
-      await mirrorPage.evaluate(
+      await mirrorPage.mainFrame.run(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+        false,
       );
 
-      const sourceHtmlNext = await tab.puppetPage.evaluate(getContentScript);
-      const mirrorHtmlNext = await mirrorPage.evaluate(getContentScript);
+      const sourceHtmlNext = await tab.puppetPage.mainFrame.run(getContentScript, false);
+      const mirrorHtmlNext = await mirrorPage.mainFrame.run(getContentScript, false);
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
   });

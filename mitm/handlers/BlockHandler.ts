@@ -7,7 +7,7 @@ export default class BlockHandler {
     if (session.isClosing) return true;
 
     const shouldBlock =
-      (ctx.resourceType && session.blockResourceTypes.includes(ctx.resourceType)) ||
+      (ctx.resourceType && session.blockedResources?.types?.includes(ctx.resourceType)) ||
       session.shouldBlockRequest(ctx.url.href);
 
     if (!shouldBlock) return false;

@@ -134,10 +134,6 @@ export default class CoreTab {
     await this.commandQueue.run('focusTab');
   }
 
-  public async closeTab(): Promise<void> {
-    await this.commandQueue.run('closeTab');
-  }
-
   public async addEventListener(
     jsPath: IJsPath | null,
     eventType: string,
@@ -156,7 +152,7 @@ export default class CoreTab {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run('close');
+    await this.commandQueue.run('closeTab');
     process.nextTick(() => {
       delete this.coreClient.tabsById[this.meta.tabId];
     });

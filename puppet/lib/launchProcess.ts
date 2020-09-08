@@ -1,42 +1,24 @@
-/**
- * Copyright 2020 Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as childProcess from 'child_process';
 import { StdioOptions } from 'child_process';
-import * as removeFolder from 'rimraf';
 import { debug } from '@secret-agent/commons/Debug';
 import { Readable, Writable } from 'stream';
-import { Connection } from './Connection';
 import { PipeTransport } from './PipeTransport';
-import { ILaunchOptions } from '../interfaces/ILaunchOptions';
+import ILaunchedProcess from "../interfaces/ILaunchedProcess";
 
-const debugLauncher = debug('puppet-chrome:launcher');
+const debugLauncher = debug('puppet:launcher');
 const PROCESS_ERROR_EXPLANATION = `SecretAgent was unable to kill the process which ran this browser binary.
 On future SecretAgent launches, SecretAgent might not be able to launch the browser.
 Please check your open processes and ensure that the browser processes that SecretAgent launched have been killed.
 If you think this is a bug, please report it on the SecretAgent issue tracker.`;
 
 export default function launchProcess(
+  executablePath: string,
   processArguments: string[],
-  tempDirectory: string,
-  launchOptions: ILaunchOptions,
-): ILaunchedProcess {
-  const { dumpio, env, executablePath } = launchOptions;
+  env: NodeJS.ProcessEnv,
+  pipeIo = false,
+) {
   const stdio: StdioOptions = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
-  if (!dumpio) {
+  if (!pipeIo) {
     stdio[1] = 'ignore';
     stdio[2] = 'ignore';
   }
@@ -52,28 +34,20 @@ export default function launchProcess(
     stdio,
   });
 
-  if (dumpio) {
+  if (pipeIo) {
     launchedProcess.stderr.pipe(process.stderr);
     launchedProcess.stdout.pipe(process.stdout);
   }
 
-  let isCleanedUp = false;
-  function cleanup() {
-    if (isCleanedUp) return;
-    isCleanedUp = true;
-    removeFolder.sync(tempDirectory);
-  }
-  launchedProcess.once('exit', cleanup.bind(this));
   process.once('exit', close.bind(this));
 
   const transport = new PipeTransport(
     launchedProcess.stdio[3] as Writable,
     launchedProcess.stdio[4] as Readable,
   );
-  const connection = new Connection(transport);
 
   return {
-    connection,
+    transport,
     close,
   } as ILaunchedProcess;
 
@@ -89,11 +63,5 @@ export default function launchProcess(
     } catch (error) {
       throw new Error(`${PROCESS_ERROR_EXPLANATION}\nError cause: ${error.stack}`);
     }
-    cleanup();
   }
-}
-
-interface ILaunchedProcess {
-  connection: Connection;
-  close: () => void;
 }

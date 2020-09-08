@@ -1,10 +1,11 @@
-import GlobalPool from '@secret-agent/core/lib/GlobalPool';
-import { UpstreamProxy } from '@secret-agent/mitm';
-import { Helpers } from '@secret-agent/testing';
-import Chrome83 from '@secret-agent/emulate-chrome-83';
-import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
-import { createPromise } from '@secret-agent/commons/utils';
-import Tab from '../lib/Tab';
+import GlobalPool from "@secret-agent/core/lib/GlobalPool";
+import { UpstreamProxy } from "@secret-agent/mitm";
+import { Helpers } from "@secret-agent/testing";
+import Chrome83 from "@secret-agent/emulate-chrome-83";
+import MitmRequestContext from "@secret-agent/mitm/lib/MitmRequestContext";
+import { createPromise } from "@secret-agent/commons/utils";
+import { LocationStatus } from "@secret-agent/core-interfaces/Location";
+import Core from "../index";
 
 const mocks = {
   MitmRequestContext: {
@@ -31,7 +32,7 @@ test('should be able to run multiple pages each with their own proxy', async () 
   const url1 = `${httpServer.url}page1`;
   const browserSession1 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession1);
-  const tab1 = await Tab.create(browserSession1);
+  const tab1 = await browserSession1.createTab();
   await tab1.goto(url1);
   await tab1.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url1);
@@ -39,7 +40,7 @@ test('should be able to run multiple pages each with their own proxy', async () 
   const url2 = `${httpServer.url}page2`;
   const browserSession2 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession2);
-  const tab2 = await Tab.create(browserSession2);
+  const tab2 = await browserSession2.createTab();
   await tab2.goto(url2);
   await tab2.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url2);
@@ -66,10 +67,11 @@ test('should send preflight requests', async () => {
 
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
-  session.requestMitmProxySession.blockUrls = ['http://dataliberationfoundation.org/postback'];
-  session.requestMitmProxySession.blockResponseHandlerFn = (request, response) => {
-    response.end(`<html>
-<head></head>
+  session.mitmRequestSession.blockedResources.urls = [
+    'http://dataliberationfoundation.org/postback',
+  ];
+  session.mitmRequestSession.blockedResources.handlerFn = (request, response) => {
+    response.end(`<html lang="en">
 <body>
 <script type="text/javascript">
 const xhr = new XMLHttpRequest();
@@ -83,7 +85,7 @@ xhr.send('<person><name>DLF</name></person>');
     `);
     return true;
   };
-  const tab = await Tab.create(session);
+  const tab = await session.createTab();
   await tab.goto(`http://dataliberationfoundation.org/postback`);
   await expect(corsPromise).resolves.toBeTruthy();
   await expect(postPromise).resolves.toBeTruthy();
@@ -98,7 +100,7 @@ xhr.send('<person><name>DLF</name></person>');
 });
 
 test('should proxy requests from worker threads', async () => {
-  const koa = await Helpers.runKoaServer();
+  const koa = await Helpers.runKoaServer(false);
   koa.get('/worker.js', ctx => {
     ctx.set('content-type', 'application/javascript');
     ctx.body = `
@@ -109,7 +111,7 @@ onmessage = function(e) {
 }`;
   });
   koa.get('/test', ctx => {
-    ctx.body = `<html><head></head>
+    ctx.body = `<html lang="en">
 <script>
 const myWorker = new Worker("worker.js");
 myWorker.postMessage('send');
@@ -126,7 +128,7 @@ myWorker.postMessage('send');
   });
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
-  const tab = await Tab.create(session);
+  const tab = await session.createTab();
   await tab.goto(`${koa.baseUrl}/test`);
   await tab.waitForLoad('AllContentLoaded');
   await expect(serviceXhr).resolves.toBe('FromWorker');
@@ -224,7 +226,7 @@ window.addEventListener('load', function() {
   process.env.MITM_ALLOW_INSECURE = 'true';
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
-  const tab = await Tab.create(session);
+  const tab = await session.createTab();
   await tab.goto(`${server.baseUrl}/service-worker`);
   await tab.waitForLoad('AllContentLoaded');
   const [originalHeaders, headersFromWorker] = await Promise.all([
@@ -236,4 +238,44 @@ window.addEventListener('load', function() {
   await expect(headersFromWorker['proxy-authorization']).not.toBeTruthy();
   await expect(originalHeaders['user-agent']).toBe(headersFromWorker['user-agent']);
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
+});
+
+test('should proxy iframe requests', async () => {
+  const koaServer = await Helpers.runKoaServer(false);
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
+
+  // @ts-ignore
+  const session = core.session;
+
+  session.mitmRequestSession.blockedResources.urls = [
+    'https://dataliberationfoundation.org/iframe',
+    'https://dataliberationfoundation.org/test.css',
+    'https://dataliberationfoundation.org/dlfSite.png',
+  ];
+  session.mitmRequestSession.blockedResources.handlerFn = (request, response) => {
+    response.end(`<html lang="en">
+<head title="test"><link rel="stylesheet" type="text/css" href="/test.css"/></head>
+<body><img alt="none" src="/dlfSite.png"/></body>
+</html>`);
+    return true;
+  };
+  koaServer.get('/iframe-test', async ctx => {
+    ctx.body = `<html lang="en">
+<body>
+This is the main body
+<iframe src="https://dataliberationfoundation.org/iframe"></iframe>
+</body>
+</html>`;
+  });
+  await core.goto(`${koaServer.baseUrl}/iframe-test`);
+  await core.waitForLoad(LocationStatus.AllContentLoaded);
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
+  const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
+  expect(urls).toEqual([
+    expect.stringMatching(/http:\/\/localhost:\d+\/iframe-test/),
+    'https://dataliberationfoundation.org/iframe',
+    'https://dataliberationfoundation.org/test.css',
+    'https://dataliberationfoundation.org/dlfSite.png',
+  ]);
 });

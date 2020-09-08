@@ -29,7 +29,7 @@ import * as URL from 'url';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';
 import { debug } from '@secret-agent/commons/Debug';
-import { assert } from '../lib/assert';
+import { assert } from '@secret-agent/commons/utils';
 
 const debugFetcher = debug(`puppet-chrome:fetcher`);
 
@@ -160,6 +160,7 @@ export class BrowserFetcher {
         resolve(response.statusCode === 200);
       });
       request.on('error', error => {
+        // eslint-disable-next-line no-console
         console.error(error);
         resolve(false);
       });
@@ -381,6 +382,7 @@ async function installDMG(dmgPath: string, folderPath: string): Promise<void> {
       const unmountCommand = `hdiutil detach "${mountPath}" -quiet`;
       debugFetcher(`Unmounting ${mountPath}`);
       childProcess.exec(unmountCommand, err => {
+        // eslint-disable-next-line no-console
         if (err) console.error(`Error unmounting dmg: ${err}`);
       });
     }

@@ -1,4 +1,4 @@
-export interface ILaunchOptions {
+export default interface ILaunchOptions {
   showBrowser?: boolean;
   executablePath: string;
   proxyPort: number;

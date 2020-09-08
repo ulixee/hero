@@ -65,7 +65,7 @@ describe('events', () => {
     };
 
     let eventCount = 0;
-    await browser.on('resource', onResourceFn);
+    await browser.activeTab.on('resource', onResourceFn);
 
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
@@ -79,7 +79,7 @@ describe('events', () => {
     ]);
     expect(eventCount).toBe(2);
 
-    await browser.off('resource', onResourceFn);
+    await browser.activeTab.off('resource', onResourceFn);
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
         id: 3,

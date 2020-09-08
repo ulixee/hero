@@ -1,4 +1,4 @@
-import { CDPSession } from '../process/CDPSession';
+import { CDPSession } from './CDPSession';
 import { Keyboard } from './Keyboard';
 
 /**

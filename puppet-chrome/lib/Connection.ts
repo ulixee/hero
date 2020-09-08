@@ -15,9 +15,9 @@
  */
 import { debug } from "@secret-agent/commons/Debug";
 import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
-import IConnectionTransport from "../interfaces/IConnectionTransport";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import IConnectionTransport from "@secret-agent/puppet/interfaces/IConnectionTransport";
 import { CDPSession } from "./CDPSession";
-import { TypedEventEmitter } from "../../commons/eventUtils";
 
 const debugProtocolSend = debug('puppet-chrome:protocol:SEND ►');
 const debugProtocolReceive = debug('puppet-chrome:protocol:RECV ◀');

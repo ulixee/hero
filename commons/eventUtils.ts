@@ -28,7 +28,66 @@ export function removeEventListeners(
   listeners.length = 0;
 }
 
-export class TypedEventEmitter<T> extends EventEmitter {
+export interface ITypedEventEmitter<T> {
+  on<K extends keyof T & (string | symbol)>(
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => any,
+  ): this;
+
+  off<K extends keyof T & (string | symbol)>(
+    event: K,
+    listener: (this: this, event?: T[K]) => any,
+  ): this;
+
+  once<K extends keyof T & (string | symbol)>(
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => any,
+  ): this;
+
+  emit<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]): boolean;
+
+  addListener<K extends keyof T & (string | symbol)>(
+    event: K,
+    listener: (this: this, event?: T[K]) => any,
+  ): this;
+
+  removeListener<K extends keyof T & (string | symbol)>(
+    event: K,
+    listener: (this: this, event?: T[K]) => any,
+  ): this;
+
+  prependListener<K extends keyof T & (string | symbol)>(
+    event: K,
+    listener: (this: this, event?: T[K]) => void,
+  ): this;
+
+  prependOnceListener<K extends keyof T & (string | symbol)>(
+    event: K,
+    listener: (this: this, event?: T[K]) => void,
+  ): this;
+}
+
+export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
+  public async waitOn<K extends keyof T & (string | symbol)>(
+    eventType: K,
+    listenerFn?: (this: this, event?: T[K]) => boolean,
+  ) {
+    return new Promise<T[K]>(resolve => {
+      const listeners: IRegisteredEventListener[] = [];
+
+      const listener = addEventListener(this, eventType, result => {
+        // give the listeners a second to register
+        process.nextTick(() => {
+          if (!listenerFn || listenerFn.call(this, result)) {
+            resolve(result);
+            removeEventListeners(listeners);
+          }
+        });
+      });
+      listeners.push(listener);
+    });
+  }
+
   public on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,

@@ -1,50 +1,40 @@
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import Response from 'awaited-dom/impl/official-klasses/Response';
-import { createSuperDocument } from 'awaited-dom/impl/create';
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Request from 'awaited-dom/impl/official-klasses/Request';
-import { bindFunctions } from '@secret-agent/commons/utils';
-import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
-import CoreClient from './CoreClient';
-import CoreTab from './CoreTab';
-import Resource from './Resource';
-import WebsocketResource from './WebsocketResource';
-import ScriptInstance from './ScriptInstance';
-import User, { createUser } from './User';
-import Fetcher from './Fetcher';
-import ICreateBrowserOptions from '../interfaces/ICreateBrowserOptions';
-import AwaitedEventTarget from './AwaitedEventTarget';
-import IBrowser from '../interfaces/IBrowser';
-import RequestGenerator from './Request';
-import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { createTab, getCoreTab } from './Tab';
+import initializeConstantsAndProperties from "awaited-dom/base/initializeConstantsAndProperties";
+import StateMachine from "awaited-dom/base/StateMachine";
+import { ILocationTrigger } from "@secret-agent/core-interfaces/Location";
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
+import { ISuperElement } from "awaited-dom/base/interfaces/super";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import { bindFunctions } from "@secret-agent/commons/utils";
+import Request from "awaited-dom/impl/official-klasses/Request";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import IInteractions, { IMousePosition, ITypeInteraction } from "../interfaces/IInteractions";
+import CoreClient from "./CoreClient";
+import CoreTab from "./CoreTab";
+import ScriptInstance from "./ScriptInstance";
+import User, { createUser } from "./User";
+import ICreateBrowserOptions from "../interfaces/ICreateBrowserOptions";
+import AwaitedEventTarget from "./AwaitedEventTarget";
+import IBrowser from "../interfaces/IBrowser";
+import IWaitForResourceFilter from "../interfaces/IWaitForResourceFilter";
+import Tab, { createTab, getCoreTab } from "./Tab";
 
-const { getState, setState } = StateMachine<IBrowser, IState>();
+const { getState, setState } = StateMachine<Browser, IState>();
 const scriptInstance = new ScriptInstance();
 
 interface IState {
-  tabs: Tab[];
   activeTab: Tab;
   sessionName: string;
   user: User;
   isClosing: boolean;
   coreTab: CoreTab;
+  coreClient: CoreClient;
+  tabs: Tab[];
 }
 
 interface IEventType {
   close: Browser;
-  resource: Resource | WebsocketResource;
 }
 
 const propertyKeys: (keyof Browser)[] = [
@@ -61,13 +51,12 @@ const propertyKeys: (keyof Browser)[] = [
 ];
 
 export default class Browser extends AwaitedEventTarget<IEventType, IState> implements IBrowser {
-  constructor(coreTab: CoreTab, sessionName: string) {
+  constructor(coreTab: CoreTab, coreClient: CoreClient, sessionName: string) {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
 
     const activeTab = createTab(this, coreTab);
     setState(this, {
-      tabs: [activeTab],
       activeTab,
       get coreTab() {
         return getCoreTab(this.activeTab);
@@ -75,46 +64,45 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
       sessionName,
       user: createUser(this),
       isClosing: false,
+      coreClient,
+      tabs: [activeTab],
     });
 
     bindFunctions(this);
   }
 
-  public get cookies(): Promise<ICookie[]> {
-    return this.activeTab.cookies;
-  }
-
-  public get document(): SuperDocument {
-    const awaitedPath = new AwaitedPath('document');
-    const coreTab = getCoreTab(this.activeTab);
-    const awaitedOptions = { browser: this, coreTab };
-    return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
-  }
-
-  public get Request(): typeof Request {
-    return RequestGenerator(getCoreTab(this.activeTab));
-  }
-
-  public get user(): User {
-    return getState(this).user;
-  }
-
-  public get url(): Promise<string> {
-    return this.activeTab.url;
-  }
-
-  public get sessionId(): string {
+  public get sessionId() {
     const { activeTab } = getState(this);
     const coreTab = getCoreTab(activeTab);
     return coreTab.sessionId;
   }
 
-  public get sessionName(): string {
+  public get sessionName() {
     return getState(this).sessionName;
   }
 
-  public get lastCommandId(): number {
+  public get user() {
+    return getState(this).user;
+  }
+
+  public get cookies() {
+    return this.activeTab.cookies;
+  }
+
+  public get document() {
+    return this.activeTab.document;
+  }
+
+  public get url() {
+    return this.activeTab.url;
+  }
+
+  public get lastCommandId() {
     return this.activeTab.lastCommandId;
+  }
+
+  public get Request() {
+    return this.activeTab.Request;
   }
 
   public get activeTab() {
@@ -122,27 +110,21 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
   }
 
   public get tabs() {
-    return [...getState(this).tabs];
+    return getSessionTabs(this);
   }
 
   // METHODS
 
-  public fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
-    return Fetcher.fetch(this, request, init);
-  }
-
   public async close(): Promise<void> {
-    const { isClosing, activeTab } = getState(this);
+    const { isClosing } = getState<Browser, IState>(this);
     if (isClosing) return;
     setState(this, { isClosing: true });
 
-    const tabSession = getCoreTab(activeTab);
-    await tabSession.close();
-  }
-
-  public async getJsValue(path: string): Promise<any> {
-    const clientTabSession = getCoreTab(this.activeTab);
-    return clientTabSession.getJsValue(path);
+    const tabs = await this.tabs;
+    for (const tab of tabs) {
+      const tabSession = getCoreTab(tab);
+      await tabSession.close();
+    }
   }
 
   public async configure(options: ISessionOptions): Promise<void> {
@@ -158,11 +140,51 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
     await tab.close();
   }
 
-  // METHODS THAT DELEGATE TO USER
+  public async waitForNewTab() {
+    const coreClient = getCoreTab(this.activeTab);
+    const coreTab = await coreClient.waitForNewTab();
+    return createTab(this, coreTab);
+  }
+
+  /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
   public async goto(href: string) {
-    return this.user.goto(href);
+    return this.activeTab.goto(href);
   }
+
+  public async fetch(request: Request | string, init?: IRequestInit) {
+    return this.activeTab.fetch(request, init);
+  }
+
+  public getJsValue<T>(path: string) {
+    return this.activeTab.getJsValue<T>(path);
+  }
+
+  public async waitForAllContentLoaded() {
+    return this.activeTab.waitForAllContentLoaded();
+  }
+
+  public async waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
+    return this.activeTab.waitForResource(filter, options);
+  }
+
+  public async waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
+    return this.activeTab.waitForElement(element, options);
+  }
+
+  public async waitForLocation(trigger: ILocationTrigger) {
+    return this.activeTab.waitForLocation(trigger);
+  }
+
+  public async waitForMillis(millis: number) {
+    return this.activeTab.waitForMillis(millis);
+  }
+
+  public async waitForWebSocket(url: string | RegExp) {
+    return this.activeTab.waitForWebSocket(url);
+  }
+
+  /////// METHODS THAT DELEGATE TO USER ////////////////////////////////////////////////////////////////////////////////
 
   public async click(mousePosition: IMousePosition) {
     return this.user.click(mousePosition);
@@ -174,34 +196,6 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
 
   public async type(...typeInteractions: ITypeInteraction[]) {
     return this.user.type(...typeInteractions);
-  }
-
-  public async waitForAllContentLoaded() {
-    return this.user.waitForAllContentLoaded();
-  }
-
-  public async waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
-    return Resource.waitFor(this.activeTab, filter, options);
-  }
-
-  public async waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
-    return this.user.waitForElement(element, options);
-  }
-
-  public async waitForLocation(trigger: ILocationTrigger) {
-    return this.user.waitForLocation(trigger);
-  }
-
-  public async waitForMillis(millis: number) {
-    return this.user.waitForMillis(millis);
-  }
-
-  public async waitForWebSocket(url: string | RegExp) {
-    return this.user.waitForWebSocket(url);
-  }
-
-  public async waitForNewTab() {
-    return this.user.waitForNewTab();
   }
 }
 
@@ -231,5 +225,18 @@ export async function createBrowser(
   if (showReplay) {
     scriptInstance.launchReplay(sessionName, coreTab);
   }
-  return new Browser(coreTab, sessionName);
+  return new Browser(coreTab, coreClient, sessionName);
+}
+
+async function getSessionTabs(browser: Browser) {
+  const { coreClient, tabs } = getState<Browser, IState>(browser);
+  const coreTabs = await coreClient.getTabsForSession(browser.sessionId);
+  for (const coreTab of coreTabs) {
+    const hasTab = tabs.some(x => x.tabId === coreTab.tabId);
+    if (!hasTab) {
+      const tab = createTab(this, coreTab);
+      tabs.push(tab);
+    }
+  }
+  return tabs;
 }

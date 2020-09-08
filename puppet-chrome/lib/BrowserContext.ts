@@ -1,17 +1,29 @@
 import { EventEmitter } from 'events';
+import { assert } from '@secret-agent/commons/utils';
+import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { Page } from './Page';
-import { assert } from './assert';
 import { Browser } from './Browser';
 
-export class BrowserContext extends EventEmitter {
+export class BrowserContext extends EventEmitter implements IPuppetContext {
+  public emulation: IBrowserEmulation;
   private readonly browser: Browser;
   private readonly id: string;
 
-  constructor(browser: Browser, contextId: string) {
+  constructor(browser: Browser, contextId: string, emulation: IBrowserEmulation) {
     super();
     this.browser = browser;
     this.id = contextId;
+    this.emulation = emulation;
     this.browser.browserContextsById.set(this.id, this);
+  }
+
+  getPageForNetworkId(networkId: string): IPuppetPage {
+    for (const [id, page] of this.browser.pagesById) {
+      if (id === networkId) return page;
+      if (page.workersById.has(id)) return page;
+    }
   }
 
   public async newPage(): Promise<Page> {

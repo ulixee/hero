@@ -1,11 +1,11 @@
 import { Protocol } from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { assert } from './assert';
-import { Connection } from '../process/Connection';
+import { assert } from '@secret-agent/commons/utils';
+import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
 import { Page } from './Page';
-import { CDPSession } from '../process/CDPSession';
-import { debugError } from "./Utils";
+import { CDPSession } from './CDPSession';
 
 type BrowserCloseCallback = () => Promise<void> | void;
 
@@ -35,11 +35,11 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
    * Creates a new incognito browser context. This won't share cookies/cache with other
    * browser contexts.
    */
-  public async newContext(): Promise<BrowserContext> {
+  public async newContext(emulation: IBrowserEmulation): Promise<BrowserContext> {
     const { browserContextId } = await this.cdpSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
     });
-    return new BrowserContext(this, browserContextId);
+    return new BrowserContext(this, browserContextId, emulation);
   }
 
   public async close(): Promise<void> {
@@ -68,7 +68,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
   }
 
   private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent) {
-    const targetId = payload.targetId!;
+    const targetId = payload.targetId;
     const page = this.pagesById.get(targetId);
     if (page) {
       this.pagesById.delete(targetId);

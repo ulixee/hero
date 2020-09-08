@@ -1,7 +1,7 @@
 import * as Helpers from '@secret-agent/testing/helpers';
 import navigatorJson from '@secret-agent/emulate-chrome-80/navigator.json';
 import { inspect } from 'util';
-import ChromeCore from '@secret-agent/core/lib/ChromeCore';
+import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
 import chrome80Dom from './chrome80DomProperties.json';
@@ -10,12 +10,12 @@ import getOverrideScript from '../injected-scripts';
 
 const { navigator } = navigatorJson;
 
-let chromeCore: ChromeCore;
+let puppet: Puppet;
 beforeAll(async () => {
   const emulator = Emulators.create(Core.defaultEmulatorId);
-  chromeCore = new ChromeCore(emulator.engineExecutablePath);
-  Helpers.onClose(() => chromeCore.close(), true);
-  chromeCore.start();
+  puppet = new Puppet(emulator);
+  Helpers.onClose(() => puppet.close(), true);
+  puppet.start();
 });
 
 afterAll(Helpers.afterAll);
@@ -26,7 +26,12 @@ const debug = process.env.DEBUG || false;
 test('it should override plugins in a browser window', async () => {
   const httpServer = await Helpers.runHttpServer();
 
-  const context = await chromeCore.createContext();
+  const context = await puppet.newContext({
+    proxyPassword: '',
+    platform: 'win32',
+    acceptLanguage: 'en',
+    userAgent: 'Plugin Test',
+  });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
 
@@ -34,7 +39,7 @@ test('it should override plugins in a browser window', async () => {
   if (debug) {
     page.on('consoleLog', log => console.log(log));
   }
-  await page.frames.addNewDocumentScript(
+  await page.addNewDocumentScript(
     getOverrideScript('plugins', {
       mimeTypes: [
         {
@@ -83,17 +88,20 @@ test('it should override plugins in a browser window', async () => {
     false,
   );
   await page.navigate(httpServer.url);
-  const hasPlugins = await page.evaluate(`'plugins' in navigator && 'mimeTypes' in navigator`);
+  const hasPlugins = await page.mainFrame.run(
+    `'plugins' in navigator && 'mimeTypes' in navigator`,
+    false,
+  );
   expect(hasPlugins).toBe(true);
 
-  const pluginCount = await page.evaluate(`navigator.plugins.length`);
+  const pluginCount = await page.mainFrame.run(`navigator.plugins.length`, false);
   expect(pluginCount).toBe(3);
 
-  const mimecount = await page.evaluate(`navigator.mimeTypes.length`);
+  const mimecount = await page.mainFrame.run(`navigator.mimeTypes.length`, false);
   expect(mimecount).toBe(4);
 
   const structure = JSON.parse(
-    (await page.evaluate(`(${inspectScript.toString()})(window, 'window')`)) as any,
+    (await page.mainFrame.run(`(${inspectScript.toString()})(window, 'window')`, false)) as any,
   ).window;
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
     if (debug) console.log(inspect(structure[proto], false, null, true));

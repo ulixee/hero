@@ -1,10 +1,10 @@
 import { Protocol } from 'devtools-protocol';
-import ResourceType, {
-  getResourceTypeForChromeValue,
-} from '@secret-agent/core-interfaces/ResourceType';
+import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
+import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { debugError } from './Utils';
-import { CDPSession } from '../process/CDPSession';
+import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
@@ -13,22 +13,18 @@ import WebSocketFrameReceivedEvent = Protocol.Network.WebSocketFrameReceivedEven
 import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSendHandshakeRequestEvent;
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
 import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
-import SetUserAgentOverrideRequest = Protocol.Emulation.SetUserAgentOverrideRequest;
 
-export interface Credentials {
-  username: string;
-  password: string;
-}
+export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
+  private readonly cdpSession: CDPSession;
+  private readonly networkId: string;
+  private readonly attemptedAuthentications = new Set<string>();
+  private emulation?: IBrowserEmulation;
 
-export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
-  cdpSession: CDPSession;
-  credentials?: Credentials = null;
-  attemptedAuthentications = new Set<string>();
-  agent?: SetUserAgentOverrideRequest;
-  parentManager?: NetworkManager;
+  private parentManager?: NetworkManager;
 
-  constructor(cdpSession: CDPSession) {
+  constructor(cdpSession: CDPSession, networkId: string) {
     super();
+    this.networkId = networkId;
     this.cdpSession = cdpSession;
 
     this.cdpSession.on('Fetch.requestPaused', this.onRequestPaused.bind(this));
@@ -45,22 +41,22 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
     this.cdpSession.on('Network.responseReceived', this.onNetworkResponseReceived.bind(this));
   }
 
-  public emit<K extends (keyof INetworkEvents & string) | (keyof INetworkEvents & symbol)>(
-    eventType: K,
-    event?: INetworkEvents[K],
-  ): boolean {
+  public emit<
+    K extends (keyof IPuppetNetworkEvents & string) | (keyof IPuppetNetworkEvents & symbol)
+  >(eventType: K, event?: IPuppetNetworkEvents[K]): boolean {
     if (this.parentManager) {
       this.parentManager.emit(eventType, event);
     }
     return super.emit(eventType, event);
   }
 
-  public async initialize(parentManager?: NetworkManager): Promise<void> {
-    if (parentManager) {
-      this.credentials = parentManager.credentials;
-      this.agent = parentManager.agent;
-      this.parentManager = parentManager;
-    }
+  public async initialize(emulation: IBrowserEmulation) {
+    this.emulation = emulation;
+    await this.cdpSession.send('Network.setUserAgentOverride', {
+      userAgent: emulation.userAgent,
+      acceptLanguage: emulation.acceptLanguage,
+      platform: emulation.platform,
+    });
     await this.cdpSession.send('Network.enable', {
       maxPostDataSize: 0,
       maxResourceBufferSize: 0,
@@ -72,13 +68,9 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
     });
   }
 
-  public setCredentials(credentials?: Credentials) {
-    this.credentials = credentials;
-  }
-
-  public async setUserAgent(agent: SetUserAgentOverrideRequest) {
-    this.agent = agent;
-    await this.cdpSession.send('Network.setUserAgentOverride', agent);
+  public async initializeFromParent(parentManager: NetworkManager) {
+    this.parentManager = parentManager;
+    return this.initialize(parentManager.emulation);
   }
 
   private onAuthRequired(event: Protocol.Fetch.AuthRequiredEvent): void {
@@ -88,12 +80,12 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
 
     if (this.attemptedAuthentications.has(event.requestId)) {
       authChallengeResponse.response = AuthChallengeResponse.CancelAuth;
-    } else if (this.credentials) {
+    } else if (this.emulation) {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
-      authChallengeResponse.username = this.credentials.username;
-      authChallengeResponse.password = this.credentials.password;
+      authChallengeResponse.username = this.networkId;
+      authChallengeResponse.password = this.emulation.proxyPassword;
     }
     this.cdpSession
       .send('Fetch.continueWithAuth', {
@@ -179,33 +171,4 @@ export class NetworkManager extends TypedEventEmitter<INetworkEvents> {
       isFromServer,
     });
   }
-}
-
-export interface INetworkEvents {
-  navigationResponse: {
-    browserRequestId: string;
-    frameId: string;
-    status: number;
-    location?: string;
-    url?: string;
-  };
-  websocketFrame: {
-    browserRequestId: string;
-    message: string | Buffer;
-    isFromServer: boolean;
-  };
-  websocketHandshake: {
-    browserRequestId: string;
-    headers: { [key: string]: string };
-  };
-  resourceWillBeRequested: {
-    browserRequestId: string;
-    resourceType: ResourceType;
-    url: string;
-    method: string;
-    hasUserGesture: boolean;
-    isDocumentNavigation: boolean;
-    documentUrl: string;
-    frameId: string;
-  };
 }

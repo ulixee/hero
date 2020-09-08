@@ -7,9 +7,13 @@ import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
-import { Page } from '@secret-agent/puppet-chrome/lib/Page';
-import { BrowserContext } from '@secret-agent/puppet-chrome/lib/BrowserContext';
+import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import GlobalPool from './GlobalPool';
+import Tab from './Tab';
+import UserProfile from './UserProfile';
 
 const { log } = Log(module);
 
@@ -21,19 +25,25 @@ export default class Session {
   public emulator: EmulatorPlugin;
   public humanoid: HumanoidPlugin;
   public proxy: MitmUpstreamProxy;
-  public readonly requestMitmProxySession: RequestSession;
+  public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
+  public browserContext?: IPuppetContext;
+  public userProfile?: IUserProfile;
 
-  public beforeClose?: () => Promise<any>;
+  public tabs: Tab[] = [];
 
-  private browserContext?: BrowserContext;
-  private isShuttingDown = false;
+  public get isClosing() {
+    return this._isClosing;
+  }
+
+  private _isClosing = false;
 
   constructor(readonly options: ICreateTabOptions) {
     Session.byId[this.id] = this;
     const emulatorId = Emulators.getId(options.emulatorId);
     this.emulator = Emulators.create(emulatorId);
     if (options.userProfile) {
+      this.userProfile = options.userProfile;
       this.emulator.setUserProfile(options.userProfile);
     }
     if (!this.emulator.canPolyfill) {
@@ -59,40 +69,74 @@ export default class Session {
       this.emulator.canPolyfill,
     );
     this.proxy = new MitmUpstreamProxy(this.id);
-    this.requestMitmProxySession = new RequestSession(
+    this.mitmRequestSession = new RequestSession(
       this.id,
       this.emulator.userAgent.raw,
       this.proxy.isReady(),
     );
 
-    this.requestMitmProxySession.delegate = this.emulator.delegate;
+    this.mitmRequestSession.delegate = this.emulator.delegate;
   }
 
-  public assignBrowserContext(context: BrowserContext) {
+  public getBrowserEmulation() {
+    const emulator = this.emulator;
+    return {
+      acceptLanguage: 'en-US,en',
+      userAgent: emulator.userAgent.raw,
+      platform: emulator.userAgent.platform,
+      proxyPassword: this.id,
+    } as IBrowserEmulation;
+  }
+
+  public async initialize(context: IPuppetContext) {
     this.browserContext = context;
+
+    if (this.userProfile) {
+      await UserProfile.install(this);
+    }
   }
 
-  public async newPage() {
-    if (this.isShuttingDown) {
-      return;
+  public async createTab() {
+    const page = await this.newPage();
+    const tab = await Tab.create(this, page);
+
+    page.initializeNewPage = this.onNewTab.bind(this, tab);
+
+    // if first tab, install session storage
+    if (!this.tabs.length && this.userProfile?.storage) {
+      await UserProfile.installSessionStorage(this, tab);
     }
-    return await this.browserContext.newPage();
+    this.tabs.push(tab);
+    return tab;
   }
 
   public async close() {
     delete Session.byId[this.id];
-    if (this.isShuttingDown) return;
-    this.isShuttingDown = true;
+    if (this._isClosing) return;
+    this._isClosing = true;
 
-    if (this.beforeClose) await this.beforeClose();
+    for (const tab of Object.values(this.tabs)) {
+      await tab.close();
+    }
     await this.sessionState.saveState();
-    await this.requestMitmProxySession.close();
+    await this.mitmRequestSession.close();
     await this.proxy.close();
     try {
       await this.browserContext?.close();
     } catch (error) {
       log.error('ErrorClosingSession', { error, sessionId: this.id });
     }
+  }
+
+  private async onNewTab(parentTab: Tab, page: IPuppetPage) {
+    const tab = await Tab.create(this, page, parentTab);
+    this.tabs.push(tab);
+    return tab;
+  }
+
+  private async newPage() {
+    if (this._isClosing) throw new Error('Cannot create tab, shutting down');
+    return await this.browserContext.newPage();
   }
 
   public static get(sessionId: string): Session {

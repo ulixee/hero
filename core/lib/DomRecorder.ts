@@ -1,8 +1,8 @@
 import fs from 'fs';
 import Log from '@secret-agent/commons/Logger';
 import { PageRecorderResultSet } from '@secret-agent/injected-scripts/scripts/pageEventsRecorder';
-import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import { IRegisteredEventListener, removeEventListeners } from '@secret-agent/commons/eventUtils';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
 
 const domObserver = fs.readFileSync(
   require.resolve('@secret-agent/injected-scripts/scripts/pageEventsRecorder.js'),
@@ -15,14 +15,14 @@ const runtimeFunction = '__saPageListenerCallback';
 
 export default class DomRecorder {
   private readonly sessionId: string;
-  private readonly puppetPage: Page;
+  private readonly puppetPage: IPuppetPage;
   private onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>;
 
   private listeners: IRegisteredEventListener[] = [];
 
   constructor(
     sessionId: string,
-    puppetPage: Page,
+    puppetPage: IPuppetPage,
     onResults: (frameId: string, ...args: PageRecorderResultSet) => Promise<any>,
   ) {
     this.sessionId = sessionId;
@@ -31,26 +31,27 @@ export default class DomRecorder {
     this.runtimeBindingCalled = this.runtimeBindingCalled.bind(this);
   }
 
-  public async listen() {
-    const callback = await this.puppetPage.frames.addPageCallback(
+  public async install() {
+    const callback = await this.puppetPage.addPageCallback(
       runtimeFunction,
       this.runtimeBindingCalled.bind(this),
     );
     this.listeners.push(callback);
 
-    await this.puppetPage.frames.addNewDocumentScript(
+    await this.puppetPage.addNewDocumentScript(
       `(function installDomRecorder(runtimeFunction) { \n\n ${domObserver.toString()} \n\n })('${runtimeFunction}');`,
+      true,
     );
     // delete binding from every context also
-    await this.puppetPage.frames.addNewDocumentScript(`delete window.${runtimeFunction}`, false);
+    await this.puppetPage.addNewDocumentScript(`delete window.${runtimeFunction}`, false);
   }
 
   public async setCommandIdForPage(commandId: number) {
-    await this.puppetPage.frames.runInActiveFrames(`window.setCommandId(${commandId});`);
+    await this.puppetPage.runInFrames(`window.setCommandId(${commandId});`, true);
   }
 
   public async flush(closeAfterFlush = false) {
-    const results = await this.puppetPage.frames.runInActiveFrames(`window.flushPageRecorder()`);
+    const results = await this.puppetPage.runInFrames<any>(`window.flushPageRecorder()`, true);
     if (!this.onResults) return;
     for (const [frameId, result] of Object.entries(results)) {
       if (result.value) {

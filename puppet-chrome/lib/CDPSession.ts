@@ -1,10 +1,9 @@
-import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
-import { Protocol } from 'devtools-protocol';
-import { EventEmitter } from 'events';
-import { assert } from '../lib/assert';
-import { Connection } from './Connection';
-import { IConnectionCallback } from '../interfaces/IConnectionCallback';
-import { debugError } from '../lib/Utils';
+import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
+import { Protocol } from "devtools-protocol";
+import { EventEmitter } from "events";
+import { assert } from '@secret-agent/commons/utils';
+import { IConnectionCallback } from "@secret-agent/puppet/interfaces/IConnectionCallback";
+import { Connection } from "./Connection";
 
 /**
  * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
@@ -91,7 +90,7 @@ export class CDPSession extends EventEmitter {
 
   async disposeObject(remoteObject: Protocol.Runtime.RemoteObject): Promise<void> {
     if (!remoteObject.objectId) return;
-    await this.send('Runtime.releaseObject', { objectId: remoteObject.objectId }).catch(error => {
+    await this.send('Runtime.releaseObject', { objectId: remoteObject.objectId }).catch(() => {
       // Exceptions might happen in case of a page been navigated or closed.
       // Swallow these since they are harmless and we don't leak anything in this case.
     });

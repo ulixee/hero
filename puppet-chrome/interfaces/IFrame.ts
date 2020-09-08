@@ -1,14 +1,4 @@
-import Protocol from 'devtools-protocol';
-import { IResolvablePromise } from '@secret-agent/commons/utils';
+import Protocol from "devtools-protocol";
+import { IPuppetFrame } from "@secret-agent/puppet/interfaces/IPuppetFrame";
 
-export interface IFrame extends Protocol.Page.Frame {
-  hasNavigated: boolean;
-  lifecycleEvents: ILifecycleEvents;
-  frameLoading: IResolvablePromise<void>;
-}
-
-export interface ILifecycleEvents {
-  DOMContentLoaded?: Date;
-  load?: Date;
-  init?: Date;
-}
+export interface IFrame extends Protocol.Page.Frame, IPuppetFrame {}

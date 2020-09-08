@@ -45,6 +45,7 @@ export default class Chrome83 extends EmulatorPlugin {
     defaultAgents,
   );
 
+  public browserEngine = 'chrome' as const;
   public get engineExecutablePath() {
     return engineExecutablePath;
   }

@@ -1,4 +1,4 @@
-import * as browserPaths from '@secret-agent/puppet-chrome/install/browserPaths';
+import * as browserPaths from '@secret-agent/puppet/lib/browserPaths';
 import chromePageOverrides from './lib/chromePageOverrides';
 import modifyHeaders from './lib/modifyHeaders';
 import readPolyfills from './lib/readPolyfills';

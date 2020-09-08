@@ -1,4 +1,4 @@
-import { CDPSession } from '../process/CDPSession';
+import { CDPSession } from './CDPSession';
 import { Keyboard } from './Keyboard';
 
 /**
@@ -26,36 +26,6 @@ import { Keyboard } from './Keyboard';
  * For example, dragging and selecting text is not possible using `page.mouse`.
  * Instead, you can use the {@link https://developer.mozilla.org/en-US/docs/Web/API/DocumentOrShadowRoot/getSelection | `DocumentOrShadowRoot.getSelection()`} functionality implemented in the platform.
  *
- * @example
- * For example, if you want to select all content between nodes:
- * ```js
- * await page.evaluate((from, to) => {
- *   const selection = from.getRootNode().getSelection();
- *   const range = document.createRange();
- *   range.setStartBefore(from);
- *   range.setEndAfter(to);
- *   selection.removeAllRanges();
- *   selection.addRange(range);
- * }, fromJSHandle, toJSHandle);
- * ```
- * If you then would want to copy-paste your selection, you can use the clipboard api:
- * ```js
- * // The clipboard api does not allow you to copy, unless the tab is focused.
- * await page.bringToFront();
- * await page.evaluate(() => {
- *   // Copy the selected content to the clipboard
- *   document.execCommand('copy');
- *   // Obtain the content of the clipboard as a string
- *   return navigator.clipboard.readText();
- * });
- * ```
- * **Note**: If you want access to the clipboard API,
- * you have to give it permission to do so:
- * ```js
- * await browser.defaultBrowserContext().overridePermissions(
- *   '<your origin>', ['clipboard-read', 'clipboard-write']
- * );
- * ```
  * @public
  */
 export default class Mouse {

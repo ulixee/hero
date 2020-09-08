@@ -1,4 +1,4 @@
-import EngineInstaller from '@secret-agent/puppet-chrome/install/EngineInstaller';
+import EngineInstaller from '@secret-agent/puppet/lib/EngineInstaller';
 
 export default function install(engine: { browser: string; revision: string }) {
   new EngineInstaller(engine)

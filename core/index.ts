@@ -44,11 +44,11 @@ export default class Core implements ICore {
   private static autoShutdownTimer: NodeJS.Timer;
   private static replayServer?: ISessionReplayServer;
   private static startQueue = new Queue();
+
   private readonly session: Session;
   private readonly tab: Tab;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
   private readonly eventListenerIdsByType: { [name: string]: Set<string> } = {};
-  private isClosing = false;
 
   constructor(session: Session, tab: Tab) {
     this.session = session;
@@ -111,11 +111,11 @@ export default class Core implements ICore {
   }
 
   public async getUserCookies() {
-    return await this.tab.puppetPage.getAllCookies();
+    return await this.tab.runCommand('getAllCookies');
   }
 
   public async exportUserProfile() {
-    return await UserProfile.export(this.session.id, this.tab.puppetPage);
+    return await UserProfile.export(this.session);
   }
 
   public async fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
@@ -175,8 +175,7 @@ export default class Core implements ICore {
   }
 
   public async close() {
-    if (this.isClosing) return;
-    this.isClosing = true;
+    if (!this.session || this.session.isClosing) return;
     await GlobalPool.closeSession(this.session);
     this.emitEvent('close');
     Core.checkForAutoShutdown();
@@ -184,14 +183,19 @@ export default class Core implements ICore {
 
   public async closeTab() {
     await this.tab.close();
+    if (this.session.tabs.length === 0) {
+      await this.close();
+    }
   }
 
   public async focusTab() {
     await this.tab.focus();
   }
 
-  public async waitForNewTab() {
-    // todo
+  public async waitForNewTab(sinceCommandId?: number) {
+    const lastCommandId = sinceCommandId ?? this.lastCommandId;
+    const tab = await this.tab.runCommand<Tab>('waitForNewTab', lastCommandId);
+    return Core.registerSessionTab(this.session, tab);
   }
 
   private bindResourceListeners(enable = true) {
@@ -259,6 +263,11 @@ export default class Core implements ICore {
     if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);
   }
 
+  public static async getTabsForSession(sessionId: string) {
+    const session = Session.get(sessionId);
+    return session.tabs.map(tab => Core.registerSessionTab(session, tab));
+  }
+
   public static async createTab(options: ICreateSessionOptions = {}) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
@@ -268,14 +277,8 @@ export default class Core implements ICore {
         await this.startReplayServer();
       }
 
-      const tab = await Tab.create(session);
-      this.byTabId[tab.id] = new Core(session, tab);
-      return {
-        sessionId: session.id,
-        sessionsDataLocation: session.baseDir,
-        tabId: tab.id,
-        replayApiServer: this.replayServer?.url,
-      };
+      const tab = await session.createTab();
+      return Core.registerSessionTab(session, tab);
     });
   }
 
@@ -334,6 +337,20 @@ export default class Core implements ICore {
   public static async startReplayServer(port?: number) {
     if (this.replayServer) return;
     this.replayServer = await createReplayServer(port);
+  }
+
+  private static registerSessionTab(session: Session, tab: Tab) {
+    let core = this.byTabId[tab.id];
+    if (!core) {
+      core = new Core(session, tab);
+      this.byTabId[tab.id] = core;
+    }
+    return {
+      sessionId: session.id,
+      sessionsDataLocation: session.baseDir,
+      tabId: tab.id,
+      replayApiServer: this.replayServer?.url,
+    } as ISessionMeta;
   }
 
   private static checkForAutoShutdown() {

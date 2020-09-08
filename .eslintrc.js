@@ -2,12 +2,12 @@ const Fs = require('fs');
 const pkg = require('./package.json');
 
 const workspaces = [];
-const workspacesWithModules = ['node_modules' ];
+const workspacesWithModules = ['node_modules'];
 for (const workspaceDir of pkg.workspaces.packages) {
   const workspace = workspaceDir.replace('/*', '');
   workspaces.push(workspace);
   workspacesWithModules.push(workspace);
-  workspacesWithModules.push(`${workspace  }/node_modules`);
+  workspacesWithModules.push(`${workspace}/node_modules`);
   if (workspaceDir.endsWith('/*')) {
     const baseDir = `${__dirname}/${workspace}`;
     for (const sub of Fs.readdirSync(baseDir)) {
@@ -20,7 +20,6 @@ for (const workspaceDir of pkg.workspaces.packages) {
   }
 }
 
-
 module.exports = {
   root: true,
   extends: [
@@ -31,7 +30,9 @@ module.exports = {
     'plugin:promise/recommended',
     'prettier',
     'prettier/@typescript-eslint',
+    'plugin:monorepo-cop/recommended',
   ],
+  plugins: ['monorepo-cop'],
   parserOptions: {
     project: 'tsconfig.json',
   },

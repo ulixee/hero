@@ -1,10 +1,11 @@
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Protocol from 'devtools-protocol';
 import { BrowserContext } from './BrowserContext';
-import { CDPSession } from '../process/CDPSession';
+import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { printStackTrace, valueFromRemoteObject } from './Utils';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
+import TargetInfo = Protocol.Target.TargetInfo;
 
 interface IServiceWorkerEvents {
   close: null;
@@ -15,21 +16,27 @@ export class Worker extends TypedEventEmitter<IServiceWorkerEvents> {
   public readonly browserContext: BrowserContext;
   private cdpSession: CDPSession;
   private networkManager: NetworkManager;
-  private readonly url: string;
-  private readonly workerType: string; // service_worker, shared_worker
+  private readonly targetInfo: TargetInfo;
 
-  constructor(browserContext: BrowserContext, cdpSession: CDPSession, url: string, type: string) {
+  public get url() {
+    return this.targetInfo.url;
+  }
+
+  public get workerType() {
+    return this.targetInfo.type;
+  }
+
+  constructor(browserContext: BrowserContext, cdpSession: CDPSession, targetInfo: TargetInfo) {
     super();
-    this.url = url;
+    this.targetInfo = targetInfo;
     this.cdpSession = cdpSession;
     this.browserContext = browserContext;
-    this.networkManager = new NetworkManager(cdpSession);
-    this.workerType = type;
+    this.networkManager = new NetworkManager(cdpSession, targetInfo.targetId);
     cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
   }
 
   async initialize(pageNetworkManager: NetworkManager) {
-    await this.networkManager.initialize(pageNetworkManager);
+    await this.networkManager.initializeFromParent(pageNetworkManager);
     await Promise.all([
       this.cdpSession.send('Runtime.enable'),
       this.cdpSession.send('Runtime.runIfWaitingForDebugger'),
