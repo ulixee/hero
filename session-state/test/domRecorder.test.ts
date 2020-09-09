@@ -3,6 +3,7 @@ import { Helpers } from '@secret-agent/testing';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { MouseEventType } from '../models/MouseEventsTable';
+import DomChangesTable from '../models/DomChangesTable';
 
 let koaServer;
 beforeAll(async () => {
@@ -35,10 +36,12 @@ function addMe() {
 
     // @ts-ignore
     const tab = core.tab;
+    // @ts-ignore
+    const pages = tab.pages;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
+    const changesAfterLoad = await state.getPageDomChanges(pages.history);
     // @ts-ignore
     const commandId = core.tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
@@ -52,7 +55,7 @@ function addMe() {
     await core.waitForElement(['document', ['querySelector', 'a#link2']]);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(state.pages.history, commandId);
+    const changes = await state.getPageDomChanges(pages.history, commandId);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('added');
@@ -78,10 +81,12 @@ function removeMe() {
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
     const tab = core.tab;
+    // @ts-ignore
+    const pages = core.tab.pages;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
+    const changesAfterLoad = await state.getPageDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(11);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
@@ -95,10 +100,12 @@ function removeMe() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
+    const changes = await state.getPageDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('removed');
+
+    await core.close();
   });
 
   it('detects reordered nodes', async () => {
@@ -130,11 +137,13 @@ function sort() {
     await core.waitForLoad('DomContentLoaded');
     // @ts-ignore
     const tab = core.tab;
+    // @ts-ignore
+    const pages = tab.pages;
 
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
+    const changesAfterLoad = await state.getPageDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(29);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
@@ -148,7 +157,7 @@ function sort() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
+    const changes = await state.getPageDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     // 1 remove and 1 add for each
     expect(changes[key]).toHaveLength(9);
@@ -162,6 +171,8 @@ function sort() {
     expect(lastChange[1]).toBe('added');
     expect(lastChange[2].id).toBe(elem1[2].id);
     expect(lastChange[2].previousSiblingId).toBe(elem3[2].id);
+
+    await core.close();
   });
 
   it('detects attribute changes', async () => {
@@ -183,9 +194,11 @@ function sort() {
     // @ts-ignore
     const tab = core.tab;
     const state = tab.sessionState;
+    // @ts-ignore
+    const pages = tab.pages;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(state.pages.history);
+    const changesAfterLoad = await state.getPageDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(14);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
@@ -199,11 +212,13 @@ function sort() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(state.pages.history, loadCommand);
+    const changes = await state.getPageDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('attribute');
     expect(changes[key][0][2].attributes['new-attr']).toBe('1');
+
+    await core.close();
   });
 });
 
@@ -254,7 +269,9 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    const changes = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = tab.pages;
+    const changes = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changes);
     const linkNode = domChanges.find(x => x[2].tagName === 'BUTTON')[2];
 
@@ -263,6 +280,8 @@ describe('basic Mouse Event tests', () => {
     const scrollRecords = state.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
     expect(scrollRecords[0].scrollY).toBeGreaterThanOrEqual(500);
+
+    await core.close();
   });
 });
 
@@ -314,7 +333,9 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
     await tab.domRecorder.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = core.tab.pages;
+    const changesAfterType = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -324,6 +345,8 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+
+    await core.close();
   });
 
   it('detects typing in a textarea', async () => {
@@ -373,7 +396,9 @@ describe('basic Form element tests', () => {
     // @ts-ignore
     await core.tab.domRecorder.flush();
     await state.db.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = core.tab.pages;
+    const changesAfterType = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -383,6 +408,8 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = domChanges.find(x => x[2].tagName === 'TEXTAREA')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+
+    await core.close();
   });
 
   it('detects checking a checkbox', async () => {
@@ -427,7 +454,9 @@ describe('basic Form element tests', () => {
     // @ts-ignore
     await core.tab.domRecorder.flush();
     await state.db.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = core.tab.pages;
+    const changesAfterType = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -437,6 +466,8 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+
+    await core.close();
   });
 
   it('detects changing a radio', async () => {
@@ -481,7 +512,9 @@ describe('basic Form element tests', () => {
     await core.tab.domRecorder.flush();
 
     await state.db.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = core.tab.pages;
+    const changesAfterType = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // 2 changes per radio change
@@ -494,6 +527,7 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = domChanges.find(x => x[2].attributes?.id === 'radio2')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+    await core.close();
   });
 
   it('detects changing a select', async () => {
@@ -543,7 +577,9 @@ describe('basic Form element tests', () => {
     await core.tab.domRecorder.flush();
 
     await state.db.flush();
-    const changesAfterType = await state.getPageDomChanges(state.pages.history);
+    // @ts-ignore
+    const pages = core.tab.pages;
+    const changesAfterType = await state.getPageDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     const focusRecords = state.db.focusEvents.all();
@@ -557,5 +593,115 @@ describe('basic Form element tests', () => {
     expect(domChanges.filter(x => x[1] === 'property')).toHaveLength(6);
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === select.id)).toHaveLength(2);
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === opt2.id)).toHaveLength(2);
+    await core.close();
+  });
+});
+
+describe('Multi-tab recording', () => {
+  it('should record dom separately for two pages', async () => {
+    koaServer.get('/page1', ctx => {
+      ctx.body = `<body>
+<a href="/page2" target="_blank" onclick="addMe()">I am on page1</a>
+<script>
+function addMe() {
+  const elem = document.createElement('A');
+  elem.setAttribute('id', 'link2');
+  elem.setAttribute('href', '/test2');
+  document.body.append(elem);
+  return true;
+}
+</script>
+</body>
+`;
+    });
+    koaServer.get('/page2', ctx => {
+      ctx.body = `<body>
+<a href="#" onclick="addMe2()">I am on page2</a>
+<script>
+function addMe2() {
+  const elem = document.createElement('div');
+  elem.setAttribute('id', 'divPage2');
+  document.body.append(elem);
+  return true;
+}
+</script>
+</body>
+`;
+    });
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(`${koaServer.baseUrl}/page1`);
+    await core.waitForLoad('DomContentLoaded');
+
+    // @ts-ignore
+    const tab = core.tab;
+    // @ts-ignore
+    const pages = tab.pages;
+
+    await core.interact([
+      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
+    ]);
+
+    await tab.domRecorder.flush();
+
+    const meta2 = await core.waitForNewTab();
+    const core2 = Core.byTabId[meta2.tabId];
+    await core2.waitForLoad('AllContentLoaded');
+    await core2.interact([
+      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
+    ]);
+
+    // @ts-ignore
+    const tab2 = core2.tab;
+    await tab2.domRecorder.flush();
+    // @ts-ignore
+    const pages2 = tab2.pages;
+
+    const tab1Changes = await tab.sessionState.getPageDomChanges(pages.history);
+    const tab2Changes = await tab2.sessionState.getPageDomChanges(pages2.history);
+
+    const [frameId] = Object.keys(tab1Changes);
+    const frame1DomRecords = tab1Changes[frameId].map(DomChangesTable.toRecord).map(x => ({
+      action: x.action,
+      textContent: x.textContent,
+      tagName: x.tagName,
+      attributes: x.attributes,
+    }));
+    const [frameId2] = Object.keys(tab2Changes);
+    const frame2DomRecords = tab2Changes[frameId2].map(DomChangesTable.toRecord).map(x => ({
+      action: x.action,
+      textContent: x.textContent,
+      tagName: x.tagName,
+      attributes: x.attributes,
+    }));
+
+    expect(frame1DomRecords[0]).toStrictEqual({
+      action: 'newDocument',
+      tagName: null,
+      attributes: undefined,
+      textContent: `${koaServer.baseUrl}/page1`,
+    });
+    expect(frame1DomRecords.filter(x => x.tagName)).toHaveLength(6);
+    expect(frame1DomRecords[frame1DomRecords.length - 1]).toStrictEqual({
+      action: 'added',
+      tagName: 'A',
+      attributes: { id: 'link2', href: '/test2' },
+      textContent: null,
+    });
+
+    expect(frame2DomRecords[0]).toStrictEqual({
+      action: 'newDocument',
+      tagName: null,
+      attributes: undefined,
+      textContent: `${koaServer.baseUrl}/page2`,
+    });
+    expect(frame2DomRecords.filter(x => x.tagName)).toHaveLength(6);
+    expect(frame2DomRecords[frame2DomRecords.length - 2]).toStrictEqual({
+      action: 'added',
+      tagName: 'DIV',
+      attributes: { id: 'divPage2' },
+      textContent: null,
+    });
+    await core.close();
   });
 });

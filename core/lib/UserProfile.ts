@@ -1,12 +1,11 @@
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import Log from '@secret-agent/commons/Logger';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import { assert } from '@secret-agent/commons/utils';
-import Session from './Session';
-import DomEnv from './DomEnv';
-import Tab from './Tab';
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import IDomStorage from "@secret-agent/core-interfaces/IDomStorage";
+import Log from "@secret-agent/commons/Logger";
+import { ICookie } from "@secret-agent/core-interfaces/ICookie";
+import { IPuppetPage } from "@secret-agent/puppet/interfaces/IPuppetPage";
+import { assert } from "@secret-agent/commons/utils";
+import Session from "./Session";
+import DomEnv from "./DomEnv";
 
 const { log } = Log(module);
 
@@ -49,32 +48,24 @@ export default class UserProfile {
 
     const parentLogId = log.info('UserProfile.install', { sessionId });
 
-    const mitmSession = session.mitmRequestSession;
-    const originalBlocker = mitmSession.blockedResources;
 
     let page: IPuppetPage;
     try {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = true;
       page = await session.browserContext.newPage();
-      if (cookies) {
+      if (cookies && cookies.length) {
         await page.setCookies(cookies, origins);
       }
 
       if (hasStorage) {
         // install scripts so we can restore storage
-        const domEnv = new DomEnv(sessionId, page);
+        const domEnv = new DomEnv({ sessionId, isClosing: false }, page);
         await domEnv.install();
-        // prime each page
-        mitmSession.blockedResources = {
-          types: [],
-          urls: origins,
-          handlerFn(request, response) {
-            response.end(`<html lang="en"><body>Empty</body></html>`);
-            return true;
-          },
-        };
 
         for (const origin of origins) {
           const originStorage = storage[origin];
+          if (!originStorage) continue;
+
           await page.navigate(origin);
           await page.mainFrame.run(
             `window.restoreUserStorage(${JSON.stringify(originStorage)})`,
@@ -83,7 +74,7 @@ export default class UserProfile {
         }
       }
     } finally {
-      mitmSession.blockedResources = originalBlocker;
+      session.mitmRequestSession.bypassAllWithEmptyResponse = false;
       if (page) await page.close();
       log.info('UserProfile.installed', { sessionId, parentLogId });
     }
@@ -91,25 +82,25 @@ export default class UserProfile {
     return this;
   }
 
-  public static async installSessionStorage(session: Session, tab: Tab) {
+  public static async installSessionStorage(session: Session, page: IPuppetPage) {
     const { userProfile } = session;
 
-    let needsOriginReset = false;
-    // reinstall session storage for the
-    for (const [origin, storage] of Object.entries(userProfile.storage)) {
-      if (storage.sessionStorage.length) {
-        needsOriginReset = true;
-        await tab.setOrigin(origin);
-        await tab.puppetPage.mainFrame.run(
+    try {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = true;
+      // reinstall session storage for the
+      for (const [origin, storage] of Object.entries(userProfile?.storage ?? {})) {
+        if (!storage.sessionStorage.length) continue;
+        await page.navigate(origin);
+        await page.mainFrame.run(
           `${JSON.stringify(
             storage.sessionStorage,
           )}.forEach(([key,value]) => sessionStorage.setItem(key,value))`,
           false,
         );
       }
-    }
-    if (needsOriginReset) {
-      await tab.setOrigin('about:blank');
+      await page.navigate('about:blank');
+    } finally {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = false;
     }
   }
 }

@@ -5,9 +5,10 @@ import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { URL } from 'url';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { debugError, exceptionDetailsToError } from './Utils';
+import { debug } from '@secret-agent/commons/Debug';
 import { CDPSession } from './CDPSession';
 import { IFrame } from '../interfaces/IFrame';
+import ConsoleMessage from './ConsoleMessage';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
@@ -24,6 +25,7 @@ import FrameStartedLoadingEvent = Protocol.Page.FrameStartedLoadingEvent;
 const { log } = Log(module);
 const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
+const debugError = debug('puppet-chrome:network-error');
 
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
   public frames: { [id: string]: IFrame } = {};
@@ -46,7 +48,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   private executionContexts: IFrameContext[] = [];
   private pendingContextPromises: {
     frameId: string;
-    worldName: string;
+    isDefault: boolean;
     promise: IResolvablePromise<IFrameContext>;
   }[] = [];
 
@@ -118,6 +120,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   public async waitForFrame(
     frameDetails: { frameId: string; loaderId?: string },
+    url: string,
     isInitiatingNavigation = false,
   ) {
     const { frameId } = frameDetails;
@@ -128,6 +131,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       if (frame.frameLoading) frame.frameLoading.resolve(frameLoading.promise);
       frame.frameLoading = frameLoading;
     }
+    if (url === DEFAULT_PAGE) frame.frameLoading.resolve();
     await frame.frameLoading.promise;
   }
 
@@ -186,11 +190,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
 
-  private getActiveContext(frameId: string, isolatedContext = false): IFrameContext | undefined {
-    const worldName = isolatedContext ? ISOLATED_WORLD : '';
+  private getActiveContext(frameId: string, isDefaultContext = false): IFrameContext | undefined {
     return this.executionContexts.find(
       x =>
-        x.worldName === worldName &&
+        x.isDefault === isDefaultContext &&
         x.frameId === frameId &&
         this.activeContexts.has(x.executionContextId),
     );
@@ -204,7 +207,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       awaitPromise: true,
     });
     if (result.exceptionDetails) {
-      throw exceptionDetailsToError(result.exceptionDetails);
+      throw ConsoleMessage.exceptionToError(result.exceptionDetails);
     }
     if (result.result?.value) {
       return result.result?.value as T;
@@ -213,22 +216,23 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   private async waitForActiveContext(
     frameId: string,
-    getIsolatedContext = true,
+    isolatedContext = true,
   ): Promise<IFrameContext> {
     const frame = this.frames[frameId];
-    if (frame?.hasNavigated && frame?.url !== DEFAULT_PAGE) {
+    if (frame?.hasNavigated && frame.url !== DEFAULT_PAGE) {
       await frame.frameLoading.promise;
     }
-    const existing = this.getActiveContext(frameId, getIsolatedContext);
+    const isDefault = isolatedContext === false;
+    const existing = this.getActiveContext(frameId, isDefault);
     if (existing) return existing;
 
-    const worldName = getIsolatedContext ? ISOLATED_WORLD : '';
     const resolvable = createPromise<IFrameContext>();
     this.pendingContextPromises.push({
-      worldName,
+      isDefault,
       frameId,
       promise: resolvable,
     });
+    if (isolatedContext) await this.createIsolatedWorld(frameId);
     return resolvable.promise;
   }
 
@@ -244,7 +248,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const { context } = event;
     const frameId = context.auxData.frameId as string;
 
-    this.addActiveContext(frameId, context.id, context.name);
+    this.addActiveContext(frameId, context.id, context.name === ISOLATED_WORLD);
   }
 
   /////// FRAMES ///////////////////////////////////////////////////////////////
@@ -259,11 +263,13 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       stored.url = frame.url;
       stored.hasNavigated = true;
     }
-    setImmediate(framePromise => framePromise.resolve(), this.frames[frame.id].frameLoading);
+    setImmediate(() => this.frames[frame.id].frameLoading.resolve());
 
-    this.emit('frameNavigated', {
-      frame: this.frames[frame.id],
-    });
+    if (frame.url !== DEFAULT_PAGE) {
+      this.emit('frameNavigated', {
+        frame: this.frames[frame.id],
+      });
+    }
   }
 
   private async onFrameStartedLoading(event: FrameStartedLoadingEvent) {
@@ -281,10 +287,15 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   }
 
   private onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
-    const { frameId, url, reason } = navigatedEvent;
+    const { frameId, url, reason, disposition } = navigatedEvent;
     const frame = this.frames[frameId];
     if (frame) {
-      this.emit('frameRequestedNavigation', { frame, url, reason });
+      frame.navigationReason = reason;
+      frame.disposition = disposition;
+
+      if (frame.url !== DEFAULT_PAGE) {
+        this.emit('frameRequestedNavigation', { frame, url, reason });
+      }
     }
   }
 
@@ -324,7 +335,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     if (!events.DOMContentLoaded) events.DOMContentLoaded = new Date();
     if (!events.load) {
       events.load = new Date();
-      this.emit('frameLifecycle', { frame, name: 'load' });
+
+      if (frame.url !== DEFAULT_PAGE) {
+        this.emit('frameLifecycle', { frame, name: 'load' });
+      }
     }
   }
 
@@ -338,7 +352,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       frame.lifecycleEvents = {};
     }
     frame.lifecycleEvents[name] = new Date();
-    this.emit('frameLifecycle', { frame, name });
+
+    if (frame.url !== DEFAULT_PAGE) {
+      this.emit('frameLifecycle', { frame, name });
+    }
   }
 
   private async recurseFrameTree(frameTree: FrameTree) {
@@ -377,20 +394,21 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
         // param is misspelled in protocol
         grantUniveralAccess: true,
       });
-      this.addActiveContext(frameId, isolatedWorld.executionContextId, ISOLATED_WORLD);
+      this.addActiveContext(frameId, isolatedWorld.executionContextId, true);
     } catch (err) {
       log.warn('Failed to create isolated world.', err);
     }
   }
 
-  private addActiveContext(frameId: string, executionContextId: number, worldName: string) {
+  private addActiveContext(frameId: string, executionContextId: number, isIsolatedWorld: boolean) {
     this.activeContexts.add(executionContextId);
     let context = this.executionContexts.find(x => x.executionContextId === executionContextId);
+    const isDefault = !isIsolatedWorld;
     if (!context) {
       context = {
         frameId,
         executionContextId,
-        worldName,
+        isDefault,
       };
       this.executionContexts.push(context);
     }
@@ -398,7 +416,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const pendingContextPromises = this.pendingContextPromises;
     this.pendingContextPromises = [];
     for (const pending of pendingContextPromises) {
-      if (pending.frameId === frameId && pending.worldName === worldName) {
+      if (pending.frameId === frameId && pending.isDefault === isDefault) {
         pending.promise.resolve(context);
       } else {
         this.pendingContextPromises.push(pending);
@@ -409,6 +427,6 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
 interface IFrameContext {
   frameId: string;
-  worldName: string;
+  isDefault: boolean;
   executionContextId: number;
 }

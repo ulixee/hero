@@ -12,7 +12,10 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   navigate(url: string, options?: { referrer?: string }): Promise<void>;
   close(): Promise<void>;
   bringToFront(): Promise<void>;
-  initializeNewPage?: (page: IPuppetPage) => Promise<void>;
+  initializeNewPage?: (
+    page: IPuppetPage,
+    openParams: { url: string; windowName: string },
+  ) => Promise<void>;
 
   getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   getPageCookies(): Promise<ICookie[]>;

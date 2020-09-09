@@ -5,6 +5,7 @@ export default class FramesTable extends BaseTable<IFrameRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Frames', [
       ['id', 'TEXT', 'NOT NULL PRIMARY KEY'],
+      ['tabId', 'TEXT'],
       ['startCommandId', 'INTEGER'],
       ['parentId', 'TEXT'],
       ['createdTime', 'TEXT'],
@@ -14,6 +15,7 @@ export default class FramesTable extends BaseTable<IFrameRecord> {
   public insert(frame: IFrameRecord) {
     return this.queuePendingInsert([
       frame.id,
+      frame.tabId,
       frame.startCommandId,
       frame.parentId,
       frame.createdTime,
@@ -23,6 +25,7 @@ export default class FramesTable extends BaseTable<IFrameRecord> {
 
 export interface IFrameRecord {
   id: string;
+  tabId: string;
   startCommandId: number;
   parentId?: string; // if null, top level frame
   createdTime: string;

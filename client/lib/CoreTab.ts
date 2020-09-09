@@ -157,4 +157,15 @@ export default class CoreTab {
       delete this.coreClient.tabsById[this.meta.tabId];
     });
   }
+
+  public async closeSession(): Promise<void> {
+    await this.commandQueue.run('close');
+    process.nextTick(() => {
+      for (const [tabId, tab] of Object.entries(this.coreClient.tabsById)) {
+        if (tab.sessionId === this.sessionId) {
+          delete this.coreClient.tabsById[tabId]
+        }
+      }
+    });
+  }
 }

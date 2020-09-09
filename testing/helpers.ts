@@ -113,18 +113,18 @@ export async function runHttpsServer(handler: RequestListener) {
 }
 
 export async function runHttpServer(
-  cookieValue?: string,
-  onPost?: (data: string) => void,
-  onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void,
+  params: {
+    onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void;
+    onPost?: (body: string) => void;
+    addToResponse?: (response: http.ServerResponse) => void;
+  } = {},
 ) {
+  const { onRequest, onPost, addToResponse } = params;
   const server = http.createServer().unref();
   server.on('request', async (request, response) => {
     if (onRequest) onRequest(request.url, request.method, request.headers);
-    if (cookieValue) {
-      response.writeHead(200, {
-        'Set-Cookie': cookieValue,
-      });
-    }
+    if (addToResponse) addToResponse(response);
+
     let pageBody = 'Hello';
     const requestUrl = Url.parse(request.url);
     if (requestUrl.pathname === '/') {

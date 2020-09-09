@@ -244,7 +244,9 @@ describe('basic LocationTracker tests', () => {
 
     // @ts-ignore
     const tab = core.tab;
-    expect(tab.sessionState.pages.history).toHaveLength(2);
+    // @ts-ignore
+    const pages = tab.pages;
+    expect(pages.history).toHaveLength(2);
 
     await core.close();
     runWaitForCbsSpy.mockRestore();
@@ -275,15 +277,17 @@ setTimeout(function() {
     await core.waitForMillis(50);
     // @ts-ignore
     const tab = core.tab;
-    expect(tab.sessionState.pages.history).toHaveLength(3);
-    expect(tab.sessionState.pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
+    // @ts-ignore
+    const pages = tab.pages;
+    expect(pages.history).toHaveLength(3);
+    expect(pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
       startingUrl,
       navigateToUrl,
       startingUrl,
     ]);
 
     const currentUrl = await core.getLocationHref();
-    expect(currentUrl).toBe(tab.sessionState.pages.top.finalUrl);
+    expect(currentUrl).toBe(pages.top.finalUrl);
 
     await core.close();
     runWaitForCbsSpy.mockRestore();

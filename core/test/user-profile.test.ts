@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import BlockHandler from '@secret-agent/mitm/handlers/BlockHandler';
+import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import Safari13 from '@secret-agent/emulate-safari-13';
 import Core from '../index';
 
@@ -243,7 +243,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
   });
 
   it('should not make requests to end sites during profile "install"', async () => {
-    const mitmSpy = jest.spyOn(BlockHandler, 'shouldBlockRequest');
+    const mitmSpy = jest.spyOn(HttpRequestHandler, 'onRequest');
     await Core.createTab({
       userProfile: {
         cookies: [],
@@ -261,8 +261,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
         },
       },
     });
-    expect(mitmSpy).toHaveBeenCalledTimes(2);
-    expect(mitmSpy).toHaveReturnedWith(true);
+    expect(mitmSpy).toHaveBeenCalledTimes(0);
   });
 
   it('should not override changed variables on a second page load in a domain', async () => {

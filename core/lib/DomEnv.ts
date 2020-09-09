@@ -47,24 +47,19 @@ ${pageScripts.domStorage}
 })();`;
 
 export default class DomEnv {
-  private readonly sessionId: string;
   private puppetPage: IPuppetPage;
   private isInstalled = false;
-  private isClosed = false;
+  private tab: { sessionId: string; isClosing: boolean };
 
-  constructor(sessionId: string, puppetPage: IPuppetPage) {
+  constructor(tab: { sessionId: string; isClosing: boolean }, puppetPage: IPuppetPage) {
     this.puppetPage = puppetPage;
-    this.sessionId = sessionId;
+    this.tab = tab;
   }
 
   public async install() {
     if (this.isInstalled) return;
     this.isInstalled = true;
     await this.puppetPage.addNewDocumentScript(domEnvScript, true);
-  }
-
-  public close() {
-    this.isClosed = true;
   }
 
   public execNonIsolatedExpression<T>(expression: string, propertiesToExtract?: string[]) {
@@ -163,9 +158,9 @@ export default class DomEnv {
     );
 
     if (unparsedResult === SA_NOT_INSTALLED) {
-      if (retries === 0 || this.isClosed) throw new Error('Injected scripts not installed.');
+      if (retries === 0 || this.tab.isClosing) throw new Error('Injected scripts not installed.');
       log.warn('Injected scripts not installed yet. Retrying', {
-        sessionId: this.sessionId,
+        sessionId: this.tab.sessionId,
         fnName,
         frames: this.puppetPage.frames,
         frameId: this.puppetPage.mainFrame.id,
@@ -176,7 +171,7 @@ export default class DomEnv {
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
     if (result?.error) {
-      log.error(fnName, { sessionId: this.sessionId, result });
+      log.error(fnName, { sessionId: this.tab.sessionId, result });
       throw new DomEnvError(result.error, result.pathState);
     } else {
       return result as T;

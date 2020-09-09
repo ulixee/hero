@@ -5,6 +5,7 @@ import BaseTable from '../lib/BaseTable';
 export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'MouseEvents', [
+      ['tabId', 'TEXT'],
       ['event', 'INTEGER'],
       ['commandId', 'INTEGER'],
       ['pageX', 'INTEGER'],
@@ -16,7 +17,7 @@ export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(mouseEvent: IMouseEvent) {
+  public insert(tabId: string, mouseEvent: IMouseEvent) {
     const [
       commandId,
       event,
@@ -28,6 +29,7 @@ export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
       isoTimestamp,
     ] = mouseEvent;
     const record = [
+      tabId,
       event,
       commandId,
       pageX,
@@ -42,6 +44,7 @@ export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
 }
 
 export interface IMouseEventRecord {
+  tabId: string;
   event: MouseEventType;
   commandId: number;
   pageX: number;

@@ -35,7 +35,7 @@ export default class PagesTable extends BaseTable<IPageRecord> {
       page.requestedUrl,
       page.finalUrl,
       page.navigationReason,
-      page.initiatedTime,
+      page.initiatedTime.toISOString(),
       page.stateChanges.get(LocationStatus.HttpRequested)?.toISOString(),
       page.stateChanges.get(LocationStatus.HttpResponded)?.toISOString(),
       page.stateChanges.get(LocationStatus.HttpRedirected)?.toISOString(),
@@ -59,7 +59,7 @@ export interface IPageRecord {
   finalUrl?: string;
   startCommandId: number;
   navigationReason: string;
-  initiatedTime: string;
+  initiatedTime: Date;
   httpRequestedTime: string;
   httpRespondedTime: string;
   httpRedirectedTime?: string;

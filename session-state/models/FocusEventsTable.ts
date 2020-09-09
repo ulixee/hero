@@ -5,6 +5,7 @@ import BaseTable from '../lib/BaseTable';
 export default class FocusEventsTable extends BaseTable<IFocusRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'FocusEvents', [
+      ['tabId', 'TEXT'],
       ['event', 'INTEGER'],
       ['commandId', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
@@ -13,9 +14,10 @@ export default class FocusEventsTable extends BaseTable<IFocusRecord> {
     ]);
   }
 
-  public insert(focusEvent: IFocusEvent) {
+  public insert(tabId: string, focusEvent: IFocusEvent) {
     const [commandId, type, targetNodeId, relatedTargetNodeId, timestamp] = focusEvent;
     const record = [
+      tabId,
       type === 'in' ? FocusEventType.IN : FocusEventType.OUT,
       commandId,
       targetNodeId,
@@ -27,6 +29,7 @@ export default class FocusEventsTable extends BaseTable<IFocusRecord> {
 }
 
 export interface IFocusRecord {
+  tabId: string;
   event: FocusEventType;
   commandId: number;
   targetNodeId?: number;

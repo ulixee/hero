@@ -1,24 +1,22 @@
 // @ts-ignore
-import nodeCommon from "_http_common";
-import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
-import Log from "@secret-agent/commons/Logger";
-import * as http from "http";
-import { parseRawHeaders } from "../lib/Utils";
-import IMitmRequestContext from "../interfaces/IMitmRequestContext";
+import nodeCommon from '_http_common';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import Log from '@secret-agent/commons/Logger';
+import * as http from 'http';
+import { parseRawHeaders } from '../lib/Utils';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 const { log } = Log(module);
 export default class HeadersHandler {
-  public static async waitForResource(ctx: IMitmRequestContext) {
+  public static async waitForBrowserRequest(ctx: IMitmRequestContext) {
     const session = ctx.requestSession;
 
     const { method, requestHeaders } = ctx;
 
-    if (method === 'OPTIONS') {
-      ctx.resourceType = 'Preflight';
-    } else if (ctx.resourceType === 'Websocket') {
+    if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
     } else {
-      const resource = await session.waitForBrowserResourceRequest(ctx.url, method, requestHeaders);
+      const resource = await session.waitForBrowserResourceRequest(ctx);
 
       if (!resource.resourceType) {
         log.error('HeadersHandler.ErrorGettingResourceType', {
@@ -30,6 +28,9 @@ export default class HeadersHandler {
       }
       ctx.browserRequestId = resource.browserRequestId;
       ctx.resourceType = resource.resourceType;
+      if (method === 'OPTIONS') {
+        ctx.resourceType = 'Preflight';
+      }
       ctx.originType = resource.originType;
       ctx.hasUserGesture = resource.hasUserGesture;
       ctx.isUserNavigation = resource.isUserNavigation;

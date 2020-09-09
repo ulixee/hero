@@ -70,19 +70,19 @@ describe('basic Tab tests', () => {
   it('can wait for another tab', async () => {
     let useragent1: string;
     let useragent2: string;
-    koaServer.get('/test3', ctx => {
+    koaServer.get('/tabTest', ctx => {
       useragent1 = ctx.get('user-agent');
       ctx.body = `<body>
-<a target="_blank" href="/test4">Nothing really here</a>
+<a target="_blank" href="/tabTestDest">Nothing really here</a>
 </body>`;
     });
-    koaServer.get('/test4', ctx => {
+    koaServer.get('/tabTestDest', ctx => {
       useragent2 = ctx.get('user-agent');
       ctx.body = `<body><h1 id="newTabHeader">You are here</h1></body>`;
     });
     const meta = await Core.createTab();
     const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test3`);
+    await core.goto(`${koaServer.baseUrl}/tabTest`);
     await core.interact([
       {
         command: InteractionCommand.click,
@@ -98,8 +98,13 @@ describe('basic Tab tests', () => {
     expect(newTab).toBeTruthy();
     expect(session.tabs).toHaveLength(2);
     await newTabCore.waitForLoad('AllContentLoaded');
-    const header = await newTabCore.execJsPath(['document', ['querySelector', '#newTabHeader'], 'textContent']);
+    const header = await newTabCore.execJsPath([
+      'document',
+      ['querySelector', '#newTabHeader'],
+      'textContent',
+    ]);
     expect(header.value).toBe('You are here');
     expect(useragent1).toBe(useragent2);
+    await newTabCore.closeTab();
   });
 });

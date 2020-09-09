@@ -44,7 +44,7 @@ export default class PageHistory {
       frameId,
       startCommandId: commandId,
       navigationReason: reason,
-      initiatedTime: new Date().toISOString(),
+      initiatedTime: new Date(),
       stateChanges: new Map<IPipelineStatus, Date>(),
       resourceId: createPromise(),
     } as IPage;

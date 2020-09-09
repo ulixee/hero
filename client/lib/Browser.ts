@@ -1,24 +1,24 @@
-import initializeConstantsAndProperties from "awaited-dom/base/initializeConstantsAndProperties";
-import StateMachine from "awaited-dom/base/StateMachine";
-import { ILocationTrigger } from "@secret-agent/core-interfaces/Location";
-import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
-import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
-import { ISuperElement } from "awaited-dom/base/interfaces/super";
-import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
-import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
-import { bindFunctions } from "@secret-agent/commons/utils";
-import Request from "awaited-dom/impl/official-klasses/Request";
-import { IRequestInit } from "awaited-dom/base/interfaces/official";
-import IInteractions, { IMousePosition, ITypeInteraction } from "../interfaces/IInteractions";
-import CoreClient from "./CoreClient";
-import CoreTab from "./CoreTab";
-import ScriptInstance from "./ScriptInstance";
-import User, { createUser } from "./User";
-import ICreateBrowserOptions from "../interfaces/ICreateBrowserOptions";
-import AwaitedEventTarget from "./AwaitedEventTarget";
-import IBrowser from "../interfaces/IBrowser";
-import IWaitForResourceFilter from "../interfaces/IWaitForResourceFilter";
-import Tab, { createTab, getCoreTab } from "./Tab";
+import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import StateMachine from 'awaited-dom/base/StateMachine';
+import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
+import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
+import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import { bindFunctions } from '@secret-agent/commons/utils';
+import Request from 'awaited-dom/impl/official-klasses/Request';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
+import CoreClient from './CoreClient';
+import CoreTab from './CoreTab';
+import ScriptInstance from './ScriptInstance';
+import User, { createUser } from './User';
+import ICreateBrowserOptions from '../interfaces/ICreateBrowserOptions';
+import AwaitedEventTarget from './AwaitedEventTarget';
+import IBrowser from '../interfaces/IBrowser';
+import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
+import Tab, { createTab, getCoreTab } from './Tab';
 
 const { getState, setState } = StateMachine<Browser, IState>();
 const scriptInstance = new ScriptInstance();
@@ -116,15 +116,12 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
   // METHODS
 
   public async close(): Promise<void> {
-    const { isClosing } = getState<Browser, IState>(this);
+    const { isClosing, activeTab } = getState<Browser, IState>(this);
     if (isClosing) return;
     setState(this, { isClosing: true });
+    const coreTab = getCoreTab(activeTab);
 
-    const tabs = await this.tabs;
-    for (const tab of tabs) {
-      const tabSession = getCoreTab(tab);
-      await tabSession.close();
-    }
+    await coreTab.closeSession();
   }
 
   public async configure(options: ISessionOptions): Promise<void> {
@@ -234,7 +231,7 @@ async function getSessionTabs(browser: Browser) {
   for (const coreTab of coreTabs) {
     const hasTab = tabs.some(x => x.tabId === coreTab.tabId);
     if (!hasTab) {
-      const tab = createTab(this, coreTab);
+      const tab = createTab(browser, coreTab);
       tabs.push(tab);
     }
   }

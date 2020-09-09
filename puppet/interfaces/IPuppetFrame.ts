@@ -6,6 +6,8 @@ export interface IPuppetFrame {
   parentId?: string;
   name?: string;
   url: string;
+  navigationReason?: string;
+  disposition?: string;
   urlFragment?: string;
   securityOrigin: string;
   hasNavigated: boolean;

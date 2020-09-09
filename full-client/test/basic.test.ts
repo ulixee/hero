@@ -1,6 +1,6 @@
-import { Helpers } from "@secret-agent/testing";
-import Chrome80 from "@secret-agent/emulate-chrome-80";
-import SecretAgent from "../index";
+import { Helpers } from '@secret-agent/testing';
+import Chrome80 from '@secret-agent/emulate-chrome-80';
+import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
@@ -61,44 +61,5 @@ describe('basic Full Client tests', () => {
     expect(await response.statusCode).toBe(200);
     expect(await response.statusMessage).toBe('OK');
     expect(await response.text()).toMatch('<h1>Example Domain</h1>');
-  });
-
-  it('can wait for another tab', async () => {
-    let useragent1: string;
-    let useragent2: string;
-    koaServer.get('/tabTest', ctx => {
-      useragent1 = ctx.get('user-agent');
-      ctx.body = `<body>
-<a target="_blank" href="/newTab">Nothing really here</a>
-</body>`;
-    });
-    koaServer.get('/newTab', ctx => {
-      useragent2 = ctx.get('user-agent');
-      ctx.body = `<body>
-<h1 id="newTabHeader">You are here</h1>
-<a href="#hash">Go back</a>
-</body>`;
-    });
-
-    const browser = await SecretAgent.createBrowser();
-
-    await browser.goto(`${koaServer.baseUrl}/tabTest`);
-    const tab1 = browser.activeTab;
-    const url = await browser.document.location.host;
-    expect(url).toBe(koaServer.baseHost);
-
-    await browser.click(browser.document.querySelector('a'));
-    const newTab = await browser.waitForNewTab();
-
-    expect(newTab.tabId).not.toBe(browser.activeTab.tabId);
-    expect(await newTab.url).toBe(`${koaServer.baseUrl}/newTab`);
-    await browser.focusTab(newTab);
-    expect(await browser.activeTab.url).toBe(`${koaServer.baseUrl}/newTab`);
-
-    await browser.click(browser.document.querySelector('a'));
-    expect(await browser.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
-    await browser.closeTab(newTab);
-    expect(await browser.tabs).toHaveLength(1);
-    expect(browser.activeTab).toBe(tab1);
   });
 });

@@ -24,6 +24,8 @@ export interface IPuppetNetworkEvents {
     method: string;
     hasUserGesture: boolean;
     isDocumentNavigation: boolean;
+    origin: string;
+    referer: string;
     documentUrl: string;
     frameId: string;
   };

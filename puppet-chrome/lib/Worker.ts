@@ -1,9 +1,9 @@
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import Protocol from 'devtools-protocol';
-import { BrowserContext } from './BrowserContext';
-import { CDPSession } from './CDPSession';
-import { NetworkManager } from './NetworkManager';
-import { printStackTrace, valueFromRemoteObject } from './Utils';
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import Protocol from "devtools-protocol";
+import { BrowserContext } from "./BrowserContext";
+import { CDPSession } from "./CDPSession";
+import { NetworkManager } from "./NetworkManager";
+import ConsoleMessage from "./ConsoleMessage";
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 
@@ -14,8 +14,8 @@ interface IServiceWorkerEvents {
 
 export class Worker extends TypedEventEmitter<IServiceWorkerEvents> {
   public readonly browserContext: BrowserContext;
-  private cdpSession: CDPSession;
-  private networkManager: NetworkManager;
+  private readonly cdpSession: CDPSession;
+  private readonly networkManager: NetworkManager;
   private readonly targetInfo: TargetInfo;
 
   public get url() {
@@ -31,7 +31,7 @@ export class Worker extends TypedEventEmitter<IServiceWorkerEvents> {
     this.targetInfo = targetInfo;
     this.cdpSession = cdpSession;
     this.browserContext = browserContext;
-    this.networkManager = new NetworkManager(cdpSession, targetInfo.targetId);
+    this.networkManager = new NetworkManager(cdpSession);
     cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
   }
 
@@ -44,24 +44,12 @@ export class Worker extends TypedEventEmitter<IServiceWorkerEvents> {
   }
 
   private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
-    const { args, stackTrace, type, context } = event;
+    const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = `${this.workerType}:${this.url}`; // TBD
-
-    const message = args
-      .map(arg => {
-        this.cdpSession.disposeObject(arg);
-
-        return valueFromRemoteObject(arg);
-      })
-      .join(' ');
-
-    const location = `//#${context ?? 'nocontext'}${printStackTrace(stackTrace)}`;
 
     this.emit('consoleLog', {
       frameId,
-      type,
-      message,
-      location,
+      ...message,
     });
   }
 }

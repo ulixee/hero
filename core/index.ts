@@ -111,7 +111,7 @@ export default class Core implements ICore {
   }
 
   public async getUserCookies() {
-    return await this.tab.runCommand('getAllCookies');
+    return await this.tab.runCommand('getUserCookies');
   }
 
   public async exportUserProfile() {
@@ -189,7 +189,7 @@ export default class Core implements ICore {
   }
 
   public async focusTab() {
-    await this.tab.focus();
+    await this.tab.runCommand('focus');
   }
 
   public async waitForNewTab(sinceCommandId?: number) {
@@ -203,9 +203,9 @@ export default class Core implements ICore {
       this.emitEvent('resource', ...args);
     };
     if (enable) {
-      this.tab.sessionState.emitter.on('resource', listenerFn);
+      this.tab.on('resource', listenerFn);
     } else {
-      this.tab.sessionState.emitter.off('resource', listenerFn);
+      this.tab.off('resource', listenerFn);
     }
   }
 
@@ -323,7 +323,9 @@ export default class Core implements ICore {
         process.exit(0);
       });
     });
+  }
 
+  public static registerExceptionHandlers() {
     process.on('uncaughtException', async (error: Error) => {
       await Core.shutdown(error);
       process.exit(1);
@@ -374,4 +376,5 @@ export default class Core implements ICore {
 
 type IAttachedId = number;
 
-if (process.env.NODE_ENV !== 'test') Core.registerSignalHandlers();
+Core.registerSignalHandlers();
+if (process.env.NODE_ENV !== 'test') Core.registerExceptionHandlers();

@@ -51,6 +51,7 @@ describe('basic Interaction tests', () => {
       'classList',
     ]);
     expect(buttonClass.value).toStrictEqual({ 0: 'clicked' });
+    await core.close();
   });
 
   it('executes basic type command', async () => {
@@ -76,6 +77,7 @@ describe('basic Interaction tests', () => {
     ]);
     const inputValue = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(inputValue.value).toBe('Hello world!');
+    await core.close();
   });
 
   it('can operate when unsafe eval not on', async () => {
@@ -96,6 +98,7 @@ describe('basic Interaction tests', () => {
     expect(input.value).toBe('');
     const x = await core.execJsPath([['document.querySelector', 'body'], 'scrollTop']);
     expect(x.value).toBe(0);
+    await core.close();
   });
 
   it('should be able to get window variables', async () => {
@@ -125,5 +128,6 @@ describe('basic Interaction tests', () => {
     const pageClicks2 = await core.getJsValue('pageClicks');
 
     expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
+    await core.close();
   });
 });

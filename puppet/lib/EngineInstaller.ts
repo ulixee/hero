@@ -1,3 +1,4 @@
+
 import * as os from 'os';
 import ProgressBar from 'progress';
 import { BrowserFetcher } from './BrowserFetcher';

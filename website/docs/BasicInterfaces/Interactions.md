@@ -20,8 +20,9 @@ Interaction Commands fall into three broad categories:
 - Keyboard Commands
 - WaitFor Commands
 
-## The Five Mouse Commands
+## The Six Mouse Commands
 
+- scroll `MousePosition` Scroll page to the desired position.
 - move `MousePosition` Move cursor to the desired position.
 - click `MousePosition` Press and release the mouse button as a single click.
 - clickDown `MousePosition` Press the mouse button.

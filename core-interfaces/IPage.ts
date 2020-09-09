@@ -7,13 +7,13 @@ export default interface IPage {
   resourceId: IResolvablePromise<number>;
   startCommandId: number;
   requestedUrl: string;
-  initiatedTime: string;
+  initiatedTime: Date;
   navigationReason: NavigationReason;
   finalUrl?: string;
   stateChanges: Map<IPipelineStatus, Date>;
 }
 
-export type NavigationReason = DevToolsNavigationReason | 'goto' | 'userGesture' | 'inPage';
+export type NavigationReason = DevToolsNavigationReason | 'goto' | 'userGesture' | 'inPage' | 'newTab';
 
 type DevToolsNavigationReason =
   | 'formSubmissionGet'

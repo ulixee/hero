@@ -62,7 +62,7 @@ export default class Interactor {
           const button = interaction.mouseButton || 'left';
           const { x, y, simulateOptionClick } = await this.getPositionXY(interaction.mousePosition);
           if (simulateOptionClick) {
-            await this.tab.simulateOptionClick(interaction.mousePosition as IJsPath);
+            await this.tab.domEnv.simulateOptionClick(interaction.mousePosition as IJsPath);
           } else {
             await this.mouse.click(x, y, { button });
           }
@@ -127,7 +127,7 @@ export default class Interactor {
     if (isMousePositionCoordinate(value)) {
       return { x: value[0] as number, y: value[1] as number };
     }
-    const rect = await this.tab.getElementRectToViewport(value as IJsPath);
+    const rect = await this.tab.domEnv.getJsPathClientRect(value as IJsPath);
     const x = round(rect.left + (rect.right - rect.left) / 2);
     const y = round(rect.top - (rect.top - rect.bottom) / 2);
     if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {

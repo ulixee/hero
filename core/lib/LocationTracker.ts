@@ -11,15 +11,17 @@ import {
 import SessionState from '@secret-agent/session-state';
 import IPage, { NavigationReason } from '@secret-agent/core-interfaces/IPage';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
+import PageHistory from '@secret-agent/session-state/lib/PageHistory';
 
 const READY = 'READY';
 
 export default class LocationTracker {
   // this is the default "starting" point for a wait-for location change if a previous command id is not specified
   private defaultWaitForLocationCommandId = 0;
+  private pages: PageHistory;
 
   private get currentPage() {
-    return this.sessionState.pages.top;
+    return this.pages.top;
   }
 
   private get currentTrigger() {
@@ -40,7 +42,7 @@ export default class LocationTracker {
     [status in ILocationStatus]: (() => void)[];
   };
 
-  constructor(readonly sessionState: SessionState) {
+  constructor(pages: PageHistory) {
     this.waitForCbs = {
       reload: [],
       change: [],
@@ -51,8 +53,9 @@ export default class LocationTracker {
       DomContentLoaded: [],
       AllContentLoaded: [],
     };
-    sessionState.pages.onNewPage = this.onNewPage.bind(this);
-    sessionState.pages.onPagePipelineStatusChange = this.onPagePipelineStatusChange.bind(this);
+    this.pages = pages;
+    this.pages.onNewPage = this.onNewPage.bind(this);
+    this.pages.onPagePipelineStatusChange = this.onPagePipelineStatusChange.bind(this);
   }
 
   public willRunCommand(command: ICommandMeta, previousCommand: ICommandMeta) {
@@ -138,7 +141,7 @@ export default class LocationTracker {
     sinceCommandId: number,
     inclusive: boolean,
   ) {
-    for (const history of this.sessionState.pages.history) {
+    for (const history of this.pages.history) {
       let isMatch = history.startCommandId > sinceCommandId;
       if (inclusive) isMatch = isMatch || history.startCommandId === sinceCommandId;
       if (isMatch) {

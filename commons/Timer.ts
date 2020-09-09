@@ -9,10 +9,7 @@ export default class Timer {
   private timeoutMessage = 'Timeout waiting';
   private readonly expirePromise = createPromise();
 
-  constructor(
-    readonly timeoutMillis: number,
-    readonly registry?: { timeout: NodeJS.Timer; reject: (err: Error) => any }[],
-  ) {
+  constructor(readonly timeoutMillis: number, readonly registry?: IRegistry[]) {
     this.timeout = setTimeout(this.expire.bind(this), timeoutMillis).unref();
     if (registry) {
       registry.push({ reject: this.expirePromise.reject, timeout: this.timeout });
@@ -52,8 +49,30 @@ export default class Timer {
     return Promise.race([promise, this.expirePromise]) as Promise<Z>;
   }
 
+  public waitForTimeout() {
+    // wait for promise to expire
+    return this.expirePromise.promise.catch(() => {});
+  }
+
   private expire() {
     this.expirePromise.reject(new TimeoutError(this.timeoutMessage));
     this.clear();
   }
+
+  public static expireAll(registry: IRegistry[], error: Error) {
+    // clear any pending timeouts
+    while (registry.length) {
+      const next = registry.shift();
+      if (next) {
+        const { timeout, reject } = next;
+        clearTimeout(timeout);
+        reject(error);
+      }
+    }
+  }
+}
+
+interface IRegistry {
+  timeout: NodeJS.Timer;
+  reject: (err: Error) => any;
 }

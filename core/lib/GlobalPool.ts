@@ -120,10 +120,7 @@ export default class GlobalPool {
     this.mitmServer = await MitmServer.start(this.localProxyPortStart);
   }
 
-  private static async createSessionNow(
-    options: ICreateSessionOptions,
-    isRetry = false,
-  ): Promise<Session> {
+  private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
     await this.startMitm();
 
     this._activeSessionCount += 1;
@@ -140,15 +137,6 @@ export default class GlobalPool {
     } catch (err) {
       this._activeSessionCount -= 1;
 
-      if (
-        puppet &&
-        !isRetry &&
-        String(err).includes('WebSocket is not open: readyState 3 (CLOSED)')
-      ) {
-        await puppet.close();
-        await puppet.start(this.mitmServer.port);
-        return this.createSessionNow(options, true);
-      }
       throw err;
     }
   }

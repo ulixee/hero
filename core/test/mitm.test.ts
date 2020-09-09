@@ -5,6 +5,7 @@ import Chrome83 from "@secret-agent/emulate-chrome-83";
 import MitmRequestContext from "@secret-agent/mitm/lib/MitmRequestContext";
 import { createPromise } from "@secret-agent/commons/utils";
 import { LocationStatus } from "@secret-agent/core-interfaces/Location";
+import { ITestKoaServer } from "@secret-agent/testing/helpers";
 import Core from "../index";
 
 const mocks = {
@@ -17,7 +18,9 @@ beforeAll(async () => {
   await GlobalPool.start([Chrome83.emulatorId]);
 });
 
-beforeEach(() => {
+let koa: ITestKoaServer
+beforeEach(async () => {
+  koa = await Helpers.runKoaServer(true);
   mocks.MitmRequestContext.create.mockClear();
 });
 
@@ -47,10 +50,9 @@ test('should be able to run multiple pages each with their own proxy', async () 
 });
 
 test('should send preflight requests', async () => {
-  const koa = await Helpers.runKoaServer(false);
 
   const corsPromise = new Promise<boolean>(resolve => {
-    koa.options('/post', ctx => {
+    koa.options('/preflightPost', ctx => {
       ctx.response.set('Access-Control-Allow-Origin', ctx.headers.origin);
       ctx.response.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
       ctx.response.set('Access-Control-Allow-Headers', 'X-PINGOTHER, Content-Type');
@@ -59,7 +61,7 @@ test('should send preflight requests', async () => {
     });
   });
   const postPromise = new Promise<boolean>(resolve => {
-    koa.post('/post', ctx => {
+    koa.post('/preflightPost', ctx => {
       ctx.body = 'ok';
       resolve(true);
     });
@@ -75,7 +77,7 @@ test('should send preflight requests', async () => {
 <body>
 <script type="text/javascript">
 const xhr = new XMLHttpRequest();
-xhr.open('POST', '${koa.baseUrl}/post');
+xhr.open('POST', '${koa.baseUrl}/preflightPost');
 xhr.setRequestHeader('X-PINGOTHER', 'pingpong');
 xhr.setRequestHeader('Content-Type', 'application/xml');
 xhr.send('<person><name>DLF</name></person>'); 
@@ -100,7 +102,6 @@ xhr.send('<person><name>DLF</name></person>');
 });
 
 test('should proxy requests from worker threads', async () => {
-  const koa = await Helpers.runKoaServer(false);
   koa.get('/worker.js', ctx => {
     ctx.set('content-type', 'application/javascript');
     ctx.body = `
@@ -110,7 +111,7 @@ onmessage = function(e) {
   xhr.send('FromWorker'); 
 }`;
   });
-  koa.get('/test', ctx => {
+  koa.get('/testWorker', ctx => {
     ctx.body = `<html lang="en">
 <script>
 const myWorker = new Worker("worker.js");
@@ -129,7 +130,7 @@ myWorker.postMessage('send');
   const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();
-  await tab.goto(`${koa.baseUrl}/test`);
+  await tab.goto(`${koa.baseUrl}/testWorker`);
   await tab.waitForLoad('AllContentLoaded');
   await expect(serviceXhr).resolves.toBe('FromWorker');
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
@@ -241,7 +242,6 @@ window.addEventListener('load', function() {
 });
 
 test('should proxy iframe requests', async () => {
-  const koaServer = await Helpers.runKoaServer(false);
   const meta = await Core.createTab();
   const core = Core.byTabId[meta.tabId];
 
@@ -255,12 +255,12 @@ test('should proxy iframe requests', async () => {
   ];
   session.mitmRequestSession.blockedResources.handlerFn = (request, response) => {
     response.end(`<html lang="en">
-<head title="test"><link rel="stylesheet" type="text/css" href="/test.css"/></head>
+<head><link rel="stylesheet" type="text/css" href="/test.css"/></head>
 <body><img alt="none" src="/dlfSite.png"/></body>
 </html>`);
     return true;
   };
-  koaServer.get('/iframe-test', async ctx => {
+  koa.get('/iframe-test', async ctx => {
     ctx.body = `<html lang="en">
 <body>
 This is the main body
@@ -268,7 +268,7 @@ This is the main body
 </body>
 </html>`;
   });
-  await core.goto(`${koaServer.baseUrl}/iframe-test`);
+  await core.goto(`${koa.baseUrl}/iframe-test`);
   await core.waitForLoad(LocationStatus.AllContentLoaded);
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);

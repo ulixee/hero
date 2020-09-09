@@ -111,7 +111,9 @@ describe('basic Dom Replay tests', () => {
 
     {
       await tab.domRecorder.flush();
-      const pageChanges = await state.getPageDomChanges(state.pages.history);
+      // @ts-ignore
+      const pages = tab.pages;
+      const pageChanges = await state.getPageDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
       await mirrorPage.mainFrame.run(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
@@ -134,7 +136,9 @@ describe('basic Dom Replay tests', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       await tab.domRecorder.flush();
-      const pageChangesByFrame = await state.getPageDomChanges(state.pages.history, lastCommandId);
+      // @ts-ignore
+      const pages = tab.pages;
+      const pageChangesByFrame = await state.getPageDomChanges(pages.history, lastCommandId);
       lastCommandId = core.lastCommandId;
       const [changes] = Object.values(pageChangesByFrame);
       await mirrorPage.mainFrame.run(

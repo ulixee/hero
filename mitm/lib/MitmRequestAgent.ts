@@ -312,7 +312,7 @@ export default class MitmRequestAgent {
       pushStream.end();
       cache.onResponseEnd();
 
-      await HeadersHandler.waitForResource(pushContext);
+      await HeadersHandler.waitForBrowserRequest(pushContext);
       parentContext.requestSession.emit(
         'response',
         MitmRequestContext.toEmittedResource(pushContext),

@@ -12,6 +12,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       'Resources',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['tabId', 'TEXT'],
         ['type', 'TEXT'],
         ['receivedAtCommandId', 'INTEGER'],
         ['seenAtCommandId', 'INTEGER'],
@@ -43,6 +44,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   }
 
   public insert(
+    tabId: string,
     meta: IResourceMeta,
     body: Buffer,
     extras: {
@@ -58,6 +60,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
   ) {
     return this.queuePendingInsert([
       meta.id,
+      tabId,
       meta.type,
       meta.receivedAtCommandId,
       null,
@@ -111,6 +114,7 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
 
 export interface IResourcesRecord {
   id: number;
+  tabId: string;
   type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;

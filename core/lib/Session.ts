@@ -5,7 +5,10 @@ import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
-import RequestSession from '@secret-agent/mitm/handlers/RequestSession';
+import RequestSession, {
+  IRequestSessionRequestEvent,
+  IRequestSessionResponseEvent,
+} from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
 import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
@@ -90,24 +93,26 @@ export default class Session {
 
   public async initialize(context: IPuppetContext) {
     this.browserContext = context;
-
     if (this.userProfile) {
       await UserProfile.install(this);
     }
+
+    const requestSession = this.mitmRequestSession;
+    requestSession.on('request', this.onMitmRequest.bind(this));
+    requestSession.on('response', this.onMitmResponse.bind(this));
   }
 
   public async createTab() {
     const page = await this.newPage();
-    const tab = await Tab.create(this, page);
-
-    page.initializeNewPage = this.onNewTab.bind(this, tab);
 
     // if first tab, install session storage
     if (!this.tabs.length && this.userProfile?.storage) {
-      await UserProfile.installSessionStorage(this, tab);
+      await UserProfile.installSessionStorage(this, page);
     }
-    this.tabs.push(tab);
-    return tab;
+
+    const tab = await Tab.create(this, page);
+    page.initializeNewPage = this.onNewTab.bind(this, tab);
+    return this.trackTab(tab);
   }
 
   public async close() {
@@ -128,10 +133,38 @@ export default class Session {
     }
   }
 
-  private async onNewTab(parentTab: Tab, page: IPuppetPage) {
-    const tab = await Tab.create(this, page, parentTab);
+  private onMitmRequest(event: IRequestSessionRequestEvent) {
+    // don't know the tab id at this point
+    this.sessionState.captureResource(null, event, false);
+  }
+
+  private onMitmResponse(event: IRequestSessionResponseEvent) {
+    const tabId = this.mitmRequestSession.browserRequestIdToTabId.get(event.browserRequestId);
+    const tab = this.tabs.find(x => x.id === tabId);
+
+    const resource = this.sessionState.captureResource(tab.id, event, true);
+    tab.emit('resource', resource);
+  }
+
+  private async onNewTab(
+    parentTab: Tab,
+    page: IPuppetPage,
+    openParams: { url: string; windowName: string },
+  ) {
+    const tab = await Tab.create(this, page, parentTab, openParams);
+    page.initializeNewPage = this.onNewTab.bind(this, tab);
+    return this.trackTab(tab);
+  }
+
+  private async trackTab(tab: Tab) {
     this.tabs.push(tab);
+    tab.on('close', this.removeTab.bind(this, tab));
     return tab;
+  }
+
+  private async removeTab(tab: Tab) {
+    const tabIdx = this.tabs.indexOf(tab);
+    if (tabIdx >= 0) this.tabs.splice(tabIdx, 1);
   }
 
   private async newPage() {

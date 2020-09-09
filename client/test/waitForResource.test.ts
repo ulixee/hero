@@ -10,6 +10,9 @@ describe('waitForResource', () => {
       if (command === 'waitForResource') {
         return { data: [{ id: 1, url: '/test.js' } as IResourceMeta] };
       }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
+      }
       if (command === 'createTab') {
         return {
           data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
@@ -37,6 +40,9 @@ describe('waitForResource', () => {
           return { data: [{ id: 1, url: '/test2.js' } as IResourceMeta] };
         }
         return { data: [] };
+      }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
       }
       if (command === 'createTab') {
         return {
@@ -67,6 +73,9 @@ describe('waitForResource', () => {
           ],
         };
       }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
+      }
       if (command === 'createTab') {
         return {
           data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
@@ -94,6 +103,9 @@ describe('waitForResource', () => {
             { id: 2, url: '/test4.js' } as IResourceMeta,
           ],
         };
+      }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
       }
       if (command === 'createTab') {
         return {
@@ -124,6 +136,9 @@ describe('waitForResource', () => {
             { id: 4, url: '/test4.js' } as IResourceMeta,
           ],
         };
+      }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
       }
       if (command === 'createTab') {
         return {
@@ -172,6 +187,9 @@ describe('waitForResource', () => {
         if (counter === 4) {
           return { data: [{ id: 5, url: '/test5.js' } as IResourceMeta] };
         }
+      }
+      if (command === 'getTabsForSession') {
+        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
       }
       if (command === 'createTab') {
         return {

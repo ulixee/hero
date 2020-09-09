@@ -1,43 +1,58 @@
+/**
+ * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import Protocol from 'devtools-protocol';
-import { assert } from '@secret-agent/commons/utils';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
+import { debug } from '@secret-agent/commons/Debug';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
 import Mouse from './Mouse';
-import Touchscreen from './Touchscreen';
 import FramesManager from './FramesManager';
-import {
-  debugError,
-  exceptionDetailsToError,
-  printStackTrace,
-  valueFromRemoteObject,
-} from './Utils';
 import { BrowserContext } from './BrowserContext';
 import { Worker } from './Worker';
+import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import CookieParam = Protocol.Network.CookieParam;
+import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
+
+const debugError = debug('puppet-chrome:pageerror');
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
   public mouse: Mouse;
-  public touchscreen: Touchscreen;
   public workersById = new Map<string, Worker>();
   public readonly browserContext: BrowserContext;
   public readonly opener: Page | null;
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
 
-  public initializeNewPage?: (page: IPuppetPage) => Promise<void>;
+  public initializeNewPage?: (
+    page: IPuppetPage,
+    openParams: { url: string; windowName: string },
+  ) => Promise<void>;
 
   public cdpSession: CDPSession;
   public targetId: string;
   public isClosed = false;
   public readonly isReady: Promise<void>;
+  public windowOpenParams: Protocol.Page.WindowOpenEvent;
 
   public get mainFrame() {
     return this.framesManager.main;
@@ -59,8 +74,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.browserContext = browserContext;
     this.keyboard = new Keyboard(cdpSession);
     this.mouse = new Mouse(cdpSession, this.keyboard);
-    this.touchscreen = new Touchscreen(cdpSession, this.keyboard);
-    this.networkManager = new NetworkManager(cdpSession, targetId);
+    this.networkManager = new NetworkManager(cdpSession);
     this.framesManager = new FramesManager(cdpSession);
     this.opener = opener;
 
@@ -68,6 +82,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.cdpSession.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
     this.cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
     this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
+    this.cdpSession.on('Page.windowOpen', this.onWindowOpen.bind(this));
 
     this.framesManager.on('frameLifecycle', ({ frame, name }) => {
       if (name === 'load' && frame.id === this.mainFrame?.id) {
@@ -191,7 +206,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
     if (navigationResponse.errorText) throw new Error(navigationResponse.errorText);
 
-    return this.framesManager.waitForFrame(navigationResponse, true);
+    return this.framesManager.waitForFrame(navigationResponse, url, true);
   }
 
   async goBack(): Promise<void> {
@@ -208,11 +223,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   async close(): Promise<void> {
     await this.framesManager.close();
-    assert(
-      this.cdpSession.isConnected(),
-      'Protocol error: Connection closed. Most likely the page has been closed.',
-    );
-    await this.cdpSession.send('Page.close');
+    if (this.cdpSession.isConnected()) {
+      await this.cdpSession.send('Page.close');
+    }
   }
 
   didClose() {
@@ -240,7 +253,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     if (this.opener) {
       await this.opener.isReady;
       if (this.opener.initializeNewPage) {
-        await this.opener.initializeNewPage(this);
+        await this.opener.initializeNewPage(this, this.opener.windowOpenParams);
       }
     }
 
@@ -276,7 +289,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   private onRuntimeException(msg: ExceptionThrownEvent) {
-    const error = exceptionDetailsToError(msg.exceptionDetails);
+    const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
     const frameId = this.framesManager.getFrameIdForExecutionContext(
       msg.exceptionDetails.executionContextId,
     );
@@ -287,28 +300,20 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
-    const { executionContextId, args, stackTrace, type, context } = event;
-    const frameId = this.framesManager.getFrameIdForExecutionContext(executionContextId);
-
-    const message = args
-      .map(arg => {
-        this.cdpSession.disposeObject(arg);
-
-        return valueFromRemoteObject(arg);
-      })
-      .join(' ');
-
-    const location = `//#${context ?? 'nocontext'}${printStackTrace(stackTrace)}`;
+    const message = ConsoleMessage.create(this.cdpSession, event);
+    const frameId = this.framesManager.getFrameIdForExecutionContext(event.executionContextId);
 
     this.emit('consoleLog', {
       frameId,
-      type,
-      message,
-      location,
+      ...message,
     });
   }
 
   private onTargetCrashed() {
     this.emit('targetCrashed', { error: new Error('Target Crashed') });
+  }
+
+  private onWindowOpen(event: WindowOpenEvent) {
+    this.windowOpenParams = event;
   }
 }

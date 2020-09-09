@@ -107,8 +107,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     filter: IWaitForResourceFilter,
     options?: IWaitForResourceOptions,
   ): Promise<(Resource | WebsocketResource)[]> {
-    const browser = getState(this).browser;
-    return Resource.waitFor(browser.activeTab, filter, options);
+    return Resource.waitFor(this, filter, options);
   }
 
   public async waitForElement(

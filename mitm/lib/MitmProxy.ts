@@ -10,6 +10,7 @@ import RequestSession from '../handlers/RequestSession';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 
 const { log } = Log(module);
+const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 /**
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
@@ -111,6 +112,10 @@ export default class MitmProxy {
       });
       proxyToClientResponse.writeHead(504);
       return proxyToClientResponse.end();
+    }
+
+    if (requestSession.bypassAllWithEmptyResponse) {
+      return proxyToClientResponse.end(emptyResponse);
     }
 
     await HttpRequestHandler.onRequest({

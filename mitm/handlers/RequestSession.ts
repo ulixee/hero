@@ -6,12 +6,11 @@ import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpReso
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
-import { URL } from 'url';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import MitmRequestContext from '../lib/MitmRequestContext';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
 export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
   public static sessions: { [sessionId: string]: RequestSession } = {};
@@ -39,6 +38,11 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   public requestAgent: MitmRequestAgent;
   public requests: IHttpResourceLoadDetails[] = [];
 
+  // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
+  public bypassAllWithEmptyResponse: boolean;
+
+  public browserRequestIdToTabId = new Map<string, string>();
+
   private readonly pendingResources: IPendingResourceLoad[] = [];
 
   constructor(
@@ -51,13 +55,20 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.requestAgent = new MitmRequestAgent(this);
   }
 
-  public async waitForBrowserResourceRequest(url: URL, method: string, headers: IResourceHeaders) {
-    const resourceIdx = this.getResourceIndex(url.href, method);
-    let resource = resourceIdx >= 0 ? this.pendingResources[resourceIdx] : null;
+  public async waitForBrowserResourceRequest(ctx: IMitmRequestContext) {
+    const referer = ctx.requestLowerHeaders.referer as string;
+    const origin = ctx.requestLowerHeaders.origin as string;
+    const url = ctx.url.href;
+    const method = ctx.method;
+
+    let resource = this.getPendingResource(url, method, origin, referer, ctx.isHttp2Push);
     if (!resource) {
       resource = {
-        url: url.href,
+        url,
         method,
+        origin,
+        referer,
+        isHttp2Push: ctx.isHttp2Push,
         load: createPromise<IPendingResourceLoad>(),
       };
       this.pendingResources.push(resource);
@@ -65,14 +76,47 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
     await resource.load.promise;
 
+    const idx = this.pendingResources.indexOf(resource);
+    if (idx >= 0) this.pendingResources.splice(idx, 1);
+
     return {
       browserRequestId: resource.browserRequestId,
       resourceType: resource.resourceType,
-      originType: MitmRequestContext.getOriginType(url, headers),
+      originType: ctx.originType,
       hasUserGesture: resource.hasUserGesture,
       isUserNavigation: resource.isUserNavigation,
       documentUrl: resource.documentUrl,
     };
+  }
+
+  public registerResource(params: Omit<IPendingResourceLoad, 'load'>) {
+    this.browserRequestIdToTabId.set(params.browserRequestId, params.tabId);
+    const { url, method, referer, origin } = params;
+
+    let resource = this.getPendingResource(url, method, origin, referer);
+    if (resource?.load.isResolved) {
+      // don't resolve same url/method twice
+      resource = null;
+    }
+
+    if (!resource) {
+      resource = {
+        url,
+        method,
+        origin,
+        referer,
+        load: createPromise<IPendingResourceLoad>(),
+      } as IPendingResourceLoad;
+      this.pendingResources.push(resource);
+    }
+
+    resource.tabId = params.tabId;
+    resource.browserRequestId = params.browserRequestId;
+    resource.documentUrl = params.documentUrl;
+    resource.resourceType = params.resourceType;
+    resource.hasUserGesture = params.hasUserGesture;
+    resource.isUserNavigation = params.isUserNavigation;
+    resource.load.resolve(resource);
   }
 
   public trackResource(resource: IHttpResourceLoadDetails) {
@@ -99,44 +143,12 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     }
   }
 
-  public registerResource(params: {
-    browserRequestId: string;
-    url: string;
-    method: string;
-    resourceType: ResourceType;
-    hasUserGesture: boolean;
-    documentUrl: string;
-    isUserNavigation: boolean;
-  }) {
-    const { url, method, resourceType } = params;
-
-    const resourceIdx = this.getResourceIndex(url, method);
-    let resource: IPendingResourceLoad;
-    if (resourceIdx >= 0) {
-      resource = this.pendingResources[resourceIdx];
-    } else {
-      resource = {
-        url,
-        method,
-        load: createPromise<IPendingResourceLoad>(),
-      } as IPendingResourceLoad;
-      this.pendingResources.push(resource);
-    }
-
-    resource.browserRequestId = params.browserRequestId;
-    resource.documentUrl = params.documentUrl;
-    resource.resourceType = resourceType;
-    resource.hasUserGesture = params.hasUserGesture;
-    resource.isUserNavigation = params.isUserNavigation;
-    resource.load.resolve(resource);
-  }
-
   public async getUpstreamProxyUrl() {
     return this.upstreamProxyUrlProvider ? this.upstreamProxyUrlProvider : null;
   }
 
-  public getProxyCredentials(tabId = '') {
-    return `${tabId}:${this.sessionId}`;
+  public getProxyCredentials() {
+    return `secret-agent:${this.sessionId}`;
   }
 
   public async close() {
@@ -183,12 +195,19 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return this.websocketBrowserResourceIds[key].promise;
   }
 
-  public registerWebsocketHeaders(browserRequestId: string, headers: IResourceHeaders) {
-    const key = this.getWebsocketHeadersKey(headers);
+  public registerWebsocketHeaders(
+    tabId: string,
+    message: {
+      browserRequestId: string;
+      headers: IResourceHeaders;
+    },
+  ) {
+    this.browserRequestIdToTabId.set(message.browserRequestId, tabId);
+    const key = this.getWebsocketHeadersKey(message.headers);
     if (!this.websocketBrowserResourceIds[key]) {
       this.websocketBrowserResourceIds[key] = createPromise<string>();
     }
-    this.websocketBrowserResourceIds[key].resolve(browserRequestId);
+    this.websocketBrowserResourceIds[key].resolve(message.browserRequestId);
   }
 
   private getWebsocketHeadersKey(headers: IResourceHeaders) {
@@ -202,10 +221,28 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return [host, websocketKey].join(',');
   }
 
-  private getResourceIndex(url: string, method: string) {
-    return this.pendingResources.findIndex(x => {
+  private getPendingResource(
+    url: string,
+    method: string,
+    origin: string,
+    referer: string,
+    isHttp2Push?: boolean,
+  ) {
+    const matches = this.pendingResources.filter(x => {
       return x.url === url && x.method === method;
     });
+
+    // if http2 push, we don't know what referer/origin headers the browser will use
+    const h2Push = matches.find(x => x.isHttp2Push);
+    if (h2Push) return h2Push;
+    if (isHttp2Push && matches.length) return matches[0];
+
+    if (method === 'OPTIONS') {
+      return matches.find(x => x.origin === origin);
+    }
+
+    // otherwise, use referer
+    return this.pendingResources.find(x => x.referer === referer);
   }
 
   public static async close() {
@@ -275,10 +312,14 @@ export interface IRequestSessionHttpErrorEvent {
 interface IPendingResourceLoad {
   url: string;
   method: string;
+  origin: string;
+  referer: string;
   load: IResolvablePromise<IPendingResourceLoad>;
+  tabId?: string;
   browserRequestId?: string;
   resourceType?: ResourceType;
   documentUrl?: string;
   hasUserGesture?: boolean;
   isUserNavigation?: boolean;
+  isHttp2Push?: boolean;
 }

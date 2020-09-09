@@ -3,7 +3,7 @@ import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/Res
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
-import { debugError } from './Utils';
+import { debug } from '@secret-agent/commons/Debug';
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -14,17 +14,17 @@ import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSe
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
 import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
 
+const debugError = debug('puppet-chrome:network-error');
+
 export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly cdpSession: CDPSession;
-  private readonly networkId: string;
   private readonly attemptedAuthentications = new Set<string>();
   private emulation?: IBrowserEmulation;
 
   private parentManager?: NetworkManager;
 
-  constructor(cdpSession: CDPSession, networkId: string) {
+  constructor(cdpSession: CDPSession) {
     super();
-    this.networkId = networkId;
     this.cdpSession = cdpSession;
 
     this.cdpSession.on('Fetch.requestPaused', this.onRequestPaused.bind(this));
@@ -84,7 +84,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
-      authChallengeResponse.username = this.networkId;
+      authChallengeResponse.username = 'puppet-chrome';
       authChallengeResponse.password = this.emulation.proxyPassword;
     }
     this.cdpSession
@@ -111,6 +111,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         url: networkRequest.request.url,
         method: networkRequest.request.method,
         hasUserGesture: false,
+        origin: networkRequest.request.headers.Origin,
+        referer: networkRequest.request.headers.Referer,
         documentUrl: networkRequest.request.headers.Referer,
         isDocumentNavigation: false,
         frameId: networkRequest.frameId,
@@ -129,6 +131,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       method: networkRequest.request.method,
       hasUserGesture: networkRequest.hasUserGesture,
       documentUrl: networkRequest.documentURL,
+      origin: networkRequest.request.headers.Origin,
+      referer: networkRequest.request.headers.Referer,
       isDocumentNavigation: isNavigation,
       frameId: networkRequest.frameId,
     });

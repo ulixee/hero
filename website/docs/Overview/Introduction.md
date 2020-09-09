@@ -14,7 +14,7 @@
 
 We started by challenging ourselves to create the ultimate scraper detection tool, which we coined [DoubleAgent](https://github.com/ulixee/double-agent/). Along the way we discovered 76,697 checks that any website can implement to [block practically all known scrapers](https://stateofscraping.org). Then we designed SecretAgent to bypass detection by emulating real users.
 
-SecretAgent uses Chromium as it's core rendering engine under the hood, with DevTools Protocol as its glue layer.
+SecretAgent uses Chromium as its core rendering engine under the hood, with DevTools Protocol as its glue layer.
 
 Instead of creating another complex puppeteer-like API that requires use of nested callbacks and running code in remote contexts, we designed the AwaitedDOM. AwaitedDOM is a W3C compliant DOM written for NodeJS that allows you to write scraper scripts as if you were inside the webpage.
 
