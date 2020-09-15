@@ -5,7 +5,8 @@ export interface IPuppetKeyboard {
   up(key: IKeyboardKey): Promise<void>;
   down(key: IKeyboardKey): Promise<void>;
   press(key: IKeyboardKey): Promise<void>;
-  type(text: string, options: { delay: number }): Promise<void>;
+  type(text: string, options?: { delay: number }): Promise<void>;
+  sendCharacter(char: string): Promise<void>;
 }
 
 export interface IPuppetMouse {

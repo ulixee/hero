@@ -3,6 +3,7 @@
   "version": "1.0.0-alpha.10",
   "description": "Puppet driver",
   "dependencies": {
+    "debug": "^4.1.1",
     "rimraf": "^3.0.2",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "5.0.0",
@@ -11,5 +12,8 @@
     "@secret-agent/commons": "^1.0.0-alpha.10",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "@secret-agent/puppet-chrome": "^1.0.0-alpha.10"
+  },
+  "devDependencies": {
+    "ws": "^7.3.1"
   }
 }

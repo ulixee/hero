@@ -1,30 +1,30 @@
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import IDomStorage from "@secret-agent/core-interfaces/IDomStorage";
-import Log from "@secret-agent/commons/Logger";
-import { ICookie } from "@secret-agent/core-interfaces/ICookie";
-import { IPuppetPage } from "@secret-agent/puppet/interfaces/IPuppetPage";
-import { assert } from "@secret-agent/commons/utils";
-import Session from "./Session";
-import DomEnv from "./DomEnv";
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
+import Log from '@secret-agent/commons/Logger';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import { assert } from '@secret-agent/commons/utils';
+import Session from './Session';
+import DomEnv from './DomEnv';
 
 const { log } = Log(module);
 
 export default class UserProfile {
   public static async export(session: Session) {
+    const cookies = await session.browserContext.getCookies();
+
     const storage: IDomStorage = {};
-    const cookies: ICookie[] = [];
     for (const tab of session.tabs) {
       const page = tab.puppetPage;
 
       const dbs = await page.getIndexedDbDatabaseNames();
+      const frames = page.frames;
       for (const { origin, frameId, databases } of dbs) {
-        storage[origin] = await page.runInFrame(
-          frameId,
+        const frame = frames.find(x => x.id === frameId);
+        storage[origin] = await frame?.evaluate(
           `window.exportDomStorage(${JSON.stringify(databases)})`,
           true,
         );
       }
-      cookies.push(...(await page.getAllCookies()));
     }
 
     return {
@@ -48,13 +48,12 @@ export default class UserProfile {
 
     const parentLogId = log.info('UserProfile.install', { sessionId });
 
-
     let page: IPuppetPage;
     try {
       session.mitmRequestSession.bypassAllWithEmptyResponse = true;
       page = await session.browserContext.newPage();
       if (cookies && cookies.length) {
-        await page.setCookies(cookies, origins);
+        await session.browserContext.addCookies(cookies, origins);
       }
 
       if (hasStorage) {
@@ -67,7 +66,7 @@ export default class UserProfile {
           if (!originStorage) continue;
 
           await page.navigate(origin);
-          await page.mainFrame.run(
+          await page.mainFrame.evaluate(
             `window.restoreUserStorage(${JSON.stringify(originStorage)})`,
             true,
           );
@@ -91,7 +90,7 @@ export default class UserProfile {
       for (const [origin, storage] of Object.entries(userProfile?.storage ?? {})) {
         if (!storage.sessionStorage.length) continue;
         await page.navigate(origin);
-        await page.mainFrame.run(
+        await page.mainFrame.evaluate(
           `${JSON.stringify(
             storage.sessionStorage,
           )}.forEach(([key,value]) => sessionStorage.setItem(key,value))`,

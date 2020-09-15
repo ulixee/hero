@@ -40,8 +40,6 @@ window.addEventListener('resize', () => {
 const domContentLoaded = new Promise(resolve => {
   window.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded');
-    document.head.appendChild(styleElement);
-
     resolve();
   });
 });

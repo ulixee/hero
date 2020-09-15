@@ -1,5 +1,6 @@
 /**
- * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
+ * Modifications copyright (c) Data Liberation Foundation Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +29,7 @@ export default class ConsoleMessage {
 
     const message = args
       .map(arg => {
-        cdpSession.disposeObject(arg);
+        cdpSession.disposeRemoteObject(arg);
 
         return stringifyRemoteObject(arg);
       })
@@ -52,6 +53,7 @@ export default class ConsoleMessage {
 
   private static printStackTrace(stackTrace: StackTrace) {
     let message = '';
+    if (!stackTrace) return message;
     for (const callframe of stackTrace.callFrames) {
       const location = `${callframe.url}:${callframe.lineNumber}:${callframe.columnNumber}`;
       const functionName = callframe.functionName || '<anonymous>';

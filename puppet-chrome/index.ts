@@ -1,10 +1,11 @@
-import IPuppetBrowser from "@secret-agent/puppet/interfaces/IPuppetBrowser";
-import ILaunchedProcess from "@secret-agent/puppet/interfaces/ILaunchedProcess";
-import IPuppetLauncher from "@secret-agent/puppet/interfaces/IPuppetLauncher";
-import { Browser } from "./lib/Browser";
-import { Connection } from "./lib/Connection";
+import IPuppetBrowser from '@secret-agent/puppet/interfaces/IPuppetBrowser';
+import ILaunchedProcess from '@secret-agent/puppet/interfaces/ILaunchedProcess';
+import IPuppetLauncher from '@secret-agent/puppet/interfaces/IPuppetLauncher';
+import os from 'os';
+import { Browser } from './lib/Browser';
+import { Connection } from './lib/Connection';
 
-const puppetLauncher: IPuppetLauncher = {
+const PuppetLauncher: IPuppetLauncher = {
   getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean }) {
     const chromeArguments = [...defaultArgs];
     if (!options.showBrowser) {
@@ -15,6 +16,20 @@ const puppetLauncher: IPuppetLauncher = {
 
     if (options.proxyPort !== undefined) {
       chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
+    }
+
+    if (process.env.NO_CHROME_SANDBOX) {
+      chromeArguments.push('--no-sandbox');
+    } else if (os.platform() === 'linux') {
+      const runningAsRoot = process.geteuid && process.geteuid() === 0;
+      if (runningAsRoot) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'WARNING: Secret-Agent is being run under "root" user - disabling Chromium sandbox! ' +
+            'Run under regular user to get rid of this warning.',
+        );
+        chromeArguments.push('--no-sandbox');
+      }
     }
     return chromeArguments;
   },
@@ -29,7 +44,7 @@ const puppetLauncher: IPuppetLauncher = {
     }
   },
 };
-export default puppetLauncher;
+export default PuppetLauncher;
 
 const defaultArgs = [
   '--disable-background-networking',

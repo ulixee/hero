@@ -106,7 +106,7 @@ export default class GlobalPool {
 
     const showBrowser = !!process.env.SHOW_BROWSER;
     const showBrowserLogs = !!process.env.DEBUG;
-    puppet.start(this.mitmServer.port, showBrowser, showBrowserLogs);
+    puppet.start({ proxyPort: this.mitmServer.port, showBrowser, pipeBrowserIo: showBrowserLogs });
     return puppet;
   }
 

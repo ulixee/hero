@@ -25,6 +25,16 @@ export interface ITestKoaServer extends KoaRouter {
   baseHost: string;
   baseUrl: string;
 }
+export interface ITestHttpServer {
+  isClosing: boolean;
+  onlyCloseOnFinal: boolean;
+  url: string;
+  port: number;
+  baseUrl: string;
+  close: () => Promise<any>;
+  on: (eventName: string, fn: (...args: any[]) => void) => any;
+  server: http.Server | https.Server;
+}
 
 export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
   const koa = new Koa();
@@ -74,7 +84,7 @@ export function sslCerts() {
   };
 }
 
-export async function runHttpsServer(handler: RequestListener) {
+export async function runHttpsServer(handler: RequestListener, onlyCloseOnFinal = false) {
   const options = {
     ...sslCerts(),
   };
@@ -87,7 +97,7 @@ export async function runHttpsServer(handler: RequestListener) {
 
   const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
-  const httpServer = {
+  const httpServer: ITestHttpServer = {
     isClosing: false,
     on(eventName, fn) {
       server.on(eventName, fn);
@@ -101,6 +111,7 @@ export async function runHttpsServer(handler: RequestListener) {
         server.close(() => setTimeout(resolve, 10));
       });
     },
+    onlyCloseOnFinal,
     baseUrl,
     url: `${baseUrl}/`,
     port,
@@ -117,6 +128,7 @@ export async function runHttpServer(
     onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void;
     onPost?: (body: string) => void;
     addToResponse?: (response: http.ServerResponse) => void;
+    onlyCloseOnFinal?: boolean;
   } = {},
 ) {
   const { onRequest, onPost, addToResponse } = params;
@@ -150,6 +162,7 @@ export async function runHttpServer(
       for await (const chunk of request) {
         body += chunk;
       }
+      // eslint-disable-next-line no-shadow
       const params = querystring.parse(body);
       pageBody = params.thisText as string;
       if (onPost) onPost(params.thisText as string);
@@ -161,8 +174,9 @@ export async function runHttpServer(
   const port = (server.address() as net.AddressInfo).port;
 
   const baseUrl = `http://localhost:${port}`;
-  const httpServer = {
+  const httpServer: ITestHttpServer = {
     isClosing: false,
+    onlyCloseOnFinal: params.onlyCloseOnFinal ?? false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },

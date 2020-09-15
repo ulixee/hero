@@ -132,7 +132,7 @@ export default class DomEnv {
   }
 
   public locationHref() {
-    return this.puppetPage.mainFrame.run<string>('location.href', false);
+    return this.puppetPage.mainFrame.evaluate<string>('location.href', false);
   }
 
   private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
@@ -152,7 +152,7 @@ export default class DomEnv {
     runInIsolatedEnvironment = true,
     retries = 10,
   ): Promise<T> {
-    const unparsedResult = await this.puppetPage.mainFrame.run(
+    const unparsedResult = await this.puppetPage.mainFrame.evaluate(
       serializedFn,
       runInIsolatedEnvironment,
     );

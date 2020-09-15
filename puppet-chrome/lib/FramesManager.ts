@@ -1,14 +1,10 @@
-import Protocol from 'devtools-protocol';
-import Log from '@secret-agent/commons/Logger';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { URL } from 'url';
-import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { debug } from '@secret-agent/commons/Debug';
-import { CDPSession } from './CDPSession';
-import { IFrame } from '../interfaces/IFrame';
-import ConsoleMessage from './ConsoleMessage';
+import Protocol from "devtools-protocol";
+import * as eventUtils from "@secret-agent/commons/eventUtils";
+import { IRegisteredEventListener, TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import { IPuppetFrameEvents } from "@secret-agent/puppet/interfaces/IPuppetFrame";
+import { debug } from "@secret-agent/commons/Debug";
+import { CDPSession } from "./CDPSession";
+import Frame from "./Frame";
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
@@ -18,17 +14,15 @@ import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEv
 import NavigatedWithinDocumentEvent = Protocol.Page.NavigatedWithinDocumentEvent;
 import FrameStoppedLoadingEvent = Protocol.Page.FrameStoppedLoadingEvent;
 import LifecycleEventEvent = Protocol.Page.LifecycleEventEvent;
-import Frame = Protocol.Page.Frame;
 import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEvent;
-import FrameStartedLoadingEvent = Protocol.Page.FrameStartedLoadingEvent;
+import Page = Protocol.Page;
 
-const { log } = Log(module);
-const DEFAULT_PAGE = 'about:blank';
+export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
-const debugError = debug('puppet-chrome:network-error');
+const debugError = debug('puppet-chrome:frames-error');
 
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
-  public frames: { [id: string]: IFrame } = {};
+  public frames: { [id: string]: Frame } = {};
 
   public get mainFrameId() {
     return Array.from(this.attachedFrameIds).find(id => !this.frames[id].parentId);
@@ -42,130 +36,41 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     return Array.from(this.attachedFrameIds).map(x => this.frames[x]);
   }
 
-  private isClosing = false;
   private attachedFrameIds = new Set<string>();
   private activeContexts = new Set<number>();
-  private executionContexts: IFrameContext[] = [];
-  private pendingContextPromises: {
-    frameId: string;
-    isDefault: boolean;
-    promise: IResolvablePromise<IFrameContext>;
-  }[] = [];
 
+  private registeredEvents: IRegisteredEventListener[] = [];
   private readonly cdpSession: CDPSession;
 
   constructor(cdpSession: CDPSession) {
     super();
     this.cdpSession = cdpSession;
-    this.cdpSession.on('Page.frameNavigated', this.onFrameNavigated.bind(this));
-    this.cdpSession.on(
-      'Page.navigatedWithinDocument',
-      this.onFrameNavigatedWithinDocument.bind(this),
-    );
-    this.cdpSession.on('Page.frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this));
-    this.cdpSession.on('Page.frameDetached', this.onFrameDetached.bind(this));
-    this.cdpSession.on('Page.frameAttached', this.onFrameAttached.bind(this));
-
-    this.cdpSession.on('Page.frameStartedLoading', this.onFrameStartedLoading.bind(this));
-    this.cdpSession.on('Page.frameStoppedLoading', this.onFrameStoppedLoading.bind(this));
-    this.cdpSession.on('Page.lifecycleEvent', this.onLifecycleEvent.bind(this));
-
-    this.cdpSession.on(
-      'Runtime.executionContextsCleared',
-      this.onExecutionContextsCleared.bind(this),
-    );
-    this.cdpSession.on(
-      'Runtime.executionContextDestroyed',
-      this.onExecutionContextDestroyed.bind(this),
-    );
-    this.cdpSession.on(
-      'Runtime.executionContextCreated',
-      this.onExecutionContextCreated.bind(this),
-    );
   }
 
   public async initialize() {
+    const framesResponse = await this.cdpSession.send('Page.getFrameTree');
+    await this.recurseFrameTree(framesResponse.frameTree);
+    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+      ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
+      ['Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument.bind(this)],
+      ['Page.frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this)],
+      ['Page.frameDetached', this.onFrameDetached.bind(this)],
+      ['Page.frameAttached', this.onFrameAttached.bind(this)],
+      ['Page.frameStoppedLoading', this.onFrameStoppedLoading.bind(this)],
+      ['Page.lifecycleEvent', this.onLifecycleEvent.bind(this)],
+      ['Runtime.executionContextsCleared', this.onExecutionContextsCleared.bind(this)],
+      ['Runtime.executionContextDestroyed', this.onExecutionContextDestroyed.bind(this)],
+      ['Runtime.executionContextCreated', this.onExecutionContextCreated.bind(this)],
+    ]);
     await Promise.all([
       this.cdpSession.send('Page.enable'),
       this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
       this.cdpSession.send('Runtime.enable'),
     ]);
-
-    const framesResponse = await this.cdpSession.send('Page.getFrameTree');
-    await this.recurseFrameTree(framesResponse.frameTree);
   }
 
   public close() {
-    this.isClosing = true;
-    for (const promise of this.pendingContextPromises) {
-      promise.promise.reject(new Error('Session closing'));
-    }
-  }
-
-  public getSecurityOrigins() {
-    const origins: { origin: string; frameId: string }[] = [];
-    for (const frame of Object.values(this.frames)) {
-      if (this.attachedFrameIds.has(frame.id) && frame.hasNavigated && frame.url !== DEFAULT_PAGE) {
-        let origin = frame.securityOrigin;
-        if (!origin || origin === '://') {
-          origin = new URL(frame.url).origin;
-        }
-        if (!origins.some(x => x.origin === origin)) {
-          origins.push({ origin, frameId: frame.id });
-        }
-      }
-    }
-    return origins;
-  }
-
-  public async waitForFrame(
-    frameDetails: { frameId: string; loaderId?: string },
-    url: string,
-    isInitiatingNavigation = false,
-  ) {
-    const { frameId } = frameDetails;
-    const frame = this.frames[frameId];
-    if (isInitiatingNavigation) {
-      const frameLoading = createPromise();
-      // chain current listeners to new promise
-      if (frame.frameLoading) frame.frameLoading.resolve(frameLoading.promise);
-      frame.frameLoading = frameLoading;
-    }
-    if (url === DEFAULT_PAGE) frame.frameLoading.resolve();
-    await frame.frameLoading.promise;
-  }
-
-  public getFrameIdForExecutionContext(executionContextId: number) {
-    for (const context of this.executionContexts) {
-      if (context.executionContextId === executionContextId) {
-        return context.frameId;
-      }
-    }
-  }
-
-  /////// RUN ISOLATED SCRIPTS /////////////////////////////////////////////////////////////////////////////////////////
-
-  public async runInActiveFrames(expression: string, runIsolated = true) {
-    const activeFrameIds = Array.from(this.attachedFrameIds);
-
-    const results: { [frameId: string]: { error?: Error; value?: any } } = {};
-    await Promise.all(
-      activeFrameIds.map(async frameId => {
-        try {
-          results[frameId] = {
-            value: await this.runInFrame(frameId, expression, runIsolated),
-          };
-        } catch (err) {
-          results[frameId] = { error: new Error('Could not execute expression') };
-        }
-      }),
-    );
-    return results;
-  }
-
-  public async runInFrame<T>(frameId: string, expression: string, runIsolated = true) {
-    const context = await this.waitForActiveContext(frameId, runIsolated);
-    return this.runInContext<T>(expression, context.executionContextId);
+    eventUtils.removeEventListeners(this.registeredEvents);
   }
 
   public async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
@@ -190,50 +95,36 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
 
-  private getActiveContext(frameId: string, isDefaultContext = false): IFrameContext | undefined {
-    return this.executionContexts.find(
-      x =>
-        x.isDefault === isDefaultContext &&
-        x.frameId === frameId &&
-        this.activeContexts.has(x.executionContextId),
-    );
+  public getSecurityOrigins() {
+    const origins: { origin: string; frameId: string }[] = [];
+    for (const frame of Object.values(this.frames)) {
+      if (this.attachedFrameIds.has(frame.id)) {
+        const origin = frame.securityOrigin;
+        if (origin && !origins.some(x => x.origin === origin)) {
+          origins.push({ origin, frameId: frame.id });
+        }
+      }
+    }
+    return origins;
   }
 
-  private async runInContext<T>(expression: string, contextId: number) {
-    const result = await this.cdpSession.send('Runtime.evaluate', {
-      expression,
-      contextId,
-      returnByValue: true,
-      awaitPromise: true,
-    });
-    if (result.exceptionDetails) {
-      throw ConsoleMessage.exceptionToError(result.exceptionDetails);
-    }
-    if (result.result?.value) {
-      return result.result?.value as T;
-    }
-  }
-
-  private async waitForActiveContext(
-    frameId: string,
-    isolatedContext = true,
-  ): Promise<IFrameContext> {
+  public async waitForFrame(
+    frameDetails: { frameId: string; loaderId?: string },
+    url: string,
+    isInitiatingNavigation = false,
+  ) {
+    const { frameId, loaderId } = frameDetails;
     const frame = this.frames[frameId];
-    if (frame?.hasNavigated && frame.url !== DEFAULT_PAGE) {
-      await frame.frameLoading.promise;
+    if (isInitiatingNavigation) {
+      frame.initiateNavigation(url, loaderId);
     }
-    const isDefault = isolatedContext === false;
-    const existing = this.getActiveContext(frameId, isDefault);
-    if (existing) return existing;
+    await frame.waitForLoader(loaderId);
+  }
 
-    const resolvable = createPromise<IFrameContext>();
-    this.pendingContextPromises.push({
-      isDefault,
-      frameId,
-      promise: resolvable,
-    });
-    if (isolatedContext) await this.createIsolatedWorld(frameId);
-    return resolvable.promise;
+  public getFrameIdForExecutionContext(executionContextId: number) {
+    for (const frame of Object.values(this.frames)) {
+      if (frame.hasContextId(executionContextId)) return frame.id;
+    }
   }
 
   private onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
@@ -248,65 +139,32 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const { context } = event;
     const frameId = context.auxData.frameId as string;
 
-    this.addActiveContext(frameId, context.id, context.name === ISOLATED_WORLD);
+    this.activeContexts.add(context.id);
+    const frame = this.frames[frameId];
+    frame?.addContextId(context.id, context.name === '');
   }
 
   /////// FRAMES ///////////////////////////////////////////////////////////////
 
-  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
-    const { frame } = navigatedEvent;
-    if (!this.frames[frame.id]) {
-      this.recordFrame(frame);
-      await this.createIsolatedWorld(frame.id);
-    } else {
-      const stored = this.frames[frame.id];
-      stored.url = frame.url;
-      stored.hasNavigated = true;
-    }
-    setImmediate(() => this.frames[frame.id].frameLoading.resolve());
-
-    if (frame.url !== DEFAULT_PAGE) {
-      this.emit('frameNavigated', {
-        frame: this.frames[frame.id],
-      });
-    }
+  private onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
+    const frame = this.recordFrame(navigatedEvent.frame);
+    frame.onNavigated(navigatedEvent.frame);
   }
 
-  private async onFrameStartedLoading(event: FrameStartedLoadingEvent) {
+  private onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
     const { frameId } = event;
-    const frame = this.frames[frameId];
-    if (!frame) {
-      await this.createIsolatedWorld(frame.id);
-      debugError('No frame for frameStartedLoading', event);
-      return;
-    }
-    const frameLoading = createPromise();
-    // chain current listeners to new promise
-    if (frame.frameLoading) frame.frameLoading.resolve(frameLoading.promise);
-    frame.frameLoading = frameLoading;
+
+    this.frames[frameId].onStoppedLoading();
   }
 
   private onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
     const { frameId, url, reason, disposition } = navigatedEvent;
-    const frame = this.frames[frameId];
-    if (frame) {
-      frame.navigationReason = reason;
-      frame.disposition = disposition;
-
-      if (frame.url !== DEFAULT_PAGE) {
-        this.emit('frameRequestedNavigation', { frame, url, reason });
-      }
-    }
+    this.frames[frameId].requestedNavigation(url, reason, disposition);
   }
 
   private onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
     const { frameId, url } = navigatedEvent;
-    const frame = this.frames[frameId];
-    if (frame && url !== DEFAULT_PAGE) {
-      frame.url = url;
-      frame.hasNavigated = true;
-      this.emit('frameNavigated', { frame, navigatedInDocument: true });
-    }
+    this.frames[frameId].onNavigatedWithinDocument(url);
   }
 
   private onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
@@ -314,119 +172,68 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     this.attachedFrameIds.delete(frameId);
   }
 
-  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
+  private onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
     const { frameId, parentFrameId } = frameAttachedEvent;
 
     this.recordFrame({ id: frameId, parentId: parentFrameId } as any);
     this.attachedFrameIds.add(frameId);
-    await this.createIsolatedWorld(frameId);
-  }
-
-  private onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
-    const { frameId } = event;
-
-    const frame = this.frames[frameId];
-    if (!frame) return;
-
-    // resolve loading in case it didn't succeed
-    frame.frameLoading.resolve();
-    frame.hasNavigated = true;
-    const events = frame.lifecycleEvents;
-    if (!events.DOMContentLoaded) events.DOMContentLoaded = new Date();
-    if (!events.load) {
-      events.load = new Date();
-
-      if (frame.url !== DEFAULT_PAGE) {
-        this.emit('frameLifecycle', { frame, name: 'load' });
-      }
-    }
   }
 
   private onLifecycleEvent(event: LifecycleEventEvent) {
     const { frameId, name, loaderId } = event;
     const frame = this.recordFrame({ id: frameId, loaderId, name } as any);
-
-    if (name === 'init') {
-      if (frame.loaderId === loaderId) return;
-      frame.loaderId = loaderId;
-      frame.lifecycleEvents = {};
-    }
-    frame.lifecycleEvents[name] = new Date();
-
-    if (frame.url !== DEFAULT_PAGE) {
-      this.emit('frameLifecycle', { frame, name });
-    }
+    return frame.onLifecycleEvent(name, loaderId);
   }
 
-  private async recurseFrameTree(frameTree: FrameTree) {
+  private recurseFrameTree(frameTree: FrameTree) {
     const { frame, childFrames } = frameTree;
     this.recordFrame(frame);
 
     this.attachedFrameIds.add(frame.id);
 
-    await this.createIsolatedWorld(frame.id);
-
     if (!childFrames) return;
     for (const childFrame of childFrames) {
-      await this.recurseFrameTree(childFrame);
+      this.recurseFrameTree(childFrame);
     }
   }
 
-  private recordFrame(newFrame: Frame) {
-    if (this.frames[newFrame.id]) return this.frames[newFrame.id];
-    const frame: IFrame = {
-      ...newFrame,
-      lifecycleEvents: {},
-      frameLoading: createPromise(),
-      hasNavigated: !!newFrame.url,
-      run: this.runInFrame.bind(this, newFrame.id),
-    };
-    this.frames[frame.id] = frame;
+  private recordFrame(newFrame: Page.Frame) {
+    const { id } = newFrame;
+    if (this.frames[id]) return this.frames[id];
+
+    const frame = Frame.create(newFrame, this.activeContexts, this.cdpSession, () =>
+      this.attachedFrameIds.has(id),
+    );
+    this.frames[id] = frame;
+    const registered = eventUtils.addEventListeners(frame, [
+      [
+        'frameLifecycle',
+        x =>
+          this.emit('frameLifecycle', {
+            frame,
+            ...x,
+          }),
+      ],
+      [
+        'frameNavigated',
+        x =>
+          this.emit('frameNavigated', {
+            frame,
+            ...x,
+          }),
+      ],
+      [
+        'frameRequestedNavigation',
+        x =>
+          this.emit('frameRequestedNavigation', {
+            frame,
+            ...x,
+          }),
+      ],
+    ]);
+    this.registeredEvents.push(...registered);
+
     this.emit('frameCreated', { frame });
     return frame;
   }
-
-  private async createIsolatedWorld(frameId: string) {
-    try {
-      const isolatedWorld = await this.cdpSession.send('Page.createIsolatedWorld', {
-        frameId,
-        worldName: ISOLATED_WORLD,
-        // param is misspelled in protocol
-        grantUniveralAccess: true,
-      });
-      this.addActiveContext(frameId, isolatedWorld.executionContextId, true);
-    } catch (err) {
-      log.warn('Failed to create isolated world.', err);
-    }
-  }
-
-  private addActiveContext(frameId: string, executionContextId: number, isIsolatedWorld: boolean) {
-    this.activeContexts.add(executionContextId);
-    let context = this.executionContexts.find(x => x.executionContextId === executionContextId);
-    const isDefault = !isIsolatedWorld;
-    if (!context) {
-      context = {
-        frameId,
-        executionContextId,
-        isDefault,
-      };
-      this.executionContexts.push(context);
-    }
-
-    const pendingContextPromises = this.pendingContextPromises;
-    this.pendingContextPromises = [];
-    for (const pending of pendingContextPromises) {
-      if (pending.frameId === frameId && pending.isDefault === isDefault) {
-        pending.promise.resolve(context);
-      } else {
-        this.pendingContextPromises.push(pending);
-      }
-    }
-  }
-}
-
-interface IFrameContext {
-  frameId: string;
-  isDefault: boolean;
-  executionContextId: number;
 }

@@ -88,7 +88,7 @@ describe('Multi-tab scenarios', () => {
     const tabs = await browser.tabs;
     expect(tabs).toHaveLength(2);
     const page2Logos = await tabs[1].waitForResource({
-      url: '/logo.png',
+      url: '/logo.png?page=page2',
     });
     expect(page2Logos).toHaveLength(1);
     expect(await page2Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page2`);

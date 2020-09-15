@@ -1,5 +1,6 @@
 /**
- * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
+ * Modifications copyright (c) Data Liberation Foundation Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { debug } from "@secret-agent/commons/Debug";
-import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
-import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import IConnectionTransport from "@secret-agent/puppet/interfaces/IConnectionTransport";
-import { CDPSession } from "./CDPSession";
+import { debug } from '@secret-agent/commons/Debug';
+import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IConnectionTransport from '@secret-agent/puppet/interfaces/IConnectionTransport';
+import { CDPSession } from './CDPSession';
 
 const debugProtocolSend = debug('puppet-chrome:protocol:SEND ►');
 const debugProtocolReceive = debug('puppet-chrome:protocol:RECV ◀');
 
 export class Connection extends TypedEventEmitter<{ disconnected: void }> {
-  lastId = 0;
-  transport: IConnectionTransport;
-  sessionsById = new Map<string, CDPSession>();
-  readonly rootSession: CDPSession;
-  isClosed = false;
+  public readonly rootSession: CDPSession;
+  public isClosed = false;
+
+  private lastId = 0;
+  private transport: IConnectionTransport;
+  private sessionsById = new Map<string, CDPSession>();
 
   constructor(transport: IConnectionTransport) {
     super();

@@ -3,7 +3,7 @@ import { debug } from '@secret-agent/commons/Debug';
 import launchProcess from './lib/launchProcess';
 import IPuppetLauncher from './interfaces/IPuppetLauncher';
 import IPuppetBrowser from './interfaces/IPuppetBrowser';
-import IBrowserEmulation from "./interfaces/IBrowserEmulation";
+import IBrowserEmulation from './interfaces/IBrowserEmulation';
 
 const debugLauncher = debug(`puppet:launch`);
 
@@ -31,7 +31,7 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.browserName === 'chrome') {
+    if (this.browserName === 'chrome' || this.browserName === 'chromium') {
       launcher = PuppetChrome;
     }
 

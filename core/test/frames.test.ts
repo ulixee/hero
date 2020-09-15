@@ -25,9 +25,9 @@ test('should handle opening a page', async () => {
   const page = tab.puppetPage as Page;
 
   // @ts-ignore
-  expect(page.framesManager.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  expect(page.mainFrame.getActiveContextId(false)).toBeTruthy();
   // @ts-ignore
-  expect(page.framesManager.getActiveContext(tab.mainFrameId)).toBeTruthy();
+  expect(page.mainFrame.getActiveContextId(tab.mainFrameId)).toBeTruthy();
 
   await core.close();
 });
@@ -78,9 +78,9 @@ test('should track navigations and redirects', async () => {
   const page = tab.puppetPage as Page;
   const frames = page.framesManager;
   // @ts-ignore
-  expect(frames.getActiveContext(tab.mainFrameId, false)).toBeTruthy();
+  expect(page.mainFrame.getActiveContextId(false)).toBeTruthy();
   // @ts-ignore
-  expect(frames.getActiveContext(tab.mainFrameId)).toBeTruthy();
+  expect(page.mainFrame.getActiveContextId()).toBeTruthy();
 
   // @ts-ignore
   expect(frames.activeContexts.size).toBe(2);

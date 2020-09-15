@@ -21,6 +21,7 @@ import { Readable, Writable } from 'stream';
 import * as readline from 'readline';
 import { PipeTransport } from './PipeTransport';
 import ILaunchedProcess from '../interfaces/ILaunchedProcess';
+import IConnectionTransport from '../interfaces/IConnectionTransport';
 
 const debugLauncher = debug('puppet:launcher');
 const errorDebug = debug('puppet:browser:error');
@@ -48,6 +49,10 @@ export default function launchProcess(
     env,
     stdio,
   });
+  if (!launchedProcess.pid) {
+    launchedProcess.once('error', debugLauncher);
+    throw new Error('Failed to launch');
+  }
 
   if (pipeIo) {
     const stdout = readline.createInterface({ input: launchedProcess.stdout });

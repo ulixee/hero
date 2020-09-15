@@ -1,18 +1,24 @@
-import * as Helpers from '@secret-agent/testing/helpers';
-import { inspect } from 'util';
-import * as os from 'os';
-import Chrome80 from '@secret-agent/emulate-chrome-80';
-import Puppet from '@secret-agent/puppet';
-import PolyfillChromeBt from './polyfill.bluetooth.json';
-import inspectScript from './inspectHierarchy';
-import getOverrideScript from '../injected-scripts';
+import * as Helpers from "@secret-agent/testing/helpers";
+import { inspect } from "util";
+import * as os from "os";
+import Chrome80 from "@secret-agent/emulate-chrome-80";
+import Puppet from "@secret-agent/puppet";
+import { ITestHttpServer } from "@secret-agent/testing/helpers";
+import PolyfillChromeBt from "./polyfill.bluetooth.json";
+import inspectScript from "./inspectHierarchy";
+import getOverrideScript from "../injected-scripts";
 
 let puppet: Puppet;
+let httpServer: ITestHttpServer;
 beforeAll(async () => {
   const emulator = new Chrome80();
   puppet = new Puppet(emulator);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
+
+  httpServer = await Helpers.runHttpsServer(async (_, response) => {
+    return response.end(`<html><head></head><body>Hello world</body></html>`);
+  }, true);
 });
 
 afterAll(Helpers.afterAll);
@@ -22,7 +28,6 @@ const debug = process.env.DEBUG || false;
 
 test('it should be able to add polyfills', async () => {
   const page = await createPage();
-  const httpServer = await Helpers.runHttpServer();
   page.on('pageError', console.log);
   if (debug) {
     page.on('consoleLog', log => console.log(log));
@@ -100,7 +105,10 @@ test('it should be able to add polyfills', async () => {
   await new Promise(resolve => page.once('load', resolve));
 
   const { window } = JSON.parse(
-    (await page.mainFrame.run(`(${inspectScript.toString()})(window, 'window')`, false)) as any,
+    (await page.mainFrame.evaluate(
+      `(${inspectScript.toString()})(window, 'window')`,
+      false,
+    )) as any,
   );
 
   const windowKeys = Object.keys(window);
@@ -121,7 +129,6 @@ test('it should be able to add polyfills', async () => {
 
 test('it should be able to remove properties', async () => {
   const page = await createPage();
-  const httpServer = await Helpers.runHttpServer();
 
   await page.addNewDocumentScript(
     getOverrideScript('polyfill', {
@@ -135,13 +142,12 @@ test('it should be able to remove properties', async () => {
   await page.navigate(httpServer.url);
   await new Promise(resolve => page.once('load', resolve));
 
-  expect(await page.mainFrame.run(`!!window.Atomics`, false)).not.toBeTruthy();
-  expect(await page.mainFrame.run(`!!Array.from`, false)).not.toBeTruthy();
+  expect(await page.mainFrame.evaluate(`!!window.Atomics`, false)).not.toBeTruthy();
+  expect(await page.mainFrame.evaluate(`!!Array.from`, false)).not.toBeTruthy();
 });
 
 test('it should be able to change properties', async () => {
   const page = await createPage();
-  const httpServer = await Helpers.runHttpServer();
 
   await page.addNewDocumentScript(
     getOverrideScript('polyfill', {
@@ -166,11 +172,11 @@ test('it should be able to change properties', async () => {
   await page.navigate(httpServer.url);
   await new Promise(resolve => page.once('load', resolve));
 
-  const protocolToString = await page.mainFrame.run(
+  const protocolToString = await page.mainFrame.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.toString()`,
     false,
   );
-  const protocolName = await page.mainFrame.run(
+  const protocolName = await page.mainFrame.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.name`,
     false,
   );
@@ -180,10 +186,9 @@ test('it should be able to change properties', async () => {
 });
 
 test('it should be able to change property order', async () => {
-  const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
 
-  const startNavigatorKeys = (await page.mainFrame.run(
+  const startNavigatorKeys = (await page.mainFrame.evaluate(
     `Object.keys(window.Navigator.prototype)`,
     false,
   )) as string[];
@@ -211,10 +216,12 @@ test('it should be able to change property order', async () => {
     false,
   );
   await new Promise(setImmediate);
-  await page.navigate(httpServer.url);
-  await new Promise(resolve => page.once('load', resolve));
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frameLifecycle', event => event.name === 'load'),
+  ]);
 
-  const keyOrder = (await page.mainFrame.run(
+  const keyOrder = (await page.mainFrame.evaluate(
     `Object.keys(window.Navigator.prototype)`,
     false,
   )) as string[];
@@ -227,9 +234,8 @@ test('it should be able to change property order', async () => {
 });
 
 test('it should be able to change window property order', async () => {
-  const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  const windowKeys = await page.mainFrame.run(`Object.keys(window)`, false);
+  const windowKeys = await page.mainFrame.evaluate(`Object.keys(window)`, false);
 
   const order = [
     {
@@ -260,10 +266,11 @@ test('it should be able to change window property order', async () => {
     }).script,
     false,
   );
-  await page.navigate(httpServer.url);
-  await new Promise(resolve => page.once('load', resolve));
-
-  const windowKeysAfter = (await page.mainFrame.run(`Object.keys(window)`, false)) as string[];
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frameLifecycle', event => event.name === 'load'),
+  ]);
+  const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
 
   const prop1Index = windowKeysAfter.indexOf(windowKeys[10]);
   expect(windowKeysAfter[prop1Index - 1]).toBe(windowKeys[1]);
@@ -282,16 +289,19 @@ test('it should be able to backfill the bluetooth stack', async () => {
   const platform = os.platform();
   const isPlatformSupported = platform === 'darwin' || platform === 'win32';
   if (!isPlatformSupported) return;
-
-  const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
 
   await page.addNewDocumentScript(getOverrideScript('polyfill', PolyfillChromeBt).script, false);
-  await page.navigate(httpServer.url);
-  await new Promise(resolve => page.once('load', resolve));
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frameLifecycle', event => event.name === 'load'),
+  ]);
 
   const structure = JSON.parse(
-    (await page.mainFrame.run(`(${inspectScript.toString()})(window, 'window')`, false)) as any,
+    (await page.mainFrame.evaluate(
+      `(${inspectScript.toString()})(window, 'window')`,
+      false,
+    )) as any,
   );
 
   function getFromStructure(path) {

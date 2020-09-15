@@ -115,7 +115,7 @@ module.exports = {
     // 'import/no-default-export': 'error',
     'import/no-extraneous-dependencies': [
       'error',
-      { devDependencies: ['**/*.test.ts', '**/examples/**', '**/scripts/**'] },
+      { devDependencies: ['**/test/**', '**/examples/**', '**/scripts/**'] },
     ],
     'no-use-before-define': 'off', // use typescript one
     'no-prototype-builtins': 'off',

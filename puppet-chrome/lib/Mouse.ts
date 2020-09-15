@@ -1,5 +1,6 @@
 /**
- * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
+ * Modifications copyright (c) Data Liberation Foundation Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { IMouseButton } from '@secret-agent/core-interfaces/IInteractions';
+import { IMouseOptions } from '@secret-agent/puppet/interfaces/IPuppetInput';
 import { CDPSession } from './CDPSession';
 import { Keyboard } from './Keyboard';
 
@@ -48,20 +51,13 @@ export default class Mouse {
   private keyboard: Keyboard;
   private x = 0;
   private y = 0;
-  private button: MouseButton | 'none' = 'none';
+  private button: IMouseButton | 'none' = 'none';
 
   constructor(cdpSession: CDPSession, keyboard: Keyboard) {
     this.cdpSession = cdpSession;
     this.keyboard = keyboard;
   }
 
-  /**
-   * Dispatches a `mousemove` event.
-   * @param x - Horizontal position of the mouse.
-   * @param y - Vertical position of the mouse.
-   * @param options - Optional object. If specified, the `steps` property
-   * sends intermediate `mousemove` events when set to `1` (default).
-   */
   async move(x: number, y: number, options: { steps?: number } = {}): Promise<void> {
     const { steps = 1 } = options;
     const fromX = this.x;
@@ -79,16 +75,10 @@ export default class Mouse {
     }
   }
 
-  /**
-   * Shortcut for `mouse.move`, `mouse.down` and `mouse.up`.
-   * @param x - Horizontal position of the mouse.
-   * @param y - Vertical position of the mouse.
-   * @param options - Optional `MouseOptions`.
-   */
   async click(
     x: number,
     y: number,
-    options: MouseOptions & { delay?: number } = {},
+    options: IMouseOptions & { delay?: number } = {},
   ): Promise<void> {
     const { delay = null } = options;
     if (delay !== null) {
@@ -100,11 +90,7 @@ export default class Mouse {
     }
   }
 
-  /**
-   * Dispatches a `mousedown` event.
-   * @param options - Optional `MouseOptions`.
-   */
-  async down(options: MouseOptions = {}): Promise<void> {
+  async down(options: IMouseOptions = {}): Promise<void> {
     const { button = 'left', clickCount = 1 } = options;
     this.button = button;
     await this.cdpSession.send('Input.dispatchMouseEvent', {
@@ -117,11 +103,7 @@ export default class Mouse {
     });
   }
 
-  /**
-   * Dispatches a `mouseup` event.
-   * @param options - Optional `MouseOptions`.
-   */
-  async up(options: MouseOptions = {}): Promise<void> {
+  async up(options: IMouseOptions = {}): Promise<void> {
     const { button = 'left', clickCount = 1 } = options;
     this.button = 'none';
     await this.cdpSession.send('Input.dispatchMouseEvent', {
@@ -134,26 +116,7 @@ export default class Mouse {
     });
   }
 
-  /**
-   * Dispatches a `mousewheel` event.
-   * @param options - Optional: `MouseWheelOptions`.
-   *
-   * @example
-   * An example of zooming into an element:
-   * ```js
-   * await page.goto('https://mdn.mozillademos.org/en-US/docs/Web/API/Element/wheel_event$samples/Scaling_an_element_via_the_wheel?revision=1587366');
-   *
-   * const elem = await page.$('div');
-   * const boundingBox = await elem.boundingBox();
-   * await page.mouse.move(
-   *   boundingBox.x + boundingBox.width / 2,
-   *   boundingBox.y + boundingBox.height / 2
-   * );
-   *
-   * await page.mouse.wheel({ deltaY: -100 })
-   * ```
-   */
-  async wheel(options: MouseWheelOptions = {}): Promise<void> {
+  async wheel(options: { deltaX?: number; deltaY?: number } = {}): Promise<void> {
     const { deltaX = 0, deltaY = 0 } = options;
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel',
@@ -165,25 +128,4 @@ export default class Mouse {
       pointerType: 'mouse',
     });
   }
-}
-
-/**
- * @public
- */
-export type MouseButton = 'left' | 'right' | 'middle';
-
-/**
- * @public
- */
-export interface MouseOptions {
-  button?: MouseButton;
-  clickCount?: number;
-}
-
-/**
- * @public
- */
-export interface MouseWheelOptions {
-  deltaX?: number;
-  deltaY?: number;
 }

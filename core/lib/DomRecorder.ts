@@ -47,17 +47,32 @@ export default class DomRecorder {
   }
 
   public async setCommandIdForPage(commandId: number) {
-    await this.puppetPage.runInFrames(`window.setCommandId(${commandId});`, true);
+    const command = `window.commandId = ${commandId}`;
+    await Promise.all(
+      this.puppetPage.frames.map(x =>
+        x.evaluate(command, true).catch(() => {
+          // can fail when frames aren't ready. don't worry about it
+        }),
+      ),
+    );
   }
 
   public async flush(closeAfterFlush = false) {
-    const results = await this.puppetPage.runInFrames<any>(`window.flushPageRecorder()`, true);
     if (!this.onResults) return;
-    for (const [frameId, result] of Object.entries(results)) {
-      if (result.value) {
-        await this.onResults(frameId, ...(result.value as PageRecorderResultSet));
-      }
-    }
+
+    await Promise.all(
+      this.puppetPage.frames.map(async frame => {
+        try {
+          const results = await frame.evaluate<PageRecorderResultSet>(
+            `window.flushPageRecorder()`,
+            true,
+          );
+          await this.onResults(frame.id, ...results);
+        } catch (error) {
+          // no op if it fails
+        }
+      }),
+    );
     if (closeAfterFlush) {
       this.onResults = null;
       removeEventListeners(this.listeners);

@@ -111,7 +111,7 @@ export default class Session {
     }
 
     const tab = await Tab.create(this, page);
-    page.initializeNewPage = this.onNewTab.bind(this, tab);
+    page.popupInitializeFn = this.onNewTab.bind(this, tab);
     return this.trackTab(tab);
   }
 
@@ -152,7 +152,7 @@ export default class Session {
     openParams: { url: string; windowName: string },
   ) {
     const tab = await Tab.create(this, page, parentTab, openParams);
-    page.initializeNewPage = this.onNewTab.bind(this, tab);
+    page.popupInitializeFn = this.onNewTab.bind(this, tab);
     return this.trackTab(tab);
   }
 

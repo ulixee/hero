@@ -374,7 +374,18 @@ const propertiesToCheck = ['value', 'selected', 'checked'];
 const recorder = new PageEventsRecorder();
 
 // @ts-ignore
-window.setCommandId = id => recorder.setCommandId(id);
+if (window.commandId) {
+  // @ts-ignore
+  recorder.setCommandId(window.commandId);
+  // @ts-ignore
+  delete window.commandId;
+}
+
+Object.defineProperty(window, 'commandId', {
+  set(value: number) {
+    return recorder.setCommandId(value);
+  },
+});
 
 function flushPageRecorder() {
   const changes = recorder.extractChanges();

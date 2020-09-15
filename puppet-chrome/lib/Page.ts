@@ -1,5 +1,6 @@
 /**
- * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
+ * Modifications copyright (c) Data Liberation Foundation Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +16,10 @@
  */
 import Protocol from 'devtools-protocol';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import { URL } from 'url';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
+import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { debug } from '@secret-agent/commons/Debug';
+import { createPromise } from '@secret-agent/commons/utils';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -29,7 +30,6 @@ import { Worker } from './Worker';
 import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
-import CookieParam = Protocol.Network.CookieParam;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 
 const debugError = debug('puppet-chrome:pageerror');
@@ -43,7 +43,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public networkManager: NetworkManager;
   public framesManager: FramesManager;
 
-  public initializeNewPage?: (
+  public popupInitializeFn?: (
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
   ) => Promise<void>;
@@ -62,6 +62,13 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.framesManager.activeFrames;
   }
 
+  public get workers() {
+    return [...this.workersById.values()];
+  }
+
+  private closePromise = createPromise();
+  private readonly registeredEvents: IRegisteredEventListener[];
+
   constructor(
     cdpSession: CDPSession,
     targetId: string,
@@ -78,11 +85,13 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager = new FramesManager(cdpSession);
     this.opener = opener;
 
-    this.cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
-    this.cdpSession.on('Inspector.targetCrashed', this.onTargetCrashed.bind(this));
-    this.cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
-    this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
-    this.cdpSession.on('Page.windowOpen', this.onWindowOpen.bind(this));
+    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
+      ['Inspector.targetCrashed', this.onTargetCrashed.bind(this)],
+      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
+      ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
+      ['Page.windowOpen', this.onWindowOpen.bind(this)],
+    ]);
 
     this.framesManager.on('frameLifecycle', ({ frame, name }) => {
       if (name === 'load' && frame.id === this.mainFrame?.id) {
@@ -107,63 +116,12 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.isReady = this.initialize();
   }
 
-  async runInFrames<T>(script: string, isolatedEnvironment: boolean) {
-    return this.framesManager.runInActiveFrames(script, isolatedEnvironment);
-  }
-
   addNewDocumentScript(script: string, isolatedEnvironment: boolean) {
     return this.framesManager.addNewDocumentScript(script, isolatedEnvironment);
   }
 
   async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
     return this.framesManager.addPageCallback(name, onCallback);
-  }
-
-  ///////   COOKIES ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  public async getPageCookies(): Promise<ICookie[]> {
-    const { cookies } = await this.cdpSession.send('Network.getCookies', {
-      urls: [this.mainFrame.url],
-    });
-    return cookies.map(
-      x =>
-        ({
-          ...x,
-          expires: String(x.expires),
-        } as ICookie),
-    );
-  }
-
-  public async getAllCookies() {
-    const cookieResponse = await this.cdpSession.send('Network.getAllCookies');
-    return cookieResponse.cookies.map(
-      x =>
-        ({
-          ...x,
-          expires: String(x.expires),
-        } as ICookie),
-    );
-  }
-
-  public async setCookies(cookies: ICookie[], origins: string[]) {
-    const originUrls = (origins ?? []).map(x => new URL(x));
-    const parsedCookies: CookieParam[] = [];
-    for (const cookie of cookies) {
-      const cookieToSend: CookieParam = {
-        ...cookie,
-        expires: cookie.expires ? parseInt(cookie.expires, 10) : null,
-      };
-      cookieToSend.url = `http${cookie.secure ? 's' : ''}://${cookie.domain}${cookie.path}`;
-      const match = originUrls.find(x => {
-        return x.hostname.endsWith(cookie.domain);
-      });
-      if (match) cookieToSend.url = match.href;
-
-      parsedCookies.push(cookieToSend);
-    }
-    return await this.cdpSession.send('Network.setCookies', {
-      cookies: parsedCookies,
-    });
   }
 
   public async getIndexedDbDatabaseNames() {
@@ -177,26 +135,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return dbs;
   }
 
-  // some dialogs can't be handled in-page
-  public handleJavascriptDialog(accept: boolean, promptText?: string) {
-    return this.cdpSession.send('Page.handleJavaScriptDialog', { accept, promptText });
-  }
-
   async setJavaScriptEnabled(enabled: boolean): Promise<void> {
     await this.cdpSession.send('Emulation.setScriptExecutionDisabled', {
       value: !enabled,
     });
   }
 
-  runInFrame<T>(frameId: string, script: string, isolatedEnvironment: boolean): Promise<T> {
-    return this.framesManager.runInFrame(frameId, script, isolatedEnvironment);
+  async evaluate<T>(expression: string): Promise<T> {
+    return this.mainFrame.evaluate<T>(expression, false);
   }
-
-  async evaluate(expression: string) {
-    return this.runInFrame(this.mainFrame.id, expression, false);
-  }
-
-  /////// NAVIGATION ///////
 
   async navigate(url: string, options: { referrer?: string } = {}) {
     const navigationResponse = await this.cdpSession.send('Page.navigate', {
@@ -205,7 +152,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       frameId: this.mainFrame.id,
     });
     if (navigationResponse.errorText) throw new Error(navigationResponse.errorText);
-
     return this.framesManager.waitForFrame(navigationResponse, url, true);
   }
 
@@ -222,14 +168,21 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   async close(): Promise<void> {
-    await this.framesManager.close();
     if (this.cdpSession.isConnected()) {
       await this.cdpSession.send('Page.close');
     }
+    return this.closePromise.promise;
   }
 
   didClose() {
-    this.cdpSession.removeAllListeners();
+    this.isClosed = true;
+    this.framesManager.close();
+    this.networkManager.close();
+    eventUtils.removeEventListeners(this.registeredEvents);
+    this.closePromise.resolve();
+    this.framesManager.cancelPendingEvents('Page closed');
+    this.networkManager.cancelPendingEvents('Page closed');
+    this.cancelPendingEvents('Page closed', ['close']);
   }
 
   private async navigateToHistory(delta: number): Promise<void> {
@@ -237,6 +190,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
     await this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id });
+    await this.framesManager.waitOn('frameNavigated');
   }
 
   private async initialize(): Promise<void> {
@@ -248,12 +202,13 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         waitForDebuggerOnStart: true,
         flatten: true,
       }),
+      this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
     ]);
 
     if (this.opener) {
       await this.opener.isReady;
-      if (this.opener.initializeNewPage) {
-        await this.opener.initializeNewPage(this, this.opener.windowOpenParams);
+      if (this.opener.popupInitializeFn) {
+        await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
       }
     }
 
@@ -267,12 +222,18 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
-    if (targetInfo.type === 'service_worker') {
+    if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
       const worker = new Worker(this.browserContext, cdpSession, targetInfo);
-      cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
+      const targetId = targetInfo.targetId;
+      this.workersById.set(targetId, worker);
+
       worker.on('consoleLog', this.emit.bind(this, 'consoleLog'));
-      this.workersById.set(targetInfo.targetId, worker);
+      worker.on('pageError', this.emit.bind(this, 'pageError'));
+      worker.on('close', () => this.workersById.delete(targetId));
+
+      // TODO: pause for initialization by client?
       worker.initialize(this.networkManager).catch(debugError);
+      this.emit('worker', { worker });
       return;
     }
 

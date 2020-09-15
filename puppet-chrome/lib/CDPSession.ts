@@ -1,5 +1,6 @@
 /**
- * Copyright 2020 Data Liberation Foundation, Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
+ * Modifications copyright (c) Data Liberation Foundation Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@ import { EventEmitter } from 'events';
 import { assert } from '@secret-agent/commons/utils';
 import { IConnectionCallback } from '@secret-agent/puppet/interfaces/IConnectionCallback';
 import { Connection } from './Connection';
+import RemoteObject = Protocol.Runtime.RemoteObject;
 
 /**
  * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
@@ -58,7 +60,6 @@ export class CDPSession extends EventEmitter {
       );
     }
 
-    // See the comment in Connection#send explaining why we do this.
     const params = paramArgs.length ? paramArgs[0] : undefined;
 
     const id = this.connection.sendMessage({
@@ -87,26 +88,9 @@ export class CDPSession extends EventEmitter {
     }
   }
 
-  /**
-   * Detaches the cdpSession from the target. Once detached, the cdpSession object
-   * won't emit any events and can't be used to send messages.
-   */
-  async detach(): Promise<void> {
-    if (!this.connection) {
-      throw new Error(
-        `Session already detached. Most likely the ${this.targetType} has been closed.`,
-      );
-    }
-    const rootSession = this.connection.getSession(this.rootSessionId);
-    if (!rootSession) throw new Error('Root session has been closed');
-    await rootSession.send('Target.detachFromTarget', {
-      sessionId: this.sessionId,
-    });
-  }
-
-  disposeObject(remoteObject: Protocol.Runtime.RemoteObject) {
-    if (!remoteObject.objectId) return;
-    this.send('Runtime.releaseObject', { objectId: remoteObject.objectId }).catch(() => {
+  disposeRemoteObject(object: RemoteObject): void {
+    if (!object.objectId) return;
+    this.send('Runtime.releaseObject', { objectId: object.objectId }).catch(() => {
       // Exceptions might happen in case of a page been navigated or closed.
       // Swallow these since they are harmless and we don't leak anything in this case.
     });

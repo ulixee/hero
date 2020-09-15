@@ -23,6 +23,9 @@ let koaServer;
 beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer();
+  koaServer.get('/empty', ctx => {
+    ctx.body = `<html></html>`;
+  });
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -77,9 +80,6 @@ describe('basic Dom Replay tests', () => {
 </script>
 </body>`;
     });
-    koaServer.get('/empty', ctx => {
-      ctx.body = `<html></html>`;
-    });
     const meta = await Core.createTab();
     const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
@@ -105,7 +105,7 @@ describe('basic Dom Replay tests', () => {
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
 
-    const sourceHtml = await tab.puppetPage.mainFrame.run(getContentScript, false);
+    const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
 
     const state = tab.sessionState;
 
@@ -115,13 +115,13 @@ describe('basic Dom Replay tests', () => {
       const pages = tab.pages;
       const pageChanges = await state.getPageDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
-      await mirrorPage.mainFrame.run(
+      await mirrorPage.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
         false,
       );
     }
 
-    const mirrorHtml = await mirrorPage.mainFrame.run(getContentScript, false);
+    const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
     expect(mirrorHtml).toBe(sourceHtml);
 
     let lastCommandId = core.lastCommandId;
@@ -141,14 +141,101 @@ describe('basic Dom Replay tests', () => {
       const pageChangesByFrame = await state.getPageDomChanges(pages.history, lastCommandId);
       lastCommandId = core.lastCommandId;
       const [changes] = Object.values(pageChangesByFrame);
-      await mirrorPage.mainFrame.run(
+      await mirrorPage.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
         false,
       );
 
-      const sourceHtmlNext = await tab.puppetPage.mainFrame.run(getContentScript, false);
-      const mirrorHtmlNext = await mirrorPage.mainFrame.run(getContentScript, false);
+      const sourceHtmlNext = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
+      const mirrorHtmlNext = await mirrorPage.mainFrame.evaluate(getContentScript, false);
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
+  });
+
+  it('should support multiple tabs', async () => {
+    koaServer.get('/tab1', ctx => {
+      ctx.body = `<body>
+<div>
+    <h1>This is the starting point</h1>
+    <ul>
+        <li>1</li>
+    </ul>
+    <a href="/tab2" target="_blank">Clickeroo</a>
+</div>
+</body>`;
+    });
+    koaServer.get('/tab2', ctx => {
+      ctx.body = `<body>
+<div>
+    <h1>This is tab 2</h1>
+</div>
+</body>`;
+    });
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(`${koaServer.baseUrl}/tab1`);
+    await core.waitForLoad('DomContentLoaded');
+    // @ts-ignore
+    const tab: Tab = core.tab;
+    // @ts-ignore
+    const session = core.session;
+
+    const mirrorChrome = new Puppet(session.emulator);
+    mirrorChrome.start();
+    Helpers.onClose(() => mirrorChrome.close());
+
+    const mirrorContext = await mirrorChrome.newContext(session.getBrowserEmulation());
+    const mirrorPage = await mirrorContext.newPage();
+    await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
+    await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
+
+    const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
+
+    {
+      await tab.domRecorder.flush();
+      // @ts-ignore
+      const pages = tab.pages;
+      const state = tab.sessionState;
+      const pageChanges = await state.getPageDomChanges(pages.history);
+      const [changes] = Object.values(pageChanges);
+      await mirrorPage.mainFrame.evaluate(
+        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+        false,
+      );
+    }
+
+    const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
+    expect(mirrorHtml).toBe(sourceHtml);
+
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+    const newTabMeta = await core.waitForNewTab();
+    const newTabCore = Core.byTabId[newTabMeta.tabId];
+    // @ts-ignore
+    const newTab = newTabCore.tab;
+    await newTab.waitForLoad('AllContentLoaded');
+    const newTabHtml = await newTab.puppetPage.mainFrame.evaluate(getContentScript, false);
+
+    const mirrorNewTab = await mirrorContext.newPage();
+    await mirrorNewTab.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
+    await mirrorNewTab.navigate(`${koaServer.baseUrl}/empty`);
+    {
+      await newTab.domRecorder.flush();
+      // @ts-ignore
+      const pages = newTab.pages;
+      const state = newTab.sessionState;
+      const pageChanges = await state.getPageDomChanges(pages.history);
+      const [changes] = Object.values(pageChanges);
+      await mirrorNewTab.mainFrame.evaluate(
+        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+        false,
+      );
+    }
+    const mirrorNewTabHtml = await mirrorNewTab.mainFrame.evaluate(getContentScript, false);
+    expect(mirrorNewTabHtml).toBe(newTabHtml);
   });
 });

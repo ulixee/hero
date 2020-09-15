@@ -7,8 +7,6 @@ import { BrowserContext } from './BrowserContext';
 import { Page } from './Page';
 import { CDPSession } from './CDPSession';
 
-type BrowserCloseCallback = () => Promise<void> | void;
-
 interface IBrowserEvents {
   disconnected: void;
 }
@@ -18,9 +16,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
   public readonly pagesById = new Map<string, Page>();
   public readonly cdpSession: CDPSession;
   private readonly connection: Connection;
-  private readonly closeCallback: BrowserCloseCallback;
+  private readonly closeCallback: () => void;
 
-  constructor(connection: Connection, closeCallback: BrowserCloseCallback) {
+  constructor(connection: Connection, closeCallback: () => void) {
     super();
     this.connection = connection;
     this.cdpSession = connection.rootSession;
@@ -31,11 +29,8 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     this.cdpSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
   }
 
-  /**
-   * Creates a new incognito browser context. This won't share cookies/cache with other
-   * browser contexts.
-   */
   public async newContext(emulation: IBrowserEmulation): Promise<BrowserContext> {
+    // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
     const { browserContextId } = await this.cdpSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
     });
@@ -43,7 +38,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
   }
 
   public async close(): Promise<void> {
-    await this.closeCallback.call(null);
+    await this.closeCallback();
     this.connection.dispose();
   }
 
@@ -51,7 +46,16 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     return !this.connection.isClosed;
   }
 
-  // NOTE: can't be async!
+  protected async listen() {
+    await this.cdpSession.send('Target.setAutoAttach', {
+      autoAttach: true,
+      waitForDebuggerOnStart: false,
+      flatten: true,
+    });
+    return this;
+  }
+
+  // NOTE: can't be async or browser contexts won't be populated
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { targetInfo, sessionId } = event;
 
@@ -76,18 +80,8 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     }
   }
 
-  public static async create(
-    connection: Connection,
-    closeCallback: BrowserCloseCallback,
-  ): Promise<Browser> {
+  public static async create(connection: Connection, closeCallback: () => void): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
-    const cdpSession = connection.rootSession;
-    await cdpSession.send('Target.setAutoAttach', {
-      autoAttach: true,
-      waitForDebuggerOnStart: false,
-      flatten: true,
-    });
-
-    return browser;
+    return await browser.listen();
   }
 }

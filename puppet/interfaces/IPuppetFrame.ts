@@ -1,4 +1,3 @@
-import { IResolvablePromise } from '@secret-agent/commons/utils';
 import { NavigationReason } from '@secret-agent/core-interfaces/IPage';
 
 export interface IPuppetFrame {
@@ -8,12 +7,9 @@ export interface IPuppetFrame {
   url: string;
   navigationReason?: string;
   disposition?: string;
-  urlFragment?: string;
   securityOrigin: string;
-  hasNavigated: boolean;
-  lifecycleEvents: ILifecycleEvents;
-  frameLoading: IResolvablePromise<void>;
-  run<T>(script: string, isolateFromWebPageEnvironment: boolean): Promise<T>;
+  waitForLoader(loaderId?: string): Promise<void>;
+  evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
 }
 
 export interface ILifecycleEvents {

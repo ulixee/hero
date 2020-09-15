@@ -24,6 +24,7 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import { redirectCodes } from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { URL } from 'url';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -315,12 +316,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async getPageCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
-    return await this.puppetPage.getPageCookies();
+    return await this.session.browserContext.getCookies(new URL(this.puppetPage.mainFrame.url));
   }
 
   public async getUserCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
-    return await this.puppetPage.getAllCookies();
+    return await this.session.browserContext.getCookies();
   }
 
   public async focus() {
@@ -352,7 +353,18 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }
       if (resourceMeta.seenAtCommandId <= opts?.sinceCommandId ?? -1) return;
       if (filter.type && resourceMeta.type !== filter.type) return;
-      if (resourceMeta.url && !resourceMeta.url.match(filter.url)) return;
+      if (filter.url) {
+        if (typeof filter.url === 'string') {
+          // don't let query string url
+          if (
+            filter.url.match(/[\w.:/_\-@;$]\?[-+;%@.\w_]+=.+/) &&
+            !filter.url.includes('\\?')
+          ) {
+            filter.url = filter.url.replace('?', '\\?');
+          }
+        }
+        if (!resourceMeta.url.match(filter.url)) return;
+      }
       // if already included, skip
       if (resourceMetas.some(x => x.id === resourceMeta.id)) return;
 

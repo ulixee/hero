@@ -1,9 +1,10 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { debug } from '@secret-agent/commons/Debug';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -22,23 +23,23 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private emulation?: IBrowserEmulation;
 
   private parentManager?: NetworkManager;
+  private readonly registeredEvents: IRegisteredEventListener[];
 
   constructor(cdpSession: CDPSession) {
     super();
     this.cdpSession = cdpSession;
 
-    this.cdpSession.on('Fetch.requestPaused', this.onRequestPaused.bind(this));
-    this.cdpSession.on('Fetch.authRequired', this.onAuthRequired.bind(this));
+    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+      ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
+      ['Fetch.authRequired', this.onAuthRequired.bind(this)],
 
-    this.cdpSession.on(
-      'Network.webSocketWillSendHandshakeRequest',
-      this.onWebsocketHandshake.bind(this),
-    );
-    this.cdpSession.on('Network.webSocketFrameReceived', this.onWebsocketFrame.bind(this, true));
-    this.cdpSession.on('Network.webSocketFrameSent', this.onWebsocketFrame.bind(this, false));
+      ['Network.webSocketWillSendHandshakeRequest', this.onWebsocketHandshake.bind(this)],
+      ['Network.webSocketFrameReceived', this.onWebsocketFrame.bind(this, true)],
+      ['Network.webSocketFrameSent', this.onWebsocketFrame.bind(this, false)],
 
-    this.cdpSession.on('Network.requestWillBeSent', this.onNetworkRequestWillBeSent.bind(this));
-    this.cdpSession.on('Network.responseReceived', this.onNetworkResponseReceived.bind(this));
+      ['Network.requestWillBeSent', this.onNetworkRequestWillBeSent.bind(this)],
+      ['Network.responseReceived', this.onNetworkResponseReceived.bind(this)],
+    ]);
   }
 
   public emit<
@@ -68,6 +69,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     });
   }
 
+  public close() {
+    eventUtils.removeEventListeners(this.registeredEvents);
+  }
+
   public async initializeFromParent(parentManager: NetworkManager) {
     this.parentManager = parentManager;
     return this.initialize(parentManager.emulation);
@@ -80,7 +85,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     if (this.attemptedAuthentications.has(event.requestId)) {
       authChallengeResponse.response = AuthChallengeResponse.CancelAuth;
-    } else if (this.emulation) {
+    } else if (this.emulation.proxyPassword) {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
