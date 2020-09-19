@@ -28,7 +28,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   constructor(cdpSession: CDPSession) {
     super();
     this.cdpSession = cdpSession;
-
     this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
       ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
       ['Fetch.authRequired', this.onAuthRequired.bind(this)],
@@ -53,20 +52,22 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   public async initialize(emulation: IBrowserEmulation) {
     this.emulation = emulation;
-    await this.cdpSession.send('Network.setUserAgentOverride', {
-      userAgent: emulation.userAgent,
-      acceptLanguage: emulation.acceptLanguage,
-      platform: emulation.platform,
-    });
-    await this.cdpSession.send('Network.enable', {
-      maxPostDataSize: 0,
-      maxResourceBufferSize: 0,
-      maxTotalBufferSize: 0,
-    });
 
-    await this.cdpSession.send('Fetch.enable', {
-      handleAuthRequests: true,
-    });
+    await Promise.all([
+      this.cdpSession.send('Network.setUserAgentOverride', {
+        userAgent: emulation.userAgent,
+        acceptLanguage: emulation.acceptLanguage,
+        platform: emulation.platform,
+      }),
+      this.cdpSession.send('Network.enable', {
+        maxPostDataSize: 0,
+        maxResourceBufferSize: 0,
+        maxTotalBufferSize: 0,
+      }),
+      this.cdpSession.send('Fetch.enable', {
+        handleAuthRequests: true,
+      }),
+    ]);
   }
 
   public close() {
@@ -110,7 +111,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     // requests from service workers (and others?) will never register with RequestWillBeSentEvent
     // -- they don't have networkIds
     if (!networkRequest.networkId) {
-      this.emit('resourceWillBeRequested', {
+      this.emit('resource-will-be-requested', {
         browserRequestId: networkRequest.requestId,
         resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
         url: networkRequest.request.url,
@@ -129,7 +130,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const isNavigation =
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
 
-    this.emit('resourceWillBeRequested', {
+    if (isNavigation) {
+      debug('resource')({ url: networkRequest.request.url, listeners: this.listenerCount('resource-will-be-requested') });
+    }
+    this.emit('resource-will-be-requested', {
       browserRequestId: networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.type),
       url: networkRequest.request.url,
@@ -149,7 +153,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const isNavigation = requestId === loaderId && type === 'Document';
     if (!isNavigation) return;
 
-    this.emit('navigationResponse', {
+    this.emit('navigation-response', {
       frameId,
       browserRequestId: requestId,
       status: response.status,
@@ -161,7 +165,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent) {
-    this.emit('websocketHandshake', {
+    this.emit('websocket-handshake', {
       browserRequestId: handshake.requestId,
       headers: handshake.request.headers,
     });
@@ -174,7 +178,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const browserRequestId = event.requestId;
     const { opcode, payloadData } = event.response;
     const message = opcode === 1 ? payloadData : Buffer.from(payloadData, 'base64');
-    this.emit('websocketFrame', {
+    this.emit('websocket-frame', {
       message,
       browserRequestId,
       isFromServer,

@@ -1,23 +1,23 @@
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 
 export interface IPuppetNetworkEvents {
-  navigationResponse: {
+  'navigation-response': {
     browserRequestId: string;
     frameId: string;
     status: number;
     location?: string;
     url?: string;
   };
-  websocketFrame: {
+  'websocket-frame': {
     browserRequestId: string;
     message: string | Buffer;
     isFromServer: boolean;
   };
-  websocketHandshake: {
+  'websocket-handshake': {
     browserRequestId: string;
     headers: { [key: string]: string };
   };
-  resourceWillBeRequested: {
+  'resource-will-be-requested': {
     browserRequestId: string;
     resourceType: ResourceType;
     url: string;

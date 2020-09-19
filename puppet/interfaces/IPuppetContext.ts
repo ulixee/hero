@@ -11,3 +11,7 @@ export default interface IPuppetContext {
   getCookies(url?: URL): Promise<ICookie[]>;
   addCookies(cookies: ICookie[], origins?: string[]): Promise<void>;
 }
+
+export interface IPuppetContextEvents {
+  page: { page: IPuppetPage };
+}

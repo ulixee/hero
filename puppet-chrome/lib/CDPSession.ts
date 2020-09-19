@@ -15,14 +15,17 @@
  * limitations under the License.
  */
 
-import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
-import { Protocol } from 'devtools-protocol';
-import { EventEmitter } from 'events';
-import { assert } from '@secret-agent/commons/utils';
-import { IConnectionCallback } from '@secret-agent/puppet/interfaces/IConnectionCallback';
-import { Connection } from './Connection';
+import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
+import { Protocol } from "devtools-protocol";
+import { EventEmitter } from "events";
+import { assert } from "@secret-agent/commons/utils";
+import { IConnectionCallback } from "@secret-agent/puppet/interfaces/IConnectionCallback";
+import { CanceledPromiseError } from "@secret-agent/commons/eventUtils";
+import { debug } from "@secret-agent/commons/Debug";
+import { Connection } from "./Connection";
 import RemoteObject = Protocol.Runtime.RemoteObject;
 
+const debugProtocolMissed = debug('puppet-chrome:protocol:MISSED X');
 /**
  * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
  *
@@ -69,7 +72,7 @@ export class CDPSession extends EventEmitter {
     });
 
     return new Promise((resolve, reject) => {
-      this.pendingMessages.set(id, { resolve, reject, error: new Error(), method });
+      this.pendingMessages.set(id, { resolve, reject, error: new CanceledPromiseError(), method });
     });
   }
 
@@ -84,6 +87,9 @@ export class CDPSession extends EventEmitter {
       }
     } else {
       assert(!object.id);
+      if (!this.listenerCount(object.method)) {
+        debugProtocolMissed(object.method);
+      }
       this.emit(object.method, object.params);
     }
   }

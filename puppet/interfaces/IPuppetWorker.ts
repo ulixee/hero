@@ -9,6 +9,6 @@ export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
 
 export interface IPuppetWorkerEvents {
   close: null;
-  pageError: { error: Error };
-  consoleLog: { frameId: string; type: string; message: string; location: string };
+  'page-error': { error: Error };
+  console: { frameId: string; type: string; message: string; location: string };
 }

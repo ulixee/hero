@@ -2,7 +2,7 @@ import { IRegisteredEventListener, ITypedEventEmitter } from '@secret-agent/comm
 import { IPuppetFrame, IPuppetFrameEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
-import { IPuppetWorker } from "./IPuppetWorker";
+import { IPuppetWorker } from './IPuppetWorker';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   mouse: IPuppetMouse;
@@ -38,7 +38,7 @@ export interface IPuppetPageEvents extends IPuppetFrameEvents, IPuppetNetworkEve
   close: undefined;
   load: undefined;
   worker: { worker: IPuppetWorker };
-  targetCrashed: { error: Error };
-  consoleLog: { frameId: string; type: string; message: string; location: string };
-  pageError: { frameId: string; error: Error };
+  crashed: { error: Error };
+  console: { frameId: string; type: string; message: string; location: string };
+  'page-error': { frameId: string; error: Error };
 }

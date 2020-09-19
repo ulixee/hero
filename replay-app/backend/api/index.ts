@@ -1,43 +1,46 @@
-import { EventEmitter } from 'events';
 import * as http2 from 'http2';
 import { ChildProcess, spawn } from 'child_process';
 import * as Path from 'path';
 import ISaSession from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
-import ReplayState from '~backend/api/ReplayState';
 import getResolvable from '~shared/utils/promise';
+import ReplayTabState from '~backend/api/ReplayTabState';
+import ReplayTime from '~backend/api/ReplayTime';
 
-export default class ReplayApi extends EventEmitter {
+export default class ReplayApi {
   public static serverProcess: ChildProcess;
   public static serverStartPath = Path.resolve(__dirname, '../../../session-state/api/start');
   private static sessions = new Set<http2.ClientHttp2Session>();
   private static localApiHost: string;
 
   public readonly saSession: ISaSession;
+  public tabs: ReplayTabState[] = [];
   public apiHost: string;
-  public state: ReplayState;
+  public unresponsiveSeconds = 0;
+
   public get isReady() {
-    return this.readyResolvable.promise;
+    return this.isReadyResolvable.promise;
   }
 
-  private readonly readyResolvable = getResolvable<void>();
+  public get getStartTab(): ReplayTabState {
+    return this.tabs[0];
+  }
+
+  private replayTime: ReplayTime;
+  private readonly isReadyResolvable = getResolvable<void>();
 
   private readonly http2Session: http2.ClientHttp2Session;
 
   private resources: ReplayResources = new ReplayResources();
-  private broadcastTimer: NodeJS.Timer;
-  private lastBroadcast?: Date;
 
   constructor(apiHost: string, replay: IReplayMeta) {
-    super();
     this.apiHost = apiHost;
     this.saSession = {
       ...replay,
       name: replay.sessionName,
       id: replay.sessionId,
     } as any;
-    this.state = new ReplayState();
 
     this.http2Session = http2.connect(apiHost, () => console.log('Reply API connected'));
 
@@ -53,7 +56,6 @@ export default class ReplayApi extends EventEmitter {
       if (path === '/session') {
         const data = await streamToJson<ISaSession>(stream);
         this.onSession(data);
-        this.readyResolvable.resolve();
         return;
       }
 
@@ -62,8 +64,10 @@ export default class ReplayApi extends EventEmitter {
       if (path === '/resource') {
         const type = headers['resource-type'] as string;
         const statusCode = parseInt((headers['resource-status-code'] as string) ?? '404', 10);
+        const tabId = headers['resource-tabid'] as string;
         await this.resources.onResource(stream, {
           url,
+          tabId,
           headers: JSON.parse(headers['resource-headers'] as string),
           statusCode,
           type,
@@ -87,7 +91,7 @@ export default class ReplayApi extends EventEmitter {
         const status = headers[':status'];
         if (status !== 200) {
           const data = await streamToJson<{ message: string }>(request);
-          this.readyResolvable.reject(new Error(data.message ?? 'Unexpected Error'));
+          this.isReadyResolvable.reject(new Error(data.message ?? 'Unexpected Error'));
         }
       });
   }
@@ -97,35 +101,62 @@ export default class ReplayApi extends EventEmitter {
   }
 
   public close() {
+    if (this.tabs.some(x => x.isActive)) return;
+
     this.http2Session.removeAllListeners();
     this.http2Session.close();
   }
 
-  private onApiFeed(path: string, json: any) {
-    this.state.loadApiFeed(path, json);
-    if (!this.lastBroadcast) {
-      return this.broadcast();
-    }
-    if (new Date().getTime() - this.lastBroadcast.getTime() > 500) {
-      return this.broadcast();
-    }
-    clearTimeout(this.broadcastTimer);
-    this.broadcastTimer = setTimeout(() => this.broadcast(), 50);
+  public getTab(tabId: string) {
+    return this.tabs.find(x => x.tabId === tabId);
   }
 
-  private broadcast() {
-    this.lastBroadcast = new Date();
-    this.emit('ticks:updated');
+  private onApiFeed(dataPath: string, data: any) {
+    const tabsWithChanges = new Set<ReplayTabState>();
+    if (dataPath === '/script-state') {
+      const closeDate = data.closeDate ? new Date(data.closeDate) : null;
+      this.replayTime.update(closeDate);
+      this.unresponsiveSeconds = data.unresponsiveSeconds;
+      for (const tab of this.tabs) tabsWithChanges.add(tab);
+    } else {
+      for (const event of data) {
+        let tab = this.getTab(event.tabId);
+        if (!tab) {
+          tab = new ReplayTabState(this.replayTime, event.tabId, null);
+          this.tabs.push(tab);
+        }
+        tabsWithChanges.add(tab);
+        if (dataPath === '/dom-changes') tab.loadDomChange(event);
+        else if (dataPath === '/commands') tab.loadCommand(event);
+        else if (dataPath === '/mouse-events') tab.loadPageEvent('mouse', event);
+        else if (dataPath === '/focus-events') tab.loadPageEvent('focus', event);
+        else if (dataPath === '/scroll-events') tab.loadPageEvent('scroll', event);
+      }
+    }
+    for (const tab of tabsWithChanges) tab.sortTicks();
   }
 
   private onSession(data: ISaSession) {
+    // parse strings to dates from api
+    data.startDate = new Date(data.startDate);
+    data.closeDate = data.closeDate ? new Date(data.closeDate) : null;
+
     Object.assign(this.saSession, data);
 
     console.log(`Loaded ReplayApi.sessionMeta`, {
       sessionId: data.id,
       dataLocation: data.dataLocation,
+      start: data.startDate,
+      close: data.closeDate,
+      tabs: data.tabs,
     });
-    this.state.loadSession(this.saSession);
+
+    this.replayTime = new ReplayTime(data.startDate, data.closeDate);
+    this.tabs = data.tabs.map(x => {
+      return new ReplayTabState(this.replayTime, x.tabId, x.startOrigin);
+    });
+
+    this.isReadyResolvable.resolve();
   }
 
   public static quit() {

@@ -8,7 +8,7 @@ function createError(message, type) {
   if (!type) {
     const match = nativeErrorRegex.exec(message);
     if (match.length) {
-      message = message.replace(`${match[1]  }: `, '');
+      message = message.replace(`${match[1]}: `, '');
       try {
         type = window[match[1]];
       } catch (err) {
@@ -19,16 +19,20 @@ function createError(message, type) {
   if (!type) type = Error;
   // eslint-disable-next-line new-cap
   const error = new type(message);
+  cleanErrorStack(error);
+  return error;
+}
+
+function cleanErrorStack(error) {
   const stack = error.stack.split(/\r?\n/);
+  const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
-    if (
-      stack[i].includes('__secretagent_bootscript__')
-    ) {
-      stack.length = i;
-      break;
+    if (stack[i].includes('__secretagent_bootscript__')) {
+      continue;
     }
+    newStack.push(stack[i]);
   }
-  error.stack = stack.join('\n');
+  error.stack = newStack.join('\n');
   return error;
 }
 
@@ -157,7 +161,7 @@ function buildDescriptor(entry) {
 const globalSymbols = {};
 for (const symbol of Reflect.ownKeys(Symbol)) {
   if (typeof Symbol[symbol] === 'symbol') {
-    globalSymbols[`${  String(Symbol[symbol])}`] = Symbol[symbol];
+    globalSymbols[`${String(Symbol[symbol])}`] = Symbol[symbol];
   }
 }
 
@@ -168,11 +172,21 @@ function proxyFunction(thisObject, functionName, replacementFunc) {
     [functionName]: {
       global: true,
       func(target, thisArg, argArray) {
-        return replacementFunc(target, thisArg, ...argArray);
+        try {
+          const result = replacementFunc(target, thisArg, ...argArray);
+          if (result && result.catch) {
+            return result.catch(err => {
+              throw cleanErrorStack(err);
+            });
+          }
+          return result;
+        } catch (err) {
+          throw cleanErrorStack(err);
+        }
       },
     },
   });
-  if (!overrides.length) throw new Error(`Could not override function ${  functionName}`);
+  if (!overrides.length) throw new Error(`Could not override function ${functionName}`);
 }
 
 function proxyDescriptors(obj, props) {
@@ -220,7 +234,7 @@ function overrideGet(obj, proto, key, descriptor, override) {
 
 function overrideFunction(obj, proto, key, descriptor, override) {
   if (typeof proto[key] !== 'function') {
-    throw new Error(`Trying to override function that's not a function! - ${  key}`);
+    throw new Error(`Trying to override function that's not a function! - ${key}`);
   }
   const toString = proto[key].toString();
   proto[key] = new Proxy(proto[key], {
@@ -268,7 +282,7 @@ function breakdownPath(path, propsToLeave) {
     if (next.startsWith('Symbol.')) next = Symbol.for(next);
     obj = obj[next];
     if (!obj) {
-      throw new Error(`Property not found -> ${  path  } at ${  next}`);
+      throw new Error(`Property not found -> ${path} at ${next}`);
     }
   }
   return { parent: obj, remainder: parts };
@@ -286,20 +300,13 @@ function reorderDescriptor(path, propertyName, prevProperty, throughProperty) {
 
   const descriptor = Object.getOwnPropertyDescriptor(owner, propertyName);
   if (!descriptor) {
-    console.log(
-      `Can't redefine a non-existent property descriptor: ${  path  } -> ${  propertyName}`,
-    );
+    console.log(`Can't redefine a non-existent property descriptor: ${path} -> ${propertyName}`);
     return;
   }
   const prevDescriptor = Object.getOwnPropertyDescriptor(owner, prevProperty);
   if (!prevDescriptor) {
     console.log(
-      `Can't redefine a non-existent prev property descriptor: ${
-        path
-        } -> ${
-        propertyName
-        }, prev =${
-        prevProperty}`,
+      `Can't redefine a non-existent prev property descriptor: ${path} -> ${propertyName}, prev =${prevProperty}`,
     );
     return;
   }
@@ -326,13 +333,13 @@ function adjustKeyOrder(keys, propertyName, prevProperty, throughProperty) {
 function addDescriptorAfterProperty(path, prevProperty, propertyName, descriptor) {
   const owner = getObjectAtPath(path);
   if (!owner) {
-    console.log(`ERROR: Parent for property descriptor not found: ${  path  } -> ${  propertyName}`);
+    console.log(`ERROR: Parent for property descriptor not found: ${path} -> ${propertyName}`);
     return;
   }
   const descriptors = Object.getOwnPropertyDescriptors(owner);
   // if already exists, don't add again
   if (descriptors[propertyName]) {
-    console.log(`Not re-adding descriptor for ${  propertyName}`);
+    console.log(`Not re-adding descriptor for ${propertyName}`);
     return;
   }
 
@@ -345,7 +352,7 @@ function addDescriptorAfterProperty(path, prevProperty, propertyName, descriptor
         },
       });
       if (!result.includes(propertyName))
-        throw new Error(`Failed to override descriptor: ${  propertyName}`);
+        throw new Error(`Failed to override descriptor: ${propertyName}`);
     } else {
       throw new Error("Can't override descriptor that doesnt have a getter");
     }

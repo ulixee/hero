@@ -1,4 +1,4 @@
-import { NavigationReason } from '@secret-agent/core-interfaces/IPage';
+import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 
 export interface IPuppetFrame {
   id: string;
@@ -19,8 +19,8 @@ export interface ILifecycleEvents {
 }
 
 export interface IPuppetFrameEvents {
-  frameCreated: { frame: IPuppetFrame };
-  frameLifecycle: { frame: IPuppetFrame; name: string };
-  frameNavigated: { frame: IPuppetFrame; navigatedInDocument?: boolean };
-  frameRequestedNavigation: { frame: IPuppetFrame; url: string; reason: NavigationReason };
+  'frame-created': { frame: IPuppetFrame };
+  'frame-lifecycle': { frame: IPuppetFrame; name: string };
+  'frame-navigated': { frame: IPuppetFrame; navigatedInDocument?: boolean };
+  'frame-requested-navigation': { frame: IPuppetFrame; url: string; reason: NavigationReason };
 }

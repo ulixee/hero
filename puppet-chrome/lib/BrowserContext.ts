@@ -1,16 +1,22 @@
-import { EventEmitter } from 'events';
 import { assert } from '@secret-agent/commons/utils';
-import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+} from '@secret-agent/puppet/interfaces/IPuppetContext';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { Page } from './Page';
 import { Browser } from './Browser';
+import { CDPSession } from './CDPSession';
 import CookieParam = Protocol.Network.CookieParam;
+import TargetInfo = Protocol.Target.TargetInfo;
 
-export class BrowserContext extends EventEmitter implements IPuppetContext {
+export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
+  implements IPuppetContext {
   public emulation: IBrowserEmulation;
+  private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;
   private isClosing = false;
@@ -23,23 +29,57 @@ export class BrowserContext extends EventEmitter implements IPuppetContext {
     this.browser.browserContextsById.set(this.id, this);
   }
 
-  public async newPage(): Promise<Page> {
+  async newPage(): Promise<Page> {
     const { targetId } = await this.browser.cdpSession.send('Target.createTarget', {
       url: 'about:blank',
       browserContextId: this.id,
     });
+
     // chrome 80 still needs you to manually attach
-    if (!this.browser.pagesById.has(targetId)) {
+    if (!this.getPageWithId(targetId)) {
       await this.browser.cdpSession.send('Target.attachToTarget', {
         targetId,
         flatten: true,
       });
     }
 
-    const page = this.browser.pagesById.get(targetId);
+    // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
+    const page = this.getPageWithId(targetId);
     await page.isReady;
     if (page.isClosed) throw new Error('Page has been closed.');
     return page;
+  }
+
+  onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
+    if (this.getPageWithId(targetInfo.targetId)) return;
+
+    let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
+    // make the first page the active page
+    if (this.pages.length) opener = this.pages[0];
+    const page = new Page(cdpSession, targetInfo.targetId, this, opener);
+    this.pages.push(page);
+  }
+
+  onPageDetached(targetId: string) {
+    const page = this.getPageWithId(targetId);
+    if (page) {
+      const idx = this.pages.indexOf(page);
+      if (idx >= 0) this.pages.splice(idx, 1);
+      page.didClose();
+    }
+  }
+
+  async close(): Promise<void> {
+    if (!this.browser.cdpSession.isConnected() || this.isClosing) return;
+    assert(this.id, 'Non-incognito profiles cannot be closed!');
+    this.isClosing = true;
+
+    await Promise.all(this.pages.map(x => x.close()));
+
+    await this.browser.cdpSession.send('Target.disposeBrowserContext', {
+      browserContextId: this.id,
+    });
+    this.browser.browserContextsById.delete(this.id);
   }
 
   async getCookies(url?: URL): Promise<ICookie[]> {
@@ -99,14 +139,7 @@ export class BrowserContext extends EventEmitter implements IPuppetContext {
     });
   }
 
-  public async close(): Promise<void> {
-    if (!this.browser.cdpSession.isConnected() || this.isClosing) return;
-    assert(this.id, 'Non-incognito profiles cannot be closed!');
-    this.isClosing = true;
-
-    await this.browser.cdpSession.send('Target.disposeBrowserContext', {
-      browserContextId: this.id,
-    });
-    this.browser.browserContextsById.delete(this.id);
+  private getPageWithId(targetId: string) {
+    return this.pages.find(x => x.targetId === targetId);
   }
 }

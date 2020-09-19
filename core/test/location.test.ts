@@ -245,7 +245,7 @@ describe('basic LocationTracker tests', () => {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
     expect(pages.history).toHaveLength(2);
 
     await core.close();
@@ -278,7 +278,7 @@ setTimeout(function() {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
     expect(pages.history).toHaveLength(3);
     expect(pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
       startingUrl,

@@ -1,6 +1,7 @@
 import * as http2 from 'http2';
 import Logger from '@secret-agent/commons/Logger';
 import { AddressInfo } from 'net';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
 import SessionLoader from './SessionLoader';
 import SessionDb from '../lib/SessionDb';
 import ISessionReplayServer from '../interfaces/ISessionReplayServer';
@@ -11,6 +12,7 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
   const activeClients = new Set<http2.Http2ServerResponse>();
   const server = http2.createServer((req, res) => {
     activeClients.add(res);
+    const listeners: eventUtils.IRegisteredEventListener[] = [];
     try {
       const lookupArgs = {
         scriptInstanceId: req.headers['script-instance-id'] as string,
@@ -25,14 +27,18 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
 
       const sessionLoader = new SessionLoader(session.sessionDb, session.sessionState);
 
-      sessionLoader.on('resources', http2PushResources.bind(this, res));
+      listeners.push(
+        eventUtils.addEventListener(sessionLoader, 'resources', http2PushResources.bind(this, res)),
+      );
 
       for (const event of SessionLoader.eventStreams) {
-        sessionLoader.on(event, http2PushJson.bind(this, res, event));
+        listeners.push(
+          eventUtils.addEventListener(sessionLoader, event, http2PushJson.bind(this, res, event)),
+        );
       }
 
       res.on('close', () => {
-        sessionLoader.removeAllListeners();
+        eventUtils.removeEventListeners(listeners);
         activeClients.delete(res);
         if (res.socket) {
           res.socket.unref();
@@ -43,7 +49,10 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
       sessionLoader.on('ready', () => {
         http2PushJson(res, 'session', {
           ...sessionLoader.session,
-          startOrigin: sessionLoader.startOrigin,
+          tabs: sessionLoader.tabIds.map(tabId => ({
+            tabId,
+            startOrigin: sessionLoader.tabStartOrigins.get(tabId),
+          })),
           dataLocation: session.dataLocation,
           relatedScriptInstances: session.relatedScriptInstances,
           relatedSessions: session.relatedSessions,
@@ -122,6 +131,7 @@ function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
       'resource-type': resource.type,
       'resource-status-code': resource.status,
       'resource-headers': JSON.stringify(resource.headers),
+      'resource-tabid': resource.tabId,
     };
     res.createPushResponse(
       {

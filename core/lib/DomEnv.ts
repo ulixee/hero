@@ -162,7 +162,13 @@ export default class DomEnv {
       log.warn('Injected scripts not installed yet. Retrying', {
         sessionId: this.tab.sessionId,
         fnName,
-        frames: this.puppetPage.frames,
+        frames: this.puppetPage.frames.map(x => ({
+          id: x.id,
+          parentId: x.parentId,
+          url: x.url,
+          name: x.name,
+          navigationReason: x.navigationReason,
+        })),
         frameId: this.puppetPage.mainFrame.id,
       });
       await new Promise(resolve => setTimeout(resolve, 100));

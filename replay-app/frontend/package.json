@@ -34,7 +34,6 @@
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^8.0.2",
-    "shx": "^0.3.2",
     "typescript": "~3.8.3"
   }
 }

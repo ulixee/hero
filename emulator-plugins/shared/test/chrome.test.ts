@@ -24,9 +24,9 @@ const debug = process.env.DEBUG || false;
 test('it should mimic a chrome object', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('pageError', console.log);
+  page.on('page-error', console.log);
   if (debug) {
-    page.on('consoleLog', log => console.log(log));
+    page.on('console', log => console.log(log));
   }
   await page.addNewDocumentScript(
     getOverrideScript('chrome', {
@@ -49,9 +49,9 @@ test('it should mimic a chrome object', async () => {
 test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('pageError', console.log);
+  page.on('page-error', console.log);
   if (debug) {
-    page.on('consoleLog', log => console.log(log));
+    page.on('console', log => console.log(log));
   }
   await page.addNewDocumentScript(
     getOverrideScript('chrome', {

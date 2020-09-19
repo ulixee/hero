@@ -5,8 +5,6 @@ import Utils from './lib/Utils';
 import UserAgents from './lib/UserAgents';
 import Browsers from './data/browsers.json';
 
-// tslint:disable:variable-name
-
 const { log } = Log(module);
 
 export default class Emulators {

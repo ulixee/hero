@@ -95,7 +95,7 @@ export default class DomChangesTable extends BaseTable<IDomChangeRecord> {
 
 export interface IDomChangeRecord {
   commandId: number;
-  tabId: number;
+  tabId: string;
   frameId: string;
   nodeId: number;
   timestamp: string;

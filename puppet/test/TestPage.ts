@@ -33,7 +33,7 @@ export async function click(page: IPuppetPage, selector: string) {
 }
 
 export async function attachFrame(page: IPuppetPage, frameId: string, url: string) {
-  const framePromise = page.waitOn('frameCreated');
+  const framePromise = page.waitOn('frame-created');
   await page.evaluate(`
         (async () => {
           const frame = document.createElement('iframe');
@@ -53,7 +53,7 @@ export async function detachFrame(page: IPuppetPage, frameId: string) {
 }
 
 export async function goto(page: IPuppetPage, url: string, waitOnLifecycle = 'load') {
-  const nav = page.waitOn('frameLifecycle', event => event.name === waitOnLifecycle);
+  const nav = page.waitOn('frame-lifecycle', event => event.name === waitOnLifecycle);
   return await Promise.all([page.navigate(url), nav]);
 }
 

@@ -8,7 +8,7 @@ import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import net from 'net';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
@@ -72,6 +72,24 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         load: createPromise<IPendingResourceLoad>(),
       };
       this.pendingResources.push(resource);
+
+      // new tab anchor navigations have an issue where they won't trigger on the new tab, so we have to make it move forward
+      if (
+        ctx.requestLowerHeaders['sec-fetch-mode'] === 'navigate' &&
+        ctx.requestLowerHeaders['sec-fetch-dest'] === 'document'
+      ) {
+        this.registerResource({
+          browserRequestId: 'fallback-navigation',
+          resourceType: 'Document',
+          referer,
+          origin,
+          url,
+          method,
+          hasUserGesture: resource.hasUserGesture,
+          isUserNavigation: !!ctx.requestLowerHeaders['sec-fetch-user'],
+          documentUrl: url,
+        });
+      }
     }
 
     await resource.load.promise;
@@ -90,14 +108,15 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public registerResource(params: Omit<IPendingResourceLoad, 'load'>) {
+    if (this.isClosing) return;
+
     this.browserRequestIdToTabId.set(params.browserRequestId, params.tabId);
     const { url, method, referer, origin } = params;
 
     let resource = this.getPendingResource(url, method, origin, referer);
-    if (resource?.load.isResolved) {
-      // don't resolve same url/method twice
-      resource = null;
-    }
+
+    // don't re-resolve same asset
+    if (resource?.load?.isResolved) resource = null;
 
     if (!resource) {
       resource = {
@@ -153,8 +172,13 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public async close() {
     this.isClosing = true;
+    for (const pending of this.pendingResources) {
+      pending.load.reject(new CanceledPromiseError('Canceling: Mitm Request Session Closing'));
+    }
     await this.requestAgent.close();
-    delete RequestSession.sessions[this.sessionId];
+
+    // give it a second for lingering requests to finish
+    setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3);
   }
 
   public shouldBlockRequest(url: string) {
@@ -242,7 +266,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     }
 
     // otherwise, use referer
-    return this.pendingResources.find(x => x.referer === referer);
+    return matches.find(x => x.referer === referer);
   }
 
   public static async close() {

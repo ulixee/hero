@@ -1,4 +1,5 @@
-import ReplayState from '~backend/api/ReplayState';
+import ReplayTabState from '~backend/api/ReplayTabState';
+import ReplayTime from '~backend/api/ReplayTime';
 
 export type IEventType = 'command' | 'paint' | 'focus' | 'mouse' | 'scroll' | 'page' | 'load';
 export default class ReplayTick {
@@ -22,9 +23,10 @@ export default class ReplayTick {
 
   private _playbarOffsetPercent: number;
   private eventDate: Date;
+  private lastDurationMillis: number;
 
   constructor(
-    state: ReplayState,
+    state: ReplayTabState,
     readonly eventType: IEventType,
     readonly eventTypeIdx: number,
     readonly commandId: number,
@@ -32,7 +34,7 @@ export default class ReplayTick {
     readonly label?: string,
   ) {
     this.eventDate = new Date(timestamp);
-    this.updateState(state);
+    this.updateDuration(state.replayTime);
   }
 
   public isMajor() {
@@ -47,13 +49,16 @@ export default class ReplayTick {
     };
   }
 
-  public updateState(state: ReplayState) {
+  public updateDuration(replayTime: ReplayTime) {
     if (this.eventType === 'load') {
       this.playbarOffsetPercent = 0;
       return;
     }
-    const startTime = state.startTime;
-    const millis = this.eventDate.getTime() - startTime.getTime();
-    this.playbarOffsetPercent = (100 * millis) / state.durationMillis;
+
+    if (replayTime.millis === this.lastDurationMillis) return;
+    this.lastDurationMillis = replayTime.millis;
+
+    const millis = this.eventDate.getTime() - replayTime.start.getTime();
+    this.playbarOffsetPercent = (100 * millis) / replayTime.millis;
   }
 }

@@ -103,11 +103,13 @@ export default class MitmProxy {
     }
 
     const requestSession = RequestSession.sessions[sessionId];
+    if (requestSession?.isClosing) return;
+
     if (!requestSession) {
-      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+      log.warn('MitmProxy.RequestWithoutSessionId', {
         sessionId,
         isSSL,
-        host: clientToProxyRequest.headers.host,
+        host: clientToProxyRequest.headers.host ?? clientToProxyRequest.headers[':authority'],
         url: clientToProxyRequest.url,
       });
       proxyToClientResponse.writeHead(504);
@@ -142,9 +144,10 @@ export default class MitmProxy {
       return RequestSession.sendNeedsAuth(socket);
     }
     const requestSession = RequestSession.sessions[sessionId];
+    if (requestSession?.isClosing) return;
 
     if (!requestSession) {
-      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+      log.warn('MitmProxy.UpgradeRequestWithoutSessionId', {
         sessionId,
         isSSL,
         host: clientToProxyRequest.headers.host,

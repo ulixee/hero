@@ -28,9 +28,9 @@ const debug = process.env.DEBUG || false;
 
 test('it should be able to add polyfills', async () => {
   const page = await createPage();
-  page.on('pageError', console.log);
+  page.on('page-error', console.log);
   if (debug) {
-    page.on('consoleLog', log => console.log(log));
+    page.on('console', log => console.log(log));
   }
 
   const objectTestProperties = {
@@ -218,7 +218,7 @@ test('it should be able to change property order', async () => {
   await new Promise(setImmediate);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frameLifecycle', event => event.name === 'load'),
+    page.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
   const keyOrder = (await page.mainFrame.evaluate(
@@ -268,7 +268,7 @@ test('it should be able to change window property order', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frameLifecycle', event => event.name === 'load'),
+    page.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
   const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
 
@@ -294,7 +294,7 @@ test('it should be able to backfill the bluetooth stack', async () => {
   await page.addNewDocumentScript(getOverrideScript('polyfill', PolyfillChromeBt).script, false);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frameLifecycle', event => event.name === 'load'),
+    page.waitOn('frame-lifecycle', event => event.name === 'load'),
   ]);
 
   const structure = JSON.parse(
@@ -346,9 +346,9 @@ async function createPage() {
   });
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
-  page.on('pageError', console.log);
+  page.on('page-error', console.log);
   if (debug) {
-    page.on('consoleLog', log => console.log(log));
+    page.on('console', log => console.log(log));
   }
   return page;
 }

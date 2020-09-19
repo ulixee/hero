@@ -32,7 +32,8 @@ import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 
-const debugError = debug('puppet-chrome:pageerror');
+const debugError = debug('puppet-chrome:page:error');
+const debugMessages = debug('puppet-chrome:page');
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -76,6 +77,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     opener: Page | null,
   ) {
     super();
+    debugMessages('Page created', targetId);
+    this.storeEventsWithoutListeners = true;
     this.cdpSession = cdpSession;
     this.targetId = targetId;
     this.browserContext = browserContext;
@@ -85,33 +88,43 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager = new FramesManager(cdpSession);
     this.opener = opener;
 
-    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
-      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
-      ['Inspector.targetCrashed', this.onTargetCrashed.bind(this)],
-      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
-      ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
-      ['Page.windowOpen', this.onWindowOpen.bind(this)],
-    ]);
+    this.setEventsToLog([
+      'frame-created',
+      'frame-navigated',
+      'frame-lifecycle',
+      'frame-requested-navigation',
+      'websocket-frame',
+      'websocket-handshake',
+      'worker',
+    ], 'puppet-chrome');
 
-    this.framesManager.on('frameLifecycle', ({ frame, name }) => {
+    this.framesManager.on('frame-lifecycle', ({ frame, name }) => {
       if (name === 'load' && frame.id === this.mainFrame?.id) {
         this.emit('load');
       }
     });
 
-    for (const event of ['frameCreated', 'frameNavigated', 'frameLifecycle'] as const) {
+    for (const event of ['frame-created', 'frame-navigated', 'frame-lifecycle'] as const) {
       this.framesManager.on(event, this.emit.bind(this, event));
     }
     for (const event of [
-      'navigationResponse',
-      'websocketFrame',
-      'websocketHandshake',
-      'resourceWillBeRequested',
+      'navigation-response',
+      'websocket-frame',
+      'websocket-handshake',
+      'resource-will-be-requested',
     ] as const) {
       this.networkManager.on(event, this.emit.bind(this, event));
     }
 
     this.cdpSession.once('disconnected', this.emit.bind(this, 'close'));
+
+    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+      ['Inspector.targetCrashed', this.onTargetCrashed.bind(this)],
+      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
+      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
+      ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
+      ['Page.windowOpen', this.onWindowOpen.bind(this)],
+    ]);
 
     this.isReady = this.initialize();
   }
@@ -169,6 +182,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   async close(): Promise<void> {
     if (this.cdpSession.isConnected()) {
+      // trigger beforeUnload
       await this.cdpSession.send('Page.close');
     }
     return this.closePromise.promise;
@@ -190,7 +204,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
     await this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id });
-    await this.framesManager.waitOn('frameNavigated');
+    await this.framesManager.waitOn('frame-navigated');
   }
 
   private async initialize(): Promise<void> {
@@ -205,16 +219,16 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
     ]);
 
-    if (this.opener) {
+    if (this.opener && this.opener.popupInitializeFn) {
+      debugMessages('Popup triggered', this.targetId);
       await this.opener.isReady;
-      if (this.opener.popupInitializeFn) {
-        await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
-      }
+      await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
+      debugMessages('Popup Initialized', this.targetId);
     }
 
     await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
     // after initialized, send self to emitters
-    this.browserContext.emit('page', this);
+    this.browserContext.emit('page', { page: this });
   }
 
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
@@ -227,8 +241,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 
-      worker.on('consoleLog', this.emit.bind(this, 'consoleLog'));
-      worker.on('pageError', this.emit.bind(this, 'pageError'));
+      worker.on('console', this.emit.bind(this, 'console'));
+      worker.on('page-error', this.emit.bind(this, 'page-error'));
       worker.on('close', () => this.workersById.delete(targetId));
 
       // TODO: pause for initialization by client?
@@ -254,7 +268,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const frameId = this.framesManager.getFrameIdForExecutionContext(
       msg.exceptionDetails.executionContextId,
     );
-    this.emit('pageError', {
+    this.emit('page-error', {
       frameId,
       error,
     });
@@ -264,14 +278,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = this.framesManager.getFrameIdForExecutionContext(event.executionContextId);
 
-    this.emit('consoleLog', {
+    this.emit('console', {
       frameId,
       ...message,
     });
   }
 
   private onTargetCrashed() {
-    this.emit('targetCrashed', { error: new Error('Target Crashed') });
+    this.emit('crashed', { error: new Error('Target Crashed') });
   }
 
   private onWindowOpen(event: WindowOpenEvent) {

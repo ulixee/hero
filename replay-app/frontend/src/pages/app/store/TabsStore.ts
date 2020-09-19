@@ -99,10 +99,10 @@ export default class TabsStore {
     });
 
     ipcRenderer.on('tab:updated', (e, args) => {
-      const { id, location, saSession, currentTickValue, replaceTabId, tickState } = args;
+      const { id, location, saSession, currentTickValue, replaceFrontendTabId, tickState } = args;
       console.log('Tab:updated', args);
-      if (replaceTabId) {
-        const origTab = this.getTabById(replaceTabId);
+      if (replaceFrontendTabId) {
+        const origTab = this.getTabById(replaceFrontendTabId);
         if (origTab) origTab.id = id;
       }
       const tab = this.getTabById(id);
@@ -117,7 +117,7 @@ export default class TabsStore {
         tab.location = null;
         tab.updateSession(saSession);
       }
-      if (replaceTabId) {
+      if (replaceFrontendTabId) {
         tab.select();
         store.tabs.updateTabsBounds(false);
       }

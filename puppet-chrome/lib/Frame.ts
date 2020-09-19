@@ -2,19 +2,13 @@ import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet/interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import {
-  CanceledPromiseError,
-  IPendingWaitEvent,
-  TypedEventEmitter,
-} from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { debug } from '@secret-agent/commons/Debug';
-import { NavigationReason } from '@secret-agent/core-interfaces/IPage';
+import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
-import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
 
 const debugWarn = debug('puppet-chrome:frame:warn');
 const debugFrame = debug('puppet-chrome:frame');
@@ -108,7 +102,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.navigationReason = reason;
     this.disposition = disposition;
 
-    this.emit('frameRequestedNavigation', { url, reason });
+    this.emit('frame-requested-navigation', { url, reason });
   }
 
   public onNavigated(frame: PageFrame) {
@@ -123,7 +117,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       this.activeLoader.resolve();
     }
 
-    this.emit('frameNavigated');
+    this.emit('frame-navigated');
   }
 
   public onNavigatedWithinDocument(url: string) {
@@ -133,7 +127,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.activeLoaderId = null;
     this.setLoader('inpage');
     this.loaderIdResolvers.get('inpage').resolve();
-    this.emit('frameNavigated', { navigatedInDocument: true });
+    this.emit('frame-navigated', { navigatedInDocument: true });
     this.onStoppedLoading();
   }
 
@@ -167,7 +161,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     else this.lifecycleEvents[name] = new Date();
 
     if (!this.isDefaultPage()) {
-      this.emit('frameLifecycle', { name });
+      this.emit('frame-lifecycle', { name });
     }
   }
 
@@ -183,10 +177,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   public addContextId(executionContextId: number, isDefault: boolean) {
     if (isDefault) {
       this.defaultContextIds.add(executionContextId);
-      this.emit('defaultContextCreated', { executionContextId });
+      this.emit('default-context-created', { executionContextId });
     } else {
       this.isolatedContextIds.add(executionContextId);
-      this.emit('isolatedContextCreated', { executionContextId });
+      this.emit('isolated-context-created', { executionContextId });
     }
   }
 
@@ -209,6 +203,18 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     await this.waitForDefaultContext();
 
     return this.waitForActiveContextId(isolatedContext);
+  }
+
+  public getActiveContextId(isolatedContext: boolean) {
+    if (isolatedContext) {
+      for (const id of this.isolatedContextIds) {
+        if (this.activeContexts.has(id)) return id;
+      }
+    } else {
+      for (const id of this.defaultContextIds) {
+        if (this.activeContexts.has(id)) return id;
+      }
+    }
   }
 
   public toJSON() {
@@ -258,7 +264,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   }
 
   private async waitForDefaultContext() {
-    return this.waitOn('defaultContextCreated').catch(err => {
+    return this.waitOn('default-context-created').catch(err => {
       if (err instanceof CanceledPromiseError) return;
       throw err;
     });
@@ -266,18 +272,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   private isDefaultPage() {
     return !this.url || this.url === DEFAULT_PAGE;
-  }
-
-  private getActiveContextId(isolatedContext: boolean) {
-    if (isolatedContext) {
-      for (const id of this.isolatedContextIds) {
-        if (this.activeContexts.has(id)) return id;
-      }
-    } else {
-      for (const id of this.defaultContextIds) {
-        if (this.activeContexts.has(id)) return id;
-      }
-    }
   }
 
   private updateUrl() {
@@ -299,9 +293,9 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 }
 
 interface IFrameEvents {
-  defaultContextCreated: { executionContextId: number };
-  isolatedContextCreated: { executionContextId: number };
-  frameLifecycle: { name: string };
-  frameNavigated: { navigatedInDocument?: boolean };
-  frameRequestedNavigation: { url: string; reason: NavigationReason };
+  'default-context-created': { executionContextId: number };
+  'isolated-context-created': { executionContextId: number };
+  'frame-lifecycle': { name: string };
+  'frame-navigated': { navigatedInDocument?: boolean };
+  'frame-requested-navigation': { url: string; reason: NavigationReason };
 }

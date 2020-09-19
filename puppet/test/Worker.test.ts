@@ -5,7 +5,7 @@ import IPuppetContext from '../interfaces/IPuppetContext';
 import { getExecutablePath } from '../lib/browserPaths';
 
 describe.each([['chromium', '756035']])(
-  'Page.navigate for %s@%s',
+  'Worker tests for %s@%s',
   (browserEngine: string, revision: string) => {
     let server: TestServer;
     let httpsServer: TestServer;
@@ -57,7 +57,7 @@ describe.each([['chromium', '756035']])(
 
     it('should report console logs', async () => {
       const [message] = await Promise.all<{ message: string }>([
-        page.waitOn('consoleLog'),
+        page.waitOn('console'),
         page.evaluate(`(() => {
           new Worker(
             URL.createObjectURL(new Blob(['console.log(1)'], { type: 'application/javascript' })),
@@ -79,7 +79,7 @@ describe.each([['chromium', '756035']])(
     });
 
     it('should report errors', async () => {
-      const errorPromise = new Promise<{ error: Error }>(resolve => page.on('pageError', resolve));
+      const errorPromise = new Promise<{ error: Error }>(resolve => page.on('page-error', resolve));
       await page.evaluate(
         `(() => {
           const blobFn =  \`setTimeout(() => {
@@ -136,7 +136,7 @@ describe.each([['chromium', '756035']])(
         page.goto(`${server.baseUrl}/worker/worker.html`),
       ]);
       const url = `${server.baseUrl}/one-style.css`;
-      const requestPromise = page.waitOn('resourceWillBeRequested');
+      const requestPromise = page.waitOn('resource-will-be-requested', x => x.url === url);
       await workerEvent.worker.evaluate(`(async () => {
           await fetch("${url}")
             .then(response => response.text())
@@ -150,7 +150,7 @@ describe.each([['chromium', '756035']])(
       // Chromium needs waitForDebugger enabled for this one.
       await page.goto(server.emptyPage);
       const url = `${server.baseUrl}/one-style.css`;
-      const requestPromise = page.waitOn('resourceWillBeRequested', x =>
+      const requestPromise = page.waitOn('resource-will-be-requested', x =>
         x.url.includes('one-style.css'),
       );
 

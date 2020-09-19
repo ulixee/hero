@@ -7,42 +7,29 @@ import {
   LocationTrigger,
   PipelineStatus,
 } from '@secret-agent/core-interfaces/Location';
-
-import SessionState from '@secret-agent/session-state';
-import IPage, { NavigationReason } from '@secret-agent/core-interfaces/IPage';
+import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import PageHistory from '@secret-agent/session-state/lib/PageHistory';
+import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
 
 const READY = 'READY';
 
 export default class LocationTracker {
   // this is the default "starting" point for a wait-for location change if a previous command id is not specified
   private defaultWaitForLocationCommandId = 0;
-  private pages: PageHistory;
-
-  private get currentPage() {
-    return this.pages.top;
-  }
-
-  private get currentTrigger() {
-    const page = this.currentPage;
-    if (!page) return;
-
-    return LocationTracker.triggerForNavigationReason(page.navigationReason);
-  }
+  private navigations: TabNavigations;
 
   private get currentStep() {
-    const page = this.currentPage;
-    if (!page) return 0;
+    const location = this.navigations.top;
+    if (!location) return 0;
 
-    return LocationTracker.getPipelineStatus(page);
+    return LocationTracker.getPipelineStatus(location);
   }
 
   private readonly waitForCbs: {
     [status in ILocationStatus]: (() => void)[];
   };
 
-  constructor(pages: PageHistory) {
+  constructor(navigations: TabNavigations) {
     this.waitForCbs = {
       reload: [],
       change: [],
@@ -53,9 +40,9 @@ export default class LocationTracker {
       DomContentLoaded: [],
       AllContentLoaded: [],
     };
-    this.pages = pages;
-    this.pages.onNewPage = this.onNewPage.bind(this);
-    this.pages.onPagePipelineStatusChange = this.onPagePipelineStatusChange.bind(this);
+    this.navigations = navigations;
+    navigations.on('navigation-requested', this.onNavigation.bind(this));
+    navigations.on('status-change', this.onPipelineStatusChange.bind(this));
   }
 
   public willRunCommand(command: ICommandMeta, previousCommand: ICommandMeta) {
@@ -73,7 +60,7 @@ export default class LocationTracker {
   }
 
   public waitForLocationResourceId() {
-    return this.currentPage?.resourceId.promise;
+    return this.navigations.top?.resourceId.promise;
   }
 
   public waitFor(
@@ -82,7 +69,7 @@ export default class LocationTracker {
     inclusiveOfCommandId = true,
   ) {
     if (status === READY) {
-      if (!this.currentTrigger) return;
+      if (!this.navigations.top) return;
       status = LocationStatus.DomContentLoaded;
     }
     assert(LocationStatus[status], `Invalid navigation status: ${status}`);
@@ -109,20 +96,21 @@ export default class LocationTracker {
     });
   }
 
-  private onNewPage(page: IPage) {
-    const trigger = LocationTracker.triggerForNavigationReason(page.navigationReason);
+  private onNavigation(lifecycle: INavigation) {
+    const trigger = LocationTracker.getTriggerForNavigationReason(lifecycle.navigationReason);
     this.runWaitForCbs(trigger);
   }
 
-  private onPagePipelineStatusChange(_: IPage, newStatus: IPipelineStatus) {
-    const incomingStep = LocationTracker.getStepByStatus(newStatus);
+  private onPipelineStatusChange(change: { newStatus: IPipelineStatus }) {
+    const incomingStep = LocationTracker.getStepByStatus(change.newStatus);
     const lastStep = this.currentStep ?? 0;
     const newStep = incomingStep > lastStep ? incomingStep : lastStep;
     const stepsToUpdate = newStep - lastStep;
 
+    const pipelineKeys = Object.keys(PipelineStatus);
     for (let i = 1; i <= stepsToUpdate; i += 1) {
       const step = (lastStep + i) as IPipelineStep;
-      const status = LocationTracker.getStatusByStep(step);
+      const status = pipelineKeys[step] as IPipelineStatus;
       if (status !== LocationStatus.HttpRedirected || step === newStep) {
         this.runWaitForCbs(status);
       }
@@ -141,11 +129,11 @@ export default class LocationTracker {
     sinceCommandId: number,
     inclusive: boolean,
   ) {
-    for (const history of this.pages.history) {
+    for (const history of this.navigations.history) {
       let isMatch = history.startCommandId > sinceCommandId;
       if (inclusive) isMatch = isMatch || history.startCommandId === sinceCommandId;
       if (isMatch) {
-        const previousState = LocationTracker.triggerForNavigationReason(history.navigationReason);
+        const previousState = LocationTracker.getTriggerForNavigationReason(history.navigationReason);
         if (previousState === trigger) {
           return true;
         }
@@ -158,11 +146,7 @@ export default class LocationTracker {
     return Number(PipelineStatus[status]) as IPipelineStep;
   }
 
-  private static getStatusByStep(step: IPipelineStep): ILocationStatus {
-    return Object.keys(PipelineStatus)[step] as IPipelineStatus;
-  }
-
-  private static getPipelineStatus(page: IPage): IPipelineStep {
+  private static getPipelineStatus(page: INavigation): IPipelineStep {
     let maxStep: IPipelineStep = 0 as any;
     for (const status of page.stateChanges.keys()) {
       const step = LocationTracker.getStepByStatus(status);
@@ -171,7 +155,7 @@ export default class LocationTracker {
     return maxStep;
   }
 
-  private static triggerForNavigationReason(reason: NavigationReason) {
+  private static getTriggerForNavigationReason(reason: NavigationReason) {
     const isReload =
       reason === 'httpHeaderRefresh' || reason === 'metaTagRefresh' || reason === 'reload';
     return isReload ? LocationTrigger.reload : LocationTrigger.change;

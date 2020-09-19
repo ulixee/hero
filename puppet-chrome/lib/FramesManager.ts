@@ -1,10 +1,11 @@
-import Protocol from "devtools-protocol";
-import * as eventUtils from "@secret-agent/commons/eventUtils";
-import { IRegisteredEventListener, TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import { IPuppetFrameEvents } from "@secret-agent/puppet/interfaces/IPuppetFrame";
-import { debug } from "@secret-agent/commons/Debug";
-import { CDPSession } from "./CDPSession";
-import Frame from "./Frame";
+import Protocol from 'devtools-protocol';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
+import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { debug } from '@secret-agent/commons/Debug';
+import { URL } from 'url';
+import { CDPSession } from './CDPSession';
+import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
 import FrameDetachedEvent = Protocol.Page.FrameDetachedEvent;
@@ -39,17 +40,12 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   private attachedFrameIds = new Set<string>();
   private activeContexts = new Set<number>();
 
-  private registeredEvents: IRegisteredEventListener[] = [];
+  private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly cdpSession: CDPSession;
 
   constructor(cdpSession: CDPSession) {
     super();
     this.cdpSession = cdpSession;
-  }
-
-  public async initialize() {
-    const framesResponse = await this.cdpSession.send('Page.getFrameTree');
-    await this.recurseFrameTree(framesResponse.frameTree);
     this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
       ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
       ['Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument.bind(this)],
@@ -62,6 +58,11 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       ['Runtime.executionContextDestroyed', this.onExecutionContextDestroyed.bind(this)],
       ['Runtime.executionContextCreated', this.onExecutionContextCreated.bind(this)],
     ]);
+  }
+
+  public async initialize() {
+    const framesResponse = await this.cdpSession.send('Page.getFrameTree');
+    await this.recurseFrameTree(framesResponse.frameTree);
     await Promise.all([
       this.cdpSession.send('Page.enable'),
       this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
@@ -91,6 +92,12 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
     });
+
+    // sometimes we get a new anchor link that already has an initiated frame. If that's the case, newDocumentScripts won't trigger.
+    // NOTE: we DON'T want this to trigger for internal pages (':', 'about:blank')
+    if (this.main.url?.startsWith('http')) {
+      await this.main.evaluate(script, installInIsolatedScope);
+    }
   }
 
   /////// EXECUTION CONTEXT ////////////////////////////////////////////////////
@@ -205,35 +212,35 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       this.attachedFrameIds.has(id),
     );
     this.frames[id] = frame;
+    this.emit('frame-created', { frame });
+
     const registered = eventUtils.addEventListeners(frame, [
       [
-        'frameLifecycle',
+        'frame-lifecycle',
         x =>
-          this.emit('frameLifecycle', {
+          this.emit('frame-lifecycle', {
             frame,
             ...x,
           }),
       ],
       [
-        'frameNavigated',
+        'frame-navigated',
         x =>
-          this.emit('frameNavigated', {
+          this.emit('frame-navigated', {
             frame,
             ...x,
           }),
       ],
       [
-        'frameRequestedNavigation',
+        'frame-requested-navigation',
         x =>
-          this.emit('frameRequestedNavigation', {
+          this.emit('frame-requested-navigation', {
             frame,
             ...x,
           }),
       ],
     ]);
     this.registeredEvents.push(...registered);
-
-    this.emit('frameCreated', { frame });
     return frame;
   }
 }

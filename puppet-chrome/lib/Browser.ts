@@ -4,7 +4,6 @@ import { assert } from '@secret-agent/commons/utils';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
-import { Page } from './Page';
 import { CDPSession } from './CDPSession';
 
 interface IBrowserEvents {
@@ -13,7 +12,6 @@ interface IBrowserEvents {
 
 export class Browser extends TypedEventEmitter<IBrowserEvents> {
   public readonly browserContextsById = new Map<string, BrowserContext>();
-  public readonly pagesById = new Map<string, Page>();
   public readonly cdpSession: CDPSession;
   private readonly connection: Connection;
   private readonly closeCallback: () => void;
@@ -38,6 +36,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
   }
 
   public async close(): Promise<void> {
+    const closePromises: Promise<any>[] = [];
+    for (const [, context] of this.browserContextsById) closePromises.push(context.close());
+    await Promise.all(closePromises);
     await this.closeCallback();
     this.connection.dispose();
   }
@@ -61,22 +62,17 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
 
     assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
 
-    if (targetInfo.type === 'page' && !this.pagesById.has(targetInfo.targetId)) {
+    if (targetInfo.type === 'page') {
       const cdpSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-
-      const opener = targetInfo.openerId ? this.pagesById.get(targetInfo.openerId) || null : null;
-      const page = new Page(cdpSession, targetInfo.targetId, context, opener);
-      this.pagesById.set(targetInfo.targetId, page);
+      context.onPageAttached(cdpSession, targetInfo);
     }
   }
 
   private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent) {
     const targetId = payload.targetId;
-    const page = this.pagesById.get(targetId);
-    if (page) {
-      this.pagesById.delete(targetId);
-      page.didClose();
+    for (const [, context] of this.browserContextsById) {
+      context.onPageDetached(targetId);
     }
   }
 

@@ -54,7 +54,7 @@ describe.each([['chromium', '756035']])(
       });
 
       it('should run beforeunload', async () => {
-        const waitForConsole = page.waitOn('consoleLog', event => {
+        const waitForConsole = page.waitOn('console', event => {
           return event.message === 'Before called';
         });
         await page.goto(server.url('beforeunload.html'));
@@ -93,7 +93,7 @@ describe.each([['chromium', '756035']])(
 
         await Promise.all([
           page.evaluate(`window.location.hash = 'dynamic';`),
-          page.waitOn('frameNavigated', event => {
+          page.waitOn('frame-navigated', event => {
             return event.navigatedInDocument;
           }),
         ]);
@@ -141,7 +141,7 @@ describe.each([['chromium', '756035']])(
         window.open('${server.emptyPage}');
       })()`),
         ]);
-        await popup.waitOn('frameLifecycle', event => event.name === 'load');
+        await popup.waitOn('frame-lifecycle', event => event.name === 'load');
         expect(await popup.evaluate('document.hasFocus()')).toBe(true);
         expect(await page.evaluate('document.hasFocus()')).toBe(true);
       });
@@ -181,15 +181,15 @@ describe.each([['chromium', '756035']])(
     describe('console', () => {
       it('should print out nested objects', async () => {
         const [message] = await Promise.all([
-          page.waitOn('consoleLog'),
+          page.waitOn('console'),
           page.evaluate(`console.log('hello', 5, { foo: 'bar' })`),
         ]);
-        expect((message as ConsoleMessage).message).toEqual(`hello 5 "Object (foo = bar)"`);
+        expect((message as ConsoleMessage).message).toEqual(`hello 5 "{ foo: bar }"`);
       });
 
       it('should emit same log twice', async () => {
         const messages = [];
-        page.on('consoleLog', m => messages.push(m.message));
+        page.on('console', m => messages.push(m.message));
         await page.evaluate(`
       for (let i = 0; i < 2; ++i) console.log('hello');
     `);
@@ -200,13 +200,13 @@ describe.each([['chromium', '756035']])(
     describe('crash', () => {
       it('should emit crash event when page crashes', async () => {
         page.navigate('chrome://crash').catch(e => {});
-        await expect(page.waitOn('targetCrashed')).resolves.toMatchObject({
+        await expect(page.waitOn('crashed')).resolves.toMatchObject({
           error: new Error('Target Crashed'),
         });
       });
     });
 
-    describe.skip('ensure no hanging', () => {
+    describe('ensure no hanging', () => {
       it('clicking on links which do not commit navigation', async () => {
         await page.goto(server.emptyPage);
         await page.setContent(`<a href='${server.emptyPage}'>foobar</a>`);
@@ -249,14 +249,6 @@ describe.each([['chromium', '756035']])(
       const popup = window.open(window.location.href);
       popup.close();
     })()`);
-      });
-
-      it('opening a popup', async () => {
-        await page.goto(server.emptyPage);
-        await Promise.all([
-          page.waitForPopup(),
-          page.evaluate(`window.open(window.location.href) && 1`),
-        ]);
       });
     });
   },

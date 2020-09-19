@@ -22,6 +22,7 @@ import { CDPSession } from './CDPSession';
 
 const debugProtocolSend = debug('puppet-chrome:protocol:SEND ►');
 const debugProtocolReceive = debug('puppet-chrome:protocol:RECV ◀');
+const debugProtocolSkip = debug('puppet-chrome:protocol:SKIP _');
 
 export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   public readonly rootSession: CDPSession;
@@ -64,6 +65,11 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   }
 
   private async onMessage(message: string): Promise<void> {
+    if (shouldChuckMessage(message)) {
+      debugProtocolSkip(`   ${message.substr(0, 50)}...`);
+      return;
+    }
+
     const object = JSON.parse(message);
     debugProtocolReceive(object.id || '  ', message);
 
@@ -96,4 +102,20 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     this.sessionsById.clear();
     this.emit('disconnected');
   }
+}
+
+const ignoredMessages = [
+  'Page.loadEventFired',
+  'Page.domContentEventFired',
+  'Network.requestWillBeSentExtraInfo',
+  'Network.responseReceivedExtraInfo',
+  'Network.dataReceived',
+  'Network.loadingFinished',
+].map(x => `{"method":"${x}"`);
+
+function shouldChuckMessage(message: string) {
+  for (const ignored of ignoredMessages) {
+    if (message.startsWith(ignored)) return true;
+  }
+  return false;
 }

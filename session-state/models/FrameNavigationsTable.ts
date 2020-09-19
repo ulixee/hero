@@ -1,13 +1,15 @@
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IPage from '@secret-agent/core-interfaces/IPage';
+import INavigation from '@secret-agent/core-interfaces/INavigation';
 import BaseTable from '../lib/BaseTable';
 
-export default class PagesTable extends BaseTable<IPageRecord> {
+export default class FrameNavigationsTable extends BaseTable<IFrameNavigationRecord> {
+  private idCounter = 0;
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
-      'Pages',
+      'FrameNavigations',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['frameId', 'INTEGER'],
@@ -27,20 +29,24 @@ export default class PagesTable extends BaseTable<IPageRecord> {
     this.defaultSortOrder = 'initiatedTime ASC';
   }
 
-  public insert(page: IPage) {
+  public insert(navigation: INavigation) {
+    if (!navigation.id) {
+      this.idCounter += 1;
+      navigation.id = this.idCounter;
+    }
     const record = [
-      page.id,
-      page.frameId,
-      page.startCommandId,
-      page.requestedUrl,
-      page.finalUrl,
-      page.navigationReason,
-      page.initiatedTime.toISOString(),
-      page.stateChanges.get(LocationStatus.HttpRequested)?.toISOString(),
-      page.stateChanges.get(LocationStatus.HttpResponded)?.toISOString(),
-      page.stateChanges.get(LocationStatus.HttpRedirected)?.toISOString(),
-      page.stateChanges.get(LocationStatus.DomContentLoaded)?.toISOString(),
-      page.stateChanges.get(LocationStatus.AllContentLoaded)?.toISOString(),
+      navigation.id,
+      navigation.frameId,
+      navigation.startCommandId,
+      navigation.requestedUrl,
+      navigation.finalUrl,
+      navigation.navigationReason,
+      navigation.initiatedTime.toISOString(),
+      navigation.stateChanges.get(LocationStatus.HttpRequested)?.toISOString(),
+      navigation.stateChanges.get(LocationStatus.HttpResponded)?.toISOString(),
+      navigation.stateChanges.get(LocationStatus.HttpRedirected)?.toISOString(),
+      navigation.stateChanges.get(LocationStatus.DomContentLoaded)?.toISOString(),
+      navigation.stateChanges.get(LocationStatus.AllContentLoaded)?.toISOString(),
     ];
     this.queuePendingInsert(record);
   }
@@ -48,11 +54,11 @@ export default class PagesTable extends BaseTable<IPageRecord> {
   public last() {
     return this.db
       .prepare(`select * from ${this.tableName} order by initiatedTime desc limit 1`)
-      .get() as IPageRecord;
+      .get() as IFrameNavigationRecord;
   }
 }
 
-export interface IPageRecord {
+export interface IFrameNavigationRecord {
   id: number;
   frameId: number;
   requestedUrl: string;

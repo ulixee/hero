@@ -1,3 +1,4 @@
 *.ts
+*.js
 !example.org.ts
 !news.ycombinator.com.ts

@@ -37,11 +37,11 @@ function addMe() {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(pages.history);
+    const changesAfterLoad = await state.getFrameNavigationDomChanges(pages.history);
     // @ts-ignore
     const commandId = core.tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
@@ -55,7 +55,7 @@ function addMe() {
     await core.waitForElement(['document', ['querySelector', 'a#link2']]);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(pages.history, commandId);
+    const changes = await state.getFrameNavigationDomChanges(pages.history, commandId);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('added');
@@ -82,11 +82,11 @@ function removeMe() {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = core.tab.pages;
+    const pages = core.tab.navigationTracker;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(pages.history);
+    const changesAfterLoad = await state.getFrameNavigationDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(11);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
@@ -100,7 +100,7 @@ function removeMe() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(pages.history, loadCommand);
+    const changes = await state.getFrameNavigationDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('removed');
@@ -138,12 +138,12 @@ function sort() {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
 
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(pages.history);
+    const changesAfterLoad = await state.getFrameNavigationDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(29);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
@@ -157,7 +157,7 @@ function sort() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(pages.history, loadCommand);
+    const changes = await state.getFrameNavigationDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     // 1 remove and 1 add for each
     expect(changes[key]).toHaveLength(9);
@@ -195,10 +195,10 @@ function sort() {
     const tab = core.tab;
     const state = tab.sessionState;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
 
     await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getPageDomChanges(pages.history);
+    const changesAfterLoad = await state.getFrameNavigationDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(14);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
@@ -212,7 +212,7 @@ function sort() {
     await core.waitForMillis(100);
 
     await tab.domRecorder.flush();
-    const changes = await state.getPageDomChanges(pages.history, loadCommand);
+    const changes = await state.getFrameNavigationDomChanges(pages.history, loadCommand);
     const [key] = Object.keys(changes);
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('attribute');
@@ -270,8 +270,8 @@ describe('basic Mouse Event tests', () => {
     expect(mouseDownEvents).toHaveLength(1);
 
     // @ts-ignore
-    const pages = tab.pages;
-    const changes = await state.getPageDomChanges(pages.history);
+    const pages = tab.navigationTracker;
+    const changes = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changes);
     const linkNode = domChanges.find(x => x[2].tagName === 'BUTTON')[2];
 
@@ -334,8 +334,8 @@ describe('basic Form element tests', () => {
     await state.db.flush();
     await tab.domRecorder.flush();
     // @ts-ignore
-    const pages = core.tab.pages;
-    const changesAfterType = await state.getPageDomChanges(pages.history);
+    const pages = core.tab.navigationTracker;
+    const changesAfterType = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -397,8 +397,8 @@ describe('basic Form element tests', () => {
     await core.tab.domRecorder.flush();
     await state.db.flush();
     // @ts-ignore
-    const pages = core.tab.pages;
-    const changesAfterType = await state.getPageDomChanges(pages.history);
+    const pages = core.tab.navigationTracker;
+    const changesAfterType = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -455,8 +455,8 @@ describe('basic Form element tests', () => {
     await core.tab.domRecorder.flush();
     await state.db.flush();
     // @ts-ignore
-    const pages = core.tab.pages;
-    const changesAfterType = await state.getPageDomChanges(pages.history);
+    const pages = core.tab.navigationTracker;
+    const changesAfterType = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // should have a change for each keypress + one for test
@@ -513,8 +513,8 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
     // @ts-ignore
-    const pages = core.tab.pages;
-    const changesAfterType = await state.getPageDomChanges(pages.history);
+    const pages = core.tab.navigationTracker;
+    const changesAfterType = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     // 2 changes per radio change
@@ -578,8 +578,8 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
     // @ts-ignore
-    const pages = core.tab.pages;
-    const changesAfterType = await state.getPageDomChanges(pages.history);
+    const pages = core.tab.navigationTracker;
+    const changesAfterType = await state.getFrameNavigationDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
     const focusRecords = state.db.focusEvents.all();
@@ -636,7 +636,7 @@ function addMe2() {
     // @ts-ignore
     const tab = core.tab;
     // @ts-ignore
-    const pages = tab.pages;
+    const pages = tab.navigationTracker;
 
     await core.interact([
       { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
@@ -655,10 +655,10 @@ function addMe2() {
     const tab2 = core2.tab;
     await tab2.domRecorder.flush();
     // @ts-ignore
-    const pages2 = tab2.pages;
+    const pages2 = tab2.navigationTracker;
 
-    const tab1Changes = await tab.sessionState.getPageDomChanges(pages.history);
-    const tab2Changes = await tab2.sessionState.getPageDomChanges(pages2.history);
+    const tab1Changes = await tab.sessionState.getFrameNavigationDomChanges(pages.history);
+    const tab2Changes = await tab2.sessionState.getFrameNavigationDomChanges(pages2.history);
 
     const [frameId] = Object.keys(tab1Changes);
     const frame1DomRecords = tab1Changes[frameId].map(DomChangesTable.toRecord).map(x => ({

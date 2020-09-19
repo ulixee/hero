@@ -1,18 +1,15 @@
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
-import ISaSession, {
-  IFocusRecord,
-  IMouseEvent,
-  IScrollRecord,
-} from '~shared/interfaces/ISaSession';
+import { IFocusRecord, IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 import ReplayTick, { IEventType } from '~backend/api/ReplayTick';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import ITickState from '~shared/interfaces/ITickState';
+import ReplayTime from '~backend/api/ReplayTime';
 
-let pageCounter = 0;
 const loadWaitTime = 5e3;
+let pageCounter = 0;
 
-export default class ReplayState {
+export default class ReplayTabState {
   public ticks: ReplayTick[] = [];
   public readonly commands: ICommandWithResult[] = [];
   public readonly pages: { id: number; url: string; commandId: number }[] = [];
@@ -21,65 +18,35 @@ export default class ReplayState {
   public readonly focusEvents: IFocusRecord[] = [];
   public readonly paintEvents: IPaintEvent[] = [];
 
+  public tabId: string;
   public startOrigin: string;
-  public startTime: Date;
-  public closeTime?: Date;
-  public durationMillis: number;
-  public unresponsiveSeconds = 0;
-  public hasRecentErrors: boolean;
-
   public urlOrigin: string;
   public currentPlaybarOffsetPct = 0;
+  public replayTime: ReplayTime;
+
+  public onChangesFn?: () => void;
+  public get isActive() {
+    return !!this.onChangesFn;
+  }
+
   private currentTickIdx = -1;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
+  private broadcastTimer: NodeJS.Timer;
+  private lastBroadcast?: Date;
 
-  public loadSession(saSession: ISaSession) {
-    this.startTime = new Date(saSession.startDate);
-    this.closeTime = saSession.closeDate ? new Date(saSession.closeDate) : null;
-    this.startOrigin = saSession.startOrigin;
-
-    if (this.ticks.length === 0) {
-      this.ticks.push(new ReplayTick(this, 'load', 0, -1, saSession.startDate, 'Load'));
-    }
-
-    this.updateDuration();
-  }
-
-  public loadApiFeed(dataPath: string, data: any) {
-    switch (dataPath) {
-      case '/dom-changes': {
-        this.loadDomChanges(data);
-        break;
-      }
-      case '/script-state': {
-        this.updateScriptState(data);
-        break;
-      }
-      case '/commands': {
-        this.loadCommands(data);
-        break;
-      }
-      case '/mouse-events': {
-        this.loadPageEvents('mouse', data);
-        break;
-      }
-      case '/focus-events': {
-        this.loadPageEvents('focus', data);
-        break;
-      }
-      case '/scroll-events': {
-        this.loadPageEvents('scroll', data);
-        break;
-      }
-    }
+  constructor(replayTime: ReplayTime, tabId: string, startOrigin: string) {
+    this.replayTime = replayTime;
+    this.startOrigin = startOrigin;
+    this.tabId = tabId;
+    this.ticks.push(new ReplayTick(this, 'load', 0, -1, replayTime.start.toISOString(), 'Load'));
   }
 
   public getTickState() {
     return {
-      durationMillis: this.durationMillis,
+      durationMillis: this.replayTime.millis,
       ticks: this.ticks.filter(x => x.isMajor()).map(x => x.playbarOffsetPercent),
-      isScriptComplete: !!this.closeTime,
+      isScriptComplete: !!this.replayTime.close,
     } as ITickState;
   }
 
@@ -91,10 +58,10 @@ export default class ReplayState {
   public nextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
     if (
-      this.closeTime &&
+      this.replayTime.close &&
       // give it a few seconds to get the rest of the data.
       // TODO: figure out how to confirm via http2 that all data is sent
-      new Date().getTime() - this.closeTime.getTime() > loadWaitTime &&
+      new Date().getTime() - this.replayTime.close.getTime() > loadWaitTime &&
       this.currentTickIdx === this.ticks.length - 1
     ) {
       this.currentPlaybarOffsetPct = 100;
@@ -169,13 +136,13 @@ export default class ReplayState {
     return changeEvents;
   }
 
-  private loadTick(newTickIdx: number, specificPlaybarOffset?: number) {
+  public loadTick(newTickIdx: number, specificPlaybarOffset?: number) {
     if (newTickIdx === this.currentTickIdx) return;
     const newTick = this.ticks[newTickIdx];
 
     // need to wait for load
     if (!newTick) return;
-    if (!this.closeTime) {
+    if (!this.replayTime.close) {
       // give ticks time to load. TODO: need a better strategy for this
       if (new Date().getTime() - new Date(newTick.timestamp).getTime() < loadWaitTime) return;
     }
@@ -192,9 +159,91 @@ export default class ReplayState {
     return [paintEvents, nodesToHighlight, mouseEvent, scrollEvent];
   }
 
-  private sortTicks() {
+  public loadCommand(command: ICommandWithResult) {
+    const existing = this.commands.find(x => x.id === command.id);
+    if (existing) {
+      Object.assign(existing, command);
+    } else {
+      const idx = this.commands.length;
+      this.commands.push(command);
+      const tick = new ReplayTick(
+        this,
+        'command',
+        idx,
+        command.id,
+        command.startDate,
+        command.label,
+      );
+      this.ticks.push(tick);
+    }
+  }
+
+  public loadPageEvent(eventType: IEventType, event: IDomEvent) {
+    let array: IDomEvent[];
+    if (eventType === 'mouse') array = this.mouseEvents;
+    if (eventType === 'focus') array = this.focusEvents;
+    if (eventType === 'scroll') array = this.scrollEvents;
+
+    const idx = array.length;
+    array.push(event);
+    const tick = new ReplayTick(this, eventType, idx, event.commandId, event.timestamp);
+    this.ticks.push(tick);
+  }
+
+  public loadDomChange(event: IDomChangeEvent) {
+    const { commandId, action, textContent, timestamp } = event;
+
+    const lastPaintEvent = this.paintEvents.length
+      ? this.paintEvents[this.paintEvents.length - 1]
+      : null;
+
+    let paintEvent: IPaintEvent;
+    if (lastPaintEvent?.timestamp === timestamp) {
+      paintEvent = lastPaintEvent;
+    } else {
+      paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
+    }
+
+    if (paintEvent) {
+      // reset paint load if we backfilled
+      if (paintEvent !== lastPaintEvent) {
+        console.log('Adding to a previous paint bucket (events out of order)');
+        this.paintEventsLoadedIdx = -1;
+      }
+      paintEvent.changeEvents.push(event);
+    } else {
+      paintEvent = {
+        changeEvents: [event],
+        timestamp,
+        commandId,
+      };
+
+      const index = this.paintEvents.length;
+      const tick = new ReplayTick(this, 'paint', index, commandId, timestamp);
+
+      if (action === 'newDocument') {
+        tick.isNewDocumentTick = true;
+        tick.documentOrigin = textContent;
+        this.pages.push({
+          id: pageCounter += 1,
+          url: textContent,
+          commandId,
+        });
+      }
+
+      this.paintEvents.push(paintEvent);
+      if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
+        console.log('Need to resort paint events - received out of order');
+        this.paintEventsLoadedIdx = -1;
+      }
+
+      this.ticks.push(tick);
+    }
+  }
+
+  public sortTicks() {
     for (const tick of this.ticks) {
-      tick.updateState(this);
+      tick.updateDuration(this.replayTime);
     }
     this.ticks.sort((a, b) => {
       return a.playbarOffsetPercent - b.playbarOffsetPercent;
@@ -269,116 +318,24 @@ export default class ReplayState {
     }
   }
 
-  private loadCommands(commands: ICommandWithResult[]) {
-    for (const command of commands) {
-      const existing = this.commands.find(x => x.id === command.id);
-      if (existing) {
-        Object.assign(existing, command);
-      } else {
-        const idx = this.commands.length;
-        this.commands.push(command);
-        const tick = new ReplayTick(
-          this,
-          'command',
-          idx,
-          command.id,
-          command.startDate,
-          command.label,
-        );
-        this.ticks.push(tick);
-      }
+  public checkBroadcast() {
+    clearTimeout(this.broadcastTimer);
+
+    const shouldBroadcast =
+      !this.lastBroadcast || new Date().getTime() - this.lastBroadcast.getTime() > 500;
+
+    // if we haven't updated in 500ms, do so now
+    if (shouldBroadcast) {
+      setImmediate(this.broadcast.bind(this));
+      return;
     }
-    this.updateDuration();
-    this.sortTicks();
+
+    this.broadcastTimer = setTimeout(this.broadcast.bind(this), 50);
   }
 
-  private updateScriptState(data: {
-    closeTime: string;
-    unresponsiveSeconds: number;
-    hasRecentErrors: boolean;
-  }) {
-    this.unresponsiveSeconds = data.unresponsiveSeconds;
-    this.hasRecentErrors = data.hasRecentErrors;
-    this.closeTime = data.closeTime ? new Date(data.closeTime) : null;
-    this.updateDuration();
-    this.sortTicks();
-  }
-
-  private loadPageEvents(eventType: IEventType, events: IDomEvent[]) {
-    let array: IDomEvent[];
-    if (eventType === 'mouse') array = this.mouseEvents;
-    if (eventType === 'focus') array = this.focusEvents;
-    if (eventType === 'scroll') array = this.scrollEvents;
-
-    for (const event of events) {
-      const idx = array.length;
-      array.push(event);
-      const tick = new ReplayTick(this, eventType, idx, event.commandId, event.timestamp);
-      this.ticks.push(tick);
-    }
-    this.sortTicks();
-  }
-
-  private loadDomChanges(events: IDomChangeEvent[]) {
-    let paintEvent: IPaintEvent;
-    for (const event of events) {
-      if (!event.isMainFrame) continue;
-      const { commandId, action, textContent, timestamp } = event;
-
-      const lastPaintEvent = this.paintEvents.length
-        ? this.paintEvents[this.paintEvents.length - 1]
-        : null;
-      if (paintEvent?.timestamp !== timestamp) {
-        paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
-      }
-      if (paintEvent) {
-        // reset paint load if we backfilled
-        if (paintEvent !== lastPaintEvent) {
-          console.log('Adding to a previous paint bucket (events out of order)');
-          this.paintEventsLoadedIdx = -1;
-        }
-        paintEvent.changeEvents.push(event);
-      } else {
-        paintEvent = {
-          changeEvents: [event],
-          timestamp,
-          commandId,
-        };
-
-        const index = this.paintEvents.length;
-        const tick = new ReplayTick(this, 'paint', index, commandId, timestamp);
-
-        if (action === 'newDocument') {
-          tick.isNewDocumentTick = true;
-          tick.documentOrigin = textContent;
-          this.pages.push({
-            id: pageCounter += 1,
-            url: textContent,
-            commandId,
-          });
-        }
-
-        this.paintEvents.push(paintEvent);
-        if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
-          console.log('Need to resort paint events - received out of order');
-          this.paintEventsLoadedIdx = -1;
-        }
-
-        this.ticks.push(tick);
-      }
-    }
-    this.updateDuration();
-    this.sortTicks();
-  }
-
-  private updateDuration() {
-    const start = this.startTime;
-    if (this.closeTime) {
-      this.durationMillis = this.closeTime.getTime() - start.getTime();
-    } else {
-      // add 10 seconds to end time
-      this.durationMillis = (new Date().getTime() - start.getTime()) * 1.25;
-    }
+  private broadcast() {
+    this.lastBroadcast = new Date();
+    if (this.onChangesFn) this.onChangesFn();
   }
 }
 

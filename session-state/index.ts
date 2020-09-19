@@ -10,13 +10,13 @@ import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
-import IPage from '@secret-agent/core-interfaces/IPage';
+import INavigation from '@secret-agent/core-interfaces/INavigation';
 import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEvent';
 import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
 import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 import IWebsocketResourceMessage from '@secret-agent/core/interfaces/IWebsocketResourceMessage';
-import PageHistory from './lib/PageHistory';
+import TabNavigations from './lib/TabNavigations';
 import { IFrameRecord } from './models/FramesTable';
 import SessionsDb from './lib/SessionsDb';
 import SessionDb from './lib/SessionDb';
@@ -34,7 +34,7 @@ export default class SessionState {
   public readonly sessionId: string;
 
   public viewport: IViewport;
-  public readonly pagesByTabId: { [tabId: string]: PageHistory } = {};
+  public readonly navigationsByTabId: { [tabId: string]: TabNavigations } = {};
   public readonly db: SessionDb;
 
   private readonly sessionName: string;
@@ -101,7 +101,7 @@ export default class SessionState {
   }
 
   public registerTab(tabId: string, parentTabId: string, openType?: string) {
-    this.pagesByTabId[tabId] = new PageHistory(this.db);
+    this.navigationsByTabId[tabId] = new TabNavigations(this.db);
   }
 
   public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta) {
@@ -234,9 +234,9 @@ export default class SessionState {
         executionMillis,
         bytes: body ? Buffer.byteLength(body) : -1,
       });
-      const pages = this.pagesByTabId[tabId];
-      if (resource.url === pages?.currentUrl && request.method !== 'OPTIONS') {
-        pages.resourceLoadedForLocation(resource.id);
+      const navigations = this.navigationsByTabId[tabId];
+      if (resource.url === navigations?.currentUrl && request.method !== 'OPTIONS') {
+        navigations.resourceLoadedForLocation(resource.id);
       }
       this.resources.push(resource);
     }
@@ -315,9 +315,9 @@ export default class SessionState {
 
   public checkForResponsive() {
     let lastSuccessDate = this.createDate;
-    for (const pages of Object.values(this.pagesByTabId)) {
-      const allContentLoaded = pages.top?.stateChanges?.get('AllContentLoaded');
-      const lastPageTime = allContentLoaded ?? pages.top?.initiatedTime;
+    for (const navigation of Object.values(this.navigationsByTabId)) {
+      const allContentLoaded = navigation.top?.stateChanges?.get('AllContentLoaded');
+      const lastPageTime = allContentLoaded ?? navigation.top?.initiatedTime;
       if (lastPageTime && lastPageTime > lastSuccessDate) {
         lastSuccessDate = lastPageTime;
       }
@@ -345,13 +345,16 @@ export default class SessionState {
     return {
       hasRecentErrors,
       unresponsiveSeconds,
-      closeTime: this.closeDate,
+      closeDate: this.closeDate,
     };
   }
 
-  public async getPageDomChanges(pages: IPage[], sinceCommandId?: number) {
+  public async getFrameNavigationDomChanges(
+    frameLifecycles: INavigation[],
+    sinceCommandId?: number,
+  ) {
     return this.db.getDomChanges(
-      pages.map(x => x.frameId),
+      frameLifecycles.map(x => x.frameId),
       sinceCommandId,
     );
   }
@@ -379,10 +382,10 @@ export default class SessionState {
     }, -1);
 
     let startCommandId = maxCommandId;
-    const pages = this.pagesByTabId[tabId];
+    const navigations = this.navigationsByTabId[tabId];
     // find last page load
-    for (let i = pages.history.length - 1; i >= 0; i -= 1) {
-      const page = pages.history[i];
+    for (let i = navigations.history.length - 1; i >= 0; i -= 1) {
+      const page = navigations.history[i];
       if (page.stateChanges.has(LocationStatus.HttpResponded)) {
         startCommandId = page.startCommandId;
         break;

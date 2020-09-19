@@ -18,8 +18,10 @@ export default class SessionLoader extends EventEmitter {
   ];
 
   public session: ISessionRecord;
-  public startOrigin: string;
+  public tabIds: string[] = [];
+  public tabStartOrigins = new Map<string, string>();
 
+  private tabSet = new Set<string>();
   private readonly sessionDb: SessionDb;
   private readonly sessionState: SessionState;
   private readonly parentFrames = new Set<string>();
@@ -36,7 +38,7 @@ export default class SessionLoader extends EventEmitter {
     const db = this.sessionDb;
     this.session = this.sessionDb.session.get();
     if (!this.session.closeDate) {
-      db.pages.subscribe(() => this.checkState());
+      db.frameNavigations.subscribe(() => this.checkState());
       db.session.subscribe(() => this.checkState());
       this.checkState();
     }
@@ -44,13 +46,15 @@ export default class SessionLoader extends EventEmitter {
     db.frames.subscribe(frames => {
       for (const frame of frames) {
         if (!frame.parentId) this.parentFrames.add(frame.id);
+        this.addTabId(frame.tabId);
       }
     });
 
     db.domChanges.subscribe(changes => {
       for (const change of changes) {
-        if (!this.startOrigin && change.action === 'newDocument') {
-          this.startOrigin = change.textContent;
+        if (!this.tabStartOrigins.has(change.tabId) && change.action === 'newDocument') {
+          this.addTabId(change.tabId);
+          this.tabStartOrigins.set(change.tabId, change.textContent);
           this.emit('ready');
         }
         (change as any).isMainFrame =
@@ -65,6 +69,7 @@ export default class SessionLoader extends EventEmitter {
     });
 
     db.commands.subscribe(commands => {
+      for (const command of commands) this.addTabId(command.tabId);
       const commandsWithResults = commands.map(CommandFormatter.parseResult);
       this.emit('commands', commandsWithResults);
       this.checkState();
@@ -89,11 +94,12 @@ export default class SessionLoader extends EventEmitter {
         if (!resourceWhitelist.includes(resource.type)) continue;
         resourcesToSend.push({
           url: resource.requestUrl,
+          tabId: resource.tabId,
           type: resource.type,
           data: resource.responseData,
           encoding: resource.responseEncoding,
           status: resource.statusCode,
-          headers: JSON.parse(resource.responseHeaders),
+          headers: resource.responseHeaders ? JSON.parse(resource.responseHeaders) : {},
         });
       }
       if (resourcesToSend.length) this.emit('resources', resourcesToSend);
@@ -119,6 +125,13 @@ export default class SessionLoader extends EventEmitter {
       lastState.unresponsiveSeconds !== scriptState.unresponsiveSeconds
     ) {
       this.emit('script-state', scriptState);
+    }
+  }
+
+  private addTabId(tabId: string) {
+    if (!this.tabSet.has(tabId)) {
+      this.tabSet.add(tabId);
+      this.tabIds.push(tabId);
     }
   }
 }

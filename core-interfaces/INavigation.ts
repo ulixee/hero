@@ -1,7 +1,7 @@
 import { IResolvablePromise } from '@secret-agent/commons/utils';
 import { IPipelineStatus } from './Location';
 
-export default interface IPage {
+export default interface INavigation {
   id: number;
   frameId: string;
   resourceId: IResolvablePromise<number>;

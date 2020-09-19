@@ -6,15 +6,15 @@ import Application from '~backend/Application';
 export default class AppView extends TabBackend {
   public location: InternalLocations;
 
-  public constructor(window: Window, location: ITabLocation, replaceTabId?: number) {
+  public constructor(window: Window, location: ITabLocation, replaceFrontendTabId?: number) {
     super(window, {
       nodeIntegration: true,
       enableRemoteModule: true,
     });
-    this.loadLocation(location, true, replaceTabId);
+    this.loadLocation(location, true, replaceFrontendTabId);
   }
 
-  public loadLocation(location: ITabLocation, isNewTab = false, replaceTabId?: number) {
+  public loadLocation(location: ITabLocation, isNewTab = false, replaceFrontendTabId?: number) {
     if (this.browserView.isDestroyed()) return;
     if (!isNewTab && !this.isActiveTab) return;
     if (location === this.location) return;
@@ -28,6 +28,6 @@ export default class AppView extends TabBackend {
 
     this.webContents.loadURL(url);
 
-    this.window.sendToRenderer('tab:updated', { id: this.id, location, replaceTabId });
+    this.window.sendToRenderer('tab:updated', { id: this.id, location, replaceFrontendTabId });
   }
 }

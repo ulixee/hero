@@ -126,16 +126,16 @@ export default class Window {
       this.selectedTab instanceof ReplayView,
     );
     const selected = this.selectedTab;
-    let replaceTabId: number;
+    let replaceFrontendTabId: number;
     if (selected) {
       if (selected instanceof AppView) {
         return selected.loadLocation(location);
       }
       selected.webContents.closeDevTools();
-      replaceTabId = selected.id;
+      replaceFrontendTabId = selected.id;
     }
 
-    this.trackTab(new AppView(this, location, replaceTabId));
+    this.trackTab(new AppView(this, location, replaceFrontendTabId));
   }
 
   public openReplayApi(replayApi: ReplayApi) {
@@ -145,20 +145,27 @@ export default class Window {
       this.selectedTab instanceof AppView,
     );
     const selected = this.selectedTab;
-    let replaceTabId: number;
+    let replaceFrontendTabId: number;
     if (selected) {
       if (selected instanceof ReplayView) {
         return selected.load(replayApi);
       }
-      replaceTabId = selected.id;
+      replaceFrontendTabId = selected.id;
     }
 
-    this.trackTab(new ReplayView(this, replayApi, replaceTabId));
+    this.trackTab(new ReplayView(this, replayApi, { replaceFrontendTabId }));
   }
 
   public createReplayTab(replayApi: ReplayApi) {
     console.log('Creating Replay Tab (%s)', replayApi.apiHost);
-    const tab = this.trackTab(new ReplayView(this, replayApi));
+    const tab = this.trackTab(new ReplayView(this, replayApi, { isNewTab: true }));
+    const id = tab.id;
+    this.sendToRenderer('insert-tab', { id, active: true, saSession: replayApi.saSession }, true);
+  }
+
+  public createReplayChildTab(replayApi: ReplayApi, replayTabId: string) {
+    console.log('Creating Child Replay Tab (%s). TabId=%s', replayApi.apiHost, replayTabId);
+    const tab = this.trackTab(new ReplayView(this, replayApi, { isNewTab: true, replayTabId }));
     const id = tab.id;
     this.sendToRenderer('insert-tab', { id, active: true, saSession: replayApi.saSession }, true);
   }

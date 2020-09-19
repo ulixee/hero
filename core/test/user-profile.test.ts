@@ -412,6 +412,11 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
       ]);
       expect(crossContent.value).toBe('1');
       await core.close();
+
+      // @ts-ignore
+      const history = core.tab.navigationTracker.history;
+      expect(history).toHaveLength(1);
+      expect(history[0].finalUrl).toBe(`${koaServer.baseUrl}/cross-storage2`);
     }
   });
 });

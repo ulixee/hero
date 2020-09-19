@@ -12,6 +12,7 @@ import { AllowedNames } from '@secret-agent/commons/AllowedNames';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
 import * as Url from 'url';
+import { URL } from 'url';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import Timer from '@secret-agent/commons/Timer';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
@@ -20,11 +21,10 @@ import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import { redirectCodes } from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { URL } from 'url';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -36,7 +36,7 @@ import IWebsocketResourceMessage from '../interfaces/IWebsocketResourceMessage';
 const { log } = Log(module);
 
 export default class Tab extends TypedEventEmitter<ITabEventParams> {
-  public readonly id: string = uuidv1();
+  public readonly id: string;
   public readonly parentTabId?: string;
   public readonly session: Session;
   public readonly locationTracker: LocationTracker;
@@ -45,13 +45,19 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public puppetPage: IPuppetPage;
   public isClosing = false;
 
+  public isReady: Promise<void>;
+
   private readonly createdAtCommandId: number;
 
   private readonly interactor: Interactor;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
 
-  private get pages() {
-    return this.sessionState.pagesByTabId[this.id];
+  private get navigationTracker() {
+    return this.sessionState.navigationsByTabId[this.id];
+  }
+
+  public get url() {
+    return this.navigationTracker.currentUrl;
   }
 
   public get sessionState() {
@@ -77,66 +83,32 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     windowOpenParams?: { url: string; windowName: string },
   ) {
     super();
+    this.id = uuidv1();
     this.session = session;
+    this.parentTabId = parentTabId;
     this.sessionState.registerTab(this.id, this.parentTabId);
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
     this.puppetPage = puppetPage;
-    this.parentTabId = parentTabId;
     this.interactor = new Interactor(this);
-    this.locationTracker = new LocationTracker(this.sessionState.pagesByTabId[this.id]);
+    this.locationTracker = new LocationTracker(this.navigationTracker);
     this.domEnv = new DomEnv(this, this.puppetPage);
-    this.puppetPage.on('pageError', this.onPageError.bind(this));
-    this.puppetPage.on('targetCrashed', this.onTargetCrashed.bind(this));
-    this.puppetPage.on('consoleLog', this.onConsole.bind(this));
     this.domRecorder = new DomRecorder(
       session.id,
       puppetPage,
       // bind session state to tab id
       this.sessionState.onPageEvents.bind(this.sessionState, this.id),
     );
+
     if (windowOpenParams) {
-      this.pages.navigationRequested(
+      this.navigationTracker.navigationRequested(
         'newTab',
         windowOpenParams.url,
         this.mainFrameId,
         this.lastCommandId,
       );
     }
-  }
-
-  public async listen() {
-    const page = this.puppetPage;
-
-    page.on('frameCreated', ({ frame }) => {
-      this.sessionState.captureFrameCreated(this.id, frame.id, frame.parentId);
-    });
-    page.on('frameNavigated', this.onFrameNavigated.bind(this));
-    page.on('frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this));
-    page.on('frameLifecycle', this.onFrameLifecycle.bind(this));
-
-    const mitm = this.session.mitmRequestSession;
-    page.on('websocketHandshake', ev => mitm.registerWebsocketHeaders(this.id, ev));
-    page.on('websocketFrame', this.onWebsocketFrame.bind(this));
-    page.on('resourceWillBeRequested', this.onResourceWillBeRequested.bind(this));
-    page.on('navigationResponse', this.onNavigationResourceResponse.bind(this));
-  }
-
-  public async install() {
-    await this.domEnv.install();
-
-    const page = this.puppetPage;
-    const pageOverrides = await this.session.emulator.generatePageOverrides();
-    for (const pageOverride of pageOverrides) {
-      if (pageOverride.callbackWindowName) {
-        await page.addPageCallback(pageOverride.callbackWindowName, payload => {
-          pageOverride.callback(JSON.parse(payload));
-        });
-      }
-      // overrides happen in main frame
-      await page.addNewDocumentScript(pageOverride.script, false);
-    }
-
-    await this.domRecorder.install();
+    this.listen();
+    this.isReady = this.install();
   }
 
   public async config(options: ITabOptions) {
@@ -171,7 +143,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
-    if (this.pages.top?.frameId) {
+    if (this.navigationTracker.top?.frameId) {
       await this.domRecorder.flush(true);
     }
 
@@ -180,7 +152,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       sessionId: this.session.id,
     });
     try {
-      Timer.expireAll(this.waitTimeouts, new Error('Terminated command because session closing'));
+      Timer.expireAll(
+        this.waitTimeouts,
+        new CanceledPromiseError('Terminated command because session closing'),
+      );
       await this.puppetPage.close();
 
       this.emit('close');
@@ -273,7 +248,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const formattedUrl = Url.format(url);
     this.session.proxy.start(formattedUrl);
 
-    this.pages.navigationRequested('goto', formattedUrl, this.mainFrameId, this.lastCommandId);
+    this.navigationTracker.navigationRequested(
+      'goto',
+      formattedUrl,
+      this.mainFrameId,
+      this.lastCommandId,
+    );
 
     await this.puppetPage.navigate(formattedUrl);
 
@@ -285,13 +265,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async goBack() {
     await this.puppetPage.goBack();
     await this.locationTracker.waitFor('AllContentLoaded');
-    return this.pages.currentUrl;
+    return this.navigationTracker.currentUrl;
   }
 
   public async goForward() {
     await this.puppetPage.goForward();
     await this.locationTracker.waitFor('AllContentLoaded');
-    return this.pages.currentUrl;
+    return this.navigationTracker.currentUrl;
   }
 
   public async interact(interactionGroups: IInteractionGroups) {
@@ -308,7 +288,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     propertiesToExtract?: string[],
   ): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
-    if (!this.pages.top) return null;
+    if (!this.navigationTracker.top) return null;
     await this.waitForLoad('READY');
     return this.domEnv.execJsPath<T>(jsPath, propertiesToExtract);
   }
@@ -463,51 +443,120 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       id: this.id,
       parentTabId: this.parentTabId,
       sessionId: this.sessionId,
-      url: this.pages.currentUrl,
+      url: this.navigationTracker.currentUrl,
       createdAtCommandId: this.createdAtCommandId,
     };
   }
 
+  private async install() {
+    await this.domEnv.install();
+
+    const page = this.puppetPage;
+    const pageOverrides = await this.session.emulator.generatePageOverrides();
+    for (const pageOverride of pageOverrides) {
+      if (pageOverride.callbackWindowName) {
+        await page.addPageCallback(pageOverride.callbackWindowName, payload => {
+          pageOverride.callback(JSON.parse(payload));
+        });
+      }
+      // overrides happen in main frame
+      await page.addNewDocumentScript(pageOverride.script, false);
+    }
+
+    await this.domRecorder.install();
+    if (this.parentTabId) {
+      await this.domRecorder.setCommandIdForPage(this.lastCommandId);
+    }
+  }
+
+  private listen() {
+    const page = this.puppetPage;
+
+    page.on('page-error', this.onPageError.bind(this), true);
+    page.on('crashed', this.onTargetCrashed.bind(this));
+    page.on('console', this.onConsole.bind(this), true);
+    page.on(
+      'frame-created',
+      ({ frame }) => {
+        this.sessionState.captureFrameCreated(this.id, frame.id, frame.parentId);
+      },
+      true,
+    );
+
+    // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
+    page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
+    page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
+
+    page.on('frame-navigated', this.onFrameNavigated.bind(this), true);
+    page.on('frame-requested-navigation', this.onFrameRequestedNavigation.bind(this), true);
+    page.on('frame-lifecycle', this.onFrameLifecycle.bind(this), true);
+
+    // websockets
+    page.on('websocket-handshake', ev => {
+      this.session.mitmRequestSession?.registerWebsocketHeaders(this.id, ev);
+    });
+    page.on('websocket-frame', this.onWebsocketFrame.bind(this));
+  }
+
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
 
-  private onResourceWillBeRequested(event: IPuppetPageEvents['resourceWillBeRequested']) {
+  private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']) {
     const { session, lastCommandId } = this;
     const { url, isDocumentNavigation, frameId } = event;
+
+    if (isDocumentNavigation && !this.navigationTracker.top) {
+      this.navigationTracker.navigationRequested('newTab', url, frameId, lastCommandId);
+    }
 
     session.mitmRequestSession.registerResource({
       ...event,
       tabId: this.id,
-      isUserNavigation: this.pages.didGotoUrl(url),
+      isUserNavigation: event.hasUserGesture || this.navigationTracker.didGotoUrl(url),
     });
 
     // only track main frame for now
     if (isDocumentNavigation && frameId === this.mainFrameId) {
-      this.pages.update(LocationStatus.HttpRequested, url, frameId, lastCommandId);
+      this.navigationTracker.updatePipelineStatus(
+        LocationStatus.HttpRequested,
+        url,
+        frameId,
+        lastCommandId,
+      );
     }
   }
 
-  private async onNavigationResourceResponse(event: IPuppetPageEvents['navigationResponse']) {
+  private async onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']) {
     if (event.frameId !== this.mainFrameId) return;
 
     const { location, url, status, frameId } = event;
     const isRedirect = redirectCodes.has(status) && !!location;
 
     if (isRedirect) {
-      this.pages.update(LocationStatus.HttpRedirected, location, frameId, this.lastCommandId);
+      this.navigationTracker.updatePipelineStatus(
+        LocationStatus.HttpRedirected,
+        location,
+        frameId,
+        this.lastCommandId,
+      );
       return;
     }
-    this.pages.update(LocationStatus.HttpResponded, url, frameId, this.lastCommandId);
+    this.navigationTracker.updatePipelineStatus(
+      LocationStatus.HttpResponded,
+      url,
+      frameId,
+      this.lastCommandId,
+    );
     this.session.mitmRequestSession.recordDocumentUserActivity(url);
   }
 
-  private onWebsocketFrame(event: IPuppetPageEvents['websocketFrame']) {
+  private onWebsocketFrame(event: IPuppetPageEvents['websocket-frame']) {
     const wsResource = this.sessionState.captureWebsocketMessage(event);
     this.emit('websocket-message', wsResource);
   }
 
   /////// PAGE EVENTS  /////////////////////////////////////////////////////////////////////////////
 
-  private onFrameLifecycle(event: IPuppetFrameEvents['frameLifecycle']) {
+  private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']) {
     if (event.frame.id === this.mainFrameId) {
       const eventName = event.name.toLowerCase();
       const status = {
@@ -516,7 +565,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }[eventName];
 
       if (status) {
-        this.pages.update(
+        this.navigationTracker.updatePipelineStatus(
           status,
           this.puppetPage.mainFrame.url,
           this.mainFrameId,
@@ -526,7 +575,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
   }
 
-  private async onFrameNavigated(event: IPuppetFrameEvents['frameNavigated']) {
+  private async onFrameNavigated(event: IPuppetFrameEvents['frame-navigated']) {
     const { navigatedInDocument, frame } = event;
     if (this.mainFrameId === frame.id && navigatedInDocument) {
       log.info('Page.navigatedWithinDocument', {
@@ -534,12 +583,14 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         ...event,
       });
       // set load state back to all loaded
-      this.pages.triggerInPageNavigation(frame.url, this.lastCommandId, frame.id);
+      this.navigationTracker.triggerInPageNavigation(frame.url, this.lastCommandId, frame.id);
     }
   }
 
   // client-side frame navigations (form posts/gets, redirects/ page reloads)
-  private async onFrameRequestedNavigation(event: IPuppetFrameEvents['frameRequestedNavigation']) {
+  private async onFrameRequestedNavigation(
+    event: IPuppetFrameEvents['frame-requested-navigation'],
+  ) {
     log.info('Page.frameRequestedNavigation', {
       sessionId: this.sessionId,
       ...event,
@@ -547,47 +598,42 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     // disposition options: currentTab, newTab, newWindow, download
     const { frame, url, reason } = event;
     if (this.mainFrameId === frame.id) {
-      this.pages.updateNavigationReason(frame.id, url, reason);
+      this.navigationTracker.updateNavigationReason(frame.id, url, reason);
     }
   }
 
   /////// LOGGGING EVENTS //////////////////////////////////////////////////////////////////////////
 
-  private onPageError(event: IPuppetPageEvents['pageError']) {
+  private onPageError(event: IPuppetPageEvents['page-error']) {
     const { error, frameId } = event;
-    this.sessionState.captureError(this.id, frameId, `events.pageerror`, error);
+    this.sessionState.captureError(this.id, frameId, `events.page-error`, error);
   }
 
-  private async onConsole(event: IPuppetPageEvents['consoleLog']) {
+  private async onConsole(event: IPuppetPageEvents['console']) {
     const { frameId, type, message, location } = event;
     this.sessionState.captureLog(this.id, frameId, type, message, location);
   }
 
-  private onTargetCrashed(event: IPuppetPageEvents['targetCrashed']) {
+  private onTargetCrashed(event: IPuppetPageEvents['crashed']) {
     const error = event.error;
     this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
   }
 
   // CREATE
 
-  public static async create(
+  public static create(
     session: Session,
     puppetPage: IPuppetPage,
     parentTab?: Tab,
     openParams?: { url: string; windowName: string },
   ) {
-    const logid = log.info('Tab.creating', {
-      sessionId: session.id,
+    const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
+    log.info('Tab.created', {
+      tabId: tab.id,
       parentTab: parentTab?.id,
       openParams,
+      sessionId: session.id,
     });
-    const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
-    await tab.listen();
-    await tab.install();
-    if (parentTab) {
-      parentTab.emit('child-tab-created', tab);
-    }
-    log.info('Tab.created', { sessionId: session.id, parentLogId: logid });
     return tab;
   }
 }

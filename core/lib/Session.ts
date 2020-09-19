@@ -23,7 +23,7 @@ const { log } = Log(module);
 export default class Session {
   private static readonly byId: { [id: string]: Session } = {};
 
-  public readonly id: string = uuidv1();
+  public readonly id: string;
   public readonly baseDir: string;
   public emulator: EmulatorPlugin;
   public humanoid: HumanoidPlugin;
@@ -42,6 +42,7 @@ export default class Session {
   private _isClosing = false;
 
   constructor(readonly options: ICreateTabOptions) {
+    this.id = uuidv1();
     Session.byId[this.id] = this;
     const emulatorId = Emulators.getId(options.emulatorId);
     this.emulator = Emulators.create(emulatorId);
@@ -58,7 +59,7 @@ export default class Session {
       });
     }
 
-    const humanoidId = options.humanoidId ?? Humanoids.getRandomId();
+    const humanoidId = options.humanoidId || Humanoids.getRandomId();
     this.humanoid = Humanoids.create(humanoidId);
 
     this.baseDir = GlobalPool.sessionsDir;
@@ -110,9 +111,10 @@ export default class Session {
       await UserProfile.installSessionStorage(this, page);
     }
 
-    const tab = await Tab.create(this, page);
-    page.popupInitializeFn = this.onNewTab.bind(this, tab);
-    return this.trackTab(tab);
+    const tab = Tab.create(this, page);
+    this.registerTab(tab, page);
+    await tab.isReady;
+    return tab;
   }
 
   public async close() {
@@ -123,9 +125,9 @@ export default class Session {
     for (const tab of Object.values(this.tabs)) {
       await tab.close();
     }
-    await this.sessionState.saveState();
     await this.mitmRequestSession.close();
     await this.proxy.close();
+    await this.sessionState.saveState();
     try {
       await this.browserContext?.close();
     } catch (error) {
@@ -140,29 +142,35 @@ export default class Session {
 
   private onMitmResponse(event: IRequestSessionResponseEvent) {
     const tabId = this.mitmRequestSession.browserRequestIdToTabId.get(event.browserRequestId);
-    const tab = this.tabs.find(x => x.id === tabId);
+    let tab = this.tabs.find(x => x.id === tabId);
+    if (!tab && event.browserRequestId === 'fallback-navigation') {
+      tab = this.tabs.find(x => x.url === event.request.url || x.url === event.redirectedToUrl);
+    }
 
-    const resource = this.sessionState.captureResource(tab.id, event, true);
-    tab.emit('resource', resource);
+    const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
+    tab?.emit('resource', resource);
   }
 
   private async onNewTab(
     parentTab: Tab,
     page: IPuppetPage,
-    openParams: { url: string; windowName: string },
+    openParams: { url: string; windowName: string } | null,
   ) {
-    const tab = await Tab.create(this, page, parentTab, openParams);
-    page.popupInitializeFn = this.onNewTab.bind(this, tab);
-    return this.trackTab(tab);
-  }
-
-  private async trackTab(tab: Tab) {
-    this.tabs.push(tab);
-    tab.on('close', this.removeTab.bind(this, tab));
+    const tab = Tab.create(this, page, parentTab, openParams);
+    this.registerTab(tab, page);
+    await tab.isReady;
+    parentTab.emit('child-tab-created', tab);
     return tab;
   }
 
-  private async removeTab(tab: Tab) {
+  private registerTab(tab: Tab, page: IPuppetPage) {
+    this.tabs.push(tab);
+    tab.on('close', this.removeTab.bind(this, tab));
+    page.popupInitializeFn = this.onNewTab.bind(this, tab);
+    return tab;
+  }
+
+  private removeTab(tab: Tab) {
     const tabIdx = this.tabs.indexOf(tab);
     if (tabIdx >= 0) this.tabs.splice(tabIdx, 1);
   }

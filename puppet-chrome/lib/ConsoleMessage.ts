@@ -42,7 +42,7 @@ export default class ConsoleMessage {
   static exceptionToError(exceptionDetails: ExceptionDetails) {
     let message = exceptionDetails.text;
     if (exceptionDetails.exception) {
-      message = exceptionDetails.exception.description || exceptionDetails.exception.value;
+      message = stringifyRemoteObject(exceptionDetails.exception);
     } else if (exceptionDetails.stackTrace) {
       message += this.printStackTrace(exceptionDetails.stackTrace);
     }
@@ -90,7 +90,9 @@ function stringifyRemoteObject(remoteObject: Protocol.Runtime.RemoteObject) {
 
 function previewToObject(preview: ObjectPreview) {
   const subProps = preview.properties.map(
-    prop => `${prop.name} = ${prop.valuePreview ? previewToObject(prop.valuePreview) : prop.value}`,
+    prop => `${prop.name}: ${prop.valuePreview ? previewToObject(prop.valuePreview) : prop.value}`,
   );
-  return `${preview.description} (${subProps.join(', ')})`;
+  const props = `{ ${subProps.join(', ')} }`;
+  if (preview.description === 'Object') return props;
+  return `${preview.description}(${props})`;
 }

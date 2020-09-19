@@ -1,14 +1,15 @@
 export default interface ISaSession {
   id: string;
   name: string;
+  tabs: { tabId: string; startOrigin: string }[];
   dataLocation: string;
   viewportWidth: number;
   viewportHeight: number;
   deviceScaleFactor: number;
   startOrigin: string;
-  startDate: string;
+  startDate: Date;
   scriptStartDate: string;
-  closeDate?: string;
+  closeDate?: Date;
   scriptEntrypoint: string;
   scriptInstanceId: string;
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];

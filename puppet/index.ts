@@ -57,7 +57,7 @@ export default class Puppet {
   }
 
   public async close() {
-    debugLauncher('ClosingChrome');
+    debugLauncher('Closing puppet browser');
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
 

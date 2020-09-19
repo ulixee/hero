@@ -16,11 +16,12 @@ export default class ReplayResources {
     resourceMeta: {
       url: string;
       headers: any;
+      tabId: string;
       statusCode: number;
       type: string;
     },
   ) {
-    const { url, headers, statusCode, type } = resourceMeta;
+    const { url, headers, statusCode, type, tabId } = resourceMeta;
     this.initResource(url);
 
     const data: Buffer[] = [];
@@ -34,6 +35,7 @@ export default class ReplayResources {
     this.resources[url].resolve({
       data: Buffer.concat(data),
       headers: headerMap,
+      tabId,
       statusCode,
       type,
     });
@@ -95,6 +97,7 @@ function getDecodeStream(buffer: Buffer, encoding: string) {
 
 interface IReplayResource {
   data: Buffer;
+  tabId: string;
   headers: Map<string, string>;
   type: string;
   statusCode: number;

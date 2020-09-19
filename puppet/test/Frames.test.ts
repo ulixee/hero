@@ -95,16 +95,6 @@ describe.each([['chromium', '756035']])(
         expect(await mainFrame.evaluate('window.location.href')).toContain('127');
       });
 
-      it('should throw for detached frames', async () => {
-        const frame1 = await page.attachFrame('frame1', server.emptyPage);
-        await page.detachFrame('frame1');
-        // give this a second to detach
-        await new Promise(setImmediate);
-        let error = null;
-        await frame1.evaluate('7 * 8').catch(e => (error = e));
-        expect(error.message).toContain('Execution Context is not available in detached frame');
-      });
-
       it('should be isolated between frames', async () => {
         await page.goto(server.emptyPage);
         await page.attachFrame('frame1', server.emptyPage);
@@ -189,7 +179,7 @@ describe.each([['chromium', '756035']])(
 
         // validate framenavigated events
         const navigatedFrames = [];
-        page.on('frameNavigated', frame => navigatedFrames.push(frame));
+        page.on('frame-navigated', frame => navigatedFrames.push(frame));
         await page.evaluate(`(async () => {
           const frame = document.getElementById('frame1');
           frame.src = './empty.html';
@@ -205,7 +195,7 @@ describe.each([['chromium', '756035']])(
 
       it('should send "frameNavigated" when navigating on anchor URLs', async () => {
         await page.goto(server.emptyPage);
-        const frameNavigated = page.waitOn('frameNavigated');
+        const frameNavigated = page.waitOn('frame-navigated');
         await page.goto(`${server.emptyPage}#foo`);
         expect(page.mainFrame.url).toBe(`${server.emptyPage}#foo`);
         await expect(frameNavigated).resolves.toBeTruthy();
@@ -220,7 +210,7 @@ describe.each([['chromium', '756035']])(
 
       it('should detach child frames on navigation', async () => {
         let navigatedFrames = [];
-        page.on('frameNavigated', frame => navigatedFrames.push(frame));
+        page.on('frame-navigated', frame => navigatedFrames.push(frame));
         await page.goto(`${server.baseUrl}/frames/nested-frames.html`);
         expect(page.frames.length).toBe(5);
         for (const frame of page.frames) await frame.waitForLoader();
@@ -234,7 +224,7 @@ describe.each([['chromium', '756035']])(
 
       it('should support framesets', async () => {
         let navigatedFrames = [];
-        page.on('frameNavigated', frame => navigatedFrames.push(frame));
+        page.on('frame-navigated', frame => navigatedFrames.push(frame));
         await page.goto(`${server.baseUrl}/frames/frameset.html`);
         expect(page.frames.length).toBe(5);
         expect(navigatedFrames.length).toBe(5);
@@ -288,7 +278,7 @@ describe.each([['chromium', '756035']])(
         })()`);
         // should have remove frame
         expect(page.frames.filter(x => x.id === frame1.id)).toHaveLength(0);
-        const frame2Promise = page.waitOn('frameCreated');
+        const frame2Promise = page.waitOn('frame-created');
         await Promise.all([
           frame2Promise,
           page.evaluate('document.body.appendChild(window.frame)'),
@@ -326,7 +316,7 @@ describe.each([['chromium', '756035']])(
         await page.mainFrame.waitForLoader();
 
         await page.click('a');
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await cross-process navigation when clicking anchor', async () => {
@@ -340,7 +330,7 @@ describe.each([['chromium', '756035']])(
         );
 
         await page.click('a');
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await form-get on click', async () => {
@@ -355,7 +345,7 @@ describe.each([['chromium', '756035']])(
       <input type="submit" value="Submit">
     </form>`);
         await page.click('input[type=submit]');
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await form-post on click', async () => {
@@ -371,7 +361,7 @@ describe.each([['chromium', '756035']])(
     </form>`);
 
         await page.click('input[type=submit]');
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await navigation when assigning location', async () => {
@@ -381,7 +371,7 @@ describe.each([['chromium', '756035']])(
         });
 
         await page.evaluate(`window.location.href = "${server.emptyPage}"`);
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await navigation when assigning location twice', async () => {
@@ -398,7 +388,7 @@ describe.each([['chromium', '756035']])(
       window.location.href = "${server.emptyPage}?cancel";
       window.location.href = "${server.emptyPage}?override";
     `);
-        const navigatedEvent = await page.waitOn('frameNavigated');
+        const navigatedEvent = await page.waitOn('frame-navigated');
         expect(navigatedEvent.frame.url).toBe(`${server.emptyPage}?override`);
       });
 
@@ -410,7 +400,7 @@ describe.each([['chromium', '756035']])(
         });
 
         await page.evaluate(`window.location.reload()`);
-        await expect(page.waitOn('frameNavigated')).resolves.toBeTruthy();
+        await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
       });
 
       it('should await navigating specified target', async () => {
@@ -424,7 +414,7 @@ describe.each([['chromium', '756035']])(
     <iframe name=target></iframe>
   `);
         const frame = page.frames.find(x => x.name === 'target');
-        const nav = page.waitOn('frameNavigated');
+        const nav = page.waitOn('frame-navigated');
         await page.click('a');
         await nav;
         expect(frame.url).toBe(server.emptyPage);

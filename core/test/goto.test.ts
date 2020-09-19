@@ -49,7 +49,7 @@ describe('basic Goto tests', () => {
     await core.goto(`${koaServer.baseUrl}/page2`);
     expect(await core.getLocationHref()).toBe(`${koaServer.baseUrl}/page2`);
     // @ts-ignore
-    const pages = core.tab.pages;
+    const pages = core.tab.navigationTracker;
     expect(pages.history).toHaveLength(2);
     expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/page2`);
 

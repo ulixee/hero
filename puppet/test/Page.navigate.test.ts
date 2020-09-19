@@ -82,7 +82,7 @@ describe.each([['chromium', '756035']])(
           res.statusCode = 204;
           res.end();
         });
-        const wait = page.waitOn('frameLifecycle', event => event.name === 'DOMContentLoaded');
+        const wait = page.waitOn('frame-lifecycle', event => event.name === 'DOMContentLoaded');
         await page.goto(`${server.baseUrl}/frames/one-frame.html`);
         await expect(wait).resolves.toBeTruthy();
       });
@@ -112,7 +112,7 @@ describe.each([['chromium', '756035']])(
           );
         })()`);
         const waitForLoad = page.waitOn(
-          'frameLifecycle',
+          'frame-lifecycle',
           event => event.name === 'DOMContentLoaded',
         );
         await page.navigate(`${server.baseUrl}/grid.html`);
@@ -182,7 +182,7 @@ describe.each([['chromium', '756035']])(
         let warning = null;
         const warningHandler = w => (warning = w);
         process.on('warning', warningHandler);
-        const promises = [...Array(20)].map(() => page.waitOn('frameNavigated'));
+        const promises = [...Array(20)].map(() => page.waitOn('frame-navigated'));
         await page.goto(server.emptyPage);
         await Promise.all(promises);
         process.off('warning', warningHandler);

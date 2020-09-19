@@ -2,16 +2,13 @@ import HumanoidBasic from '@secret-agent/humanoid-basic';
 import HumanoidSkipper from '@secret-agent/humanoid-skipper';
 import HumanoidPlugin from './lib/HumanoidPlugin';
 import Utils from './lib/Utils';
-
-type IHumanoidPlugin = new () => HumanoidPlugin;
+import { IHumanoidPluginStatics } from './HumanoidPluginStatics';
 
 export default class Humanoids {
-  private static readonly pluginsById: { [id: string]: IHumanoidPlugin } = {};
+  private static readonly pluginsById: { [id: string]: IHumanoidPluginStatics } = {};
 
-  // tslint:disable-next-line:variable-name
-  public static load(EmulatorPlugin: IHumanoidPlugin) {
-    // @ts-ignore
-    this.pluginsById[EmulatorPlugin.id] = EmulatorPlugin;
+  public static load(HumanoidPluginImpl: IHumanoidPluginStatics) {
+    this.pluginsById[HumanoidPluginImpl.id] = HumanoidPluginImpl;
   }
 
   public static create(id: string) {

@@ -39,6 +39,7 @@ export default abstract class BaseHttpHandler {
         method: context.method,
         ws: context.isUpgrade,
       });
+      if (session.isClosing) return;
 
       if (BlockHandler.shouldBlockRequest(context)) {
         log.info(`Http.RequestBlocked`, {

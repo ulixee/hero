@@ -83,7 +83,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   private onRuntimeException(msg: ExceptionThrownEvent) {
     const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
 
-    this.emit('pageError', {
+    this.emit('page-error', {
       error,
     });
   }
@@ -92,7 +92,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = `${this.type}:${this.url}`; // TBD
 
-    this.emit('consoleLog', {
+    this.emit('console', {
       frameId,
       ...message,
     });

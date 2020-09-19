@@ -218,7 +218,7 @@ export default class Application {
     ipcMain.on('navigate-to-session-page', async (e, page: { id: number; url: string }) => {
       const replayTab = Window.current?.selectedReplayTab;
       if (!replayTab) return;
-      const offset = replayTab.replayApi.state.getPageOffset(page);
+      const offset = replayTab.tabState.getPageOffset(page);
       replayTab.changeTickOffset(offset);
     });
 
@@ -318,13 +318,12 @@ export default class Application {
     });
 
     ipcMain.handle('fetch-session-pages', () => {
-      const replayApi = Window.current.selectedReplayTab?.replayApi;
-      if (!replayApi) return;
-      return replayApi.state.pages.map(x => {
+      const tab = Window.current.selectedReplayTab;
+      if (!tab) return;
+      return tab.tabState.pages.map(x => {
         return {
           ...x,
-          isActive:
-            replayApi.state.urlOrigin === x.url || `${replayApi.state.urlOrigin}/` === x.url,
+          isActive: tab.tabState.urlOrigin === x.url || `${tab.tabState.urlOrigin}/` === x.url,
         };
       });
     });

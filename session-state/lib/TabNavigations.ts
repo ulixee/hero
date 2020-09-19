@@ -1,9 +1,15 @@
-import IPage, { NavigationReason } from '@secret-agent/core-interfaces/IPage';
+import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { IPipelineStatus, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { createPromise } from '@secret-agent/commons/utils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import SessionDb from './SessionDb';
 
-export default class PageHistory {
+interface TabNavigationEvents {
+  'navigation-requested': INavigation;
+  'status-change': { navigation: INavigation; newStatus: IPipelineStatus };
+}
+
+export default class TabNavigations extends TypedEventEmitter<TabNavigationEvents> {
   public get top() {
     return this.history.length > 0 ? this.history[this.history.length - 1] : null;
   }
@@ -14,13 +20,12 @@ export default class PageHistory {
     return location.finalUrl ?? location.requestedUrl;
   }
 
-  public onNewPage: (urlState: IPage) => any;
-  public onPagePipelineStatusChange: (page: IPage, newStatus: IPipelineStatus) => any;
-  public history: IPage[] = [];
+  public history: INavigation[] = [];
 
-  private idCounter = 0;
-
-  constructor(readonly db: SessionDb) {}
+  constructor(readonly db: SessionDb) {
+    super();
+    this.setEventsToLog(['navigation-requested', 'status-change'], 'tab:navigation');
+  }
 
   public resourceLoadedForLocation(resourceId: number) {
     if (!this.top || this.top.resourceId.isResolved) return;
@@ -38,7 +43,6 @@ export default class PageHistory {
     commandId: number,
   ) {
     const entry = {
-      id: this.idCounter += 1,
       requestedUrl: url,
       finalUrl: url,
       frameId,
@@ -47,7 +51,7 @@ export default class PageHistory {
       initiatedTime: new Date(),
       stateChanges: new Map<IPipelineStatus, Date>(),
       resourceId: createPromise(),
-    } as IPage;
+    } as INavigation;
 
     const prevTop = this.top;
     // if in-page, set the state to match current top
@@ -60,50 +64,51 @@ export default class PageHistory {
     }
     this.history.push(entry);
 
-    if (this.onNewPage) this.onNewPage(entry);
-    this.captureLocationUpdate(entry);
+    this.emit('navigation-requested', entry);
+    this.captureNavigationUpdate(entry);
   }
 
   public triggerInPageNavigation(url: string, lastCommandId: number, frameId: string) {
     this.navigationRequested('inPage', url, frameId, lastCommandId);
   }
 
-  public update(
+  public updatePipelineStatus(
     incomingStatus: IPipelineStatus,
     url: string,
     frameId: string,
     lastCommandId: number,
   ) {
+    if (url === 'about:blank') return;
     if (
       incomingStatus === LocationStatus[LocationStatus.HttpRequested] &&
-      this.top?.stateChanges.has(incomingStatus)
+      this.top?.stateChanges.has(incomingStatus) === true
     ) {
       const reason = url === this.currentUrl ? 'reload' : 'userGesture';
       this.navigationRequested(reason, url, frameId, lastCommandId);
     }
-    const page = this.top;
-    if (this.onPagePipelineStatusChange) this.onPagePipelineStatusChange(page, incomingStatus);
+    const navigation = this.top;
+    this.emit('status-change', { navigation, newStatus: incomingStatus });
 
-    page.stateChanges.set(incomingStatus, new Date());
+    navigation.stateChanges.set(incomingStatus, new Date());
     if (
       incomingStatus === LocationStatus[LocationStatus.HttpResponded] ||
       incomingStatus === LocationStatus[LocationStatus.HttpRedirected]
     ) {
-      page.finalUrl = url;
+      navigation.finalUrl = url;
     }
-    this.captureLocationUpdate(page);
+    this.captureNavigationUpdate(navigation);
   }
 
   public updateNavigationReason(frameId: string, url: string, reason: NavigationReason) {
-    const page = this.top;
+    const frameLifecycle = this.top;
 
-    if (page.requestedUrl === url && page.frameId === frameId) {
-      page.navigationReason = reason;
-      this.captureLocationUpdate(page);
+    if (frameLifecycle.requestedUrl === url && frameLifecycle.frameId === frameId) {
+      frameLifecycle.navigationReason = reason;
+      this.captureNavigationUpdate(frameLifecycle);
     }
   }
 
-  private captureLocationUpdate(page: IPage) {
-    this.db.pages.insert(page);
+  private captureNavigationUpdate(navigation: INavigation) {
+    this.db.frameNavigations.insert(navigation);
   }
 }
