@@ -282,6 +282,18 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       .then(x => this.sessionState.getResourceMeta(x));
   }
 
+  public async goBack() {
+    await this.puppetPage.goBack();
+    await this.locationTracker.waitFor('AllContentLoaded');
+    return this.pages.currentUrl;
+  }
+
+  public async goForward() {
+    await this.puppetPage.goForward();
+    await this.locationTracker.waitFor('AllContentLoaded');
+    return this.pages.currentUrl;
+  }
+
   public async interact(interactionGroups: IInteractionGroups) {
     await this.locationTracker.waitFor('READY');
     await this.interactor.play(interactionGroups);
@@ -356,10 +368,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       if (filter.url) {
         if (typeof filter.url === 'string') {
           // don't let query string url
-          if (
-            filter.url.match(/[\w.:/_\-@;$]\?[-+;%@.\w_]+=.+/) &&
-            !filter.url.includes('\\?')
-          ) {
+          if (filter.url.match(/[\w.:/_\-@;$]\?[-+;%@.\w_]+=.+/) && !filter.url.includes('\\?')) {
             filter.url = filter.url.replace('?', '\\?');
           }
         }

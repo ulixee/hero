@@ -67,6 +67,14 @@ export default class Core implements ICore {
     return this.tab.runCommand<void>('goto', url);
   }
 
+  public async goBack() {
+    return this.tab.runCommand<string>('goBack');
+  }
+
+  public async goForward() {
+    return this.tab.runCommand<string>('goForward');
+  }
+
   public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
     return await this.tab.runCommand('waitForResource', filter, opts);
   }

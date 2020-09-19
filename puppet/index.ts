@@ -24,10 +24,20 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public start(proxyPort?: number, showBrowser = false, pipeBrowserIo = false) {
+  public start(
+    args: {
+      proxyPort?: number;
+      showBrowser?: boolean;
+      pipeBrowserIo?: boolean;
+    } = {
+      showBrowser: false,
+      pipeBrowserIo: false,
+    },
+  ) {
     if (this.browser) {
       return;
     }
+    const { proxyPort, showBrowser, pipeBrowserIo } = args;
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
