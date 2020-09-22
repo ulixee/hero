@@ -1,7 +1,7 @@
 export default interface ISaSession {
   id: string;
   name: string;
-  tabs: { tabId: string; startOrigin: string }[];
+  tabs: ISessionTab[];
   dataLocation: string;
   viewportWidth: number;
   viewportHeight: number;
@@ -14,6 +14,12 @@ export default interface ISaSession {
   scriptInstanceId: string;
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];
   relatedSessions: { id: string; name: string }[];
+}
+
+export interface ISessionTab {
+  tabId: string;
+  createdTime: string;
+  startOrigin?: string;
 }
 
 export interface IMouseEvent {

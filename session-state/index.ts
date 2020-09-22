@@ -301,7 +301,7 @@ export default class SessionState {
     }
   }
 
-  public async saveState() {
+  public async close() {
     this.closeDate = new Date();
     this.db.session.update(this.sessionId, {
       closeDate: this.closeDate,
@@ -376,12 +376,12 @@ export default class SessionState {
       focusEvents: focusEvents.length,
       scrollEvents: scrollEvents.length,
     });
-    const maxCommandId = domChanges.reduce((max, change) => {
+
+    let startCommandId = domChanges.reduce((max, change) => {
       if (max > change[0]) return max;
       return change[0];
     }, -1);
 
-    let startCommandId = maxCommandId;
     const navigations = this.navigationsByTabId[tabId];
     // find last page load
     for (let i = navigations.history.length - 1; i >= 0; i -= 1) {

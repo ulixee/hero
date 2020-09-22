@@ -48,8 +48,11 @@ export default class CommandOverlay extends Vue {
 
 .CommandOverlay {
   @include overlayStyle();
+  min-height: 80px;
+  padding: 1px;
   .title {
     margin: 20px;
+    box-sizing: content-box;
     wrap-word: break-word;
     text-align: center;
   }

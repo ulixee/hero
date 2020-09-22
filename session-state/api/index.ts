@@ -27,6 +27,8 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
 
       const sessionLoader = new SessionLoader(session.sessionDb, session.sessionState);
 
+      let hasSentSession = false;
+
       listeners.push(
         eventUtils.addEventListener(sessionLoader, 'resources', http2PushResources.bind(this, res)),
       );
@@ -46,13 +48,13 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
         }
       });
 
-      sessionLoader.on('ready', () => {
+      sessionLoader.on('tab-ready', () => {
+        if (hasSentSession) return;
+        hasSentSession = true;
+
         http2PushJson(res, 'session', {
           ...sessionLoader.session,
-          tabs: sessionLoader.tabIds.map(tabId => ({
-            tabId,
-            startOrigin: sessionLoader.tabStartOrigins.get(tabId),
-          })),
+          tabs: [...sessionLoader.tabs.values()],
           dataLocation: session.dataLocation,
           relatedScriptInstances: session.relatedScriptInstances,
           relatedSessions: session.relatedSessions,

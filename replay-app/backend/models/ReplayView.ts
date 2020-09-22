@@ -1,24 +1,23 @@
 import { v1 as uuidv1 } from 'uuid';
 import Window from './Window';
 import ReplayApi from '~backend/api';
-import IRectangle from '~shared/interfaces/IRectangle';
-import Application from '~backend/Application';
-import TabBackend from './TabBackend';
+import ViewBackend from './ViewBackend';
 import ReplayTabState from '~backend/api/ReplayTabState';
+import PlaybarView from '~backend/models/PlaybarView';
+import Application from '~backend/Application';
+import { TOOLBAR_HEIGHT } from '~shared/constants/design';
+import IRectangle from '~shared/interfaces/IRectangle';
+import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
 
-interface IReplayViewOptions {
-  replaceFrontendTabId?: number;
-  replayTabId?: string;
-  isNewTab?: boolean;
-}
-
-export default class ReplayView extends TabBackend {
+export default class ReplayView extends ViewBackend {
   public replayApi: ReplayApi;
   public tabState: ReplayTabState;
+  public readonly playbarView: PlaybarView;
 
-  public constructor(window: Window, replayApi: ReplayApi, options: IReplayViewOptions) {
+  public constructor(window: Window) {
     super(window, {
       preload: domReplayerScript,
       enableRemoteModule: false,
@@ -27,109 +26,122 @@ export default class ReplayView extends TabBackend {
       javascript: false,
     });
     this.interceptHttpRequests();
-    this.load(replayApi, options);
+    this.playbarView = new PlaybarView(window);
+    this.checkResponsive = this.checkResponsive.bind(this);
   }
 
-  public async load(replayApi: ReplayApi, options: IReplayViewOptions = { isNewTab: false }) {
+  public async load(replayApi: ReplayApi) {
     if (this.browserView.isDestroyed()) return;
+    this.clearReplayApi();
+    await this.window.webContents.session.clearCache();
 
-    console.log('loading replayview', options);
-    const { replaceFrontendTabId } = options;
-
-    this.clearState();
+    this.attach();
 
     this.replayApi = replayApi;
+    this.replayApi.onNewTab = this.onNewTab.bind(this);
+    await replayApi.isReady;
+    await this.loadTab();
+  }
 
-    await this.window.webContents.session.clearCache();
-    this.webContents.openDevTools({ mode: 'detach', activate: false });
+  public start() {
+    this.playbarView.play();
+  }
 
-    await this.replayApi.isReady;
-    if (options.replayTabId) {
-      this.tabState = this.replayApi.getTab(options.replayTabId);
-    } else {
-      this.tabState = this.replayApi.getStartTab;
-    }
-    console.log('loaded tab state', this.tabState.startOrigin);
+  public async loadTab(id?: string) {
+    this.clearTabState();
+    this.window.setAddressBarUrl('Loading session...');
 
-    this.tabState.onChangesFn = this.updateFrontendTicks.bind(this);
+    this.tabState = id ? this.replayApi.getTab(id) : this.replayApi.getStartTab;
+    this.tabState.on('tick:changes', this.checkResponsive);
+    this.playbarView.load(this.tabState);
+
+    console.log('Loaded tab state', this.tabState.startOrigin);
+    this.window.setActiveTabId(this.tabState.tabId);
+    this.window.setAddressBarUrl(this.tabState.startOrigin);
+
     await this.webContents.loadURL(this.tabState.startOrigin);
 
-    this.window.sendToRenderer('tab:updated', {
-      id: this.id,
-      currentTickValue: 0,
-      saSession: replayApi.saSession,
-      replaceFrontendTabId,
-      tickState: this.tabState.getTickState(),
-    });
-  }
-
-  public async changeTickOffset(offset: number) {
-    this.onTick(offset);
-    this.window.sendToRenderer('tab:updated', {
-      id: this.id,
-      currentTickValue: offset,
-    });
-  }
-
-  public onTick(tickValue: number) {
-    if (!this.replayApi) return;
-    const events = this.tabState.setTickValue(tickValue);
-    this.publishTickChanges(events);
-  }
-
-  public nextTick() {
-    const events = this.tabState.nextTick();
-    this.publishTickChanges(events);
-    return this.tabState.currentPlaybarOffsetPct;
+    if (this.tabState.currentPlaybarOffsetPct > 0) {
+      console.log('Resetting playbar offset to %s%', this.tabState.currentPlaybarOffsetPct);
+      const events = this.tabState.setTickValue(this.tabState.currentPlaybarOffsetPct, true);
+      await this.publishTickChanges(events);
+    }
   }
 
   public onTickHover(rect: IRectangle, tickValue: number) {
-    const tick = this.tabState.ticks.find(x => x.playbarOffsetPercent === tickValue);
-    if (!tick) return;
+    this.playbarView.onTickHover(rect, tickValue);
+  }
 
-    const commandLabel = tick.label;
-    const commandResult =
-      tick.eventType === 'command'
-        ? this.tabState.commands.find(x => x.id === tick.commandId)
-        : {
-            duration: 0,
-          };
-    Application.instance.overlayManager.show(
-      'command-overlay',
-      this.window.browserWindow,
-      rect,
-      commandLabel,
-      commandResult,
-    );
+  public fixBounds(newBounds: { x: number; width: number; y: any; height: number }) {
+    super.fixBounds(newBounds);
+
+    this.playbarView.fixBounds({
+      x: 0,
+      y: newBounds.height + newBounds.y,
+      width: newBounds.width,
+      height: TOOLBAR_HEIGHT,
+    });
+  }
+
+  public attach() {
+    super.attach();
+    this.webContents.openDevTools({ mode: 'detach', activate: false });
+  }
+
+  public detach() {
+    if (this.isAttached) {
+      this.webContents.closeDevTools();
+    }
+    super.detach();
+    this.playbarView.detach();
+  }
+
+  public async onTick(tickValue: number) {
+    if (!this.isAttached || !this.tabState) return;
+    const events = this.tabState.setTickValue(tickValue);
+    await this.publishTickChanges(events);
+  }
+
+  public async nextTick() {
+    if (!this.isAttached || !this.tabState) return 0;
+    const events = this.tabState.gotoNextTick();
+    await this.publishTickChanges(events);
+
+    return this.tabState.currentPlaybarOffsetPct;
   }
 
   public destroy() {
     super.destroy();
-    this.clearState();
+    this.clearReplayApi();
+    this.clearTabState();
   }
 
-  private clearState() {
-    if (this.tabState) this.tabState.onChangesFn = null;
-    this.replayApi?.close();
-    this.tabState = null;
-    this.replayApi = null;
-  }
-
-  private publishTickChanges(events: any[]) {
-    if (!events) return;
+  private async publishTickChanges(
+    events: [IDomChangeEvent[], number[], IMouseEvent, IScrollRecord],
+  ) {
+    if (!events || !events.length) return;
+    const [domChanges] = events;
+    if (domChanges?.length) {
+      if (domChanges[0].action === 'newDocument') {
+        const nav = domChanges.shift();
+        console.log('Re-navigating', nav.textContent);
+        await this.webContents.loadURL(nav.textContent);
+      }
+    }
     this.webContents.send('dom:apply', ...events);
-    this.window.sendToRenderer('tab:page-url', { url: this.tabState.urlOrigin, id: this.id });
+    this.window.setAddressBarUrl(this.tabState.urlOrigin);
   }
 
-  private async updateFrontendTicks() {
-    await this.replayApi.isReady;
+  private async onNewTab(tab: ReplayTabState) {
+    await tab.isReady.promise;
+    this.window.onNewReplayTab({
+      tabId: tab.tabId,
+      startOrigin: tab.startOrigin,
+      createdTime: tab.tabCreatedTime,
+    });
+  }
 
-    const tabUpdateParam = {
-      id: this.id,
-      tickState: this.tabState.getTickState(),
-    };
-    this.window.sendToRenderer('tab:updated', tabUpdateParam);
-
+  private checkResponsive() {
     if (this.replayApi.unresponsiveSeconds >= 5) {
       Application.instance.overlayManager.show(
         'message-overlay',
@@ -142,6 +154,21 @@ export default class ReplayView extends TabBackend {
       );
     } else {
       Application.instance.overlayManager.getByName('message-overlay').hide();
+    }
+  }
+
+  private clearReplayApi() {
+    if (this.replayApi) {
+      this.replayApi.onNewTab = null;
+      this.replayApi.close();
+      this.replayApi = null;
+    }
+  }
+
+  private clearTabState() {
+    if (this.tabState) {
+      this.tabState.off('tick:changes', this.checkResponsive);
+      this.tabState = null;
     }
   }
 

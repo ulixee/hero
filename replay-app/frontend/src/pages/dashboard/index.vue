@@ -1,23 +1,23 @@
 <template lang="pug">
-.HomeScreen.Screen
-  .content
-    img(src="../../assets/logo.svg")
-    h1 SecretAgent Replay
-    button(@click="openFile") Open Script
+  .HomeScreen.Screen
+    .content
+      img(src="../../assets/logo.svg")
+      h1 SecretAgent Replay
+      button(@click="openFile") Open Script
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
-  import Component from 'vue-class-component';
-  import { ipcRenderer } from 'electron';
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { ipcRenderer } from 'electron';
 
-  @Component({ components: { } })
-  export default class HomeScreen extends Vue {
-    private openFile(e: any) {
-      e.target.blur();
-      ipcRenderer.send('open-file');
-    }
+@Component({ components: { } })
+export default class HomeScreen extends Vue {
+  private openFile(e: any) {
+    e.target.blur();
+    ipcRenderer.send('open-file');
   }
+}
 </script>
 
 <style lang="scss">

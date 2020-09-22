@@ -1,6 +1,7 @@
 import SettingsDb, { ISettings } from './SettingsDb';
-import HistoryDb, { IHistoryRecord } from './HistoryDb';
+import HistoryDb from './HistoryDb';
 import WindowStateDb, { IWindowState } from './WindowStateDb';
+import { IHistoryRecord } from "~shared/interfaces/IHistoryRecord";
 
 class Storage {
   private readonly settingsDb = new SettingsDb();
@@ -48,7 +49,8 @@ class Storage {
   }
 
   public fetchHistory() {
-    return [...this.historyDb.fetchAll()];
+    const history = this.historyDb.fetchAll();
+    return history.filter(x => !!x.scriptEntrypoint);
   }
 
   public persistAll() {

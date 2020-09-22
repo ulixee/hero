@@ -1,7 +1,6 @@
-import { ClientHttp2Stream } from 'http2';
-import * as zlib from 'zlib';
-import { PassThrough } from 'stream';
-import getResolvable from '~shared/utils/promise';
+import * as zlib from "zlib";
+import { PassThrough } from "stream";
+import getResolvable from "~shared/utils/promise";
 
 export default class ReplayResources {
   private resources: {
@@ -11,8 +10,8 @@ export default class ReplayResources {
     };
   } = {};
 
-  public async onResource(
-    http2Stream: ClientHttp2Stream,
+  public onResource(
+    data: Buffer,
     resourceMeta: {
       url: string;
       headers: any;
@@ -24,16 +23,13 @@ export default class ReplayResources {
     const { url, headers, statusCode, type, tabId } = resourceMeta;
     this.initResource(url);
 
-    const data: Buffer[] = [];
-    for await (const chunk of http2Stream) data.push(chunk);
-
     const headerMap = new Map<string, string>();
     for (const [k, v] of Object.entries(headers)) {
       headerMap.set(k.toLowerCase(), v as string);
     }
 
     this.resources[url].resolve({
-      data: Buffer.concat(data),
+      data,
       headers: headerMap,
       tabId,
       statusCode,

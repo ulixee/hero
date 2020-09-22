@@ -1,6 +1,7 @@
 import * as http2 from 'http2';
 import { ChildProcess, spawn } from 'child_process';
 import * as Path from 'path';
+import { ClientHttp2Stream, IncomingHttpHeaders, IncomingHttpStatusHeader } from 'http2';
 import ISaSession from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
@@ -18,6 +19,8 @@ export default class ReplayApi {
   public tabs: ReplayTabState[] = [];
   public apiHost: string;
   public unresponsiveSeconds = 0;
+
+  public onNewTab?: (tab: ReplayTabState) => any;
 
   public get isReady() {
     return this.isReadyResolvable.promise;
@@ -46,37 +49,7 @@ export default class ReplayApi {
 
     ReplayApi.sessions.add(this.http2Session);
     this.http2Session.on('close', () => ReplayApi.sessions.delete(this.http2Session));
-
-    this.http2Session.on('stream', async (stream, headers) => {
-      const path = headers[':path'];
-
-      const url = headers['resource-url'] as string;
-      console.log('Replay Api Stream: %s', ...[path, url].filter(Boolean));
-
-      if (path === '/session') {
-        const data = await streamToJson<ISaSession>(stream);
-        this.onSession(data);
-        return;
-      }
-
-      await this.isReady;
-
-      if (path === '/resource') {
-        const type = headers['resource-type'] as string;
-        const statusCode = parseInt((headers['resource-status-code'] as string) ?? '404', 10);
-        const tabId = headers['resource-tabid'] as string;
-        await this.resources.onResource(stream, {
-          url,
-          tabId,
-          headers: JSON.parse(headers['resource-headers'] as string),
-          statusCode,
-          type,
-        });
-      } else {
-        const json = await streamToJson(stream);
-        this.onApiFeed(path, json);
-      }
-    });
+    this.http2Session.on('stream', this.onStream.bind(this));
 
     const request = this.http2Session
       .request({
@@ -111,9 +84,51 @@ export default class ReplayApi {
     return this.tabs.find(x => x.tabId === tabId);
   }
 
+  private async onStream(
+    stream: ClientHttp2Stream,
+    headers: IncomingHttpHeaders & IncomingHttpStatusHeader,
+  ) {
+    const path = headers[':path'];
+
+    if (path === '/session') {
+      const data = await streamToJson<ISaSession>(stream);
+      this.onSession(data);
+      return;
+    }
+
+    // don't load api data until the session is ready
+    await this.isReady;
+
+    if (path === '/resource') {
+      const data = await readStream(stream);
+      this.onResource(data, headers as any);
+    } else {
+      const json = await streamToJson(stream);
+      this.onApiFeed(path, json);
+    }
+  }
+
+  private onResource(data: Buffer, headers: { [key: string]: string }) {
+    const type = headers['resource-type'];
+    const statusCode = parseInt(headers['resource-status-code'] ?? '404', 10);
+    const tabId = headers['resource-tabid'];
+    const url = headers['resource-url'];
+    console.log('Replay Resource: %s', url);
+
+    this.resources.onResource(data, {
+      url,
+      tabId,
+      headers: JSON.parse(headers['resource-headers']),
+      statusCode,
+      type,
+    });
+  }
+
   private onApiFeed(dataPath: string, data: any) {
+    console.log('Replay Api Feed', dataPath);
     const tabsWithChanges = new Set<ReplayTabState>();
     if (dataPath === '/script-state') {
+      console.log('ScriptState', data);
       const closeDate = data.closeDate ? new Date(data.closeDate) : null;
       this.replayTime.update(closeDate);
       this.unresponsiveSeconds = data.unresponsiveSeconds;
@@ -122,7 +137,14 @@ export default class ReplayApi {
       for (const event of data) {
         let tab = this.getTab(event.tabId);
         if (!tab) {
-          tab = new ReplayTabState(this.replayTime, event.tabId, null);
+          console.log('New Tab created in replay');
+          const tabMeta = {
+            tabId: event.tabId,
+            createdTime: event.timestamp ?? event.startDate,
+          };
+          tab = new ReplayTabState(tabMeta, this.replayTime);
+          if (this.onNewTab) this.onNewTab(tab);
+
           this.tabs.push(tab);
         }
         tabsWithChanges.add(tab);
@@ -152,9 +174,7 @@ export default class ReplayApi {
     });
 
     this.replayTime = new ReplayTime(data.startDate, data.closeDate);
-    this.tabs = data.tabs.map(x => {
-      return new ReplayTabState(this.replayTime, x.tabId, x.startOrigin);
-    });
+    this.tabs = data.tabs.map(x => new ReplayTabState(x, this.replayTime));
 
     this.isReadyResolvable.resolve();
   }
@@ -213,9 +233,14 @@ export default class ReplayApi {
   }
 }
 
-async function streamToJson<T>(stream: http2.Http2Stream): Promise<T> {
+async function readStream(stream: http2.Http2Stream): Promise<Buffer> {
   const data: Buffer[] = [];
   for await (const chunk of stream) data.push(chunk);
-  const json = Buffer.concat(data).toString('utf8');
+  return Buffer.concat(data);
+}
+
+async function streamToJson<T>(stream: http2.Http2Stream): Promise<T> {
+  const data = await readStream(stream);
+  const json = data.toString('utf8');
   return JSON.parse(json);
 }

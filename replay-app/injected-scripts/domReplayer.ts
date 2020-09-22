@@ -17,6 +17,7 @@ window.replayEvents = async function replayEvents(
   scrollEvent,
 ) {
   await domContentLoaded;
+  console.log('Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s', changeEvents?.length ?? 0, resultNodeIds?.length ?? 0, !!mouseEvent, !!scrollEvent);
   if (changeEvents) applyDomChanges(changeEvents);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);

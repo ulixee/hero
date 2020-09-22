@@ -18,10 +18,7 @@ export default class SessionLoader extends EventEmitter {
   ];
 
   public session: ISessionRecord;
-  public tabIds: string[] = [];
-  public tabStartOrigins = new Map<string, string>();
-
-  private tabSet = new Set<string>();
+  public tabs = new Map<string, { tabId: string; createdTime: string; startOrigin: string }>();
   private readonly sessionDb: SessionDb;
   private readonly sessionState: SessionState;
   private readonly parentFrames = new Set<string>();
@@ -46,16 +43,19 @@ export default class SessionLoader extends EventEmitter {
     db.frames.subscribe(frames => {
       for (const frame of frames) {
         if (!frame.parentId) this.parentFrames.add(frame.id);
-        this.addTabId(frame.tabId);
+        this.addTabId(frame.tabId, frame.createdTime);
       }
     });
 
     db.domChanges.subscribe(changes => {
       for (const change of changes) {
-        if (!this.tabStartOrigins.has(change.tabId) && change.action === 'newDocument') {
-          this.addTabId(change.tabId);
-          this.tabStartOrigins.set(change.tabId, change.textContent);
-          this.emit('ready');
+        if (change.action === 'newDocument') {
+          this.addTabId(change.tabId, change.timestamp);
+          const tab = this.tabs.get(change.tabId);
+          if (!tab.startOrigin) {
+            tab.startOrigin = change.textContent;
+          }
+          this.emit('tab-ready');
         }
         (change as any).isMainFrame =
           this.parentFrames.size === 0 || this.parentFrames.has(change.frameId);
@@ -69,7 +69,7 @@ export default class SessionLoader extends EventEmitter {
     });
 
     db.commands.subscribe(commands => {
-      for (const command of commands) this.addTabId(command.tabId);
+      for (const command of commands) this.addTabId(command.tabId, command.startDate);
       const commandsWithResults = commands.map(CommandFormatter.parseResult);
       this.emit('commands', commandsWithResults);
       this.checkState();
@@ -114,24 +114,27 @@ export default class SessionLoader extends EventEmitter {
 
   public checkState() {
     if (!this.sessionState || this.session.closeDate) return;
-    const scriptState: IScriptState = this.sessionState.checkForResponsive();
+    const scriptState = this.sessionState.checkForResponsive();
     const lastState = this.lastScriptState;
 
     this.lastScriptState = scriptState;
     if (
       !lastState ||
       lastState.hasRecentErrors !== scriptState.hasRecentErrors ||
-      lastState.closeTime !== scriptState.closeTime ||
+      lastState.closeDate !== scriptState.closeDate ||
       lastState.unresponsiveSeconds !== scriptState.unresponsiveSeconds
     ) {
       this.emit('script-state', scriptState);
     }
   }
 
-  private addTabId(tabId: string) {
-    if (!this.tabSet.has(tabId)) {
-      this.tabSet.add(tabId);
-      this.tabIds.push(tabId);
+  private addTabId(tabId: string, timestamp: string) {
+    if (!this.tabs.has(tabId)) {
+      this.tabs.set(tabId, {
+        tabId,
+        createdTime: timestamp,
+        startOrigin: null,
+      });
     }
   }
 }
@@ -150,5 +153,5 @@ const resourceWhitelist: ResourceType[] = [
 interface IScriptState {
   unresponsiveSeconds: number;
   hasRecentErrors: boolean;
-  closeTime?: Date;
+  closeDate?: Date;
 }

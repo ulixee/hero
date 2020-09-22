@@ -168,11 +168,24 @@ describe('basic Dom Replay tests', () => {
 </body>`;
     });
     koaServer.get('/tab2', ctx => {
-      ctx.body = `<body>
+      ctx.body = `
+<html>
+<head>
+  <script type="text/javascript">
+  (() => {
+    console.log('Ran!');
+  })();
+</script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <title>Dom Replay Test</title>
+</head>
+<body>
 <div>
     <h1>This is tab 2</h1>
 </div>
-</body>`;
+</body>
+</html>`;
     });
     const meta = await Core.createTab();
     const core = Core.byTabId[meta.tabId];

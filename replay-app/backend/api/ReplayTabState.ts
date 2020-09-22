@@ -1,15 +1,22 @@
+import { EventEmitter } from 'events';
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
-import { IFocusRecord, IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import {
+  IFocusRecord,
+  IMouseEvent,
+  IScrollRecord,
+  ISessionTab,
+} from '~shared/interfaces/ISaSession';
 import ReplayTick, { IEventType } from '~backend/api/ReplayTick';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
+import getResolvable from '~shared/utils/promise';
 
 const loadWaitTime = 5e3;
 let pageCounter = 0;
 
-export default class ReplayTabState {
+export default class ReplayTabState extends EventEmitter {
   public ticks: ReplayTick[] = [];
   public readonly commands: ICommandWithResult[] = [];
   public readonly pages: { id: number; url: string; commandId: number }[] = [];
@@ -23,11 +30,17 @@ export default class ReplayTabState {
   public urlOrigin: string;
   public currentPlaybarOffsetPct = 0;
   public replayTime: ReplayTime;
+  public tabCreatedTime: string;
 
-  public onChangesFn?: () => void;
   public get isActive() {
-    return !!this.onChangesFn;
+    return this.listenerCount('tick:changes') > 0;
   }
+
+  public get currentTick() {
+    return this.ticks[this.currentTickIdx];
+  }
+
+  public isReady = getResolvable<void>();
 
   private currentTickIdx = -1;
   // put in placeholder
@@ -35,18 +48,21 @@ export default class ReplayTabState {
   private broadcastTimer: NodeJS.Timer;
   private lastBroadcast?: Date;
 
-  constructor(replayTime: ReplayTime, tabId: string, startOrigin: string) {
+  constructor(tabMeta: ISessionTab, replayTime: ReplayTime) {
+    super();
     this.replayTime = replayTime;
-    this.startOrigin = startOrigin;
-    this.tabId = tabId;
+    this.tabCreatedTime = tabMeta.createdTime;
+    this.startOrigin = tabMeta.startOrigin;
+    if (this.startOrigin) this.isReady.resolve();
+    this.tabId = tabMeta.tabId;
     this.ticks.push(new ReplayTick(this, 'load', 0, -1, replayTime.start.toISOString(), 'Load'));
   }
 
   public getTickState() {
     return {
+      currentTickOffset: this.currentPlaybarOffsetPct,
       durationMillis: this.replayTime.millis,
       ticks: this.ticks.filter(x => x.isMajor()).map(x => x.playbarOffsetPercent),
-      isScriptComplete: !!this.replayTime.close,
     } as ITickState;
   }
 
@@ -55,7 +71,7 @@ export default class ReplayTabState {
     return this.ticks.find(x => x.commandId === pageToLoad.commandId)?.playbarOffsetPercent ?? 0;
   }
 
-  public nextTick() {
+  public gotoNextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
     if (
       this.replayTime.close &&
@@ -69,8 +85,13 @@ export default class ReplayTabState {
     return result;
   }
 
-  public setTickValue(playbarOffset: number) {
+  public setTickValue(playbarOffset: number, isReset = false) {
     const ticks = this.ticks;
+    if (isReset) {
+      this.currentPlaybarOffsetPct = 0;
+      this.currentTickIdx = -1;
+      this.paintEventsLoadedIdx = -1;
+    }
     if (!ticks.length || this.currentPlaybarOffsetPct === playbarOffset) return;
 
     let newTickIdx = this.currentTickIdx;
@@ -118,6 +139,9 @@ export default class ReplayTabState {
           console.log('Paint event not loaded!', i);
           return;
         }
+        if (paints.changeEvents[0].action === 'newDocument') {
+          changeEvents.length = 0;
+        }
         changeEvents.push(...paints.changeEvents);
       }
     }
@@ -136,7 +160,10 @@ export default class ReplayTabState {
     return changeEvents;
   }
 
-  public loadTick(newTickIdx: number, specificPlaybarOffset?: number) {
+  public loadTick(
+    newTickIdx: number,
+    specificPlaybarOffset?: number,
+  ): [IDomChangeEvent[], number[], IMouseEvent, IScrollRecord] {
     if (newTickIdx === this.currentTickIdx) return;
     const newTick = this.ticks[newTickIdx];
 
@@ -146,6 +173,8 @@ export default class ReplayTabState {
       // give ticks time to load. TODO: need a better strategy for this
       if (new Date().getTime() - new Date(newTick.timestamp).getTime() < loadWaitTime) return;
     }
+
+    console.log('Loading tick %s', newTickIdx);
 
     const playbarOffset = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
     this.currentTickIdx = newTickIdx;
@@ -192,6 +221,11 @@ export default class ReplayTabState {
 
   public loadDomChange(event: IDomChangeEvent) {
     const { commandId, action, textContent, timestamp } = event;
+    if (event.action === 'newDocument' && !this.startOrigin) {
+      this.startOrigin = event.textContent;
+      console.log('Got start origin for new tab', this.startOrigin);
+      this.isReady.resolve();
+    }
 
     const lastPaintEvent = this.paintEvents.length
       ? this.paintEvents[this.paintEvents.length - 1]
@@ -335,7 +369,7 @@ export default class ReplayTabState {
 
   private broadcast() {
     this.lastBroadcast = new Date();
-    if (this.onChangesFn) this.onChangesFn();
+    this.emit('tick:changes');
   }
 }
 

@@ -1,9 +1,7 @@
-import { clipboard, nativeImage, Menu } from 'electron';
-import Window from '../models/Window';
-import { saveAs, viewSource, printPage } from './CommonActions';
+import { clipboard, Menu, nativeImage } from 'electron';
+import { printPage, saveAs, viewSource } from './CommonActions';
 
 export default function generateContextMenu(
-  window: Window,
   params: Electron.ContextMenuParams,
   webContents: Electron.WebContents,
 ) {
@@ -170,6 +168,8 @@ export default function generateContextMenu(
 
       if (webContents.isDevToolsOpened()) {
         webContents.devToolsWebContents.focus();
+      } else {
+        webContents.openDevTools({ mode: 'detach' });
       }
     },
   });

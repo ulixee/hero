@@ -12655,18 +12655,6 @@ mkdirp@0.3.0:
   dependencies:
     minimist "^1.2.5"
 
-mobx-vue@^2.0.10:
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/mobx-vue/-/mobx-vue-2.0.10.tgz#ead1660a8f7a9bd8cd0e306595261a44121f80bb"
-  integrity sha512-+VlHrgNzkOQ5hJA1TRjXahGwDt1mzaQEvipv2ow8sypmMxI+B+9Oo2B5f3uy7dySPF8yhB3jg95Z9BPIbxfhmg==
-  dependencies:
-    tslib "^1.9.0"
-
-mobx@^5.15.4:
-  version "5.15.6"
-  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.6.tgz#24750af56f87bcf9c3cf82ece4c79eb91bb71968"
-  integrity sha512-U5nnx3UNdRkUjntpwzO060VWifGVx/JZeu/aMw4y28dTjDNjoY3vNKs6tFNm7z1qIfcPInsd9L9HIm8H0zTDqg==
-
 modify-values@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/modify-values/-/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"

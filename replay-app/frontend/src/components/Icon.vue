@@ -6,9 +6,9 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { transparency } from '~frontend/constants/transparency';
-import { TOOLBAR_BUTTON_HEIGHT } from '~shared/constants/design';
-import store from '../models/BaseStore';
 import NoCache from '~frontend/lib/NoCache';
+import { getTheme } from '~shared/utils/themes';
+import settings from '~frontend/lib/settings';
 
 const IconProps = Vue.extend({
   props: {
@@ -23,6 +23,9 @@ const IconProps = Vue.extend({
 
 @Component({})
 export default class Icon extends IconProps {
+  public get theme() {
+    return getTheme(settings.theme);
+  }
   public $emit: any;
 
   private onClick(e) {
@@ -32,7 +35,7 @@ export default class Icon extends IconProps {
 
   @NoCache
   private get cssVars() {
-    const toolbarLightForeground = store.theme.toolbarLightForeground;
+    const toolbarLightForeground = this.theme.toolbarLightForeground;
     return {
       '--backgroundImage': `url(${this.src})`,
       '--buttonIconSize': `${this.size}px`,
@@ -52,7 +55,7 @@ export default class Icon extends IconProps {
   transition: 0.15s background-image;
   backface-visibility: hidden;
   background-image: var(--backgroundImage);
-  background-size: var(--buttonIconBackgroundSize);
+  background-size: contain;
   background-repeat: no-repeat;
   opacity: var(--buttonIconOpacity);
   filter: var(--buttonIconFilter);

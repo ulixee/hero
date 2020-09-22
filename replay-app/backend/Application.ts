@@ -8,6 +8,7 @@ import storage from './storage';
 import Window from './models/Window';
 import IReplayMeta from '../shared/interfaces/IReplayMeta';
 
+// NOTE: this has to come before app load
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
@@ -70,13 +71,16 @@ export default class Application {
 
     ReplayApi.serverStartPath = replayApiPackagePath;
 
-    await this.loadSessionReplay({
-      dataLocation,
-      sessionName,
-      sessionId,
-      scriptInstanceId,
-      sessionStateApi,
-    });
+    await this.loadSessionReplay(
+      {
+        dataLocation,
+        sessionName,
+        sessionId,
+        scriptInstanceId,
+        sessionStateApi,
+      },
+      true,
+    );
   }
 
   private createWindowIfNeeded() {
@@ -85,7 +89,7 @@ export default class Application {
     }
   }
 
-  private async loadSessionReplay(replay: IReplayMeta, useCurrentTab = false) {
+  private async loadSessionReplay(replay: IReplayMeta, findOpenReplayScriptWindow = false) {
     let replayApi: ReplayApi;
     try {
       replayApi = await ReplayApi.connect(replay);
@@ -102,17 +106,18 @@ export default class Application {
       scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
     });
 
-    if (Window.noneOpen()) {
-      return Window.create(replayApi);
+    if (findOpenReplayScriptWindow) {
+      const match = Window.list.find(
+        x => x.replayApi?.saSession?.scriptEntrypoint === replay.scriptEntrypoint,
+      );
+      if (match) return match.openReplayApi(replayApi);
     }
 
-    // ToDo: need to search windows/tabs for same session
-    const window = Window.current;
-    if (useCurrentTab) {
-      window.openReplayApi(replayApi);
-    } else {
-      window.createReplayTab(replayApi);
+    if (Window.noneOpen()) {
+      return Window.create({ replayApi });
     }
+
+    await Window.current.openReplayApi(replayApi);
   }
 
   private bindEventHandlers() {
@@ -153,31 +158,8 @@ export default class Application {
       window.browserWindow.close();
     });
 
-    ipcMain.on('window:fix-dragging', () => {
-      const window = Window.current;
-      window.fixDragging();
-    });
-
-    // TABS
-
-    ipcMain.handle('tab:create', (e, options, sendToRenderer) => {
-      return Window.current.createAppTab(options, false, sendToRenderer);
-    });
-
-    ipcMain.on('tab:print', () => {
-      Window.current.selectedTab.webContents.print();
-    });
-
-    ipcMain.handle('tab:select', (e, tabId: number) => {
-      Window.current.selectedTabId = tabId;
-    });
-
-    ipcMain.on('tab:destroy', (e, tabId: number) => {
-      Window.current.destroyTab(tabId);
-    });
-
-    ipcMain.on('tab:reload', () => {
-      Window.current.selectedTab.webContents.reload();
+    ipcMain.on('window:print', () => {
+      Window.current.activeView.webContents.print();
     });
 
     // OVERLAYS
@@ -196,50 +178,45 @@ export default class Application {
       this.overlayManager.getByWebContentsId(webContentsId).hide();
     });
 
-    ipcMain.handle('overlay:is-visible', (e, overlay) => {
-      return Application.instance.overlayManager.isVisible(overlay);
-    });
 
     // GOTO
-
-    ipcMain.on('navigate-to-location', (e, location, useCurrentTab) => {
-      const currentWindow = Window.current;
-      if (useCurrentTab) {
-        currentWindow.openAppLocation(location);
-      } else {
-        currentWindow.createAppTab({ location, active: true });
-      }
+    ipcMain.on('go-back', (e, location) => {
+      Window.current.goBack();
     });
 
-    ipcMain.on('navigate-to-history', async (e, replayMeta, useCurrentTab) => {
-      await this.loadSessionReplay(replayMeta, useCurrentTab);
+    ipcMain.on('go-forward', (e, location) => {
+      Window.current.goForward();
     });
 
-    ipcMain.on('navigate-to-session-page', async (e, page: { id: number; url: string }) => {
-      const replayTab = Window.current?.selectedReplayTab;
-      if (!replayTab) return;
-      const offset = replayTab.tabState.getPageOffset(page);
-      replayTab.changeTickOffset(offset);
+    ipcMain.on('navigate-to-location', (e, location) => {
+      Window.current.openAppLocation(location);
     });
 
+    ipcMain.on('navigate-to-history', async (e, replayMeta) => {
+      await this.loadSessionReplay(replayMeta);
+    });
+
+    ipcMain.on('navigate-to-session', (e, session: { id: number; name: string }) => {});
+
+    ipcMain.on('navigate-to-session-tab', (e, tab: { id: string }) => {
+      Window.current?.loadReplayTab(tab.id);
+    });
+
+    // TICKS
     let tickDebounce: NodeJS.Timeout;
     ipcMain.on('on-tick', (e, tickValue) => {
       clearTimeout(tickDebounce);
-      const replayTab = Window.current?.selectedReplayTab;
-      if (!replayTab) return;
-      tickDebounce = setTimeout((tab, val) => tab.onTick(val), 10, replayTab, tickValue);
+      const replayView = Window.current?.replayView;
+      if (!replayView) return;
+      tickDebounce = setTimeout(() => replayView.onTick(tickValue), 10);
     });
 
     ipcMain.handle('next-tick', () => {
-      const replayTab = Window.current?.selectedReplayTab;
-      if (!replayTab) return;
-      return replayTab.nextTick();
+      return Window.current?.replayView?.nextTick();
     });
 
     ipcMain.on('on-tick-hover', (e, containerRect, tickValue) => {
-      const replayTab = Window.current?.selectedReplayTab;
-      if (!replayTab) return;
-      replayTab.onTickHover(containerRect, tickValue);
+      Window.current?.replayView?.onTickHover(containerRect, tickValue);
     });
 
     // SETTINGS
@@ -267,19 +244,16 @@ export default class Application {
       if (result.filePaths.length) {
         const [filename] = result.filePaths;
         if (filename.endsWith('.db')) {
-          return this.loadSessionReplay({ dataLocation: filename }, true);
+          return this.loadSessionReplay({ dataLocation: filename });
         }
         let sessionContainerDir = Path.dirname(filename);
         while (Fs.existsSync(sessionContainerDir)) {
           const sessionsDir = Fs.existsSync(`${sessionContainerDir}/.sessions`);
           if (sessionsDir) {
-            return this.loadSessionReplay(
-              {
-                dataLocation: `${sessionContainerDir}/.sessions`,
-                scriptEntrypoint: filename,
-              },
-              true,
-            );
+            return this.loadSessionReplay({
+              dataLocation: `${sessionContainerDir}/.sessions`,
+              scriptEntrypoint: filename,
+            });
           }
           sessionContainerDir = Path.resolve(sessionContainerDir, '..');
         }
@@ -293,39 +267,6 @@ export default class Application {
 
     ipcMain.handle('fetch-history', () => {
       return storage.fetchHistory();
-    });
-
-    ipcMain.handle('fetch-script-instances', () => {
-      const replayTab = Window.current?.selectedReplayTab;
-      if (!replayTab) return;
-
-      const replayApi = replayTab.replayApi;
-      return replayApi.saSession.relatedScriptInstances.map(x => {
-        return {
-          ...x,
-          scriptInstanceId: x.id,
-          isActive: replayApi.saSession.scriptInstanceId === x.id,
-          dataLocation: replayApi.saSession.dataLocation,
-          sessionName: replayApi.saSession.name,
-        };
-      });
-    });
-
-    ipcMain.handle('fetch-sessions', () => {
-      const replayApi = Window.current?.selectedReplayTab?.replayApi;
-      if (!replayApi) return;
-      return replayApi.saSession.relatedSessions;
-    });
-
-    ipcMain.handle('fetch-session-pages', () => {
-      const tab = Window.current.selectedReplayTab;
-      if (!tab) return;
-      return tab.tabState.pages.map(x => {
-        return {
-          ...x,
-          isActive: tab.tabState.urlOrigin === x.url || `${tab.tabState.urlOrigin}/` === x.url,
-        };
-      });
     });
   }
 

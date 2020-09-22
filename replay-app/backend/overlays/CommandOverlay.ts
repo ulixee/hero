@@ -8,6 +8,7 @@ export default class CommandOverlay extends BaseOverlay {
   constructor() {
     super({
       name: 'command-overlay',
+      maxHeight: 250,
       calcBounds(bounds: IRectangle) {
         let x = bounds.x - middle;
         if (x + width > bounds.right + 50) {
@@ -19,17 +20,28 @@ export default class CommandOverlay extends BaseOverlay {
           }
         }
 
+        if (this.hasNewHeight) {
+          const startHeight = bounds.height;
+          bounds.height = Math.max(this.lastHeight, 100) + 28;
+          bounds.y -= this.lastHeight + startHeight + 25;
+        }
+
         return {
           width,
-          height: 200,
+          height: bounds.height,
           x,
-          y: bounds.y + bounds.height,
+          y: bounds.y,
         };
       },
-      devtools: false,
       onWindowBoundsUpdate: () => {
         this.hide();
       },
     });
+  }
+
+  protected async adjustHeight(): Promise<void> {
+    const isFirstDraw = this.lastHeight === 0;
+    await super.adjustHeight();
+    if (this.hasNewHeight && isFirstDraw) this.rearrange(this.browserView.getBounds());
   }
 }

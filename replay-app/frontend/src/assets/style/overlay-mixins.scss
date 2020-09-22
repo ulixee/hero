@@ -13,14 +13,15 @@ $DIALOG_BORDER_RADIUS: 4px;
   box-shadow: $DIALOG_BOX_SHADOW;
   border-radius: $DIALOG_BORDER_RADIUS;
   transition: $DIALOG_TRANSITION;
-  overflow: hidden;
   position: relative;
-  height: calc(100vh - 28px);
   background-color: var(--dropdownBackgroundColor);
+  -webkit-app-region: no-drag;
 
   ul {
+    max-height: calc(100vh - 28px);
     list-style: none;
     margin-left: 0;
+    overflow-y: auto;
     padding: 0;
     li {
       cursor: pointer;

@@ -127,7 +127,7 @@ export default class Session {
     }
     await this.mitmRequestSession.close();
     await this.proxy.close();
-    await this.sessionState.saveState();
+    await this.sessionState.close();
     try {
       await this.browserContext?.close();
     } catch (error) {

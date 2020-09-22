@@ -1,7 +1,6 @@
-import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from 'electron';
-import { defaultTabOptions } from '~shared/constants/tabs';
-import { saveAs, viewSource } from './CommonActions';
-import Window from '../models/Window';
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from "electron";
+import { saveAs, viewSource } from "./CommonActions";
+import Window from "../models/Window";
 
 const isMac = process.platform === 'darwin';
 
@@ -35,13 +34,6 @@ export default function generateAppMenu() {
           },
           'New Window',
         ),
-        ...createMenuItem(
-          ['CmdOrCtrl+T'],
-          window => {
-            window.createAppTab(defaultTabOptions);
-          },
-          'New Tab',
-        ),
         {
           type: 'separator',
         },
@@ -61,13 +53,6 @@ export default function generateAppMenu() {
             window.browserWindow.close();
           },
           'Close Window',
-        ),
-        ...createMenuItem(
-          ['CmdOrCtrl+W', 'CmdOrCtrl+F4'],
-          window => {
-            window.sendToRenderer('remove-tab', window.selectedTabId);
-          },
-          'Close Tab',
         ),
         {
           type: 'separator',
@@ -128,14 +113,14 @@ export default function generateAppMenu() {
         ...createMenuItem(
           ['CmdOrCtrl+R', 'F5'],
           () => {
-            Window.current.selectedTab.webContents.reload();
+            Window.current.activeView.webContents.reload();
           },
           'Reload',
         ),
         ...createMenuItem(
           ['CmdOrCtrl+Shift+R', 'Shift+F5'],
           () => {
-            Window.current.selectedTab.webContents.reloadIgnoringCache();
+            Window.current.activeView.webContents.reloadIgnoringCache();
           },
           'Reload ignoring cache',
         ),
@@ -156,7 +141,7 @@ export default function generateAppMenu() {
           ['CmdOrCtrl+Shift+I', 'CmdOrCtrl+Shift+J', 'F12'],
           () => {
             setTimeout(() => {
-              Window.current.selectedTab.webContents.toggleDevTools();
+              Window.current.activeView.webContents.toggleDevTools();
             }, 0);
           },
           'Developer Tools',
@@ -168,25 +153,6 @@ export default function generateAppMenu() {
             webContents.getFocusedWebContents().openDevTools({ mode: 'detach' });
           }, 0);
         }),
-      ],
-    },
-    {
-      label: 'Tab',
-      submenu: [
-        ...createMenuItem(
-          isMac ? ['Cmd+Option+Right'] : ['Ctrl+Tab', 'Ctrl+PageDown'],
-          () => {
-            Window.current.webContents.send('select-next-tab');
-          },
-          'Select next tab',
-        ),
-        ...createMenuItem(
-          isMac ? ['Cmd+Option+Left'] : ['Ctrl+Shift+Tab', 'Ctrl+PageUp'],
-          () => {
-            Window.current.webContents.send('select-previous-tab');
-          },
-          'Select previous tab',
-        ),
       ],
     },
     {

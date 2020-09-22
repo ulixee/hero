@@ -5,18 +5,17 @@ import IRectangle from '~shared/interfaces/IRectangle';
 export default class MainMenu extends BaseOverlay {
   constructor() {
     const menuWidth = 330;
-    const menuHeight = 240;
+    const menuHeight = 204;
     super({
       name: 'main-menu',
       calcBounds(bounds: IRectangle) {
         return {
           width: menuWidth,
           height: menuHeight,
-          x: bounds.x - menuWidth + DIALOG_MARGIN,
-          y: bounds.y - DIALOG_MARGIN_TOP,
+          x: bounds.x - menuWidth + DIALOG_MARGIN + DIALOG_MARGIN,
+          y: bounds.y + 20 - DIALOG_MARGIN_TOP,
         };
       },
-      devtools: false,
       onWindowBoundsUpdate: () => {
         this.hide();
       },

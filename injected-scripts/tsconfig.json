@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "lib": ["DOM", "DOM.Iterable", "ES2018"],
+    "lib": ["dom", "dom.iterable", "es2018"],
     "declaration": true,
     "skipLibCheck": true,
     "rootDir": ".",

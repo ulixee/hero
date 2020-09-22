@@ -5,6 +5,10 @@ export const ICON_DOWN = require('~frontend/assets/icons/down.svg');
 export const ICON_UP = require('~frontend/assets/icons/up.svg');
 export const ICON_ARROW_RIGHT = require('~frontend/assets/icons/arrow-right.svg');
 
+
+export const ICON_BACK = require('~frontend/assets/icons/back.svg');
+export const ICON_FORWARD = require('~frontend/assets/icons/forward.svg');
+
 export const ICON_FIRE = require('~frontend/assets/icons/fire.svg');
 export const ICON_TOPMOST = require('~frontend/assets/icons/top-most.svg');
 export const ICON_TAB = require('~frontend/assets/icons/tab.svg');

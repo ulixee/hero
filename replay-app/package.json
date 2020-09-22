@@ -55,7 +55,8 @@
     "core-js": "^3.6.5",
     "electron-log": "^4.2.1",
     "source-map-support": "^0.5.19",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.113",

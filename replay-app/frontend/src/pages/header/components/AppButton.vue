@@ -24,7 +24,6 @@ import { transparency } from '~frontend/constants/transparency';
 import { BLUE_500 } from '~frontend/constants';
 import Preloader from '~frontend/components/Preloader.vue';
 import { TOOLBAR_BUTTON_WIDTH, TOOLBAR_BUTTON_HEIGHT } from '~shared/constants/design';
-import store from '~frontend/pages/app/store';
 import NoCache from '~frontend/lib/NoCache';
 
 const AppButtonProps = Vue.extend({
@@ -37,6 +36,7 @@ const AppButtonProps = Vue.extend({
     children: null,
     opacity: { type: Number, default: transparency.icons.active },
     autoInvert: { type: Boolean, default: true },
+    toolbarBackground: { type: String },
     badgeBackground: { type: String, default: BLUE_500 },
     badge: Boolean,
     badgeTextColor: { type: String, default: 'white' },
@@ -77,14 +77,13 @@ export default class AppButton extends AppButtonProps {
 
   @NoCache
   private get cssVars() {
-    const toolbarLightForeground = store.theme.toolbarLightForeground;
+    const toolbarLightForeground = this.toolbarBackground;
     const toggledBgColor = toolbarLightForeground ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)';
     const hoverBgColor = toolbarLightForeground
       ? 'rgba(255, 255, 255, 0.08)'
       : 'rgba(0, 0, 0, 0.06)';
     return {
       '--height': `${TOOLBAR_BUTTON_HEIGHT}px`,
-      '--minWidth': `${TOOLBAR_BUTTON_WIDTH}px`,
       '--pointerEvents': `${this.disabled ? 'none' : 'inherit'}`,
       '--appRegion': `${this.disabled ? 'drag' : 'no-drag'}`,
       '--backgroundColor': `${this.toggled ? toggledBgColor : 'none'}`,
@@ -117,7 +116,6 @@ export default class AppButton extends AppButtonProps {
   margin: 0 1px;
   border-radius: 4px;
   height: var(--height);
-  min-width: var(--minWidth);
   pointer-events: var(--pointerEvents);
   -webkit-app-region: var(--appRegion);
   background-color: var(--backgroundColor);

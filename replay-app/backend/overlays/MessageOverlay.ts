@@ -20,7 +20,6 @@ export default class MessageOverlay extends BaseOverlay {
           y: bounds.y + bounds.height / 2 - 150,
         };
       },
-      devtools: false,
     });
   }
 }
