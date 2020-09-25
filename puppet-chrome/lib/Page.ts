@@ -88,15 +88,18 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager = new FramesManager(cdpSession);
     this.opener = opener;
 
-    this.setEventsToLog([
-      'frame-created',
-      'frame-navigated',
-      'frame-lifecycle',
-      'frame-requested-navigation',
-      'websocket-frame',
-      'websocket-handshake',
-      'worker',
-    ], 'puppet-chrome');
+    this.setEventsToLog(
+      [
+        'frame-created',
+        'frame-navigated',
+        'frame-lifecycle',
+        'frame-requested-navigation',
+        'websocket-frame',
+        'websocket-handshake',
+        'worker',
+      ],
+      'puppet-chrome',
+    );
 
     this.framesManager.on('frame-lifecycle', ({ frame, name }) => {
       if (name === 'load' && frame.id === this.mainFrame?.id) {
@@ -194,7 +197,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
     this.closePromise.resolve();
-    this.framesManager.cancelPendingEvents('Page closed');
+    this.framesManager.close();
     this.networkManager.cancelPendingEvents('Page closed');
     this.cancelPendingEvents('Page closed', ['close']);
   }
@@ -222,6 +225,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     if (this.opener && this.opener.popupInitializeFn) {
       debugMessages('Popup triggered', this.targetId);
       await this.opener.isReady;
+      if (this.opener.isClosed) {
+        debugMessages('Popup canceled', this.targetId);
+        return;
+      }
       await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
       debugMessages('Popup Initialized', this.targetId);
     }

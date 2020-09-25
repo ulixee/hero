@@ -157,8 +157,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       this.loaderIdResolvers.get(loaderId)?.resolve();
     }
 
-    if (loaderId) this.loaderLifecycles.get(loaderId)[name] = new Date();
-    else this.lifecycleEvents[name] = new Date();
+    let lifecycle = this.lifecycleEvents;
+    if (loaderId) {
+      lifecycle = this.loaderLifecycles.get(loaderId) ?? this.lifecycleEvents;
+    }
+
+    if (lifecycle) {
+      lifecycle[name] = new Date();
+    }
 
     if (!this.isDefaultPage()) {
       this.emit('frame-lifecycle', { name });
@@ -286,9 +292,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     cdpSession: CDPSession,
     isAttached: () => boolean,
   ) {
-    const frame = new Frame(internalFrame, activeContexts, cdpSession, isAttached);
-    frame.createIsolatedWorld().catch(debugWarn);
-    return frame;
+    return new Frame(internalFrame, activeContexts, cdpSession, isAttached);
   }
 }
 

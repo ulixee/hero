@@ -13,7 +13,9 @@ interface IBrowserEvents {
 export class Browser extends TypedEventEmitter<IBrowserEvents> {
   public readonly browserContextsById = new Map<string, BrowserContext>();
   public readonly cdpSession: CDPSession;
+
   private readonly connection: Connection;
+
   private readonly closeCallback: () => void;
 
   constructor(connection: Connection, closeCallback: () => void) {
@@ -47,12 +49,21 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     return !this.connection.isClosed;
   }
 
-  protected async listen() {
+  protected async listen(needsTargetDiscovery = false) {
     await this.cdpSession.send('Target.setAutoAttach', {
       autoAttach: true,
-      waitForDebuggerOnStart: false,
+      waitForDebuggerOnStart: needsTargetDiscovery,
       flatten: true,
     });
+
+    if (needsTargetDiscovery) {
+      // NOTE: only needed for < Chrome 83 to detect popups!!
+      await this.cdpSession.send('Target.setDiscoverTargets', {
+        discover: true,
+      });
+      this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
+      this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
+    }
     return this;
   }
 
@@ -69,6 +80,21 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     }
   }
 
+  private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent) {
+    const { targetInfo } = event;
+    if (targetInfo.type === 'page') {
+      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      await context.attachToTarget(targetInfo.targetId);
+    }
+  }
+
+  private async onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent) {
+    const { targetId } = event;
+    for (const context of this.browserContextsById.values()) {
+      context.targetDestroyed(targetId);
+    }
+  }
+
   private onDetachedFromTarget(payload: Protocol.Target.DetachedFromTargetEvent) {
     const targetId = payload.targetId;
     for (const [, context] of this.browserContextsById) {
@@ -76,8 +102,15 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     }
   }
 
-  public static async create(connection: Connection, closeCallback: () => void): Promise<Browser> {
+  public static async create(
+    connection: Connection,
+    revision: string,
+    closeCallback: () => void,
+  ): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
-    return await browser.listen();
+
+    const needsTargetDiscovery = revision === '722234';
+
+    return await browser.listen(needsTargetDiscovery);
   }
 }

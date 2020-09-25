@@ -10,14 +10,17 @@ const debugLauncher = debug(`puppet:launch`);
 let puppBrowserCounter = 1;
 export default class Puppet {
   public readonly id: number;
-  public browserName: string;
+  public engine: { browser: string; revision: string };
   public isShuttingDown: boolean;
   public readonly executablePath: string;
   private browser: Promise<IPuppetBrowser>;
 
-  constructor(engine: { browserEngine: string; engineExecutablePath: string }) {
-    this.browserName = engine.browserEngine;
-    this.executablePath = engine.engineExecutablePath;
+  constructor(startParams: {
+    engine: { browser: string; revision: string };
+    engineExecutablePath: string;
+  }) {
+    this.engine = startParams.engine;
+    this.executablePath = startParams.engineExecutablePath;
     this.isShuttingDown = false;
     this.id = puppBrowserCounter;
     this.browser = null;
@@ -41,13 +44,13 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.browserName === 'chrome' || this.browserName === 'chromium') {
+    if (this.engine.browser === 'chrome' || this.engine.browser === 'chromium') {
       launcher = PuppetChrome;
     }
 
     const launchArgs = launcher.getLaunchArgs({ proxyPort, showBrowser });
     const launchedProcess = launchProcess(this.executablePath, launchArgs, {}, pipeBrowserIo);
-    this.browser = launcher.createPuppet(launchedProcess);
+    this.browser = launcher.createPuppet(launchedProcess, this.engine.revision);
   }
 
   public async newContext(emulation: IBrowserEmulation) {

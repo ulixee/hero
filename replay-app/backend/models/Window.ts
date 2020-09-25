@@ -1,16 +1,15 @@
-import { app, BrowserWindow } from 'electron';
-import { resolve } from 'path';
-import Application from '../Application';
-import ReplayApi from '~backend/api';
-import storage from '../storage';
-import AppView from './AppView';
-import ReplayView from './ReplayView';
-import IWindowLocation, { InternalLocations } from '~shared/interfaces/IWindowLocation';
-import ViewBackend from '~backend/models/ViewBackend';
-import PlaybarView from '~backend/models/PlaybarView';
-import { TOOLBAR_HEIGHT } from '~shared/constants/design';
-import IReplayMeta from '~shared/interfaces/IReplayMeta';
-import generateContextMenu from '~backend/menus/generateContextMenu';
+import { app, BrowserWindow } from "electron";
+import { resolve } from "path";
+import Application from "../Application";
+import ReplayApi from "~backend/api";
+import storage from "../storage";
+import AppView from "./AppView";
+import ReplayView from "./ReplayView";
+import IWindowLocation, { InternalLocations } from "~shared/interfaces/IWindowLocation";
+import ViewBackend from "~backend/models/ViewBackend";
+import { TOOLBAR_HEIGHT } from "~shared/constants/design";
+import IReplayMeta from "~shared/interfaces/IReplayMeta";
+import generateContextMenu from "~backend/menus/generateContextMenu";
 import { ISessionTab } from "~shared/interfaces/ISaSession";
 
 export default class Window {

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as EventUtils from '@secret-agent/commons/EventUtils';
+import * as EventUtils from '@secret-agent/commons/eventUtils';
 import { debug } from '@secret-agent/commons/Debug';
 import IConnectionTransport from '../interfaces/IConnectionTransport';
 

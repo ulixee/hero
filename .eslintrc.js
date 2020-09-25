@@ -92,6 +92,7 @@ module.exports = {
   ignorePatterns: [
     '**/node_modules',
     'node_modules',
+    "**/test/assets/**",
     'build',
     'build-dist',
     '**/build/**',

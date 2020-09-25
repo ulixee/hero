@@ -23,7 +23,7 @@ export default class Emulators {
 
     const usagePct = statCounterUsage?.usage ?? 0;
 
-    if (!usagePct) {
+    if (!usagePct && process.env.NODE_ENV !== 'test') {
       log.warn("Browser plugin doesn't have a usage percent in the wild!", {
         sessionId: null,
         emulatorId: EmulatorPluginImpl.emulatorId,

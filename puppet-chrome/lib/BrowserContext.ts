@@ -35,6 +35,21 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
       browserContextId: this.id,
     });
 
+    await this.attachToTarget(targetId);
+
+    // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
+    const page = this.getPageWithId(targetId);
+    await page.isReady;
+    if (page.isClosed) throw new Error('Page has been closed.');
+    return page;
+  }
+
+  targetDestroyed(targetId: string) {
+    const page = this.getPageWithId(targetId);
+    if (page) page.didClose();
+  }
+
+  async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
     if (!this.getPageWithId(targetId)) {
       await this.browser.cdpSession.send('Target.attachToTarget', {
@@ -42,12 +57,6 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
         flatten: true,
       });
     }
-
-    // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
-    const page = this.getPageWithId(targetId);
-    await page.isReady;
-    if (page.isClosed) throw new Error('Page has been closed.');
-    return page;
   }
 
   onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {

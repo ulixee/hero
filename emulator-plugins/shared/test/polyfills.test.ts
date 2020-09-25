@@ -1,24 +1,30 @@
-import * as Helpers from "@secret-agent/testing/helpers";
-import { inspect } from "util";
-import * as os from "os";
-import Chrome80 from "@secret-agent/emulate-chrome-80";
-import Puppet from "@secret-agent/puppet";
-import { ITestHttpServer } from "@secret-agent/testing/helpers";
-import PolyfillChromeBt from "./polyfill.bluetooth.json";
-import inspectScript from "./inspectHierarchy";
-import getOverrideScript from "../injected-scripts";
+import * as Helpers from '@secret-agent/testing/helpers';
+import { ITestHttpServer } from '@secret-agent/testing/helpers';
+import { inspect } from 'util';
+import Puppet from '@secret-agent/puppet';
+import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import Emulators from '@secret-agent/emulators';
+import Core from '@secret-agent/core';
+import inspectScript from './inspectHierarchy';
+import getOverrideScript from '../injected-scripts';
 
 let puppet: Puppet;
 let httpServer: ITestHttpServer;
+let context: IPuppetContext;
 beforeAll(async () => {
-  const emulator = new Chrome80();
+  const emulator = Emulators.create(Core.defaultEmulatorId);
   puppet = new Puppet(emulator);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 
-  httpServer = await Helpers.runHttpsServer(async (_, response) => {
-    return response.end(`<html><head></head><body>Hello world</body></html>`);
-  }, true);
+  context = await puppet.newContext({
+    proxyPassword: '',
+    platform: 'win32',
+    acceptLanguage: 'en',
+    userAgent: 'Chrome Test',
+  });
+  Helpers.onClose(() => context.close().catch(), true);
+  httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
 });
 
 afterAll(Helpers.afterAll);
@@ -84,14 +90,14 @@ test('it should be able to add polyfills', async () => {
       additions: [
         {
           path: 'window',
-          propertyName: 'chrome',
+          propertyName: 'chromey',
           prevProperty: 'Atomics',
           property: chromeProperty,
         },
         {
           path: 'window',
           propertyName: 'ObjectTest',
-          prevProperty: 'chrome',
+          prevProperty: 'chromey',
           property: objectTestProperties,
         },
       ],
@@ -102,29 +108,29 @@ test('it should be able to add polyfills', async () => {
     false,
   );
   await page.navigate(httpServer.url);
-  await new Promise(resolve => page.once('load', resolve));
+  await page.waitOn('load');
 
-  const { window } = JSON.parse(
-    (await page.mainFrame.evaluate(
-      `(${inspectScript.toString()})(window, 'window')`,
-      false,
-    )) as any,
+  const json = await page.mainFrame.evaluate(
+    `(${inspectScript.toString()})(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
+    false,
   );
+  const result = JSON.parse(json as any);
 
-  const windowKeys = Object.keys(window);
+  const windowKeys = result.windowKeys;
+  const window = result.window;
   // test chrome property
   if (debug) {
-    console.log('chrome', inspect(window.chrome, false, null, true));
+    console.log('chromey', inspect(window.chromey, false, null, true));
   }
-  expect(window.chrome).toStrictEqual(chromeProperty);
-  expect(windowKeys.indexOf('chrome')).toBe(windowKeys.indexOf('Atomics') + 1);
+  expect(window.chromey).toStrictEqual(chromeProperty);
+  expect(windowKeys.indexOf('chromey')).toBe(windowKeys.indexOf('Atomics') + 1);
 
   // test ObjectTest property
   if (debug) {
     console.log('ObjectTest', inspect(window.ObjectTest, false, null, true));
   }
   expect(window.ObjectTest).toStrictEqual(objectTestProperties);
-  expect(windowKeys.indexOf('ObjectTest')).toBe(windowKeys.indexOf('chrome') + 1);
+  expect(windowKeys.indexOf('ObjectTest')).toBe(windowKeys.indexOf('chromey') + 1);
 });
 
 test('it should be able to remove properties', async () => {
@@ -285,67 +291,9 @@ test('it should be able to change window property order', async () => {
   expect(windowKeysAfter.indexOf(windowKeys[50])).toBe(prop3Index + 25);
 }, 10e3);
 
-test('it should be able to backfill the bluetooth stack', async () => {
-  const platform = os.platform();
-  const isPlatformSupported = platform === 'darwin' || platform === 'win32';
-  if (!isPlatformSupported) return;
-  const page = await createPage();
-
-  await page.addNewDocumentScript(getOverrideScript('polyfill', PolyfillChromeBt).script, false);
-  await Promise.all([
-    page.navigate(httpServer.url),
-    page.waitOn('frame-lifecycle', event => event.name === 'load'),
-  ]);
-
-  const structure = JSON.parse(
-    (await page.mainFrame.evaluate(
-      `(${inspectScript.toString()})(window, 'window')`,
-      false,
-    )) as any,
-  );
-
-  function getFromStructure(path) {
-    const pathSplit = path.split('.');
-    let entry = structure;
-    for (const split of pathSplit) {
-      if (split) {
-        entry = entry[split];
-      }
-    }
-    return entry;
-  }
-
-  for (const polyfill of PolyfillChromeBt.additions) {
-    const parent = getFromStructure(polyfill.path);
-
-    if (debug) {
-      console.log(
-        `${polyfill.path}.${polyfill.propertyName}`,
-        inspect(parent ? parent[polyfill.propertyName] : 'parent null', false, null, true),
-      );
-    }
-    const keys = Object.keys(parent);
-    expect(keys.indexOf(polyfill.propertyName)).toBe(keys.indexOf(polyfill.prevProperty) + 1);
-  }
-
-  for (const polyfill of PolyfillChromeBt.additions) {
-    const parent = getFromStructure(polyfill.path);
-    expect(parent[polyfill.propertyName]).toStrictEqual(polyfill.property);
-    if (debug) {
-      console.log('Matched structure', polyfill.path, polyfill.propertyName);
-    }
-  }
-});
-
 async function createPage() {
-  const context = await puppet.newContext({
-    proxyPassword: '',
-    platform: 'win32',
-    acceptLanguage: 'en',
-    userAgent: 'Chrome Test',
-  });
-  Helpers.onClose(() => context.close());
   const page = await context.newPage();
+  Helpers.onClose(() => page.close());
   page.on('page-error', console.log);
   if (debug) {
     page.on('console', log => console.log(log));

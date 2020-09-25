@@ -86,7 +86,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.id = uuidv1();
     this.session = session;
     this.parentTabId = parentTabId;
-    this.sessionState.registerTab(this.id, this.parentTabId);
+    this.sessionState.registerTab(this.id);
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
     this.puppetPage = puppetPage;
     this.interactor = new Interactor(this);
@@ -152,10 +152,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       sessionId: this.session.id,
     });
     try {
-      Timer.expireAll(
-        this.waitTimeouts,
-        new CanceledPromiseError('Terminated command because session closing'),
-      );
+      const cancelMessage = 'Terminated command because session closing';
+      Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
+      this.cancelPendingEvents(cancelMessage);
       await this.puppetPage.close();
 
       this.emit('close');

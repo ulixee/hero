@@ -178,13 +178,12 @@ export default class Application {
       this.overlayManager.getByWebContentsId(webContentsId).hide();
     });
 
-
     // GOTO
-    ipcMain.on('go-back', (e, location) => {
+    ipcMain.on('go-back', () => {
       Window.current.goBack();
     });
 
-    ipcMain.on('go-forward', (e, location) => {
+    ipcMain.on('go-forward', () => {
       Window.current.goForward();
     });
 
@@ -196,7 +195,7 @@ export default class Application {
       await this.loadSessionReplay(replayMeta);
     });
 
-    ipcMain.on('navigate-to-session', (e, session: { id: number; name: string }) => {});
+    ipcMain.on('navigate-to-session', () => {});
 
     ipcMain.on('navigate-to-session-tab', (e, tab: { id: string }) => {
       Window.current?.loadReplayTab(tab.id);

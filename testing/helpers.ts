@@ -13,6 +13,7 @@ import * as net from 'net';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core from '@secret-agent/core';
+import { CanceledPromiseError } from '@secret-agent/commons/eventUtils';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -287,7 +288,7 @@ export async function runHttp2Server(
       }
       httpServer.isClosing = true;
       for (const session of sessions) {
-        session.socket.unref();
+        session.socket?.unref();
         session.destroy();
       }
       return new Promise(resolve => {
@@ -349,6 +350,7 @@ async function closeAll(isFinal = false) {
       try {
         await toClose.close();
       } catch (err) {
+        if (err instanceof CanceledPromiseError) return;
         // eslint-disable-next-line no-console
         console.log('Error shutting down', err);
       }

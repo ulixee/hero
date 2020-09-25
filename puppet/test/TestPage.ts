@@ -54,7 +54,7 @@ export async function detachFrame(page: IPuppetPage, frameId: string) {
 
 export async function goto(page: IPuppetPage, url: string, waitOnLifecycle = 'load') {
   const nav = page.waitOn('frame-lifecycle', event => event.name === waitOnLifecycle);
-  return await Promise.all([page.navigate(url), nav]);
+  await Promise.all([page.navigate(url), nav]);
 }
 
 export async function setContent(page: IPuppetPage, content: string) {

@@ -1,9 +1,9 @@
-import IPuppetBrowser from '@secret-agent/puppet/interfaces/IPuppetBrowser';
-import ILaunchedProcess from '@secret-agent/puppet/interfaces/ILaunchedProcess';
-import IPuppetLauncher from '@secret-agent/puppet/interfaces/IPuppetLauncher';
-import os from 'os';
-import { Browser } from './lib/Browser';
-import { Connection } from './lib/Connection';
+import IPuppetBrowser from "@secret-agent/puppet/interfaces/IPuppetBrowser";
+import ILaunchedProcess from "@secret-agent/puppet/interfaces/ILaunchedProcess";
+import IPuppetLauncher from "@secret-agent/puppet/interfaces/IPuppetLauncher";
+import os from "os";
+import { Browser } from "./lib/Browser";
+import { Connection } from "./lib/Connection";
 
 const PuppetLauncher: IPuppetLauncher = {
   getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean }) {
@@ -33,11 +33,11 @@ const PuppetLauncher: IPuppetLauncher = {
     }
     return chromeArguments;
   },
-  async createPuppet(process: ILaunchedProcess): Promise<IPuppetBrowser> {
+  async createPuppet(process: ILaunchedProcess, revision: string): Promise<IPuppetBrowser> {
     const { transport, close } = process;
     try {
       const connection = new Connection(transport);
-      return await Browser.create(connection, close);
+      return await Browser.create(connection, revision, close);
     } catch (error) {
       close();
       throw error;

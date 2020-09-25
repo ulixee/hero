@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
-import { EventEmitter } from 'events';
-import * as Debug from './Debug';
-import TimeoutError from './interfaces/TimeoutError';
+import { EventEmitter } from "events";
+import * as Debug from "./Debug";
+import { createPromise, IResolvablePromise } from "./utils";
 
 export interface IRegisteredEventListener {
   emitter: EventEmitter;
@@ -18,6 +18,16 @@ export function addEventListener(
   return { emitter, eventName, handler };
 }
 
+export function addTypedEventListener(
+  emitter: TypedEventEmitter<any>,
+  eventName: string | symbol,
+  handler: (...args: any[]) => void,
+  includePreviousEvents?: boolean,
+): IRegisteredEventListener {
+  emitter.on(eventName, handler, includePreviousEvents);
+  return { emitter, eventName, handler };
+}
+
 export function addEventListeners(
   emitter: EventEmitter,
   registrations: [string | symbol, (...args: any[]) => void, boolean?][],
@@ -25,48 +35,6 @@ export function addEventListeners(
   return registrations.map(([eventName, handler]) => {
     emitter.on(eventName, handler);
     return { emitter, eventName, handler };
-  });
-}
-
-function waitForEvent<T>(
-  emitter: EventEmitter,
-  eventName: string | symbol,
-  handler?: (...args: any[]) => void,
-  timeoutMillis?: number,
-  includePreviousEvents = false,
-  pendingRegistry?: IPendingWaitEvent[],
-) {
-  return new Promise<T>((resolve, reject) => {
-    let timeout: NodeJS.Timeout;
-    if (timeoutMillis) {
-      const timeoutError = new TimeoutError(`Error waiting for ${String(eventName)}`);
-      timeout = setTimeout(() => reject(timeoutError), timeoutMillis);
-    }
-    if (pendingRegistry) {
-      pendingRegistry.push({
-        event: eventName,
-        timeout,
-        reject,
-        error: new CanceledPromiseError(`Event (${String(eventName)}) canceled`),
-      });
-    }
-    const listeners: IRegisteredEventListener[] = [];
-
-    const listener = addEventListener(emitter, eventName, result => {
-      // give the listeners a second to register
-      process.nextTick(() => {
-        if (!handler || handler.call(emitter, result)) {
-          resolve(result);
-          if (pendingRegistry) {
-            const idx = pendingRegistry.findIndex(x => x.reject === reject);
-            if (idx >= 0) pendingRegistry.splice(idx, 1);
-          }
-          clearTimeout(timeout);
-          removeEventListeners(listeners);
-        }
-      });
-    });
-    listeners.push(listener);
   });
 }
 
@@ -137,9 +105,9 @@ export interface ITypedEventEmitter<T> {
 export class CanceledPromiseError extends Error {}
 
 export interface IPendingWaitEvent {
+  id: number;
   event: string | symbol;
-  reject: (err: CanceledPromiseError) => any;
-  timeout: NodeJS.Timeout;
+  resolvable: IResolvablePromise;
   error: CanceledPromiseError;
 }
 
@@ -151,6 +119,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     this.isDebugEnabled = Debug.isEnabled(this._logPrefix);
   }
 
+  private pendingIdCounter = 0;
   private _logPrefix: string;
   private isDebugEnabled: boolean;
 
@@ -172,9 +141,8 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
         this.pendingWaitEvents.push(event);
         continue;
       }
-      clearTimeout(event.timeout);
       if (message) event.error.message = message;
-      event.reject(event.error);
+      event.resolvable.reject(event.error);
     }
   }
 
@@ -191,14 +159,35 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     timeoutMillis = 30e3,
     includePreviousEvents = false,
   ) {
-    return waitForEvent<T[K]>(
+    const promise = createPromise<T[K]>(timeoutMillis, `Timeout waiting for ${String(eventType)}`);
+
+    this.pendingIdCounter += 1;
+    const id = this.pendingIdCounter;
+
+    this.pendingWaitEvents.push({
+      id,
+      event: eventType,
+      resolvable: promise,
+      error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
+    });
+
+    const listener = addTypedEventListener(
       this,
       eventType,
-      listenerFn,
-      timeoutMillis,
+      (result: T[K]) => {
+        // give the listeners a second to register
+        if (!listenerFn || listenerFn.call(this, result)) {
+          promise.resolve(result);
+        }
+      },
       includePreviousEvents,
-      this.pendingWaitEvents,
     );
+
+    return promise.promise.finally(() => {
+      removeEventListeners([listener]);
+      const idx = this.pendingWaitEvents.findIndex(x => x.id === id);
+      if (idx >= 0) this.pendingWaitEvents.splice(idx, 1);
+    });
   }
 
   public on<K extends keyof T & (string | symbol)>(

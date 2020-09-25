@@ -3,5 +3,5 @@ import IPuppetBrowser from './IPuppetBrowser';
 
 export default interface IPuppetLauncher {
   getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean });
-  createPuppet(process: ILaunchedProcess): Promise<IPuppetBrowser>;
+  createPuppet(process: ILaunchedProcess, revision: string): Promise<IPuppetBrowser>;
 }

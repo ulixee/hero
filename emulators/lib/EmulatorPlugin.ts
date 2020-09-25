@@ -8,7 +8,7 @@ export default abstract class EmulatorPlugin {
   public readonly userAgent: IUserAgent;
   public abstract canPolyfill: boolean;
   public abstract engineExecutablePath: string;
-  public abstract browserEngine: 'chrome' | 'webkit';
+  public abstract engine: { browser: string; revision: string };
   public abstract delegate: IHttpRequestModifierDelegate;
   protected userProfile: IUserProfile;
 

@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
-import { Protocol } from "devtools-protocol";
-import { EventEmitter } from "events";
-import { assert } from "@secret-agent/commons/utils";
-import { IConnectionCallback } from "@secret-agent/puppet/interfaces/IConnectionCallback";
-import { CanceledPromiseError } from "@secret-agent/commons/eventUtils";
-import { debug } from "@secret-agent/commons/Debug";
-import { Connection } from "./Connection";
+import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
+import { Protocol } from 'devtools-protocol';
+import { EventEmitter } from 'events';
+import { assert } from '@secret-agent/commons/utils';
+import { IConnectionCallback } from '@secret-agent/puppet/interfaces/IConnectionCallback';
+import { CanceledPromiseError } from '@secret-agent/commons/eventUtils';
+import { debug } from '@secret-agent/commons/Debug';
+import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;
 
 const debugProtocolMissed = debug('puppet-chrome:protocol:MISSED X');
@@ -103,10 +103,11 @@ export class CDPSession extends EventEmitter {
   }
 
   onClosed(): void {
-    for (const callback of this.pendingMessages.values())
+    for (const callback of this.pendingMessages.values()) {
       callback.reject(
         rewriteError(callback.error, `Protocol error (${callback.method}): Target closed.`),
       );
+    }
     this.pendingMessages.clear();
     this.connection = null;
     this.emit('disconnected');

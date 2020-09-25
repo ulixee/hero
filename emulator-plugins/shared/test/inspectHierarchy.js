@@ -1,6 +1,6 @@
 // copied from double-agent. do not modify manually!
 
-module.exports = async function inspect(obj, parentPath) {
+module.exports = async function inspect(obj, parentPath, extractKeys = []) {
   const skipProps = [
     'Fingerprint2',
     'pageQueue',
@@ -44,6 +44,14 @@ module.exports = async function inspect(obj, parentPath) {
   const detached = {};
 
   const result = await extractPropsFromObject(obj, parentPath);
+
+  if (extractKeys && extractKeys.length) {
+    const extracted = {};
+    for (const key of extractKeys) {
+      extracted[key] = result[key];
+    }
+    return JSON.stringify({ window: extracted, windowKeys: Object.keys(result) });
+  }
   // NOTE: need to stringify to make sure this transfers same as it will from a browser window
   return JSON.stringify({ window: result, detached });
 
@@ -108,10 +116,10 @@ module.exports = async function inspect(obj, parentPath) {
       }
       if (key === 'constructor') continue;
 
-      const path = `${parentPath  }.${  String(key)}`;
+      const path = `${parentPath}.${String(key)}`;
       if (path.endsWith('_GLOBAL_HOOK__')) continue;
 
-      const prop = `${  String(key)}`;
+      const prop = `${String(key)}`;
       if (
         path.startsWith('window.document') &&
         typeof key === 'string' &&
@@ -165,7 +173,7 @@ module.exports = async function inspect(obj, parentPath) {
     try {
       if (obj.prototype) {
         const instance = await new obj();
-        newObj['new()'] = await extractPropsFromObject(instance, `${parentPath  }.new()`);
+        newObj['new()'] = await extractPropsFromObject(instance, `${parentPath}.new()`);
       }
     } catch (err) {
       newObj['new()'] = err.toString();
@@ -189,10 +197,10 @@ module.exports = async function inspect(obj, parentPath) {
 
         if (loadedObjects.has(proto)) continue;
 
-        let path = `window.${  name}`;
+        let path = `window.${name}`;
         const topType = name.split('.').shift();
         if (!(topType in window)) {
-          path = `detached.${  name}`;
+          path = `detached.${name}`;
         }
 
         if (!hierarchyNav.has(path)) {
@@ -239,7 +247,7 @@ module.exports = async function inspect(obj, parentPath) {
       (typeof value === 'function' || typeof value === 'object' || typeof value === 'symbol')
     ) {
       if (loadedObjects.has(value)) {
-        return `REF: ${  loadedObjects.get(value)}`;
+        return `REF: ${loadedObjects.get(value)}`;
       }
       // safari will end up in an infinite loop since each plugin is a new object as your traverse
       if (path.includes('.navigator') && path.endsWith('.enabledPlugin')) {
@@ -256,7 +264,7 @@ module.exports = async function inspect(obj, parentPath) {
 
     if (!Object.keys(descriptor).length && !Object.keys(details).length) return undefined;
     const prop = Object.assign(details, descriptor);
-    if (prop._value === `REF: ${  path}`) {
+    if (prop._value === `REF: ${path}`) {
       prop._value = undefined;
     }
     return prop;
@@ -286,38 +294,37 @@ module.exports = async function inspect(obj, parentPath) {
       plainObject._invocation = functionDetails.invocation;
 
       return plainObject;
-    } 
-      let value;
-      try {
-        value = objDesc.value;
-        if (!value && !accessException) {
-          value = obj[key];
-        }
-      } catch (err) {}
+    }
+    let value;
+    try {
+      value = objDesc.value;
+      if (!value && !accessException) {
+        value = obj[key];
+      }
+    } catch (err) {}
 
-      let type = typeof value;
-      value = getValueString(value, key);
-      const functionDetails = await getFunctionDetails(value, obj, key, type, path);
-      type = functionDetails.type;
+    let type = typeof value;
+    value = getValueString(value, key);
+    const functionDetails = await getFunctionDetails(value, obj, key, type, path);
+    type = functionDetails.type;
 
-      const flags = [];
-      if (objDesc.configurable) flags.push('c');
-      if (objDesc.enumerable) flags.push('e');
-      if (objDesc.writable) flags.push('w');
+    const flags = [];
+    if (objDesc.configurable) flags.push('c');
+    if (objDesc.enumerable) flags.push('e');
+    if (objDesc.writable) flags.push('w');
 
-      return {
-        _type: type,
-        _function: functionDetails.func,
-        _invocation: functionDetails.invocation,
-        _flags: flags.join(''),
-        _accessException: accessException ? accessException.toString() : undefined,
-        _value: value,
-        _get: objDesc.get ? objDesc.get.toString() : undefined,
-        _set: objDesc.set ? objDesc.set.toString() : undefined,
-        _getToStringToString: objDesc.get ? objDesc.get.toString.toString() : undefined,
-        _setToStringToString: objDesc.set ? objDesc.set.toString.toString() : undefined,
-      };
-    
+    return {
+      _type: type,
+      _function: functionDetails.func,
+      _invocation: functionDetails.invocation,
+      _flags: flags.join(''),
+      _accessException: accessException ? accessException.toString() : undefined,
+      _value: value,
+      _get: objDesc.get ? objDesc.get.toString() : undefined,
+      _set: objDesc.set ? objDesc.set.toString() : undefined,
+      _getToStringToString: objDesc.get ? objDesc.get.toString.toString() : undefined,
+      _setToStringToString: objDesc.set ? objDesc.set.toString.toString() : undefined,
+    };
   }
 
   async function getFunctionDetails(value, obj, key, type, path) {
@@ -376,15 +383,14 @@ module.exports = async function inspect(obj, parentPath) {
     }
     try {
       if (value && typeof value === 'symbol') {
-        value = `${  String(value)}`;
+        value = `${String(value)}`;
       } else if (value && (value instanceof Promise || typeof value.then === 'function')) {
         value = 'Promise';
       } else if (value && typeof value === 'object') {
         if (loadedObjects.has(value)) {
-          return `REF: ${  loadedObjects.get(value)}`;
-        } 
-          value = String(value);
-        
+          return `REF: ${loadedObjects.get(value)}`;
+        }
+        value = String(value);
       } else if (value && typeof value === 'string') {
         const url = '${ctx.url.href}';
         const host = '${ctx.url.host}';
@@ -408,7 +414,7 @@ module.exports = async function inspect(obj, parentPath) {
     if (obj === Object.prototype) return 'Object.prototype';
     try {
       if (typeof obj === 'symbol') {
-        return `${  String(obj)}`;
+        return `${String(obj)}`;
       }
     } catch (err) {}
     try {
@@ -439,7 +445,7 @@ module.exports = async function inspect(obj, parentPath) {
 
       if (!name) return;
 
-      return `${name  }.prototype`;
+      return `${name}.prototype`;
     } catch (err) {}
   }
 };

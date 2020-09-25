@@ -14,6 +14,8 @@
     "@secret-agent/puppet-chrome": "^1.0.0-alpha.10"
   },
   "devDependencies": {
-    "ws": "^7.3.1"
+    "ws": "^7.3.1",
+    "@secret-agent/emulate-chrome-80": "^1.0.0-alpha.11",
+    "@secret-agent/emulate-chrome-83": "^1.0.0-alpha.11"
   }
 }

@@ -43,20 +43,20 @@
   document.head.appendChild(styleElement);
   document.body.appendChild(box);
   document.addEventListener('mousemove', event => {
-    box.style.left = event.pageX + 'px';
-    box.style.top = event.pageY + 'px';
+    box.style.left = `${event.pageX  }px`;
+    box.style.top = `${event.pageY  }px`;
     updateButtons(event.buttons);
   }, true);
   document.addEventListener('mousedown', event => {
     updateButtons(event.buttons);
-    box.classList.add('button-' + event.which);
+    box.classList.add(`button-${  event.which}`);
   }, true);
   document.addEventListener('mouseup', event => {
     updateButtons(event.buttons);
-    box.classList.remove('button-' + event.which);
+    box.classList.remove(`button-${  event.which}`);
   }, true);
   function updateButtons(buttons) {
     for (let i = 0; i < 5; i++)
-      box.classList.toggle('button-' + i, buttons & (1 << i));
+      box.classList.toggle(`button-${  i}`, buttons & (1 << i));
   }
 })();

@@ -40,7 +40,7 @@ test('it should mimic a chrome object', async () => {
   await page.navigate(httpServer.url);
 
   const structure = JSON.parse(
-    (await page.mainFrame.evaluate(`(${inspectScript.toString()})(window, 'window')`, false)) as any,
+    (await page.mainFrame.evaluate(`(${inspectScript.toString()})(window, 'window', ['chrome'])`, false)) as any,
   ).window;
   if (debug) console.log(inspect(structure.chrome, false, null, true));
   expect(structure.chrome).toStrictEqual(chrome);

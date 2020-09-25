@@ -2,6 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import Core from '@secret-agent/core';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import os from 'os';
 import SecretAgent from '../index';
 
 let koaServer;
@@ -131,8 +132,9 @@ describe('Multi-tab scenarios', () => {
     Helpers.needsClosing.push(browser);
 
     await browser.goto(`${koaServer.baseUrl}/tabTest2`);
+    const newTabKey = os.platform() === 'darwin' ? KeyboardKeys.MetaLeft : KeyboardKeys.ControlLeft;
     await browser.interact({
-      [Command.keyDown]: KeyboardKeys.MetaLeft,
+      [Command.keyDown]: newTabKey,
     });
     await browser.click(browser.document.querySelector('a'));
     const newTab = await browser.waitForNewTab();

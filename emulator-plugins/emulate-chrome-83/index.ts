@@ -1,25 +1,28 @@
-import Emulators, { EmulatorPlugin, EmulatorPluginStatics, UserAgents } from "@secret-agent/emulators";
-import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
+import Emulators, {
+  EmulatorPlugin,
+  EmulatorPluginStatics,
+  UserAgents,
+} from '@secret-agent/emulators';
+import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
 import {
   chromePageOverrides,
   getEngineExecutablePath,
   modifyHeaders,
   readPolyfills,
-  tcpVars
-} from "@secret-agent/emulator-plugins-shared";
-import { randomBytes } from "crypto";
-import { pickRandom } from "@secret-agent/emulators/lib/Utils";
-import IUserAgent from "@secret-agent/emulators/interfaces/IUserAgent";
-import defaultAgents from "./user-agents.json";
-import navigator from "./navigator.json";
-import chrome from "./chrome.json";
-import codecs from "./codecs.json";
-import pkg from "./package.json";
-import headerProfiles from "./headers.json";
+  tcpVars,
+} from '@secret-agent/emulator-plugins-shared';
+import { randomBytes } from 'crypto';
+import { pickRandom } from '@secret-agent/emulators/lib/Utils';
+import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
+import defaultAgents from './user-agents.json';
+import navigator from './navigator.json';
+import chrome from './chrome.json';
+import codecs from './codecs.json';
+import pkg from './package.json';
+import headerProfiles from './headers.json';
 
 const polyfills = readPolyfills(__dirname);
-const engineExecutablePath =
-  process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
+const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
 
 @EmulatorPluginStatics
 export default class Chrome83 extends EmulatorPlugin {
@@ -45,7 +48,7 @@ export default class Chrome83 extends EmulatorPlugin {
     defaultAgents,
   );
 
-  public browserEngine = 'chrome' as const;
+  public engine = pkg.engine;
   public get engineExecutablePath() {
     return engineExecutablePath;
   }

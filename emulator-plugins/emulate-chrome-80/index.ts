@@ -49,7 +49,7 @@ export default class Chrome80 extends EmulatorPlugin {
 
   protected static polyfills = readPolyfills(__dirname);
 
-  public browserEngine = 'chrome' as const;
+  public engine = pkg.engine;
 
   public get engineExecutablePath() {
     return engineExecutablePath;

@@ -49,7 +49,7 @@ export default class Safari13 extends EmulatorPlugin {
     defaultAgents,
   );
 
-  public browserEngine = 'chrome' as const;
+  public engine = pkg.engine;
   public get engineExecutablePath() {
     return engineExecutablePath;
   }

@@ -2,8 +2,6 @@ import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { debug } from '@secret-agent/commons/Debug';
-import { URL } from 'url';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -20,21 +18,20 @@ import Page = Protocol.Page;
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
-const debugError = debug('puppet-chrome:frames-error');
 
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
-  public frames: { [id: string]: Frame } = {};
+  public framesById = new Map<string, Frame>();
 
   public get mainFrameId() {
-    return Array.from(this.attachedFrameIds).find(id => !this.frames[id].parentId);
+    return Array.from(this.attachedFrameIds).find(id => !this.framesById.get(id).parentId);
   }
 
   public get main() {
-    return this.frames[this.mainFrameId];
+    return this.framesById.get(this.mainFrameId);
   }
 
   public get activeFrames() {
-    return Array.from(this.attachedFrameIds).map(x => this.frames[x]);
+    return Array.from(this.attachedFrameIds).map(x => this.framesById.get(x));
   }
 
   private attachedFrameIds = new Set<string>();
@@ -72,6 +69,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   public close() {
     eventUtils.removeEventListeners(this.registeredEvents);
+    this.cancelPendingEvents('Page closed');
+    for (const frame of this.framesById.values()) {
+      frame.cancelPendingEvents('Page closed');
+    }
   }
 
   public async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
@@ -104,7 +105,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   public getSecurityOrigins() {
     const origins: { origin: string; frameId: string }[] = [];
-    for (const frame of Object.values(this.frames)) {
+    for (const frame of this.framesById.values()) {
       if (this.attachedFrameIds.has(frame.id)) {
         const origin = frame.securityOrigin;
         if (origin && !origins.some(x => x.origin === origin)) {
@@ -121,7 +122,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     isInitiatingNavigation = false,
   ) {
     const { frameId, loaderId } = frameDetails;
-    const frame = this.frames[frameId];
+    const frame = this.framesById.get(frameId);
     if (isInitiatingNavigation) {
       frame.initiateNavigation(url, loaderId);
     }
@@ -129,7 +130,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   }
 
   public getFrameIdForExecutionContext(executionContextId: number) {
-    for (const frame of Object.values(this.frames)) {
+    for (const frame of this.framesById.values()) {
       if (frame.hasContextId(executionContextId)) return frame.id;
     }
   }
@@ -147,7 +148,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const frameId = context.auxData.frameId as string;
 
     this.activeContexts.add(context.id);
-    const frame = this.frames[frameId];
+    const frame = this.framesById.get(frameId);
     frame?.addContextId(context.id, context.name === '');
   }
 
@@ -161,17 +162,17 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   private onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
     const { frameId } = event;
 
-    this.frames[frameId].onStoppedLoading();
+    this.framesById.get(frameId).onStoppedLoading();
   }
 
   private onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
     const { frameId, url, reason, disposition } = navigatedEvent;
-    this.frames[frameId].requestedNavigation(url, reason, disposition);
+    this.framesById.get(frameId).requestedNavigation(url, reason, disposition);
   }
 
   private onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
     const { frameId, url } = navigatedEvent;
-    this.frames[frameId].onNavigatedWithinDocument(url);
+    this.framesById.get(frameId).onNavigatedWithinDocument(url);
   }
 
   private onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
@@ -206,12 +207,12 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   private recordFrame(newFrame: Page.Frame) {
     const { id } = newFrame;
-    if (this.frames[id]) return this.frames[id];
+    if (this.framesById.has(id)) return this.framesById.get(id);
 
     const frame = Frame.create(newFrame, this.activeContexts, this.cdpSession, () =>
       this.attachedFrameIds.has(id),
     );
-    this.frames[id] = frame;
+    this.framesById.set(id, frame);
     this.emit('frame-created', { frame });
 
     const registered = eventUtils.addEventListeners(frame, [

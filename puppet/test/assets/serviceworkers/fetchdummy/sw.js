@@ -5,7 +5,7 @@ self.addEventListener('fetch', event => {
   }
   const slash = event.request.url.lastIndexOf('/');
   const name = event.request.url.substring(slash + 1);
-  const blob = new Blob(["responseFromServiceWorker:" + name], {type : 'text/css'});
+  const blob = new Blob([`responseFromServiceWorker:${  name}`], {type : 'text/css'});
   const response = new Response(blob, { "status" : 200 , "statusText" : "OK" });
   event.respondWith(response);
 });

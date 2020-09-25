@@ -130,9 +130,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const isNavigation =
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
 
-    if (isNavigation) {
-      debug('resource')({ url: networkRequest.request.url, listeners: this.listenerCount('resource-will-be-requested') });
-    }
     this.emit('resource-will-be-requested', {
       browserRequestId: networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.type),

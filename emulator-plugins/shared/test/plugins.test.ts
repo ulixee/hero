@@ -101,7 +101,10 @@ test('it should override plugins in a browser window', async () => {
   expect(mimecount).toBe(4);
 
   const structure = JSON.parse(
-    (await page.mainFrame.evaluate(`(${inspectScript.toString()})(window, 'window')`, false)) as any,
+    (await page.mainFrame.evaluate(
+      `(${inspectScript.toString()})(window, 'window',  ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray','navigator'])`,
+      false,
+    )) as any,
   ).window;
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
     if (debug) console.log(inspect(structure[proto], false, null, true));

@@ -100,7 +100,7 @@ export default class SessionState {
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public registerTab(tabId: string, parentTabId: string, openType?: string) {
+  public registerTab(tabId: string) {
     this.navigationsByTabId[tabId] = new TabNavigations(this.db);
   }
 

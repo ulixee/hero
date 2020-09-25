@@ -5,7 +5,7 @@ function workerFunction() {
 }
 
 self.addEventListener('message', event => {
-  console.log('got this data: ' + event.data);
+  console.log(`got this data: ${  event.data}`);
 });
 
 (async function() {

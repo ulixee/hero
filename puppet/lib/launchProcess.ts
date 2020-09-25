@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as childProcess from 'child_process';
-import { StdioOptions } from 'child_process';
-import { debug } from '@secret-agent/commons/Debug';
-import { Readable, Writable } from 'stream';
-import * as readline from 'readline';
-import { PipeTransport } from './PipeTransport';
-import ILaunchedProcess from '../interfaces/ILaunchedProcess';
-import IConnectionTransport from '../interfaces/IConnectionTransport';
+import * as childProcess from "child_process";
+import { StdioOptions } from "child_process";
+import { debug } from "@secret-agent/commons/Debug";
+import { Readable, Writable } from "stream";
+import * as readline from "readline";
+import { PipeTransport } from "./PipeTransport";
+import ILaunchedProcess from "../interfaces/ILaunchedProcess";
 
 const debugLauncher = debug('puppet:launcher');
 const errorDebug = debug('puppet:browser:error');
