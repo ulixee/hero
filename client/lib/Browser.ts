@@ -149,6 +149,14 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
     return this.activeTab.goto(href);
   }
 
+  public async goBack() {
+    return this.activeTab.goBack();
+  }
+
+  public async goForward() {
+    return this.activeTab.goForward();
+  }
+
   public async fetch(request: Request | string, init?: IRequestInit) {
     return this.activeTab.fetch(request, init);
   }

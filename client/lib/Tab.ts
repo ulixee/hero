@@ -83,6 +83,16 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return createResource(resource, coreTab);
   }
 
+  public async goBack() {
+    const coreTab = getCoreTab(this);
+    return coreTab.goBack();
+  }
+
+  public async goForward() {
+    const coreTab = getCoreTab(this);
+    return coreTab.goForward();
+  }
+
   public async getJsValue<T>(path: string) {
     return getCoreTab(this).getJsValue<T>(path);
   }

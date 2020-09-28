@@ -32,7 +32,15 @@ or
 yarn add secret-agent
 ```
 
-Note: When you install SecretAgent, it also downloads a recent version of Chromium (~170MB Mac, ~282MB Linux, ~280MB Win).
+Note: When you install SecretAgent, it also downloads a recent version of Chromium 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [emulator](/docs/advanced/emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+
+Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Secret Agent npm installations.
+
+- Mac: ~/Library/Cache/
+- Linux: ~/.cache (environment variable XDG_CACHE_HOME)
+- Windows: ~/AppData/Local (environment variable LOCALAPPDATA)
+
+Secret Agent also installs an app called [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions. Replay is ~200MB unpacked. To skip download (ie, in a production environment), you can set the following environmental variable: `SA_REPLAY_SKIP_BINARY_DOWNLOAD=true`.
 
 ## Usage Example
 

@@ -82,6 +82,14 @@ export default class CoreTab {
     return await this.commandQueue.run('goto', href);
   }
 
+  public async goBack(): Promise<string> {
+    return await this.commandQueue.run('goBack');
+  }
+
+  public async goForward(): Promise<string> {
+    return await this.commandQueue.run('goForward');
+  }
+
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
     await this.commandQueue.run('interact', ...interactionGroups);
   }

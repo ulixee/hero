@@ -101,12 +101,13 @@ When multiple commands are combined within a single Interaction, their execution
 4. click
 5. doubleclick
 6. clickDown
-7. move
-8. clickUp
-9. keyPress
-10. keyDown
-11. type
-12. keyUp
+7. scroll
+8. move
+9. clickUp
+10. keyPress
+11. keyDown
+12. type
+13. keyUp
 
 Note: Although commands within a single Interaction are sometimes executed at "nearly" the same time, it is never at the same precise moment. Their execution always follows the order listed above.
 

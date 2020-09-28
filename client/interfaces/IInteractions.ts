@@ -8,6 +8,7 @@ type IInteractions = IInteraction[];
 export default IInteractions;
 
 export enum Command {
+  scroll = 'scroll',
   move = 'move',
 
   click = 'click',
@@ -43,6 +44,7 @@ export enum Command {
 export type ICommand = keyof typeof Command;
 
 export interface ICommandDetailed {
+  [Command.scroll]?: IMousePosition;
   [Command.move]?: IMousePosition;
   [Command.click]?: IMousePosition;
   [Command.clickLeft]?: IMousePosition;

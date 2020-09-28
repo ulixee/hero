@@ -9,6 +9,7 @@
   items:
     - SecretAgent
     - Browser
+    - Tab
     - User
     - Interactions
     - AwaitedDOM

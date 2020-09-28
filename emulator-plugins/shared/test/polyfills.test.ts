@@ -131,7 +131,7 @@ test('it should be able to add polyfills', async () => {
   }
   expect(window.ObjectTest).toStrictEqual(objectTestProperties);
   expect(windowKeys.indexOf('ObjectTest')).toBe(windowKeys.indexOf('chromey') + 1);
-});
+}, 60e3);
 
 test('it should be able to remove properties', async () => {
   const page = await createPage();

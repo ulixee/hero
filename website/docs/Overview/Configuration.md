@@ -51,12 +51,12 @@ const rawProfileJson = fs.readFileSync('profile.json', 'utf-8');
 const profile = JSON.parse(rawProfileJson); // { cookies: { sessionId: 'test' }}
 
 const browser = await SecretAgent.createBrowser({ userProfile: profile });
-const latestUserProfile = await browser.user.export(); 
+const latestUserProfile = await browser.user.exportProfile(); 
 // { cookies, emulatorPlugin, humanoidPlugin, cache, IP } 
 
 await browser.goto('http://example.com');
 
-const latestUserProfile = await browser.user.export(); // 
+const latestUserProfile = await browser.user.exportProfile();
 
 fs.writeFileSync('profile.json', JSON.stringify(latestUserProfile, null, 2));
 ````
