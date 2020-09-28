@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
-import { EventEmitter } from "events";
-import * as Debug from "./Debug";
-import { createPromise, IResolvablePromise } from "./utils";
+import { EventEmitter } from 'events';
+import * as Debug from './Debug';
+import { createPromise, IResolvablePromise } from './utils';
 
 export interface IRegisteredEventListener {
   emitter: EventEmitter;
@@ -22,9 +22,9 @@ export function addTypedEventListener(
   emitter: TypedEventEmitter<any>,
   eventName: string | symbol,
   handler: (...args: any[]) => void,
-  includePreviousEvents?: boolean,
+  includeUnhandledEvents?: boolean,
 ): IRegisteredEventListener {
-  emitter.on(eventName, handler, includePreviousEvents);
+  emitter.on(eventName, handler, includeUnhandledEvents);
   return { emitter, eventName, handler };
 }
 
@@ -56,13 +56,13 @@ export interface ITypedEventEmitter<T> {
     eventType: K,
     listenerFn?: (this: this, event?: T[K]) => boolean,
     timeoutMillis?: number,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): Promise<T[K]>;
 
   on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): this;
 
   off<K extends keyof T & (string | symbol)>(
@@ -73,7 +73,7 @@ export interface ITypedEventEmitter<T> {
   once<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): this;
 
   emit<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]): boolean;
@@ -81,7 +81,7 @@ export interface ITypedEventEmitter<T> {
   addListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => any,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): this;
 
   removeListener<K extends keyof T & (string | symbol)>(
@@ -92,13 +92,13 @@ export interface ITypedEventEmitter<T> {
   prependListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => void,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): this;
 
   prependOnceListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => void,
-    includePreviousEvents?: boolean,
+    includeUnhandledEvents?: boolean,
   ): this;
 }
 
@@ -157,7 +157,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     eventType: K,
     listenerFn?: (this: this, event?: T[K]) => boolean,
     timeoutMillis = 30e3,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ) {
     const promise = createPromise<T[K]>(timeoutMillis, `Timeout waiting for ${String(eventType)}`);
 
@@ -170,6 +170,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       resolvable: promise,
       error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
     });
+    Debug.debug('waiton')(eventType);
 
     const listener = addTypedEventListener(
       this,
@@ -177,10 +178,11 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       (result: T[K]) => {
         // give the listeners a second to register
         if (!listenerFn || listenerFn.call(this, result)) {
+          Debug.debug('waiton:resolve')(eventType);
           promise.resolve(result);
         }
       },
-      includePreviousEvents,
+      includeUnhandledEvents,
     );
 
     return promise.promise.finally(() => {
@@ -193,10 +195,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ) {
     super.on(eventType, listenerFn);
-    if (includePreviousEvents) this.replayMissedEvents(eventType);
+    if (includeUnhandledEvents) this.replayMissedEvents(eventType);
     else this.clearMissedEvents(eventType);
     return this;
   }
@@ -211,10 +213,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public once<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ) {
     super.once(eventType, listenerFn);
-    if (includePreviousEvents) this.replayMissedEvents(eventType);
+    if (includeUnhandledEvents) this.replayMissedEvents(eventType);
     else this.clearMissedEvents(eventType);
     return this;
   }
@@ -234,10 +236,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public addListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => any,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ): this {
     super.addListener(event, listener);
-    if (includePreviousEvents) this.replayMissedEvents(event);
+    if (includeUnhandledEvents) this.replayMissedEvents(event);
     else this.clearMissedEvents(event);
     return this;
   }
@@ -252,10 +254,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public prependListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => void,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ): this {
     super.prependListener(event, listener);
-    if (includePreviousEvents) this.replayMissedEvents(event);
+    if (includeUnhandledEvents) this.replayMissedEvents(event);
     else this.clearMissedEvents(event);
     return this;
   }
@@ -263,10 +265,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   public prependOnceListener<K extends keyof T & (string | symbol)>(
     event: K,
     listener: (this: this, event?: T[K]) => void,
-    includePreviousEvents = false,
+    includeUnhandledEvents = false,
   ): this {
     super.prependOnceListener(event, listener);
-    if (includePreviousEvents) this.replayMissedEvents(event);
+    if (includeUnhandledEvents) this.replayMissedEvents(event);
     else this.clearMissedEvents(event);
     return this;
   }

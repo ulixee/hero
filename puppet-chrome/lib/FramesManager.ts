@@ -2,6 +2,7 @@ import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { debug } from '@secret-agent/commons/Debug';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -18,6 +19,8 @@ import Page = Protocol.Page;
 
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
+
+const debugWarn = debug('puppet-chrome:frames-manager:warn');
 
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
   public framesById = new Map<string, Frame>();
@@ -40,6 +43,8 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly cdpSession: CDPSession;
 
+  private isReady: Promise<void>;
+
   constructor(cdpSession: CDPSession) {
     super();
     this.cdpSession = cdpSession;
@@ -57,21 +62,25 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     ]);
   }
 
-  public async initialize() {
-    const framesResponse = await this.cdpSession.send('Page.getFrameTree');
-    await this.recurseFrameTree(framesResponse.frameTree);
-    await Promise.all([
-      this.cdpSession.send('Page.enable'),
-      this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-      this.cdpSession.send('Runtime.enable'),
-    ]);
+  public initialize() {
+    this.isReady = new Promise<void>(async resolve => {
+      await Promise.all([
+        this.cdpSession.send('Page.enable'),
+        this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
+        this.cdpSession.send('Runtime.enable'),
+      ]);
+      const framesResponse = await this.cdpSession.send('Page.getFrameTree');
+      this.recurseFrameTree(framesResponse.frameTree);
+      resolve();
+    });
+    return this.isReady;
   }
 
   public close() {
     eventUtils.removeEventListeners(this.registeredEvents);
-    this.cancelPendingEvents('Page closed');
+    this.cancelPendingEvents('FramesManager closed');
     for (const frame of this.framesById.values()) {
-      frame.cancelPendingEvents('Page closed');
+      frame.cancelPendingEvents('FramesManager closed');
     }
   }
 
@@ -121,6 +130,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     url: string,
     isInitiatingNavigation = false,
   ) {
+    await this.isReady;
     const { frameId, loaderId } = frameDetails;
     const frame = this.framesById.get(frameId);
     if (isInitiatingNavigation) {
@@ -135,67 +145,80 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     }
   }
 
-  private onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
+  private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
+    await this.isReady;
     this.activeContexts.delete(event.executionContextId);
   }
 
-  private onExecutionContextsCleared() {
+  private async onExecutionContextsCleared() {
+    await this.isReady;
     this.activeContexts.clear();
   }
 
-  private onExecutionContextCreated(event: ExecutionContextCreatedEvent) {
+  private async onExecutionContextCreated(event: ExecutionContextCreatedEvent) {
+    await this.isReady;
     const { context } = event;
     const frameId = context.auxData.frameId as string;
 
     this.activeContexts.add(context.id);
     const frame = this.framesById.get(frameId);
-    frame?.addContextId(context.id, context.name === '');
+    if (!frame) {
+      debugWarn('No frame for active context!', frameId, context.id);
+    }
+    frame?.addContextId(context.id, context.name === '' || context.auxData?.isDefault === true);
   }
 
   /////// FRAMES ///////////////////////////////////////////////////////////////
 
-  private onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
+  private async onFrameNavigated(navigatedEvent: FrameNavigatedEvent) {
+    await this.isReady;
     const frame = this.recordFrame(navigatedEvent.frame);
     frame.onNavigated(navigatedEvent.frame);
   }
 
-  private onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
+  private async onFrameStoppedLoading(event: FrameStoppedLoadingEvent) {
+    await this.isReady;
     const { frameId } = event;
 
     this.framesById.get(frameId).onStoppedLoading();
   }
 
-  private onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
+  private async onFrameRequestedNavigation(navigatedEvent: FrameRequestedNavigationEvent) {
+    await this.isReady;
     const { frameId, url, reason, disposition } = navigatedEvent;
     this.framesById.get(frameId).requestedNavigation(url, reason, disposition);
   }
 
-  private onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
+  private async onFrameNavigatedWithinDocument(navigatedEvent: NavigatedWithinDocumentEvent) {
+    await this.isReady;
     const { frameId, url } = navigatedEvent;
     this.framesById.get(frameId).onNavigatedWithinDocument(url);
   }
 
-  private onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
+  private async onFrameDetached(frameDetachedEvent: FrameDetachedEvent) {
+    await this.isReady;
     const { frameId } = frameDetachedEvent;
     this.attachedFrameIds.delete(frameId);
   }
 
-  private onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
+  private async onFrameAttached(frameAttachedEvent: FrameAttachedEvent) {
+    await this.isReady;
     const { frameId, parentFrameId } = frameAttachedEvent;
 
     this.recordFrame({ id: frameId, parentId: parentFrameId } as any);
     this.attachedFrameIds.add(frameId);
   }
 
-  private onLifecycleEvent(event: LifecycleEventEvent) {
+  private async onLifecycleEvent(event: LifecycleEventEvent) {
+    await this.isReady;
     const { frameId, name, loaderId } = event;
-    const frame = this.recordFrame({ id: frameId, loaderId, name } as any);
+    const frame = this.recordFrame({ id: frameId, loaderId } as any);
     return frame.onLifecycleEvent(name, loaderId);
   }
 
   private recurseFrameTree(frameTree: FrameTree) {
     const { frame, childFrames } = frameTree;
-    this.recordFrame(frame);
+    this.recordFrame(frame, true);
 
     this.attachedFrameIds.add(frame.id);
 
@@ -205,9 +228,13 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     }
   }
 
-  private recordFrame(newFrame: Page.Frame) {
+  private recordFrame(newFrame: Page.Frame, isFrameTreeRecurse = false) {
     const { id } = newFrame;
-    if (this.framesById.has(id)) return this.framesById.get(id);
+    if (this.framesById.has(id)) {
+      const frame = this.framesById.get(id);
+      if (isFrameTreeRecurse) frame.onLoaded(newFrame);
+      return frame;
+    }
 
     const frame = Frame.create(newFrame, this.activeContexts, this.cdpSession, () =>
       this.attachedFrameIds.has(id),

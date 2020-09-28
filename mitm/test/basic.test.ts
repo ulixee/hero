@@ -323,10 +323,8 @@ describe('basic MitM tests', () => {
 
     const proxyCredentials = session.getProxyCredentials();
 
-    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
-
-    expect(result).toBeTruthy();
-
+    await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
+    
     expect(session.delegate.modifyHeadersBeforeSend).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 

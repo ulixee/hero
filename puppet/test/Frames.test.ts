@@ -315,8 +315,9 @@ describe.each([
       await page.setContent(`<a href="${server.emptyPage}">empty.html</a>`);
       await page.mainFrame.waitForLoader();
 
+      const navigate = page.waitOn('frame-navigated');
       await page.click('a');
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await cross-process navigation when clicking anchor', async () => {
@@ -325,12 +326,11 @@ describe.each([
         res.end(`<link rel='stylesheet' href='./one-style.css'>`);
       });
 
-      await page.setContent(
-        `<a href="${`${server.crossProcessBaseUrl}/empty.html`}">empty.html</a>`,
-      );
+      await page.setContent(`<a href="${server.crossProcessBaseUrl}/empty.html">empty.html</a>`);
 
+      const navigate = page.waitOn('frame-navigated');
       await page.click('a');
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await form-get on click', async () => {
@@ -344,8 +344,9 @@ describe.each([
       <input name="foo" value="bar">
       <input type="submit" value="Submit">
     </form>`);
+      const navigate = page.waitOn('frame-navigated');
       await page.click('input[type=submit]');
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await form-post on click', async () => {
@@ -360,8 +361,9 @@ describe.each([
       <input type="submit" value="Submit">
     </form>`);
 
+      const navigate = page.waitOn('frame-navigated');
       await page.click('input[type=submit]');
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await navigation when assigning location', async () => {
@@ -370,8 +372,9 @@ describe.each([
         res.end(`<link rel='stylesheet' href='./one-style.css'>`);
       });
 
+      const navigate = page.waitOn('frame-navigated');
       await page.evaluate(`window.location.href = "${server.emptyPage}"`);
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await navigation when assigning location twice', async () => {
@@ -384,12 +387,12 @@ describe.each([
         res.end('done');
       });
 
+      const navigatedEvent = page.waitOn('frame-navigated');
       await page.evaluate(`
       window.location.href = "${server.emptyPage}?cancel";
       window.location.href = "${server.emptyPage}?override";
     `);
-      const navigatedEvent = await page.waitOn('frame-navigated');
-      expect(navigatedEvent.frame.url).toBe(`${server.emptyPage}?override`);
+      expect((await navigatedEvent).frame.url).toBe(`${server.emptyPage}?override`);
     });
 
     it('should await navigation when evaluating reload', async () => {
@@ -399,8 +402,9 @@ describe.each([
         res.end(`<link rel='stylesheet' href='./one-style.css'>`);
       });
 
+      const navigate = page.waitOn('frame-navigated');
       await page.evaluate(`window.location.reload()`);
-      await expect(page.waitOn('frame-navigated')).resolves.toBeTruthy();
+      await expect(navigate).resolves.toBeTruthy();
     });
 
     it('should await navigating specified target', async () => {

@@ -64,7 +64,7 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
 
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
-    if (this.pages.length) opener = this.pages[0];
+    if (!opener && this.pages.length) opener = this.pages[0];
     const page = new Page(cdpSession, targetInfo.targetId, this, opener);
     this.pages.push(page);
   }

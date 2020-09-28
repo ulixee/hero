@@ -131,46 +131,6 @@ describe.each([
       }
     });
 
-    it('should work for popups', async () => {
-      const context = await puppet.newContext({
-        userAgent: 'popupcity',
-        platform: 'Windows95',
-        acceptLanguage: 'en-GB',
-        proxyPassword: '',
-      });
-      needsClosing.push(context);
-      const page = createTestPage(await context.newPage());
-      needsClosing.push(page);
-      server.setRoute('/empty.html', (req, res) => {
-        res.end(`<a href="${server.emptyPage}" target="_blank">Click me</a>`);
-      });
-
-      const popupPromise = page.waitForPopup();
-      await page.goto(server.emptyPage);
-      expect(await page.evaluate(`navigator.userAgent`)).toBe('popupcity');
-      expect(await page.evaluate(`navigator.platform`)).toBe('Windows95');
-      expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en-GB']);
-      const coordinates: any = await page.evaluate(`(()=>{ 
-    const rect = document.querySelector('a').getBoundingClientRect();
-    return {
-      x: rect.x,
-      y: rect.y
-    };
-})();`);
-      await page.mouse.click(coordinates.x, coordinates.y);
-      const popup = await popupPromise;
-      needsClosing.push(popup);
-      expect(await popup.evaluate(`navigator.userAgent`)).toBe('popupcity');
-      expect(await popup.evaluate(`navigator.platform`)).toBe('Windows95');
-
-      // broken on windows for Chrome 80 (we have to polyfill)
-      const isLanguagesBroken = revision === '722234' && process.platform === 'win32';
-      if (!isLanguagesBroken) {
-        expect(await popup.evaluate(`navigator.languages`)).toStrictEqual(['en-GB']);
-      }
-      await context.close();
-    });
-
     it('should work for subframes', async () => {
       {
         const context = await puppet.newContext(defaultEmulator);

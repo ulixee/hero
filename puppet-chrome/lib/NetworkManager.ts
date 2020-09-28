@@ -72,6 +72,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   public close() {
     eventUtils.removeEventListeners(this.registeredEvents);
+    this.cancelPendingEvents('NetworkManager closed');
   }
 
   public async initializeFromParent(parentManager: NetworkManager) {

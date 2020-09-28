@@ -197,8 +197,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
     this.closePromise.resolve();
-    this.framesManager.close();
-    this.networkManager.cancelPendingEvents('Page closed');
     this.cancelPendingEvents('Page closed', ['close']);
   }
 
@@ -206,8 +204,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
-    await this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id });
-    await this.framesManager.waitOn('frame-navigated');
+    await Promise.all([
+      this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id }),
+      this.framesManager.waitOn('frame-navigated'),
+    ]);
   }
 
   private async initialize(): Promise<void> {
@@ -223,14 +223,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     ]);
 
     if (this.opener && this.opener.popupInitializeFn) {
-      debugMessages('Popup triggered', this.targetId);
+      debugMessages('Popup triggered', { targetId: this.targetId, opener: this.opener.targetId });
       await this.opener.isReady;
       if (this.opener.isClosed) {
         debugMessages('Popup canceled', this.targetId);
         return;
       }
       await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
-      debugMessages('Popup Initialized', this.targetId);
+      debugMessages('Popup initialized', this.targetId);
     }
 
     await this.cdpSession.send('Runtime.runIfWaitingForDebugger');

@@ -220,7 +220,10 @@ export default class ReplayTabState extends EventEmitter {
   }
 
   public loadDomChange(event: IDomChangeEvent) {
-    const { commandId, action, textContent, timestamp } = event;
+    const { commandId, action, textContent, timestamp, isMainFrame } = event;
+
+    if (!isMainFrame) return;
+
     if (event.action === 'newDocument' && !this.startOrigin) {
       this.startOrigin = event.textContent;
       console.log('Got start origin for new tab', this.startOrigin);

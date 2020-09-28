@@ -144,19 +144,6 @@ describe.each([
       expect(await page2.evaluate('document.hasFocus()')).toBe(true);
       await page2.close();
     });
-
-    it('should focus popups by default', async () => {
-      await page.goto(server.emptyPage);
-      const [popup] = await Promise.all<IPuppetPage, any>([
-        page.waitForPopup(),
-        page.evaluate(`(() => {
-        window.open('${server.emptyPage}');
-      })()`),
-      ]);
-      needsClosing.push(popup);
-      expect(await popup.evaluate('document.hasFocus()')).toBe(true);
-      expect(await page.evaluate('document.hasFocus()')).toBe(true);
-    });
   });
 
   describe('addNewDocumentScript', () => {
@@ -261,20 +248,6 @@ describe.each([
       window.location.href = "${server.emptyPage}";
       window.location.href = "about:blank";`),
       ).resolves.toBe('about:blank');
-    });
-
-    it('calling window.open and window.close', async () => {
-      // chrome 80 bombs on disconnect
-      if (revision === Chrome80.engine.revision) {
-        return;
-      }
-      await page.goto(server.emptyPage);
-      await expect(
-        page.evaluate(`(() => {
-      const popup = window.open(window.location.href);
-      popup.close();
-    })()`),
-      ).resolves.toBe(undefined);
     });
   });
 });

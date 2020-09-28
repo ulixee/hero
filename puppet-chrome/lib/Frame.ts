@@ -59,19 +59,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   private defaultContextIds = new Set<number>();
   private isolatedContextIds = new Set<number>();
+  private internalFrame: PageFrame;
 
   private constructor(
-    private internalFrame: PageFrame,
+    internalFrame: PageFrame,
     private readonly activeContexts: Set<number>,
     private readonly cdpSession: CDPSession,
     private readonly isAttached: () => boolean,
   ) {
     super();
-    this.updateUrl();
-    this.setLoader(internalFrame.loaderId);
-    if (internalFrame.loaderId && this.url) {
-      this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
-    }
+    this.onLoaded(internalFrame);
   }
 
   public async evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean) {
@@ -105,11 +102,18 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.emit('frame-requested-navigation', { url, reason });
   }
 
+  public onLoaded(internalFrame: PageFrame) {
+    this.internalFrame = internalFrame;
+    this.updateUrl();
+    this.setLoader(internalFrame.loaderId);
+    if (internalFrame.loaderId && this.url) {
+      this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
+    }
+  }
+
   public onNavigated(frame: PageFrame) {
     this.internalFrame = frame;
-    if (this.internalFrame.url) {
-      this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
-    }
+    this.updateUrl();
 
     if (frame.loaderId) {
       this.loaderIdResolvers.get(frame.loaderId).resolve();
@@ -270,6 +274,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   }
 
   private async waitForDefaultContext() {
+    if (this.getActiveContextId(false)) return;
+
     return this.waitOn('default-context-created').catch(err => {
       if (err instanceof CanceledPromiseError) return;
       throw err;
