@@ -60,27 +60,35 @@ export default class Application {
       return this.createWindowIfNeeded();
     }
 
-    const [
-      dataLocation,
-      sessionName,
-      scriptInstanceId,
-      sessionId,
-      sessionStateApi,
-      replayApiPackagePath,
-    ] = args;
+    const replayMeta: IReplayMeta = {} as any;
+    for (const arg of args) {
+      if (!arg || !arg.startsWith('--replay')) continue;
+      const [key, val] = arg.split('=');
+      let value = val;
+      if (value.startsWith('"')) {
+        value = value.slice(1, value.length - 1);
+      }
+      if (key === '--replay-data-location') {
+        replayMeta.dataLocation = value;
+      }
+      if (key === '--replay-session-name') {
+        replayMeta.sessionName = value;
+      }
+      if (key === '--replay-script-instance-id') {
+        replayMeta.scriptInstanceId = value;
+      }
+      if (key === '--replay-session-id') {
+        replayMeta.sessionId = value;
+      }
+      if (key === '--replay-api-server') {
+        replayMeta.sessionStateApi = value;
+      }
+      if (key === '--replay-api-path') {
+        ReplayApi.serverStartPath = value;
+      }
+    }
 
-    ReplayApi.serverStartPath = replayApiPackagePath;
-
-    await this.loadSessionReplay(
-      {
-        dataLocation,
-        sessionName,
-        sessionId,
-        scriptInstanceId,
-        sessionStateApi,
-      },
-      true,
-    );
+    await this.loadSessionReplay(replayMeta, true);
   }
 
   private createWindowIfNeeded() {

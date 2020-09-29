@@ -64,7 +64,9 @@ export default function launchProcess(
       errorDebug(data);
     });
   }
+  let processKilled = false;
   launchedProcess.once('exit', (exitCode, signal) => {
+    processKilled = true;
     outDebug(`<process did exit: exitCode=${exitCode}, signal=${signal}>`);
   });
 
@@ -81,7 +83,7 @@ export default function launchProcess(
   } as ILaunchedProcess;
 
   function close() {
-    if (launchedProcess.killed) return;
+    if (launchedProcess.killed || processKilled) return;
 
     try {
       if (process.platform === 'win32') {
@@ -90,9 +92,7 @@ export default function launchProcess(
         launchedProcess.kill('SIGKILL');
       }
     } catch (error) {
-      throw new Error(
-        `Killing off browser process failed. Please search for Chromium or Webkit processes and manually kill them.\nError cause: ${error.stack}`,
-      );
+      // might have already been kill off
     }
   }
 }

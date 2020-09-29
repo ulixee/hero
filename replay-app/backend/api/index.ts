@@ -194,8 +194,8 @@ export default class ReplayApi {
       await ReplayApi.startServer();
     }
 
-    console.log('Connecting to Replay API', replay.sessionStateApi ?? this.localApiHost);
-    const api = new ReplayApi(replay.sessionStateApi ?? this.localApiHost, replay);
+    console.log('Connecting to Replay API', replay.sessionStateApi || this.localApiHost);
+    const api = new ReplayApi(replay.sessionStateApi || this.localApiHost, replay);
     await api.isReady;
     return api;
   }
@@ -205,7 +205,7 @@ export default class ReplayApi {
 
     const args = [];
     console.log('Launching Replay API Server at %s', this.serverStartPath);
-    const child = spawn(`node ${this.serverStartPath}`, args, {
+    const child = spawn(`node "${this.serverStartPath}"`, args, {
       stdio: ['ignore', 'pipe', 'inherit'],
       shell: true,
       windowsHide: true,

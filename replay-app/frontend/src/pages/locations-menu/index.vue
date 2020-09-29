@@ -7,13 +7,14 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
-import { ipcRenderer } from "electron";
-import { ICON_SCRIPT } from "~frontend/constants/icons";
-import Icon from "~frontend/components/Icon.vue";
-import NoCache from "~frontend/lib/NoCache";
-import { OverlayStore } from "~frontend/models/OverlayStore";
+import Vue from 'vue';
+import Component from 'vue-class-component';
+import { ipcRenderer } from 'electron';
+import { ICON_SCRIPT } from '~frontend/constants/icons';
+import Icon from '~frontend/components/Icon.vue';
+import NoCache from '~frontend/lib/NoCache';
+import { OverlayStore } from '~frontend/models/OverlayStore';
+import Path from 'path';
 
 @Component({ components: { Icon } })
 export default class LocationsMenuScreen extends Vue {
@@ -27,7 +28,11 @@ export default class LocationsMenuScreen extends Vue {
   }
 
   private scriptName(item) {
-    return item.scriptEntrypoint.split('/').filter(Boolean).slice(-2).join('/');
+    return item.scriptEntrypoint
+      .split(Path.sep)
+      .filter(Boolean)
+      .slice(-2)
+      .join('/');
   }
 
   @NoCache

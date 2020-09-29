@@ -64,6 +64,7 @@ import AppButton from '~frontend/pages/header/components/AppButton.vue';
 import ISaSession from '~shared/interfaces/ISaSession';
 import { getTheme } from '~shared/utils/themes';
 import moment from 'moment';
+import Path from 'path';
 import settings from '~frontend/lib/settings';
 
 @Component({ components: { AppButton, Icon } })
@@ -131,7 +132,7 @@ export default class HeaderPage extends Vue {
 
   get scriptName() {
     return this.saSession.scriptEntrypoint
-      .split('/')
+      .split(Path.sep)
       .filter(Boolean)
       .slice(-2)
       .join('/');

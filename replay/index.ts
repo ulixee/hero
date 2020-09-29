@@ -17,12 +17,12 @@ export default function replay(launchArgs: IReplayLaunchArgs) {
 
   const spawnArgs = [
     '',
-    sessionsDataLocation,
-    sessionName,
-    scriptInstanceId,
-    sessionId,
-    replayApiServer,
-    apiPath,
+    `--replay-data-location="${sessionsDataLocation}"`,
+    `--replay-session-name="${sessionName}"`,
+    `--replay-script-instance-id="${scriptInstanceId}"`,
+    `--replay-session-id="${sessionId}"`,
+    `--replay-api-path="${apiPath}"`,
+    `--replay-api-server="${replayApiServer}"`,
   ];
 
   if (isBinaryInstalled()) {
@@ -36,7 +36,6 @@ export default function replay(launchArgs: IReplayLaunchArgs) {
     spawn('yarn electron', spawnArgs, true);
   } catch (err) {
     log.info('Replay app not found');
-    
   }
 }
 
