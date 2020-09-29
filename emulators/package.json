@@ -1,22 +1,22 @@
 {
   "name": "@secret-agent/emulators",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.12",
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {
     "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'"
   },
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.10",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
+    "@secret-agent/commons": "^1.0.0-alpha.12",
+    "@secret-agent/core-interfaces": "^1.0.0-alpha.12",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.21",
     "user-agents": "^1.0.559"
   },
   "devDependencies": {
-    "moment": "^2.27.0",
     "@types/ua-parser-js": "^0.7.33",
     "axios": "^0.19.2",
-    "csv-parser": "^2.3.2"
+    "csv-parser": "^2.3.2",
+    "moment": "^2.27.0"
   }
 }

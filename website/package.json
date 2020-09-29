@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/website",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.12",
   "private": true,
   "scripts": {
     "start": "gridsome develop",
@@ -16,15 +16,15 @@
     "@gridsome/vue-remark": "^0.2.1",
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
+    "awaited-dom": "^1.1.4",
     "decamelize": "^4.0.0",
     "docsearch.js": "^2.6.3",
     "gridsome": "^0.7.12",
-    "awaited-dom": "^1.1.4",
-    "vue": "^2.6.12",
     "lodash.kebabcase": "^4.1.1",
     "moment": "^2.24.0",
     "remark-slug": "git://github.com/ulixee/remark-slug.git",
     "typography": "^0.16.19",
+    "vue": "^2.6.12",
     "vue-prismjs": "^1.2.0",
     "vue-property-decorator": "^8.3.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/testing",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.12",
   "description": "Helpers and stubs for testing",
   "main": "index.js",
   "private": true,
@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@koa/router": "^8.0.8",
-    "@secret-agent/commons": "^1.0.0-alpha.10",
-    "@secret-agent/core": "^1.0.0-alpha.11",
+    "@secret-agent/commons": "^1.0.0-alpha.12",
+    "@secret-agent/core": "^1.0.0-alpha.12",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0"
