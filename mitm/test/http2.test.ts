@@ -16,7 +16,7 @@ const mocks = {
     create: jest.spyOn(MitmRequestContext, 'create'),
   },
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForResource'),
+    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
   },
 };
 

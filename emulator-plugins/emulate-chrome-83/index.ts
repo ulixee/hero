@@ -6,7 +6,7 @@ import Emulators, {
 import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
 import {
   chromePageOverrides,
-  EngineInstaller,
+  getEngineExecutablePath,
   modifyHeaders,
   readPolyfills,
   tcpVars,
@@ -22,8 +22,7 @@ import pkg from './package.json';
 import headerProfiles from './headers.json';
 
 const polyfills = readPolyfills(__dirname);
-const engineExecutablePath =
-  process.env.CHROME_83_BIN ?? new EngineInstaller(pkg.engine).getExecutablePath();
+const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
 
 @EmulatorPluginStatics
 export default class Chrome83 extends EmulatorPlugin {
@@ -49,6 +48,7 @@ export default class Chrome83 extends EmulatorPlugin {
     defaultAgents,
   );
 
+  public engine = pkg.engine;
   public get engineExecutablePath() {
     return engineExecutablePath;
   }

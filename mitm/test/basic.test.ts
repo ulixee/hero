@@ -16,7 +16,7 @@ const mocks = {
     onRequest: jest.spyOn<any, any>(HttpRequestHandler.prototype, 'onRequest'),
   },
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForResource'),
+    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
   },
 };
 
@@ -138,11 +138,13 @@ describe('basic MitM tests', () => {
   });
 
   it('should strip proxy headers', async () => {
-    const httpServer = await Helpers.runHttpServer(null, null, (url, method, headers1) => {
-      expect(url).toBe('/page1');
-      expect(method).toBe('GET');
-      expect(Object.keys(headers1).filter(x => x.startsWith('proxy-'))).toHaveLength(0);
-      expect(headers1.last).toBe('1');
+    const httpServer = await Helpers.runHttpServer({
+      onRequest(url, method, headers1) {
+        expect(url).toBe('/page1');
+        expect(method).toBe('GET');
+        expect(Object.keys(headers1).filter(x => x.startsWith('proxy-'))).toHaveLength(0);
+        expect(headers1.last).toBe('1');
+      },
     });
     const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
@@ -303,12 +305,15 @@ describe('basic MitM tests', () => {
     const session = new RequestSession('1', 'any agent', null);
     session.delegate.modifyHeadersBeforeSend = jest.fn();
     session.registerResource({
+      tabId: '1',
       browserRequestId: '1',
       url: `${httpServer.url}page1`,
       method: 'GET',
       resourceType: 'Document',
       hasUserGesture: true,
       isUserNavigation: true,
+      origin: undefined,
+      referer: undefined,
       documentUrl: `${httpServer.url}page1`,
     });
     const onresponse = jest.fn();
@@ -318,10 +323,8 @@ describe('basic MitM tests', () => {
 
     const proxyCredentials = session.getProxyCredentials();
 
-    const result = await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
-
-    expect(result).toBeTruthy();
-
+    await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
+    
     expect(session.delegate.modifyHeadersBeforeSend).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 

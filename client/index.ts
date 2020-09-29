@@ -3,7 +3,7 @@ import './lib/SetupAwaitedHandler';
 
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import { RenderingOption } from '@secret-agent/core-interfaces/IWindowOptions';
+import { RenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
 import os from 'os';
 import Browser, { createBrowser } from './lib/Browser';
 import ICreateBrowserOptions from './interfaces/ICreateBrowserOptions';
@@ -14,7 +14,6 @@ import ISecretAgent, {
 } from './interfaces/ISecretAgent';
 import Signals = NodeJS.Signals;
 
-// tslint:disable:variable-name
 const DefaultOptions = {
   maxActiveSessionCount: 10,
   localProxyPortStart: 10e3,

@@ -14,7 +14,7 @@
 
 We started by challenging ourselves to create the ultimate scraper detection tool, which we coined [DoubleAgent](https://github.com/ulixee/double-agent/). Along the way we discovered 76,697 checks that any website can implement to [block practically all known scrapers](https://stateofscraping.org). Then we designed SecretAgent to bypass detection by emulating real users.
 
-SecretAgent uses Chromium as it's core rendering engine under the hood, with DevTools Protocol as its glue layer.
+SecretAgent uses Chromium as its core rendering engine under the hood, with DevTools Protocol as its glue layer.
 
 Instead of creating another complex puppeteer-like API that requires use of nested callbacks and running code in remote contexts, we designed the AwaitedDOM. AwaitedDOM is a W3C compliant DOM written for NodeJS that allows you to write scraper scripts as if you were inside the webpage.
 
@@ -32,7 +32,15 @@ or
 yarn add secret-agent
 ```
 
-Note: When you install SecretAgent, it also downloads a recent version of Chromium (~170MB Mac, ~282MB Linux, ~280MB Win).
+Note: When you install SecretAgent, it also downloads a recent version of Chromium 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [emulator](/docs/advanced/emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+
+Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Secret Agent npm installations.
+
+- Mac: ~/Library/Cache/
+- Linux: ~/.cache (environment variable XDG_CACHE_HOME)
+- Windows: ~/AppData/Local (environment variable LOCALAPPDATA)
+
+Secret Agent also installs an app called [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions. Replay is ~200MB unpacked. To skip download (ie, in a production environment), you can set the following environmental variable: `SA_REPLAY_SKIP_BINARY_DOWNLOAD=true`.
 
 ## Usage Example
 

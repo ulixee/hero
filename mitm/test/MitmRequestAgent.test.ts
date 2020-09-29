@@ -9,7 +9,7 @@ import MitmRequestAgent from '../lib/MitmRequestAgent';
 
 const mocks = {
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForResource'),
+    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
   },
 };
 

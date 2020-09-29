@@ -6,13 +6,13 @@ describe('events', () => {
   it('receives close event', async () => {
     const { SecretAgent, coreClient } = SecretAgentClientGenerator();
     const sessionMeta = {
-      windowId: 'window-id',
+      tabId: 'tab-id',
       sessionId: 'session-id',
       sessionsDataLocation: '',
     };
     coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return { data: sessionMeta };
       }
       if (command === 'addEventListener') {
@@ -31,7 +31,7 @@ describe('events', () => {
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
-      [null, 'createSession'],
+      [null, 'createTab'],
       [expect.any(Object), 'addEventListener'],
       [expect.any(Object), 'close'],
     ]);
@@ -43,14 +43,14 @@ describe('events', () => {
   it('adds and removes event listeners', async () => {
     const { SecretAgent, coreClient } = SecretAgentClientGenerator();
     const sessionMeta = {
-      windowId: 'window-id',
+      tabId: 'tab-id',
       sessionId: 'session-id',
       sessionsDataLocation: '',
     };
 
     coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createSession') {
+      if (command === 'createTab') {
         return { data: sessionMeta };
       }
       if (command === 'addEventListener') {
@@ -65,7 +65,7 @@ describe('events', () => {
     };
 
     let eventCount = 0;
-    await browser.on('resource', onResourceFn);
+    await browser.activeTab.on('resource', onResourceFn);
 
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
@@ -79,7 +79,7 @@ describe('events', () => {
     ]);
     expect(eventCount).toBe(2);
 
-    await browser.off('resource', onResourceFn);
+    await browser.activeTab.off('resource', onResourceFn);
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
         id: 3,

@@ -11,8 +11,8 @@ import {
 } from '@secret-agent/core-interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { getKeyboardChar } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import Window from './Window';
+import { getKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import Tab from './Tab';
 
 const commandsNeedingScroll = [
   InteractionCommand.click,
@@ -21,24 +21,24 @@ const commandsNeedingScroll = [
 ];
 
 export default class Interactor {
-  private readonly window: Window;
+  private readonly tab: Tab;
 
   private get mouse() {
-    return this.window.puppPage.mouse;
+    return this.tab.puppetPage.mouse;
   }
 
   private get keyboard() {
-    return this.window.puppPage.keyboard;
+    return this.tab.puppetPage.keyboard;
   }
 
-  constructor(window: Window) {
-    this.window = window;
+  constructor(tab: Tab) {
+    this.tab = tab;
   }
 
   public async play(interactions: IInteractionGroups) {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
-    const humanoid = this.window.session.humanoid;
+    const humanoid = this.tab.session.humanoid;
 
     await humanoid.playInteractions(finalInteractions, async interaction => {
       switch (interaction.command) {
@@ -49,11 +49,11 @@ export default class Interactor {
         }
         case InteractionCommand.scroll: {
           if (isMousePositionCoordinate(interaction.mousePosition)) {
-            await this.window.scrollCoordinatesIntoView(
+            await this.tab.scrollCoordinatesIntoView(
               interaction.mousePosition as IMousePositionXY,
             );
           } else {
-            await this.window.scrollJsPathIntoView(interaction.mousePosition as IJsPath);
+            await this.tab.scrollJsPathIntoView(interaction.mousePosition as IJsPath);
           }
           break;
         }
@@ -62,7 +62,7 @@ export default class Interactor {
           const button = interaction.mouseButton || 'left';
           const { x, y, simulateOptionClick } = await this.getPositionXY(interaction.mousePosition);
           if (simulateOptionClick) {
-            await this.window.simulateOptionClick(interaction.mousePosition as IJsPath);
+            await this.tab.domEnv.simulateOptionClick(interaction.mousePosition as IJsPath);
           } else {
             await this.mouse.click(x, y, { button });
           }
@@ -89,28 +89,28 @@ export default class Interactor {
         case InteractionCommand.type: {
           for (const keyboardCommand of interaction.keyboardCommands) {
             if ('keyCode' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyPress).keyCode);
-              await this.keyboard.press(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyPress).keyCode);
+              await this.keyboard.press(key);
             } else if ((keyboardCommand as IKeyboardString).string) {
               const delay = interaction.keyboardDelayBetween || 0;
               await this.keyboard.type((keyboardCommand as IKeyboardString).string, { delay });
             } else if ('up' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyboardUp).up);
-              await this.keyboard.up(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyboardUp).up);
+              await this.keyboard.up(key);
             } else if ('down' in keyboardCommand) {
-              const char = getKeyboardChar((keyboardCommand as IKeyboardDown).down);
-              await this.keyboard.down(char);
+              const key = getKeyboardKey((keyboardCommand as IKeyboardDown).down);
+              await this.keyboard.down(key);
             }
           }
           break;
         }
 
         case InteractionCommand.waitForNode: {
-          await this.window.waitForNode(interaction.delayNode);
+          await this.tab.waitForNode(interaction.delayNode);
           break;
         }
         case InteractionCommand.waitForElementVisible: {
-          await this.window.waitForElement(interaction.delayElement, { waitForVisible: true });
+          await this.tab.waitForElement(interaction.delayElement, { waitForVisible: true });
           break;
         }
         case InteractionCommand.waitForMillis: {
@@ -127,7 +127,7 @@ export default class Interactor {
     if (isMousePositionCoordinate(value)) {
       return { x: value[0] as number, y: value[1] as number };
     }
-    const rect = await this.window.getElementRectToViewport(value as IJsPath);
+    const rect = await this.tab.domEnv.getJsPathClientRect(value as IJsPath);
     const x = round(rect.left + (rect.right - rect.left) / 2);
     const y = round(rect.top - (rect.top - rect.bottom) / 2);
     if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {

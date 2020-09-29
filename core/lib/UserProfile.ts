@@ -1,140 +1,105 @@
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IDomStorage, { IDomStorageForOrigin } from '@secret-agent/core-interfaces/IDomStorage';
-import Protocol from 'devtools-protocol';
+import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
 import Log from '@secret-agent/commons/Logger';
-import { URL } from 'url';
-import { exceptionDetailsToError } from './Utils';
-import IDevtoolsClient from '../interfaces/IDevtoolsClient';
-import Window from './Window';
+import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import { assert } from '@secret-agent/commons/utils';
+import Session from './Session';
 import DomEnv from './DomEnv';
-import SetCookiesRequest = Protocol.Network.SetCookiesRequest;
-import CookieParam = Protocol.Network.CookieParam;
 
 const { log } = Log(module);
 
 export default class UserProfile {
-  public static installedWorld = DomEnv.installedDomWorldName;
-  private readonly devtoolsClient: IDevtoolsClient;
-  private readonly sessionId: string;
+  public static async export(session: Session) {
+    const cookies = await session.browserContext.getCookies();
 
-  constructor(sessionId: string, devtoolsClient: IDevtoolsClient) {
-    this.devtoolsClient = devtoolsClient;
-    this.sessionId = sessionId;
-  }
+    const storage: IDomStorage = {};
+    for (const tab of session.tabs) {
+      const page = tab.puppetPage;
 
-  private async getStorageItems(securityOrigins: { origin: string; executionId: number }[]) {
-    const items: IDomStorage = {};
-    for (const securityOrigin of securityOrigins) {
-      const databaseNames = await this.getDatabaseNames(securityOrigin.origin);
-      items[securityOrigin.origin] = await this.readDomStorage(
-        databaseNames,
-        securityOrigin.executionId,
-      );
+      const dbs = await page.getIndexedDbDatabaseNames();
+      const frames = page.frames;
+      for (const { origin, frameId, databases } of dbs) {
+        const frame = frames.find(x => x.id === frameId);
+        storage[origin] = await frame?.evaluate(
+          `window.exportDomStorage(${JSON.stringify(databases)})`,
+          true,
+        );
+      }
     }
-    return items;
-  }
 
-  private async readDomStorage(
-    databaseNames: string[],
-    executionContextId: number,
-  ): Promise<IDomStorageForOrigin> {
-    const record = await this.devtoolsClient.send('Runtime.evaluate', {
-      expression: `window.exportDomStorage(${JSON.stringify(databaseNames)})`,
-      awaitPromise: true,
-      contextId: executionContextId,
-      returnByValue: true,
-    });
-    if (record.exceptionDetails) {
-      const error = exceptionDetailsToError(record.exceptionDetails);
-      log.warn('ReadDomStorage.Error', { sessionId: this.sessionId, error });
-      throw error;
-    }
-    return record.result?.value;
-  }
-
-  private async getDatabaseNames(securityOrigin: string) {
-    return this.devtoolsClient
-      .send('IndexedDB.requestDatabaseNames', {
-        securityOrigin,
-      })
-      .then(x => x.databaseNames);
-  }
-
-  public static async export(
-    sessionId: string,
-    devtoolsClient: IDevtoolsClient,
-    origins: { origin: string; executionId: number }[],
-  ) {
-    const instance = new UserProfile(sessionId, devtoolsClient);
     return {
-      cookies: await this.getAllCookies(devtoolsClient),
-      storage: await instance.getStorageItems(origins),
+      cookies,
+      storage,
     } as IUserProfile;
   }
 
-  public static async install(fromProfile: IUserProfile, window: Window) {
-    const { devtoolsClient } = window;
+  public static async install(session: Session) {
+    const { userProfile } = session;
+    assert(userProfile, 'UserProfile exists');
+    const sessionId = session.id;
 
-    await window.domEnv.install();
+    const { storage, cookies } = userProfile;
+    const origins = Object.keys(storage ?? {});
 
-    if (fromProfile?.cookies) {
-      await this.setCookies(
-        fromProfile.cookies,
-        devtoolsClient,
-        Object.keys(fromProfile?.storage ?? {}),
-      );
+    const hasStorage = storage && origins.length;
+    if (!cookies && !hasStorage) {
+      return this;
     }
 
-    if (fromProfile?.storage && Object.keys(fromProfile.storage).length) {
-      // prime each page
-      for (const origin of Object.keys(fromProfile.storage)) {
-        await window.setBrowserOrigin(origin);
-        await window.frameTracker.runInFrameWorld(
-          `window.restoreUserStorage(${JSON.stringify(fromProfile.storage[origin])})`,
-          window.frameTracker.mainFrameId,
-          UserProfile.installedWorld,
-        );
+    const parentLogId = log.info('UserProfile.install', { sessionId });
+
+    let page: IPuppetPage;
+    try {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = true;
+      page = await session.browserContext.newPage();
+      if (cookies && cookies.length) {
+        await session.browserContext.addCookies(cookies, origins);
       }
-      // reset browser to start page
-      await window.setBrowserOrigin('about:blank');
+
+      if (hasStorage) {
+        // install scripts so we can restore storage
+        const domEnv = new DomEnv({ sessionId, isClosing: false }, page);
+        await domEnv.install();
+
+        for (const origin of origins) {
+          const originStorage = storage[origin];
+          if (!originStorage) continue;
+
+          await page.navigate(origin);
+          await page.mainFrame.evaluate(
+            `window.restoreUserStorage(${JSON.stringify(originStorage)})`,
+            true,
+          );
+        }
+      }
+    } finally {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = false;
+      if (page) await page.close();
+      log.info('UserProfile.installed', { sessionId, parentLogId });
     }
+
     return this;
   }
 
-  public static async getAllCookies(devtoolsClient: IDevtoolsClient) {
-    const cookieResponse = await devtoolsClient.send('Network.getAllCookies');
-    return cookieResponse.cookies.map(
-      x =>
-        ({
-          ...x,
-          expires: String(x.expires),
-        } as ICookie),
-    );
-  }
+  public static async installSessionStorage(session: Session, page: IPuppetPage) {
+    const { userProfile } = session;
 
-  private static async setCookies(
-    cookies: ICookie[],
-    devtoolsClient: IDevtoolsClient,
-    origins: string[],
-  ) {
-    const originUrls = (origins ?? []).map(x => new URL(x));
-    const parsedCookies: CookieParam[] = [];
-    for (const cookie of cookies) {
-      const cookieToSend: CookieParam = {
-        ...cookie,
-        expires: cookie.expires ? parseInt(cookie.expires, 10) : null,
-      };
-      cookieToSend.url = `http${cookie.secure ? 's' : ''}://${cookie.domain}${cookie.path}`;
-      const match = originUrls.find(x => {
-        return x.hostname.endsWith(cookie.domain);
-      });
-      if (match) cookieToSend.url = match.href;
-
-      parsedCookies.push(cookieToSend);
+    try {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = true;
+      // reinstall session storage for the
+      for (const [origin, storage] of Object.entries(userProfile?.storage ?? {})) {
+        if (!storage.sessionStorage.length) continue;
+        await page.navigate(origin);
+        await page.mainFrame.evaluate(
+          `${JSON.stringify(
+            storage.sessionStorage,
+          )}.forEach(([key,value]) => sessionStorage.setItem(key,value))`,
+          false,
+        );
+      }
+      await page.navigate('about:blank');
+    } finally {
+      session.mitmRequestSession.bypassAllWithEmptyResponse = false;
     }
-    return await devtoolsClient.send('Network.setCookies', {
-      cookies: parsedCookies,
-    } as SetCookiesRequest);
   }
 }

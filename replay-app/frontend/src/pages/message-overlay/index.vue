@@ -1,7 +1,7 @@
 <template lang="pug">
     .MessageOverlay.Page(:style="cssVars")
-        h4.title {{store.title}}
-        .message {{store.message}}
+        h4.title {{title}}
+        .message {{message}}
 
 </template>
 

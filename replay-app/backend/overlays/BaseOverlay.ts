@@ -1,16 +1,17 @@
 import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Application from '~backend/Application';
+import generateContextMenu from '~backend/menus/generateContextMenu';
 import Rectangle = Electron.Rectangle;
 
 interface IOptions {
   name: string;
-  devtools?: boolean;
   bounds?: IRectangle;
   calcBounds?: (bounds: IRectangle) => IRectangle;
   customHide?: boolean;
   webPreferences?: Electron.WebPreferences;
   onWindowBoundsUpdate?: () => void;
+  maxHeight?: number;
 }
 
 export default class BaseOverlay {
@@ -18,16 +19,16 @@ export default class BaseOverlay {
   public browserWindow: BrowserWindow;
   public browserView: BrowserView;
   public visible = false;
-  public bounds: IRectangle = {
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  };
+
+  public maxHeight = 500;
+  protected lastHeight = 0;
+  protected hasNewHeight = true;
 
   private readonly calcBounds: (bounds: IRectangle) => IRectangle;
+  private isReady: Promise<void>;
 
-  public constructor({ name, bounds, calcBounds, webPreferences, devtools }: IOptions) {
+  public constructor(options: IOptions) {
+    const { name, bounds, calcBounds, webPreferences, maxHeight } = options;
     this.browserView = new BrowserView({
       webPreferences: {
         nodeIntegration: true,
@@ -37,14 +38,24 @@ export default class BaseOverlay {
       },
     });
 
-    this.bounds = { ...this.bounds, ...(bounds || {}) };
+    this.browserView.setAutoResize({
+      height: true,
+      width: true,
+    });
+
     this.calcBounds = calcBounds;
     this.name = name;
+    this.maxHeight = maxHeight ?? 500;
 
-    this.webContents.loadURL(Application.instance.getPageUrl(this.name));
-    if (devtools) {
-      this.webContents.openDevTools({ mode: 'detach' });
+    if (bounds) {
+      this.browserView.setBounds({
+        x: bounds.x ?? 0,
+        y: bounds.y ?? 0,
+        height: bounds.height ?? this.maxHeight,
+        width: bounds.width,
+      });
     }
+    this.isReady = this.load();
   }
 
   public get webContents() {
@@ -53,22 +64,6 @@ export default class BaseOverlay {
 
   public get id() {
     return this.webContents.id;
-  }
-
-  public rearrange(rect: IRectangle = {}) {
-    let newRect: IRectangle = {
-      height: rect.height || this.bounds.height || 0,
-      width: rect.width || this.bounds.width || 0,
-      x: rect.x || this.bounds.x || 0,
-      y: rect.y || this.bounds.y || 0,
-      right: rect.right,
-      left: rect.left,
-    };
-    newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(newRect) : newRect);
-
-    if (this.visible) {
-      this.browserView.setBounds(newRect as Rectangle);
-    }
   }
 
   public show(
@@ -80,13 +75,14 @@ export default class BaseOverlay {
     this.browserWindow = browserWindow;
 
     this.webContents.send('will-show', ...args);
-    browserWindow.webContents.send('overlay-visibility-change', this.name, true);
-
-    if (!this.visible) {
-      browserWindow.addBrowserView(this.browserView);
-      this.visible = true;
+    if (this.visible) {
+      this.rearrange(rect);
+      return;
     }
 
+    // remove first so we can add back on top
+    browserWindow.addBrowserView(this.browserView);
+    this.visible = true;
     this.rearrange(rect);
     if (focus) {
       this.webContents.focus();
@@ -101,8 +97,6 @@ export default class BaseOverlay {
     if (!this.browserWindow) return;
     if (!this.visible) return;
 
-    this.browserWindow.webContents.send('overlay-visibility-change', this.name, false);
-
     this.browserWindow.removeBrowserView(this.browserView);
 
     this.visible = false;
@@ -111,6 +105,50 @@ export default class BaseOverlay {
   public destroy() {
     this.browserView.destroy();
     this.browserView = null;
+  }
+
+  protected getHeight(): Promise<number> {
+    return this.webContents.executeJavaScript(`document.querySelector('.Page').offsetHeight`);
+  }
+
+  protected async adjustHeight() {
+    const height = await this.getHeight();
+
+    this.hasNewHeight = height !== this.lastHeight;
+    this.lastHeight = height;
+  }
+
+  protected rearrange(rect: IRectangle = {}) {
+    if (!this.visible) return;
+
+    const newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(rect) : rect);
+
+    this.browserView.setBounds(newRect as Rectangle);
+  }
+
+  private async load() {
+    await this.webContents.loadURL(Application.instance.getPageUrl(this.name));
+    this.webContents.on('ipc-message', (e, message) => {
+      if (message === 'resize-height') {
+        this.adjustHeight();
+      }
+    });
+
+    // resize the BrowserView's height when the toolbar height changes
+    await this.webContents.executeJavaScript(`
+        const {ipcRenderer} = require('electron');
+        const resizeObserver = new ResizeObserver(() => {
+          ipcRenderer.send('resize-height');
+        });
+        const elem = document.querySelector('.Page');
+        resizeObserver.observe(elem);
+      `);
+
+    if (process.env.NODE_ENV === 'development') {
+      this.webContents.on('context-menu', (e, params) => {
+        generateContextMenu(params, this.webContents).popup();
+      });
+    }
   }
 }
 

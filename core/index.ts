@@ -1,134 +1,144 @@
-import { v1 as uuidv1 } from "uuid";
-import IConfigureOptions from "@secret-agent/core-interfaces/IConfigureOptions";
-import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
-import { ILocationStatus, ILocationTrigger, LocationTrigger } from "@secret-agent/core-interfaces/Location";
-import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
-import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
-import { IInteractionGroups } from "@secret-agent/core-interfaces/IInteractions";
-import { IJsPath } from "awaited-dom/base/AwaitedPath";
-import ICore from "@secret-agent/core-interfaces/ICore";
-import ISessionMeta from "@secret-agent/core-interfaces/ISessionMeta";
-import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
-import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
-import { IRequestInit } from "awaited-dom/base/interfaces/official";
-import IAttachedState from "@secret-agent/injected-scripts/interfaces/IAttachedStateCopy";
-import Log from "@secret-agent/commons/Logger";
-import { createReplayServer } from "@secret-agent/session-state/api";
-import ISessionReplayServer from "@secret-agent/session-state/interfaces/ISessionReplayServer";
-import Queue from "@secret-agent/commons/Queue";
-import Chrome83 from "@secret-agent/emulate-chrome-83";
-import Emulators from "@secret-agent/emulators";
-import IListenerObject from "./interfaces/IListenerObject";
-import UserProfile from "./lib/UserProfile";
-import Session from "./lib/Session";
-import Window from "./lib/Window";
-import GlobalPool from "./lib/GlobalPool";
-import IResourceFilterProperties from "./interfaces/IResourceFilterProperties";
+import { v1 as uuidv1 } from 'uuid';
+import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
+import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import {
+  ILocationStatus,
+  ILocationTrigger,
+  LocationTrigger,
+} from '@secret-agent/core-interfaces/Location';
+import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
+import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
+import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import ICore from '@secret-agent/core-interfaces/ICore';
+import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
+import Log from '@secret-agent/commons/Logger';
+import { createReplayServer } from '@secret-agent/session-state/api';
+import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
+import Queue from '@secret-agent/commons/Queue';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
+import Emulators from '@secret-agent/emulators';
+import IListenerObject from './interfaces/IListenerObject';
+import UserProfile from './lib/UserProfile';
+import Session from './lib/Session';
+import Tab from './lib/Tab';
+import GlobalPool from './lib/GlobalPool';
+import IResourceFilterProperties from './interfaces/IResourceFilterProperties';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
-export { GlobalPool, Window, Session, LocationTrigger };
+export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core implements ICore {
   public static defaultEmulatorId = Chrome83.emulatorId;
-  public static byWindowId: { [windowId: string]: Core } = {};
+  public static byTabId: { [tabId: string]: Core } = {};
   public static onEventFn: (meta: ISessionMeta, listenerId: string, ...eventArgs: any[]) => void;
   private static wasManuallyStarted = false;
   private static autoShutdownMillis = 2e3;
   private static autoShutdownTimer: NodeJS.Timer;
   private static replayServer?: ISessionReplayServer;
   private static startQueue = new Queue();
+
   private readonly session: Session;
-  private readonly window: Window;
+  private readonly tab: Tab;
   private readonly eventListenersById: { [id: string]: IListenerObject } = {};
   private readonly eventListenerIdsByType: { [name: string]: Set<string> } = {};
-  private isClosing = false;
 
-  constructor(session: Session) {
+  constructor(session: Session, tab: Tab) {
     this.session = session;
-    this.window = session.window;
+    this.tab = tab;
   }
 
   public get lastCommandId() {
-    return this.window.lastCommandId;
+    return this.tab.lastCommandId;
   }
 
   public async getResourceProperty(resourceId: number, propertyPath: string) {
-    return this.window.getResourceProperty(resourceId, propertyPath);
+    return this.tab.getResourceProperty(resourceId, propertyPath);
   }
 
   public async goto(url: string) {
-    return this.window.runCommand<void>('goto', url);
+    return this.tab.runCommand<void>('goto', url);
+  }
+
+  public async goBack() {
+    return this.tab.runCommand<string>('goBack');
+  }
+
+  public async goForward() {
+    return this.tab.runCommand<string>('goForward');
   }
 
   public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
-    return await this.window.runCommand('waitForResource', filter, opts);
+    return await this.tab.runCommand('waitForResource', filter, opts);
   }
 
   public async waitForElement(jsPath: IJsPath, opts?: IWaitForElementOptions) {
-    await this.window.runCommand('waitForElement', jsPath, opts);
+    await this.tab.runCommand('waitForElement', jsPath, opts);
   }
 
   public async waitForLoad(status: ILocationStatus) {
-    await this.window.runCommand('waitForLoad', status);
+    await this.tab.runCommand('waitForLoad', status);
   }
 
   public async waitForLocation(trigger: ILocationTrigger) {
-    await this.window.runCommand('waitForLocation', trigger);
+    await this.tab.runCommand('waitForLocation', trigger);
   }
 
   public async waitForMillis(millis: number) {
-    await this.window.runCommand('waitForMillis', millis);
+    await this.tab.runCommand('waitForMillis', millis);
   }
 
-  public async getJsValue<T = any>(path: string) {
-    return this.window.runCommand<{ value: T; type: string }>('getJsValue', path);
+  public async getJsValue<T = any>(path: string): Promise<{ value: T; type: string }> {
+    return this.tab.runCommand('getJsValue', path);
   }
 
   public async execJsPath<T = any>(
     jsPath: IJsPath,
     propertiesToExtract?: string[],
   ): Promise<IExecJsPathResult<T>> {
-    return this.window.runCommand<IExecJsPathResult<T>>('execJsPath', jsPath, propertiesToExtract);
+    return this.tab.runCommand('execJsPath', jsPath, propertiesToExtract);
   }
 
   public async getLocationHref() {
-    return this.window.runCommand<string>('getLocationHref');
+    return this.tab.runCommand('getLocationHref');
   }
 
   public async interact(...interactionGroups: IInteractionGroups) {
-    await this.window.runCommand('interact', interactionGroups);
+    await this.tab.runCommand('interact', interactionGroups);
   }
 
   public async getPageCookies() {
-    return await this.window.runCommand('getPageCookies');
+    return await this.tab.runCommand('getPageCookies');
   }
 
   public async getUserCookies() {
-    return await UserProfile.getAllCookies(this.window.devtoolsClient);
+    return await this.tab.runCommand('getUserCookies');
   }
 
   public async exportUserProfile() {
-    const origins = this.window.frameTracker.getSecurityOrigins(UserProfile.installedWorld);
-    return await UserProfile.export(this.session.id, this.window.devtoolsClient, origins);
+    return await UserProfile.export(this.session);
   }
 
   public async fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
-    return this.window.runCommand<IAttachedState>('fetch', request, init);
+    return this.tab.runCommand('fetch', request, init);
   }
 
   public async createRequest(
     input: IAttachedId | string,
     init?: IRequestInit,
   ): Promise<IAttachedState> {
-    return this.window.runCommand<IAttachedState>('createRequest', input, init);
+    return this.tab.runCommand('createRequest', input, init);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async configure(options: ISessionOptions) {
-    // ToDo: needs implementation
+    return this.tab.config(options);
   }
 
   public async addEventListener(jsPath: IJsPath | null, type: string) {
@@ -162,10 +172,7 @@ export default class Core implements ICore {
       this.bindResourceListeners(false);
     }
     if (listener.jsPath && listener.jsPath[0] === 'resources' && listener.type === 'message') {
-      this.window.sessionState.stopWebsocketMessages(
-        listener.jsPath[1] as string,
-        listener.listenFn,
-      );
+      this.tab.sessionState.stopWebsocketMessages(listener.jsPath[1] as string, listener.listenFn);
     }
     if (this.eventListenerIdsByType[listener.type]) {
       this.eventListenerIdsByType[listener.type].delete(listener.id);
@@ -176,11 +183,27 @@ export default class Core implements ICore {
   }
 
   public async close() {
-    if (this.isClosing) return;
-    this.isClosing = true;
+    if (!this.session || this.session.isClosing) return;
     await GlobalPool.closeSession(this.session);
     this.emitEvent('close');
     Core.checkForAutoShutdown();
+  }
+
+  public async closeTab() {
+    await this.tab.close();
+    if (this.session.tabs.length === 0) {
+      await this.close();
+    }
+  }
+
+  public async focusTab() {
+    await this.tab.runCommand('focus');
+  }
+
+  public async waitForNewTab(sinceCommandId?: number) {
+    const lastCommandId = sinceCommandId ?? this.lastCommandId;
+    const tab = await this.tab.runCommand<Tab>('waitForNewTab', lastCommandId);
+    return Core.registerSessionTab(this.session, tab);
   }
 
   private bindResourceListeners(enable = true) {
@@ -188,9 +211,9 @@ export default class Core implements ICore {
       this.emitEvent('resource', ...args);
     };
     if (enable) {
-      this.window.sessionState.emitter.on('resource', listenerFn);
+      this.tab.on('resource', listenerFn);
     } else {
-      this.window.sessionState.emitter.off('resource', listenerFn);
+      this.tab.off('resource', listenerFn);
     }
   }
 
@@ -200,7 +223,7 @@ export default class Core implements ICore {
     for (const listenerId of listenerIds) {
       const sessionMeta: ISessionMeta = {
         sessionId: this.session.id,
-        windowId: this.window.id,
+        tabId: this.tab.id,
       };
       if (Core.onEventFn) {
         Core.onEventFn(sessionMeta, listenerId, ...args);
@@ -209,20 +232,20 @@ export default class Core implements ICore {
   }
 
   private bindWebsocketEvents(resourceId: number, listener: IListenerObject) {
-    this.window.sessionState.onWebsocketMessages(resourceId, listener.listenFn);
+    this.tab.sessionState.onWebsocketMessages(resourceId, listener.listenFn);
   }
 
   private buildEventIdTrigger(id: string, ...args) {
     const sessionMeta: ISessionMeta = {
       sessionId: this.session.id,
-      windowId: this.window.id,
+      tabId: this.tab.id,
     };
     if (Core.onEventFn) {
       Core.onEventFn(sessionMeta, id, ...args);
     }
   }
 
-  // STATIC /////////////////////////////////////
+  /////// STATIC /////////////////////////////////////
 
   public static async start(options?: IConfigureOptions) {
     return this.startQueue.run(async () => {
@@ -248,7 +271,12 @@ export default class Core implements ICore {
     if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);
   }
 
-  public static async createSession(options: ICreateSessionOptions = {}) {
+  public static async getTabsForSession(sessionId: string) {
+    const session = Session.get(sessionId);
+    return session.tabs.map(tab => Core.registerSessionTab(session, tab));
+  }
+
+  public static async createTab(options: ICreateSessionOptions = {}) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       if (!Emulators.defaultEmulatorId) Emulators.defaultEmulatorId = Core.defaultEmulatorId;
@@ -256,32 +284,27 @@ export default class Core implements ICore {
       if (shouldStartReplayServer) {
         await this.startReplayServer();
       }
-      const window = session.window;
-      this.byWindowId[window.id] = new Core(session);
-      return {
-        sessionId: session.id,
-        sessionsDataLocation: session.baseDir,
-        windowId: window.id,
-        replayApiServer: this.replayServer?.url,
-      };
+
+      const tab = await session.createTab();
+      return Core.registerSessionTab(session, tab);
     });
   }
 
-  public static async disconnect(windowIds?: string[], clientError?: Error) {
+  public static async disconnect(tabIds?: string[], clientError?: Error) {
     return this.startQueue.run(async () => {
       if (clientError) log.error('UnhandledClientError', { clientError, sessionId: null });
 
       const promises: Promise<void>[] = [];
-      for (const key of windowIds ?? Object.keys(Core.byWindowId)) {
-        const core = Core.byWindowId[key];
-        delete Core.byWindowId[key];
+      for (const key of tabIds ?? Object.keys(Core.byTabId)) {
+        const core = Core.byTabId[key];
+        delete Core.byTabId[key];
         promises.push(core.close());
       }
 
       await Promise.all(promises);
 
       // if nothing open, check for shutdown
-      if (windowIds?.length && Object.keys(Core.byWindowId).length === 0) {
+      if (tabIds?.length && Object.keys(Core.byTabId).length === 0) {
         this.wasManuallyStarted = false;
         this.checkForAutoShutdown();
       }
@@ -308,7 +331,9 @@ export default class Core implements ICore {
         process.exit(0);
       });
     });
+  }
 
+  public static registerExceptionHandlers() {
     process.on('uncaughtException', async (error: Error) => {
       await Core.shutdown(error);
       process.exit(1);
@@ -322,6 +347,20 @@ export default class Core implements ICore {
   public static async startReplayServer(port?: number) {
     if (this.replayServer) return;
     this.replayServer = await createReplayServer(port);
+  }
+
+  private static registerSessionTab(session: Session, tab: Tab) {
+    let core = this.byTabId[tab.id];
+    if (!core) {
+      core = new Core(session, tab);
+      this.byTabId[tab.id] = core;
+    }
+    return {
+      sessionId: session.id,
+      sessionsDataLocation: session.baseDir,
+      tabId: tab.id,
+      replayApiServer: this.replayServer?.url,
+    } as ISessionMeta;
   }
 
   private static checkForAutoShutdown() {
@@ -345,4 +384,5 @@ export default class Core implements ICore {
 
 type IAttachedId = number;
 
-if (process.env.NODE_ENV !== 'test') Core.registerSignalHandlers();
+Core.registerSignalHandlers();
+if (process.env.NODE_ENV !== 'test') Core.registerExceptionHandlers();

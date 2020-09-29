@@ -17,8 +17,7 @@ import IInteractions, {
   IInteraction,
   IMousePosition,
 } from '../interfaces/IInteractions';
-import CoreClientSession from './CoreClientSession';
-import User from './User';
+import CoreTab from './CoreTab';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
@@ -29,27 +28,20 @@ const COMMAND_POS: { [k: string]: number } = {
   click: 3,
   doubleclick: 4,
   clickDown: 5,
-  move: 6,
-  clickUp: 7,
-  keyPress: 8,
-  keyDown: 9,
-  type: 10,
-  keyUp: 11,
+  scroll: 6,
+  move: 7,
+  clickUp: 8,
+  keyPress: 9,
+  keyDown: 10,
+  type: 11,
+  keyUp: 12,
 };
 const MAX_COMMAND_POS = Object.keys(COMMAND_POS).length;
 
 export default class Interactor {
-  private browserUser: User;
-  private coreClientSession: CoreClientSession;
-
-  constructor(browserUser: User, coreClientSession: CoreClientSession) {
-    this.browserUser = browserUser;
-    this.coreClientSession = coreClientSession;
-  }
-
-  public async run(interactions: IInteractions) {
+  public static async run(coreTab: CoreTab, interactions: IInteractions) {
     const interactionGroups = convertToInteractionGroups(interactions);
-    await this.coreClientSession.interact(interactionGroups);
+    await coreTab.interact(interactionGroups);
   }
 }
 
@@ -83,6 +75,11 @@ function convertInteractionToInteractionGroup(interaction: IInteraction): IInter
 
   Object.entries(interaction).forEach(([key, value]) => {
     switch (key) {
+      case Command.scroll: {
+        const command = CoreCommand.scroll;
+        const mousePosition = convertToCoreMousePosition(value);
+        return iGroup.push({ command, mousePosition });
+      }
       case Command.move: {
         const command = CoreCommand.move;
         const mousePosition = convertToCoreMousePosition(value);
@@ -234,6 +231,10 @@ function convertCommandToInteractionStep(interaction: ICommand): IInteractionSte
   switch (interaction) {
     case Command.move: {
       return { command: CoreCommand.move };
+      break;
+    }
+    case Command.scroll: {
+      return { command: CoreCommand.scroll };
       break;
     }
     case Command.click: {

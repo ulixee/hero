@@ -1,4 +1,3 @@
-// tslint:disable-next-line
 import { CommandId, ISOTimestamp } from './GenericTypes';
 
 type ScrollX = number;

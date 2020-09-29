@@ -10,6 +10,7 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
       'Commands',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['tabId', 'TEXT'],
         ['frameId', 'INTEGER'],
         ['name', 'TEXT'],
         ['result', 'TEXT'],
@@ -27,6 +28,7 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
   public insert(commandMeta: ICommandMeta) {
     this.queuePendingInsert([
       commandMeta.id,
+      commandMeta.tabId,
       commandMeta.frameId,
       commandMeta.name,
       JSON.stringify(commandMeta.result),

@@ -51,7 +51,6 @@ class NodeTracker {
       return this.nodeIds.get(node);
     }
 
-    recorder.extractChanges();
     this.nextId += 1;
     const id = this.nextId;
     this.nodeIds.set(node, id);
@@ -91,6 +90,23 @@ class PageEventsRecorder {
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
+    if (document && document.childNodes.length) {
+      const mutations: MutationRecord[] = [
+        {
+          type: 'childList' as any,
+          addedNodes: document.childNodes,
+          removedNodes: [] as any,
+          nextSibling: null,
+          previousSibling: null,
+          oldValue: null,
+          attributeNamespace: null,
+          attributeName: null,
+          target: document,
+        },
+      ];
+
+      this.onMutation(mutations);
+    }
     this.observer.observe(document, {
       attributes: true,
       childList: true,
@@ -374,7 +390,18 @@ const propertiesToCheck = ['value', 'selected', 'checked'];
 const recorder = new PageEventsRecorder();
 
 // @ts-ignore
-window.setCommandId = id => recorder.setCommandId(id);
+if (window.commandId) {
+  // @ts-ignore
+  recorder.setCommandId(window.commandId);
+  // @ts-ignore
+  delete window.commandId;
+}
+
+Object.defineProperty(window, 'commandId', {
+  set(value: number) {
+    return recorder.setCommandId(value);
+  },
+});
 
 function flushPageRecorder() {
   const changes = recorder.extractChanges();

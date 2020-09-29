@@ -1,18 +1,25 @@
 export default interface ISaSession {
   id: string;
   name: string;
+  tabs: ISessionTab[];
   dataLocation: string;
   viewportWidth: number;
   viewportHeight: number;
   deviceScaleFactor: number;
   startOrigin: string;
-  startDate: string;
+  startDate: Date;
   scriptStartDate: string;
-  closeDate?: string;
+  closeDate?: Date;
   scriptEntrypoint: string;
   scriptInstanceId: string;
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];
   relatedSessions: { id: string; name: string }[];
+}
+
+export interface ISessionTab {
+  tabId: string;
+  createdTime: string;
+  startOrigin?: string;
 }
 
 export interface IMouseEvent {

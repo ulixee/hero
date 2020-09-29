@@ -1,11 +1,11 @@
-import EngineInstaller from './lib/EngineInstaller';
+import EngineInstaller from '@secret-agent/puppet/lib/EngineInstaller';
 
 export default function install(engine: { browser: string; revision: string }) {
   new EngineInstaller(engine)
     .install()
-    // eslint-disable-next-line promise/always-return
     .then(() => {
       process.exit();
+      return null;
     })
     .catch(error => {
       console.log('ERROR installing engine', error);

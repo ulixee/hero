@@ -10,7 +10,6 @@ export default class FindOverlay extends BaseOverlay {
         height: 70,
         y: VIEW_Y_OFFSET,
       },
-      devtools: false,
     });
   }
 }

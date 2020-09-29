@@ -2,9 +2,12 @@ import { Helpers } from '@secret-agent/testing';
 import { GlobalPool } from '@secret-agent/core';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import SecretAgent from '../index';
 
+let koaServer: ITestKoaServer;
 beforeAll(async () => {
+  koaServer = await Helpers.runKoaServer(true);
   GlobalPool.maxActiveSessionCount = 3;
 });
 afterAll(Helpers.afterAll);
@@ -16,7 +19,7 @@ describe('basic Interact tests', () => {
     const onPost = jest.fn().mockImplementation(body => {
       expect(body).toBe(text);
     });
-    const httpServer = await Helpers.runHttpServer('', onPost);
+    const httpServer = await Helpers.runHttpServer({ onPost });
     const url = httpServer.url;
 
     const browser = await SecretAgent.createBrowser();
@@ -38,7 +41,11 @@ describe('basic Interact tests', () => {
   }, 20e3);
 
   it('should be able to get multiple entries out of the pool', async () => {
-    const httpServer = await Helpers.runHttpServer('ulixee=test1');
+    const httpServer = await Helpers.runHttpServer({
+      addToResponse: response => {
+        response.setHeader('Set-Cookie', 'ulixee=test1');
+      },
+    });
     expect(GlobalPool.maxActiveSessionCount).toBe(3);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
@@ -75,30 +82,32 @@ describe('basic Interact tests', () => {
     await browser4.close();
     expect(GlobalPool.activeSessionCount).toBe(2);
 
-    await browser1.close();
-    await browser2.close();
-    await browser3.close();
+    await Promise.all([browser1.close(), browser2.close(), browser3.close()]);
     expect(GlobalPool.activeSessionCount).toBe(0);
     await httpServer.close();
-  }, 30e3);
+  }, 15e3);
 
   it('should clean up cookies between runs', async () => {
     const browser1 = await SecretAgent.createBrowser();
+    let cookieValue = 'ulixee=test1';
+    const httpServer = await Helpers.runHttpServer({
+      addToResponse: response => {
+        response.setHeader('Set-Cookie', cookieValue);
+      },
+    });
+
     Helpers.needsClosing.push(browser1);
     {
-      const httpServer = await Helpers.runHttpServer('ulixee=test1');
       const url = httpServer.url;
       await browser1.goto(url);
 
       const cookies = await browser1.cookies;
       expect(cookies[0].name).toBe('ulixee');
       expect(cookies[0].value).toBe('test1');
-
-      await httpServer.close();
     }
 
     {
-      const httpServer = await Helpers.runHttpServer('ulixee2=test2');
+      cookieValue = 'ulixee2=test2';
       const url = httpServer.url;
       await browser1.goto(url);
 
@@ -106,15 +115,13 @@ describe('basic Interact tests', () => {
       expect(cookies).toHaveLength(2);
       expect(cookies.find(x => x.name === 'ulixee').value).toBe('test1');
       expect(cookies.find(x => x.name === 'ulixee2').value).toBe('test2');
-
-      await httpServer.close();
     }
 
     {
+      cookieValue = 'ulixee3=test3';
       // should be able to get a second agent out of the pool
       const browser2 = await SecretAgent.createBrowser();
       Helpers.needsClosing.push(browser2);
-      const httpServer = await Helpers.runHttpServer('ulixee3=test3');
       const url = httpServer.url;
       await browser2.goto(url);
 
@@ -123,7 +130,6 @@ describe('basic Interact tests', () => {
       expect(cookies[0].name).toBe('ulixee3');
       expect(cookies[0].value).toBe('test3');
 
-      await httpServer.close();
       await browser2.close();
     }
 
@@ -131,8 +137,7 @@ describe('basic Interact tests', () => {
   }, 20e3);
 
   it('should be able to combine a waitForElementVisible and a click', async () => {
-    const koaServer = await Helpers.runKoaServer(false);
-    koaServer.get('/page1', ctx => {
+    koaServer.get('/waitTest', ctx => {
       ctx.body = `
         <body>
           <a href="/finish">Click Me</a>
@@ -147,7 +152,7 @@ describe('basic Interact tests', () => {
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
     const browser = await SecretAgent.createBrowser();
     Helpers.needsClosing.push(browser);
-    await browser.goto(`${koaServer.baseUrl}/page1`);
+    await browser.goto(`${koaServer.baseUrl}/waitTest`);
     await browser.waitForAllContentLoaded();
     const readyLink = browser.document.querySelector('a.ready');
     await browser.interact({ click: readyLink, waitForElementVisible: readyLink });
@@ -156,11 +161,9 @@ describe('basic Interact tests', () => {
     expect(finalUrl).toBe(`${koaServer.baseUrl}/finish`);
 
     await browser.close();
-    await koaServer.close();
   });
 
   it('should be able to type various combinations of characters', async () => {
-    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/keys', ctx => {
       ctx.body = `
         <body>

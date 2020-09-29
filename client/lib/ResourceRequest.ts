@@ -2,12 +2,12 @@ import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstan
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
-import CoreClientSession from './CoreClientSession';
+import CoreTab from './CoreTab';
 
 const { getState, setState } = StateMachine<ResourceRequest, IState>();
 
 interface IState {
-  coreClientSession: CoreClientSession;
+  coreTab: CoreTab;
   resourceId: number;
 }
 
@@ -45,14 +45,14 @@ export default class ResourceRequest {
   }
 }
 
-export function createResourceRequest(coreClientSession: CoreClientSession, resourceId?: number) {
+export function createResourceRequest(coreTab: CoreTab, resourceId?: number) {
   const request = new ResourceRequest();
-  setState(request, { coreClientSession, resourceId });
+  setState(request, { coreTab, resourceId });
   return request;
 }
 
 function getRequestProperty<T>(container: ResourceRequest, name: keyof IResourceRequest) {
   const state = getState(container);
   const id = state.resourceId;
-  return state.coreClientSession.getResourceProperty<T>(id, `request.${name}`);
+  return state.coreTab.getResourceProperty<T>(id, `request.${name}`);
 }

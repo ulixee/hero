@@ -1,55 +1,47 @@
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import Response from 'awaited-dom/impl/official-klasses/Response';
-import { createSuperDocument } from 'awaited-dom/impl/create';
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Request from 'awaited-dom/impl/official-klasses/Request';
 import { bindFunctions } from '@secret-agent/commons/utils';
-import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import Request from 'awaited-dom/impl/official-klasses/Request';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
 import CoreClient from './CoreClient';
-import CoreClientSession from './CoreClientSession';
-import Resource, { createResource } from './Resource';
-import WebsocketResource from './WebsocketResource';
+import CoreTab from './CoreTab';
 import ScriptInstance from './ScriptInstance';
 import User, { createUser } from './User';
-import Fetcher, { createFetcher } from './Fetcher';
 import ICreateBrowserOptions from '../interfaces/ICreateBrowserOptions';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IBrowser from '../interfaces/IBrowser';
-import RequestGenerator from './Request';
-import IWaitForResourceFilter from "../interfaces/IWaitForResourceFilter";
+import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
+import Tab, { createTab, getCoreTab } from './Tab';
 
-const { getState, setState } = StateMachine<IBrowser, IState>();
+const { getState, setState } = StateMachine<Browser, IState>();
 const scriptInstance = new ScriptInstance();
 
 interface IState {
-  coreClientSession: CoreClientSession;
+  activeTab: Tab;
   sessionName: string;
-  superDocument: SuperDocument;
   user: User;
   isClosing: boolean;
-  fetcher: Fetcher;
+  coreTab: CoreTab;
+  coreClient: CoreClient;
+  tabs: Tab[];
 }
 
 interface IEventType {
   close: Browser;
-  resource: Resource | WebsocketResource;
 }
 
 const propertyKeys: (keyof Browser)[] = [
   'document',
   'sessionId',
+  'tabs',
+  'activeTab',
   'sessionName',
   'user',
   'url',
@@ -58,94 +50,146 @@ const propertyKeys: (keyof Browser)[] = [
   'Request',
 ];
 
-export default class Browser extends AwaitedEventTarget<IEventType> implements IBrowser {
-  constructor(coreClientSession: CoreClientSession, sessionName: string) {
+export default class Browser extends AwaitedEventTarget<IEventType, IState> implements IBrowser {
+  constructor(coreTab: CoreTab, coreClient: CoreClient, sessionName: string) {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
-    const awaitedPath = new AwaitedPath('document');
-    const awaitedOptions = { browser: this, coreClientSession };
 
+    const activeTab = createTab(this, coreTab);
     setState(this, {
-      coreClientSession,
+      activeTab,
+      get coreTab() {
+        return getCoreTab(this.activeTab);
+      },
       sessionName,
-      superDocument: createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions),
-      user: createUser(this, coreClientSession),
-      fetcher: createFetcher(this, coreClientSession),
+      user: createUser(this),
       isClosing: false,
+      coreClient,
+      tabs: [activeTab],
     });
-
-    if (!coreClientSession.eventHeap.hasEventInterceptors('resource')) {
-      coreClientSession.eventHeap.registerEventInterceptor(
-        'resource',
-        (resource: IResourceMeta) => {
-          return [createResource(resource, coreClientSession)];
-        },
-      );
-    }
 
     bindFunctions(this);
   }
 
-  public get cookies(): Promise<ICookie[]> {
-    return getState(this).coreClientSession.getPageCookies();
+  public get sessionId() {
+    const { activeTab } = getState(this);
+    const coreTab = getCoreTab(activeTab);
+    return coreTab.sessionId;
   }
 
-  public get document(): SuperDocument {
-    return getState(this).superDocument;
-  }
-
-  public get Request(): typeof Request {
-    const coreClientSession = getState(this).coreClientSession;
-    return RequestGenerator(coreClientSession);
-  }
-
-  public get user(): User {
-    return getState(this).user;
-  }
-
-  public get url(): Promise<string> {
-    return getState(this).coreClientSession.getUrl();
-  }
-
-  public get sessionId(): string {
-    const { coreClientSession } = getState(this);
-    return coreClientSession.sessionId;
-  }
-
-  public get sessionName(): string {
+  public get sessionName() {
     return getState(this).sessionName;
   }
 
-  public get lastCommandId(): number {
-    return getState(this).coreClientSession.commandQueue.lastCommandId;
+  public get user() {
+    return getState(this).user;
+  }
+
+  public get cookies() {
+    return this.activeTab.cookies;
+  }
+
+  public get document() {
+    return this.activeTab.document;
+  }
+
+  public get url() {
+    return this.activeTab.url;
+  }
+
+  public get lastCommandId() {
+    return this.activeTab.lastCommandId;
+  }
+
+  public get Request() {
+    return this.activeTab.Request;
+  }
+
+  public get activeTab() {
+    return getState(this).activeTab;
+  }
+
+  public get tabs() {
+    return getSessionTabs(this);
   }
 
   // METHODS
 
-  public fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
-    return getState(this).fetcher.fetch(request, init);
-  }
-
   public async close(): Promise<void> {
-    const { isClosing, coreClientSession } = getState(this);
+    const { isClosing, activeTab } = getState<Browser, IState>(this);
     if (isClosing) return;
     setState(this, { isClosing: true });
-    await coreClientSession.close();
-  }
+    const coreTab = getCoreTab(activeTab);
 
-  public async getJsValue(path: string): Promise<any> {
-    return getState(this).coreClientSession.getJsValue(path);
+    await coreTab.closeSession();
   }
 
   public async configure(options: ISessionOptions): Promise<void> {
-    await getState(this).coreClientSession.configure(options);
+    const clientTabSession = getCoreTab(this.activeTab);
+    return clientTabSession.configure(options);
   }
 
-  // METHODS THAT DELEGATE TO USER
+  public async focusTab(tab: Tab): Promise<void> {
+    await tab.focus();
+  }
+
+  public async closeTab(tab: Tab): Promise<void> {
+    await tab.close();
+  }
+
+  public async waitForNewTab() {
+    const coreClient = getCoreTab(this.activeTab);
+    const coreTab = await coreClient.waitForNewTab();
+    return createTab(this, coreTab);
+  }
+
+  /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
   public async goto(href: string) {
-    return this.user.goto(href);
+    return this.activeTab.goto(href);
   }
+
+  public async goBack() {
+    return this.activeTab.goBack();
+  }
+
+  public async goForward() {
+    return this.activeTab.goForward();
+  }
+
+  public async fetch(request: Request | string, init?: IRequestInit) {
+    return this.activeTab.fetch(request, init);
+  }
+
+  public getJsValue<T>(path: string) {
+    return this.activeTab.getJsValue<T>(path);
+  }
+
+  public async waitForAllContentLoaded() {
+    return this.activeTab.waitForAllContentLoaded();
+  }
+
+  public async waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
+    return this.activeTab.waitForResource(filter, options);
+  }
+
+  public async waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
+    return this.activeTab.waitForElement(element, options);
+  }
+
+  public async waitForLocation(trigger: ILocationTrigger) {
+    return this.activeTab.waitForLocation(trigger);
+  }
+
+  public async waitForMillis(millis: number) {
+    return this.activeTab.waitForMillis(millis);
+  }
+
+  public async waitForWebSocket(url: string | RegExp) {
+    return this.activeTab.waitForWebSocket(url);
+  }
+
+  /////// METHODS THAT DELEGATE TO USER ////////////////////////////////////////////////////////////////////////////////
 
   public async click(mousePosition: IMousePosition) {
     return this.user.click(mousePosition);
@@ -157,30 +201,6 @@ export default class Browser extends AwaitedEventTarget<IEventType> implements I
 
   public async type(...typeInteractions: ITypeInteraction[]) {
     return this.user.type(...typeInteractions);
-  }
-
-  public async waitForAllContentLoaded() {
-    return this.user.waitForAllContentLoaded();
-  }
-
-  public async waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
-    return this.user.waitForResource(filter, options);
-  }
-
-  public async waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
-    return this.user.waitForElement(element, options);
-  }
-
-  public async waitForLocation(trigger: ILocationTrigger) {
-    return this.user.waitForLocation(trigger);
-  }
-
-  public async waitForMillis(millis: number) {
-    return this.user.waitForMillis(millis);
-  }
-
-  public async waitForWebSocket(url: string | RegExp) {
-    return this.user.waitForWebSocket(url);
   }
 }
 
@@ -198,7 +218,7 @@ export async function createBrowser(
     sessionName,
     scriptInstanceMeta: scriptInstance.meta,
   };
-  const coreClientSession = await coreClient.createSession(sessionOptions);
+  const coreTab = await coreClient.createTab(sessionOptions);
 
   let showReplay = true;
   if (options.showReplay !== undefined) {
@@ -208,7 +228,20 @@ export async function createBrowser(
   }
 
   if (showReplay) {
-    scriptInstance.launchReplay(sessionName, coreClientSession);
+    scriptInstance.launchReplay(sessionName, coreTab);
   }
-  return new Browser(coreClientSession, sessionName);
+  return new Browser(coreTab, coreClient, sessionName);
+}
+
+async function getSessionTabs(browser: Browser) {
+  const { coreClient, tabs } = getState<Browser, IState>(browser);
+  const coreTabs = await coreClient.getTabsForSession(browser.sessionId);
+  for (const coreTab of coreTabs) {
+    const hasTab = tabs.some(x => x.tabId === coreTab.tabId);
+    if (!hasTab) {
+      const tab = createTab(browser, coreTab);
+      tabs.push(tab);
+    }
+  }
+  return tabs;
 }

@@ -1,47 +1,33 @@
 <template lang="pug">
 .LocationsMenuScreen.Page(:style="cssVars")
   ul
-    li(@click="gotoLocation('Home')")
-      Icon(:src="ICON_HOME" :size=16 )
-      .text Home
-    li(@click="gotoLocation('Settings')")
-      Icon(:src="ICON_SETTINGS")
-      .text Settings
-    li(@click="gotoLocation('History')")
-      Icon(:src="ICON_HISTORY" :size=16 iconStyle="transform: 'scale(-1,1)'")
-      .text History
-  h3 Recently Opened Scripts
-  ul
     li(@click="navigateToHistory(item)" v-for="item of history")
-      .text {{item.scriptEntrypoint}}
+      Icon(:src="ICON_SCRIPT" :size=16 iconStyle="transform: 'scale(-1,1)'")
+      .text {{scriptName(item)}}
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { ipcRenderer } from 'electron';
-import Icon from '~frontend/components/Icon.vue';
-import NoCache from '~frontend/lib/NoCache';
-import { ICON_HISTORY, ICON_HOME, ICON_SETTINGS } from '~frontend/constants/icons';
-import ITabLocation from '~shared/interfaces/ITabLocation';
-import { OverlayStore } from '~frontend/models/OverlayStore';
+import Vue from "vue";
+import Component from "vue-class-component";
+import { ipcRenderer } from "electron";
+import { ICON_SCRIPT } from "~frontend/constants/icons";
+import Icon from "~frontend/components/Icon.vue";
+import NoCache from "~frontend/lib/NoCache";
+import { OverlayStore } from "~frontend/models/OverlayStore";
 
 @Component({ components: { Icon } })
 export default class LocationsMenuScreen extends Vue {
   private store = new OverlayStore();
-  private ICON_HOME = ICON_HOME;
-  private ICON_SETTINGS = ICON_SETTINGS;
-  private ICON_HISTORY = ICON_HISTORY;
   private history = [];
+  readonly ICON_SCRIPT = ICON_SCRIPT;
 
-  private gotoLocation(location: ITabLocation) {
-    ipcRenderer.send(`navigate-to-location`, location, true);
+  private navigateToHistory(item) {
+    ipcRenderer.send(`navigate-to-history`, item);
     this.store.hide();
   }
 
-  private navigateToHistory(item) {
-    ipcRenderer.send(`navigate-to-history`, item, true);
-    this.store.hide();
+  private scriptName(item) {
+    return item.scriptEntrypoint.split('/').filter(Boolean).slice(-2).join('/');
   }
 
   @NoCache
@@ -66,30 +52,35 @@ export default class LocationsMenuScreen extends Vue {
 
 .LocationsMenuScreen {
   @include overlayStyle();
-  h3 {
-    margin: 20px 10px 0;
-  }
   ul {
     @include reset-ul();
-    margin: 10px 0 0;
+    padding-top:5px;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
     li {
+      box-sizing: border-box;
       padding-left: 10px;
+      padding-right: 10px;
+      align-items: center;
       margin: 0;
+      flex: 1;
+      display: flex;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      pointer-events: bounding-box;
+
       .text {
-        display: inline-block;
-        line-height: 16px;
+        cursor: pointer;
+        padding: 5px 0;
+        flex: 1;
         margin-left: 5px;
-        vertical-align: top;
       }
       .Icon {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        background-size: contain;
-        background-position: center;
-      }
-      &:hover {
-        background-color: var(--menuItemHoverBackgroundColor);
+        cursor: pointer;
+        width: 20px;
       }
     }
   }

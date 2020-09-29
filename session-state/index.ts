@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { EventEmitter } from 'events';
 import {
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
@@ -9,19 +8,16 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import IDevtoolsClient from '@secret-agent/core/interfaces/IDevtoolsClient';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
-import IPage from '@secret-agent/core-interfaces/IPage';
+import INavigation from '@secret-agent/core-interfaces/INavigation';
 import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEvent';
 import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
 import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import FrameTracker from '@secret-agent/core/lib/FrameTracker';
-import PageHistory from './lib/PageHistory';
+import IWebsocketResourceMessage from '@secret-agent/core/interfaces/IWebsocketResourceMessage';
+import TabNavigations from './lib/TabNavigations';
 import { IFrameRecord } from './models/FramesTable';
-import PageEventsListener from './lib/PageEventsListener';
-import IWebsocketResourceMessage from './interfaces/IWebsocketResourceMessage';
 import SessionsDb from './lib/SessionsDb';
 import SessionDb from './lib/SessionDb';
 
@@ -29,35 +25,35 @@ const { log } = Log(module);
 
 export default class SessionState {
   public static registry = new Map<string, SessionState>();
-  public emitter: EventEmitter;
   public readonly commands: ICommandMeta[] = [];
   public get lastCommand() {
     if (this.commands.length === 0) return;
     return this.commands[this.commands.length - 1];
   }
 
+  public readonly sessionId: string;
+
   public viewport: IViewport;
-  public readonly pages: PageHistory;
+  public readonly navigationsByTabId: { [tabId: string]: TabNavigations } = {};
   public readonly db: SessionDb;
 
-  private readonly sessionId: string;
   private readonly sessionName: string;
   private readonly scriptInstanceMeta: IScriptInstanceMeta;
-  private readonly createDate: Date;
+  private readonly createDate = new Date();
   private readonly frames: { [frameId: number]: IFrameRecord } = {};
   private readonly resources: IResourceMeta[] = [];
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
-  private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
-  private lastErrorTime?: Date;
-  private closeDate?: Date;
-  private websocketMessageIdCounter = 0;
-  private pageEventsListener: PageEventsListener;
-
-  private readonly logSubscriptionId: number;
-
   private websocketListeners: {
     [resourceId: string]: ((msg: IWebsocketResourceMessage) => any)[];
   } = {};
+
+  private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
+  private lastErrorTime?: Date;
+  private closeDate?: Date;
+
+  private websocketMessageIdCounter = 0;
+
+  private readonly logSubscriptionId: number;
 
   constructor(
     sessionsDirectory: string,
@@ -68,7 +64,6 @@ export default class SessionState {
     humanoidId: string,
     hasEmulatorPolyfills: boolean,
   ) {
-    this.createDate = new Date();
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.scriptInstanceMeta = scriptInstanceMeta;
@@ -77,8 +72,6 @@ export default class SessionState {
     fs.mkdirSync(sessionsDirectory, { recursive: true });
 
     this.db = new SessionDb(sessionsDirectory, sessionId);
-    this.pages = new PageHistory(this.db);
-    this.emitter = new EventEmitter();
 
     if (scriptInstanceMeta) {
       const sessionsTable = SessionsDb.find(sessionsDirectory).sessions;
@@ -104,29 +97,11 @@ export default class SessionState {
       scriptInstanceMeta?.startDate,
     );
 
-    this.emitter.on('websocket-message', (msg: IWebsocketResourceMessage) => {
-      const listeners = this.websocketListeners[msg.resourceId];
-      if (!listeners) return;
-      for (const listener of listeners) {
-        listener(msg);
-      }
-    });
-
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public async listenForPageEvents(devtoolsClient: IDevtoolsClient, frameTracker: FrameTracker) {
-    this.pageEventsListener = new PageEventsListener(
-      this.sessionId,
-      devtoolsClient,
-      frameTracker,
-      this.onPageEvents.bind(this),
-    );
-    this.pageEventsListener.onNewContext = contextId => {
-      if (!this.lastCommand) return;
-      return this.pageEventsListener.setCommandIdInContext(this.lastCommand.id, contextId);
-    };
-    await this.pageEventsListener.listen();
+  public registerTab(tabId: string) {
+    this.navigationsByTabId[tabId] = new TabNavigations(this.db);
   }
 
   public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta) {
@@ -134,7 +109,6 @@ export default class SessionState {
 
     let result: T;
     try {
-      await this.pageEventsListener.setCommandIdForPage(commandMeta.id);
       commandMeta.startDate = new Date().toISOString();
       this.db.commands.insert(commandMeta);
 
@@ -174,11 +148,12 @@ export default class SessionState {
     if (idx >= 0) listeners.splice(idx, 1);
   }
 
-  public captureWebsocketMessage(
-    browserRequestId: string,
-    isFromServer: boolean,
-    message: string | Buffer,
-  ) {
+  public captureWebsocketMessage(event: {
+    browserRequestId: string;
+    isFromServer: boolean;
+    message: string | Buffer;
+  }) {
+    const { browserRequestId, isFromServer, message } = event;
     const resourceId = this.browserRequestIdToResourceId[browserRequestId];
     if (!resourceId) {
       log.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
@@ -199,10 +174,17 @@ export default class SessionState {
     this.websocketMessages.push(resourceMessage);
     this.db.websocketMessages.insert(this.lastCommand?.id, resourceMessage);
 
-    this.emitter.emit('websocket-message', resourceMessage);
+    const listeners = this.websocketListeners[resourceMessage.resourceId];
+    if (listeners) {
+      for (const listener of listeners) {
+        listener(resourceMessage);
+      }
+    }
+    return resourceMessage;
   }
 
   public captureResource(
+    tabId: string,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
     isResponse: boolean,
   ): IResourceMeta {
@@ -211,16 +193,19 @@ export default class SessionState {
       response,
       resourceType,
       body,
+      executionMillis,
       browserRequestId,
       redirectedToUrl,
+      wasCached,
     } = resourceEvent as IRequestSessionResponseEvent;
 
     if (browserRequestId) {
       this.browserRequestIdToResourceId[browserRequestId] = resourceEvent.id;
     }
 
-    const meta = {
+    const resource = {
       id: resourceEvent.id,
+      tabId,
       url: request.url,
       receivedAtCommandId: this.lastCommand?.id,
       type: resourceType,
@@ -232,24 +217,34 @@ export default class SessionState {
     } as IResourceMeta;
 
     if (isResponse && response?.statusCode) {
-      meta.response = response;
-      if (response.url) meta.url = response.url;
-      else meta.response.url = request.url;
+      resource.response = response;
+      if (response.url) resource.url = response.url;
+      else resource.response.url = request.url;
     }
 
-    this.db.resources.insert(meta, body, resourceEvent);
+    this.db.resources.insert(tabId, resource, body, resourceEvent);
 
     if (isResponse) {
-      this.resources.push(meta);
-      this.emitter.emit('resource', meta);
+      log.info('Http.Response', {
+        sessionId: this.sessionId,
+        url: request.url,
+        method: request.method,
+        headers: response.headers,
+        wasCached,
+        executionMillis,
+        bytes: body ? Buffer.byteLength(body) : -1,
+      });
+      const navigations = this.navigationsByTabId[tabId];
+      if (resource.url === navigations?.currentUrl && request.method !== 'OPTIONS') {
+        navigations.resourceLoadedForLocation(resource.id);
+      }
+      this.resources.push(resource);
     }
-    return meta;
+    return resource;
   }
 
-  public async forEachResource(onResourceFn: (resourceMeta: IResourceMeta) => Promise<any>) {
-    for (const resource of this.resources) {
-      await onResourceFn(resource);
-    }
+  public getResources(tabId: string) {
+    return this.resources.filter(x => x.tabId === tabId);
   }
 
   public async getResourceData(id: number) {
@@ -260,11 +255,12 @@ export default class SessionState {
     return this.resources.find(x => x.id === id);
   }
 
-  /////// / FRAMES ///////
+  ///////   FRAMES ///////
 
-  public captureFrameCreated(frameId: string, parentFrameId: string | null) {
+  public captureFrameCreated(tabId: string, frameId: string, parentFrameId: string | null) {
     const frame = {
       id: frameId,
+      tabId,
       parentId: parentFrameId,
       startCommandId: this.lastCommand?.id,
       url: null,
@@ -274,18 +270,24 @@ export default class SessionState {
     this.db.frames.insert(frame);
   }
 
-  public captureError(frameId: string, source: string, error: Error) {
+  public captureError(tabId: string, frameId: string, source: string, error: Error) {
     log.error('Window.error', { sessionId: this.sessionId, source, error });
-    this.db.pageLogs.insert(frameId, source, error.stack || String(error), new Date());
+    this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
-  public captureLog(frameId: string, consoleType: string, message: string, location?: string) {
+  public captureLog(
+    tabId: string,
+    frameId: string,
+    consoleType: string,
+    message: string,
+    location?: string,
+  ) {
     if (message.includes('Error: ') || message.startsWith('ERROR')) {
       log.error('Window.error', { sessionId: this.sessionId, message });
     } else {
       log.info('Window.console', { sessionId: this.sessionId, message });
     }
-    this.db.pageLogs.insert(frameId, consoleType, message, new Date(), location);
+    this.db.pageLogs.insert(tabId, frameId, consoleType, message, new Date(), location);
   }
 
   public onLogEvent(entry: ILogEntry) {
@@ -299,39 +301,36 @@ export default class SessionState {
     }
   }
 
-  public async saveBeforeWindowClose() {
-    try {
-      await this.flush(true);
-    } finally {
-      this.closeDate = new Date();
-      this.db.session.update(this.sessionId, {
-        closeDate: this.closeDate,
-        viewport: this.viewport,
-      });
-      LogEvents.unsubscribe(this.logSubscriptionId);
-      this.db.flush();
-      this.db.close();
-      SessionState.registry.delete(this.sessionId);
-    }
-  }
-
-  public async flush(isCloseEvent = false) {
-    await this.pageEventsListener?.flush(isCloseEvent);
+  public async close() {
+    this.closeDate = new Date();
+    this.db.session.update(this.sessionId, {
+      closeDate: this.closeDate,
+      viewport: this.viewport,
+    });
+    LogEvents.unsubscribe(this.logSubscriptionId);
     this.db.flush();
+    this.db.close();
+    SessionState.registry.delete(this.sessionId);
   }
 
   public checkForResponsive() {
-    const latestPage = this.pages.top;
-    const allContentLoaded = this.pages.top?.stateChanges?.get('AllContentLoaded');
-    let lastSuccessDate = allContentLoaded ?? latestPage?.initiatedTime ?? this.createDate;
-    for (const command of this.commands) {
-      if (!command.endDate) continue;
-      if (
-        allContentLoaded &&
-        command.endDate > lastSuccessDate &&
-        !command.resultType?.includes('Error')
-      ) {
-        lastSuccessDate = command.endDate;
+    let lastSuccessDate = this.createDate;
+    for (const navigation of Object.values(this.navigationsByTabId)) {
+      const allContentLoaded = navigation.top?.stateChanges?.get('AllContentLoaded');
+      const lastPageTime = allContentLoaded ?? navigation.top?.initiatedTime;
+      if (lastPageTime && lastPageTime > lastSuccessDate) {
+        lastSuccessDate = lastPageTime;
+      }
+      for (const command of this.commands) {
+        if (!command.endDate) continue;
+        const endDate = new Date(command.endDate);
+        if (
+          allContentLoaded &&
+          endDate > lastSuccessDate &&
+          !command.resultType?.includes('Error')
+        ) {
+          lastSuccessDate = endDate;
+        }
       }
     }
 
@@ -346,21 +345,22 @@ export default class SessionState {
     return {
       hasRecentErrors,
       unresponsiveSeconds,
-      closeTime: this.closeDate,
+      closeDate: this.closeDate,
     };
   }
 
-  public async getPageDomChanges(pages: IPage[], flush = false, sinceCommandId?: number) {
-    if (flush) {
-      await this.flush();
-    }
+  public async getFrameNavigationDomChanges(
+    frameLifecycles: INavigation[],
+    sinceCommandId?: number,
+  ) {
     return this.db.getDomChanges(
-      pages.map(x => x.frameId),
+      frameLifecycles.map(x => x.frameId),
       sinceCommandId,
     );
   }
 
-  private onPageEvents(
+  public onPageEvents(
+    tabId: string,
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
@@ -369,20 +369,23 @@ export default class SessionState {
   ) {
     log.stats('State.onPageEvents', {
       sessionId: this.sessionId,
+      tabId,
+      frameId,
       dom: domChanges.length,
       mouse: mouseEvents.length,
       focusEvents: focusEvents.length,
       scrollEvents: scrollEvents.length,
     });
-    const maxCommandId = domChanges.reduce((max, change) => {
+
+    let startCommandId = domChanges.reduce((max, change) => {
       if (max > change[0]) return max;
       return change[0];
     }, -1);
 
-    let startCommandId = maxCommandId;
+    const navigations = this.navigationsByTabId[tabId];
     // find last page load
-    for (let i = this.pages.history.length - 1; i >= 0; i -= 1) {
-      const page = this.pages.history[i];
+    for (let i = navigations.history.length - 1; i >= 0; i -= 1) {
+      const page = navigations.history[i];
       if (page.stateChanges.has(LocationStatus.HttpResponded)) {
         startCommandId = page.startCommandId;
         break;
@@ -391,22 +394,22 @@ export default class SessionState {
 
     for (const domChange of domChanges) {
       if (domChange[0] === -1) domChange[0] = startCommandId;
-      this.db.domChanges.insert(frameId, domChange);
+      this.db.domChanges.insert(tabId, frameId, domChange);
     }
 
     for (const mouseEvent of mouseEvents) {
       if (mouseEvent[0] === -1) mouseEvent[0] = startCommandId;
-      this.db.mouseEvents.insert(mouseEvent);
+      this.db.mouseEvents.insert(tabId, mouseEvent);
     }
 
     for (const focusEvent of focusEvents) {
       if (focusEvent[0] === -1) focusEvent[0] = startCommandId;
-      this.db.focusEvents.insert(focusEvent);
+      this.db.focusEvents.insert(tabId, focusEvent);
     }
 
     for (const scrollEvent of scrollEvents) {
       if (scrollEvent[0] === -1) scrollEvent[0] = startCommandId;
-      this.db.scrollEvents.insert(scrollEvent);
+      this.db.scrollEvents.insert(tabId, scrollEvent);
     }
   }
 }

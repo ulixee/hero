@@ -6,12 +6,8 @@
         .icon(:style="`background-image: url(${ICON_TOPMOST})`")
         .menu-item-title Always on Top
         .right-control
-          //Switch(:value="store.alwaysOnTop")
+          Switch(:value="store.alwaysOnTop")
       .line
-      .menu-item(@click="createNewTab('Home')")
-        .icon(:style="`background-image: url(${ICON_TAB})`")
-        .menu-item-title New Tab
-        .shortcut Ctrl+T
       .menu-item(@click="onNewWindowClick")
         .icon(:style="`background-image: url(${ICON_WINDOW})`")
         .menu-item-title New Window
@@ -52,7 +48,7 @@ import {
   ICON_ARROW_RIGHT,
 } from '~frontend/constants/icons';
 import NoCache from '~frontend/lib/NoCache';
-import ITabLocation from '~shared/interfaces/ITabLocation';
+import IWindowLocation from '~shared/interfaces/IWindowLocation';
 import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: {} })
@@ -60,25 +56,14 @@ export default class QuickMenu extends Vue {
   private store = new OverlayStore();
   private ICON_FIRE = ICON_FIRE;
   private ICON_TOPMOST = ICON_TOPMOST;
-  private ICON_TAB = ICON_TAB;
   private ICON_WINDOW = ICON_WINDOW;
   private ICON_HISTORY = ICON_HISTORY;
   private ICON_SETTINGS = ICON_SETTINGS;
   private ICON_FIND = ICON_FIND;
   private ICON_PRINT = ICON_PRINT;
 
-  private onFindClick() {
-    // TODO(sentialx): get selected tab
-    // ipcRenderer.send(
-    //   'overlay:toggle'
-    //   'find',
-    //   store.tabs.selectedTab.id,
-    //   store.tabs.selectedTab.findInfo,
-    // );
-  }
-
   private onPrintClick() {
-    ipcRenderer.send('tab:print', null);
+    ipcRenderer.send('window:print', null);
     this.store.hide();
   }
 
@@ -96,7 +81,7 @@ export default class QuickMenu extends Vue {
     ipcRenderer.send('window:create');
   }
 
-  private createNewTab(location: ITabLocation) {
+  private createNewTab(location: IWindowLocation) {
     ipcRenderer.send('tab:create', { location, active: true }, true);
     this.store.hide();
   }

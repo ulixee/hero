@@ -1,5 +1,6 @@
 export default interface ICommandWithResult {
   id: number;
+  tabId: string;
   frameId: number;
   name: string;
   label: string;

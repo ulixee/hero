@@ -10,6 +10,7 @@ import RequestSession from '../handlers/RequestSession';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 
 const { log } = Log(module);
+const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 /**
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
@@ -102,15 +103,21 @@ export default class MitmProxy {
     }
 
     const requestSession = RequestSession.sessions[sessionId];
+    if (requestSession?.isClosing) return;
+
     if (!requestSession) {
-      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+      log.warn('MitmProxy.RequestWithoutSessionId', {
         sessionId,
         isSSL,
-        host: clientToProxyRequest.headers.host,
+        host: clientToProxyRequest.headers.host ?? clientToProxyRequest.headers[':authority'],
         url: clientToProxyRequest.url,
       });
       proxyToClientResponse.writeHead(504);
       return proxyToClientResponse.end();
+    }
+
+    if (requestSession.bypassAllWithEmptyResponse) {
+      return proxyToClientResponse.end(emptyResponse);
     }
 
     await HttpRequestHandler.onRequest({
@@ -137,9 +144,10 @@ export default class MitmProxy {
       return RequestSession.sendNeedsAuth(socket);
     }
     const requestSession = RequestSession.sessions[sessionId];
+    if (requestSession?.isClosing) return;
 
     if (!requestSession) {
-      log.warn('MitmUpgrade.RequestWithoutSessionId', {
+      log.warn('MitmProxy.UpgradeRequestWithoutSessionId', {
         sessionId,
         isSSL,
         host: clientToProxyRequest.headers.host,

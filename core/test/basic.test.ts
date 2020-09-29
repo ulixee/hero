@@ -1,6 +1,9 @@
+import { Helpers } from '@secret-agent/testing/index';
 import Core, { GlobalPool } from '../index';
 
 const shutdownSpy = jest.spyOn(Core, 'shutdown');
+
+afterAll(Helpers.afterAll);
 
 describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {
@@ -13,10 +16,10 @@ describe('basic Core tests', () => {
     await Core.shutdown();
   });
 
-  it('runs createSession', async () => {
+  it('runs createTab', async () => {
     await Core.start();
     await Core.configure({ maxActiveSessionCount: 2 });
-    await Core.createSession();
+    await Core.createTab();
 
     expect(GlobalPool.maxActiveSessionCount).toBe(2);
     expect(GlobalPool.activeSessionCount).toBe(1);
@@ -28,8 +31,8 @@ describe('basic Core tests', () => {
     // @ts-ignore
     Core.autoShutdownMillis = 0;
     shutdownSpy.mockClear();
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.close();
     await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
@@ -41,8 +44,8 @@ describe('basic Core tests', () => {
     shutdownSpy.mockClear();
     await Core.start();
     await Core.configure({ maxActiveSessionCount: 5 });
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.close();
     await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(0);
@@ -55,8 +58,8 @@ describe('basic Core tests', () => {
     shutdownSpy.mockClear();
     await Core.start();
     await Core.configure({ maxActiveSessionCount: 5 });
-    const meta = await Core.createSession();
-    await Core.disconnect([meta.windowId]);
+    const meta = await Core.createTab();
+    await Core.disconnect([meta.tabId]);
     await new Promise(resolve => setTimeout(resolve, 50));
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
     await Core.shutdown();

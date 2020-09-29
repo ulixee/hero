@@ -51,11 +51,11 @@ if (args.ensureOneVideoDevice) {
   }
 }
 
-proxyFunction(Permissions.prototype, 'query', (func, thisArg, parameters) => {
-  if (parameters && parameters.name === 'notifications') {
+proxyFunction(Permissions.prototype, 'query', (func, thisArg, ...parameters) => {
+  if (parameters && parameters.length && parameters[0].name === 'notifications') {
     return Promise.resolve({ state: Notification.permission, onchange: null });
   }
-  return func.apply(thisArg, parameters);
+  return Reflect.apply(func, thisArg, parameters);
 });
 
 proxyDescriptors(Notification, {

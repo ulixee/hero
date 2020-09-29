@@ -1,43 +1,42 @@
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { Helpers } from '@secret-agent/testing';
+import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import Core from '../index';
-import { Helpers } from '../../testing';
-import DomEnv from '../lib/DomEnv';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   await Core.start();
-  koaServer = await Helpers.runKoaServer();
+  koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 test('should handle opening a page', async () => {
-  const meta = await Core.createSession();
-  const core = Core.byWindowId[meta.windowId];
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
   await core.goto(koaServer.baseUrl);
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
   // @ts-ignore
-  const window = core.window;
+  const tab = core.tab;
 
-  expect(window.frameTracker.getActiveContext('', window.frameTracker.mainFrameId)).toBeTruthy();
-  expect(
-    window.frameTracker.getActiveContext(
-      DomEnv.installedDomWorldName,
-      window.frameTracker.mainFrameId,
-    ),
-  ).toBeTruthy();
+  const page = tab.puppetPage as Page;
+
+  // @ts-ignore
+  expect(page.mainFrame.getActiveContextId(false)).toBeTruthy();
+  // @ts-ignore
+  expect(page.mainFrame.getActiveContextId(tab.mainFrameId)).toBeTruthy();
 
   await core.close();
 });
 
 test('should track navigations and redirects', async () => {
-  const meta = await Core.createSession();
-  const core = Core.byWindowId[meta.windowId];
+  const meta = await Core.createTab();
+  const core = Core.byTabId[meta.tabId];
   // @ts-ignore
-  const window = core.window;
+  const tab = core.tab;
   koaServer.get('/page1', ctx => {
     ctx.body = `
         <body>
@@ -76,16 +75,15 @@ test('should track navigations and redirects', async () => {
 
   await core.waitForLoad(LocationStatus.AllContentLoaded);
 
-  expect(window.frameTracker.getActiveContext('', window.frameTracker.mainFrameId)).toBeTruthy();
-  expect(
-    window.frameTracker.getActiveContext(
-      DomEnv.installedDomWorldName,
-      window.frameTracker.mainFrameId,
-    ),
-  ).toBeTruthy();
+  const page = tab.puppetPage as Page;
+  const frames = page.framesManager;
+  // @ts-ignore
+  expect(page.mainFrame.getActiveContextId(false)).toBeTruthy();
+  // @ts-ignore
+  expect(page.mainFrame.getActiveContextId()).toBeTruthy();
 
   // @ts-ignore
-  expect(window.frameTracker.activeContexts.size).toBe(3);
+  expect(frames.activeContexts.size).toBe(2);
 
   // make sure we can use the active context associated with the new window
   const pageLink = await core.execJsPath([

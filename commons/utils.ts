@@ -1,4 +1,4 @@
-export function assert(value, message, reject?) {
+export function assert(value: unknown, message?: string, reject?) {
   if (value) return;
   const error = new Error(message);
   if (reject) {

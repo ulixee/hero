@@ -7,11 +7,10 @@ export default class BlockHandler {
     if (session.isClosing) return true;
 
     const shouldBlock =
-      (session.blockImages && ctx.resourceType === 'Image') ||
+      (ctx.resourceType && session.blockedResources?.types?.includes(ctx.resourceType)) ||
       session.shouldBlockRequest(ctx.url.href);
 
     if (!shouldBlock) return false;
-
     ctx.didBlockResource = shouldBlock;
 
     let contentType = 'text/html';

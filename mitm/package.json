@@ -8,11 +8,11 @@
     "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "@secret-agent/mitm-socket": "^1.0.0-alpha.10",
     "devtools-protocol": "^0.0.799653",
-    "node-forge": "^0.9.1"
+    "node-forge": "^0.10.0"
   },
   "devDependencies": {
     "@secret-agent/testing": "^1.0.0-alpha.10",
-    "@types/node-forge": "^0.9.3",
+    "@types/node-forge": "^0.9.5",
     "@types/ws": "^7.2.4",
     "http-proxy-agent": "^4.0.1",
     "proxy": "^1.0.1",

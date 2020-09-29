@@ -6,8 +6,7 @@
     "@secret-agent/commons": "^1.0.0-alpha.10",
     "@secret-agent/core-interfaces": "^1.0.0-alpha.10",
     "@secret-agent/emulators": "^1.0.0-alpha.10",
-    "progress": "^2.0.1",
-    "puppeteer-core": "^5.2.1"
+    "@secret-agent/puppet": "^1.0.0-alpha.10"
   },
   "devDependencies": {
     "@secret-agent/core": "^1.0.0-alpha.11",

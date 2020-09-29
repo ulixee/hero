@@ -4,7 +4,7 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import CoreClientSession from './CoreClientSession';
+import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
@@ -15,15 +15,19 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreClientSession: CoreClientSession;
+  coreTab: CoreTab;
   awaitedPath: AwaitedPath;
+}
+
+interface IEventType {
+  message: IWebsocketMessage;
 }
 
 const propertyKeys: (keyof WebsocketResource)[] = ['url', 'request', 'response'];
 
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
-export default class WebsocketResource extends AwaitedEventTarget<{ message: IWebsocketMessage }> {
+export default class WebsocketResource extends AwaitedEventTarget<IEventType, IState> {
   constructor() {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
@@ -62,14 +66,11 @@ export default class WebsocketResource extends AwaitedEventTarget<{ message: IWe
   }
 }
 
-export function createWebsocketResource(
-  resourceMeta: IResourceMeta,
-  coreClientSession: CoreClientSession,
-) {
+export function createWebsocketResource(resourceMeta: IResourceMeta, coreTab: CoreTab) {
   const resource = new WebsocketResource();
-  const request = createResourceRequest(coreClientSession, resourceMeta.id);
-  const response = createResourceResponse(coreClientSession, resourceMeta.id);
+  const request = createResourceRequest(coreTab, resourceMeta.id);
+  const response = createResourceResponse(coreTab, resourceMeta.id);
   const awaitedPath = new AwaitedPath('resources', String(resourceMeta.id));
-  setState(resource, { coreClientSession, resource: resourceMeta, request, response, awaitedPath });
+  setState(resource, { coreTab, resource: resourceMeta, request, response, awaitedPath });
   return resource;
 }

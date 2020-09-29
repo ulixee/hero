@@ -1,4 +1,5 @@
 import BaseDb from './BaseDb';
+import { IHistoryRecord } from "~shared/interfaces/IHistoryRecord";
 
 const MAX_RECORD_COUNT = 100;
 
@@ -42,14 +43,4 @@ export default class HistoryDb extends BaseDb<IHistoryRecord[]> {
   public fetchAll(): IHistoryRecord[] {
     return [...this.allData];
   }
-}
-
-export interface IHistoryRecord {
-  id: string;
-  dataLocation: string;
-  sessionName: string;
-  scriptInstanceId: string;
-  scriptEntrypoint: string;
-  firstAccessedAt: string;
-  lastAccessedAt: string;
 }

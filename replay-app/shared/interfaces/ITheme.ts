@@ -9,9 +9,6 @@ export default interface ITheme {
   toolbarLightForeground: boolean;
   toolbarSeparatorColor: string;
 
-  tabTextColor: string;
-  tabSelectedTextColor: string;
-
   controlBackgroundColor: string;
   controlHoverBackgroundColor: string;
   controlValueColor: string;
@@ -34,10 +31,6 @@ export default interface ITheme {
 
   backgroundColor: string;
   accentColor: string;
-
-  titlebarHeight?: number;
-  tabHeight?: number;
-  tabMarginTop?: number;
 
   dark?: boolean;
 }

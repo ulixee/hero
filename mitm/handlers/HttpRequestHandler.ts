@@ -80,7 +80,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
   protected onError(kind: string, error: Error) {
     const url = this.context.url.href;
-    const { method, requestSession, isSSL, proxyToClientResponse } = this.context;
+    const { method, requestSession, proxyToClientResponse } = this.context;
     const sessionId = requestSession.sessionId;
 
     requestSession.emit('httpError', { url, method, error });
@@ -89,9 +89,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     log[logLevel](`MitmHttpRequest.${kind}`, {
       sessionId,
-      isSSL,
-      url,
-      method,
+      request: `${method}: ${url}`,
       error,
     });
     proxyToClientResponse.writeHead(504);

@@ -19,6 +19,8 @@
       "emulators",
       "emulator-plugins/*",
       "full-client",
+      "puppet",
+      "puppet-chrome",
       "humanoids",
       "humanoid-plugins/*",
       "injected-scripts",

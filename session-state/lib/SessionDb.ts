@@ -5,7 +5,7 @@ import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
 import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
-import PagesTable from '../models/PagesTable';
+import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
 import PageLogsTable from '../models/PageLogsTable';
 import BaseTable from './BaseTable';
@@ -28,7 +28,7 @@ export default class SessionDb {
   public readonly readonly: boolean;
   public readonly commands: CommandsTable;
   public readonly frames: FramesTable;
-  public readonly pages: PagesTable;
+  public readonly frameNavigations: FrameNavigationsTable;
   public readonly resources: ResourcesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
@@ -57,7 +57,7 @@ export default class SessionDb {
 
     this.commands = new CommandsTable(this.db);
     this.frames = new FramesTable(this.db);
-    this.pages = new PagesTable(this.db);
+    this.frameNavigations = new FrameNavigationsTable(this.db);
     this.resources = new ResourcesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
@@ -71,7 +71,7 @@ export default class SessionDb {
     this.tables.push(
       this.commands,
       this.frames,
-      this.pages,
+      this.frameNavigations,
       this.resources,
       this.websocketMessages,
       this.domChanges,

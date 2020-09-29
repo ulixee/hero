@@ -57,7 +57,7 @@ page.evaluate(
 );
 ```
 
-As you'll notice, the above example throws an error. Although you can pass arguments into a remote function, they must be serializable, which means you can only pass through simple types.
+As you'll notice, the above example throws an error. Although you can pass arguments into a remote method, they must be serializable, which means you can only pass through simple types.
 
 When used in a simple example as show above, Puppeteer's approach seems okay. However, the reality is, most scraper scripts are complex, and your code becomes littered with multiple contexts, adding context to an already complex environment.
 

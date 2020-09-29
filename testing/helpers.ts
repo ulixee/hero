@@ -12,7 +12,8 @@ import KoaRouter from '@koa/router';
 import * as net from 'net';
 import * as http2 from 'http2';
 import * as stream from 'stream';
-import Core from '../core';
+import Core from '@secret-agent/core';
+import { CanceledPromiseError } from '@secret-agent/commons/eventUtils';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -24,6 +25,16 @@ export interface ITestKoaServer extends KoaRouter {
   onlyCloseOnFinal?: boolean;
   baseHost: string;
   baseUrl: string;
+}
+export interface ITestHttpServer {
+  isClosing: boolean;
+  onlyCloseOnFinal: boolean;
+  url: string;
+  port: number;
+  baseUrl: string;
+  close: () => Promise<any>;
+  on: (eventName: string, fn: (...args: any[]) => void) => any;
+  server: http.Server | https.Server;
 }
 
 export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
@@ -74,7 +85,7 @@ export function sslCerts() {
   };
 }
 
-export async function runHttpsServer(handler: RequestListener) {
+export async function runHttpsServer(handler: RequestListener, onlyCloseOnFinal = false) {
   const options = {
     ...sslCerts(),
   };
@@ -87,7 +98,7 @@ export async function runHttpsServer(handler: RequestListener) {
 
   const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
-  const httpServer = {
+  const httpServer: ITestHttpServer = {
     isClosing: false,
     on(eventName, fn) {
       server.on(eventName, fn);
@@ -101,6 +112,7 @@ export async function runHttpsServer(handler: RequestListener) {
         server.close(() => setTimeout(resolve, 10));
       });
     },
+    onlyCloseOnFinal,
     baseUrl,
     url: `${baseUrl}/`,
     port,
@@ -113,18 +125,19 @@ export async function runHttpsServer(handler: RequestListener) {
 }
 
 export async function runHttpServer(
-  cookieValue?: string,
-  onPost?: (data: string) => void,
-  onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void,
+  params: {
+    onRequest?: (url: string, method: string, headers: http.IncomingHttpHeaders) => void;
+    onPost?: (body: string) => void;
+    addToResponse?: (response: http.ServerResponse) => void;
+    onlyCloseOnFinal?: boolean;
+  } = {},
 ) {
+  const { onRequest, onPost, addToResponse } = params;
   const server = http.createServer().unref();
   server.on('request', async (request, response) => {
     if (onRequest) onRequest(request.url, request.method, request.headers);
-    if (cookieValue) {
-      response.writeHead(200, {
-        'Set-Cookie': cookieValue,
-      });
-    }
+    if (addToResponse) addToResponse(response);
+
     let pageBody = 'Hello';
     const requestUrl = Url.parse(request.url);
     if (requestUrl.pathname === '/') {
@@ -150,6 +163,7 @@ export async function runHttpServer(
       for await (const chunk of request) {
         body += chunk;
       }
+      // eslint-disable-next-line no-shadow
       const params = querystring.parse(body);
       pageBody = params.thisText as string;
       if (onPost) onPost(params.thisText as string);
@@ -161,8 +175,9 @@ export async function runHttpServer(
   const port = (server.address() as net.AddressInfo).port;
 
   const baseUrl = `http://localhost:${port}`;
-  const httpServer = {
+  const httpServer: ITestHttpServer = {
     isClosing: false,
+    onlyCloseOnFinal: params.onlyCloseOnFinal ?? false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },
@@ -273,7 +288,7 @@ export async function runHttp2Server(
       }
       httpServer.isClosing = true;
       for (const session of sessions) {
-        session.socket.unref();
+        session.socket?.unref();
         session.destroy();
       }
       return new Promise(resolve => {
@@ -335,6 +350,7 @@ async function closeAll(isFinal = false) {
       try {
         await toClose.close();
       } catch (err) {
+        if (err instanceof CanceledPromiseError) return;
         // eslint-disable-next-line no-console
         console.log('Error shutting down', err);
       }

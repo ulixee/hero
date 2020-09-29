@@ -29,7 +29,7 @@ export default class CoreServerConnection {
   public pipeIncoming(payload: IRequestPayload) {
     const { messageId, command, meta, args } = payload;
     if (meta) {
-      const core = Core.byWindowId[meta.windowId];
+      const core = Core.byTabId[meta.tabId];
       this.runCommand(messageId, core, command, args).catch(error =>
         log.error('RunCommandError', { sessionId: meta.sessionId, error }),
       );

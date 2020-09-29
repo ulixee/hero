@@ -1,5 +1,6 @@
 export interface IDomChangeEvent {
   nodeId: number;
+  tabId:string;
   action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
   timestamp: string;
   isMainFrame: boolean;

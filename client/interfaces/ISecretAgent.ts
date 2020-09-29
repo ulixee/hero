@@ -1,6 +1,6 @@
 import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import { IRenderingOption } from '@secret-agent/core-interfaces/IWindowOptions';
+import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import Browser from '../lib/Browser';
 

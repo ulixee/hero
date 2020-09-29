@@ -38,7 +38,7 @@ interface IItem {
     private categories: ICategory[] = [];
 
     private navigateToHistory(e: any, item: IItem) {
-      ipcRenderer.send(`navigate-to-history`, item, true);
+      ipcRenderer.send(`navigate-to-history`, item);
     }
 
     private onRemoveClick(e: any, category: ICategory, item: IItem) {

@@ -39,18 +39,20 @@ export default abstract class BaseHttpHandler {
         method: context.method,
         ws: context.isUpgrade,
       });
+      if (session.isClosing) return;
 
       if (BlockHandler.shouldBlockRequest(context)) {
         log.info(`Http.RequestBlocked`, {
           sessionId: session.sessionId,
           url: context.url.href,
         });
+        await HeadersHandler.waitForBrowserRequest(context);
         session.emit('response', MitmRequestContext.toEmittedResource(this.context));
         // already wrote reply
         return;
       }
 
-      await HeadersHandler.waitForResource(context);
+      await HeadersHandler.waitForBrowserRequest(context);
       await CookieHandler.setProxyToServerCookies(context);
 
       context.cacheHandler.onRequest();

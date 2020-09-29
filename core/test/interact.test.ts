@@ -25,8 +25,8 @@ describe('basic Interaction tests', () => {
       `;
     });
     const mouseUrl = `${koaServer.baseUrl}/mouse`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     // @ts-ignore
     const session = core.session;
     await core.goto(mouseUrl);
@@ -51,6 +51,7 @@ describe('basic Interaction tests', () => {
       'classList',
     ]);
     expect(buttonClass.value).toStrictEqual({ 0: 'clicked' });
+    await core.close();
   });
 
   it('executes basic type command', async () => {
@@ -63,8 +64,8 @@ describe('basic Interaction tests', () => {
       `;
     });
     const inputUrl = `${koaServer.baseUrl}/input`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     await core.goto(inputUrl);
     await core.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
@@ -76,6 +77,7 @@ describe('basic Interaction tests', () => {
     ]);
     const inputValue = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(inputValue.value).toBe('Hello world!');
+    await core.close();
   });
 
   it('can operate when unsafe eval not on', async () => {
@@ -88,14 +90,15 @@ describe('basic Interaction tests', () => {
       `;
     });
     const inputUrl = `${koaServer.baseUrl}/unsafe`;
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
 
     await core.goto(inputUrl);
     const input = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(input.value).toBe('');
     const x = await core.execJsPath([['document.querySelector', 'body'], 'scrollTop']);
     expect(x.value).toBe(0);
+    await core.close();
   });
 
   it('should be able to get window variables', async () => {
@@ -113,8 +116,8 @@ describe('basic Interaction tests', () => {
       `;
     });
 
-    const meta = await Core.createSession();
-    const core = Core.byWindowId[meta.windowId];
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/vars`);
     await core.waitForLoad('DomContentLoaded');
 
@@ -125,5 +128,6 @@ describe('basic Interaction tests', () => {
     const pageClicks2 = await core.getJsValue('pageClicks');
 
     expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
+    await core.close();
   });
 });

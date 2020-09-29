@@ -1,22 +1,15 @@
 import ITheme from '~shared/interfaces/ITheme';
 import { BLUE_500 } from './colors';
-import {
-  DEFAULT_TITLEBAR_HEIGHT,
-  DEFAULT_TAB_MARGIN_TOP,
-  DEFAULT_TAB_HEIGHT,
-} from '~shared/constants/design';
 
 export const lightTheme: ITheme = {
   titlebarBackgroundColor: '#d4d4d4',
   addressBarBackgroundColor: '#fff',
   addressBarTextColor: '#000',
-  toolbarBackgroundColor: '#f8f8f8',
+  toolbarBackgroundColor: '#ECECEC',
   toolbarBottomLineBackgroundColor: 'rgba(0, 0, 0, 0.12)',
   toolbarLightForeground: false,
   toolbarSeparatorColor: 'rgba(0, 0, 0, 0.12)',
-  tabSelectedTextColor: '#000',
-  tabTextColor: `rgba(0, 0, 0, 0.7)`,
-  controlBackgroundColor: 'rgba(0, 0, 0, 0.08)',
+  controlBackgroundColor: 'rgba(0,0,0,0.08)',
   controlHoverBackgroundColor: 'rgba(0, 0, 0, 0.1)',
   controlValueColor: '#000',
   controlLightIcon: false,
@@ -34,9 +27,6 @@ export const lightTheme: ITheme = {
   dropdownSeparatorColor: 'rgba(0, 0, 0, 0.12)',
   backgroundColor: '#fff',
   accentColor: BLUE_500,
-  titlebarHeight: DEFAULT_TITLEBAR_HEIGHT,
-  tabMarginTop: DEFAULT_TAB_MARGIN_TOP,
-  tabHeight: DEFAULT_TAB_HEIGHT,
 };
 
 export const darkTheme: ITheme = {
@@ -47,8 +37,6 @@ export const darkTheme: ITheme = {
   toolbarBottomLineBackgroundColor: 'rgba(255, 255, 255, 0.08)',
   toolbarLightForeground: true,
   toolbarSeparatorColor: 'rgba(255, 255, 255, 0.12)',
-  tabSelectedTextColor: '#fff',
-  tabTextColor: 'rgba(255, 255, 255, 0.54)',
   controlBackgroundColor: 'rgba(255, 255, 255, 0.1)',
   controlHoverBackgroundColor: 'rgba(255, 255, 255, 0.12)',
   controlValueColor: '#fff',
@@ -67,7 +55,4 @@ export const darkTheme: ITheme = {
   pagesNavigationDrawerBackgroundColor: 'rgba(255, 255, 255, 0.05)',
   backgroundColor: '#1c1c1c',
   accentColor: BLUE_500,
-  titlebarHeight: DEFAULT_TITLEBAR_HEIGHT,
-  tabMarginTop: DEFAULT_TAB_MARGIN_TOP,
-  tabHeight: DEFAULT_TAB_HEIGHT,
 };

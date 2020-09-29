@@ -12,7 +12,16 @@
   * {
     box-sizing: border-box;
   }
-};
+
+  button {
+    -webkit-filter: brightness(100%);
+
+    &:hover {
+      -webkit-filter: brightness(90%);
+      -webkit-transition: all 0.3s ease;
+    }
+  }
+}
 
 @mixin centerIcon($size: contain) {
   @if $size == 'contain' {

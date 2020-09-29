@@ -16,8 +16,6 @@
     "@vue/cli-service": "~4.5.4",
     "animejs": "^3.2.0",
     "core-js": "^3.6.5",
-    "mobx": "^5.15.4",
-    "mobx-vue": "^2.0.10",
     "source-map-support": "^0.5.19",
     "uuid": "^8.1.0",
     "vue": "^2.6.11",
@@ -34,7 +32,6 @@
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^8.0.2",
-    "shx": "^0.3.2",
     "typescript": "~3.8.3"
   }
 }

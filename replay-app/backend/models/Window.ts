@@ -1,37 +1,50 @@
-import { app, BrowserWindow } from 'electron';
-import { resolve } from 'path';
-import Application from '../Application';
-import ReplayApi from '~backend/api';
-import storage from '../storage';
-import ICreateTabOptions from '~shared/interfaces/ICreateTabOptions';
-import { defaultTabOptions } from '~shared/constants/tabs';
-import ITabMeta from '~shared/interfaces/ITabMeta';
-import AppView from './AppView';
-import ReplayView from './ReplayView';
-import ITabLocation from '~shared/interfaces/ITabLocation';
+import { app, BrowserWindow } from "electron";
+import { resolve } from "path";
+import Application from "../Application";
+import ReplayApi from "~backend/api";
+import storage from "../storage";
+import AppView from "./AppView";
+import ReplayView from "./ReplayView";
+import IWindowLocation, { InternalLocations } from "~shared/interfaces/IWindowLocation";
+import ViewBackend from "~backend/models/ViewBackend";
+import { TOOLBAR_HEIGHT } from "~shared/constants/design";
+import IReplayMeta from "~shared/interfaces/IReplayMeta";
+import generateContextMenu from "~backend/menus/generateContextMenu";
+import { ISessionTab } from "~shared/interfaces/ISaSession";
 
 export default class Window {
   public static list: Window[] = [];
   public static current: Window;
-
-  public tabsById = new Map<number, AppView | ReplayView>();
-  public _selectedTabId = 0;
-  public _fullscreen = false;
+  public activeView: ViewBackend;
   public browserWindow: BrowserWindow;
-  public pendingReplayApi: ReplayApi;
+
+  public get replayApi() {
+    if (this.isReplayActive) return this.replayView.replayApi;
+  }
+
+  public get isReplayActive() {
+    return this.activeView instanceof ReplayView;
+  }
+
+  public readonly replayView: ReplayView;
+  public readonly appView: AppView;
 
   private readonly windowState: any = {};
 
-  protected constructor(pendingReplayApi: ReplayApi) {
-    this.pendingReplayApi = pendingReplayApi;
+  private readonly navHistory: { location?: IWindowLocation; replayMeta?: IReplayMeta }[] = [];
+
+  private navCursor: number;
+
+  private _fullscreen = false;
+  private isReady: Promise<void>;
+
+  protected constructor(state: { replayApi?: ReplayApi; location?: IWindowLocation }) {
     this.browserWindow = new BrowserWindow({
-      frame: false,
       minWidth: 400,
       minHeight: 450,
       width: 900,
       height: 700,
       titleBarStyle: 'hiddenInset',
-      backgroundColor: '#ffffff',
       webPreferences: {
         nodeIntegration: true,
         contextIsolation: false,
@@ -47,10 +60,18 @@ export default class Window {
 
     this.bindListenersToWindow();
 
-    this.browserWindow.loadURL(Application.instance.getPageUrl('app'));
-    if (process.env.NODE_ENV === 'development') {
-      this.webContents.openDevTools({ mode: 'detach' });
-    }
+    this.replayView = new ReplayView(this);
+    this.appView = new AppView(this);
+
+    this.isReady = this.load(state);
+  }
+
+  public get id() {
+    return this.browserWindow.id;
+  }
+
+  public get webContents() {
+    return this.browserWindow.webContents;
   }
 
   public get fullscreen() {
@@ -62,163 +83,148 @@ export default class Window {
     this.fixBounds();
   }
 
-  public get id() {
-    return this.browserWindow.id;
-  }
-
-  public get webContents() {
-    return this.browserWindow.webContents;
-  }
-
-  public get selectedTab() {
-    return this.tabsById.get(this.selectedTabId);
-  }
-
-  public get selectedTabId() {
-    return this._selectedTabId;
-  }
-
-  public set selectedTabId(value: number) {
-    if (this._selectedTabId === value) return;
-
-    const tab = this.tabsById.get(value);
-    if (!tab) return;
-
-    if (this.selectedTab) {
-      this.browserWindow.removeBrowserView(this.selectedTab.browserView);
-    }
-    this._selectedTabId = value;
-
-    this.browserWindow.addBrowserView(tab.browserView);
-    this.webContents.focus();
-    this.updateTitle();
-
-    this.fixBounds();
-  }
-
-  public get selectedReplayTab() {
-    const selected = this.selectedTab;
-    if (selected instanceof ReplayView) return selected as ReplayView;
-    return null;
-  }
-
-  public fixDragging() {
-    const bounds = this.browserWindow.getBounds();
-    this.browserWindow.setBounds({
-      height: bounds.height + 1,
-    });
-    this.browserWindow.setBounds(bounds);
-  }
-
   public sendToRenderer(channel: string, ...args: any[]) {
     this.webContents.send(channel, ...args);
   }
 
-  public updateTitle() {
-    const { title } = this.selectedTab;
-    this.browserWindow.setTitle(title.trim() === '' ? app.name : `${title} - ${app.name}`);
+  public async goBack() {
+    if (this.hasBack()) {
+      return this.goToHistory(this.navCursor - 1);
+    }
   }
 
-  public openAppLocation(location: ITabLocation) {
-    console.log(
-      'Navigating to %s. Will destroy current tab?',
+  public async goForward() {
+    if (this.hasNext()) {
+      return this.goToHistory(this.navCursor + 1);
+    }
+  }
+
+  public async openAppLocation(location: IWindowLocation, navigateToHistoryIdx?: number) {
+    console.log('Navigating to %s', location);
+
+    this.replayView.detach();
+
+    this.logHistory({ location }, navigateToHistoryIdx);
+
+    this.activeView = this.appView;
+    await this.appView.load(location);
+
+    this.sendToRenderer('location:updated', {
       location,
-      this.selectedTab instanceof ReplayView,
-    );
-    const selected = this.selectedTab;
-    let replaceTabId: number;
-    if (selected) {
-      if (selected instanceof AppView) {
-        return selected.loadLocation(location);
-      }
-      selected.webContents.closeDevTools();
-      replaceTabId = selected.id;
-    }
-
-    this.trackTab(new AppView(this, location, replaceTabId));
+      hasNext: this.hasNext(),
+      hasBack: this.hasBack(),
+    });
   }
 
-  public openReplayApi(replayApi: ReplayApi) {
-    console.log(
-      'Navigating to Replay Api (%s). Will destroy current tab?',
-      replayApi.apiHost,
-      this.selectedTab instanceof AppView,
-    );
-    const selected = this.selectedTab;
-    let replaceTabId: number;
-    if (selected) {
-      if (selected instanceof ReplayView) {
-        return selected.load(replayApi);
-      }
-      replaceTabId = selected.id;
-    }
+  public async openReplayApi(replayApi: ReplayApi, navigateToHistoryIdx?: number) {
+    console.log('Navigating to Replay Api (%s)', replayApi.apiHost);
 
-    this.trackTab(new ReplayView(this, replayApi, replaceTabId));
+    this.appView.detach();
+
+    this.logHistory({ replayMeta: replayApi.saSession }, navigateToHistoryIdx);
+
+    this.activeView = this.replayView;
+    await this.replayView.load(replayApi);
+    await this.fixBounds();
+
+    this.sendToRenderer('location:updated', {
+      saSession: replayApi.saSession,
+      hasNext: this.hasNext(),
+      hasBack: this.hasBack(),
+    });
   }
 
-  public createReplayTab(replayApi: ReplayApi) {
-    console.log('Creating Replay Tab (%s)', replayApi.apiHost);
-    const tab = this.trackTab(new ReplayView(this, replayApi));
-    const id = tab.id;
-    this.sendToRenderer('insert-tab', { id, active: true, saSession: replayApi.saSession }, true);
+  public onNewReplayTab(tab: ISessionTab) {
+    this.sendToRenderer('replay:new-tab', tab);
   }
 
-  public createAppTab(opts: ICreateTabOptions, isNext = false, notifyRenderer = true) {
-    if (this.pendingReplayApi) {
-      const replayApi = this.pendingReplayApi;
-      delete this.pendingReplayApi;
-      return this.createReplayTab(replayApi);
-    }
+  public setAddressBarUrl(url: string) {
+    this.sendToRenderer('replay:page-url', url);
+  }
 
-    const { location, active, index } = opts ?? defaultTabOptions;
-    console.log('Creating App Tab (%s)', location);
-    const tab = this.trackTab(new AppView(this, location));
-    const id = tab.id;
+  public setActiveTabId(id: string) {
+    this.sendToRenderer('replay:active-tab', id);
+  }
 
-    const tabMeta: ITabMeta = { id, location, active, index };
-    if (notifyRenderer) {
-      this.sendToRenderer('insert-tab', { ...tabMeta }, isNext);
-    }
-    return tabMeta;
+  public async loadReplayTab(id: string) {
+    await this.replayView.loadTab(id);
   }
 
   public async fixBounds() {
-    const tab = this.selectedTab;
-    if (!tab) return;
-
     const { width, height } = this.browserWindow.getContentBounds();
-    const toolbarContentHeight = await this.webContents.executeJavaScript(
-      `document.querySelector('.AppPage').offsetHeight`,
-    );
+    const toolbarContentHeight = await this.getHeaderHeight();
 
     const newBounds = {
       x: 0,
-      y: this.fullscreen ? 0 : toolbarContentHeight,
+      y: this.fullscreen ? 0 : toolbarContentHeight + 1,
       width,
       height: this.fullscreen ? height : height - toolbarContentHeight,
     };
 
-    tab.fixBounds(newBounds);
-  }
-
-  public destroyTab(id: number) {
-    const tab = this.tabsById.get(id);
-
-    this.tabsById.delete(id);
-
-    if (tab && !tab.browserView.isDestroyed()) {
-      this.browserWindow.removeBrowserView(tab.browserView);
-      tab.destroy();
+    if (this.isReplayActive) {
+      newBounds.height -= TOOLBAR_HEIGHT;
+      this.replayView.fixBounds(newBounds);
+    } else {
+      this.appView.fixBounds(newBounds);
     }
   }
 
-  private trackTab(tab: AppView | ReplayView) {
-    const id = tab.id;
-    this.tabsById.set(id, tab);
-    tab.webContents.once('destroyed', () => {
-      this.tabsById.delete(id);
-    });
-    return tab;
+  protected async load(state: { replayApi?: ReplayApi; location?: IWindowLocation }) {
+    const { replayApi, location } = state || {};
+    await this.browserWindow.loadURL(Application.instance.getPageUrl('header'));
+
+    // resize the BrowserView's height when the toolbar height changes
+    await this.webContents.executeJavaScript(`
+        const {ipcRenderer} = require('electron');
+        const resizeObserver = new ResizeObserver(() => {
+          ipcRenderer.send('resize-height');
+        });
+        const elem = document.querySelector('.HeaderPage');
+        resizeObserver.observe(elem);
+      `);
+
+    if (replayApi) {
+      await this.openReplayApi(replayApi);
+      this.replayView.start();
+      return;
+    }
+    return this.openAppLocation(location ?? InternalLocations.Dashboard);
+  }
+
+  /////// HISTORY  /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  private async goToHistory(index: number) {
+    const history = this.navHistory[index];
+    if (history.location) return this.openAppLocation(history.location, index);
+
+    const api = await ReplayApi.connect(history.replayMeta);
+    return this.openReplayApi(api, index);
+  }
+
+  private hasBack() {
+    return this.navCursor > 0;
+  }
+
+  private hasNext() {
+    return this.navCursor + 1 < this.navHistory.length;
+  }
+
+  private logHistory(
+    history: { replayMeta?: IReplayMeta; location?: IWindowLocation },
+    historyIdx?: number,
+  ) {
+    if (historyIdx !== undefined) {
+      this.navCursor = historyIdx;
+    } else {
+      this.navCursor = this.navHistory.length;
+      this.navHistory.push(history);
+    }
+  }
+
+  private async getHeaderHeight() {
+    return await this.webContents.executeJavaScript(
+      `document.querySelector('.HeaderPage').offsetHeight`,
+    );
   }
 
   private bindListenersToWindow() {
@@ -247,7 +253,7 @@ export default class Window {
     });
 
     this.browserWindow.on('scroll-touch-end', () => {
-      this.selectedTab.webContents.send('scroll-touch-end');
+      this.activeView.webContents.send('scroll-touch-end');
       this.sendToRenderer('scroll-touch-end');
     });
 
@@ -273,15 +279,9 @@ export default class Window {
     this.browserWindow.on('unmaximize', () => this.resize());
     this.browserWindow.on('close', () => this.close());
 
-    // resize the BrowserView's height when the toolbar height changes
-    this.webContents.executeJavaScript(`
-        const {ipcRenderer} = require('electron');
-        const resizeObserver = new ResizeObserver(() => {
-          ipcRenderer.send('resize-height');
-        });
-        const elem = document.querySelector('.AppPage');
-        resizeObserver.observe(elem);
-      `);
+    this.webContents.on('context-menu', (e, params) => {
+      generateContextMenu(params, this.webContents).popup();
+    });
 
     this.webContents.on('ipc-message', (e, message) => {
       if (message === 'resize-height') {
@@ -295,6 +295,13 @@ export default class Window {
       const windowState = storage.windowState;
       Object.assign(this.windowState, windowState);
 
+      if (Window.list.length > 0) {
+        const last = Window.list[Window.list.length - 1];
+        this.windowState.bounds = last.browserWindow.getBounds();
+        this.windowState.bounds.x += 10;
+        this.windowState.bounds.y += 10;
+      }
+
       this.browserWindow.setBounds({ ...this.windowState.bounds });
       if (this.windowState.isMaximized) this.browserWindow.maximize();
       if (this.windowState.isFullscreen) this.browserWindow.setFullScreen(true);
@@ -305,10 +312,7 @@ export default class Window {
   }
 
   private resize() {
-    setTimeout(() => this.fixBounds(), 0);
-
-    this.webContents.send('tabs-resize');
-    setTimeout(() => this.webContents.send('tabs-resize'), 500);
+    setImmediate(() => this.fixBounds());
   }
 
   private close() {
@@ -317,9 +321,9 @@ export default class Window {
     storage.windowState = this.windowState;
     storage.persistAll();
     this.browserWindow.setBrowserView(null);
-
-    Application.instance.overlayManager.destroy();
-    Object.values(this.tabsById).forEach(x => x.destroy());
+    this.replayView.destroy();
+    this.replayView.destroy();
+    this.appView.destroy();
 
     Window.list = Window.list.filter(x => x.browserWindow.id !== this.browserWindow.id);
     if (this.webContents.isDevToolsOpened) {
@@ -327,8 +331,10 @@ export default class Window {
     }
   }
 
-  public static create(replayApi?: ReplayApi) {
-    const window = new Window(replayApi);
+  public static create(
+    initialLocation: { replayApi?: ReplayApi; location?: IWindowLocation } = {},
+  ) {
+    const window = new Window(initialLocation);
     this.list.push(window);
   }
 

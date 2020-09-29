@@ -14,7 +14,6 @@ export default class LocationsMenu extends BaseOverlay {
           y: bounds.y + bounds.height - 5,
         };
       },
-      devtools: false,
       onWindowBoundsUpdate: () => {
         this.hide();
       },

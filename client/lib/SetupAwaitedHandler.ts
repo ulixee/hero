@@ -12,8 +12,8 @@ AwaitedHandler.initializer = function initializer<TClass>(self: AwaitedHandler<T
     await awaitRemoteInitializer(instance);
     const state = self.getState(instance);
     const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreClientSession } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreClientSession.execJsPath<T>(awaitedPath.addProperty(name).toJSON());
+    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+    const result = await coreTab.execJsPath<T>(awaitedPath.addProperty(name).toJSON());
 
     return cleanResult(instance, result);
   };
@@ -31,8 +31,8 @@ AwaitedHandler.initializer = function initializer<TClass>(self: AwaitedHandler<T
     await awaitRemoteInitializer(instance);
     const state = self.getState(instance);
     const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreClientSession } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreClientSession.execJsPath<T>(
+    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+    const result = await coreTab.execJsPath<T>(
       awaitedPath.addMethod(name, ...args).toJSON(),
     );
     return cleanResult(instance, result);
@@ -46,8 +46,8 @@ AwaitedHandler.initializer = function initializer<TClass>(self: AwaitedHandler<T
     await awaitRemoteInitializer(instance);
     const state = self.getState(instance);
     const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreClientSession } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreClientSession.execJsPath(
+    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+    const result = await coreTab.execJsPath(
       awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON(),
     );
 

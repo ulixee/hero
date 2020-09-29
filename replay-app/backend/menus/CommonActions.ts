@@ -3,7 +3,7 @@ import { dialog } from 'electron';
 import Window from '../models/Window';
 
 export const saveAs = async () => {
-  const { title, webContents } = Window.current.selectedTab;
+  const { title, webContents } = Window.current.activeView;
 
   const { canceled, filePath } = await dialog.showSaveDialog({
     defaultPath: title,
@@ -26,6 +26,6 @@ export const viewSource = async () => {
 };
 
 export const printPage = () => {
-  const { webContents } = Window.current.selectedTab;
+  const { webContents } = Window.current.activeView;
   webContents.print();
 };
