@@ -5,7 +5,7 @@ import Emulators from '@secret-agent/emulators';
 import Core from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
 import inspectScript from './inspectHierarchy';
-import getOverrideScript from '../injected-scripts';
+import { getOverrideScript } from '../injected-scripts';
 
 const { chrome, prevProperty } = ChromeJson as any;
 
@@ -37,10 +37,16 @@ test('it should mimic a chrome object', async () => {
     }).script,
     false,
   );
-  await page.navigate(httpServer.url);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+  ]);
 
   const structure = JSON.parse(
-    (await page.mainFrame.evaluate(`(${inspectScript.toString()})(window, 'window', ['chrome'])`, false)) as any,
+    (await page.mainFrame.evaluate(
+      `(${inspectScript.toString()})(window, 'window', ['chrome'])`,
+      false,
+    )) as any,
   ).window;
   if (debug) console.log(inspect(structure.chrome, false, null, true));
   expect(structure.chrome).toStrictEqual(chrome);
@@ -63,7 +69,10 @@ test('it should update loadtimes and csi values', async () => {
     }).script,
     false,
   );
-  await page.navigate(httpServer.url);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+  ]);
 
   const loadTimes = JSON.parse(
     (await page.mainFrame.evaluate(`JSON.stringify(chrome.loadTimes())`, false)) as any,
@@ -71,7 +80,9 @@ test('it should update loadtimes and csi values', async () => {
   if (debug) console.log(inspect(loadTimes, false, null, true));
   expect(loadTimes.requestTime).not.toBe(chrome.loadTimes['new()'].requestTime._value);
 
-  const csi = JSON.parse((await page.mainFrame.evaluate(`JSON.stringify(chrome.csi())`, false)) as any);
+  const csi = JSON.parse(
+    (await page.mainFrame.evaluate(`JSON.stringify(chrome.csi())`, false)) as any,
+  );
   if (debug) console.log(inspect(csi, false, null, true));
   expect(csi.pageT).not.toBe(chrome.csi['new()'].pageT._value);
 

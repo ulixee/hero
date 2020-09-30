@@ -1,9 +1,32 @@
-const nativeToStringFunctionString = Error.toString().replace(/Error/g, 'toString');
+// eslint-disable-next-line prefer-const -- must be let: could change for different browser (ie, Safari)
+let nativeToStringFunctionString = Error.toString().replace(/Error/g, 'toString');
 
 // when functions are re-bound to work around the loss of scope issue in chromium, they blow up their native toString
 const definedFuncs = new Map();
 
+// From puppeteer-stealth: this is to prevent someone snooping at Reflect calls
+const ReflectCached = {
+  construct: Reflect.construct.bind(Reflect),
+  get: Reflect.get.bind(Reflect),
+  set: Reflect.set.bind(Reflect),
+  apply: Reflect.apply.bind(Reflect),
+  ownKeys: Reflect.ownKeys.bind(Reflect),
+  getOwnPropertyDescriptor: Reflect.getOwnPropertyDescriptor.bind(Reflect),
+};
+
 const nativeErrorRegex = new RegExp(/^(\w+):\s/);
+
+const globalSymbols = {};
+for (const symbol of ReflectCached.ownKeys(Symbol)) {
+  if (typeof Symbol[symbol] === 'symbol') {
+    globalSymbols[`${String(Symbol[symbol])}`] = Symbol[symbol];
+  }
+}
+
+const nativeKey = '_____native_____';
+
+/////// END CONST //////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function createError(message, type) {
   if (!type) {
     const match = nativeErrorRegex.exec(message);
@@ -18,32 +41,17 @@ function createError(message, type) {
   }
   if (!type) type = Error;
   // eslint-disable-next-line new-cap
-  const error = new type(message);
-  cleanErrorStack(error);
-  return error;
+  return new type(message);
 }
 
-function cleanErrorStack(error) {
-  const stack = error.stack.split(/\r?\n/);
-  const newStack = [];
-  for (let i = 0; i < stack.length; i += 1) {
-    if (stack[i].includes('__secretagent_bootscript__')) {
-      continue;
-    }
-    newStack.push(stack[i]);
-  }
-  error.stack = newStack.join('\n');
-  return error;
-}
-
-proxyFunction(Function.prototype, 'toString', (target, thisArg) => {
+proxyFunction(Function.prototype, 'toString', (target, thisArg, ...args) => {
   if (definedFuncs.has(thisArg)) {
     return definedFuncs.get(thisArg);
   }
   if (target === Function.prototype.toString) {
     return nativeToStringFunctionString;
   }
-  return target.apply(thisArg);
+  return target.apply(thisArg, args);
 });
 
 function newObjectConstructor(newProps) {
@@ -158,14 +166,18 @@ function buildDescriptor(entry) {
   return attrs;
 }
 
-const globalSymbols = {};
-for (const symbol of Reflect.ownKeys(Symbol)) {
-  if (typeof Symbol[symbol] === 'symbol') {
-    globalSymbols[`${String(Symbol[symbol])}`] = Symbol[symbol];
+function cleanErrorStack(error) {
+  const stack = error.stack.split(/\r?\n/);
+  const newStack = [];
+  for (let i = 0; i < stack.length; i += 1) {
+    if (stack[i].includes(sourceUrl)) {
+      continue;
+    }
+    newStack.push(stack[i]);
   }
+  error.stack = newStack.join('\n');
+  return error;
 }
-
-const nativeKey = '_____native_____';
 
 function proxyFunction(thisObject, functionName, replacementFunc) {
   const overrides = proxyDescriptors(thisObject, {
@@ -206,6 +218,9 @@ function proxyDescriptors(obj, props) {
       if (override.get) {
         overrideGet(obj, proto, key, descriptor, override);
       }
+      if (override.set) {
+        overrideSet(obj, proto, key, descriptor, override);
+      }
       if (override.func) {
         overrideFunction(obj, proto, key, descriptor, override);
       }
@@ -220,15 +235,30 @@ function proxyDescriptors(obj, props) {
 function overrideGet(obj, proto, key, descriptor, override) {
   const toString = descriptor.get.toString();
   descriptor.get = new Proxy(descriptor.get, {
-    apply(target, thisArg) {
-      if (thisArg === obj) {
+    apply(_, thisArg) {
+      if (override.global || thisArg === obj) {
         const result = override.get(...arguments);
         if (result !== nativeKey) return result;
       }
-      return Reflect.apply(...arguments);
+      return ReflectCached.apply(...arguments);
     },
   });
   definedFuncs.set(descriptor.get, toString);
+  Object.defineProperty(proto, key, descriptor);
+}
+
+function overrideSet(obj, proto, key, descriptor, override) {
+  const toString = descriptor.set.toString();
+  descriptor.set = new Proxy(descriptor.set, {
+    apply(_, thisArg) {
+      if (override.global || thisArg === obj) {
+        const result = override.set(...arguments);
+        if (result !== nativeKey) return result;
+      }
+      return ReflectCached.apply(...arguments);
+    },
+  });
+  definedFuncs.set(descriptor.set, toString);
   Object.defineProperty(proto, key, descriptor);
 }
 
@@ -243,7 +273,7 @@ function overrideFunction(obj, proto, key, descriptor, override) {
         const result = override.func(...arguments);
         if (result !== nativeKey) return result;
       }
-      return Reflect.apply(...arguments);
+      return ReflectCached.apply(...arguments);
     },
   });
   definedFuncs.set(proto[key], toString);

@@ -20,6 +20,7 @@ import chrome from './chrome.json';
 import codecs from './codecs.json';
 import pkg from './package.json';
 import headerProfiles from './headers.json';
+import frame from './frame.json';
 
 const polyfills = readPolyfills(__dirname);
 const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
@@ -71,12 +72,17 @@ export default class Chrome83 extends EmulatorPlugin {
   }
 
   public async generatePageOverrides() {
+    const os = this.userAgent.os;
+    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
+    const windowFrame = frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
+
     const args = {
-      osFamily: this.userAgent.os.family,
-      osVersion: `${this.userAgent.os.major}.${this.userAgent.os.minor}`,
+      osFamily: os.family,
+      osVersion: `${os.major}.${os.minor}`,
       platform: this.userAgent.platform,
       memory: Math.ceil(Math.random() * 4) * 2,
       languages: ['en-US', 'en'],
+      windowFrame,
       videoDevice: {
         // TODO: stabilize per user
         deviceId: randomBytes(32).toString('hex'),

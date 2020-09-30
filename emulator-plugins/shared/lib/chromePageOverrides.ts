@@ -1,5 +1,4 @@
-import IPageOverride from '@secret-agent/emulators/interfaces/IPageOverride';
-import getOverrideScript from '../injected-scripts';
+import InjectedScripts from '../injected-scripts';
 import parseNavigatorPlugins from './parseNavigatorPlugins';
 
 export default function pageOverrides(
@@ -21,38 +20,35 @@ export default function pageOverrides(
 ) {
   const { codecs, chrome, polyfills, navigator } = data;
 
-  const scripts: IPageOverride[] = [
-    getOverrideScript('navigator', {
-      platform: args.platform,
-      memory: args.memory,
-      languages: args.languages,
-      ensureOneVideoDevice: args.videoDevice,
-    }),
-    getOverrideScript('chrome', {
-      updateLoadTimes: true,
-      polyfill: {
-        property: chrome.chrome,
-        prevProperty: chrome.prevProperty,
-      },
-    }),
-  ];
+  const injectedScripts = new InjectedScripts();
+  injectedScripts.add('errors');
+  injectedScripts.add('navigator', {
+    platform: args.platform,
+    memory: args.memory,
+    languages: args.languages,
+    ensureOneVideoDevice: args.videoDevice,
+  });
+  injectedScripts.add('chrome', {
+    updateLoadTimes: true,
+    polyfill: {
+      property: chrome.chrome,
+      prevProperty: chrome.prevProperty,
+    },
+  });
 
   if (polyfills) {
-    scripts.push(getOverrideScript('polyfill', polyfills));
+    injectedScripts.add('polyfill', polyfills);
   }
 
-  scripts.push(
-    getOverrideScript('plugins', parseNavigatorPlugins((navigator as any).navigator)),
-    getOverrideScript('webGl'),
-    getOverrideScript('console'),
-    getOverrideScript('iframe'),
-  );
+  injectedScripts.add('plugins', parseNavigatorPlugins(navigator.navigator));
+  injectedScripts.add('webGl');
+  injectedScripts.add('console');
+  injectedScripts.add('iframe');
+
   if (args.windowFrame) {
-    scripts.push(
-      getOverrideScript('screen', {
-        windowFrame: args.windowFrame,
-      }),
-    );
+    injectedScripts.add('screen', {
+      windowFrame: args.windowFrame,
+    });
   }
   const osString = `${args.osFamily} ${args.osVersion}`;
   let matchingCodec = codecs.find(x => x.opSyses.includes(osString));
@@ -61,18 +57,14 @@ export default function pageOverrides(
     matchingCodec = codecs.find(x => x.opSyses.some(y => y.includes(args.osFamily)));
   }
   if (matchingCodec) {
-    scripts.push(
-      getOverrideScript('codecs', {
-        audioCodecs: matchingCodec.profile.audioSupport,
-        videoCodecs: matchingCodec.profile.videoSupport,
-      }),
-    );
-    scripts.push(
-      getOverrideScript('webRtc', {
-        video: matchingCodec.profile.webRtcVideoCodecs,
-        audio: matchingCodec.profile.webRtcAudioCodecs,
-      }),
-    );
+    injectedScripts.add('codecs', {
+      audioCodecs: matchingCodec.profile.audioSupport,
+      videoCodecs: matchingCodec.profile.videoSupport,
+    });
+    injectedScripts.add('webRtc', {
+      video: matchingCodec.profile.webRtcVideoCodecs,
+      audio: matchingCodec.profile.webRtcAudioCodecs,
+    });
   }
-  return scripts;
+  return injectedScripts.build();
 }

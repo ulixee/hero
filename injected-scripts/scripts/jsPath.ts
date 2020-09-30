@@ -377,10 +377,8 @@ function getProperty(object, name, index): unknown {
 
 function runMethod(object, name, index, args): unknown {
   if (index === 0 && !object[name]) {
-    // tslint:disable-next-line:ban-types
     return getPropertyAtPath<Function>(name)(...args);
   }
-  // tslint:disable-next-line:ban-types
   return ((object[name] as unknown) as Function).apply(object, args);
 }
 
