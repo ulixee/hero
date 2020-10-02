@@ -16,7 +16,7 @@ descriptor.set = new Proxy(descriptor.set, {
       const cookie = argArray[0];
       cookieTrigger(JSON.stringify({ cookie, origin }));
     }
-    return Reflect.apply(...arguments);
+    return ReflectCached.apply(...arguments);
   },
 });
 

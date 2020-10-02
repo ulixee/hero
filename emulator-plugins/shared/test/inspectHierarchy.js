@@ -338,36 +338,33 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       } catch (err) {
         func = err.toString();
       }
-      try {
-        if (!doNotInvoke.includes(key) && !doNotInvoke.includes(path) && !value.prototype) {
-          invocation = await new Promise(async (resolve, reject) => {
-            const c = setTimeout(() => reject('Promise-like'), 250);
-            let didReply = false;
-            try {
-              let answer = obj[key]();
-              if (answer && answer.on) {
-                answer.on('error', err => {
-                  console.log('Error', err, obj, key);
-                });
-              }
-              answer = await answer;
 
-              if (didReply) return;
-              clearTimeout(c);
-              didReply = true;
-              resolve(answer);
-            } catch (err) {
-              if (didReply) return;
-              didReply = true;
-              clearTimeout(c);
-              reject(err);
+      if (!doNotInvoke.includes(key) && !doNotInvoke.includes(path) && !value.prototype) {
+        invocation = await new Promise(async (resolve, reject) => {
+          const c = setTimeout(() => reject('Promise-like'), 200);
+          let didReply = false;
+          try {
+            let answer = obj[key]();
+            if (answer && answer.on) {
+              answer.on('error', err => {
+                console.log('Error', err, obj, key);
+              });
             }
-          }).catch(err => {
-            invocation = err.toString();
-          });
-        }
-      } catch (err) {
-        invocation = err.toString();
+            answer = await answer;
+
+            if (didReply) return;
+            clearTimeout(c);
+            didReply = true;
+            resolve(answer);
+          } catch (err) {
+            if (didReply) return;
+            didReply = true;
+            clearTimeout(c);
+            reject(err);
+          }
+        }).catch(err => {
+          invocation = err.toString();
+        });
       }
     }
     return {

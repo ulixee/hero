@@ -3,9 +3,10 @@ import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
+import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import inspectHierarchy from './inspectHierarchy';
 import { proxyFunction } from '../injected-scripts/utils';
-import getOverrideScript from '../injected-scripts';
+import { getOverrideScript } from '../injected-scripts';
 
 let puppet: Puppet;
 beforeAll(async () => {
@@ -76,9 +77,14 @@ test('should override a function and clean error stacks', async () => {
     }).script,
     false,
   );
-  await page.navigate(httpServer.url);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+  ]);
 
-  const worksOnce = await page.evaluate(`navigator.permissions.query({ name: 'geolocation' }).then(x => x.state)`);
+  const worksOnce = await page.evaluate(
+    `navigator.permissions.query({ name: 'geolocation' }).then(x => x.state)`,
+  );
   expect(worksOnce).toBeTruthy();
 
   const perms = await page.evaluate(`(async () => {
@@ -88,5 +94,5 @@ test('should override a function and clean error stacks', async () => {
       return err.stack;
     }
   })();`);
-  expect(perms).not.toContain('__secretagent_bootscript__');
+  expect(perms).not.toContain(injectedSourceUrl);
 });

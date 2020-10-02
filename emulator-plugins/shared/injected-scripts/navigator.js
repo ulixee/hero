@@ -27,6 +27,17 @@ if (args.memory) {
 proxyDescriptors(window.navigator, props);
 
 if (args.ensureOneVideoDevice) {
+  const videoDevice = {
+    deviceId:
+      args.ensureOneVideoDevice.deviceId ||
+      '34af339e7d636e6372d65f50b56e774f7cd13e127c2a48ea6d022fbdf82bed3c',
+    groupId:
+      args.ensureOneVideoDevice.groupId ||
+      'cd04412d4be125b24466d2731b0eb1e30253d0c83b158e08e206e00e9e2975bb',
+    kind: 'videoinput',
+    label: '',
+  };
+
   if (
     navigator.mediaDevices &&
     navigator.mediaDevices.enumerateDevices &&
@@ -35,16 +46,7 @@ if (args.ensureOneVideoDevice) {
     proxyFunction(MediaDevices.prototype, 'enumerateDevices', (func, thisObj, ...args) => {
       return func.apply(thisObj, args).then(list => {
         if (list.find(x => x.kind === 'videoinput')) return list;
-        list.push({
-          deviceId:
-            args.ensureOneVideoDevice.deviceId ||
-            '34af339e7d636e6372d65f50b56e774f7cd13e127c2a48ea6d022fbdf82bed3c',
-          groupId:
-            args.ensureOneVideoDevice.groupId ||
-            'cd04412d4be125b24466d2731b0eb1e30253d0c83b158e08e206e00e9e2975bb',
-          kind: 'videoinput',
-          label: '',
-        });
+        list.push(videoDevice);
         return list;
       });
     });
@@ -53,9 +55,11 @@ if (args.ensureOneVideoDevice) {
 
 proxyFunction(Permissions.prototype, 'query', (func, thisArg, ...parameters) => {
   if (parameters && parameters.length && parameters[0].name === 'notifications') {
-    return Promise.resolve({ state: Notification.permission, onchange: null });
+    const result = { state: Notification.permission };
+    Object.setPrototypeOf(result, PermissionStatus.prototype);
+    return Promise.resolve(result);
   }
-  return Reflect.apply(func, thisArg, parameters);
+  return func.apply(thisArg, parameters);
 });
 
 proxyDescriptors(Notification, {

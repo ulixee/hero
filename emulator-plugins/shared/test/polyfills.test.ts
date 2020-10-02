@@ -6,7 +6,7 @@ import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
 import Emulators from '@secret-agent/emulators';
 import Core from '@secret-agent/core';
 import inspectScript from './inspectHierarchy';
-import getOverrideScript from '../injected-scripts';
+import { getOverrideScript } from '../injected-scripts';
 
 let puppet: Puppet;
 let httpServer: ITestHttpServer;

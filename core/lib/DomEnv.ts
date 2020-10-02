@@ -9,6 +9,7 @@ import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
 import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import DomEnvError from './DomEnvError';
 import { Serializable } from '../interfaces/ISerializable';
 
@@ -78,7 +79,9 @@ export default class DomEnv {
     type,
   });
 
-})(${propertiesToExtract ?? [].join(',')});`,
+})(${propertiesToExtract ?? [].join(',')});
+//# sourceURL=${injectedSourceUrl}
+`,
       false,
     );
   }

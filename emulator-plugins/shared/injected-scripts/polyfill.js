@@ -95,7 +95,7 @@ function reorderOnWindow(objectPath, propertyName, prevProperty, throughProperty
   const getOwnPropertyDescriptorsToString = Object.getOwnPropertyDescriptors.toString();
   Object.getOwnPropertyDescriptors = new Proxy(Object.getOwnPropertyDescriptors, {
     apply(target, thisArg, argArray) {
-      const descriptors = Reflect.apply(...arguments);
+      const descriptors = ReflectCached.apply(...arguments);
       const objectAtPath = getObjectAtPath(objectPath);
       if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
         const keys = Object.keys(descriptors);
@@ -115,7 +115,7 @@ function reorderOnWindow(objectPath, propertyName, prevProperty, throughProperty
   Object.getOwnPropertyNames = new Proxy(Object.getOwnPropertyNames, {
     apply(target, thisArg, argArray) {
       const objectAtPath = getObjectAtPath(objectPath);
-      const keys = Reflect.apply(...arguments);
+      const keys = ReflectCached.apply(...arguments);
       if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
         adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);
       }
@@ -127,7 +127,7 @@ function reorderOnWindow(objectPath, propertyName, prevProperty, throughProperty
   const keysToString = Object.keys.toString();
   Object.keys = new Proxy(Object.keys, {
     apply(target, thisArg, argArray) {
-      const keys = Reflect.apply(...arguments);
+      const keys = ReflectCached.apply(...arguments);
       const objectAtPath = getObjectAtPath(objectPath);
       if (thisArg === objectAtPath || (argArray && argArray[0] === objectAtPath)) {
         adjustKeyOrder(keys, propertyName, prevProperty, throughProperty);

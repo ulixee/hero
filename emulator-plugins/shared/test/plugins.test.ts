@@ -6,7 +6,7 @@ import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
 import chrome80Dom from './chrome80DomProperties.json';
 import inspectScript from './inspectHierarchy';
-import getOverrideScript from '../injected-scripts';
+import { getOverrideScript } from '../injected-scripts';
 
 const { navigator } = navigatorJson;
 
@@ -87,7 +87,11 @@ test('it should override plugins in a browser window', async () => {
     }).script,
     false,
   );
-  await page.navigate(httpServer.url);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+  ]);
+
   const hasPlugins = await page.mainFrame.evaluate(
     `'plugins' in navigator && 'mimeTypes' in navigator`,
     false,

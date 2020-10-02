@@ -8534,6 +8534,18 @@ forwarded@~0.1.2:
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
 
+fpcollect@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/fpcollect/-/fpcollect-1.0.4.tgz#3401571016ea48d0bee8dcaf34ccf3671896ac85"
+  integrity sha512-LFt5vtCWRFTin/RnNOGwrwtsI1xGfJzpMvFZzYfqkQ15sScS4qo0wa2SX6j8j7O4KAASJkvM3XPx/KPZV75jcA==
+
+fpscanner@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/fpscanner/-/fpscanner-0.1.5.tgz#f4eb26cd5414f3eff2a0714726691de1a5c39e9a"
+  integrity sha512-DNHW1xDndAj1WEfmaXwSnT/CRYenoB5unfJyYY+aFBGPjXb5zdbWPLUeMnskci0naZBxIcG7aF/LMl4sFVwi9Q==
+  dependencies:
+    ua-parser-js "^0.7.18"
+
 fragment-cache@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/fragment-cache/-/fragment-cache-0.2.1.tgz#4290fad27f13e89be7f33799c6bc5a0abfff0d19"
