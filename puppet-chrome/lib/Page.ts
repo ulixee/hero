@@ -196,7 +196,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager.close();
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
-    this.closePromise.resolve();
+    Promise.all([...this.workersById.values()].map(x => x.close()))
+      .finally(() => this.closePromise.resolve())
+      .catch(debugError);
     this.cancelPendingEvents('Page closed', ['close']);
   }
 
@@ -244,7 +246,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
     if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
-      const worker = new Worker(this.browserContext, cdpSession, targetInfo);
+      const worker = new Worker(this.browserContext, this.networkManager, cdpSession, targetInfo);
       const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 
@@ -252,8 +254,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       worker.on('page-error', this.emit.bind(this, 'page-error'));
       worker.on('close', () => this.workersById.delete(targetId));
 
-      // TODO: pause for initialization by client?
-      worker.initialize(this.networkManager).catch(debugError);
+      // TODO: pause for initialization by core/Tab?
       this.emit('worker', { worker });
       return;
     }

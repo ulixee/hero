@@ -163,4 +163,51 @@ describe('Multi-tab scenarios', () => {
 
     await browser.closeTab(newTab);
   });
+
+  it('can handle new tabs created in js callbacks', async () => {
+    koaServer.get('/ajaxNewResult', ctx => {
+      ctx.body = '<h1>Overridden Result</h1>';
+    });
+    koaServer.get('/ajaxTab', ctx => {
+      ctx.body = `<body>
+<a href="/newTab">Nothing else really here</a>
+<script>
+document.querySelector('a').addEventListener('click', event => {
+  // Prevent default link behavior
+  event.preventDefault();
+  event.stopPropagation();
+
+  // Simulate Asynchronous delay
+  setTimeout(function(){
+      window.open('${koaServer.baseUrl}/ajaxNewResult', '_blank');
+  }, 100);
+  return false;
+})
+</script>
+</body>`;
+    });
+
+    const browser = await SecretAgent.createBrowser();
+    Helpers.needsClosing.push(browser);
+
+    await browser.goto(`${koaServer.baseUrl}/ajaxTab`);
+    await browser.click(browser.document.querySelector('a'));
+    const newTab = await browser.waitForNewTab();
+
+    expect(newTab.tabId).not.toBe(browser.activeTab.tabId);
+    expect(await newTab.url).toBe(`${koaServer.baseUrl}/ajaxNewResult`);
+    await browser.focusTab(newTab);
+    const { document } = newTab;
+    expect(await document.querySelector('h1').textContent).toBe('Overridden Result');
+
+    // @ts-ignore
+    const core = Object.values(Core.byTabId).find(x => x.tab.sessionId === browser.sessionId);
+    // @ts-ignore
+    const emulator = core.session.emulator;
+    // make sure user agent is wired up
+    const agent = await browser.getJsValue('navigator.userAgent');
+    expect(agent.value).toBe(emulator.userAgent.raw);
+
+    await browser.closeTab(newTab);
+  });
 });

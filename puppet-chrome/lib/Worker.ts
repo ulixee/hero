@@ -1,6 +1,8 @@
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
+import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Protocol from 'devtools-protocol';
 import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/puppet/interfaces/IPuppetWorker';
+import { createPromise } from '@secret-agent/commons/utils';
 import { BrowserContext } from './BrowserContext';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
@@ -8,13 +10,18 @@ import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
+import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEvent;
 
 export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IPuppetWorker {
   public readonly browserContext: BrowserContext;
+  public isReady: Promise<Error | null>;
+
   private readonly cdpSession: CDPSession;
   private readonly networkManager: NetworkManager;
   private readonly targetInfo: TargetInfo;
-  private readonly executionContextId: Promise<number>;
+
+  private readonly registeredEvents: IRegisteredEventListener[];
+  private readonly executionContextId = createPromise<number>();
 
   public get id() {
     return this.targetInfo.targetId;
@@ -28,20 +35,24 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     return this.targetInfo.type;
   }
 
-  constructor(browserContext: BrowserContext, cdpSession: CDPSession, targetInfo: TargetInfo) {
+  constructor(
+    browserContext: BrowserContext,
+    parentNetworkManager: NetworkManager,
+    cdpSession: CDPSession,
+    targetInfo: TargetInfo,
+  ) {
     super();
     this.targetInfo = targetInfo;
     this.cdpSession = cdpSession;
     this.browserContext = browserContext;
     this.networkManager = new NetworkManager(cdpSession);
-    cdpSession.on('Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this));
-    cdpSession.on('Runtime.exceptionThrown', this.onRuntimeException.bind(this));
-    cdpSession.once('disconnected', this.emit.bind(this, 'close'));
-    this.executionContextId = new Promise<number>(resolve => {
-      this.cdpSession.once('Runtime.executionContextCreated', event => {
-        resolve(event.context.id);
-      });
-    });
+    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+      ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
+      ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
+      ['Runtime.executionContextCreated', this.onContextCreated.bind(this)],
+      ['disconnected', this.emit.bind(this, 'close')],
+    ]);
+    this.isReady = this.initialize(parentNetworkManager).catch(err => err);
   }
 
   async initialize(pageNetworkManager: NetworkManager) {
@@ -57,10 +68,13 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   }
 
   async evaluate<T>(expression: string): Promise<T> {
+    const didThrowError = await this.isReady;
+    if (didThrowError) throw didThrowError;
+    const contextId = await this.executionContextId.promise;
     const result = await this.cdpSession.send('Runtime.evaluate', {
       expression,
       awaitPromise: true,
-      contextId: await this.executionContextId,
+      contextId,
       returnByValue: true,
     });
     if (result.exceptionDetails) {
@@ -72,12 +86,22 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     return remote.value as T;
   }
 
+  async close() {
+    this.networkManager.close();
+    this.cancelPendingEvents('Worker closing', ['close']);
+    eventUtils.removeEventListeners(this.registeredEvents);
+  }
+
   toJSON() {
     return {
       id: this.id,
       url: this.url,
       type: this.type,
     };
+  }
+
+  private onContextCreated(event: ExecutionContextCreatedEvent) {
+    this.executionContextId.resolve(event.context.id);
   }
 
   private onRuntimeException(msg: ExceptionThrownEvent) {
