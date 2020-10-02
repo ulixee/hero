@@ -1,16 +1,16 @@
-import { app, BrowserWindow } from "electron";
-import { resolve } from "path";
-import Application from "../Application";
-import ReplayApi from "~backend/api";
-import storage from "../storage";
-import AppView from "./AppView";
-import ReplayView from "./ReplayView";
-import IWindowLocation, { InternalLocations } from "~shared/interfaces/IWindowLocation";
-import ViewBackend from "~backend/models/ViewBackend";
-import { TOOLBAR_HEIGHT } from "~shared/constants/design";
-import IReplayMeta from "~shared/interfaces/IReplayMeta";
-import generateContextMenu from "~backend/menus/generateContextMenu";
-import { ISessionTab } from "~shared/interfaces/ISaSession";
+import { app, BrowserWindow } from 'electron';
+import { resolve } from 'path';
+import Application from '../Application';
+import ReplayApi from '~backend/api';
+import storage from '../storage';
+import AppView from './AppView';
+import ReplayView from './ReplayView';
+import IWindowLocation, { InternalLocations } from '~shared/interfaces/IWindowLocation';
+import ViewBackend from '~backend/models/ViewBackend';
+import { TOOLBAR_HEIGHT } from '~shared/constants/design';
+import IReplayMeta from '~shared/interfaces/IReplayMeta';
+import generateContextMenu from '~backend/menus/generateContextMenu';
+import { ISessionTab } from '~shared/interfaces/ISaSession';
 
 export default class Window {
   public static list: Window[] = [];
@@ -150,6 +150,10 @@ export default class Window {
     await this.replayView.loadTab(id);
   }
 
+  public replayOnFocus() {
+    this.replayView.start();
+  }
+
   public async fixBounds() {
     const { width, height } = this.browserWindow.getContentBounds();
     const toolbarContentHeight = await this.getHeaderHeight();
@@ -184,9 +188,7 @@ export default class Window {
       `);
 
     if (replayApi) {
-      await this.openReplayApi(replayApi);
-      this.replayView.start();
-      return;
+      return this.openReplayApi(replayApi);
     }
     return this.openAppLocation(location ?? InternalLocations.Dashboard);
   }
@@ -336,6 +338,7 @@ export default class Window {
   ) {
     const window = new Window(initialLocation);
     this.list.push(window);
+    return window;
   }
 
   public static noneOpen() {

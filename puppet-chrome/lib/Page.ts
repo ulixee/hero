@@ -282,7 +282,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
+  private onRuntimeConsole(event: ConsoleAPICalledEvent) {
     const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = this.framesManager.getFrameIdForExecutionContext(event.executionContextId);
 

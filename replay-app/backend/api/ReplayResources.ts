@@ -1,6 +1,6 @@
-import * as zlib from "zlib";
-import { PassThrough } from "stream";
-import getResolvable from "~shared/utils/promise";
+import * as zlib from 'zlib';
+import { PassThrough } from 'stream';
+import getResolvable from '~shared/utils/promise';
 
 export default class ReplayResources {
   private resources: {
@@ -37,13 +37,18 @@ export default class ReplayResources {
     });
   }
 
-  public async get(url: string) {
+  public async get(urlStr: string) {
+    const url = urlStr.split('#').shift();
     this.initResource(url);
     const resource = await this.resources[url].promise;
-    const headers = {
+    const headers: any = {
       'Cache-Control': 'public, max-age=500',
       'Content-Type': resource.headers.get('content-type'),
     };
+
+    if (resource.headers.get('location')) {
+      headers.Location = resource.headers.get('location');
+    }
 
     let readable = new PassThrough();
     if (resource.type === 'Document') {

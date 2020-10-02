@@ -90,20 +90,25 @@ test('should pass FpScanner', async () => {
   expect(data).toBeTruthy();
 });
 
-test('permissions API', async () => {
+test('should not be denied for notifications, but prompt for permissions', async () => {
   const browser = await SecretAgent.createBrowser();
   await browser.goto(`${koaServer.baseUrl}`);
   const core = Core.byTabId[browser.activeTab.tabId];
   // @ts-ignore
   const page = core.tab.puppetPage;
-  const isHeadless = await page.evaluate(`(async () => {
+  const permissions = await page.evaluate<any>(`(async () => {
     const permissionStatus = await navigator.permissions.query({
       name: 'notifications',
     });
   
-    return Notification.permission === 'denied' && permissionStatus.state === 'prompt';
+    return {
+      notificationValue: Notification.permission,
+      permissionState: permissionStatus.state
+    }
   })();`);
-  expect(isHeadless).toBe(false);
+
+  expect(permissions.notificationValue).toBe('default');
+  expect(permissions.permissionState).toBe('prompt');
 });
 
 test('should not leave markers on permissions.query.toString ', async () => {

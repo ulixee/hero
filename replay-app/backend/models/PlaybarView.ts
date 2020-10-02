@@ -5,8 +5,10 @@ import ReplayTabState from '~backend/api/ReplayTabState';
 import ViewBackend from '~backend/models/ViewBackend';
 
 export default class PlaybarView extends ViewBackend {
-  private isReady: Promise<void>;
+  private readonly isReady: Promise<void>;
   private tabState: ReplayTabState;
+  private isLoaded = false;
+  private playOnLoaded = false;
 
   constructor(window: Window) {
     super(window, {
@@ -27,7 +29,8 @@ export default class PlaybarView extends ViewBackend {
     this.updateFrontendTicks = this.updateFrontendTicks.bind(this);
   }
 
-  public load(tabState: ReplayTabState) {
+  public async load(tabState: ReplayTabState) {
+    this.isLoaded = false;
     this.attach();
 
     // remove existing listeners
@@ -36,11 +39,20 @@ export default class PlaybarView extends ViewBackend {
     this.tabState = tabState;
     this.tabState.on('tick:changes', this.updateFrontendTicks);
 
+    await this.isReady;
+
     this.browserView.webContents.send('ticks:load', this.tabState.getTickState());
+    this.isLoaded = true;
+    if (this.playOnLoaded) this.play();
   }
 
   public play() {
-    this.browserView.webContents.send('start');
+    if (!this.isLoaded) {
+      this.playOnLoaded = true;
+    } else {
+      this.playOnLoaded = false;
+      this.browserView.webContents.send('start');
+    }
   }
 
   public async changeTickOffset(offset: number) {

@@ -167,6 +167,8 @@ function buildDescriptor(entry) {
 }
 
 function cleanErrorStack(error) {
+  if (!error.stack) return error;
+
   const stack = error.stack.split(/\r?\n/);
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {

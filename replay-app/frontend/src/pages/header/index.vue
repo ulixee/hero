@@ -373,9 +373,13 @@ export default class HeaderPage extends Vue {
         padding-left: 5px;
         font-weight: lighter;
         color: #676767;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
       .Icon {
         margin-top: 1px;
+        width: 30px;
       }
     }
   }

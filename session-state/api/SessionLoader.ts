@@ -147,6 +147,7 @@ const resourceWhitelist: ResourceType[] = [
   'Media',
   'Font',
   'Stylesheet',
+  'Other',
   'Document',
 ];
 

@@ -53,7 +53,7 @@ export default class ReplayView extends ViewBackend {
 
     this.tabState = id ? this.replayApi.getTab(id) : this.replayApi.getStartTab;
     this.tabState.on('tick:changes', this.checkResponsive);
-    this.playbarView.load(this.tabState);
+    await this.playbarView.load(this.tabState);
 
     console.log('Loaded tab state', this.tabState.startOrigin);
     this.window.setActiveTabId(this.tabState.tabId);
