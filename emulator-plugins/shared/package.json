@@ -1,16 +1,16 @@
 {
   "name": "@secret-agent/emulator-plugins-shared",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "description": "SecretAgent client that runs remotely",
   "dependencies": {
-    "@secret-agent/commons": "^1.0.0-alpha.12",
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.12",
-    "@secret-agent/emulators": "^1.0.0-alpha.12",
-    "@secret-agent/puppet": "^1.0.0-alpha.12"
+    "@secret-agent/commons": "1.0.0-alpha.13",
+    "@secret-agent/core-interfaces": "1.0.0-alpha.13",
+    "@secret-agent/emulators": "1.0.0-alpha.13",
+    "@secret-agent/puppet": "1.0.0-alpha.13"
   },
   "devDependencies": {
-    "@secret-agent/core": "^1.0.0-alpha.12",
-    "@secret-agent/emulate-chrome-80": "^1.0.0-alpha.12",
-    "@secret-agent/testing": "^1.0.0-alpha.12"
+    "@secret-agent/core": "1.0.0-alpha.13",
+    "@secret-agent/emulate-chrome-80": "1.0.0-alpha.13",
+    "@secret-agent/testing": "1.0.0-alpha.13"
   }
 }

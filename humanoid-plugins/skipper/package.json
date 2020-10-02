@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/humanoid-skipper",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "description": "Skip the humanoid for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "^1.0.0-alpha.12",
-    "@secret-agent/humanoids": "^1.0.0-alpha.12"
+    "@secret-agent/core-interfaces": "1.0.0-alpha.13",
+    "@secret-agent/humanoids": "1.0.0-alpha.13"
   }
 }
