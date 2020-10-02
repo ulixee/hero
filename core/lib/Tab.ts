@@ -83,6 +83,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     windowOpenParams?: { url: string; windowName: string },
   ) {
     super();
+    this.setEventsToLog(['child-tab-created', 'close']);
     this.id = uuidv1();
     this.session = session;
     this.parentTabId = parentTabId;
@@ -464,7 +465,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     await this.domRecorder.install();
     if (this.parentTabId) {
-      await this.domRecorder.setCommandIdForPage(this.lastCommandId);
+      // the page is paused waiting for debugger, so it won't resume until "install" is complete
+      this.domRecorder.setCommandIdForPage(this.lastCommandId).catch(err => {
+        log.warn('Tab.child.setCommandId.error', {
+          err,
+          sessionId: this.sessionId,
+        });
+      });
     }
   }
 
