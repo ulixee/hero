@@ -88,7 +88,8 @@ export default class Application {
       }
     }
 
-    await this.loadSessionReplay(replayMeta, true);
+    const window = await this.loadSessionReplay(replayMeta, true);
+    window.replayOnFocus();
   }
 
   private createWindowIfNeeded() {
@@ -114,18 +115,23 @@ export default class Application {
       scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
     });
 
+    let existingWindow = Window.current;
     if (findOpenReplayScriptWindow) {
-      const match = Window.list.find(
-        x => x.replayApi?.saSession?.scriptEntrypoint === replay.scriptEntrypoint,
+      existingWindow = Window.list.find(
+        x => x.replayApi?.saSession?.scriptEntrypoint === replayApi.saSession.scriptEntrypoint,
       );
-      if (match) return match.openReplayApi(replayApi);
     }
 
-    if (Window.noneOpen()) {
+    if (!existingWindow && Window.current?.isReplayActive === false) {
+      existingWindow = Window.current;
+    }
+
+    if (!existingWindow) {
       return Window.create({ replayApi });
     }
 
-    await Window.current.openReplayApi(replayApi);
+    await existingWindow.openReplayApi(replayApi);
+    return existingWindow;
   }
 
   private bindEventHandlers() {

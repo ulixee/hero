@@ -55,7 +55,8 @@ if (args.ensureOneVideoDevice) {
 
 proxyFunction(Permissions.prototype, 'query', (func, thisArg, ...parameters) => {
   if (parameters && parameters.length && parameters[0].name === 'notifications') {
-    const result = { state: Notification.permission };
+    const state = Notification.permission === 'default' ? 'prompt' : Notification.permission;
+    const result = { state };
     Object.setPrototypeOf(result, PermissionStatus.prototype);
     return Promise.resolve(result);
   }

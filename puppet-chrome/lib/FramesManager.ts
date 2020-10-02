@@ -89,8 +89,9 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     await this.cdpSession.send('Runtime.addBinding', {
       name,
     });
-    return eventUtils.addEventListener(this.cdpSession, 'Runtime.bindingCalled', event => {
+    return eventUtils.addEventListener(this.cdpSession, 'Runtime.bindingCalled', async event => {
       if (event.name === name) {
+        await this.isReady;
         const frameId = this.getFrameIdForExecutionContext(event.executionContextId);
         onCallback(event.payload, frameId);
       }

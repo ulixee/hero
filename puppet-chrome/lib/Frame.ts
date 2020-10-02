@@ -276,7 +276,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   private async waitForDefaultContext() {
     if (this.getActiveContextId(false)) return;
 
-    return this.waitOn('default-context-created').catch(err => {
+    // don't time out this event, we'll just wait for the page to shut down
+    return this.waitOn('default-context-created', null, null).catch(err => {
       if (err instanceof CanceledPromiseError) return;
       throw err;
     });

@@ -19,12 +19,15 @@ const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) =>
 // @ts-ignore
 delete window[runtimeFunction];
 
+let lastUploadDate: Date;
+
 function upload(records: PageRecorderResultSet) {
   try {
     const total = records.reduce((tot, ent) => tot + ent.length, 0);
     if (total > 0) {
       eventsCallback(JSON.stringify(records));
     }
+    lastUploadDate = new Date();
     return true;
   } catch (err) {
     console.log(`ERROR calling page recorder callback: ${String(err)}`, err);
@@ -113,6 +116,10 @@ class PageEventsRecorder {
       subtree: true,
       characterData: true,
     });
+  }
+
+  public hasCommandId() {
+    return this.commandId !== -1;
   }
 
   public setCommandId(id: number) {
@@ -221,7 +228,7 @@ class PageEventsRecorder {
     this.uploadChanges();
   }
 
-  private uploadChanges() {
+  public uploadChanges() {
     if (upload(this.pageResultset)) {
       this.resetLists();
     }
@@ -412,9 +419,20 @@ function flushPageRecorder() {
 // @ts-ignore
 window.flushPageRecorder = flushPageRecorder;
 
+const interval = setInterval(() => {
+  if (!lastUploadDate || new Date().getTime() - lastUploadDate.getTime() > 1e3) {
+    // if we haven't uploaded in 1 second, make sure nothing is pending
+    recorder.uploadChanges();
+  }
+}, 500);
+
 window.addEventListener('beforeunload', () => {
+  clearInterval(interval);
   recorder.disconnect();
 });
+
+window.addEventListener('DOMContentLoaded', () => recorder.uploadChanges());
+window.addEventListener('load', () => recorder.uploadChanges());
 
 document.addEventListener('input', () => recorder.checkForPropertyChanges(), {
   capture: true,
