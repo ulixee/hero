@@ -240,10 +240,7 @@ export default class MitmRequestAgent {
 
   private http2Request(ctx: IMitmRequestContext, connectResult: MitmSocket) {
     const client = this.createHttp2Session(ctx, connectResult);
-    const http2Stream = client.request(ctx.requestHeaders, { waitForTrailers: true });
-    http2Stream.on('push', this.onHttp2PushStream.bind(this, ctx, http2Stream));
-
-    return http2Stream;
+    return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
 
   private onHttp2PushStream(
@@ -266,7 +263,14 @@ export default class MitmRequestAgent {
     }
 
     pushContext.serverToProxyResponse = stream;
-    MitmRequestContext.readHttp2Response(pushContext, stream, headers);
+    HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
+
+    const onResponseHeaders = new Promise(resolve => {
+      stream.once('push', responseHeaders => {
+        MitmRequestContext.readHttp2Response(pushContext, stream, responseHeaders);
+        resolve();
+      });
+    });
 
     // emit request
     if (!parentContext.isClientHttp2) {
@@ -288,12 +292,15 @@ export default class MitmRequestAgent {
         return;
       }
 
+      stream.on('headers', additional => pushStream.additionalHeaders(additional));
+
       let trailers: http2.IncomingHttpHeaders;
       stream.once('trailers', trailerHeaders => {
         trailers = trailerHeaders;
       });
 
-      pushStream.respond({ ':status': 200 }, { waitForTrailers: true });
+      await onResponseHeaders;
+      pushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
       pushStream.on('wantTrailers', async () => {
         pushContext.responseTrailers = trailers;
         pushStream.sendTrailers(pushContext.responseTrailers ?? {});
@@ -309,6 +316,7 @@ export default class MitmRequestAgent {
         pushStream.write(cache.cacheData);
       }
 
+      stream.end();
       pushStream.end();
       cache.onResponseEnd();
 
