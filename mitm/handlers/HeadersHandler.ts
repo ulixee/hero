@@ -90,12 +90,12 @@ export default class HeadersHandler {
         if (canonizedKey[0] === ':') delete ctx.responseHeaders[key];
       }
 
-      if (!nodeCommon._checkInvalidHeaderChar(value)) {
-        if (Array.isArray(value)) {
-          headers[canonizedKey] = [...value];
-        } else {
-          headers[canonizedKey] = value;
-        }
+      if (nodeCommon._checkInvalidHeaderChar(value)) continue;
+
+      if (Array.isArray(value)) {
+        headers[canonizedKey] = [...value];
+      } else {
+        headers[canonizedKey] = value;
       }
     }
 

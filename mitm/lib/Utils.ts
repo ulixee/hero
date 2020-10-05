@@ -9,8 +9,9 @@ export function parseRawHeaders(rawHeaders: string[]): IResourceHeaders {
     if (headers[key] || key.toLowerCase() === 'set-cookie') {
       if (Array.isArray(headers[key])) {
         headers[key].push(value);
+      } else if (headers[key]) {
+        headers[key] = [headers[key], value];
       } else {
-        if (headers[key]) headers[key] = [headers[key]];
         headers[key] = [value];
       }
     } else {

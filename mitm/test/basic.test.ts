@@ -1,4 +1,4 @@
-import http from 'http';
+import http, { IncomingHttpHeaders } from 'http';
 import { Helpers } from '@secret-agent/testing';
 import HttpProxyAgent from 'http-proxy-agent';
 import { AddressInfo } from 'net';
@@ -10,6 +10,7 @@ import RequestSession from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
+import { parseRawHeaders } from "../lib/Utils";
 
 const mocks = {
   httpRequestHandler: {
@@ -49,6 +50,40 @@ describe('basic MitM tests', () => {
     const res = await Helpers.httpGet(httpServer.url, proxyHost, proxyCredentials);
     expect(res.includes('Hello')).toBeTruthy();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+
+    await mitmServer.close();
+  });
+
+  it('should send http1 response headers through proxy', async () => {
+    const httpServer = await Helpers.runHttpServer({
+      addToResponse(response) {
+        response.setHeader('x-test', ['1', '2']);
+      },
+    });
+    const mitmServer = await MitmServer.start();
+    Helpers.needsClosing.push(mitmServer);
+    const proxyHost = `http://localhost:${mitmServer.port}`;
+
+    const session = new RequestSession('headers', 'any agent', null);
+
+    const proxyCredentials = session.getProxyCredentials();
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+
+    let rawHeaders: string[];
+    const res = await Helpers.httpRequest(
+      httpServer.url,
+      'GET',
+      proxyHost,
+      proxyCredentials,
+      {},
+      getRes => {
+        rawHeaders = getRes.rawHeaders;
+      },
+    );
+    const headers = parseRawHeaders(rawHeaders);
+    expect(res.includes('Hello')).toBeTruthy();
+    expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+    expect(headers['x-test']).toHaveLength(2);
 
     await mitmServer.close();
   });
@@ -324,7 +359,7 @@ describe('basic MitM tests', () => {
     const proxyCredentials = session.getProxyCredentials();
 
     await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
-    
+
     expect(session.delegate.modifyHeadersBeforeSend).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 

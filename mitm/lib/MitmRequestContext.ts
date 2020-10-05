@@ -73,17 +73,15 @@ export default class MitmRequestContext {
     return ctx;
   }
 
-  public static createFromHttp2Push(
-    parentContext: IMitmRequestContext,
-    headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
-  ) {
+  public static createFromHttp2Push(parentContext: IMitmRequestContext, rawHeaders: string[]) {
+    const requestHeaders = parseRawHeaders(rawHeaders);
     const url = new URL(
-      `${parentContext.url.protocol}//${headers[':authority']}${headers[':path']}`,
+      `${parentContext.url.protocol}//${requestHeaders[':authority']}${requestHeaders[':path']}`,
     );
     const ctx = {
       id: this.contextIdCounter += 1,
       url,
-      method: headers[':method'],
+      method: requestHeaders[':method'],
       isServerHttp2: parentContext.isServerHttp2,
       isClientHttp2: parentContext.isClientHttp2,
       requestSession: parentContext.requestSession,
@@ -95,9 +93,9 @@ export default class MitmRequestContext {
       isSSL: parentContext.isSSL,
       hasUserGesture: parentContext.hasUserGesture,
       isHttp2Push: true,
-      requestOriginalHeaders: { ...headers },
-      requestHeaders: headers,
-      requestLowerHeaders: { ...headers },
+      requestOriginalHeaders: parseRawHeaders(rawHeaders),
+      requestHeaders,
+      requestLowerHeaders: { ...requestHeaders },
       responseHeaders: null,
       responseUrl: null,
       responseTrailers: null,
@@ -197,9 +195,11 @@ export default class MitmRequestContext {
   public static readHttp2Response(
     ctx: IMitmRequestContext,
     response: http2.ClientHttp2Stream,
-    headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
+    statusCode: number,
+    rawHeaders: string[],
   ) {
-    ctx.status = headers[':status'];
+    const headers = parseRawHeaders(rawHeaders);
+    ctx.status = statusCode;
     ctx.responseTime = new Date();
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = headers;

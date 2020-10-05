@@ -248,12 +248,13 @@ export default class MitmRequestAgent {
     stream: http2.ClientHttp2Stream,
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
     flags: number,
+    rawHeaders: string[],
   ) {
     const session = this.session;
     const sessionId = session.sessionId;
     log.info('Http2Client.pushReceived', { sessionId, headers, flags });
 
-    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, headers);
+    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
     this.session.trackResource(pushContext);
     this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
 
@@ -266,8 +267,13 @@ export default class MitmRequestAgent {
     HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
 
     const onResponseHeaders = new Promise(resolve => {
-      stream.once('push', responseHeaders => {
-        MitmRequestContext.readHttp2Response(pushContext, stream, responseHeaders);
+      stream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
+        MitmRequestContext.readHttp2Response(
+          pushContext,
+          stream,
+          responseHeaders[':status'],
+          responseRawHeaders,
+        );
         resolve();
       });
     });
@@ -283,7 +289,7 @@ export default class MitmRequestAgent {
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
 
-    clientToProxyRequest.stream.pushStream(headers, async (err, pushStream) => {
+    clientToProxyRequest.stream.pushStream(pushContext.requestHeaders, async (err, pushStream) => {
       if (err) {
         log.warn('Http2.PushStreamError', {
           sessionId,
