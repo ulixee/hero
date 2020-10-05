@@ -126,6 +126,8 @@ interface CDPSessionOnMessageObject {
   result?: any;
 }
 
+class ProtocolError extends Error {}
+
 export function createProtocolError(
   error: Error,
   method: string,
@@ -133,7 +135,9 @@ export function createProtocolError(
 ): Error {
   let message = `Protocol error (${method}): ${object.error.message}`;
   if ('data' in object.error) message += ` ${object.error.data}`;
-  return rewriteError(error, message);
+  const protocolError = new ProtocolError(message);
+  protocolError.stack = error.stack;
+  return protocolError;
 }
 
 export function rewriteError(error: Error, message: string): Error {

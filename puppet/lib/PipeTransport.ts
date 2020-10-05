@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as EventUtils from '@secret-agent/commons/eventUtils';
-import { debug } from '@secret-agent/commons/Debug';
-import IConnectionTransport from '../interfaces/IConnectionTransport';
+import * as EventUtils from "@secret-agent/commons/eventUtils";
+import { debug } from "@secret-agent/commons/Debug";
+import IConnectionTransport from "../interfaces/IConnectionTransport";
 
-const debugError = debug('puppet:error');
+const debugError = debug('puppet:transport:error');
+const debugInfo = debug('puppet:transport');
 
 export class PipeTransport implements IConnectionTransport {
   pipeWrite: NodeJS.WritableStream;
@@ -33,6 +34,7 @@ export class PipeTransport implements IConnectionTransport {
     this.eventListeners = [
       EventUtils.addEventListener(pipeRead, 'data', buffer => this._dispatch(buffer)),
       EventUtils.addEventListener(pipeRead, 'close', () => {
+        debugInfo('PipeTransport closed');
         if (this.onclose) this.onclose.call(null);
       }),
       EventUtils.addEventListener(pipeRead, 'error', debugError),

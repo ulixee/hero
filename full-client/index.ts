@@ -5,7 +5,6 @@ import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 
 process.title = 'SecretAgent';
 
-// tslint:disable:variable-name
 const { SecretAgent, coreClient } = SecretAgentClientGenerator();
 
 // OUTGOING ////////////////////////////////////////////////////////////////////
