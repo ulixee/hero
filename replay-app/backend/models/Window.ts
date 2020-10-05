@@ -33,7 +33,7 @@ export default class Window {
 
   private readonly navHistory: { location?: IWindowLocation; replayMeta?: IReplayMeta }[] = [];
 
-  private navCursor: number;
+  private navCursor = -1;
 
   private _fullscreen = false;
   private isReady: Promise<void>;
@@ -218,6 +218,7 @@ export default class Window {
     if (historyIdx !== undefined) {
       this.navCursor = historyIdx;
     } else {
+      this.navHistory.length = this.navCursor+1;
       this.navCursor = this.navHistory.length;
       this.navHistory.push(history);
     }
