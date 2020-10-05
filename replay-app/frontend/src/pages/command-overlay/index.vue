@@ -49,15 +49,16 @@ export default class CommandOverlay extends Vue {
 .CommandOverlay {
   @include overlayStyle();
   min-height: 80px;
-  padding: 1px;
+  box-sizing: border-box;
+  padding: 10px 25px 10px 15px;
+  overflow: hidden;
   .title {
-    margin: 20px;
+    margin-top: 5px;
     box-sizing: content-box;
-    wrap-word: break-word;
+    word-break: break-word;
     text-align: center;
   }
   .resultBox {
-    margin: 20px;
     font-size: 0.9em;
     .label {
       color: #3c3c3c;
@@ -65,6 +66,7 @@ export default class CommandOverlay extends Vue {
       margin-right: 5px;
     }
     .value {
+      word-break: break-word;
       &.error {
         font-style: italic;
         color: #717171;
