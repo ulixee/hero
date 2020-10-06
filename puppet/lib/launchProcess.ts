@@ -19,12 +19,11 @@ import { StdioOptions } from "child_process";
 import { debug } from "@secret-agent/commons/Debug";
 import { Readable, Writable } from "stream";
 import * as readline from "readline";
+import Path from 'path';
 import { PipeTransport } from "./PipeTransport";
 import ILaunchedProcess from "../interfaces/ILaunchedProcess";
 
 const debugLauncher = debug('puppet:launcher');
-const errorDebug = debug('puppet:browser:error');
-const outDebug = debug('puppet:browser:out');
 
 export default function launchProcess(
   executablePath: string,
@@ -53,6 +52,9 @@ export default function launchProcess(
     throw new Error('Failed to launch');
   }
 
+  const exe = executablePath.split(Path.sep).pop().toLowerCase();
+  const errorDebug = debug(`${exe}:stderr`);
+  const outDebug = debug(`${exe}:stdout`);
   if (pipeIo) {
     const stdout = readline.createInterface({ input: launchedProcess.stdout });
     stdout.on('line', (data: string) => {

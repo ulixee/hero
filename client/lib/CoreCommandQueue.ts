@@ -37,6 +37,10 @@ export default class CoreCommandQueue {
     return promise;
   }
 
+  public clearPending() {
+    this.items.length = 0;
+  }
+
   // PRIVATE
 
   private async processQueue() {

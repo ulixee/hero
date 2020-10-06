@@ -90,12 +90,12 @@ export default class HeadersHandler {
         if (canonizedKey[0] === ':') delete ctx.responseHeaders[key];
       }
 
-      if (!nodeCommon._checkInvalidHeaderChar(value)) {
-        if (Array.isArray(value)) {
-          headers[canonizedKey] = [...value];
-        } else {
-          headers[canonizedKey] = value;
-        }
+      if (nodeCommon._checkInvalidHeaderChar(value)) continue;
+
+      if (Array.isArray(value)) {
+        headers[canonizedKey] = [...value];
+      } else {
+        headers[canonizedKey] = value;
       }
     }
 
@@ -121,25 +121,25 @@ export default class HeadersHandler {
 
   public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext) {
     const url = ctx.url;
-
-    const newHeaders = {} as IResourceHeaders;
-    if (!ctx.requestHeaders[':path']) {
-      newHeaders[':authority'] =
-        ctx.requestLowerHeaders.host ?? ctx.requestLowerHeaders[':authority'];
-      newHeaders[':path'] = url.pathname + url.search;
-      newHeaders[':method'] = ctx.method;
-      newHeaders[':scheme'] = 'https';
+    if (ctx.isServerHttp2 && ctx.isClientHttp2 === false) {
+      if (!ctx.requestHeaders[':path']) ctx.requestHeaders[':path'] = url.pathname + url.search;
+      if (!ctx.requestHeaders[':authority'])
+        ctx.requestHeaders[':authority'] = ctx.requestLowerHeaders.host;
+      if (!ctx.requestHeaders[':scheme']) ctx.requestHeaders[':scheme'] = 'https';
+      if (!ctx.requestHeaders[':method']) ctx.requestHeaders[':method'] = ctx.method;
     }
 
+    this.stripHttp1HeadersForHttp2(ctx);
+  }
+
+  public static stripHttp1HeadersForHttp2(ctx: IMitmRequestContext) {
     // TODO: should be part of an emulator for h2 headers
     for (const key of Object.keys(ctx.requestHeaders)) {
       const lowerKey = key.toLowerCase();
       if (stripHttp1HeadersForH2.includes(lowerKey)) {
-        continue;
+        delete ctx.requestHeaders[key];
       }
-      newHeaders[lowerKey] = ctx.requestHeaders[key];
     }
-    ctx.requestHeaders = newHeaders;
   }
 
   private static cleanRequestHeaders(ctx: IMitmRequestContext) {

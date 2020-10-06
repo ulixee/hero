@@ -50,6 +50,10 @@ export function SecretAgentClientGenerator(
       await coreClient.start(options as IConfigureOptions);
     }
 
+    public static async recordUnhandledError(error: Error) {
+      await coreClient.logUnhandledError(error);
+    }
+
     public static async shutdown(error?: Error) {
       await coreClient.shutdown(error);
     }

@@ -291,9 +291,8 @@ export default class Core implements ICore {
   }
 
   public static async disconnect(tabIds?: string[], clientError?: Error) {
+    if (clientError) this.logUnhandledError(clientError);
     return this.startQueue.run(async () => {
-      if (clientError) log.error('UnhandledClientError', { clientError, sessionId: null });
-
       const promises: Promise<void>[] = [];
       for (const key of tabIds ?? Object.keys(Core.byTabId)) {
         const core = Core.byTabId[key];
@@ -309,6 +308,10 @@ export default class Core implements ICore {
         this.checkForAutoShutdown();
       }
     });
+  }
+
+  public static logUnhandledError(clientError: Error) {
+    log.error('UnhandledError', { clientError, sessionId: null });
   }
 
   public static async shutdown(fatalError?: Error, force = false) {

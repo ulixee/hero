@@ -1,6 +1,7 @@
 import * as http from 'http';
 import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
+import { ClientHttp2Stream } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -48,12 +49,19 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
   protected async onResponse(
     response: http.IncomingMessage | (http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader),
+    flags?: number,
+    rawHeaders?: string[],
   ) {
     const context = this.context;
     if (response instanceof http.IncomingMessage) {
       MitmRequestContext.readHttp1Response(context, response);
     } else {
-      MitmRequestContext.readHttp2Response(context, context.proxyToServerRequest as any, response);
+      MitmRequestContext.readHttp2Response(
+        context,
+        context.proxyToServerRequest as ClientHttp2Stream,
+        response[':status'],
+        rawHeaders,
+      );
     }
     const { serverToProxyResponse } = context;
     serverToProxyResponse.on('error', this.onError.bind(this, 'ServerToProxy.ResponseError'));
@@ -124,7 +132,12 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     const { serverToProxyResponse, proxyToClientResponse } = this.context;
 
-    proxyToClientResponse.writeHead(context.status, context.responseHeaders);
+    proxyToClientResponse.statusCode = context.status;
+    // write individually so we properly write header-lists
+    for (const [key, value] of Object.entries(context.responseHeaders)) {
+      proxyToClientResponse.setHeader(key, value);
+    }
+
     serverToProxyResponse.once('trailers', headers => {
       context.responseTrailers = headers;
     });

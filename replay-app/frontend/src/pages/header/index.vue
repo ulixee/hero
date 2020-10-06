@@ -36,7 +36,7 @@
     button(v-if="saSession.tabs.length > 1" @click="showTabs" ref="tabRef")
       .text {{activeTabIdx + 1}}/{{saSession.tabs.length}}
     .address-bar
-      Icon(:src="ICON_LOCK" :size=16 iconStyle="transform: 'scale(-1,1)'")
+      Icon(:src="ICON_LOCK" :size=16 iconStyle="transform: 'scale(-1,1)'" disabled="true")
       .text {{currentUrl}}
 
 </template>
@@ -379,7 +379,8 @@ export default class HeaderPage extends Vue {
       }
       .Icon {
         margin-top: 1px;
-        width: 30px;
+        width: 16px;
+        height: 13px;
       }
     }
   }

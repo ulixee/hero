@@ -1,12 +1,14 @@
-import { Helpers } from '@secret-agent/testing';
-import * as http2 from 'http2';
-import { URL } from 'url';
-import MitmSocket from '@secret-agent/mitm-socket';
-import MitmServer from '../lib/MitmProxy';
-import RequestSession from '../handlers/RequestSession';
-import HttpRequestHandler from '../handlers/HttpRequestHandler';
-import HeadersHandler from '../handlers/HeadersHandler';
-import MitmRequestContext from '../lib/MitmRequestContext';
+import { Helpers } from "@secret-agent/testing";
+import * as http2 from "http2";
+import { URL } from "url";
+import MitmSocket from "@secret-agent/mitm-socket";
+import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import MitmServer from "../lib/MitmProxy";
+import RequestSession from "../handlers/RequestSession";
+import HttpRequestHandler from "../handlers/HttpRequestHandler";
+import HeadersHandler from "../handlers/HeadersHandler";
+import MitmRequestContext from "../lib/MitmRequestContext";
+import { parseRawHeaders } from "../lib/Utils";
 
 const mocks = {
   httpRequestHandler: {
@@ -79,6 +81,33 @@ test('should be able to handle an http2->http2 request', async () => {
   expect(call[0].clientToProxyRequest).toBeInstanceOf(http2.Http2ServerRequest);
 });
 
+it('should send http1 response headers through proxy', async () => {
+  const server = await Helpers.runHttp2Server((req, res1) => {
+    res1.setHeader('x-test', ['1', '2']);
+    res1.end('headers done');
+  });
+  const session = new RequestSession('h2-to-h2', 'any agent', null);
+  Helpers.needsClosing.push(session);
+  const proxyCredentials = session.getProxyCredentials();
+
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+
+  const h2stream = client.request({
+    ':path': '/',
+  });
+  const h2Headers = new Promise<string[]>(resolve => {
+    h2stream.on('response', (headers, flags, rawHeaders) => {
+      resolve(rawHeaders);
+    });
+  });
+  const buffer = await Helpers.readableToBuffer(h2stream);
+  expect(buffer.toString()).toBe('headers done');
+
+  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
+  const headers = parseRawHeaders(await h2Headers);
+  expect(headers['x-test']).toHaveLength(2);
+});
+
 test('should support push streams', async () => {
   const server = await Helpers.runHttp2Server((req, res1) => {
     res1.createPushResponse(
@@ -92,8 +121,10 @@ test('should support push streams', async () => {
     res1.createPushResponse(
       {
         ':path': '/push2',
+        'send-1': ['a', 'b'],
       },
       (err, pushRes) => {
+        pushRes.setHeader('x-push-test', ['1', '2', '3']);
         pushRes.end('Push2');
       },
     );
@@ -105,15 +136,23 @@ test('should support push streams', async () => {
   const proxyCredentials = session.getProxyCredentials();
 
   const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
-  const pushes: string[] = [];
-  client.on('stream', (stream, headers1) => {
-    pushes.push(headers1[':path']);
+  const pushRequestHeaders: {
+    [path: string]: { requestHeaders: IResourceHeaders; responseHeaders?: IResourceHeaders };
+  } = {};
+  client.on('stream', (stream, headers1, flags, rawHeaders) => {
+    const path = headers1[':path'];
+    pushRequestHeaders[path] = { requestHeaders: parseRawHeaders(rawHeaders) };
+    stream.on('push', (responseHeaders, responseFalgs, rawResponseHeaders) => {
+      pushRequestHeaders[path].responseHeaders = parseRawHeaders(rawResponseHeaders);
+    });
   });
   const h2stream = client.request({ ':path': '/' });
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('H2 response');
-  expect(pushes.includes('/push1')).toBeTruthy();
-  expect(pushes.includes('/push2')).toBeTruthy();
+  expect(pushRequestHeaders['/push1']).toBeTruthy();
+  expect(pushRequestHeaders['/push2']).toBeTruthy();
+  expect(pushRequestHeaders['/push2'].responseHeaders['x-push-test']).toStrictEqual(['1', '2', '3']);
+  expect(pushRequestHeaders['/push2'].requestHeaders['send-1']).toStrictEqual(['a', 'b']);
 });
 
 test('should handle h2 client going to h1 request', async () => {

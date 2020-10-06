@@ -49,7 +49,9 @@ export default class MitmRequestAgent {
       mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
     }
     MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
+    await HeadersHandler.modifyHeaders(ctx);
 
+    requestSettings.headers = ctx.requestHeaders;
     requestSettings.createConnection = () => mitmSocket.socket;
     requestSettings.agent = null;
 
@@ -240,10 +242,7 @@ export default class MitmRequestAgent {
 
   private http2Request(ctx: IMitmRequestContext, connectResult: MitmSocket) {
     const client = this.createHttp2Session(ctx, connectResult);
-    const http2Stream = client.request(ctx.requestHeaders, { waitForTrailers: true });
-    http2Stream.on('push', this.onHttp2PushStream.bind(this, ctx, http2Stream));
-
-    return http2Stream;
+    return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
 
   private onHttp2PushStream(
@@ -251,12 +250,13 @@ export default class MitmRequestAgent {
     stream: http2.ClientHttp2Stream,
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
     flags: number,
+    rawHeaders: string[],
   ) {
     const session = this.session;
     const sessionId = session.sessionId;
     log.info('Http2Client.pushReceived', { sessionId, headers, flags });
 
-    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, headers);
+    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
     this.session.trackResource(pushContext);
     this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
 
@@ -266,7 +266,19 @@ export default class MitmRequestAgent {
     }
 
     pushContext.serverToProxyResponse = stream;
-    MitmRequestContext.readHttp2Response(pushContext, stream, headers);
+    HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
+
+    const onResponseHeaders = new Promise(resolve => {
+      stream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
+        MitmRequestContext.readHttp2Response(
+          pushContext,
+          stream,
+          responseHeaders[':status'],
+          responseRawHeaders,
+        );
+        resolve();
+      });
+    });
 
     // emit request
     if (!parentContext.isClientHttp2) {
@@ -279,7 +291,7 @@ export default class MitmRequestAgent {
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
 
-    clientToProxyRequest.stream.pushStream(headers, async (err, pushStream) => {
+    clientToProxyRequest.stream.pushStream(pushContext.requestHeaders, async (err, pushStream) => {
       if (err) {
         log.warn('Http2.PushStreamError', {
           sessionId,
@@ -288,12 +300,15 @@ export default class MitmRequestAgent {
         return;
       }
 
+      stream.on('headers', additional => pushStream.additionalHeaders(additional));
+
       let trailers: http2.IncomingHttpHeaders;
       stream.once('trailers', trailerHeaders => {
         trailers = trailerHeaders;
       });
 
-      pushStream.respond({ ':status': 200 }, { waitForTrailers: true });
+      await onResponseHeaders;
+      pushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
       pushStream.on('wantTrailers', async () => {
         pushContext.responseTrailers = trailers;
         pushStream.sendTrailers(pushContext.responseTrailers ?? {});
@@ -309,6 +324,7 @@ export default class MitmRequestAgent {
         pushStream.write(cache.cacheData);
       }
 
+      stream.end();
       pushStream.end();
       cache.onResponseEnd();
 

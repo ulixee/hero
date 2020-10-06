@@ -119,7 +119,13 @@ function http2PushJson(res: http2.Http2ServerResponse, event: string, data: any)
   });
 
   res.createPushResponse({ ':path': `/${event}` }, (err, pushResponse) => {
-    if (err) throw err;
+    if (err) {
+      log.warn(`Error sending ${event} to Replay`, {
+        err,
+        sessionId: this.sessionId,
+      });
+      return;
+    }
     pushResponse.stream.respond({ ':status': 200 });
     pushResponse.stream.end(json);
   });
@@ -141,7 +147,14 @@ function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
         ...headers,
       },
       (err, pushResponse) => {
-        if (err) throw err;
+        if (err) {
+          log.warn(`Error sending resource to Replay`, {
+            err,
+            url: resource.url,
+            sessionId: this.sessionId,
+          });
+          return;
+        }
         pushResponse.stream.respond({ ':status': 200 });
         if (resource.type === 'Document') {
           // body won't be rendered from resource, so just send back empty

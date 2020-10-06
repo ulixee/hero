@@ -6,7 +6,13 @@ import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
+let maxHighlightTop = -1;
+let minHighlightTop = 10e3;
+let lastHighlightNodes: number[] = [];
 const domChangeList = [];
+
+const replayNode = document.createElement('sa-replay');
+const replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
 console.log('DomReplayer loaded.');
 // @ts-ignore
@@ -17,11 +23,20 @@ window.replayEvents = async function replayEvents(
   scrollEvent,
 ) {
   await domContentLoaded;
-  console.log('Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s', changeEvents?.length ?? 0, resultNodeIds?.length ?? 0, !!mouseEvent, !!scrollEvent);
+  console.log(
+    'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
+    changeEvents?.length ?? 0,
+    resultNodeIds?.length ?? 0,
+    !!mouseEvent,
+    !!scrollEvent,
+  );
   if (changeEvents) applyDomChanges(changeEvents);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
+  if (mouseEvent || scrollEvent || resultNodeIds) {
+    document.body.appendChild(replayNode);
+  }
 };
 
 function cancelEvent(e: Event) {
@@ -84,6 +99,12 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
     if (nodeType === document.DOCUMENT_TYPE_NODE) {
       idMap.set(nodeId, document.doctype);
       continue;
+    }
+
+    if (tagName && tagName.toLowerCase() === 'noscript') {
+      if (!changeEvent.attributes) changeEvent.attributes = {};
+      if (changeEvent.attributes.style) changeEvent.attributes.style += ';display:none';
+      else changeEvent.attributes.style = 'display:none';
     }
 
     let node: Node;
@@ -165,7 +186,6 @@ function resetLocation(href: string, commandId: number) {
     window.history.replaceState({}, 'Replay', href);
     window.scrollTo({ top: 0 });
     document.documentElement.innerHTML = '';
-    document.head.appendChild(styleElement);
     idMap.clear();
     while (document.documentElement.previousSibling) {
       const prev = document.documentElement.previousSibling;
@@ -189,10 +209,18 @@ function setNodeAttributes(node: Element, data: IDomChangeEvent) {
   if (!data.attributes) return;
   for (const [name, value] of Object.entries(data.attributes)) {
     const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
-    if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
-      node.setAttribute(name, value);
-    } else {
-      node.setAttributeNS(ns || null, name, value);
+    try {
+      if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
+        node.setAttribute(name, value);
+      } else {
+        node.setAttributeNS(ns || null, name, value);
+      }
+    } catch (err) {
+      if (
+        !err.toString().match(/not a valid attribute name/) &&
+        !err.toString().match(/qualified name/)
+      )
+        throw err;
     }
   }
 }
@@ -247,10 +275,34 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
 /////// / DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
 
 const styleElement = document.createElement('style');
-styleElement.innerHTML = `
-  noscript {
-    display:none
+styleElement.textContent = `
+  sa-overflow-bar {
+    width: 500px;
+    background-color:#3498db;
+    margin:0 auto; 
+    height: 100%;
+    box-shadow: 3px 0 0 0 #3498db;
+    display:block;
   }
+  
+  sa-overflow {
+    display:block;
+    width:100%; 
+    height:8px; 
+    position:fixed;
+    pointer-events: none;
+  }
+  
+  sa-highlight {
+    z-index:10000;
+    position:absolute;
+    box-shadow: 1px 1px 3px 0 #3498db;
+    border-radius:3px;
+    border:1px solid #3498db;
+    padding:5px;
+    pointer-events: none;
+  }
+  
   sa-mouse-pointer {
     pointer-events: none;
     position: absolute;
@@ -286,34 +338,8 @@ styleElement.innerHTML = `
     transition: none;
     border-color: rgba(0,255,0,0.9);
   }
-  
-  sa-overflow-bar {
-    width: 500px;
-    background-color:#3498db;
-    margin:0 auto; 
-    height: 100%;
-    box-shadow: 3px 0 0 0 #3498db;
-    display:block;
-  }
-  
-  sa-overflow {
-    display:block;
-    width:100%; 
-    height:8px; 
-    position:fixed;
-    pointer-events: none;
-  }
-  
-  sa-highlight {
-    z-index:10000;
-    position:absolute;
-    box-shadow: 1px 1px 3px 0 #3498db;
-    border-radius:3px;
-    border:1px solid #3498db;
-    padding:5px;
-    pointer-events: none;
-  }
 `;
+replayShadow.appendChild(styleElement);
 
 const highlightElements: any[] = [];
 
@@ -327,15 +353,11 @@ const showMoreDown = document.createElement('sa-overflow');
 showMoreDown.setAttribute('style', 'bottom:0;');
 showMoreDown.innerHTML = overflowBar;
 
-let maxHighlightTop = -1;
-let minHighlightTop = 10e3;
-let lastHighlightNodes: number[] = [];
-
 function buildHover() {
   const hoverNode = document.createElement('sa-highlight');
+
   highlightElements.push(hoverNode);
-  document.head.appendChild(styleElement);
-  document.body.appendChild(hoverNode);
+  replayShadow.appendChild(hoverNode);
   return hoverNode;
 }
 
@@ -345,7 +367,6 @@ function highlightNodes(nodeIds: number[]) {
   try {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
-    document.head.appendChild(styleElement);
     for (let i = 0; i < length; i += 1) {
       const node = idMap.get(nodeIds[i]);
       const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];
@@ -364,8 +385,7 @@ function highlightNodes(nodeIds: number[]) {
 
       if (bounds.y > maxHighlightTop) maxHighlightTop = bounds.y;
       if (bounds.y + bounds.height < minHighlightTop) minHighlightTop = bounds.y + bounds.height;
-
-      document.body.appendChild(hoverNode);
+      replayShadow.appendChild(hoverNode);
     }
 
     checkOverflows();
@@ -379,13 +399,13 @@ function highlightNodes(nodeIds: number[]) {
 
 function checkOverflows() {
   if (maxHighlightTop > window.innerHeight + window.scrollY) {
-    document.body.appendChild(showMoreDown);
+    replayShadow.appendChild(showMoreDown);
   } else {
     showMoreDown.remove();
   }
 
   if (minHighlightTop < window.scrollY) {
-    document.body.appendChild(showMoreUp);
+    replayShadow.appendChild(showMoreUp);
   } else {
     showMoreUp.remove();
   }
@@ -395,18 +415,18 @@ document.addEventListener('scroll', () => checkOverflows());
 
 /////// mouse ///////
 let lastMouseEvent: IMouseEvent;
-const box = document.createElement('sa-mouse-pointer');
+const mouse = document.createElement('sa-mouse-pointer');
+replayShadow.appendChild(mouse);
 
 function updateMouse(mouseEvent: IMouseEvent) {
   lastMouseEvent = mouseEvent;
-  document.body.appendChild(box);
   if (mouseEvent.pageX !== undefined) {
-    box.style.left = `${mouseEvent.pageX}px`;
-    box.style.top = `${mouseEvent.pageY}px`;
+    mouse.style.left = `${mouseEvent.pageX}px`;
+    mouse.style.top = `${mouseEvent.pageY}px`;
   }
   if (mouseEvent.buttons !== undefined) {
     for (let i = 0; i < 5; i += 1) {
-      box.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
+      mouse.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
     }
   }
 }

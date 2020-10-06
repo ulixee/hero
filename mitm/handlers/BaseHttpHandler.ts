@@ -57,8 +57,6 @@ export default abstract class BaseHttpHandler {
 
       context.cacheHandler.onRequest();
 
-      await HeadersHandler.modifyHeaders(context);
-
       // do one more check on the session before doing a connect
       if (session.isClosing) return;
 

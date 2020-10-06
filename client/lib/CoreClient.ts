@@ -44,12 +44,17 @@ export default class CoreClient {
 
   public async shutdown(error?: Error): Promise<void> {
     const tabIds = Object.keys(this.tabsById);
+    this.commandQueue.clearPending();
     if (tabIds.length || error) {
       await this.commandQueue.run('disconnect', tabIds, error);
     }
     for (const tabId of tabIds) {
       delete this.tabsById[tabId];
     }
+  }
+
+  public async logUnhandledError(error: Error): Promise<void> {
+    await this.commandQueue.run('logUnhandledError', error);
   }
 
   public async start(options?: IConfigureOptions): Promise<void> {
