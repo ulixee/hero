@@ -52,6 +52,8 @@ describe.each([
     const worker = page.workers[0];
     expect(worker.url).toContain('worker.js');
 
+    await new Promise(setImmediate);
+
     expect(await worker.evaluate(`self.workerFunction()`)).toBe('worker function result');
 
     await page.goto(server.emptyPage);

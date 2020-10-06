@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
 import { EventEmitter } from 'events';

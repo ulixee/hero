@@ -121,12 +121,13 @@ export default class HeadersHandler {
 
   public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext) {
     const url = ctx.url;
-
-    if (!ctx.requestHeaders[':path']) ctx.requestHeaders[':path'] = url.pathname + url.search;
-    if (!ctx.requestHeaders[':authority'])
-      ctx.requestHeaders[':authority'] = ctx.requestLowerHeaders.host;
-    if (!ctx.requestHeaders[':scheme']) ctx.requestHeaders[':scheme'] = 'https';
-    if (!ctx.requestHeaders[':method']) ctx.requestHeaders[':method'] = ctx.method;
+    if (ctx.isServerHttp2 && ctx.isClientHttp2 === false) {
+      if (!ctx.requestHeaders[':path']) ctx.requestHeaders[':path'] = url.pathname + url.search;
+      if (!ctx.requestHeaders[':authority'])
+        ctx.requestHeaders[':authority'] = ctx.requestLowerHeaders.host;
+      if (!ctx.requestHeaders[':scheme']) ctx.requestHeaders[':scheme'] = 'https';
+      if (!ctx.requestHeaders[':method']) ctx.requestHeaders[':method'] = ctx.method;
+    }
 
     this.stripHttp1HeadersForHttp2(ctx);
   }

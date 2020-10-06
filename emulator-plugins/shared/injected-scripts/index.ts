@@ -18,18 +18,7 @@ export default class InjectedScripts {
   const sourceUrl = '${injectedSourceUrl}';
   ${utilsScript}
   
-  function runNewDocumentScript(){ 
-    ${this.scripts.join('\n\n')}      
-  }
-  // if main frame and HTML element not loaded yet, give it a sec
-  if (window.self === window.top && !document.documentElement) {
-    new MutationObserver((list, observer) => {
-      observer.disconnect();
-      runNewDocumentScript();
-    }).observe(document, {childList: true, subtree: true});
-  } else {
-    runNewDocumentScript();
-  }
+   ${this.scripts.join('\n\n')}
 })();
 //# sourceURL=${injectedSourceUrl}`.replace(/\/\/# sourceMap.+/g, ''),
       },
@@ -44,13 +33,28 @@ export default class InjectedScripts {
     if (shouldCache) cache[name] = script;
 
     if (name === 'errors') args.sourceUrl = injectedSourceUrl;
-    this.scripts.push(`(function newDocumentScript_${name}(args) {
+
+    let wrapper = `(function newDocumentScript_${name}(args) {
   try {
     ${script};
   } catch(err) {
     console.log('Failed to initialize "${name}"', err);
   }
-})(${JSON.stringify(args)});`);
+})(${JSON.stringify(args)});`;
+
+    if (name === 'polyfill') {
+      wrapper = `// if main frame and HTML element not loaded yet, give it a sec
+  if (window.self === window.top && !document.documentElement) {
+    new MutationObserver((list, observer) => {
+      observer.disconnect();
+      ${wrapper}
+    }).observe(document, {childList: true, subtree: true});
+  } else {
+    ${wrapper}
+  }
+`;
+    }
+    this.scripts.push(wrapper);
   }
 }
 

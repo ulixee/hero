@@ -1,15 +1,15 @@
-import http, { IncomingHttpHeaders } from 'http';
-import { Helpers } from '@secret-agent/testing';
-import HttpProxyAgent from 'http-proxy-agent';
-import { AddressInfo } from 'net';
-import WebSocket from 'ws';
-import Url from 'url';
-import { createPromise } from '@secret-agent/commons/utils';
-import HttpRequestHandler from '../handlers/HttpRequestHandler';
-import RequestSession from '../handlers/RequestSession';
-import MitmServer from '../lib/MitmProxy';
-import HeadersHandler from '../handlers/HeadersHandler';
-import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
+import http from "http";
+import { Helpers } from "@secret-agent/testing";
+import HttpProxyAgent from "http-proxy-agent";
+import { AddressInfo } from "net";
+import WebSocket from "ws";
+import Url from "url";
+import { createPromise } from "@secret-agent/commons/utils";
+import HttpRequestHandler from "../handlers/HttpRequestHandler";
+import RequestSession from "../handlers/RequestSession";
+import MitmServer from "../lib/MitmProxy";
+import HeadersHandler from "../handlers/HeadersHandler";
+import HttpUpgradeHandler from "../handlers/HttpUpgradeHandler";
 import { parseRawHeaders } from "../lib/Utils";
 
 const mocks = {

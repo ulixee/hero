@@ -31,10 +31,12 @@ window.replayEvents = async function replayEvents(
     !!scrollEvent,
   );
   if (changeEvents) applyDomChanges(changeEvents);
-  document.body.appendChild(replayNode);
   if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
   if (mouseEvent) updateMouse(mouseEvent);
   if (scrollEvent) updateScroll(scrollEvent);
+  if (mouseEvent || scrollEvent || resultNodeIds) {
+    document.body.appendChild(replayNode);
+  }
 };
 
 function cancelEvent(e: Event) {
@@ -383,7 +385,7 @@ function highlightNodes(nodeIds: number[]) {
 
       if (bounds.y > maxHighlightTop) maxHighlightTop = bounds.y;
       if (bounds.y + bounds.height < minHighlightTop) minHighlightTop = bounds.y + bounds.height;
-      document.body.appendChild(hoverNode);
+      replayShadow.appendChild(hoverNode);
     }
 
     checkOverflows();

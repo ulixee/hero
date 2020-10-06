@@ -1,15 +1,14 @@
-import { Helpers } from '@secret-agent/testing';
-import * as http2 from 'http2';
-import { URL } from 'url';
-import MitmSocket from '@secret-agent/mitm-socket';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import MitmServer from '../lib/MitmProxy';
-import RequestSession from '../handlers/RequestSession';
-import HttpRequestHandler from '../handlers/HttpRequestHandler';
-import HeadersHandler from '../handlers/HeadersHandler';
-import MitmRequestContext from '../lib/MitmRequestContext';
-import { parseRawHeaders } from '../lib/Utils';
-import { h2 } from '../../replay-app/frontend/src/mixins';
+import { Helpers } from "@secret-agent/testing";
+import * as http2 from "http2";
+import { URL } from "url";
+import MitmSocket from "@secret-agent/mitm-socket";
+import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import MitmServer from "../lib/MitmProxy";
+import RequestSession from "../handlers/RequestSession";
+import HttpRequestHandler from "../handlers/HttpRequestHandler";
+import HeadersHandler from "../handlers/HeadersHandler";
+import MitmRequestContext from "../lib/MitmRequestContext";
+import { parseRawHeaders } from "../lib/Utils";
 
 const mocks = {
   httpRequestHandler: {
