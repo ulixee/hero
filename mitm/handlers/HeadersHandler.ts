@@ -3,6 +3,7 @@ import nodeCommon from '_http_common';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
+import http2 from 'http2';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 
@@ -93,7 +94,11 @@ export default class HeadersHandler {
       if (nodeCommon._checkInvalidHeaderChar(value)) continue;
 
       if (Array.isArray(value)) {
-        headers[canonizedKey] = [...value];
+        if (singleValueHttp2Headers.has(key)) {
+          headers[canonizedKey] = value[0];
+        } else {
+          headers[canonizedKey] = [...value];
+        }
       } else {
         headers[canonizedKey] = value;
       }
@@ -139,6 +144,10 @@ export default class HeadersHandler {
       if (stripHttp1HeadersForH2.includes(lowerKey)) {
         delete ctx.requestHeaders[key];
       }
+      if (singleValueHttp2Headers.has(lowerKey)) {
+        const value = ctx.requestHeaders[key];
+        if (Array.isArray(value) && value.length) ctx.requestHeaders[key] = value[0];
+      }
     }
   }
 
@@ -157,11 +166,58 @@ export default class HeadersHandler {
 }
 
 const stripHttp1HeadersForH2 = [
-  'connection',
+  http2.constants.HTTP2_HEADER_CONNECTION,
+  http2.constants.HTTP2_HEADER_UPGRADE,
+  http2.constants.HTTP2_HEADER_HTTP2_SETTINGS,
+  http2.constants.HTTP2_HEADER_KEEP_ALIVE,
+  http2.constants.HTTP2_HEADER_PROXY_CONNECTION,
+  http2.constants.HTTP2_HEADER_TRANSFER_ENCODING,
   'host',
-  'keep-alive',
-  'transfer-encoding',
   'via',
-  'proxy-connection',
   'forwarded',
 ];
+// This set contains headers that are permitted to have only a single
+// value. Multiple instances must not be specified.
+// NOTE: some are not exposed in constants, so we're putting strings in place
+const singleValueHttp2Headers = new Set([
+  http2.constants.HTTP2_HEADER_STATUS,
+  http2.constants.HTTP2_HEADER_METHOD,
+  http2.constants.HTTP2_HEADER_AUTHORITY,
+  http2.constants.HTTP2_HEADER_SCHEME,
+  http2.constants.HTTP2_HEADER_PATH,
+  ':protocol',
+  'access-control-allow-credentials',
+  'access-control-max-age',
+  'access-control-request-method',
+  http2.constants.HTTP2_HEADER_AGE,
+  http2.constants.HTTP2_HEADER_AUTHORIZATION,
+  http2.constants.HTTP2_HEADER_CONTENT_ENCODING,
+  http2.constants.HTTP2_HEADER_CONTENT_LANGUAGE,
+  http2.constants.HTTP2_HEADER_CONTENT_LENGTH,
+  http2.constants.HTTP2_HEADER_CONTENT_LOCATION,
+  http2.constants.HTTP2_HEADER_CONTENT_MD5,
+  http2.constants.HTTP2_HEADER_CONTENT_RANGE,
+  http2.constants.HTTP2_HEADER_CONTENT_TYPE,
+  http2.constants.HTTP2_HEADER_DATE,
+  'dnt',
+  http2.constants.HTTP2_HEADER_ETAG,
+  http2.constants.HTTP2_HEADER_EXPIRES,
+  http2.constants.HTTP2_HEADER_FROM,
+  http2.constants.HTTP2_HEADER_HOST,
+  http2.constants.HTTP2_HEADER_IF_MATCH,
+  http2.constants.HTTP2_HEADER_IF_MODIFIED_SINCE,
+  http2.constants.HTTP2_HEADER_IF_NONE_MATCH,
+  http2.constants.HTTP2_HEADER_IF_RANGE,
+  http2.constants.HTTP2_HEADER_IF_UNMODIFIED_SINCE,
+  http2.constants.HTTP2_HEADER_LAST_MODIFIED,
+  http2.constants.HTTP2_HEADER_LOCATION,
+  http2.constants.HTTP2_HEADER_MAX_FORWARDS,
+  http2.constants.HTTP2_HEADER_PROXY_AUTHORIZATION,
+  http2.constants.HTTP2_HEADER_RANGE,
+  http2.constants.HTTP2_HEADER_REFERER,
+  http2.constants.HTTP2_HEADER_RETRY_AFTER,
+  'tk',
+  'upgrade-insecure-requests',
+  http2.constants.HTTP2_HEADER_USER_AGENT,
+  'x-content-type-options',
+]);
