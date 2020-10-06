@@ -20,11 +20,9 @@ jobs:
 
       - name: Yarn install
         run: yarn install
-        working-directory: ./replay-app
 
       - name: Build
         run: yarn build
-        working-directory: ./replay-app
 
       - name: Electron Builder
         run: yarn build:pack

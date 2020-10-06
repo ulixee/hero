@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-chrome-80",
-  "version": "1.0.0-alpha.14",
+  "version": "1.0.0-alpha.15",
   "description": "EmulatorPlugin for Google Chrome version 80",
   "main": "index.js",
   "engine": {
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@secret-agent/commons": "1.0.0-alpha.14",
-    "@secret-agent/emulator-plugins-shared": "1.0.0-alpha.14",
+    "@secret-agent/emulator-plugins-shared": "1.0.0-alpha.15",
     "@secret-agent/emulators": "1.0.0-alpha.14"
   }
 }

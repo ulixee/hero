@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.15](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2020-10-06)
+
+
+### Bug Fixes
+
+* **mitm:** filter response headers ([828dc94](https://github.com/ulixee/secret-agent/commit/828dc94bdb880713567fb2629eec79c2c6f0d6ed))
+
+
+
+
+
 # [1.0.0-alpha.14](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2020-10-06)
 
 
