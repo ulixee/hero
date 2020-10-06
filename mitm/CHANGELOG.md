@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.14](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2020-10-06)
+
+
+### Bug Fixes
+
+* **mitm:** change headers after alpn is set ([a21d4ca](https://github.com/ulixee/secret-agent/commit/a21d4cab3f3adcc9e413f976ac6864ae85cb053e))
+* **mitm:** push headers + header arrays ([f411b93](https://github.com/ulixee/secret-agent/commit/f411b936c98219d1b57740f3504322fd5de6037c))
+* **replay:** fix http2 push headers ([755667f](https://github.com/ulixee/secret-agent/commit/755667f4ec4b32c9e22b2541fa7ef08aa613d063))
+
+
+
+
+
 
 
 **Note:** Version bump only for package @secret-agent/mitm

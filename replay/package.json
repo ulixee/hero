@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/replay",
-  "version": "1.0.0-alpha.13",
+  "version": "1.0.0-alpha.14",
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
   "dependencies": {
-    "@secret-agent/commons": "1.0.0-alpha.13",
+    "@secret-agent/commons": "1.0.0-alpha.14",
     "axios": "^0.19.2",
     "progress": "^2.0.3",
     "tar-fs": "^2.1.0"
