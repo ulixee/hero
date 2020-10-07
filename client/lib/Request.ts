@@ -2,10 +2,12 @@ import FetchRequest from 'awaited-dom/impl/official-klasses/Request';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
+import IAttachedState from "awaited-dom/base/IAttachedState";
 import CoreTab from './CoreTab';
 
 interface IState {
   awaitedPath: AwaitedPath;
+  attachedState: IAttachedState;
   remoteInitializerPromise: Promise<void>;
   coreTab: CoreTab;
 }

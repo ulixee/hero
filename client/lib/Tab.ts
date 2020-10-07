@@ -20,6 +20,8 @@ import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
 
 const { getState, setState } = StateMachine<Tab, IState>();
+const browserState = StateMachine<Browser, { activeTab: Tab; tabs: Tab[] }>();
+const awaitedPathState = StateMachine<any, { awaitedPath: AwaitedPath }>();
 
 export interface IState {
   browser: Browser;
@@ -124,7 +126,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     element: ISuperElement,
     options?: IWaitForElementOptions,
   ): Promise<void> {
-    const { awaitedPath } = getState<ISuperElement, { awaitedPath: AwaitedPath }>(element);
+    const { awaitedPath } = awaitedPathState.getState(element);
     await getCoreTab(this).waitForElement(awaitedPath.toJSON(), options);
   }
 
@@ -142,7 +144,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   public async focus() {
     const { browser, coreTab } = getState(this);
-    setState(browser, {
+    browserState.setState(browser, {
       activeTab: this,
     });
     return coreTab.focusTab();
@@ -150,10 +152,10 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   public async close() {
     const { browser, coreTab } = getState(this);
-    const { tabs } = getState(browser);
+    const { tabs } = browserState.getState(browser);
     const updatedTabs = tabs.filter(x => x !== this);
     if (updatedTabs.length) {
-      setState(browser, {
+      browserState.setState(browser, {
         activeTab: updatedTabs[0],
         tabs: updatedTabs,
       });

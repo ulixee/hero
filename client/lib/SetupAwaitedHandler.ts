@@ -1,75 +1,124 @@
 import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHandler';
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import CoreTab from './CoreTab';
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
-AwaitedHandler.initializer = function initializer<TClass>(self: AwaitedHandler<TClass>) {
-  self.getProperty = async function getProperty<T>(instance: TClass, name: string): Promise<T> {
-    await awaitRemoteInitializer(instance);
-    const state = self.getState(instance);
-    const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreTab.execJsPath<T>(awaitedPath.addProperty(name).toJSON());
+AwaitedHandler.delegate = exports;
 
-    return cleanResult(instance, result);
-  };
+export async function getProperty<T, TClass>(
+  self: AwaitedHandler<TClass>,
+  instance: TClass,
+  name: string,
+): Promise<T> {
+  const state = self.getState(instance);
+  await awaitRemoteInitializer(state);
+  const awaitedPath = state.awaitedPath as AwaitedPath;
+  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const finalPath = awaitedPath.addProperty(name).toJSON();
+  const result = await execJsPath<TClass, T>(self, coreTab, instance, finalPath);
 
-  self.setProperty = async function setProperty<T>(instance: TClass, name: string, value: T) {
-    await awaitRemoteInitializer(instance);
-    self.setState(instance, { [name]: value });
-  };
+  return cleanResult(self, instance, result);
+}
 
-  self.runMethod = async function runMethod<T>(
-    instance: TClass,
-    name: string,
-    args: any[],
-  ): Promise<T> {
-    await awaitRemoteInitializer(instance);
-    const state = self.getState(instance);
-    const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreTab.execJsPath<T>(
-      awaitedPath.addMethod(name, ...args).toJSON(),
-    );
-    return cleanResult(instance, result);
-  };
+export async function setProperty<T, TClass>(
+  self: AwaitedHandler<TClass>,
+  instance: TClass,
+  name: string,
+  value: T,
+) {
+  await awaitRemoteInitializer(self.getState(instance));
+  self.setState(instance, { [name]: value });
+}
 
-  self.runStatic = function runStatic<T>(_klass: Constructable<TClass>, name: string): T {
-    throw new NotImplementedError(`${self.className}.${name} static method not implemented`);
-  };
+export async function runMethod<T, TClass>(
+  self: AwaitedHandler<TClass>,
+  instance: TClass,
+  name: string,
+  args: any[],
+): Promise<T> {
+  await awaitRemoteInitializer(instance);
+  const state = self.getState(instance);
+  const awaitedPath = state.awaitedPath as AwaitedPath;
+  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const finalPath = awaitedPath.addMethod(name, ...args).toJSON();
+  const result = await execJsPath<TClass, T>(self, coreTab, instance, finalPath);
+  return cleanResult(self, instance, result);
+}
 
-  self.loadState = async function loadState(instance: TClass, properties?: string[]) {
-    await awaitRemoteInitializer(instance);
-    const state = self.getState(instance);
-    const awaitedPath = state.awaitedPath as AwaitedPath;
-    const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-    const result = await coreTab.execJsPath(
-      awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON(),
-    );
+export async function loadState<TClass>(
+  self: AwaitedHandler<TClass>,
+  instance: TClass,
+  properties?: string[],
+) {
+  await awaitRemoteInitializer(instance);
+  const state = self.getState(instance);
+  const awaitedPath = state.awaitedPath as AwaitedPath;
+  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const finalPath = awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON();
+  const result = await execJsPath<TClass, null>(self, coreTab, instance, finalPath);
 
-    return result?.attachedState as IAttachedState;
-  };
+  return result?.attachedState as IAttachedState;
+}
 
-  async function awaitRemoteInitializer(instance: TClass) {
-    const state = self.getState(instance);
-    if (state?.remoteInitializerPromise) {
-      await state.remoteInitializerPromise;
+export function runStatic<T, TClass>(
+  self: AwaitedHandler<TClass>,
+  _klass: Constructable<TClass>,
+  name: string,
+): T {
+  throw new NotImplementedError(`${self.className}.${name} static method not implemented`);
+}
+
+export function construct<TClass>(self: AwaitedHandler<TClass>): TClass {
+  throw new NotImplementedError(`${self.className} constructor not implemented`);
+}
+
+async function execJsPath<TClass, T>(
+  self: AwaitedHandler<TClass>,
+  coreTab: CoreTab,
+  instance: TClass,
+  path: IJsPath,
+) {
+  for (const part of path) {
+    // if part is method call, see if any params need to be remotely initialized first
+    if (Array.isArray(part)) {
+      for (let i = 0; i < part.length; i += 1) {
+        const param = part[i];
+        if (!param) continue;
+        if (typeof param === 'object') {
+          const awaitedPath = self.getState(param)?.awaitedPath;
+          if (awaitedPath) {
+            part[i] = `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
+          }
+        }
+      }
     }
   }
+  return coreTab.execJsPath<T>(path);
+}
 
-  function cleanResult<T>(instance: TClass, result: IExecJsPathResult<T>) {
-    if (!result) return null;
-    if (!result?.attachedState) return result?.value;
+function cleanResult<T, TClass>(
+  self: AwaitedHandler<TClass>,
+  instance: TClass,
+  result: IExecJsPathResult<T>,
+) {
+  if (!result) return null;
+  if (!result?.attachedState) return result?.value;
 
-    self.setState(instance, {
-      attachedState: result.attachedState,
-    });
-    delete result.attachedState;
+  self.setState(instance, {
+    attachedState: result.attachedState,
+  });
+  delete result.attachedState;
 
-    return result.value;
+  return result.value;
+}
+
+async function awaitRemoteInitializer(state: any) {
+  if (state?.remoteInitializerPromise) {
+    await state.remoteInitializerPromise;
   }
-};
+}

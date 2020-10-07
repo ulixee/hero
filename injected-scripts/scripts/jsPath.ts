@@ -263,7 +263,15 @@ class ObjectAtPath {
       this.lookupStep = step;
       if (Array.isArray(step)) {
         const [methodName, ...args] = step;
-        currentObject = runMethod(currentObject, methodName, this.lookupStepIndex, args);
+        // extract node ids as args
+        const finalArgs = args.map(x => {
+          if (typeof x !== 'string') return x;
+          if (!x.startsWith('$$jsPath=')) return x;
+          const innerPath = JSON.parse(x.split('$$jsPath=').pop());
+          const sub = new ObjectAtPath(innerPath).lookup();
+          return sub.objectAtPath;
+        });
+        currentObject = runMethod(currentObject, methodName, this.lookupStepIndex, finalArgs);
       } else if (typeof step === 'number') {
         currentObject = NodeTracker.getNodeWithId(step);
       } else if (typeof step === 'string') {

@@ -15,6 +15,7 @@
     "@secret-agent/testing": "1.0.0-alpha.15",
     "@types/node": "^12.7.11",
     "fpcollect": "^1.0.4",
+    "awaited-dom": "^1.1.5",
     "fpscanner": "^0.1.5",
     "ws": "^7.3.1"
   }
