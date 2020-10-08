@@ -1,11 +1,11 @@
-import { BrowserWindow } from "electron";
-import BaseOverlay from "../overlays/BaseOverlay";
-import MainMenu from "../overlays/MainMenu";
-import LocationsMenu from "../overlays/LocationsMenu";
-import IRectangle from "~shared/interfaces/IRectangle";
-import CommandOverlay from "../overlays/CommandOverlay";
-import MessageOverlay from "../overlays/MessageOverlay";
-import ListMenu from "~backend/overlays/ListMenu";
+import { BrowserWindow } from 'electron';
+import BaseOverlay from '../overlays/BaseOverlay';
+import MainMenu from '../overlays/MainMenu';
+import LocationsMenu from '../overlays/LocationsMenu';
+import IRectangle from '~shared/interfaces/IRectangle';
+import CommandOverlay from '../overlays/CommandOverlay';
+import MessageOverlay from '../overlays/MessageOverlay';
+import ListMenu from '~backend/overlays/ListMenu';
 
 export default class OverlayManager {
   private overlays: BaseOverlay[] = [];

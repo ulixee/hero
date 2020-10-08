@@ -71,6 +71,11 @@ export default class ReplayTabState extends EventEmitter {
     return this.ticks.find(x => x.commandId === pageToLoad.commandId)?.playbarOffsetPercent ?? 0;
   }
 
+  public gotoPreviousTick() {
+    const prevTickIdx = this.currentTickIdx > 0 ? this.currentTickIdx - 1 : this.currentTickIdx;
+    return this.loadTick(prevTickIdx);
+  }
+
   public gotoNextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
     if (
@@ -147,7 +152,7 @@ export default class ReplayTabState extends EventEmitter {
     }
 
     console.log(
-      'Paint load. Current=%s. New: %s->%s (%s, back? %s)',
+      'Paint load. Current=%s. New: %s->%s (paints: %s, back? %s)',
       this.paintEventsLoadedIdx,
       startIndex,
       newTick.paintEventIdx,
@@ -318,15 +323,16 @@ export default class ReplayTabState extends EventEmitter {
           if (command.resultNodeIds) {
             lastSelectedNodeIds = command.resultNodeIds;
           }
-          if (lastFocusEventIdx !== null) {
-            const focusEvent = this.focusEvents[lastFocusEventIdx];
-            if (focusEvent.event === 0 && !lastSelectedNodeIds) {
-              lastSelectedNodeIds = [focusEvent.targetNodeId];
-            }
-          }
           break;
         case 'focus':
           lastFocusEventIdx = tick.eventTypeIdx;
+          const focusEvent = this.focusEvents[lastFocusEventIdx];
+          if (focusEvent.event === 0 && focusEvent.targetNodeId) {
+            lastSelectedNodeIds = [focusEvent.targetNodeId];
+          } else if (focusEvent.event === 1) {
+            lastSelectedNodeIds = null;
+          }
+
           break;
         case 'paint':
           lastPaintEventIdx = tick.eventTypeIdx;
@@ -336,6 +342,12 @@ export default class ReplayTabState extends EventEmitter {
           break;
         case 'mouse':
           lastMouseEventIdx = tick.eventTypeIdx;
+          const mouseEvent = this.mouseEvents[lastMouseEventIdx];
+          if (mouseEvent.event === 1 && mouseEvent.targetNodeId) {
+            lastSelectedNodeIds = [mouseEvent.targetNodeId];
+          } else if (mouseEvent.event === 2) {
+            lastSelectedNodeIds = null;
+          }
           break;
       }
 
@@ -353,6 +365,7 @@ export default class ReplayTabState extends EventEmitter {
         tick.paintEventIdx = -1;
       }
     }
+    this.checkBroadcast();
   }
 
   public checkBroadcast() {

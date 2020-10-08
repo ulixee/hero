@@ -63,6 +63,7 @@ export default class Playbar extends Vue {
   mounted() {
     ipcRenderer.on('ticks:load', (e, tickState: ITickState) => {
       console.log('ticks:load', tickState);
+      this.pause();
       this.currentTickValue = tickState.currentTickOffset ?? 0;
       this.loadTickState(tickState);
     });
@@ -141,7 +142,7 @@ export default class Playbar extends Vue {
   private onValueChange(value: number) {
     // this is called when someone clicks, so pause the playback
     this.pause();
-    ipcRenderer.send('on-tick', value, true);
+    ipcRenderer.send('on-tick', value);
   }
 
   private closestTick(pos: number) {

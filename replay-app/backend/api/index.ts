@@ -18,7 +18,9 @@ export default class ReplayApi {
   public readonly saSession: ISaSession;
   public tabs: ReplayTabState[] = [];
   public apiHost: string;
-  public unresponsiveSeconds = 0;
+  public lastActivityDate: Date;
+  public lastCommandName: string;
+  public showUnresponsiveMessage = true;
 
   public onNewTab?: (tab: ReplayTabState) => any;
 
@@ -131,7 +133,8 @@ export default class ReplayApi {
       console.log('ScriptState', data);
       const closeDate = data.closeDate ? new Date(data.closeDate) : null;
       this.replayTime.update(closeDate);
-      this.unresponsiveSeconds = data.unresponsiveSeconds;
+      this.lastActivityDate = data.lastActivityDate ? new Date(data.lastActivityDate) : null;
+      this.lastCommandName = data.lastCommandName;
       for (const tab of this.tabs) tabsWithChanges.add(tab);
     } else {
       for (const event of data) {

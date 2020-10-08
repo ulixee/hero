@@ -2,6 +2,7 @@
     .MessageOverlay.Page(:style="cssVars")
         h4.title {{title}}
         .message {{message}}
+        button(@click="hide") Hide Message
 
 </template>
 
@@ -14,20 +15,25 @@ import { ipcRenderer } from 'electron';
 
 @Component
 export default class MessageOverlay extends Vue {
-  private store = new OverlayStore({ hideOnBlur: true, persistent: false });
-  public title: string;
-
-  public message: string;
+  store = new OverlayStore(false);
+  title = '';
+  message = '';
+  id: string;
 
   @NoCache
-  private get cssVars() {
+  get cssVars() {
     return this.store.cssVars;
   }
 
+  hide() {
+    ipcRenderer.send('message-overlay:hide', this.store.webContentsId, this.id);
+  }
+
   mounted() {
-    ipcRenderer.on('will-show', (_, arg: { message: string; title: string }) => {
-      this.message = arg.message;
+    ipcRenderer.on('will-show', (_, arg: { message: string; title: string; id: string }) => {
       this.title = arg.title;
+      this.message = arg.message;
+      this.id = arg.id;
     });
   }
 }
@@ -43,5 +49,14 @@ export default class MessageOverlay extends Vue {
   opacity: 0.8;
   padding: 10px;
   text-align: center;
+  z-index: 100;
+  .message {
+    margin-bottom: 16px;
+  }
+  button {
+    width: 100%;
+    padding: 10px;
+    margin: 16px 0 30px;
+  }
 }
 </style>

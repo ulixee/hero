@@ -53,6 +53,7 @@ import { OverlayStore } from '~frontend/models/OverlayStore';
 
 @Component({ components: {} })
 export default class QuickMenu extends Vue {
+  private alwaysOnTop = remote.getCurrentWindow().isAlwaysOnTop();
   private store = new OverlayStore();
   private ICON_FIRE = ICON_FIRE;
   private ICON_TOPMOST = ICON_TOPMOST;
@@ -73,8 +74,8 @@ export default class QuickMenu extends Vue {
   }
 
   private onAlwaysClick() {
-    this.store.alwaysOnTop = !this.store.alwaysOnTop;
-    remote.getCurrentWindow().setAlwaysOnTop(this.store.alwaysOnTop);
+    this.alwaysOnTop = !remote.getCurrentWindow().isAlwaysOnTop();
+    remote.getCurrentWindow().setAlwaysOnTop(this.alwaysOnTop);
   }
 
   private onNewWindowClick() {

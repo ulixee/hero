@@ -20,11 +20,8 @@ export default class CommandOverlay extends BaseOverlay {
           }
         }
 
-        if (this.hasNewHeight) {
-          const startHeight = bounds.height;
-          bounds.height = Math.max(this.lastHeight, 100) + 28;
-          bounds.y -= this.lastHeight + startHeight + 25;
-        }
+        bounds.height = Math.max(this.lastHeight, 100) + 28;
+        bounds.y -= bounds.height - 25;
 
         return {
           width,

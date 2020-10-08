@@ -339,14 +339,19 @@ export default class SessionState {
     const hasRecentErrors = this.lastErrorTime >= lastSuccessDate;
 
     const lastCommand = this.lastCommand;
-    let unresponsiveSeconds = 0;
+    let lastActivityDate = lastSuccessDate;
+    let lastCommandName: string;
     if (lastCommand) {
-      const lastCommandDate = new Date(lastCommand.endDate ?? lastCommand.startDate).getTime();
-      unresponsiveSeconds = Math.floor((new Date().getTime() - lastCommandDate) / 1000);
+      lastCommandName = lastCommand.name;
+      const commandDate = new Date(lastCommand.endDate ?? lastCommand.startDate);
+      if (commandDate > lastActivityDate) {
+        lastActivityDate = commandDate;
+      }
     }
     return {
       hasRecentErrors,
-      unresponsiveSeconds,
+      lastActivityDate,
+      lastCommandName,
       closeDate: this.closeDate,
     };
   }

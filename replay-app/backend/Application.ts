@@ -188,6 +188,11 @@ export default class Application {
       this.overlayManager.show(name, browserWindow, rect, ...args);
     });
 
+    ipcMain.on('message-overlay:hide', (e, webContentsId, messageId) => {
+      this.overlayManager.getByWebContentsId(webContentsId).hide();
+      Window.current.hideMessageOverlay(messageId);
+    });
+
     ipcMain.on('overlay:hide', (e, webContentsId) => {
       this.overlayManager.getByWebContentsId(webContentsId).hide();
     });
