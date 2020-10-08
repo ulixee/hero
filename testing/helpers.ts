@@ -328,7 +328,7 @@ export async function afterEach() {
 
 export async function afterAll() {
   await closeAll(true);
-  await Core.shutdown(null, true);
+  await Core.shutdown(true);
 }
 
 async function closeAll(isFinal = false) {

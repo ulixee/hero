@@ -290,8 +290,8 @@ export default class Core implements ICore {
     });
   }
 
-  public static async disconnect(tabIds?: string[], clientError?: Error) {
-    if (clientError) this.logUnhandledError(clientError);
+  public static async disconnect(tabIds?: string[], fatalError?: Error) {
+    if (fatalError) this.logUnhandledError(fatalError, true);
     return this.startQueue.run(async () => {
       const promises: Promise<void>[] = [];
       for (const key of tabIds ?? Object.keys(Core.byTabId)) {
@@ -310,13 +310,17 @@ export default class Core implements ICore {
     });
   }
 
-  public static logUnhandledError(clientError: Error) {
-    log.error('UnhandledError', { clientError, sessionId: null });
+  public static logUnhandledError(clientError: Error, fatalError = false) {
+    if (fatalError) {
+      log.error('UnhandledError(fatal)', { clientError, sessionId: null });
+    } else {
+      log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
+    }
   }
 
-  public static async shutdown(fatalError?: Error, force = false) {
+  public static async shutdown(force = false) {
     // runs own queue, don't put inside this loop
-    await Core.disconnect(null, fatalError);
+    await Core.disconnect();
     return this.startQueue.run(async () => {
       log.info('Core.shutdown');
       clearTimeout(Core.autoShutdownTimer);
@@ -338,12 +342,13 @@ export default class Core implements ICore {
 
   public static registerExceptionHandlers() {
     process.on('uncaughtException', async (error: Error) => {
-      await Core.shutdown(error);
+      await Core.logUnhandledError(error, true);
+      await Core.shutdown();
       process.exit(1);
     });
 
     process.on('unhandledRejection', async (error: Error) => {
-      await Core.shutdown(error);
+      await Core.logUnhandledError(error, false);
     });
   }
 

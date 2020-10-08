@@ -76,7 +76,7 @@ export function SecretAgentClientGenerator(
     process.on('unhandledRejection', async (error: Error) => {
       // keep core node behavior intact
       process.stderr.write(`${error.stack}\n`);
-      await SecretAgent.shutdown(error);
+      await SecretAgent.recordUnhandledError(error);
     });
   }
 

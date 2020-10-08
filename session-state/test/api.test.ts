@@ -99,7 +99,7 @@ describe('basic Replay API tests', () => {
     expect(paintEvents[0]).toHaveLength(1);
     expect(paintEvents[1]).toHaveLength(13);
 
-    await Core.shutdown(null, true);
+    await Core.shutdown(true);
     api.destroy();
   }, 20e3);
 });
