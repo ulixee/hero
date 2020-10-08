@@ -1,7 +1,7 @@
 import * as http from 'http';
 import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
-import { ClientHttp2Stream } from 'http2';
+import { ClientHttp2Stream, Http2ServerResponse } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -144,7 +144,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
-      if (data) {
+      if (data && !(proxyToClientResponse as Http2ServerResponse).stream?.destroyed) {
         proxyToClientResponse.write(data, error => {
           if (error) this.onError('ServerToProxy.WriteResponseError', error);
         });

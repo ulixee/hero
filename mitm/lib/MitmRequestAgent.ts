@@ -255,6 +255,12 @@ export default class MitmRequestAgent {
     const session = this.session;
     const sessionId = session.sessionId;
     log.info('Http2Client.pushReceived', { sessionId, headers, flags });
+    stream.on('error', error => {
+      log.warn('Http2.ProxyToServer.PushStreamError', {
+        sessionId,
+        error,
+      });
+    });
 
     const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
     this.session.trackResource(pushContext);
@@ -266,8 +272,17 @@ export default class MitmRequestAgent {
     }
 
     pushContext.serverToProxyResponse = stream;
-    HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
 
+    // emit request
+    if (!parentContext.isClientHttp2) {
+      log.warn('Http2Client.pushReceivedWithNonH2BrowserClient', {
+        sessionId,
+        path: headers[':path'],
+      });
+      return stream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
+    }
+
+    HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
     const onResponseHeaders = new Promise(resolve => {
       stream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
         MitmRequestContext.readHttp2Response(
@@ -280,60 +295,68 @@ export default class MitmRequestAgent {
       });
     });
 
-    // emit request
-    if (!parentContext.isClientHttp2) {
-      log.warn('Http2Client.pushReceivedWithNonH2BrowserClient', {
-        sessionId,
-        path: headers[':path'],
-      });
-      return stream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
-    }
+    if (stream.destroyed) return;
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
 
-    clientToProxyRequest.stream.pushStream(pushContext.requestHeaders, async (err, pushStream) => {
-      if (err) {
-        log.warn('Http2.PushStreamError', {
-          sessionId,
-          err,
+    clientToProxyRequest.stream.pushStream(
+      pushContext.requestHeaders,
+      async (error, pushStream) => {
+        if (error) {
+          log.warn('Http2.ClientToProxy.PushStreamError', {
+            sessionId,
+            error,
+          });
+          return;
+        }
+        pushStream.on('error', pushError => {
+          log.warn('Http2.ClientToProxy.PushStreamError', {
+            sessionId,
+            error: pushError,
+          });
         });
-        return;
-      }
 
-      stream.on('headers', additional => pushStream.additionalHeaders(additional));
+        stream.on('headers', additional => {
+          if (!pushStream.destroyed) pushStream.additionalHeaders(additional);
+        });
 
-      let trailers: http2.IncomingHttpHeaders;
-      stream.once('trailers', trailerHeaders => {
-        trailers = trailerHeaders;
-      });
+        let trailers: http2.IncomingHttpHeaders;
+        stream.once('trailers', trailerHeaders => {
+          trailers = trailerHeaders;
+        });
 
-      await onResponseHeaders;
-      pushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
-      pushStream.on('wantTrailers', async () => {
-        pushContext.responseTrailers = trailers;
-        pushStream.sendTrailers(pushContext.responseTrailers ?? {});
-      });
-      const cache = pushContext.cacheHandler;
-      cache.onHttp2PushStream();
+        await onResponseHeaders;
+        if (pushStream.destroyed || stream.destroyed) {
+          return;
+        }
+        pushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
+        pushStream.on('wantTrailers', async () => {
+          pushContext.responseTrailers = trailers;
+          pushStream.sendTrailers(pushContext.responseTrailers ?? {});
+        });
+        const cache = pushContext.cacheHandler;
+        cache.onHttp2PushStream();
 
-      for await (const chunk of stream) {
-        cache.onResponseData(chunk);
-        pushStream.write(chunk);
-      }
-      if (cache.shouldServeCachedData) {
-        pushStream.write(cache.cacheData);
-      }
+        for await (const chunk of stream) {
+          if (pushStream.destroyed || stream.destroyed) return;
+          cache.onResponseData(chunk);
+          pushStream.write(chunk);
+        }
+        if (cache.shouldServeCachedData) {
+          if (!pushStream.destroyed && !stream.destroyed) pushStream.write(cache.cacheData);
+        }
 
-      stream.end();
-      pushStream.end();
-      cache.onResponseEnd();
+        if (!stream.destroyed) stream.end();
+        if (!pushStream.destroyed) pushStream.end();
+        cache.onResponseEnd();
 
-      await HeadersHandler.waitForBrowserRequest(pushContext);
-      parentContext.requestSession.emit(
-        'response',
-        MitmRequestContext.toEmittedResource(pushContext),
-      );
-    });
+        await HeadersHandler.waitForBrowserRequest(pushContext);
+        parentContext.requestSession.emit(
+          'response',
+          MitmRequestContext.toEmittedResource(pushContext),
+        );
+      },
+    );
   }
 
   private getHttp2Session(origin: string) {
