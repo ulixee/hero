@@ -24,7 +24,8 @@ export default class CacheHandler {
       const cache = this.responseCache?.get(ctx.url.href);
 
       if (cache?.etag) {
-        ctx.requestHeaders['If-None-Match'] = cache.etag;
+        const key = this.ctx.isServerHttp2 ? 'if-none-match' : 'If-None-Match';
+        ctx.requestHeaders[key] = cache.etag;
         this.didProposeCachedResource = true;
       }
     }

@@ -146,7 +146,7 @@ export default class HeadersHandler {
       }
       if (singleValueHttp2Headers.has(lowerKey)) {
         const value = ctx.requestHeaders[key];
-        if (Array.isArray(value) && value.length) ctx.requestHeaders[key] = value[0];
+        if (Array.isArray(value) && value.length) ctx.requestHeaders[lowerKey] = value[0];
       }
     }
   }

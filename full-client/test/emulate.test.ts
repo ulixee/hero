@@ -182,7 +182,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
   const browser = await SecretAgent.createBrowser();
   koaServer.get('/marker', ctx => {
     ctx.body = `
-<body></body>
+<body>
 <script type="text/javascript">
   function errorCheck() {
     const err = new Error('This is from inside');
@@ -195,6 +195,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
     };
   })(document.querySelectorAll);
 </script>
+</body>
     `;
   });
   const url = `${koaServer.baseUrl}/marker`;
