@@ -65,7 +65,7 @@ function convertToCoreMousePosition(mousePosition: IMousePosition): ICoreMousePo
   if (Array.isArray(mousePosition)) {
     return mousePosition;
   }
-  const { awaitedPath } = getState<ISuperElement, { awaitedPath: AwaitedPath }>(mousePosition);
+  const { awaitedPath } = getState(mousePosition);
   if (!awaitedPath) throw new Error(`Element not found -> ${mousePosition}`);
   return awaitedPath.toJSON();
 }
@@ -195,13 +195,13 @@ function convertInteractionToInteractionGroup(interaction: IInteraction): IInter
 
       case Command.waitForNode: {
         const command = CoreCommand.waitForNode;
-        const { awaitedPath } = getState<ISuperElement, { awaitedPath: AwaitedPath }>(value);
+        const { awaitedPath } = getState(value);
         const jsPath = awaitedPath.toJSON();
         return iGroup.push({ command, delayNode: jsPath });
       }
       case Command.waitForElementVisible: {
         const command = CoreCommand.waitForElementVisible;
-        const { awaitedPath } = getState<ISuperNode, { awaitedPath: AwaitedPath }>(value);
+        const { awaitedPath } = getState(value);
         const jsPath = awaitedPath.toJSON();
         return iGroup.push({ command, delayElement: jsPath });
       }

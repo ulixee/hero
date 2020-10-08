@@ -116,7 +116,7 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
   // METHODS
 
   public async close(): Promise<void> {
-    const { isClosing, activeTab } = getState<Browser, IState>(this);
+    const { isClosing, activeTab } = getState(this);
     if (isClosing) return;
     setState(this, { isClosing: true });
     const coreTab = getCoreTab(activeTab);
@@ -234,7 +234,7 @@ export async function createBrowser(
 }
 
 async function getSessionTabs(browser: Browser) {
-  const { coreClient, tabs } = getState<Browser, IState>(browser);
+  const { coreClient, tabs } = getState(browser);
   const coreTabs = await coreClient.getTabsForSession(browser.sessionId);
   for (const coreTab of coreTabs) {
     const hasTab = tabs.some(x => x.tabId === coreTab.tabId);

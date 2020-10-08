@@ -1,4 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
+import { XPathResult } from '@secret-agent/core-interfaces/AwaitedDom';
 import SecretAgent from '../index';
 
 let koaServer;
@@ -11,10 +12,7 @@ afterEach(Helpers.afterEach);
 
 describe('basic Document tests', () => {
   it('runs goto', async () => {
-    const exampleUrl = `${koaServer.baseUrl}/`;
-    const browser = await SecretAgent.createBrowser();
-
-    await browser.goto(exampleUrl);
+    const browser = await openBrowser('/');
     const url = await browser.document.location.host;
     const html = await browser.document.body.outerHTML;
     const linkText = await browser.document.querySelector('a').textContent;
@@ -33,9 +31,7 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await SecretAgent.createBrowser();
-    await browser.goto(`${koaServer.baseUrl}/page`);
-    await browser.waitForAllContentLoaded();
+    const browser = await openBrowser(`/page`);
     const links = await browser.document.querySelectorAll('a');
 
     for (const link of links) {
@@ -44,8 +40,6 @@ describe('basic Document tests', () => {
     }
     const finalUrl = await browser.url;
     expect(finalUrl).toBe(`${koaServer.baseUrl}/page#page3`);
-
-    await browser.close();
   });
 
   it('can refresh an element list', async () => {
@@ -63,9 +57,7 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await SecretAgent.createBrowser();
-    await browser.goto(`${koaServer.baseUrl}/refresh`);
-    await browser.waitForAllContentLoaded();
+    const browser = await openBrowser(`/refresh`);
     const links = browser.document.querySelectorAll('a');
     const links1 = await links;
     expect([...links1]).toHaveLength(1);
@@ -75,10 +67,9 @@ describe('basic Document tests', () => {
     expect([...(await links)]).toHaveLength(2);
     expect([...(await links1)]).toHaveLength(1);
     expect([...(await links1.values())]).toHaveLength(1);
-    await browser.close();
   });
 
-  it('must call await on a nodelist to re-iterate', async () => {
+  it('must call await on a NodeList to re-iterate', async () => {
     koaServer.get('/reiterate', ctx => {
       ctx.body = `
         <body>
@@ -96,9 +87,7 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await SecretAgent.createBrowser();
-    await browser.goto(`${koaServer.baseUrl}/reiterate`);
-    await browser.waitForAllContentLoaded();
+    const browser = await openBrowser(`/reiterate`);
     const ul = await browser.document.querySelector('ul');
     const lis = await ul.getElementsByTagName('li');
     expect(Array.from(lis)).toHaveLength(3);
@@ -114,8 +103,6 @@ describe('basic Document tests', () => {
       // eslint-disable-next-line jest/no-try-expect
       expect(String(error)).toMatch(/Please add an await/);
     }
-
-    await browser.close();
   });
 
   it('can re-await an element to refresh the underlying attached nodeids', async () => {
@@ -134,8 +121,7 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await SecretAgent.createBrowser();
-    await browser.goto(`${koaServer.baseUrl}/refresh-element`);
+    const browser = await openBrowser('/refresh-element');
     await browser.waitForAllContentLoaded();
     const lastChild = await browser.document.body.firstElementChild;
     expect(await lastChild.getAttribute('id')).toBe('first');
@@ -146,6 +132,60 @@ describe('basic Document tests', () => {
 
     const updatedChild = await browser.document.body.firstElementChild;
     expect(await updatedChild.getAttribute('id')).toBe('number2');
-    await browser.close();
+  });
+
+  it('should be able to access a NodeList by index', async () => {
+    koaServer.get('/index', ctx => {
+      ctx.body = `
+        <body>
+          <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+          </ul>
+        </body>
+      `;
+    });
+    const browser = await openBrowser(`/index`);
+
+    const element2Text = await browser.document.querySelectorAll('li')[1].textContent;
+    expect(element2Text).toBe('2');
+  });
+
+  it('can execute xpath', async () => {
+    koaServer.get('/xpath', ctx => {
+      ctx.body = `
+        <body>
+          <h2>Here I am</h2>
+          <ul>
+            <li>1</li>
+            <li>2</li>
+            <li>3</li>
+          </ul>
+          <h2>Also me</h2>
+        </body>
+      `;
+    });
+    const browser = await openBrowser(`/xpath`);
+
+    const headings = await browser.document.evaluate(
+      '/html/body//h2',
+      browser.document,
+      null,
+      XPathResult.ANY_TYPE,
+      null,
+    );
+    const nextHeading = headings.iterateNext();
+    expect(await nextHeading.textContent).toBe('Here I am');
+    const heading2 = headings.iterateNext();
+    expect(await heading2.textContent).toBe('Also me');
   });
 });
+
+async function openBrowser(path: string) {
+  const browser = await SecretAgent.createBrowser();
+  Helpers.needsClosing.push(browser);
+  await browser.goto(`${koaServer.baseUrl}${path}`);
+  await browser.waitForAllContentLoaded();
+  return browser;
+}
