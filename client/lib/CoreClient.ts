@@ -42,11 +42,11 @@ export default class CoreClient {
     return coreTabs;
   }
 
-  public async shutdown(error?: Error): Promise<void> {
+  public async shutdown(fatalError?: Error): Promise<void> {
     const tabIds = Object.keys(this.tabsById);
     this.commandQueue.clearPending();
-    if (tabIds.length || error) {
-      await this.commandQueue.run('disconnect', tabIds, error);
+    if (tabIds.length || fatalError) {
+      await this.commandQueue.run('disconnect', tabIds, fatalError);
     }
     for (const tabId of tabIds) {
       delete this.tabsById[tabId];
