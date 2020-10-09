@@ -72,31 +72,41 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
     this.navigationRequested('inPage', url, frameId, lastCommandId);
   }
 
-  public updatePipelineStatus(
-    incomingStatus: IPipelineStatus,
-    url: string,
-    frameId: string,
-    lastCommandId: number,
-  ) {
+  public updatePipelineStatus(args: {
+    incomingStatus: IPipelineStatus;
+    url: string;
+    frameId: string;
+    lastCommandId: number;
+    redirectedFromUrl?: string;
+    requestInitiator?: NavigationReason;
+  }) {
+    const { url, incomingStatus } = args;
     if (url === 'about:blank') return;
-    if (
-      incomingStatus === LocationStatus[LocationStatus.HttpRequested] &&
-      this.top?.stateChanges.has(incomingStatus) === true
-    ) {
-      const reason = url === this.currentUrl ? 'reload' : 'userGesture';
-      this.navigationRequested(reason, url, frameId, lastCommandId);
-    }
-    const navigation = this.top;
-    this.emit('status-change', { navigation, newStatus: incomingStatus });
 
-    navigation.stateChanges.set(incomingStatus, new Date());
-    if (
-      incomingStatus === LocationStatus[LocationStatus.HttpResponded] ||
-      incomingStatus === LocationStatus[LocationStatus.HttpRedirected]
-    ) {
-      navigation.finalUrl = url;
+    // if this is a redirect, capture in top
+    if (args.redirectedFromUrl && this.top?.requestedUrl === args.redirectedFromUrl) {
+      this.changePipelineStatus(this.top, LocationStatus.HttpRedirected, url);
     }
-    this.captureNavigationUpdate(navigation);
+
+    // if we already have this status at top level, this is a new nav
+    if (
+      incomingStatus === LocationStatus.HttpRequested &&
+      this.top?.stateChanges.has(LocationStatus.HttpRequested) === true
+    ) {
+      let reason = args.requestInitiator;
+      if (!reason) {
+        if (args.redirectedFromUrl) reason = this.top.navigationReason;
+        else if (url === this.currentUrl) reason = 'reload';
+        else reason = 'userGesture';
+      }
+      this.navigationRequested(reason, url, args.frameId, args.lastCommandId);
+    }
+
+    if (incomingStatus === LocationStatus.HttpResponded) {
+      this.top.finalUrl = url;
+    }
+
+    this.changePipelineStatus(this.top, incomingStatus, url);
   }
 
   public updateNavigationReason(frameId: string, url: string, reason: NavigationReason) {
@@ -106,6 +116,17 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
       frameLifecycle.navigationReason = reason;
       this.captureNavigationUpdate(frameLifecycle);
     }
+  }
+
+  private changePipelineStatus(
+    navigation: INavigation,
+    newStatus: IPipelineStatus,
+    finalUrl?: string,
+  ) {
+    this.emit('status-change', { navigation, newStatus });
+    navigation.stateChanges.set(newStatus, new Date());
+    if (finalUrl) navigation.finalUrl = finalUrl;
+    this.captureNavigationUpdate(navigation);
   }
 
   private captureNavigationUpdate(navigation: INavigation) {

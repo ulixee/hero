@@ -123,6 +123,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         documentUrl: networkRequest.request.headers.Referer,
         isDocumentNavigation: false,
         frameId: networkRequest.frameId,
+        redirectedFromUrl: null,
       });
     }
   }
@@ -130,6 +131,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent) {
     const isNavigation =
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
+
+    const redirectedFromUrl = networkRequest.redirectResponse?.url;
 
     this.emit('resource-will-be-requested', {
       browserRequestId: networkRequest.requestId,
@@ -142,6 +145,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       referer: networkRequest.request.headers.Referer,
       isDocumentNavigation: isNavigation,
       frameId: networkRequest.frameId,
+      redirectedFromUrl,
     });
   }
 

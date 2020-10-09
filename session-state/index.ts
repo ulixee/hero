@@ -227,9 +227,11 @@ export default class SessionState {
     if (isResponse) {
       log.info('Http.Response', {
         sessionId: this.sessionId,
+        tabId,
         url: request.url,
         method: request.method,
         headers: response.headers,
+        status: response.statusCode,
         wasCached,
         executionMillis,
         bytes: body ? Buffer.byteLength(body) : -1,

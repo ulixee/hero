@@ -22,6 +22,7 @@ import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessio
 import Queue from '@secret-agent/commons/Queue';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import Emulators from '@secret-agent/emulators';
+import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import IListenerObject from './interfaces/IListenerObject';
 import UserProfile from './lib/UserProfile';
 import Session from './lib/Session';
@@ -64,7 +65,7 @@ export default class Core implements ICore {
   }
 
   public async goto(url: string) {
-    return this.tab.runCommand<void>('goto', url);
+    return this.tab.runCommand<IResourceMeta>('goto', url);
   }
 
   public async goBack() {
@@ -203,6 +204,7 @@ export default class Core implements ICore {
   public async waitForNewTab(sinceCommandId?: number) {
     const lastCommandId = sinceCommandId ?? this.lastCommandId;
     const tab = await this.tab.runCommand<Tab>('waitForNewTab', lastCommandId);
+    await tab.locationTracker.waitForLocationResourceId();
     return Core.registerSessionTab(this.session, tab);
   }
 

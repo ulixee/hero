@@ -40,6 +40,7 @@ export default class Session {
   }
 
   private _isClosing = false;
+  private pendingNavigationMitmResponses: IRequestSessionResponseEvent[] = [];
 
   constructor(readonly options: ICreateTabOptions) {
     this.id = uuidv1();
@@ -122,6 +123,8 @@ export default class Session {
     if (this._isClosing) return;
     this._isClosing = true;
 
+    this.pendingNavigationMitmResponses.forEach(x => this.onMitmResponse(x));
+
     for (const tab of Object.values(this.tabs)) {
       await tab.close();
     }
@@ -145,6 +148,9 @@ export default class Session {
     let tab = this.tabs.find(x => x.id === tabId);
     if (!tab && event.browserRequestId === 'fallback-navigation') {
       tab = this.tabs.find(x => x.url === event.request.url || x.url === event.redirectedToUrl);
+      if (!tab) {
+        return this.pendingNavigationMitmResponses.push(event);
+      }
     }
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
@@ -156,10 +162,23 @@ export default class Session {
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ) {
+    const startUrl = page.mainFrame.url;
     const tab = Tab.create(this, page, parentTab, openParams);
     this.registerTab(tab, page);
     await tab.isReady;
     parentTab.emit('child-tab-created', tab);
+    // make sure we match browser requests that weren't associated with a tab to the new tab
+    if (this.pendingNavigationMitmResponses.length) {
+      const replayPending = [...this.pendingNavigationMitmResponses];
+      this.pendingNavigationMitmResponses.length = 0;
+      while (replayPending.length) {
+        const next = replayPending.pop();
+        if (next.redirectedToUrl === startUrl || next.request.url === startUrl) {
+          const resource = this.sessionState.captureResource(tab.id, next, true);
+          tab.emit('resource', resource);
+        }
+      }
+    }
     return tab;
   }
 

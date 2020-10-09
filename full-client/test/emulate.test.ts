@@ -200,6 +200,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
   });
   const url = `${koaServer.baseUrl}/marker`;
   await browser.goto(url);
+  await browser.waitForAllContentLoaded();
   const core = Core.byTabId[browser.activeTab.tabId];
 
   const pageFunction = await core.getJsValue('errorCheck()');

@@ -19,6 +19,7 @@ export interface IPuppetNetworkEvents {
   };
   'resource-will-be-requested': {
     browserRequestId: string;
+    redirectedFromUrl: string;
     resourceType: ResourceType;
     url: string;
     method: string;

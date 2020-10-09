@@ -86,7 +86,7 @@ it('should send http1 response headers through proxy', async () => {
     res1.setHeader('x-test', ['1', '2']);
     res1.end('headers done');
   });
-  const session = new RequestSession('h2-to-h2', 'any agent', null);
+  const session = new RequestSession('h1-to-h2-response', 'any agent', null);
   Helpers.needsClosing.push(session);
   const proxyCredentials = session.getProxyCredentials();
 
@@ -131,7 +131,7 @@ test('should support push streams', async () => {
     res1.end('H2 response');
   });
 
-  const session = new RequestSession('h2', 'any agent', null);
+  const session = new RequestSession('push-streams', 'any agent', null);
   Helpers.needsClosing.push(session);
   const proxyCredentials = session.getProxyCredentials();
 
