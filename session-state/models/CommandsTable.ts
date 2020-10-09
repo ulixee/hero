@@ -13,11 +13,11 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
         ['tabId', 'TEXT'],
         ['frameId', 'INTEGER'],
         ['name', 'TEXT'],
-        ['result', 'TEXT'],
-        ['resultType', 'TEXT'],
+        ['args', 'TEXT'],
         ['startDate', 'TEXT'],
         ['endDate', 'TEXT'],
-        ['args', 'TEXT'],
+        ['result', 'TEXT'],
+        ['resultType', 'TEXT'],
       ],
       true,
     );
@@ -31,13 +31,13 @@ export default class CommandsTable extends BaseTable<ICommandMeta> {
       commandMeta.tabId,
       commandMeta.frameId,
       commandMeta.name,
+      commandMeta.args,
+      commandMeta.startDate,
+      commandMeta.endDate,
       JSON.stringify(commandMeta.result),
       commandMeta.result?.constructor
         ? commandMeta.result.constructor.name
         : typeof commandMeta.result,
-      commandMeta.startDate,
-      commandMeta.endDate,
-      commandMeta.args,
     ]);
   }
 

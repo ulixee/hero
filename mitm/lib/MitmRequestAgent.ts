@@ -1,5 +1,5 @@
 import MitmSocket from '@secret-agent/mitm-socket';
-import http2, { ClientHttp2Session } from 'http2';
+import http2, { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import https, { RequestOptions } from 'https';
 import http from 'http';
@@ -245,7 +245,7 @@ export default class MitmRequestAgent {
     return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
 
-  private onHttp2PushStream(
+  private onHttp2ServerToProxyPush(
     parentContext: IMitmRequestContext,
     serverPushStream: http2.ClientHttp2Stream,
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
@@ -298,72 +298,79 @@ export default class MitmRequestAgent {
     if (serverPushStream.destroyed) return;
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
-
     clientToProxyRequest.stream.pushStream(
       pushContext.requestHeaders,
-      async (error, clientPushStream) => {
-        if (error) {
-          log.warn('Http2.ClientToProxy.PushStreamError', {
-            sessionId,
-            error,
-          });
-          return;
-        }
-        clientPushStream.on('error', pushError => {
-          log.warn('Http2.ClientToProxy.PushStreamError', {
-            sessionId,
-            error: pushError,
-          });
-        });
-
-        serverPushStream.on('headers', additional => {
-          if (!clientPushStream.destroyed) clientPushStream.additionalHeaders(additional);
-        });
-
-        let trailers: http2.IncomingHttpHeaders;
-        serverPushStream.once('trailers', trailerHeaders => {
-          trailers = trailerHeaders;
-        });
-
-        await onResponseHeaders;
-        if (clientPushStream.destroyed || serverPushStream.destroyed) {
-          return;
-        }
-        const cache = pushContext.cacheHandler;
-        cache.onHttp2PushStream();
-
-        if (cache.shouldServeCachedData) {
-          if (!clientPushStream.destroyed) {
-            clientPushStream.write(cache.cacheData);
-          }
-          if (!serverPushStream.destroyed) {
-            serverPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
-          }
-        } else {
-          clientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
-          clientPushStream.on('wantTrailers', async () => {
-            pushContext.responseTrailers = trailers;
-            clientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
-          });
-
-          for await (const chunk of serverPushStream) {
-            if (clientPushStream.destroyed || serverPushStream.destroyed) return;
-            cache.onResponseData(chunk);
-            clientPushStream.write(chunk);
-          }
-          if (!serverPushStream.destroyed) serverPushStream.end();
-        }
-
-        if (!clientPushStream.destroyed) clientPushStream.end();
-        cache.onResponseEnd();
-
-        await HeadersHandler.waitForBrowserRequest(pushContext);
-        parentContext.requestSession.emit(
-          'response',
-          MitmRequestContext.toEmittedResource(pushContext),
-        );
-      },
+      this.handleHttp2ProxyToClientPush.bind(this, pushContext, onResponseHeaders),
     );
+  }
+
+  private async handleHttp2ProxyToClientPush(
+    pushContext: IMitmRequestContext,
+    onResponseHeaders: Promise<void>,
+    error: Error,
+    proxyToClientPushStream: ServerHttp2Stream,
+  ) {
+    const serverToProxyPushStream = pushContext.serverToProxyResponse as ClientHttp2Stream;
+    const cache = pushContext.cacheHandler;
+    const session = this.session;
+    const sessionId = session.sessionId;
+
+    if (error) {
+      log.warn('Http2.ClientToProxy.PushStreamError', {
+        sessionId,
+        error,
+      });
+      return;
+    }
+    proxyToClientPushStream.on('error', pushError => {
+      log.warn('Http2.ClientToProxy.PushStreamError', {
+        sessionId,
+        error: pushError,
+      });
+    });
+
+    serverToProxyPushStream.on('headers', additional => {
+      if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.additionalHeaders(additional);
+    });
+
+    let trailers: http2.IncomingHttpHeaders;
+    serverToProxyPushStream.once('trailers', trailerHeaders => {
+      trailers = trailerHeaders;
+    });
+
+    await onResponseHeaders;
+    if (proxyToClientPushStream.destroyed || serverToProxyPushStream.destroyed) {
+      return;
+    }
+    cache.onHttp2PushStream();
+
+    if (cache.shouldServeCachedData) {
+      if (!proxyToClientPushStream.destroyed) {
+        proxyToClientPushStream.write(cache.cacheData);
+      }
+      if (!serverToProxyPushStream.destroyed) {
+        serverToProxyPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
+      }
+    } else {
+      proxyToClientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
+      proxyToClientPushStream.on('wantTrailers', async () => {
+        pushContext.responseTrailers = trailers;
+        proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
+      });
+
+      for await (const chunk of serverToProxyPushStream) {
+        if (proxyToClientPushStream.destroyed || serverToProxyPushStream.destroyed) return;
+        cache.onResponseData(chunk);
+        proxyToClientPushStream.write(chunk);
+      }
+      if (!serverToProxyPushStream.destroyed) serverToProxyPushStream.end();
+    }
+
+    if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.end();
+    cache.onResponseEnd();
+
+    await HeadersHandler.waitForBrowserRequest(pushContext);
+    this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
   }
 
   private getHttp2Session(origin: string) {
@@ -382,7 +389,7 @@ export default class MitmRequestAgent {
       createConnection: () => mitmSocket.socket,
     });
 
-    proxyToServerH2Client.on('stream', this.onHttp2PushStream.bind(this, ctx));
+    proxyToServerH2Client.on('stream', this.onHttp2ServerToProxyPush.bind(this, ctx));
 
     proxyToServerH2Client.on('remoteSettings', settings => {
       log.info('Http2Client.remoteSettings', {

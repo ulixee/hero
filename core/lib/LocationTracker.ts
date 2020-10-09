@@ -97,6 +97,8 @@ export default class LocationTracker {
   }
 
   private onNavigation(lifecycle: INavigation) {
+    // don't trigger change for the first url on a new tab
+    if (lifecycle.navigationReason === 'newTab') return;
     const trigger = LocationTracker.getTriggerForNavigationReason(lifecycle.navigationReason);
     this.runWaitForCbs(trigger);
   }
@@ -133,7 +135,9 @@ export default class LocationTracker {
       let isMatch = history.startCommandId > sinceCommandId;
       if (inclusive) isMatch = isMatch || history.startCommandId === sinceCommandId;
       if (isMatch) {
-        const previousState = LocationTracker.getTriggerForNavigationReason(history.navigationReason);
+        const previousState = LocationTracker.getTriggerForNavigationReason(
+          history.navigationReason,
+        );
         if (previousState === trigger) {
           return true;
         }
@@ -156,6 +160,7 @@ export default class LocationTracker {
   }
 
   private static getTriggerForNavigationReason(reason: NavigationReason) {
+    if (reason === 'newTab') return null;
     const isReload =
       reason === 'httpHeaderRefresh' || reason === 'metaTagRefresh' || reason === 'reload';
     return isReload ? LocationTrigger.reload : LocationTrigger.change;
