@@ -8,7 +8,14 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreTab from './CoreTab';
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
-AwaitedHandler.delegate = exports;
+AwaitedHandler.delegate = {
+  getProperty,
+  setProperty,
+  construct,
+  runMethod,
+  runStatic,
+  loadState,
+};
 
 export async function getProperty<T, TClass>(
   self: AwaitedHandler<TClass>,

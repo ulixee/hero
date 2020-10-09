@@ -96,6 +96,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         'frame-requested-navigation',
         'websocket-frame',
         'websocket-handshake',
+        'navigation-response',
         'worker',
       ],
       'puppet-chrome',

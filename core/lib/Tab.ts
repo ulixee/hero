@@ -23,7 +23,6 @@ import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJs
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import { redirectCodes } from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
@@ -508,7 +507,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']) {
     const { session, lastCommandId } = this;
-    const { url, isDocumentNavigation, frameId } = event;
+    const { url, isDocumentNavigation, frameId, redirectedFromUrl } = event;
 
     if (isDocumentNavigation && !this.navigationTracker.top) {
       this.navigationTracker.navigationRequested('newTab', url, frameId, lastCommandId);
@@ -522,37 +521,26 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     // only track main frame for now
     if (isDocumentNavigation && frameId === this.mainFrameId) {
-      this.navigationTracker.updatePipelineStatus(
-        LocationStatus.HttpRequested,
+      this.navigationTracker.updatePipelineStatus({
+        incomingStatus: LocationStatus.HttpRequested,
         url,
-        frameId,
+        redirectedFromUrl,
         lastCommandId,
-      );
+        frameId,
+      });
     }
   }
 
   private async onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']) {
     if (event.frameId !== this.mainFrameId) return;
 
-    const { location, url, status, frameId } = event;
-    const isRedirect = redirectCodes.has(status) && !!location;
-
-    if (isRedirect) {
-      this.navigationTracker.updatePipelineStatus(
-        LocationStatus.HttpRedirected,
-        location,
-        frameId,
-        this.lastCommandId,
-      );
-      return;
-    }
-    this.navigationTracker.updatePipelineStatus(
-      LocationStatus.HttpResponded,
-      url,
-      frameId,
-      this.lastCommandId,
-    );
-    this.session.mitmRequestSession.recordDocumentUserActivity(url);
+    this.navigationTracker.updatePipelineStatus({
+      incomingStatus: LocationStatus.HttpResponded,
+      url: event.url,
+      frameId: event.frameId,
+      lastCommandId: this.lastCommandId,
+    });
+    this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
   }
 
   private onWebsocketFrame(event: IPuppetPageEvents['websocket-frame']) {
@@ -571,12 +559,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }[eventName];
 
       if (status) {
-        this.navigationTracker.updatePipelineStatus(
-          status,
-          this.puppetPage.mainFrame.url,
-          this.mainFrameId,
-          this.lastCommandId,
-        );
+        const frame = this.puppetPage.mainFrame;
+        this.navigationTracker.updatePipelineStatus({
+          incomingStatus: status,
+          url: frame.url,
+          frameId: frame.id,
+          lastCommandId: this.lastCommandId,
+        });
       }
     }
   }

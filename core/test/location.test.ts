@@ -292,4 +292,132 @@ setTimeout(function() {
     await core.close();
     runWaitForCbsSpy.mockRestore();
   });
+
+  it.todo('handles going to about:blank');
+
+  it('correctly triggers location change for new tabs', async () => {
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+
+    koaServer.get('/newTab', ctx => {
+      ctx.body = `<body><h1>Loaded</h1></body>`;
+    });
+    koaServer.get('/newTabPrompt', ctx => {
+      ctx.body = `<body><a href='${koaServer.baseUrl}/newTab' target="_blank">Popup</a></body>`;
+    });
+
+    await core.goto(`${koaServer.baseUrl}/newTabPrompt`);
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    // clear data before this run
+    const popupTabMeta = await core.waitForNewTab();
+    const popupCore = Core.byTabId[popupTabMeta.tabId];
+    const jestSpy = jest.fn();
+    // eslint-disable-next-line jest/valid-expect-in-promise
+    popupCore
+      .waitForLocation('change')
+      .then(jestSpy)
+      .catch(err => expect(err).not.toBeTruthy());
+    await popupCore.waitForLoad('AllContentLoaded');
+    expect(jestSpy).toHaveBeenCalledTimes(0);
+  });
+
+  it('handles a new tab that redirects', async () => {
+    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+
+    koaServer.get('/popup-redirect', ctx => {
+      ctx.redirect('/popup-redirect2');
+    });
+    koaServer.get('/popup-redirect2', ctx => {
+      ctx.redirect('/popup-redirect3');
+    });
+    koaServer.get('/popup-redirect3', ctx => {
+      ctx.body = '<body><h1>Long journey!</h1></body>';
+    });
+    koaServer.get('/popup', ctx => {
+      ctx.body = `<body>
+<h1>Loaded</h1>
+<script type="text/javascript">
+setTimeout(() => {
+  window.location.href = '/popup-redirect';
+}, 50);
+</script>
+      </body>`;
+    });
+    koaServer.get('/popup-start', ctx => {
+      ctx.body = `<body><a href='${koaServer.baseUrl}/popup' target="_blank">Popup</a></body>`;
+    });
+
+    await core.goto(`${koaServer.baseUrl}/popup-start`);
+
+    await core.waitForLoad(LocationStatus.AllContentLoaded);
+    runWaitForCbsSpy.mockClear();
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    // clear data before this run
+    const popupTabMeta = await core.waitForNewTab();
+    const popupCore = Core.byTabId[popupTabMeta.tabId];
+
+    await popupCore.waitForLoad('DomContentLoaded');
+    await popupCore.waitForLocation(LocationTrigger.change);
+    await popupCore.waitForLoad('AllContentLoaded');
+
+    expect(await popupCore.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
+
+    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
+
+    // @ts-ignore
+    const history = popupCore.tab.navigationTracker.history;
+    expect(history).toHaveLength(4);
+    expect(history.map(x => x.requestedUrl)).toStrictEqual([
+      `${koaServer.baseUrl}/popup`,
+      `${koaServer.baseUrl}/popup-redirect`,
+      `${koaServer.baseUrl}/popup-redirect2`,
+      `${koaServer.baseUrl}/popup-redirect3`,
+    ]);
+    expect(history.map(x => x.finalUrl)).toStrictEqual([
+      `${koaServer.baseUrl}/popup`,
+      `${koaServer.baseUrl}/popup-redirect2`,
+      `${koaServer.baseUrl}/popup-redirect3`,
+      `${koaServer.baseUrl}/popup-redirect3`,
+    ]);
+    expect(history[0].stateChanges.has('AllContentLoaded')).toBe(true);
+    expect(history[1].stateChanges.has('HttpRedirected')).toBe(true);
+    expect(history[2].stateChanges.has('HttpRedirected')).toBe(true);
+    expect(history[3].stateChanges.has('AllContentLoaded')).toBe(true);
+
+    expect(locationStatusHistory).toMatchObject([
+      'change',
+      'HttpRequested',
+      'HttpResponded',
+      'DomContentLoaded',
+      'AllContentLoaded',
+      'change',
+      'HttpRequested',
+      'HttpRedirected',
+      'change',
+      'HttpRequested',
+      'HttpRedirected',
+      'change',
+      'HttpRequested',
+      'HttpResponded',
+      'DomContentLoaded',
+      'AllContentLoaded',
+    ]);
+
+    await core.close();
+    runWaitForCbsSpy.mockRestore();
+  });
 });
