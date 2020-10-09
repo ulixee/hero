@@ -1,14 +1,14 @@
-import { Helpers } from "@secret-agent/testing";
-import * as http2 from "http2";
-import { URL } from "url";
-import MitmSocket from "@secret-agent/mitm-socket";
-import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
-import MitmServer from "../lib/MitmProxy";
-import RequestSession from "../handlers/RequestSession";
-import HttpRequestHandler from "../handlers/HttpRequestHandler";
-import HeadersHandler from "../handlers/HeadersHandler";
-import MitmRequestContext from "../lib/MitmRequestContext";
-import { parseRawHeaders } from "../lib/Utils";
+import { Helpers } from '@secret-agent/testing';
+import * as http2 from 'http2';
+import { URL } from 'url';
+import MitmSocket from '@secret-agent/mitm-socket';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import MitmServer from '../lib/MitmProxy';
+import RequestSession from '../handlers/RequestSession';
+import HttpRequestHandler from '../handlers/HttpRequestHandler';
+import HeadersHandler from '../handlers/HeadersHandler';
+import MitmRequestContext from '../lib/MitmRequestContext';
+import { parseRawHeaders } from '../lib/Utils';
 
 const mocks = {
   httpRequestHandler: {
@@ -151,7 +151,11 @@ test('should support push streams', async () => {
   expect(buffer.toString()).toBe('H2 response');
   expect(pushRequestHeaders['/push1']).toBeTruthy();
   expect(pushRequestHeaders['/push2']).toBeTruthy();
-  expect(pushRequestHeaders['/push2'].responseHeaders['x-push-test']).toStrictEqual(['1', '2', '3']);
+  expect(pushRequestHeaders['/push2'].responseHeaders['x-push-test']).toStrictEqual([
+    '1',
+    '2',
+    '3',
+  ]);
   expect(pushRequestHeaders['/push2'].requestHeaders['send-1']).toStrictEqual(['a', 'b']);
 });
 
@@ -195,6 +199,42 @@ test('should handle h2 client going to h1 request', async () => {
     'cache-control': 'public',
     date: expect.any(String),
   });
+});
+
+test('should handle cache headers for h2', async () => {
+  const etags: string[] = [];
+  const server = await Helpers.runHttp2Server((req, res1) => {
+    if (req.headers[':path'] === '/cached') {
+      etags.push(req.headers['if-none-match'] as string);
+      res1.setHeader('etag', '"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
+      return res1.end(Buffer.from(['a', 'c']));
+    }
+    return res1.end('bad data');
+  });
+
+  const mitmServer = await MitmServer.start();
+  Helpers.onClose(() => mitmServer.close());
+  const proxyHost = `http://localhost:${mitmServer.port}`;
+
+  const session = new RequestSession('h2-cache-headers', 'any agent', null);
+  Helpers.needsClosing.push(session);
+
+  const proxyCredentials = session.getProxyCredentials();
+  expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
+
+  const res1 = await Helpers.httpGet(`${server.baseUrl}/cached`, proxyHost, proxyCredentials);
+  expect(res1).toBeTruthy();
+  expect(etags[0]).not.toBeTruthy();
+
+  const res2 = await Helpers.httpGet(`${server.baseUrl}/cached`, proxyHost, proxyCredentials);
+  expect(res2).toBeTruthy();
+  expect(etags[1]).toBe('"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
+
+  const res3 = await Helpers.httpGet(`${server.baseUrl}/cached`, proxyHost, proxyCredentials, {
+    'if-none-match': 'etag2',
+  });
+  expect(res3).toBeTruthy();
+  expect(etags[2]).toBe('etag2');
 });
 
 test('should send trailers', async () => {

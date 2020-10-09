@@ -20,7 +20,7 @@ export default class CacheHandler {
   public onRequest() {
     const ctx = this.ctx;
     // only cache get (don't do preflight, post, etc)
-    if (ctx.method === 'GET') {
+    if (ctx.method === 'GET' && !ctx.requestLowerHeaders['if-none-match']) {
       const cache = this.responseCache?.get(ctx.url.href);
 
       if (cache?.etag) {
