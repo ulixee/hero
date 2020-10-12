@@ -155,6 +155,21 @@ Executes a navigation request for the document associated with the parent Secret
 
 #### **Returns**: `Promise<Resource>` The loaded resource representing this page.
 
+### tab.isElementVisible*(element)* {#is-element-visible}
+
+Determines if an element is visible to a user. This method checks whether an element has:
+
+- layout: width, height, x and y.
+- opacity: non-zero opacity.
+- css visibility: the element does not have a computed style where visibility=hidden.
+- no overlay: no other element which overlays any part of this element.
+
+#### **Arguments**:
+
+- element `SuperElement`. The element to determine visibility.
+
+#### **Returns**: `Promise<boolean>` Whether the element is visible to a user.
+
 ### tab.waitForAllContentLoaded*()* {#wait-for-all-content}
 
 Wait for the "load" DOM event. We renamed this to be more explicit because we're always mixing up DOMContentLoaded and load.
@@ -170,7 +185,7 @@ Wait until a specific element is present in the dom.
 - element `SuperElement`
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds.
-  - waitForVisible `boolean`. Wait until this element is visible.
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
 
 #### **Returns**: `Promise`
 

@@ -79,6 +79,14 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   // METHODS
 
+  public async fetch(request: Request | string, init?: IRequestInit) {
+    const requestInput = await getRequestIdOrUrl(request);
+    const attachedState = await getCoreTab(this).fetch(requestInput, init);
+
+    const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
+    return createResponse(awaitedPath, { ...getState(this) });
+  }
+
   public async goto(href: string) {
     const coreTab = getCoreTab(this);
     const resource = await coreTab.goto(href);
@@ -99,12 +107,9 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return getCoreTab(this).getJsValue<T>(path);
   }
 
-  public async fetch(request: Request | string, init?: IRequestInit) {
-    const requestInput = await getRequestIdOrUrl(request);
-    const attachedState = await getCoreTab(this).fetch(requestInput, init);
-
-    const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
-    return createResponse(awaitedPath, { ...getState(this) });
+  public async isElementVisible(element: ISuperElement): Promise<boolean> {
+    const { awaitedPath } = awaitedPathState.getState(element);
+    return getCoreTab(this).isElementVisible(awaitedPath.toJSON());
   }
 
   public async waitForAllContentLoaded(): Promise<void> {

@@ -211,7 +211,7 @@ class ObjectAtPath {
   public get boundingClientRect() {
     const element = this.closestElement;
     if (!element) {
-      return { top: 0, bottom: 0, right: 0, left: 0, width: 0, height: 0, isOptionElement: false };
+      return { top: 0, bottom: 0, right: 0, left: 0, width: 0, height: 0, tag: 'node' };
     }
 
     const rect = element.getBoundingClientRect();
@@ -231,11 +231,27 @@ class ObjectAtPath {
     const element = this.closestElement;
     if (element) {
       const style = getComputedStyle(element);
-      if (style?.visibility === 'hidden') return false;
+      if (style?.visibility === 'hidden' || style?.display === 'none' || style?.opacity === '0') {
+        return false;
+      }
+
+      if (this.isBehindOtherElement) return false;
 
       const rect = this.boundingClientRect;
       return !!(rect.top || rect.bottom || rect.width || rect.height);
     }
+    return false;
+  }
+
+  public get isBehindOtherElement() {
+    const element = this.closestElement;
+    if (!element) return false;
+    const { top, right, left, bottom } = element.getBoundingClientRect();
+    // adjust coordinates to get more accurate results
+    if (document.elementFromPoint(left + 1, top + 1) !== element) return true;
+    if (document.elementFromPoint(left + 1, bottom - 1) !== element) return true;
+    if (document.elementFromPoint(right - 1, top + 1) !== element) return true;
+    if (document.elementFromPoint(right - 1, bottom - 1) !== element) return true;
     return false;
   }
 

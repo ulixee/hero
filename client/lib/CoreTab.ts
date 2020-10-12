@@ -106,6 +106,10 @@ export default class CoreTab {
     return await this.commandQueue.run('getAllCookies');
   }
 
+  public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
+    return await this.commandQueue.run('isElementVisible', jsPath);
+  }
+
   public async waitForResource(
     filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
     opts: IWaitForResourceOptions,
@@ -171,7 +175,7 @@ export default class CoreTab {
     process.nextTick(() => {
       for (const [tabId, tab] of Object.entries(this.coreClient.tabsById)) {
         if (tab.sessionId === this.sessionId) {
-          delete this.coreClient.tabsById[tabId]
+          delete this.coreClient.tabsById[tabId];
         }
       }
     });
