@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.17](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.16...v1.0.0-alpha.17) (2020-10-13)
+
+
+### Bug Fixes
+
+* publish latest replay ([62d1ef0](https://github.com/ulixee/secret-agent/commit/62d1ef046bccb2d90df206d5425999a80b7d4fd8))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2020-10-13)
 
 
