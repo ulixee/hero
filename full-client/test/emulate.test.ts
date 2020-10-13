@@ -48,6 +48,7 @@ beforeAll(async () => {
 
       return res;
   });
+  
   const fp = await fpCollect.generateFingerprint();
   await fetch('/analyze', {
     method:'POST',
@@ -59,8 +60,8 @@ beforeAll(async () => {
     `;
   });
 });
-afterAll(Helpers.afterAll);
-afterEach(Helpers.afterEach);
+afterAll(Helpers.afterAll, 30e3);
+afterEach(Helpers.afterEach, 30e3);
 
 test('should pass FpScanner', async () => {
   const analyzePromise = new Promise(resolve => {
@@ -88,7 +89,7 @@ test('should pass FpScanner', async () => {
     expect(isConsistent).toBe(true);
   }
   expect(data).toBeTruthy();
-});
+}, 30e3);
 
 test('should not be denied for notifications, but prompt for permissions', async () => {
   const browser = await SecretAgent.createBrowser();
