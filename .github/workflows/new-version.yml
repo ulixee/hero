@@ -1,4 +1,4 @@
-name: Replay
+name: New Version
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  replay-and-site:
     runs-on: macos-latest
 
     steps:
@@ -41,3 +41,33 @@ jobs:
           done
           tag_name="${GITHUB_REF##*/}"
           hub release edit "${assets[@]}" -m "" "$tag_name"
+
+      - name: Build Webite
+        run: yarn build
+        working-directory: ./website
+
+      - name: Deploy Website
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build-dist/website
+          commit_message: "[skip ci] Updates"
+
+  socket:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+
+      - name: Build Sockets
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist --debug
+          workdir: ${{ github.workspace }}/mitm-socket
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

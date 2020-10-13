@@ -1,0 +1,129 @@
+name: Test Matrix
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!gh-pages'
+
+jobs:
+  lint:
+    name: Lint
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+
+      - name: Run "build" step
+        run: yarn tsc
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+
+      - name: Run  Lint
+        run: yarn lint
+
+      - name: 'Tar files'
+        run: tar -cvf js_files.tar --exclude=node_modules --exclude=dist ./build
+
+      - name: Upload built Javascript files
+        uses: actions/upload-artifact@v2
+        with:
+          name: js-build
+          path: js_files.tar
+          retention-days: 1
+
+  test:
+    name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
+    needs: lint
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node-version: [12, 13]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+      - name: Download a single artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: js-build
+          path: .
+
+      - name: Untar files
+        run: tar -xf js_files.tar
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install mitm
+        run: yarn run build
+        working-directory: ./mitm-socket
+
+      - name: Copy built mitm
+        run: cp -r mitm-socket/dist build/mitm-socket
+
+      - name: Build modules
+        run: yarn
+        working-directory: ./build
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+
+      - name: Run tests
+        run: yarn jest --testTimeout=15000 --maxConcurrency=3
+        working-directory: ./build
+        env:
+          SA_SHOW_REPLAY: false
+          CACHE_DIR: .sessions
+          NODE_ENV: test
+
+      - name: Coverage
+        run: npm -g install codecov && codecov
+        working-directory: ./build
+        if: ${{ matrix.node-version == '12' && matrix.os == 'ubuntu-latest' }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
