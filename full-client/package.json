@@ -1,18 +1,18 @@
 {
   "name": "@secret-agent/full-client",
-  "version": "1.0.0-alpha.18",
+  "version": "1.0.0-alpha.19",
   "description": "The Web Browser Built for Scraping",
   "dependencies": {
-    "@secret-agent/client": "1.0.0-alpha.18",
-    "@secret-agent/core": "1.0.0-alpha.18",
+    "@secret-agent/client": "1.0.0-alpha.19",
+    "@secret-agent/core": "1.0.0-alpha.19",
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
     "@secret-agent/commons": "1.0.0-alpha.16",
-    "@secret-agent/emulate-chrome-80": "1.0.0-alpha.18",
-    "@secret-agent/mitm": "1.0.0-alpha.18",
-    "@secret-agent/testing": "1.0.0-alpha.18",
+    "@secret-agent/emulate-chrome-80": "1.0.0-alpha.19",
+    "@secret-agent/mitm": "1.0.0-alpha.19",
+    "@secret-agent/testing": "1.0.0-alpha.19",
     "@types/node": "^12.7.11",
     "awaited-dom": "^1.1.5",
     "fpcollect": "^1.0.4",

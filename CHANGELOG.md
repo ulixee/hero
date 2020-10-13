@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.19](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.18...v1.0.0-alpha.19) (2020-10-13)
+
+
+### Bug Fixes
+
+* **replay:** install script broke ([b79c572](https://github.com/ulixee/secret-agent/commit/b79c572883a8c7b0240c97c13ca1d0cf9ef8cc43))
+
+
+
+
+
 # [1.0.0-alpha.18](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.17...v1.0.0-alpha.18) (2020-10-13)
 
 
