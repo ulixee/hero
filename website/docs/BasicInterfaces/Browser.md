@@ -188,7 +188,11 @@ Alias for [Tab.goForward](./tab#forward)
 
 ### browser.goto*(href)*
 
-Alias for [Tab.goto](./tab#goto)
+Alias for [Tab.goto](./tab#goto
+
+### browser.isElementVisible*(element)*
+
+Alias for [Tab.isElementVisible](./tab#is-element-visible)
 
 ### browser.waitForAllContentLoaded*()*
 

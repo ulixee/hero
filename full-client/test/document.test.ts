@@ -180,6 +180,44 @@ describe('basic Document tests', () => {
     const heading2 = headings.iterateNext();
     expect(await heading2.textContent).toBe('Also me');
   });
+
+  it('can determine if an element is visible', async () => {
+    koaServer.get('/isVisible', ctx => {
+      ctx.body = `
+        <body>
+          <div id="elem-1">Element 1</div>
+          <div style="visibility: hidden">
+            <div id="elem-2">Visibility none</div>
+          </div>
+          <div style="visibility: visible">
+            <div id="elem-3">Visibility visible</div>
+          </div>
+          <div style="display:none" id="elem-4">No display</div>
+          <div style="opacity: 0" id="elem-5">Opacity 0</div>
+          <div style="opacity: 0.1" id="elem-6">Opacity 0.1</div>
+          <div style="position: relative; width: 100px">
+            <div id="elem-7" style="position: absolute; left: 0; width: 20px; top; 0; height:20px;">Showing Element</div>
+            <div id="elem-8" style="position: absolute; left: 20px; width: 20px; top; 0; height:20px;">Showing Element</div>
+            <div style="position: absolute; left: 21px; width: 10px; top; 0; height:20px;">Overlay Element</div>
+          </div>
+        </body>
+      `;
+    });
+    const browser = await openBrowser(`/isVisible`);
+    const { document } = browser;
+    await expect(browser.isElementVisible(document.querySelector('#elem-1'))).resolves.toBe(true);
+    // visibility
+    await expect(browser.isElementVisible(document.querySelector('#elem-2'))).resolves.toBe(false);
+    await expect(browser.isElementVisible(document.querySelector('#elem-3'))).resolves.toBe(true);
+    // layout
+    await expect(browser.isElementVisible(document.querySelector('#elem-4'))).resolves.toBe(false);
+    // opacity
+    await expect(browser.isElementVisible(document.querySelector('#elem-5'))).resolves.toBe(false);
+    await expect(browser.isElementVisible(document.querySelector('#elem-6'))).resolves.toBe(true);
+    // overlay
+    await expect(browser.isElementVisible(document.querySelector('#elem-7'))).resolves.toBe(true);
+    await expect(browser.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
+  });
 });
 
 async function openBrowser(path: string) {

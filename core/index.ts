@@ -76,6 +76,10 @@ export default class Core implements ICore {
     return this.tab.runCommand<string>('goForward');
   }
 
+  public async isElementVisible(jsPath: IJsPath) {
+    return this.tab.runCommand<boolean>('isElementVisible', jsPath);
+  }
+
   public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
     return await this.tab.runCommand('waitForResource', filter, opts);
   }

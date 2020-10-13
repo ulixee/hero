@@ -319,6 +319,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     await this.puppetPage.bringToFront();
   }
 
+  public async isElementVisible(jsPath: IJsPath) {
+    const isVisible = await this.domEnv.isJsPathVisible(jsPath);
+    return isVisible.value;
+  }
+
   public async waitForNewTab(sinceCommandId: number) {
     if (sinceCommandId >= 0) {
       for (const tab of this.session.tabs) {

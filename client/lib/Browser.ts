@@ -165,6 +165,10 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
     return this.activeTab.getJsValue<T>(path);
   }
 
+  public isElementVisible(element: ISuperElement) {
+    return this.activeTab.isElementVisible(element);
+  }
+
   public async waitForAllContentLoaded() {
     return this.activeTab.waitForAllContentLoaded();
   }
