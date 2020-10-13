@@ -1,7 +1,7 @@
 import * as http from 'http';
 import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
-import { ClientHttp2Stream, Http2ServerResponse } from 'http2';
+import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -31,6 +31,14 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     try {
       clientToProxyRequest.pause();
       clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
+      if (clientToProxyRequest instanceof Http2ServerRequest) {
+        if (clientToProxyRequest.stream.session.listenerCount('error') === 0) {
+          clientToProxyRequest.stream.session.on(
+            'error',
+            this.onError.bind(this, 'ClientToProxy.SessionError'),
+          );
+        }
+      }
       proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
 
       const proxyToServerRequest = await this.createProxyToServerRequest();

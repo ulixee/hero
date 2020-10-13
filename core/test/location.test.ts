@@ -399,7 +399,6 @@ setTimeout(() => {
     expect(history[3].stateChanges.has('AllContentLoaded')).toBe(true);
 
     expect(locationStatusHistory).toMatchObject([
-      'change',
       'HttpRequested',
       'HttpResponded',
       'DomContentLoaded',
