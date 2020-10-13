@@ -9,6 +9,9 @@
   "references": [
     {
       "path": "injected-scripts/tsconfig.dist.json"
+    },
+    {
+      "path": "replay/tsconfig.dist.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json"],
@@ -22,11 +25,7 @@
     "**/build",
     "build",
     "build-dist",
-    "replay/app.ts",
-    "replay/frontend",
-    "replay/backend",
-    "replay/injected-scripts",
-    "replay/shared",
+    "replay",
     "examples",
     "website",
     "injected-scripts"

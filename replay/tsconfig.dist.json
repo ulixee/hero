@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../build-dist/replay"
+  },
+  "include": ["index.ts", "install/*.ts", ".eslintrc.js", "*.json"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "**/node_modules",
+    "app.ts",
+    "backend",
+    "shared",
+    "injected-scripts",
+    "frontend"
+  ]
+}
