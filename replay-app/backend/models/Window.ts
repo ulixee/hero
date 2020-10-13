@@ -99,6 +99,14 @@ export default class Window {
     }
   }
 
+  public hasBack() {
+    return this.navCursor > 0;
+  }
+
+  public hasNext() {
+    return this.navCursor + 1 < this.navHistory.length;
+  }
+
   public async openAppLocation(location: IWindowLocation, navigateToHistoryIdx?: number) {
     console.log('Navigating to %s', location);
 
@@ -173,6 +181,12 @@ export default class Window {
     }
   }
 
+  public hideMessageOverlay(messageId: string) {
+    if (messageId === ReplayView.MESSAGE_HANG_ID) {
+      this.replayView.replayApi.showUnresponsiveMessage = false;
+    }
+  }
+
   protected async load(state: { replayApi?: ReplayApi; location?: IWindowLocation }) {
     const { replayApi, location } = state || {};
     await this.browserWindow.loadURL(Application.instance.getPageUrl('header'));
@@ -203,14 +217,6 @@ export default class Window {
     return this.openReplayApi(api, index);
   }
 
-  private hasBack() {
-    return this.navCursor > 0;
-  }
-
-  private hasNext() {
-    return this.navCursor + 1 < this.navHistory.length;
-  }
-
   private logHistory(
     history: { replayMeta?: IReplayMeta; location?: IWindowLocation },
     historyIdx?: number,
@@ -218,7 +224,7 @@ export default class Window {
     if (historyIdx !== undefined) {
       this.navCursor = historyIdx;
     } else {
-      this.navHistory.length = this.navCursor+1;
+      this.navHistory.length = this.navCursor + 1;
       this.navCursor = this.navHistory.length;
       this.navHistory.push(history);
     }

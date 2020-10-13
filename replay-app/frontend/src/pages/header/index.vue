@@ -381,6 +381,7 @@ export default class HeaderPage extends Vue {
         margin-top: 1px;
         width: 16px;
         height: 13px;
+        flex: 0 0 auto;
       }
     }
   }

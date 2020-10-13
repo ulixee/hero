@@ -27,6 +27,7 @@ export interface IMouseEvent {
   pageX: number;
   pageY: number;
   buttons: number;
+  targetNodeId: number;
   event: number;
   timestamp: string;
 }

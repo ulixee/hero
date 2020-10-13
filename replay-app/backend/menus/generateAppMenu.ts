@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from "electron";
-import { saveAs, viewSource } from "./CommonActions";
-import Window from "../models/Window";
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from 'electron';
+import { saveAs, viewSource } from './CommonActions';
+import Window from '../models/Window';
 
 const isMac = process.platform === 'darwin';
 
@@ -127,6 +127,25 @@ export default function generateAppMenu() {
       ],
     },
     {
+      label: 'Replay',
+      submenu: [
+        {
+          label: 'View History',
+          click: () => {
+            return Window.current.openAppLocation('History');
+          },
+        },
+        ...createMenuItem(['Left'], () => {
+          if (!Window.current) return;
+          return Window.current.replayView?.gotoPreviousTick();
+        }),
+        ...createMenuItem(['Right'], () => {
+          if (!Window.current) return;
+          return Window.current.replayView?.gotoNextTick();
+        }),
+      ],
+    },
+    {
       label: 'Tools',
       submenu: [
         ...createMenuItem(
@@ -176,23 +195,6 @@ export default function generateAppMenu() {
       ],
     },
   ];
-
-  // Ctrl+1 - Ctrl+8
-  template[0].submenu = template[0].submenu.concat(
-    createMenuItem(
-      Array.from({ length: 8 }, (v, k) => k + 1).map(i => `CmdOrCtrl+${i}`),
-      (window, menuItem, i) => {
-        Window.current.webContents.send('select-tab-index', i);
-      },
-    ),
-  );
-
-  // Ctrl+9
-  template[0].submenu = template[0].submenu.concat(
-    createMenuItem(['CmdOrCtrl+9'], () => {
-      Window.current.webContents.send('select-last-tab');
-    }),
-  );
 
   return Menu.buildFromTemplate(template);
 }

@@ -13,9 +13,12 @@ import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
 
 export default class ReplayView extends ViewBackend {
+  public static MESSAGE_HANG_ID = 'script-hang';
   public replayApi: ReplayApi;
   public tabState: ReplayTabState;
   public readonly playbarView: PlaybarView;
+
+  private lastInactivityMillis = 0;
 
   public constructor(window: Window) {
     super(window, {
@@ -25,6 +28,7 @@ export default class ReplayView extends ViewBackend {
       contextIsolation: true,
       javascript: false,
     });
+
     this.interceptHttpRequests();
     this.playbarView = new PlaybarView(window);
     this.checkResponsive = this.checkResponsive.bind(this);
@@ -102,10 +106,22 @@ export default class ReplayView extends ViewBackend {
     await this.publishTickChanges(events);
   }
 
+  public async gotoNextTick() {
+    const offset = await this.nextTick();
+    this.playbarView.changeTickOffset(offset);
+  }
+
+  public async gotoPreviousTick() {
+    const state = this.tabState.gotoPreviousTick();
+    await this.publishTickChanges(state);
+    this.playbarView.changeTickOffset(this.tabState.currentPlaybarOffsetPct);
+  }
+
   public async nextTick() {
     if (!this.isAttached || !this.tabState) return 0;
     const events = this.tabState.gotoNextTick();
     await this.publishTickChanges(events);
+    setImmediate(() => this.checkResponsive());
 
     return this.tabState.currentPlaybarOffsetPct;
   }
@@ -123,9 +139,13 @@ export default class ReplayView extends ViewBackend {
     const [domChanges] = events;
     if (domChanges?.length) {
       if (domChanges[0].action === 'newDocument') {
-        const nav = domChanges.shift();
-        console.log('Re-navigating', nav.textContent);
-        await this.webContents.loadURL(nav.textContent);
+        const url = new URL(domChanges[0].textContent);
+        const currentUrl = new URL(this.webContents.getURL());
+        if (url.origin !== currentUrl.origin) {
+          console.log('Re-navigating', url.href);
+          domChanges.shift();
+          await this.webContents.loadURL(url.href);
+        }
       }
     }
     this.webContents.send('dom:apply', ...events);
@@ -142,14 +162,30 @@ export default class ReplayView extends ViewBackend {
   }
 
   private checkResponsive() {
-    if (this.replayApi.unresponsiveSeconds >= 5) {
+    const lastActivityMillis =
+      new Date().getTime() - (this.replayApi.lastActivityDate ?? new Date()).getTime();
+
+    if (lastActivityMillis < this.lastInactivityMillis) {
+      this.lastInactivityMillis = lastActivityMillis;
+      return;
+    }
+    if (lastActivityMillis - this.lastInactivityMillis < 500) return;
+    this.lastInactivityMillis = lastActivityMillis;
+
+    if (
+      lastActivityMillis >= 5e3 &&
+      this.replayApi.lastCommandName !== 'waitForMillis' &&
+      this.replayApi.showUnresponsiveMessage
+    ) {
+      const lastActivitySecs = Math.floor(lastActivityMillis / 1e3);
       Application.instance.overlayManager.show(
         'message-overlay',
         this.window.browserWindow,
         this.window.browserWindow.getContentBounds(),
         {
           title: 'Did your script hang?',
-          message: `The last update was ${this.replayApi.unresponsiveSeconds} seconds ago.`,
+          message: `The last update was ${lastActivitySecs} seconds ago.`,
+          id: ReplayView.MESSAGE_HANG_ID,
         },
       );
     } else {

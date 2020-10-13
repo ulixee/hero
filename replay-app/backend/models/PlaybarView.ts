@@ -4,6 +4,7 @@ import IRectangle from '~shared/interfaces/IRectangle';
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ViewBackend from '~backend/models/ViewBackend';
 
+
 export default class PlaybarView extends ViewBackend {
   private readonly isReady: Promise<void>;
   private tabState: ReplayTabState;
@@ -55,7 +56,12 @@ export default class PlaybarView extends ViewBackend {
     }
   }
 
-  public async changeTickOffset(offset: number) {
+  public pause() {
+    this.playOnLoaded = false;
+    this.browserView.webContents.send('pause');
+  }
+
+  public changeTickOffset(offset: number) {
     this.browserView.webContents.send('ticks:change-offset', offset);
   }
 
@@ -64,7 +70,8 @@ export default class PlaybarView extends ViewBackend {
     const tick = this.tabState.ticks.find(x => x.playbarOffsetPercent === tickValue);
     if (!tick) return;
 
-    rect.y += this.bounds.y;
+    const bounds = this.browserView.getBounds();
+    rect.y += bounds.y - bounds.height;
     const commandLabel = tick.label;
     const commandResult =
       tick.eventType === 'command'

@@ -128,11 +128,11 @@ export default class CommandFormatter {
   }
 }
 
-function formatJsPath(path: any) {
+export function formatJsPath(path: any) {
   const jsPath = path
     .map((x, i) => {
       if (i === 0 && typeof x === 'number') {
-        return 'prev';
+        return '<previouslySelectedNode>';
       }
       if (Array.isArray(x)) {
         if (x[0] === getAttachedStateFnName) return;

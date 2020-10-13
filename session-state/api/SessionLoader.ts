@@ -122,7 +122,8 @@ export default class SessionLoader extends EventEmitter {
       !lastState ||
       lastState.hasRecentErrors !== scriptState.hasRecentErrors ||
       lastState.closeDate !== scriptState.closeDate ||
-      lastState.unresponsiveSeconds !== scriptState.unresponsiveSeconds
+      lastState.lastActivityDate !== scriptState.lastActivityDate ||
+      lastState.lastCommandName !== scriptState.lastCommandName
     ) {
       this.emit('script-state', scriptState);
     }
@@ -152,7 +153,8 @@ const resourceWhitelist: ResourceType[] = [
 ];
 
 interface IScriptState {
-  unresponsiveSeconds: number;
+  lastCommandName: string;
+  lastActivityDate: Date;
   hasRecentErrors: boolean;
   closeDate?: Date;
 }

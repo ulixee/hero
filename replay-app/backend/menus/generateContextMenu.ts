@@ -1,5 +1,6 @@
 import { clipboard, Menu, nativeImage } from 'electron';
 import { printPage, saveAs, viewSource } from './CommonActions';
+import Window from '../models/Window';
 
 export default function generateContextMenu(
   params: Electron.ContextMenuParams,
@@ -109,17 +110,17 @@ export default function generateContextMenu(
       {
         label: 'Go back',
         accelerator: 'Alt+Left',
-        enabled: webContents.canGoBack(),
+        enabled: Window.current.hasBack(),
         click: () => {
-          webContents.goBack();
+          return Window.current.goBack();
         },
       },
       {
         label: 'Go forward',
         accelerator: 'Alt+Right',
-        enabled: webContents.canGoForward(),
+        enabled: Window.current.hasNext(),
         click: () => {
-          webContents.goForward();
+          return Window.current.goForward();
         },
       },
       {

@@ -121,7 +121,18 @@ export default class BaseOverlay {
   protected rearrange(rect: IRectangle = {}) {
     if (!this.visible) return;
 
+    // put on top
+    this.browserWindow.addBrowserView(this.browserView);
     const newRect = roundifyRectangle(this.calcBounds ? this.calcBounds(rect) : rect);
+    const current = this.browserView.getBounds();
+    if (
+      current.height === newRect.height &&
+      current.width === newRect.width &&
+      current.x === newRect.x &&
+      current.y === newRect.y
+    ) {
+      return;
+    }
 
     this.browserView.setBounds(newRect as Rectangle);
   }

@@ -12,6 +12,7 @@ let lastHighlightNodes: number[] = [];
 const domChangeList = [];
 
 const replayNode = document.createElement('sa-replay');
+replayNode.setAttribute('style', 'z-index:10000000;');
 const replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
 console.log('DomReplayer loaded.');
@@ -60,20 +61,27 @@ const domContentLoaded = new Promise(resolve => {
   });
 });
 
-let isNavigating = false;
-
 function applyDomChanges(changeEvents: IDomChangeEvent[]) {
-  if (isNavigating) return;
-
   domChangeList.push(...changeEvents);
 
   while (domChangeList.length) {
     const changeEvent = domChangeList.shift();
     const { nodeId, commandId, action, textContent } = changeEvent;
     if (action === 'newDocument') {
-      if (resetLocation(textContent, commandId)) {
-        domChangeList.length = 0;
-        return;
+      const href = textContent;
+      const newUrl = new URL(href);
+
+      window.scrollTo({ top: 0 });
+      document.documentElement.innerHTML = '';
+      while (document.documentElement.previousSibling) {
+        const prev = document.documentElement.previousSibling;
+        if (prev === document.doctype) break;
+        prev.remove();
+      }
+      idMap.clear();
+
+      if (window.location.origin === newUrl.origin) {
+        window.history.replaceState({}, 'Replay', href);
       }
       continue;
     }
@@ -169,37 +177,6 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
 
 // HELPER FUNCTIONS ////////////////////
 
-function resetLocation(href: string, commandId: number) {
-  if (window.location.href === href && commandId !== -1) return false;
-  if (isNavigating) return false;
-
-  const newUrl = new URL(href);
-  console.log(
-    'Document changing. (Command %s. %s ==> %s). Keep origin? %s',
-    commandId === -1 ? 'load' : commandId,
-    window.location.href,
-    href,
-    window.location.origin === newUrl.origin,
-  );
-
-  if (window.location.origin === newUrl.origin) {
-    window.history.replaceState({}, 'Replay', href);
-    window.scrollTo({ top: 0 });
-    document.documentElement.innerHTML = '';
-    idMap.clear();
-    while (document.documentElement.previousSibling) {
-      const prev = document.documentElement.previousSibling;
-      if (prev === document.doctype) break;
-      prev.remove();
-    }
-    return false;
-  }
-  isNavigating = true;
-
-  // if it's an origin change, we have to change page
-  window.location.href = newUrl.href;
-  return true;
-}
 function getNode(id: number) {
   if (id === null || id === undefined) return null;
   return idMap.get(id);
@@ -217,8 +194,8 @@ function setNodeAttributes(node: Element, data: IDomChangeEvent) {
       }
     } catch (err) {
       if (
-        !err.toString().match(/not a valid attribute name/) &&
-        !err.toString().match(/qualified name/)
+        !err.toString().includes('not a valid attribute name') &&
+        !err.toString().includes('qualified name')
       )
         throw err;
     }
@@ -286,6 +263,7 @@ styleElement.textContent = `
   }
   
   sa-overflow {
+    z-index:10000;
     display:block;
     width:100%; 
     height:8px; 
