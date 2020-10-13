@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.16](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2020-10-13)
+
+
+### Bug Fixes
+
+* **core:** wait for location change on new tab ([0c70d6e](https://github.com/ulixee/secret-agent/commit/0c70d6e7553025222b9fe4139407be4d69ee20b9))
+* **mitm:** catch exceptions on closed h2 session ([6b5c7d4](https://github.com/ulixee/secret-agent/commit/6b5c7d455c06d21f59ad4674199d76d73a5373d2))
+* **mitm:** don’t send duplicated headers to h2 ([ece1b1f](https://github.com/ulixee/secret-agent/commit/ece1b1fe421d2b7aa2728f1031b30c5efa1e4948))
+* **mitm:** duplicate if-none-match header ([1cbe1f1](https://github.com/ulixee/secret-agent/commit/1cbe1f1cecacaac9c99af040ddbf39c72c959a4a))
+
+
+
+
+
 # [1.0.0-alpha.15](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2020-10-06)
 
 
