@@ -9,6 +9,7 @@
     "importHelpers": true,
     "experimentalDecorators": true,
     "noImplicitAny": false,
+    "resolveJsonModule": true,
     "sourceMap": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
@@ -27,6 +28,8 @@
     "shared/**/*.ts",
     "frontend/src/constants",
     "index.ts",
+    "install.ts",
+    "lib/**/*.ts",
     ".eslintrc.js"
   ],
   "exclude": ["dist", "node_modules", "**/node_modules"]

@@ -1,31 +1,59 @@
-import 'source-map-support/register';
-import { app } from 'electron';
-import { platform } from 'os';
-import log from 'electron-log';
+import ChildProcess from 'child_process';
+import Log from '@secret-agent/commons/Logger';
+import { getBinaryPath, isBinaryInstalled } from './lib/Utils';
 
-/////// ///////////////////////////////////////////////////////////////////////////////////////////
+const { log } = Log(module);
 
-import Application from './backend/Application';
+const apiPath = require.resolve('@secret-agent/session-state/api/start');
 
-// SETUP LOGGING //////////////////////////////////////////////////////////////////////////////////
+export default function replay(launchArgs: IReplayLaunchArgs) {
+  const {
+    replayApiServer,
+    sessionsDataLocation,
+    sessionName,
+    scriptInstanceId,
+    sessionId,
+  } = launchArgs;
 
-console.log = log.log;
-console.log(`Logging to ${log.transports.file.getFile().path}`);
+  const spawnArgs = [
+    '',
+    `--replay-data-location="${sessionsDataLocation}"`,
+    `--replay-session-name="${sessionName}"`,
+    `--replay-script-instance-id="${scriptInstanceId}"`,
+    `--replay-session-id="${sessionId}"`,
+    `--replay-api-path="${apiPath}"`,
+    `--replay-api-server="${replayApiServer}"`,
+  ];
 
-(process.env as any).ELECTRON_DISABLE_SECURITY_WARNINGS = true;
-
-app.name = 'SecretAgent';
-app.allowRendererProcessReuse = true;
-app.commandLine.appendSwitch('--enable-transparent-visuals');
-
-process.on('uncaughtException', error => {
-  console.error(error);
-});
-
-app.on('window-all-closed', () => {
-  if (platform() !== 'darwin') {
-    app.quit();
+  if (isBinaryInstalled()) {
+    return spawn(getBinaryPath(), spawnArgs);
   }
-});
 
-Application.instance.start().catch(error => console.log('Error starting Application: ', error));
+  try {
+    // see if we can launch from monorepo
+    spawnArgs[0] = require.resolve('@secret-agent/replay-app');
+
+    spawn('yarn electron', spawnArgs, true);
+  } catch (err) {
+    log.info('Replay app not found');
+  }
+}
+
+function spawn(appPath: string, args: string[], needsShell = false) {
+  const showLogs = !!process.env.SA_REPLAY_DEBUG;
+
+  ChildProcess.spawn(appPath, args, {
+    detached: true,
+    stdio: showLogs ? 'inherit' : 'ignore',
+    shell: needsShell,
+    windowsHide: false,
+  }).unref();
+}
+
+interface IReplayLaunchArgs {
+  replayApiServer: string;
+  sessionsDataLocation: string;
+  sessionName: string;
+  sessionId: string;
+  scriptInstanceId: string;
+}

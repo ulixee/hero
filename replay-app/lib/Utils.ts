@@ -1,7 +1,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import * as os from 'os';
-import packageJson from './package.json';
+import packageJson from '../package.json';
 
 const { version } = packageJson;
 

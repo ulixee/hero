@@ -7,7 +7,7 @@ import ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import * as os from 'os';
 import Path from 'path';
-import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
+import { distDir, isBinaryInstalled, recordVersion, version } from './lib/Utils';
 
 if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
   process.exit(0);

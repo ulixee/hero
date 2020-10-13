@@ -9,7 +9,12 @@
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
   "version": "1.0.0-alpha.16",
-  "main": "./index.js",
+  "main": "./app.js",
+  "files": [
+    "index.js",
+    "install.js",
+    "lib/*"
+  ],
   "build": {
     "appId": "dev.secretagent.replay",
     "productName": "SecretAgentReplay",
@@ -56,6 +61,10 @@
     "electron-log": "^4.2.1",
     "moment": "^2.24.0",
     "source-map-support": "^0.5.19",
+    "@secret-agent/commons": "1.0.0-alpha.16",
+    "axios": "^0.19.2",
+    "progress": "^2.0.3",
+    "tar-fs": "^2.1.0",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
