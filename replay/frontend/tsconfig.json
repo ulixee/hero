@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../../build/replay-app/static",
+    "outDir": "../../build/replay/static",
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "../build/replay-app",
+    "outDir": "../build/replay",
     "module": "commonjs",
     "target": "es2018",
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],

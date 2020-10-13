@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/replay-app",
+  "name": "@secret-agent/replay",
   "author": "Data Liberation Foundation",
   "private": true,
   "contributors": [
@@ -41,18 +41,18 @@
   },
   "scripts": {
     "build:frontend": "cd frontend && yarn build",
-    "build:backend-paths": "tscpaths -p tsconfig.json -s ./ -o ../build/replay-app",
-    "build:backend": "tsc -b tsconfig.json && yarn build:backend-paths && shx cp package.json ../build/replay-app && shx cp -r *.png ../build/replay-app",
-    "build:icons": "electron-icon-builder -f --input=./icon@2x.png --output=../build/replay-app/build",
+    "build:backend-paths": "tscpaths -p tsconfig.json -s ./ -o ../build/replay",
+    "build:backend": "tsc -b tsconfig.json && yarn build:backend-paths && shx cp package.json ../build/replay && shx cp -r *.png ../build/replay",
+    "build:icons": "electron-icon-builder -f --input=./icon@2x.png --output=../build/replay/build",
     "build:dist": "yarn build:frontend && yarn build:backend",
     "build": "yarn build:dist",
-    "build:pack": "yarn build:icons && shx cp pack.sh ../build/replay-app/pack.sh && cd ../build/replay-app && electron-builder -mwl && ./pack.sh",
-    "clean": "rm -rf ../build/replay-app/static && tsc -b --clean tsconfig.json && tsc -b --clean frontend/tsconfig.json",
+    "build:pack": "yarn build:icons && shx cp pack.sh ../build/replay/pack.sh && cd ../build/replay && electron-builder -mwl && ./pack.sh",
+    "clean": "rm -rf ../build/replay/static && tsc -b --clean tsconfig.json && tsc -b --clean frontend/tsconfig.json",
     "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"cd frontend && yarn serve\"",
-    "start:backend": "cross-env CLEAR_LOGS=true WEBPACK_DEV_SERVER_URL=http://localhost:8080 NODE_ENV=development electron ../build/replay-app",
+    "start:backend": "cross-env CLEAR_LOGS=true WEBPACK_DEV_SERVER_URL=http://localhost:8080 NODE_ENV=development electron ../build/replay",
     "start:frontend": "cd frontend && yarn dev",
-    "start": "electron ../build/replay-app",
-    "logs": "touch ~/Library/Logs/@secret-agent/replay-app/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay-app/main.log"
+    "start": "electron ../build/replay",
+    "logs": "touch ~/Library/Logs/@secret-agent/replay/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay/main.log"
   },
   "license": "MIT",
   "dependencies": {

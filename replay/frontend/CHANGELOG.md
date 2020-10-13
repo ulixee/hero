@@ -27,7 +27,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @secret-agent/replay-app-frontend
+**Note:** Version bump only for package @secret-agent/replay-frontend
 
 
 
@@ -52,7 +52,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.10](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2020-08-25)
 
-**Note:** Version bump only for package @secret-agent/replay-app-frontend
+**Note:** Version bump only for package @secret-agent/replay-frontend
 
 
 

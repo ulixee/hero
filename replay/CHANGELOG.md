@@ -29,7 +29,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @secret-agent/replay-app
+**Note:** Version bump only for package @secret-agent/replay
 
 
 
@@ -58,7 +58,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.10](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2020-08-25)
 
-**Note:** Version bump only for package @secret-agent/replay-app
+**Note:** Version bump only for package @secret-agent/replay
 
 
 
@@ -127,7 +127,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.6](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2020-07-22)
 
-**Note:** Version bump only for package @secret-agent/replay-app
+**Note:** Version bump only for package @secret-agent/replay
 
 
 
@@ -146,7 +146,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2020-07-20)
 
-**Note:** Version bump only for package @secret-agent/replay-app
+**Note:** Version bump only for package @secret-agent/replay
 
 
 

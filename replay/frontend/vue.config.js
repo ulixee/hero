@@ -11,7 +11,7 @@ module.exports = {
     target: 'electron-renderer',
   },
   publicPath: '/',
-  outputDir: '../../build/replay-app/frontend',
+  outputDir: '../../build/replay/frontend',
   pages: {
     header: './src/pages/header/index.ts',
     'command-overlay': './src/pages/command-overlay/index.ts',

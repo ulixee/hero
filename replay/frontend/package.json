@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/replay-app-frontend",
+  "name": "@secret-agent/replay-frontend",
   "version": "1.0.0-alpha.16",
   "private": true,
   "scripts": {
