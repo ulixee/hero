@@ -6,7 +6,7 @@ import Puppet from '@secret-agent/puppet';
 import DomChangesTable from '../models/DomChangesTable';
 
 const domReplayScript = fs.readFileSync(
-  require.resolve('@secret-agent/replay-app/injected-scripts/domReplayer'),
+  require.resolve('@secret-agent/replay/injected-scripts/domReplayer'),
   'utf8',
 );
 

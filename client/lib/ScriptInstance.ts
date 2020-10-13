@@ -18,8 +18,8 @@ export default class ScriptInstance {
 
   public launchReplay(sessionName: string, coreTab: CoreTab) {
     // eslint-disable-next-line global-require
-    const launch = require('@secret-agent/replay').default;
-    launch({
+    const { replay } = require('@secret-agent/replay/index');
+    replay({
       scriptInstanceId: this.id,
       sessionName,
       sessionsDataLocation: coreTab.sessionsDataLocation,

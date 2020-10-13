@@ -1,19 +1,17 @@
 {
   "name": "@secret-agent/replay",
   "author": "Data Liberation Foundation",
-  "private": true,
   "contributors": [
     "Caleb Clark",
     "Blake Byrnes"
   ],
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.0.0-alpha.16",
+  "version": "1.0.0-alpha.17",
   "main": "./app.js",
   "files": [
     "index.js",
-    "install.js",
-    "lib/*"
+    "install/*"
   ],
   "build": {
     "appId": "dev.secretagent.replay",

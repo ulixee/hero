@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "postinstall": "node install.js"
+    "postinstall": "node install"
   },
+  "main": "./index.js",
   "dependencies": {
     "@secret-agent/commons": "1.0.0-alpha.16",
     "axios": "^0.19.2",

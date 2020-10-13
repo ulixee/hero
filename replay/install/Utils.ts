@@ -1,11 +1,12 @@
-import Path from 'path';
-import Fs from 'fs';
+import * as Path from 'path';
+import * as Fs from 'fs';
 import * as os from 'os';
-import packageJson from '../package.json';
+
+const packageJson = require('../package.json');
 
 const { version } = packageJson;
 
-const distDir = Path.join(__dirname, 'dist');
+const distDir = Path.join(__dirname, '..', 'dist');
 
 export { version, distDir };
 

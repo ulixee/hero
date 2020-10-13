@@ -10,6 +10,7 @@
     "experimentalDecorators": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
+    "esModuleInterop": false,
     "sourceMap": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
@@ -27,9 +28,9 @@
     "injected-scripts/**/*.ts",
     "shared/**/*.ts",
     "frontend/src/constants",
+    "app.ts",
     "index.ts",
-    "install.ts",
-    "lib/**/*.ts",
+    "install/*.ts",
     ".eslintrc.js"
   ],
   "exclude": ["dist", "node_modules", "**/node_modules"]

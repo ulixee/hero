@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "postinstall": "yarn workspace @secret-agent/mitm-socket postinstall && yarn workspace @secret-agent/emulators postinstall"
+    "postinstall": "yarn workspace @secret-agent/mitm-socket postinstall"
   },
   "devDependencies": {
     "lerna": "^3.4.3",

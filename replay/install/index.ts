@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import Fs from 'fs';
-import TarFs from 'tar-fs';
+import * as Fs from 'fs';
+import * as TarFs from 'tar-fs';
 import Axios from 'axios';
-import ProgressBar from 'progress';
+import * as ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import * as os from 'os';
-import Path from 'path';
-import { distDir, isBinaryInstalled, recordVersion, version } from './lib/Utils';
+import * as Path from 'path';
+import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
 
 if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
   process.exit(0);

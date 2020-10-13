@@ -26,7 +26,7 @@ jobs:
 
       - name: Electron Builder
         run: yarn build:pack
-        working-directory: ./replay-app
+        working-directory: ./replay
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -36,7 +36,7 @@ jobs:
         run: |
           set -x
           assets=()
-          for asset in ./build/replay-app/dist/assets/*; do
+          for asset in ./build/replay/dist/assets/*; do
             assets+=("-a" "$asset")
           done
           tag_name="${GITHUB_REF##*/}"

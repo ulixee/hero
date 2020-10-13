@@ -1,12 +1,12 @@
-import ChildProcess from 'child_process';
+import * as ChildProcess from 'child_process';
 import Log from '@secret-agent/commons/Logger';
-import { getBinaryPath, isBinaryInstalled } from './lib/Utils';
+import { getBinaryPath, isBinaryInstalled } from './install/Utils';
 
 const { log } = Log(module);
 
 const apiPath = require.resolve('@secret-agent/session-state/api/start');
 
-export default function replay(launchArgs: IReplayLaunchArgs) {
+export function replay(launchArgs: IReplayLaunchArgs) {
   const {
     replayApiServer,
     sessionsDataLocation,

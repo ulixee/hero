@@ -22,7 +22,11 @@
     "**/build",
     "build",
     "build-dist",
-    "replay-app",
+    "replay/app.ts",
+    "replay/frontend",
+    "replay/backend",
+    "replay/injected-scripts",
+    "replay/shared",
     "examples",
     "website",
     "injected-scripts"

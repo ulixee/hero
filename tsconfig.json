@@ -25,7 +25,7 @@
       "path": "injected-scripts/tsconfig.json"
     },
     {
-      "path": "replay-app/tsconfig.json"
+      "path": "replay/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
@@ -37,8 +37,8 @@
     "**/build",
     "build",
     "build-dist",
-    "replay-app",
-    "replay-app/injected-scripts",
+    "replay",
+    "replay/injected-scripts",
     "website",
     "injected-scripts"
   ]

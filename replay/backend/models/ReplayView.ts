@@ -173,6 +173,7 @@ export default class ReplayView extends ViewBackend {
     this.lastInactivityMillis = lastActivityMillis;
 
     if (
+      !this.replayApi.saSession.closeDate &&
       lastActivityMillis >= 5e3 &&
       this.replayApi.lastCommandName !== 'waitForMillis' &&
       this.replayApi.showUnresponsiveMessage
