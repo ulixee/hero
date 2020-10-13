@@ -2652,6 +2652,21 @@
   dependencies:
     "@types/node" ">= 8"
 
+"@secret-agent/commons@1.0.0-alpha.14":
+  version "1.0.0-alpha.14"
+  resolved "https://registry.yarnpkg.com/@secret-agent/commons/-/commons-1.0.0-alpha.14.tgz#dcdb925b739f1ee834d7821f082cd0322f3ec0b8"
+  integrity sha512-KVj/NqROtAFeIIeKibxf6l7Tdish7eslKO7ASGE+gNK+1scYoY2LJ6ZQ6pz2ukhRLmU0Ym4jTjSGyg5F4ti1fQ==
+  dependencies:
+    "@secret-agent/core-interfaces" "1.0.0-alpha.14"
+    debug "^4.1.1"
+
+"@secret-agent/core-interfaces@1.0.0-alpha.14":
+  version "1.0.0-alpha.14"
+  resolved "https://registry.yarnpkg.com/@secret-agent/core-interfaces/-/core-interfaces-1.0.0-alpha.14.tgz#249140800a64acd46d7068c8f99315974fefca81"
+  integrity sha512-qh/p1PUsVOWRGktqyQhYHW8pzSQoEG0/sgPFmUhNkOd8BloqZalmt1tGcF4UT0kNNRT9A16EqF2nmMsEQRVSgA==
+  dependencies:
+    "@secret-agent/commons" "1.0.0-alpha.14"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
