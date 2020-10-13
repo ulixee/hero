@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-safari-13",
-  "version": "1.0.0-alpha.17",
+  "version": "1.0.0-alpha.18",
   "description": "EmulatorPlugin for Apple Safari version 13.0",
   "main": "index.js",
   "engine": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "@secret-agent/commons": "1.0.0-alpha.16",
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
-    "@secret-agent/emulator-plugins-shared": "1.0.0-alpha.17",
+    "@secret-agent/emulator-plugins-shared": "1.0.0-alpha.18",
     "@secret-agent/emulators": "1.0.0-alpha.16",
     "tough-cookie": "^4.0.0"
   },

@@ -1,17 +1,17 @@
 {
   "name": "@secret-agent/core",
-  "version": "1.0.0-alpha.17",
+  "version": "1.0.0-alpha.18",
   "description": "The core browser API used to run SecretAgent",
   "dependencies": {
     "@secret-agent/commons": "1.0.0-alpha.16",
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
-    "@secret-agent/emulate-chrome-83": "1.0.0-alpha.17",
+    "@secret-agent/emulate-chrome-83": "1.0.0-alpha.18",
     "@secret-agent/emulators": "1.0.0-alpha.16",
     "@secret-agent/humanoids": "1.0.0-alpha.16",
     "@secret-agent/injected-scripts": "1.0.0-alpha.16",
-    "@secret-agent/mitm": "1.0.0-alpha.17",
-    "@secret-agent/puppet": "1.0.0-alpha.17",
-    "@secret-agent/session-state": "1.0.0-alpha.17",
+    "@secret-agent/mitm": "1.0.0-alpha.18",
+    "@secret-agent/puppet": "1.0.0-alpha.18",
+    "@secret-agent/session-state": "1.0.0-alpha.18",
     "awaited-dom": "^1.1.5",
     "moment": "^2.24.0",
     "typeson": "^5.18.2",
@@ -19,11 +19,11 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@secret-agent/client": "1.0.0-alpha.17",
-    "@secret-agent/core": "1.0.0-alpha.17",
-    "@secret-agent/emulate-safari-13": "1.0.0-alpha.17",
-    "@secret-agent/puppet-chrome": "1.0.0-alpha.17",
-    "@secret-agent/testing": "1.0.0-alpha.17",
+    "@secret-agent/client": "1.0.0-alpha.18",
+    "@secret-agent/core": "1.0.0-alpha.18",
+    "@secret-agent/emulate-safari-13": "1.0.0-alpha.18",
+    "@secret-agent/puppet-chrome": "1.0.0-alpha.18",
+    "@secret-agent/testing": "1.0.0-alpha.18",
     "http-proxy-agent": "^4.0.1"
   }
 }
