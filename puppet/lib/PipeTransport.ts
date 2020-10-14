@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as EventUtils from '@secret-agent/commons/eventUtils';
-import Log from '@secret-agent/commons/logger';
+import Log from '@secret-agent/commons/Logger';
 import { addEventListeners, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IConnectionTransport, {
   IConnectionTransportEvents,

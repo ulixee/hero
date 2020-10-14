@@ -187,7 +187,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     await this.requestAgent.close();
 
     // give it a second for lingering requests to finish
-    setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3);
+    setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3).unref();
   }
 
   public shouldBlockRequest(url: string) {
@@ -337,8 +337,7 @@ export interface IRequestSessionRequestEvent {
 }
 
 export interface IRequestSessionHttpErrorEvent {
-  url: string;
-  method: string;
+  request: IRequestSessionResponseEvent
   error: Error;
 }
 

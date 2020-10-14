@@ -73,7 +73,6 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return this;
   }
 
-  // NOTE: can't be async or browser contexts won't be populated
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { targetInfo, sessionId } = event;
 
@@ -82,7 +81,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     if (targetInfo.type === 'page') {
       const cdpSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      context.onPageAttached(cdpSession, targetInfo);
+      context?.onPageAttached(cdpSession, targetInfo);
     }
 
     if (event.waitingForDebugger) {

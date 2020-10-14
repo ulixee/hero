@@ -12,32 +12,34 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       'Resources',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['devtoolsRequestId', 'TEXT'],
         ['tabId', 'TEXT'],
         ['type', 'TEXT'],
         ['receivedAtCommandId', 'INTEGER'],
         ['seenAtCommandId', 'INTEGER'],
-        ['redirectedToUrl', 'TEXT'],
         ['requestUrl', 'TEXT'],
-        ['requestOriginalHeaders', 'TEXT'],
         ['requestHeaders', 'TEXT'],
         ['requestTrailers', 'TEXT'],
         ['requestTimestamp', 'TEXT'],
         ['requestPostData', 'TEXT'],
-        ['clientAlpn', 'TEXT'],
-        ['serverAlpn', 'TEXT'],
-        ['localAddress', 'TEXT'],
+        ['redirectedToUrl', 'TEXT'],
+        ['statusCode', 'INTEGER'],
+        ['statusMessage', 'TEXT'],
         ['responseUrl', 'TEXT'],
         ['responseHeaders', 'TEXT'],
         ['responseTrailers', 'TEXT'],
-        ['responseData', 'BLOB'],
-        ['responseEncoding', 'TEXT'],
         ['responseTimestamp', 'TEXT'],
+        ['responseEncoding', 'TEXT'],
+        ['responseData', 'BLOB'],
+        ['clientAlpn', 'TEXT'],
+        ['serverAlpn', 'TEXT'],
+        ['localAddress', 'TEXT'],
         ['remoteAddress', 'TEXT'],
-        ['statusCode', 'INTEGER'],
-        ['statusMessage', 'TEXT'],
-        ['usedBrowserCache', 'INTEGER'],
-        ['didBlockResource', 'INTEGER'],
         ['isHttp2Push', 'INTEGER'],
+        ['usedArtificialCache', 'INTEGER'],
+        ['didBlockResource', 'INTEGER'],
+        ['requestOriginalHeaders', 'TEXT'],
+        ['httpError', 'TEXT'],
       ],
       true,
     );
@@ -55,37 +57,52 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
       localAddress: string;
       wasCached?: boolean;
       didBlockResource: boolean;
+      browserRequestId?: string;
       isHttp2Push: boolean;
     },
+    error?: Error,
   ) {
+    let errorString: string;
+    if (error) {
+      if (typeof error === 'string') errorString = error;
+      else
+        errorString = JSON.stringify({
+          name: error.name,
+          stack: error.stack,
+          message: error.message,
+          ...error,
+        });
+    }
     return this.queuePendingInsert([
       meta.id,
+      extras.browserRequestId,
       tabId,
       meta.type,
       meta.receivedAtCommandId,
       null,
-      extras.redirectedToUrl,
       meta.request.url,
-      JSON.stringify(extras.originalHeaders ?? {}),
       JSON.stringify(meta.request.headers ?? {}),
       JSON.stringify(meta.request.trailers ?? {}),
       meta.request.timestamp,
       meta.request.postData,
-      extras.clientAlpn,
-      extras.serverAlpn,
-      extras.localAddress,
+      extras.redirectedToUrl,
+      meta.response?.statusCode,
+      meta.response?.statusMessage,
       meta.response?.url,
       meta.response ? JSON.stringify(meta.response.headers ?? {}) : undefined,
       meta.response ? JSON.stringify(meta.response.trailers ?? {}) : undefined,
-      meta.response ? body : undefined,
-      meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
       meta.response?.timestamp,
+      meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
+      meta.response ? body : undefined,
+      extras.clientAlpn,
+      extras.serverAlpn,
+      extras.localAddress,
       meta.response?.remoteAddress,
-      meta.response?.statusCode,
-      meta.response?.statusMessage,
+      extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
       extras.didBlockResource ? 1 : 0,
-      extras.isHttp2Push ? 1 : 0,
+      JSON.stringify(extras.originalHeaders ?? {}),
+      errorString,
     ]);
   }
 
@@ -114,30 +131,32 @@ export default class ResourcesTable extends BaseTable<IResourcesRecord> {
 
 export interface IResourcesRecord {
   id: number;
+  devtoolsRequestId: number;
   tabId: string;
   type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;
-  redirectedToUrl?: string;
   requestUrl: string;
-  requestOriginalHeaders: string;
   requestHeaders: string;
   requestTrailers?: string;
   requestTimestamp: string;
   requestPostData?: string;
-  clientAlpn: string;
-  serverAlpn: string;
-  localAddress: string;
+  redirectedToUrl?: string;
+  statusCode: number;
+  statusMessage: string;
   responseUrl: string;
   responseHeaders: string;
   responseTrailers?: string;
-  responseData?: Buffer;
-  responseEncoding: string;
   responseTimestamp: string;
+  responseEncoding: string;
+  responseData?: Buffer;
+  clientAlpn: string;
+  serverAlpn: string;
+  localAddress: string;
   remoteAddress: string;
-  statusCode: number;
-  statusMessage: string;
-  usedBrowserCache: boolean;
+  usedArtificialCache: boolean;
   didBlockResource: boolean;
   isHttp2Push: boolean;
+  requestOriginalHeaders: string;
+  httpError: string;
 }

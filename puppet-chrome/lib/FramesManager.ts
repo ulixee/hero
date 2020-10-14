@@ -246,33 +246,22 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     this.framesById.set(id, frame);
     this.emit('frame-created', { frame });
 
-    const registered = eventUtils.addEventListeners(frame, [
-      [
-        'frame-lifecycle',
-        x =>
-          this.emit('frame-lifecycle', {
-            frame,
-            ...x,
-          }),
-      ],
-      [
-        'frame-navigated',
-        x =>
-          this.emit('frame-navigated', {
-            frame,
-            ...x,
-          }),
-      ],
-      [
-        'frame-requested-navigation',
-        x =>
-          this.emit('frame-requested-navigation', {
-            frame,
-            ...x,
-          }),
-      ],
-    ]);
-    this.registeredEvents.push(...registered);
+    const proxiedEvents = [
+      'frame-lifecycle',
+      'frame-navigated',
+      'frame-requested-navigation',
+    ] as const;
+
+    for (const eventName of proxiedEvents) {
+      const listener = eventUtils.addEventListener(frame, eventName, event =>
+        this.emit(eventName, {
+          frame,
+          ...event,
+        }),
+      );
+      this.registeredEvents.push(listener);
+    }
+
     return frame;
   }
 }

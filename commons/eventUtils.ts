@@ -19,16 +19,6 @@ export function addEventListener(
   return { emitter, eventName, handler };
 }
 
-export function addTypedEventListener(
-  emitter: ITypedEventEmitter<any>,
-  eventName: string | symbol,
-  handler: (...args: any[]) => void,
-  includeUnhandledEvents?: boolean,
-): IRegisteredEventListener {
-  emitter.on(eventName, handler, includeUnhandledEvents);
-  return { emitter, eventName, handler };
-}
-
 export function addEventListeners(
   emitter: EventEmitter,
   registrations: [string | symbol, (...args: any[]) => void, boolean?][],
@@ -50,6 +40,26 @@ export function removeEventListeners(
     listener.emitter.removeListener(listener.eventName, listener.handler);
   }
   listeners.length = 0;
+}
+
+export function addTypedEventListener<T, K extends keyof T & (string | symbol)>(
+  emitter: TypedEventEmitter<T>,
+  eventName: K,
+  handler: (this: TypedEventEmitter<T>, event?: T[K], initiator?: any) => any,
+  includeUnhandledEvents?: boolean,
+): IRegisteredEventListener {
+  emitter.on(eventName, handler, includeUnhandledEvents);
+  return { emitter, eventName, handler };
+}
+
+export function addTypedEventListeners<T, K extends keyof T & (string | symbol)>(
+  emitter: TypedEventEmitter<T>,
+  registrations: [K, (this: TypedEventEmitter<T>, event?: T[K]) => any, boolean?][],
+): IRegisteredEventListener[] {
+  return registrations.map(([eventName, handler, includeUnhandled]) => {
+    emitter.on(eventName, handler, includeUnhandled);
+    return { emitter, eventName, handler };
+  });
 }
 
 export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
@@ -103,7 +113,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     });
 
     const listener = addTypedEventListener(
-      this as ITypedEventEmitter<any>,
+      this,
       eventType,
       (result: T[K]) => {
         // give the listeners a second to register
@@ -154,7 +164,11 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     return this;
   }
 
-  public emit<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]) {
+  public emit<K extends keyof T & (string | symbol)>(
+    eventType: K,
+    event?: T[K],
+    sendInitiator?: object,
+  ) {
     if (!super.listenerCount(eventType)) {
       if (this.storeEventsWithoutListeners) {
         this.storedEvents.push({ eventType, event });
@@ -163,7 +177,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     }
     this.logEvent(eventType, event);
 
-    return super.emit(eventType, event);
+    return super.emit(eventType, event, sendInitiator);
   }
 
   public addListener<K extends keyof T & (string | symbol)>(

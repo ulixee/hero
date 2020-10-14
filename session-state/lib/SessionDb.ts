@@ -16,6 +16,8 @@ import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
 import SessionState from '../index';
+import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
+import TabsTable from '../models/TabsTable';
 
 const { log } = Log(module);
 
@@ -38,6 +40,8 @@ export default class SessionDb {
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
+  public readonly devtoolsMessages: DevtoolsMessagesTable;
+  public readonly tabs: TabsTable;
   public readonly sessionId: string;
 
   private readonly batchInsert?: Transaction;
@@ -56,6 +60,7 @@ export default class SessionDb {
     this.readonly = readonly;
 
     this.commands = new CommandsTable(this.db);
+    this.tabs = new TabsTable(this.db);
     this.frames = new FramesTable(this.db);
     this.frameNavigations = new FrameNavigationsTable(this.db);
     this.resources = new ResourcesTable(this.db);
@@ -67,9 +72,11 @@ export default class SessionDb {
     this.focusEvents = new FocusEventsTable(this.db);
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
+    this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
 
     this.tables.push(
       this.commands,
+      this.tabs,
       this.frames,
       this.frameNavigations,
       this.resources,
@@ -81,6 +88,7 @@ export default class SessionDb {
       this.focusEvents,
       this.scrollEvents,
       this.sessionLogs,
+      this.devtoolsMessages,
     );
 
     if (!readonly) {

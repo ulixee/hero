@@ -1,25 +1,23 @@
-import fs from 'fs';
-import {
-  IRequestSessionRequestEvent,
-  IRequestSessionResponseEvent,
-} from '@secret-agent/mitm/handlers/RequestSession';
-import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import Log, { IBoundLog, ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
-import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import INavigation from '@secret-agent/core-interfaces/INavigation';
-import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEvent';
-import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
-import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
-import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import IWebsocketResourceMessage from '@secret-agent/core/interfaces/IWebsocketResourceMessage';
-import TabNavigations from './lib/TabNavigations';
-import { IFrameRecord } from './models/FramesTable';
-import SessionsDb from './lib/SessionsDb';
-import SessionDb from './lib/SessionDb';
+import fs from "fs";
+import { IRequestSessionRequestEvent, IRequestSessionResponseEvent } from "@secret-agent/mitm/handlers/RequestSession";
+import IWebsocketMessage from "@secret-agent/core-interfaces/IWebsocketMessage";
+import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
+import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
+import Log, { IBoundLog, ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
+import { IDomChangeEvent } from "@secret-agent/injected-scripts/interfaces/IDomChangeEvent";
+import { LocationStatus } from "@secret-agent/core-interfaces/Location";
+import IViewport from "@secret-agent/core-interfaces/IViewport";
+import INavigation from "@secret-agent/core-interfaces/INavigation";
+import { IMouseEvent } from "@secret-agent/injected-scripts/interfaces/IMouseEvent";
+import { IFocusEvent } from "@secret-agent/injected-scripts/interfaces/IFocusEvent";
+import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollEvent";
+import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
+import IWebsocketResourceMessage from "@secret-agent/core/interfaces/IWebsocketResourceMessage";
+import type { IPuppetContextEvents } from "@secret-agent/puppet/interfaces/IPuppetContext";
+import TabNavigations from "./lib/TabNavigations";
+import { IFrameRecord } from "./models/FramesTable";
+import SessionsDb from "./lib/SessionsDb";
+import SessionDb from "./lib/SessionDb";
 
 const { log } = Log(module);
 
@@ -187,20 +185,48 @@ export default class SessionState {
     return resourceMessage;
   }
 
+  public captureResourceError(tabId: string, resourceEvent: IRequestSessionResponseEvent, error: Error) {
+    const resource = this.resourceEventToMeta(tabId, resourceEvent);
+    this.db.resources.insert(tabId, resource, null, resourceEvent, error);
+  }
+
   public captureResource(
     tabId: string,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
     isResponse: boolean,
   ): IResourceMeta {
-    const { request } = resourceEvent;
+    const resource = this.resourceEventToMeta(tabId, resourceEvent);
+    const resourceResponseEvent = resourceEvent as IRequestSessionResponseEvent;
+
+    this.db.resources.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
+
+    if (isResponse) {
+      this.logger.info('Http.Response', {
+        tabId,
+        url: resource.request.url,
+        method: resource.request.method,
+        headers: resource.response?.headers,
+        status: resource.response?.statusCode,
+        executionMillis: resourceResponseEvent.executionMillis,
+        bytes: resourceResponseEvent.body ? Buffer.byteLength(resourceResponseEvent.body) : -1,
+      });
+      const navigations = this.navigationsByTabId[tabId];
+      if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
+        navigations.resourceLoadedForLocation(resource.id);
+      }
+      this.resources.push(resource);
+    }
+    return resource;
+  }
+
+
+  public resourceEventToMeta(tabId: string, resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent) {
     const {
+      request,
       response,
       resourceType,
-      body,
-      executionMillis,
       browserRequestId,
       redirectedToUrl,
-      wasCached,
     } = resourceEvent as IRequestSessionResponseEvent;
 
     if (browserRequestId) {
@@ -220,31 +246,12 @@ export default class SessionState {
       },
     } as IResourceMeta;
 
-    if (isResponse && response?.statusCode) {
+    if (response?.statusCode) {
       resource.response = response;
       if (response.url) resource.url = response.url;
       else resource.response.url = request.url;
     }
 
-    this.db.resources.insert(tabId, resource, body, resourceEvent);
-
-    if (isResponse) {
-      this.logger.info('Http.Response', {
-        tabId,
-        url: request.url,
-        method: request.method,
-        headers: response.headers,
-        status: response.statusCode,
-        wasCached,
-        executionMillis,
-        bytes: body ? Buffer.byteLength(body) : -1,
-      });
-      const navigations = this.navigationsByTabId[tabId];
-      if (resource.url === navigations?.currentUrl && request.method !== 'OPTIONS') {
-        navigations.resourceLoadedForLocation(resource.id);
-      }
-      this.resources.push(resource);
-    }
     return resource;
   }
 
@@ -421,4 +428,13 @@ export default class SessionState {
       this.db.scrollEvents.insert(tabId, scrollEvent);
     }
   }
+
+  public captureDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
+    this.db.devtoolsMessages.insert(event);
+  }
+
+  public captureTab(tabId: string, pageId: string, devtoolsSessionId: string, openerTabId?: string, ) {
+    this.db.tabs.insert(tabId, pageId, devtoolsSessionId, openerTabId);
+  }
+
 }

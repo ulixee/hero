@@ -82,12 +82,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   public async evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean) {
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
-    const result = await this.cdpSession.send('Runtime.evaluate', {
-      expression,
-      contextId,
-      returnByValue: true,
-      awaitPromise: true,
-    });
+    const result = await this.cdpSession.send(
+      'Runtime.evaluate',
+      {
+        expression,
+        contextId,
+        returnByValue: true,
+        awaitPromise: true,
+      },
+      this,
+    );
     if (result.exceptionDetails) {
       throw ConsoleMessage.exceptionToError(result.exceptionDetails);
     }
@@ -274,12 +278,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   private async createIsolatedWorld() {
     try {
       if (!this.isAttached()) return;
-      const isolatedWorld = await this.cdpSession.send('Page.createIsolatedWorld', {
-        frameId: this.id,
-        worldName: ISOLATED_WORLD,
-        // param is misspelled in protocol
-        grantUniveralAccess: true,
-      });
+      const isolatedWorld = await this.cdpSession.send(
+        'Page.createIsolatedWorld',
+        {
+          frameId: this.id,
+          worldName: ISOLATED_WORLD,
+          // param is misspelled in protocol
+          grantUniveralAccess: true,
+        },
+        this,
+      );
       const { executionContextId } = isolatedWorld;
       this.activeContexts.add(executionContextId);
       this.addContextId(executionContextId, false);

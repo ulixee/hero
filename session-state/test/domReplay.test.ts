@@ -3,7 +3,7 @@ import { Helpers } from '@secret-agent/testing';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import Puppet from '@secret-agent/puppet';
-import Log from '@secret-agent/commons/logger';
+import Log from '@secret-agent/commons/Logger';
 import DomChangesTable from '../models/DomChangesTable';
 
 const { log } = Log(module);

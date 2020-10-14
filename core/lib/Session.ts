@@ -6,11 +6,14 @@ import SessionState from '@secret-agent/session-state';
 import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession, {
+  IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
-import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+} from '@secret-agent/puppet/interfaces/IPuppetContext';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
@@ -95,6 +98,7 @@ export default class Session {
 
   public async initialize(context: IPuppetContext) {
     this.browserContext = context;
+    context.on('devtools-message', this.onDevtoolsMessage.bind(this));
     if (this.userProfile) {
       await UserProfile.install(this);
     }
@@ -102,6 +106,7 @@ export default class Session {
     const requestSession = this.mitmRequestSession;
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
+    requestSession.on('httpError', this.onMitmError.bind(this));
   }
 
   public async createTab() {
@@ -113,6 +118,7 @@ export default class Session {
     }
 
     const tab = Tab.create(this, page);
+    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId);
     this.registerTab(tab, page);
     await tab.isReady;
     return tab;
@@ -138,6 +144,10 @@ export default class Session {
     }
   }
 
+  private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
+    this.sessionState.captureDevtoolsMessage(event);
+  }
+
   private onMitmRequest(event: IRequestSessionRequestEvent) {
     // don't know the tab id at this point
     this.sessionState.captureResource(null, event, false);
@@ -157,6 +167,14 @@ export default class Session {
     tab?.emit('resource', resource);
   }
 
+  private onMitmError(event: IRequestSessionHttpErrorEvent) {
+    const tabId = this.mitmRequestSession.browserRequestIdToTabId.get(
+      event.request.browserRequestId,
+    );
+
+    this.sessionState.captureResourceError(tabId, event.request, event.error);
+  }
+
   private async onNewTab(
     parentTab: Tab,
     page: IPuppetPage,
@@ -164,6 +182,7 @@ export default class Session {
   ) {
     const startUrl = page.mainFrame.url;
     const tab = Tab.create(this, page, parentTab, openParams);
+    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
     this.registerTab(tab, page);
     await tab.isReady;
     parentTab.emit('child-tab-created', tab);

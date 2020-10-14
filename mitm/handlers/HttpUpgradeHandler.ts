@@ -37,7 +37,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     const url = context.url.href;
     const session = context.requestSession;
     const sessionId = session.sessionId;
-    session.emit('httpError', { url, method: context.method, error });
+    session.emit('httpError', { request: MitmRequestContext.toEmittedResource(context), error });
 
     if (!(error as any)?.isLogged) {
       log.error(`MitmWebSocket.${errorType}`, {

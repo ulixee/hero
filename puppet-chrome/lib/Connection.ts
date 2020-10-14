@@ -21,7 +21,9 @@ import {
   removeEventListeners,
   TypedEventEmitter,
 } from '@secret-agent/commons/eventUtils';
-import IConnectionTransport from '@secret-agent/puppet/interfaces/IConnectionTransport';
+import IConnectionTransport, {
+  IConnectionTransportEvents,
+} from '@secret-agent/puppet/interfaces/IConnectionTransport';
 import { IPuppetConnectionEvents } from '@secret-agent/puppet/interfaces/IPuppetConnection';
 import Log from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
@@ -40,9 +42,10 @@ export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
   constructor(readonly transport: IConnectionTransport) {
     super();
 
+    const messageSink = (transport as unknown) as TypedEventEmitter<IConnectionTransportEvents>;
     this.registeredEvents = [
-      addTypedEventListener(transport, 'message', this.onMessage.bind(this)),
-      addTypedEventListener(transport, 'close', this.onClosed.bind(this)),
+      addTypedEventListener(messageSink, 'message', this.onMessage.bind(this)),
+      addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
     ];
 
     this.rootSession = new CDPSession(this, 'browser', '');

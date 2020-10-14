@@ -91,6 +91,9 @@ export default class MitmSocket {
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
+      env: {
+        GODEBUG: 'netdns=cgo',
+      },
     });
     this.child = child;
     child.stdout.setEncoding('utf8');
@@ -198,7 +201,8 @@ export default class MitmSocket {
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||
-      message.includes('connection refused')
+      message.includes('connection refused') ||
+      message.includes('no such host')
     ) {
       this.connectError = message.trim();
       this.close();

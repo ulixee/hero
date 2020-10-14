@@ -52,6 +52,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public readonly isReady: Promise<void>;
   public windowOpenParams: Protocol.Page.WindowOpenEvent;
 
+  public get id() {
+    return this.targetId;
+  }
+
+  public get devtoolsSessionId() {
+    return this.cdpSession.id;
+  }
+
   public get mainFrame() {
     return this.framesManager.main;
   }
@@ -80,7 +88,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.logger = logger.createChild(module, {
       targetId,
     });
-    this.logger.stats('Page created');
+    this.logger.info('Page.created');
     this.storeEventsWithoutListeners = true;
     this.cdpSession = cdpSession;
     this.targetId = targetId;
@@ -202,6 +210,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager.close();
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
+    this.cancelPendingEvents('Page closed', ['close']);
     Promise.all([...this.workersById.values()].map(x => x.close()))
       .finally(() => this.closePromise.resolve())
       .catch(error => {
@@ -209,7 +218,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
           error,
         });
       });
-    this.cancelPendingEvents('Page closed', ['close']);
   }
 
   private async navigateToHistory(delta: number): Promise<void> {
@@ -269,6 +277,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         this.logger,
         targetInfo,
       );
+      this.browserContext.onWorkerAttached(cdpSession, worker, this.targetId);
       const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 

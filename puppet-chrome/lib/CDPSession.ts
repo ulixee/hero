@@ -33,6 +33,10 @@ import RemoteObject = Protocol.Runtime.RemoteObject;
 export class CDPSession extends EventEmitter {
   public connection: Connection;
   public messageEvents = new TypedEventEmitter<IMessageEvents>();
+  public get id() {
+    return this.sessionId;
+  }
+
   private readonly sessionId: string;
   private readonly targetType: string;
   private readonly pendingMessages: Map<number, IConnectionCallback> = new Map();
@@ -47,6 +51,7 @@ export class CDPSession extends EventEmitter {
   async send<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
+    sendInitiator?: object,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (!this.isConnected()) {
       throw new Error(
@@ -60,10 +65,14 @@ export class CDPSession extends EventEmitter {
       params,
     };
     const id = this.connection.sendMessage(message);
-    this.messageEvents.emit('send', {
-      id,
-      ...message,
-    });
+    this.messageEvents.emit(
+      'send',
+      {
+        id,
+        ...message,
+      },
+      sendInitiator,
+    );
 
     return new Promise((resolve, reject) => {
       this.pendingMessages.set(id, { resolve, reject, error: new CanceledPromiseError(), method });
@@ -71,9 +80,9 @@ export class CDPSession extends EventEmitter {
   }
 
   onMessage(object: ICDPSendResponseMessage & ICDPEventMessage): void {
-    this.messageEvents.emit('receive', object);
+    this.messageEvents.emit('receive', { ...object });
     if (!object.id) {
-      setImmediate(() => this.emit(object.method, object.params));
+      this.emit(object.method, object.params);
       return;
     }
 
@@ -81,18 +90,12 @@ export class CDPSession extends EventEmitter {
     if (!callback) return;
 
     this.pendingMessages.delete(object.id);
-    setImmediate(() => {
-      if (object.error) {
-        const protocolError = new ProtocolError(
-          callback.error.stack,
-          callback.method,
-          object.error,
-        );
-        callback.reject(protocolError);
-      } else {
-        callback.resolve(object.result);
-      }
-    });
+    if (object.error) {
+      const protocolError = new ProtocolError(callback.error.stack, callback.method, object.error);
+      callback.reject(protocolError);
+    } else {
+      callback.resolve(object.result);
+    }
   }
 
   disposeRemoteObject(object: RemoteObject): void {
@@ -120,17 +123,19 @@ export class CDPSession extends EventEmitter {
 }
 
 interface ICDPSendResponseMessage {
+  sessionId: string;
   id: number;
   error?: { message: string; data: any };
   result?: any;
 }
 
 interface ICDPEventMessage {
+  sessionId: string;
   method: string;
   params: object;
 }
 
 export interface IMessageEvents {
-  send: { id: number; method: string; params: any };
+  send: { sessionId: string | undefined; id: number; method: string; params: any };
   receive: ICDPSendResponseMessage | ICDPEventMessage;
 }
