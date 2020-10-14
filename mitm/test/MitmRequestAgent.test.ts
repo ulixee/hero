@@ -33,7 +33,7 @@ test('should create up to a max number of secure connections per origin', async 
   });
   const mitmServer = await startMitmServer();
 
-  const session = new RequestSession('1', 'any agent', null);
+  const session = createMitmSession();
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -74,7 +74,7 @@ test('should create new connections as needed when no keepalive', async () => {
   });
   const mitmServer = await startMitmServer();
 
-  const session = new RequestSession('1', 'any agent', null);
+  const session = createMitmSession();
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -112,7 +112,8 @@ test('it should not put upgrade connections in a pool', async () => {
   const httpServer = await Helpers.runHttpServer();
   const mitmServer = await startMitmServer();
   const wsServer = new WebSocket.Server({ noServer: true });
-  const session = new RequestSession('4', 'any agent', null);
+
+  const session = createMitmSession();
 
   httpServer.server.on('upgrade', (request, socket, head) => {
     wsServer.handleUpgrade(request, socket, head, async (ws: WebSocket) => {
@@ -144,7 +145,7 @@ test('it should reuse http2 connections', async () => {
 
   const mitmServer = await startMitmServer();
   const mitmUrl = `http://localhost:${mitmServer.port}`;
-  const session = new RequestSession('1', 'any agent', null);
+  const session = createMitmSession();
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -170,4 +171,10 @@ async function startMitmServer() {
   const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
   return mitmServer;
+}
+
+let counter = 1;
+function createMitmSession() {
+  counter += 1;
+  return new RequestSession(`${counter}`, 'any agent', null);
 }
