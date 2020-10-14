@@ -2,12 +2,15 @@ import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INa
 import { IPipelineStatus, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { createPromise } from '@secret-agent/commons/utils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import SessionDb from './SessionDb';
 
 interface TabNavigationEvents {
   'navigation-requested': INavigation;
   'status-change': { navigation: INavigation; newStatus: IPipelineStatus };
 }
+
+const { log } = Log(module);
 
 export default class TabNavigations extends TypedEventEmitter<TabNavigationEvents> {
   public get top() {
@@ -22,9 +25,14 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
 
   public history: INavigation[] = [];
 
+  protected logger: IBoundLog;
+
   constructor(readonly db: SessionDb) {
     super();
-    this.setEventsToLog(['navigation-requested', 'status-change'], 'tab:navigation');
+    this.setEventsToLog(['navigation-requested', 'status-change']);
+    this.logger = log.createChild(module, {
+      sessionId: db.sessionId,
+    });
   }
 
   public resourceLoadedForLocation(resourceId: number) {

@@ -1,12 +1,15 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import { Page } from '@secret-agent/puppet-chrome/lib/Page';
+import Log from '@secret-agent/commons/Logger';
 import { TestServer } from './server';
 import { IPuppetPage } from '../interfaces/IPuppetPage';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { getExecutablePath } from '../lib/browserPaths';
 import { createTestPage, ITestPage } from './TestPage';
+
+const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
@@ -22,12 +25,15 @@ describe.each([
     const engineExecutablePath = getExecutablePath(browserEngine, revision);
     puppet = new Puppet({ engine: { browser: browserEngine, revision }, engineExecutablePath });
     await puppet.start();
-    context = await puppet.newContext({
-      userAgent: 'Page tests',
-      acceptLanguage: 'en',
-      platform: 'Linux',
-      proxyPassword: '',
-    });
+    context = await puppet.newContext(
+      {
+        userAgent: 'Page tests',
+        acceptLanguage: 'en',
+        platform: 'Linux',
+        proxyPassword: '',
+      },
+      log,
+    );
   });
 
   afterEach(async () => {

@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import ITypedEventEmitter from '@secret-agent/commons/interfaces/ITypedEventEmitter';
 
-export default interface IConnectionTransport {
-  send(string);
+export default interface IConnectionTransport
+  extends ITypedEventEmitter<IConnectionTransportEvents> {
+  send(body: string);
   close();
-  onmessage?: (message: string) => void;
-  onclose?: () => void;
+}
+
+export interface IConnectionTransportEvents {
+  close: void;
+  message: string;
 }

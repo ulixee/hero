@@ -3,6 +3,7 @@ import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commo
 import Protocol from 'devtools-protocol';
 import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/puppet/interfaces/IPuppetWorker';
 import { createPromise } from '@secret-agent/commons/utils';
+import { IBoundLog } from '@secret-agent/commons/Logger';
 import { BrowserContext } from './BrowserContext';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
@@ -15,6 +16,8 @@ import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEv
 export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IPuppetWorker {
   public readonly browserContext: BrowserContext;
   public isReady: Promise<Error | null>;
+
+  protected readonly logger: IBoundLog;
 
   private readonly cdpSession: CDPSession;
   private readonly networkManager: NetworkManager;
@@ -39,13 +42,18 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     browserContext: BrowserContext,
     parentNetworkManager: NetworkManager,
     cdpSession: CDPSession,
+    logger: IBoundLog,
     targetInfo: TargetInfo,
   ) {
     super();
     this.targetInfo = targetInfo;
     this.cdpSession = cdpSession;
     this.browserContext = browserContext;
-    this.networkManager = new NetworkManager(cdpSession);
+    this.logger = logger.createChild(module, {
+      workerTargetId: this.id,
+      workerType: this.type,
+    });
+    this.networkManager = new NetworkManager(cdpSession, this.logger);
     this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
       ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
       ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],

@@ -8,9 +8,13 @@ import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import net from 'net';
-import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+
+const { log } = Log(module);
 
 export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
   public static sessions: { [sessionId: string]: RequestSession } = {};
@@ -43,6 +47,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public browserRequestIdToTabId = new Map<string, string>();
 
+  protected readonly logger: IBoundLog;
+
   private readonly pendingResources: IPendingResourceLoad[] = [];
 
   constructor(
@@ -52,6 +58,9 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   ) {
     super();
     RequestSession.sessions[sessionId] = this;
+    this.logger = log.createChild(module, {
+      sessionId,
+    });
     this.requestAgent = new MitmRequestAgent(this);
   }
 

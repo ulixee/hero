@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as childProcess from "child_process";
-import { StdioOptions } from "child_process";
-import { debug } from "@secret-agent/commons/Debug";
-import { Readable, Writable } from "stream";
-import * as readline from "readline";
+import * as childProcess from 'child_process';
+import { StdioOptions } from 'child_process';
+import { Readable, Writable } from 'stream';
+import * as readline from 'readline';
 import Path from 'path';
-import { PipeTransport } from "./PipeTransport";
-import ILaunchedProcess from "../interfaces/ILaunchedProcess";
+import Log from '@secret-agent/commons/Logger';
+import { PipeTransport } from './PipeTransport';
+import ILaunchedProcess from '../interfaces/ILaunchedProcess';
 
-const debugLauncher = debug('puppet:launcher');
+const { log } = Log(module);
+
+const logProcessExit = process.env.NODE_ENV !== 'test';
 
 export default function launchProcess(
   executablePath: string,
@@ -37,7 +39,7 @@ export default function launchProcess(
     stdio[2] = 'ignore';
   }
 
-  debugLauncher(`Calling ${executablePath} ${processArguments.join(' ')}`);
+  log.info(`Puppet.LaunchProcess`, { sessionId: null, executablePath, processArguments });
   const launchedProcess = childProcess.spawn(executablePath, processArguments, {
     // On non-windows platforms, `detached: true` makes child process a
     // leader of a new process group, making it possible to kill child
@@ -48,28 +50,37 @@ export default function launchProcess(
     stdio,
   });
   if (!launchedProcess.pid) {
-    launchedProcess.once('error', debugLauncher);
+    launchedProcess.once('error', error => {
+      if (logProcessExit) {
+        log.error('Puppet.LaunchError', { error, sessionId: null });
+      }
+    });
     throw new Error('Failed to launch');
   }
 
-  const exe = executablePath.split(Path.sep).pop().toLowerCase();
-  const errorDebug = debug(`${exe}:stderr`);
-  const outDebug = debug(`${exe}:stdout`);
+  let exe = executablePath
+    .split(Path.sep)
+    .pop()
+    .toLowerCase();
+  exe = exe[0].toUpperCase() + exe.slice(1);
+
   if (pipeIo) {
     const stdout = readline.createInterface({ input: launchedProcess.stdout });
-    stdout.on('line', (data: string) => {
-      outDebug(data);
+    stdout.on('line', line => {
+      log.stats(`${exe}.stdout`, { message: line, sessionId: null });
     });
 
     const stderr = readline.createInterface({ input: launchedProcess.stderr });
-    stderr.on('line', (data: string) => {
-      errorDebug(data);
+    stderr.on('line', line => {
+      log.error(`${exe}.stderr`, { message: line, sessionId: null });
     });
   }
   let processKilled = false;
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;
-    outDebug(`<process did exit: exitCode=${exitCode}, signal=${signal}>`);
+    if (logProcessExit) {
+      log.info(`${exe}.ProcessExited`, { exitCode, signal, sessionId: null });
+    }
   });
 
   process.once('exit', close.bind(this));

@@ -38,10 +38,10 @@ export default class SessionDb {
   public readonly mouseEvents: MouseEventsTable;
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
+  public readonly sessionId: string;
 
   private readonly batchInsert?: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
-  private readonly sessionId: string;
 
   private db: SqliteDatabase;
   private readonly tables: BaseTable<any>[] = [];

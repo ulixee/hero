@@ -2,16 +2,14 @@ import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
 import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet/interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { debug } from '@secret-agent/commons/Debug';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
+import { IBoundLog } from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
-
-const debugWarn = debug('puppet-chrome:frame:warn');
-const debugFrame = debug('puppet-chrome:frame');
 
 export default class Frame extends TypedEventEmitter<IFrameEvents> implements IPuppetFrame {
   public get id() {
@@ -50,8 +48,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   }
 
   public loaderLifecycles = new Map<string, ILifecycleEvents>();
+
+  protected readonly logger: IBoundLog;
+
   private loaderIdResolvers = new Map<string, IResolvablePromise<void>>();
   private activeLoaderId: string;
+  private readonly activeContexts: Set<number>;
+  private readonly cdpSession: CDPSession;
+  private readonly isAttached: () => boolean;
 
   private get activeLoader() {
     return this.loaderIdResolvers.get(this.activeLoaderId);
@@ -61,13 +65,18 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   private isolatedContextIds = new Set<number>();
   private internalFrame: PageFrame;
 
-  private constructor(
+  constructor(
     internalFrame: PageFrame,
-    private readonly activeContexts: Set<number>,
-    private readonly cdpSession: CDPSession,
-    private readonly isAttached: () => boolean,
+    activeContexts: Set<number>,
+    cdpSession: CDPSession,
+    logger: IBoundLog,
+    isAttached: () => boolean,
   ) {
     super();
+    this.activeContexts = activeContexts;
+    this.cdpSession = cdpSession;
+    this.logger = logger.createChild(module);
+    this.isAttached = isAttached;
     this.onLoaded(internalFrame);
   }
 
@@ -152,12 +161,18 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init') {
       if (!this.loaderIdResolvers.has(loaderId)) {
-        debugFrame('Queuing new loader', loaderId);
+        this.logger.info('Queuing new loader', {
+          loaderId,
+          frameId: this.id,
+        });
         this.setLoader(loaderId);
       }
     }
     if (name === 'commit') {
-      debugFrame('Resolving loader', loaderId);
+      this.logger.info('Resolving loader', {
+        loaderId,
+        frameId: this.id,
+      });
       this.loaderIdResolvers.get(loaderId)?.resolve();
     }
 
@@ -231,6 +246,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return {
       id: this.id,
       parentId: this.parentId,
+      activeLoaderId: this.activeLoaderId,
       name: this.name,
       url: this.url,
       navigationReason: this.navigationReason,
@@ -268,8 +284,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       this.activeContexts.add(executionContextId);
       this.addContextId(executionContextId, false);
       return executionContextId;
-    } catch (err) {
-      debugWarn('Failed to create isolated world.', err);
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) {
+        return;
+      }
+      this.logger.warn('Failed to create isolated world.', {
+        frameId: this.id,
+        error,
+      });
     }
   }
 
@@ -291,15 +313,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     if (this.internalFrame.url) {
       this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
     }
-  }
-
-  public static create(
-    internalFrame: PageFrame,
-    activeContexts: Set<number>,
-    cdpSession: CDPSession,
-    isAttached: () => boolean,
-  ) {
-    return new Frame(internalFrame, activeContexts, cdpSession, isAttached);
   }
 }
 

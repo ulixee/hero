@@ -1,10 +1,11 @@
-// eslint-disable-next-line max-classes-per-file
 import { EventEmitter } from 'events';
-import * as Debug from './Debug';
-import { createPromise, IResolvablePromise } from './utils';
+import { createPromise } from './utils';
+import ITypedEventEmitter from './interfaces/ITypedEventEmitter';
+import IPendingWaitEvent, { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
+import { IBoundLog } from './Logger';
 
 export interface IRegisteredEventListener {
-  emitter: EventEmitter;
+  emitter: EventEmitter | ITypedEventEmitter<any>;
   eventName: string | symbol;
   handler: (...args: any[]) => void;
 }
@@ -19,7 +20,7 @@ export function addEventListener(
 }
 
 export function addTypedEventListener(
-  emitter: TypedEventEmitter<any>,
+  emitter: ITypedEventEmitter<any>,
   eventName: string | symbol,
   handler: (...args: any[]) => void,
   includeUnhandledEvents?: boolean,
@@ -40,7 +41,7 @@ export function addEventListeners(
 
 export function removeEventListeners(
   listeners: Array<{
-    emitter: EventEmitter;
+    emitter: EventEmitter | ITypedEventEmitter<any>;
     eventName: string | symbol;
     handler: (...args: any[]) => void;
   }>,
@@ -51,86 +52,16 @@ export function removeEventListeners(
   listeners.length = 0;
 }
 
-export interface ITypedEventEmitter<T> {
-  waitOn<K extends keyof T & (string | symbol)>(
-    eventType: K,
-    listenerFn?: (this: this, event?: T[K]) => boolean,
-    timeoutMillis?: number,
-    includeUnhandledEvents?: boolean,
-  ): Promise<T[K]>;
-
-  on<K extends keyof T & (string | symbol)>(
-    eventType: K,
-    listenerFn: (this: this, event?: T[K]) => any,
-    includeUnhandledEvents?: boolean,
-  ): this;
-
-  off<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
-  ): this;
-
-  once<K extends keyof T & (string | symbol)>(
-    eventType: K,
-    listenerFn: (this: this, event?: T[K]) => any,
-    includeUnhandledEvents?: boolean,
-  ): this;
-
-  emit<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]): boolean;
-
-  addListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
-    includeUnhandledEvents?: boolean,
-  ): this;
-
-  removeListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
-  ): this;
-
-  prependListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => void,
-    includeUnhandledEvents?: boolean,
-  ): this;
-
-  prependOnceListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => void,
-    includeUnhandledEvents?: boolean,
-  ): this;
-}
-
-export class CanceledPromiseError extends Error {}
-
-export interface IPendingWaitEvent {
-  id: number;
-  event: string | symbol;
-  resolvable: IResolvablePromise;
-  error: CanceledPromiseError;
-}
-
 export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmitter<T> {
   public storeEventsWithoutListeners = false;
 
-  protected set logPrefix(value: string) {
-    this._logPrefix = value;
-    this.isDebugEnabled = Debug.isEnabled(this._logPrefix);
-  }
+  protected logger?: IBoundLog;
 
   private pendingIdCounter = 0;
-  private _logPrefix: string;
-  private isDebugEnabled: boolean;
-
   private pendingWaitEvents: IPendingWaitEvent[] = [];
+
   private eventsToLog = new Set<string | symbol>();
   private storedEvents: { eventType: keyof T & (string | symbol); event?: any }[] = [];
-
-  constructor() {
-    super();
-    this.logPrefix = 'emit';
-  }
 
   public cancelPendingEvents(message?: string, excludeEvents?: (keyof T & string)[]) {
     const events = [...this.pendingWaitEvents];
@@ -146,11 +77,8 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     }
   }
 
-  public setEventsToLog<K extends keyof T & (string | symbol)>(events: K[], logPrefix?: string) {
+  public setEventsToLog<K extends keyof T & (string | symbol)>(events: K[]) {
     this.eventsToLog = new Set<string | symbol>(events);
-    if (logPrefix) {
-      this.logPrefix = logPrefix;
-    }
   }
 
   public async waitOn<K extends keyof T & (string | symbol)>(
@@ -170,15 +98,20 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       resolvable: promise,
       error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
     });
-    Debug.debug('waiton')(eventType);
+    const messageId = this.logger?.stats('waitOn', {
+      eventType,
+    });
 
     const listener = addTypedEventListener(
-      this,
+      this as ITypedEventEmitter<any>,
       eventType,
       (result: T[K]) => {
         // give the listeners a second to register
         if (!listenerFn || listenerFn.call(this, result)) {
-          Debug.debug('waiton:resolve')(eventType);
+          this.logger?.stats('waitOn.resolve', {
+            eventType,
+            parentLogId: messageId,
+          });
           promise.resolve(result);
         }
       },
@@ -301,9 +234,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   }
 
   private logEvent<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]) {
-    if (this.eventsToLog.has(eventType) && this.isDebugEnabled) {
-      const ns = `${this._logPrefix}:${eventType}`;
-      Debug.debug(ns)(JSON.stringify(event));
+    if (this.eventsToLog.has(eventType)) {
+      const data: any = { eventType };
+      if (event) data.eventBody = event;
+      this.logger?.stats('emit', data);
     }
   }
 }

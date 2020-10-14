@@ -1,4 +1,5 @@
-import { IRegisteredEventListener, ITypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IRegisteredEventListener } from '@secret-agent/commons/eventUtils';
+import ITypedEventEmitter from "@secret-agent/commons/interfaces/ITypedEventEmitter";
 import { IPuppetFrame, IPuppetFrameEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';

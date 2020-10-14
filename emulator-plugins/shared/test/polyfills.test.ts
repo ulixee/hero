@@ -5,8 +5,11 @@ import Puppet from '@secret-agent/puppet';
 import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
 import Emulators from '@secret-agent/emulators';
 import Core from '@secret-agent/core';
+import Log from '@secret-agent/commons/Logger';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../injected-scripts';
+
+const { log } = Log(module);
 
 let puppet: Puppet;
 let httpServer: ITestHttpServer;
@@ -17,12 +20,15 @@ beforeAll(async () => {
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 
-  context = await puppet.newContext({
-    proxyPassword: '',
-    platform: 'win32',
-    acceptLanguage: 'en',
-    userAgent: 'Chrome Test',
-  });
+  context = await puppet.newContext(
+    {
+      proxyPassword: '',
+      platform: 'win32',
+      acceptLanguage: 'en',
+      userAgent: 'Chrome Test',
+    },
+    log,
+  );
   Helpers.onClose(() => context.close().catch(), true);
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
 });
@@ -34,10 +40,6 @@ const debug = process.env.DEBUG || false;
 
 test('it should be able to add polyfills', async () => {
   const page = await createPage();
-  page.on('page-error', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log));
-  }
 
   const objectTestProperties = {
     length: {
@@ -287,7 +289,7 @@ async function createPage() {
   Helpers.onClose(() => page.close());
   page.on('page-error', console.log);
   if (debug) {
-    page.on('console', log => console.log(log));
+    page.on('console', console.log);
   }
   return page;
 }

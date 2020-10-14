@@ -4,8 +4,11 @@ import { inspect } from 'util';
 import Emulators from '@secret-agent/emulators';
 import Core from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
+import Log from '@secret-agent/commons/Logger';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../injected-scripts';
+
+const { log } = Log(module);
 
 const { chrome, prevProperty } = ChromeJson as any;
 
@@ -24,10 +27,6 @@ const debug = process.env.DEBUG || false;
 test('it should mimic a chrome object', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('page-error', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log));
-  }
   await page.addNewDocumentScript(
     getOverrideScript('chrome', {
       polyfill: {
@@ -55,10 +54,6 @@ test('it should mimic a chrome object', async () => {
 test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  page.on('page-error', console.log);
-  if (debug) {
-    page.on('console', log => console.log(log));
-  }
   await page.addNewDocumentScript(
     getOverrideScript('chrome', {
       updateLoadTimes: true,
@@ -92,12 +87,20 @@ test('it should update loadtimes and csi values', async () => {
 }, 60e3);
 
 async function createPage() {
-  const context = await puppet.newContext({
-    proxyPassword: '',
-    platform: 'win32',
-    acceptLanguage: 'en',
-    userAgent: 'Chrome Test',
-  });
+  const context = await puppet.newContext(
+    {
+      proxyPassword: '',
+      platform: 'win32',
+      acceptLanguage: 'en',
+      userAgent: 'Chrome Test',
+    },
+    log,
+  );
   Helpers.onClose(() => context.close());
-  return context.newPage();
+  const page = await context.newPage();
+  page.on('page-error', console.log);
+  if (debug) {
+    page.on('console', console.log);
+  }
+  return page;
 }

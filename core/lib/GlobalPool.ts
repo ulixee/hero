@@ -130,7 +130,12 @@ export default class GlobalPool {
 
       puppet = this.getPuppet(session.emulator) ?? this.addPuppet(session.emulator);
 
-      const browserContext = await puppet.newContext(session.getBrowserEmulation());
+      const browserContext = await puppet.newContext(
+        session.getBrowserEmulation(),
+        log.createChild(module, {
+          sessionId: session.id,
+        }),
+      );
       await session.initialize(browserContext);
 
       return session;

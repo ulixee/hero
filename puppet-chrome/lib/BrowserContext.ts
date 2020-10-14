@@ -7,6 +7,7 @@ import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IBoundLog } from '@secret-agent/commons/Logger';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -16,16 +17,25 @@ import TargetInfo = Protocol.Target.TargetInfo;
 export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
   public emulation: IBrowserEmulation;
+  public logger: IBoundLog;
   private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;
   private isClosing = false;
 
-  constructor(browser: Browser, contextId: string, emulation: IBrowserEmulation) {
+  constructor(
+    browser: Browser,
+    contextId: string,
+    emulation: IBrowserEmulation,
+    logger: IBoundLog,
+  ) {
     super();
     this.browser = browser;
     this.id = contextId;
     this.emulation = emulation;
+    this.logger = logger.createChild(module, {
+      browserContextId: contextId,
+    });
     this.browser.browserContextsById.set(this.id, this);
   }
 
@@ -65,8 +75,10 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
     if (!opener && this.pages.length) opener = this.pages[0];
-    const page = new Page(cdpSession, targetInfo.targetId, this, opener);
+    const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
     this.pages.push(page);
+    // eslint-disable-next-line promise/catch-or-return
+    page.isReady.then(() => this.emit('page', { page }));
   }
 
   onPageDetached(targetId: string) {

@@ -1,11 +1,14 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import { URL } from 'url';
+import Log from '@secret-agent/commons/Logger';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { getExecutablePath } from '../lib/browserPaths';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { createTestPage, ITestPage } from './TestPage';
+
+const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
@@ -42,7 +45,7 @@ describe.each([
 
   describe('basic', () => {
     it('should create new context', async () => {
-      const context = await puppet.newContext(defaultEmulator);
+      const context = await puppet.newContext(defaultEmulator, log);
       needsClosing.push(context);
       expect(context).toBeTruthy();
       await context.close();
@@ -50,9 +53,9 @@ describe.each([
 
     it('should isolate localStorage and cookies', async () => {
       // Create two incognito contexts.
-      const context1 = await puppet.newContext(defaultEmulator);
+      const context1 = await puppet.newContext(defaultEmulator, log);
       needsClosing.push(context1);
-      const context2 = await puppet.newContext(defaultEmulator);
+      const context2 = await puppet.newContext(defaultEmulator, log);
       needsClosing.push(context2);
 
       // Create a page in first incognito context.
@@ -84,13 +87,13 @@ describe.each([
     });
 
     it('close() should work for empty context', async () => {
-      const context = await puppet.newContext(defaultEmulator);
+      const context = await puppet.newContext(defaultEmulator, log);
       needsClosing.push(context);
       await expect(context.close()).resolves.toBe(undefined);
     });
 
     it('close() should be callable twice', async () => {
-      const context = await puppet.newContext(defaultEmulator);
+      const context = await puppet.newContext(defaultEmulator, log);
       needsClosing.push(context);
       await Promise.all([context.close(), context.close()]);
       await expect(context.close()).resolves.toBe(undefined);
@@ -100,7 +103,7 @@ describe.each([
   describe('emulator', () => {
     it('should set for all pages', async () => {
       {
-        const context = await puppet.newContext(defaultEmulator);
+        const context = await puppet.newContext(defaultEmulator, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -110,12 +113,15 @@ describe.each([
         await context.close();
       }
       {
-        const context = await puppet.newContext({
-          userAgent: 'foobar',
-          platform: 'Windows',
-          acceptLanguage: 'de',
-          proxyPassword: '',
-        });
+        const context = await puppet.newContext(
+          {
+            userAgent: 'foobar',
+            platform: 'Windows',
+            acceptLanguage: 'de',
+            proxyPassword: '',
+          },
+          log,
+        );
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -133,7 +139,7 @@ describe.each([
 
     it('should work for subframes', async () => {
       {
-        const context = await puppet.newContext(defaultEmulator);
+        const context = await puppet.newContext(defaultEmulator, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -141,7 +147,7 @@ describe.each([
         await context.close();
       }
       {
-        const context = await puppet.newContext({ userAgent: 'foobar' } as any);
+        const context = await puppet.newContext({ userAgent: 'foobar' } as any, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -165,7 +171,7 @@ describe.each([
     let context: IPuppetContext;
     let page: ITestPage;
     beforeEach(async () => {
-      context = await puppet.newContext(defaultEmulator);
+      context = await puppet.newContext(defaultEmulator, log);
       page = createTestPage(await context.newPage());
     });
     afterEach(async () => {

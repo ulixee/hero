@@ -1,10 +1,11 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
-import { debug } from '@secret-agent/commons/Debug';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
+import { IBoundLog } from '@secret-agent/commons/Logger';
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -15,9 +16,8 @@ import WebSocketWillSendHandshakeRequestEvent = Protocol.Network.WebSocketWillSe
 import ResponseReceivedEvent = Protocol.Network.ResponseReceivedEvent;
 import RequestPausedEvent = Protocol.Fetch.RequestPausedEvent;
 
-const debugError = debug('puppet-chrome:network-error');
-
 export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
+  protected readonly logger: IBoundLog;
   private readonly cdpSession: CDPSession;
   private readonly attemptedAuthentications = new Set<string>();
   private emulation?: IBrowserEmulation;
@@ -25,9 +25,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
 
-  constructor(cdpSession: CDPSession) {
+  constructor(cdpSession: CDPSession, logger: IBoundLog) {
     super();
     this.cdpSession = cdpSession;
+    this.logger = logger.createChild(module);
     this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
       ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
       ['Fetch.authRequired', this.onAuthRequired.bind(this)],
@@ -99,7 +100,14 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         requestId: event.requestId,
         authChallengeResponse,
       })
-      .catch(debugError);
+      .catch(error => {
+        if (error instanceof CanceledPromiseError) return;
+        this.logger.warn('NetworkManager.continueWithAuthError', {
+          error,
+          requestId: event.requestId,
+          url: event.request.url,
+        });
+      });
   }
 
   private onRequestPaused(networkRequest: RequestPausedEvent) {
@@ -107,7 +115,14 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       .send('Fetch.continueRequest', {
         requestId: networkRequest.requestId,
       })
-      .catch(debugError);
+      .catch(error => {
+        if (error instanceof CanceledPromiseError) return;
+        this.logger.warn('NetworkManager.continueRequestError', {
+          error,
+          requestId: networkRequest.requestId,
+          url: networkRequest.request.url,
+        });
+      });
 
     // requests from service workers (and others?) will never register with RequestWillBeSentEvent
     // -- they don't have networkIds

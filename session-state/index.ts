@@ -6,7 +6,7 @@ import {
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
+import Log, { IBoundLog, ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
@@ -47,6 +47,8 @@ export default class SessionState {
     [resourceId: string]: ((msg: IWebsocketResourceMessage) => any)[];
   } = {};
 
+  private readonly logger: IBoundLog;
+
   private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
   private lastErrorTime?: Date;
   private closeDate?: Date;
@@ -67,6 +69,9 @@ export default class SessionState {
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.scriptInstanceMeta = scriptInstanceMeta;
+    this.logger = log.createChild(module, {
+      sessionId,
+    });
     SessionState.registry.set(sessionId, this);
 
     fs.mkdirSync(sessionsDirectory, { recursive: true });
@@ -156,8 +161,7 @@ export default class SessionState {
     const { browserRequestId, isFromServer, message } = event;
     const resourceId = this.browserRequestIdToResourceId[browserRequestId];
     if (!resourceId) {
-      log.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
-        sessionId: this.sessionId,
+      this.logger.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
         browserRequestId,
         message,
       });
@@ -225,8 +229,7 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, body, resourceEvent);
 
     if (isResponse) {
-      log.info('Http.Response', {
-        sessionId: this.sessionId,
+      this.logger.info('Http.Response', {
         tabId,
         url: request.url,
         method: request.method,
@@ -273,7 +276,7 @@ export default class SessionState {
   }
 
   public captureError(tabId: string, frameId: string, source: string, error: Error) {
-    log.error('Window.error', { sessionId: this.sessionId, source, error });
+    this.logger.error('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
@@ -285,9 +288,9 @@ export default class SessionState {
     location?: string,
   ) {
     if (message.includes('Error: ') || message.startsWith('ERROR')) {
-      log.error('Window.error', { sessionId: this.sessionId, message });
+      this.logger.error('Window.error', { message });
     } else {
-      log.info('Window.console', { sessionId: this.sessionId, message });
+      this.logger.info('Window.console', { message });
     }
     this.db.pageLogs.insert(tabId, frameId, consoleType, message, new Date(), location);
   }
@@ -374,8 +377,7 @@ export default class SessionState {
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
   ) {
-    log.stats('State.onPageEvents', {
-      sessionId: this.sessionId,
+    this.logger.stats('State.onPageEvents', {
       tabId,
       frameId,
       dom: domChanges.length,

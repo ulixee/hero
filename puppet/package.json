@@ -6,7 +6,6 @@
     "@secret-agent/commons": "1.0.0-alpha.16",
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
     "@secret-agent/puppet-chrome": "1.0.0-alpha.19",
-    "debug": "^4.1.1",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "5.0.0",
     "progress": "^2.0.1",

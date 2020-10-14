@@ -2,7 +2,7 @@ import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { debug } from '@secret-agent/commons/Debug';
+import { IBoundLog } from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -20,8 +20,6 @@ import Page = Protocol.Page;
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
 
-const debugWarn = debug('puppet-chrome:frames-manager:warn');
-
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
   public framesById = new Map<string, Frame>();
 
@@ -37,17 +35,19 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     return Array.from(this.attachedFrameIds).map(x => this.framesById.get(x));
   }
 
+  protected readonly logger: IBoundLog;
+
   private attachedFrameIds = new Set<string>();
   private activeContexts = new Set<number>();
-
   private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly cdpSession: CDPSession;
 
   private isReady: Promise<void>;
 
-  constructor(cdpSession: CDPSession) {
+  constructor(cdpSession: CDPSession, logger: IBoundLog) {
     super();
     this.cdpSession = cdpSession;
+    this.logger = logger.createChild(module);
     this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
       ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
       ['Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument.bind(this)],
@@ -164,7 +164,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     this.activeContexts.add(context.id);
     const frame = this.framesById.get(frameId);
     if (!frame) {
-      debugWarn('No frame for active context!', frameId, context.id);
+      this.logger.warn('No frame for active context!', {
+        frameId,
+        executionContextId: context.id,
+      });
     }
     frame?.addContextId(context.id, context.name === '' || context.auxData?.isDefault === true);
   }
@@ -237,7 +240,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
       return frame;
     }
 
-    const frame = Frame.create(newFrame, this.activeContexts, this.cdpSession, () =>
+    const frame = new Frame(newFrame, this.activeContexts, this.cdpSession, this.logger, () =>
       this.attachedFrameIds.has(id),
     );
     this.framesById.set(id, frame);

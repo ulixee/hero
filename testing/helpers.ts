@@ -13,7 +13,7 @@ import * as net from 'net';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core from '@secret-agent/core';
-import { CanceledPromiseError } from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 

@@ -1,12 +1,21 @@
 import path from 'path';
 import os from 'os';
+import Log from '@secret-agent/commons/Logger';
 import { BrowserFetcher } from './BrowserFetcher';
+
+const { log } = Log(module);
 
 export function getExecutablePath(browser: string, revision: string) {
   const browserFetcher = new BrowserFetcher({
     path: getInstallDirectory(browser, revision),
   });
-  const revisionInfo = browserFetcher.revisionInfo(revision);
+  const revisionInfo = browserFetcher.revisionInfo(revision, false);
+
+  log.stats('Browser.getExecutablePath', {
+    sessionId: null,
+    revision: revisionInfo.revision,
+    folder: revisionInfo.folderPath,
+  });
   return revisionInfo.executablePath;
 }
 

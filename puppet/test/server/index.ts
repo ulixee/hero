@@ -21,13 +21,13 @@ import * as url from 'url';
 import * as fs from 'fs';
 import * as Path from 'path';
 import { Server as WebSocketServer } from 'ws';
-import { debug } from '@secret-agent/commons/Debug';
 import { AddressInfo, Socket } from 'net';
 import { gzip } from 'zlib';
+import Log from "@secret-agent/commons/Logger";
 
+const { log } = Log(module);
 const fulfillSymbol = Symbol('fulfill callback');
 const rejectSymbol = Symbol('reject callback');
-const debugServer = debug('test:server');
 
 export class TestServer {
   public baseUrl: string;
@@ -95,7 +95,6 @@ export class TestServer {
   }
 
   setAuth(path: string, username: string, password: string) {
-    debugServer(`set auth for ${path} to ${username}:${password}`);
     this.auths.set(path, { username, password });
   }
 
@@ -157,17 +156,14 @@ export class TestServer {
       else throw error;
     });
     const pathName = url.parse(request.url).path;
-    debugServer(`request ${request.method} ${pathName}`);
+    log.stats(`OnRequest: ${request.method} ${pathName}`);
     if (this.auths.has(pathName)) {
       const auth = this.auths.get(pathName);
       const credentials = Buffer.from(
         (request.headers.authorization || '').split(' ')[1] || '',
         'base64',
       ).toString();
-      debugServer(`request credentials ${credentials}`);
-      debugServer(`actual credentials ${auth.username}:${auth.password}`);
       if (credentials !== `${auth.username}:${auth.password}`) {
-        debugServer(`request write www-auth`);
         response.writeHead(401, { 'WWW-Authenticate': 'Basic realm="Secure Area"' });
         response.end('HTTP Error 401 Unauthorized: Access is denied');
         return;

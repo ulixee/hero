@@ -1,11 +1,14 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import Log from '@secret-agent/commons/Logger';
 import { TestServer } from './server';
 import { createTestPage, ITestPage } from './TestPage';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { getExecutablePath } from '../lib/browserPaths';
+
+const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
@@ -21,12 +24,15 @@ describe.each([
     const engineExecutablePath = getExecutablePath(browserEngine, revision);
     puppet = new Puppet({ engine: { browser: browserEngine, revision }, engineExecutablePath });
     await puppet.start();
-    context = await puppet.newContext({
-      userAgent: 'Page tests',
-      acceptLanguage: 'en',
-      platform: 'Linux',
-      proxyPassword: '',
-    });
+    context = await puppet.newContext(
+      {
+        userAgent: 'Page tests',
+        acceptLanguage: 'en',
+        platform: 'Linux',
+        proxyPassword: '',
+      },
+      log,
+    );
   });
 
   afterEach(async () => {

@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import Log from '@secret-agent/commons/Logger';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import ITabOptions from '@secret-agent/core-interfaces/ITabOptions';
 import {
   ILocationStatus,
@@ -21,9 +21,10 @@ import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { CanceledPromiseError, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -46,8 +47,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public isReady: Promise<void>;
 
-  private readonly createdAtCommandId: number;
+  protected readonly logger: IBoundLog;
 
+  private readonly createdAtCommandId: number;
   private readonly interactor: Interactor;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
 
@@ -84,6 +86,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     super();
     this.setEventsToLog(['child-tab-created', 'close']);
     this.id = uuidv1();
+    this.logger = log.createChild(module, {
+      tabId: this.id,
+      sessionId: session.id,
+    });
     this.session = session;
     this.parentTabId = parentTabId;
     this.sessionState.registerTab(this.id);
@@ -147,10 +153,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       await this.domRecorder.flush(true);
     }
 
-    log.info('Tab.Closing', {
-      tabId: this.id,
-      sessionId: this.session.id,
-    });
+    this.logger.info('Tab.Closing');
     try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
@@ -160,7 +163,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.emit('close');
     } catch (error) {
       if (!error.message.includes('Target closed')) {
-        log.error('Tab.ClosingError', { sessionId: this.sessionId, error });
+        this.logger.error('Tab.ClosingError', { error });
       }
     }
   }
@@ -184,13 +187,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     if (functionName !== 'goto') {
       await this.domRecorder.setCommandIdForPage(commandMeta.id);
     }
-    const id = log.info('Tab.runCommand', { ...commandMeta, sessionId: this.sessionId });
+    const id = this.logger.info('Tab.runCommand', commandMeta);
     let result: T;
     try {
       const commandFn = this[functionName].bind(this, ...args);
       result = await this.sessionState.runCommand<T>(commandFn, commandMeta);
     } finally {
-      log.stats('Tab.ranCommand', { sessionId: this.sessionId, result, parentLogId: id });
+      this.logger.stats('Tab.ranCommand', { result, parentLogId: id });
     }
     return result;
   }
@@ -470,10 +473,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     await this.domRecorder.install();
     if (this.parentTabId) {
       // the page is paused waiting for debugger, so it won't resume until "install" is complete
-      this.domRecorder.setCommandIdForPage(this.lastCommandId).catch(err => {
-        log.warn('Tab.child.setCommandId.error', {
-          err,
-          sessionId: this.sessionId,
+      this.domRecorder.setCommandIdForPage(this.lastCommandId).catch(error => {
+        this.logger.warn('Tab.child.setCommandId.error', {
+          error,
         });
       });
     }
@@ -578,10 +580,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private async onFrameNavigated(event: IPuppetFrameEvents['frame-navigated']) {
     const { navigatedInDocument, frame } = event;
     if (this.mainFrameId === frame.id && navigatedInDocument) {
-      log.info('Page.navigatedWithinDocument', {
-        sessionId: this.sessionId,
-        ...event,
-      });
+      this.logger.info('Page.navigatedWithinDocument', event);
       // set load state back to all loaded
       this.navigationTracker.triggerInPageNavigation(frame.url, this.lastCommandId, frame.id);
     }
@@ -591,10 +590,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private async onFrameRequestedNavigation(
     event: IPuppetFrameEvents['frame-requested-navigation'],
   ) {
-    log.info('Page.frameRequestedNavigation', {
-      sessionId: this.sessionId,
-      ...event,
-    });
+    this.logger.info('Page.frameRequestedNavigation', event);
     // disposition options: currentTab, newTab, newWindow, download
     const { frame, url, reason } = event;
     if (this.mainFrameId === frame.id) {
@@ -628,11 +624,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     openParams?: { url: string; windowName: string },
   ) {
     const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
-    log.info('Tab.created', {
-      tabId: tab.id,
+    tab.logger.info('Tab.created', {
       parentTab: parentTab?.id,
       openParams,
-      sessionId: session.id,
     });
     return tab;
   }

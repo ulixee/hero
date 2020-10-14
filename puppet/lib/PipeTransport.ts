@@ -13,63 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as EventUtils from "@secret-agent/commons/eventUtils";
-import { debug } from "@secret-agent/commons/Debug";
-import IConnectionTransport from "../interfaces/IConnectionTransport";
+import * as EventUtils from '@secret-agent/commons/eventUtils';
+import Log from '@secret-agent/commons/logger';
+import { addEventListeners, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IConnectionTransport, {
+  IConnectionTransportEvents,
+} from '../interfaces/IConnectionTransport';
 
-const debugError = debug('puppet:transport:error');
-const debugInfo = debug('puppet:transport');
+const { log } = Log(module);
 
-export class PipeTransport implements IConnectionTransport {
+export class PipeTransport extends TypedEventEmitter<IConnectionTransportEvents>
+  implements IConnectionTransport {
   pipeWrite: NodeJS.WritableStream;
   pendingMessage: string;
   eventListeners: EventUtils.IRegisteredEventListener[];
 
-  onclose?: () => void;
-  onmessage?: () => void;
-
   constructor(pipeWrite: NodeJS.WritableStream, pipeRead: NodeJS.ReadableStream) {
+    super();
     this.pipeWrite = pipeWrite;
     this.pendingMessage = '';
-    this.eventListeners = [
-      EventUtils.addEventListener(pipeRead, 'data', buffer => this._dispatch(buffer)),
-      EventUtils.addEventListener(pipeRead, 'close', () => {
-        debugInfo('PipeTransport closed');
-        if (this.onclose) this.onclose.call(null);
-      }),
-      EventUtils.addEventListener(pipeRead, 'error', debugError),
-      EventUtils.addEventListener(pipeWrite, 'error', debugError),
-    ];
-    this.onmessage = null;
-    this.onclose = null;
+    this.eventListeners = addEventListeners(pipeRead, [
+      ['data', this.dispatch.bind(this)],
+      ['close', this.onReadClosed.bind(this)],
+      ['error', error => log.error('PipeTransport.ReadError', { error, sessionId: null })],
+    ]);
+    this.eventListeners.push(
+      EventUtils.addEventListener(pipeWrite, 'error', error =>
+        log.error('PipeTransport.WriteError', { error, sessionId: null }),
+      ),
+    );
   }
 
-  send(message: string): void {
+  send(message: string) {
     this.pipeWrite.write(message);
     this.pipeWrite.write('\0');
   }
 
-  _dispatch(buffer: Buffer): void {
+  close() {
+    this.pipeWrite = null;
+    EventUtils.removeEventListeners(this.eventListeners);
+  }
+
+  private onReadClosed() {
+    log.info('PipeTransport.Closed');
+    this.emit('close');
+  }
+
+  private dispatch(buffer: Buffer): void {
     let end = buffer.indexOf('\0');
     if (end === -1) {
       this.pendingMessage += buffer.toString();
       return;
     }
     const message = this.pendingMessage + buffer.toString(undefined, 0, end);
-    if (this.onmessage) this.onmessage.call(null, message);
+    this.emit('message', message);
 
     let start = end + 1;
     end = buffer.indexOf('\0', start);
     while (end !== -1) {
-      if (this.onmessage) this.onmessage.call(null, buffer.toString(undefined, start, end));
+      this.emit('message', buffer.toString(undefined, start, end));
       start = end + 1;
       end = buffer.indexOf('\0', start);
     }
     this.pendingMessage = buffer.toString(undefined, start);
-  }
-
-  close(): void {
-    this.pipeWrite = null;
-    EventUtils.removeEventListeners(this.eventListeners);
   }
 }
