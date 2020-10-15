@@ -1,163 +1,120 @@
-import fs, { promises as FS } from 'fs';
-import path from 'path';
 import Forge from 'node-forge';
-import Log from '@secret-agent/commons/Logger';
+import moment from 'moment';
+import NetworkDb from './NetworkDb';
 import pki = Forge.pki;
-
-const { log } = Log(module);
 
 export default class CertificateAuthority {
   private certificate: pki.Certificate;
   private keyPair: pki.KeyPair;
-  private certsFolder: string;
-  private keysFolder: string;
-  private baseCAFolder: string;
+  private db: NetworkDb;
 
-  public generateServerCertificateKeys(hostParam: string | string[]) {
+  constructor(networkDb: NetworkDb) {
+    this.db = networkDb;
+    const baseCert = this.db.certificates.get('ca');
+    if (baseCert) {
+      this.certificate = pki.certificateFromPem(baseCert.pem);
+
+      const keypair = this.db.pki.get('ca');
+      this.keyPair = {
+        privateKey: pki.privateKeyFromPem(keypair.privateKey),
+        publicKey: pki.publicKeyFromPem(keypair.publicKey),
+      };
+    } else {
+      this.generateCA();
+    }
+  }
+
+  public async getCertificateKeys(hostname: string) {
+    const key = this.db.pki.get(hostname);
+    if (key) {
+      const cert = this.db.certificates.get(hostname);
+      return { key: key.privateKey, cert: cert.pem };
+    }
+
+    const hosts = [hostname];
+    return this.generateServerCertificateKeys(hosts);
+  }
+
+  private async generateServerCertificateKeys(hostParam: string | string[]) {
     let hosts = hostParam;
     if (typeof hosts === 'string') hosts = [hosts];
 
     const [mainHost] = hosts;
-    const keysServer = pki.rsa.generateKeyPair(2048);
-    const certServer = pki.createCertificate();
-    certServer.publicKey = keysServer.publicKey;
-    certServer.serialNumber = this.randomSerialNumber();
-    certServer.validity.notBefore = new Date();
-    certServer.validity.notBefore.setDate(certServer.validity.notBefore.getDate() - 1);
-    certServer.validity.notAfter = new Date();
-    certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2);
-    const attrsServer = ServerAttrs.slice(0);
-    attrsServer.unshift({
-      name: 'commonName',
-      value: mainHost,
-    });
-    certServer.setSubject(attrsServer);
-    certServer.setIssuer(this.certificate.issuer.attributes);
-    certServer.setExtensions(
-      ServerExtensions.concat([
-        {
-          name: 'subjectAltName',
-          altNames: hosts.map(host => {
-            if (host.match(/^[\d.]+$/)) {
-              return { type: 7, ip: host };
-            }
-            return { type: 2, value: host };
-          }),
-        },
-      ]),
-    );
-    certServer.sign(this.keyPair.privateKey, Forge.md.sha256.create());
-    const certPem = pki.certificateToPem(certServer);
-    const keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey);
-    const keyPublicPem = pki.publicKeyToPem(keysServer.publicKey);
-
-    const hostFilename = mainHost.replace(/\*/g, '_');
-
-    Promise.all([
-      FS.writeFile(`${this.certsFolder}/${hostFilename}.pem`, certPem),
-      FS.writeFile(`${this.keysFolder}/${hostFilename}.key`, keyPrivatePem),
-      FS.writeFile(`${this.keysFolder}/${hostFilename}.public.key`, keyPublicPem),
-    ]).catch(error => {
-      log.error('CertificateSaveError', { error, sessionId: null });
-    });
-    // returns synchronously even before files get written to disk
-    return { cert: certPem, key: keyPrivatePem };
-  }
-
-  public async getCertificateKeys(hostname: string) {
-    const keyFilePath = `${this.keysFolder}/${hostname}.key`;
-    const certFilePath = `${this.certsFolder}/${hostname}.pem`;
-    if (fs.existsSync(keyFilePath)) {
-      const certPromises = [FS.readFile(keyFilePath), FS.readFile(certFilePath)];
-      return Promise.all(certPromises);
-    }
-
-    const hosts = [hostname];
-    const certs = await this.generateServerCertificateKeys(hosts);
-    return [certs.key, certs.cert];
-  }
-
-  private randomSerialNumber() {
-    // generate random 16 bytes hex string
-    let sn = '';
-    for (let i = 0; i < 4; i += 1) {
-      // eslint-disable-next-line no-restricted-properties
-      const randomHex = Math.floor(Math.random() * Math.pow(256, 4)).toString(16);
-      sn += `00000000${randomHex}`.slice(-8);
-    }
-    return sn;
-  }
-
-  private async generateCA() {
-    const keys = await new Promise<pki.KeyPair>((resolve, reject) => {
-      pki.rsa.generateKeyPair({ bits: 2048 }, (err, k) => {
-        if (err) {
-          return reject(err);
-        }
-        resolve(k);
+    const keys = await new Promise<pki.rsa.KeyPair>((resolve, reject) => {
+      pki.rsa.generateKeyPair({ bits: 2048 }, (err, keypair) => {
+        if (err) return reject(err);
+        resolve(keypair);
       });
     });
+    const cert = pki.createCertificate();
+    cert.publicKey = keys.publicKey;
+    cert.serialNumber = randomSerialNumber();
+    cert.validity.notBefore = moment()
+      .subtract(1, 'day')
+      .toDate();
+    cert.validity.notAfter = moment()
+      .add(2, 'years')
+      .toDate();
+
+    cert.setSubject([
+      {
+        name: 'commonName',
+        value: mainHost,
+      },
+      ...ServerAttrs,
+    ]);
+    cert.setIssuer(this.certificate.issuer.attributes);
+    cert.setExtensions(getServerExtensions(hosts));
+    cert.sign(this.keyPair.privateKey, Forge.md.sha256.create());
+
+    const { certPem, privateKey } = this.recordPem(mainHost, cert, keys);
+    return { cert: certPem, key: privateKey };
+  }
+
+  private generateCA() {
+    const keys = pki.rsa.generateKeyPair(2048);
 
     const cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
-    cert.serialNumber = this.randomSerialNumber();
-    cert.validity.notBefore = new Date();
-    cert.validity.notBefore.setDate(cert.validity.notBefore.getDate() - 1);
-    cert.validity.notAfter = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
-    cert.setSubject(CAattrs);
-    cert.setIssuer(CAattrs);
-    cert.setExtensions(CAextensions);
+    cert.serialNumber = randomSerialNumber();
+    cert.validity.notBefore = moment()
+      .subtract(1, 'days')
+      .toDate();
+    cert.validity.notAfter = moment()
+      .add(10, 'years')
+      .toDate();
+    cert.setSubject(CaAttrs);
+    cert.setIssuer(CaAttrs);
+    cert.setExtensions(CaExtensions);
     cert.sign(keys.privateKey, Forge.md.sha256.create());
     this.certificate = cert;
     this.keyPair = keys;
-
-    await Promise.all([
-      FS.writeFile(path.join(this.certsFolder, 'ca.pem'), pki.certificateToPem(cert)),
-      FS.writeFile(
-        path.join(this.keysFolder, 'ca.private.key'),
-        pki.privateKeyToPem(keys.privateKey),
-      ),
-      FS.writeFile(path.join(this.keysFolder, 'ca.public.key'), pki.publicKeyToPem(keys.publicKey)),
-    ]);
+    this.recordPem('ca', cert, keys);
   }
 
-  private async loadCA() {
-    const certPEM = FS.readFile(path.join(this.certsFolder, 'ca.pem'), 'utf-8');
-    const keyPrivatePEM = FS.readFile(path.join(this.keysFolder, 'ca.private.key'), 'utf-8');
-    const keyPublicPEM = FS.readFile(path.join(this.keysFolder, 'ca.public.key'), 'utf-8');
+  private recordPem(host: string, cert: pki.Certificate, keyPair: pki.KeyPair) {
+    const certPem = pki.certificateToPem(cert);
+    const privateKey = pki.privateKeyToPem(keyPair.privateKey);
+    const publicKey = pki.publicKeyToPem(keyPair.publicKey);
 
-    this.certificate = pki.certificateFromPem(await certPEM);
-    this.keyPair = {
-      privateKey: pki.privateKeyFromPem(await keyPrivatePEM),
-      publicKey: pki.publicKeyFromPem(await keyPublicPEM),
-    };
-  }
-
-  public static async create(caFolder: string) {
-    const ca = new CertificateAuthority();
-    ca.baseCAFolder = caFolder;
-    ca.certsFolder = path.join(ca.baseCAFolder, 'certs');
-    ca.keysFolder = path.join(ca.baseCAFolder, 'keys');
-
-    await FS.mkdir(ca.baseCAFolder, { recursive: true });
-    await FS.mkdir(ca.certsFolder, { recursive: true });
-    await FS.mkdir(ca.keysFolder, { recursive: true });
-
-    try {
-      const stats = await FS.lstat(path.join(ca.certsFolder, 'ca.pem'));
-      if (stats.isFile()) {
-        await ca.loadCA();
-      }
-    } catch (err) {
-      await ca.generateCA();
-    }
-    return ca;
+    this.db.certificates.insert({
+      host,
+      pem: certPem,
+      beginDate: cert.validity.notBefore,
+      expireDate: cert.validity.notAfter,
+    });
+    this.db.pki.insert({
+      host,
+      privateKey,
+      publicKey,
+      beginDate: cert.validity.notBefore,
+      expireDate: cert.validity.notAfter,
+    });
+    return { certPem, privateKey, publicKey };
   }
 }
 
-// tslint:disable-next-line:variable-name
-const CAattrs = [
+const CaAttrs = [
   {
     name: 'commonName',
     value: 'SecretAgentCA',
@@ -184,8 +141,7 @@ const CAattrs = [
   },
 ];
 
-// tslint:disable-next-line:variable-name
-const CAextensions = [
+const CaExtensions = [
   {
     name: 'basicConstraints',
     cA: true,
@@ -221,7 +177,6 @@ const CAextensions = [
   },
 ];
 
-// tslint:disable-next-line:variable-name
 const ServerAttrs = [
   {
     name: 'countryName',
@@ -245,39 +200,60 @@ const ServerAttrs = [
   },
 ];
 
-// tslint:disable-next-line:variable-name
-const ServerExtensions: any[] = [
-  {
-    name: 'basicConstraints',
-    cA: false,
-  },
-  {
-    name: 'keyUsage',
-    keyCertSign: false,
-    digitalSignature: true,
-    nonRepudiation: false,
-    keyEncipherment: true,
-    dataEncipherment: true,
-  },
-  {
-    name: 'extKeyUsage',
-    serverAuth: true,
-    clientAuth: true,
-    codeSigning: false,
-    emailProtection: false,
-    timeStamping: false,
-  },
-  {
-    name: 'nsCertType',
-    client: true,
-    server: true,
-    email: false,
-    objsign: false,
-    sslCA: false,
-    emailCA: false,
-    objCA: false,
-  },
-  {
-    name: 'subjectKeyIdentifier',
-  },
-];
+function getServerExtensions(hosts: string[]) {
+  return [
+    {
+      name: 'basicConstraints',
+      cA: false,
+    },
+    {
+      name: 'keyUsage',
+      keyCertSign: false,
+      digitalSignature: true,
+      nonRepudiation: false,
+      keyEncipherment: true,
+      dataEncipherment: true,
+    },
+    {
+      name: 'extKeyUsage',
+      serverAuth: true,
+      clientAuth: true,
+      codeSigning: false,
+      emailProtection: false,
+      timeStamping: false,
+    },
+    {
+      name: 'nsCertType',
+      client: true,
+      server: true,
+      email: false,
+      objsign: false,
+      sslCA: false,
+      emailCA: false,
+      objCA: false,
+    },
+    {
+      name: 'subjectKeyIdentifier',
+    },
+    {
+      name: 'subjectAltName',
+      altNames: hosts.map(host => {
+        if (host.match(/^[\d.]+$/)) {
+          return { type: 7, ip: host };
+        }
+        return { type: 2, value: host };
+      }),
+    },
+  ];
+}
+
+function randomSerialNumber() {
+  // generate random 16 bytes hex string
+  let sn = '';
+  for (let i = 0; i < 4; i += 1) {
+    // eslint-disable-next-line no-restricted-properties
+    const randomHex = Math.floor(Math.random() * Math.pow(256, 4)).toString(16);
+    sn += `00000000${randomHex}`.slice(-8);
+  }
+  return sn;
+}

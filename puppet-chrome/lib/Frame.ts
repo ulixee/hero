@@ -6,6 +6,7 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { IBoundLog } from '@secret-agent/commons/Logger';
+import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
@@ -295,6 +296,12 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     } catch (error) {
       if (error instanceof CanceledPromiseError) {
         return;
+      }
+      if (error instanceof ProtocolError) {
+        // 32000 code means frame doesn't exist, see if we just missed timing
+        if (error.remoteError?.code === -32000) {
+          if (!this.isAttached()) return;
+        }
       }
       this.logger.warn('Failed to create isolated world.', {
         frameId: this.id,

@@ -1,6 +1,5 @@
-import Fs from 'fs';
-import { Helpers } from '@secret-agent/testing';
-import MitmProxy from '../lib/MitmProxy';
+import { Helpers } from "@secret-agent/testing";
+import MitmProxy from "../lib/MitmProxy";
 
 afterAll(Helpers.afterAll);
 
@@ -10,6 +9,6 @@ test('should generate a root CA file', async () => {
 
   await proxy.listen();
   // @ts-ignore
-  expect(Fs.existsSync(`${proxy.sslCaDir}/certs/ca.pem`)).toBeTruthy();
+  expect(proxy.ca.certificate).toBeTruthy();
   await proxy.close();
 });

@@ -1,8 +1,8 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import { ILogEntry } from '@secret-agent/commons/Logger';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class SessionLogsTable extends BaseTable<ISessionLogRecord> {
+export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'SessionLogs', [
       ['id', 'INTEGER'],

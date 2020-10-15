@@ -1,8 +1,8 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class ScrollEventsTable extends BaseTable<IScrollRecord> {
+export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'ScrollEvents', [
       ['tabId', 'TEXT'],

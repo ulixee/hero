@@ -1,8 +1,8 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import type { IPuppetContextEvents } from '@secret-agent/puppet/interfaces/IPuppetContext';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class DevtoolsMessagesTable extends BaseTable<IDevtoolsMessageRecord> {
+export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private fetchRequestIdToNetworkId = new Map<string, string>();
   private sentMessageIds: {
     id: number;

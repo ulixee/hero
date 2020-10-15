@@ -8,6 +8,7 @@
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
     "@secret-agent/mitm-socket": "1.0.0-alpha.19",
     "devtools-protocol": "^0.0.799653",
+    "better-sqlite3": "^7.1.1",
     "node-forge": "^0.10.0"
   },
   "devDependencies": {

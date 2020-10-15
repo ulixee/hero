@@ -91,9 +91,6 @@ export default class MitmSocket {
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: {
-        GODEBUG: 'netdns=cgo',
-      },
     });
     this.child = child;
     child.stdout.setEncoding('utf8');
@@ -135,7 +132,7 @@ export default class MitmSocket {
   }
 
   private closeChild() {
-    if (this.child.killed) return;
+    if (!this.child || this.child.killed) return;
     try {
       // fix for node 13 throwing errors on closed sockets
       this.child.stdin.on('error', () => {

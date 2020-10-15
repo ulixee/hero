@@ -1,8 +1,8 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEvent';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class MouseEventsTable extends BaseTable<IMouseEventRecord> {
+export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'MouseEvents', [
       ['tabId', 'TEXT'],

@@ -1,8 +1,8 @@
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class CommandsTable extends BaseTable<ICommandMeta> {
+export default class CommandsTable extends SqliteTable<ICommandMeta> {
   private readonly getQuery: Statement;
   constructor(readonly db: SqliteDatabase) {
     super(

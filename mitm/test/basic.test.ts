@@ -1,4 +1,4 @@
-import http from 'http';
+import http, { IncomingHttpHeaders } from 'http';
 import { Helpers } from '@secret-agent/testing';
 import HttpProxyAgent from 'http-proxy-agent';
 import { AddressInfo } from 'net';
@@ -54,7 +54,7 @@ describe('basic MitM tests', () => {
     await mitmServer.close();
   });
 
-  it('should send http1 response headers through proxy', async () => {
+  it('should return http1 response headers through proxy', async () => {
     const httpServer = await Helpers.runHttpServer({
       addToResponse(response) {
         response.setHeader('x-test', ['1', '2']);
@@ -136,8 +136,10 @@ describe('basic MitM tests', () => {
   });
 
   it('should support http calls through the mitm', async () => {
+    let headers: IncomingHttpHeaders;
     const server = http
       .createServer((req, res) => {
+        headers = req.headers;
         return res.end('Ok');
       })
       .listen(0)
@@ -164,6 +166,7 @@ describe('basic MitM tests', () => {
       proxyCredentials,
     );
     expect(res).toBe('Ok');
+    expect(headers['proxy-authorization']).not.toBeTruthy();
 
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
   });
