@@ -1,18 +1,19 @@
-import * as http from 'http';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import * as http2 from 'http2';
-import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
-import net from 'net';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
-import MitmRequestAgent from '../lib/MitmRequestAgent';
-import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import * as http from "http";
+import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
+import ResourceType from "@secret-agent/core-interfaces/ResourceType";
+import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
+import IHttpResourceLoadDetails from "@secret-agent/commons/interfaces/IHttpResourceLoadDetails";
+import IResourceRequest from "@secret-agent/core-interfaces/IResourceRequest";
+import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import * as http2 from "http2";
+import IResourceResponse from "@secret-agent/core-interfaces/IResourceResponse";
+import net from "net";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import Log, { IBoundLog } from "@secret-agent/commons/Logger";
+import MitmRequestAgent from "../lib/MitmRequestAgent";
+import IMitmRequestContext from "../interfaces/IMitmRequestContext";
+import { Dns } from "../lib/Dns";
 
 const { log } = Log(module);
 
@@ -23,8 +24,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   public websocketBrowserResourceIds: {
     [headersHash: string]: IResolvablePromise<string>;
   } = {};
-
-  public delegate: IHttpRequestModifierDelegate = {};
 
   public isClosing = false;
   public blockedResources: {
@@ -51,10 +50,13 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   private readonly pendingResources: IPendingResourceLoad[] = [];
 
+  private readonly dns: Dns;
+
   constructor(
     readonly sessionId: string,
     readonly useragent: string,
     readonly upstreamProxyUrlProvider: Promise<string>,
+    readonly delegate: IHttpRequestModifierDelegate = {},
   ) {
     super();
     RequestSession.sessions[sessionId] = this;
@@ -62,6 +64,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       sessionId,
     });
     this.requestAgent = new MitmRequestAgent(this);
+    this.dns = new Dns(this);
   }
 
   public async waitForBrowserResourceRequest(ctx: IMitmRequestContext) {
@@ -175,6 +178,17 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return this.upstreamProxyUrlProvider ? this.upstreamProxyUrlProvider : null;
   }
 
+  public async lookupDns(host: string) {
+    if (this.dns) {
+      try {
+        return this.dns.lookupIp(host);
+      } catch (error) {
+        // if fails, pass through to returning host untouched
+      }
+    }
+    return host;
+  }
+
   public getProxyCredentials() {
     return `secret-agent:${this.sessionId}`;
   }
@@ -185,6 +199,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       pending.load.reject(new CanceledPromiseError('Canceling: Mitm Request Session Closing'));
     }
     await this.requestAgent.close();
+    this.dns.close();
 
     // give it a second for lingering requests to finish
     setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3).unref();
@@ -337,7 +352,7 @@ export interface IRequestSessionRequestEvent {
 }
 
 export interface IRequestSessionHttpErrorEvent {
-  request: IRequestSessionResponseEvent
+  request: IRequestSessionResponseEvent;
   error: Error;
 }
 

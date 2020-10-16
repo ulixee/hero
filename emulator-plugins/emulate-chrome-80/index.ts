@@ -14,6 +14,7 @@ import {
 import { randomBytes } from 'crypto';
 import { pickRandom } from '@secret-agent/emulators/lib/Utils';
 import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
+import { ConnectionOptions } from 'tls';
 import navigator from './navigator.json';
 import chrome from './chrome.json';
 import codecs from './codecs.json';
@@ -30,6 +31,11 @@ export default class Chrome80 extends EmulatorPlugin {
   public static emulatorId = pkg.name;
   public static statcounterBrowser = 'Chrome 80.0';
   public static engine = pkg.engine;
+  public static dnsOverTlsConnectOptions = <ConnectionOptions>{
+    host: '1.1.1.1',
+    servername: 'cloudflare-dns.com',
+  };
+
   protected static agents = UserAgents.getList(
     {
       deviceCategory: 'desktop',
@@ -70,6 +76,7 @@ export default class Chrome80 extends EmulatorPlugin {
       modifyHeadersBeforeSend: modifyHeaders.bind(this, this.userAgent, headerProfiles),
       tlsProfileId: 'Chrome80',
       tcpVars: tcpVars(this.userAgent.os),
+      dnsOverTlsConnectOptions: Chrome80.dnsOverTlsConnectOptions,
     };
   }
 

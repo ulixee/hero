@@ -108,8 +108,9 @@ export default class MitmRequestAgent {
     const isKeepAlive = ((options.headers.connection ??
       options.headers.Connection) as string)?.match(/keep-alive/i);
 
+    const ipIfNeeded = await session.lookupDns(options.host);
     const mitmSocket = new MitmSocket(session.sessionId, {
-      host: options.host,
+      host: ipIfNeeded,
       port: String(options.port),
       isSsl,
       servername: options.servername || options.host,

@@ -1,9 +1,11 @@
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import { ConnectionOptions } from "tls";
 import OriginType from './OriginType';
 import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 
 export default interface IHttpRequestModifierDelegate {
+  dnsOverTlsConnectOptions?: ConnectionOptions;
   modifyHeadersBeforeSend?: (request: IResourceToModify) => { [key: string]: string };
 
   maxConnectionsPerOrigin?: number;
