@@ -352,7 +352,7 @@ describe('basic MitM tests', () => {
     const onresponse = jest.fn();
     const onError = jest.fn();
     session.on('response', onresponse);
-    session.on('httpError', onError);
+    session.on('http-error', onError);
 
     const proxyCredentials = session.getProxyCredentials();
 

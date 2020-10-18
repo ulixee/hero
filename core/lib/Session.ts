@@ -9,6 +9,7 @@ import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
+  IResourceStateChangeEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
 import IPuppetContext, {
@@ -105,7 +106,8 @@ export default class Session {
     const requestSession = this.mitmRequestSession;
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
-    requestSession.on('httpError', this.onMitmError.bind(this));
+    requestSession.on('http-error', this.onMitmError.bind(this));
+    requestSession.on('resource-state', this.onResourceStates.bind(this));
   }
 
   public async createTab() {
@@ -172,6 +174,10 @@ export default class Session {
     );
 
     this.sessionState.captureResourceError(tabId, event.request, event.error);
+  }
+
+  private onResourceStates(event: IResourceStateChangeEvent) {
+    this.sessionState.captureResourceState(event.context.id, event.context.stateChanges);
   }
 
   private async onNewTab(

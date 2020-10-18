@@ -4,6 +4,7 @@ import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpReso
 import MitmSocket from '@secret-agent/mitm-socket';
 import RequestSession from '../handlers/RequestSession';
 import CacheHandler from '../handlers/CacheHandler';
+import ResourceState from './ResourceState';
 
 export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
   id: number;
@@ -16,4 +17,6 @@ export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
   serverToProxyResponse?: http.IncomingMessage | http2.ClientHttp2Stream;
   requestSession?: RequestSession;
   proxyToServerMitmSocket?: MitmSocket;
+  stateChanges: Map<ResourceState, Date>;
+  setState(state: ResourceState);
 }

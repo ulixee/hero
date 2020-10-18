@@ -252,10 +252,10 @@ class ObjectAtPath {
     if (!element) return false;
     const { top, right, left, bottom } = element.getBoundingClientRect();
     // adjust coordinates to get more accurate results
-    if (document.elementFromPoint(left + 1, top + 1) !== element) return true;
-    if (document.elementFromPoint(left + 1, bottom - 1) !== element) return true;
-    if (document.elementFromPoint(right - 1, top + 1) !== element) return true;
-    if (document.elementFromPoint(right - 1, bottom - 1) !== element) return true;
+    if (!element.contains(document.elementFromPoint(left + 1, top + 1))) return true;
+    if (!element.contains(document.elementFromPoint(left + 1, bottom - 1))) return true;
+    if (!element.contains(document.elementFromPoint(right - 1, top + 1))) return true;
+    if (!element.contains(document.elementFromPoint(right - 1, bottom - 1))) return true;
     return false;
   }
 

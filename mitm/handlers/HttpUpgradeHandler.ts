@@ -5,6 +5,7 @@ import MitmRequestContext from '../lib/MitmRequestContext';
 import CookieHandler from './CookieHandler';
 import BaseHttpHandler from './BaseHttpHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 
@@ -15,12 +16,12 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     readonly clientHead: Buffer,
   ) {
     super(request, true, null);
+    this.context.setState(ResourceState.ClientToProxyRequest);
+    this.clientSocket.on('error', this.onError.bind(this, 'ClientToProxy.UpgradeSocketError'));
   }
 
   public async onUpgrade() {
     try {
-      this.clientSocket.on('error', this.onError.bind(this, 'ClientToProxy.UpgradeSocketError'));
-
       const proxyToServerRequest = await this.createProxyToServerRequest();
       if (!proxyToServerRequest) return;
 
@@ -37,7 +38,9 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     const url = context.url.href;
     const session = context.requestSession;
     const sessionId = session.sessionId;
-    session.emit('httpError', { request: MitmRequestContext.toEmittedResource(context), error });
+    context.setState(ResourceState.Error);
+
+    session.emit('http-error', { request: MitmRequestContext.toEmittedResource(context), error });
 
     if (!(error as any)?.isLogged) {
       log.error(`MitmWebSocket.${errorType}`, {
@@ -54,6 +57,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     serverSocket: net.Socket,
     serverHead: Buffer,
   ) {
+    this.context.setState(ResourceState.ServerToProxyOnResponse);
     serverSocket.pause();
     MitmRequestContext.readHttp1Response(this.context, serverResponse);
     this.context.serverToProxyResponse = serverResponse;
@@ -65,6 +69,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     clientSocket.on('end', () => proxyToServerMitmSocket.close());
     serverSocket.on('end', () => proxyToServerMitmSocket.close());
     proxyToServerMitmSocket.on('close', () => {
+      this.context.setState(ResourceState.End);
       // don't try to write again
       clientSocket.destroy();
       serverSocket.destroy();
@@ -77,11 +82,13 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     }
     await CookieHandler.readServerResponseCookies(this.context);
 
+    this.context.setState(ResourceState.WriteProxyToClientResponseBody);
     clientSocket.write(`${responseMessage}\r\n`, error => {
       if (error) this.onError('ProxyToClient.UpgradeWriteError', error);
     });
 
     if (!serverSocket.readable || !serverSocket.writable) {
+      this.context.setState(ResourceState.PrematurelyClosed);
       return serverSocket.destroy();
     }
     serverSocket.on('error', this.onError.bind(this, 'ServerToProxy.UpgradeSocketError'));
@@ -104,6 +111,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
 
     const formattedResponse = MitmRequestContext.toEmittedResource(this.context);
     this.context.requestSession.emit('response', formattedResponse);
+    // don't log close since this stays open...
   }
 
   public static async onUpgrade(

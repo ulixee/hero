@@ -1,11 +1,13 @@
 import Log from '@secret-agent/commons/Logger';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import ResourceState from "../interfaces/ResourceState";
 
 const { log } = Log(module);
 
 export default class CookieHandler {
   public static async setProxyToServerCookies(ctx: IMitmRequestContext) {
+    ctx.setState(ResourceState.SetCookieHeader);
     const session = ctx.requestSession;
     if (!session || !session.delegate?.getCookieHeader) return;
     // never send cookies to preflight requests
@@ -16,6 +18,7 @@ export default class CookieHandler {
   }
 
   public static async readServerResponseCookies(ctx: IMitmRequestContext) {
+    ctx.setState(ResourceState.ReadResponseCookies);
     const session = ctx.requestSession;
     if (!session || !session.delegate?.setCookie) return;
 

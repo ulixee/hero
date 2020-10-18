@@ -18,6 +18,7 @@ import SessionsDb from './SessionsDb';
 import SessionState from '../index';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
+import ResourceStatesTable from '../models/ResourceStatesTable';
 
 const { log } = Log(module);
 
@@ -32,6 +33,7 @@ export default class SessionDb {
   public readonly frames: FramesTable;
   public readonly frameNavigations: FrameNavigationsTable;
   public readonly resources: ResourcesTable;
+  public readonly resourceStates: ResourceStatesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
   public readonly domChanges: DomChangesTable;
   public readonly pageLogs: PageLogsTable;
@@ -64,6 +66,7 @@ export default class SessionDb {
     this.frames = new FramesTable(this.db);
     this.frameNavigations = new FrameNavigationsTable(this.db);
     this.resources = new ResourcesTable(this.db);
+    this.resourceStates = new ResourceStatesTable(this.db);
     this.websocketMessages = new WebsocketMessagesTable(this.db);
     this.domChanges = new DomChangesTable(this.db);
     this.pageLogs = new PageLogsTable(this.db);
@@ -80,6 +83,7 @@ export default class SessionDb {
       this.frames,
       this.frameNavigations,
       this.resources,
+      this.resourceStates,
       this.websocketMessages,
       this.domChanges,
       this.pageLogs,

@@ -129,10 +129,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.internalFrame = frame;
     this.updateUrl();
 
-    if (frame.loaderId) {
-      this.loaderIdResolvers.get(frame.loaderId).resolve();
+    let loader = this.activeLoader;
+    if (frame.loaderId && frame.loaderId !== this.activeLoaderId) {
+      loader = this.loaderIdResolvers.get(frame.loaderId) ?? this.activeLoader;
+    }
+    if (frame.unreachableUrl) {
+      loader.reject(new Error(`Unreachable url for navigation "${frame.unreachableUrl}"`));
     } else {
-      this.activeLoader.resolve();
+      loader.resolve();
     }
 
     this.emit('frame-navigated');

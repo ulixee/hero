@@ -10,6 +10,7 @@ import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 
@@ -39,12 +40,8 @@ export default class MitmRequestAgent {
       rejectUnauthorized: process.env.MITM_ALLOW_INSECURE !== 'true',
     };
 
-    let mitmSocket = await this.getAvailableSocket(
-      ctx.url.origin,
-      ctx.isSSL,
-      ctx.isUpgrade,
-      requestSettings,
-    );
+    ctx.setState(ResourceState.GetSocket);
+    let mitmSocket = await this.getAvailableSocket(ctx, requestSettings);
     if (!mitmSocket) {
       mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
     }
@@ -97,22 +94,19 @@ export default class MitmRequestAgent {
     }
   }
 
-  private async createSocketConnection(
-    origin: string,
-    isSsl: boolean,
-    isUpgrade: boolean,
-    options: RequestOptions,
-  ) {
+  private async createSocketConnection(ctx: IMitmRequestContext, options: RequestOptions) {
     const session = this.session;
     const tlsProfileId = session.delegate.tlsProfileId;
     const isKeepAlive = ((options.headers.connection ??
       options.headers.Connection) as string)?.match(/keep-alive/i);
 
+    ctx.setState(ResourceState.LookupDns);
     const ipIfNeeded = await session.lookupDns(options.host);
+    ctx.dnsResolvedIp = ipIfNeeded || 'Not Found';
     const mitmSocket = new MitmSocket(session.sessionId, {
-      host: ipIfNeeded,
+      host: ipIfNeeded || options.host,
       port: String(options.port),
-      isSsl,
+      isSsl: ctx.isSSL,
       servername: options.servername || options.host,
       rejectUnauthorized: options.rejectUnauthorized,
       clientHelloId: tlsProfileId,
@@ -122,17 +116,18 @@ export default class MitmRequestAgent {
     const tcpVars = session.delegate.tcpVars;
     if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
 
-    const proxyUrl = await session.getUpstreamProxyUrl();
-    if (proxyUrl) mitmSocket.setProxy(proxyUrl);
+    const proxyUrl = session.getUpstreamProxyUrl();
+    if (proxyUrl) {
+      ctx.setState(ResourceState.GetUpstreamProxyUrl);
+      mitmSocket.setProxy(await proxyUrl);
+    }
 
+    ctx.setState(ResourceState.SocketConnect);
     await mitmSocket.connect();
 
-    mitmSocket.on(
-      'close',
-      this.onSocketClosed.bind(this, mitmSocket, origin, isSsl, isUpgrade, options),
-    );
+    mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
 
-    if (isUpgrade) {
+    if (ctx.isUpgrade) {
       mitmSocket.socket.setNoDelay(true);
       mitmSocket.socket.setTimeout(0);
     }
@@ -164,11 +159,10 @@ export default class MitmRequestAgent {
 
   private async onSocketClosed(
     socketConnect: MitmSocket,
-    origin: string,
-    isSsl: boolean,
-    isUpgrade: boolean,
+    ctx: IMitmRequestContext,
     options: RequestOptions,
   ) {
+    const origin = ctx.url.origin;
     this.sockets.delete(socketConnect);
 
     log.stats('Socket closed', {
@@ -183,13 +177,13 @@ export default class MitmRequestAgent {
     const freeIdx = pool.free.indexOf(socketConnect);
     if (freeIdx >= 0) pool.free.splice(freeIdx, 1);
 
-    if (this.session.isClosing || isUpgrade) return;
+    if (this.session.isClosing || ctx.isUpgrade) return;
 
     // if nothing pending, return
     if (!pool.pending.length) return;
 
     // safe to create one since we are short
-    const socket = await this.getAvailableSocket(origin, isSsl, isUpgrade, options);
+    const socket = await this.getAvailableSocket(ctx, options);
     if (!socket) return;
 
     const pending = pool.pending.shift();
@@ -201,12 +195,10 @@ export default class MitmRequestAgent {
     }
   }
 
-  private getAvailableSocket(
-    origin: string,
-    isSsl: boolean,
-    isUpgrade: boolean,
-    options: RequestOptions,
-  ) {
+  private getAvailableSocket(ctx: IMitmRequestContext, options: RequestOptions) {
+    const origin = ctx.url.origin;
+    const isUpgrade = ctx.isUpgrade;
+
     const pool = this.getSocketPoolByOrigin(origin);
     return pool.queue.run(async () => {
       const http2Session = this.getHttp2Session(origin);
@@ -220,7 +212,7 @@ export default class MitmRequestAgent {
         return null;
       }
 
-      const mitmSocket = await this.createSocketConnection(origin, isSsl, isUpgrade, options);
+      const mitmSocket = await this.createSocketConnection(ctx, options);
       pool.alpn = mitmSocket.alpn;
 
       this.sockets.add(mitmSocket);
@@ -236,6 +228,7 @@ export default class MitmRequestAgent {
 
   private http1Request(ctx: IMitmRequestContext, requestSettings: http.RequestOptions) {
     const httpModule = ctx.isSSL ? https : http;
+    ctx.setState(ResourceState.CreateProxyToServerRequest);
     return httpModule.request(requestSettings);
   }
 
@@ -243,6 +236,7 @@ export default class MitmRequestAgent {
 
   private http2Request(ctx: IMitmRequestContext, connectResult: MitmSocket) {
     const client = this.createHttp2Session(ctx, connectResult);
+    ctx.setState(ResourceState.CreateProxyToServerRequest);
     return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
 
@@ -265,10 +259,12 @@ export default class MitmRequestAgent {
 
     const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
     this.session.trackResource(pushContext);
+    pushContext.setState(ResourceState.ServerToProxyPush);
     this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
 
     if (BlockHandler.shouldBlockRequest(pushContext)) {
       this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
+      pushContext.setState(ResourceState.Blocked);
       return serverPushStream.close(http2.constants.NGHTTP2_CANCEL);
     }
 
@@ -280,6 +276,7 @@ export default class MitmRequestAgent {
         sessionId,
         path: headers[':path'],
       });
+      pushContext.setState(ResourceState.PrematurelyClosed);
       return serverPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
     }
 
@@ -296,9 +293,13 @@ export default class MitmRequestAgent {
       });
     });
 
-    if (serverPushStream.destroyed) return;
+    if (serverPushStream.destroyed) {
+      pushContext.setState(ResourceState.PrematurelyClosed);
+      return;
+    }
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
+    pushContext.setState(ResourceState.ProxyToClientPush);
     clientToProxyRequest.stream.pushStream(
       pushContext.requestHeaders,
       this.handleHttp2ProxyToClientPush.bind(this, pushContext, onResponseHeaders),
@@ -311,6 +312,7 @@ export default class MitmRequestAgent {
     error: Error,
     proxyToClientPushStream: ServerHttp2Stream,
   ) {
+    pushContext.setState(ResourceState.ProxyToClientPushResponse);
     const serverToProxyPushStream = pushContext.serverToProxyResponse as ClientHttp2Stream;
     const cache = pushContext.cacheHandler;
     const session = this.session;
@@ -359,6 +361,7 @@ export default class MitmRequestAgent {
         proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
       });
 
+      pushContext.setState(ResourceState.ServerToProxyPushResponse);
       for await (const chunk of serverToProxyPushStream) {
         if (proxyToClientPushStream.destroyed || serverToProxyPushStream.destroyed) return;
         cache.onResponseData(chunk);
@@ -386,6 +389,7 @@ export default class MitmRequestAgent {
     const existing = this.getHttp2Session(origin);
     if (existing) return existing.client;
 
+    ctx.setState(ResourceState.CreateH2Session);
     const proxyToServerH2Client = http2.connect(origin, {
       createConnection: () => mitmSocket.socket,
     });

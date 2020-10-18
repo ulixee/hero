@@ -14,6 +14,7 @@ import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollE
 import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
 import IWebsocketResourceMessage from "@secret-agent/core/interfaces/IWebsocketResourceMessage";
 import type { IPuppetContextEvents } from "@secret-agent/puppet/interfaces/IPuppetContext";
+import ResourceState from "@secret-agent/mitm/interfaces/ResourceState";
 import TabNavigations from "./lib/TabNavigations";
 import { IFrameRecord } from "./models/FramesTable";
 import SessionsDb from "./lib/SessionsDb";
@@ -47,7 +48,7 @@ export default class SessionState {
 
   private readonly logger: IBoundLog;
 
-  private readonly browserRequestIdToResourceId: { [browserRequestId: string]: number } = {};
+  private readonly browserRequestIdToResources: { [browserRequestId: string]: { resourceId: number; url:string }[] } = {};
   private lastErrorTime?: Date;
   private closeDate?: Date;
 
@@ -157,8 +158,8 @@ export default class SessionState {
     message: string | Buffer;
   }) {
     const { browserRequestId, isFromServer, message } = event;
-    const resourceId = this.browserRequestIdToResourceId[browserRequestId];
-    if (!resourceId) {
+    const resources = this.browserRequestIdToResources[browserRequestId];
+    if (!resources?.length) {
       this.logger.error(`CaptureWebsocketMessageError.UnregisteredResource`, {
         browserRequestId,
         message,
@@ -166,8 +167,10 @@ export default class SessionState {
       return;
     }
 
+    const finalRedirect = resources[resources.length-1];
+
     const resourceMessage = {
-      resourceId,
+      resourceId: finalRedirect.resourceId,
       message,
       messageId: this.websocketMessageIdCounter += 1,
       source: isFromServer ? 'server' : 'client',
@@ -183,6 +186,10 @@ export default class SessionState {
       }
     }
     return resourceMessage;
+  }
+
+  public captureResourceState(id: number, state: Map<ResourceState, Date>) {
+    this.db.resourceStates.insert(id, state)
   }
 
   public captureResourceError(tabId: string, resourceEvent: IRequestSessionResponseEvent, error: Error) {
@@ -230,7 +237,14 @@ export default class SessionState {
     } = resourceEvent as IRequestSessionResponseEvent;
 
     if (browserRequestId) {
-      this.browserRequestIdToResourceId[browserRequestId] = resourceEvent.id;
+      // NOTE: browserRequestId can be shared amongst redirects
+      if (!this.browserRequestIdToResources[browserRequestId]) {
+        this.browserRequestIdToResources[browserRequestId] = [];
+      }
+      this.browserRequestIdToResources[browserRequestId].push({
+        resourceId: resourceEvent.id,
+        url: request.url
+      });
     }
 
     const resource = {
