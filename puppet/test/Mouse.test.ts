@@ -174,26 +174,6 @@ describe.each([
     }
   });
 
-  it('should tween mouse movement', async () => {
-    // The test becomes flaky on WebKit without next line.
-    // if (options.WEBKIT) await page.evaluate(() => new Promise(requestAnimationFrame));
-    await page.mouse.move(100, 100);
-    await page.evaluate(`(() => {
-        window.result = [];
-        document.addEventListener('mousemove', event => {
-          window.result.push([event.clientX, event.clientY]);
-        });
-      })()`);
-    await page.mouse.move(200, 300, { steps: 5 });
-    expect(await page.evaluate('result')).toEqual([
-      [120, 140],
-      [140, 180],
-      [160, 220],
-      [180, 260],
-      [200, 300],
-    ]);
-  });
-
   // PUPPETEER doesn't support drag and drop. Playwright has a solution that dispatches events to the page, a la
   // https://gist.github.com/wardnath/0aa9f293ee964c3a2bc149d9e924822e
   // eslint-disable-next-line jest/no-disabled-tests

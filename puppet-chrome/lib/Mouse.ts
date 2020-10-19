@@ -58,21 +58,16 @@ export default class Mouse {
     this.keyboard = keyboard;
   }
 
-  async move(x: number, y: number, options: { steps?: number } = {}): Promise<void> {
-    const { steps = 1 } = options;
-    const fromX = this.x;
-    const fromY = this.y;
-    this.x = x;
-    this.y = y;
-    for (let i = 1; i <= steps; i += 1) {
-      await this.cdpSession.send('Input.dispatchMouseEvent', {
-        type: 'mouseMoved',
-        button: this.button,
-        x: fromX + (this.x - fromX) * (i / steps),
-        y: fromY + (this.y - fromY) * (i / steps),
-        modifiers: this.keyboard.modifiers,
-      });
-    }
+  async move(x: number, y: number): Promise<void> {
+    this.x = Math.floor(x ?? 0);
+    this.y = Math.floor(y ?? 0);
+    await this.cdpSession.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      button: this.button,
+      x: this.x,
+      y: this.y,
+      modifiers: this.keyboard.modifiers,
+    });
   }
 
   async click(
@@ -117,12 +112,13 @@ export default class Mouse {
 
   async wheel(options: { deltaX?: number; deltaY?: number } = {}): Promise<void> {
     const { deltaX = 0, deltaY = 0 } = options;
+
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel',
       x: this.x,
       y: this.y,
-      deltaX,
-      deltaY,
+      deltaX: Math.round(deltaX ?? 0),
+      deltaY: Math.round(deltaY ?? 0),
       modifiers: this.keyboard.modifiers,
       pointerType: 'mouse',
     });

@@ -55,20 +55,24 @@ class JsPath {
     }
   }
 
-  public static async scrollCoordinatesIntoView(coordinates: [number, number]) {
+  public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
     const [left, top] = coordinates;
-    const isVisible =
-      top >= 0 &&
-      left >= 0 &&
-      top <= (window.innerHeight || document.documentElement.clientHeight) &&
-      left <= (window.innerWidth || document.documentElement.clientWidth);
-    if (!isVisible) {
-      window.scrollTo({
-        left,
-        top,
-        behavior: 'auto',
-      });
-    }
+    const start = new Date().getTime();
+    do {
+      if (window.scrollX >= left && window.scrollY >= top) return true;
+      await new Promise(resolve => setTimeout(resolve, 20));
+    } while (new Date().getTime() - start < timeoutMillis);
+    return false;
+  }
+
+  public static async getWindowOffset() {
+    // @ts-ignore
+    return TSON.stringify({
+      innerHeight: window.innerHeight || document.documentElement.clientHeight,
+      innerWidth: window.innerWidth || document.documentElement.clientWidth,
+      pageYOffset: window.pageYOffset || document.documentElement.scrollTop,
+      pageXOffset: window.pageXOffset || document.documentElement.scrollLeft,
+    });
   }
 
   public static simulateOptionClick(jsPath: IJsPath) {

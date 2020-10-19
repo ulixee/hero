@@ -279,7 +279,6 @@ describe('basic Mouse Event tests', () => {
 
     const scrollRecords = state.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
-    expect(scrollRecords[0].scrollY).toBeGreaterThanOrEqual(500);
 
     await core.close();
   });

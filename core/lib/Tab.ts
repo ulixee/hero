@@ -1,37 +1,33 @@
-import { v1 as uuidv1 } from 'uuid';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
-import ITabOptions from '@secret-agent/core-interfaces/ITabOptions';
-import {
-  ILocationStatus,
-  ILocationTrigger,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { AllowedNames } from '@secret-agent/commons/AllowedNames';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import { IInteractionGroups, IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import * as Url from 'url';
-import { URL } from 'url';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import Timer from '@secret-agent/commons/Timer';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import { createPromise } from '@secret-agent/commons/utils';
-import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import LocationTracker from './LocationTracker';
-import Interactor from './Interactor';
-import Session from './Session';
-import DomEnv from './DomEnv';
-import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
-import DomRecorder from './DomRecorder';
-import IWebsocketResourceMessage from '../interfaces/IWebsocketResourceMessage';
+import { v1 as uuidv1 } from "uuid";
+import Log, { IBoundLog } from "@secret-agent/commons/Logger";
+import ITabOptions from "@secret-agent/core-interfaces/ITabOptions";
+import { ILocationStatus, ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
+import { IJsPath } from "awaited-dom/base/AwaitedPath";
+import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
+import { AllowedNames } from "@secret-agent/commons/AllowedNames";
+import { ICookie } from "@secret-agent/core-interfaces/ICookie";
+import { IInteractionGroups } from "@secret-agent/core-interfaces/IInteractions";
+import * as Url from "url";
+import { URL } from "url";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import Timer from "@secret-agent/commons/Timer";
+import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
+import { createPromise } from "@secret-agent/commons/utils";
+import TimeoutError from "@secret-agent/commons/interfaces/TimeoutError";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import { IPuppetPage, IPuppetPageEvents } from "@secret-agent/puppet/interfaces/IPuppetPage";
+import { IPuppetFrameEvents } from "@secret-agent/puppet/interfaces/IPuppetFrame";
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import LocationTracker from "./LocationTracker";
+import Interactor from "./Interactor";
+import Session from "./Session";
+import DomEnv from "./DomEnv";
+import IResourceFilterProperties from "../interfaces/IResourceFilterProperties";
+import DomRecorder from "./DomRecorder";
+import IWebsocketResourceMessage from "../interfaces/IWebsocketResourceMessage";
 
 const { log } = Log(module);
 
@@ -434,16 +430,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  public async scrollJsPathIntoView(jsPath: IJsPath) {
-    await this.locationTracker.waitFor(LocationStatus.DomContentLoaded);
-    await this.domEnv.scrollJsPathIntoView(jsPath);
-  }
-
-  public async scrollCoordinatesIntoView(coordinates: IMousePositionXY) {
-    await this.locationTracker.waitFor(LocationStatus.DomContentLoaded);
-    await this.domEnv.scrollCoordinatesIntoView(coordinates);
-  }
 
   public async toJSON() {
     return {

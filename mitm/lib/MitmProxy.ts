@@ -1,7 +1,6 @@
 import net, { Socket } from 'net';
 import http, { IncomingMessage } from 'http';
 import http2 from 'http2';
-import path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
