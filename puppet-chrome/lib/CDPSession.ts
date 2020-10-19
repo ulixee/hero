@@ -82,7 +82,7 @@ export class CDPSession extends EventEmitter {
   onMessage(object: ICDPSendResponseMessage & ICDPEventMessage): void {
     this.messageEvents.emit('receive', { ...object });
     if (!object.id) {
-      this.emit(object.method, object.params);
+      setImmediate(() => this.emit(object.method, object.params));
       return;
     }
 
@@ -92,9 +92,9 @@ export class CDPSession extends EventEmitter {
     this.pendingMessages.delete(object.id);
     if (object.error) {
       const protocolError = new ProtocolError(callback.error.stack, callback.method, object.error);
-      callback.reject(protocolError);
+      setImmediate(() => callback.reject(protocolError));
     } else {
-      callback.resolve(object.result);
+      setImmediate(() => callback.resolve(object.result));
     }
   }
 

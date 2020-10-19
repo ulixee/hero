@@ -137,7 +137,8 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     if (isInitiatingNavigation) {
       frame.initiateNavigation(url, loaderId);
     }
-    await frame.waitForLoader(loaderId);
+    const loaderError = await frame.waitForLoader(loaderId);
+    if (loaderError) throw loaderError;
   }
 
   public getFrameIdForExecutionContext(executionContextId: number) {

@@ -30,6 +30,10 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     const { clientToProxyRequest, proxyToClientResponse } = request;
     clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
     if (clientToProxyRequest instanceof Http2ServerRequest) {
+      clientToProxyRequest.stream.on(
+        'error',
+        this.onError.bind(this, 'ClientToProxy.Http2StreamError'),
+      );
       const http2Session = clientToProxyRequest.stream.session;
       if (!http2Session.listenerCount('error')) {
         http2Session.on('error', this.onError.bind(this, 'ClientToProxy.Http2SessionError'));

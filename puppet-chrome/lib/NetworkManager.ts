@@ -103,7 +103,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       })
       .catch(error => {
         if (error instanceof CanceledPromiseError) return;
-        this.logger.warn('NetworkManager.continueWithAuthError', {
+        this.logger.info('NetworkManager.continueWithAuthError', {
           error,
           requestId: event.requestId,
           url: event.request.url,
@@ -118,7 +118,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       })
       .catch(error => {
         if (error instanceof CanceledPromiseError) return;
-        this.logger.warn('NetworkManager.continueRequestError', {
+        this.logger.info('NetworkManager.continueRequestError', {
           error,
           requestId: networkRequest.requestId,
           url: networkRequest.request.url,
