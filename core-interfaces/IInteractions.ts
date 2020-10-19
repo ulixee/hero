@@ -10,7 +10,6 @@ export type IInteractionGroup = IInteractionStep[];
 export interface IInteractionStep {
   command: IInteractionCommand;
   mousePosition?: IMousePosition;
-  mouseSteps?: number;
   mouseButton?: IMouseButton;
   keyboardCommands?: IKeyboardCommand[];
   keyboardDelayBetween?: number;

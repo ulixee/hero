@@ -130,4 +130,52 @@ describe('basic Interaction tests', () => {
     expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
     await core.close();
   });
+
+  it('should be able to click elements off screen', async () => {
+    koaServer.get('/longpage', ctx => {
+      ctx.body = `
+        <body>
+          <div style="height:500px">
+            <button id="button-1" onclick="click1()">Test</button>
+          </div>
+          <div style="margin-top:1500px">
+            <button id="button-2" onclick="click2()">Test 2</button>
+          </div>
+          <script>
+            var lastClicked = '';
+            function click1() {
+              lastClicked = 'click1';
+            }
+            function click2() {
+              lastClicked = 'click2';
+            }
+          </script>
+        </body>
+      `;
+    });
+    const mouseUrl = `${koaServer.baseUrl}/longpage`;
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(mouseUrl);
+
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', '#button-1']],
+      },
+    ]);
+    let lastClicked = await core.getJsValue('lastClicked');
+    expect(lastClicked.value).toBe('click1');
+
+    await core.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', '#button-2']],
+      },
+    ]);
+    lastClicked = await core.getJsValue('lastClicked');
+    expect(lastClicked.value).toBe('click2');
+
+    await core.close();
+  });
 });

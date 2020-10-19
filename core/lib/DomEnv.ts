@@ -1,17 +1,16 @@
-import * as fs from 'fs';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
-import Typeson from 'typeson';
-import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
-import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
-import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
-import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
-import DomEnvError from './DomEnvError';
-import { Serializable } from '../interfaces/ISerializable';
+import * as fs from "fs";
+import { IJsPath } from "awaited-dom/base/AwaitedPath";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import Log, { IBoundLog } from "@secret-agent/commons/Logger";
+import Typeson from "typeson";
+import TypesonRegistry from "typeson-registry/dist/presets/builtin";
+import IElementRect from "@secret-agent/injected-scripts/interfaces/IElementRect";
+import IExecJsPathResult from "@secret-agent/injected-scripts/interfaces/IExecJsPathResult";
+import IAttachedState from "@secret-agent/injected-scripts/interfaces/IAttachedStateCopy";
+import { IPuppetPage } from "@secret-agent/puppet/interfaces/IPuppetPage";
+import injectedSourceUrl from "@secret-agent/core-interfaces/injectedSourceUrl";
+import DomEnvError from "./DomEnvError";
+import { Serializable } from "../interfaces/ISerializable";
 
 const { log } = Log(module);
 const TSON = new Typeson().register(TypesonRegistry);
@@ -120,6 +119,14 @@ export default class DomEnv {
     return this.runIsolatedFn<IAttachedState>('window.SecretAgent.Fetcher.fetch', input, init);
   }
 
+  public waitForScrollOffset(scrollX: number, scrollY: number, timeoutMillis = 2e3) {
+    return this.runIsolatedFn<boolean>(
+      'window.SecretAgent.JsPath.waitForScrollOffset',
+      [scrollX, scrollY],
+      timeoutMillis,
+    );
+  }
+
   public getJsPathClientRect(jsPath: IJsPath) {
     return this.runIsolatedFn<IElementRect>('window.SecretAgent.JsPath.getClientRect', jsPath);
   }
@@ -128,15 +135,13 @@ export default class DomEnv {
     return this.runIsolatedFn<boolean>('window.SecretAgent.JsPath.simulateOptionClick', jsPath);
   }
 
-  public scrollJsPathIntoView(jsPath: IJsPath) {
-    return this.runIsolatedFn<void>('window.SecretAgent.JsPath.scrollIntoView', jsPath);
-  }
-
-  public scrollCoordinatesIntoView(coordinates: IMousePositionXY) {
-    return this.runIsolatedFn<void>(
-      'window.SecretAgent.JsPath.scrollCoordinatesIntoView',
-      coordinates,
-    );
+  public getWindowOffset() {
+    return this.runIsolatedFn<{
+      innerWidth: number;
+      innerHeight: number;
+      pageXOffset: number;
+      pageYOffset: number;
+    }>('window.SecretAgent.JsPath.getWindowOffset');
   }
 
   public locationHref() {

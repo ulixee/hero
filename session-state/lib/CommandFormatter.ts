@@ -20,7 +20,6 @@ export default class CommandFormatter {
             const extras: any = {};
             for (const [key, value] of Object.entries(y)) {
               if (
-                key === 'mouseSteps' ||
                 key === 'mouseButton' ||
                 key === 'keyboardDelayBetween' ||
                 key === 'delayMillis'

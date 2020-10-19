@@ -6,7 +6,6 @@ import {
   IKeyboardUp,
   IKeyPress,
   IMousePosition,
-  IMousePositionXY,
   InteractionCommand,
 } from '@secret-agent/core-interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
@@ -44,16 +43,24 @@ export default class Interactor {
       switch (interaction.command) {
         case InteractionCommand.move: {
           const { x, y } = await this.getPositionXY(interaction.mousePosition);
-          await this.mouse.move(x, y, { steps: interaction.mouseSteps || 1 });
+          await this.mouse.move(x, y);
           break;
         }
         case InteractionCommand.scroll: {
-          if (isMousePositionCoordinate(interaction.mousePosition)) {
-            await this.tab.scrollCoordinatesIntoView(
-              interaction.mousePosition as IMousePositionXY,
+          const windowBounds = await this.tab.domEnv.getWindowOffset();
+          const { x, y } = await this.getPositionXY(interaction.mousePosition);
+
+          const isYInViewPort = y >= 0 && y < windowBounds.innerHeight;
+          const isXInViewPort = x >= 0 && x < windowBounds.innerWidth;
+          if (!isYInViewPort || !isXInViewPort) {
+            const deltaY = isYInViewPort ? 0 : y - windowBounds.innerHeight;
+            const deltaX = isXInViewPort ? 0 : x - windowBounds.innerWidth;
+            await this.mouse.wheel({ deltaY, deltaX });
+            // need to check for offset since wheel event doesn't wait for scroll
+            await this.tab.domEnv.waitForScrollOffset(
+              deltaX + windowBounds.pageXOffset,
+              deltaY + windowBounds.pageYOffset,
             );
-          } else {
-            await this.tab.scrollJsPathIntoView(interaction.mousePosition as IJsPath);
           }
           break;
         }
