@@ -14,49 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { debug } from '@secret-agent/commons/Debug';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IConnectionTransport from '@secret-agent/puppet/interfaces/IConnectionTransport';
+import {
+  addTypedEventListener,
+  IRegisteredEventListener,
+  removeEventListeners,
+  TypedEventEmitter,
+} from '@secret-agent/commons/eventUtils';
+import IConnectionTransport, {
+  IConnectionTransportEvents,
+} from '@secret-agent/puppet/interfaces/IConnectionTransport';
+import { IPuppetConnectionEvents } from '@secret-agent/puppet/interfaces/IPuppetConnection';
+import Log from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
 
-const debugProtocolSend = debug('puppet-chrome:protocol:SEND ►');
-const debugProtocolReceive = debug('puppet-chrome:protocol:RECV ◀');
-const debugProtocolSkip = debug('puppet-chrome:protocol:SKIP _');
+const { log } = Log(module);
 
-export class Connection extends TypedEventEmitter<{ disconnected: void }> {
+export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
   public readonly rootSession: CDPSession;
   public isClosed = false;
 
   private lastId = 0;
-  private transport: IConnectionTransport;
   private sessionsById = new Map<string, CDPSession>();
 
-  constructor(transport: IConnectionTransport) {
+  private readonly registeredEvents: IRegisteredEventListener[];
+
+  constructor(readonly transport: IConnectionTransport) {
     super();
 
-    this.transport = transport;
-    this.transport.onmessage = this.onMessage.bind(this);
-    this.transport.onclose = this.onClose.bind(this);
-    this.rootSession = new CDPSession(this, '', 'browser', '');
+    const messageSink = (transport as unknown) as TypedEventEmitter<IConnectionTransportEvents>;
+    this.registeredEvents = [
+      addTypedEventListener(messageSink, 'message', this.onMessage.bind(this)),
+      addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
+    ];
+
+    this.rootSession = new CDPSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
   }
 
-  public dispose(): void {
-    this.onClose();
-    this.transport.close();
-  }
-
-  public sendMessage<T extends keyof ProtocolMapping.Commands>(message: {
-    method: T;
-    params: any;
-    sessionId?: string;
-  }): number {
+  public sendMessage<T extends keyof ProtocolMapping.Commands>(message: object): number {
     this.lastId += 1;
     const id = this.lastId;
-    const body = JSON.stringify({ ...message, id });
-    debugProtocolSend(id, body);
-    this.transport.send(body);
+    this.transport.send(JSON.stringify({ ...message, id }));
     return id;
   }
 
@@ -64,58 +63,44 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     return this.sessionsById.get(sessionId);
   }
 
-  private async onMessage(message: string): Promise<void> {
-    if (shouldChuckMessage(message)) {
-      debugProtocolSkip(`   ${message.substr(0, 50)}...`);
-      return;
-    }
+  public dispose(): void {
+    this.onClosed();
+    this.transport.close();
+  }
 
+  private async onMessage(message: string): Promise<void> {
     const object = JSON.parse(message);
-    debugProtocolReceive(object.id || '  ', message);
+    const cdpSessionId = object.params?.sessionId;
 
     if (object.method === 'Target.attachedToTarget') {
-      const sessionId = object.params.sessionId;
-      const rootSessionId = object.sessionId || '';
-      const session = new CDPSession(this, rootSessionId, object.params.targetInfo.type, sessionId);
-      this.sessionsById.set(sessionId, session);
+      const session = new CDPSession(this, object.params.targetInfo.type, cdpSessionId);
+      this.sessionsById.set(cdpSessionId, session);
     }
     if (object.method === 'Target.detachedFromTarget') {
-      const session = this.sessionsById.get(object.params.sessionId);
+      const session = this.sessionsById.get(cdpSessionId);
       if (session) {
         session.onClosed();
-        this.sessionsById.delete(object.params.sessionId);
+        this.sessionsById.delete(cdpSessionId);
       }
     }
 
-    const session = this.sessionsById.get(object.sessionId || '');
-    if (session) {
-      session.onMessage(object);
+    const cdpSession = this.sessionsById.get(object.sessionId || '');
+    if (cdpSession) {
+      // make asynchronous so we don't have accidental bugs where things are behaving synchronous until stack backs up
+      cdpSession.onMessage(object);
+    } else {
+      log.warn('MessageWithUnknownSession', { sessionId: null, message: object });
     }
   }
 
-  private onClose() {
+  private onClosed() {
     if (this.isClosed) return;
     this.isClosed = true;
-    this.transport.onmessage = null;
-    this.transport.onclose = null;
-    for (const session of this.sessionsById.values()) session.onClosed();
-    this.sessionsById.clear();
+    for (const [id, session] of this.sessionsById) {
+      session.onClosed();
+      this.sessionsById.delete(id);
+    }
+    removeEventListeners(this.registeredEvents);
     this.emit('disconnected');
   }
-}
-
-const ignoredMessages = [
-  'Page.loadEventFired',
-  'Page.domContentEventFired',
-  'Network.requestWillBeSentExtraInfo',
-  'Network.responseReceivedExtraInfo',
-  'Network.dataReceived',
-  'Network.loadingFinished',
-].map(x => `{"method":"${x}"`);
-
-function shouldChuckMessage(message: string) {
-  for (const ignored of ignoredMessages) {
-    if (message.startsWith(ignored)) return true;
-  }
-  return false;
 }

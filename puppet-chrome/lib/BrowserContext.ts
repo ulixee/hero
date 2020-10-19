@@ -6,31 +6,58 @@ import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import {
+  addTypedEventListener,
+  IRegisteredEventListener,
+  removeEventListeners,
+  TypedEventEmitter,
+} from '@secret-agent/commons/eventUtils';
+import { IBoundLog } from '@secret-agent/commons/Logger';
+import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
+import { Worker } from './Worker';
+import Frame from './Frame';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
 
 export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
   public emulation: IBrowserEmulation;
+  public logger: IBoundLog;
   private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;
   private isClosing = false;
 
-  constructor(browser: Browser, contextId: string, emulation: IBrowserEmulation) {
+  private cdpSessions = new WeakSet<CDPSession>();
+
+  private eventListeners: IRegisteredEventListener[] = [];
+  private browserContextInitiatedMessageIds = new Set<number>();
+
+  constructor(
+    browser: Browser,
+    contextId: string,
+    emulation: IBrowserEmulation,
+    logger: IBoundLog,
+  ) {
     super();
     this.browser = browser;
     this.id = contextId;
     this.emulation = emulation;
+    this.logger = logger.createChild(module, {
+      browserContextId: contextId,
+    });
     this.browser.browserContextsById.set(this.id, this);
+
+    this.subscribeToDevtoolsMessages(this.browser.cdpSession, {
+      sessionType: 'browser',
+    });
   }
 
   async newPage(): Promise<Page> {
-    const { targetId } = await this.browser.cdpSession.send('Target.createTarget', {
+    const { targetId } = await this.cdpRootSessionSend('Target.createTarget', {
       url: 'about:blank',
       browserContextId: this.id,
     });
@@ -52,7 +79,7 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
     if (!this.getPageWithId(targetId)) {
-      await this.browser.cdpSession.send('Target.attachToTarget', {
+      await this.cdpRootSessionSend('Target.attachToTarget', {
         targetId,
         flatten: true,
       });
@@ -62,11 +89,18 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
     if (this.getPageWithId(targetInfo.targetId)) return;
 
+    this.subscribeToDevtoolsMessages(cdpSession, {
+      sessionType: 'page',
+      pageTargetId: targetInfo.targetId,
+    });
+
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
     if (!opener && this.pages.length) opener = this.pages[0];
-    const page = new Page(cdpSession, targetInfo.targetId, this, opener);
+    const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
     this.pages.push(page);
+    // eslint-disable-next-line promise/catch-or-return
+    page.isReady.then(() => this.emit('page', { page }));
   }
 
   onPageDetached(targetId: string) {
@@ -78,21 +112,28 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
     }
   }
 
+  onWorkerAttached(cdpSession: CDPSession, worker: Worker, pageTargetId: string) {
+    this.subscribeToDevtoolsMessages(cdpSession, {
+      sessionType: 'worker' as const,
+      pageTargetId,
+      workerTargetId: worker.id,
+    });
+  }
+
   async close(): Promise<void> {
-    if (!this.browser.cdpSession.isConnected() || this.isClosing) return;
-    assert(this.id, 'Non-incognito profiles cannot be closed!');
+    if (this.isClosing) return;
     this.isClosing = true;
 
+    removeEventListeners(this.eventListeners);
     await Promise.all(this.pages.map(x => x.close()));
-
-    await this.browser.cdpSession.send('Target.disposeBrowserContext', {
+    await this.cdpRootSessionSend('Target.disposeBrowserContext', {
       browserContextId: this.id,
     });
     this.browser.browserContextsById.delete(this.id);
   }
 
   async getCookies(url?: URL): Promise<ICookie[]> {
-    const { cookies } = await this.browser.cdpSession.send('Storage.getCookies', {
+    const { cookies } = await this.cdpRootSessionSend('Storage.getCookies', {
       browserContextId: this.id,
     });
     return cookies
@@ -142,10 +183,60 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
 
       parsedCookies.push(cookieToSend);
     }
-    await this.browser.cdpSession.send('Storage.setCookies', {
+    await this.cdpRootSessionSend('Storage.setCookies', {
       cookies: parsedCookies,
       browserContextId: this.id,
     });
+  }
+
+  private async cdpRootSessionSend<T extends keyof ProtocolMapping.Commands>(
+    method: T,
+    params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
+  ) {
+    return this.browser.cdpSession.send(method, params, this);
+  }
+
+  private subscribeToDevtoolsMessages(
+    cdpSession: CDPSession,
+    details: Pick<
+      IPuppetContextEvents['devtools-message'],
+      'pageTargetId' | 'sessionType' | 'workerTargetId'
+    >,
+  ) {
+    if (this.cdpSessions.has(cdpSession)) return;
+
+    this.cdpSessions.add(cdpSession);
+    const shouldFilter = details.sessionType === 'browser';
+
+    const receive = addTypedEventListener(cdpSession.messageEvents, 'receive', event => {
+      if (shouldFilter) {
+        // see if this was initiated by this browser context
+        const { id } = event as any;
+        if (id && !this.browserContextInitiatedMessageIds.has(id)) return;
+      }
+      this.emit('devtools-message', {
+        direction: 'receive',
+        timestamp: new Date(),
+        ...details,
+        ...event,
+      });
+    });
+    const send = addTypedEventListener(cdpSession.messageEvents, 'send', (event, initiator) => {
+      if (shouldFilter) {
+        if (initiator && initiator !== this) return;
+        this.browserContextInitiatedMessageIds.add(event.id);
+      }
+      if (initiator && initiator instanceof Frame) {
+        (event as any).frameId = initiator.id;
+      }
+      this.emit('devtools-message', {
+        direction: 'send',
+        timestamp: new Date(),
+        ...details,
+        ...event,
+      });
+    });
+    this.eventListeners.push(receive, send);
   }
 
   private getPageWithId(targetId: string) {

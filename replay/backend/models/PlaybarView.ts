@@ -71,7 +71,8 @@ export default class PlaybarView extends ViewBackend {
     if (!tick) return;
 
     const bounds = this.browserView.getBounds();
-    rect.y += bounds.y - bounds.height;
+    // set rect y to the top of the playbar
+    rect.y = bounds.y;
     const commandLabel = tick.label;
     const commandResult =
       tick.eventType === 'command'

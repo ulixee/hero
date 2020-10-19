@@ -1,11 +1,14 @@
-import Chrome80 from "@secret-agent/emulate-chrome-80";
-import Chrome83 from "@secret-agent/emulate-chrome-83";
-import { TestServer } from "./server";
-import { IPuppetPage } from "../interfaces/IPuppetPage";
-import { getExecutablePath } from "../lib/browserPaths";
-import Puppet from "../index";
-import IPuppetContext from "../interfaces/IPuppetContext";
-import { createTestPage, ITestPage } from "./TestPage";
+import Chrome80 from '@secret-agent/emulate-chrome-80';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
+import Log from '@secret-agent/commons/Logger';
+import { TestServer } from './server';
+import { IPuppetPage } from '../interfaces/IPuppetPage';
+import { getExecutablePath } from '../lib/browserPaths';
+import Puppet from '../index';
+import IPuppetContext from '../interfaces/IPuppetContext';
+import { createTestPage, ITestPage } from './TestPage';
+
+const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
@@ -22,12 +25,15 @@ describe.each([
     const engineExecutablePath = getExecutablePath(browserEngine, revision);
     puppet = new Puppet({ engine: { browser: browserEngine, revision }, engineExecutablePath });
     await puppet.start();
-    context = await puppet.newContext({
-      userAgent: 'popupcity',
-      acceptLanguage: 'en-GB',
-      platform: 'Windows95',
-      proxyPassword: '',
-    });
+    context = await puppet.newContext(
+      {
+        userAgent: 'popupcity',
+        acceptLanguage: 'en-GB',
+        platform: 'Windows95',
+        proxyPassword: '',
+      },
+      log,
+    );
     context.on('page', event => {
       needsClosing.push(event.page);
     });
@@ -122,7 +128,6 @@ describe.each([
 
           await newPage.click('a');
           popup = await popupNavigate;
-
 
           await popup.waitOn('load', null, 5e3, true);
           expect(popup.mainFrame.url).toBe(server.emptyPage);

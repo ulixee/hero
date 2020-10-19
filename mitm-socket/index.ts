@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as net from 'net';
 import { promises as fs, unlink } from 'fs';
-import Log from '@secret-agent/commons/Logger';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
@@ -25,11 +25,13 @@ export default class MitmSocket {
   private emitter = new EventEmitter();
   private connectError?: string;
 
+  private readonly logger: IBoundLog;
+
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     const id = uuid();
     this.socketPath =
       os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
-
+    this.logger = log.createChild(module, { sessionId });
     if (connectOpts.debug === undefined) connectOpts.debug = log.level === 'stats';
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
@@ -71,7 +73,7 @@ export default class MitmSocket {
     const socket = net.connect(this.socketPath);
     this.socket = socket;
     socket.on('error', error => {
-      log.error('SocketConnectDriver.SocketError', {
+      this.logger.error('SocketConnectDriver.SocketError', {
         sessionId: this.sessionId,
         error,
         socketPath: this.socketPath,
@@ -89,6 +91,9 @@ export default class MitmSocket {
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
+      env: {
+        GODEBUG: 'netdns=cgo',
+      },
     });
     this.child = child;
     child.stdout.setEncoding('utf8');
@@ -102,8 +107,7 @@ export default class MitmSocket {
 
     child.on('error', error => {
       promise.reject(error);
-      log.error('SocketConnectDriver.ChildConnectError', {
-        sessionId: this.sessionId,
+      this.logger.error('SocketConnectDriver.ChildConnectError', {
         error,
         host: this.connectOpts?.host,
         clientHello: this.connectOpts?.clientHelloId,
@@ -178,15 +182,13 @@ export default class MitmSocket {
         if (matches?.length) {
           this.alpn = matches[1];
         }
-        log.stats('SocketHandler.Connected', {
-          sessionId: this.sessionId,
+        this.logger.stats('SocketHandler.Connected', {
           alpn: this.alpn,
           host: this.connectOpts?.host,
           clientHello: this.connectOpts?.clientHelloId,
         });
       } else if (message) {
-        log.info('SocketHandler.onData', {
-          sessionId: this.sessionId,
+        this.logger.info('SocketHandler.onData', {
           message,
           host: this.connectOpts?.host,
           clientHello: this.connectOpts?.clientHelloId,
@@ -199,14 +201,15 @@ export default class MitmSocket {
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||
-      message.includes('connection refused')
+      message.includes('connection refused') ||
+      message.includes('no such host')
     ) {
       this.connectError = message.trim();
       this.close();
     } else if (message.includes('DomainSocket -> EOF') && !this.connectOpts.keepAlive) {
       this.close();
     } else {
-      log.warn(`SocketConnectDriver.Error => ${message}`, { sessionId: this.sessionId });
+      this.logger.warn(`SocketConnectDriver.Error => ${message}`);
     }
   }
 }

@@ -1,7 +1,10 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
+import Log from '@secret-agent/commons/Logger';
 import Puppet from '../index';
 import { getExecutablePath } from '../lib/browserPaths';
+
+const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
@@ -22,13 +25,13 @@ describe.each([
   it('should reject all promises when browser is closed', async () => {
     const browser = await new Puppet(defaultBrowserOptions);
     await browser.start();
-    const page = await (await browser.newContext(defaultContextOptions)).newPage();
+    const page = await (await browser.newContext(defaultContextOptions, log)).newPage();
     let error = null;
     const neverResolves = page.evaluate(`new Promise(r => {})`).catch(e => (error = e));
     await page.evaluate(`new Promise(f => setTimeout(f, 0))`);
     await browser.close();
     await neverResolves;
-    expect(error.message).toContain('Protocol error');
+    expect(error.message).toContain('Cancel Pending Promise');
   });
 
   it('should reject if executable path is invalid', async () => {

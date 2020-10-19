@@ -18,8 +18,8 @@ import Protocol from 'devtools-protocol';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { debug } from '@secret-agent/commons/Debug';
 import { createPromise } from '@secret-agent/commons/utils';
+import { IBoundLog } from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -31,9 +31,6 @@ import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
-
-const debugError = debug('puppet-chrome:page:error');
-const debugMessages = debug('puppet-chrome:page');
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -55,6 +52,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public readonly isReady: Promise<void>;
   public windowOpenParams: Protocol.Page.WindowOpenEvent;
 
+  public get id() {
+    return this.targetId;
+  }
+
+  public get devtoolsSessionId() {
+    return this.cdpSession.id;
+  }
+
   public get mainFrame() {
     return this.framesManager.main;
   }
@@ -67,6 +72,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return [...this.workersById.values()];
   }
 
+  protected readonly logger: IBoundLog;
   private closePromise = createPromise();
   private readonly registeredEvents: IRegisteredEventListener[];
 
@@ -74,33 +80,35 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     cdpSession: CDPSession,
     targetId: string,
     browserContext: BrowserContext,
+    logger: IBoundLog,
     opener: Page | null,
   ) {
     super();
-    debugMessages('Page created', targetId);
+
+    this.logger = logger.createChild(module, {
+      targetId,
+    });
+    this.logger.info('Page.created');
     this.storeEventsWithoutListeners = true;
     this.cdpSession = cdpSession;
     this.targetId = targetId;
     this.browserContext = browserContext;
     this.keyboard = new Keyboard(cdpSession);
     this.mouse = new Mouse(cdpSession, this.keyboard);
-    this.networkManager = new NetworkManager(cdpSession);
-    this.framesManager = new FramesManager(cdpSession);
+    this.networkManager = new NetworkManager(cdpSession, this.logger);
+    this.framesManager = new FramesManager(cdpSession, this.logger);
     this.opener = opener;
 
-    this.setEventsToLog(
-      [
-        'frame-created',
-        'frame-navigated',
-        'frame-lifecycle',
-        'frame-requested-navigation',
-        'websocket-frame',
-        'websocket-handshake',
-        'navigation-response',
-        'worker',
-      ],
-      'puppet-chrome',
-    );
+    this.setEventsToLog([
+      'frame-created',
+      'frame-navigated',
+      'frame-lifecycle',
+      'frame-requested-navigation',
+      'websocket-frame',
+      'websocket-handshake',
+      'navigation-response',
+      'worker',
+    ]);
 
     this.framesManager.on('frame-lifecycle', ({ frame, name }) => {
       if (name === 'load' && frame.id === this.mainFrame?.id) {
@@ -130,7 +138,12 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       ['Page.windowOpen', this.onWindowOpen.bind(this)],
     ]);
 
-    this.isReady = this.initialize();
+    this.isReady = this.initialize().catch(error => {
+      this.logger.error('Page.initializationError', {
+        error,
+      });
+      throw error;
+    });
   }
 
   addNewDocumentScript(script: string, isolatedEnvironment: boolean) {
@@ -197,10 +210,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.framesManager.close();
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
+    this.cancelPendingEvents('Page closed', ['close']);
     Promise.all([...this.workersById.values()].map(x => x.close()))
       .finally(() => this.closePromise.resolve())
-      .catch(debugError);
-    this.cancelPendingEvents('Page closed', ['close']);
+      .catch(error => {
+        this.logger.error('Page.closeWorkersError', {
+          error,
+        });
+      });
   }
 
   private async navigateToHistory(delta: number): Promise<void> {
@@ -226,19 +243,25 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     ]);
 
     if (this.opener && this.opener.popupInitializeFn) {
-      debugMessages('Popup triggered', { targetId: this.targetId, opener: this.opener.targetId });
+      this.logger.stats('Popup triggered', {
+        targetId: this.targetId,
+        opener: this.opener.targetId,
+      });
       await this.opener.isReady;
       if (this.opener.isClosed) {
-        debugMessages('Popup canceled', this.targetId);
+        this.logger.stats('Popup canceled', {
+          targetId: this.targetId,
+        });
         return;
       }
       await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
-      debugMessages('Popup initialized', this.targetId);
+      this.logger.stats('Popup initialized', {
+        targetId: this.targetId,
+        windowOpenParams: this.opener.windowOpenParams,
+      });
     }
 
     await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
-    // after initialized, send self to emitters
-    this.browserContext.emit('page', { page: this });
   }
 
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
@@ -247,7 +270,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
     if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
-      const worker = new Worker(this.browserContext, this.networkManager, cdpSession, targetInfo);
+      const worker = new Worker(
+        this.browserContext,
+        this.networkManager,
+        cdpSession,
+        this.logger,
+        targetInfo,
+      );
+      this.browserContext.onWorkerAttached(cdpSession, worker, this.targetId);
       const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 
@@ -263,12 +293,22 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     if (waitingForDebugger) {
       return cdpSession
         .send('Runtime.runIfWaitingForDebugger')
-        .catch(debugError)
+        .catch(error => {
+          this.logger.error('Runtime.runIfWaitingForDebugger.Error', {
+            error,
+            cdpSessionId: sessionId,
+          });
+        })
         .then(() =>
           // detach from page session
-          this.cdpSession.send('Target.detachFromTarget', { sessionId: event.sessionId }),
+          this.cdpSession.send('Target.detachFromTarget', { sessionId }),
         )
-        .catch(debugError);
+        .catch(error => {
+          this.logger.error('Target.detachFromTarget', {
+            error,
+            cdpSessionId: sessionId,
+          });
+        });
     }
   }
 

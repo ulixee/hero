@@ -70,6 +70,8 @@ export default class Playbar extends Vue {
 
     ipcRenderer.on('ticks:change-offset', (e, offset: number) => {
       this.currentTickValue = offset;
+      const playbarOffsetPercent = this.closestTick(offset);
+      this.hoverTick(playbarOffsetPercent);
     });
 
     ipcRenderer.on('start', () => {
@@ -123,6 +125,17 @@ export default class Playbar extends Vue {
     return this.hoveredValue === String(value);
   }
 
+  private hoverTick(playbarOffsetPercent: number) {
+    this.hoveredValue = String(playbarOffsetPercent);
+
+    const sliderRef = this.$refs.slider as VueSlider;
+    const containerRect = sliderRef.$refs.container.getBoundingClientRect().toJSON();
+
+    containerRect.x += Math.floor((containerRect.width * Number(playbarOffsetPercent)) / 100);
+
+    ipcRenderer.send('on-tick-hover', containerRect, playbarOffsetPercent);
+  }
+
   private onHoverPlaybar(e: MouseEvent) {
     const sliderRef = this.$refs.slider as VueSlider;
     sliderRef.setScale();
@@ -130,13 +143,7 @@ export default class Playbar extends Vue {
     const pos = sliderRef.getPosByEvent(e);
 
     const playbarOffsetPercent = this.closestTick(pos);
-    this.hoveredValue = String(playbarOffsetPercent);
-
-    const containerRect = sliderRef.$refs.container.getBoundingClientRect().toJSON();
-
-    containerRect.x += Math.floor((containerRect.width * Number(playbarOffsetPercent)) / 100);
-
-    ipcRenderer.send('on-tick-hover', containerRect, playbarOffsetPercent);
+    this.hoverTick(playbarOffsetPercent);
   }
 
   private onValueChange(value: number) {

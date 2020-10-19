@@ -111,7 +111,11 @@ class JsPath {
       const box = objectAtPath.lookup().boundingClientRect;
 
       // @ts-ignore
-      return TSON.stringify(box);
+      return TSON.stringify({
+        ...box,
+        isVisible: objectAtPath.isVisible,
+        isBehindElement: objectAtPath.isBehindOtherElement,
+      });
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }

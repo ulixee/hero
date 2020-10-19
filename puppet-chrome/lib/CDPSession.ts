@@ -15,18 +15,16 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line max-classes-per-file
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
 import { EventEmitter } from 'events';
-import { assert } from '@secret-agent/commons/utils';
 import { IConnectionCallback } from '@secret-agent/puppet/interfaces/IConnectionCallback';
-import { CanceledPromiseError } from '@secret-agent/commons/eventUtils';
-import { debug } from '@secret-agent/commons/Debug';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;
 
-const debugProtocolMissed = debug('puppet-chrome:protocol:MISSED X');
 /**
  * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
  *
@@ -34,64 +32,69 @@ const debugProtocolMissed = debug('puppet-chrome:protocol:MISSED X');
  */
 export class CDPSession extends EventEmitter {
   public connection: Connection;
+  public messageEvents = new TypedEventEmitter<IMessageEvents>();
+  public get id() {
+    return this.sessionId;
+  }
+
   private readonly sessionId: string;
-  private readonly rootSessionId: string;
   private readonly targetType: string;
   private readonly pendingMessages: Map<number, IConnectionCallback> = new Map();
 
-  constructor(
-    connection: Connection,
-    rootSessionId: string,
-    targetType: string,
-    sessionId: string,
-  ) {
+  constructor(connection: Connection, targetType: string, sessionId: string) {
     super();
     this.connection = connection;
     this.targetType = targetType;
     this.sessionId = sessionId;
-    this.rootSessionId = rootSessionId;
   }
 
-  send<T extends keyof ProtocolMapping.Commands>(
+  async send<T extends keyof ProtocolMapping.Commands>(
     method: T,
-    ...paramArgs: ProtocolMapping.Commands[T]['paramsType']
+    params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
+    sendInitiator?: object,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (!this.isConnected()) {
-      return Promise.reject(
-        new Error(
-          `Protocol error (${method}): Session closed. Most likely the ${this.targetType} has been closed.`,
-        ),
+      throw new Error(
+        `Protocol error (${method}): Session closed. Most likely the ${this.targetType} has been closed.`,
       );
     }
 
-    const params = paramArgs.length ? paramArgs[0] : undefined;
-
-    const id = this.connection.sendMessage({
+    const message = {
       sessionId: this.sessionId || undefined,
       method,
-      params: params || {},
-    });
+      params,
+    };
+    const id = this.connection.sendMessage(message);
+    this.messageEvents.emit(
+      'send',
+      {
+        id,
+        ...message,
+      },
+      sendInitiator,
+    );
 
     return new Promise((resolve, reject) => {
       this.pendingMessages.set(id, { resolve, reject, error: new CanceledPromiseError(), method });
     });
   }
 
-  onMessage(object: CDPSessionOnMessageObject): void {
-    if (object.id && this.pendingMessages.has(object.id)) {
-      const callback = this.pendingMessages.get(object.id);
-      this.pendingMessages.delete(object.id);
-      if (object.error) {
-        callback.reject(createProtocolError(callback.error, callback.method, object));
-      } else {
-        callback.resolve(object.result);
-      }
-    } else {
-      assert(!object.id);
-      if (!this.listenerCount(object.method)) {
-        debugProtocolMissed(object.method);
-      }
+  onMessage(object: ICDPSendResponseMessage & ICDPEventMessage): void {
+    this.messageEvents.emit('receive', { ...object });
+    if (!object.id) {
       this.emit(object.method, object.params);
+      return;
+    }
+
+    const callback = this.pendingMessages.get(object.id);
+    if (!callback) return;
+
+    this.pendingMessages.delete(object.id);
+    if (object.error) {
+      const protocolError = new ProtocolError(callback.error.stack, callback.method, object.error);
+      callback.reject(protocolError);
+    } else {
+      callback.resolve(object.result);
     }
   }
 
@@ -105,9 +108,9 @@ export class CDPSession extends EventEmitter {
 
   onClosed(): void {
     for (const callback of this.pendingMessages.values()) {
-      callback.reject(
-        rewriteError(callback.error, `Protocol error (${callback.method}): Target closed.`),
-      );
+      const error = callback.error;
+      error.message = `Cancel Pending Promise (${callback.method}): Target closed.`;
+      callback.reject(error);
     }
     this.pendingMessages.clear();
     this.connection = null;
@@ -119,29 +122,20 @@ export class CDPSession extends EventEmitter {
   }
 }
 
-interface CDPSessionOnMessageObject {
-  id?: number;
-  method: string;
-  params: {};
-  error: { message: string; data: any };
+interface ICDPSendResponseMessage {
+  sessionId: string;
+  id: number;
+  error?: { message: string; data: any };
   result?: any;
 }
 
-class ProtocolError extends Error {}
-
-export function createProtocolError(
-  error: Error,
-  method: string,
-  object: { error: { message: string; data: any } },
-): Error {
-  let message = `Protocol error (${method}): ${object.error.message}`;
-  if ('data' in object.error) message += ` ${object.error.data}`;
-  const protocolError = new ProtocolError(message);
-  protocolError.stack = error.stack;
-  return protocolError;
+interface ICDPEventMessage {
+  sessionId: string;
+  method: string;
+  params: object;
 }
 
-export function rewriteError(error: Error, message: string): Error {
-  error.message = message;
-  return error;
+export interface IMessageEvents {
+  send: { sessionId: string | undefined; id: number; method: string; params: any };
+  receive: ICDPSendResponseMessage | ICDPEventMessage;
 }

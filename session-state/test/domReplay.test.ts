@@ -3,7 +3,10 @@ import { Helpers } from '@secret-agent/testing';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import Puppet from '@secret-agent/puppet';
+import Log from '@secret-agent/commons/Logger';
 import DomChangesTable from '../models/DomChangesTable';
+
+const { log } = Log(module);
 
 const domReplayScript = fs.readFileSync(
   require.resolve('@secret-agent/replay/injected-scripts/domReplayer'),
@@ -93,14 +96,14 @@ describe('basic Dom Replay tests', () => {
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const context = await mirrorChrome.newContext(session.getBrowserEmulation());
+    const context = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
     const mirrorPage = await context.newPage();
     const debug = false;
     if (debug) {
       // eslint-disable-next-line no-console
       mirrorPage.on('page-error', console.log);
       // eslint-disable-next-line no-console
-      mirrorPage.on('console', log => console.log(log));
+      mirrorPage.on('console', console.log);
     }
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
@@ -200,7 +203,7 @@ describe('basic Dom Replay tests', () => {
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const mirrorContext = await mirrorChrome.newContext(session.getBrowserEmulation());
+    const mirrorContext = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
     const mirrorPage = await mirrorContext.newPage();
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);

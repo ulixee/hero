@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IMousePositionXY } from '@secret-agent/core-interfaces/IInteractions';
-import Log from '@secret-agent/commons/Logger';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
@@ -50,11 +50,16 @@ ${pageScripts.domStorage}
 export default class DomEnv {
   private puppetPage: IPuppetPage;
   private isInstalled = false;
-  private tab: { sessionId: string; isClosing: boolean };
+  private tab: { isClosing: boolean };
+  private logger: IBoundLog;
 
-  constructor(tab: { sessionId: string; isClosing: boolean }, puppetPage: IPuppetPage) {
+  constructor(tab: { sessionId: string; isClosing: boolean; id: string }, puppetPage: IPuppetPage) {
     this.puppetPage = puppetPage;
     this.tab = tab;
+    this.logger = log.createChild(module, {
+      sessionId: tab.sessionId,
+      tabId: tab.id,
+    });
   }
 
   public async install() {
@@ -162,8 +167,7 @@ export default class DomEnv {
 
     if (unparsedResult === SA_NOT_INSTALLED) {
       if (retries === 0 || this.tab.isClosing) throw new Error('Injected scripts not installed.');
-      log.warn('Injected scripts not installed yet. Retrying', {
-        sessionId: this.tab.sessionId,
+      this.logger.warn('Injected scripts not installed yet. Retrying', {
         fnName,
         frames: this.puppetPage.frames.map(x => ({
           id: x.id,
@@ -180,7 +184,7 @@ export default class DomEnv {
 
     const result = unparsedResult ? TSON.parse(unparsedResult) : unparsedResult;
     if (result?.error) {
-      log.error(fnName, { sessionId: this.tab.sessionId, result });
+      this.logger.error(fnName, { result });
       throw new DomEnvError(result.error, result.pathState);
     } else {
       return result as T;

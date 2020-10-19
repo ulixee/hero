@@ -4,9 +4,12 @@ import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
+import Log from '@secret-agent/commons/Logger';
 import chrome80Dom from './chrome80DomProperties.json';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../injected-scripts';
+
+const { log } = Log(module);
 
 const { navigator } = navigatorJson;
 
@@ -26,18 +29,21 @@ const debug = process.env.DEBUG || false;
 test('it should override plugins in a browser window', async () => {
   const httpServer = await Helpers.runHttpServer();
 
-  const context = await puppet.newContext({
-    proxyPassword: '',
-    platform: 'win32',
-    acceptLanguage: 'en',
-    userAgent: 'Plugin Test',
-  });
+  const context = await puppet.newContext(
+    {
+      proxyPassword: '',
+      platform: 'win32',
+      acceptLanguage: 'en',
+      userAgent: 'Plugin Test',
+    },
+    log,
+  );
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
 
   page.on('page-error', console.log);
   if (debug) {
-    page.on('console', log => console.log(log));
+    page.on('console', console.log);
   }
   await page.addNewDocumentScript(
     getOverrideScript('plugins', {

@@ -28,10 +28,7 @@ import removeRecursive from 'rimraf';
 import * as URL from 'url';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';
-import { debug } from '@secret-agent/commons/Debug';
 import { assert } from '@secret-agent/commons/utils';
-
-const debugFetcher = debug(`puppet-chrome:fetcher`);
 
 const downloadURLs = {
   linux: '%s/chromium-browser-snapshots/Linux_x64/%d/%s.zip',
@@ -236,7 +233,7 @@ export class BrowserFetcher {
    * @param revision - The revision to get info for.
    * @returns The revision info for the given revision.
    */
-  public revisionInfo(revision: string): BrowserFetcherRevisionInfo {
+  public revisionInfo(revision: string, printRevisionInfo = true): BrowserFetcherRevisionInfo {
     const folderPath = this._getFolderPath(revision);
     let executablePath = '';
     if (this._platform === 'mac')
@@ -256,20 +253,17 @@ export class BrowserFetcher {
 
     const url = downloadURL(this._platform, this._downloadHost, revision);
     const local = fs.existsSync(folderPath);
-    debugFetcher({
-      revision,
-      executablePath,
-      folderPath,
-      local,
-      url,
-    });
-    return {
+    const revisionInfo = {
       revision,
       executablePath,
       folderPath,
       local,
       url,
     };
+    if (printRevisionInfo) {
+      npmlog(revisionInfo);
+    }
+    return revisionInfo;
   }
 
   /**
@@ -310,7 +304,7 @@ function downloadFile(
   destinationPath: string,
   progressCallback: (x: number, y: number) => void,
 ): Promise<void> {
-  debugFetcher(`Downloading binary from ${url}`);
+  npmlog(`Downloading binary from ${url}`);
   let downloadResolve;
   let downloadReject;
   let downloadedBytes = 0;
@@ -348,7 +342,7 @@ function downloadFile(
 }
 
 function install(archivePath: string, folderPath: string): Promise<unknown> {
-  debugFetcher(`Installing ${archivePath} to ${folderPath}`);
+  npmlog(`Installing ${archivePath} to ${folderPath}`);
   if (archivePath.endsWith('.zip')) return extractZip(archivePath, { dir: folderPath });
   if (archivePath.endsWith('.dmg')) {
     return mkdirAsync(folderPath).then(() => installDMG(archivePath, folderPath));
@@ -375,12 +369,12 @@ async function installDMG(dmgPath: string, folderPath: string): Promise<void> {
     const appName = fileNames.filter(item => typeof item === 'string' && item.endsWith('.app'))[0];
     if (!appName) throw new Error(`Cannot find app in ${mountPath}`);
     const copyPath = path.join(mountPath, appName);
-    debugFetcher(`Copying ${copyPath} to ${folderPath}`);
+    npmlog(`Copying ${copyPath} to ${folderPath}`);
     childProcess.execSync(`cp -R "${copyPath}" "${folderPath}"`);
   } finally {
     if (mountPath) {
       const unmountCommand = `hdiutil detach "${mountPath}" -quiet`;
-      debugFetcher(`Unmounting ${mountPath}`);
+      npmlog(`Unmounting ${mountPath}`);
       childProcess.exec(unmountCommand, err => {
         // eslint-disable-next-line no-console
         if (err) console.error(`Error unmounting dmg: ${err}`);
@@ -440,4 +434,12 @@ function httpRequest(
       : http.request(options, requestCallback);
   request.end();
   return request;
+}
+
+function npmlog(toBeLogged) {
+  const logLevel = process.env.npm_config_loglevel;
+  const logLevelDisplay = ['silent', 'error', 'warn'].indexOf(logLevel) > -1;
+
+  // eslint-disable-next-line no-console
+  if (!logLevelDisplay) console.log(toBeLogged);
 }

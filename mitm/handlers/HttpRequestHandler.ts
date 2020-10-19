@@ -99,7 +99,10 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     const { method, requestSession, proxyToClientResponse } = this.context;
     const sessionId = requestSession.sessionId;
 
-    requestSession.emit('httpError', { url, method, error });
+    requestSession.emit('httpError', {
+      request: MitmRequestContext.toEmittedResource(this.context),
+      error,
+    });
 
     const logLevel = requestSession.isClosing ? 'stats' : 'error';
 
@@ -108,8 +111,12 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       request: `${method}: ${url}`,
       error,
     });
-    proxyToClientResponse.writeHead(504);
-    proxyToClientResponse.end(`${error}`);
+    try {
+      if (!proxyToClientResponse.headersSent) proxyToClientResponse.writeHead(504);
+      if (!proxyToClientResponse.finished) proxyToClientResponse.end(`${error}`);
+    } catch (e) {
+      // drown errors
+    }
   }
 
   private async writeRequest() {

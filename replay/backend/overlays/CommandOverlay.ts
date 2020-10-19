@@ -21,7 +21,7 @@ export default class CommandOverlay extends BaseOverlay {
         }
 
         bounds.height = Math.max(this.lastHeight, 100) + 28;
-        bounds.y -= bounds.height - 25;
+        bounds.y -= bounds.height;
 
         return {
           width,

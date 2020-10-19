@@ -44,9 +44,7 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
-
-    const proxyCredentials = session.getProxyCredentials();
+    const proxyCredentials = createProxyCredentials();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
     const res = await Helpers.httpGet(httpServer.url, proxyHost, proxyCredentials);
@@ -66,9 +64,7 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession('headers', 'any agent', null);
-
-    const proxyCredentials = session.getProxyCredentials();
+    const proxyCredentials = createProxyCredentials();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
     let rawHeaders: string[] = null;
@@ -99,9 +95,7 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
-
-    const proxyCredentials = session.getProxyCredentials();
+    const proxyCredentials = createProxyCredentials();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
     process.env.MITM_ALLOW_INSECURE = 'true';
@@ -109,7 +103,6 @@ describe('basic MitM tests', () => {
     expect(res.includes('Secure as anything!')).toBeTruthy();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
     process.env.MITM_ALLOW_INSECURE = 'false';
-    await session.close();
   });
 
   it('should send an https request through upstream proxy', async () => {
@@ -162,9 +155,7 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
-
-    const proxyCredentials = session.getProxyCredentials();
+    const proxyCredentials = createProxyCredentials();
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
     const res = await Helpers.httpGet(
@@ -175,7 +166,6 @@ describe('basic MitM tests', () => {
     expect(res).toBe('Ok');
 
     expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
-    await session.close();
   });
 
   it('should strip proxy headers', async () => {
@@ -191,9 +181,7 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
-
-    const proxyCredentials = session.getProxyCredentials();
+    const proxyCredentials = createProxyCredentials();
 
     await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials, {
       'proxy-authorization': `Basic ${Buffer.from(proxyCredentials).toString('base64')}`,
@@ -209,8 +197,8 @@ describe('basic MitM tests', () => {
     const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
-
     const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
+    Helpers.needsClosing.push(session);
 
     const proxyCredentials = session.getProxyCredentials();
 
@@ -242,7 +230,8 @@ describe('basic MitM tests', () => {
     Helpers.needsClosing.push(mitmServer);
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
-    const session = new RequestSession('3', 'any agent', null);
+    const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
+    Helpers.needsClosing.push(session);
 
     const proxyCredentials = session.getProxyCredentials();
     const buffers: Buffer[] = [];
@@ -385,3 +374,10 @@ describe('basic MitM tests', () => {
     await mitmServer.close();
   });
 });
+
+function createProxyCredentials() {
+  const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
+  Helpers.needsClosing.push(session);
+
+  return session.getProxyCredentials();
+}

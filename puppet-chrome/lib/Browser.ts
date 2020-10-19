@@ -2,6 +2,8 @@ import { Protocol } from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { assert } from '@secret-agent/commons/utils';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import IPuppetBrowser from '@secret-agent/puppet/interfaces/IPuppetBrowser';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
 import { CDPSession } from './CDPSession';
@@ -9,8 +11,9 @@ import { CDPSession } from './CDPSession';
 interface IBrowserEvents {
   disconnected: void;
 }
+const { log } = Log(module);
 
-export class Browser extends TypedEventEmitter<IBrowserEvents> {
+export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
   public readonly browserContextsById = new Map<string, BrowserContext>();
   public readonly cdpSession: CDPSession;
 
@@ -29,12 +32,15 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     this.cdpSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
   }
 
-  public async newContext(emulation: IBrowserEmulation): Promise<BrowserContext> {
+  public async newContext(
+    emulation: IBrowserEmulation,
+    logger: IBoundLog,
+  ): Promise<BrowserContext> {
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
     const { browserContextId } = await this.cdpSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
     });
-    return new BrowserContext(this, browserContextId, emulation);
+    return new BrowserContext(this, browserContextId, emulation, logger);
   }
 
   public async close(): Promise<void> {
@@ -67,7 +73,6 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     return this;
   }
 
-  // NOTE: can't be async or browser contexts won't be populated
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { targetInfo, sessionId } = event;
 
@@ -76,7 +81,15 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> {
     if (targetInfo.type === 'page') {
       const cdpSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      context.onPageAttached(cdpSession, targetInfo);
+      context?.onPageAttached(cdpSession, targetInfo);
+    }
+
+    if (event.waitingForDebugger) {
+      log.error('Browser.attachedToTarget.waitingForDebugger', {
+        event,
+        sessionId: null,
+      });
+      throw new Error('Attached to target waiting for debugger!');
     }
   }
 

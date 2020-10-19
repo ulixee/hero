@@ -1,11 +1,11 @@
 import PuppetChrome from '@secret-agent/puppet-chrome';
-import { debug } from '@secret-agent/commons/Debug';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import launchProcess from './lib/launchProcess';
 import IPuppetLauncher from './interfaces/IPuppetLauncher';
 import IPuppetBrowser from './interfaces/IPuppetBrowser';
 import IBrowserEmulation from './interfaces/IBrowserEmulation';
 
-const debugLauncher = debug(`puppet:launch`);
+const { log } = Log(module);
 
 let puppBrowserCounter = 1;
 export default class Puppet {
@@ -53,16 +53,16 @@ export default class Puppet {
     this.browser = launcher.createPuppet(launchedProcess, this.engine.revision);
   }
 
-  public async newContext(emulation: IBrowserEmulation) {
+  public async newContext(emulation: IBrowserEmulation, logger: IBoundLog) {
     const browser = await this.browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(emulation);
+    return browser.newContext(emulation, logger);
   }
 
   public async close() {
-    debugLauncher('Closing puppet browser');
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
+    log.stats('Puppet.Closing');
 
     const browserPromise = this.browser;
     this.browser = null;
@@ -71,7 +71,7 @@ export default class Puppet {
       const browser = await browserPromise;
       if (browser) await browser.close();
     } catch (error) {
-      debugLauncher('ClosingPuppetError', { sessionId: null, error });
+      log.error('Puppet.Closing:Error', { sessionId: null, error });
     }
   }
 }

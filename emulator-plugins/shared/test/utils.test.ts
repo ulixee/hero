@@ -4,9 +4,12 @@ import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import Log from '@secret-agent/commons/Logger';
 import inspectHierarchy from './inspectHierarchy';
 import { proxyFunction } from '../injected-scripts/utils';
 import { getOverrideScript } from '../injected-scripts';
+
+const { log } = Log(module);
 
 let puppet: Puppet;
 beforeAll(async () => {
@@ -57,18 +60,21 @@ test('should be able to override a function', async () => {
 test('should override a function and clean error stacks', async () => {
   const httpServer = await Helpers.runHttpServer();
 
-  const context = await puppet.newContext({
-    proxyPassword: '',
-    platform: 'win32',
-    acceptLanguage: 'en',
-    userAgent: 'Plugin Test',
-  });
+  const context = await puppet.newContext(
+    {
+      proxyPassword: '',
+      platform: 'win32',
+      acceptLanguage: 'en',
+      userAgent: 'Plugin Test',
+    },
+    log,
+  );
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
 
   page.on('page-error', console.log);
   if (debug) {
-    page.on('console', log => console.log(log));
+    page.on('console', console.log);
   }
   await page.addNewDocumentScript(
     getOverrideScript('navigator', {
