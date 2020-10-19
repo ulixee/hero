@@ -1,12 +1,9 @@
 import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import Log from '@secret-agent/commons/Logger';
 import { ConnectionOptions } from 'tls';
 import moment from 'moment';
 import net from 'net';
 import DnsOverTlsSocket from './DnsOverTlsSocket';
 import RequestSession from '../handlers/RequestSession';
-
-const { log } = Log(module);
 
 export class Dns {
   public socket: DnsOverTlsSocket;
@@ -23,7 +20,7 @@ export class Dns {
     try {
       // get cached (or in process resolver)
       const cachedRecord = await this.getNextCachedARecord(host);
-      if (cachedRecord) return cachedRecord.ip;
+      if (cachedRecord) return cachedRecord;
     } catch (error) {
       if (retries === 0) throw error;
       // if the cache lookup failed, likely because another lookup failed... try again
@@ -31,17 +28,8 @@ export class Dns {
     }
 
     // if not found in cache, perform dns lookup
-    try {
-      const dnsEntry = await this.lookupDnsEntry(host);
-      return this.nextIp(dnsEntry);
-    } catch (error) {
-      log.error('DnsLookup.Error', {
-        sessionId: this.requestSession.sessionId,
-        error,
-      });
-      // fallback to host
-      return host;
-    }
+    const dnsEntry = await this.lookupDnsEntry(host);
+    return this.nextIp(dnsEntry);
   }
 
   public close() {
@@ -56,7 +44,7 @@ export class Dns {
       const dnsEntry = createPromise<IDnsEntry>();
       this.dnsEntries.set(host, dnsEntry);
 
-      if (!this.socket?.isActive) {
+      if (!this.socket) {
         this.socket = new DnsOverTlsSocket(
           this.dnsServer,
           this.requestSession,
@@ -93,7 +81,7 @@ export class Dns {
         // move record to back
         dnsEntry.aRecords.splice(i, 1);
         dnsEntry.aRecords.push(record);
-        return record;
+        return record.ip;
       }
     }
     return null;

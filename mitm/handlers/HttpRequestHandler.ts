@@ -9,6 +9,7 @@ import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
 import BaseHttpHandler from './BaseHttpHandler';
 import HttpResponseCache from '../lib/HttpResponseCache';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 const redirectCodes = new Set([300, 301, 302, 303, 305, 307, 308]);
@@ -23,23 +24,29 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     >,
   ) {
     super(request, false, HttpRequestHandler.responseCache);
+    this.context.setState(ResourceState.ClientToProxyRequest);
+
+    // register error listeners first
+    const { clientToProxyRequest, proxyToClientResponse } = request;
+    clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
+    if (clientToProxyRequest instanceof Http2ServerRequest) {
+      clientToProxyRequest.stream.on(
+        'error',
+        this.onError.bind(this, 'ClientToProxy.Http2StreamError'),
+      );
+      const http2Session = clientToProxyRequest.stream.session;
+      if (!http2Session.listenerCount('error')) {
+        http2Session.on('error', this.onError.bind(this, 'ClientToProxy.Http2SessionError'));
+      }
+    }
+    proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
   }
 
   public async onRequest() {
-    const { clientToProxyRequest, proxyToClientResponse } = this.context;
+    const { clientToProxyRequest } = this.context;
 
     try {
       clientToProxyRequest.pause();
-      clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
-      if (clientToProxyRequest instanceof Http2ServerRequest) {
-        if (clientToProxyRequest.stream.session.listenerCount('error') === 0) {
-          clientToProxyRequest.stream.session.on(
-            'error',
-            this.onError.bind(this, 'ClientToProxy.SessionError'),
-          );
-        }
-      }
-      proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
 
       const proxyToServerRequest = await this.createProxyToServerRequest();
       if (!proxyToServerRequest) return;
@@ -61,6 +68,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     rawHeaders?: string[],
   ) {
     const context = this.context;
+    context.setState(ResourceState.ServerToProxyOnResponse);
+
     if (response instanceof http.IncomingMessage) {
       MitmRequestContext.readHttp1Response(context, response);
     } else {
@@ -91,6 +100,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     await this.writeResponse();
 
+    context.setState(ResourceState.End);
+
     process.nextTick(agent => agent.freeSocket(context), context.requestSession.requestAgent);
   }
 
@@ -99,7 +110,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     const { method, requestSession, proxyToClientResponse } = this.context;
     const sessionId = requestSession.sessionId;
 
-    requestSession.emit('httpError', {
+    this.context.setState(ResourceState.Error);
+    requestSession.emit('http-error', {
       request: MitmRequestContext.toEmittedResource(this.context),
       error,
     });
@@ -120,6 +132,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
   }
 
   private async writeRequest() {
+    this.context.setState(ResourceState.WriteProxyToServerRequestBody);
     const { proxyToServerRequest, clientToProxyRequest } = this.context;
 
     const onWriteError = error => {
@@ -142,6 +155,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       log.warn('Error.NoProxyToClientResponse', {
         sessionId: context.requestSession.sessionId,
       });
+      context.setState(ResourceState.PrematurelyClosed);
       return;
     }
 
@@ -157,6 +171,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       context.responseTrailers = headers;
     });
 
+    context.setState(ResourceState.WriteProxyToClientResponseBody);
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
       if (data && !(proxyToClientResponse as Http2ServerResponse).stream?.destroyed) {

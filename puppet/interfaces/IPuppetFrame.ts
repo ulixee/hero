@@ -8,7 +8,7 @@ export interface IPuppetFrame {
   navigationReason?: string;
   disposition?: string;
   securityOrigin: string;
-  waitForLoader(loaderId?: string): Promise<void>;
+  waitForLoader(loaderId?: string): Promise<Error | undefined>;
   evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
 }
 

@@ -52,7 +52,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   protected readonly logger: IBoundLog;
 
-  private loaderIdResolvers = new Map<string, IResolvablePromise<void>>();
+  private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private activeLoaderId: string;
   private readonly activeContexts: Set<number>;
   private readonly cdpSession: CDPSession;
@@ -129,10 +129,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.internalFrame = frame;
     this.updateUrl();
 
-    if (frame.loaderId) {
-      this.loaderIdResolvers.get(frame.loaderId).resolve();
+    let loader = this.activeLoader;
+    if (frame.loaderId && frame.loaderId !== this.activeLoaderId) {
+      loader = this.loaderIdResolvers.get(frame.loaderId) ?? this.activeLoader;
+    }
+    if (frame.unreachableUrl) {
+      loader.resolve(new Error(`Unreachable url for navigation "${frame.unreachableUrl}"`));
     } else {
-      this.activeLoader.resolve();
+      loader.resolve();
     }
 
     this.emit('frame-navigated');
@@ -159,10 +163,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   }
 
   public async waitForLoader(loaderId?: string) {
-    await this.loaderIdResolvers.get(loaderId ?? this.activeLoaderId)?.promise;
+    const hasLoaderError = await this.loaderIdResolvers.get(loaderId ?? this.activeLoaderId)
+      ?.promise;
+    if (hasLoaderError) return hasLoaderError;
+
+    if (!this.getActiveContextId(false)) {
+      await this.waitForDefaultContext();
+    }
   }
 
-  public async onLifecycleEvent(name: string, pageLoaderId?: string) {
+  public onLifecycleEvent(name: string, pageLoaderId?: string) {
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init') {
       if (!this.loaderIdResolvers.has(loaderId)) {
@@ -173,7 +183,11 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
         this.setLoader(loaderId);
       }
     }
-    if (name === 'commit') {
+
+    if (
+      (name === 'commit' || name === 'DOMContentLoaded' || name === 'load') &&
+      !this.loaderIdResolvers.get(loaderId)?.isResolved
+    ) {
       this.logger.info('Resolving loader', {
         loaderId,
         frameId: this.id,
@@ -216,9 +230,6 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   public async waitForActiveContextId(isolatedContext = true): Promise<number> {
     if (!this.isAttached()) throw new Error('Execution Context is not available in detached frame');
-    if (this.activeLoaderId) {
-      await this.loaderIdResolvers.get(this.activeLoaderId).promise;
-    }
 
     const existing = this.getActiveContextId(isolatedContext);
     if (existing) return existing;
@@ -231,8 +242,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     }
 
     await this.waitForDefaultContext();
-
-    return this.waitForActiveContextId(isolatedContext);
+    return this.getActiveContextId(isolatedContext);
   }
 
   public getActiveContextId(isolatedContext: boolean) {
@@ -262,18 +272,21 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   private setLoader(loaderId: string) {
     if (!loaderId) return;
     if (loaderId === this.activeLoaderId) return;
-    this.loaderLifecycles.set(loaderId, {});
-    this.activeLoaderId = loaderId;
-    const newResolver = createPromise();
-    if (loaderId !== 'inpage') {
-      const promise = newResolver.promise;
-      newResolver.promise = this.createIsolatedWorld().then(promise as any);
-      if (!this.getActiveContextId(false)) {
-        newResolver.promise = this.waitForDefaultContext().then(newResolver.promise as any);
+    if (loaderId === 'inpage' || !this.loaderIdResolvers.has(loaderId)) {
+      this.loaderLifecycles.set(loaderId, {});
+      const newResolver = createPromise();
+      if (loaderId !== 'inpage') {
+        const chain = newResolver.promise;
+        newResolver.promise = this.createIsolatedWorld().then(() => chain);
       }
-    }
 
-    this.loaderIdResolvers.set(loaderId, newResolver);
+      if (this.activeLoader && !this.activeLoader.isResolved) {
+        this.activeLoader.resolve(newResolver.promise);
+      }
+
+      this.loaderIdResolvers.set(loaderId, newResolver);
+    }
+    this.activeLoaderId = loaderId;
   }
 
   private async createIsolatedWorld() {

@@ -5,7 +5,7 @@ import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commo
 import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { IBoundLog } from '@secret-agent/commons/Logger';
-import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -20,6 +20,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   protected readonly logger: IBoundLog;
   private readonly cdpSession: CDPSession;
   private readonly attemptedAuthentications = new Set<string>();
+  private readonly publishedResources = new Set<string>();
   private emulation?: IBrowserEmulation;
 
   private parentManager?: NetworkManager;
@@ -102,7 +103,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       })
       .catch(error => {
         if (error instanceof CanceledPromiseError) return;
-        this.logger.warn('NetworkManager.continueWithAuthError', {
+        this.logger.info('NetworkManager.continueWithAuthError', {
           error,
           requestId: event.requestId,
           url: event.request.url,
@@ -117,29 +118,33 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       })
       .catch(error => {
         if (error instanceof CanceledPromiseError) return;
-        this.logger.warn('NetworkManager.continueRequestError', {
+        this.logger.info('NetworkManager.continueRequestError', {
           error,
           requestId: networkRequest.requestId,
           url: networkRequest.request.url,
         });
       });
 
+    const resource = <IPuppetNetworkEvents['resource-will-be-requested']>{
+      browserRequestId: networkRequest.requestId,
+      resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
+      url: networkRequest.request.url,
+      method: networkRequest.request.method,
+      hasUserGesture: false,
+      origin: networkRequest.request.headers.Origin,
+      referer: networkRequest.request.headers.Referer,
+      documentUrl: networkRequest.request.headers.Referer,
+      isDocumentNavigation: false,
+      frameId: networkRequest.frameId,
+      redirectedFromUrl: null,
+    };
     // requests from service workers (and others?) will never register with RequestWillBeSentEvent
     // -- they don't have networkIds
     if (!networkRequest.networkId) {
-      this.emit('resource-will-be-requested', {
-        browserRequestId: networkRequest.requestId,
-        resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
-        url: networkRequest.request.url,
-        method: networkRequest.request.method,
-        hasUserGesture: false,
-        origin: networkRequest.request.headers.Origin,
-        referer: networkRequest.request.headers.Referer,
-        documentUrl: networkRequest.request.headers.Referer,
-        isDocumentNavigation: false,
-        frameId: networkRequest.frameId,
-        redirectedFromUrl: null,
-      });
+      this.emitResource(resource);
+    } else {
+      // send on delay in case we never get a Network.requestWillBeSent (happens for certain types of requests)
+      setTimeout(this.emitResource.bind(this), 500, resource).unref();
     }
   }
 
@@ -148,8 +153,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
 
     const redirectedFromUrl = networkRequest.redirectResponse?.url;
-
-    this.emit('resource-will-be-requested', {
+    const resource = {
       browserRequestId: networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.type),
       url: networkRequest.request.url,
@@ -161,7 +165,23 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       isDocumentNavigation: isNavigation,
       frameId: networkRequest.frameId,
       redirectedFromUrl,
-    });
+    };
+    const didEmit = this.emitResource(resource);
+    if (!didEmit) {
+      // this can happen in 2 cases observed so far:
+      // 1: the fetch comes first and Network.requestWillBeSent takes > 500 ms
+      // 2: a duplicated resource is loaded across frames and piggybacks the first request
+      this.logger.warn('ResourceEmittedTwice', resource);
+    }
+  }
+
+  private emitResource(event: IPuppetNetworkEvents['resource-will-be-requested']) {
+    // NOTE: same requestId will be used in devtools for redirected resources
+    if (this.publishedResources.has(`${event.browserRequestId}_${event.url}`)) return false;
+    this.publishedResources.add(`${event.browserRequestId}_${event.url}`);
+
+    this.emit('resource-will-be-requested', event);
+    return true;
   }
 
   private async onNetworkResponseReceived(event: ResponseReceivedEvent) {

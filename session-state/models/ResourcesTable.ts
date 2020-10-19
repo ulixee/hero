@@ -34,6 +34,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['clientAlpn', 'TEXT'],
         ['serverAlpn', 'TEXT'],
         ['localAddress', 'TEXT'],
+        ['dnsResolvedIp', 'TEXT'],
         ['remoteAddress', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
@@ -55,6 +56,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       clientAlpn: string;
       serverAlpn: string;
       localAddress: string;
+      dnsResolvedIp?: string;
       wasCached?: boolean;
       didBlockResource: boolean;
       browserRequestId?: string;
@@ -97,6 +99,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.clientAlpn,
       extras.serverAlpn,
       extras.localAddress,
+      extras.dnsResolvedIp,
       meta.response?.remoteAddress,
       extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
@@ -153,6 +156,7 @@ export interface IResourcesRecord {
   clientAlpn: string;
   serverAlpn: string;
   localAddress: string;
+  dnsResolvedIp: string;
   remoteAddress: string;
   usedArtificialCache: boolean;
   didBlockResource: boolean;

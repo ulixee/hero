@@ -6,10 +6,12 @@ import * as http from 'http';
 import http2 from 'http2';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 export default class HeadersHandler {
   public static async waitForBrowserRequest(ctx: IMitmRequestContext) {
+    ctx.setState(ResourceState.WaitForBrowserRequest);
     const session = ctx.requestSession;
 
     const { method, requestHeaders } = ctx;
@@ -46,6 +48,7 @@ export default class HeadersHandler {
   }
 
   public static modifyHeaders(ctx: IMitmRequestContext) {
+    ctx.setState(ResourceState.ModifyHeaders);
     const session = ctx.requestSession;
     if (session.delegate?.modifyHeadersBeforeSend) {
       const updatedHeaders = session.delegate.modifyHeadersBeforeSend({

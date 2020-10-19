@@ -81,13 +81,12 @@ export default class Mouse {
     options: IMouseOptions & { delay?: number } = {},
   ): Promise<void> {
     const { delay = null } = options;
+    await this.move(x, y);
+    await this.down(options);
     if (delay !== null) {
-      await Promise.all([this.move(x, y), this.down(options)]);
       await new Promise(resolve => setTimeout(resolve, delay));
-      await this.up(options);
-    } else {
-      await Promise.all([this.move(x, y), this.down(options), this.up(options)]);
     }
+    await this.up(options);
   }
 
   async down(options: IMouseOptions = {}): Promise<void> {

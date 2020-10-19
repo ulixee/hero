@@ -21,8 +21,7 @@ export default class DnsOverTlsSocket {
 
   private pending = new Map<number, IResolvablePromise<IDnsResponse>>();
 
-  private currentMessage: Buffer = null;
-  private packetLength = 0;
+  private buffer: Buffer = null;
   private isClosing = false;
 
   private readonly onClose?: () => void;
@@ -97,30 +96,36 @@ export default class DnsOverTlsSocket {
   }
 
   private onData(data: Buffer) {
-    if (this.currentMessage === null) {
-      this.currentMessage = Buffer.from(data);
+    if (this.buffer === null) {
+      this.buffer = Buffer.from(data);
     } else {
-      this.currentMessage = Buffer.concat([this.currentMessage, data]);
+      this.buffer = Buffer.concat([this.buffer, data]);
     }
 
-    if (this.currentMessage.byteLength >= 2 && !this.packetLength) {
+    while (this.buffer.byteLength > 2) {
+      const messageLength = this.getMessageLength();
+      if (messageLength < 12) {
+        return this.disconnect();
+      }
+
+      if (this.buffer.byteLength < messageLength + 2) return;
+
+      // append prefixed byte length
+      const next = this.buffer.slice(0, messageLength + 2);
+      const decoded = dnsPacket.streamDecode(next) as IDnsResponse;
+      this.pending.get(decoded.id)?.resolve(decoded);
+      this.pending.delete(decoded.id);
+      this.buffer = this.buffer.slice(messageLength + 2);
+    }
+  }
+
+  private getMessageLength() {
+    if (this.buffer.byteLength >= 2) {
       // https://tools.ietf.org/html/rfc7858#section-3.3
       // https://tools.ietf.org/html/rfc1035#section-4.2.2
       // The message is prefixed with a two byte length field which gives the
       // message length, excluding the two byte length field.
-      this.packetLength = this.currentMessage.readUInt16BE(0);
-      if (this.packetLength < 12) {
-        return this.disconnect();
-      }
-    }
-
-    // append prefixed byte length
-    if (this.currentMessage.byteLength === this.packetLength + 2) {
-      const decoded = dnsPacket.streamDecode(this.currentMessage) as IDnsResponse;
-      this.pending.get(decoded.id)?.resolve(decoded);
-      this.pending.delete(decoded.id);
-      this.currentMessage = null;
-      this.packetLength = 0;
+      return this.buffer.readUInt16BE(0);
     }
   }
 }

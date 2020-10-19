@@ -430,7 +430,7 @@ describe.each([
       expect(frame.url).toBe(server.emptyPage);
     });
 
-    it('should work with goto following click', async () => {
+    it('should be able to navigate directly following click', async () => {
       server.setRoute('/login.html', async (req, res) => {
         res.setHeader('Content-Type', 'text/html');
         res.end(`You are logged in`);
@@ -445,7 +445,8 @@ describe.each([
       await page.click('input[type=text]');
       await page.keyboard.type('admin');
       await page.click('input[type=submit]');
-      await expect(page.goto(server.emptyPage)).resolves.toBe(undefined);
+      
+      await expect(page.navigate(server.emptyPage)).resolves.toBe(undefined);
     });
   });
 });

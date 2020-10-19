@@ -1,19 +1,20 @@
-import * as http from "http";
-import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
-import ResourceType from "@secret-agent/core-interfaces/ResourceType";
-import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
-import IHttpResourceLoadDetails from "@secret-agent/commons/interfaces/IHttpResourceLoadDetails";
-import IResourceRequest from "@secret-agent/core-interfaces/IResourceRequest";
-import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
-import * as http2 from "http2";
-import IResourceResponse from "@secret-agent/core-interfaces/IResourceResponse";
-import net from "net";
-import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
-import Log, { IBoundLog } from "@secret-agent/commons/Logger";
-import MitmRequestAgent from "../lib/MitmRequestAgent";
-import IMitmRequestContext from "../interfaces/IMitmRequestContext";
-import { Dns } from "../lib/Dns";
+import * as http from 'http';
+import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
+import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import * as http2 from 'http2';
+import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import net from 'net';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import MitmRequestAgent from '../lib/MitmRequestAgent';
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import { Dns } from '../lib/Dns';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 
@@ -183,6 +184,10 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       try {
         return this.dns.lookupIp(host);
       } catch (error) {
+        log.error('DnsLookup.Error', {
+          sessionId: this.sessionId,
+          error,
+        });
         // if fails, pass through to returning host untouched
       }
     }
@@ -285,6 +290,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     if (h2Push) return h2Push;
     if (isHttp2Push && matches.length) return matches[0];
 
+    if (matches.length === 1) return matches[0];
+
     if (method === 'OPTIONS') {
       return matches.find(x => x.origin === origin);
     }
@@ -327,13 +334,20 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 interface IRequestSessionEvents {
   response: IRequestSessionResponseEvent;
   request: IRequestSessionRequestEvent;
-  httpError: IRequestSessionHttpErrorEvent;
+  'http-error': IRequestSessionHttpErrorEvent;
+  'resource-state': IResourceStateChangeEvent;
+}
+
+export interface IResourceStateChangeEvent {
+  context: IMitmRequestContext;
+  state: ResourceState;
 }
 
 export interface IRequestSessionResponseEvent extends IRequestSessionRequestEvent {
   browserRequestId: string;
   response: IResourceResponse;
   wasCached: boolean;
+  dnsResolvedIp?: string;
   resourceType: ResourceType;
   body: Buffer;
   redirectedToUrl?: string;

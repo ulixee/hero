@@ -20,7 +20,7 @@ export default interface IHttpResourceLoadDetails {
   firstRedirectingUrl?: string; // track back to first redirection
   redirectedToUrl?: string;
   clientAlpn: string;
-
+  dnsResolvedIp?: string;
   url: URL;
   method: string;
   requestTime: Date;

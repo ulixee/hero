@@ -52,6 +52,15 @@ describe('DnsOverTlsSocket', () => {
     expect(response.answers).toHaveLength(2);
   });
 
+  test('should be able to lookup multiple records at once', async () => {
+    const response = await Promise.all([
+      cloudflareDnsSocket.lookupARecords('headers.ulixee.org'),
+      cloudflareDnsSocket.lookupARecords('tls.ulixee.org'),
+      cloudflareDnsSocket.lookupARecords('stateofscraping.org'),
+    ])
+    expect(response).toHaveLength(3);
+  });
+
   test('should be able to lookup with google', async () => {
     let socket: DnsOverTlsSocket;
     try {

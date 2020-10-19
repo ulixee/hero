@@ -5,6 +5,7 @@ import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import HttpResponseCache from '../lib/HttpResponseCache';
+import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 
@@ -39,9 +40,10 @@ export default abstract class BaseHttpHandler {
         method: context.method,
         ws: context.isUpgrade,
       });
-      if (session.isClosing) return;
+      if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 
       if (BlockHandler.shouldBlockRequest(context)) {
+        context.setState(ResourceState.Blocked);
         log.info(`Http.RequestBlocked`, {
           sessionId: session.sessionId,
           url: context.url.href,
@@ -58,7 +60,7 @@ export default abstract class BaseHttpHandler {
       context.cacheHandler.onRequest();
 
       // do one more check on the session before doing a connect
-      if (session.isClosing) return;
+      if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 
       this.context.proxyToServerRequest = await session.requestAgent.request(context);
       this.context.proxyToServerRequest.on(

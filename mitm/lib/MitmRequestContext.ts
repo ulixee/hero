@@ -13,6 +13,7 @@ import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
 import CacheHandler from '../handlers/CacheHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { parseRawHeaders } from './Utils';
+import ResourceState from '../interfaces/ResourceState';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
@@ -41,6 +42,7 @@ export default class MitmRequestContext {
       url.protocol = expectedProtocol;
     }
 
+    const state = new Map<ResourceState, Date>();
     const requestHeaders = parseRawHeaders(clientToProxyRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
       id: this.contextIdCounter += 1,
@@ -63,6 +65,11 @@ export default class MitmRequestContext {
       originType: this.getOriginType(url, requestHeaders),
       didBlockResource: false,
       cacheHandler: null,
+      stateChanges: state,
+      setState(stateStep: ResourceState) {
+        state.set(stateStep, new Date());
+        requestSession.emit('resource-state', { context: ctx, state: stateStep });
+      },
     };
 
     if (protocol === 'ws') {
@@ -78,6 +85,7 @@ export default class MitmRequestContext {
     const url = new URL(
       `${parentContext.url.protocol}//${requestHeaders[':authority']}${requestHeaders[':path']}`,
     );
+    const state = new Map<ResourceState, Date>();
     const ctx = {
       id: this.contextIdCounter += 1,
       url,
@@ -106,6 +114,11 @@ export default class MitmRequestContext {
       requestTime: new Date(),
       didBlockResource: false,
       cacheHandler: null,
+      stateChanges: state,
+      setState(stateStep: ResourceState) {
+        state.set(stateStep, new Date());
+        parentContext.requestSession.emit('resource-state', { context: ctx, state: stateStep });
+      },
     } as IMitmRequestContext;
 
     ctx.cacheHandler = new CacheHandler(parentContext.cacheHandler.responseCache, ctx);
@@ -141,6 +154,7 @@ export default class MitmRequestContext {
       resourceType: ctx.resourceType,
       body: ctx.cacheHandler.buffer,
       localAddress: ctx.localAddress,
+      dnsResolvedIp: ctx.dnsResolvedIp,
       originalHeaders: ctx.requestOriginalHeaders,
       clientAlpn: ctx.clientAlpn,
       serverAlpn: ctx.proxyToServerMitmSocket?.alpn,
