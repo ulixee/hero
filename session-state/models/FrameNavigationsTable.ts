@@ -1,9 +1,9 @@
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import INavigation from '@secret-agent/core-interfaces/INavigation';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class FrameNavigationsTable extends BaseTable<IFrameNavigationRecord> {
+export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
   private idCounter = 0;
 
   constructor(readonly db: SqliteDatabase) {

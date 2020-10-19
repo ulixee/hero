@@ -8,6 +8,7 @@ import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession from '../handlers/RequestSession';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
+import NetworkDb from './NetworkDb';
 
 const { log } = Log(module);
 const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
@@ -39,13 +40,14 @@ export default class MitmProxy {
     [hostname: string]: Promise<void>;
   } = {};
 
-  private readonly sslCaDir: string;
   private ca: CertificateAuthority;
+  private readonly db: NetworkDb;
 
   constructor(options: IMitmProxyOptions) {
     this.options = options || {};
 
-    this.sslCaDir = options.sslCaDir || path.resolve(process.cwd(), '.mitm-ca');
+    this.db = new NetworkDb(options.sslCaDir || process.cwd());
+    this.ca = new CertificateAuthority(this.db);
     this.httpServer = http.createServer();
     this.httpServer.on('connect', this.onHttpConnect.bind(this));
     this.httpServer.on('clientError', this.onClientError.bind(this, false));
@@ -59,8 +61,6 @@ export default class MitmProxy {
   }
 
   public async listen() {
-    this.ca = await CertificateAuthority.create(this.sslCaDir);
-
     await startServer(this.httpServer, this.options.port ?? 0);
 
     await startServer(this.http2Server);
@@ -74,6 +74,7 @@ export default class MitmProxy {
   public async close() {
     if (this.isClosing) return;
     this.isClosing = true;
+    this.db.close();
     while (this.serverConnects.length) {
       const connect = this.serverConnects.shift();
       connect.destroy();
@@ -274,8 +275,8 @@ export default class MitmProxy {
   }
 
   private async addSecureContext(hostname: string) {
-    const [key, cert] = await this.ca.getCertificateKeys(hostname);
-    this.http2Server.addContext(hostname, { key, cert });
+    const credentials = await this.ca.getCertificateKeys(hostname);
+    this.http2Server.addContext(hostname, credentials);
   }
 
   public static async start(startingPort?: number): Promise<MitmProxy> {

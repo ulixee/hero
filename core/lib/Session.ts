@@ -81,9 +81,8 @@ export default class Session {
       this.id,
       this.emulator.userAgent.raw,
       this.proxy.isReady(),
+      this.emulator.delegate,
     );
-
-    this.mitmRequestSession.delegate = this.emulator.delegate;
   }
 
   public getBrowserEmulation() {

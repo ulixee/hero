@@ -1,7 +1,7 @@
 export default class ProtocolError extends Error {
-  private remoteError: { message: string; data: any };
-  private method: string;
-  constructor(stack: string, method: string, remoteError: { message: string; data: any }) {
+  public remoteError: { message: string; data: any; code?: number };
+  public method: string;
+  constructor(stack: string, method: string, remoteError: { message: string; data: any; code?: number }) {
     let message = `${method}: ${remoteError.message}`;
     if ('data' in remoteError) {
       if (typeof remoteError.data === 'string') {

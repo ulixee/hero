@@ -4555,10 +4555,10 @@ before-after-hook@^2.0.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.1.0.tgz#b6c03487f44e24200dd30ca5e6a1979c5d2fb635"
   integrity sha512-IWIbu7pMqyw3EAJHzzHbWa85b6oud/yfKYg5rqB5hNE8CeMi3nX+2C2sj0HswfblST86hpVEOAb9x34NZd6P7A==
 
-better-sqlite3@^7.1.0:
-  version "7.1.0"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.1.0.tgz#4894d0fa4002bd7859a0a539577f14f24b245f6a"
-  integrity sha512-FV/snQ8F/kyqhdxsevzbojVtMowDWOfe1A5N3lYu1KJwoho2t7JgITmdlSc7DkOh3Zq65I+ZyeNWXQrkLEDFTg==
+better-sqlite3@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.1.1.tgz#107457a8b770cfb16be646e347c17b42bc204dd3"
+  integrity sha512-AkvGGyhAVZhRBOul2WT+5CB2EuveM3ZkebEKe1wxMqDZUy1XB/1RBgM66t0ybHC4DIni8+pr7NaLqEX87NUTwg==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^5.3.3"
@@ -6963,6 +6963,13 @@ dns-packet@^1.3.1:
   dependencies:
     ip "^1.1.0"
     safe-buffer "^5.0.1"
+
+dns-packet@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/dns-packet/-/dns-packet-5.2.1.tgz#26cec0be92252a1b97ed106482921192a7e08f72"
+  integrity sha512-JHj2yJeKOqlxzeuYpN1d56GfhzivAxavNwHj9co3qptECel27B1rLY5PifJAvubsInX5pGLDjAHuCfCUc2Zv/w==
+  dependencies:
+    ip "^1.1.5"
 
 dns-txt@^2.0.2:
   version "2.0.2"

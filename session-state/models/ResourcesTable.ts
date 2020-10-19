@@ -3,9 +3,9 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class ResourcesTable extends BaseTable<IResourcesRecord> {
+export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(
       db,

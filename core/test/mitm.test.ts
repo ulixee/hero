@@ -1,12 +1,12 @@
-import GlobalPool from "@secret-agent/core/lib/GlobalPool";
-import { UpstreamProxy } from "@secret-agent/mitm";
-import { Helpers } from "@secret-agent/testing";
-import Chrome83 from "@secret-agent/emulate-chrome-83";
-import MitmRequestContext from "@secret-agent/mitm/lib/MitmRequestContext";
-import { createPromise } from "@secret-agent/commons/utils";
-import { LocationStatus } from "@secret-agent/core-interfaces/Location";
-import { ITestKoaServer } from "@secret-agent/testing/helpers";
-import Core from "../index";
+import GlobalPool from '@secret-agent/core/lib/GlobalPool';
+import { UpstreamProxy } from '@secret-agent/mitm';
+import { Helpers } from '@secret-agent/testing';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
+import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
+import { createPromise } from '@secret-agent/commons/utils';
+import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Core from '../index';
 
 const mocks = {
   MitmRequestContext: {
@@ -14,25 +14,26 @@ const mocks = {
   },
 };
 
+let koa: ITestKoaServer;
 beforeAll(async () => {
+  koa = await Helpers.runKoaServer(true);
   await GlobalPool.start([Chrome83.emulatorId]);
 });
 
-let koa: ITestKoaServer
 beforeEach(async () => {
-  koa = await Helpers.runKoaServer(true);
   mocks.MitmRequestContext.create.mockClear();
 });
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-test('should be able to run multiple pages each with their own proxy', async () => {
+test('should be able to run multiple pages each with their own upstream proxy', async () => {
   const acquireUpstreamProxyUrl = jest.spyOn<any, any>(UpstreamProxy.prototype, 'acquireProxyUrl');
 
-  const httpServer = await Helpers.runHttpServer();
+  koa.get('/page1', ctx => ctx.body = 'ok');
+  koa.get('/page2', ctx => ctx.body = 'ok');
 
-  const url1 = `${httpServer.url}page1`;
+  const url1 = `${koa.baseUrl}/page1`;
   const browserSession1 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession1);
   const tab1 = await browserSession1.createTab();
@@ -40,7 +41,7 @@ test('should be able to run multiple pages each with their own proxy', async () 
   await tab1.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url1);
 
-  const url2 = `${httpServer.url}page2`;
+  const url2 = `${koa.baseUrl}/page2`;
   const browserSession2 = await GlobalPool.createSession({});
   Helpers.needsClosing.push(browserSession2);
   const tab2 = await browserSession2.createTab();
@@ -50,7 +51,6 @@ test('should be able to run multiple pages each with their own proxy', async () 
 });
 
 test('should send preflight requests', async () => {
-
   const corsPromise = new Promise<boolean>(resolve => {
     koa.options('/preflightPost', ctx => {
       ctx.response.set('Access-Control-Allow-Origin', ctx.headers.origin);

@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class PageLogsTable extends BaseTable<IPageLogRecord> {
+export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'PageLogs', [
       ['tabId', 'TEXT'],

@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class FramesTable extends BaseTable<IFrameRecord> {
+export default class FramesTable extends SqliteTable<IFrameRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Frames', [
       ['id', 'TEXT', 'NOT NULL PRIMARY KEY'],

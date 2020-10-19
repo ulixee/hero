@@ -1,6 +1,7 @@
 import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 import ResourcesTable from '../models/ResourcesTable';
 import DomChangesTable from '../models/DomChangesTable';
 import CommandsTable from '../models/CommandsTable';
@@ -8,7 +9,6 @@ import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
 import PageLogsTable from '../models/PageLogsTable';
-import BaseTable from './BaseTable';
 import SessionTable from '../models/SessionTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
@@ -48,7 +48,7 @@ export default class SessionDb {
   private readonly saveInterval: NodeJS.Timeout;
 
   private db: SqliteDatabase;
-  private readonly tables: BaseTable<any>[] = [];
+  private readonly tables: SqliteTable<any>[] = [];
 
   constructor(baseDir: string, id: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;

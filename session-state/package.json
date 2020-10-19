@@ -9,7 +9,7 @@
     "@secret-agent/core-interfaces": "1.0.0-alpha.16",
     "@secret-agent/injected-scripts": "1.0.0-alpha.16",
     "@secret-agent/mitm": "1.0.0-alpha.19",
-    "better-sqlite3": "^7.1.0",
+    "better-sqlite3": "^7.1.1",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {

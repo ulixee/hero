@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import BaseTable from '../lib/BaseTable';
+import SqliteTable from '@secret-agent/commons/SqliteTable';
 
-export default class TabsTable extends BaseTable<ITabsRecord> {
+export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Tabs', [
       ['tabId', 'TEXT'],
