@@ -208,15 +208,6 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
 
     if (isResponse) {
-      this.logger.info('Http.Response', {
-        tabId,
-        url: resource.request.url,
-        method: resource.request.method,
-        headers: resource.response?.headers,
-        status: resource.response?.statusCode,
-        executionMillis: resourceResponseEvent.executionMillis,
-        bytes: resourceResponseEvent.body ? Buffer.byteLength(resourceResponseEvent.body) : -1,
-      });
       const navigations = this.navigationsByTabId[tabId];
       if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
         navigations.resourceLoadedForLocation(resource.id);
@@ -327,7 +318,8 @@ export default class SessionState {
     }
   }
 
-  public async close() {
+  public close() {
+    this.logger.info('SessionState.Closing');
     this.closeDate = new Date();
     this.db.session.update(this.sessionId, {
       closeDate: this.closeDate,

@@ -199,11 +199,12 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public async close() {
+    this.logger.info('MitmRequestSession.Closing');
     this.isClosing = true;
     for (const pending of this.pendingResources) {
       pending.load.reject(new CanceledPromiseError('Canceling: Mitm Request Session Closing'));
     }
-    await this.requestAgent.close();
+    this.requestAgent.close();
     this.dns.close();
 
     // give it a second for lingering requests to finish

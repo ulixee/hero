@@ -129,20 +129,25 @@ export default class Session {
     delete Session.byId[this.id];
     if (this._isClosing) return;
     this._isClosing = true;
+    const start = log.info('Session.Closing', {
+      sessionId: this.id,
+    });
 
     this.pendingNavigationMitmResponses.forEach(x => this.onMitmResponse(x));
 
-    for (const tab of Object.values(this.tabs)) {
-      await tab.close();
-    }
     await this.mitmRequestSession.close();
     await this.proxy.close();
-    await this.sessionState.close();
+    await Promise.all(Object.values(this.tabs).map(x => x.close()));
     try {
       await this.browserContext?.close();
     } catch (error) {
       log.error('ErrorClosingSession', { error, sessionId: this.id });
     }
+    log.info('Session.Closed', {
+      sessionId: this.id,
+      parentLogId: start,
+    });
+    this.sessionState.close();
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {

@@ -34,12 +34,6 @@ export default abstract class BaseHttpHandler {
       session.trackResource(this.context);
       session.emit('request', MitmRequestContext.toEmittedResource(this.context));
 
-      log.info(`Http.Request`, {
-        sessionId: session.sessionId,
-        url: context.url.href,
-        method: context.method,
-        ws: context.isUpgrade,
-      });
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 
       if (BlockHandler.shouldBlockRequest(context)) {

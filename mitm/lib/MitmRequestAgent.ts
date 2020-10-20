@@ -80,18 +80,13 @@ export default class MitmRequestAgent {
     }
   }
 
-  public async close() {
-    while (this.http2Sessions.length) {
-      const session = this.http2Sessions.shift();
-      await new Promise(resolve => session.client.close(() => resolve()));
+  public close() {
+    this.http2Sessions.map(x => x.client.destroy());
+    this.http2Sessions.length = 0;
+    for (const socket of this.sockets) {
+      socket.close();
     }
-
-    const socketConnects = [...this.sockets];
     this.sockets.clear();
-    while (socketConnects.length) {
-      const socket = socketConnects.shift();
-      await socket.close();
-    }
   }
 
   private async createSocketConnection(ctx: IMitmRequestContext, options: RequestOptions) {

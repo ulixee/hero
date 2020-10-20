@@ -171,7 +171,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       // this can happen in 2 cases observed so far:
       // 1: the fetch comes first and Network.requestWillBeSent takes > 500 ms
       // 2: a duplicated resource is loaded across frames and piggybacks the first request
-      this.logger.warn('ResourceEmittedTwice', resource);
+      this.logger.info('ResourceEmittedTwice', resource);
     }
   }
 

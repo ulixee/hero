@@ -124,11 +124,11 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
     if (this.isClosing) return;
     this.isClosing = true;
 
-    removeEventListeners(this.eventListeners);
     await Promise.all(this.pages.map(x => x.close()));
     await this.cdpRootSessionSend('Target.disposeBrowserContext', {
       browserContextId: this.id,
     });
+    removeEventListeners(this.eventListeners);
     this.browser.browserContextsById.delete(this.id);
   }
 
