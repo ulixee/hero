@@ -59,6 +59,16 @@ Executes a series of mouse and keyboard interactions.
 
 Refer to the [Interactions page](./interactions) for details on how to construct an interaction.
 
+### user.scrollTo*(mousePosition)* {#click}
+
+Executes a scroll interaction. This is a shortcut for `user.interact({ scroll: mousePosition })`. See the [Interactions page](./interactions) for more details.
+
+#### **Arguments**:
+
+- mousePosition `MousePosition`
+
+#### **Returns**: `Promise`
+
 ### user.type*(keyboardInteraction\[, keyboardInteraction, ...])* {#type}
 
 Executes a keyboard interactions. This is a shortcut for `user.interact({ type: string | KeyName[] })`.

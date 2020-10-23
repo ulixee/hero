@@ -4,7 +4,7 @@ import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
 import Browser from './Browser';
-import IInteractions, { IMousePosition, ITypeInteraction } from '../interfaces/IInteractions';
+import IInteractions, { Command, IMousePosition, ITypeInteraction } from "../interfaces/IInteractions";
 import Interactor from './Interactor';
 import Tab, { getCoreTab } from './Tab';
 
@@ -42,6 +42,11 @@ export default class User {
   public async click(mousePosition: IMousePosition) {
     const activeTab = getActiveTabSession(this);
     await Interactor.run(activeTab, [{ click: mousePosition }]);
+  }
+
+  public async scrollTo(mousePosition: IMousePosition) {
+    const activeTab = getActiveTabSession(this);
+    await Interactor.run(activeTab, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async interact(...interactions: IInteractions) {

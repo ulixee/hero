@@ -199,12 +199,16 @@ export default class Browser extends AwaitedEventTarget<IEventType, IState> impl
     return this.user.click(mousePosition);
   }
 
-  public async interact(...interactions: IInteractions) {
-    return this.user.interact(...interactions);
+  public async scrollTo(mousePosition: IMousePosition) {
+    return this.user.scrollTo(mousePosition);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]) {
     return this.user.type(...typeInteractions);
+  }
+
+  public async interact(...interactions: IInteractions) {
+    return this.user.interact(...interactions);
   }
 }
 

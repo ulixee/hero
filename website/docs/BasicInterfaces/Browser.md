@@ -230,6 +230,10 @@ Alias for [User.click](./user#click)
 
 Alias for [User.interact](./user#interact)
 
+### browser.scrollTo*(mousePosition)*
+
+Alias for [User.scrollTo](./user#scroll)
+
 ### browser.type*(keyboardInteraction\[, keyboardInteraction, ...])*
 
 Alias for [User.type](./user#type)
