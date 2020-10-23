@@ -230,6 +230,16 @@ describe.each([
       await page.goto(`${server.baseUrl}/frames/lazy-frame.html`);
       expect(page.frames.length).toBe(2);
     });
+
+    it('should work with mixed content', async () => {
+      httpsServer.setRoute('/mixedcontent.html', (req, res) => {
+        res.end(`<iframe src=${server.emptyPage}></iframe>`);
+      });
+      await expect(page.goto(`${httpsServer.baseUrl}/mixedcontent.html`, 'load')).resolves.toBe(
+        undefined,
+      );
+      expect(page.frames).toHaveLength(2);
+    });
   });
 
   describe('history', () => {

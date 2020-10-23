@@ -118,7 +118,8 @@ class JsPath {
       return TSON.stringify({
         ...box,
         isVisible: objectAtPath.isVisible,
-        isBehindElement: objectAtPath.isBehindOtherElement,
+        attachedState: objectAtPath.extractAttachedState(),
+        overlappingElements: objectAtPath.overlappingElements,
       });
     } catch (error) {
       return objectAtPath.toReturnError(error);
@@ -249,6 +250,18 @@ class ObjectAtPath {
       return !!(rect.top || rect.bottom || rect.width || rect.height);
     }
     return false;
+  }
+
+  public get overlappingElements() {
+    const element = this.closestElement;
+    if (!element) return [];
+    const { top, right, left, bottom } = element.getBoundingClientRect();
+    return [
+      document.elementFromPoint(left + 1, top + 1),
+      document.elementFromPoint(left + 1, bottom - 1),
+      document.elementFromPoint(right - 1, top + 1),
+      document.elementFromPoint(right - 1, bottom - 1),
+    ].map(x => (x ? NodeTracker.getNodeId(x) : null));
   }
 
   public get isBehindOtherElement() {

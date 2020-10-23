@@ -23,7 +23,17 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
         ...log.data,
       };
     }
-    const data = log.data ? JSON.stringify(log.data) : null;
+    const data = log.data
+      ? JSON.stringify(log.data, (key, value) => {
+          if (value instanceof Error) {
+            return {
+              stack: value.stack,
+              ...value
+            };
+          }
+          return value;
+        })
+      : null;
     return this.queuePendingInsert([
       log.id,
       log.timestamp.toISOString(),

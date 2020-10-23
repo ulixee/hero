@@ -135,11 +135,11 @@ export default class Interactor {
       return { x: value[0] as number, y: value[1] as number };
     }
     const rect = await this.tab.domEnv.getJsPathClientRect(value as IJsPath);
-    const x = round(rect.left + (rect.right - rect.left) / 2);
-    const y = round(rect.top - (rect.top - rect.bottom) / 2);
     if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {
       return { x: 0, y: 0, simulateOptionClick: rect.tag === 'option' };
     }
+    const x = round(rect.left + rect.width / 2);
+    const y = round(rect.top + rect.height / 2);
     return { x, y };
   }
 

@@ -156,6 +156,32 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should not print regex %c', async () => {
+  const browser = await SecretAgent.createBrowser();
+  koaServer.get('/frame', ctx => {
+    ctx.body = `<iframe src="/frameContents"></iframe>`;
+  });
+  koaServer.get('/frameContents', ctx => {
+    ctx.body = `<body>
+    <script>
+    let gotYou = 0;
+    const spooky = /./;
+    spooky.toString = function() {
+      gotYou += 1;
+      return 'spooky';
+    };
+    console.log('%c', spooky);
+    if (gotYou > 1) window.close();
+    </script>
+    </body>
+    `;
+  });
+  await browser.goto(`${koaServer.baseUrl}/frame`);
+  const core = Core.byTabId[browser.activeTab.tabId];
+  // @ts-ignore
+  const page = core.tab.puppetPage;
+});
+
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
   const browser = await SecretAgent.createBrowser();

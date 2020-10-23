@@ -255,5 +255,21 @@ describe.each([
       window.location.href = "about:blank";`),
       ).resolves.toBe('about:blank');
     });
+
+    it('should work when subframe issues window.stop()', async () => {
+      server.setRoute('/frames/style.css', () => {});
+      const navigationPromise = page.goto(`${server.baseUrl}/frames/one-frame.html`);
+      await page.waitOn('frame-created');
+      const frame = page.frames[1];
+      const loaded = page.waitOn('load');
+      await new Promise(resolve => {
+        page.on('frame-navigated', f => {
+          if (f.frame.id === frame.id) resolve();
+        });
+      });
+      await frame.evaluate(`window.stop()`);
+      await expect(navigationPromise).resolves.toBe(undefined);
+      await expect(loaded).resolves.toBe(undefined);
+    });
   });
 });
