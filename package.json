@@ -1,6 +1,5 @@
 {
   "name": "@secret-agent/monorepo",
-  "version": "1.0.0-alpha.17",
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {

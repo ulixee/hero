@@ -4,7 +4,6 @@
   },
   "main": "./index.js",
   "dependencies": {
-    "@secret-agent/commons": "1.0.0-alpha.16",
     "axios": "^0.19.2",
     "progress": "^2.0.3",
     "tar-fs": "^2.1.0"

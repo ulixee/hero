@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/website",
-  "version": "1.0.0-alpha.16",
+  "version": "1.0.0-alpha.20",
   "private": true,
   "scripts": {
     "start": "gridsome develop",

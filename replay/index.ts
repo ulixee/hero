@@ -1,10 +1,8 @@
 import * as ChildProcess from 'child_process';
-import Log from '@secret-agent/commons/Logger';
 import { getBinaryPath, isBinaryInstalled } from './install/Utils';
 
-const { log } = Log(module);
-
 const apiPath = require.resolve('@secret-agent/session-state/api/start');
+const showLogs = !!process.env.SA_REPLAY_DEBUG;
 
 export function replay(launchArgs: IReplayLaunchArgs) {
   const {
@@ -35,13 +33,13 @@ export function replay(launchArgs: IReplayLaunchArgs) {
 
     spawn('yarn electron', spawnArgs, true);
   } catch (err) {
-    log.info('Replay app not found');
+    if (showLogs) {
+      console.log('Replay app not found');
+    }
   }
 }
 
 function spawn(appPath: string, args: string[], needsShell = false) {
-  const showLogs = !!process.env.SA_REPLAY_DEBUG;
-
   ChildProcess.spawn(appPath, args, {
     detached: true,
     stdio: showLogs ? 'inherit' : 'ignore',

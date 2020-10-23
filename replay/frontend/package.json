@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/replay-frontend",
-  "version": "1.0.0-alpha.18",
+  "version": "1.0.0-alpha.20",
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",

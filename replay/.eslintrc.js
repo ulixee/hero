@@ -18,5 +18,9 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'import/extensions': 'off',
+    'import/no-extraneous-dependencies': [
+      'error',
+      { devDependencies: ['**/frontend/**', '**/backend/**', '**/shared/**', '**/app.ts'] },
+    ],
   },
 };

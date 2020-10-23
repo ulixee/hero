@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.20](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.19...v1.0.0-alpha.20) (2020-10-23)
+
+
+### Features
+
+* **client:** add scrollTo shortcut ([a1613f1](https://github.com/ulixee/secret-agent/commit/a1613f15907c6eaea30e597bdabc3238eb7c96c1))
+
+
+
+
+
 # [1.0.0-alpha.16](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2020-10-13)
 
 
