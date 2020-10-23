@@ -28,6 +28,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
           if (value instanceof Error) {
             return {
               stack: value.stack,
+              toString: value.toString(),
               ...value
             };
           }

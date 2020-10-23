@@ -197,9 +197,9 @@ export default class MitmProxy {
     // for http, we are proxying to clear out the buffer (for websockets in particular)
     // NOTE: this probably can be optimized away for http
 
-    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: true });
+    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: false });
     proxyConnection.on('error', error => {
-      this.onConnectError(request.url, 'PROXY_TO_PROXY_CONNECT_ERROR', error);
+      this.onConnectError(request.url, 'ProxyToProxy.ConnectError', error);
       if (!socket.destroyed && socket.writable && socket.readable) {
         socket.destroy(error);
       }
