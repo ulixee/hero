@@ -220,6 +220,64 @@ function sort() {
 
     await core.close();
   });
+
+  it('supports recording closed shadow dom roots', async () => {
+    koaServer.get('/test5', ctx => {
+      ctx.body = `<body>
+<script>
+customElements.define('image-list', class extends HTMLElement {
+  closedShadow;
+  
+  connectedCallback() {
+    const shadow = this.attachShadow({mode: 'closed'});
+    shadow.innerHTML = '<img alt="image 1">';
+    this.closedShadow = shadow;
+  }
+
+  addImage() {
+    const img = document.createElement('img');
+    const isClosed = !!this.shadowRoot && this.closedShadow.mode === 'closed';
+    img.alt = ' new image ' + (isClosed ? 'is closed ' : '');
+    this.closedShadow.appendChild(img)
+  }
+})
+</script>
+<image-list id="LI"></image-list>
+<a onclick="LI.addImage()">Add image</a>
+</body>`;
+    });
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(`${koaServer.baseUrl}/test5`);
+    await core.waitForLoad('DomContentLoaded');
+    // @ts-ignore
+    const tab = core.tab;
+    const state = tab.sessionState;
+    // @ts-ignore
+    const pages = tab.navigationTracker;
+
+    await core.waitForElement(['document', ['querySelector', 'a']]);
+    await core.interact([
+      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
+    ]);
+
+    await core.waitForMillis(100);
+
+    await tab.domRecorder.flush();
+    const changes = await state.getFrameNavigationDomChanges(pages.history);
+    const [key] = Object.keys(changes);
+    expect(changes[key].find(x => x[1] === 'shadowRootAttached')).toBeTruthy();
+
+    const shadowRoot = changes[key].find(x => x[1] === 'shadowRootAttached')[2];
+    expect(changes[key].find(x => x[2].id === shadowRoot.parentNodeId)[2].tagName).toBe(
+      'IMAGE-LIST',
+    );
+    const shadowImg = changes[key].find(x => x[2].parentNodeId === shadowRoot.id);
+
+    expect(shadowImg[2].tagName).toBe('IMG');
+    expect(shadowImg[2].attributes.alt).toBe(' new image is closed ');
+    await core.close();
+  });
 });
 
 describe('basic Mouse Event tests', () => {

@@ -215,6 +215,13 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
   let node = getNode(data.nodeId);
   if (node) return node;
 
+  if (parent && data.action === 'shadowRootAttached') {
+    // NOTE: we just make all shadows open in replay
+    node = parent.attachShadow({ mode: 'open' });
+    idMap.set(data.nodeId, node);
+    return node;
+  }
+
   switch (data.nodeType) {
     case Node.COMMENT_NODE:
       node = document.createComment(data.textContent);

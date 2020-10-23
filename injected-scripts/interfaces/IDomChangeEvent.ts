@@ -3,7 +3,7 @@ import type { CommandId, ISOTimestamp } from './GenericTypes';
 
 export type IDomChangeEvent = [
   CommandId,
-  'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
+  'newDocument' | 'shadowRootAttached' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
   INodeData,
   ISOTimestamp,
 ];

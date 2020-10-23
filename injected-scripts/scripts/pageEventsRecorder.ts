@@ -249,7 +249,8 @@ class PageEventsRecorder {
     const addedNodes: Node[] = [];
     for (const mutation of mutations) {
       for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-        addedNodes.push(mutation.addedNodes[i]);
+        const entry = mutation.addedNodes[i];
+        addedNodes.push(entry);
       }
     }
 
@@ -280,6 +281,22 @@ class PageEventsRecorder {
             isFirstAdded ? mutation.previousSibling : node.previousSibling,
           );
           changes.push([currentCommandId, 'added', serial, stamp]);
+          const shadowRoot = (node as Element).shadowRoot;
+          if (shadowRoot && !nodeTracker.has(shadowRoot)) {
+            const id = nodeTracker.track(shadowRoot);
+            changes.push([
+              currentCommandId,
+              'shadowRootAttached',
+              { id, parentNodeId: serial.id },
+              stamp,
+            ]);
+            this.observer.observe(shadowRoot, {
+              attributes: true,
+              childList: true,
+              subtree: true,
+              characterData: true,
+            });
+          }
           isFirstAdded = false;
         }
 
