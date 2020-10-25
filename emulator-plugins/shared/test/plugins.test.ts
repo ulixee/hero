@@ -5,7 +5,7 @@ import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
 import Emulators from '@secret-agent/emulators';
 import Log from '@secret-agent/commons/Logger';
-import chrome80Dom from './chrome80DomProperties.json';
+import pluginsChrome from './plugins-Chrome.json';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../injected-scripts';
 
@@ -118,7 +118,7 @@ test('it should override plugins in a browser window', async () => {
   ).window;
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
     if (debug) console.log(inspect(structure[proto], false, null, true));
-    expect(structure[proto]).toStrictEqual(chrome80Dom[proto]);
+    expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);
   }
   const navigatorStructure = structure.navigator;
   if (debug) console.log(inspect(navigatorStructure.mimeTypes, false, null, true));

@@ -478,13 +478,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     page.on('page-error', this.onPageError.bind(this), true);
     page.on('crashed', this.onTargetCrashed.bind(this));
     page.on('console', this.onConsole.bind(this), true);
-    page.on(
-      'frame-created',
-      ({ frame }) => {
-        this.sessionState.captureFrameCreated(this.id, frame.id, frame.parentId);
-      },
-      true,
-    );
+    page.on('frame-created', this.onFrameCreated.bind(this), true);
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
@@ -574,6 +568,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.logger.info('Page.navigatedWithinDocument', event);
       // set load state back to all loaded
       this.navigationTracker.triggerInPageNavigation(frame.url, this.lastCommandId, frame.id);
+    } else if (this.mainFrameId !== frame.id) {
+      this.sessionState.captureSubFrameNavigated(this.id, frame, navigatedInDocument);
     }
   }
 
@@ -587,6 +583,24 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     if (this.mainFrameId === frame.id) {
       this.navigationTracker.updateNavigationReason(frame.id, url, reason);
     }
+  }
+
+  private async onFrameCreated(event: IPuppetFrameEvents['frame-created']) {
+    const { frame } = event;
+    let domNodeId: number = null;
+    try {
+      if (frame.parentId) {
+        domNodeId = await frame.evaluateOnIsolatedFrameElement<number>('saTrackerNodeId');
+      }
+    } catch (error) {
+      // This can happen if the node goes away. Still want to record frame
+      this.logger.warn('FrameCreated.getDomNodeIdError', {
+        error,
+        frameId: frame.id,
+      });
+    }
+
+    this.sessionState.captureFrameCreated(this.id, frame, domNodeId);
   }
 
   /////// LOGGGING EVENTS //////////////////////////////////////////////////////////////////////////

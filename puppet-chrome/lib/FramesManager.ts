@@ -234,15 +234,21 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   }
 
   private recordFrame(newFrame: Page.Frame, isFrameTreeRecurse = false) {
-    const { id } = newFrame;
+    const { id, parentId } = newFrame;
     if (this.framesById.has(id)) {
       const frame = this.framesById.get(id);
       if (isFrameTreeRecurse) frame.onLoaded(newFrame);
       return frame;
     }
 
-    const frame = new Frame(newFrame, this.activeContexts, this.cdpSession, this.logger, () =>
-      this.attachedFrameIds.has(id),
+    const parentFrame = parentId ? this.framesById.get(parentId) : null;
+    const frame = new Frame(
+      newFrame,
+      this.activeContexts,
+      this.cdpSession,
+      this.logger,
+      () => this.attachedFrameIds.has(id),
+      parentFrame,
     );
     this.framesById.set(id, frame);
     this.emit('frame-created', { frame });

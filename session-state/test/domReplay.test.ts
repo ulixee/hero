@@ -116,7 +116,7 @@ describe('basic Dom Replay tests', () => {
       await tab.domRecorder.flush();
       // @ts-ignore
       const pages = tab.navigationTracker;
-      const pageChanges = await state.getFrameNavigationDomChanges(pages.history);
+      const pageChanges = await state.getMainFrameDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
       await mirrorPage.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
@@ -141,7 +141,7 @@ describe('basic Dom Replay tests', () => {
       await tab.domRecorder.flush();
       // @ts-ignore
       const pages = tab.navigationTracker;
-      const pageChangesByFrame = await state.getFrameNavigationDomChanges(
+      const pageChangesByFrame = await state.getMainFrameDomChanges(
         pages.history,
         lastCommandId,
       );
@@ -215,7 +215,7 @@ describe('basic Dom Replay tests', () => {
       // @ts-ignore
       const pages = tab.navigationTracker;
       const state = tab.sessionState;
-      const pageChanges = await state.getFrameNavigationDomChanges(pages.history);
+      const pageChanges = await state.getMainFrameDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
       await mirrorPage.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
@@ -247,7 +247,7 @@ describe('basic Dom Replay tests', () => {
       // @ts-ignore
       const pages = newTab.navigationTracker;
       const state = newTab.sessionState;
-      const pageChanges = await state.getFrameNavigationDomChanges(pages.history);
+      const pageChanges = await state.getMainFrameDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
       await mirrorNewTab.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,

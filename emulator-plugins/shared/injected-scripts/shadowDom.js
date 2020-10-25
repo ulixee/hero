@@ -1,5 +1,5 @@
 const closedShadows = new WeakSet();
-const closedShadowCtrs = new WeakSet();
+const closedShadowOwners = new WeakSet();
 
 proxyDescriptors(Element.prototype, {
   shadowRoot: {
@@ -29,7 +29,7 @@ proxyFunction(Element.prototype, 'attachShadow', (func, thisArg, init) => {
   
   const shadow = func.apply(thisArg, [init]);
   if (needsCloseRemoval) {
-    closedShadowCtrs.add(thisArg);
+    closedShadowOwners.add(thisArg);
     closedShadows.add(shadow);
   }
   return shadow;
