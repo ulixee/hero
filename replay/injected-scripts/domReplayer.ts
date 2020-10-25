@@ -3,6 +3,7 @@
 import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
+const SHADOW_NODE_TYPE = 40;
 const idMap = new Map<number, Node>();
 const preserveElements = ['HTML', 'HEAD', 'BODY'];
 
@@ -129,8 +130,13 @@ function applyDomChanges(changeEvents: IDomChangeEvent[]) {
       }
       if (node && preserveElements.includes((node as Element).tagName)) {
         if (action === 'removed') {
-          (node as Element).innerHTML = '';
-          console.log('WARN: script trying to remove preserved node', changeEvent);
+          const elem = node as Element;
+          elem.innerHTML = '';
+          for (const attr of elem.attributes) {
+            elem.removeAttributeNS(attr.name, attr.namespaceURI);
+            elem.removeAttribute(attr.name);
+          }
+          console.log('WARN: script trying to remove preserved node', changeEvent, elem);
           continue;
         }
         if (action === 'added') {
@@ -205,6 +211,15 @@ function setNodeAttributes(node: Element, data: IDomChangeEvent) {
 function setNodeProperties(node: Element, data: IDomChangeEvent) {
   if (!data.properties) return;
   for (const [name, value] of Object.entries(data.properties)) {
+    if (name === 'sheet.cssRules') {
+      const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
+      for (let i = 0; i < sheet.cssRules.length; i += 1) {
+        sheet.deleteRule(i);
+      }
+      for (const rule of value as string[]) {
+        sheet.insertRule(rule);
+      }
+    }
     node[name] = value;
   }
 }
@@ -215,7 +230,7 @@ function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
   let node = getNode(data.nodeId);
   if (node) return node;
 
-  if (parent && data.action === 'shadowRootAttached') {
+  if (parent && data.nodeType === SHADOW_NODE_TYPE) {
     // NOTE: we just make all shadows open in replay
     node = parent.attachShadow({ mode: 'open' });
     idMap.set(data.nodeId, node);

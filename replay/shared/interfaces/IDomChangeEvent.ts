@@ -1,7 +1,7 @@
 export interface IDomChangeEvent {
   nodeId: number;
-  tabId:string;
-  action: 'newDocument' | 'shadowRootAttached' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
+  tabId: string;
+  action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
   timestamp: string;
   isMainFrame: boolean;
   commandId: number;
@@ -13,5 +13,5 @@ export interface IDomChangeEvent {
   parentNodeId?: number;
   attributes?: { [key: string]: string };
   attributeNamespaces?: { [key: string]: string };
-  properties?: { [key: string]: string | boolean | number };
+  properties?: { [key: string]: string | boolean | number | string[] };
 }

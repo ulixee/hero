@@ -221,18 +221,55 @@ function sort() {
     await core.close();
   });
 
-  it('supports recording closed shadow dom roots', async () => {
+  it('supports recording CSSOM', async () => {
+    koaServer.get('/cssom', ctx => {
+      ctx.body = `<body>
+<style id="style1" type="text/css"></style>
+<a onclick="clickIt()">Click this link</a>
+
+<script>
+function clickIt() {
+  const style = document.querySelector('#style1');
+  style.sheet.insertRule('body { color:red }');
+}
+</script>
+</body>`;
+    });
+
+    const meta = await Core.createTab();
+    const core = Core.byTabId[meta.tabId];
+    await core.goto(`${koaServer.baseUrl}/cssom`);
+    await core.waitForLoad('DomContentLoaded');
+    // @ts-ignore
+    const tab = core.tab;
+    const state = tab.sessionState;
+    // @ts-ignore
+    const pages = tab.navigationTracker;
+
+    await core.waitForElement(['document', ['querySelector', 'a']]);
+    await core.interact([
+      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
+    ]);
+
+    await core.waitForMillis(100);
+
+    await tab.domRecorder.flush();
+    const changes = await state.getFrameNavigationDomChanges(pages.history);
+    const [key] = Object.keys(changes);
+
+    const propChange = changes[key].find(x => x[1] === 'property' && !!x[2].properties['sheet.cssRules']);
+    expect(propChange).toBeTruthy();
+
+    expect(propChange[2].properties['sheet.cssRules']).toStrictEqual(['body { color: red; }']);
+    await core.close();
+  });
+
+  it.only('supports recording closed shadow dom roots', async () => {
     koaServer.get('/test5', ctx => {
       ctx.body = `<body>
 <script>
 customElements.define('image-list', class extends HTMLElement {
   closedShadow;
-  
-  connectedCallback() {
-    const shadow = this.attachShadow({mode: 'closed'});
-    shadow.innerHTML = '<img alt="image 1">';
-    this.closedShadow = shadow;
-  }
 
   addImage() {
     const img = document.createElement('img');
@@ -244,6 +281,13 @@ customElements.define('image-list', class extends HTMLElement {
 </script>
 <image-list id="LI"></image-list>
 <a onclick="LI.addImage()">Add image</a>
+
+<script>
+    const elem = document.querySelector('#LI')
+    const shadow = elem.attachShadow({mode: 'closed'});
+    shadow.innerHTML = '<img alt="image 1">';
+    elem.closedShadow = shadow;
+</script>
 </body>`;
     });
     const meta = await Core.createTab();
@@ -266,9 +310,9 @@ customElements.define('image-list', class extends HTMLElement {
     await tab.domRecorder.flush();
     const changes = await state.getFrameNavigationDomChanges(pages.history);
     const [key] = Object.keys(changes);
-    expect(changes[key].find(x => x[1] === 'shadowRootAttached')).toBeTruthy();
+    expect(changes[key].find(x => x[1] === 'added' && x[2].nodeType === 40)).toBeTruthy();
 
-    const shadowRoot = changes[key].find(x => x[1] === 'shadowRootAttached')[2];
+    const shadowRoot = changes[key].find(x => x[1] === 'added' && x[2].nodeType === 40)[2];
     expect(changes[key].find(x => x[2].id === shadowRoot.parentNodeId)[2].tagName).toBe(
       'IMAGE-LIST',
     );

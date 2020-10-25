@@ -13,6 +13,7 @@ export type PageRecorderResultSet = [
   IFocusEvent[],
   IScrollEvent[],
 ];
+const SHADOW_NODE_TYPE = 40;
 
 // @ts-ignore
 const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) => void;
@@ -53,9 +54,10 @@ class NodeTracker {
     if (this.nodeIds.has(node)) {
       return this.nodeIds.get(node);
     }
-
-    this.nextId += 1;
     const id = this.nextId;
+    // @ts-ignore
+    node.saTrackerNodeId = id;
+    this.nextId += 1;
     this.nodeIds.set(node, id);
     return id;
   }
@@ -72,13 +74,25 @@ class NodeTracker {
 
 const nodeTracker = new NodeTracker();
 
+let eventCounter = 0;
+
+function idx() {
+  return (eventCounter += 1);
+}
+
 // @ts-ignore
 window.nodeTracker = nodeTracker;
 
 class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [
     // preload with a document
-    [-1, 'newDocument', { id: -1, textContent: window.location.href }, new Date().toISOString()],
+    [
+      -1,
+      'newDocument',
+      { id: -1, textContent: window.location.href },
+      new Date().toISOString(),
+      idx(),
+    ],
   ];
 
   private mouseEvents: IMouseEvent[] = [];
@@ -88,6 +102,7 @@ class PageEventsRecorder {
 
   private commandId = -1;
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
+  private stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
   private readonly observer: MutationObserver;
 
@@ -183,7 +198,27 @@ class PageEventsRecorder {
         'location',
         { id: -1, textContent: currentLocation },
         timestamp,
+        idx(),
       ]);
+    }
+  }
+
+  public checkForStylesheetChanges(changeTime?: string) {
+    const timestamp = changeTime || new Date().toISOString();
+    for (const [style, current] of this.stylesheets) {
+      if (!style.sheet || !style.isConnected) continue;
+      const newPropValue = [...(style.sheet as CSSStyleSheet).cssRules].map(x => x.cssText);
+      if (newPropValue.toString() !== current.toString()) {
+        const nodeId = nodeTracker.getId(style);
+        this.domChanges.push([
+          this.commandId,
+          'property',
+          { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
+          timestamp,
+          idx(),
+        ]);
+        this.stylesheets.set(style, newPropValue);
+      }
     }
   }
 
@@ -199,6 +234,7 @@ class PageEventsRecorder {
             'property',
             { id: nodeId, properties: { [propertyName]: newPropValue } },
             timestamp,
+            idx(),
           ]);
           propertyMap.set(propertyName, newPropValue);
         }
@@ -234,6 +270,20 @@ class PageEventsRecorder {
     }
   }
 
+  private trackStylesheet(element: HTMLLinkElement | HTMLStyleElement) {
+    if (!element || this.stylesheets.has(element)) return;
+    if (!element.sheet) return;
+
+    const shouldRecordInitialStyle = element.textContent || element instanceof HTMLStyleElement;
+    if (element.sheet instanceof CSSStyleSheet) {
+      // if there's style text, record the current state
+      const startingStyle = shouldRecordInitialStyle
+        ? [...element.sheet.cssRules].map(x => x.cssText)
+        : [];
+      this.stylesheets.set(element, startingStyle);
+    }
+  }
+
   private onMutation(mutations: MutationRecord[]) {
     const changes = this.convertMutationsToChanges(mutations);
     this.domChanges.push(...changes);
@@ -266,7 +316,7 @@ class PageEventsRecorder {
           serial.previousSiblingId = nodeTracker.getId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([currentCommandId, 'removed', serial, stamp]);
+          changes.push([currentCommandId, 'removed', serial, stamp, idx()]);
           isFirstRemoved = false;
         }
 
@@ -280,23 +330,7 @@ class PageEventsRecorder {
           serial.previousSiblingId = nodeTracker.getId(
             isFirstAdded ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([currentCommandId, 'added', serial, stamp]);
-          const shadowRoot = (node as Element).shadowRoot;
-          if (shadowRoot && !nodeTracker.has(shadowRoot)) {
-            const id = nodeTracker.track(shadowRoot);
-            changes.push([
-              currentCommandId,
-              'shadowRootAttached',
-              { id, parentNodeId: serial.id },
-              stamp,
-            ]);
-            this.observer.observe(shadowRoot, {
-              attributes: true,
-              childList: true,
-              subtree: true,
-              characterData: true,
-            });
-          }
+          changes.push([currentCommandId, 'added', serial, stamp, idx()]);
           isFirstAdded = false;
         }
 
@@ -307,7 +341,7 @@ class PageEventsRecorder {
           const node = mutation.addedNodes[i];
           const children = this.serializeChildren(node, addedNodes);
           for (const childData of children) {
-            changes.push([currentCommandId, 'added', childData, stamp]);
+            changes.push([currentCommandId, 'added', childData, stamp, idx()]);
           }
         }
       }
@@ -323,30 +357,51 @@ class PageEventsRecorder {
           if (!attributeChange.attributeNamespaces) attributeChange.attributeNamespaces = {};
           attributeChange.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
         }
-        changes.push([currentCommandId, 'attribute', attributeChange, stamp]);
+        changes.push([currentCommandId, 'attribute', attributeChange, stamp, idx()]);
       }
 
       if (type === 'characterData') {
         const textChange = this.serializeNode(target);
         textChange.textContent = target.textContent;
-        changes.push([currentCommandId, 'text', textChange, stamp]);
+        changes.push([currentCommandId, 'text', textChange, stamp, idx()]);
       }
     }
+
+    this.checkForStylesheetChanges(stamp);
 
     return changes;
   }
 
   private serializeChildren(node: Node, addedNodes: Node[]) {
     const serialized: INodeData[] = [];
-    for (let i = 0, length = node.childNodes.length; i < length; i += 1) {
-      const child = node.childNodes[i];
+
+    for (const child of node.childNodes) {
       if (!nodeTracker.has(child) && !addedNodes.includes(child)) {
         const serial = this.serializeNode(child);
-        serial.parentNodeId = nodeTracker.getId(child.parentElement);
+        serial.parentNodeId = nodeTracker.getId(child.parentElement ?? child.getRootNode());
         serial.previousSiblingId = nodeTracker.getId(child.previousSibling);
         serialized.push(serial, ...this.serializeChildren(child, addedNodes));
       }
     }
+
+    for (const element of [node, ...node.childNodes] as Element[]) {
+      if (element.tagName === 'STYLE' || element.tagName === 'LINK') {
+        this.trackStylesheet(element as HTMLStyleElement);
+      }
+      const shadowRoot = element.shadowRoot;
+      if (shadowRoot && !nodeTracker.has(shadowRoot)) {
+        const serial = this.serializeNode(shadowRoot);
+        serial.parentNodeId = nodeTracker.getId(element);
+        serialized.push(serial, ...this.serializeChildren(shadowRoot, addedNodes));
+        this.observer.observe(shadowRoot, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+          characterData: true,
+        });
+      }
+    }
+
     return serialized;
   }
 
@@ -364,6 +419,11 @@ class PageEventsRecorder {
       nodeType: node.nodeType,
       id: nodeTracker.track(node),
     };
+
+    if (node instanceof ShadowRoot) {
+      data.nodeType = SHADOW_NODE_TYPE;
+      return data;
+    }
 
     switch (data.nodeType) {
       case Node.COMMENT_NODE:
