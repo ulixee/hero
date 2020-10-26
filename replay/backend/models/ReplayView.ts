@@ -7,7 +7,7 @@ import PlaybarView from '~backend/models/PlaybarView';
 import Application from '~backend/Application';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IRectangle from '~shared/interfaces/IRectangle';
-import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import { IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
@@ -26,6 +26,7 @@ export default class ReplayView extends ViewBackend {
       enableRemoteModule: false,
       partition: uuidv1(),
       contextIsolation: true,
+      webSecurity: false,
       javascript: false,
     });
 
@@ -133,19 +134,17 @@ export default class ReplayView extends ViewBackend {
   }
 
   private async publishTickChanges(
-    events: [IDomChangeEvent[], number[], IMouseEvent, IScrollRecord],
+    events: [IFrontendDomChangeEvent[], number[], IMouseEvent, IScrollRecord],
   ) {
     if (!events || !events.length) return;
     const [domChanges] = events;
-    if (domChanges?.length) {
-      if (domChanges[0].action === 'newDocument') {
-        const url = new URL(domChanges[0].textContent);
-        const currentUrl = new URL(this.webContents.getURL());
-        if (url.origin !== currentUrl.origin) {
-          console.log('Re-navigating', url.href);
-          domChanges.shift();
-          await this.webContents.loadURL(url.href);
-        }
+    if (domChanges?.length && domChanges[0].action === 'newDocument' && domChanges[0].isMainFrame) {
+      const url = new URL(domChanges[0].textContent);
+      const currentUrl = new URL(this.webContents.getURL());
+      if (url.origin !== currentUrl.origin) {
+        console.log('Re-navigating', url.href);
+        domChanges.shift();
+        await this.webContents.loadURL(url.href);
       }
     }
     this.webContents.send('dom:apply', ...events);

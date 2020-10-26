@@ -51,8 +51,6 @@ export default abstract class BaseHttpHandler {
       await HeadersHandler.waitForBrowserRequest(context);
       await CookieHandler.setProxyToServerCookies(context);
 
-      context.cacheHandler.onRequest();
-
       // do one more check on the session before doing a connect
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 

@@ -89,7 +89,7 @@ class PageEventsRecorder {
     [
       -1,
       'newDocument',
-      { id: -1, textContent: window.location.href },
+      { id: -1, textContent: window.self.location.href },
       new Date().toISOString(),
       idx(),
     ],
@@ -98,7 +98,7 @@ class PageEventsRecorder {
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];
-  private location = window.location.href;
+  private location = window.self.location.href;
 
   private commandId = -1;
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
@@ -190,7 +190,7 @@ class PageEventsRecorder {
 
   public checkForLocationChange(changeTime?: string) {
     const timestamp = changeTime || new Date().toISOString();
-    const currentLocation = window.location.href;
+    const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
       this.domChanges.push([
@@ -333,17 +333,6 @@ class PageEventsRecorder {
           changes.push([currentCommandId, 'added', serial, stamp, idx()]);
           isFirstAdded = false;
         }
-
-        // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
-        // individually so we need to extract child nodes into flat hierarchy
-
-        for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-          const node = mutation.addedNodes[i];
-          const children = this.serializeChildren(node, addedNodes);
-          for (const childData of children) {
-            changes.push([currentCommandId, 'added', childData, stamp, idx()]);
-          }
-        }
       }
 
       if (type === 'attributes') {
@@ -364,6 +353,18 @@ class PageEventsRecorder {
         const textChange = this.serializeNode(target);
         textChange.textContent = target.textContent;
         changes.push([currentCommandId, 'text', textChange, stamp, idx()]);
+      }
+    }
+    for (const mutation of mutations) {
+      // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
+      // individually so we need to extract child nodes into flat hierarchy
+
+      for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
+        const node = mutation.addedNodes[i];
+        const children = this.serializeChildren(node, addedNodes);
+        for (const childData of children) {
+          changes.push([currentCommandId, 'added', childData, stamp, idx()]);
+        }
       }
     }
 

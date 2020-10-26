@@ -28,7 +28,7 @@ export default class ReplayTick {
   constructor(
     state: ReplayTabState,
     readonly eventType: IEventType,
-    readonly eventTypeIdx: number,
+    public eventTypeIdx: number,
     readonly commandId: number,
     readonly timestamp: string,
     readonly label?: string,

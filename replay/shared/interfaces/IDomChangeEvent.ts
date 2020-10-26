@@ -1,8 +1,10 @@
 export interface IDomChangeEvent {
   nodeId: number;
   tabId: string;
+  eventIndex: number;
   action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
   timestamp: string;
+  frameIdPath?: string;
   isMainFrame: boolean;
   commandId: number;
   nodeType?: number;
@@ -15,3 +17,8 @@ export interface IDomChangeEvent {
   attributeNamespaces?: { [key: string]: string };
   properties?: { [key: string]: string | boolean | number | string[] };
 }
+
+export type IFrontendDomChangeEvent = Omit<
+  IDomChangeEvent,
+  'tabId' | 'timestamp' | 'commandId'
+>;

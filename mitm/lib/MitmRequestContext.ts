@@ -136,7 +136,7 @@ export default class MitmRequestContext {
 
     const response = {
       url: ctx.responseUrl,
-      statusCode: ctx.status,
+      statusCode: ctx.originalStatus,
       statusMessage: ctx.statusMessage,
       headers: ctx.responseHeaders,
       trailers: ctx.responseTrailers,
@@ -197,6 +197,7 @@ export default class MitmRequestContext {
 
   public static readHttp1Response(ctx: IMitmRequestContext, response: http.IncomingMessage) {
     ctx.status = response.statusCode;
+    ctx.originalStatus = response.statusCode;
     ctx.statusMessage = response.statusMessage;
 
     ctx.responseUrl = response.url;
@@ -214,6 +215,7 @@ export default class MitmRequestContext {
   ) {
     const headers = parseRawHeaders(rawHeaders);
     ctx.status = statusCode;
+    ctx.originalStatus = statusCode;
     ctx.responseTime = new Date();
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = headers;

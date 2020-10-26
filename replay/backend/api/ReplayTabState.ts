@@ -8,7 +8,7 @@ import {
 } from '~shared/interfaces/ISaSession';
 import ReplayTick, { IEventType } from '~backend/api/ReplayTick';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
-import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import { IDomChangeEvent, IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
 import getResolvable from '~shared/utils/promise';
@@ -129,7 +129,7 @@ export default class ReplayTabState extends EventEmitter {
       startIndex = newTick.documentLoadPaintIndex;
     }
 
-    const changeEvents: IDomChangeEvent[] = [];
+    const changeEvents: IFrontendDomChangeEvent[] = [];
     if (newTick.eventType === 'load') {
       startIndex = -1;
       changeEvents.push({
@@ -144,7 +144,7 @@ export default class ReplayTabState extends EventEmitter {
           console.log('Paint event not loaded!', i);
           return;
         }
-        if (paints.changeEvents[0].action === 'newDocument') {
+        if (paints.changeEvents[0].isMainFrame && paints.changeEvents[0].action === 'newDocument') {
           changeEvents.length = 0;
         }
         changeEvents.push(...paints.changeEvents);
@@ -168,7 +168,7 @@ export default class ReplayTabState extends EventEmitter {
   public loadTick(
     newTickIdx: number,
     specificPlaybarOffset?: number,
-  ): [IDomChangeEvent[], number[], IMouseEvent, IScrollRecord] {
+  ): [IFrontendDomChangeEvent[], number[], IMouseEvent, IScrollRecord] {
     if (newTickIdx === this.currentTickIdx) return;
     const newTick = this.ticks[newTickIdx];
 
@@ -227,9 +227,10 @@ export default class ReplayTabState extends EventEmitter {
   public loadDomChange(event: IDomChangeEvent) {
     const { commandId, action, textContent, timestamp, isMainFrame } = event;
 
-    if (!isMainFrame) return;
+    // if this is a subframe without a frame, ignore it
+    if (!isMainFrame && !event.frameIdPath) return;
 
-    if (event.action === 'newDocument' && !this.startOrigin) {
+    if (isMainFrame && event.action === 'newDocument' && !this.startOrigin) {
       this.startOrigin = event.textContent;
       console.log('Got start origin for new tab', this.startOrigin);
       this.isReady.resolve();
@@ -246,16 +247,39 @@ export default class ReplayTabState extends EventEmitter {
       paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
     }
 
+    const frontendEvent: IFrontendDomChangeEvent = {
+      nodeId: event.nodeId,
+      eventIndex: event.eventIndex,
+      action: event.action,
+      frameIdPath: event.frameIdPath,
+      isMainFrame: event.isMainFrame,
+      nodeType: event.nodeType,
+      textContent: event.textContent,
+      tagName: event.tagName,
+      namespaceUri: event.namespaceUri,
+      previousSiblingId: event.previousSiblingId,
+      parentNodeId: event.parentNodeId,
+      attributes: event.attributes,
+      attributeNamespaces: event.attributeNamespaces,
+      properties: event.properties,
+    };
+
     if (paintEvent) {
-      // reset paint load if we backfilled
-      if (paintEvent !== lastPaintEvent) {
-        console.log('Adding to a previous paint bucket (events out of order)');
-        this.paintEventsLoadedIdx = -1;
+      const events = paintEvent.changeEvents;
+      events.push(frontendEvent);
+
+      if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
+        events.sort((a, b) => {
+          if (a.isMainFrame && !b.isMainFrame) return -1;
+          if (!a.isMainFrame && b.isMainFrame) return 1;
+          return a.eventIndex - b.eventIndex;
+        });
+        const paintIndex = this.paintEvents.indexOf(paintEvent);
+        if (paintIndex < this.paintEventsLoadedIdx) this.paintEventsLoadedIdx = paintIndex - 1;
       }
-      paintEvent.changeEvents.push(event);
     } else {
       paintEvent = {
-        changeEvents: [event],
+        changeEvents: [frontendEvent],
         timestamp,
         commandId,
       };
@@ -263,7 +287,7 @@ export default class ReplayTabState extends EventEmitter {
       const index = this.paintEvents.length;
       const tick = new ReplayTick(this, 'paint', index, commandId, timestamp);
 
-      if (action === 'newDocument') {
+      if (isMainFrame && action === 'newDocument') {
         tick.isNewDocumentTick = true;
         tick.documentOrigin = textContent;
         this.pages.push({
@@ -274,12 +298,23 @@ export default class ReplayTabState extends EventEmitter {
       }
 
       this.paintEvents.push(paintEvent);
-      if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
-        console.log('Need to resort paint events - received out of order');
-        this.paintEventsLoadedIdx = -1;
-      }
 
       this.ticks.push(tick);
+
+      if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
+        console.log('Need to resort paint events - received out of order');
+
+        this.paintEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+
+        for (const t of this.ticks) {
+          if (t.eventType !== 'paint') continue;
+          const newIndex = this.paintEvents.findIndex(x => x.timestamp === t.timestamp);
+          if (t.eventTypeIdx !== newIndex) {
+            if (this.paintEventsLoadedIdx >= newIndex) this.paintEventsLoadedIdx = newIndex - 1;
+            t.eventTypeIdx = newIndex;
+          }
+        }
+      }
     }
   }
 

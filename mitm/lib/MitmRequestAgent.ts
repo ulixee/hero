@@ -46,6 +46,7 @@ export default class MitmRequestAgent {
       mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
     }
     MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
+    ctx.cacheHandler.onRequest();
     await HeadersHandler.modifyHeaders(ctx);
 
     requestSettings.headers = ctx.requestHeaders;

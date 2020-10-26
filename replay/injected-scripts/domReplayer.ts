@@ -1,11 +1,10 @@
 // NOTE: do not use node dependencies
 
-import { IDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import { IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const SHADOW_NODE_TYPE = 40;
-const idMap = new Map<number, Node>();
-const preserveElements = ['HTML', 'HEAD', 'BODY'];
+const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
 
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
@@ -18,13 +17,7 @@ const replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
 console.log('DomReplayer loaded.');
 // @ts-ignore
-window.replayEvents = async function replayEvents(
-  changeEvents,
-  resultNodeIds,
-  mouseEvent,
-  scrollEvent,
-) {
-  await domContentLoaded;
+window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
   console.log(
     'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
     changeEvents?.length ?? 0,
@@ -55,220 +48,289 @@ window.addEventListener('resize', () => {
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 });
 
-const domContentLoaded = new Promise(resolve => {
-  window.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded');
-    resolve();
-  });
-});
+const replayers = new Map<string, DomReplayer>();
 
-function applyDomChanges(changeEvents: IDomChangeEvent[]) {
+function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
   domChangeList.push(...changeEvents);
+  if (!replayers.has(DomReplayer.MAIN_FRAME_PATH)) {
+    replayers.set(
+      DomReplayer.MAIN_FRAME_PATH,
+      new DomReplayer(window, document, DomReplayer.MAIN_FRAME_PATH),
+    );
+  }
 
   while (domChangeList.length) {
     const changeEvent = domChangeList.shift();
-    const { nodeId, commandId, action, textContent } = changeEvent;
-    if (action === 'newDocument') {
-      const href = textContent;
-      const newUrl = new URL(href);
-
-      window.scrollTo({ top: 0 });
-      document.documentElement.innerHTML = '';
-      while (document.documentElement.previousSibling) {
-        const prev = document.documentElement.previousSibling;
-        if (prev === document.doctype) break;
-        prev.remove();
-      }
-      idMap.clear();
-
-      if (window.location.origin === newUrl.origin) {
-        window.history.replaceState({}, 'Replay', href);
-      }
-      continue;
-    }
-
-    if (action === 'location') {
-      console.log('Location changed', commandId, changeEvent);
-      window.history.replaceState({}, 'Replay', textContent);
-      continue;
-    }
-
-    const { nodeType, parentNodeId, tagName } = changeEvent;
-    if (preserveElements.includes(tagName)) {
-      const elem = window.document.querySelector(tagName);
-      if (!elem) {
-        console.log('Preserved element doesnt exist!', tagName);
-        continue;
-      }
-      idMap.set(nodeId, elem);
-    }
-    if (nodeType === document.DOCUMENT_NODE) {
-      idMap.set(nodeId, document);
-    }
-    if (nodeType === document.DOCUMENT_TYPE_NODE) {
-      idMap.set(nodeId, document.doctype);
-      continue;
-    }
-
-    if (tagName && tagName.toLowerCase() === 'noscript') {
-      if (!changeEvent.attributes) changeEvent.attributes = {};
-      if (changeEvent.attributes.style) changeEvent.attributes.style += ';display:none';
-      else changeEvent.attributes.style = 'display:none';
-    }
-
-    let node: Node;
-    let parentNode: Node;
+    const { frameIdPath } = changeEvent;
+    const replayer = replayers.get(frameIdPath || DomReplayer.MAIN_FRAME_PATH);
     try {
-      node = deserializeNode(changeEvent);
-      parentNode = getNode(parentNodeId);
-      if (!parentNode && !parentNodeId && action === 'added') {
-        parentNode = document;
-      }
-      if (!parentNode && (action === 'added' || action === 'removed')) {
-        console.log('WARN: parent node id not found', changeEvent);
-        continue;
-      }
-      if (node && preserveElements.includes((node as Element).tagName)) {
-        if (action === 'removed') {
-          const elem = node as Element;
-          elem.innerHTML = '';
-          for (const attr of elem.attributes) {
-            elem.removeAttributeNS(attr.name, attr.namespaceURI);
-            elem.removeAttribute(attr.name);
-          }
-          console.log('WARN: script trying to remove preserved node', changeEvent, elem);
-          continue;
-        }
-        if (action === 'added') {
-          if (changeEvent.attributes) {
-            setNodeAttributes(node as any, changeEvent);
-          }
-          if (changeEvent.properties) {
-            setNodeProperties(node as any, changeEvent);
-          }
-          (node as Element).innerHTML = '';
-          continue;
-        }
-      }
-
-      switch (action) {
-        case 'added':
-          let next: Node;
-          if (!changeEvent.previousSiblingId) {
-            (parentNode as Element).prepend(node);
-          } else if (getNode(changeEvent.previousSiblingId)) {
-            next = getNode(changeEvent.previousSiblingId).nextSibling;
-            if (next) parentNode.insertBefore(node, next);
-            else parentNode.appendChild(node);
-          }
-          break;
-        case 'removed':
-          parentNode.removeChild(node);
-          break;
-        case 'attribute':
-          setNodeAttributes(node as Element, changeEvent);
-          break;
-        case 'property':
-          setNodeProperties(node as Element, changeEvent);
-          break;
-        case 'text':
-          deserializeNode(changeEvent).textContent = textContent;
-          break;
-      }
-    } catch (error) {
-      console.log('ERROR applying action', error.stack, parentNode, node, changeEvent);
+      if (replayer) replayer.replay(changeEvent);
+      else console.log('iFrame Replayer not available!', frameIdPath);
+    } catch (err) {
+      console.log('ERROR applying change', changeEvent, err);
     }
   }
 }
 
 // HELPER FUNCTIONS ////////////////////
 
-function getNode(id: number) {
-  if (id === null || id === undefined) return null;
-  return idMap.get(id);
-}
+class DomReplayer {
+  static MAIN_FRAME_PATH = 'main';
+  readonly isLoaded: Promise<void>;
+  readonly idMap = new Map<number, Node>();
 
-function setNodeAttributes(node: Element, data: IDomChangeEvent) {
-  if (!data.attributes) return;
-  for (const [name, value] of Object.entries(data.attributes)) {
-    const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
-    try {
-      if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
-        node.setAttribute(name, value);
+  get isMainFrame() {
+    return this.path === DomReplayer.MAIN_FRAME_PATH;
+  }
+
+  get document() {
+    if (this.element instanceof HTMLDocument) return this.element;
+    if (this.element instanceof HTMLObjectElement) {
+      return this.element.getSVGDocument() ?? this.element.contentDocument;
+    }
+    if (this.element instanceof HTMLIFrameElement) return this.element.contentDocument;
+  }
+
+  constructor(
+    readonly window: Window,
+    readonly element: HTMLObjectElement | HTMLIFrameElement | HTMLDocument,
+    readonly path: string,
+  ) {
+    this.isLoaded = new Promise(resolve => {
+      if (document && document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', () => {
+          console.log('DOMContentLoaded');
+          resolve();
+        });
+      }
+    });
+  }
+
+  replay(event: IFrontendDomChangeEvent) {
+    const { action, textContent, nodeId } = event;
+    if (action === 'newDocument') {
+      this.onNewDocument(textContent);
+      return;
+    }
+
+    if (action === 'location') {
+      console.log('Location changed', event);
+      if (!this.isMainFrame) {
+        if (this.element instanceof HTMLObjectElement) {
+          this.element.data = textContent;
+        }
       } else {
-        node.setAttributeNS(ns || null, name, value);
+        this.window.history.replaceState({}, 'Replay', textContent);
       }
-    } catch (err) {
-      if (
-        !err.toString().includes('not a valid attribute name') &&
-        !err.toString().includes('qualified name')
-      )
-        throw err;
+      return;
+    }
+
+    const { nodeType, parentNodeId, tagName } = event;
+    if (preserveElements.has(tagName)) {
+      const elem = this.document.querySelector(tagName);
+      if (!elem) {
+        console.log('Preserved element doesnt exist!', tagName);
+        return;
+      }
+      this.idMap.set(nodeId, elem);
+      if (action === 'removed') {
+        elem.innerHTML = '';
+        for (const attr of elem.attributes) {
+          elem.removeAttributeNS(attr.name, attr.namespaceURI);
+          elem.removeAttribute(attr.name);
+        }
+        console.log('WARN: script trying to remove preserved node', event, elem);
+        return;
+      }
+      if (action === 'added') {
+        elem.innerHTML = '';
+        if (event.attributes) {
+          this.setNodeAttributes(elem, event);
+        }
+        if (event.properties) {
+          this.setNodeProperties(elem, event);
+        }
+        return;
+      }
+    }
+    if (nodeType === this.document.DOCUMENT_NODE) {
+      this.idMap.set(nodeId, this.document);
+    }
+    if (nodeType === this.document.DOCUMENT_TYPE_NODE) {
+      this.idMap.set(nodeId, this.document.doctype);
+      return;
+    }
+
+    if (tagName && tagName.toLowerCase() === 'noscript') {
+      if (!event.attributes) event.attributes = {};
+      if (event.attributes.style) event.attributes.style += ';display:none';
+      else event.attributes.style = 'display:none';
+    }
+
+    let node: Node;
+    let parentNode: Node;
+    try {
+      parentNode = this.getNode(parentNodeId);
+      if (!parentNode && !parentNodeId && action === 'added') {
+        parentNode = this.document;
+      }
+      if (!parentNode && (action === 'added' || action === 'removed')) {
+        console.log('WARN: parent node id not found', event);
+        return;
+      }
+
+      node = this.deserializeNode(event, parentNode as Element);
+      switch (action) {
+        case 'added':
+          let next: Node;
+          if (!event.previousSiblingId) {
+            (parentNode as Element).prepend(node);
+          } else if (this.getNode(event.previousSiblingId)) {
+            next = this.getNode(event.previousSiblingId).nextSibling;
+            if (next) parentNode.insertBefore(node, next);
+            else parentNode.appendChild(node);
+          }
+          if ((node as Element).tagName === 'IFRAME') {
+            console.log('Added iframe!', nodeId);
+            const frame = node as HTMLIFrameElement;
+            const key = `${this.path}_${nodeId}`;
+            replayers.set(key, new DomReplayer(frame.contentWindow, frame, key));
+          }
+          if ((node as Element).tagName === 'OBJECT') {
+            console.log('Added object!', nodeId);
+            const object = node as HTMLObjectElement;
+            const key = `${this.path}_${nodeId}`;
+            replayers.set(key, new DomReplayer(object.contentWindow, object, key));
+          }
+          break;
+        case 'removed':
+          parentNode.removeChild(node);
+          break;
+        case 'attribute':
+          this.setNodeAttributes(node as Element, event);
+          break;
+        case 'property':
+          this.setNodeProperties(node as Element, event);
+          break;
+        case 'text':
+          node.textContent = textContent;
+          break;
+      }
+    } catch (error) {
+      console.log('ERROR applying action', error.stack, parentNode, node, event);
     }
   }
-}
 
-function setNodeProperties(node: Element, data: IDomChangeEvent) {
-  if (!data.properties) return;
-  for (const [name, value] of Object.entries(data.properties)) {
-    if (name === 'sheet.cssRules') {
-      const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
-      for (let i = 0; i < sheet.cssRules.length; i += 1) {
-        sheet.deleteRule(i);
+  onNewDocument(textContent: string) {
+    const href = textContent;
+    const newUrl = new URL(href);
+
+    if (!this.isMainFrame) {
+      if (this.element instanceof HTMLObjectElement) {
+        this.element.data = textContent;
+        return;
       }
-      for (const rule of value as string[]) {
-        sheet.insertRule(rule);
-      }
+      this.window.location.href = newUrl.href;
     }
-    node[name] = value;
-  }
-}
+    this.window?.scrollTo({ top: 0 });
 
-function deserializeNode(data: IDomChangeEvent, parent?: Element): Node {
-  if (data === null) return null;
+    this.document.documentElement.innerHTML = '';
+    while (this.document.documentElement.previousSibling) {
+      const prev = this.document.documentElement.previousSibling;
+      if (prev === this.document.doctype) break;
+      prev.remove();
+    }
 
-  let node = getNode(data.nodeId);
-  if (node) return node;
-
-  if (parent && data.nodeType === SHADOW_NODE_TYPE) {
-    // NOTE: we just make all shadows open in replay
-    node = parent.attachShadow({ mode: 'open' });
-    idMap.set(data.nodeId, node);
-    return node;
+    if (this.isMainFrame && this.window.location.origin === newUrl.origin) {
+      this.window.history.replaceState({}, 'Replay', href);
+    }
   }
 
-  switch (data.nodeType) {
-    case Node.COMMENT_NODE:
-      node = document.createComment(data.textContent);
-      break;
+  getNode(id: number) {
+    if (id === null || id === undefined) return null;
+    return this.idMap.get(id);
+  }
 
-    case Node.TEXT_NODE:
-      node = document.createTextNode(data.textContent);
-      break;
-
-    case Node.ELEMENT_NODE:
-      if (!node) {
-        if (data.namespaceUri) {
-          node = document.createElementNS(data.namespaceUri, data.tagName);
+  setNodeAttributes(node: Element, data: IFrontendDomChangeEvent) {
+    if (!data.attributes) return;
+    for (const [name, value] of Object.entries(data.attributes)) {
+      const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
+      try {
+        if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
+          node.setAttribute(name, value);
         } else {
-          node = document.createElement(data.tagName);
+          node.setAttributeNS(ns || null, name, value);
+        }
+      } catch (err) {
+        if (
+          !err.toString().includes('not a valid attribute name') &&
+          !err.toString().includes('qualified name')
+        )
+          throw err;
+      }
+    }
+  }
+
+  setNodeProperties(node: Element, data: IFrontendDomChangeEvent) {
+    if (!data.properties) return;
+    for (const [name, value] of Object.entries(data.properties)) {
+      if (name === 'sheet.cssRules') {
+        const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
+        for (let i = 0; i < sheet.cssRules.length; i += 1) {
+          sheet.deleteRule(i);
+        }
+        for (const rule of value as string[]) {
+          sheet.insertRule(rule);
         }
       }
-      setNodeAttributes(node as Element, data);
-      if (data.textContent) {
-        node.textContent = data.textContent;
-      }
-
-      break;
+      node[name] = value;
+    }
   }
 
-  if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
+  deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
+    if (data === null) return null;
 
-  idMap.set(data.nodeId, node);
+    let node = this.getNode(data.nodeId);
+    if (node) return node;
 
-  if (parent) parent.appendChild(node);
+    if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
+      // NOTE: we just make all shadows open in replay
+      node = parent.attachShadow({ mode: 'open' });
+      this.idMap.set(data.nodeId, node);
+      return node;
+    }
 
-  return node;
+    switch (data.nodeType) {
+      case Node.COMMENT_NODE:
+        node = this.document.createComment(data.textContent);
+        break;
+
+      case Node.TEXT_NODE:
+        node = this.document.createTextNode(data.textContent);
+        break;
+
+      case Node.ELEMENT_NODE:
+        if (!node) {
+          if (data.namespaceUri) {
+            node = this.document.createElementNS(data.namespaceUri, data.tagName);
+          } else {
+            node = this.document.createElement(data.tagName);
+          }
+        }
+        this.setNodeAttributes(node as Element, data);
+        if (data.textContent) {
+          node.textContent = data.textContent;
+        }
+
+        break;
+    }
+
+    if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
+
+    this.idMap.set(data.nodeId, node);
+
+    return node;
+  }
 }
 
 /////// / DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
@@ -368,7 +430,7 @@ function highlightNodes(nodeIds: number[]) {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
     for (let i = 0; i < length; i += 1) {
-      const node = idMap.get(nodeIds[i]);
+      const node = replayers.get(null).idMap.get(nodeIds[i]);
       const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];
       if (!node) {
         highlightElements[i].remove();

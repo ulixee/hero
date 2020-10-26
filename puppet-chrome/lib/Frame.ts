@@ -32,7 +32,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   public url: string;
 
   public get securityOrigin() {
-    if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url) return null;
+    if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url || this.url === ':') return '';
     const origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
       return new URL(this.url).origin;

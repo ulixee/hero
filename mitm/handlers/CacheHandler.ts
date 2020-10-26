@@ -1,6 +1,6 @@
 import HttpResponseCache from '../lib/HttpResponseCache';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
-import ResourceState from "../interfaces/ResourceState";
+import ResourceState from '../interfaces/ResourceState';
 
 export default class CacheHandler {
   public didProposeCachedResource = false;
@@ -21,6 +21,7 @@ export default class CacheHandler {
   public onRequest() {
     const ctx = this.ctx;
     ctx.setState(ResourceState.CheckCacheOnRequest);
+
     // only cache get (don't do preflight, post, etc)
     if (ctx.method === 'GET' && !ctx.requestLowerHeaders['if-none-match']) {
       const cache = this.responseCache?.get(ctx.url.href);
