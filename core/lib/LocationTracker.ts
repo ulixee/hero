@@ -1,15 +1,15 @@
-import { assert } from '@secret-agent/commons/utils';
+import { assert } from "@secret-agent/commons/utils";
 import {
   ILocationStatus,
   IPipelineStatus,
   IPipelineStep,
   LocationStatus,
   LocationTrigger,
-  PipelineStatus,
-} from '@secret-agent/core-interfaces/Location';
-import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
+  PipelineStatus
+} from "@secret-agent/core-interfaces/Location";
+import INavigation, { NavigationReason } from "@secret-agent/core-interfaces/INavigation";
+import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
+import TabNavigations from "@secret-agent/session-state/lib/TabNavigations";
 
 const READY = 'READY';
 
@@ -45,17 +45,21 @@ export default class LocationTracker {
     navigations.on('status-change', this.onPipelineStatusChange.bind(this));
   }
 
-  public willRunCommand(command: ICommandMeta, previousCommand: ICommandMeta) {
-    const isPreviousCommandWait = previousCommand?.name.startsWith('waitFor') ?? false;
-    // if this is a goto, reset the "waitForLocation(change/reload)" command marker
-    const isGoto = command.name === 'goto';
-    // if last command was a "click" and current command is "waitForLocation", we don't want to move
-    // up the last command marker clear previous triggers
-    // however, if the command is a waitForLocation, and the previous command was a waitFor*, we want to clear
-    // previous triggers
-    const isWaitAfterWait = command.name === 'waitForLocation' && isPreviousCommandWait;
-    if (isWaitAfterWait || isGoto) {
-      this.defaultWaitForLocationCommandId = command.id;
+  // this function will find the "starting command" to look for waitForLocation(change/reload)
+  public willRunCommand(newCommand: ICommandMeta, previousCommands: ICommandMeta[]) {
+    let last: ICommandMeta;
+    for (const command of previousCommands) {
+      // if this is a goto, set this to the "waitForLocation(change/reload)" command marker
+      if (command.name === 'goto') this.defaultWaitForLocationCommandId = command.id;
+      // find the last "waitFor" command that is not followed by another waitFor
+      if (last?.name.startsWith('waitFor') && !command.name.startsWith('waitFor')) {
+        this.defaultWaitForLocationCommandId = command.id;
+      }
+      last = command;
+    }
+    // handle cases like waitForLocation two times in a row
+    if (newCommand.name === 'waitForLocation' && last && last.name.startsWith('waitFor')) {
+      this.defaultWaitForLocationCommandId = newCommand.id;
     }
   }
 

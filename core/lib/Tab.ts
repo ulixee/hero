@@ -180,11 +180,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       args: args.length ? JSON.stringify(args) : undefined,
     } as ICommandMeta;
 
-    const previousCommand = commandHistory.length
-      ? commandHistory[commandHistory.length - 1]
-      : null;
 
-    this.locationTracker.willRunCommand(commandMeta, previousCommand);
+    this.locationTracker.willRunCommand(commandMeta, commandHistory);
     if (functionName !== 'goto') {
       await this.domRecorder.setCommandIdForPage(commandMeta.id);
     }

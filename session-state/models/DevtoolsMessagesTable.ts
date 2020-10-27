@@ -30,19 +30,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
   public insert(event: IPuppetContextEvents['devtools-message']) {
     if (filteredEventMethods.has(event.method)) return;
-    let params = event.params;
-    if (
-      params &&
-      event.method === 'Runtime.bindingCalled' &&
-      params.name === '__saPageListenerCallback' &&
-      params.payload?.length > 250
-    ) {
-      params = {
-        ...params,
-        payload: `${params.payload.substr(0, 250)}... truncated ${params.payload.length -
-          250} chars`,
-      };
-    }
+    const params = event.params;
     let frameId = event.frameId;
     let requestId: string;
     let pageId = event.pageTargetId;
@@ -80,6 +68,23 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       }
     }
 
+    function paramsStringifyFilter(key: string, value: any) {
+      if (
+        key === 'payload' &&
+        event.method === 'Runtime.bindingCalled' &&
+        params.name === '__saPageListenerCallback' &&
+        value?.length > 250
+      ) {
+        return `${value.substr(0, 250)}... truncated ${params.payload.length - 250} chars`;
+      }
+
+      // clean out post data and headers (we have these in resources table)
+      if ((key === 'headers' || key === 'postData') && params.request) {
+        return undefined;
+      }
+      return value;
+    }
+
     const record = [
       event.direction,
       pageId,
@@ -89,7 +94,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       event.sessionType,
       event.method,
       event.id,
-      params ? JSON.stringify(params) : undefined,
+      params ? JSON.stringify(params, paramsStringifyFilter) : undefined,
       event.error ? JSON.stringify(event.error) : undefined,
       event.result ? JSON.stringify(event.result) : undefined,
       event.timestamp.toISOString(),

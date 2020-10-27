@@ -1,6 +1,8 @@
-import * as zlib from 'zlib';
-import { PassThrough } from 'stream';
-import getResolvable from '~shared/utils/promise';
+import * as zlib from "zlib";
+import { PassThrough } from "stream";
+import getResolvable from "~shared/utils/promise";
+
+const packageJson = require('../../package.json');
 
 export default class ReplayResources {
   private resources: {
@@ -44,6 +46,7 @@ export default class ReplayResources {
     const headers: any = {
       'Cache-Control': 'public, max-age=500',
       'Content-Type': resource.headers.get('content-type'),
+      'X-Replay-Agent': `Secret Agent Replay v${packageJson.version}`,
     };
 
     if (resource.headers.get('location')) {
@@ -52,8 +55,6 @@ export default class ReplayResources {
 
     let readable = new PassThrough();
     if (resource.type === 'Document') {
-      const csp = resource.headers.get('content-security-policy');
-      if (csp) headers['Content-Security-Policy'] = csp;
       readable.end(`<!DOCTYPE html><html><head></head><body></body></html>`);
     } else {
       const encoding = resource.headers.get('content-encoding');

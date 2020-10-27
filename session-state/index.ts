@@ -289,6 +289,7 @@ export default class SessionState {
     this.db.frames.insert(frame);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public captureSubFrameNavigated(tabId: string, frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & { navigationReason?: string}, navigatedInDocument: boolean) {
     const existing = this.frames[frame.id];
     if (existing) {

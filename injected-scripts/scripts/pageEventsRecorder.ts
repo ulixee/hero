@@ -276,11 +276,15 @@ class PageEventsRecorder {
 
     const shouldRecordInitialStyle = element.textContent || element instanceof HTMLStyleElement;
     if (element.sheet instanceof CSSStyleSheet) {
-      // if there's style text, record the current state
-      const startingStyle = shouldRecordInitialStyle
-        ? [...element.sheet.cssRules].map(x => x.cssText)
-        : [];
-      this.stylesheets.set(element, startingStyle);
+      try {
+        // if there's style text, record the current state
+        const startingStyle = shouldRecordInitialStyle
+          ? [...element.sheet.cssRules].map(x => x.cssText)
+          : [];
+        this.stylesheets.set(element, startingStyle);
+      } catch (err) {
+        // can't track cors stylesheet rules
+      }
     }
   }
 

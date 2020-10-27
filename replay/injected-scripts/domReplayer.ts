@@ -48,24 +48,19 @@ window.addEventListener('resize', () => {
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 });
 
-const replayers = new Map<string, DomReplayer>();
+const domReplayersByPath = new Map<string, DomReplayer>();
 
 function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
   domChangeList.push(...changeEvents);
-  if (!replayers.has(DomReplayer.MAIN_FRAME_PATH)) {
-    replayers.set(
-      DomReplayer.MAIN_FRAME_PATH,
-      new DomReplayer(window, document, DomReplayer.MAIN_FRAME_PATH),
-    );
-  }
+  // load default replayer
+  getDefaultDomReplayer();
 
   while (domChangeList.length) {
     const changeEvent = domChangeList.shift();
     const { frameIdPath } = changeEvent;
-    const replayer = replayers.get(frameIdPath || DomReplayer.MAIN_FRAME_PATH);
     try {
-      if (replayer) replayer.replay(changeEvent);
-      else console.log('iFrame Replayer not available!', frameIdPath);
+      const replayer = domReplayersByPath.get(frameIdPath || DomReplayer.MAIN_FRAME_PATH);
+      replayer.replay(changeEvent);
     } catch (err) {
       console.log('ERROR applying change', changeEvent, err);
     }
@@ -155,6 +150,7 @@ class DomReplayer {
     }
     if (nodeType === this.document.DOCUMENT_NODE) {
       this.idMap.set(nodeId, this.document);
+      return;
     }
     if (nodeType === this.document.DOCUMENT_TYPE_NODE) {
       this.idMap.set(nodeId, this.document.doctype);
@@ -171,9 +167,6 @@ class DomReplayer {
     let parentNode: Node;
     try {
       parentNode = this.getNode(parentNodeId);
-      if (!parentNode && !parentNodeId && action === 'added') {
-        parentNode = this.document;
-      }
       if (!parentNode && (action === 'added' || action === 'removed')) {
         console.log('WARN: parent node id not found', event);
         return;
@@ -182,29 +175,29 @@ class DomReplayer {
       node = this.deserializeNode(event, parentNode as Element);
       switch (action) {
         case 'added':
-          let next: Node;
           if (!event.previousSiblingId) {
             (parentNode as Element).prepend(node);
           } else if (this.getNode(event.previousSiblingId)) {
-            next = this.getNode(event.previousSiblingId).nextSibling;
+            const next = this.getNode(event.previousSiblingId).nextSibling;
+
             if (next) parentNode.insertBefore(node, next);
             else parentNode.appendChild(node);
           }
+
           if ((node as Element).tagName === 'IFRAME') {
-            console.log('Added iframe!', nodeId);
             const frame = node as HTMLIFrameElement;
             const key = `${this.path}_${nodeId}`;
-            replayers.set(key, new DomReplayer(frame.contentWindow, frame, key));
+            domReplayersByPath.set(key, new DomReplayer(frame.contentWindow, frame, key));
           }
           if ((node as Element).tagName === 'OBJECT') {
-            console.log('Added object!', nodeId);
             const object = node as HTMLObjectElement;
             const key = `${this.path}_${nodeId}`;
-            replayers.set(key, new DomReplayer(object.contentWindow, object, key));
+            domReplayersByPath.set(key, new DomReplayer(object.contentWindow, object, key));
           }
+
           break;
         case 'removed':
-          parentNode.removeChild(node);
+          if (parentNode.contains(node)) parentNode.removeChild(node);
           break;
         case 'attribute':
           this.setNodeAttributes(node as Element, event);
@@ -423,6 +416,15 @@ function buildHover() {
   return hoverNode;
 }
 
+function getDefaultDomReplayer() {
+  let replayer = domReplayersByPath.get(DomReplayer.MAIN_FRAME_PATH);
+  if (!replayer) {
+    replayer = new DomReplayer(window, document, DomReplayer.MAIN_FRAME_PATH);
+    domReplayersByPath.set(replayer.path, replayer);
+  }
+  return replayer;
+}
+
 function highlightNodes(nodeIds: number[]) {
   lastHighlightNodes = nodeIds;
   const length = nodeIds ? nodeIds.length : 0;
@@ -430,7 +432,7 @@ function highlightNodes(nodeIds: number[]) {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
     for (let i = 0; i < length; i += 1) {
-      const node = replayers.get(null).idMap.get(nodeIds[i]);
+      const node = getDefaultDomReplayer().idMap.get(nodeIds[i]);
       const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];
       if (!node) {
         highlightElements[i].remove();
