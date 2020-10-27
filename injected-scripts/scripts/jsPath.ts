@@ -119,7 +119,7 @@ class JsPath {
         ...box,
         isVisible: objectAtPath.isVisible,
         attachedState: objectAtPath.extractAttachedState(),
-        overlappingElements: objectAtPath.overlappingElements,
+        overlappingElementId: objectAtPath.overlappingElementId,
       });
     } catch (error) {
       return objectAtPath.toReturnError(error);
@@ -157,13 +157,43 @@ class JsPath {
     }
   }
 
+  public static waitForElement(jsPath: IJsPath, waitForVisible: boolean, timeoutMillis: number) {
+    return new Promise<IExecJsPathResult<boolean>>(async resolve => {
+      const objectAtPath = new ObjectAtPath(jsPath);
+      const end = new Date();
+      end.setTime(end.getTime() + timeoutMillis);
+
+      while (new Date() < end) {
+        try {
+          if (!objectAtPath.objectAtPath) objectAtPath.lookup();
+          if (!waitForVisible || objectAtPath.isVisible) {
+            return resolve({
+              attachedState: objectAtPath.extractAttachedState(),
+              value: true,
+            });
+          }
+        } catch (err) {
+          // can happen if lookup path is bad
+        }
+        // eslint-disable-next-line promise/param-names
+        await new Promise(resolve1 => setTimeout(resolve1, 20));
+      }
+      resolve(<IExecJsPathResult>{
+        attachedState: objectAtPath.extractAttachedState(),
+        overlappingElementId: objectAtPath.overlappingElementId,
+        value: false,
+      });
+    });
+  }
+
   public static isVisible(jsPath: IJsPath) {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
       objectAtPath.lookup();
 
-      const returnObject: IExecJsPathResult = {
+      const returnObject = <IExecJsPathResult>{
         attachedState: objectAtPath.extractAttachedState(),
+        overlappingElementId: objectAtPath.overlappingElementId,
         value: objectAtPath.isVisible,
       };
 
@@ -252,28 +282,42 @@ class ObjectAtPath {
     return false;
   }
 
-  public get overlappingElements() {
+  public get overlappingElement() {
     const element = this.closestElement;
-    if (!element) return [];
+    if (!element) return null;
     const { top, right, left, bottom } = element.getBoundingClientRect();
-    return [
-      document.elementFromPoint(left + 1, top + 1),
-      document.elementFromPoint(left + 1, bottom - 1),
-      document.elementFromPoint(right - 1, top + 1),
-      document.elementFromPoint(right - 1, bottom - 1),
-    ].map(x => (x ? NodeTracker.getNodeId(x) : null));
+    const centerX = Math.floor(100 * left + (right - left) / 2) / 100;
+    const centerY = Math.floor(100 * top + (bottom - top) / 2) / 100;
+
+    return document.elementFromPoint(centerX, centerY);
+  }
+
+  public get overlappingElementId() {
+    const overlapping = this.overlappingElement;
+    if (!overlapping) return null;
+    return NodeTracker.getNodeId(overlapping);
   }
 
   public get isBehindOtherElement() {
-    const element = this.closestElement;
-    if (!element) return false;
-    const { top, right, left, bottom } = element.getBoundingClientRect();
+    const overlapping = this.overlappingElement;
+    if (!overlapping) return false;
+
     // adjust coordinates to get more accurate results
-    if (!element.contains(document.elementFromPoint(left + 1, top + 1))) return true;
-    if (!element.contains(document.elementFromPoint(left + 1, bottom - 1))) return true;
-    if (!element.contains(document.elementFromPoint(right - 1, top + 1))) return true;
-    if (!element.contains(document.elementFromPoint(right - 1, bottom - 1))) return true;
-    return false;
+    const isContained = this.closestElement.contains(overlapping);
+    if (isContained) return false;
+
+    // make sure overlapping element is visible
+    const style = getComputedStyle(overlapping);
+    if (style?.visibility === 'hidden' || style?.display === 'none' || style?.opacity === '0') {
+      return false;
+    }
+
+    // if this is another element, needs to be taking up > 50% of element
+    const overlappingBounds = overlapping.getBoundingClientRect();
+    const thisRect = this.boundingClientRect;
+    const isOverHalfWidth = overlappingBounds.width > thisRect.width / 2;
+    const isOverHalfHeight = overlappingBounds.height > thisRect.height / 2;
+    return isOverHalfWidth && isOverHalfHeight;
   }
 
   private get isTextNode() {

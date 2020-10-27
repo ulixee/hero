@@ -180,7 +180,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       args: args.length ? JSON.stringify(args) : undefined,
     } as ICommandMeta;
 
-
     this.locationTracker.willRunCommand(commandMeta, commandHistory);
     if (functionName !== 'goto') {
       await this.domRecorder.setCommandIdForPage(commandMeta.id);
@@ -397,18 +396,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
 
     try {
-      let isFound = false;
+      const isFound = false;
       do {
-        const jsonValue = await this.domEnv.isJsPathVisible(jsPath).catch(() => null);
+        const jsonValue = await this.domEnv
+          .waitForElement(jsPath, waitForVisible, 1e3)
+          .catch(() => null);
         if (jsonValue) {
-          if (waitForVisible) {
-            isFound = jsonValue.value;
-          } else {
-            isFound = jsonValue.attachedState !== null;
-          }
+          return jsonValue.value;
         }
         timer.throwIfExpired(`Timeout waiting for element ${jsPath} to be visible`);
-        await new Promise(resolve => setTimeout(resolve, 50));
       } while (!isFound);
     } finally {
       timer.clear();
