@@ -94,6 +94,14 @@ export default class CacheHandler {
       const key = isLowerKeys ? 'content-encoding' : 'Content-Encoding';
       responseHeaders[key] = cached.encoding;
     }
+    if (
+      cached.contentType &&
+      !responseHeaders['content-type'] &&
+      !responseHeaders['Content-Type']
+    ) {
+      const key = isLowerKeys ? 'content-type' : 'Content-Type';
+      responseHeaders[key] = cached.contentType;
+    }
     const lengthKey = isLowerKeys ? 'content-length' : 'Content-Length';
     responseHeaders[lengthKey] = String(Buffer.byteLength(cached.file, 'utf8'));
     this.shouldServeCachedData = true;
