@@ -262,6 +262,7 @@ export default class ReplayTabState extends EventEmitter {
       attributes: event.attributes,
       attributeNamespaces: event.attributeNamespaces,
       properties: event.properties,
+      timestamp: event.timestamp,
     };
 
     if (paintEvent) {
@@ -270,9 +271,8 @@ export default class ReplayTabState extends EventEmitter {
 
       if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
         events.sort((a, b) => {
-          if (a.isMainFrame && !b.isMainFrame) return -1;
-          if (!a.isMainFrame && b.isMainFrame) return 1;
-          return a.eventIndex - b.eventIndex;
+          if (a.frameIdPath === b.frameIdPath) return a.eventIndex - b.eventIndex;
+          return a.frameIdPath.localeCompare(b.frameIdPath);
         });
         const paintIndex = this.paintEvents.indexOf(paintEvent);
         if (paintIndex < this.paintEventsLoadedIdx) this.paintEventsLoadedIdx = paintIndex - 1;

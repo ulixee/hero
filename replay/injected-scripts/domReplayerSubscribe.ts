@@ -6,5 +6,5 @@ declare namespace window {
 }
 
 ipcRenderer.on('dom:apply', (event, ...args) => {
-  requestAnimationFrame(() => window.replayEvents(...args));
+  window.replayEvents(...args);
 });

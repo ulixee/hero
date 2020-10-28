@@ -23,6 +23,7 @@ export default class ReplayView extends ViewBackend {
   public constructor(window: Window) {
     super(window, {
       preload: domReplayerScript,
+      nodeIntegrationInSubFrames: true,
       enableRemoteModule: false,
       partition: uuidv1(),
       contextIsolation: true,

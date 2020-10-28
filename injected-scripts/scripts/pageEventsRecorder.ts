@@ -1,6 +1,7 @@
 // NOTE: do not use node dependencies
 
 // eslint-disable-next-line max-classes-per-file
+import { doc } from "prettier";
 import { IDomChangeEvent, INodeData } from '../interfaces/IDomChangeEvent';
 import { IMouseEvent } from '../interfaces/IMouseEvent';
 import { IFocusEvent } from '../interfaces/IFocusEvent';
@@ -207,7 +208,8 @@ class PageEventsRecorder {
     const timestamp = changeTime || new Date().toISOString();
     for (const [style, current] of this.stylesheets) {
       if (!style.sheet || !style.isConnected) continue;
-      const newPropValue = [...(style.sheet as CSSStyleSheet).cssRules].map(x => x.cssText);
+      const sheet = style.sheet as CSSStyleSheet;
+      const newPropValue = [...sheet.cssRules].map(x => x.cssText);
       if (newPropValue.toString() !== current.toString()) {
         const nodeId = nodeTracker.getId(style);
         this.domChanges.push([
@@ -310,6 +312,9 @@ class PageEventsRecorder {
 
     for (const mutation of mutations) {
       const { type, target } = mutation;
+      if (target === document && !nodeTracker.getId(target)) {
+        changes.push([currentCommandId, 'added', this.serializeNode(document), stamp, idx()]);
+      }
 
       if (type === 'childList') {
         let isFirstRemoved = true;
@@ -390,7 +395,7 @@ class PageEventsRecorder {
     }
 
     for (const element of [node, ...node.childNodes] as Element[]) {
-      if (element.tagName === 'STYLE' || element.tagName === 'LINK') {
+      if (element.tagName === 'STYLE') {
         this.trackStylesheet(element as HTMLStyleElement);
       }
       const shadowRoot = element.shadowRoot;

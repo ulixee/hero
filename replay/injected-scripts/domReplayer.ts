@@ -12,12 +12,18 @@ let lastHighlightNodes: number[] = [];
 const domChangeList = [];
 
 const replayNode = document.createElement('sa-replay');
-replayNode.setAttribute('style', 'z-index:10000000;');
+replayNode.style.zIndex = '10000000';
 const replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
-console.log('DomReplayer loaded.');
+console.log(
+  'Loaded: isMain=%s, pid=%s., href=%s',
+  process.isMainFrame,
+  process.pid,
+  window.location.href,
+);
 // @ts-ignore
 window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
+  if (!process.isMainFrame) return;
   console.log(
     'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
     changeEvents?.length ?? 0,
@@ -48,49 +54,71 @@ window.addEventListener('resize', () => {
   if (lastMouseEvent) updateMouse(lastMouseEvent);
 });
 
-const domReplayersByPath = new Map<string, DomReplayer>();
+let frameNodePath: string;
+window.addEventListener('message', ev => {
+  if (ev.data.frameNodePath) {
+    frameNodePath = ev.data.frameNodePath;
+  }
+  const event = ev.data.event;
+  getReplayer().replay(event);
+});
+
+const pendingFrameCreationEvents = new Map<
+  string,
+  { frameNodePath: string; event: IFrontendDomChangeEvent }[]
+>();
+
+let replayer: DomReplayer;
+function getReplayer() {
+  if (!replayer) replayer = new DomReplayer();
+  return replayer;
+}
+
+const isoPeriodOffset = new Date().toISOString().indexOf('.');
 
 function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
-  domChangeList.push(...changeEvents);
-  // load default replayer
-  getDefaultDomReplayer();
+  const toProcess = domChangeList.concat(changeEvents);
+  domChangeList.length = 0;
 
-  while (domChangeList.length) {
-    const changeEvent = domChangeList.shift();
-    const { frameIdPath } = changeEvent;
-    try {
-      const replayer = domReplayersByPath.get(frameIdPath || DomReplayer.MAIN_FRAME_PATH);
-      replayer.replay(changeEvent);
-    } catch (err) {
-      console.log('ERROR applying change', changeEvent, err);
+  const blocks: IFrontendDomChangeEvent[][] = [];
+  let lastStamp: string = null;
+  let currentList: IFrontendDomChangeEvent[];
+  for (const changeEvent of toProcess) {
+    if (
+      !lastStamp ||
+      lastStamp.substr(0, isoPeriodOffset) !== changeEvent.timestamp.substr(0, isoPeriodOffset)
+    ) {
+      currentList = [];
+      blocks.push(currentList);
+      lastStamp = changeEvent.timestamp;
+    }
+    currentList.push(changeEvent);
+  }
+
+  const domReplayer = getReplayer();
+  for (const block of blocks) {
+    for (const changeEvent of block) {
+      try {
+        domReplayer.replay(changeEvent);
+      } catch (err) {
+        console.log('ERROR applying change', changeEvent, err);
+      }
     }
   }
+}
+
+const isMainFrame = process.isMainFrame;
+if (isMainFrame) {
+  frameNodePath = 'main';
 }
 
 // HELPER FUNCTIONS ////////////////////
 
 class DomReplayer {
-  static MAIN_FRAME_PATH = 'main';
   readonly isLoaded: Promise<void>;
   readonly idMap = new Map<number, Node>();
 
-  get isMainFrame() {
-    return this.path === DomReplayer.MAIN_FRAME_PATH;
-  }
-
-  get document() {
-    if (this.element instanceof HTMLDocument) return this.element;
-    if (this.element instanceof HTMLObjectElement) {
-      return this.element.getSVGDocument() ?? this.element.contentDocument;
-    }
-    if (this.element instanceof HTMLIFrameElement) return this.element.contentDocument;
-  }
-
-  constructor(
-    readonly window: Window,
-    readonly element: HTMLObjectElement | HTMLIFrameElement | HTMLDocument,
-    readonly path: string,
-  ) {
+  constructor() {
     this.isLoaded = new Promise(resolve => {
       if (document && document.addEventListener) {
         document.addEventListener('DOMContentLoaded', () => {
@@ -102,27 +130,26 @@ class DomReplayer {
   }
 
   replay(event: IFrontendDomChangeEvent) {
-    const { action, textContent, nodeId } = event;
+    const { action, textContent, nodeId, frameIdPath } = event;
+    if (frameIdPath && frameIdPath !== frameNodePath) {
+      this.delegate(event);
+      return;
+    }
+
     if (action === 'newDocument') {
       this.onNewDocument(textContent);
       return;
     }
 
     if (action === 'location') {
-      console.log('Location changed', event);
-      if (!this.isMainFrame) {
-        if (this.element instanceof HTMLObjectElement) {
-          this.element.data = textContent;
-        }
-      } else {
-        this.window.history.replaceState({}, 'Replay', textContent);
-      }
+      console.log('Location: href=%s', event.textContent);
+      window.history.replaceState({}, 'Replay', textContent);
       return;
     }
 
     const { nodeType, parentNodeId, tagName } = event;
     if (preserveElements.has(tagName)) {
-      const elem = this.document.querySelector(tagName);
+      const elem = document.querySelector(tagName);
       if (!elem) {
         console.log('Preserved element doesnt exist!', tagName);
         return;
@@ -148,12 +175,14 @@ class DomReplayer {
         return;
       }
     }
-    if (nodeType === this.document.DOCUMENT_NODE) {
-      this.idMap.set(nodeId, this.document);
+
+    if (nodeType === document.DOCUMENT_NODE) {
+      this.idMap.set(nodeId, document);
       return;
     }
-    if (nodeType === this.document.DOCUMENT_TYPE_NODE) {
-      this.idMap.set(nodeId, this.document.doctype);
+
+    if (nodeType === document.DOCUMENT_TYPE_NODE) {
+      this.idMap.set(nodeId, document.doctype);
       return;
     }
 
@@ -184,17 +213,6 @@ class DomReplayer {
             else parentNode.appendChild(node);
           }
 
-          if ((node as Element).tagName === 'IFRAME') {
-            const frame = node as HTMLIFrameElement;
-            const key = `${this.path}_${nodeId}`;
-            domReplayersByPath.set(key, new DomReplayer(frame.contentWindow, frame, key));
-          }
-          if ((node as Element).tagName === 'OBJECT') {
-            const object = node as HTMLObjectElement;
-            const key = `${this.path}_${nodeId}`;
-            domReplayersByPath.set(key, new DomReplayer(object.contentWindow, object, key));
-          }
-
           break;
         case 'removed':
           if (parentNode.contains(node)) parentNode.removeChild(node);
@@ -210,32 +228,81 @@ class DomReplayer {
           break;
       }
     } catch (error) {
-      console.log('ERROR applying action', error.stack, parentNode, node, event);
+      console.log('ERROR: applying action', error.stack, parentNode, node, event);
+    }
+  }
+
+  delegate(event: IFrontendDomChangeEvent) {
+    const childPath = event.frameIdPath
+      .replace(frameNodePath, '')
+      .split('_')
+      .filter(Boolean)
+      .map(Number);
+
+    if (childPath.length) {
+      const childId = childPath.shift();
+      const childFrameNodePath = `${frameNodePath}_${childId}`;
+
+      const node = replayer.idMap.get(childId);
+      if (!node) {
+        if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
+          pendingFrameCreationEvents.set(childFrameNodePath, []);
+        }
+        // queue for pending events
+        pendingFrameCreationEvents
+          .get(childFrameNodePath)
+          .push({ frameNodePath: childFrameNodePath, event });
+        console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
+        return;
+      }
+
+      if (
+        node instanceof HTMLObjectElement &&
+        (event.action === 'location' || event.action === 'newDocument')
+      ) {
+        node.data = event.textContent;
+      } else {
+        const frame = node as HTMLIFrameElement;
+        if (!frame.contentWindow) {
+          console.log('Frame: without window', frame);
+          return;
+        }
+        if (pendingFrameCreationEvents.has(childFrameNodePath)) {
+          for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
+            frame.contentWindow.postMessage(ev, window.location.origin);
+          }
+          pendingFrameCreationEvents.delete(childFrameNodePath);
+        }
+
+        frame.contentWindow.postMessage(
+          { frameNodePath: childFrameNodePath, event },
+          window.location.origin,
+        );
+      }
     }
   }
 
   onNewDocument(textContent: string) {
+    if (!isMainFrame) {
+      // window.location.href = textContent;
+      return;
+    }
     const href = textContent;
     const newUrl = new URL(href);
 
-    if (!this.isMainFrame) {
-      if (this.element instanceof HTMLObjectElement) {
-        this.element.data = textContent;
-        return;
-      }
-      this.window.location.href = newUrl.href;
-    }
-    this.window?.scrollTo({ top: 0 });
+    console.log('Location: (new document) %s', textContent);
 
-    this.document.documentElement.innerHTML = '';
-    while (this.document.documentElement.previousSibling) {
-      const prev = this.document.documentElement.previousSibling;
-      if (prev === this.document.doctype) break;
+    window.scrollTo({ top: 0 });
+
+    document.documentElement.innerHTML = '';
+    while (document.documentElement.previousSibling) {
+      const prev = document.documentElement.previousSibling;
+      if (prev === document.doctype) break;
       prev.remove();
     }
 
-    if (this.isMainFrame && this.window.location.origin === newUrl.origin) {
-      this.window.history.replaceState({}, 'Replay', href);
+    if (window.location.origin === newUrl.origin) {
+      window.history.replaceState({}, 'Replay', href);
     }
   }
 
@@ -275,8 +342,9 @@ class DomReplayer {
         for (const rule of value as string[]) {
           sheet.insertRule(rule);
         }
+      } else {
+        node[name] = value;
       }
-      node[name] = value;
     }
   }
 
@@ -295,20 +363,23 @@ class DomReplayer {
 
     switch (data.nodeType) {
       case Node.COMMENT_NODE:
-        node = this.document.createComment(data.textContent);
+        node = document.createComment(data.textContent);
         break;
 
       case Node.TEXT_NODE:
-        node = this.document.createTextNode(data.textContent);
+        node = document.createTextNode(data.textContent);
         break;
 
       case Node.ELEMENT_NODE:
         if (!node) {
           if (data.namespaceUri) {
-            node = this.document.createElementNS(data.namespaceUri, data.tagName);
+            node = document.createElementNS(data.namespaceUri, data.tagName);
           } else {
-            node = this.document.createElement(data.tagName);
+            node = document.createElement(data.tagName);
           }
+        }
+        if (node instanceof HTMLIFrameElement) {
+          console.log("Frame: frameNodePath=%s", `${frameNodePath}_${data.nodeId}`);
         }
         this.setNodeAttributes(node as Element, data);
         if (data.textContent) {
@@ -401,11 +472,11 @@ const highlightElements: any[] = [];
 const overflowBar = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
 
 const showMoreUp = document.createElement('sa-overflow');
-showMoreUp.setAttribute('style', 'top:0;');
+showMoreUp.style.top = '0';
 showMoreUp.innerHTML = overflowBar;
 
 const showMoreDown = document.createElement('sa-overflow');
-showMoreDown.setAttribute('style', 'bottom:0;');
+showMoreDown.style.bottom = '0';
 showMoreDown.innerHTML = overflowBar;
 
 function buildHover() {
@@ -416,15 +487,6 @@ function buildHover() {
   return hoverNode;
 }
 
-function getDefaultDomReplayer() {
-  let replayer = domReplayersByPath.get(DomReplayer.MAIN_FRAME_PATH);
-  if (!replayer) {
-    replayer = new DomReplayer(window, document, DomReplayer.MAIN_FRAME_PATH);
-    domReplayersByPath.set(replayer.path, replayer);
-  }
-  return replayer;
-}
-
 function highlightNodes(nodeIds: number[]) {
   lastHighlightNodes = nodeIds;
   const length = nodeIds ? nodeIds.length : 0;
@@ -432,7 +494,7 @@ function highlightNodes(nodeIds: number[]) {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
     for (let i = 0; i < length; i += 1) {
-      const node = getDefaultDomReplayer().idMap.get(nodeIds[i]);
+      const node = getReplayer().idMap.get(nodeIds[i]);
       const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];
       if (!node) {
         highlightElements[i].remove();

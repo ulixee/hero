@@ -20,5 +20,5 @@ export interface IDomChangeEvent {
 
 export type IFrontendDomChangeEvent = Omit<
   IDomChangeEvent,
-  'tabId' | 'timestamp' | 'commandId'
+  'tabId' | 'commandId'
 >;
