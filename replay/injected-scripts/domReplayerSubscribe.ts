@@ -1,10 +1,19 @@
 import { ipcRenderer } from 'electron';
 import './domReplayer';
 
-declare namespace window {
-  function replayEvents(...args: any[]);
+declare global {
+  interface Window {
+    replayEvents(...args: any[]);
+    isMainFrame: boolean;
+  }
 }
 
-ipcRenderer.on('dom:apply', (event, ...args) => {
-  window.replayEvents(...args);
-});
+window.isMainFrame = process.isMainFrame;
+
+console.log('Loaded: isMain=%s, pid=%s., href=%s', window.isMainFrame, process?.pid, window.location.href);
+
+if (process.isMainFrame) {
+  ipcRenderer.on('dom:apply', (event, ...args) => {
+    window.replayEvents(...args);
+  });
+}

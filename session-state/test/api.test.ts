@@ -97,7 +97,7 @@ describe('basic Replay API tests', () => {
     // 1 is just the new document
     const paintEvents = Object.values(paintMap);
     expect(paintEvents[0]).toHaveLength(1);
-    expect(paintEvents[1]).toHaveLength(13);
+    expect(paintEvents[1]).toHaveLength(14);
 
     await Core.shutdown(true);
     api.destroy();

@@ -8,22 +8,19 @@ const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
 
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
+let replayNode: HTMLElement;
+let replayShadow: ShadowRoot;
+let frameNodePath: string;
 let lastHighlightNodes: number[] = [];
 const domChangeList = [];
 
-const replayNode = document.createElement('sa-replay');
-replayNode.style.zIndex = '10000000';
-const replayShadow = replayNode.attachShadow({ mode: 'closed' });
+const isMainFrame = window.isMainFrame ?? true;
+if (isMainFrame) {
+  frameNodePath = 'main';
+}
 
-console.log(
-  'Loaded: isMain=%s, pid=%s., href=%s',
-  process.isMainFrame,
-  process.pid,
-  window.location.href,
-);
-// @ts-ignore
 window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
-  if (!process.isMainFrame) return;
+  createReplayItems();
   console.log(
     'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
     changeEvents?.length ?? 0,
@@ -40,21 +37,6 @@ window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEv
   }
 };
 
-function cancelEvent(e: Event) {
-  e.preventDefault();
-  e.stopPropagation();
-  return false;
-}
-
-document.addEventListener('click', cancelEvent, true);
-document.addEventListener('submit', cancelEvent, true);
-
-window.addEventListener('resize', () => {
-  if (lastHighlightNodes) highlightNodes(lastHighlightNodes);
-  if (lastMouseEvent) updateMouse(lastMouseEvent);
-});
-
-let frameNodePath: string;
 window.addEventListener('message', ev => {
   if (ev.data.frameNodePath) {
     frameNodePath = ev.data.frameNodePath;
@@ -74,42 +56,18 @@ function getReplayer() {
   return replayer;
 }
 
-const isoPeriodOffset = new Date().toISOString().indexOf('.');
-
 function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
   const toProcess = domChangeList.concat(changeEvents);
   domChangeList.length = 0;
 
-  const blocks: IFrontendDomChangeEvent[][] = [];
-  let lastStamp: string = null;
-  let currentList: IFrontendDomChangeEvent[];
-  for (const changeEvent of toProcess) {
-    if (
-      !lastStamp ||
-      lastStamp.substr(0, isoPeriodOffset) !== changeEvent.timestamp.substr(0, isoPeriodOffset)
-    ) {
-      currentList = [];
-      blocks.push(currentList);
-      lastStamp = changeEvent.timestamp;
-    }
-    currentList.push(changeEvent);
-  }
-
   const domReplayer = getReplayer();
-  for (const block of blocks) {
-    for (const changeEvent of block) {
-      try {
-        domReplayer.replay(changeEvent);
-      } catch (err) {
-        console.log('ERROR applying change', changeEvent, err);
-      }
+  for (const changeEvent of toProcess) {
+    try {
+      domReplayer.replay(changeEvent);
+    } catch (err) {
+      console.log('ERROR applying change', changeEvent, err);
     }
   }
-}
-
-const isMainFrame = process.isMainFrame;
-if (isMainFrame) {
-  frameNodePath = 'main';
 }
 
 // HELPER FUNCTIONS ////////////////////
@@ -239,66 +197,64 @@ class DomReplayer {
       .filter(Boolean)
       .map(Number);
 
-    if (childPath.length) {
-      const childId = childPath.shift();
-      const childFrameNodePath = `${frameNodePath}_${childId}`;
+    const childId = childPath.shift();
+    const childFrameNodePath = `${frameNodePath}_${childId}`;
 
-      const node = replayer.idMap.get(childId);
-      if (!node) {
-        if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
-          pendingFrameCreationEvents.set(childFrameNodePath, []);
-        }
-        // queue for pending events
-        pendingFrameCreationEvents
-          .get(childFrameNodePath)
-          .push({ frameNodePath: childFrameNodePath, event });
-        console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
-        return;
+    const node = replayer.idMap.get(childId);
+    if (!node) {
+      if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
+        pendingFrameCreationEvents.set(childFrameNodePath, []);
       }
-
-      if (
-        node instanceof HTMLObjectElement &&
-        (event.action === 'location' || event.action === 'newDocument')
-      ) {
-        node.data = event.textContent;
-      } else {
-        const frame = node as HTMLIFrameElement;
-        if (!frame.contentWindow) {
-          console.log('Frame: without window', frame);
-          return;
-        }
-        if (pendingFrameCreationEvents.has(childFrameNodePath)) {
-          for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
-            frame.contentWindow.postMessage(ev, window.location.origin);
-          }
-          pendingFrameCreationEvents.delete(childFrameNodePath);
-        }
-
-        frame.contentWindow.postMessage(
-          { frameNodePath: childFrameNodePath, event },
-          window.location.origin,
-        );
-      }
+      // queue for pending events
+      pendingFrameCreationEvents
+        .get(childFrameNodePath)
+        .push({ frameNodePath: childFrameNodePath, event });
+      console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
+      return;
     }
+
+    if (
+      (event.action === 'location' || event.action === 'newDocument') &&
+      node instanceof HTMLObjectElement
+    ) {
+      return;
+    }
+
+    const frame = node as HTMLIFrameElement;
+    if (!frame.contentWindow) {
+      console.log('Frame: without window', frame);
+      return;
+    }
+    if (pendingFrameCreationEvents.has(childFrameNodePath)) {
+      for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
+        frame.contentWindow.postMessage(ev, '*');
+      }
+      pendingFrameCreationEvents.delete(childFrameNodePath);
+    }
+
+    frame.contentWindow.postMessage({ frameNodePath: childFrameNodePath, event }, '*');
   }
 
   onNewDocument(textContent: string) {
-    if (!isMainFrame) {
-      // window.location.href = textContent;
-      return;
-    }
     const href = textContent;
     const newUrl = new URL(href);
 
     console.log('Location: (new document) %s', textContent);
 
+    if (!isMainFrame) {
+      window.location.href = href;
+      return;
+    }
+
     window.scrollTo({ top: 0 });
 
-    document.documentElement.innerHTML = '';
-    while (document.documentElement.previousSibling) {
-      const prev = document.documentElement.previousSibling;
-      if (prev === document.doctype) break;
-      prev.remove();
+    if (document.documentElement) {
+      document.documentElement.innerHTML = '';
+      while (document.documentElement.previousSibling) {
+        const prev = document.documentElement.previousSibling;
+        if (prev === document.doctype) break;
+        prev.remove();
+      }
     }
 
     if (window.location.origin === newUrl.origin) {
@@ -336,11 +292,17 @@ class DomReplayer {
     for (const [name, value] of Object.entries(data.properties)) {
       if (name === 'sheet.cssRules') {
         const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
-        for (let i = 0; i < sheet.cssRules.length; i += 1) {
-          sheet.deleteRule(i);
+        const newRules = value as string[];
+        let i = 0;
+        for (i = 0; i < sheet.cssRules.length; i += 1) {
+          const newRule = newRules[i];
+          if (newRule !== sheet.cssRules[i].cssText) {
+            sheet.deleteRule(i);
+            if (newRule) sheet.insertRule(newRule, i);
+          }
         }
-        for (const rule of value as string[]) {
-          sheet.insertRule(rule);
+        for (; i < newRules.length; i += 1) {
+          sheet.insertRule(newRules[i], i);
         }
       } else {
         node[name] = value;
@@ -379,9 +341,11 @@ class DomReplayer {
           }
         }
         if (node instanceof HTMLIFrameElement) {
-          console.log("Frame: frameNodePath=%s", `${frameNodePath}_${data.nodeId}`);
+          console.log('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
+          (node as any).nodeId = data.nodeId;
         }
         this.setNodeAttributes(node as Element, data);
+        this.setNodeProperties(node as Element, data);
         if (data.textContent) {
           node.textContent = data.textContent;
         }
@@ -399,8 +363,111 @@ class DomReplayer {
 
 /////// / DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
 
-const styleElement = document.createElement('style');
-styleElement.textContent = `
+const highlightElements: HTMLElement[] = [];
+
+let showMoreUp: HTMLElement;
+let showMoreDown: HTMLElement;
+function checkOverflows() {
+  createReplayItems();
+  if (maxHighlightTop > window.innerHeight + window.scrollY) {
+    replayShadow.appendChild(showMoreDown);
+  } else {
+    showMoreDown.remove();
+  }
+
+  if (minHighlightTop < window.scrollY) {
+    replayShadow.appendChild(showMoreUp);
+  } else {
+    showMoreUp.remove();
+  }
+}
+
+function highlightNodes(nodeIds: number[]) {
+  lastHighlightNodes = nodeIds;
+  const length = nodeIds ? nodeIds.length : 0;
+  try {
+    minHighlightTop = 10e3;
+    maxHighlightTop = -1;
+    for (let i = 0; i < length; i += 1) {
+      const node = getReplayer().idMap.get(nodeIds[i]);
+      let hoverNode = highlightElements[i];
+      if (!hoverNode) {
+        hoverNode = document.createElement('sa-highlight');
+        highlightElements.push(hoverNode);
+      }
+      if (!node) {
+        highlightElements[i].remove();
+        continue;
+      }
+      const element = node.nodeType === node.TEXT_NODE ? node.parentElement : (node as Element);
+      const bounds = element.getBoundingClientRect();
+      bounds.x += window.scrollX;
+      bounds.y += window.scrollY;
+      hoverNode.style.width = `${bounds.width}px`;
+      hoverNode.style.height = `${bounds.height}px`;
+      hoverNode.style.top = `${bounds.top - 5}px`;
+      hoverNode.style.left = `${bounds.left - 5}px`;
+
+      if (bounds.y > maxHighlightTop) maxHighlightTop = bounds.y;
+      if (bounds.y + bounds.height < minHighlightTop) minHighlightTop = bounds.y + bounds.height;
+      replayShadow.appendChild(hoverNode);
+    }
+
+    checkOverflows();
+    for (let i = length; i < highlightElements.length; i += 1) {
+      highlightElements[i].remove();
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+/////// mouse ///////
+let lastMouseEvent: IMouseEvent;
+let mouse: HTMLElement;
+
+function updateMouse(mouseEvent: IMouseEvent) {
+  lastMouseEvent = mouseEvent;
+  if (mouseEvent.pageX !== undefined) {
+    mouse.style.left = `${mouseEvent.pageX}px`;
+    mouse.style.top = `${mouseEvent.pageY}px`;
+  }
+  if (mouseEvent.buttons !== undefined) {
+    for (let i = 0; i < 5; i += 1) {
+      mouse.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
+    }
+  }
+}
+
+// // other events /////
+
+function updateScroll(scrollEvent: IScrollRecord) {
+  window.scroll({
+    behavior: 'auto',
+    top: scrollEvent.scrollY,
+    left: scrollEvent.scrollX,
+  });
+}
+
+// /// BUILD ELEMENTS
+let isInitialized = false;
+function createReplayItems() {
+  if (!isMainFrame || isInitialized) return;
+  isInitialized = true;
+  replayNode = document.createElement('sa-replay');
+  replayNode.style.zIndex = '10000000';
+  replayShadow = replayNode.attachShadow({ mode: 'closed' });
+
+  showMoreUp = document.createElement('sa-overflow');
+  showMoreUp.style.top = '0';
+  showMoreUp.innerHTML = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
+
+  showMoreDown = document.createElement('sa-overflow');
+  showMoreDown.style.bottom = '0';
+  showMoreDown.innerHTML = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
+
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
   sa-overflow-bar {
     width: 500px;
     background-color:#3498db;
@@ -465,104 +532,26 @@ styleElement.textContent = `
     border-color: rgba(0,255,0,0.9);
   }
 `;
-replayShadow.appendChild(styleElement);
+  replayShadow.appendChild(styleElement);
 
-const highlightElements: any[] = [];
+  mouse = document.createElement('sa-mouse-pointer');
+  replayShadow.appendChild(mouse);
 
-const overflowBar = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
-
-const showMoreUp = document.createElement('sa-overflow');
-showMoreUp.style.top = '0';
-showMoreUp.innerHTML = overflowBar;
-
-const showMoreDown = document.createElement('sa-overflow');
-showMoreDown.style.bottom = '0';
-showMoreDown.innerHTML = overflowBar;
-
-function buildHover() {
-  const hoverNode = document.createElement('sa-highlight');
-
-  highlightElements.push(hoverNode);
-  replayShadow.appendChild(hoverNode);
-  return hoverNode;
-}
-
-function highlightNodes(nodeIds: number[]) {
-  lastHighlightNodes = nodeIds;
-  const length = nodeIds ? nodeIds.length : 0;
-  try {
-    minHighlightTop = 10e3;
-    maxHighlightTop = -1;
-    for (let i = 0; i < length; i += 1) {
-      const node = getReplayer().idMap.get(nodeIds[i]);
-      const hoverNode = i >= highlightElements.length ? buildHover() : highlightElements[i];
-      if (!node) {
-        highlightElements[i].remove();
-        continue;
-      }
-      const element = node.nodeType === node.TEXT_NODE ? node.parentElement : (node as Element);
-      const bounds = element.getBoundingClientRect();
-      bounds.x += window.scrollX;
-      bounds.y += window.scrollY;
-      hoverNode.style.width = `${bounds.width}px`;
-      hoverNode.style.height = `${bounds.height}px`;
-      hoverNode.style.top = `${bounds.top - 5}px`;
-      hoverNode.style.left = `${bounds.left - 5}px`;
-
-      if (bounds.y > maxHighlightTop) maxHighlightTop = bounds.y;
-      if (bounds.y + bounds.height < minHighlightTop) minHighlightTop = bounds.y + bounds.height;
-      replayShadow.appendChild(hoverNode);
-    }
-
-    checkOverflows();
-    for (let i = length; i < highlightElements.length; i += 1) {
-      highlightElements[i].remove();
-    }
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-function checkOverflows() {
-  if (maxHighlightTop > window.innerHeight + window.scrollY) {
-    replayShadow.appendChild(showMoreDown);
-  } else {
-    showMoreDown.remove();
+  function cancelEvent(e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
   }
 
-  if (minHighlightTop < window.scrollY) {
-    replayShadow.appendChild(showMoreUp);
-  } else {
-    showMoreUp.remove();
-  }
-}
-
-document.addEventListener('scroll', () => checkOverflows());
-
-/////// mouse ///////
-let lastMouseEvent: IMouseEvent;
-const mouse = document.createElement('sa-mouse-pointer');
-replayShadow.appendChild(mouse);
-
-function updateMouse(mouseEvent: IMouseEvent) {
-  lastMouseEvent = mouseEvent;
-  if (mouseEvent.pageX !== undefined) {
-    mouse.style.left = `${mouseEvent.pageX}px`;
-    mouse.style.top = `${mouseEvent.pageY}px`;
-  }
-  if (mouseEvent.buttons !== undefined) {
-    for (let i = 0; i < 5; i += 1) {
-      mouse.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
-    }
-  }
-}
-
-// // other events /////
-
-function updateScroll(scrollEvent: IScrollRecord) {
-  window.scroll({
-    behavior: 'auto',
-    top: scrollEvent.scrollY,
-    left: scrollEvent.scrollX,
+  document.addEventListener('click', cancelEvent, true);
+  document.addEventListener('submit', cancelEvent, true);
+  document.addEventListener('scroll', () => checkOverflows());
+  window.addEventListener('resize', () => {
+    if (lastHighlightNodes) highlightNodes(lastHighlightNodes);
+    if (lastMouseEvent) updateMouse(lastMouseEvent);
   });
+}
+
+if (isMainFrame) {
+  createReplayItems();
 }

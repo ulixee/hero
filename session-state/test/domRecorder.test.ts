@@ -45,7 +45,7 @@ function addMe() {
     // @ts-ignore
     const commandId = core.tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(11);
+    expect(changesAfterLoad[frameId]).toHaveLength(12);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
     await core.interact([
@@ -88,7 +88,7 @@ function removeMe() {
     await tab.domRecorder.flush();
     const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(11);
+    expect(changesAfterLoad[frameId]).toHaveLength(12);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
     const loadCommand = core.lastCommandId;
 
@@ -145,7 +145,7 @@ function sort() {
     await tab.domRecorder.flush();
     const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(29);
+    expect(changesAfterLoad[frameId]).toHaveLength(30);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
     const loadCommand = core.lastCommandId;
 
@@ -200,7 +200,7 @@ function sort() {
     await tab.domRecorder.flush();
     const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
     const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(14);
+    expect(changesAfterLoad[frameId]).toHaveLength(15);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
     const loadCommand = core.lastCommandId;
 

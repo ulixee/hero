@@ -256,6 +256,12 @@ export default class MitmProxy {
         hostname,
         errorKind,
       });
+    } else if (errorCode === 'EPIPE') {
+      log.info(`Got EPIPE on Proxy Connect, ignoring.`, {
+        sessionId: null,
+        hostname,
+        errorKind,
+      });
     } else {
       const logLevel = this.isClosing ? 'stats' : 'error';
       log[logLevel]('MitmConnectError', {
