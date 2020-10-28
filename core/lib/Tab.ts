@@ -396,14 +396,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
 
     try {
-      const isFound = false;
+      let isFound = false;
       do {
         const jsonValue = await this.domEnv
           .waitForElement(jsPath, waitForVisible, 1e3)
           .catch(() => null);
-        if (jsonValue) {
-          return jsonValue.value;
-        }
+        isFound = (jsonValue as any)?.value ?? false;
+        if (isFound) return true;
         timer.throwIfExpired(`Timeout waiting for element ${jsPath} to be visible`);
       } while (!isFound);
     } finally {

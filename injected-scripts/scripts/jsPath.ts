@@ -157,33 +157,43 @@ class JsPath {
     }
   }
 
-  public static waitForElement(jsPath: IJsPath, waitForVisible: boolean, timeoutMillis: number) {
-    return new Promise<IExecJsPathResult<boolean>>(async resolve => {
-      const objectAtPath = new ObjectAtPath(jsPath);
-      const end = new Date();
-      end.setTime(end.getTime() + timeoutMillis);
+  public static async waitForElement(
+    jsPath: IJsPath,
+    waitForVisible: boolean,
+    timeoutMillis: number,
+  ) {
+    const objectAtPath = new ObjectAtPath(jsPath);
+    try {
+      const returnObject = await new Promise<IExecJsPathResult<boolean>>(async resolve => {
+        const end = new Date();
+        end.setTime(end.getTime() + timeoutMillis);
 
-      while (new Date() < end) {
-        try {
-          if (!objectAtPath.objectAtPath) objectAtPath.lookup();
-          if (!waitForVisible || objectAtPath.isVisible) {
-            return resolve({
-              attachedState: objectAtPath.extractAttachedState(),
-              value: true,
-            });
+        while (new Date() < end) {
+          try {
+            if (!objectAtPath.objectAtPath) objectAtPath.lookup();
+            if (!waitForVisible || objectAtPath.isVisible) {
+              return resolve({
+                attachedState: objectAtPath.extractAttachedState(),
+                value: true,
+              });
+            }
+          } catch (err) {
+            // can happen if lookup path is bad
           }
-        } catch (err) {
-          // can happen if lookup path is bad
+          // eslint-disable-next-line promise/param-names
+          await new Promise(resolve1 => setTimeout(resolve1, 20));
         }
-        // eslint-disable-next-line promise/param-names
-        await new Promise(resolve1 => setTimeout(resolve1, 20));
-      }
-      resolve(<IExecJsPathResult>{
-        attachedState: objectAtPath.extractAttachedState(),
-        overlappingElementId: objectAtPath.overlappingElementId,
-        value: false,
+        resolve(<IExecJsPathResult>{
+          attachedState: objectAtPath.extractAttachedState(),
+          overlappingElementId: objectAtPath.overlappingElementId,
+          value: false,
+        });
       });
-    });
+      // @ts-ignore
+      return TSON.stringify(returnObject);
+    } catch (error) {
+      return objectAtPath.toReturnError(error);
+    }
   }
 
   public static isVisible(jsPath: IJsPath) {
