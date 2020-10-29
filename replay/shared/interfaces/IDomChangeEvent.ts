@@ -5,7 +5,6 @@ export interface IDomChangeEvent {
   action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
   timestamp: string;
   frameIdPath?: string;
-  isMainFrame: boolean;
   commandId: number;
   nodeType?: number;
   textContent?: string;

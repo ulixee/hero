@@ -171,7 +171,7 @@ class JsPath {
         while (new Date() < end) {
           try {
             if (!objectAtPath.objectAtPath) objectAtPath.lookup();
-            if (!waitForVisible || objectAtPath.isVisible) {
+            if (objectAtPath.objectAtPath && (!waitForVisible || objectAtPath.isVisible)) {
               return resolve({
                 attachedState: objectAtPath.extractAttachedState(),
                 value: true,
@@ -322,11 +322,11 @@ class ObjectAtPath {
       return false;
     }
 
-    // if this is another element, needs to be taking up > 50% of element
+    // if this is another element, needs to be taking up >= 50% of element
     const overlappingBounds = overlapping.getBoundingClientRect();
     const thisRect = this.boundingClientRect;
-    const isOverHalfWidth = overlappingBounds.width > thisRect.width / 2;
-    const isOverHalfHeight = overlappingBounds.height > thisRect.height / 2;
+    const isOverHalfWidth = overlappingBounds.width >= thisRect.width / 2;
+    const isOverHalfHeight = overlappingBounds.height >= thisRect.height / 2;
     return isOverHalfWidth && isOverHalfHeight;
   }
 

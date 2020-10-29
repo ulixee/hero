@@ -12,14 +12,16 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
   const activeClients = new Set<http2.Http2ServerResponse>();
   const server = http2.createServer((req, res) => {
     activeClients.add(res);
+    const sessionId = req.headers['session-id'] as string;
+
     const listeners: eventUtils.IRegisteredEventListener[] = [];
     try {
       const lookupArgs = {
         scriptInstanceId: req.headers['script-instance-id'] as string,
         scriptEntrypoint: req.headers['script-entrypoint'] as string,
         sessionName: req.headers['session-name'] as string,
-        sessionId: req.headers['session-id'] as string,
         dataLocation: req.headers['data-location'] as string,
+        sessionId,
       };
       log.stats('ReplayApi', lookupArgs);
 
@@ -39,7 +41,22 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
         );
       }
 
+      res.stream.session.on('error', err =>
+        log.error('Replay Http2Session Error', {
+          error: err,
+          sessionId,
+        }),
+      );
+
+      res.stream.on('error', err =>
+        log.error('Replay Server Error', {
+          error: err,
+          sessionId,
+        }),
+      );
+
       res.on('close', () => {
+        log.info('Replay Server Closed', { sessionId });
         eventUtils.removeEventListeners(listeners);
         activeClients.delete(res);
         if (res.socket) {
@@ -61,16 +78,13 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
         });
       });
 
-      sessionLoader.on('close', () => {
-        res.end();
-      });
       sessionLoader.listen();
     } catch (error) {
       res.writeHead(500).end(JSON.stringify({ message: `ERROR loading session ${error.stack}` }));
       log.error('SessionState.ErrorLoadingSession', {
         error,
         ...req.headers,
-        sessionId: req.headers['session-id'] as string,
+        sessionId,
       });
     }
   });
@@ -131,8 +145,9 @@ function http2PushJson(res: http2.Http2ServerResponse, event: string, data: any)
   });
 }
 
-function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
+async function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
   if (res.stream.closed) return;
+  let promises: Promise<any>[] = [];
   for (const resource of resources) {
     const headers: any = {
       'resource-url': resource.url,
@@ -141,28 +156,35 @@ function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
       'resource-headers': JSON.stringify(resource.headers),
       'resource-tabid': resource.tabId,
     };
-    res.createPushResponse(
-      {
-        ':path': '/resource',
-        ...headers,
-      },
-      (err, pushResponse) => {
-        if (err) {
-          log.warn(`Error sending resource to Replay`, {
-            err,
-            url: resource.url,
-            sessionId: this.sessionId,
-          });
-          return;
-        }
-        pushResponse.stream.respond({ ':status': 200 });
-        if (resource.type === 'Document') {
-          // body won't be rendered from resource, so just send back empty
-          pushResponse.stream.end(Buffer.from(''));
-        } else {
-          pushResponse.stream.end(resource.data);
-        }
-      },
-    );
+    const promise = new Promise(resolve => {
+      res.createPushResponse(
+        {
+          ':path': '/resource',
+          ...headers,
+        },
+        (err, pushResponse) => {
+          if (err) {
+            log.warn(`Error sending resource to Replay`, {
+              err,
+              url: resource.url,
+              sessionId: this.sessionId,
+            });
+            return;
+          }
+          pushResponse.stream.respond({ ':status': 200 });
+          if (resource.type === 'Document') {
+            // body won't be rendered from resource, so just send back empty
+            pushResponse.stream.end(Buffer.from(''), resolve);
+          } else {
+            pushResponse.stream.end(resource.data, resolve);
+          }
+        },
+      );
+    });
+    promises.push(promise);
+    if (promises.length === 10) {
+      await Promise.all(promises);
+      promises = [];
+    }
   }
 }

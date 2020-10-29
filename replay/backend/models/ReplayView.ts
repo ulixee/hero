@@ -120,7 +120,7 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async nextTick() {
-    if (!this.isAttached || !this.tabState) return 0;
+    if (!this.tabState) return 0;
     const events = this.tabState.gotoNextTick();
     await this.publishTickChanges(events);
     setImmediate(() => this.checkResponsive());
@@ -139,7 +139,11 @@ export default class ReplayView extends ViewBackend {
   ) {
     if (!events || !events.length) return;
     const [domChanges] = events;
-    if (domChanges?.length && domChanges[0].action === 'newDocument' && domChanges[0].isMainFrame) {
+    if (
+      domChanges?.length &&
+      domChanges[0].action === 'newDocument' &&
+      domChanges[0].frameIdPath === 'main'
+    ) {
       const url = new URL(domChanges[0].textContent);
       const currentUrl = new URL(this.webContents.getURL());
       if (url.origin !== currentUrl.origin) {

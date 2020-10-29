@@ -65,7 +65,6 @@ export default class SessionLoader extends EventEmitter {
           }
           this.emit('tab-ready');
         }
-        (change as any).isMainFrame = isMainFrame;
         (change as any).frameIdPath = this.frameIdToNodePath.get(change.frameId);
         if (change.attributes) change.attributes = JSON.parse(change.attributes);
         if (change.attributeNamespaces) {
@@ -99,7 +98,9 @@ export default class SessionLoader extends EventEmitter {
     db.resources.subscribe(resources => {
       const resourcesToSend = [];
       for (const resource of resources) {
-        if (!resourceWhitelist.includes(resource.type)) continue;
+        if (!resourceWhitelist.includes(resource.type)) {
+          continue;
+        }
         resourcesToSend.push({
           url: resource.requestUrl,
           tabId: resource.tabId,
@@ -115,8 +116,10 @@ export default class SessionLoader extends EventEmitter {
 
     // don't close a live db
     if (db.readonly) {
-      db.close();
-      setImmediate(() => this.emit('close'));
+      setImmediate(() => {
+        db.close();
+        this.emit('close');
+      });
     }
   }
 

@@ -10,7 +10,7 @@ declare global {
 
 window.isMainFrame = process.isMainFrame;
 
-console.log('Loaded: isMain=%s, pid=%s., href=%s', window.isMainFrame, process?.pid, window.location.href);
+console.log('Loaded: isMain=%s, pid=%s, href=%s', window.isMainFrame, process?.pid, window.location.href);
 
 if (process.isMainFrame) {
   ipcRenderer.on('dom:apply', (event, ...args) => {

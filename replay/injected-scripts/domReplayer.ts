@@ -95,7 +95,7 @@ class DomReplayer {
     }
 
     if (action === 'newDocument') {
-      this.onNewDocument(textContent);
+      this.onNewDocument(event);
       return;
     }
 
@@ -235,11 +235,12 @@ class DomReplayer {
     frame.contentWindow.postMessage({ frameNodePath: childFrameNodePath, event }, '*');
   }
 
-  onNewDocument(textContent: string) {
+  onNewDocument(event: IFrontendDomChangeEvent) {
+    const { textContent } = event;
     const href = textContent;
     const newUrl = new URL(href);
 
-    console.log('Location: (new document) %s', textContent);
+    console.log('Location: (new document) %s, frame: %s, idx: %s', href, event.frameIdPath, event.eventIndex);
 
     if (!isMainFrame) {
       window.location.href = href;
