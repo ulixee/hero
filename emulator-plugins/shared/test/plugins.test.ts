@@ -33,7 +33,7 @@ test('it should override plugins in a browser window', async () => {
     {
       proxyPassword: '',
       platform: 'win32',
-      acceptLanguage: 'en',
+      locale: 'en',
       userAgent: 'Plugin Test',
       viewport: {
         screenHeight: 900,

@@ -122,7 +122,7 @@ export default class Safari13 extends EmulatorPlugin {
       osVersion: `${this.userAgent.os.major}.${this.userAgent.os.minor}`,
       platform: this.userAgent.platform,
       memory: Math.ceil(Math.random() * 4) * 2,
-      languages: ['en-US'],
+      languages: this.locale.split(','),
       videoDevice: {
         // TODO: stabilize per user
         deviceId: randomBytes(32).toString('hex'),

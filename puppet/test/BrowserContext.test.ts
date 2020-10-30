@@ -112,7 +112,7 @@ describe.each([
           {
             userAgent: 'foobar',
             platform: 'Windows',
-            acceptLanguage: 'de',
+            locale: 'de',
             proxyPassword: '',
             viewport: {
               screenHeight: 901,

@@ -60,6 +60,8 @@ export default class Session {
       this.userProfile = options.userProfile;
       this.emulator.setUserProfile(options.userProfile);
     }
+    if (options.locale) this.emulator.setLocale(options.locale);
+
     if (!this.emulator.canPolyfill) {
       log.warn('Emulator.PolyfillNotSupported', {
         sessionId: this.id,
@@ -102,12 +104,12 @@ export default class Session {
   public getBrowserEmulation() {
     const emulator = this.emulator;
     return {
-      acceptLanguage: 'en-US,en',
+      locale: emulator.locale,
       userAgent: emulator.userAgent.raw,
       platform: emulator.userAgent.platform,
       proxyPassword: this.id,
-      viewport: this.options.viewport,
-      timezoneId: this.options.timezoneId,
+      viewport: this.viewport,
+      timezoneId: this.timezoneId,
     } as IBrowserEmulation;
   }
 

@@ -65,7 +65,7 @@ export default class ReplayView extends ViewBackend {
     this.window.setActiveTabId(this.tabState.tabId);
     this.window.setAddressBarUrl(this.tabState.startOrigin);
 
-    this.browserView.setBackgroundColor('#ececec');
+    this.browserView.setBackgroundColor('#ffffff');
 
     // eslint-disable-next-line promise/always-return
     await this.webContents
@@ -164,8 +164,6 @@ export default class ReplayView extends ViewBackend {
     if (viewSize.height * scale > viewSize.height) {
       viewSize.height *= scale;
     }
-
-    console.log(viewPosition, scale, viewSize, screenSize);
 
     this.browserView.webContents.enableDeviceEmulation({
       deviceScaleFactor: 0,

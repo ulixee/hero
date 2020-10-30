@@ -1,5 +1,6 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Log from '@secret-agent/commons/Logger';
+import Chrome83 from "@secret-agent/emulate-chrome-83/index";
 import { TestServer } from './server';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
@@ -11,7 +12,7 @@ const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
-  // [Chrome83.engine.browser, Chrome83.engine.revision],
+  [Chrome83.engine.browser, Chrome83.engine.revision],
 ])('Load test for %s@%s', (browserEngine: string, revision: string) => {
   let server: TestServer;
   let puppet: Puppet;

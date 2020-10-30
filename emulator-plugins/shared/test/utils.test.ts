@@ -64,7 +64,7 @@ test('should override a function and clean error stacks', async () => {
     {
       proxyPassword: '',
       platform: 'win32',
-      acceptLanguage: 'en',
+      locale: 'en',
       userAgent: 'Plugin Test',
       viewport: {
         screenHeight: 900,

@@ -20,7 +20,6 @@ if (isMainFrame) {
 
   if (document && document.addEventListener) {
     document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.style.backgroundColor = 'white';
       console.log('DOMContentLoaded');
     });
   }
@@ -253,7 +252,6 @@ function onNewDocument(event: IFrontendDomChangeEvent) {
 
   if (document.documentElement) {
     document.documentElement.innerHTML = '';
-    document.documentElement.style.backgroundColor = 'white';
     while (document.documentElement.previousSibling) {
       const prev = document.documentElement.previousSibling;
       if (prev === document.doctype) break;
@@ -433,12 +431,7 @@ let mouse: HTMLElement;
 function updateMouse(mouseEvent: IFrontendMouseEvent) {
   lastMouseEvent = mouseEvent;
   if (mouseEvent.pageX !== undefined) {
-    if (mouseEvent.viewportWidth) {
-      const pageX = Math.floor((window.innerWidth / mouseEvent.viewportWidth) * mouseEvent.pageX);
-      mouse.style.left = `${pageX}px`;
-    } else {
-      mouse.style.left = `${mouseEvent.pageX}px`;
-    }
+    mouse.style.left = `${mouseEvent.pageX}px`;
     mouse.style.top = `${mouseEvent.pageY}px`;
   }
   if (mouseEvent.buttons !== undefined) {

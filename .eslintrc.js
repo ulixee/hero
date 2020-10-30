@@ -104,7 +104,7 @@ module.exports = {
   rules: {
     'import/no-named-as-default-member': 'off',
     'import/prefer-default-export': 'off',
-    'import/no-cycle': 'off', // TODO:we need to work throught this!!
+    'import/no-cycle': 'off', // TODO:we need to work through this!!
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -116,7 +116,7 @@ module.exports = {
     // 'import/no-default-export': 'error',
     'import/no-extraneous-dependencies': [
       'error',
-      { devDependencies: ['**/test/**', '**/examples/**', '**/scripts/**'] },
+      { devDependencies: ['**/test/**', '**/examples/**', '**/scripts/**', '**/*.test.ts'] },
     ],
     'no-use-before-define': 'off', // use typescript one
     'no-prototype-builtins': 'off',

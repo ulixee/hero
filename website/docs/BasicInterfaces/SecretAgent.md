@@ -45,10 +45,14 @@ Creates a new sandboxed browser instance with [unique user session and fingerpri
 
 - options `object` Accepts any of the following:
   - name `string`. This is used to generate a unique sessionName.
-  - emulatorId `string` defaults to `chrome-80`. Emulates a specific browser version.
+  - emulatorId `string` defaults to `chrome-83`. Emulates a specific browser version.
   - humanoidId `string`. Drives human-like mouse/keyboard movements.
+  - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
+  - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
+  - viewport `IViewport`. Sets the browser screen size, window position, inner/outer width and height. If not provided, a random screen, position and viewport will be statistically sampled from data pulled from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
   - renderingOptions `string[]`. Controls browser functionality.
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
+  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
 
 #### **Returns**: `Promise<BrowserInstance>`
 

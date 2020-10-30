@@ -1,6 +1,6 @@
 const defaultEmulation = {
   userAgent: 'Page tests',
-  acceptLanguage: 'en',
+  locale: 'en',
   platform: 'Linux',
   proxyPassword: '',
   viewport: {

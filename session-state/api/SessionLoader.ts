@@ -46,7 +46,6 @@ export default class SessionLoader extends EventEmitter {
     }
 
     db.tabs.subscribe(tabs => {
-      console.log(tabs)
       for (const tab of tabs) {
         if (!this.tabs.has(tab.tabId)) {
           this.addTabId(tab.tabId, tab.createdTime);

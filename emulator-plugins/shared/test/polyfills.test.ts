@@ -24,7 +24,7 @@ beforeAll(async () => {
     {
       proxyPassword: '',
       platform: 'win32',
-      acceptLanguage: 'en',
+      locale: 'en',
       userAgent: 'Chrome Test',
       viewport: {
         screenHeight: 900,

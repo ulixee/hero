@@ -58,7 +58,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     await Promise.all([
       this.cdpSession.send('Network.setUserAgentOverride', {
         userAgent: emulation.userAgent,
-        acceptLanguage: emulation.acceptLanguage,
+        acceptLanguage: emulation.locale,
         platform: emulation.platform,
       }),
       this.cdpSession.send('Network.enable', {

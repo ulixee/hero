@@ -30,7 +30,7 @@ describe.each([
       {
         ...defaultEmulation,
         userAgent: 'popupcity',
-        acceptLanguage: 'en-GB',
+        locale: 'en-GB',
         platform: 'Windows95',
       },
       log,

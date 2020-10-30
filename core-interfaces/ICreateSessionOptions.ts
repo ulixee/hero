@@ -10,4 +10,5 @@ export default interface ICreateSessionOptions extends ISessionOptions {
   scriptInstanceMeta?: IScriptInstanceMeta;
   viewport?: IViewport;
   timezoneId?: string;
+  locale?: string;
 }
