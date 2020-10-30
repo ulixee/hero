@@ -147,6 +147,8 @@ export default class ReplayApi {
           const tabMeta = {
             tabId: event.tabId,
             createdTime: event.timestamp ?? event.startDate,
+            width: this.tabs[0].viewportWidth,
+            height: this.tabs[0].viewportHeight,
           };
           tab = new ReplayTabState(tabMeta, this.replayTime);
           if (this.onNewTab) this.onNewTab(tab);

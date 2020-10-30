@@ -66,6 +66,14 @@ test('should override a function and clean error stacks', async () => {
       platform: 'win32',
       acceptLanguage: 'en',
       userAgent: 'Plugin Test',
+      viewport: {
+        screenHeight: 900,
+        screenWidth: 1024,
+        positionY: 0,
+        positionX: 0,
+        height: 900,
+        width: 1024,
+      },
     },
     log,
   );

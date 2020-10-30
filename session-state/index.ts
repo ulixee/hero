@@ -64,10 +64,13 @@ export default class SessionState {
     emulatorId: string,
     humanoidId: string,
     hasEmulatorPolyfills: boolean,
+    viewport: IViewport,
+    timezoneId: string,
   ) {
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.scriptInstanceMeta = scriptInstanceMeta;
+    this.viewport = viewport;
     this.logger = log.createChild(module, {
       sessionId,
     });
@@ -99,6 +102,8 @@ export default class SessionState {
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.entrypoint,
       scriptInstanceMeta?.startDate,
+      timezoneId,
+      viewport,
     );
 
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
@@ -334,10 +339,7 @@ export default class SessionState {
   public close() {
     this.logger.info('SessionState.Closing');
     this.closeDate = new Date();
-    this.db.session.update(this.sessionId, {
-      closeDate: this.closeDate,
-      viewport: this.viewport,
-    });
+    this.db.session.close(this.sessionId, this.closeDate);
     LogEvents.unsubscribe(this.logSubscriptionId);
     this.db.flush();
     this.db.close();
@@ -453,7 +455,7 @@ export default class SessionState {
   }
 
   public captureTab(tabId: string, pageId: string, devtoolsSessionId: string, openerTabId?: string, ) {
-    this.db.tabs.insert(tabId, pageId, devtoolsSessionId, openerTabId);
+    this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
   }
 
 }

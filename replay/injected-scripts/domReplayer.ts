@@ -1,10 +1,9 @@
 // NOTE: do not use node dependencies
 
 import { IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
-import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const SHADOW_NODE_TYPE = 40;
-const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
 
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
@@ -12,11 +11,19 @@ let replayNode: HTMLElement;
 let replayShadow: ShadowRoot;
 let frameNodePath: string;
 let lastHighlightNodes: number[] = [];
+const idMap = new Map<number, Node>();
 const domChangeList = [];
 
 const isMainFrame = window.isMainFrame ?? true;
 if (isMainFrame) {
   frameNodePath = 'main';
+
+  if (document && document.addEventListener) {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.style.backgroundColor = 'white';
+      console.log('DOMContentLoaded');
+    });
+  }
 }
 
 window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
@@ -42,327 +49,322 @@ window.addEventListener('message', ev => {
     frameNodePath = ev.data.frameNodePath;
   }
   const event = ev.data.event;
-  getReplayer().replay(event);
+  replayDomEvent(event);
 });
-
-const pendingFrameCreationEvents = new Map<
-  string,
-  { frameNodePath: string; event: IFrontendDomChangeEvent }[]
->();
-
-let replayer: DomReplayer;
-function getReplayer() {
-  if (!replayer) replayer = new DomReplayer();
-  return replayer;
-}
 
 function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
   const toProcess = domChangeList.concat(changeEvents);
   domChangeList.length = 0;
 
-  const domReplayer = getReplayer();
   for (const changeEvent of toProcess) {
     try {
-      domReplayer.replay(changeEvent);
+      replayDomEvent(changeEvent);
     } catch (err) {
       console.log('ERROR applying change', changeEvent, err);
     }
   }
 }
 
-// HELPER FUNCTIONS ////////////////////
+/////// DOM REPLAYER ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-class DomReplayer {
-  readonly isLoaded: Promise<void>;
-  readonly idMap = new Map<number, Node>();
-
-  constructor() {
-    this.isLoaded = new Promise(resolve => {
-      if (document && document.addEventListener) {
-        document.addEventListener('DOMContentLoaded', () => {
-          console.log('DOMContentLoaded');
-          resolve();
-        });
-      }
-    });
+function replayDomEvent(event: IFrontendDomChangeEvent) {
+  const { action, textContent, frameIdPath } = event;
+  if (frameIdPath && frameIdPath !== frameNodePath) {
+    delegateToSubframe(event);
+    return;
   }
 
-  replay(event: IFrontendDomChangeEvent) {
-    const { action, textContent, nodeId, frameIdPath } = event;
-    if (frameIdPath && frameIdPath !== frameNodePath) {
-      this.delegate(event);
-      return;
-    }
-
-    if (action === 'newDocument') {
-      this.onNewDocument(event);
-      return;
-    }
-
-    if (action === 'location') {
-      console.log('Location: href=%s', event.textContent);
-      window.history.replaceState({}, 'Replay', textContent);
-      return;
-    }
-
-    const { nodeType, parentNodeId, tagName } = event;
-    if (preserveElements.has(tagName)) {
-      const elem = document.querySelector(tagName);
-      if (!elem) {
-        console.log('Preserved element doesnt exist!', tagName);
-        return;
-      }
-      this.idMap.set(nodeId, elem);
-      if (action === 'removed') {
-        elem.innerHTML = '';
-        for (const attr of elem.attributes) {
-          elem.removeAttributeNS(attr.name, attr.namespaceURI);
-          elem.removeAttribute(attr.name);
-        }
-        console.log('WARN: script trying to remove preserved node', event, elem);
-        return;
-      }
-      if (action === 'added') {
-        elem.innerHTML = '';
-        if (event.attributes) {
-          this.setNodeAttributes(elem, event);
-        }
-        if (event.properties) {
-          this.setNodeProperties(elem, event);
-        }
-        return;
-      }
-    }
-
-    if (nodeType === document.DOCUMENT_NODE) {
-      this.idMap.set(nodeId, document);
-      return;
-    }
-
-    if (nodeType === document.DOCUMENT_TYPE_NODE) {
-      this.idMap.set(nodeId, document.doctype);
-      return;
-    }
-
-    if (tagName && tagName.toLowerCase() === 'noscript') {
-      if (!event.attributes) event.attributes = {};
-      if (event.attributes.style) event.attributes.style += ';display:none';
-      else event.attributes.style = 'display:none';
-    }
-
-    let node: Node;
-    let parentNode: Node;
-    try {
-      parentNode = this.getNode(parentNodeId);
-      if (!parentNode && (action === 'added' || action === 'removed')) {
-        console.log('WARN: parent node id not found', event);
-        return;
-      }
-
-      node = this.deserializeNode(event, parentNode as Element);
-      switch (action) {
-        case 'added':
-          if (!event.previousSiblingId) {
-            (parentNode as Element).prepend(node);
-          } else if (this.getNode(event.previousSiblingId)) {
-            const next = this.getNode(event.previousSiblingId).nextSibling;
-
-            if (next) parentNode.insertBefore(node, next);
-            else parentNode.appendChild(node);
-          }
-
-          break;
-        case 'removed':
-          if (parentNode.contains(node)) parentNode.removeChild(node);
-          break;
-        case 'attribute':
-          this.setNodeAttributes(node as Element, event);
-          break;
-        case 'property':
-          this.setNodeProperties(node as Element, event);
-          break;
-        case 'text':
-          node.textContent = textContent;
-          break;
-      }
-    } catch (error) {
-      console.log('ERROR: applying action', error.stack, parentNode, node, event);
-    }
+  if (action === 'newDocument') {
+    onNewDocument(event);
+    return;
   }
 
-  delegate(event: IFrontendDomChangeEvent) {
-    const childPath = event.frameIdPath
-      .replace(frameNodePath, '')
-      .split('_')
-      .filter(Boolean)
-      .map(Number);
+  if (action === 'location') {
+    console.log('Location: href=%s', event.textContent);
+    window.history.replaceState({}, 'Replay', textContent);
+    return;
+  }
 
-    const childId = childPath.shift();
-    const childFrameNodePath = `${frameNodePath}_${childId}`;
+  if (isPreservedElement(event)) return;
+  const { parentNodeId, tagName } = event;
 
-    const node = replayer.idMap.get(childId);
-    if (!node) {
-      if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
-        pendingFrameCreationEvents.set(childFrameNodePath, []);
-      }
-      // queue for pending events
-      pendingFrameCreationEvents
-        .get(childFrameNodePath)
-        .push({ frameNodePath: childFrameNodePath, event });
-      console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
+  if (tagName && tagName.toLowerCase() === 'noscript') {
+    if (!event.attributes) event.attributes = {};
+    if (event.attributes.style) event.attributes.style += ';display:none';
+    else event.attributes.style = 'display:none';
+  }
+
+  let node: Node;
+  let parentNode: Node;
+  try {
+    parentNode = getNode(parentNodeId);
+    if (!parentNode && (action === 'added' || action === 'removed')) {
+      console.log('WARN: parent node id not found', event);
       return;
     }
 
-    if (
-      (event.action === 'location' || event.action === 'newDocument') &&
-      node instanceof HTMLObjectElement
-    ) {
-      return;
-    }
+    node = deserializeNode(event, parentNode as Element);
+    switch (action) {
+      case 'added':
+        if (!event.previousSiblingId) {
+          (parentNode as Element).prepend(node);
+        } else if (getNode(event.previousSiblingId)) {
+          const next = getNode(event.previousSiblingId).nextSibling;
 
-    const frame = node as HTMLIFrameElement;
-    if (!frame.contentWindow) {
-      console.log('Frame: without window', frame);
-      return;
-    }
-    if (pendingFrameCreationEvents.has(childFrameNodePath)) {
-      for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
-        frame.contentWindow.postMessage(ev, '*');
-      }
-      pendingFrameCreationEvents.delete(childFrameNodePath);
-    }
-
-    frame.contentWindow.postMessage({ frameNodePath: childFrameNodePath, event }, '*');
-  }
-
-  onNewDocument(event: IFrontendDomChangeEvent) {
-    const { textContent } = event;
-    const href = textContent;
-    const newUrl = new URL(href);
-
-    console.log('Location: (new document) %s, frame: %s, idx: %s', href, event.frameIdPath, event.eventIndex);
-
-    if (!isMainFrame) {
-      window.location.href = href;
-      return;
-    }
-
-    window.scrollTo({ top: 0 });
-
-    if (document.documentElement) {
-      document.documentElement.innerHTML = '';
-      while (document.documentElement.previousSibling) {
-        const prev = document.documentElement.previousSibling;
-        if (prev === document.doctype) break;
-        prev.remove();
-      }
-    }
-
-    if (window.location.origin === newUrl.origin) {
-      window.history.replaceState({}, 'Replay', href);
-    }
-  }
-
-  getNode(id: number) {
-    if (id === null || id === undefined) return null;
-    return this.idMap.get(id);
-  }
-
-  setNodeAttributes(node: Element, data: IFrontendDomChangeEvent) {
-    if (!data.attributes) return;
-    for (const [name, value] of Object.entries(data.attributes)) {
-      const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
-      try {
-        if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
-          node.setAttribute(name, value);
-        } else {
-          node.setAttributeNS(ns || null, name, value);
-        }
-      } catch (err) {
-        if (
-          !err.toString().includes('not a valid attribute name') &&
-          !err.toString().includes('qualified name')
-        )
-          throw err;
-      }
-    }
-  }
-
-  setNodeProperties(node: Element, data: IFrontendDomChangeEvent) {
-    if (!data.properties) return;
-    for (const [name, value] of Object.entries(data.properties)) {
-      if (name === 'sheet.cssRules') {
-        const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
-        const newRules = value as string[];
-        let i = 0;
-        for (i = 0; i < sheet.cssRules.length; i += 1) {
-          const newRule = newRules[i];
-          if (newRule !== sheet.cssRules[i].cssText) {
-            sheet.deleteRule(i);
-            if (newRule) sheet.insertRule(newRule, i);
-          }
-        }
-        for (; i < newRules.length; i += 1) {
-          sheet.insertRule(newRules[i], i);
-        }
-      } else {
-        node[name] = value;
-      }
-    }
-  }
-
-  deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
-    if (data === null) return null;
-
-    let node = this.getNode(data.nodeId);
-    if (node) return node;
-
-    if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
-      // NOTE: we just make all shadows open in replay
-      node = parent.attachShadow({ mode: 'open' });
-      this.idMap.set(data.nodeId, node);
-      return node;
-    }
-
-    switch (data.nodeType) {
-      case Node.COMMENT_NODE:
-        node = document.createComment(data.textContent);
-        break;
-
-      case Node.TEXT_NODE:
-        node = document.createTextNode(data.textContent);
-        break;
-
-      case Node.ELEMENT_NODE:
-        if (!node) {
-          if (data.namespaceUri) {
-            node = document.createElementNS(data.namespaceUri, data.tagName);
-          } else {
-            node = document.createElement(data.tagName);
-          }
-        }
-        if (node instanceof HTMLIFrameElement) {
-          console.log('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
-          (node as any).nodeId = data.nodeId;
-        }
-        this.setNodeAttributes(node as Element, data);
-        this.setNodeProperties(node as Element, data);
-        if (data.textContent) {
-          node.textContent = data.textContent;
+          if (next) parentNode.insertBefore(node, next);
+          else parentNode.appendChild(node);
         }
 
         break;
+      case 'removed':
+        if (parentNode.contains(node)) parentNode.removeChild(node);
+        break;
+      case 'attribute':
+        setNodeAttributes(node as Element, event);
+        break;
+      case 'property':
+        setNodeProperties(node as Element, event);
+        break;
+      case 'text':
+        node.textContent = textContent;
+        break;
     }
-
-    if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
-
-    this.idMap.set(data.nodeId, node);
-
-    return node;
+  } catch (error) {
+    console.log('ERROR: applying action', error.stack, parentNode, node, event);
   }
 }
 
-/////// / DOM HIGHLIGHTER ///////////////////////////////////////////////////////////////////////////
+/////// PRESERVE HTML, BODY, HEAD ELEMS ////////////////////////////////////////////////////////////////////////////////
+
+const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
+function isPreservedElement(event: IFrontendDomChangeEvent) {
+  const { action, nodeId, nodeType, tagName } = event;
+
+  if (nodeType === document.DOCUMENT_NODE) {
+    idMap.set(nodeId, document);
+    return true;
+  }
+
+  if (nodeType === document.DOCUMENT_TYPE_NODE) {
+    idMap.set(nodeId, document.doctype);
+    return true;
+  }
+
+  if (!preserveElements.has(event.tagName)) return false;
+
+  const elem = document.querySelector(tagName);
+  if (!elem) {
+    console.log('Preserved element doesnt exist!', tagName);
+    return true;
+  }
+
+  idMap.set(nodeId, elem);
+  if (action === 'removed') {
+    elem.innerHTML = '';
+    for (const attr of elem.attributes) {
+      elem.removeAttributeNS(attr.name, attr.namespaceURI);
+      elem.removeAttribute(attr.name);
+    }
+    console.log('WARN: script trying to remove preserved node', event, elem);
+    return true;
+  }
+
+  if (action === 'added') {
+    elem.innerHTML = '';
+  }
+  if (event.attributes) {
+    setNodeAttributes(elem, event);
+  }
+  if (event.properties) {
+    setNodeProperties(elem, event);
+  }
+  return true;
+}
+
+/////// DELEGATION BETWEEN FRAMES   ////////////////////////////////////////////////////////////////////////////////////
+
+const pendingFrameCreationEvents = new Map<
+  string,
+  { frameNodePath: string; event: IFrontendDomChangeEvent }[]
+>();
+function delegateToSubframe(event: IFrontendDomChangeEvent) {
+  const childPath = event.frameIdPath
+    .replace(frameNodePath, '')
+    .split('_')
+    .filter(Boolean)
+    .map(Number);
+
+  const childId = childPath.shift();
+  const childFrameNodePath = `${frameNodePath}_${childId}`;
+
+  const node = idMap.get(childId);
+  if (!node) {
+    if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
+      pendingFrameCreationEvents.set(childFrameNodePath, []);
+    }
+    // queue for pending events
+    pendingFrameCreationEvents
+      .get(childFrameNodePath)
+      .push({ frameNodePath: childFrameNodePath, event });
+    console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
+    return;
+  }
+
+  if (
+    (event.action === 'location' || event.action === 'newDocument') &&
+    node instanceof HTMLObjectElement
+  ) {
+    return;
+  }
+
+  const frame = node as HTMLIFrameElement;
+  if (!frame.contentWindow) {
+    console.log('Frame: without window', frame);
+    return;
+  }
+  if (pendingFrameCreationEvents.has(childFrameNodePath)) {
+    for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
+      frame.contentWindow.postMessage(ev, '*');
+    }
+    pendingFrameCreationEvents.delete(childFrameNodePath);
+  }
+
+  frame.contentWindow.postMessage({ frameNodePath: childFrameNodePath, event }, '*');
+}
+
+function onNewDocument(event: IFrontendDomChangeEvent) {
+  const { textContent } = event;
+  const href = textContent;
+  const newUrl = new URL(href);
+
+  console.log(
+    'Location: (new document) %s, frame: %s, idx: %s',
+    href,
+    event.frameIdPath,
+    event.eventIndex,
+  );
+
+  if (!isMainFrame) {
+    window.location.href = href;
+    return;
+  }
+
+  window.scrollTo({ top: 0 });
+
+  if (document.documentElement) {
+    document.documentElement.innerHTML = '';
+    document.documentElement.style.backgroundColor = 'white';
+    while (document.documentElement.previousSibling) {
+      const prev = document.documentElement.previousSibling;
+      if (prev === document.doctype) break;
+      prev.remove();
+    }
+  }
+
+  if (window.location.origin === newUrl.origin) {
+    window.history.replaceState({}, 'Replay', href);
+  }
+}
+
+function getNode(id: number) {
+  if (id === null || id === undefined) return null;
+  return idMap.get(id);
+}
+
+function setNodeAttributes(node: Element, data: IFrontendDomChangeEvent) {
+  if (!data.attributes) return;
+  for (const [name, value] of Object.entries(data.attributes)) {
+    const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
+    try {
+      if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
+        node.setAttribute(name, value);
+      } else {
+        node.setAttributeNS(ns || null, name, value);
+      }
+    } catch (err) {
+      if (
+        !err.toString().includes('not a valid attribute name') &&
+        !err.toString().includes('qualified name')
+      )
+        throw err;
+    }
+  }
+}
+
+function setNodeProperties(node: Element, data: IFrontendDomChangeEvent) {
+  if (!data.properties) return;
+  for (const [name, value] of Object.entries(data.properties)) {
+    if (name === 'sheet.cssRules') {
+      const sheet = (node as HTMLStyleElement).sheet as CSSStyleSheet;
+      const newRules = value as string[];
+      let i = 0;
+      for (i = 0; i < sheet.cssRules.length; i += 1) {
+        const newRule = newRules[i];
+        if (newRule !== sheet.cssRules[i].cssText) {
+          sheet.deleteRule(i);
+          if (newRule) sheet.insertRule(newRule, i);
+        }
+      }
+      for (; i < newRules.length; i += 1) {
+        sheet.insertRule(newRules[i], i);
+      }
+    } else {
+      node[name] = value;
+    }
+  }
+}
+
+function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
+  if (data === null) return null;
+
+  let node = getNode(data.nodeId);
+  if (node) return node;
+
+  if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
+    // NOTE: we just make all shadows open in replay
+    node = parent.attachShadow({ mode: 'open' });
+    idMap.set(data.nodeId, node);
+    return node;
+  }
+
+  switch (data.nodeType) {
+    case Node.COMMENT_NODE:
+      node = document.createComment(data.textContent);
+      break;
+
+    case Node.TEXT_NODE:
+      node = document.createTextNode(data.textContent);
+      break;
+
+    case Node.ELEMENT_NODE:
+      if (!node) {
+        if (data.namespaceUri) {
+          node = document.createElementNS(data.namespaceUri, data.tagName);
+        } else {
+          node = document.createElement(data.tagName);
+        }
+      }
+      if (node instanceof HTMLIFrameElement) {
+        console.log('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
+        (node as any).nodeId = data.nodeId;
+      }
+      setNodeAttributes(node as Element, data);
+      setNodeProperties(node as Element, data);
+      if (data.textContent) {
+        node.textContent = data.textContent;
+      }
+
+      break;
+  }
+
+  if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
+
+  idMap.set(data.nodeId, node);
+
+  return node;
+}
+
+/////// DOM HIGHLIGHTER  ///////////////////////////////////////////////////////////////////////////////////////////////
 
 const highlightElements: HTMLElement[] = [];
 
@@ -390,7 +392,7 @@ function highlightNodes(nodeIds: number[]) {
     minHighlightTop = 10e3;
     maxHighlightTop = -1;
     for (let i = 0; i < length; i += 1) {
-      const node = getReplayer().idMap.get(nodeIds[i]);
+      const node = idMap.get(nodeIds[i]);
       let hoverNode = highlightElements[i];
       if (!hoverNode) {
         hoverNode = document.createElement('sa-highlight');
@@ -423,14 +425,20 @@ function highlightNodes(nodeIds: number[]) {
   }
 }
 
-/////// mouse ///////
-let lastMouseEvent: IMouseEvent;
+/////// MOUSE EVENTS ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+let lastMouseEvent: IFrontendMouseEvent;
 let mouse: HTMLElement;
 
-function updateMouse(mouseEvent: IMouseEvent) {
+function updateMouse(mouseEvent: IFrontendMouseEvent) {
   lastMouseEvent = mouseEvent;
   if (mouseEvent.pageX !== undefined) {
-    mouse.style.left = `${mouseEvent.pageX}px`;
+    if (mouseEvent.viewportWidth) {
+      const pageX = Math.floor((window.innerWidth / mouseEvent.viewportWidth) * mouseEvent.pageX);
+      mouse.style.left = `${pageX}px`;
+    } else {
+      mouse.style.left = `${mouseEvent.pageX}px`;
+    }
     mouse.style.top = `${mouseEvent.pageY}px`;
   }
   if (mouseEvent.buttons !== undefined) {
@@ -440,8 +448,6 @@ function updateMouse(mouseEvent: IMouseEvent) {
   }
 }
 
-// // other events /////
-
 function updateScroll(scrollEvent: IScrollRecord) {
   window.scroll({
     behavior: 'auto',
@@ -450,13 +456,16 @@ function updateScroll(scrollEvent: IScrollRecord) {
   });
 }
 
-// /// BUILD ELEMENTS
+/////// BUILD UI ELEMENTS //////////////////////////////////////////////////////////////////////////////////////////////
+
 let isInitialized = false;
 function createReplayItems() {
   if (!isMainFrame || isInitialized) return;
   isInitialized = true;
+
   replayNode = document.createElement('sa-replay');
   replayNode.style.zIndex = '10000000';
+
   replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
   showMoreUp = document.createElement('sa-overflow');

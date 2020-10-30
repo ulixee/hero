@@ -20,6 +20,7 @@ import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/commons/Logger';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -240,6 +241,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         flatten: true,
       }),
       this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
+      this.setTimezone(this.browserContext.emulation.timezoneId),
+      this.setScreensize(this.browserContext.emulation.viewport),
     ]);
 
     if (this.opener && this.opener.popupInitializeFn) {
@@ -339,5 +342,30 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   private onWindowOpen(event: WindowOpenEvent) {
     this.windowOpenParams = event;
+  }
+
+  private async setScreensize(viewport: IViewport) {
+    if (!viewport) return;
+    await this.cdpSession.send('Emulation.setDeviceMetricsOverride', {
+      width: viewport.width,
+      height: viewport.height,
+      deviceScaleFactor: viewport.deviceScaleFactor ?? 1,
+      positionX: viewport.positionX,
+      positionY: viewport.positionY,
+      screenHeight: viewport.screenHeight,
+      screenWidth: viewport.screenWidth,
+      mobile: false,
+    });
+  }
+
+  private async setTimezone(timezoneId = '') {
+    try {
+      await this.cdpSession.send('Emulation.setTimezoneOverride', { timezoneId });
+    } catch (exception) {
+      if (exception.message.includes('Timezone override is already in effect')) return;
+      if (exception.message.includes('Invalid timezone'))
+        throw new Error(`Invalid timezone ID: ${timezoneId}`);
+      throw exception;
+    }
   }
 }

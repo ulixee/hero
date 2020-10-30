@@ -18,6 +18,8 @@ import IPuppetContext, {
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import Viewport from '@secret-agent/emulators/lib/Viewport';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -36,6 +38,9 @@ export default class Session {
   public sessionState: SessionState;
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
+
+  public viewport: IViewport;
+  public timezoneId?: string;
 
   public tabs: Tab[] = [];
 
@@ -64,6 +69,12 @@ export default class Session {
       });
     }
 
+    this.timezoneId = options.timezoneId;
+    this.viewport = options.viewport;
+    if (!this.viewport) {
+      this.viewport = Viewport.getRandom();
+    }
+
     const humanoidId = options.humanoidId || Humanoids.getRandomId();
     this.humanoid = Humanoids.create(humanoidId);
 
@@ -76,6 +87,8 @@ export default class Session {
       emulatorId,
       humanoidId,
       this.emulator.canPolyfill,
+      this.viewport,
+      this.timezoneId,
     );
     this.proxy = new MitmUpstreamProxy(this.id);
     this.mitmRequestSession = new RequestSession(
@@ -93,6 +106,8 @@ export default class Session {
       userAgent: emulator.userAgent.raw,
       platform: emulator.userAgent.platform,
       proxyPassword: this.id,
+      viewport: this.options.viewport,
+      timezoneId: this.options.timezoneId,
     } as IBrowserEmulation;
   }
 

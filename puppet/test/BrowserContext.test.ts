@@ -7,6 +7,7 @@ import Puppet from '../index';
 import { getExecutablePath } from '../lib/browserPaths';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { createTestPage, ITestPage } from './TestPage';
+import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
@@ -17,13 +18,6 @@ describe.each([
   let server: TestServer;
   let puppet: Puppet;
   const needsClosing = [];
-
-  const defaultEmulator = {
-    userAgent: 'Page tests',
-    acceptLanguage: 'en',
-    platform: 'Linux',
-    proxyPassword: '',
-  };
 
   beforeAll(async () => {
     server = await TestServer.create(0);
@@ -45,7 +39,7 @@ describe.each([
 
   describe('basic', () => {
     it('should create new context', async () => {
-      const context = await puppet.newContext(defaultEmulator, log);
+      const context = await puppet.newContext(defaultEmulation, log);
       needsClosing.push(context);
       expect(context).toBeTruthy();
       await context.close();
@@ -53,9 +47,9 @@ describe.each([
 
     it('should isolate localStorage and cookies', async () => {
       // Create two incognito contexts.
-      const context1 = await puppet.newContext(defaultEmulator, log);
+      const context1 = await puppet.newContext(defaultEmulation, log);
       needsClosing.push(context1);
-      const context2 = await puppet.newContext(defaultEmulator, log);
+      const context2 = await puppet.newContext(defaultEmulation, log);
       needsClosing.push(context2);
 
       // Create a page in first incognito context.
@@ -87,13 +81,13 @@ describe.each([
     });
 
     it('close() should work for empty context', async () => {
-      const context = await puppet.newContext(defaultEmulator, log);
+      const context = await puppet.newContext(defaultEmulation, log);
       needsClosing.push(context);
       await expect(context.close()).resolves.toBe(undefined);
     });
 
     it('close() should be callable twice', async () => {
-      const context = await puppet.newContext(defaultEmulator, log);
+      const context = await puppet.newContext(defaultEmulation, log);
       needsClosing.push(context);
       await Promise.all([context.close(), context.close()]);
       await expect(context.close()).resolves.toBe(undefined);
@@ -103,13 +97,14 @@ describe.each([
   describe('emulator', () => {
     it('should set for all pages', async () => {
       {
-        const context = await puppet.newContext(defaultEmulator, log);
+        const context = await puppet.newContext(defaultEmulation, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
-        expect(await page.evaluate(`navigator.userAgent`)).toBe(defaultEmulator.userAgent);
-        expect(await page.evaluate(`navigator.platform`)).toBe(defaultEmulator.platform);
+        expect(await page.evaluate(`navigator.userAgent`)).toBe(defaultEmulation.userAgent);
+        expect(await page.evaluate(`navigator.platform`)).toBe(defaultEmulation.platform);
         expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en']);
+        expect(await page.evaluate('screen.height')).toBe(defaultEmulation.viewport.height);
         await context.close();
       }
       {
@@ -119,6 +114,14 @@ describe.each([
             platform: 'Windows',
             acceptLanguage: 'de',
             proxyPassword: '',
+            viewport: {
+              screenHeight: 901,
+              screenWidth: 1024,
+              positionY: 1,
+              positionX: 0,
+              height: 900,
+              width: 1024,
+            },
           },
           log,
         );
@@ -133,17 +136,18 @@ describe.each([
         expect(await page.evaluate(`navigator.userAgent`)).toBe('foobar');
         expect(await page.evaluate(`navigator.platform`)).toBe('Windows');
         expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['de']);
+        expect(await page.evaluate('screen.height')).toBe(901);
         await context.close();
       }
     });
 
     it('should work for subframes', async () => {
       {
-        const context = await puppet.newContext(defaultEmulator, log);
+        const context = await puppet.newContext(defaultEmulation, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
-        expect(await page.evaluate(`navigator.userAgent`)).toContain(defaultEmulator.userAgent);
+        expect(await page.evaluate(`navigator.userAgent`)).toContain(defaultEmulation.userAgent);
         await context.close();
       }
       {
@@ -171,7 +175,7 @@ describe.each([
     let context: IPuppetContext;
     let page: ITestPage;
     beforeEach(async () => {
-      context = await puppet.newContext(defaultEmulator, log);
+      context = await puppet.newContext(defaultEmulation, log);
       page = createTestPage(await context.newPage());
     });
     afterEach(async () => {

@@ -93,6 +93,14 @@ async function createPage() {
       platform: 'win32',
       acceptLanguage: 'en',
       userAgent: 'Chrome Test',
+      viewport: {
+        screenHeight: 900,
+        screenWidth: 1024,
+        positionY: 0,
+        positionX: 0,
+        height: 900,
+        width: 1024,
+      },
     },
     log,
   );

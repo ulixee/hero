@@ -7,6 +7,7 @@ import { getExecutablePath } from '../lib/browserPaths';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { createTestPage, ITestPage } from './TestPage';
+import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
@@ -27,10 +28,10 @@ describe.each([
     await puppet.start();
     context = await puppet.newContext(
       {
+        ...defaultEmulation,
         userAgent: 'popupcity',
         acceptLanguage: 'en-GB',
         platform: 'Windows95',
-        proxyPassword: '',
       },
       log,
     );

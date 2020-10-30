@@ -2,6 +2,7 @@ import { EventEmitter } from 'events';
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
 import {
   IFocusRecord,
+  IFrontendMouseEvent,
   IMouseEvent,
   IScrollRecord,
   ISessionTab,
@@ -28,6 +29,8 @@ export default class ReplayTabState extends EventEmitter {
   public tabId: string;
   public startOrigin: string;
   public urlOrigin: string;
+  public viewportWidth: number;
+  public viewportHeight: number;
   public currentPlaybarOffsetPct = 0;
   public replayTime: ReplayTime;
   public tabCreatedTime: string;
@@ -53,6 +56,8 @@ export default class ReplayTabState extends EventEmitter {
     this.replayTime = replayTime;
     this.tabCreatedTime = tabMeta.createdTime;
     this.startOrigin = tabMeta.startOrigin;
+    this.viewportHeight = tabMeta.height;
+    this.viewportWidth = tabMeta.width;
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
     this.ticks.push(new ReplayTick(this, 'load', 0, -1, replayTime.start.toISOString(), 'Load'));
@@ -171,7 +176,7 @@ export default class ReplayTabState extends EventEmitter {
   public loadTick(
     newTickIdx: number,
     specificPlaybarOffset?: number,
-  ): [IFrontendDomChangeEvent[], number[], IMouseEvent, IScrollRecord] {
+  ): [IFrontendDomChangeEvent[], number[], IFrontendMouseEvent, IScrollRecord] {
     if (newTickIdx === this.currentTickIdx) return;
     const newTick = this.ticks[newTickIdx];
 
@@ -193,7 +198,18 @@ export default class ReplayTabState extends EventEmitter {
     const scrollEvent = this.scrollEvents[newTick.scrollEventIdx];
     const nodesToHighlight = newTick.highlightNodeIds;
 
-    return [paintEvents, nodesToHighlight, mouseEvent, scrollEvent];
+    let frontendMouseEvent: IFrontendMouseEvent;
+    if (mouseEvent) {
+      frontendMouseEvent = {
+        pageX: mouseEvent.pageX,
+        pageY: mouseEvent.pageY,
+        buttons: mouseEvent.buttons,
+        viewportHeight: this.viewportHeight,
+        viewportWidth: this.viewportWidth,
+      };
+    }
+
+    return [paintEvents, nodesToHighlight, frontendMouseEvent, scrollEvent];
   }
 
   public loadCommand(command: ICommandWithResult) {

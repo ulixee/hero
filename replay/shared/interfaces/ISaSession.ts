@@ -3,8 +3,8 @@ export default interface ISaSession {
   name: string;
   tabs: ISessionTab[];
   dataLocation: string;
-  viewportWidth: number;
-  viewportHeight: number;
+  screenWidth: number;
+  screenHeight: number;
   deviceScaleFactor: number;
   startOrigin: string;
   startDate: Date;
@@ -20,6 +20,8 @@ export interface ISessionTab {
   tabId: string;
   createdTime: string;
   startOrigin?: string;
+  width: number;
+  height: number;
 }
 
 export interface IMouseEvent {
@@ -30,6 +32,14 @@ export interface IMouseEvent {
   targetNodeId: number;
   event: number;
   timestamp: string;
+}
+
+export interface IFrontendMouseEvent {
+  pageX: number;
+  pageY: number;
+  buttons: number;
+  viewportWidth: number;
+  viewportHeight: number;
 }
 
 export interface IFocusRecord {
