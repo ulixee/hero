@@ -1,6 +1,9 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
+import Log from '@secret-agent/commons/Logger';
 import CoreTab from './CoreTab';
+
+const { log } = Log(module);
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
@@ -16,16 +19,22 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreTab: CoreTab) {
+  public launchReplay(sessionName: string, coreTab: Promise<CoreTab>) {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
-    replay({
-      scriptInstanceId: this.id,
-      sessionName,
-      sessionsDataLocation: coreTab.sessionsDataLocation,
-      replayApiServer: coreTab.replayApiServer,
-      sessionId: coreTab.sessionId,
-    });
+    coreTab
+      .then(tab => {
+        return replay({
+          scriptInstanceId: this.id,
+          sessionName,
+          sessionsDataLocation: tab.sessionsDataLocation,
+          replayApiServer: tab.replayApiServer,
+          sessionId: tab.sessionId,
+        });
+      })
+      .catch(err => {
+        log.warn('Unable to connect to CoreTab', { error: err, sessionId: this.id });
+      });
   }
 
   public generateSessionName(name: string, shouldCleanName = true) {

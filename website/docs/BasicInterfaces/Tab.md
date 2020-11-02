@@ -1,12 +1,12 @@
 # Tab
 
-A Tab is similar to a tab in a consumer Browser. Each Tab drives an underlying document with it's own page lifecycle and resources. Many of the tab functions are available from the Browser object.
+A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying document with its own page lifecycle and resources. Many of the tab functions are available from the SecretAgent object.
 
 ## Constructor
 
-A default tab is provided in each Browser. Navigate by using the [SecretAgent.goto](./secret-agent#goto) method.
+A default tab is provided in each SecretAgent instance. Navigate by using the [secretAgent.goto](./secret-agent#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Browser. These can be discovered using the [Browser.tabs](./browser#tabs) method, or waiting with [Browser.waitForNewTab()](./browser#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the SecretAgent instance. These can be discovered using the [secretAgent.tabs](./secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](./secret-agent#wait-for-new-tab).
 
 ## Properties
 
@@ -36,17 +36,17 @@ An identifier for the tab.
 
 ### tab.lastCommandId {#lastCommandId}
 
-An execution point that refers to a command run on this Browser (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
+An execution point that refers to a command run on this SecretAgent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
 
-#### **Type**: `number`
+#### **Type**: `Promise<number>`
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
 Returns a constructor for a Request object that can be sent to [tab.fetch(request)](#fetch).
 
 ```js
-const browser = await SecretAgent.createBrowser();
-const { Request, fetch } = browser;
+const agent = await new SecretAgent();
+const { Request, fetch } = agent;
 const url = 'https://dataliberationfoundation.org';
 const request = new Request(url, {
   headers: {
@@ -62,13 +62,13 @@ const response = await fetch(request);
 
 ### tab.close*()* {#close}
 
-Closes the current tab only (will close the whole browser if there are no open tabs).
+Closes the current tab only (will close the whole SecretAgent instance if there are no open tabs).
 
 #### **Returns**: `Promise`
 
 ### tab.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
-Perform a native "fetch" request in the current browser context.
+Perform a native "fetch" request in the current tab context.
 
 #### **Arguments**:
 
@@ -80,17 +80,17 @@ Perform a native "fetch" request in the current browser context.
 #### **Returns**: `Promise<Response>`
 
 ```js
-const browser = await SecretAgent.createBrowser();
+const agent = new SecretAgent();
 const url = 'https://dataliberationfoundation.org';
-const response = await browser.fetch(url);
+const response = await agent.fetch(url);
 ```
 
 Http Post example with a body:
 
 ```js
-const browser = await SecretAgent.createBrowser();
+const agent = new SecretAgent();
 const url = 'https://dataliberationfoundation.org/nopost';
-const response = await browser.fetch(url, {
+const response = await agent.fetch(url, {
   method: 'post',
   headers: {
     Authorization: 'Basic ZWx1c3VhcmlvOnlsYWNsYXZl',
@@ -103,15 +103,7 @@ const response = await browser.fetch(url, {
 
 ### tab.focus*()* {#focus}
 
-Make this tab the `activeTab` within a browser, which directs Browser functions to this tab.
-
-#### **Arguments**:
-
-- options `object` Accepts any of the following:
-  - emulatorId `string`. Emulate a specific browser version.
-  - humanoidId `string`. Create human-like mouse/keyboard movements.
-  - renderingOptions `string[]`. Controls browser functionality.
-  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
+Make this tab the `activeTab` within a browser, which directs many SecretAgent methods to this tab.
 
 #### **Returns**: `Promise`
 
@@ -128,9 +120,9 @@ Extract any publicly accessible javascript value from the webpage context.
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-const browser = await SecretAgent.createBrowser();
-await browser.goto('https://dataliberationfoundation.org');
-const navigatorAgent = await browser.activeTab.getJsValue(`navigator.userAgent`);
+const agent = new SecretAgent();
+await agent.goto('https://dataliberationfoundation.org');
+const navigatorAgent = await agent.activeTab.getJsValue(`navigator.userAgent`);
 ```
 
 ### tab.goBack*()* {#back}
@@ -157,7 +149,7 @@ Executes a navigation request for the document associated with the parent Secret
 
 ### tab.isElementVisible*(element)* {#is-element-visible}
 
-Determines if an element is visible to a user. This method checks whether an element has:
+Determines if an element is visible to an end user. This method checks whether an element has:
 
 - layout: width, height, x and y.
 - opacity: non-zero opacity.
@@ -168,7 +160,7 @@ Determines if an element is visible to a user. This method checks whether an ele
 
 - element `SuperElement`. The element to determine visibility.
 
-#### **Returns**: `Promise<boolean>` Whether the element is visible to a user.
+#### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
 ### tab.waitForAllContentLoaded*()* {#wait-for-all-content}
 
@@ -192,8 +184,8 @@ Wait until a specific element is present in the dom.
 If at the moment of calling this method, the selector already exists, the method will return immediately.
 
 ```js
-const browser = await SecretAgent.createBrowser();
-const { activeTab, document } = browser;
+const agent = new SecretAgent();
+const { activeTab, document } = agent;
 
 const elem = document.querySelector('a.visible');
 await activeTab.waitForElement(elem, {
@@ -246,8 +238,8 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const browser = await SecretAgent.createBrowser();
-const { user, activeTab, document } = browser;
+const agent = new SecretAgent();
+const { user, activeTab, document } = agent;
 await activeTab.goto('http://example.com');
 
 await user.click(document.querySelector('a'));
@@ -274,13 +266,13 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
 #### **Returns**: `Promise<Resource[]>`
 
 ```js
-const browser = await SecretAgent.createBrowser();
-const { user, activeTab, document } = browser;
+const agent = new SecretAgent();
+const { user, activeTab, document } = agent;
 
 await activeTab.goto('http://example.com');
 
 const elem = document.querySelector('a');
-await user.click(elem);
+await agent.click(elem);
 
 // get all Fetches that have occurred on the page thus far.
 const allFetchResources = await activeTab.waitForResource({
@@ -290,7 +282,7 @@ const allFetchResources = await activeTab.waitForResource({
 const lastCommandId = activeTab.lastCommandId;
 
 const button = document.querySelector('#submit');
-await user.click(button);
+await agent.click(button);
 
 const xhrsAfterSubmit = await activeTab.waitForResource(
   {

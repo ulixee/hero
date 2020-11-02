@@ -7,7 +7,7 @@ import CoreTab from './CoreTab';
 const { getState, setState } = StateMachine<ResourceResponse, IState>();
 
 interface IState {
-  coreTab: CoreTab;
+  coreTab: Promise<CoreTab>;
   resourceId: number;
 }
 
@@ -63,7 +63,7 @@ export default class ResourceResponse {
   }
 }
 
-export function createResourceResponse(coreTab: CoreTab, resourceId?: number) {
+export function createResourceResponse(coreTab: Promise<CoreTab>, resourceId?: number) {
   const response = new ResourceResponse();
   setState(response, { coreTab, resourceId });
   return response;
@@ -75,5 +75,5 @@ function getResponseProperty<T>(
 ) {
   const state = getState(container);
   const id = state.resourceId;
-  return state.coreTab.getResourceProperty<T>(id, `response.${name}`);
+  return state.coreTab.then(x => x.getResourceProperty<T>(id, `response.${name}`));
 }

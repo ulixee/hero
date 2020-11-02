@@ -2,7 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import SecretAgent from '../index';
 
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -26,22 +26,22 @@ describe('basic waitForLocation change detections', () => {
 
     const startUrl = `${koaServer.baseUrl}/start`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(startUrl);
-    const firstUrl = await browser.url;
-    await browser.waitForAllContentLoaded();
-    const button = browser.document.querySelector('button');
-    await browser.waitForElement(button);
+    await agent.goto(startUrl);
+    const firstUrl = await agent.url;
+    await agent.waitForAllContentLoaded();
+    const button = agent.document.querySelector('button');
+    await agent.waitForElement(button);
 
-    await browser.interact({ click: button });
-    await browser.waitForLocation('change');
-    const lastUrl = await browser.url;
+    await agent.interact({ click: button });
+    await agent.waitForLocation('change');
+    const lastUrl = await agent.url;
 
     expect(firstUrl).toBe(startUrl);
     expect(lastUrl).toBe(finishUrl);
 
-    await browser.close();
+    await agent.close();
     await koaServer.close();
   });
 
@@ -71,19 +71,19 @@ describe('basic waitForLocation change detections', () => {
     });
 
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const browser = await SecretAgent.createBrowser();
-    await browser.goto(`${koaServer.baseUrl}/page1`);
-    const startlink = browser.document.querySelector('a');
-    await browser.interact({ click: startlink, waitForElementVisible: startlink });
-    await browser.waitForLocation('change');
-    expect(await browser.url).toBe(`${koaServer.baseUrl}/page3`);
+    const agent = await new SecretAgent();
+    await agent.goto(`${koaServer.baseUrl}/page1`);
+    const startlink = agent.document.querySelector('a');
+    await agent.interact({ click: startlink, waitForElementVisible: startlink });
+    await agent.waitForLocation('change');
+    expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);
 
-    const nextlink = browser.document.querySelector('a');
-    await browser.interact({ click: nextlink, waitForElementVisible: nextlink });
-    await browser.waitForLocation('change');
-    expect(await browser.url).toBe(`${koaServer.baseUrl}/finish`);
+    const nextlink = agent.document.querySelector('a');
+    await agent.interact({ click: nextlink, waitForElementVisible: nextlink });
+    await agent.waitForLocation('change');
+    expect(await agent.url).toBe(`${koaServer.baseUrl}/finish`);
 
-    await browser.close();
+    await agent.close();
     await koaServer.close();
   });
 
@@ -108,28 +108,28 @@ describe('basic waitForLocation change detections', () => {
     const startUrl = `${koaServer.baseUrl}/page1`;
     const page2Url = `${koaServer.baseUrl}/page2`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(startUrl);
-    const firstUrl = await browser.url;
-    await browser.waitForAllContentLoaded();
-    const readyLink = browser.document.querySelector('a');
-    await browser.interact({ click: readyLink, waitForElementVisible: readyLink });
-    await browser.waitForLocation('change');
-    const secondUrl = await browser.url;
-    await browser.waitForAllContentLoaded();
+    await agent.goto(startUrl);
+    const firstUrl = await agent.url;
+    await agent.waitForAllContentLoaded();
+    const readyLink = agent.document.querySelector('a');
+    await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
+    await agent.waitForLocation('change');
+    const secondUrl = await agent.url;
+    await agent.waitForAllContentLoaded();
 
-    const readyLink2 = browser.document.querySelector('a');
-    await browser.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
-    await browser.waitForLocation('change');
-    await browser.waitForAllContentLoaded();
-    const lastUrl = await browser.url;
+    const readyLink2 = agent.document.querySelector('a');
+    await agent.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
+    await agent.waitForLocation('change');
+    await agent.waitForAllContentLoaded();
+    const lastUrl = await agent.url;
 
     expect(firstUrl).toBe(startUrl);
     expect(secondUrl).toBe(page2Url);
     expect(lastUrl).toBe(finishUrl);
 
-    await browser.close();
+    await agent.close();
     await koaServer.close();
   });
 });

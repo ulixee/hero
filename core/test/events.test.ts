@@ -4,7 +4,7 @@ import Core from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  await Core.start();
+  await Core.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -12,7 +12,7 @@ afterEach(Helpers.afterEach);
 
 describe('Core events tests', () => {
   it('receives close event when closed', async () => {
-    await Core.start();
+    await Core.prewarm();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
     const { tabId } = await Core.createTab();
@@ -27,7 +27,7 @@ describe('Core events tests', () => {
   });
 
   it('receives resource events', async () => {
-    await Core.start();
+    await Core.prewarm();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
     const { tabId } = await Core.createTab();
@@ -51,7 +51,7 @@ describe('Core events tests', () => {
   }, 10e3);
 
   it('removes event listeners', async () => {
-    await Core.start();
+    await Core.prewarm();
     const onEventFn = jest.fn();
     Core.onEventFn = onEventFn;
     const { tabId } = await Core.createTab();

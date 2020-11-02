@@ -1,15 +1,15 @@
 # Interactions
 
-Every User in a BrowserInstance has a `interact()` method, which allow you to control the user's mouse and keyboard. `Interactions` are simple key/value objects you pass into this method:
+Every SecretAgent instance has an `interact()` method, which allow you to control the mouse and keyboard. `Interactions` are simple key/value objects you pass into this method:
 
 ```js
-user.interact({ move: [100, 356] });
+agent.interact({ move: [100, 356] });
 ```
 
 Multiple Interactions can be passed through as multiple arguments:
 
 ```js
-user.interact({ click: [250, 356] }, { type: 'hello world' });
+agent.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
 The timing of Interactions are controlled by an emulation layer, called [Huminoids](../advanced-functionality/humanoids), which generate realistic-looking, human-like movements on the remote webpage.
@@ -38,20 +38,20 @@ Every mouse command include a `MousePosition` value, which specifies where the i
 For example, here's how to hover over a link:
 
 ```js
-const aElem = browser.document.querySelector('a.more-information');
-user.interact({ move: aElem });
+const aElem = agent.document.querySelector('a.more-information');
+agent.interact({ move: aElem });
 `````
 
 Or double-click on a specific x/y coordinate:
 ```js
-user.interact({ doubleclick: [50, 150] });
+agent.interact({ doubleclick: [50, 150] });
 `````
 
 #### **Dictating Left, Middle or Right**:
 All button commands (click, doubleclick, etc) operate on the `Left` button by default. However, you can affix any of these commands with `Left`, `Middle` or `Right` to specify a specific button. For example:
 
 ```js
-user.interact({ clickRight: [55, 42] });
+agent.interact({ clickRight: [55, 42] });
 ````
 
 ## The Four Keyboard Commands
@@ -78,7 +78,7 @@ If you have no need to change the position of the mouse between commands (or oth
 For example, follow up a move command with click:
 
 ```js
-user.interact({ move: [55, 42] }, 'click');
+agent.interact({ move: [55, 42] }, 'click');
 ````
 
 ## Combining Commands
@@ -90,7 +90,7 @@ Interactions are similar to paragraphs. The Humanoid adds a longer pause between
 For example, this allows you to implement simple drag and drop interactions:
 
 ```js
-user.interact({ clickDown: [55, 42], move: [155, 142] }, 'clickUp');
+agent.interact({ clickDown: [55, 42], move: [155, 142] }, 'clickUp');
 ````
 
 When multiple commands are combined within a single Interaction, their execution takes the following order:
@@ -121,7 +121,7 @@ For example, there is a subtle but important difference between the following th
 </label>
 
 ```js
-user.interact({ clickDown: [55, 42] });
+agent.interact({ clickDown: [55, 42] });
 ````
 
 <label>
@@ -129,7 +129,7 @@ user.interact({ clickDown: [55, 42] });
 </label>
 
 ```js
-user.interact({ move: [55, 42], clickDown: [5, 5] });
+agent.interact({ move: [55, 42], clickDown: [5, 5] });
 ````
 
 <label>
@@ -137,7 +137,7 @@ user.interact({ move: [55, 42], clickDown: [5, 5] });
 </label>
 
 ```js
-user.interact({ move: [55, 42] }, { clickDown: [5, 5] });
+agent.interact({ move: [55, 42] }, { clickDown: [5, 5] });
 ````
 
 The first example moves the cursor to 55x42 before pressing the mouse down.
@@ -153,11 +153,11 @@ An error will be thrown if you send commands that conflict with each other.
 For example, the following example blows up when doubleclick is called while the mouse is still down:
 
 ```js
-user.interact({ clickDown: [55, 42] }, { doubleclick: [5, 5] });
+agent.interact({ clickDown: [55, 42] }, { doubleclick: [5, 5] });
 ````
 
 You can fix this by releasing the down:
 
 ```js
-user.interact({ clickDown: [55, 42] }, 'up', { doubleclick: [5, 5] });
+agent.interact({ clickDown: [55, 42] }, 'up', { doubleclick: [5, 5] });
 ````

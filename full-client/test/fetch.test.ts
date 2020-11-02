@@ -4,7 +4,7 @@ import SecretAgent from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -15,11 +15,11 @@ describe('Fetch tests', () => {
     koaServer.get('/fetch', ctx => {
       ctx.body = { got: 'it' };
     });
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(`${koaServer.baseUrl}/`);
-    await browser.waitForAllContentLoaded();
-    const result = await browser.fetch('/fetch');
+    await agent.goto(`${koaServer.baseUrl}/`);
+    await agent.waitForAllContentLoaded();
+    const result = await agent.fetch('/fetch');
     const json = await result.json();
     expect(json).toStrictEqual({ got: 'it' });
   });
@@ -35,12 +35,12 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: '2' };
     });
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(`${koaServer.baseUrl}/`);
-    await browser.waitForAllContentLoaded();
+    await agent.goto(`${koaServer.baseUrl}/`);
+    await agent.waitForAllContentLoaded();
 
-    const response = await browser.fetch(`${koaServer.baseUrl}/post`, {
+    const response = await agent.fetch(`${koaServer.baseUrl}/post`, {
       method: 'post',
       headers: {
         Accept: 'application/json',
@@ -60,12 +60,12 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: 'request' };
     });
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(`${koaServer.baseUrl}/`);
-    await browser.waitForAllContentLoaded();
+    await agent.goto(`${koaServer.baseUrl}/`);
+    await agent.waitForAllContentLoaded();
 
-    const { Request, fetch } = browser;
+    const { Request, fetch } = agent;
     const request = new Request(`${koaServer.baseUrl}/request`, {
       headers: {
         header1: 'sent',
@@ -82,12 +82,12 @@ describe('Fetch tests', () => {
     koaServer.get('/buffer', ctx => {
       ctx.body = Buffer.from('This is a test');
     });
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(`${koaServer.baseUrl}/`);
-    await browser.waitForAllContentLoaded();
+    await agent.goto(`${koaServer.baseUrl}/`);
+    await agent.waitForAllContentLoaded();
 
-    const response = await browser.fetch(`${koaServer.baseUrl}/buffer`);
+    const response = await agent.fetch(`${koaServer.baseUrl}/buffer`);
 
     const buff = await response.arrayBuffer();
 

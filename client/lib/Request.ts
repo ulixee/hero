@@ -2,19 +2,19 @@ import FetchRequest from 'awaited-dom/impl/official-klasses/Request';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from "awaited-dom/base/IAttachedState";
+import IAttachedState from 'awaited-dom/base/IAttachedState';
 import CoreTab from './CoreTab';
 
 interface IState {
   awaitedPath: AwaitedPath;
   attachedState: IAttachedState;
   remoteInitializerPromise: Promise<void>;
-  coreTab: CoreTab;
+  coreTab: Promise<CoreTab>;
 }
 
 const { getState, setState } = StateMachine<FetchRequest, IState>();
 
-export default function RequestGenerator(coreTab: CoreTab) {
+export default function RequestGenerator(coreTab: Promise<CoreTab>) {
   return class Request extends FetchRequest {
     constructor(input: IRequestInfo, init?: IRequestInit) {
       super(input, init);
@@ -29,11 +29,12 @@ export default function RequestGenerator(coreTab: CoreTab) {
 
 async function createRemoteInitializer(
   instance: FetchRequest,
-  coreTab: CoreTab,
+  coreTabPromise: Promise<CoreTab>,
   input: IRequestInfo,
   init?: IRequestInit,
 ) {
   const requestInput = await getRequestIdOrUrl(input);
+  const coreTab = await coreTabPromise;
   const attachedState = await coreTab.createRequest(requestInput, init);
   const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
   setState(instance, {

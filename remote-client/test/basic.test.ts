@@ -1,6 +1,6 @@
 import RemoteClient from '../index';
 
-describe('basic browser remote tests', () => {
+describe('basic RemoteClient tests', () => {
   it('should goto and waitForLocation', async () => {
     const remoteClient = new RemoteClient();
     const { SecretAgent } = remoteClient;
@@ -18,10 +18,10 @@ describe('basic browser remote tests', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const sessionId = browser.sessionId;
-    await browser.goto('http://example.org');
-    await browser.close();
+    const agent = await new SecretAgent();
+    const sessionId = await agent.sessionId;
+    await agent.goto('http://example.org');
+    await agent.close();
 
     expect(sessionId).toBe('session-id');
     expect(payloads.map(p => p.command)).toMatchObject(['createTab', 'goto', 'close']);

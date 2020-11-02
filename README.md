@@ -30,11 +30,11 @@ SecretAgent provides access to the W3C DOM specification without the need for Pu
 const SecretAgent = require('secret-agent');
 
 (async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto('https://example.org');
-  const title = await browser.document.title;
-  const intro = await browser.document.querySelector('p').textContent;
-  await browser.close();
+  const agent = await new SecretAgent();
+  await agent.goto('https://example.org');
+  const title = await agent.document.title;
+  const intro = await agent.document.querySelector('p').textContent;
+  await agent.close();
 })();
 ```
 

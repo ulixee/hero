@@ -7,21 +7,21 @@ afterAll(Helpers.afterAll);
 
 describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {
-    await Core.start();
-    await Core.configure({ maxActiveSessionCount: 5 });
+    await Core.prewarm();
+    await Core.configure({ maxConcurrentSessionsCount: 5 });
 
-    expect(GlobalPool.maxActiveSessionCount).toBe(5);
+    expect(GlobalPool.maxConcurrentSessionsCount).toBe(5);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     await Core.shutdown();
   });
 
   it('runs createTab', async () => {
-    await Core.start();
-    await Core.configure({ maxActiveSessionCount: 2 });
+    await Core.prewarm();
+    await Core.configure({ maxConcurrentSessionsCount: 2 });
     await Core.createTab();
 
-    expect(GlobalPool.maxActiveSessionCount).toBe(2);
+    expect(GlobalPool.maxConcurrentSessionsCount).toBe(2);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
     await Core.shutdown();
@@ -42,8 +42,8 @@ describe('basic Core tests', () => {
     // @ts-ignore
     Core.autoShutdownMillis = 0;
     shutdownSpy.mockClear();
-    await Core.start();
-    await Core.configure({ maxActiveSessionCount: 5 });
+    await Core.prewarm();
+    await Core.configure({ maxConcurrentSessionsCount: 5 });
     const meta = await Core.createTab();
     const core = Core.byTabId[meta.tabId];
     await core.close();
@@ -56,8 +56,8 @@ describe('basic Core tests', () => {
     // @ts-ignore
     Core.autoShutdownMillis = 0;
     shutdownSpy.mockClear();
-    await Core.start();
-    await Core.configure({ maxActiveSessionCount: 5 });
+    await Core.prewarm();
+    await Core.configure({ maxConcurrentSessionsCount: 5 });
     const meta = await Core.createTab();
     await Core.disconnect([meta.tabId]);
     await new Promise(resolve => setTimeout(resolve, 50));

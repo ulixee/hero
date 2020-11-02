@@ -7,7 +7,7 @@ import CoreTab from './CoreTab';
 const { getState, setState } = StateMachine<ResourceRequest, IState>();
 
 interface IState {
-  coreTab: CoreTab;
+  coreTab: Promise<CoreTab>;
   resourceId: number;
 }
 
@@ -45,7 +45,7 @@ export default class ResourceRequest {
   }
 }
 
-export function createResourceRequest(coreTab: CoreTab, resourceId?: number) {
+export function createResourceRequest(coreTab: Promise<CoreTab>, resourceId?: number) {
   const request = new ResourceRequest();
   setState(request, { coreTab, resourceId });
   return request;
@@ -54,5 +54,5 @@ export function createResourceRequest(coreTab: CoreTab, resourceId?: number) {
 function getRequestProperty<T>(container: ResourceRequest, name: keyof IResourceRequest) {
   const state = getState(container);
   const id = state.resourceId;
-  return state.coreTab.getResourceProperty<T>(id, `request.${name}`);
+  return state.coreTab.then(x => x.getResourceProperty<T>(id, `request.${name}`));
 }

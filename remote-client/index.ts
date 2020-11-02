@@ -5,6 +5,7 @@ import IRequestPayload from '@secret-agent/remote-interfaces/IRequestPayload';
 import IResponsePayload from '@secret-agent/remote-interfaces/IResponsePayload';
 import IEventPayload from '@secret-agent/remote-interfaces/IEventPayload';
 import { createPromise } from '@secret-agent/commons/utils';
+import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgent";
 import PendingMessages from './lib/PendingMessages';
 
 // tslint:disable:variable-name
@@ -14,7 +15,7 @@ export { ISecretAgent };
 process.title = 'SecretAgent-Remote';
 
 export default class RemoteClient {
-  public SecretAgent: ISecretAgent;
+  public SecretAgent: ISecretAgentClass;
   private sendToOutgoingFn: (payload: IRequestPayload) => void;
   private readonly coreClient: CoreClient;
   private pendingMessages: PendingMessages = new PendingMessages();

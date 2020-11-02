@@ -18,7 +18,7 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreTab: CoreTab;
+  coreTab: Promise<CoreTab>;
 }
 
 const propertyKeys: (keyof Resource)[] = [
@@ -59,7 +59,8 @@ export default class Resource {
 
   public get data(): Promise<Buffer> {
     const id = getState(this).resource.id;
-    return getState(this).coreTab.getResourceProperty<Buffer>(id, 'data');
+    const coreTab = getState(this).coreTab;
+    return coreTab.then(x => x.getResourceProperty<Buffer>(id, 'data'));
   }
 
   public text(): Promise<string> {
@@ -75,7 +76,7 @@ export default class Resource {
     filter: IWaitForResourceFilter,
     options: IWaitForResourceOptions,
   ): Promise<Resource[]> {
-    const coreTab = getCoreTab(tab);
+    const coreTab = await getCoreTab(tab);
     const resources: Resource[] = [];
 
     const idsSeen = new Set<number>();
@@ -96,10 +97,7 @@ export default class Resource {
       let foundResources: IResourceMeta[] = [];
 
       try {
-        const waitForResourcePromise = coreTab.waitForResource(
-          resourceFilter,
-          resourceOptions,
-        );
+        const waitForResourcePromise = coreTab.waitForResource(resourceFilter, resourceOptions);
         foundResources = await timer.waitForPromise(
           waitForResourcePromise,
           'Timeout waiting for Resource(s)',
@@ -118,7 +116,7 @@ export default class Resource {
         if (idsSeen.has(resourceMeta.id)) continue;
         idsSeen.add(resourceMeta.id);
 
-        const resource = createResource(resourceMeta, coreTab);
+        const resource = createResource(resourceMeta, Promise.resolve(coreTab));
 
         if (filter.filterFn) {
           if (filter.filterFn(resource, done)) {
@@ -141,10 +139,7 @@ export default class Resource {
   }
 }
 
-export function createResource(
-  resourceMeta: IResourceMeta,
-  coreTab: CoreTab,
-) {
+export function createResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>) {
   if (resourceMeta.type === 'Websocket') {
     return createWebsocketResource(resourceMeta, coreTab);
   }

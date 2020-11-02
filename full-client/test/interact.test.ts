@@ -8,7 +8,7 @@ import SecretAgent from '../index';
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxActiveSessionCount = 3;
+  GlobalPool.maxConcurrentSessionsCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -22,21 +22,21 @@ describe('basic Interact tests', () => {
     const httpServer = await Helpers.runHttpServer({ onPost });
     const url = httpServer.url;
 
-    const browser = await SecretAgent.createBrowser();
-    Helpers.needsClosing.push(browser);
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
 
-    await browser.goto(`${url}page1`);
-    await browser.document.querySelector('#input').focus();
-    await browser.waitForMillis(50);
-    await browser.interact({ type: text });
-    await browser.waitForMillis(20);
-    await browser.click(browser.document.querySelector('#submit-button'));
-    await browser.waitForLocation('change');
-    const html = await browser.document.documentElement.outerHTML;
+    await agent.goto(`${url}page1`);
+    await agent.document.querySelector('#input').focus();
+    await agent.waitForMillis(50);
+    await agent.interact({ type: text });
+    await agent.waitForMillis(20);
+    await agent.click(agent.document.querySelector('#submit-button'));
+    await agent.waitForLocation('change');
+    const html = await agent.document.documentElement.outerHTML;
     expect(html).toBe(`<html><head></head><body>${text}</body></html>`);
     expect(onPost).toHaveBeenCalledTimes(1);
 
-    await browser.close();
+    await agent.close();
     await httpServer.close();
   }, 20e3);
 
@@ -46,23 +46,23 @@ describe('basic Interact tests', () => {
         response.setHeader('Set-Cookie', 'ulixee=test1');
       },
     });
-    expect(GlobalPool.maxActiveSessionCount).toBe(3);
+    expect(GlobalPool.maxConcurrentSessionsCount).toBe(3);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
-    const browser1 = await SecretAgent.createBrowser();
+    const browser1 = await new SecretAgent();
     Helpers.needsClosing.push(browser1);
     // #1
     await browser1.goto(httpServer.url);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
-    const browser2 = await SecretAgent.createBrowser();
+    const browser2 = await new SecretAgent();
     Helpers.needsClosing.push(browser2);
 
     // #2
     await browser2.goto(httpServer.url);
     expect(GlobalPool.activeSessionCount).toBe(2);
 
-    const browser3 = await SecretAgent.createBrowser();
+    const browser3 = await new SecretAgent();
     Helpers.needsClosing.push(browser3);
 
     // #3
@@ -70,7 +70,7 @@ describe('basic Interact tests', () => {
     expect(GlobalPool.activeSessionCount).toBe(3);
 
     // #4
-    const browser4Promise = SecretAgent.createBrowser();
+    const browser4Promise = new SecretAgent();
     expect(GlobalPool.activeSessionCount).toBe(3);
     await browser1.close();
     const browser4 = await browser4Promise;
@@ -88,7 +88,7 @@ describe('basic Interact tests', () => {
   }, 15e3);
 
   it('should clean up cookies between runs', async () => {
-    const browser1 = await SecretAgent.createBrowser();
+    const agent1 = await new SecretAgent();
     let cookieValue = 'ulixee=test1';
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
@@ -96,12 +96,12 @@ describe('basic Interact tests', () => {
       },
     });
 
-    Helpers.needsClosing.push(browser1);
+    Helpers.needsClosing.push(agent1);
     {
       const url = httpServer.url;
-      await browser1.goto(url);
+      await agent1.goto(url);
 
-      const cookies = await browser1.cookies;
+      const cookies = await agent1.cookies;
       expect(cookies[0].name).toBe('ulixee');
       expect(cookies[0].value).toBe('test1');
     }
@@ -109,9 +109,9 @@ describe('basic Interact tests', () => {
     {
       cookieValue = 'ulixee2=test2';
       const url = httpServer.url;
-      await browser1.goto(url);
+      await agent1.goto(url);
 
-      const cookies = await browser1.cookies;
+      const cookies = await agent1.cookies;
       expect(cookies).toHaveLength(2);
       expect(cookies.find(x => x.name === 'ulixee').value).toBe('test1');
       expect(cookies.find(x => x.name === 'ulixee2').value).toBe('test2');
@@ -120,20 +120,20 @@ describe('basic Interact tests', () => {
     {
       cookieValue = 'ulixee3=test3';
       // should be able to get a second agent out of the pool
-      const browser2 = await SecretAgent.createBrowser();
-      Helpers.needsClosing.push(browser2);
+      const agent2 = await new SecretAgent();
+      Helpers.needsClosing.push(agent2);
       const url = httpServer.url;
-      await browser2.goto(url);
+      await agent2.goto(url);
 
-      const cookies = await browser2.cookies;
+      const cookies = await agent2.cookies;
       expect(cookies).toHaveLength(1);
       expect(cookies[0].name).toBe('ulixee3');
       expect(cookies[0].value).toBe('test3');
 
-      await browser2.close();
+      await agent2.close();
     }
 
-    await browser1.close();
+    await agent1.close();
   }, 20e3);
 
   it('should be able to combine a waitForElementVisible and a click', async () => {
@@ -150,17 +150,17 @@ describe('basic Interact tests', () => {
       `;
     });
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const browser = await SecretAgent.createBrowser();
-    Helpers.needsClosing.push(browser);
-    await browser.goto(`${koaServer.baseUrl}/waitTest`);
-    await browser.waitForAllContentLoaded();
-    const readyLink = browser.document.querySelector('a.ready');
-    await browser.interact({ click: readyLink, waitForElementVisible: readyLink });
-    await browser.waitForLocation('change');
-    const finalUrl = await browser.url;
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${koaServer.baseUrl}/waitTest`);
+    await agent.waitForAllContentLoaded();
+    const readyLink = agent.document.querySelector('a.ready');
+    await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
+    await agent.waitForLocation('change');
+    const finalUrl = await agent.url;
     expect(finalUrl).toBe(`${koaServer.baseUrl}/finish`);
 
-    await browser.close();
+    await agent.close();
   });
 
   it('should be able to type various combinations of characters', async () => {
@@ -171,18 +171,18 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const browser = await SecretAgent.createBrowser();
-    Helpers.needsClosing.push(browser);
-    await browser.goto(`${koaServer.baseUrl}/keys`);
-    await browser.waitForAllContentLoaded();
-    const textarea = browser.document.querySelector('textarea');
-    await browser.click(textarea);
-    await browser.type('Test!');
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${koaServer.baseUrl}/keys`);
+    await agent.waitForAllContentLoaded();
+    const textarea = agent.document.querySelector('textarea');
+    await agent.click(textarea);
+    await agent.type('Test!');
     expect(await textarea.value).toBe('Test!');
-    await browser.type(KeyboardKeys.Backspace);
+    await agent.type(KeyboardKeys.Backspace);
     expect(await textarea.value).toBe('Test');
 
-    await browser.interact(
+    await agent.interact(
       { [Command.keyDown]: KeyboardKeys.Shift },
       { [Command.keyPress]: KeyboardKeys.ArrowLeft },
       { [Command.keyPress]: KeyboardKeys.ArrowLeft },
@@ -192,6 +192,6 @@ describe('basic Interact tests', () => {
     );
 
     expect(await textarea.value).toBe('T');
-    await browser.close();
+    await agent.close();
   });
 });

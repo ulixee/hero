@@ -57,8 +57,8 @@ export default class CoreClient {
     await this.commandQueue.run('logUnhandledError', error);
   }
 
-  public async start(options?: IConfigureOptions): Promise<void> {
-    await this.commandQueue.run('start', options);
+  public async prewarm(options?: IConfigureOptions): Promise<void> {
+    await this.commandQueue.run('prewarm', options);
   }
 
   public pipeIncomingEvent(meta: ISessionMeta, listenerId: string, eventData: any): void {

@@ -253,7 +253,7 @@ export default class Core implements ICore {
 
   /////// STATIC /////////////////////////////////////
 
-  public static async start(options?: IConfigureOptions) {
+  public static async prewarm(options?: IConfigureOptions) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       this.wasManuallyStarted = true;
@@ -270,8 +270,8 @@ export default class Core implements ICore {
   }
 
   public static async configure(options: IConfigureOptions) {
-    const { maxActiveSessionCount, localProxyPortStart, sessionsDir, activeEmulatorIds } = options;
-    if (maxActiveSessionCount) GlobalPool.maxActiveSessionCount = options.maxActiveSessionCount;
+    const { maxConcurrentSessionsCount, localProxyPortStart, sessionsDir, activeEmulatorIds } = options;
+    if (maxConcurrentSessionsCount) GlobalPool.maxConcurrentSessionsCount = options.maxConcurrentSessionsCount;
     if (localProxyPortStart) GlobalPool.localProxyPortStart = options.localProxyPortStart;
     if (sessionsDir) GlobalPool.sessionsDir = options.sessionsDir;
     if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);

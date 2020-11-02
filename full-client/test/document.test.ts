@@ -4,7 +4,7 @@ import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -12,10 +12,10 @@ afterEach(Helpers.afterEach);
 
 describe('basic Document tests', () => {
   it('runs goto', async () => {
-    const browser = await openBrowser('/');
-    const url = await browser.document.location.host;
-    const html = await browser.document.body.outerHTML;
-    const linkText = await browser.document.querySelector('a').textContent;
+    const agent = await openBrowser('/');
+    const url = await agent.document.location.host;
+    const html = await agent.document.body.outerHTML;
+    const linkText = await agent.document.querySelector('a').textContent;
     expect(html).toMatch('Example Domain');
     expect(linkText).toBe('More information...');
     expect(url).toBe(koaServer.baseHost);
@@ -31,14 +31,14 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/page`);
-    const links = await browser.document.querySelectorAll('a');
+    const agent = await openBrowser(`/page`);
+    const links = await agent.document.querySelectorAll('a');
 
     for (const link of links) {
-      await browser.interact({ click: link, waitForElementVisible: link });
-      await browser.waitForLocation('change');
+      await agent.interact({ click: link, waitForElementVisible: link });
+      await agent.waitForLocation('change');
     }
-    const finalUrl = await browser.url;
+    const finalUrl = await agent.url;
     expect(finalUrl).toBe(`${koaServer.baseUrl}/page#page3`);
   });
 
@@ -57,12 +57,12 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/refresh`);
-    const links = browser.document.querySelectorAll('a');
+    const agent = await openBrowser(`/refresh`);
+    const links = agent.document.querySelectorAll('a');
     const links1 = await links;
     expect([...links1]).toHaveLength(1);
     expect([...(await links1.values())]).toHaveLength(1);
-    await browser.click([...(await links1.values())][0]);
+    await agent.click([...(await links1.values())][0]);
 
     expect([...(await links)]).toHaveLength(2);
     expect([...(await links1)]).toHaveLength(1);
@@ -87,13 +87,13 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/reiterate`);
-    const ul = await browser.document.querySelector('ul');
+    const agent = await openBrowser(`/reiterate`);
+    const ul = await agent.document.querySelector('ul');
     const lis = await ul.getElementsByTagName('li');
     expect(Array.from(lis)).toHaveLength(3);
 
-    const link = await browser.document.querySelector('a');
-    await browser.click(link);
+    const link = await agent.document.querySelector('a');
+    await agent.click(link);
     try {
       // should throw
       for (const child of lis) {
@@ -121,16 +121,16 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser('/refresh-element');
-    await browser.waitForAllContentLoaded();
-    const lastChild = await browser.document.body.firstElementChild;
+    const agent = await openBrowser('/refresh-element');
+    await agent.waitForAllContentLoaded();
+    const lastChild = await agent.document.body.firstElementChild;
     expect(await lastChild.getAttribute('id')).toBe('first');
-    await browser.click(lastChild);
+    await agent.click(lastChild);
 
     const refreshedChild = await lastChild;
     expect(await refreshedChild.getAttribute('id')).toBe('first');
 
-    const updatedChild = await browser.document.body.firstElementChild;
+    const updatedChild = await agent.document.body.firstElementChild;
     expect(await updatedChild.getAttribute('id')).toBe('number2');
   });
 
@@ -146,9 +146,9 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/index`);
+    const agent = await openBrowser(`/index`);
 
-    const element2Text = await browser.document.querySelectorAll('li')[1].textContent;
+    const element2Text = await agent.document.querySelectorAll('li')[1].textContent;
     expect(element2Text).toBe('2');
   });
 
@@ -166,11 +166,11 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/xpath`);
+    const agent = await openBrowser(`/xpath`);
 
-    const headings = await browser.document.evaluate(
+    const headings = await agent.document.evaluate(
       '/html/body//h2',
-      browser.document,
+      agent.document,
       null,
       XPathResult.ANY_TYPE,
       null,
@@ -203,27 +203,27 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const browser = await openBrowser(`/isVisible`);
-    const { document } = browser;
-    await expect(browser.isElementVisible(document.querySelector('#elem-1'))).resolves.toBe(true);
+    const agent = await openBrowser(`/isVisible`);
+    const { document } = agent;
+    await expect(agent.isElementVisible(document.querySelector('#elem-1'))).resolves.toBe(true);
     // visibility
-    await expect(browser.isElementVisible(document.querySelector('#elem-2'))).resolves.toBe(false);
-    await expect(browser.isElementVisible(document.querySelector('#elem-3'))).resolves.toBe(true);
+    await expect(agent.isElementVisible(document.querySelector('#elem-2'))).resolves.toBe(false);
+    await expect(agent.isElementVisible(document.querySelector('#elem-3'))).resolves.toBe(true);
     // layout
-    await expect(browser.isElementVisible(document.querySelector('#elem-4'))).resolves.toBe(false);
+    await expect(agent.isElementVisible(document.querySelector('#elem-4'))).resolves.toBe(false);
     // opacity
-    await expect(browser.isElementVisible(document.querySelector('#elem-5'))).resolves.toBe(false);
-    await expect(browser.isElementVisible(document.querySelector('#elem-6'))).resolves.toBe(true);
+    await expect(agent.isElementVisible(document.querySelector('#elem-5'))).resolves.toBe(false);
+    await expect(agent.isElementVisible(document.querySelector('#elem-6'))).resolves.toBe(true);
     // overlay
-    await expect(browser.isElementVisible(document.querySelector('#elem-7'))).resolves.toBe(true);
-    await expect(browser.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
+    await expect(agent.isElementVisible(document.querySelector('#elem-7'))).resolves.toBe(true);
+    await expect(agent.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
   });
 });
 
 async function openBrowser(path: string) {
-  const browser = await SecretAgent.createBrowser();
-  Helpers.needsClosing.push(browser);
-  await browser.goto(`${koaServer.baseUrl}${path}`);
-  await browser.waitForAllContentLoaded();
-  return browser;
+  const agent = new SecretAgent();
+  Helpers.needsClosing.push(agent);
+  await agent.goto(`${koaServer.baseUrl}${path}`);
+  await agent.waitForAllContentLoaded();
+  return agent;
 }

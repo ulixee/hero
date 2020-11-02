@@ -1,6 +1,6 @@
 # Basic Concepts
 
-## Each Browser Instance Has a Unique User
+## Each SecretAgent Instance Has a Unique User
 
 - user-agent
 - ip address
@@ -24,8 +24,8 @@ Here's how you would do it with SecretAgent:
 ```js
 const SecretAgent = require('secret-agent');
 
-const browser = await SecretAgent.createBrowser();
-const { document } = browser;
+const agent = new SecretAgent();
+const { document } = agent;
 
 const elems = document.querySelectorAll('ul');
 for (const elem of await elems) {

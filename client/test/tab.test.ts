@@ -14,8 +14,8 @@ describe('createBrowser tests', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    await browser.close();
+    const agent = await new SecretAgent();
+    await agent.close();
     await SecretAgent.shutdown();
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
@@ -24,6 +24,6 @@ describe('createBrowser tests', () => {
       [expect.any(Object), 'close'],
       [null, 'disconnect'],
     ]);
-    expect(browser.sessionId).toBe('session-id');
+    expect(await agent.sessionId).toBe('session-id');
   });
 });

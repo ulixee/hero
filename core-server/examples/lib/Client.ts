@@ -1,10 +1,11 @@
-import RemoteClient, { ISecretAgent } from '@secret-agent/remote-client';
-import JsonSocket from 'json-socket';
-import Net from 'net';
+import RemoteClient from "@secret-agent/remote-client";
+import JsonSocket from "json-socket";
+import Net from "net";
+import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgent";
 
 export default class SecretAgentSocketClient {
   public remoteClient: RemoteClient;
-  public SecretAgent: ISecretAgent; // tslint:disable-line:variable-name
+  public SecretAgent: ISecretAgentClass;
   private readonly port: number;
   private netSocket: Net.Socket;
   private isOpen = false;

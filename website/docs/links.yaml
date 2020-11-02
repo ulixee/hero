@@ -8,9 +8,7 @@
 - title: Basic Interfaces
   items:
     - SecretAgent
-    - Browser
     - Tab
-    - User
     - Interactions
     - AwaitedDOM
     #- DetachedDOM

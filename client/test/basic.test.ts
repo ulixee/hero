@@ -8,13 +8,13 @@ describe('basic SecretAgent tests', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
     });
 
-    await SecretAgent.start();
+    await SecretAgent.prewarm();
     await SecretAgent.configure({});
     await SecretAgent.shutdown();
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
     expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
-      [null, 'start'],
+      [null, 'prewarm'],
       [null, 'configure'],
       // no shutdown call if no browsers created
     ]);
@@ -32,7 +32,7 @@ describe('basic SecretAgent tests', () => {
       }
     });
 
-    await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
     await SecretAgent.shutdown();
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
