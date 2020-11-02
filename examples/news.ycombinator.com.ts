@@ -3,21 +3,21 @@ import SecretAgent from '@secret-agent/full-client';
 process.env.SA_SHOW_REPLAY = 'true';
 
 async function run() {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto('https://news.ycombinator.com/');
-  await browser.waitForAllContentLoaded();
+  const agent = await new SecretAgent();
+  await agent.goto('https://news.ycombinator.com/');
+  await agent.waitForAllContentLoaded();
 
   console.log('\n-- PRINTING location.href ---------');
-  console.log(await browser.url);
+  console.log(await agent.url);
 
   const results = [];
 
-  const stories = await browser.document.querySelectorAll('.athing');
+  const stories = await agent.document.querySelectorAll('.athing');
   let lastStory;
   for (const story of stories) {
-    await browser.waitForMillis(200);
+    await agent.waitForMillis(200);
     const extraElem = await story.nextElementSibling;
-    await browser.interact({
+    await agent.interact({
       move: story,
     });
 
@@ -65,13 +65,13 @@ async function run() {
   }
 
   if (lastStory) {
-    await browser.click(lastStory);
-    await browser.waitForLocation('change');
-    await browser.waitForElement(browser.document.querySelector('textarea'));
-    await browser.click(browser.document.querySelector('textarea'));
-    await browser.type('Hackernews!');
-    const comments = [...(await browser.document.querySelectorAll('.commtext'))];
-    await browser.interact({
+    await agent.click(lastStory);
+    await agent.waitForLocation('change');
+    await agent.waitForElement(agent.document.querySelector('textarea'));
+    await agent.click(agent.document.querySelector('textarea'));
+    await agent.type('Hackernews!');
+    const comments = [...(await agent.document.querySelectorAll('.commtext'))];
+    await agent.interact({
       move: comments[comments.length - 1],
     });
   }

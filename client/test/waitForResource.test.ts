@@ -20,10 +20,10 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({ url: '/test.js' });
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({ url: '/test.js' });
     expect(resources).toHaveLength(1);
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 
@@ -51,12 +51,12 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({ url: '/test2.js' });
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({ url: '/test2.js' });
     expect(resources).toHaveLength(1);
     expect(attempts).toBe(3);
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 
@@ -83,11 +83,11 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({ type: 'Xhr' });
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({ type: 'Xhr' });
     expect(resources).toHaveLength(2);
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 
@@ -114,11 +114,11 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({ url: '/test3.js' });
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({ url: '/test3.js' });
     expect(resources).toHaveLength(2);
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 
@@ -147,8 +147,8 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test1.js') {
           done();
@@ -159,7 +159,7 @@ describe('waitForResource', () => {
     expect(resources).toHaveLength(1);
     expect(resources[0].url).toBe('/test1.js');
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 
@@ -198,8 +198,8 @@ describe('waitForResource', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    const resources = await browser.waitForResource({
+    const agent = await new SecretAgent();
+    const resources = await agent.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test5.js') {
           done();
@@ -212,7 +212,7 @@ describe('waitForResource', () => {
     });
     expect(resources).toHaveLength(4);
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   });
 });

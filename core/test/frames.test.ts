@@ -7,7 +7,7 @@ import Core from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await Core.start();
+  await Core.prewarm();
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);

@@ -4,7 +4,7 @@ import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -13,27 +13,27 @@ afterEach(Helpers.afterEach);
 describe('basic Full Client tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(exampleUrl);
-    const url = await browser.document.location.host;
+    await agent.goto(exampleUrl);
+    const url = await agent.document.location.host;
     expect(url).toBe(koaServer.baseHost);
   });
 
   it('runs goto with no document loaded', async () => {
-    const browser = await SecretAgent.createBrowser();
-    const url = await browser.document.location.host;
+    const agent = await new SecretAgent();
+    const url = await agent.document.location.host;
     expect(url).toBe(null);
   });
 
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const browser = await SecretAgent.createBrowser({
+    const agent = await new SecretAgent({
       emulatorId: Chrome80.emulatorId,
       locale: 'en-US,en;q=0.9',
     });
 
-    const resource = await browser.goto(exampleUrl);
+    const resource = await agent.goto(exampleUrl);
 
     const { request, response } = resource;
     expect(await request.headers).toMatchObject({

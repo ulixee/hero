@@ -24,7 +24,7 @@ const getContentScript = `(() => {
 
 let koaServer;
 beforeAll(async () => {
-  await Core.start();
+  await Core.prewarm();
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/empty', ctx => {
     ctx.body = `<html></html>`;

@@ -1,7 +1,7 @@
-import CoreTab from '../lib/CoreTab';
-import Browser from '../lib/Browser';
+import CoreTab from "../lib/CoreTab";
+import { ISecretAgent } from "./ISecretAgent";
 
 export default interface IAwaitedOptions {
-  browser: Browser;
-  coreTab: CoreTab;
+  secretAgent: ISecretAgent;
+  coreTab: Promise<CoreTab>;
 }

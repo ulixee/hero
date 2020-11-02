@@ -8,7 +8,7 @@ import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 
@@ -57,17 +57,17 @@ describe('Websocket tests', () => {
   </script>
 </html>`;
     });
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(`${koaServer.baseUrl}/ws-test`);
+    await agent.goto(`${koaServer.baseUrl}/ws-test`);
 
-    await browser.waitForElement(browser.document.querySelector('h1'));
+    await agent.waitForElement(agent.document.querySelector('h1'));
     await serverMessagePromise.promise;
     expect(receivedMessages).toBe(20);
 
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
 
-    const resources = await browser.waitForResource({ type: 'Websocket' });
+    const resources = await agent.waitForResource({ type: 'Websocket' });
     expect(resources).toHaveLength(1);
 
     const [wsResource] = resources as WebsocketResource[];
@@ -83,6 +83,6 @@ describe('Websocket tests', () => {
     await broadcast.promise;
     expect(messagesCtr).toBe(41);
 
-    await browser.close();
+    await agent.close();
   });
 });

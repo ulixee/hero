@@ -1,14 +1,14 @@
 import SecretAgent from '@secret-agent/full-client';
 
 async function run() {
-  const browser = await SecretAgent.createBrowser({ sessionName: 'example.org' });
-  await browser.goto('https://example.org/');
-  await browser.waitForAllContentLoaded();
+  const agent = await new SecretAgent({ sessionName: 'example.org' });
+  await agent.goto('https://example.org/');
+  await agent.waitForAllContentLoaded();
 
   console.log('\n-- PRINTING location.href ---------');
-  console.log(await browser.url);
+  console.log(await agent.url);
 
-  const html = await browser.document.documentElement.outerHTML;
+  const html = await agent.document.documentElement.outerHTML;
   console.log('-- PRINTING outerHTML ---------------');
   console.log(html);
 

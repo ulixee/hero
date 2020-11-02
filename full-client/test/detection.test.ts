@@ -8,7 +8,7 @@ const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 
 let koaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
 
   koaServer.get('/fpCollect.min.js', ctx => {
@@ -76,8 +76,8 @@ test('should pass FpScanner', async () => {
     });
   });
 
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}/collect`);
+  const agent = await new SecretAgent();
+  await agent.goto(`${koaServer.baseUrl}/collect`);
 
   const data = await analyzePromise;
   const results = fpscanner.analyseFingerprint(data);
@@ -92,9 +92,11 @@ test('should pass FpScanner', async () => {
 }, 30e3);
 
 test('should not be denied for notifications, but prompt for permissions', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
+  const agent = await new SecretAgent();
+  await agent.goto(`${koaServer.baseUrl}`);
+  const activeTab = await agent.activeTab;
+  const tabid = await activeTab.tabId;
+  const core = Core.byTabId[tabid];
   // @ts-ignore
   const page = core.tab.puppetPage;
   const permissions = await page.evaluate<any>(`(async () => {
@@ -113,9 +115,10 @@ test('should not be denied for notifications, but prompt for permissions', async
 });
 
 test('should not leave markers on permissions.query.toString ', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
+  const agent = await new SecretAgent();
+  const tabid = await agent.activeTab.tabId;
+  await agent.goto(`${koaServer.baseUrl}`);
+  const core = Core.byTabId[tabid];
   // @ts-ignore
   const page = core.tab.puppetPage;
   const perms: any = await page.evaluate(`(() => {
@@ -138,9 +141,10 @@ test('should not leave markers on permissions.query.toString ', async () => {
 });
 
 test('should not recurse the toString function', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
+  const agent = await new SecretAgent();
+  await agent.goto(`${koaServer.baseUrl}`);
+  const tabid = await agent.activeTab.tabId;
+  const core = Core.byTabId[tabid];
   // @ts-ignore
   const page = core.tab.puppetPage;
   const isHeadless = await page.evaluate(`(() => {
@@ -158,9 +162,10 @@ test('should not recurse the toString function', async () => {
 
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(koaServer.baseUrl);
-  const core = Core.byTabId[browser.activeTab.tabId];
+  const agent = await new SecretAgent();
+  const tabid = await agent.activeTab.tabId;
+  await agent.goto(koaServer.baseUrl);
+  const core = Core.byTabId[tabid];
   // @ts-ignore
   const page = core.tab.puppetPage;
   await page.evaluate(`(() => {
@@ -180,7 +185,7 @@ document.querySelector = (function (orig) {
 });
 
 test('should not leave stack trace markers when calling in page functions', async () => {
-  const browser = await SecretAgent.createBrowser();
+  const agent = await new SecretAgent();
   koaServer.get('/marker', ctx => {
     ctx.body = `
 <body>
@@ -200,9 +205,10 @@ test('should not leave stack trace markers when calling in page functions', asyn
     `;
   });
   const url = `${koaServer.baseUrl}/marker`;
-  await browser.goto(url);
-  await browser.waitForAllContentLoaded();
-  const core = Core.byTabId[browser.activeTab.tabId];
+  await agent.goto(url);
+  await agent.waitForAllContentLoaded();
+  const tabid = await agent.activeTab.tabId;
+  const core = Core.byTabId[tabid];
 
   const pageFunction = await core.getJsValue('errorCheck()');
   expect(pageFunction.value).toBe(`Error: This is from inside\n    at errorCheck (${url}:5:17)`);

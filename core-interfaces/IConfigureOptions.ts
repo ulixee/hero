@@ -1,5 +1,5 @@
 export default interface IConfigureOptions {
-  maxActiveSessionCount?: number;
+  maxConcurrentSessionsCount?: number;
   localProxyPortStart?: number;
   replayServerPort?: number;
   sessionsDir?: string;

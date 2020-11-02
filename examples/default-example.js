@@ -1,7 +1,7 @@
 const SecretAgent = require('@secret-agent/full-client');
 
 (async () => {
-  const browser = await SecretAgent.createBrowser();
+  const agent = await new SecretAgent();
   await browser.goto('https://example.org');
   await browser.waitForAllContentLoaded();
   const title = await browser.document.title;

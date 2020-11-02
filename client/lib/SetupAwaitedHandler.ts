@@ -26,8 +26,9 @@ export async function getProperty<T, TClass>(
   await awaitRemoteInitializer(state);
   const awaitedPath = state.awaitedPath as AwaitedPath;
   const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const tab = await coreTab;
   const finalPath = awaitedPath.addProperty(name).toJSON();
-  const result = await execJsPath<TClass, T>(self, coreTab, instance, finalPath);
+  const result = await execJsPath<TClass, T>(self, tab, instance, finalPath);
 
   return cleanResult(self, instance, result);
 }
@@ -52,8 +53,9 @@ export async function runMethod<T, TClass>(
   const state = self.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
   const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const tab = await coreTab;
   const finalPath = awaitedPath.addMethod(name, ...args).toJSON();
-  const result = await execJsPath<TClass, T>(self, coreTab, instance, finalPath);
+  const result = await execJsPath<TClass, T>(self, tab, instance, finalPath);
   return cleanResult(self, instance, result);
 }
 
@@ -66,8 +68,9 @@ export async function loadState<TClass>(
   const state = self.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
   const { coreTab } = state.awaitedOptions as IAwaitedOptions;
+  const tab = await coreTab;
   const finalPath = awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON();
-  const result = await execJsPath<TClass, null>(self, coreTab, instance, finalPath);
+  const result = await execJsPath<TClass, null>(self, tab, instance, finalPath);
 
   return result?.attachedState as IAttachedState;
 }

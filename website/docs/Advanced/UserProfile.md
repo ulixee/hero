@@ -5,27 +5,27 @@
 UserProfiles enable you to capture the full browser state of a user after performing a series of activities. You might use this to:
  - resume the state of a "logged-in" user
  - accumulate "usage" behavior for an ongoing profile
- - share browser profiles between browser instances running on different machines
+ - share browser profiles between SecretAgent instances running on different machines
 
 ## Constructor
 
-This "state" is not instantiated, but retrieved from a Browser: [browser.user.exportProfile()](../basic-interfaces/user#export-profile).
+This "state" is not instantiated, but retrieved from a SecretAgent instance: [agent.exportUserProfile()](../basic-interfaces/secret-agent#export-profile).
 
 State is stored for all domains (origins) that are loaded into a window at the time of export. The exported state is JSON with additional type information for IndexedDB ([typeson](https://github.com/dfahlander/typeson).
 
 When you restore a UserProfile, Secret Agent will restore the Cookies, Dom Storage and IndexedDB records for all domains that are included in the state.
 
 ```js
-const browser = await SecretAgent.createBrowser();
-await browser.goto('https://dataliberationfoundation.org');
-const theStoredProfile = await browser.user.exportProfile();
+const agent = new SecretAgent();
+await agent.goto('https://dataliberationfoundation.org');
+const theStoredProfile = await agent.exportUserProfile();
 
 // ... some time later...
 
 // This browser will be instantiated with all the cookies
 // dom storage, etc from the prior session.
 
-const browserWithProfile = await SecretAgent.createBrowser({
+const agentWithProfile = await new SecretAgent({
   userProfile: theStoredProfile,
 });
 ```

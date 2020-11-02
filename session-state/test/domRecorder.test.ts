@@ -7,7 +7,7 @@ import DomChangesTable from '../models/DomChangesTable';
 
 let koaServer;
 beforeAll(async () => {
-  await Core.start();
+  await Core.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);

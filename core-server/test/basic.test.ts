@@ -20,17 +20,17 @@ describe('basic browser remote tests', () => {
     coreConnection.pipeOutgoing(p => remoteClient.pipeIncoming(p));
     remoteClient.pipeOutgoing(p => coreConnection.pipeIncoming(p));
 
-    const browser = await SecretAgent.createBrowser();
-    const sessionId = browser.sessionId;
+    const agent = await new SecretAgent();
+    const sessionId = await agent.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await browser.goto(url);
+    await agent.goto(url);
 
-    const html = await browser.document.documentElement.outerHTML;
+    const html = await agent.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
   }, 10e3);
 });

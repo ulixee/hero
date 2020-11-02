@@ -15,7 +15,7 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreTab: CoreTab;
+  coreTab: Promise<CoreTab>;
   awaitedPath: AwaitedPath;
 }
 
@@ -66,7 +66,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType, IS
   }
 }
 
-export function createWebsocketResource(resourceMeta: IResourceMeta, coreTab: CoreTab) {
+export function createWebsocketResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>) {
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);
   const response = createResourceResponse(coreTab, resourceMeta.id);

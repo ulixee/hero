@@ -36,13 +36,13 @@ We've included two very simple humanoid plugins to get you started. They are pre
 
 Note: Use the `skipper` plugin when you want to turn OFF humanoid functionality. It disables all humanoid affects allowing you to run mouse and keyboard commands as if there were no human translation layer.
 
-To use a specific emulator, pass your chosen ID into `createBrowser`:
+To use a specific emulator, pass your chosen ID into `new SecretAgent({ humanoidId... )`:
 
 ```js
 const SecretAgent = 'secret-agent';
 
 (async () => {
-  const browser = await SecretAgent.createBrowser({ humanoidId: 'basic' });
+  const agent = await new SecretAgent({ humanoidId: 'basic' });
 })();
 ````
 

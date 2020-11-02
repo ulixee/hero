@@ -34,10 +34,10 @@ describe('document tests', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
-    Helpers.needsClosing.push(browser);
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
 
-    const element = browser.document.querySelector('h1');
+    const element = agent.document.querySelector('h1');
     const jsPath = getElementState(element).awaitedPath.toJSON();
     expect(jsPath[0]).toBe('document');
     expect(jsPath[1]).toMatchObject(['querySelector', 'h1']);
@@ -45,7 +45,7 @@ describe('document tests', () => {
     const superElement = await element;
     await superElement.tagName;
 
-    await browser.close();
+    await agent.close();
     await SecretAgent.shutdown();
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
@@ -56,6 +56,6 @@ describe('document tests', () => {
       [expect.any(Object), 'close', []],
       [null, 'disconnect', [['tab-id'], undefined]],
     ]);
-    expect(browser.sessionId).toBe('session-id');
+    expect(await agent.sessionId).toBe('session-id');
   });
 });

@@ -3,7 +3,7 @@ import SecretAgent from '../index';
 
 let koaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
+  await SecretAgent.prewarm();
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/test', ctx => {
     ctx.body = `<html>
@@ -30,30 +30,30 @@ afterEach(Helpers.afterEach);
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
 
-    await browser.goto(exampleUrl);
-    const elem = browser.document.querySelector('a');
-    await browser.click(elem);
+    await agent.goto(exampleUrl);
+    const elem = agent.document.querySelector('a');
+    await agent.click(elem);
 
-    const resources = await browser.waitForResource({ type: 'Fetch' });
+    const resources = await agent.waitForResource({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
   });
 
   it('waits for a resource loaded since a previous command id', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const browser = await SecretAgent.createBrowser();
+    const agent = new SecretAgent();
 
-    await browser.goto(exampleUrl);
-    let lastCommandId;
+    await agent.goto(exampleUrl);
+    let lastCommandId: number;
     for (let i = 0; i <= 4; i += 1) {
-      const elem = browser.document.querySelector('a');
-      await browser.click(elem);
-      const resources = await browser.waitForResource(
+      const elem = agent.document.querySelector('a');
+      await agent.click(elem);
+      const resources = await agent.waitForResource(
         { type: 'Fetch' },
         { sinceCommandId: lastCommandId },
       );
-      lastCommandId = browser.lastCommandId;
+      lastCommandId = await agent.lastCommandId;
       expect(resources).toHaveLength(1);
       expect(resources[0].url).toContain(`counter=${i}`);
     }

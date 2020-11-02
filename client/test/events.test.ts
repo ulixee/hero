@@ -21,12 +21,12 @@ describe('events', () => {
     });
 
     let isClosed = false;
-    const browser = await SecretAgent.createBrowser();
-    await browser.on('close', () => {
+    const agent = await new SecretAgent();
+    await agent.on('close', () => {
       isClosed = true;
     });
 
-    await browser.close();
+    await agent.close();
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', []);
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
@@ -58,14 +58,14 @@ describe('events', () => {
       }
     });
 
-    const browser = await SecretAgent.createBrowser();
+    const agent = await new SecretAgent();
     const onResourceFn = resource => {
       expect(resource).toBeInstanceOf(Resource);
       eventCount += 1;
     };
 
     let eventCount = 0;
-    await browser.activeTab.on('resource', onResourceFn);
+    await agent.activeTab.on('resource', onResourceFn);
 
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
@@ -79,7 +79,7 @@ describe('events', () => {
     ]);
     expect(eventCount).toBe(2);
 
-    await browser.activeTab.off('resource', onResourceFn);
+    await agent.activeTab.off('resource', onResourceFn);
     coreClient.pipeIncomingEvent(sessionMeta, 'listener-id', [
       {
         id: 3,

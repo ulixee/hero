@@ -1,9 +1,9 @@
 # Mouse
 
-Every User/BrowserInstance has its own Mouse instance, accessible through user.mouse or user.mouse. It uses an emulation layer, called [Huminoids](../advanced-functionality/humanoids), to create realistic-looking, human-like interactions.
+Every SecretAgent instance has its own Mouse instance, accessible through user.mouse or user.mouse. It uses an emulation layer, called [Huminoids](../advanced-functionality/humanoids), to create realistic-looking, human-like interactions.
 
 ## Constructor
-An instance is automatically created during [SecretAgent.createBrowser](./secret-agent#createBrowser). You cannot directly create one.
+An instance is automatically created during [new SecretAgent()](./secret-agent#constructor). You cannot directly create one.
 
 ## Methods
 
@@ -44,7 +44,7 @@ Every command must include a `MousePosition` value specifying where the interact
 For example, here's how you would hover over a link:
 
 ```js
-const aElem = browser.document.querySelector('a.more-information');
+const aElem = agent.document.querySelector('a.more-information');
 user.mouse.interact({ move: aElem });
 `````
 
@@ -144,8 +144,8 @@ user.mouse.interact({ down: [55, 42] }, 'up', { doubleclick: [5, 5] });
 Mouse Interactions allow you to create complex patterns with a minimal of effort:
 
 ```js
-const browser = await SecretAgent.createBrowser();
-const { user, document } = browser;
+const agent = new SecretAgent();
+const { user, document } = agent;
 await user.goto('https://example.org');
 
 const title = document.querySelector('.title');

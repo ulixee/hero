@@ -31,7 +31,7 @@ const RemoteClient = require('@secret-agent/remote-client');
   remoteClient.pipeOutgoing(payload => netConnection.write(JSON.stringify(payload)));
 
   // scrape
-  const browser = SecretAgent.createBrowser();
-  browser.goto('https://example.org');
+  const agent = await new SecretAgent();
+  await agent.goto('https://example.org');
 })();
 ```

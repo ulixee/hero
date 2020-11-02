@@ -52,11 +52,11 @@ For example, here's how you might extract the title and intro paragraph from exa
 const SecretAgent = require('secret-agent');
 
 (async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto('https://example.org');
-  const title = await browser.document.title;
-  const intro = await browser.document.querySelector('p').textContent;
-  await browser.close();
+  const agent = new SecretAgent();
+  await agent.goto('https://example.org');
+  const title = await agent.document.title;
+  const intro = await agent.document.querySelector('p').textContent;
+  await agent.close();
 
   console.log('Retrieved from https://example.org', {
     title,

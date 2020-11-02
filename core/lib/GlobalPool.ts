@@ -13,14 +13,14 @@ const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
-  public static maxActiveSessionCount = 10;
+  public static maxConcurrentSessionsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
 
   public static get hasAvailability() {
-    return this.activeSessionCount < GlobalPool.maxActiveSessionCount;
+    return this.activeSessionCount < GlobalPool.maxConcurrentSessionsCount;
   }
 
   private static _activeSessionCount = 0;
@@ -51,7 +51,7 @@ export default class GlobalPool {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
-      maxActiveSessionCount: this.maxActiveSessionCount,
+      maxConcurrentSessionsCount: this.maxConcurrentSessionsCount,
     });
 
     if (!this.hasAvailability) {

@@ -48,7 +48,7 @@ We've included a few emulator plugins to get you started. These plugins are pre-
 | Chrome 80   | @secret-agent/emulate-chrome-80   | chrome-80   |
 | Chrome 83   | @secret-agent/emulate-chrome-83   | chrome-83   |
 
-Note: You can use the full NPM Package Name or Short ID to reference the emulator you want when calling `SecretAgent.createBrowser`.
+Note: You can use the full NPM Package Name or Short ID to reference the emulator you want when calling `new SecretAgent()`.
 
 For example, here's how to use chrome-80:
 
@@ -56,7 +56,7 @@ For example, here's how to use chrome-80:
 const SecretAgent = 'secret-agent';
 
 (async () => {
-  const browser = await SecretAgent.createBrowser({ emulatorId: 'chrome-80' });
+  const agent = await new SecretAgent({ emulatorId: 'chrome-80' });
 })();
 ```
 

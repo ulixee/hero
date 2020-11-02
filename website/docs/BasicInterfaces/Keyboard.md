@@ -19,7 +19,7 @@ await user.keyboard.press('Backspace');
 ```
 
 ## Constructor
-An instance is automatically created during [SecretAgent.createBrowser](./secret-agent#createBrowser). You cannot directly create one.
+An instance is automatically created during [new SecretAgent()](./secret-agent#constructor). You cannot directly create one.
 
 ## Methods
 

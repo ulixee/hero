@@ -45,7 +45,7 @@ export default class CoreTab {
 
     if (!this.eventHeap.hasEventInterceptors('resource')) {
       this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
-        return [createResource(resource, this)];
+        return [createResource(resource, Promise.resolve(this))];
       });
     }
   }
@@ -103,7 +103,7 @@ export default class CoreTab {
   }
 
   public async getAllCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run('getAllCookies');
+    return await this.commandQueue.run('getUserCookies');
   }
 
   public async isElementVisible(jsPath: IJsPath): Promise<boolean> {

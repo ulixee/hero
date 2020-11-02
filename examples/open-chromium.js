@@ -4,7 +4,7 @@ process.env.SHOW_BROWSER = 'true';
 process.env.SA_REPLAY_DEBUG = '1';
 
 (async () => {
-  const browser = await SecretAgent.createBrowser();
+  const agent = await new SecretAgent();
 
   const url = `https://dataliberationfoundation.org/`;
   console.log('Opened Browser');

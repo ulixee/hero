@@ -10,7 +10,6 @@ import Request from 'awaited-dom/impl/official-klasses/Request';
 import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import Browser from './Browser';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -18,14 +17,15 @@ import WebsocketResource from './WebsocketResource';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
+import { ISecretAgent } from '../interfaces/ISecretAgent';
 
 const { getState, setState } = StateMachine<Tab, IState>();
-const browserState = StateMachine<Browser, { activeTab: Tab; tabs: Tab[] }>();
+const agentState = StateMachine<ISecretAgent, { activeTab: Tab; tabs: Tab[] }>();
 const awaitedPathState = StateMachine<any, { awaitedPath: AwaitedPath }>();
 
 export interface IState {
-  browser: Browser;
-  coreTab: CoreTab;
+  secretAgent: ISecretAgent;
+  coreTab: Promise<CoreTab>;
 }
 
 interface IEventType {
@@ -42,29 +42,29 @@ const propertyKeys: (keyof Tab)[] = [
 ];
 
 export default class Tab extends AwaitedEventTarget<IEventType, IState> {
-  constructor(browser: Browser, coreTab: CoreTab) {
+  constructor(secretAgent: ISecretAgent, coreTab: Promise<CoreTab>) {
     super();
     initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
-      browser,
+      secretAgent,
       coreTab,
     });
   }
 
-  public get tabId(): string {
-    return getCoreTab(this).tabId;
+  public get tabId(): Promise<string> {
+    return getCoreTab(this).then(x => x.tabId);
   }
 
-  public get lastCommandId(): number {
-    return getCoreTab(this).commandQueue.lastCommandId;
+  public get lastCommandId(): Promise<number> {
+    return getCoreTab(this).then(x => x.commandQueue.lastCommandId);
   }
 
   public get url(): Promise<string> {
-    return getCoreTab(this).getUrl();
+    return getCoreTab(this).then(x => x.getUrl());
   }
 
   public get cookies(): Promise<ICookie[]> {
-    return getCoreTab(this).getPageCookies();
+    return getCoreTab(this).then(x => x.getPageCookies());
   }
 
   public get document(): SuperDocument {
@@ -81,43 +81,48 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   public async fetch(request: Request | string, init?: IRequestInit) {
     const requestInput = await getRequestIdOrUrl(request);
-    const attachedState = await getCoreTab(this).fetch(requestInput, init);
+    const coreTab = await getCoreTab(this);
+    const attachedState = await coreTab.fetch(requestInput, init);
 
     const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
   public async goto(href: string) {
-    const coreTab = getCoreTab(this);
+    const coreTab = await getCoreTab(this);
     const resource = await coreTab.goto(href);
-    return createResource(resource, coreTab);
+    return createResource(resource, Promise.resolve(coreTab));
   }
 
   public async goBack() {
-    const coreTab = getCoreTab(this);
+    const coreTab = await getCoreTab(this);
     return coreTab.goBack();
   }
 
   public async goForward() {
-    const coreTab = getCoreTab(this);
+    const coreTab = await getCoreTab(this);
     return coreTab.goForward();
   }
 
   public async getJsValue<T>(path: string) {
-    return getCoreTab(this).getJsValue<T>(path);
+    const coreTab = await getCoreTab(this);
+    return coreTab.getJsValue<T>(path);
   }
 
   public async isElementVisible(element: ISuperElement): Promise<boolean> {
     const { awaitedPath } = awaitedPathState.getState(element);
-    return getCoreTab(this).isElementVisible(awaitedPath.toJSON());
+    const coreTab = await getCoreTab(this);
+    return coreTab.isElementVisible(awaitedPath.toJSON());
   }
 
   public async waitForAllContentLoaded(): Promise<void> {
-    await getCoreTab(this).waitForLoad(LocationStatus.AllContentLoaded);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForLoad(LocationStatus.AllContentLoaded);
   }
 
   public async waitForLoad(status: LocationStatus): Promise<void> {
-    await getCoreTab(this).waitForLoad(status);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForLoad(status);
   }
 
   public async waitForResource(
@@ -132,49 +137,53 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     options?: IWaitForElementOptions,
   ): Promise<void> {
     const { awaitedPath } = awaitedPathState.getState(element);
-    await getCoreTab(this).waitForElement(awaitedPath.toJSON(), options);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForElement(awaitedPath.toJSON(), options);
   }
 
   public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    await getCoreTab(this).waitForLocation(trigger);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForLocation(trigger);
   }
 
   public async waitForMillis(millis: number): Promise<void> {
-    await getCoreTab(this).waitForMillis(millis);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForMillis(millis);
   }
 
   public async waitForWebSocket(url: string | RegExp): Promise<void> {
-    await getCoreTab(this).waitForWebSocket(url);
+    const coreTab = await getCoreTab(this);
+    await coreTab.waitForWebSocket(url);
   }
 
   public async focus() {
-    const { browser, coreTab } = getState(this);
-    browserState.setState(browser, {
+    const { secretAgent, coreTab } = getState(this);
+    agentState.setState(secretAgent, {
       activeTab: this,
     });
-    return coreTab.focusTab();
+    return coreTab.then(x => x.focusTab());
   }
 
   public async close() {
-    const { browser, coreTab } = getState(this);
-    const { tabs } = browserState.getState(browser);
+    const { secretAgent, coreTab } = getState(this);
+    const { tabs } = agentState.getState(secretAgent);
     const updatedTabs = tabs.filter(x => x !== this);
     if (updatedTabs.length) {
-      browserState.setState(browser, {
+      agentState.setState(secretAgent, {
         activeTab: updatedTabs[0],
         tabs: updatedTabs,
       });
     }
-    return coreTab.close();
+    return coreTab.then(x => x.close());
   }
 }
 
-export function getCoreTab(tab: Tab): CoreTab {
+export function getCoreTab(tab: Tab): Promise<CoreTab> {
   return getState(tab).coreTab;
 }
 
 // CREATE
 
-export function createTab(browser: Browser, coreTab: CoreTab): Tab {
-  return new Tab(browser, coreTab);
+export function createTab(secretAgent: ISecretAgent, coreTab: Promise<CoreTab>): Tab {
+  return new Tab(secretAgent, coreTab);
 }
