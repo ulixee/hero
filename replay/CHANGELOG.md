@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.21](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.20...v1.0.0-alpha.21) (2020-11-02)
+
+
+### Bug Fixes
+
+* **mitm:** cache content-type ([68d7384](https://github.com/ulixee/secret-agent/commit/68d7384305e46106830f1a548d6de77c7b9deb07))
+* **replay:** cross domain iframes ([db65711](https://github.com/ulixee/secret-agent/commit/db6571120ccf1c5fa59c091bde6d752706c5c2e6))
+* **replay:** loading resources ([747f4ff](https://github.com/ulixee/secret-agent/commit/747f4ff24ba7ef1b162f0a2a5f1327ebd39cf18e))
+* bugs in replay ([2bf8808](https://github.com/ulixee/secret-agent/commit/2bf8808ae115ba9ea9f3cc64f3eba673fcb311aa))
+
+
+### Features
+
+* **locale:** add locale emulation + tests ([57cc7ff](https://github.com/ulixee/secret-agent/commit/57cc7ff8c342dc27a477b16cca066dffb9687e2f))
+* **replay:** add support for iframe and shadows ([0978fd5](https://github.com/ulixee/secret-agent/commit/0978fd55802ebf4285a48ef1ce0d208e2d21aeba))
+* **replay:** record heirarchy of elements ([89310c0](https://github.com/ulixee/secret-agent/commit/89310c0ba186d02e01b246dfa9c56f89d7a651af))
+* **replay:** set screen viewport ([f818ff5](https://github.com/ulixee/secret-agent/commit/f818ff5577d49d284a4116d328e78dc1d235824a))
+* **session:** support CSSOM for recorder/playback ([0cbe7c8](https://github.com/ulixee/secret-agent/commit/0cbe7c81aa6e6111a82db4bcbff5bf2efbc6d5b9))
+* **session-state:** record and playback shadows ([508fd39](https://github.com/ulixee/secret-agent/commit/508fd3988eb5e25d2c11a713a99f3f6a5a78ed5b))
+
+
+
+
+
 # [1.0.0-alpha.20](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.19...v1.0.0-alpha.20) (2020-10-23)
 
 

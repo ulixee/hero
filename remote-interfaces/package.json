@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/remote-interfaces",
-  "version": "1.0.0-alpha.20",
+  "version": "1.0.0-alpha.21",
   "description": "SecretAgent helper library for remote packages",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.0.0-alpha.20"
+    "@secret-agent/core-interfaces": "1.0.0-alpha.21"
   },
   "devDependencies": {
-    "@secret-agent/testing": "1.0.0-alpha.20",
+    "@secret-agent/testing": "1.0.0-alpha.21",
     "@types/node": "^12.7.11"
   }
 }

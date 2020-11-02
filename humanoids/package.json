@@ -1,11 +1,11 @@
 {
   "name": "@secret-agent/humanoids",
-  "version": "1.0.0-alpha.20",
+  "version": "1.0.0-alpha.21",
   "description": "Mouse and keyboard movements with human-like interactions",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.0.0-alpha.20",
-    "@secret-agent/humanoid-basic": "1.0.0-alpha.20",
-    "@secret-agent/humanoid-skipper": "1.0.0-alpha.20"
+    "@secret-agent/core-interfaces": "1.0.0-alpha.21",
+    "@secret-agent/humanoid-basic": "1.0.0-alpha.21",
+    "@secret-agent/humanoid-skipper": "1.0.0-alpha.21"
   }
 }

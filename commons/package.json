@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.0.0-alpha.20",
+  "version": "1.0.0-alpha.21",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.0.0-alpha.20",
+    "@secret-agent/core-interfaces": "1.0.0-alpha.21",
     "better-sqlite3": "^7.1.1"
   }
 }
