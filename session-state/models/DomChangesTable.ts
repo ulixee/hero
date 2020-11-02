@@ -5,43 +5,45 @@ import SqliteTable from '@secret-agent/commons/SqliteTable';
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
-      ['commandId', 'INTEGER'],
-      ['tabId', 'TEXT'],
       ['frameId', 'TEXT'],
+      ['eventIndex', 'INTEGER'],
       ['action', 'TEXT'],
-      ['timestamp', 'TEXT'],
       ['nodeId', 'INTEGER'],
       ['nodeType', 'INTEGER'],
       ['tagName', 'TEXT'],
-      ['namespaceUri', 'TEXT'],
-      ['textContent', 'TEXT'],
       ['previousSiblingId', 'INTEGER'],
       ['parentNodeId', 'INTEGER'],
+      ['textContent', 'TEXT'],
       ['attributes', 'TEXT'],
       ['attributeNamespaces', 'TEXT'],
       ['properties', 'TEXT'],
+      ['namespaceUri', 'TEXT'],
+      ['commandId', 'INTEGER'],
+      ['tabId', 'TEXT'],
+      ['timestamp', 'TEXT'],
     ]);
     this.defaultSortOrder = 'timestamp ASC';
   }
 
   public insert(tabId: string, frameId: string, change: IDomChangeEvent) {
-    const [commandId, action, nodeData, timestamp] = change;
+    const [commandId, action, nodeData, timestamp, eventIndex] = change;
     const record = [
-      commandId,
-      tabId,
       frameId,
+      eventIndex,
       action,
-      timestamp,
       nodeData.id,
       nodeData.nodeType,
       nodeData.tagName,
-      nodeData.namespaceUri,
-      nodeData.textContent,
       nodeData.previousSiblingId,
       nodeData.parentNodeId,
+      nodeData.textContent,
       nodeData.attributes ? JSON.stringify(nodeData.attributes) : undefined,
       nodeData.attributeNamespaces ? JSON.stringify(nodeData.attributeNamespaces) : undefined,
       nodeData.properties ? JSON.stringify(nodeData.properties) : undefined,
+      nodeData.namespaceUri,
+      commandId,
+      tabId,
+      timestamp,
     ];
     this.queuePendingInsert(record);
   }
@@ -53,8 +55,8 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     );
 
     const records: { [frameId: string]: IDomChangeEvent[] } = {};
-    for (const frameid of frameIds) {
-      records[frameid] = [];
+    for (const frameId of frameIds) {
+      records[frameId] = [];
     }
 
     for (const record of query.iterate(...frameIds, sinceCommandId ?? -2) as IterableIterator<
@@ -79,6 +81,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
         properties: record.properties ? JSON.parse(record.properties) : undefined,
       },
       record.timestamp,
+      record.eventIndex
     ];
   }
 
@@ -99,6 +102,7 @@ export interface IDomChangeRecord {
   frameId: string;
   nodeId: number;
   timestamp: string;
+  eventIndex: number;
   action: string;
   nodeType: number;
   tagName: string;

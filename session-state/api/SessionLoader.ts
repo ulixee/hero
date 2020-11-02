@@ -21,7 +21,8 @@ export default class SessionLoader extends EventEmitter {
   public tabs = new Map<string, { tabId: string; createdTime: string; startOrigin: string }>();
   private readonly sessionDb: SessionDb;
   private readonly sessionState: SessionState;
-  private readonly parentFrames = new Set<string>();
+  private readonly frameIdToNodePath = new Map<string, string>();
+  private readonly mainFrames = new Set<string>();
 
   private lastScriptState: IScriptState;
 
@@ -42,14 +43,21 @@ export default class SessionLoader extends EventEmitter {
 
     db.frames.subscribe(frames => {
       for (const frame of frames) {
-        if (!frame.parentId) this.parentFrames.add(frame.id);
+        if (!frame.parentId) {
+          this.mainFrames.add(frame.id);
+          this.frameIdToNodePath.set(frame.id, 'main');
+        } else {
+          const parentPath = this.frameIdToNodePath.get(frame.parentId);
+          this.frameIdToNodePath.set(frame.id, `${parentPath ?? ''}_${frame.domNodeId}`);
+        }
         this.addTabId(frame.tabId, frame.createdTime);
       }
     });
 
     db.domChanges.subscribe(changes => {
       for (const change of changes) {
-        if (change.action === 'newDocument') {
+        const isMainFrame = this.mainFrames.has(change.frameId);
+        if (isMainFrame && change.action === 'newDocument') {
           this.addTabId(change.tabId, change.timestamp);
           const tab = this.tabs.get(change.tabId);
           if (!tab.startOrigin) {
@@ -57,8 +65,7 @@ export default class SessionLoader extends EventEmitter {
           }
           this.emit('tab-ready');
         }
-        (change as any).isMainFrame =
-          this.parentFrames.size === 0 || this.parentFrames.has(change.frameId);
+        (change as any).frameIdPath = this.frameIdToNodePath.get(change.frameId);
         if (change.attributes) change.attributes = JSON.parse(change.attributes);
         if (change.attributeNamespaces) {
           change.attributeNamespaces = JSON.parse(change.attributeNamespaces);
@@ -91,7 +98,9 @@ export default class SessionLoader extends EventEmitter {
     db.resources.subscribe(resources => {
       const resourcesToSend = [];
       for (const resource of resources) {
-        if (!resourceWhitelist.includes(resource.type)) continue;
+        if (!resourceWhitelist.includes(resource.type)) {
+          continue;
+        }
         resourcesToSend.push({
           url: resource.requestUrl,
           tabId: resource.tabId,
@@ -107,8 +116,10 @@ export default class SessionLoader extends EventEmitter {
 
     // don't close a live db
     if (db.readonly) {
-      db.close();
-      setImmediate(() => this.emit('close'));
+      setImmediate(() => {
+        db.close();
+        this.emit('close');
+      });
     }
   }
 

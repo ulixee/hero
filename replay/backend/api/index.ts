@@ -50,7 +50,10 @@ export default class ReplayApi {
     this.http2Session = http2.connect(apiHost, () => console.log('Reply API connected'));
 
     ReplayApi.sessions.add(this.http2Session);
-    this.http2Session.on('close', () => ReplayApi.sessions.delete(this.http2Session));
+    this.http2Session.on('close', () => {
+      ReplayApi.sessions.delete(this.http2Session);
+      console.log('Http2 Session closed');
+    });
     this.http2Session.on('stream', this.onStream.bind(this));
 
     const request = this.http2Session
@@ -80,6 +83,7 @@ export default class ReplayApi {
 
     this.http2Session.removeAllListeners();
     this.http2Session.close();
+    ReplayApi.sessions.delete(this.http2Session);
   }
 
   public getTab(tabId: string) {
@@ -115,7 +119,6 @@ export default class ReplayApi {
     const statusCode = parseInt(headers['resource-status-code'] ?? '404', 10);
     const tabId = headers['resource-tabid'];
     const url = headers['resource-url'];
-    console.log('Replay Resource: %s', url);
 
     this.resources.onResource(data, {
       url,

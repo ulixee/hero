@@ -30,6 +30,7 @@ export default interface IHttpResourceLoadDetails {
   requestTrailers?: IResourceHeaders;
   requestPostData?: Buffer;
   status?: number;
+  originalStatus?: number;
   statusMessage?: string;
   responseUrl?: string;
   responseOriginalHeaders?: IResourceHeaders;

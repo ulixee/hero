@@ -2,6 +2,8 @@ import * as zlib from 'zlib';
 import { PassThrough } from 'stream';
 import getResolvable from '~shared/utils/promise';
 
+const packageJson = require('../../package.json');
+
 export default class ReplayResources {
   private resources: {
     [url: string]: {
@@ -41,9 +43,11 @@ export default class ReplayResources {
     const url = urlStr.split('#').shift();
     this.initResource(url);
     const resource = await this.resources[url].promise;
+    const contentType = resource.headers.get('content-type');
     const headers: any = {
       'Cache-Control': 'public, max-age=500',
-      'Content-Type': resource.headers.get('content-type'),
+      'Content-Type': contentType,
+      'X-Replay-Agent': `Secret Agent Replay v${packageJson.version}`,
     };
 
     if (resource.headers.get('location')) {
@@ -51,9 +55,7 @@ export default class ReplayResources {
     }
 
     let readable = new PassThrough();
-    if (resource.type === 'Document') {
-      const csp = resource.headers.get('content-security-policy');
-      if (csp) headers['Content-Security-Policy'] = csp;
+    if (resource.type === 'Document' && !isAllowedDocumentContentType(contentType)) {
       readable.end(`<!DOCTYPE html><html><head></head><body></body></html>`);
     } else {
       const encoding = resource.headers.get('content-encoding');
@@ -74,6 +76,13 @@ export default class ReplayResources {
       this.resources[url] = getResolvable<IReplayResource>();
     }
   }
+}
+
+function isAllowedDocumentContentType(contentType: string) {
+  if (!contentType) return false;
+  return (
+    contentType.includes('json') || contentType.includes('svg') || contentType.includes('font')
+  );
 }
 
 function getDecodeStream(buffer: Buffer, encoding: string) {

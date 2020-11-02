@@ -44,6 +44,7 @@ export default function pageOverrides(
   injectedScripts.add('webGl');
   injectedScripts.add('console');
   injectedScripts.add('iframe');
+  injectedScripts.add('shadowDom');
 
   if (args.windowFrame) {
     injectedScripts.add('screen', {

@@ -1,15 +1,15 @@
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { URL } from 'url';
-import Protocol from 'devtools-protocol';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import { IBoundLog } from '@secret-agent/commons/Logger';
-import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
-import { CDPSession } from './CDPSession';
-import ConsoleMessage from './ConsoleMessage';
-import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
+import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
+import { ILifecycleEvents, IPuppetFrame } from "@secret-agent/puppet/interfaces/IPuppetFrame";
+import { URL } from "url";
+import Protocol from "devtools-protocol";
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import { NavigationReason } from "@secret-agent/core-interfaces/INavigation";
+import { IBoundLog } from "@secret-agent/commons/Logger";
+import ProtocolError from "@secret-agent/puppet/lib/ProtocolError";
+import { CDPSession } from "./CDPSession";
+import ConsoleMessage from "./ConsoleMessage";
+import { DEFAULT_PAGE, ISOLATED_WORLD } from "./FramesManager";
 import PageFrame = Protocol.Page.Frame;
 
 export default class Frame extends TypedEventEmitter<IFrameEvents> implements IPuppetFrame {
@@ -28,7 +28,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   public url: string;
 
   public get securityOrigin() {
-    if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url) return null;
+    if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url || this.url === ':') return '';
     const origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
       return new URL(this.url).origin;
@@ -42,8 +42,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   }
 
   public navigationReason?: string;
-  public disposition?: string;
 
+  public disposition?: string;
   public get lifecycleEvents() {
     return this.loaderLifecycles.get(this.activeLoaderId);
   }
@@ -52,6 +52,8 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   protected readonly logger: IBoundLog;
 
+  private isolatedWorldElementObjectId?: string;
+  private readonly parentFrame: Frame | null;
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private activeLoaderId: string;
   private readonly activeContexts: Set<number>;
@@ -72,11 +74,13 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     cdpSession: CDPSession,
     logger: IBoundLog,
     isAttached: () => boolean,
+    parentFrame: Frame | null,
   ) {
     super();
     this.activeContexts = activeContexts;
     this.cdpSession = cdpSession;
     this.logger = logger.createChild(module);
+    this.parentFrame = parentFrame;
     this.isAttached = isAttached;
     this.onLoaded(internalFrame);
   }
@@ -102,6 +106,30 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return remote.value as T;
   }
 
+  public async evaluateOnIsolatedFrameElement<T>(expression: string) {
+    const objectId = await this.getParentElementId();
+    if (!objectId) return;
+    try {
+      const result = await this.cdpSession.send('Runtime.callFunctionOn', {
+        functionDeclaration: `function executeRemoteFn() {
+        return this.${expression};
+      }`,
+        returnByValue: true,
+        objectId,
+      });
+      if (result.exceptionDetails) {
+        throw ConsoleMessage.exceptionToError(result.exceptionDetails);
+      }
+
+      const remote = result.result;
+      if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
+      return remote.value as T;
+    } catch (err) {
+      if (err instanceof CanceledPromiseError) return;
+      throw err;
+    }
+  }
+
   /////// NAVIGATION ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   public initiateNavigation(url: string, loaderId: string) {
@@ -121,6 +149,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.updateUrl();
     this.setLoader(internalFrame.loaderId);
     if (internalFrame.loaderId && this.url) {
+      this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
+    }
+    if (internalFrame.loaderId && internalFrame.unreachableUrl) {
+      // if this is a loaded frame, just count it as loaded. it shouldn't fail
       this.loaderIdResolvers.get(internalFrame.loaderId).resolve();
     }
   }
@@ -266,7 +298,13 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       url: this.url,
       navigationReason: this.navigationReason,
       disposition: this.disposition,
+      lifecycle: this.lifecycleEvents,
     };
+  }
+
+  public async waitForLoad(): Promise<void> {
+    if (this.lifecycleEvents.load) return;
+    await this.waitOn('frame-lifecycle', x => x.name === 'load');
   }
 
   private setLoader(loaderId: string) {
@@ -303,8 +341,12 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
         this,
       );
       const { executionContextId } = isolatedWorld;
-      this.activeContexts.add(executionContextId);
-      this.addContextId(executionContextId, false);
+      if (!this.activeContexts.has(executionContextId)) {
+        this.activeContexts.add(executionContextId);
+        this.addContextId(executionContextId, false);
+        this.getParentElementId().catch(() => null);
+      }
+
       return executionContextId;
     } catch (error) {
       if (error instanceof CanceledPromiseError) {
@@ -317,6 +359,27 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
         }
       }
       this.logger.warn('Failed to create isolated world.', {
+        frameId: this.id,
+        error,
+      });
+    }
+  }
+
+  private async getParentElementId() {
+    try {
+      if (!this.parentFrame || this.isolatedWorldElementObjectId)
+        return this.isolatedWorldElementObjectId;
+      const owner = await this.cdpSession.send('DOM.getFrameOwner', { frameId: this.id });
+      const resolved = await this.cdpSession.send('DOM.resolveNode', {
+        backendNodeId: owner.backendNodeId,
+        executionContextId: this.parentFrame.getActiveContextId(true),
+        nodeId: owner.nodeId,
+      });
+      this.isolatedWorldElementObjectId = resolved.object.objectId;
+      return this.isolatedWorldElementObjectId;
+    } catch (error) {
+      // ignore errors looking this up
+      this.logger.info('Failed to lookup isolated node', {
         frameId: this.id,
         error,
       });

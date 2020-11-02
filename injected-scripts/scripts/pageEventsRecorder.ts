@@ -13,6 +13,7 @@ export type PageRecorderResultSet = [
   IFocusEvent[],
   IScrollEvent[],
 ];
+const SHADOW_NODE_TYPE = 40;
 
 // @ts-ignore
 const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) => void;
@@ -53,9 +54,10 @@ class NodeTracker {
     if (this.nodeIds.has(node)) {
       return this.nodeIds.get(node);
     }
-
-    this.nextId += 1;
     const id = this.nextId;
+    // @ts-ignore
+    node.saTrackerNodeId = id;
+    this.nextId += 1;
     this.nodeIds.set(node, id);
     return id;
   }
@@ -72,22 +74,35 @@ class NodeTracker {
 
 const nodeTracker = new NodeTracker();
 
+let eventCounter = 0;
+
+function idx() {
+  return (eventCounter += 1);
+}
+
 // @ts-ignore
 window.nodeTracker = nodeTracker;
 
 class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [
     // preload with a document
-    [-1, 'newDocument', { id: -1, textContent: window.location.href }, new Date().toISOString()],
+    [
+      -1,
+      'newDocument',
+      { id: -1, textContent: window.self.location.href },
+      new Date().toISOString(),
+      idx(),
+    ],
   ];
 
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];
-  private location = window.location.href;
+  private location = window.self.location.href;
 
   private commandId = -1;
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
+  private stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
   private readonly observer: MutationObserver;
 
@@ -175,7 +190,7 @@ class PageEventsRecorder {
 
   public checkForLocationChange(changeTime?: string) {
     const timestamp = changeTime || new Date().toISOString();
-    const currentLocation = window.location.href;
+    const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
       this.domChanges.push([
@@ -183,7 +198,28 @@ class PageEventsRecorder {
         'location',
         { id: -1, textContent: currentLocation },
         timestamp,
+        idx(),
       ]);
+    }
+  }
+
+  public checkForStylesheetChanges(changeTime?: string) {
+    const timestamp = changeTime || new Date().toISOString();
+    for (const [style, current] of this.stylesheets) {
+      if (!style.sheet || !style.isConnected) continue;
+      const sheet = style.sheet as CSSStyleSheet;
+      const newPropValue = [...sheet.cssRules].map(x => x.cssText);
+      if (newPropValue.toString() !== current.toString()) {
+        const nodeId = nodeTracker.getId(style);
+        this.domChanges.push([
+          this.commandId,
+          'property',
+          { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
+          timestamp,
+          idx(),
+        ]);
+        this.stylesheets.set(style, newPropValue);
+      }
     }
   }
 
@@ -199,6 +235,7 @@ class PageEventsRecorder {
             'property',
             { id: nodeId, properties: { [propertyName]: newPropValue } },
             timestamp,
+            idx(),
           ]);
           propertyMap.set(propertyName, newPropValue);
         }
@@ -234,6 +271,24 @@ class PageEventsRecorder {
     }
   }
 
+  private trackStylesheet(element: HTMLLinkElement | HTMLStyleElement) {
+    if (!element || this.stylesheets.has(element)) return;
+    if (!element.sheet) return;
+
+    const shouldRecordInitialStyle = element.textContent || element instanceof HTMLStyleElement;
+    if (element.sheet instanceof CSSStyleSheet) {
+      try {
+        // if there's style text, record the current state
+        const startingStyle = shouldRecordInitialStyle
+          ? [...element.sheet.cssRules].map(x => x.cssText)
+          : [];
+        this.stylesheets.set(element, startingStyle);
+      } catch (err) {
+        // can't track cors stylesheet rules
+      }
+    }
+  }
+
   private onMutation(mutations: MutationRecord[]) {
     const changes = this.convertMutationsToChanges(mutations);
     this.domChanges.push(...changes);
@@ -246,26 +301,28 @@ class PageEventsRecorder {
 
     this.checkForLocationChange(stamp);
     this.checkForPropertyChanges(stamp);
-    const addedNodes: Node[] = [];
-    for (const mutation of mutations) {
-      for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-        addedNodes.push(mutation.addedNodes[i]);
-      }
-    }
+
+    const addedNodeMap = new Map<Node, INodeData>();
+    const removedNodes = new Set<Node>();
 
     for (const mutation of mutations) {
       const { type, target } = mutation;
+      if (!nodeTracker.has(target)) {
+        this.serializeHierarchy(target, changes, currentCommandId, stamp, addedNodeMap);
+      }
 
       if (type === 'childList') {
         let isFirstRemoved = true;
         for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
           const node = mutation.removedNodes[i];
+          removedNodes.add(node);
+          if (!nodeTracker.has(node)) continue;
           const serial = this.serializeNode(node);
           serial.parentNodeId = nodeTracker.getId(target);
           serial.previousSiblingId = nodeTracker.getId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([currentCommandId, 'removed', serial, stamp]);
+          changes.push([currentCommandId, 'removed', serial, stamp, idx()]);
           isFirstRemoved = false;
         }
 
@@ -279,57 +336,139 @@ class PageEventsRecorder {
           serial.previousSiblingId = nodeTracker.getId(
             isFirstAdded ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([currentCommandId, 'added', serial, stamp]);
           isFirstAdded = false;
-        }
-
-        // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
-        // individually so we need to extract child nodes into flat hierarchy
-
-        for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
-          const node = mutation.addedNodes[i];
-          const children = this.serializeChildren(node, addedNodes);
-          for (const childData of children) {
-            changes.push([currentCommandId, 'added', childData, stamp]);
+          // if we get a re-order of nodes, sometimes we'll remove nodes, and add them again
+          if (addedNodeMap.has(node) && !removedNodes.has(node)) {
+            const existing = addedNodeMap.get(node);
+            if (
+              existing.previousSiblingId === serial.previousSiblingId &&
+              existing.parentNodeId === serial.parentNodeId
+            ) {
+              continue;
+            }
           }
+          addedNodeMap.set(node, serial);
+          changes.push([currentCommandId, 'added', serial, stamp, idx()]);
         }
       }
 
       if (type === 'attributes') {
-        const attributeChange = this.serializeNode(target);
-        if (!attributeChange.attributes) attributeChange.attributes = {};
-        attributeChange.attributes[mutation.attributeName] = (target as Element).getAttributeNS(
+        // don't store
+        if (!nodeTracker.has(target)) {
+          this.serializeHierarchy(target, changes, currentCommandId, stamp, addedNodeMap);
+        }
+        const serial = addedNodeMap.get(target) || this.serializeNode(target);
+        if (!serial.attributes) serial.attributes = {};
+        serial.attributes[mutation.attributeName] = (target as Element).getAttributeNS(
           mutation.attributeNamespace,
           mutation.attributeName,
         );
         if (mutation.attributeNamespace && mutation.attributeNamespace !== '') {
-          if (!attributeChange.attributeNamespaces) attributeChange.attributeNamespaces = {};
-          attributeChange.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
+          if (!serial.attributeNamespaces) serial.attributeNamespaces = {};
+          serial.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
         }
-        changes.push([currentCommandId, 'attribute', attributeChange, stamp]);
+
+        const changeType = 'attribute';
+        // flatten changes
+        if (!addedNodeMap.has(target)) {
+          changes.push([currentCommandId, changeType as any, serial, stamp, idx()]);
+        }
       }
 
       if (type === 'characterData') {
         const textChange = this.serializeNode(target);
         textChange.textContent = target.textContent;
-        changes.push([currentCommandId, 'text', textChange, stamp]);
+        changes.push([currentCommandId, 'text', textChange, stamp, idx()]);
       }
     }
+
+    for (const [node] of addedNodeMap) {
+      // A batch of changes (setting innerHTML) will send nodes in a hierarchy instead of
+      // individually so we need to extract child nodes into flat hierarchy
+      const children = this.serializeChildren(node, addedNodeMap);
+      for (const childData of children) {
+        changes.push([currentCommandId, 'added', childData, stamp, idx()]);
+      }
+    }
+
+    this.checkForStylesheetChanges(stamp);
 
     return changes;
   }
 
-  private serializeChildren(node: Node, addedNodes: Node[]) {
+  private serializeHierarchy(
+    node: Node,
+    changes: IDomChangeEvent[],
+    currentCommandId: number,
+    stamp: string,
+    addedNodeMap: Map<Node, INodeData>,
+  ) {
+    if (nodeTracker.has(node)) return this.serializeNode(node);
+
+    const serial = this.serializeNode(node);
+    serial.parentNodeId = nodeTracker.getId(node.parentNode);
+    if (!serial.parentNodeId && node.parentNode) {
+      const parentSerial = this.serializeHierarchy(
+        node.parentNode,
+        changes,
+        currentCommandId,
+        stamp,
+        addedNodeMap,
+      );
+
+      serial.parentNodeId = parentSerial.id;
+    }
+    serial.previousSiblingId = nodeTracker.getId(node.previousSibling);
+    if (!serial.previousSiblingId && node.previousSibling) {
+      const previous = this.serializeHierarchy(
+        node.previousSibling,
+        changes,
+        currentCommandId,
+        stamp,
+        addedNodeMap,
+      );
+      serial.previousSiblingId = previous.id;
+    }
+    changes.push([currentCommandId, 'added', serial, stamp, idx()]);
+    addedNodeMap.set(node, serial);
+    const childRecords = this.serializeChildren(node, addedNodeMap);
+    for (const childData of childRecords) {
+      changes.push([currentCommandId, 'added', childData, stamp, idx()]);
+    }
+    return serial;
+  }
+
+  private serializeChildren(node: Node, addedNodes: Map<Node, INodeData>) {
     const serialized: INodeData[] = [];
-    for (let i = 0, length = node.childNodes.length; i < length; i += 1) {
-      const child = node.childNodes[i];
-      if (!nodeTracker.has(child) && !addedNodes.includes(child)) {
+
+    for (const child of node.childNodes) {
+      if (!nodeTracker.has(child)) {
         const serial = this.serializeNode(child);
-        serial.parentNodeId = nodeTracker.getId(child.parentElement);
+        serial.parentNodeId = nodeTracker.getId(child.parentElement ?? child.getRootNode());
         serial.previousSiblingId = nodeTracker.getId(child.previousSibling);
+        addedNodes.set(child, serial);
         serialized.push(serial, ...this.serializeChildren(child, addedNodes));
       }
     }
+
+    for (const element of [node, ...node.childNodes] as Element[]) {
+      if (element.tagName === 'STYLE') {
+        this.trackStylesheet(element as HTMLStyleElement);
+      }
+      const shadowRoot = element.shadowRoot;
+      if (shadowRoot && !nodeTracker.has(shadowRoot)) {
+        const serial = this.serializeNode(shadowRoot);
+        serial.parentNodeId = nodeTracker.getId(element);
+        serialized.push(serial, ...this.serializeChildren(shadowRoot, addedNodes));
+        this.observer.observe(shadowRoot, {
+          attributes: true,
+          childList: true,
+          subtree: true,
+          characterData: true,
+        });
+      }
+    }
+
     return serialized;
   }
 
@@ -347,6 +486,11 @@ class PageEventsRecorder {
       nodeType: node.nodeType,
       id: nodeTracker.track(node),
     };
+
+    if (node instanceof ShadowRoot) {
+      data.nodeType = SHADOW_NODE_TYPE;
+      return data;
+    }
 
     switch (data.nodeType) {
       case Node.COMMENT_NODE:

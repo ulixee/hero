@@ -72,12 +72,22 @@ class Log implements ILog {
         .replace('.js', '')
         .replace('.ts', '')
         .replace('build/', '');
+      const printData = {};
+      for (const [key, value] of Object.entries(entry.data)) {
+        if (value === undefined || value === null) continue;
+        if (value instanceof Error) {
+          printData[key] = value.toString();
+        } else {
+          printData[key] = value;
+        }
+      }
+      const params = Object.keys(printData).length ? [printData] : [];
       // eslint-disable-next-line no-console
       console.log(
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${
           entry.action
         }`,
-        ...[entry.data].filter(x => x !== undefined && x !== null),
+        ...params,
       );
     }
     LogEvents.broadcast(entry);

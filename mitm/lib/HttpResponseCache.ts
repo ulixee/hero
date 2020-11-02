@@ -27,6 +27,9 @@ export default class HttpResponseCache {
       if (lower === 'content-encoding') {
         resource.encoding = val;
       }
+      if (lower === 'content-type') {
+        resource.contentType = val;
+      }
       if (lower === 'expires') {
         resource.expires = val;
       }
@@ -70,6 +73,7 @@ interface IResource {
   file: Buffer;
   etag: string;
   cacheControl: string;
+  contentType: string;
   lastModified: string;
   expires: string;
   encoding: string;

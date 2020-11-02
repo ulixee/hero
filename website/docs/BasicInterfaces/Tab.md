@@ -162,7 +162,7 @@ Determines if an element is visible to a user. This method checks whether an ele
 - layout: width, height, x and y.
 - opacity: non-zero opacity.
 - css visibility: the element does not have a computed style where visibility=hidden.
-- no overlay: no other element which overlays any part of this element.
+- no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
 
 #### **Arguments**:
 

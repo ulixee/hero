@@ -8,8 +8,10 @@ export interface IPuppetFrame {
   navigationReason?: string;
   disposition?: string;
   securityOrigin: string;
+  waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
+  evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
 }
 
 export interface ILifecycleEvents {

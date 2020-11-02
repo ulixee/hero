@@ -274,17 +274,30 @@ export default class SessionState {
 
   ///////   FRAMES ///////
 
-  public captureFrameCreated(tabId: string, frameId: string, parentFrameId: string | null) {
+  public captureFrameCreated(tabId: string, createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>, domNodeId: number ) {
     const frame = {
-      id: frameId,
+      id: createdFrame.id,
       tabId,
-      parentId: parentFrameId,
+      domNodeId,
+      parentId: createdFrame.parentId,
+      name: createdFrame.name,
+      securityOrigin: createdFrame.securityOrigin,
       startCommandId: this.lastCommand?.id,
-      url: null,
       createdTime: new Date().toISOString(),
     } as IFrameRecord;
-    this.frames[frameId] = frame;
+    this.frames[createdFrame.id] = frame;
     this.db.frames.insert(frame);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public captureSubFrameNavigated(tabId: string, frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & { navigationReason?: string}, navigatedInDocument: boolean) {
+    const existing = this.frames[frame.id];
+    if (existing) {
+      existing.name = frame.name;
+      existing.securityOrigin = frame.securityOrigin;
+      this.db.frames.insert(existing);
+    }
+    // TODO: capture frame navigations
   }
 
   public captureError(tabId: string, frameId: string, source: string, error: Error) {
@@ -372,7 +385,7 @@ export default class SessionState {
     };
   }
 
-  public async getFrameNavigationDomChanges(
+  public async getMainFrameDomChanges(
     frameLifecycles: INavigation[],
     sinceCommandId?: number,
   ) {
