@@ -13,14 +13,15 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['emulatorId', 'TEXT'],
         ['humanoidId', 'TEXT'],
         ['hasEmulatorPolyfills', 'INTEGER'],
-        ['viewportWidth', 'INTEGER'],
-        ['viewportHeight', 'INTEGER'],
+        ['screenWidth', 'INTEGER'],
+        ['screenHeight', 'INTEGER'],
         ['deviceScaleFactor', 'INTEGER'],
         ['startDate', 'TEXT'],
         ['closeDate', 'TEXT'],
         ['scriptInstanceId', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
         ['scriptStartDate', 'TEXT'],
+        ['timezoneId', 'TEXT'],
       ],
       true,
     );
@@ -36,6 +37,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     scriptInstanceId: string,
     scriptEntrypoint: string,
     scriptStartDate: string,
+    timezoneId: string,
+    viewport: IViewport,
   ) {
     const record = [
       id,
@@ -43,27 +46,22 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       emulatorId,
       humanoidId,
       hasEmulatorPolyfills ? 1 : 0,
-      null,
-      null,
-      null,
+      viewport.screenWidth,
+      viewport.screenHeight,
+      viewport.deviceScaleFactor,
       startDate.toISOString(),
       null,
       scriptInstanceId,
       scriptEntrypoint,
       scriptStartDate,
+      timezoneId,
     ];
     this.insertNow(record);
   }
 
-  public update(id: string, { viewport, closeDate }: { viewport: IViewport; closeDate: Date }) {
-    const values = [
-      viewport?.width || null,
-      viewport?.height || null,
-      viewport?.deviceScaleFactor || null,
-      closeDate.toISOString(),
-      id,
-    ];
-    const fields = ['viewportWidth', 'viewportHeight', 'deviceScaleFactor', 'closeDate'];
+  public close(id: string, closeDate: Date) {
+    const values = [closeDate.toISOString(), id];
+    const fields = ['closeDate'];
     const sql = `UPDATE ${this.tableName} SET ${fields.map(n => `${n}=?`).join(', ')} WHERE id=?`;
     this.db.prepare(sql).run(...values);
     if (this.insertCallbackFn) this.insertCallbackFn([]);
@@ -80,12 +78,13 @@ export interface ISessionRecord {
   emulatorId: string;
   humanoidId: string;
   hasEmulatorPolyfills: boolean;
-  viewportWidth: number;
-  viewportHeight: number;
+  screenWidth: number;
+  screenHeight: number;
   deviceScaleFactor: number;
   startDate: string;
   closeDate: string;
   scriptInstanceId: string;
   scriptEntrypoint: string;
   scriptStartDate: string;
+  timezoneId: string;
 }

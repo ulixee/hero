@@ -1,16 +1,18 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Log from '@secret-agent/commons/Logger';
+import Chrome83 from "@secret-agent/emulate-chrome-83/index";
 import { TestServer } from './server';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { getExecutablePath } from '../lib/browserPaths';
 import { createTestPage, ITestPage } from './TestPage';
+import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
 describe.each([
   [Chrome80.engine.browser, Chrome80.engine.revision],
-  // [Chrome83.engine.browser, Chrome83.engine.revision],
+  [Chrome83.engine.browser, Chrome83.engine.revision],
 ])('Load test for %s@%s', (browserEngine: string, revision: string) => {
   let server: TestServer;
   let puppet: Puppet;
@@ -21,15 +23,7 @@ describe.each([
     const engineExecutablePath = getExecutablePath(browserEngine, revision);
     puppet = new Puppet({ engine: { browser: browserEngine, revision }, engineExecutablePath });
     await puppet.start();
-    context = await puppet.newContext(
-      {
-        userAgent: 'Page tests',
-        acceptLanguage: 'en',
-        platform: 'Linux',
-        proxyPassword: '',
-      },
-      log,
-    );
+    context = await puppet.newContext(defaultEmulation, log);
     server.setRoute('/link.html', async (req, res) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(`

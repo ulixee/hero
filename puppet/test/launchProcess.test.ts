@@ -3,6 +3,7 @@ import Chrome83 from '@secret-agent/emulate-chrome-83';
 import Log from '@secret-agent/commons/Logger';
 import Puppet from '../index';
 import { getExecutablePath } from '../lib/browserPaths';
+import defaultEmulation from "./_defaultEmulation";
 
 const { log } = Log(module);
 
@@ -15,17 +16,11 @@ describe.each([
     engine: { browser: browserEngine, revision },
     engineExecutablePath,
   };
-  const defaultContextOptions = {
-    userAgent: 'Page tests',
-    acceptLanguage: 'en',
-    platform: 'Linux',
-    proxyPassword: '',
-  };
 
   it('should reject all promises when browser is closed', async () => {
     const browser = await new Puppet(defaultBrowserOptions);
     await browser.start();
-    const page = await (await browser.newContext(defaultContextOptions, log)).newPage();
+    const page = await (await browser.newContext(defaultEmulation, log)).newPage();
     let error = null;
     const neverResolves = page.evaluate(`new Promise(r => {})`).catch(e => (error = e));
     await page.evaluate(`new Promise(f => setTimeout(f, 0))`);

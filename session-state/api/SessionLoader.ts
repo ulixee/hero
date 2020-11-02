@@ -18,7 +18,11 @@ export default class SessionLoader extends EventEmitter {
   ];
 
   public session: ISessionRecord;
-  public tabs = new Map<string, { tabId: string; createdTime: string; startOrigin: string }>();
+  public tabs = new Map<
+    string,
+    { tabId: string; createdTime: string; startOrigin: string; width: number; height: number }
+  >();
+
   private readonly sessionDb: SessionDb;
   private readonly sessionState: SessionState;
   private readonly frameIdToNodePath = new Map<string, string>();
@@ -40,6 +44,17 @@ export default class SessionLoader extends EventEmitter {
       db.session.subscribe(() => this.checkState());
       this.checkState();
     }
+
+    db.tabs.subscribe(tabs => {
+      for (const tab of tabs) {
+        if (!this.tabs.has(tab.tabId)) {
+          this.addTabId(tab.tabId, tab.createdTime);
+        }
+        const sessionTab = this.tabs.get(tab.tabId);
+        sessionTab.height = tab.viewportHeight;
+        sessionTab.width = tab.viewportWidth;
+      }
+    });
 
     db.frames.subscribe(frames => {
       for (const frame of frames) {
@@ -146,6 +161,8 @@ export default class SessionLoader extends EventEmitter {
         tabId,
         createdTime: timestamp,
         startOrigin: null,
+        width: null,
+        height: null,
       });
     }
   }

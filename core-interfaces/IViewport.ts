@@ -8,19 +8,12 @@ export default interface IViewport {
    * @default 1
    */
   deviceScaleFactor?: number;
-  /**
-   * Whether the `meta viewport` tag is taken into account.
-   * @default false
-   */
-  isMobile?: boolean;
-  /**
-   * Specifies if viewport supports touch events.
-   * @default false
-   */
-  hasTouch?: boolean;
-  /**
-   * Specifies if viewport is in landscape mode.
-   * @default false
-   */
-  isLandscape?: boolean;
+  /** The screen width in pixels. */
+  screenWidth: number;
+  /** The screen height in pixels. */
+  screenHeight: number;
+  /** Overriding view X position on screen in pixels (minimum 0, maximum 10000000). */
+  positionX: number;
+  /** Overriding view Y position on screen in pixels (minimum 0, maximum 10000000). */
+  positionY: number;
 }

@@ -18,6 +18,8 @@ import IPuppetContext, {
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
 import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import Viewport from '@secret-agent/emulators/lib/Viewport';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -37,6 +39,9 @@ export default class Session {
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
 
+  public viewport: IViewport;
+  public timezoneId?: string;
+
   public tabs: Tab[] = [];
 
   public get isClosing() {
@@ -55,6 +60,8 @@ export default class Session {
       this.userProfile = options.userProfile;
       this.emulator.setUserProfile(options.userProfile);
     }
+    if (options.locale) this.emulator.setLocale(options.locale);
+
     if (!this.emulator.canPolyfill) {
       log.warn('Emulator.PolyfillNotSupported', {
         sessionId: this.id,
@@ -62,6 +69,12 @@ export default class Session {
         userAgent: this.emulator.userAgent,
         runtimeOs: Os.platform(),
       });
+    }
+
+    this.timezoneId = options.timezoneId;
+    this.viewport = options.viewport;
+    if (!this.viewport) {
+      this.viewport = Viewport.getRandom();
     }
 
     const humanoidId = options.humanoidId || Humanoids.getRandomId();
@@ -76,6 +89,8 @@ export default class Session {
       emulatorId,
       humanoidId,
       this.emulator.canPolyfill,
+      this.viewport,
+      this.timezoneId,
     );
     this.proxy = new MitmUpstreamProxy(this.id);
     this.mitmRequestSession = new RequestSession(
@@ -89,10 +104,12 @@ export default class Session {
   public getBrowserEmulation() {
     const emulator = this.emulator;
     return {
-      acceptLanguage: 'en-US,en',
+      locale: emulator.locale,
       userAgent: emulator.userAgent.raw,
       platform: emulator.userAgent.platform,
       proxyPassword: this.id,
+      viewport: this.viewport,
+      timezoneId: this.timezoneId,
     } as IBrowserEmulation;
   }
 

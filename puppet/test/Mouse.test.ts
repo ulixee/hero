@@ -7,6 +7,7 @@ import { createTestPage, ITestPage } from './TestPage';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
 import { getExecutablePath } from '../lib/browserPaths';
+import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
@@ -24,15 +25,7 @@ describe.each([
     const engineExecutablePath = getExecutablePath(browserEngine, revision);
     puppet = new Puppet({ engine: { browser: browserEngine, revision }, engineExecutablePath });
     await puppet.start();
-    context = await puppet.newContext(
-      {
-        userAgent: 'Page tests',
-        acceptLanguage: 'en',
-        platform: 'Linux',
-        proxyPassword: '',
-      },
-      log,
-    );
+    context = await puppet.newContext(defaultEmulation, log);
   });
 
   afterEach(async () => {

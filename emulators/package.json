@@ -4,7 +4,7 @@
   "description": "Emulators for various browsers",
   "main": "index.js",
   "scripts": {
-    "updateStats": "node -e 'require(\"./lib/BrowserStats.js\").default()'"
+    "updateStats": "node -e 'require(\"./scripts/updateBrowserStats\").default()' && node -e 'require(\"./scripts/updateScreenSizesStats\").default()'"
   },
   "dependencies": {
     "@secret-agent/commons": "1.0.0-alpha.20",

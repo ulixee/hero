@@ -30,6 +30,7 @@ describe('basic Full Client tests', () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
     const browser = await SecretAgent.createBrowser({
       emulatorId: Chrome80.emulatorId,
+      locale: 'en-US,en;q=0.9',
     });
 
     const resource = await browser.goto(exampleUrl);

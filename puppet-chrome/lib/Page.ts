@@ -20,6 +20,8 @@ import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/commons/Logger';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -198,9 +200,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   async close(): Promise<void> {
-    if (this.cdpSession.isConnected()) {
+    if (this.cdpSession.isConnected() && !this.isClosed) {
       // trigger beforeUnload
-      await this.cdpSession.send('Page.close');
+      try {
+        await this.cdpSession.send('Page.close');
+      } catch (err) {
+        if (!err.message.includes('Target closed') && !(err instanceof CanceledPromiseError)) {
+          throw err;
+        }
+      }
     }
     return this.closePromise.promise;
   }
@@ -240,6 +248,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         flatten: true,
       }),
       this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
+      this.setTimezone(this.browserContext.emulation.timezoneId),
+      this.setLocale(this.browserContext.emulation.locale),
+      this.setScreensize(this.browserContext.emulation.viewport),
     ]);
 
     if (this.opener && this.opener.popupInitializeFn) {
@@ -339,5 +350,44 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   private onWindowOpen(event: WindowOpenEvent) {
     this.windowOpenParams = event;
+  }
+
+  private async setScreensize(viewport: IViewport) {
+    if (!viewport) return;
+    await this.cdpSession.send('Emulation.setDeviceMetricsOverride', {
+      width: viewport.width,
+      height: viewport.height,
+      deviceScaleFactor: viewport.deviceScaleFactor ?? 1,
+      positionX: viewport.positionX,
+      positionY: viewport.positionY,
+      screenHeight: viewport.screenHeight,
+      screenWidth: viewport.screenWidth,
+      mobile: false,
+    });
+  }
+
+  private async setTimezone(timezoneId = '') {
+    try {
+      await this.cdpSession.send('Emulation.setTimezoneOverride', { timezoneId });
+    } catch (error) {
+      if (error.message.includes('Timezone override is already in effect')) return;
+      if (error.message.includes('Invalid timezone'))
+        throw new Error(`Invalid timezone ID: ${timezoneId}`);
+      throw error;
+    }
+  }
+
+  private async setLocale(locale = 'en-US') {
+    try {
+      await this.cdpSession.send('Emulation.setLocaleOverride', { locale });
+    } catch (error) {
+      // not installed in Chrome 80
+      if (error.message.includes("'Emulation.setLocaleOverride' wasn't found")) return;
+      // All pages in the same renderer share locale. All such pages belong to the same
+      // context and if locale is overridden for one of them its value is the same as
+      // we are trying to set so it's not a problem.
+      if (error.message.includes('Another locale override is already in effect')) return;
+      throw error;
+    }
   }
 }

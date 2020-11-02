@@ -87,7 +87,7 @@ export default class Chrome83 extends EmulatorPlugin {
       osVersion: `${os.major}.${os.minor}`,
       platform: this.userAgent.platform,
       memory: Math.ceil(Math.random() * 4) * 2,
-      languages: ['en-US', 'en'],
+      languages: this.locale.split(','),
       windowFrame,
       videoDevice: {
         // TODO: stabilize per user

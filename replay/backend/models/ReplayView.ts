@@ -8,7 +8,7 @@ import Application from '~backend/Application';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IRectangle from '~shared/interfaces/IRectangle';
 import { IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
-import { IMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
 
@@ -65,7 +65,17 @@ export default class ReplayView extends ViewBackend {
     this.window.setActiveTabId(this.tabState.tabId);
     this.window.setAddressBarUrl(this.tabState.startOrigin);
 
-    await this.webContents.loadURL(this.tabState.startOrigin);
+    this.browserView.setBackgroundColor('#ffffff');
+
+    // eslint-disable-next-line promise/always-return
+    await this.webContents
+      .loadURL(this.tabState.startOrigin)
+      .then(() => this.sizeWebContentsToFit());
+    let resizeTimeout;
+    this.window.browserWindow.on('resize', () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => this.sizeWebContentsToFit(), 20);
+    });
 
     if (this.tabState.currentPlaybarOffsetPct > 0) {
       console.log('Resetting playbar offset to %s%', this.tabState.currentPlaybarOffsetPct);
@@ -80,6 +90,7 @@ export default class ReplayView extends ViewBackend {
 
   public fixBounds(newBounds: { x: number; width: number; y: any; height: number }) {
     super.fixBounds(newBounds);
+    this.sizeWebContentsToFit();
 
     this.playbarView.fixBounds({
       x: 0,
@@ -134,23 +145,49 @@ export default class ReplayView extends ViewBackend {
     this.clearTabState();
   }
 
+  public sizeWebContentsToFit() {
+    const screenSize = this.browserView.getBounds();
+
+    const viewSize = {
+      height: Math.min(this.tabState.viewportHeight, screenSize.height),
+      width: this.tabState.viewportWidth,
+    };
+
+    // NOTE: This isn't working in electron, so setting scale instead
+    const viewPosition = {
+      x: screenSize.width > viewSize.width ? (screenSize.width - viewSize.width) / 2 : 0,
+      y: screenSize.height > viewSize.height ? (screenSize.height - viewSize.height) / 2 : 0,
+    };
+
+    const scale = screenSize.width / viewSize.width;
+
+    if (viewSize.height * scale > viewSize.height) {
+      viewSize.height *= scale;
+    }
+
+    this.browserView.webContents.enableDeviceEmulation({
+      deviceScaleFactor: 0,
+      screenPosition: 'desktop',
+      viewSize,
+      scale,
+      viewPosition,
+      screenSize,
+    });
+  }
+
   private async publishTickChanges(
-    events: [IFrontendDomChangeEvent[], number[], IMouseEvent, IScrollRecord],
+    events: [IFrontendDomChangeEvent[], number[], IFrontendMouseEvent, IScrollRecord],
   ) {
     if (!events || !events.length) return;
     const [domChanges] = events;
     if (
       domChanges?.length &&
-      domChanges[0].action === 'newDocument' &&
+      (domChanges[0].action === 'newDocument' || (domChanges[0].action as any) === 'load') &&
       domChanges[0].frameIdPath === 'main'
     ) {
-      const url = new URL(domChanges[0].textContent);
-      const currentUrl = new URL(this.webContents.getURL());
-      if (url.origin !== currentUrl.origin) {
-        console.log('Re-navigating', url.href);
-        domChanges.shift();
-        await this.webContents.loadURL(url.href);
-      }
+      const nav = domChanges.shift();
+      console.log('Navigating to url', nav.textContent);
+      await this.webContents.loadURL(nav.textContent);
     }
     this.webContents.send('dom:apply', ...events);
     this.window.setAddressBarUrl(this.tabState.urlOrigin);
@@ -162,6 +199,8 @@ export default class ReplayView extends ViewBackend {
       tabId: tab.tabId,
       startOrigin: tab.startOrigin,
       createdTime: tab.tabCreatedTime,
+      width: tab.viewportWidth,
+      height: tab.viewportHeight,
     });
   }
 

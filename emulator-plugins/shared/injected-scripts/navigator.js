@@ -1,25 +1,7 @@
 delete Navigator.prototype.webdriver;
 
 const props = {};
-const languages = args.languages;
-if (languages) {
-  for (const i of languages) {
-    Object.defineProperty(languages, i, {
-      ...Object.getOwnPropertyDescriptor(languages, i),
-      configurable: true,
-      enumerable: true,
-      writable: true,
-    });
-  }
-  Object.seal(languages);
-  Object.freeze(languages);
-  props.languages = { get: () => languages };
-  props.language = { get: () => languages[0] };
-}
 
-if (args.platform) {
-  props.platform = { get: () => args.platform };
-}
 if (args.memory) {
   props.deviceMemory = { get: () => args.memory };
 }

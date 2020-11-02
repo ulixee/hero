@@ -1,215 +1,162 @@
-import { Helpers } from '@secret-agent/testing';
-import Fs from 'fs';
-import fpscanner from 'fpscanner';
-import Core from '@secret-agent/core';
-import SecretAgent from '../index';
+import { Helpers } from "@secret-agent/testing";
+import { GlobalPool } from "@secret-agent/core";
+import { ITestKoaServer } from "@secret-agent/testing/helpers";
+import Viewport from "@secret-agent/emulators/lib/Viewport";
+import SecretAgent from "../index";
 
-const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
-
-let koaServer;
+let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await SecretAgent.start();
-  koaServer = await Helpers.runKoaServer();
+  koaServer = await Helpers.runKoaServer(true);
+  GlobalPool.maxActiveSessionCount = 3;
+});
+afterAll(Helpers.afterAll);
+afterEach(Helpers.afterEach);
 
-  koaServer.get('/fpCollect.min.js', ctx => {
-    ctx.set('Content-Type', 'application/javascript');
-    ctx.body = Fs.readFileSync(fpCollectPath, 'utf-8')
-      .replace('module.exports = fpCollect;', '')
-      .replace('const fpCollect = ', 'var fpCollect = ');
+describe('basic Emulator tests', () => {
+  it('should be able to set a timezoneId', async () => {
+    const browser = await SecretAgent.createBrowser({
+      timezoneId: 'America/Los_Angeles',
+    });
+    Helpers.needsClosing.push(browser);
+
+    await browser.goto(`${koaServer.baseUrl}`);
+
+    const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
+    const timezoneOffset = await browser.getJsValue('new Date(1479579154987).toString()');
+    expect(timezoneOffset.value).toBe(formatted);
   });
-  koaServer.get('/collect', ctx => {
-    ctx.body = `
-<body>
-<h1>Collect test</h1>
-<script src="/fpCollect.min.js"></script>
-<script type="text/javascript">
-(async () => {
-  fpCollect.addCustomFunction('detailChrome', false, () => {
-      const res = {};
 
-      ["webstore", "runtime", "app", "csi", "loadTimes"].forEach((property) => {
-          try {
-              res[property] = window.chrome[property].constructor.toString();
-          } catch(e){
-              res.properties = e.toString();
-          }
+  it('should affect accept-language header', async () => {
+    const browser = await SecretAgent.createBrowser({ locale: 'en-US,en;q=0.9' });
+    Helpers.needsClosing.push(browser);
+
+    let acceptLanguage = '';
+    koaServer.get('/headers', ctx => {
+      acceptLanguage = ctx.get('accept-language');
+    });
+
+    await browser.goto(`${koaServer.baseUrl}/headers`);
+    expect(acceptLanguage).toBe('en-US,en;q=0.9');
+  });
+
+  it('should affect navigator.language', async () => {
+    const browser = await SecretAgent.createBrowser({ locale: 'fr-CH,fr-CA' });
+    Helpers.needsClosing.push(browser);
+
+    await browser.goto(`${koaServer.baseUrl}`);
+    const result = await browser.getJsValue(`navigator.language`);
+    expect(result.value).toBe('fr-CH');
+
+    const result2 = await browser.getJsValue(`navigator.languages`);
+    expect(result2.value).toStrictEqual(['fr-CH', 'fr-CA']);
+  });
+
+  it('should format number', async () => {
+    {
+      const browser = await SecretAgent.createBrowser({ locale: 'en-US,en;q=0.9' });
+      Helpers.needsClosing.push(browser);
+
+      await browser.goto(`${koaServer.baseUrl}`);
+      const result = await browser.getJsValue(`(1000000.5).toLocaleString()`);
+      expect(result.value).toBe('1,000,000.5');
+    }
+    {
+      const browser = await SecretAgent.createBrowser({ locale: 'fr-CH' });
+      Helpers.needsClosing.push(browser);
+
+      await browser.goto(`${koaServer.baseUrl}`);
+
+      const result = await browser.getJsValue(`(1000000.5).toLocaleString()`);
+      expect(result.value).toBe('1 000 000,5');
+    }
+  });
+
+  it('should format date', async () => {
+    {
+      const browser = await SecretAgent.createBrowser({
+        locale: 'en-US',
+        timezoneId: 'America/Los_Angeles',
       });
+      Helpers.needsClosing.push(browser);
 
-      try {
-          window.chrome.runtime.connect('');
-      } catch (e) {
-          res.connect = e.toString();
-      }
-      try {
-          window.chrome.runtime.sendMessage();
-      } catch (e) {
-          res.sendMessage = e.toString();
-      }
+      await browser.goto(`${koaServer.baseUrl}`);
 
-      return res;
-  });
-  
-  const fp = await fpCollect.generateFingerprint();
-  await fetch('/analyze', {
-    method:'POST',
-    body: JSON.stringify(fp),
-  });
-})(); 
-</script>
-</body>
-    `;
-  });
-});
-afterAll(Helpers.afterAll, 30e3);
-afterEach(Helpers.afterEach, 30e3);
+      const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
 
-test('should pass FpScanner', async () => {
-  const analyzePromise = new Promise(resolve => {
-    koaServer.post('/analyze', async ctx => {
-      let body = '';
-      for await (const chunk of ctx.req) {
-        body += chunk.toString();
-      }
-
-      resolve(JSON.parse(body));
-      ctx.body = 'Ok';
-    });
-  });
-
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}/collect`);
-
-  const data = await analyzePromise;
-  const results = fpscanner.analyseFingerprint(data);
-  for (const key of Object.keys(results)) {
-    const result = results[key];
-    const isConsistent = result.consistent === fpscanner.CONSISTENT;
-    // eslint-disable-next-line no-console
-    if (!isConsistent) console.log('Not consistent', result);
-    expect(isConsistent).toBe(true);
-  }
-  expect(data).toBeTruthy();
-}, 30e3);
-
-test('should not be denied for notifications, but prompt for permissions', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
-  // @ts-ignore
-  const page = core.tab.puppetPage;
-  const permissions = await page.evaluate<any>(`(async () => {
-    const permissionStatus = await navigator.permissions.query({
-      name: 'notifications',
-    });
-  
-    return {
-      notificationValue: Notification.permission,
-      permissionState: permissionStatus.state
+      const result = await browser.getJsValue(`new Date(1479579154987).toString()`);
+      expect(result.value).toBe(formatted);
     }
-  })();`);
+    {
+      const browser = await SecretAgent.createBrowser({
+        locale: 'de-DE',
+        timezoneId: 'Europe/Berlin',
+      });
+      Helpers.needsClosing.push(browser);
 
-  expect(permissions.notificationValue).toBe('default');
-  expect(permissions.permissionState).toBe('prompt');
-});
+      await browser.goto(`${koaServer.baseUrl}`);
 
-test('should not leave markers on permissions.query.toString ', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
-  // @ts-ignore
-  const page = core.tab.puppetPage;
-  const perms: any = await page.evaluate(`(() => {
-    const permissions = window.navigator.permissions;
-    return {
-      hasDirectQueryProperty: permissions.hasOwnProperty('query'),
-      queryToString: permissions.query.toString(),
-      queryToStringToString: permissions.query.toString.toString(),
-      queryToStringHasProxyHandler: permissions.query.toString.hasOwnProperty('[[Handler]]'),
-      queryToStringHasProxyTarget: permissions.query.toString.hasOwnProperty('[[Target]]'),
-      queryToStringHasProxyRevoked: permissions.query.toString.hasOwnProperty('[[IsRevoked]]'),
+      const formatted = 'Sat Nov 19 2016 19:12:34 GMT+0100 (Mitteleuropäische Normalzeit)';
+      const result = await browser.getJsValue(`new Date(1479579154987).toString()`);
+      expect(result.value).toBe(formatted);
     }
-  })();`);
-  expect(perms.hasDirectQueryProperty).toBe(false);
-  expect(perms.queryToString).toBe('function query() { [native code] }');
-  expect(perms.queryToStringToString).toBe('function toString() { [native code] }');
-  expect(perms.queryToStringHasProxyHandler).toBe(false);
-  expect(perms.queryToStringHasProxyTarget).toBe(false);
-  expect(perms.queryToStringHasProxyRevoked).toBe(false);
-});
-
-test('should not recurse the toString function', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(`${koaServer.baseUrl}`);
-  const core = Core.byTabId[browser.activeTab.tabId];
-  // @ts-ignore
-  const page = core.tab.puppetPage;
-  const isHeadless = await page.evaluate(`(() => {
-    let gotYou = 0;
-    const spooky = /./;
-    spooky.toString = function() {
-      gotYou += 1;
-      return 'spooky';
-    };
-    console.debug(spooky);
-    return gotYou > 1;
-  })();`);
-  expect(isHeadless).toBe(false);
-});
-
-// https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
-test('should not leave stack trace markers when calling getJsValue', async () => {
-  const browser = await SecretAgent.createBrowser();
-  await browser.goto(koaServer.baseUrl);
-  const core = Core.byTabId[browser.activeTab.tabId];
-  // @ts-ignore
-  const page = core.tab.puppetPage;
-  await page.evaluate(`(() => {
-document.querySelector = (function (orig) {
-  return function() {
-    const err = new Error('QuerySelector Override Detection');
-    return err.stack.toString();
-  };
-})(document.querySelector);
-  })();`);
-
-  // for live variables, we shouldn't see markers of utils.js
-  const query = await core.getJsValue('document.querySelector("h1")');
-  expect(query.value).toBe(
-    'Error: QuerySelector Override Detection\n    at HTMLDocument.querySelector (<anonymous>:4:17)',
-  );
-});
-
-test('should not leave stack trace markers when calling in page functions', async () => {
-  const browser = await SecretAgent.createBrowser();
-  koaServer.get('/marker', ctx => {
-    ctx.body = `
-<body>
-<script type="text/javascript">
-  function errorCheck() {
-    const err = new Error('This is from inside');
-    return err.stack.toString();
-  }
-  document.querySelectorAll = (function () {
-    return function outerFunction() {
-      const err = new Error('All Error');
-      return err.stack.toString();
-    };
-  })(document.querySelectorAll);
-</script>
-</body>
-    `;
   });
-  const url = `${koaServer.baseUrl}/marker`;
-  await browser.goto(url);
-  await browser.waitForAllContentLoaded();
-  const core = Core.byTabId[browser.activeTab.tabId];
+});
 
-  const pageFunction = await core.getJsValue('errorCheck()');
-  expect(pageFunction.value).toBe(`Error: This is from inside\n    at errorCheck (${url}:5:17)`);
+describe('setScreensize', () => {
+  it('should set the proper viewport size', async () => {
+    const viewport = Viewport.getRandom();
+    const browser = await SecretAgent.createBrowser({
+      viewport,
+    });
+    Helpers.needsClosing.push(browser);
 
-  // for something created
-  const queryAllTest = await core.getJsValue('document.querySelectorAll("h1")');
-  expect(queryAllTest.value).toBe(
-    `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:10:19)`,
-  );
+    await browser.goto(`${koaServer.baseUrl}`);
+    const screenWidth = await browser.getJsValue('screen.width');
+    expect(screenWidth.value).toBe(viewport.screenWidth);
+    const screenHeight = await browser.getJsValue('screen.height');
+    expect(screenHeight.value).toBe(viewport.screenHeight);
+
+    const screenX = await browser.getJsValue('screenX');
+    expect(screenX.value).toBe(viewport.positionX);
+    const screenY = await browser.getJsValue('screenY');
+    expect(screenY.value).toBe(viewport.positionY);
+
+    const innerWidth = await browser.getJsValue('innerWidth');
+    expect(innerWidth.value).toBe(viewport.width);
+    const innerHeight = await browser.getJsValue('innerHeight');
+    expect(innerHeight.value).toBe(viewport.height);
+  });
+
+  it('should support Media Queries', async () => {
+    const browser = await SecretAgent.createBrowser({
+      viewport: {
+        width: 200,
+        height: 200,
+        screenWidth: 200,
+        screenHeight: 200,
+        positionY: 0,
+        positionX: 0,
+      },
+    });
+    Helpers.needsClosing.push(browser);
+
+    async function getQueryValue(mediaQuery: string) {
+      const result = await browser.getJsValue(mediaQuery);
+      return result.value;
+    }
+
+    expect(await getQueryValue(`matchMedia('(min-device-width: 100px)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(min-device-width: 300px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(max-device-width: 100px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(max-device-width: 300px)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(device-width: 500px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(device-width: 200px)').matches`)).toBe(true);
+
+    expect(await getQueryValue(`matchMedia('(min-device-height: 100px)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(min-device-height: 300px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(max-device-height: 100px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(max-device-height: 300px)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(device-height: 500px)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
+  });
 });
