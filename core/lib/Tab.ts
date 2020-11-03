@@ -388,8 +388,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions) {
     const waitForVisible = options?.waitForVisible ?? false;
+    const timeoutMs = options?.timeoutMs ?? 30e3;
+    const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
+    const timeoutMessage = `Timeout waiting for element ${jsPath} to be visible`;
 
-    const timer = new Timer(options?.timeoutMs ?? 30e3, this.waitTimeouts);
+    const timer = new Timer(timeoutMs, this.waitTimeouts);
     await timer.waitForPromise(
       this.locationTracker.waitFor('READY'),
       'Timeout waiting for DomContentLoaded',
@@ -398,12 +401,16 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     try {
       let isFound = false;
       do {
-        const jsonValue = await this.domEnv
-          .waitForElement(jsPath, waitForVisible, 1e3)
+        const promise = this.domEnv
+          .waitForElement(jsPath, waitForVisible, timeoutPerTry)
           .catch(() => null);
+
+        const jsonValue = await timer.waitForPromise(promise, timeoutMessage);
         isFound = (jsonValue as any)?.value ?? false;
         if (isFound) return true;
-        timer.throwIfExpired(`Timeout waiting for element ${jsPath} to be visible`);
+
+        if (timer.isResolved()) return false;
+        timer.throwIfExpired(timeoutMessage);
       } while (!isFound);
     } finally {
       timer.clear();
