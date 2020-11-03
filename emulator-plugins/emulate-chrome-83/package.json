@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-chrome-83",
-  "version": "1.0.0-alpha.21",
+  "version": "1.1.0-alpha.0",
   "description": "EmulatorPlugin for Google Chrome version 83",
   "main": "index.js",
   "engine": {
@@ -8,8 +8,8 @@
     "revision": "756035"
   },
   "dependencies": {
-    "@secret-agent/commons": "1.0.0-alpha.21",
-    "@secret-agent/emulator-plugins-shared": "1.0.0-alpha.21",
-    "@secret-agent/emulators": "1.0.0-alpha.21"
+    "@secret-agent/commons": "1.1.0-alpha.0",
+    "@secret-agent/emulator-plugins-shared": "1.1.0-alpha.0",
+    "@secret-agent/emulators": "1.1.0-alpha.0"
   }
 }
