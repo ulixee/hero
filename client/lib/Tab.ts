@@ -17,7 +17,7 @@ import WebsocketResource from './WebsocketResource';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import { ISecretAgent } from '../interfaces/ISecretAgent';
+import ISecretAgent from '../interfaces/ISecretAgent';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 
 const { getState, setState } = StateMachine<Tab, IState>();

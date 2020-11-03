@@ -118,7 +118,7 @@ describe('Multi-tab scenarios', () => {
     expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);
     expect(await tabs[1].url).toBe(`${koaServer.baseUrl}/page3`);
     expect(await tabs[0].url).toBe(`${koaServer.baseUrl}/page1`);
-  });
+  }, 30e3);
 
   it('can command click on a link to get to a new tab', async () => {
     koaServer.get('/tabTest2', ctx => {
