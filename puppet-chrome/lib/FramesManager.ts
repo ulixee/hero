@@ -150,11 +150,17 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
     await this.isReady;
     this.activeContexts.delete(event.executionContextId);
+    for (const frame of this.framesById.values()) {
+      frame.removeContextId(event.executionContextId);
+    }
   }
 
   private async onExecutionContextsCleared() {
     await this.isReady;
     this.activeContexts.clear();
+    for (const frame of this.framesById.values()) {
+      frame.clearContextIds();
+    }
   }
 
   private async onExecutionContextCreated(event: ExecutionContextCreatedEvent) {

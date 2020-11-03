@@ -39,6 +39,10 @@ export default class Timer {
     return this.elapsedMillis() > this.timeoutMillis;
   }
 
+  public isResolved() {
+    return this.expirePromise.isResolved;
+  }
+
   public elapsedMillis() {
     const time = process.hrtime(this.time);
     return time[0] * 1000 + time[1] / 1000000;

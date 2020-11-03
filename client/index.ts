@@ -309,13 +309,13 @@ export function SecretAgentClientGenerator(
     }
   }
 
-  if (initArgs?.handleShutdownSignals) {
+  if (initArgs?.handleShutdownSignals ?? true) {
     ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
       process.once(name as Signals, async () => await SecretAgent.shutdown());
     });
   }
 
-  if (initArgs?.captureUncaughtClientErrors) {
+  if (initArgs?.captureUncaughtClientErrors ?? true) {
     process.on('uncaughtException', async (error: Error) => {
       // keep core node behavior intact
       process.stderr.write(`${error.stack}\n`);
