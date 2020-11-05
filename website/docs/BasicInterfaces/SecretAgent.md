@@ -59,11 +59,9 @@ Returns a reference to the currently active tab.
 
 ### agent.cookies {#cookies}
 
-Returns an array of cookie objects from the current document.
+Returns an array of cookies across all open tabs.
 
 #### **Type**: `Promise<Cookie[]>`
-
-Alias for [activeTab.cookies](./tab#cookies)
 
 ### agent.document <div class="specs"><i>W3C</i></div> {#document}
 
@@ -279,9 +277,9 @@ Alias for [Tab.goBack](./tab#back)
 
 Alias for [Tab.goForward](./tab#forward)
 
-### agent.goto*(href)*
+### agent.goto*(href)* {#goto}
 
-Alias for [Tab.goto](./tab#goto
+Alias for [Tab.goto](./tab#goto)
 
 ### agent.isElementVisible*(element)*
 
@@ -349,7 +347,7 @@ Close SecretAgent and any SecretAgent instances that have been opened.
 
 After shutdown, the SecretAgent object is considered to be disposed and cannot be used again unless you call SecretAgent.prewarm() to reinitialize.
 
-Note: Because Chromium is launched when you call `start/new SecretAgent`, your NodeJS script cannot exit cleanly until `shutdown()` completes.
+Note: Because Chromium is launched when you call `prewarm/new SecretAgent()`, your NodeJS script cannot exit cleanly until `shutdown()` completes.
 
 ### SecretAgent.prewarm*(\[options])* {#prewarm}
 

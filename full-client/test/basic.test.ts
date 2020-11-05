@@ -1,5 +1,4 @@
 import { Helpers } from '@secret-agent/testing';
-import Chrome80 from '@secret-agent/emulate-chrome-80';
 import SecretAgent from '../index';
 
 let koaServer;
@@ -14,6 +13,7 @@ describe('basic Full Client tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
     const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
 
     await agent.goto(exampleUrl);
     const url = await agent.document.location.host;
@@ -22,6 +22,7 @@ describe('basic Full Client tests', () => {
 
   it('runs goto with no document loaded', async () => {
     const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
     const url = await agent.document.location.host;
     expect(url).toBe(null);
   });
@@ -29,9 +30,9 @@ describe('basic Full Client tests', () => {
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
     const agent = await new SecretAgent({
-      emulatorId: Chrome80.emulatorId,
       locale: 'en-US,en;q=0.9',
     });
+    Helpers.needsClosing.push(agent);
 
     const resource = await agent.goto(exampleUrl);
 
@@ -62,5 +63,65 @@ describe('basic Full Client tests', () => {
     expect(await response.statusCode).toBe(200);
     expect(await response.statusMessage).toBe('OK');
     expect(await response.text()).toMatch('<h1>Example Domain</h1>');
+  });
+
+  it('can get and set cookies', async () => {
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
+
+    koaServer.get('/cookies', ctx => {
+      ctx.cookies.set('Cookie1', 'This is a test', {
+        httpOnly: true,
+      });
+    });
+
+    await agent.goto(`${koaServer.baseUrl}/cookies`);
+    const cookieStorage = agent.activeTab.cookieStorage;
+    {
+      expect(await cookieStorage.length).toBe(1);
+      const cookie = await cookieStorage.getItem('Cookie1');
+      expect(cookie.expires).toBe('-1');
+      expect(cookie.httpOnly).toBe(true);
+      // httponly not in doc
+      const documentCookies = await agent.getJsValue('document.cookie');
+      expect(documentCookies.value).toBe('');
+    }
+    {
+      const expires = new Date();
+      expires.setTime(new Date().getTime() + 10e3);
+      await cookieStorage.setItem('Cookie2', 'test2', { expires });
+      expect(await cookieStorage.length).toBe(2);
+      const cookie = await cookieStorage.getItem('Cookie2');
+      expect(Math.round(Number(cookie.expires))).toBe(expires.getTime());
+      expect(cookie.httpOnly).toBe(false);
+
+      const documentCookies = await agent.getJsValue('document.cookie');
+      expect(documentCookies.value).toBe('Cookie2=test2');
+    }
+    // test deleting
+    {
+      await cookieStorage.removeItem('Cookie2');
+      expect(await cookieStorage.length).toBe(1);
+      const documentCookies = await agent.getJsValue('document.cookie');
+      expect(documentCookies.value).toBe('');
+    }
+  });
+
+  it('can get and set localStorage', async () => {
+    const agent = await new SecretAgent();
+    Helpers.needsClosing.push(agent);
+
+    await agent.goto(`${koaServer.baseUrl}/`);
+    const localStorage = agent.activeTab.localStorage;
+    expect(await localStorage.length).toBe(0);
+    await localStorage.setItem('Test1', 'here');
+    expect(await localStorage.length).toBe(1);
+
+    const { value } = await agent.getJsValue('localStorage.getItem("Test1")');
+    expect(value).toBe('here');
+
+    expect(await localStorage.key(0)).toBe('Test1');
+    await localStorage.removeItem('Test1');
+    expect(await localStorage.length).toBe(0);
   });
 });

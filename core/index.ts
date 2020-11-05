@@ -23,6 +23,7 @@ import Queue from '@secret-agent/commons/Queue';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import Emulators from '@secret-agent/emulators';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IListenerObject from './interfaces/IListenerObject';
 import UserProfile from './lib/UserProfile';
 import Session from './lib/Session';
@@ -119,12 +120,20 @@ export default class Core implements ICore {
     await this.tab.runCommand('interact', interactionGroups);
   }
 
-  public async getPageCookies() {
-    return await this.tab.runCommand('getPageCookies');
+  public async getTabCookies() {
+    return await this.tab.runCommand('getCookies');
   }
 
-  public async getUserCookies() {
-    return await this.tab.runCommand('getUserCookies');
+  public async setTabCookie(
+    name: string,
+    value: string,
+    options?: ISetCookieOptions,
+  ): Promise<boolean> {
+    return await this.tab.runCommand('setCookie', name, value, options);
+  }
+
+  public async removeTabCookie(name: string): Promise<boolean> {
+    return await this.tab.runCommand('removeCookie', name);
   }
 
   public async exportUserProfile() {
@@ -270,8 +279,14 @@ export default class Core implements ICore {
   }
 
   public static async configure(options: IConfigureOptions) {
-    const { maxConcurrentSessionsCount, localProxyPortStart, sessionsDir, activeEmulatorIds } = options;
-    if (maxConcurrentSessionsCount) GlobalPool.maxConcurrentSessionsCount = options.maxConcurrentSessionsCount;
+    const {
+      maxConcurrentSessionsCount,
+      localProxyPortStart,
+      sessionsDir,
+      activeEmulatorIds,
+    } = options;
+    if (maxConcurrentSessionsCount)
+      GlobalPool.maxConcurrentSessionsCount = options.maxConcurrentSessionsCount;
     if (localProxyPortStart) GlobalPool.localProxyPortStart = options.localProxyPortStart;
     if (sessionsDir) GlobalPool.sessionsDir = options.sessionsDir;
     if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);

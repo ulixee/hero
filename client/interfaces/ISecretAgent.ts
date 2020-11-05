@@ -1,22 +1,21 @@
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import Response from 'awaited-dom/impl/official-klasses/Response';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import Resource from '../lib/Resource';
-import IInteractions, { IMousePosition, ITypeInteraction } from './IInteractions';
-import IWaitForResourceFilter from './IWaitForResourceFilter';
-import ICreateSecretAgentOptions from './ICreateSecretAgentOptions';
-import Tab from '../lib/Tab';
-import IAwaitedEventTarget from './IAwaitedEventTarget';
+import IConfigureOptions from "@secret-agent/core-interfaces/IConfigureOptions";
+import { IRenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import SuperDocument from "awaited-dom/impl/super-klasses/SuperDocument";
+import { ILocationTrigger } from "@secret-agent/core-interfaces/Location";
+import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
+import { ISuperElement } from "awaited-dom/base/interfaces/super";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import Response from "awaited-dom/impl/official-klasses/Response";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import Request from "awaited-dom/impl/official-klasses/Request";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import Resource from "../lib/Resource";
+import IInteractions, { IMousePosition, ITypeInteraction } from "./IInteractions";
+import IWaitForResourceFilter from "./IWaitForResourceFilter";
+import ICreateSecretAgentOptions from "./ICreateSecretAgentOptions";
+import Tab from "../lib/Tab";
+import IAwaitedEventTarget from "./IAwaitedEventTarget";
 
 export interface ISecretAgentConfigureOptions extends IConfigureOptions {
   defaultRenderingOptions: IRenderingOption[];
@@ -39,7 +38,6 @@ export interface ISecretAgent extends IAwaitedEventTarget<ISecretAgentEvents> {
   activeTab: Tab;
   sessionName: Promise<string>;
   url: Promise<string>;
-  cookies: Promise<ICookie[]>;
   lastCommandId: Promise<number>;
 
   click(mousePosition: IMousePosition): Promise<void>;

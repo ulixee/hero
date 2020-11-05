@@ -40,8 +40,8 @@ describe('UserProfile cookie tests', () => {
     // try loading an empty session now to confirm cookies are gone without reloading
     const meta2 = await Core.createTab();
     const core2 = Core.byTabId[meta2.tabId];
-    const core2Cookies = await core2.getUserCookies();
-    expect(core2Cookies).toHaveLength(0);
+    const core2Cookies = await core2.exportUserProfile();
+    expect(core2Cookies.cookies).toHaveLength(0);
 
     await core2.goto(`${koaServer.baseUrl}/cookie2`);
     await core2.waitForLoad('AllContentLoaded');
@@ -51,8 +51,8 @@ describe('UserProfile cookie tests', () => {
       userProfile: profile,
     });
     const core3 = Core.byTabId[meta3.tabId];
-    const cookiesBefore = await core3.getUserCookies();
-    expect(cookiesBefore).toHaveLength(1);
+    const cookiesBefore = await core3.exportUserProfile();
+    expect(cookiesBefore.cookies).toHaveLength(1);
 
     await core3.goto(`${koaServer.baseUrl}/cookie2`);
     await core3.waitForLoad('AllContentLoaded');
@@ -543,10 +543,16 @@ describe('UserProfile IndexedDb tests', () => {
       ['querySelector', '#records'],
       'textContent',
     ]);
-    const records = JSON.parse(recordsJson.value);
-    expect(records).toHaveLength(2);
-    expect(records[0].child.name).toBe('Richard');
+    // NOTE: remove. trying to track down github actions error
+    try {
+      const records = JSON.parse(recordsJson.value);
 
+      expect(records).toHaveLength(2);
+      expect(records[0].child.name).toBe('Richard');
+    } catch (err) {
+      console.log(recordsJson);
+      throw err;
+    }
     const indexLookupJson = await core2.execJsPath([
       'document',
       ['querySelector', '#richard'],

@@ -25,6 +25,7 @@ import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/
 import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -305,14 +306,40 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.domEnv.locationHref();
   }
 
-  public async getPageCookies(): Promise<ICookie[]> {
+  public async getCookies(): Promise<ICookie[]> {
     await this.waitForLoad('READY');
-    return await this.session.browserContext.getCookies(new URL(this.puppetPage.mainFrame.url));
+    return await this.session.browserContext.getCookies(
+      new URL(this.puppetPage.mainFrame.securityOrigin ?? this.puppetPage.mainFrame.url),
+    );
   }
 
-  public async getUserCookies(): Promise<ICookie[]> {
+  public async setCookie(
+    name: string,
+    value: string,
+    options?: ISetCookieOptions,
+  ): Promise<boolean> {
     await this.waitForLoad('READY');
-    return await this.session.browserContext.getCookies();
+    await this.session.browserContext.addCookies([
+      {
+        name,
+        value,
+        url: this.puppetPage.mainFrame.url,
+        ...options,
+      },
+    ]);
+    return true;
+  }
+
+  public async removeCookie(name: string): Promise<boolean> {
+    await this.session.browserContext.addCookies([
+      {
+        name,
+        value: '',
+        expires: 0,
+        url: this.puppetPage.mainFrame.url,
+      },
+    ]);
+    return true;
   }
 
   public async focus() {

@@ -1,41 +1,37 @@
 // setup must go first
-import './lib/SetupAwaitedHandler';
+import "./lib/SetupAwaitedHandler";
 
-import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import { RenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
-import os from 'os';
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import Request from 'awaited-dom/impl/official-klasses/Request';
-import { bindFunctions } from '@secret-agent/commons/utils';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import ICreateSecretAgentOptions from './interfaces/ICreateSecretAgentOptions';
-import CoreClient from './lib/CoreClient';
+import { ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
+import IConfigureOptions from "@secret-agent/core-interfaces/IConfigureOptions";
+import { RenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
+import os from "os";
+import initializeConstantsAndProperties from "awaited-dom/base/initializeConstantsAndProperties";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import { ISuperElement } from "awaited-dom/base/interfaces/super";
+import IDomStorage from "@secret-agent/core-interfaces/IDomStorage";
+import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import StateMachine from "awaited-dom/base/StateMachine";
+import Request from "awaited-dom/impl/official-klasses/Request";
+import { bindFunctions } from "@secret-agent/commons/utils";
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import ICreateSecretAgentOptions from "./interfaces/ICreateSecretAgentOptions";
+import CoreClient from "./lib/CoreClient";
 import ISecretAgentClass, {
   ISecretAgent,
-  ISecretAgentConfigureOptions, ISecretAgentEvents,
+  ISecretAgentConfigureOptions,
+  ISecretAgentEvents,
   SecretAgentStatics
 } from "./interfaces/ISecretAgent";
-import CoreTab from './lib/CoreTab';
-import Tab, { createTab, getCoreTab } from './lib/Tab';
-import IInteractions, {
-  Command,
-  IMousePosition,
-  ITypeInteraction,
-} from './interfaces/IInteractions';
-import Interactor from './lib/Interactor';
-import IWaitForResourceFilter from './interfaces/IWaitForResourceFilter';
-import AwaitedEventTarget from './lib/AwaitedEventTarget';
-import ScriptInstance from './lib/ScriptInstance';
+import CoreTab from "./lib/CoreTab";
+import Tab, { createTab, getCoreTab } from "./lib/Tab";
+import IInteractions, { Command, IMousePosition, ITypeInteraction } from "./interfaces/IInteractions";
+import Interactor from "./lib/Interactor";
+import IWaitForResourceFilter from "./interfaces/IWaitForResourceFilter";
+import AwaitedEventTarget from "./lib/AwaitedEventTarget";
+import ScriptInstance from "./lib/ScriptInstance";
 import Signals = NodeJS.Signals;
 
 const DefaultOptions = {
@@ -64,7 +60,6 @@ export function SecretAgentClientGenerator(
     'activeTab',
     'sessionName',
     'url',
-    'cookies',
     'lastCommandId',
     'Request',
   ];
@@ -123,10 +118,6 @@ export function SecretAgentClientGenerator(
 
     public get activeTab() {
       return getState(this).activeTab;
-    }
-
-    public get cookies(): Promise<ICookie[]> {
-      return getCoreTab(this.activeTab).then(x => x.getAllCookies());
     }
 
     public get document() {
