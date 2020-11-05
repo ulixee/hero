@@ -11,7 +11,10 @@ export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContex
   close(): Promise<void>;
 
   getCookies(url?: URL): Promise<ICookie[]>;
-  addCookies(cookies: ICookie[], origins?: string[]): Promise<void>;
+  addCookies(
+    cookies: (Omit<ICookie, 'expires'> & { expires?: string | Date | number })[],
+    origins?: string[],
+  ): Promise<void>;
 }
 
 export interface IPuppetContextEvents {

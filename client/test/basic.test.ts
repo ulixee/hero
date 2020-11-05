@@ -1,4 +1,4 @@
-import { SecretAgentClientGenerator } from '../index';
+import { SecretAgentClientGenerator } from "../index";
 
 describe('basic SecretAgent tests', () => {
   it('starts, configures, and shuts down', async () => {
@@ -32,7 +32,7 @@ describe('basic SecretAgent tests', () => {
       }
     });
 
-    const agent = await new SecretAgent();
+    await new SecretAgent();
     await SecretAgent.shutdown();
 
     const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;

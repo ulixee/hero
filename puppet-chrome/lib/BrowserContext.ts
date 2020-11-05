@@ -156,16 +156,31 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
       });
   }
 
-  async addCookies(cookies: ICookie[], origins?: string[]) {
+  async addCookies(
+    cookies: (Omit<ICookie, 'expires'> & { expires?: string | Date | number })[],
+    origins?: string[],
+  ) {
     const originUrls = (origins ?? []).map(x => new URL(x));
     const parsedCookies: CookieParam[] = [];
     for (const cookie of cookies) {
       assert(cookie.name, 'Cookie should have a name');
-      assert(cookie.value, 'Cookie should have a value');
+      assert(cookie.value !== undefined && cookie.value !== null, 'Cookie should have a value');
       assert(cookie.domain || cookie.url, 'Cookie should have a domain or url');
+
+      let expires = cookie.expires ?? -1;
+      if (expires && typeof expires === 'string') {
+        if (expires.match(/\d+/)) {
+          expires = parseInt(expires, 10);
+        } else {
+          expires = new Date(expires).getTime();
+        }
+      } else if (expires && expires instanceof Date) {
+        expires = expires.getTime();
+      }
+
       const cookieToSend: CookieParam = {
         ...cookie,
-        expires: cookie.expires ? parseInt(cookie.expires, 10) : -1,
+        expires: expires as number,
       };
 
       if (!cookieToSend.url) {

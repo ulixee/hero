@@ -97,6 +97,6 @@ Supers give you access to all properties and methods of dependent classes.
 
  |   |   | 
  | --- | --- | 
- | [Attr](/docs/awaited-dom/attr) | [CharacterData](/docs/awaited-dom/character-data)
-[EventTarget](/docs/awaited-dom/event-target) |  | 
+ | [Attr](/docs/awaited-dom/attr) | [EventTarget](/docs/awaited-dom/event-target)
+[Storage](/docs/awaited-dom/storage) |  | 
 

@@ -4,7 +4,7 @@
   "description": "Core interfaces used by SecretAgent",
   "dependencies": {
     "@secret-agent/commons": "1.1.0-alpha.0",
-    "awaited-dom": "^1.1.5"
+    "awaited-dom": "^1.1.6"
   },
   "devDependencies": {
     "@secret-agent/injected-scripts": "1.1.0-alpha.0",

@@ -89,46 +89,45 @@ describe('basic Interact tests', () => {
 
   it('should clean up cookies between runs', async () => {
     const agent1 = await new SecretAgent();
-    let cookieValue = 'ulixee=test1';
+    let setCookieValue = 'ulixee=test1';
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
-        response.setHeader('Set-Cookie', cookieValue);
+        response.setHeader('Set-Cookie', setCookieValue);
       },
     });
+    const url = httpServer.url;
 
     Helpers.needsClosing.push(agent1);
     {
-      const url = httpServer.url;
       await agent1.goto(url);
 
-      const cookies = await agent1.cookies;
-      expect(cookies[0].name).toBe('ulixee');
-      expect(cookies[0].value).toBe('test1');
+      const cookie = await agent1.activeTab.cookieStorage.getItem('ulixee');
+      expect(cookie.value).toBe('test1');
     }
 
     {
-      cookieValue = 'ulixee2=test2';
-      const url = httpServer.url;
+      setCookieValue = 'ulixee2=test2';
       await agent1.goto(url);
 
-      const cookies = await agent1.cookies;
-      expect(cookies).toHaveLength(2);
-      expect(cookies.find(x => x.name === 'ulixee').value).toBe('test1');
-      expect(cookies.find(x => x.name === 'ulixee2').value).toBe('test2');
+      const cookieStorage = await agent1.activeTab.cookieStorage;
+      expect(await cookieStorage.length).toBe(2);
+      const cookie1 = await cookieStorage.getItem('ulixee');
+      expect(cookie1.value).toBe('test1');
+      const cookie2 = await cookieStorage.getItem('ulixee2');
+      expect(cookie2.value).toBe('test2');
     }
 
     {
-      cookieValue = 'ulixee3=test3';
+      setCookieValue = 'ulixee3=test3';
       // should be able to get a second agent out of the pool
       const agent2 = await new SecretAgent();
       Helpers.needsClosing.push(agent2);
-      const url = httpServer.url;
       await agent2.goto(url);
 
-      const cookies = await agent2.cookies;
-      expect(cookies).toHaveLength(1);
-      expect(cookies[0].name).toBe('ulixee3');
-      expect(cookies[0].value).toBe('test3');
+      const cookieStorage = await agent2.activeTab.cookieStorage;
+      expect(await cookieStorage.length).toBe(1);
+      const cookie = await cookieStorage.getItem('ulixee3');
+      expect(cookie.value).toBe('test3');
 
       await agent2.close();
     }

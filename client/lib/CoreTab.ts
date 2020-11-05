@@ -11,6 +11,7 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
+import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import CoreClient from './CoreClient';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
@@ -98,12 +99,20 @@ export default class CoreTab {
     return await this.commandQueue.run('exportUserProfile');
   }
 
-  public async getPageCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run('getPageCookies');
+  public async getCookies(): Promise<ICookie[]> {
+    return await this.commandQueue.run('getTabCookies');
   }
 
-  public async getAllCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run('getUserCookies');
+  public async setCookie(
+    name: string,
+    value: string,
+    options?: ISetCookieOptions,
+  ): Promise<boolean> {
+    return await this.commandQueue.run('setTabCookie', name, value, options);
+  }
+
+  public async removeCookie(name: string): Promise<boolean> {
+    return await this.commandQueue.run('removeTabCookie', name);
   }
 
   public async isElementVisible(jsPath: IJsPath): Promise<boolean> {

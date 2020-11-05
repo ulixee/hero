@@ -1,11 +1,11 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import { createResponse, createSuperDocument } from 'awaited-dom/impl/create';
+import Storage from 'awaited-dom/impl/official-klasses/Storage';
+import { createResponse, createStorage, createSuperDocument } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
@@ -17,7 +17,8 @@ import WebsocketResource from './WebsocketResource';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import { ISecretAgent } from '../interfaces/ISecretAgent';
+import ISecretAgent from '../interfaces/ISecretAgent';
+import CookieStorage, { createCookieStorage } from './CookieStorage';
 
 const { getState, setState } = StateMachine<Tab, IState>();
 const agentState = StateMachine<ISecretAgent, { activeTab: Tab; tabs: Tab[] }>();
@@ -36,7 +37,9 @@ const propertyKeys: (keyof Tab)[] = [
   'lastCommandId',
   'tabId',
   'url',
-  'cookies',
+  'cookieStorage',
+  'localStorage',
+  'sessionStorage',
   'document',
   'Request',
 ];
@@ -63,14 +66,26 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return getCoreTab(this).then(x => x.getUrl());
   }
 
-  public get cookies(): Promise<ICookie[]> {
-    return getCoreTab(this).then(x => x.getPageCookies());
+  public get cookieStorage(): CookieStorage {
+    return createCookieStorage(getCoreTab(this));
   }
 
   public get document(): SuperDocument {
     const awaitedPath = new AwaitedPath('document');
     const awaitedOptions = { ...getState(this) };
     return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
+  }
+
+  public get localStorage(): Storage {
+    const awaitedPath = new AwaitedPath('localStorage');
+    const awaitedOptions = { ...getState(this) };
+    return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
+  }
+
+  public get sessionStorage(): Storage {
+    const awaitedPath = new AwaitedPath('sessionStorage');
+    const awaitedOptions = { ...getState(this) };
+    return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
   }
 
   public get Request(): typeof Request {

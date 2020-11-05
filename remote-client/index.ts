@@ -5,7 +5,7 @@ import IRequestPayload from '@secret-agent/remote-interfaces/IRequestPayload';
 import IResponsePayload from '@secret-agent/remote-interfaces/IResponsePayload';
 import IEventPayload from '@secret-agent/remote-interfaces/IEventPayload';
 import { createPromise } from '@secret-agent/commons/utils';
-import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgent";
+import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgentClass";
 import PendingMessages from './lib/PendingMessages';
 
 // tslint:disable:variable-name

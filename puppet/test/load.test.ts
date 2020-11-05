@@ -56,5 +56,5 @@ describe.each([
       }
     });
     await Promise.all(concurrent);
-  });
+  }, 30e3);
 });

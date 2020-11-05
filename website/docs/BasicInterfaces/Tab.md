@@ -10,23 +10,35 @@ When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a
 
 ## Properties
 
+### tab.cookieManager {#cookie-manager}
+
+Returns a [CookieManager](../advanced/cookie-manager) instance to get/set/delete Tab cookies.
+
+#### **Type**: `CookieManager`
+
 ### tab.document <div class="specs"><i>W3C</i></div> {#document}
 
-Returns a reference to the document that the active tab contains.
+Returns a reference to the document of the tab.
 
 #### **Type**: `SuperDocument`
 
-### tab.url {#url}
+### tab.lastCommandId {#lastCommandId}
 
-The url of the active tab.
+An execution point that refers to a command run on this SecretAgent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
 
-#### **Type**: `Promise<string>`
+#### **Type**: `Promise<number>`
 
-### tab.cookies {#cookies}
+### tab.localStorage <div class="specs"><i>W3C</i></div> {#local-storage}
 
-Returns an array of cookie objects from the current document.
+Returns a reference to the [Storage](../awaited-dom/storage) object managing localStorage for the tab.
 
-#### **Type**: `Promise<Cookie[]>`
+#### **Type**: `Storage`
+
+### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
+
+Returns a reference to the [Storage](../awaited-dom/storage) object managing sessionStorage for the tab.
+
+#### **Type**: `Storage`
 
 ### tab.tabId {#tabid}
 
@@ -34,11 +46,11 @@ An identifier for the tab.
 
 #### **Type**: `Promise<string>`
 
-### tab.lastCommandId {#lastCommandId}
+### tab.url {#url}
 
-An execution point that refers to a command run on this SecretAgent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
+The url of the active tab.
 
-#### **Type**: `Promise<number>`
+#### **Type**: `Promise<string>`
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 

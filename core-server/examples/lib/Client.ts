@@ -1,7 +1,7 @@
 import RemoteClient from "@secret-agent/remote-client";
 import JsonSocket from "json-socket";
 import Net from "net";
-import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgent";
+import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgentClass";
 
 export default class SecretAgentSocketClient {
   public remoteClient: RemoteClient;

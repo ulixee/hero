@@ -580,6 +580,17 @@ Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### **Returns**: `Promise<void>` true
 
+### doc.getElementById*(...args)* <div class="specs"><i>W3C</i></div> {#getElementById}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true
+
 ### doc.querySelector*(...args)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
 Returns the first <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code>
@@ -604,7 +615,29 @@ Returns a <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are col
 
 #### **Returns**: `Promise<void>` true
 
+### doc.createExpression*(...args)* <div class="specs"><i>W3C</i></div> {#createExpression}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true
+
+### doc.evaluate*(...args)* <div class="specs"><i>W3C</i></div> {#evaluate}
+
+Needs content.
+
+#### **Arguments**:
+
+
+ - none
+
+#### **Returns**: `Promise<void>` true
+
 ## Unimplemented Specs
 
 
-This class has 94 unimplemented properties and 40 unimplemented methods.
+This class has 94 unimplemented properties and 37 unimplemented methods.

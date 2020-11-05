@@ -4348,10 +4348,10 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@^1.1.5:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.5.tgz#5327084da916cec2923c6af9e6fbce2fd446bde6"
-  integrity sha512-Car6uqMQIZ/31k+gB9ilJkW37gEbquzbWhTGto2zIgZjhDCtvd0KV0UG5GBnBA2qWoV/0IkY0Ct4+pbN1U5pXQ==
+awaited-dom@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.6.tgz#7a73263b47244010a7223a82e498107e9838f20e"
+  integrity sha512-cO2nqKWj+jD4Rd9h0VftamsqMK9DOzKhSOakZzTF5KNrTuX+lxqGhFZCPqRLJ15w899uC6WW19NwrhWbuzf0UQ==
 
 aws-sign2@~0.7.0:
   version "0.7.0"

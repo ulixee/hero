@@ -48,8 +48,9 @@ jsonSocket.on('message', m => secretAgentClient.pipeIncoming(m));
 secretAgentClient.pipeOutgoing(m => jsonSocket.sendMessage(m));
 
 netSocket.once('connect', async () => {
-  const secretAgent = await secretAgentClient.open();
-  const page = await secretAgent.goto('https://news.ycombinator.com');
+  const { SecretAgent } = secretAgentClient;
+  const secretAgent = await new SecretAgent();
+  const resource = await secretAgent.goto('https://news.ycombinator.com');
   // whatever else you want to do with secretAgent...
 });
 ```

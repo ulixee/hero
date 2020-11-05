@@ -8,7 +8,6 @@ import os from 'os';
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
 import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
@@ -20,11 +19,8 @@ import { bindFunctions } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ICreateSecretAgentOptions from './interfaces/ICreateSecretAgentOptions';
 import CoreClient from './lib/CoreClient';
-import ISecretAgentClass, {
-  ISecretAgent,
-  ISecretAgentConfigureOptions, ISecretAgentEvents,
-  SecretAgentStatics
-} from "./interfaces/ISecretAgent";
+import ISecretAgentClass, { SecretAgentStatics, ISecretAgentConfigureOptions } from "./interfaces/ISecretAgentClass";
+import ISecretAgent, { ISecretAgentEvents } from './interfaces/ISecretAgent';
 import CoreTab from './lib/CoreTab';
 import Tab, { createTab, getCoreTab } from './lib/Tab';
 import IInteractions, {
@@ -64,7 +60,6 @@ export function SecretAgentClientGenerator(
     'activeTab',
     'sessionName',
     'url',
-    'cookies',
     'lastCommandId',
     'Request',
   ];
@@ -123,10 +118,6 @@ export function SecretAgentClientGenerator(
 
     public get activeTab() {
       return getState(this).activeTab;
-    }
-
-    public get cookies(): Promise<ICookie[]> {
-      return getCoreTab(this.activeTab).then(x => x.getAllCookies());
     }
 
     public get document() {
@@ -363,6 +354,5 @@ interface IState {
   tabs: Tab[];
   readyPromise: Promise<ISecretAgent>;
 }
-
 
 export { LocationStatus, ISecretAgent, ISecretAgentClass };
