@@ -30,8 +30,8 @@ afterEach(Helpers.afterEach);
 test('should be able to run multiple pages each with their own upstream proxy', async () => {
   const acquireUpstreamProxyUrl = jest.spyOn<any, any>(UpstreamProxy.prototype, 'acquireProxyUrl');
 
-  koa.get('/page1', ctx => ctx.body = 'ok');
-  koa.get('/page2', ctx => ctx.body = 'ok');
+  koa.get('/page1', ctx => (ctx.body = 'ok'));
+  koa.get('/page2', ctx => (ctx.body = 'ok'));
 
   const url1 = `${koa.baseUrl}/page1`;
   const browserSession1 = await GlobalPool.createSession({});
@@ -48,6 +48,26 @@ test('should be able to run multiple pages each with their own upstream proxy', 
   await tab2.goto(url2);
   await tab2.waitForMillis(100);
   expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url2);
+});
+
+test('should send a Host header to secure http1 Chrome requests', async () => {
+  let rawHeaders: string[] = [];
+
+  const server = await Helpers.runHttpsServer((req, res) => {
+    rawHeaders = req.rawHeaders;
+    res.end('<html>Loaded</html>');
+  });
+
+  const url = `${server.baseUrl}/`;
+  const session = await GlobalPool.createSession({
+    emulatorId: 'chrome-83',
+  });
+  Helpers.needsClosing.push(session);
+  const tab = await session.createTab();
+  process.env.MITM_ALLOW_INSECURE = 'true';
+  await tab.goto(url);
+  expect(rawHeaders[0]).toBe('Host');
+  process.env.MITM_ALLOW_INSECURE = 'false';
 });
 
 test('should send preflight requests', async () => {

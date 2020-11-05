@@ -50,6 +50,10 @@ export default class HeadersHandler {
   public static modifyHeaders(ctx: IMitmRequestContext) {
     ctx.setState(ResourceState.ModifyHeaders);
     const session = ctx.requestSession;
+    if (ctx.isServerHttp2 === false && !ctx.requestLowerHeaders.host) {
+      ctx.requestHeaders.Host = ctx.url.host;
+      ctx.requestLowerHeaders.host = ctx.url.host;
+    }
     if (session.delegate?.modifyHeadersBeforeSend) {
       const updatedHeaders = session.delegate.modifyHeadersBeforeSend({
         method: ctx.method,
