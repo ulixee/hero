@@ -1,17 +1,17 @@
 {
   "name": "@secret-agent/client",
-  "version": "1.1.0-alpha.0",
+  "version": "1.1.0-alpha.1",
   "description": "The client interface for SecretAgent",
   "dependencies": {
-    "@secret-agent/commons": "1.1.0-alpha.0",
-    "@secret-agent/core": "1.1.0-alpha.0",
-    "@secret-agent/core-interfaces": "1.1.0-alpha.0",
+    "@secret-agent/commons": "1.1.0-alpha.1",
+    "@secret-agent/core": "1.1.0-alpha.1",
+    "@secret-agent/core-interfaces": "1.1.0-alpha.1",
     "@secret-agent/replay": "1.1.0-alpha.0",
     "awaited-dom": "^1.1.6",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@secret-agent/testing": "1.1.0-alpha.0",
+    "@secret-agent/testing": "1.1.0-alpha.1",
     "@types/node": "^12.7.11"
   }
 }
