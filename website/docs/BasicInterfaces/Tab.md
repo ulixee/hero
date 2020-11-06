@@ -10,17 +10,17 @@ When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a
 
 ## Properties
 
-### tab.cookieManager {#cookie-manager}
+### tab.cookieStorage {#cookie-storage}
 
-Returns a [CookieManager](../advanced/cookie-manager) instance to get/set/delete Tab cookies.
+Returns a [CookieStorage](../advanced/cookie-storage) instance to get/set/delete Tab cookies.
 
-#### **Type**: `CookieManager`
+#### **Type**: [`CookieStorage`](../advanced/cookie-storage)
 
 ### tab.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document of the tab.
 
-#### **Type**: `SuperDocument`
+#### **Type**: [`SuperDocument`](../awaited-dom/super-document)
 
 ### tab.lastCommandId {#lastCommandId}
 
@@ -32,13 +32,13 @@ An execution point that refers to a command run on this SecretAgent instance (`w
 
 Returns a reference to the [Storage](../awaited-dom/storage) object managing localStorage for the tab.
 
-#### **Type**: `Storage`
+#### **Type**: [`Storage`](../awaited-dom/storage)
 
 ### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
 Returns a reference to the [Storage](../awaited-dom/storage) object managing sessionStorage for the tab.
 
-#### **Type**: `Storage`
+#### **Type**: [`Storage`](../awaited-dom/storage)
 
 ### tab.tabId {#tabid}
 
@@ -54,7 +54,7 @@ The url of the active tab.
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a Request object that can be sent to [tab.fetch(request)](#fetch).
+Returns a constructor for a [Request](../awaited-dom/request) object that can be sent to [tab.fetch(request)](#fetch).
 
 ```js
 const agent = await new SecretAgent();
@@ -68,7 +68,7 @@ const request = new Request(url, {
 const response = await fetch(request);
 ```
 
-#### **Type**: `Request`
+#### **Type**: [`Request`](../awaited-dom/request)
 
 ## Methods
 
@@ -89,7 +89,7 @@ Perform a native "fetch" request in the current tab context.
   - Inbound Body currently supports: `string`, `ArrayBuffer`, `null`.
   - Not supported: `Blob`, `FormData`, `ReadableStream`, `URLSearchParams`
 
-#### **Returns**: `Promise<Response>`
+#### **Returns**: [`Promise<Response>`](../awaited-dom/response)
 
 ```js
 const agent = new SecretAgent();
@@ -118,8 +118,6 @@ const response = await agent.fetch(url, {
 Make this tab the `activeTab` within a browser, which directs many SecretAgent methods to this tab.
 
 #### **Returns**: `Promise`
-
-See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [Emulators](../advanced/emulators) and [Humanoids](../advanced/humanoids).
 
 ### tab.getJsValue*(path)* {#get-js-value}
 
@@ -157,7 +155,7 @@ Executes a navigation request for the document associated with the parent Secret
 
 - locationHref `string` The location to navigate to.
 
-#### **Returns**: `Promise<Resource>` The loaded resource representing this page.
+#### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
 
 ### tab.isElementVisible*(element)* {#is-element-visible}
 
@@ -170,7 +168,7 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Arguments**:
 
-- element `SuperElement`. The element to determine visibility.
+- element [`SuperElement`](../awaited-dom/super-element). The element to determine visibility.
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
@@ -186,7 +184,7 @@ Wait until a specific element is present in the dom.
 
 #### **Arguments**:
 
-- element `SuperElement`
+- element [`SuperElement`](../awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds.
   - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
@@ -268,14 +266,14 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
 
 - filter `object` Accepts any of the following:
   - url `string | RegExp` A string or regex to match a url on
-  - type `ResourceType` A resource type to filter on
+  - type [`ResourceType`](../advanced/resource#type) A resource type to filter on
   - filterFn `function(resource: Resource, done: Callback): boolean` A function to allow further filtering of returned resources. Return true to include resources, false to exclude. Calling `done` finishes execution.
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds
   - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`
   - sinceCommandId `number`. A `commandId` from which to look for resources.
 
-#### **Returns**: `Promise<Resource[]>`
+#### **Returns**: [`Promise<Resource[]>`](../advanced/resource)
 
 ```js
 const agent = new SecretAgent();
@@ -324,7 +322,7 @@ Waits until the specified web socket has been received.
 
 - filename `number | RegExp`
 
-#### **Returns**: `Promise<WebSocket>`
+#### **Returns**: [`Promise<WebSocketResource>`](../advanced/websocket-resource)
 
 ## Events
 
@@ -336,4 +334,4 @@ Emitted for each resource request received by the webpage.
 
 #### **Arguments in callback**:
 
-- `Resource | WebsocketResource`
+- [`Resource`](../advanced/resource) | [`WebsocketResource`](../advanced/websocket-resource)

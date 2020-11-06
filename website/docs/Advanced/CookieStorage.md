@@ -17,16 +17,15 @@ const cookieStorage = agent.activeTab.cookieStorage;
 
 Returns the number of cookies for the current tab origin;
 
-#### **Type**: `cookieStorage`
+#### **Type**: `Promise<number>`
 
 ## Methods
 
 ### cookieStorage.getItems*()*
 
-Gets all cookies for the current tab origin as `ICookie` objects.
+Gets all cookies for the current tab origin as `Cookie` objects.
 
-`ICookie` properties:
-
+#### `Cookie` properties: {#cookie}
 - name `string`. The cookie name.
 - value `string`. The cookie value.
 - domain `string`. The cookie domain.
@@ -37,7 +36,7 @@ Gets all cookies for the current tab origin as `ICookie` objects.
 - secure `boolean`. Whether the cookie should only apply to https secured urls.
 - sameSite `Strict | Lax | None`. The same site setting for the cookie.
 
-#### **Returns**: `Promise<ICookie[]>`
+#### **Returns**: [`Promise<Cookie[]>`](#cookie)
 
 ### cookieStorage.getItem*(keyName)*
 
@@ -47,7 +46,7 @@ Gets the cookie with the given `name` equal to `keyName`.
 
 - keyName `string`. The cookie name to retrieve.
 
-#### **Returns**: `Promise<ICookie>`
+#### **Returns**: [`Promise<Cookie[]>`](#cookie)
 
 ### cookieStorage.key*(index)*
 

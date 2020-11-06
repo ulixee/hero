@@ -1,4 +1,5 @@
 # AwaitedDOM
+
 > The AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script context.
 
 ## What Properties and Methods Can I Use?
@@ -9,7 +10,7 @@
 
 ## Introducing Supers
 
-Supers give you access to all properties and methods of dependent classes.   
+Supers give you access to all properties and methods of dependent classes.
 
  |   |   | 
  | --- | --- | 
@@ -24,7 +25,8 @@ Supers give you access to all properties and methods of dependent classes.
  |   |   | 
  | --- | --- | 
  | [Document](/docs/awaited-dom/document) | [DocumentFragment](/docs/awaited-dom/document-fragment)
-[HTMLDocument](/docs/awaited-dom/html-document) | [XMLDocument](/docs/awaited-dom/xml-document) | 
+[HTMLDocument](/docs/awaited-dom/html-document) | [XMLDocument](/docs/awaited-dom/xml-document)
+[XPathEvaluator](/docs/awaited-dom/x-path-evaluator) |  | 
 
 
 ## Node Interfaces
@@ -93,10 +95,19 @@ Supers give you access to all properties and methods of dependent classes.
 [NodeList](/docs/awaited-dom/node-list) | [RadioNodeList](/docs/awaited-dom/radio-node-list) | 
 
 
+## XPath Interfaces
+
+ |   |   | 
+ | --- | --- | 
+ | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathExpression](/docs/awaited-dom/x-path-expression)
+[XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver) | [XPathResult](/docs/awaited-dom/x-path-result) | 
+
+
 ## Miscellaneous Interfaces
 
  |   |   | 
  | --- | --- | 
- | [Attr](/docs/awaited-dom/attr) | [EventTarget](/docs/awaited-dom/event-target)
-[Storage](/docs/awaited-dom/storage) |  | 
+ | [Attr](/docs/awaited-dom/attr) | [CharacterData](/docs/awaited-dom/character-data)
+[EventTarget](/docs/awaited-dom/event-target) | [Request](/docs/awaited-dom/request)
+[Response](/docs/awaited-dom/response) | [Storage](/docs/awaited-dom/storage) | 
 

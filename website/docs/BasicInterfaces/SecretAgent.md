@@ -55,19 +55,13 @@ const SecretAgent = require('secret-agent');
 
 Returns a reference to the currently active tab.
 
-#### **Type**: `Tab`
-
-### agent.cookies {#cookies}
-
-Returns an array of cookies across all open tabs.
-
-#### **Type**: `Promise<Cookie[]>`
+#### **Type**: [`Tab`](./tab)
 
 ### agent.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document that the active tab contains.
 
-#### **Type**: `SuperDocument`
+#### **Type**: [`SuperDocument`](../awaited-dom/super-document)
 
 Alias for [activeTab.document](./tab#document)
 
@@ -93,17 +87,11 @@ You can set this property when calling [new SecretAgent()](./secret-agent#constr
 
 #### **Type**: `Promise<string>`
 
-### agent.storage {#storage}
-
-Returns a reference to the [Storage](./storage) instance controlling storage retrieval and manipulation for the agent.
-
-#### **Type**: `Storage`
-
 ### agent.tabs {#tabs}
 
 Returns all open browser tabs.
 
-#### **Type**: `Promise<Tab[]>`
+#### **Type**: [`Promise<Tab[]>`](./tab)
 
 ### agent.url {#url}
 
@@ -115,9 +103,9 @@ Alias for [Tab.url](./tab#url)
 
 ### agent.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request(tab)](./tab#request-type). These objects can be used to run browser-native [tab.fetch](./tab#fetch) requests from the context of the Tab document.
+Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](./tab#request-type). These objects can be used to run browser-native [tab.fetch](./tab#fetch) requests from the context of the Tab document.
 
-#### **Type**: `Request`
+#### **Type**: [`Request`](../awaited-dom/request)
 
 Alias for [Tab.Request](./tab#request-tab)
 
@@ -129,7 +117,7 @@ Executes a click interaction. This is a shortcut for `agent.interact({ click: mo
 
 #### **Arguments**:
 
-- mousePosition `MousePosition`
+- mousePosition [`MousePosition`](./interactions#mouseposition)
 
 #### **Returns**: `Promise`
 
@@ -164,7 +152,7 @@ Update existing configuration settings.
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
   - renderingOptions `string[]`. Controls enabled browser rendering features.
-  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
+  - showReplay `boolean`. Whether or not to show the [Replay UI](../advanced/session-replay). Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
 
 #### **Returns**: `Promise`
 
@@ -174,7 +162,7 @@ See the [Configuration](../overview/configuration) page for more details on `opt
 
 Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `new SecretAgent({ userProfile: serialized })`. See the [UserProfile page](../advanced/user-profile) for more details.
 
-#### **Returns**: `Promise<IUserProfile>`
+#### **Returns**: [`Promise<IUserProfile>`](../advanced/user-profile)
 
 ### agent.interact*(interaction\[, interaction, ...])* {#interact}
 
@@ -182,7 +170,7 @@ Executes a series of mouse and keyboard interactions.
 
 #### **Arguments**:
 
-- interaction `Interaction`
+- interaction [`Interaction`](./interactions)
 
 #### **Returns**: `Promise`
 
@@ -204,7 +192,7 @@ Executes a keyboard interactions. This is a shortcut for `agent.interact({ type:
 
 #### **Arguments**:
 
-- keyboardInteraction `KeyboardInteraction`
+- keyboardInteraction [`KeyboardInteraction`](./interactions#the-four-keyboard-commands)
 
 #### **Returns**: `Promise`
 
@@ -226,7 +214,7 @@ Alias for [Tab.focus()](./tab#focus)
 
 Wait for a new tab to be created. This can occur either via a `window.open` from within the page javascript, or a Link with a target opening in a new tab or window.
 
-#### **Returns**: `Promise<Tab>`
+#### **Returns**: [`Promise<Tab>`](./tab)
 
 ```js
 const agent = await new SecretAgent();

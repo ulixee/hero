@@ -3075,6 +3075,11 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
 
+"@types/parse5@^5.0.2":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@types/parse5/-/parse5-5.0.3.tgz#e7b5aebbac150f8b5fdd4a46e7f0bd8e65e19109"
+  integrity sha512-kUNnecmtkunAoQ3CnjmMkzNU/gtxG8guhi+Fk2U/kOpIKjIMKnXGp4IJCgQJrXSgMsWYimYG4TGjz/UzbGEBTw==
+
 "@types/pluralize@^0.0.29":
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/pluralize/-/pluralize-0.0.29.tgz#6ffa33ed1fc8813c469b859681d09707eb40d03c"
@@ -3158,6 +3163,11 @@
   dependencies:
     source-map "^0.6.1"
 
+"@types/underscore@^1.9.4":
+  version "1.10.24"
+  resolved "https://registry.yarnpkg.com/@types/underscore/-/underscore-1.10.24.tgz#dede004deed3b3f99c4db0bdb9ee21cae25befdd"
+  integrity sha512-T3NQD8hXNW2sRsSbLNjF/aBo18MyJlbw0lSpQHB/eZZtScPdexN4HSa8cByYwTw9Wy7KuOFr81mlDQcQQaZ79w==
+
 "@types/unist@*", "@types/unist@^2.0.0", "@types/unist@^2.0.2":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-2.0.3.tgz#9c088679876f374eb5983f150d4787aa6fb32d7e"
@@ -3178,6 +3188,11 @@
     "@types/node" "*"
     "@types/unist" "*"
     "@types/vfile-message" "*"
+
+"@types/w3c-xmlserializer@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/w3c-xmlserializer/-/w3c-xmlserializer-2.0.1.tgz#bdd9431082390ad779857a903bf644a80eb835e5"
+  integrity sha512-eoiofcSieIP36LD581OZXcTIab75+n9+chJEwBTGLhkevbOElgZ/aDABe08wb8PIG3EAqxthDX7H2Y9FqV3D/A==
 
 "@types/webpack-dev-server@^3.11.0":
   version "3.11.0"
@@ -4348,10 +4363,10 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.6.tgz#7a73263b47244010a7223a82e498107e9838f20e"
-  integrity sha512-cO2nqKWj+jD4Rd9h0VftamsqMK9DOzKhSOakZzTF5KNrTuX+lxqGhFZCPqRLJ15w899uC6WW19NwrhWbuzf0UQ==
+awaited-dom@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.7.tgz#194abc09e1ffc9b25393d43e0ec595fe5cc20f02"
+  integrity sha512-FiA7OsMUJRkGpsP4fanHL9L+NNe5cXud9kIebCd+PULdV0m2pUf8W3DgtE6r64/ErVbGIHFamM0Xljg92xSLWQ==
 
 aws-sign2@~0.7.0:
   version "0.7.0"
@@ -13047,6 +13062,19 @@ node-sass@^4.12.0, node-sass@^4.14.1:
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
 
+"noderdom-detached@git://github.com/ulixee/noderdom-detached.git#dist":
+  version "0.3.2"
+  resolved "git://github.com/ulixee/noderdom-detached.git#25b6180898bec798a18b2821a4ce57896b688da9"
+  dependencies:
+    "@types/parse5" "^5.0.2"
+    "@types/underscore" "^1.9.4"
+    "@types/w3c-xmlserializer" "^2.0.0"
+    nwsapi "^2.2.0"
+    parse5 "^5.1.1"
+    saxes "^4.0.2"
+    underscore "^1.9.2"
+    w3c-xmlserializer "https://github.com/ulixee/w3c-xmlserializer.git"
+
 noms@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/noms/-/noms-0.0.0.tgz#da8ebd9f3af9d6760919b27d9cdc8092a7332859"
@@ -15819,6 +15847,13 @@ sax@>=0.6.0, sax@^1.2.4, sax@~1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
+saxes@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/saxes/-/saxes-4.0.2.tgz#76f8e762efc96ec4af5f885d8151c50426103165"
+  integrity sha512-EZOTeQ4bgkOaGCDaTKux+LaRNcLNbdbvMH7R3/yjEEULPEmqvkFbFub6DJhJTub2iGMT93CfpZ5LTdKZmAbVeQ==
+  dependencies:
+    xmlchars "^2.2.0"
+
 saxes@^5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/saxes/-/saxes-5.0.1.tgz#eebab953fa3b7608dbe94e5dadb15c888fa6696d"
@@ -17775,6 +17810,11 @@ underscore@*:
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.10.2.tgz#73d6aa3668f3188e4adb0f1943bd12cfd7efaaaf"
   integrity sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
 
+underscore@^1.9.2:
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.11.0.tgz#dd7c23a195db34267186044649870ff1bab5929e"
+  integrity sha512-xY96SsN3NA461qIRKZ/+qox37YXPtSBswMGfiNptr+wrt6ds4HaMw23TP612fEyGekRE6LNRiLYr/aqbHXNedw==
+
 unherit@^1.0.4:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/unherit/-/unherit-1.1.3.tgz#6c9b503f2b41b262330c80e91c8614abdaa69c22"
@@ -18443,6 +18483,12 @@ w3c-xmlserializer@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/w3c-xmlserializer/-/w3c-xmlserializer-2.0.0.tgz#3e7104a05b75146cc60f564380b7f683acf1020a"
   integrity sha512-4tzD0mF8iSiMiNs30BiLO3EpfGLZUT2MSX/G+o7ZywDzliWQ3OPtTZ0PTC3B3ca1UAf4cJMHB+2Bf56EriJuRA==
+  dependencies:
+    xml-name-validator "^3.0.0"
+
+"w3c-xmlserializer@https://github.com/ulixee/w3c-xmlserializer.git":
+  version "2.0.0"
+  resolved "https://github.com/ulixee/w3c-xmlserializer.git#74efc6b7211319a6a14a2c12d86028ca60f4f559"
   dependencies:
     xml-name-validator "^3.0.0"
 

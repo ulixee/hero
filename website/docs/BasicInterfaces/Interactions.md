@@ -22,17 +22,17 @@ Interaction Commands fall into three broad categories:
 
 ## The Six Mouse Commands
 
-- scroll `MousePosition` Scroll page to the desired position.
-- move `MousePosition` Move cursor to the desired position.
-- click `MousePosition` Press and release the mouse button as a single click.
-- clickDown `MousePosition` Press the mouse button.
-- clickUp `MousePosition` Release the mouse button.
-- doubleclick `MousePosition` Press and release the mouse button twice in rapid succession.
+- scroll [`MousePosition`](#mouseposition) Scroll page to the desired position.
+- move [`MousePosition`](#mouseposition) Move cursor to the desired position.
+- click [`MousePosition`](#mouseposition) Press and release the mouse button as a single click.
+- clickDown [`MousePosition`](#mouseposition) Press the mouse button.
+- clickUp [`MousePosition`](#mouseposition) Release the mouse button.
+- doubleclick [`MousePosition`](#mouseposition) Press and release the mouse button twice in rapid succession.
 
 #### **MousePosition**:
-Every mouse command include a `MousePosition` value, which specifies where the interaction takes place. It accepts three possible options:
+Every mouse command include a [`MousePosition`](#mouseposition) value, which specifies where the interaction takes place. It accepts three possible options:
 - `[x, y]` These are pixels relative to the top-left corner of the viewport.
-- `SuperElement` Any element from the AwaitedDOM, which are translated into x/y coordinates.
+- [`SuperElement`](../awaited-dom/super-element) Any element from the AwaitedDOM, which are translated into x/y coordinates.
 - `null` Leave the mouse in its current position.
 
 For example, here's how to hover over a link:
@@ -65,8 +65,8 @@ Import KeyboardKeys from IKeyboardLayoutUS for all valid KeyboardChar values (e.
 
 ## The Three WaitFor Commands
 
-- waitForNode: `SuperNode`
-- waitForElementVisible: `SuperElement`
+- waitForNode: [`SuperNode`](../awaited-dom/super-node)
+- waitForElementVisible: [`SuperElement`](../awaited-dom/super-element)
 - waitForMillis: `number`
 
 Read [this StackOverflow discussion](https://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object) on the difference between Nodes and Elements.

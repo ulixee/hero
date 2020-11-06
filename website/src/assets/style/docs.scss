@@ -25,7 +25,7 @@
   h1, h2, h3 {
     margin-top: 1rem;
 
-    a {
+    a[aria-hidden=true] {
       float: left;
       top: 0.12em;
       margin-left: -1.2em;
@@ -145,7 +145,7 @@
     opacity: .8;
     margin-bottom: 10px }
 
-  h1 a, h4 a, h5 a, h6 a {
+  h1 a[aria-hidden=true], h4 a[aria-hidden=true], h5 a[aria-hidden=true], h6 a[aria-hidden=true] {
     display: none;
   }
 

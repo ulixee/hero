@@ -78,6 +78,7 @@ function tryBuild(programName) {
   if (isGoInstalled) {
     if (compile()) {
       fs.renameSync(`${__dirname}/lib/${programName}`, `${outDir}/${programName}`);
+      return true;
     }
   }
   return false;

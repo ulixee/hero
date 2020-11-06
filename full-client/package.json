@@ -15,7 +15,7 @@
     "@secret-agent/mitm": "1.1.0-alpha.1",
     "@secret-agent/testing": "1.1.0-alpha.1",
     "@types/node": "^12.7.11",
-    "awaited-dom": "^1.1.6",
+    "awaited-dom": "^1.1.7",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "ws": "^7.3.1"
