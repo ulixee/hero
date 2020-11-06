@@ -1,6 +1,6 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Log from '@secret-agent/commons/Logger';
-import Chrome83 from "@secret-agent/emulate-chrome-83/index";
+import Chrome83 from '@secret-agent/emulate-chrome-83/index';
 import { TestServer } from './server';
 import Puppet from '../index';
 import IPuppetContext from '../interfaces/IPuppetContext';
@@ -35,10 +35,8 @@ describe.each([
   });
 
   afterAll(async () => {
-    await server.stop();
-    await context.close();
-    await puppet.close();
-  });
+    await Promise.all([server.stop(), context.close(), puppet.close()]).catch();
+  }, 30e3);
 
   it('should be able to capture navigation events under load', async () => {
     const concurrent = new Array(50).fill(0).map(async () => {

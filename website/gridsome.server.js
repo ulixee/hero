@@ -1,5 +1,6 @@
+const pkg = require('./package.json');
 module.exports = api => {
   api.loadSource(async ({ addMetadata, addCollection }) => {
-    addMetadata('browserVersion', '1.0.0-alpha')
+    addMetadata('browserVersion', pkg.version);
   });
 };

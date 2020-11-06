@@ -1,63 +1,57 @@
 # [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> DocumentFragment
 
-<div class='overview'><span class="seoSummary">The <strong><code>DocumentFragment</code></strong> interface represents a minimal document object that has no parent. It is used as a lightweight version of <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code></a> that stores a segment of a document structure comprised of nodes just like a standard document.</span> The key difference is due to the fact that&nbsp;the&nbsp;document fragment isn't part of the active document tree structure.&nbsp;Changes made to the fragment don't affect the document (even on&nbsp;<a class="glossaryLink" href="/en-US/docs/Glossary/reflow" title="reflow: Reflow&nbsp;happens when a browser must process and draw part or all of a webpage again, such as after an update on an interactive site.">reflow</a>)&nbsp;or incur any performance impact when changes are made.</div>
+<div class='overview'><span class="seoSummary">The <strong><code>DocumentFragment</code></strong> interface represents a minimal document object that has no parent. It is used as a lightweight version of <code>Document</code> that stores a segment of a document structure comprised of nodes just like a standard document.</span> The key difference is due to the fact that&nbsp;the&nbsp;document fragment isn't part of the active document tree structure.&nbsp;Changes made to the fragment don't affect the document (even on&nbsp;reflow)&nbsp;or incur any performance impact when changes are made.</div>
 
 ## Properties
 
 ### doc.baseURI <div class="specs"><i>W3C</i></div> {#baseURI}
 
-Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> representing the base URL of the document containing the <code>Node
-</code>.
+Returns a `string` representing the base URL of the document containing the <code>Node</code>.
 
-#### **Type**: `string`
+#### **Type**: `Promise<string>`
 
 ### doc.childNodes <div class="specs"><i>W3C</i></div> {#childNodes}
 
-Returns a live <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code></a> containing all the children of this node. <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code></a> being live means that if the children of the <code>Node</code> change, the <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code>
-</a> object is automatically updated.
+Returns a live <code>NodeList</code> containing all the children of this node. <code>NodeList</code> being live means that if the children of the <code>Node</code> change, the <code>NodeList</code> object is automatically updated.
 
-#### **Type**: `SuperNodeList`
+#### **Type**: [`SuperNodeList`](./super-node-list)
 
 ### doc.firstChild <div class="specs"><i>W3C</i></div> {#firstChild}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the first direct child node of the node, or <code>null
-</code> if the node has no child.
+Returns a <code>Node</code> representing the first direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: `SuperNode`
+#### **Type**: [`SuperNode`](./super-node)
 
 ### doc.isConnected <div class="specs"><i>W3C</i></div> {#isConnected}
 
-A boolean indicating whether or not the Node is connected (directly or indirectly) to the context object, e.g. the <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code></a> object in the case of the normal DOM, or the <a href="/en-US/docs/Web/API/ShadowRoot" title="The ShadowRoot interface of the Shadow DOM API is the root node of a DOM subtree that is rendered separately from a document's main DOM tree."><code>ShadowRoot</code>
-</a> in the case of a shadow DOM.
+A boolean indicating whether or not the Node is connected (directly or indirectly) to the context object, e.g. the <code>Document</code> object in the case of the normal DOM, or the <code>ShadowRoot</code> in the case of a shadow DOM.
 
-#### **Type**: `boolean`
+#### **Type**: `Promise<boolean>`
 
 ### doc.lastChild <div class="specs"><i>W3C</i></div> {#lastChild}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the last direct child node of the node, or <code>null
-</code> if the node has no child.
+Returns a <code>Node</code> representing the last direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: `SuperNode`
+#### **Type**: [`SuperNode`](./super-node)
 
 ### doc.nextSibling <div class="specs"><i>W3C</i></div> {#nextSibling}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the next node in the tree, or <code>null
-</code> if there isn't such node.
+Returns a <code>Node</code> representing the next node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: `SuperNode`
+#### **Type**: [`SuperNode`](./super-node)
 
 ### doc.nodeName <div class="specs"><i>W3C</i></div> {#nodeName}
 
-Returns a <a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the name of the <code>Node</code>. The structure of the name will differ with the node type. E.g. An <a href="/en-US/docs/Web/API/HTMLElement" title="The HTMLElement interface represents any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it."><code>HTMLElement</code></a> will contain the name of the corresponding tag, like <code>'audio'</code> for an <a href="/en-US/docs/Web/API/HTMLAudioElement" title="The HTMLAudioElement interface provides access to the properties of <audio> elements, as well as methods to manipulate them."><code>HTMLAudioElement</code></a>, a <a href="/en-US/docs/Web/API/Text" title="The Text interface represents the textual content of Element or Attr. If an element has no markup within its content, it has a single child implementing Text that contains the element's text. However, if the element contains markup, it is parsed into information items and Text nodes that form its children."><code>Text</code></a> node will have the <code>'#text'</code> string, or a <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code></a> node will have the <code>'#document'
-</code> string.
+Returns a `string` containing the name of the <code>Node</code>. The structure of the name will differ with the node type. E.g. An <code>HTMLElement</code> will contain the name of the corresponding tag, like <code>'audio'</code> for an <code>HTMLAudioElement</code>, a <code>Text</code> node will have the <code>'#text'</code> string, or a <code>Document</code> node will have the <code>'#document'</code> string.
 
-#### **Type**: `string`
+#### **Type**: `Promise<string>`
 
 ### doc.nodeType <div class="specs"><i>W3C</i></div> {#nodeType}
 
-Returns an <code>unsigned short
-</code> representing the type of the node. Possible values are:
-	<table class="standard-table">
+Returns an <code>unsigned short</code> representing the type of the node. Possible values are:
+	
+<code class="language-html">
+    <table class="standard-table">
 		<thead>
 			<tr>
 				<th scope="col">Name</th>
@@ -115,233 +109,218 @@ Returns an <code>unsigned short
 			</tr>
 		</tbody>
 	</table>
+</code>
+
 	
 
-#### **Type**: `number`
+#### **Type**: `Promise<number>`
 
 ### doc.nodeValue <div class="specs"><i>W3C</i></div> {#nodeValue}
 
 Returns / Sets the value of the current node.
 
-#### **Type**: `string`
+#### **Type**: `Promise<string>`
 
 ### doc.ownerDocument <div class="specs"><i>W3C</i></div> {#ownerDocument}
 
-Returns the <a href="/en-US/docs/Web/API/Document" title="The Document interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree."><code>Document</code></a> that this node belongs to. If the node is itself a document, returns <code>null
-</code>.
+Returns the <code>Document</code> that this node belongs to. If the node is itself a document, returns <code>null</code>.
 
-#### **Type**: `SuperDocument`
+#### **Type**: [`SuperDocument`](./super-document)
 
 ### doc.parentElement <div class="specs"><i>W3C</i></div> {#parentElement}
 
-Returns an <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> that is the parent of this node. If the node has no parent, or if that parent is not an <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a>, this property returns <code>null
-</code>.
+Returns an <code>Element</code> that is the parent of this node. If the node has no parent, or if that parent is not an <code>Element</code>, this property returns <code>null</code>.
 
-#### **Type**: `SuperElement`
+#### **Type**: [`SuperElement`](./super-element)
 
 ### doc.parentNode <div class="specs"><i>W3C</i></div> {#parentNode}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null
-</code>.
+Returns a <code>Node</code> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null</code>.
 
-#### **Type**: `SuperNode`
+#### **Type**: [`SuperNode`](./super-node)
 
 ### doc.previousSibling <div class="specs"><i>W3C</i></div> {#previousSibling}
 
-Returns a <a href="/en-US/docs/Web/API/Node" title="Node is an interface from which various types of DOM API objects inherit, allowing those types to be treated similarly; for example, inheriting the same set of methods, or being testable in the same way."><code>Node</code></a> representing the previous node in the tree, or <code>null
-</code> if there isn't such node.
+Returns a <code>Node</code> representing the previous node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: `SuperNode`
+#### **Type**: [`SuperNode`](./super-node)
 
 ### doc.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
 Returns / Sets the textual content of an element and all its descendants.
 
-#### **Type**: `string`
+#### **Type**: `Promise<string>`
 
 ### doc.childElementCount <div class="specs"><i>W3C</i></div> {#childElementCount}
 
-Returns the number of children of this <code>ParentNode
-</code> which are elements.
+Returns the number of children of this <code>ParentNode</code> which are elements.
 
-#### **Type**: `number`
+#### **Type**: `Promise<number>`
 
 ### doc.children <div class="specs"><i>W3C</i></div> {#children}
 
-Returns a live <a href="/en-US/docs/Web/API/HTMLCollection" title="The HTMLCollection interface represents a generic collection (array-like object similar to arguments) of elements (in document order) and offers methods and properties for selecting from the list."><code>HTMLCollection</code></a> containing all of the <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code></a> objects that are children of this <code>ParentNode
-</code>, omitting all of its non-element nodes.
+Returns a live <code>HTMLCollection</code> containing all of the <code>Element</code> objects that are children of this <code>ParentNode</code>, omitting all of its non-element nodes.
 
-#### **Type**: `SuperHTMLCollection`
+#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
 
 ### doc.firstElementChild <div class="specs"><i>W3C</i></div> {#firstElementChild}
 
-Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null
-</code> if there is none.
+Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: `SuperElement`
+#### **Type**: [`SuperElement`](./super-element)
 
 ### doc.lastElementChild <div class="specs"><i>W3C</i></div> {#lastElementChild}
 
-Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null
-</code> if there is none.
+Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: `SuperElement`
+#### **Type**: [`SuperElement`](./super-element)
 
 ## Methods
 
-### doc.compareDocumentPosition*(...args)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
+### doc.compareDocumentPosition*(other)* <div class="specs"><i>W3C</i></div> {#compareDocumentPosition}
 
 Compares the position of the current node against another node in any other document.
 
 #### **Arguments**:
 
 
- - none
+ - other [`Node`](./node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<number>`
 
-### doc.contains*(...args)* <div class="specs"><i>W3C</i></div> {#contains}
+### doc.contains*(other)* <div class="specs"><i>W3C</i></div> {#contains}
 
-Returns a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code>
-</a> value indicating whether or not a node is a descendant of the calling node.
+Returns a `boolean` value indicating whether or not a node is a descendant of the calling node.
 
 #### **Arguments**:
 
 
- - none
+ - other [`Node`](./node). Needs content.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<boolean>`
 
-### doc.getRootNode*(...args)* <div class="specs"><i>W3C</i></div> {#getRootNode}
+### doc.getRootNode*(options?)* <div class="specs"><i>W3C</i></div> {#getRootNode}
 
 Returns the context object's root which optionally includes the shadow root if it is available.&nbsp;
 
 #### **Arguments**:
 
 
- - none
+ - options `GetRootNodeOptions`. An object that sets options for getting the root node. The available options are:
+     <ul>
+      <li><code>composed</code>: A `boolean` that indicates whether the shadow root should be returned (<code>false</code>, the default), or a root node beyond shadow root (<code>true</code>).</li>
+     </ul>
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: [`SuperNode`](./super-node)
 
-### doc.hasChildNodes*(...args)* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
+### doc.hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
-Returns a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code>
-</a> indicating whether or not the element has any child nodes.
+Returns a `boolean` indicating whether or not the element has any child nodes.
 
-#### **Arguments**:
+#### **Returns**: `Promise<boolean>`
 
+### doc.isDefaultNamespace*(namespace)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
 
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### doc.isDefaultNamespace*(...args)* <div class="specs"><i>W3C</i></div> {#isDefaultNamespace}
-
-Accepts a namespace URI as an argument and returns a&nbsp;<a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code></a>&nbsp;with a value of&nbsp;<code>true</code>&nbsp;if the namespace is the default namespace on the given node or&nbsp;<code>false
-</code>&nbsp;if not.
+Accepts a namespace URI as an argument and returns a&nbsp;`boolean`&nbsp;with a value of&nbsp;<code>true</code>&nbsp;if the namespace is the default namespace on the given node or&nbsp;<code>false</code>&nbsp;if not.
 
 #### **Arguments**:
 
 
- - none
+ - namespace `string`. <code>namespaceURI</code> is a string representing the namespace against which the element will be checked.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<boolean>`
 
-### doc.isEqualNode*(...args)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
+### doc.isEqualNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isEqualNode}
 
-Returns a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code>
-</a> which indicates whether or not two nodes are of the same type and all their defining data points match.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### doc.isSameNode*(...args)* <div class="specs"><i>W3C</i></div> {#isSameNode}
-
-Returns a <a href="/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean" title="The Boolean object is an object wrapper for a boolean value."><code>Boolean</code>
-</a> value indicating whether or not the two nodes are the same (that is, they reference the same object).
+Returns a `boolean` which indicates whether or not two nodes are of the same type and all their defining data points match.
 
 #### **Arguments**:
 
 
- - none
+ - otherNode [`Node`](./node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<boolean>`
 
-### doc.lookupNamespaceURI*(...args)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
+### doc.isSameNode*(otherNode)* <div class="specs"><i>W3C</i></div> {#isSameNode}
 
-Accepts a prefix and returns the namespace URI associated with it on the given node if found (and&nbsp;<code>null</code>&nbsp;if not). Supplying&nbsp;<code>null
-</code>&nbsp;for the prefix will return the default namespace.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### doc.lookupPrefix*(...args)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
-
-Returns a&nbsp;<a href="/en-US/docs/Web/API/DOMString" title="DOMString is a UTF-16 String. As JavaScript already uses such strings, DOMString is mapped directly to a String."><code>DOMString</code></a> containing the prefix for a given namespace URI, if present, and&nbsp;<code>null
-</code>&nbsp;if not. When multiple prefixes are possible, the result is implementation-dependent.
+Returns a `boolean` value indicating whether or not the two nodes are the same (that is, they reference the same object).
 
 #### **Arguments**:
 
 
- - none
+ - otherNode [`Node`](./node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<boolean>`
 
-### doc.normalize*(...args)* <div class="specs"><i>W3C</i></div> {#normalize}
+### doc.lookupNamespaceURI*(prefix)* <div class="specs"><i>W3C</i></div> {#lookupNamespaceURI}
+
+Accepts a prefix and returns the namespace URI associated with it on the given node if found (and&nbsp;<code>null</code>&nbsp;if not). Supplying&nbsp;<code>null</code>&nbsp;for the prefix will return the default namespace.
+
+#### **Arguments**:
+
+
+ - prefix `string`. The prefix to look for. If this parameter is <code>null</code>, the method will return the default namespace URI, if any.
+
+#### **Returns**: `Promise<string>`
+
+### doc.lookupPrefix*(namespace)* <div class="specs"><i>W3C</i></div> {#lookupPrefix}
+
+Returns a&nbsp;`string` containing the prefix for a given namespace URI, if present, and&nbsp;<code>null</code>&nbsp;if not. When multiple prefixes are possible, the result is implementation-dependent.
+
+#### **Arguments**:
+
+
+ - namespace `string`. Needs content.
+
+#### **Returns**: `Promise<string>`
+
+### doc.normalize*()* <div class="specs"><i>W3C</i></div> {#normalize}
 
 Clean up all the text nodes under this element (merge adjacent, remove empty).
 
-#### **Arguments**:
+#### **Returns**: `Promise<void>`
 
-
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### doc.getElementById*(...args)* <div class="specs"><i>W3C</i></div> {#getElementById}
+### doc.getElementById*(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
 
 Needs content.
 
 #### **Arguments**:
 
 
- - none
+ - elementId `string`. Needs content.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: [`SuperElement`](./super-element)
 
-### doc.querySelector*(...args)* <div class="specs"><i>W3C</i></div> {#querySelector}
+### doc.querySelector*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
-Returns the first <a href="/en-US/docs/Web/API/Element" title="Element is the most general base class from which all element objects (i.e. objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element."><code>Element</code>
-</a> with the current element as root that matches the specified group of selectors.
-
-#### **Arguments**:
-
-
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### doc.querySelectorAll*(...args)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
-
-Returns a <a href="/en-US/docs/Web/API/NodeList" title="NodeList objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll()."><code>NodeList</code>
-</a> representing a list of elements with the current element as root that matches the specified group of selectors.
+Returns the first <code>Element</code> with the current element as root that matches the specified group of selectors.
 
 #### **Arguments**:
 
 
- - none
+ - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid compound selector list supported by the browser; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: [`SuperElement`](./super-element)
+
+### doc.querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
+
+Returns a <code>NodeList</code> representing a list of elements with the current element as root that matches the specified group of selectors.
+
+#### **Arguments**:
+
+
+ - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid CSS selector string; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
+
+#### **Returns**: [`SuperNodeList`](./super-node-list)
 
 ## Unimplemented Specs
 
+#### Methods
 
-This class has 0 unimplemented properties and 10 unimplemented methods.
+ |   |   | 
+ | --- | --- | 
+ | `appendChild()` | `cloneNode()`
+`insertBefore()` | `removeChild()`
+`replaceChild()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()`
+`append()` | `prepend()` | 

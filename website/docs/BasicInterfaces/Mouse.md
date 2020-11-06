@@ -21,8 +21,8 @@ Interactions are meta command objects that provide high-level guidance for how t
 
 #### **Properties**:
 - \[`Commands`]: `MousePosition`
-- waitForNode: `SuperNode`
-- waitForElementVisible: `SuperElement`
+- waitForNode: [`SuperNode`](../awaited-dom/super-node)
+- waitForElementVisible: [`SuperElement`](../awaited-dom/super-element)
 - waitForMillis: `number`
 
 ### The Five Commands
@@ -38,7 +38,7 @@ Commands as given as a key/value combination. There are five primary keys:
 #### **Value**:
 Every command must include a `MousePosition` value specifying where the interaction takes place. It accepts three possible options:
 - `[x, y]` These are pixels relative to the top-left corner of the viewport.
-- `SuperElement` Any element from the AwaitedDOM which will be translated into x/y.
+- [`SuperElement`](../awaited-dom/super-element) Any element from the AwaitedDOM which will be translated into x/y.
 - `null` Leave the mouse where it currently sits.
 
 For example, here's how you would hover over a link:

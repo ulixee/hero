@@ -10,13 +10,13 @@ The WebsocketResource class is returned from `window.waitForResource`. It contai
 
 The Http Upgrade request used to create this Websocket.
 
-#### **Returns** `ResourceRequest`
+#### **Returns** [`ResourceRequest`](./resource-request)
 
 ### response
 
 A simulation of an HTTP response pieced together from the socket headers returned during a normal HTTP upgrade.
 
-#### **Returns** `ResourceResponse`
+#### **Returns** [`ResourceResponse`](./resource-response)
 
 ### url
 
@@ -44,48 +44,48 @@ Invalid call. Throws an Error. To subscribe to messages, see `on('message', call
 
 ## Methods
 
-### on<em>('message', callback: `WebsocketMessage` => any)</em>
+### on<em>('message', callback: [`WebsocketMessage`](#websocket-message) => any)</em> {#on}
 
 Called on each websocket message returned.
 
-`WebsocketMessages` contain:
+#### `WebsocketMessage` contain: {#websocket-message}
 - message `string | Buffer` - the contents of the message
 - source `server | client` - where the message originated
 
 #### **Returns** `Promise<void>`
 
-### off<em>('message', callback: `WebsocketMessage` => any)</em>
+### off<em>('message', callback: [`WebsocketMessage`](#websocket-message) => any)</em> {#off}
 
 Unsubscribe to messages.
 
 #### **Returns** `Promise<void>`
 
-### once<em>('message', callback: `WebsocketMessage` => any)</em>
+### once<em>('message', callback: [`WebsocketMessage`](#websocket-message) => any)</em> {#once}
 
 Subscribe to a single websocket message
 
 #### **Returns** `Promise<void>`
 
-### addEventListener<em>('message', callback: `WebsocketMessage` => any)</em>
+### addEventListener<em>('message', callback: [`WebsocketMessage`](#websocket-message) => any)</em> {#add-event-listener}
 
 Alias for `on('message', callback')`
 
 #### **Returns** `Promise<void>`
 
-### removeEventListener<em>('message', callback: `WebsocketMessage` => any)</em>
+### removeEventListener<em>('message', callback: [`WebsocketMessage`](#websocket-message) =>  any)</em> {#remove-event-listener}
 
 Alias for `off('message', callback')`
 
 #### **Returns** `Promise<void>`
 
 
-### text<em>()</em>
+### text<em>()</em> {#text}
 
 Invalid call. Throws an Error. To subscribe to messages, see `on('message', callback)`
 
 #### **Returns** `Promise<string>`
 
-### json<em>()</em>
+### json<em>()</em> {#json}
 
 Invalid call. Throws an Error. To subscribe to messages, see `on('message', callback)`
 

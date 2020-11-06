@@ -18,6 +18,7 @@
     - Emulators
     - Humanoids
     - UserProfile
+    - CookieStorage
     - UpstreamProxy
     - Resource
     - ResourceRequest

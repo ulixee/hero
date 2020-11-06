@@ -36,15 +36,17 @@ const agentWithProfile = await new SecretAgent({
 
 Cookies for all loaded "origins" for the browsing session.
 
-#### **Type**: `Cookie[]`
+#### **Type**: [`Cookie[]`](./cookie-storage#cookie)
 
 ### storage
 
-An object with a key for each "security origin" of a page, and value all the associated storage.
+An object with a key for each "security origin" of a page, and value all the associated [DomStorage](#dom-storage).
 
-#### **Type**: `object { [origin: string]: DomStorage }`
-
-- securityOrigin `string`. The "security origin" of a page iFrame as defined by Chromium.
+#### A `DomStorage` object contains: {#dom-storage}
   - localStorage `[key,value][]`. The `window.localStorage` entries for a given domain.
   - sessionStorage `[key,value][]`. The `window.sessionStorage` entries for a given domain.
   - indexedDB `IndexedDB[]`. An array of the `indexedDB` databases for a given domain with records stored as [typeson](https://github.com/dfahlander/typeson).
+  
+#### **Type**: `object { [origin: string]: DomStorage }`
+  - key `string`. The "security origin" of a page or iFrame as defined by Chromium.
+  - value [DomStorage](#dom-storage). The `DomStorage` entry for the given origin.

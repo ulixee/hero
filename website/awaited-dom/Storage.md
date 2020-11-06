@@ -1,72 +1,66 @@
 # [AwaitedDOM](/docs/basic-interfaces/awaited-dom) <span>/</span> Storage
 
-<div class='overview'>The <strong><code>Storage</code></strong> interface of the <a href="/en-US/docs/Web/API/Web_Storage_API">Web Storage API</a> provides access to a particular domain's session or local storage. It allows, for example, the addition, modification, or deletion of stored data items.</div>
+<div class='overview'>The <strong><code>Storage</code></strong> interface of the Web Storage API provides access to a particular domain's session or local storage. It allows, for example, the addition, modification, or deletion of stored data items.</div>
 
-<div class='overview'>To manipulate, for instance, the session storage for a domain, a call to <a href="/en-US/docs/Web/API/Window/sessionStorage" title="The sessionStorage property accesses a session Storage object for the current origin. sessionStorage is similar to localStorage; the difference is that while data in localStorage doesn't expire, data in sessionStorage is cleared when the page session ends."><code>Window.sessionStorage</code></a> is made; whereas for local storage the call is made to <a href="/en-US/docs/Web/API/Window/localStorage" title="The read-only localStorage property allows you to access a Storage object for the Document's origin; the stored data is saved across browser sessions."><code>Window.localStorage</code></a>.</div>
+<div class='overview'>To manipulate, for instance, the session storage for a domain, a call to <code>Window.sessionStorage</code> is made; whereas for local storage the call is made to <code>Window.localStorage</code>.</div>
 
 ## Properties
 
 ### .length <div class="specs"><i>W3C</i></div> {#length}
 
-Returns an integer representing the number of data items stored in the <code>Storage
-</code> object.
+Returns an integer representing the number of data items stored in the <code>Storage</code> object.
 
-#### **Type**: `number`
+#### **Type**: `Promise<number>`
 
 ## Methods
 
-### .clear*(...args)* <div class="specs"><i>W3C</i></div> {#clear}
+### .clear*()* <div class="specs"><i>W3C</i></div> {#clear}
 
 When invoked, will empty all keys out of the storage.
 
-#### **Arguments**:
+#### **Returns**: `Promise<undefined>`
 
-
- - none
-
-#### **Returns**: `Promise<void>` true
-
-### .getItem*(...args)* <div class="specs"><i>W3C</i></div> {#getItem}
+### .getItem*(key)* <div class="specs"><i>W3C</i></div> {#getItem}
 
 When passed a key name, will return that key's value.
 
 #### **Arguments**:
 
 
- - none
+ - key `string`. A `string` containing the name of the key you want to retrieve the value of.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<string>`
 
-### .key*(...args)* <div class="specs"><i>W3C</i></div> {#key}
+### .key*(index)* <div class="specs"><i>W3C</i></div> {#key}
 
-When passed a number <code>n
-</code>, this method will return the name of the nth key in the storage.
+When passed a number <code>n</code>, this method will return the name of the nth key in the storage.
 
 #### **Arguments**:
 
 
- - none
+ - index `number`. An integer representing the number of the key you want to get the name of. This is a zero-based index.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<string>`
 
-### .removeItem*(...args)* <div class="specs"><i>W3C</i></div> {#removeItem}
+### .removeItem*(key)* <div class="specs"><i>W3C</i></div> {#removeItem}
 
 When passed a key name, will remove that key from the storage.
 
 #### **Arguments**:
 
 
- - none
+ - key `string`. A `string` containing the name of the key you want to remove.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<undefined>`
 
-### .setItem*(...args)* <div class="specs"><i>W3C</i></div> {#setItem}
+### .setItem*(key, value)* <div class="specs"><i>W3C</i></div> {#setItem}
 
 When passed a key name and value, will add that key to the storage, or update that key's value if it already exists.
 
 #### **Arguments**:
 
 
- - none
+ - key `string`. A `string` containing the name of the key you want to create/update.
+ - value `string`. A `string` containing the value you want to give the key you are creating/updating.
 
-#### **Returns**: `Promise<void>` true
+#### **Returns**: `Promise<undefined>`

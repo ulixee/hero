@@ -1,3 +1,3 @@
 # SessionReplay
 
-> SessionReplay let's you replay each session replay in high fidelity.
+> SessionReplay lets you replay each session replay in high fidelity.

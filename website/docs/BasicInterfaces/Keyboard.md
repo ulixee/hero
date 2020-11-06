@@ -28,7 +28,7 @@ Only the keyboard.type method fully emulates human-like behavior, which is why i
 ### keyboard.interact*(...interactions)*
 Execute a series of keyboard interactions on the page.
 #### **Arguments**:
-- interactions `Interactions`
+- interactions [`Interactions`](./interactions)
 #### **Returns**: `Promise`
 
 ### keyboard.type<em>(chars\[, chars, ...])</em>
