@@ -1,13 +1,14 @@
-import * as Fs from 'fs';
-import * as Path from 'path';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import Log from '@secret-agent/commons/Logger';
-import { MitmProxy as MitmServer } from '@secret-agent/mitm';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
-import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
-import Puppet from '@secret-agent/puppet';
-import Session from './Session';
+import * as Fs from "fs";
+import * as Path from "path";
+import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
+import Log from "@secret-agent/commons/Logger";
+import { MitmProxy as MitmServer } from "@secret-agent/mitm";
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import SessionsDb from "@secret-agent/session-state/lib/SessionsDb";
+import Puppet from "@secret-agent/puppet";
+import { IBrowserEmulator } from "@secret-agent/emulate-browsers-base";
+import Session from "./Session";
+import BrowserEmulators from "./BrowserEmulators";
 
 const { log } = Log(module);
 let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
@@ -31,16 +32,16 @@ export default class GlobalPool {
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start(emulatorIds: string[]) {
+  public static async start(browserEmulatorIds: string[]) {
     log.info('StartingGlobalPool', {
       sessionId: null,
-      emulatorIds,
+      browserEmulatorIds,
     });
     await this.startMitm();
 
-    for (const emulatorId of emulatorIds) {
-      const emulator = Emulators.create(emulatorId);
-      this.addPuppet(emulator);
+    for (const emulatorId of browserEmulatorIds) {
+      const browserEmulator = BrowserEmulators.create(emulatorId);
+      this.addPuppet(browserEmulator);
     }
 
     this.resolveWaitingConnection();
@@ -97,11 +98,11 @@ export default class GlobalPool {
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
-  private static addPuppet(emulator: EmulatorPlugin) {
-    const existing = this.getPuppet(emulator);
+  private static addPuppet(browserEmulator: IBrowserEmulator) {
+    const existing = this.getPuppet(browserEmulator);
     if (existing) return existing;
 
-    const puppet = new Puppet(emulator);
+    const puppet = new Puppet(browserEmulator);
     this.puppets.push(puppet);
 
     const showBrowser = !!process.env.SHOW_BROWSER;
@@ -110,9 +111,9 @@ export default class GlobalPool {
     return puppet;
   }
 
-  private static getPuppet(emulator?: EmulatorPlugin) {
-    if (!emulator) return this.puppets[0];
-    return this.puppets.find(x => x.executablePath === emulator.engineExecutablePath);
+  private static getPuppet(browserEmulator?: IBrowserEmulator) {
+    if (!browserEmulator) return this.puppets[0];
+    return this.puppets.find(x => x.executablePath === browserEmulator.engineExecutablePath);
   }
 
   private static async startMitm() {
@@ -128,7 +129,7 @@ export default class GlobalPool {
     try {
       const session = new Session(options);
 
-      puppet = this.getPuppet(session.emulator) ?? this.addPuppet(session.emulator);
+      puppet = this.getPuppet(session.browserEmulator) ?? this.addPuppet(session.browserEmulator);
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

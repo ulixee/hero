@@ -3,7 +3,7 @@ import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import launchProcess from './lib/launchProcess';
 import IPuppetLauncher from './interfaces/IPuppetLauncher';
 import IPuppetBrowser from './interfaces/IPuppetBrowser';
-import IBrowserEmulation from './interfaces/IBrowserEmulation';
+import IBrowserEmulationSettings from './interfaces/IBrowserEmulationSettings';
 
 const { log } = Log(module);
 
@@ -53,7 +53,7 @@ export default class Puppet {
     this.browser = launcher.createPuppet(launchedProcess, this.engine.revision);
   }
 
-  public async newContext(emulation: IBrowserEmulation, logger: IBoundLog) {
+  public async newContext(emulation: IBrowserEmulationSettings, logger: IBoundLog) {
     const browser = await this.browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
     return browser.newContext(emulation, logger);

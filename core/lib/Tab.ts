@@ -476,7 +476,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     await this.domEnv.install();
 
     const page = this.puppetPage;
-    const pageOverrides = await this.session.emulator.generatePageOverrides();
+    const pageOverrides = await this.session.browserEmulator.generatePageOverrides();
     for (const pageOverride of pageOverrides) {
       if (pageOverride.callbackWindowName) {
         await page.addPageCallback(pageOverride.callbackWindowName, payload => {

@@ -7,7 +7,7 @@
 - **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
 - **Powered by Chromium** - The powerful Chromium engine sits under the hood, allowing for lightning fast rendering.
-- **Emulates any modern browser** - Emulator plugins make it easy to disguise your script as practically any browser.
+- **Emulates any modern browser** - BrowserEmulator plugins make it easy to disguise your script as practically any browser.
 - **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 
 ## How It Works
@@ -32,7 +32,7 @@ or
 yarn add secret-agent
 ```
 
-Note: When you install SecretAgent, it also downloads a recent version of Chromium 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [emulator](/docs/advanced/emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+Note: When you install SecretAgent, it also downloads a recent version of Chromium 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/advanced/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
 
 Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Secret Agent npm installations.
 

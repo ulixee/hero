@@ -61,7 +61,7 @@ const profile = JSON.parse(rawProfileJson); // { cookies: { sessionId: 'test' }}
 
 const agent = new SecretAgent({ userProfile: profile });
 const latestUserProfile = await agent.exportUserProfile();
-// { cookies, emulatorPlugin, humanoidPlugin, cache, IP }
+// { cookies, localStorage, sessionStorage, indexedDBs }
 
 await agent.goto('http://example.com');
 
@@ -70,6 +70,6 @@ const latestUserProfile = await agent.exportUserProfile();
 fs.writeFileSync('profile.json', JSON.stringify(latestUserProfile, null, 2));
 ```
 
-### Emulators <div class="specs"><i>Class</i><i>Instance</i></div>
+### BrowserEmulators <div class="specs"><i>Class</i><i>Instance</i></div>
 
-### Humanoids <div class="specs"><i>Class</i><i>Instance</i></div>
+### HumanEmulators <div class="specs"><i>Class</i><i>Instance</i></div>

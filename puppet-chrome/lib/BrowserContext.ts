@@ -2,7 +2,7 @@ import { assert } from '@secret-agent/commons/utils';
 import IPuppetContext, {
   IPuppetContextEvents,
 } from '@secret-agent/puppet/interfaces/IPuppetContext';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import IBrowserEmulationSettings from '@secret-agent/puppet/interfaces/IBrowserEmulationSettings';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
@@ -24,7 +24,7 @@ import TargetInfo = Protocol.Target.TargetInfo;
 
 export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
-  public emulation: IBrowserEmulation;
+  public emulation: IBrowserEmulationSettings;
   public logger: IBoundLog;
   private readonly pages: Page[] = [];
   private readonly browser: Browser;
@@ -39,7 +39,7 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
   constructor(
     browser: Browser,
     contextId: string,
-    emulation: IBrowserEmulation,
+    emulation: IBrowserEmulationSettings,
     logger: IBoundLog,
   ) {
     super();

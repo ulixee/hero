@@ -1,7 +1,7 @@
 import { Protocol } from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { assert } from '@secret-agent/commons/utils';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import IBrowserEmulationSettings from '@secret-agent/puppet/interfaces/IBrowserEmulationSettings';
 import IPuppetBrowser from '@secret-agent/puppet/interfaces/IPuppetBrowser';
 import Log, { IBoundLog } from '@secret-agent/commons/Logger';
 import { Connection } from './Connection';
@@ -33,7 +33,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   }
 
   public async newContext(
-    emulation: IBrowserEmulation,
+    emulation: IBrowserEmulationSettings,
     logger: IBoundLog,
   ): Promise<BrowserContext> {
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.

@@ -1,8 +1,8 @@
 import { IBoundLog } from '@secret-agent/commons/Logger';
 import IPuppetContext from './IPuppetContext';
-import IBrowserEmulation from './IBrowserEmulation';
+import IBrowserEmulationSettings from './IBrowserEmulationSettings';
 
 export default interface IPuppetBrowser {
-  newContext(emulation: IBrowserEmulation, logger: IBoundLog): Promise<IPuppetContext>;
+  newContext(emulation: IBrowserEmulationSettings, logger: IBoundLog): Promise<IPuppetContext>;
   close(): Promise<void>;
 }

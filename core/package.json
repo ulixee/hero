@@ -6,8 +6,9 @@
     "@secret-agent/commons": "1.1.0-alpha.1",
     "@secret-agent/core-interfaces": "1.1.0-alpha.1",
     "@secret-agent/emulate-chrome-83": "1.1.0-alpha.1",
-    "@secret-agent/emulators": "1.1.0-alpha.1",
-    "@secret-agent/humanoids": "1.1.0-alpha.1",
+    "@secret-agent/emulate-browsers-base": "1.1.0-alpha.1",
+    "@secret-agent/emulate-humans-skipper": "1.1.0-alpha.1",
+    "@secret-agent/emulate-humans-basic": "1.1.0-alpha.1",
     "@secret-agent/injected-scripts": "1.1.0-alpha.1",
     "@secret-agent/mitm": "1.1.0-alpha.1",
     "@secret-agent/puppet": "1.1.0-alpha.1",
@@ -16,6 +17,8 @@
     "moment": "^2.24.0",
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.38",
+    "core-js-bundle": "^3.7.0",
+    "regenerator-runtime": "^0.13.7",
     "uuid": "^8.1.0"
   },
   "devDependencies": {

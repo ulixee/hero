@@ -92,7 +92,7 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const session = core.session;
 
-    const mirrorChrome = new Puppet(session.emulator);
+    const mirrorChrome = new Puppet(session.browserEmulator);
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
@@ -120,8 +120,6 @@ describe('basic Dom Replay tests', () => {
       const [changes] = Object.values(pageChanges);
       const records = changes.map(DomChangesTable.toRecord);
       await mirrorPage.mainFrame.evaluate(`window.replayEvents(${JSON.stringify(records)})`, false);
-      // replay happens on animation tick now
-      await new Promise(setImmediate);
     }
 
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
@@ -198,7 +196,7 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const session = core.session;
 
-    const mirrorChrome = new Puppet(session.emulator);
+    const mirrorChrome = new Puppet(session.browserEmulator);
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 

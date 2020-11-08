@@ -40,8 +40,8 @@ const SecretAgent = require('secret-agent');
 
 - options `object` Accepts any of the following:
   - name `string`. This is used to generate a unique sessionName.
-  - emulatorId `string` defaults to `chrome-83`. Emulates a specific browser engine version.
-  - humanoidId `string`. Drives human-like mouse/keyboard movements.
+  - browserEmulatorId `string` defaults to `chrome-83`. Emulates a specific browser engine version.
+  - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, a random screen, position and viewport will be statistically sampled from data pulled from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
@@ -146,8 +146,8 @@ Update existing configuration settings.
 #### **Arguments**:
 
 - options `object` Accepts any of the following:
-  - emulatorId `string`. Emulate a specific browser version.
-  - humanoidId `string`. Create human-like mouse/keyboard movements.
+  - browserEmulatorId `string`. Emulate a specific browser version.
+  - humanEmulatorId `string`. Create human-like mouse/keyboard movements.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
@@ -156,7 +156,7 @@ Update existing configuration settings.
 
 #### **Returns**: `Promise`
 
-See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [Emulators](../advanced/emulators) and [Humanoids](../advanced/humanoids).
+See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](../advanced/browser-emulators) and [HumanEmulators](../advanced/human-emulators).
 
 ### agent.exportUserProfile*()* {#export-profile}
 
@@ -339,7 +339,7 @@ Note: Because Chromium is launched when you call `prewarm/new SecretAgent()`, yo
 
 ### SecretAgent.prewarm*(\[options])* {#prewarm}
 
-Initializes the library and launches any underlying Chromium engines based on which [Emulators](./emulator) are installed.
+Initializes the library and launches any underlying Chromium engines based on which [BrowserEmulators](./browser-emulators) are installed.
 
 #### **Arguments**:
 
@@ -347,6 +347,6 @@ Initializes the library and launches any underlying Chromium engines based on wh
 
 #### **Returns**: `Promise`
 
-Starting SecretAgent can take between 5 and 15 seconds. It must launch the Chromium engine, set up man-in-the-middle proxies, and prime the Emulators and Humanoids.
+Starting SecretAgent can take between 5 and 15 seconds. It must launch the Chromium engine, set up man-in-the-middle proxies, and prime the BrowserEmulators and HumanEmulators.
 
 Note: You are not required to call this method as a new instance will do so the first time it runs. Directly calling `prewarm` merely speeds up the response time of your first call to `new SecretAgent()`.

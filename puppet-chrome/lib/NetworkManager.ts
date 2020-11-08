@@ -3,7 +3,7 @@ import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/Res
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
+import IBrowserEmulationSettings from '@secret-agent/puppet/interfaces/IBrowserEmulationSettings';
 import { IBoundLog } from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { CDPSession } from './CDPSession';
@@ -21,7 +21,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly cdpSession: CDPSession;
   private readonly attemptedAuthentications = new Set<string>();
   private readonly publishedResources = new Set<string>();
-  private emulation?: IBrowserEmulation;
+  private emulation?: IBrowserEmulationSettings;
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
@@ -52,7 +52,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return super.emit(eventType, event);
   }
 
-  public async initialize(emulation: IBrowserEmulation) {
+  public async initialize(emulation: IBrowserEmulationSettings) {
     this.emulation = emulation;
 
     await Promise.all([

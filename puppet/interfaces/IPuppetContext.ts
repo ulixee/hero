@@ -2,10 +2,10 @@ import { URL } from 'url';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import ITypedEventEmitter from '@secret-agent/commons/interfaces/ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
-import IBrowserEmulation from './IBrowserEmulation';
+import IBrowserEmulationSettings from './IBrowserEmulationSettings';
 
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
-  emulation: IBrowserEmulation;
+  emulation: IBrowserEmulationSettings;
 
   newPage(): Promise<IPuppetPage>;
   close(): Promise<void>;

@@ -1,0 +1,20 @@
+{
+  "name": "@secret-agent/emulate-safari-13",
+  "version": "1.1.0-alpha.1",
+  "description": "EmulatorPlugin for Apple Safari version 13.0",
+  "main": "index.js",
+  "engine": {
+    "browser": "chromium",
+    "revision": "722234"
+  },
+  "dependencies": {
+    "@secret-agent/commons": "1.1.0-alpha.1",
+    "@secret-agent/core-interfaces": "1.1.0-alpha.1",
+    "@secret-agent/emulate-browsers-base": "1.1.0-alpha.1",
+    "tough-cookie": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/tough-cookie": "^4.0.0",
+    "source-map-loader": "^0.2.4"
+  }
+}

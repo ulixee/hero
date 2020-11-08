@@ -37,9 +37,9 @@ export default class Interactor {
   public async play(interactions: IInteractionGroups) {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
-    const humanoid = this.tab.session.humanoid;
+    const humanEmulator = this.tab.session.humanEmulator;
 
-    await humanoid.playInteractions(finalInteractions, async interaction => {
+    await humanEmulator.playInteractions(finalInteractions, async interaction => {
       switch (interaction.command) {
         case InteractionCommand.move: {
           const { x, y } = await this.getPositionXY(interaction.mousePosition);
@@ -129,7 +129,7 @@ export default class Interactor {
   }
 
   private async getPositionXY(value: IMousePosition) {
-    // ToDo: we need to pass in randomized factor from Humanoid so point can change.
+    // ToDo: we need to pass in randomized factor from HumanEmulator so point can change.
     assert(value, 'value should not be null');
     if (isMousePositionCoordinate(value)) {
       return { x: value[0] as number, y: value[1] as number };

@@ -17,7 +17,7 @@ const mocks = {
 let koa: ITestKoaServer;
 beforeAll(async () => {
   koa = await Helpers.runKoaServer(true);
-  await GlobalPool.start([Chrome83.emulatorId]);
+  await GlobalPool.start([Chrome83.id]);
 });
 
 beforeEach(async () => {
@@ -60,7 +60,7 @@ test('should send a Host header to secure http1 Chrome requests', async () => {
 
   const url = `${server.baseUrl}/`;
   const session = await GlobalPool.createSession({
-    emulatorId: 'chrome-83',
+    browserEmulatorId: 'chrome-83',
   });
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();

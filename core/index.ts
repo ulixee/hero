@@ -21,7 +21,6 @@ import { createReplayServer } from '@secret-agent/session-state/api';
 import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
 import Queue from '@secret-agent/commons/Queue';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
-import Emulators from '@secret-agent/emulators';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IListenerObject from './interfaces/IListenerObject';
@@ -30,6 +29,7 @@ import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
 import IResourceFilterProperties from './interfaces/IResourceFilterProperties';
+import BrowserEmulators from './lib/BrowserEmulators';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
@@ -38,7 +38,7 @@ const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ??
 export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core implements ICore {
-  public static defaultEmulatorId = Chrome83.emulatorId;
+  public static defaultBrowserEmulatorId = Chrome83.id;
   public static byTabId: { [tabId: string]: Core } = {};
   public static onEventFn: (meta: ISessionMeta, listenerId: string, ...eventArgs: any[]) => void;
   private static wasManuallyStarted = false;
@@ -270,7 +270,7 @@ export default class Core implements ICore {
         await this.configure(options);
       }
       if (!options?.activeEmulatorIds) {
-        await GlobalPool.start([Core.defaultEmulatorId]);
+        await GlobalPool.start([Core.defaultBrowserEmulatorId]);
       }
       if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
         await this.startReplayServer(options.replayServerPort);
@@ -300,7 +300,9 @@ export default class Core implements ICore {
   public static async createTab(options: ICreateSessionOptions = {}) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
-      if (!Emulators.defaultEmulatorId) Emulators.defaultEmulatorId = Core.defaultEmulatorId;
+      if (!BrowserEmulators.defaultEmulatorId) {
+        BrowserEmulators.defaultEmulatorId = Core.defaultBrowserEmulatorId;
+      }
       const session = await GlobalPool.createSession(options);
       if (shouldStartReplayServer) {
         await this.startReplayServer();
