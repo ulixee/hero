@@ -15,6 +15,6 @@ proxyFunction(Error, 'captureStackTrace', (func, thisArg, ...parameters) => {
   descriptor.value = new Proxy(Error, {
     construct,
   });
-  definedFuncs.set(construct, toString);
+  definedFuncs.set(descriptor.value, toString);
   Object.defineProperty(window, 'Error', descriptor);
 })();
