@@ -12,7 +12,7 @@ NOTE: each BrowserEmulator will download its own rendering engine as needed. To 
 
 ### BrowserEmulators.get<em>(emulatorId)</em>
 
-Retrieve a specific browser emulator from the list of plugins already been loaded.
+Retrieve a specific browser emulator from the list of loaded emulators.
 
 #### **Arguments**:
 
@@ -22,13 +22,13 @@ Retrieve a specific browser emulator from the list of plugins already been loade
 
 ### BrowserEmulators.getRandom<em>()</em>
 
-Retrieve a random browser emulator from the list of plugins already loaded.
+Retrieve a random browser emulator from the list of loaded emulators.
 
 #### **Returns** `IBrowserEmulator`
 
 ### BrowserEmulators.load<em>(BrowserEmulatorClass)</em>
 
-Load a 3rd party browser emulator into your environment.
+Load a browser emulator into your environment.
 
 #### **Arguments**:
 

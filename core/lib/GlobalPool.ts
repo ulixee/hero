@@ -7,11 +7,12 @@ import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionO
 import SessionsDb from "@secret-agent/session-state/lib/SessionsDb";
 import Puppet from "@secret-agent/puppet";
 import { IBrowserEmulator } from "@secret-agent/emulate-browsers-base";
+import Os from "os";
 import Session from "./Session";
 import BrowserEmulators from "./BrowserEmulators";
 
 const { log } = Log(module);
-let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
+let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
   public static maxConcurrentSessionsCount = 10;
@@ -118,7 +119,7 @@ export default class GlobalPool {
 
   private static async startMitm() {
     if (this.mitmServer) return;
-    this.mitmServer = await MitmServer.start(this.localProxyPortStart);
+    this.mitmServer = await MitmServer.start(this.localProxyPortStart, this.sessionsDir);
   }
 
   private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {

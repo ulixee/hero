@@ -118,7 +118,6 @@ jobs:
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false
-          CACHE_DIR: .sessions
           NODE_ENV: test
 
       - name: Coverage

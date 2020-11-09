@@ -15,7 +15,7 @@ const SecretAgent = require('secret-agent');
 
 Unlike most other browsers, SecretAgent is initialized with a single window that can spawn tabs. Only a single tab can be focused at a time, meaning clicks and other user interaction will go to the active tab.
 
-Each SecretAgent instance has its own cache, cookies, session data, and [emulator](../advanced-features/emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
+Each SecretAgent instance has its own cache, cookies, session data, and [BrowserEmulator](../advanced-features/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Constructor
 
@@ -314,12 +314,9 @@ Update existing settings.
 #### **Arguments**:
 
 - options `object` Accepts any of the following:
-  - maxConcurrentSessionsCount `number` defaults to `10`. Limit concurrent SecretAgent sessions running at any given time.
-  - localProxyPortStart `number` defaults to `10000`. Starting proxy port.
-  - sessionsDir `string` defaults to `os.tmpdir()`. Where session files are stored.
   - defaultRenderingOptions `string[]` defaults to `[All]`. Controls enabled browser rendering features.
   - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
-  - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
+  - browserEmulatorIds `string[]`. Ids of [BrowserEmulators](../advanced/browser-emulators) to prewarm.
 
 #### **Returns**: `Promise`
 
@@ -339,7 +336,7 @@ Note: Because Chromium is launched when you call `prewarm/new SecretAgent()`, yo
 
 ### SecretAgent.prewarm*(\[options])* {#prewarm}
 
-Initializes the library and launches any underlying Chromium engines based on which [BrowserEmulators](./browser-emulators) are installed.
+Initializes the library and pre-launches any underlying Chromium engines [BrowserEmulators](./browser-emulators).
 
 #### **Arguments**:
 

@@ -4,18 +4,35 @@ Configuration variables are defined at either:
 
 - `Class` At a SecretAgent class level, which can be configured using [SecretAgent.prewarm()](../basic-interfaces/secret-agent#prewarm) or [SecretAgent.configure()](../basic-interfaces/secret-agent#configure).
 - `Instance` At a SecretAgent instance level, configured via [new SecretAgent()](../basic-interfaces/secret-agent#constructor).
+- `Core` Must be configured within the internal `@secret-agent/core` module of SecretAgent. This must be run in the environment where your Browser Engine(s) and `@secret-agent/core` module are running. If you're running remote, this will be your server.
 
-### Max Concurrent Sessions Count <div class="specs"><i>Class</i></div>
+The internal `@secret-agent/core` function can receive several configuration options
+
+### Max Concurrent Sessions Count <div class="specs"><i>Core</i></div>
 
 Limit concurrent SecretAgent sessions running at any given time. Defaults to `10` per SecretAgent class.
 
-### Local Proxy Port Start <div class="specs"><i>Class</i></div>
+Configurable via [`Core.configure()`](#core-configure) or [`Core.prewarm()`](#core-prewarm).
 
-Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `10000`;
+### Local Proxy Port Start <div class="specs"><i>Core</i></div>
 
-### Sessions Directory <div class="specs"><i>Class</i></div>
+Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
 
-This can only be set on SecretAgent during the first instantiation or [SecretAgent.prewarm()](../basic-interfaces/secret-agent#prewarm) call.
+Configurable via `Core.configure()`.
+
+### Replay Session Port <div class="specs"><i>Core</i></div>
+
+Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
+
+Configurable via [`Core.configure()`](#core-configure) or [`Core.prewarm()`](#core-prewarm).
+
+### Sessions Directory <div class="specs"><i>Core</i></div>
+
+This can only be set on SecretAgent during the first instantiation or [`SecretAgent.prewarm()`](../basic-interfaces/secret-agent#prewarm) call.
+
+`Environmental variable`: `SA_SESSIONS_DIR=/your-absolute-dir-path`
+
+Configurable via [`Core.configure()`](#core-configure) or [`Core.prewarm()`](#core-prewarm).
 
 ### Rendering Options <div class="specs"><i>Class</i><i>Instance</i></div>
 
@@ -51,7 +68,7 @@ const document = SecretAgent.DetachedDOM.load(responseHtml);
 console.log(document.querySelector('title'));
 ```
 
-### User Profiles <div class="specs"><i>Class</i></div>
+### User Profiles <div class="specs"><i>Class</i><i>Instance</i></div>
 
 The serialized user profile passed into a SecretAgent instance is never modified.
 
@@ -70,6 +87,40 @@ const latestUserProfile = await agent.exportUserProfile();
 fs.writeFileSync('profile.json', JSON.stringify(latestUserProfile, null, 2));
 ```
 
+### Browsers Emulator Ids <div class="specs"><i>Class</i><i>Instance</i><i>Core</i></div>
+
+Configures which [BrowserEmulators](../advanced/browser-emulators) to prewarm.
+
+Configurable via `Core` or [`SecretAgent`](../basic-interfaces/secret-agent#configure)
+
 ### BrowserEmulators <div class="specs"><i>Class</i><i>Instance</i></div>
 
 ### HumanEmulators <div class="specs"><i>Class</i><i>Instance</i></div>
+
+## Core Configuration
+
+Configuration for Core should be performed before initialization.
+
+### Core.configure*(options)* {#core-configure}
+
+Update existing settings.
+
+#### **Arguments**:
+
+- options `object` Accepts any of the following:
+  - maxConcurrentSessionsCount `number` defaults to `10`. Limit concurrent SecretAgent sessions running at any given time.
+  - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
+  - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
+  - defaultRenderingOptions `string[]` defaults to `[All]`. Controls enabled browser rendering features.
+  - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
+  - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
+
+#### **Returns**: `Promise`
+
+The internal `@secret-agent/core` function can receive several configuration options
+
+### Core.prewarm*(options)* {#core-prewarm}
+
+Takes the same configuration object as [`Core.configure`](#core-configure)
+
+#### **Returns**: `Promise`

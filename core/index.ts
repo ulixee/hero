@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
+import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import {
   ILocationStatus,
@@ -262,14 +262,14 @@ export default class Core implements ICore {
 
   /////// STATIC /////////////////////////////////////
 
-  public static async prewarm(options?: IConfigureOptions) {
+  public static async prewarm(options?: ICoreConfigureOptions) {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       this.wasManuallyStarted = true;
       if (options) {
         await this.configure(options);
       }
-      if (!options?.activeEmulatorIds) {
+      if (!options?.browserEmulatorIds) {
         await GlobalPool.start([Core.defaultBrowserEmulatorId]);
       }
       if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
@@ -278,18 +278,18 @@ export default class Core implements ICore {
     });
   }
 
-  public static async configure(options: IConfigureOptions) {
+  public static async configure(options: ICoreConfigureOptions) {
     const {
       maxConcurrentSessionsCount,
       localProxyPortStart,
       sessionsDir,
-      activeEmulatorIds,
+      browserEmulatorIds,
     } = options;
     if (maxConcurrentSessionsCount)
       GlobalPool.maxConcurrentSessionsCount = options.maxConcurrentSessionsCount;
     if (localProxyPortStart) GlobalPool.localProxyPortStart = options.localProxyPortStart;
     if (sessionsDir) GlobalPool.sessionsDir = options.sessionsDir;
-    if (activeEmulatorIds?.length) await GlobalPool.start(activeEmulatorIds);
+    if (browserEmulatorIds?.length) await GlobalPool.start(browserEmulatorIds);
   }
 
   public static async getTabsForSession(sessionId: string) {

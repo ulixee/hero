@@ -19,7 +19,7 @@ Retrieve a random human emulator from the list of plugins already loaded.
 #### **Returns** `IHumanEmulator`
 
 ### HumanEmulators.load<em>(humanEmulator)</em>
-Load a 3rd party human emulator into your environment.
+Load a human emulator into your environment.
 #### **Arguments**:
 - humanEmulator `IHumanEmulator`
 #### **Returns** `null`
@@ -34,7 +34,7 @@ We've included two very simple human emulator plugins to get you started. They a
 | basic | It's the most basic of human-like interactions. |
 | skipper | It's an anti-human-emulator with no delays. It just runs the commands. |
 
-Note: Use the `skipper` plugin when you want to turn OFF human-emulator functionality. It disables all humanoid affects allowing you to run mouse and keyboard commands as if there were no human translation layer.
+Note: Use the `skipper` emulator when you want to turn OFF human-emulator functionality. It disables all humanoid affects allowing you to run mouse and keyboard commands as if there were no human translation layer.
 
 To use a specific emulator, pass your chosen ID into `new SecretAgent({ humanEmulatorId... )`:
 
