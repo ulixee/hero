@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@secret-agent/commons": "1.1.0-alpha.1",
+    "@secret-agent/core-interfaces": "1.1.0-alpha.1",
     "uuid": "^3.4.0"
   },
   "devDependencies": {

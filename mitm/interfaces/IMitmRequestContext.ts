@@ -1,6 +1,6 @@
 import * as http from 'http';
 import http2 from 'http2';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import MitmSocket from '@secret-agent/mitm-socket';
 import RequestSession from '../handlers/RequestSession';
 import CacheHandler from '../handlers/CacheHandler';

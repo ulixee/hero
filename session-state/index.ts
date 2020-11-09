@@ -3,7 +3,8 @@ import { IRequestSessionRequestEvent, IRequestSessionResponseEvent } from "@secr
 import IWebsocketMessage from "@secret-agent/core-interfaces/IWebsocketMessage";
 import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
 import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
-import Log, { IBoundLog, ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
+import Log, {  ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
 import { IDomChangeEvent } from "@secret-agent/injected-scripts/interfaces/IDomChangeEvent";
 import { LocationStatus } from "@secret-agent/core-interfaces/Location";
 import IViewport from "@secret-agent/core-interfaces/IViewport";
@@ -13,7 +14,7 @@ import { IFocusEvent } from "@secret-agent/injected-scripts/interfaces/IFocusEve
 import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollEvent";
 import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
 import IWebsocketResourceMessage from "@secret-agent/core/interfaces/IWebsocketResourceMessage";
-import type { IPuppetContextEvents } from "@secret-agent/puppet/interfaces/IPuppetContext";
+import type { IPuppetContextEvents } from "@secret-agent/puppet-interfaces/IPuppetContext";
 import ResourceState from "@secret-agent/mitm/interfaces/ResourceState";
 import TabNavigations from "./lib/TabNavigations";
 import { IFrameRecord } from "./models/FramesTable";

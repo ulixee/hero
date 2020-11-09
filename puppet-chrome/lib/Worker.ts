@@ -1,9 +1,10 @@
 import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import Protocol from 'devtools-protocol';
-import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/puppet/interfaces/IPuppetWorker';
+import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import { createPromise } from '@secret-agent/commons/utils';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { BrowserContext } from './BrowserContext';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';

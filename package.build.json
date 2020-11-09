@@ -27,6 +27,7 @@
       "full-client",
       "injected-scripts",
       "puppet",
+      "puppet-interfaces",
       "puppet-chrome",
       "mitm",
       "mitm-socket",

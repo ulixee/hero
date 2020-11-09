@@ -1,7 +1,8 @@
 import { randomBytes } from 'crypto';
 import * as dnsPacket from 'dns-packet';
 import { ConnectionOptions } from 'tls';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
 import MitmSocket from '@secret-agent/mitm-socket/index';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import RequestSession from '../handlers/RequestSession';
@@ -36,7 +37,7 @@ export default class DnsOverTlsSocket {
       isSsl: true,
       servername: dnsServer.servername,
       rejectUnauthorized: false,
-      clientHelloId: requestSession?.delegate?.tlsProfileId,
+      clientHelloId: requestSession?.networkInterceptorDelegate?.tls.emulatorProfileId,
       keepAlive: true,
     });
     this.dnsServer = dnsServer;

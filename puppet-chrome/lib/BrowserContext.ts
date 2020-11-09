@@ -1,19 +1,19 @@
 import { assert } from '@secret-agent/commons/utils';
 import IPuppetContext, {
   IPuppetContextEvents,
-} from '@secret-agent/puppet/interfaces/IPuppetContext';
-import IBrowserEmulationSettings from '@secret-agent/puppet/interfaces/IBrowserEmulationSettings';
+} from '@secret-agent/puppet-interfaces/IPuppetContext';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import {
   addTypedEventListener,
-  IRegisteredEventListener,
   removeEventListeners,
   TypedEventEmitter,
 } from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';

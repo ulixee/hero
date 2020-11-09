@@ -4,6 +4,7 @@
   "description": "Core interfaces used by SecretAgent",
   "dependencies": {
     "@secret-agent/commons": "1.1.0-alpha.1",
+    "@secret-agent/puppet-interfaces": "1.1.0-alpha.1",
     "awaited-dom": "^1.1.7"
   },
   "devDependencies": {

@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { ITestHttpServer } from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import IPuppetContext from '@secret-agent/puppet/interfaces/IPuppetContext';
+import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Core from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
@@ -15,8 +15,8 @@ let puppet: Puppet;
 let httpServer: ITestHttpServer;
 let context: IPuppetContext;
 beforeAll(async () => {
-  const emulator = BrowserEmulators.create(Core.defaultBrowserEmulatorId);
-  puppet = new Puppet(emulator);
+  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 

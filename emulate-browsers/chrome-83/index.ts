@@ -1,4 +1,4 @@
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
   chromePageOverrides,
@@ -6,12 +6,13 @@ import {
   IUserAgent,
   modifyHeaders,
   readPolyfills,
-  tcpVars,
+  StatcounterBrowserUsage,
+  getTcpSettingsForOs,
   UserAgents,
+  DnsOverTlsProviders,
 } from '@secret-agent/emulate-browsers-base';
 import { randomBytes } from 'crypto';
 import { pickRandom } from '@secret-agent/commons/utils';
-import { ConnectionOptions } from 'tls';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import defaultAgents from './user-agents.json';
 import navigator from './navigator.json';
@@ -22,54 +23,45 @@ import headerProfiles from './headers.json';
 import frame from './frame.json';
 
 const polyfills = readPolyfills(__dirname);
-const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
+const agents = UserAgents.getSupportedAgents('Chrome', 83, defaultAgents);
 
 @BrowserEmulatorClassDecorator
 export default class Chrome83 {
   public static id = pkg.name;
-  public static statcounterBrowser = 'Chrome 83.0';
-  public static engine = pkg.engine;
-  public static dnsOverTlsConnectOptions = <ConnectionOptions>{
-    host: '1.1.1.1',
-    servername: 'cloudflare-dns.com',
+  public static roundRobinPercent = StatcounterBrowserUsage.getConsumerUsageForBrowser(
+    'Chrome 83.0',
+  );
+
+  public static engine = {
+    ...pkg.engine,
+    executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
   };
 
-  protected static agents = UserAgents.getList(
-    {
-      deviceCategory: 'desktop',
-      vendor: 'Google Inc.',
-      family: 'Chrome',
-      versionMajor: 83,
-      operatingSystems: [
-        {
-          family: 'Windows',
-        },
-        {
-          family: 'Mac OS X',
-        },
-      ],
-    },
-    defaultAgents,
-  );
+  public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 
   public get canPolyfill() {
     return polyfills?.canPolyfill(this);
   }
 
-  public engineExecutablePath = engineExecutablePath;
-  public engine = pkg.engine;
-  public locale = 'en-US';
-  public userProfile: IUserProfile;
   public readonly userAgent: IUserAgent;
-  public delegate: IHttpRequestModifierDelegate;
+  public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
+
+  public locale = 'en-US,en;0.9';
+  public userProfile: IUserProfile;
 
   constructor(userAgent?: IUserAgent) {
-    this.userAgent = userAgent ?? pickRandom(Chrome83.agents);
-    this.delegate = {
-      modifyHeadersBeforeSend: modifyHeaders.bind(this, this.userAgent, headerProfiles),
-      tlsProfileId: 'Chrome83',
-      tcpVars: tcpVars(this.userAgent.os),
-      dnsOverTlsConnectOptions: Chrome83.dnsOverTlsConnectOptions,
+    this.userAgent = userAgent ?? pickRandom(agents);
+    this.networkInterceptorDelegate = {
+      tcp: getTcpSettingsForOs(this.userAgent.os),
+      tls: {
+        emulatorProfileId: 'Chrome83',
+      },
+      dns: {
+        dnsOverTlsConnection: Chrome83.dnsOverTlsConnectOptions,
+      },
+      http: {
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+      },
     };
   }
 

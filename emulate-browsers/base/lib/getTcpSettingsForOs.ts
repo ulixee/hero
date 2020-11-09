@@ -1,4 +1,4 @@
-export default function tcpVars(os?: { family: string; major: string }) {
+export default function getTcpSettingsForOs(os?: { family: string; major: string }) {
   if (!os) return null;
 
   const osFamily = os.family;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import ITypedEventEmitter from '@secret-agent/commons/interfaces/ITypedEventEmitter';
+import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
 
 export default interface IConnectionTransport
   extends ITypedEventEmitter<IConnectionTransportEvents> {

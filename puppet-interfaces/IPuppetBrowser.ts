@@ -1,4 +1,4 @@
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IPuppetContext from './IPuppetContext';
 import IBrowserEmulationSettings from './IBrowserEmulationSettings';
 

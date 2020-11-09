@@ -1,4 +1,5 @@
-import { createPromise, IResolvablePromise } from './utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from './utils';
 
 type Callback<T> = (value?: any) => Promise<T>;
 

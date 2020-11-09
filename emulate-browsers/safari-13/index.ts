@@ -1,11 +1,12 @@
 import { URL } from 'url';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
   getEngineExecutablePath,
   IUserAgent,
   modifyHeaders,
-  tcpVars,
+  StatcounterBrowserUsage,
+  getTcpSettingsForOs,
   UserAgents,
 } from '@secret-agent/emulate-browsers-base';
 import {
@@ -17,41 +18,34 @@ import {
   permuteDomain,
 } from 'tough-cookie';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import { createPromise, IResolvablePromise, pickRandom } from '@secret-agent/commons/utils';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-
 import pageOverrides from './pageOverrides';
 import headerProfiles from './headers.json';
 import pkg from './package.json';
 import defaultAgents from './user-agents.json';
 
-const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
+const agents = UserAgents.getSupportedAgents('Chrome', 83, defaultAgents);
 
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
   public static id = pkg.name;
-  public static statcounterBrowser = 'Safari 13.1';
-  public static engine = pkg.engine;
-
-  protected static agents = UserAgents.getList(
-    {
-      deviceCategory: 'desktop',
-      vendor: 'Apple Computer, Inc.',
-      family: 'Safari',
-      versionMajor: 13,
-      versionMinor: 1,
-    },
-    defaultAgents,
+  public static roundRobinPercent = StatcounterBrowserUsage.getConsumerUsageForBrowser(
+    'Safari 13.1',
   );
 
-  public engineExecutablePath = engineExecutablePath;
-  public engine = pkg.engine;
-  public locale = 'en-US';
+  public static engine = {
+    ...pkg.engine,
+    executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
+  };
+
   public readonly userAgent: IUserAgent;
-  public delegate: IHttpRequestModifierDelegate;
-  public cookieJar: CookieJar;
+  public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
+  public locale = 'en-US';
+  public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
   public sitesWithUserInteraction: string[] = [];
   // This Flag Should be enabled once double agent deciphers patch level changes
@@ -85,15 +79,18 @@ export default class Safari13 {
   } = {};
 
   constructor(userAgent?: IUserAgent) {
-    this.userAgent = userAgent ?? pickRandom(Safari13.agents);
-    this.cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
-    this.delegate = {
-      modifyHeadersBeforeSend: modifyHeaders.bind(this, this.userAgent, headerProfiles),
-      tlsProfileId: 'Safari13',
-      tcpVars: tcpVars(this.userAgent.os),
-      getCookieHeader: this.getCookieHeader.bind(this),
-      setCookie: this.setCookie.bind(this),
-      documentHasUserActivity: this.documentHasUserActivity.bind(this),
+    this.userAgent = userAgent ?? pickRandom(agents);
+    this.networkInterceptorDelegate = {
+      tcp: getTcpSettingsForOs(this.userAgent.os),
+      tls: {
+        emulatorProfileId: 'Safari13',
+      },
+      http: {
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        cookieHeader: this.getCookieHeader.bind(this),
+        onSetCookie: this.setCookie.bind(this),
+        onOriginHasFirstPartyInteraction: this.documentHasUserActivity.bind(this),
+      },
     };
   }
 

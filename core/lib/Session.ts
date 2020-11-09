@@ -1,28 +1,31 @@
-import { v1 as uuidv1 } from "uuid";
-import Log from "@secret-agent/commons/Logger";
-import ICreateTabOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
-import { UpstreamProxy as MitmUpstreamProxy } from "@secret-agent/mitm";
-import SessionState from "@secret-agent/session-state";
+import { v1 as uuidv1 } from 'uuid';
+import Log from '@secret-agent/commons/Logger';
+import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
+import SessionState from '@secret-agent/session-state';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
-  IResourceStateChangeEvent
-} from "@secret-agent/mitm/handlers/RequestSession";
-import * as Os from "os";
-import IPuppetContext, { IPuppetContextEvents } from "@secret-agent/puppet/interfaces/IPuppetContext";
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import IBrowserEmulationSettings from "@secret-agent/puppet/interfaces/IBrowserEmulationSettings";
-import { IPuppetPage } from "@secret-agent/puppet/interfaces/IPuppetPage";
-import IViewport from "@secret-agent/core-interfaces/IViewport";
-import IHumanEmulator from "@secret-agent/core-interfaces/IHumanEmulator";
-import Viewport from "@secret-agent/emulate-browsers-base/lib/Viewport";
-import IBrowserEmulator from "@secret-agent/core-interfaces/IBrowserEmulator";
-import GlobalPool from "./GlobalPool";
-import Tab from "./Tab";
-import UserProfile from "./UserProfile";
-import BrowserEmulators from "./BrowserEmulators";
-import HumanEmulators from "./HumanEmulators";
+  IResourceStateChangeEvent,
+} from '@secret-agent/mitm/handlers/RequestSession';
+import * as Os from 'os';
+import IPuppetContext, {
+  IPuppetContextEvents,
+} from '@secret-agent/puppet-interfaces/IPuppetContext';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
+import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
+import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import GlobalPool from './GlobalPool';
+import Tab from './Tab';
+import UserProfile from './UserProfile';
+import BrowserEmulators from './BrowserEmulators';
+import HumanEmulators from './HumanEmulators';
 
 const { log } = Log(module);
 
@@ -31,6 +34,7 @@ export default class Session {
 
   public readonly id: string;
   public readonly baseDir: string;
+  public browserEngine: IBrowserEngine;
   public browserEmulator: IBrowserEmulator;
   public humanEmulator: IHumanEmulator;
   public proxy: MitmUpstreamProxy;
@@ -54,8 +58,10 @@ export default class Session {
   constructor(readonly options: ICreateTabOptions) {
     this.id = uuidv1();
     Session.byId[this.id] = this;
-    const emulatorId = BrowserEmulators.getId(options.browserEmulatorId);
-    this.browserEmulator = BrowserEmulators.create(emulatorId);
+    const browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
+    const BrowserEmulator = BrowserEmulators.getClass(browserEmulatorId);
+    this.browserEngine = BrowserEmulator.engine;
+    this.browserEmulator = new BrowserEmulator();
     if (options.userProfile) {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
@@ -65,7 +71,7 @@ export default class Session {
     if (!this.browserEmulator.canPolyfill) {
       log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
-        emulatorId,
+        browserEmulatorId,
         userAgent: this.browserEmulator.userAgent,
         runtimeOs: Os.platform(),
       });
@@ -86,7 +92,7 @@ export default class Session {
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-      emulatorId,
+      browserEmulatorId,
       humanEmulatorId,
       this.browserEmulator.canPolyfill,
       this.viewport,
@@ -97,7 +103,7 @@ export default class Session {
       this.id,
       this.browserEmulator.userAgent.raw,
       this.proxy.isReady(),
-      this.browserEmulator.delegate,
+      this.browserEmulator.networkInterceptorDelegate,
     );
   }
 

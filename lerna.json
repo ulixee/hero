@@ -11,6 +11,7 @@
     "injected-scripts",
     "puppet",
     "puppet-chrome",
+    "puppet-interfaces",
     "mitm",
     "core-server",
     "remote-client",

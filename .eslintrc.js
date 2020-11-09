@@ -124,7 +124,7 @@ module.exports = {
       'error',
       {
         devDependencies: [
-          '**/test/**',
+          '**/**/test/**',
           '**/examples/**',
           '**/scripts/**',
           '**/data-scripts/**',

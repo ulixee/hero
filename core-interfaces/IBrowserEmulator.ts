@@ -1,14 +1,12 @@
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import INetworkInterceptorDelegate from './INetworkInterceptorDelegate';
 import IUserProfile from './IUserProfile';
 import IUserAgent from './IUserAgent';
 import IPageOverride from './IPageOverride';
 
 export default interface IBrowserEmulator {
   readonly userAgent: IUserAgent;
-  canPolyfill: boolean;
-  engineExecutablePath: string;
-  engine: { browser: string; revision: string };
-  delegate: IHttpRequestModifierDelegate;
+  readonly canPolyfill: boolean;
+  readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   locale: string;
   userProfile: IUserProfile;
 

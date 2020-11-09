@@ -1,4 +1,4 @@
-import ITypedEventEmitter from '@secret-agent/commons/interfaces/ITypedEventEmitter';
+import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
 
 export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
   id: string;

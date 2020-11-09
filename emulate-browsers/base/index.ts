@@ -7,26 +7,28 @@ import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import chromePageOverrides from './lib/chromePageOverrides';
 import modifyHeaders from './lib/modifyHeaders';
 import readPolyfills from './lib/readPolyfills';
-import tcpVars from './lib/tcpVars';
+import getTcpSettingsForOs from './lib/getTcpSettingsForOs';
 import parseNavigatorPlugins from './lib/parseNavigatorPlugins';
-import BrowserDistribution from './lib/BrowserDistribution';
+import StatcounterBrowserUsage from './lib/StatcounterBrowserUsage';
 import UserAgents from './lib/UserAgents';
+import * as DnsOverTlsProviders from './lib/DnsOverTlsProviders';
 
 function getEngineExecutablePath(engine: { browser: string; revision: string }) {
   return browserPaths.getExecutablePath(engine.browser, engine.revision);
 }
 
 export {
+  DnsOverTlsProviders,
   BrowserEmulatorClassDecorator,
   IUserAgent,
   IBrowserEmulator,
   IBrowserEmulatorClass,
-  BrowserDistribution,
+  StatcounterBrowserUsage,
   UserAgents,
   chromePageOverrides,
   modifyHeaders,
   readPolyfills,
-  tcpVars,
+  getTcpSettingsForOs,
   getEngineExecutablePath,
   parseNavigatorPlugins,
 };

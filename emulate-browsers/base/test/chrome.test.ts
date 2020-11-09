@@ -14,8 +14,8 @@ const { chrome, prevProperty } = ChromeJson as any;
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const emulator = BrowserEmulators.create(Core.defaultBrowserEmulatorId);
-  puppet = new Puppet(emulator);
+  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 });

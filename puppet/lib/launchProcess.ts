@@ -20,8 +20,8 @@ import { Readable, Writable } from 'stream';
 import * as readline from 'readline';
 import Path from 'path';
 import Log from '@secret-agent/commons/Logger';
+import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
 import { PipeTransport } from './PipeTransport';
-import ILaunchedProcess from '../interfaces/ILaunchedProcess';
 
 const { log } = Log(module);
 

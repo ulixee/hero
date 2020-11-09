@@ -1,6 +1,6 @@
 import { URL } from 'url';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import ITypedEventEmitter from '@secret-agent/commons/interfaces/ITypedEventEmitter';
+import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
 import IBrowserEmulationSettings from './IBrowserEmulationSettings';
 

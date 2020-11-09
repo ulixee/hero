@@ -1,10 +1,12 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as net from 'net';
 import { promises as fs, unlink } from 'fs';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import Log from '@secret-agent/commons/Logger';
+import {  IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { EventEmitter } from 'events';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
+
 import { v1 as uuid } from 'uuid';
 
 const { log } = Log(module);

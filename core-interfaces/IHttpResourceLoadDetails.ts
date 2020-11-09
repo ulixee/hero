@@ -1,7 +1,7 @@
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import { URL } from 'url';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import OriginType from './OriginType';
+import { URL } from "url";
+import ResourceType from "./ResourceType";
+import IResourceHeaders from "./IResourceHeaders";
+import OriginType from "./OriginType";
 
 export default interface IHttpResourceLoadDetails {
   isSSL: boolean;
