@@ -6,8 +6,10 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
 import inspectHierarchy from './inspectHierarchy';
-import { proxyFunction } from '../injected-scripts/utils';
-import { getOverrideScript } from '../injected-scripts';
+// @ts-ignore
+// eslint-disable-next-line import/extensions
+import { proxyFunction } from '../injected-scripts/_proxyUtils';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -38,12 +40,12 @@ test('should be able to override a function', async () => {
     holder,
   };
 
-  const heirarchy = JSON.parse(await inspectHierarchy(win, 'win')).window;
-  if (debug) console.log(inspect(heirarchy, false, null, true));
+  const hierarchy = JSON.parse(await inspectHierarchy(win, 'win')).window;
+  if (debug) console.log(inspect(hierarchy, false, null, true));
   expect(win.holder.tester.doSomeWork('we')).toBe('we nope');
 
   proxyFunction(win.TestClass.prototype, 'doSomeWork', (target, thisArg, args) => {
-    return `${target.call(thisArg, args)} yep`;
+    return `${target.apply(thisArg, args)} yep`;
   });
 
   const afterHierarchy = JSON.parse(await inspectHierarchy(win, 'win')).window;
@@ -52,9 +54,9 @@ test('should be able to override a function', async () => {
   expect(win.holder.tester.doSomeWork('oh')).toBe('oh nope yep');
   expect(afterHierarchy.TestClass.prototype.doSomeWork._invocation).toBe('undefined nope yep');
   // these 2 will now be different in the structure
-  delete heirarchy.TestClass.prototype.doSomeWork._invocation;
+  delete hierarchy.TestClass.prototype.doSomeWork._invocation;
   delete afterHierarchy.TestClass.prototype.doSomeWork._invocation;
-  expect(heirarchy).toStrictEqual(afterHierarchy);
+  expect(hierarchy).toStrictEqual(afterHierarchy);
 });
 
 test('should override a function and clean error stacks', async () => {
@@ -85,8 +87,7 @@ test('should override a function and clean error stacks', async () => {
     page.on('console', console.log);
   }
   await page.addNewDocumentScript(
-    getOverrideScript('navigator', {
-      platform: 'win32',
+    getOverrideScript('navigator.deviceMemory', {
       memory: '4gb',
     }).script,
     false,
@@ -113,7 +114,7 @@ test('should override a function and clean error stacks', async () => {
 
 test('should override Errors properly on https pages', async () => {
   const httpServer = await Helpers.runHttpsServer((req, res) => {
-    res.end(`<html><body><h1>Hi</h1></body></html>`);
+    res.end(`<html lang="en"><body><h1>Hi</h1></body></html>`);
   });
 
   const context = await puppet.newContext(
@@ -137,7 +138,8 @@ test('should override Errors properly on https pages', async () => {
   const page = await context.newPage();
 
   page.on('console', console.log);
-  await page.addNewDocumentScript(getOverrideScript('errors').script, false);
+  await page.addNewDocumentScript(getOverrideScript('Error.captureStackTrace').script, false);
+  await page.addNewDocumentScript(getOverrideScript('Error.constructor').script, false);
   await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
 
   const errorToString = await page.evaluate(`Error.toString()`);

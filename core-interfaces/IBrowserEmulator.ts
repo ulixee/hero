@@ -1,7 +1,7 @@
 import INetworkInterceptorDelegate from './INetworkInterceptorDelegate';
 import IUserProfile from './IUserProfile';
 import IUserAgent from './IUserAgent';
-import IPageOverride from './IPageOverride';
+import INewDocumentInjectedScript from './INewDocumentInjectedScript';
 
 export default interface IBrowserEmulator {
   readonly userAgent: IUserAgent;
@@ -10,5 +10,5 @@ export default interface IBrowserEmulator {
   locale: string;
   userProfile: IUserProfile;
 
-  generatePageOverrides(): Promise<IPageOverride[]>;
+  newDocumentInjectedScripts(): Promise<INewDocumentInjectedScript[]>;
 }

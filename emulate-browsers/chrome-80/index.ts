@@ -1,12 +1,13 @@
 import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
-  chromePageOverrides,
   DnsOverTlsProviders,
+  DomOverridesBuilder,
   getEngineExecutablePath,
   getTcpSettingsForOs,
   IUserAgent,
   modifyHeaders,
+  parseNavigatorPlugins,
   readPolyfills,
   StatcounterBrowserUsage,
 } from '@secret-agent/emulate-browsers-base';
@@ -22,7 +23,7 @@ import headerProfiles from './headers.json';
 import defaultUseragents from './user-agents.json';
 import frame from './frame.json';
 
-const polyfills = readPolyfills(__dirname);
+const polyfillSet = readPolyfills(__dirname);
 const agents = UserAgents.getSupportedAgents('Chrome', 80, defaultUseragents);
 
 @BrowserEmulatorClassDecorator
@@ -40,13 +41,15 @@ export default class Chrome80 {
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 
   public get canPolyfill() {
-    return polyfills?.canPolyfill(this);
+    return polyfillSet?.canPolyfill(this);
   }
 
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   public locale = 'en-US,en;0.9';
   public userProfile: IUserProfile;
+
+  protected domOverrides = new DomOverridesBuilder();
 
   constructor(userAgent?: IUserAgent) {
     this.userAgent = userAgent ?? pickRandom(agents);
@@ -62,33 +65,115 @@ export default class Chrome80 {
         requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
       },
     };
+    this.loadDomOverrides();
   }
 
-  public async generatePageOverrides() {
-    const os = this.userAgent.os;
-    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
-    const windowFrame = frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
+  public async newDocumentInjectedScripts() {
+    return this.domOverrides.build();
+  }
 
-    const args = {
-      osFamily: os.family,
-      osVersion: `${os.major}.${os.minor}`,
-      platform: this.userAgent.platform,
-      memory: Math.ceil(Math.random() * 4) * 2,
-      languages: this.locale.split(','),
-      windowFrame,
+  protected loadDomOverrides() {
+    const domOverrides = this.domOverrides;
+
+    domOverrides.add('Error.captureStackTrace');
+    domOverrides.add('Error.constructor');
+
+    domOverrides.add('navigator.webdriver');
+
+    const deviceMemory = Math.ceil(Math.random() * 4) * 2;
+    domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
+
+    domOverrides.add('MediaDevices.prototype.enumerateDevices', {
       videoDevice: {
-        // TODO: stabilize per user
         deviceId: randomBytes(32).toString('hex'),
         groupId: randomBytes(32).toString('hex'),
       },
-    };
-
-    // import scripts from single file
-    return chromePageOverrides(args, {
-      codecs,
-      chrome,
-      polyfills: polyfills.get(this),
-      navigator,
     });
+
+    domOverrides.add('Notification.permission');
+    domOverrides.add('Permission.prototype.query');
+
+    domOverrides.add('window.chrome', {
+      updateLoadTimes: true,
+      polyfill: {
+        property: chrome.chrome,
+        prevProperty: chrome.prevProperty,
+      },
+    });
+
+    const polyfills = polyfillSet.get(this);
+    if (polyfills?.removals?.length) {
+      domOverrides.add('polyfill.removals', {
+        removals: polyfills.removals,
+      });
+    }
+    if (polyfills?.additions?.length) {
+      domOverrides.add('polyfill.additions', {
+        additions: polyfills.additions,
+      });
+    }
+    if (polyfills?.changes?.length) {
+      domOverrides.add('polyfill.changes', {
+        changes: polyfills.changes,
+      });
+    }
+    if (polyfills?.order?.length) {
+      domOverrides.add('polyfill.reorder', {
+        order: polyfills.order,
+      });
+    }
+
+    domOverrides.add('navigator.plugins', parseNavigatorPlugins(navigator.navigator));
+    domOverrides.add('WebGLRenderingContext.prototype.getParameter', {
+      // UNMASKED_VENDOR_WEBGL
+      37445: 'Intel Inc.',
+      // UNMASKED_RENDERER_WEBGL
+      37446: 'Intel Iris OpenGL Engine',
+    });
+    domOverrides.add('console.debug');
+    domOverrides.add('HTMLIFrameElement.prototype');
+    domOverrides.add('Element.prototype.attachShadow');
+
+    domOverrides.add('window.outerWidth');
+
+    const windowFrame = this.getFrameHeight();
+    if (windowFrame) {
+      domOverrides.add('window.outerHeight', {
+        windowFrame,
+      });
+    }
+
+    const agentCodecs = this.getCodecs();
+    if (agentCodecs) {
+      domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
+        audioCodecs: agentCodecs.audioSupport,
+        videoCodecs: agentCodecs.videoSupport,
+      });
+      domOverrides.add('MediaRecorder.isTypeSupported', {
+        supportedCodecs: agentCodecs.audioSupport.recordingFormats.concat(
+          agentCodecs.videoSupport.recordingFormats,
+        ),
+      });
+      domOverrides.add('RTCRtpSender.getCapabilities', {
+        videoCodecs: agentCodecs.webRtcVideoCodecs,
+        audioCodecs: agentCodecs.webRtcAudioCodecs,
+      });
+    }
+  }
+
+  private getFrameHeight() {
+    const os = this.userAgent.os;
+    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
+    return frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
+  }
+
+  private getCodecs() {
+    const os = this.userAgent.os;
+    let osCodecs = codecs.find(x => x.opSyses.includes(`${os.family} ${os.major}`));
+    if (!osCodecs) {
+      // just match on os
+      osCodecs = codecs.find(x => x.opSyses.some(y => y.includes(os.family)));
+    }
+    return osCodecs?.profile;
   }
 }

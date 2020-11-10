@@ -3,6 +3,15 @@ function toSeconds(millis) {
   if (entry.endsWith('0')) entry = entry.substr(0, entry.length - 1);
   return parseFloat(entry);
 }
+
+interface PerformanceEntry {
+  loadEventEnd: number;
+  responseStart: number;
+  domContentLoadedEventEnd: number;
+  type: string;
+  nextHopProtocol: string;
+}
+
 // from https://developers.google.com/web/updates/2017/12/chrome-loadtimes-deprecated
 const loadTimeConversion = {
   requestTime() {
@@ -31,7 +40,7 @@ const loadTimeConversion = {
     return toSeconds(start + performance.timeOrigin);
   },
   firstPaintTime() {
-    let fpEntry = performance.getEntriesByType('paint')[0];
+    let fpEntry: { startTime: number } = performance.getEntriesByType('paint')[0];
     if (!fpEntry) {
       const ntEntry = performance.getEntriesByType('navigation')[0];
       const start = ntEntry ? ntEntry.loadEventEnd : 0;
@@ -84,12 +93,12 @@ const csiConversion = {
   startE() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
     const start = ntEntry ? ntEntry.loadEventEnd : 0;
-    return parseInt(start + performance.timeOrigin, 10);
+    return parseInt((start + performance.timeOrigin) as any, 10);
   },
   onloadT() {
     const ntEntry = performance.getEntriesByType('navigation')[0];
     const load = ntEntry ? ntEntry.domContentLoadedEventEnd : 0;
-    return parseInt(load + performance.timeOrigin, 10);
+    return parseInt((load + performance.timeOrigin) as any, 10);
   },
   pageT() {
     return parseFloat(performance.now().toFixed(3));
@@ -111,7 +120,7 @@ const csiConversion = {
     /**
      *
      const int kTransitionLink = 0;
-     
+
      case blink::kWebNavigationTypeLinkClicked:
      case blink::kWebNavigationTypeFormSubmitted:
      case blink::kWebNavigationTypeFormResubmitted:
@@ -130,5 +139,5 @@ if (args.updateLoadTimes) {
     property.csi['new()'][name]['_value()'] = func;
   }
 }
-
-addDescriptorAfterProperty('window', prevProperty, 'chrome', buildDescriptor(property));
+const descriptor = buildDescriptor(property);
+addDescriptorAfterProperty('window', prevProperty, 'chrome', descriptor);

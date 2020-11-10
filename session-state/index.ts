@@ -318,7 +318,7 @@ export default class SessionState {
     message: string,
     location?: string,
   ) {
-    if (message.includes('Error: ') || message.startsWith('ERROR')) {
+    if (message.match(/error/ig)) {
       this.logger.error('Window.error', { message });
     } else {
       this.logger.info('Window.console', { message });

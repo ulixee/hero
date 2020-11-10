@@ -7,7 +7,7 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Core from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import inspectScript from './inspectHierarchy';
-import { getOverrideScript } from '../injected-scripts';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -96,7 +96,7 @@ test('it should be able to add polyfills', async () => {
     _value: 'I am chrome',
   };
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill', {
+    getOverrideScript('polyfill.additions', {
       additions: [
         {
           path: 'window',
@@ -111,9 +111,6 @@ test('it should be able to add polyfills', async () => {
           property: objectTestProperties,
         },
       ],
-      removals: [],
-      changes: [],
-      order: [],
     }).script,
     false,
   );
@@ -146,11 +143,8 @@ test('it should be able to remove properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill', {
-      additions: [],
+    getOverrideScript('polyfill.removals', {
       removals: ['window.Atomics', 'window.Array.from'],
-      changes: [],
-      order: [],
     }).script,
     false,
   );
@@ -164,9 +158,7 @@ test('it should be able to change properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill', {
-      additions: [],
-      removals: [],
+    getOverrideScript('polyfill.changes', {
       changes: [
         {
           path: 'window.Navigator.prototype.registerProtocolHandler.name',
@@ -179,7 +171,6 @@ test('it should be able to change properties', async () => {
           property: 'function registerProtocolHandler() { [unnative code] }',
         },
       ],
-      order: [],
     }).script,
     false,
   );
@@ -207,10 +198,7 @@ test('it should be able to change property order', async () => {
   )) as string[];
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill', {
-      removals: [],
-      additions: [],
-      changes: [],
+    getOverrideScript('polyfill.reorder', {
       order: [
         {
           path: 'window.Navigator.prototype',
@@ -268,10 +256,7 @@ test('it should be able to change window property order', async () => {
     },
   ];
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill', {
-      removals: [],
-      additions: [],
-      changes: [],
+    getOverrideScript('polyfill.reorder', {
       order,
     }).script,
     false,

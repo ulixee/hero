@@ -1,29 +1,14 @@
+// @ts-ignore
 const { audioCodecs, videoCodecs } = args;
-
-emulateRecordingCodecs(audioCodecs.recordingFormats, videoCodecs.recordingFormats);
-
-function parseCodecs(list = []) {
-  return list.map(x => {
-    const [mime, codecs] = x.split(';');
-    if (!codecs) return mime;
-    const sortedCodecs = codecs
-      .replace('codecs=', '')
-      .split(',')
-      .filter(Boolean)
-      .sort()
-      .join(',');
-
-    return `${mime};codecs=${sortedCodecs}`;
-  });
-}
 
 audioCodecs.probablyPlays = parseCodecs(audioCodecs.probablyPlays);
 audioCodecs.maybePlays = parseCodecs(audioCodecs.maybePlays);
 videoCodecs.probablyPlays = parseCodecs(videoCodecs.probablyPlays);
 videoCodecs.maybePlays = parseCodecs(videoCodecs.maybePlays);
 
-proxyFunction(HTMLMediaElement.prototype, 'canPlayType', (func, thisArg, type) => {
-  if (type === undefined || typeof type !== 'string') return nativeKey;
+proxyFunction(HTMLMediaElement.prototype, 'canPlayType', (func, thisArg, argArray) => {
+  const type = argArray.length ? argArray[0] : undefined;
+  if (type === undefined || typeof type !== 'string') return ProxyOverride.callOriginal;
 
   const [mime, codecs] = type
     .split(';')
@@ -54,14 +39,20 @@ proxyFunction(HTMLMediaElement.prototype, 'canPlayType', (func, thisArg, type) =
     return 'maybe';
   }
   // fallback to calling browser
-  return nativeKey;
+  return ProxyOverride.callOriginal;
 });
 
-function emulateRecordingCodecs(audioRecordingCodecs, videoRecordingCodecs) {
-  if (window.MediaRecorder) {
-    proxyFunction(MediaRecorder, 'isTypeSupported', (func, thisArg, type) => {
-      if (type === undefined) return nativeKey;
-      return audioRecordingCodecs.includes(type) || videoRecordingCodecs.includes(type);
-    });
-  }
+function parseCodecs(list = []) {
+  return list.map(x => {
+    const [mime, codecs] = x.split(';');
+    if (!codecs) return mime;
+    const sortedCodecs = codecs
+      .replace('codecs=', '')
+      .split(',')
+      .filter(Boolean)
+      .sort()
+      .join(',');
+
+    return `${mime};codecs=${sortedCodecs}`;
+  });
 }
