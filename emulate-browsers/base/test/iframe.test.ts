@@ -91,7 +91,7 @@ test('should have plugins in frames', async () => {
     const iframe = document.createElement('iframe');
     iframe.srcdoc = 'page intentionally left blank';
     document.body.appendChild(iframe);
-    
+
     return iframe.contentWindow.navigator.plugins.length;
   })()`);
   expect(plugins).toBe(iframePlugins);
@@ -109,9 +109,9 @@ test('should not be able to detect contentWindow overrides', async () => {
 
     const descriptors = Object.getOwnPropertyDescriptors(HTMLIFrameElement.prototype);
     results.descriptorToString = descriptors.contentWindow.get.toString();
-    results.descriptorToStringToString = descriptors.contentWindow.get.toString.toString(); 
+    results.descriptorToStringToString = descriptors.contentWindow.get.toString.toString();
     results.windowType = typeof iframe.contentWindow;
-    results.noProxySignature = !iframe.srcdoc.toString.hasOwnProperty('[[IsRevoked]]'); 
+    results.noProxySignature = !iframe.srcdoc.toString.hasOwnProperty('[[IsRevoked]]');
     return results;
   })()`);
   expect(results.descriptorToString).toBe('function get contentWindow() { [native code] }');
@@ -129,11 +129,12 @@ test('should emulate contentWindow features', async () => {
     const iframe = document.createElement('iframe');
     iframe.srcdoc = 'page intentionally left blank';
     document.body.appendChild(iframe);
-    
+
     results.doesExist = !!iframe.contentWindow; // Verify iframe isn't remapped to main window
     results.isNotAClone = iframe.contentWindow !== window; // Verify iframe isn't remapped to main window
     results.selfIsNotWindow = iframe.contentWindow.self !== window;
     results.selfIsNotWindowTop = iframe.contentWindow.self !== window.top;
+    results.selfIsAWindow = iframe.contentWindow.self instanceof Window;
     results.topIsNotSame = iframe.contentWindow.top !== iframe.contentWindow;
     results.frameElementMatches =  iframe.contentWindow.frameElement === iframe;
 
@@ -146,6 +147,7 @@ test('should emulate contentWindow features', async () => {
   expect(results.isNotAClone).toBe(true);
   expect(results.selfIsNotWindow).toBe(true);
   expect(results.selfIsNotWindowTop).toBe(true);
+  expect(results.selfIsAWindow).toBe(true);
   expect(results.topIsNotSame).toBe(true);
 });
 

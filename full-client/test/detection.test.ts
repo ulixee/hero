@@ -48,13 +48,13 @@ beforeAll(async () => {
 
       return res;
   });
-  
+
   const fp = await fpCollect.generateFingerprint();
   await fetch('/analyze', {
     method:'POST',
     body: JSON.stringify(fp),
   });
-})(); 
+})();
 </script>
 </body>
     `;
@@ -103,7 +103,7 @@ test('should not be denied for notifications, but prompt for permissions', async
     const permissionStatus = await navigator.permissions.query({
       name: 'notifications',
     });
-  
+
     return {
       notificationValue: Notification.permission,
       permissionState: permissionStatus.state

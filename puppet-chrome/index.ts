@@ -1,6 +1,6 @@
-import IPuppetBrowser from "@secret-agent/puppet/interfaces/IPuppetBrowser";
-import ILaunchedProcess from "@secret-agent/puppet/interfaces/ILaunchedProcess";
-import IPuppetLauncher from "@secret-agent/puppet/interfaces/IPuppetLauncher";
+import IPuppetBrowser from "@secret-agent/puppet-interfaces/IPuppetBrowser";
+import ILaunchedProcess from "@secret-agent/puppet-interfaces/ILaunchedProcess";
+import IPuppetLauncher from "@secret-agent/puppet-interfaces/IPuppetLauncher";
 import os from "os";
 import { Browser } from "./lib/Browser";
 import { Connection } from "./lib/Connection";

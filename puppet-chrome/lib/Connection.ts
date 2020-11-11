@@ -14,19 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
-import {
-  addTypedEventListener,
-  IRegisteredEventListener,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@secret-agent/commons/eventUtils';
-import IConnectionTransport, {
-  IConnectionTransportEvents,
-} from '@secret-agent/puppet/interfaces/IConnectionTransport';
-import { IPuppetConnectionEvents } from '@secret-agent/puppet/interfaces/IPuppetConnection';
-import Log from '@secret-agent/commons/Logger';
-import { CDPSession } from './CDPSession';
+import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
+import { addTypedEventListener, removeEventListeners, TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import IConnectionTransport, { IConnectionTransportEvents } from "@secret-agent/puppet-interfaces/IConnectionTransport";
+import { IPuppetConnectionEvents } from "@secret-agent/puppet-interfaces/IPuppetConnection";
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import Log from "@secret-agent/commons/Logger";
+import { CDPSession } from "./CDPSession";
 
 const { log } = Log(module);
 

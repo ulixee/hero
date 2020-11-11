@@ -1,11 +1,12 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
-import IBrowserEmulationSettings from '@secret-agent/puppet/interfaces/IBrowserEmulationSettings';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import {  TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IPuppetNetworkEvents } from '@secret-agent/puppet-interfaces/IPuppetNetworkEvents';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;

@@ -1,15 +1,16 @@
-import * as Fs from "fs";
-import * as Path from "path";
-import { createPromise, IResolvablePromise } from "@secret-agent/commons/utils";
-import Log from "@secret-agent/commons/Logger";
-import { MitmProxy as MitmServer } from "@secret-agent/mitm";
-import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
-import SessionsDb from "@secret-agent/session-state/lib/SessionsDb";
-import Puppet from "@secret-agent/puppet";
-import { IBrowserEmulator } from "@secret-agent/emulate-browsers-base";
-import Os from "os";
-import Session from "./Session";
-import BrowserEmulators from "./BrowserEmulators";
+import * as Fs from 'fs';
+import * as Path from 'path';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
+import Log from '@secret-agent/commons/Logger';
+import { MitmProxy as MitmServer } from '@secret-agent/mitm';
+import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
+import Puppet from '@secret-agent/puppet';
+import Os from 'os';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import Session from './Session';
+import BrowserEmulators from './BrowserEmulators';
 
 const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
@@ -41,8 +42,8 @@ export default class GlobalPool {
     await this.startMitm();
 
     for (const emulatorId of browserEmulatorIds) {
-      const browserEmulator = BrowserEmulators.create(emulatorId);
-      this.addPuppet(browserEmulator);
+      const browserEmulator = BrowserEmulators.getClass(emulatorId);
+      this.addPuppet(browserEmulator.engine);
     }
 
     this.resolveWaitingConnection();
@@ -99,11 +100,11 @@ export default class GlobalPool {
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
-  private static addPuppet(browserEmulator: IBrowserEmulator) {
-    const existing = this.getPuppet(browserEmulator);
+  private static addPuppet(engine: IBrowserEngine) {
+    const existing = this.getPuppet(engine);
     if (existing) return existing;
 
-    const puppet = new Puppet(browserEmulator);
+    const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
     const showBrowser = !!process.env.SHOW_BROWSER;
@@ -112,9 +113,9 @@ export default class GlobalPool {
     return puppet;
   }
 
-  private static getPuppet(browserEmulator?: IBrowserEmulator) {
-    if (!browserEmulator) return this.puppets[0];
-    return this.puppets.find(x => x.executablePath === browserEmulator.engineExecutablePath);
+  private static getPuppet(engine?: IBrowserEngine) {
+    if (!engine) return this.puppets[0];
+    return this.puppets.find(x => x.engine === engine);
   }
 
   private static async startMitm() {
@@ -130,7 +131,7 @@ export default class GlobalPool {
     try {
       const session = new Session(options);
 
-      puppet = this.getPuppet(session.browserEmulator) ?? this.addPuppet(session.browserEmulator);
+      puppet = this.getPuppet(session.browserEngine) ?? this.addPuppet(session.browserEngine);
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

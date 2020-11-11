@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 import * as EventUtils from '@secret-agent/commons/eventUtils';
-import Log from '@secret-agent/commons/Logger';
 import { addEventListeners, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import Log from '@secret-agent/commons/Logger';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import IConnectionTransport, {
   IConnectionTransportEvents,
-} from '../interfaces/IConnectionTransport';
+} from '@secret-agent/puppet-interfaces/IConnectionTransport';
 
 const { log } = Log(module);
 
@@ -26,7 +27,7 @@ export class PipeTransport extends TypedEventEmitter<IConnectionTransportEvents>
   implements IConnectionTransport {
   pipeWrite: NodeJS.WritableStream;
   pendingMessage: string;
-  eventListeners: EventUtils.IRegisteredEventListener[];
+  eventListeners: IRegisteredEventListener[];
 
   constructor(pipeWrite: NodeJS.WritableStream, pipeRead: NodeJS.ReadableStream) {
     super();

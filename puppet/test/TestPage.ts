@@ -1,5 +1,5 @@
-import { IPuppetPage } from '../interfaces/IPuppetPage';
-import { IPuppetFrame } from '../interfaces/IPuppetFrame';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import { IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 
 export interface ITestPage extends IPuppetPage {
   click(selector: string): Promise<void>;

@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import Log from '@secret-agent/commons/Logger';
 import ITabOptions from '@secret-agent/core-interfaces/ITabOptions';
 import {
   ILocationStatus,
@@ -21,11 +21,12 @@ import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -476,15 +477,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     await this.domEnv.install();
 
     const page = this.puppetPage;
-    const pageOverrides = await this.session.browserEmulator.generatePageOverrides();
-    for (const pageOverride of pageOverrides) {
-      if (pageOverride.callbackWindowName) {
-        await page.addPageCallback(pageOverride.callbackWindowName, payload => {
-          pageOverride.callback(JSON.parse(payload));
+    const newDocumentInjectedScripts = await this.session.browserEmulator.newDocumentInjectedScripts();
+    for (const newDocumentScript of newDocumentInjectedScripts) {
+      if (newDocumentScript.callbackWindowName) {
+        await page.addPageCallback(newDocumentScript.callbackWindowName, payload => {
+          newDocumentScript.callback(JSON.parse(payload));
         });
       }
       // overrides happen in main frame
-      await page.addNewDocumentScript(pageOverride.script, false);
+      await page.addNewDocumentScript(newDocumentScript.script, false);
     }
 
     await this.domRecorder.install();

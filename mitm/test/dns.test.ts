@@ -1,7 +1,7 @@
-import IHttpRequestModifierDelegate from "@secret-agent/commons/interfaces/IHttpRequestModifierDelegate";
-import DnsOverTlsSocket from "../lib/DnsOverTlsSocket";
-import { Dns } from "../lib/Dns";
-import RequestSession from "../handlers/RequestSession";
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
+import { Dns } from '../lib/Dns';
+import RequestSession from '../handlers/RequestSession';
 
 const CloudFlare = {
   host: '1.1.1.1',
@@ -21,10 +21,14 @@ const Quad9 = {
 let dns: Dns;
 beforeAll(() => {
   dns = new Dns({
-    delegate: {
-      tlsProfileId: 'Chrome83',
-      dnsOverTlsConnectOptions: Quad9,
-    } as IHttpRequestModifierDelegate,
+    networkInterceptorDelegate: {
+      tls: {
+        emulatorProfileId: 'Chrome83',
+      },
+      dns: {
+        dnsOverTlsConnection: Quad9,
+      },
+    } as INetworkInterceptorDelegate,
     getUpstreamProxyUrl: () => null,
   } as RequestSession);
 });
@@ -57,7 +61,7 @@ describe('DnsOverTlsSocket', () => {
       cloudflareDnsSocket.lookupARecords('headers.ulixee.org'),
       cloudflareDnsSocket.lookupARecords('tls.ulixee.org'),
       cloudflareDnsSocket.lookupARecords('stateofscraping.org'),
-    ])
+    ]);
     expect(response).toHaveLength(3);
   });
 

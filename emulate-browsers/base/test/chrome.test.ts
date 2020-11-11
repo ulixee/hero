@@ -6,7 +6,7 @@ import Core from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import inspectScript from './inspectHierarchy';
-import { getOverrideScript } from '../injected-scripts';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -14,8 +14,8 @@ const { chrome, prevProperty } = ChromeJson as any;
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const emulator = BrowserEmulators.create(Core.defaultBrowserEmulatorId);
-  puppet = new Puppet(emulator);
+  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 });
@@ -27,15 +27,13 @@ const debug = process.env.DEBUG || false;
 test('it should mimic a chrome object', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
-  await page.addNewDocumentScript(
-    getOverrideScript('chrome', {
-      polyfill: {
-        property: chrome,
-        prevProperty,
-      },
-    }).script,
-    false,
-  );
+  const script = getOverrideScript('window.chrome', {
+    polyfill: {
+      property: chrome,
+      prevProperty,
+    },
+  }).script;
+  await page.addNewDocumentScript(script, false);
   await Promise.all([
     page.navigate(httpServer.url),
     page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
@@ -55,7 +53,7 @@ test('it should update loadtimes and csi values', async () => {
   const httpServer = await Helpers.runHttpServer();
   const page = await createPage();
   await page.addNewDocumentScript(
-    getOverrideScript('chrome', {
+    getOverrideScript('window.chrome', {
       updateLoadTimes: true,
       polyfill: {
         property: chrome,

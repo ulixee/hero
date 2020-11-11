@@ -1,3 +1,5 @@
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+
 export function assert(value: unknown, message?: string, reject?) {
   if (value) return;
   const error = new Error(message);
@@ -60,12 +62,4 @@ export function createPromise<T = any>(
   (response as any).then = response.promise.then.bind(response.promise);
   (response as any).catch = response.promise.catch.bind(response.promise);
   return response;
-}
-
-export interface IResolvablePromise<T = any> {
-  isResolved: boolean;
-  promise?: Promise<T>;
-  resolve?: (value?: T | PromiseLike<T>) => void;
-  reject?: (reason?: any) => void;
-  timeout?: NodeJS.Timeout;
 }

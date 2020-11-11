@@ -3,8 +3,8 @@ import IBrowserEmulator from './IBrowserEmulator';
 
 export default interface IBrowserEmulatorClass {
   id: string;
-  statcounterBrowser: string;
-  engine: { browser: string; revision: string };
+  roundRobinPercent: number;
+  engine: { browser: string; executablePath: string; revision: string };
   new (userAgent?: IUserAgent): IBrowserEmulator;
 }
 

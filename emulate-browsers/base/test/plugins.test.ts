@@ -7,7 +7,7 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Log from '@secret-agent/commons/Logger';
 import pluginsChrome from './plugins-Chrome.json';
 import inspectScript from './inspectHierarchy';
-import { getOverrideScript } from '../injected-scripts';
+import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
@@ -15,8 +15,8 @@ const { navigator } = navigatorJson;
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const emulator = BrowserEmulators.create(Core.defaultBrowserEmulatorId);
-  puppet = new Puppet(emulator);
+  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
 });
@@ -54,7 +54,7 @@ test('it should override plugins in a browser window', async () => {
     page.on('console', console.log);
   }
   await page.addNewDocumentScript(
-    getOverrideScript('plugins', {
+    getOverrideScript('navigator.plugins', {
       mimeTypes: [
         {
           type: 'application/pdf',
@@ -115,6 +115,18 @@ test('it should override plugins in a browser window', async () => {
   const pluginCount = await page.mainFrame.evaluate(`navigator.plugins.length`, false);
   expect(pluginCount).toBe(3);
 
+  const plugin1Count = await page.mainFrame.evaluate(
+    `(() => {
+  let mimes = [];
+  for(const mime of navigator.plugins[0]) {
+    mimes.push(mime.type);
+  }
+  return mimes;
+})()`,
+    false,
+  );
+  expect(plugin1Count).toStrictEqual(['application/x-google-chrome-pdf']);
+
   const mimecount = await page.mainFrame.evaluate(`navigator.mimeTypes.length`, false);
   expect(mimecount).toBe(4);
 
@@ -125,7 +137,7 @@ test('it should override plugins in a browser window', async () => {
     )) as any,
   ).window;
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
-    if (debug) console.log(inspect(structure[proto], false, null, true));
+    if (debug) console.log(proto, inspect(structure[proto], false, null, true));
     expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);
   }
   const navigatorStructure = structure.navigator;

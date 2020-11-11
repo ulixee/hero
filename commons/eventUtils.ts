@@ -1,14 +1,10 @@
 import { EventEmitter } from 'events';
+import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import { IBoundLog} from "@secret-agent/core-interfaces/ILog";
 import { createPromise } from './utils';
-import ITypedEventEmitter from './interfaces/ITypedEventEmitter';
 import IPendingWaitEvent, { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
-import { IBoundLog } from './Logger';
 
-export interface IRegisteredEventListener {
-  emitter: EventEmitter | ITypedEventEmitter<any>;
-  eventName: string | symbol;
-  handler: (...args: any[]) => void;
-}
 
 export function addEventListener(
   emitter: EventEmitter,

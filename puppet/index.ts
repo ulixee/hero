@@ -1,26 +1,23 @@
 import PuppetChrome from '@secret-agent/puppet-chrome';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
+import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import launchProcess from './lib/launchProcess';
-import IPuppetLauncher from './interfaces/IPuppetLauncher';
-import IPuppetBrowser from './interfaces/IPuppetBrowser';
-import IBrowserEmulationSettings from './interfaces/IBrowserEmulationSettings';
 
 const { log } = Log(module);
 
 let puppBrowserCounter = 1;
 export default class Puppet {
   public readonly id: number;
-  public engine: { browser: string; revision: string };
+  public readonly engine: IBrowserEngine;
   public isShuttingDown: boolean;
-  public readonly executablePath: string;
   private browser: Promise<IPuppetBrowser>;
 
-  constructor(startParams: {
-    engine: { browser: string; revision: string };
-    engineExecutablePath: string;
-  }) {
-    this.engine = startParams.engine;
-    this.executablePath = startParams.engineExecutablePath;
+  constructor(engine: IBrowserEngine) {
+    this.engine = engine;
     this.isShuttingDown = false;
     this.id = puppBrowserCounter;
     this.browser = null;
@@ -49,7 +46,12 @@ export default class Puppet {
     }
 
     const launchArgs = launcher.getLaunchArgs({ proxyPort, showBrowser });
-    const launchedProcess = launchProcess(this.executablePath, launchArgs, {}, pipeBrowserIo);
+    const launchedProcess = launchProcess(
+      this.engine.executablePath,
+      launchArgs,
+      {},
+      pipeBrowserIo,
+    );
     this.browser = launcher.createPuppet(launchedProcess, this.engine.revision);
   }
 

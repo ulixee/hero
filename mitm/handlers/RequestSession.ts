@@ -1,8 +1,9 @@
 import * as http from 'http';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
@@ -10,7 +11,8 @@ import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import Log from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
@@ -57,7 +59,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly sessionId: string,
     readonly useragent: string,
     readonly upstreamProxyUrlProvider: Promise<string>,
-    readonly delegate: IHttpRequestModifierDelegate = {},
+    readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
   ) {
     super();
     RequestSession.sessions[sessionId] = this;
@@ -233,8 +235,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public recordDocumentUserActivity(documentUrl: string) {
-    if (this.delegate?.documentHasUserActivity) {
-      this.delegate?.documentHasUserActivity(documentUrl);
+    if (this.networkInterceptorDelegate?.http.onOriginHasFirstPartyInteraction) {
+      this.networkInterceptorDelegate.http.onOriginHasFirstPartyInteraction(documentUrl);
     }
   }
 

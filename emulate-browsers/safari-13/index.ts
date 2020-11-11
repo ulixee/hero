@@ -1,11 +1,14 @@
 import { URL } from 'url';
-import IHttpRequestModifierDelegate from '@secret-agent/commons/interfaces/IHttpRequestModifierDelegate';
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
+  DomOverridesBuilder,
   getEngineExecutablePath,
+  getTcpSettingsForOs,
   IUserAgent,
   modifyHeaders,
-  tcpVars,
+  parseNavigatorPlugins,
+  StatcounterBrowserUsage,
   UserAgents,
 } from '@secret-agent/emulate-browsers-base';
 import {
@@ -17,41 +20,38 @@ import {
   permuteDomain,
 } from 'tough-cookie';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
-import IHttpResourceLoadDetails from '@secret-agent/commons/interfaces/IHttpResourceLoadDetails';
-import { createPromise, IResolvablePromise, pickRandom } from '@secret-agent/commons/utils';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-
-import pageOverrides from './pageOverrides';
 import headerProfiles from './headers.json';
 import pkg from './package.json';
 import defaultAgents from './user-agents.json';
+import codecs from './codecs.json';
+import frame from './frame.json';
+import navigator from './navigator.json';
 
-const engineExecutablePath = process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine);
+// NOTE: runs on Chrome83 since we don't support webkit yet
+const agents = UserAgents.getSupportedAgents('Chrome', 83, defaultAgents);
+const cookieCallbackName = 'SecretAgentSetCookie';
 
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
   public static id = pkg.name;
-  public static statcounterBrowser = 'Safari 13.1';
-  public static engine = pkg.engine;
-
-  protected static agents = UserAgents.getList(
-    {
-      deviceCategory: 'desktop',
-      vendor: 'Apple Computer, Inc.',
-      family: 'Safari',
-      versionMajor: 13,
-      versionMinor: 1,
-    },
-    defaultAgents,
+  public static roundRobinPercent = StatcounterBrowserUsage.getConsumerUsageForBrowser(
+    'Safari 13.1',
   );
 
-  public engineExecutablePath = engineExecutablePath;
-  public engine = pkg.engine;
-  public locale = 'en-US';
+  public static engine = {
+    ...pkg.engine,
+    executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
+  };
+
   public readonly userAgent: IUserAgent;
-  public delegate: IHttpRequestModifierDelegate;
-  public cookieJar: CookieJar;
+  public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
+  public locale = 'en-US';
+  public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
   public sitesWithUserInteraction: string[] = [];
   // This Flag Should be enabled once double agent deciphers patch level changes
@@ -78,6 +78,7 @@ export default class Safari13 {
     }
   }
 
+  protected domOverrides = new DomOverridesBuilder();
   private _userProfile: IUserProfile;
 
   private readonly userInteractionTrigger: {
@@ -85,37 +86,109 @@ export default class Safari13 {
   } = {};
 
   constructor(userAgent?: IUserAgent) {
-    this.userAgent = userAgent ?? pickRandom(Safari13.agents);
-    this.cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
-    this.delegate = {
-      modifyHeadersBeforeSend: modifyHeaders.bind(this, this.userAgent, headerProfiles),
-      tlsProfileId: 'Safari13',
-      tcpVars: tcpVars(this.userAgent.os),
-      getCookieHeader: this.getCookieHeader.bind(this),
-      setCookie: this.setCookie.bind(this),
-      documentHasUserActivity: this.documentHasUserActivity.bind(this),
+    this.userAgent = userAgent ?? pickRandom(agents);
+    this.networkInterceptorDelegate = {
+      tcp: getTcpSettingsForOs(this.userAgent.os),
+      tls: {
+        emulatorProfileId: 'Safari13',
+      },
+      http: {
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        cookieHeader: this.getCookieHeader.bind(this),
+        onSetCookie: this.setCookie.bind(this),
+        onOriginHasFirstPartyInteraction: this.documentHasUserActivity.bind(this),
+      },
     };
+    this.loadDomOverrides();
   }
 
-  public async generatePageOverrides() {
-    return pageOverrides({
-      osFamily: this.userAgent.os.family,
-      osVersion: `${this.userAgent.os.major}.${this.userAgent.os.minor}`,
-      platform: this.userAgent.platform,
-      memory: Math.ceil(Math.random() * 4) * 2,
-      languages: this.locale.split(','),
+  public async newDocumentInjectedScripts() {
+    const result = this.domOverrides.build();
+    Object.assign(result[0], {
+      callback: ({ cookie, origin }) => {
+        this.cookieJar.setCookie(cookie, origin);
+      },
+      callbackWindowName: cookieCallbackName,
+    });
+    return result;
+  }
+
+  protected loadDomOverrides() {
+    const domOverrides = this.domOverrides;
+    domOverrides.add('Error.captureStackTrace');
+    domOverrides.add('Error.constructor');
+
+    domOverrides.add('navigator.webdriver');
+
+    const deviceMemory = Math.ceil(Math.random() * 4) * 2;
+    domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
+
+    domOverrides.add('MediaDevices.prototype.enumerateDevices', {
       videoDevice: {
-        // TODO: stabilize per user
         deviceId: randomBytes(32).toString('hex'),
         groupId: randomBytes(32).toString('hex'),
       },
-      cookieParams: {
-        callback: ({ cookie, origin }) => {
-          this.cookieJar.setCookie(cookie, origin);
-        },
-        callbackWindowName: 'SecretAgentSetCookie',
-      },
     });
+
+    domOverrides.add('Notification.permission');
+    domOverrides.add('Permission.prototype.query');
+
+    domOverrides.add('navigator.plugins', parseNavigatorPlugins(navigator.navigator));
+    domOverrides.add('WebGLRenderingContext.prototype.getParameter', {
+      // UNMASKED_VENDOR_WEBGL
+      37445: 'Intel Inc.',
+      // UNMASKED_RENDERER_WEBGL
+      37446: 'Intel Iris OpenGL Engine',
+    });
+    domOverrides.add('console.debug');
+
+    domOverrides.add('Element.prototype.attachShadow');
+
+    domOverrides.add('window.outerWidth');
+
+    const windowFrame = this.getFrameHeight();
+    if (windowFrame) {
+      domOverrides.add('window.outerHeight', {
+        windowFrame,
+      });
+    }
+
+    const agentCodecs = this.getCodecs();
+    if (agentCodecs) {
+      domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
+        audioCodecs: agentCodecs.audioSupport,
+        videoCodecs: agentCodecs.videoSupport,
+      });
+      domOverrides.add('MediaRecorder.isTypeSupported', {
+        supportedCodecs: agentCodecs.audioSupport.recordingFormats.concat(
+          agentCodecs.videoSupport.recordingFormats,
+        ),
+      });
+      domOverrides.add('RTCRtpSender.getCapabilities', {
+        videoCodecs: agentCodecs.webRtcVideoCodecs,
+        audioCodecs: agentCodecs.webRtcAudioCodecs,
+      });
+    }
+
+    domOverrides.add('Document.prototype.cookie', {
+      callbackName: cookieCallbackName,
+    });
+  }
+
+  private getFrameHeight() {
+    const os = this.userAgent.os;
+    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
+    return frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
+  }
+
+  private getCodecs() {
+    const os = this.userAgent.os;
+    let osCodecs = codecs.find(x => x.opSyses.includes(`${os.family} ${os.major}`));
+    if (!osCodecs) {
+      // just match on os
+      osCodecs = codecs.find(x => x.opSyses.some(y => y.includes(os.family)));
+    }
+    return osCodecs?.profile;
   }
 
   private loadProfileCookies() {

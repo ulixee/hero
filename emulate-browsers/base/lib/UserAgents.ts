@@ -35,6 +35,25 @@ export default class UserAgents {
     return Object.values(userAgents);
   }
 
+  public static getSupportedAgents(family: string, versionMajor: number, defaultAgents: string[]) {
+    return UserAgents.getList(
+      {
+        deviceCategory: 'desktop',
+        family,
+        versionMajor,
+        operatingSystems: [
+          {
+            family: 'Windows',
+          },
+          {
+            family: 'Mac OS X',
+          },
+        ],
+      },
+      defaultAgents,
+    );
+  }
+
   public static convertDesktopAgent(useragent: string): IUserAgent {
     const agent = new UserAgent(useragent);
     let platform = 'MacIntel';

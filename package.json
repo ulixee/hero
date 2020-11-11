@@ -87,6 +87,7 @@
       "mitm-socket",
       "core-server",
       "puppet",
+      "puppet-interfaces",
       "puppet-chrome",
       "remote-client",
       "remote-interfaces",

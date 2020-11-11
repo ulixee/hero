@@ -1,6 +1,5 @@
 import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
 import { pickRandom } from '@secret-agent/commons/utils';
-import BrowserDistribution from '@secret-agent/emulate-browsers-base/lib/BrowserDistribution';
 
 export default class BrowserEmulators {
   public static defaultEmulatorId: string;
@@ -12,13 +11,13 @@ export default class BrowserEmulators {
     if (!this.defaultEmulatorId) this.defaultEmulatorId = BrowserEmulatorClass.id;
     this.emulatorsById[BrowserEmulatorClass.id] = BrowserEmulatorClass;
 
-    const usagePct = BrowserDistribution.getBrowserConsumerUsage(BrowserEmulatorClass);
+    const usagePct = BrowserEmulatorClass.roundRobinPercent ?? 1;
     for (let i = 0; i < usagePct; i += 1) {
       this.emulatorPublicUsageDistribution.push(BrowserEmulatorClass.id);
     }
   }
 
-  public static create(browserEmulatorId: string) {
+  public static getClass(browserEmulatorId: string) {
     let BrowserEmulator = this.emulatorsById[browserEmulatorId];
     if (!BrowserEmulator) {
       const fromShortId = `@secret-agent/emulate-${browserEmulatorId}`;
@@ -35,7 +34,7 @@ export default class BrowserEmulators {
     if (!BrowserEmulator) {
       throw new Error(`BrowserEmulator could not be found: ${browserEmulatorId}`);
     }
-    return new BrowserEmulator();
+    return BrowserEmulator;
   }
 
   public static getId(emulatorId?: string) {

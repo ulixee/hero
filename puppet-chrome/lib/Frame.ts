@@ -1,12 +1,13 @@
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
-import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet/interfaces/IPuppetFrame';
+import { createPromise } from '@secret-agent/commons/utils';
+import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
+import IResolvablePromise from "@secret-agent/core-interfaces/IResolvablePromise";
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
