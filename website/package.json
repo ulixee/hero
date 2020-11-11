@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/website",
-  "version": "1.1.0-alpha.1",
+  "version": "1.2.0-alpha.0",
   "private": true,
   "scripts": {
     "start": "gridsome develop",
@@ -36,14 +36,14 @@
     "gridsome-plugin-typescript": "git://github.com/calebjclark/gridsome-plugin-typescript.git",
     "json2md": "^1.7.0",
     "node-sass": "^4.12.0",
-    "vue-template-compiler": "^2.6.12",
     "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
     "pug": "^2.0.3",
     "sass-loader": "^8.0.0",
     "sharp": "^0.23.2",
     "ts-loader": "^6.2.1",
     "typescript": "~3.8.3",
-    "vue-svg-loader": "^0.12.0"
+    "vue-svg-loader": "^0.12.0",
+    "vue-template-compiler": "^2.6.12"
   },
   "resolutions": {
     "remark-slug": "git://github.com/ulixee/remark-slug.git"

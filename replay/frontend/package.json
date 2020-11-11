@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/replay-frontend",
-  "version": "1.1.0-alpha.0",
+  "version": "1.2.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",
@@ -26,13 +26,13 @@
   },
   "devDependencies": {
     "concurrently": "^5.2.0",
-    "webpack": "4.44.2",
     "cross-env": "^7.0.2",
     "css-loader": "~3.5.3",
     "node-sass": "^4.14.1",
     "pug": "^2.0.4",
     "pug-plain-loader": "^1.0.0",
     "sass-loader": "^8.0.2",
-    "typescript": "~3.8.3"
+    "typescript": "~3.8.3",
+    "webpack": "4.44.2"
   }
 }

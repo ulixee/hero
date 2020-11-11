@@ -14,7 +14,7 @@
       "path": "replay/tsconfig.dist.json"
     },
     {
-      "path": "emulate-browsers/base/injected-scripts/tsconfig.json"
+      "path": "emulate-browsers/base/injected-scripts/tsconfig.dist.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json"],
@@ -31,6 +31,7 @@
     "replay",
     "examples",
     "website",
-    "injected-scripts"
+    "injected-scripts",
+    "emulate-browsers/base/injected-scripts"
   ]
 }

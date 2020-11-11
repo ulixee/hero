@@ -7,7 +7,7 @@
   ],
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.1.0-alpha.0",
+  "version": "1.2.0-alpha.0",
   "main": "./app.js",
   "files": [
     "index.js",
