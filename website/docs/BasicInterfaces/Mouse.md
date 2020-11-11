@@ -1,6 +1,6 @@
 # Mouse
 
-Every SecretAgent instance has its own Mouse instance, accessible through user.mouse or user.mouse. It uses an emulation layer, called [Huminoids](../advanced-functionality/humanoids), to create realistic-looking, human-like interactions.
+Every SecretAgent instance has its own Mouse instance, accessible through user.mouse or user.mouse. It uses an emulation layer, called [HumanEmulator](../advanced-functionality/human-emulators), to create realistic-looking, human-like interactions.
 
 ## Constructor
 An instance is automatically created during [new SecretAgent()](./secret-agent#constructor). You cannot directly create one.
@@ -17,7 +17,7 @@ Refer to the Interaction Object section below for details on how to construct an
 
 ## Interaction Object
 
-Interactions are meta command objects that provide high-level guidance for how the Humanoid should control your mouse.
+Interactions are meta command objects that provide high-level guidance for how the HumanEmulator should control your mouse.
 
 #### **Properties**:
 - \[`Commands`]: `MousePosition`
@@ -72,9 +72,9 @@ user.mouse.interact({ move: [55, 42] }, 'click');
 
 ### Combining Commands
 
-A single interaction can include multiple commands. Multiple commands within a single Interaction are executed in rapid succession by the Humanoid.
+A single interaction can include multiple commands. Multiple commands within a single Interaction are executed in rapid succession by the HumanEmulator.
 
-Interactions are similar to paragraphs. The Humanoid adds a longer pause between Interactions then it does between commands within a single Interaction.
+Interactions are similar to paragraphs. The HumanEmulator adds a longer pause between Interactions then it does between commands within a single Interaction.
 
 For example, this allows you to implement simple drag and drop interactions:
 

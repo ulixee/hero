@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
-import Safari13 from '@secret-agent/emulate-safari-13';
-import Core from '../index';
+import { Helpers } from "@secret-agent/testing";
+import { InteractionCommand } from "@secret-agent/core-interfaces/IInteractions";
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import HttpRequestHandler from "@secret-agent/mitm/handlers/HttpRequestHandler";
+import Safari13 from "@secret-agent/emulate-safari-13";
+import Core from "../index";
 
 let koaServer;
 beforeAll(async () => {
@@ -134,7 +134,7 @@ describe('UserProfile cookie tests', () => {
     let profile: IUserProfile;
     {
       const meta = await Core.createTab({
-        emulatorId: Safari13.emulatorId,
+        browserEmulatorId: Safari13.id,
       });
       const core = Core.byTabId[meta.tabId];
       koaServer.get('/safari-cookie', ctx => {
@@ -151,7 +151,7 @@ describe('UserProfile cookie tests', () => {
     {
       const meta = await Core.createTab({
         userProfile: profile,
-        emulatorId: Safari13.emulatorId,
+        browserEmulatorId: Safari13.id,
       });
       const core = Core.byTabId[meta.tabId];
 
@@ -423,9 +423,6 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
 
 describe('UserProfile IndexedDb tests', () => {
   it('should be able to save and restore an indexed db', async () => {
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-
     koaServer.get('/db', ctx => {
       ctx.body = `<body>
 <h1>db page</h1>
@@ -488,11 +485,11 @@ describe('UserProfile IndexedDb tests', () => {
     
     const recordQuery = tx.getAll();
     
-    let doneCounter = 0;
+    const completed = new Set();
     recordQuery.onsuccess = function({ target }) {
       document.querySelector('#records').innerHTML = JSON.stringify(target.result);
-      doneCounter +=1;
-      if (doneCounter === 2) {
+      completed.add('records');
+      if (completed.size === 2) {
         ready();
       }
     };
@@ -501,8 +498,8 @@ describe('UserProfile IndexedDb tests', () => {
     indexQuery.onsuccess = function({ target }) {
       document.querySelector('#richard').innerHTML = JSON.stringify(target.result);
       document.querySelector('#date-type').innerHTML = target.result.child.age.constructor.name;
-      doneCounter +=1;
-      if (doneCounter === 2) {
+      completed.add('richard');
+      if (completed.size === 2) {
         ready();
       }
     };
@@ -511,64 +508,64 @@ describe('UserProfile IndexedDb tests', () => {
 </body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/db`);
-    await core.waitForLoad('AllContentLoaded');
-    await core.waitForElement(['document', ['querySelector', 'body.ready']]);
+    let profile: IUserProfile;
+    {
+      const meta = await Core.createTab();
+      const core = Core.byTabId[meta.tabId];
+      Helpers.needsClosing.push(core);
+      await core.goto(`${koaServer.baseUrl}/db`);
+      await core.waitForLoad('AllContentLoaded');
+      await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-    const profile = await core.exportUserProfile();
-    expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
-    const db = profile.storage[koaServer.baseUrl]?.indexedDB[0];
-    expect(db.name).toBe('db1');
-    expect(db.version).toBe(1);
-    expect(db.objectStores).toHaveLength(2);
-    expect(db.objectStores[0].name).toBe('store1');
-    expect(db.objectStores[0].keyPath).toBe('id');
-    expect(db.objectStores[0].indexes).toHaveLength(2);
-    expect(db.objectStores[0].indexes[0].keyPath).toStrictEqual(['child', 'name']);
-    expect(db.objectStores[1].name).toBe('store2');
-    expect(db.objectStores[1].keyPath).not.toBeTruthy();
+      profile = await core.exportUserProfile();
+      expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
+      const db = profile.storage[koaServer.baseUrl]?.indexedDB[0];
+      expect(db.name).toBe('db1');
+      expect(db.version).toBe(1);
+      expect(db.objectStores).toHaveLength(2);
+      expect(db.objectStores[0].name).toBe('store1');
+      expect(db.objectStores[0].keyPath).toBe('id');
+      expect(db.objectStores[0].indexes).toHaveLength(2);
+      expect(db.objectStores[0].indexes[0].keyPath).toStrictEqual(['child', 'name']);
+      expect(db.objectStores[1].name).toBe('store2');
+      expect(db.objectStores[1].keyPath).not.toBeTruthy();
 
-    expect(db.data.store1).toHaveLength(2);
-    const meta2 = await Core.createTab({
-      userProfile: profile,
-    });
-    const core2 = Core.byTabId[meta2.tabId];
+      expect(db.data.store1).toHaveLength(2);
+    }
+    {
+      const meta = await Core.createTab({
+        userProfile: profile,
+      });
+      const core = Core.byTabId[meta.tabId];
+      Helpers.needsClosing.push(core);
 
-    await core2.goto(`${koaServer.baseUrl}/dbrestore`);
-    await core2.waitForLoad('AllContentLoaded');
-    await core.waitForElement(['document', ['querySelector', 'body.ready']]);
+      await core.goto(`${koaServer.baseUrl}/dbrestore`);
+      await core.waitForLoad('AllContentLoaded');
+      await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-    const recordsJson = await core2.execJsPath([
-      'document',
-      ['querySelector', '#records'],
-      'textContent',
-    ]);
-    // NOTE: remove. trying to track down github actions error
-    try {
+      const recordsJson = await core.execJsPath([
+        'document',
+        ['querySelector', '#records'],
+        'textContent',
+      ]);
       const records = JSON.parse(recordsJson.value);
 
       expect(records).toHaveLength(2);
       expect(records[0].child.name).toBe('Richard');
-    } catch (err) {
-      console.log(recordsJson);
-      throw err;
+      const indexLookupJson = await core.execJsPath([
+        'document',
+        ['querySelector', '#richard'],
+        'textContent',
+      ]);
+      const indexLookup = JSON.parse(indexLookupJson.value);
+      expect(indexLookup.id).toBe(1);
+
+      const typePreservation = await core.execJsPath([
+        'document',
+        ['querySelector', '#date-type'],
+        'textContent',
+      ]);
+      expect(typePreservation.value).toBe('Date');
     }
-    const indexLookupJson = await core2.execJsPath([
-      'document',
-      ['querySelector', '#richard'],
-      'textContent',
-    ]);
-    const indexLookup = JSON.parse(indexLookupJson.value);
-    expect(indexLookup.id).toBe(1);
-
-    const typePreservation = await core2.execJsPath([
-      'document',
-      ['querySelector', '#date-type'],
-      'textContent',
-    ]);
-    expect(typePreservation.value).toBe('Date');
-
-    await core.close();
-    await core2.close();
   });
 });

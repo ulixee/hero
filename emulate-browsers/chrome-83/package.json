@@ -1,0 +1,15 @@
+{
+  "name": "@secret-agent/emulate-chrome-83",
+  "version": "1.1.0-alpha.1",
+  "description": "EmulatorPlugin for Google Chrome version 83",
+  "main": "index.js",
+  "engine": {
+    "browser": "chromium",
+    "revision": "756035"
+  },
+  "dependencies": {
+    "@secret-agent/commons": "1.1.0-alpha.1",
+    "@secret-agent/core-interfaces": "1.1.0-alpha.1",
+    "@secret-agent/emulate-browsers-base": "1.1.0-alpha.1"
+  }
+}

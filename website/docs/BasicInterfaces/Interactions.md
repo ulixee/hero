@@ -12,7 +12,7 @@ Multiple Interactions can be passed through as multiple arguments:
 agent.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
-The timing of Interactions are controlled by an emulation layer, called [Huminoids](../advanced-functionality/humanoids), which generate realistic-looking, human-like movements on the remote webpage.
+The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](../advanced-functionality/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
 
 Interaction Commands fall into three broad categories:
 
@@ -83,9 +83,9 @@ agent.interact({ move: [55, 42] }, 'click');
 
 ## Combining Commands
 
-A single Interaction can include multiple commands. Multiple commands within a single Interaction are executed in rapid succession by the Humanoid.
+A single Interaction can include multiple commands. Multiple commands within a single Interaction are executed in rapid succession by the HumanEmulator.
 
-Interactions are similar to paragraphs. The Humanoid adds a longer pause between Interactions then it does between commands within a single Interaction.
+Interactions are similar to paragraphs. The HumanEmulator adds a longer pause between Interactions then it does between commands within a single Interaction.
 
 For example, this allows you to implement simple drag and drop interactions:
 

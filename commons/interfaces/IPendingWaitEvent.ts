@@ -1,4 +1,4 @@
-import { IResolvablePromise } from '../utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 
 export class CanceledPromiseError extends Error {}
 

@@ -3,7 +3,8 @@ import { IRequestSessionRequestEvent, IRequestSessionResponseEvent } from "@secr
 import IWebsocketMessage from "@secret-agent/core-interfaces/IWebsocketMessage";
 import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
 import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
-import Log, { IBoundLog, ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
+import Log, {  ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
 import { IDomChangeEvent } from "@secret-agent/injected-scripts/interfaces/IDomChangeEvent";
 import { LocationStatus } from "@secret-agent/core-interfaces/Location";
 import IViewport from "@secret-agent/core-interfaces/IViewport";
@@ -13,7 +14,7 @@ import { IFocusEvent } from "@secret-agent/injected-scripts/interfaces/IFocusEve
 import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollEvent";
 import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
 import IWebsocketResourceMessage from "@secret-agent/core/interfaces/IWebsocketResourceMessage";
-import type { IPuppetContextEvents } from "@secret-agent/puppet/interfaces/IPuppetContext";
+import type { IPuppetContextEvents } from "@secret-agent/puppet-interfaces/IPuppetContext";
 import ResourceState from "@secret-agent/mitm/interfaces/ResourceState";
 import TabNavigations from "./lib/TabNavigations";
 import { IFrameRecord } from "./models/FramesTable";
@@ -61,9 +62,9 @@ export default class SessionState {
     sessionId: string,
     sessionName: string | null,
     scriptInstanceMeta: IScriptInstanceMeta,
-    emulatorId: string,
-    humanoidId: string,
-    hasEmulatorPolyfills: boolean,
+    browserEmulatorId: string,
+    humanEmulatorId: string,
+    hasBrowserEmulatorPolyfills: boolean,
     viewport: IViewport,
     timezoneId: string,
   ) {
@@ -95,9 +96,9 @@ export default class SessionState {
     this.db.session.insert(
       sessionId,
       sessionName,
-      emulatorId,
-      humanoidId,
-      hasEmulatorPolyfills,
+      browserEmulatorId,
+      humanEmulatorId,
+      hasBrowserEmulatorPolyfills,
       this.createDate,
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.entrypoint,
@@ -317,7 +318,7 @@ export default class SessionState {
     message: string,
     location?: string,
   ) {
-    if (message.includes('Error: ') || message.startsWith('ERROR')) {
+    if (message.match(/error/ig)) {
       this.logger.error('Window.error', { message });
     } else {
       this.logger.info('Window.console', { message });

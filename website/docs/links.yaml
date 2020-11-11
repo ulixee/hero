@@ -15,8 +15,8 @@
 
 - title: Advanced
   items:
-    - Emulators
-    - Humanoids
+    - BrowserEmulators
+    - HumanEmulators
     - UserProfile
     - CookieStorage
     - UpstreamProxy

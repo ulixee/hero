@@ -1,4 +1,6 @@
-import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, MenuItem, webContents, shell } from 'electron';
+import * as Path from 'path';
+import * as Os from 'os';
 import { saveAs, viewSource } from './CommonActions';
 import Window from '../models/Window';
 
@@ -133,6 +135,21 @@ export default function generateAppMenu() {
           label: 'View History',
           click: () => {
             return Window.current.openAppLocation('History');
+          },
+        },
+        {
+          label: 'Reveal in Sessions Directory',
+          click: () => {
+            const dir = Path.join(
+              Window.current.replayApi?.saSession?.dataLocation ??
+                Path.join(Os.tmpdir(), '.secret-agent'),
+            );
+            if (Window.current.replayApi?.saSession) {
+              return shell.showItemInFolder(
+                `${Path.join(dir, Window.current.replayApi?.saSession.id)}.db`,
+              );
+            }
+            return shell.openPath(dir);
           },
         },
         ...createMenuItem(['Left'], () => {

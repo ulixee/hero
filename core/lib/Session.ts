@@ -3,8 +3,6 @@ import Log from '@secret-agent/commons/Logger';
 import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
-import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
-import Humanoids, { HumanoidPlugin } from '@secret-agent/humanoids';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -14,15 +12,20 @@ import RequestSession, {
 import * as Os from 'os';
 import IPuppetContext, {
   IPuppetContextEvents,
-} from '@secret-agent/puppet/interfaces/IPuppetContext';
+} from '@secret-agent/puppet-interfaces/IPuppetContext';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
-import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
-import Viewport from '@secret-agent/emulators/lib/Viewport';
+import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
+import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
+import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
+import BrowserEmulators from './BrowserEmulators';
+import HumanEmulators from './HumanEmulators';
 
 const { log } = Log(module);
 
@@ -31,8 +34,9 @@ export default class Session {
 
   public readonly id: string;
   public readonly baseDir: string;
-  public emulator: EmulatorPlugin;
-  public humanoid: HumanoidPlugin;
+  public browserEngine: IBrowserEngine;
+  public browserEmulator: IBrowserEmulator;
+  public humanEmulator: IHumanEmulator;
   public proxy: MitmUpstreamProxy;
   public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
@@ -54,19 +58,21 @@ export default class Session {
   constructor(readonly options: ICreateTabOptions) {
     this.id = uuidv1();
     Session.byId[this.id] = this;
-    const emulatorId = Emulators.getId(options.emulatorId);
-    this.emulator = Emulators.create(emulatorId);
+    const browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
+    const BrowserEmulator = BrowserEmulators.getClass(browserEmulatorId);
+    this.browserEngine = BrowserEmulator.engine;
+    this.browserEmulator = new BrowserEmulator();
     if (options.userProfile) {
       this.userProfile = options.userProfile;
-      this.emulator.setUserProfile(options.userProfile);
+      this.browserEmulator.userProfile = options.userProfile;
     }
-    if (options.locale) this.emulator.setLocale(options.locale);
+    if (options.locale) this.browserEmulator.locale = options.locale;
 
-    if (!this.emulator.canPolyfill) {
-      log.warn('Emulator.PolyfillNotSupported', {
+    if (!this.browserEmulator.canPolyfill) {
+      log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
-        emulatorId,
-        userAgent: this.emulator.userAgent,
+        browserEmulatorId,
+        userAgent: this.browserEmulator.userAgent,
         runtimeOs: Os.platform(),
       });
     }
@@ -77,8 +83,8 @@ export default class Session {
       this.viewport = Viewport.getRandom();
     }
 
-    const humanoidId = options.humanoidId || Humanoids.getRandomId();
-    this.humanoid = Humanoids.create(humanoidId);
+    const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
+    this.humanEmulator = HumanEmulators.create(humanEmulatorId);
 
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
@@ -86,31 +92,31 @@ export default class Session {
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-      emulatorId,
-      humanoidId,
-      this.emulator.canPolyfill,
+      browserEmulatorId,
+      humanEmulatorId,
+      this.browserEmulator.canPolyfill,
       this.viewport,
       this.timezoneId,
     );
     this.proxy = new MitmUpstreamProxy(this.id);
     this.mitmRequestSession = new RequestSession(
       this.id,
-      this.emulator.userAgent.raw,
+      this.browserEmulator.userAgent.raw,
       this.proxy.isReady(),
-      this.emulator.delegate,
+      this.browserEmulator.networkInterceptorDelegate,
     );
   }
 
   public getBrowserEmulation() {
-    const emulator = this.emulator;
+    const browserEmulator = this.browserEmulator;
     return {
-      locale: emulator.locale,
-      userAgent: emulator.userAgent.raw,
-      platform: emulator.userAgent.platform,
+      locale: browserEmulator.locale,
+      userAgent: browserEmulator.userAgent.raw,
+      platform: browserEmulator.userAgent.platform,
       proxyPassword: this.id,
       viewport: this.viewport,
       timezoneId: this.timezoneId,
-    } as IBrowserEmulation;
+    } as IBrowserEmulationSettings;
   }
 
   public async initialize(context: IPuppetContext) {

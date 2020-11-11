@@ -1,8 +1,9 @@
 import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetFrameEvents } from '@secret-agent/puppet/interfaces/IPuppetFrame';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;

@@ -2,6 +2,8 @@ import net, { Socket } from 'net';
 import http, { IncomingMessage } from 'http';
 import http2 from 'http2';
 import Log from '@secret-agent/commons/Logger';
+import Os from 'os';
+import Path from 'path';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
@@ -11,6 +13,11 @@ import NetworkDb from './NetworkDb';
 
 const { log } = Log(module);
 const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
+
+const defaultStorageDirectory =
+  process.env.SA_NETWORK_DIR ??
+  process.env.SA_SESSIONS_DIR ??
+  Path.join(Os.tmpdir(), '.secret-agent');
 
 /**
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
@@ -43,9 +50,9 @@ export default class MitmProxy {
   private readonly db: NetworkDb;
 
   constructor(options: IMitmProxyOptions) {
-    this.options = options || {};
+    this.options = options;
 
-    this.db = new NetworkDb(options.sslCaDir || process.cwd());
+    this.db = new NetworkDb(options.sslCaDir);
     this.ca = new CertificateAuthority(this.db);
     this.httpServer = http.createServer();
     this.httpServer.on('connect', this.onHttpConnect.bind(this));
@@ -284,8 +291,11 @@ export default class MitmProxy {
     this.http2Server.addContext(hostname, credentials);
   }
 
-  public static async start(startingPort?: number): Promise<MitmProxy> {
-    const proxy = new MitmProxy({ port: startingPort });
+  public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
+    const proxy = new MitmProxy({
+      port: startingPort,
+      sslCaDir: sslCaDir || defaultStorageDirectory,
+    });
     await proxy.listen();
     return proxy;
   }

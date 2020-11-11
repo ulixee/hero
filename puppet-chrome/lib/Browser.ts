@@ -1,12 +1,13 @@
-import { Protocol } from 'devtools-protocol';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { assert } from '@secret-agent/commons/utils';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
-import IPuppetBrowser from '@secret-agent/puppet/interfaces/IPuppetBrowser';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
-import { Connection } from './Connection';
-import { BrowserContext } from './BrowserContext';
-import { CDPSession } from './CDPSession';
+import { Protocol } from "devtools-protocol";
+import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import { assert } from "@secret-agent/commons/utils";
+import IBrowserEmulationSettings from "@secret-agent/puppet-interfaces/IBrowserEmulationSettings";
+import IPuppetBrowser from "@secret-agent/puppet-interfaces/IPuppetBrowser";
+import Log from "@secret-agent/commons/Logger";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
+import { Connection } from "./Connection";
+import { BrowserContext } from "./BrowserContext";
+import { CDPSession } from "./CDPSession";
 
 interface IBrowserEvents {
   disconnected: void;
@@ -33,7 +34,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   }
 
   public async newContext(
-    emulation: IBrowserEmulation,
+    emulation: IBrowserEmulationSettings,
     logger: IBoundLog,
   ): Promise<BrowserContext> {
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.

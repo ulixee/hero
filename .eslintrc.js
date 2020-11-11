@@ -48,7 +48,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: 'emulator-plugins/shared/test/*.ts',
+      files: 'emulate-browsers/base/test/*.ts',
       rules: {
         'no-console': 'off',
       },
@@ -83,7 +83,13 @@ module.exports = {
       },
     },
     {
-      files: ['**/install*', '**/*Install*', '**/prepare-*.js', '**/scripts/*.ts'],
+      files: [
+        '**/install*',
+        '**/*Install*',
+        '**/prepare-*.js',
+        '**/scripts/*.ts',
+        '**/data-scripts/*.ts',
+      ],
       rules: {
         'no-console': 'off',
       },
@@ -92,7 +98,7 @@ module.exports = {
   ignorePatterns: [
     '**/node_modules',
     'node_modules',
-    "**/test/assets/**",
+    '**/test/assets/**',
     'build',
     'build-dist',
     '**/build/**',
@@ -116,7 +122,15 @@ module.exports = {
     // 'import/no-default-export': 'error',
     'import/no-extraneous-dependencies': [
       'error',
-      { devDependencies: ['**/test/**', '**/examples/**', '**/scripts/**', '**/*.test.ts'] },
+      {
+        devDependencies: [
+          '**/**/test/**',
+          '**/examples/**',
+          '**/scripts/**',
+          '**/data-scripts/**',
+          '**/*.test.ts',
+        ],
+      },
     ],
     'no-use-before-define': 'off', // use typescript one
     'no-prototype-builtins': 'off',

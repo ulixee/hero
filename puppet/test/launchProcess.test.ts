@@ -1,45 +1,41 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import Log from '@secret-agent/commons/Logger';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import Puppet from '../index';
-import { getExecutablePath } from '../lib/browserPaths';
-import defaultEmulation from "./_defaultEmulation";
+import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
-describe.each([
-  [Chrome80.engine.browser, Chrome80.engine.revision],
-  [Chrome83.engine.browser, Chrome83.engine.revision],
-])('launchProcess for %s@%s', (browserEngine: string, revision: string) => {
-  const engineExecutablePath = getExecutablePath(browserEngine, revision);
-  const defaultBrowserOptions = {
-    engine: { browser: browserEngine, revision },
-    engineExecutablePath,
-  };
+describe.each([[Chrome80.engine], [Chrome83.engine]])(
+  'launchProcess for %s@%s',
+  (browserEngine: IBrowserEngine) => {
+    const defaultBrowserOptions = browserEngine;
 
-  it('should reject all promises when browser is closed', async () => {
-    const browser = await new Puppet(defaultBrowserOptions);
-    await browser.start();
-    const page = await (await browser.newContext(defaultEmulation, log)).newPage();
-    let error = null;
-    const neverResolves = page.evaluate(`new Promise(r => {})`).catch(e => (error = e));
-    await page.evaluate(`new Promise(f => setTimeout(f, 0))`);
-    await browser.close();
-    await neverResolves;
-    expect(error.message).toContain('Cancel Pending Promise');
-  });
-
-  it('should reject if executable path is invalid', async () => {
-    const browser = new Puppet({
-      engine: defaultBrowserOptions.engine,
-      engineExecutablePath: 'random-invalid-path',
+    it('should reject all promises when browser is closed', async () => {
+      const browser = await new Puppet(defaultBrowserOptions);
+      await browser.start();
+      const page = await (await browser.newContext(defaultEmulation, log)).newPage();
+      let error = null;
+      const neverResolves = page.evaluate(`new Promise(r => {})`).catch(e => (error = e));
+      await page.evaluate(`new Promise(f => setTimeout(f, 0))`);
+      await browser.close();
+      await neverResolves;
+      expect(error.message).toContain('Cancel Pending Promise');
     });
-    expect(browser.start.bind(browser)).toThrow('Failed to launch');
-  });
 
-  it('should be callable twice', async () => {
-    const browser = await new Puppet(defaultBrowserOptions);
-    await Promise.all([browser.close(), browser.close()]);
-    await expect(browser.close()).resolves.toBe(undefined);
-  });
-});
+    it('should reject if executable path is invalid', async () => {
+      const browser = new Puppet({
+        ...defaultBrowserOptions,
+        executablePath: 'random-invalid-path',
+      });
+      expect(browser.start.bind(browser)).toThrow('Failed to launch');
+    });
+
+    it('should be callable twice', async () => {
+      const browser = await new Puppet(defaultBrowserOptions);
+      await Promise.all([browser.close(), browser.close()]);
+      await expect(browser.close()).resolves.toBe(undefined);
+    });
+  },
+);

@@ -1,13 +1,14 @@
-import IConfigureOptions from "@secret-agent/core-interfaces/IConfigureOptions";
+import ICoreConfigureOptions from "@secret-agent/core-interfaces/ICoreConfigureOptions";
 import { IRenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
 import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import ICreateSecretAgentOptions from './ICreateSecretAgentOptions';
+import ICreateSecretAgentOptions from "./ICreateSecretAgentOptions";
 import ISecretAgent from "./ISecretAgent";
 
-export interface ISecretAgentConfigureOptions extends IConfigureOptions {
+export interface ISecretAgentConfigureOptions extends Pick<ICoreConfigureOptions, 'browserEmulatorIds'> {
   defaultRenderingOptions: IRenderingOption[];
   defaultUserProfile: IUserProfile;
 }
+
 export default interface ISecretAgentClass {
   // private options: ISecretAgentConfigureOptions;
   configure(options: Partial<ISecretAgentConfigureOptions>): Promise<void>;

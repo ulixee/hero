@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
-import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import Core from '../index';
-import LocationTracker from '../lib/LocationTracker';
+import { Helpers } from "@secret-agent/testing";
+import { LocationStatus, LocationTrigger } from "@secret-agent/core-interfaces/Location";
+import { InteractionCommand } from "@secret-agent/core-interfaces/IInteractions";
+import Core from "../index";
+import LocationTracker from "../lib/LocationTracker";
 
 let koaServer;
 beforeAll(async () => {
@@ -347,7 +347,7 @@ setTimeout(function() {
 <script type="text/javascript">
 setTimeout(() => {
   window.location.href = '/popup-redirect';
-}, 50);
+}, 200);
 </script>
       </body>`;
     });

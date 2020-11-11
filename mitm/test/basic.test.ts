@@ -336,7 +336,7 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
-    session.delegate.modifyHeadersBeforeSend = jest.fn();
+    session.networkInterceptorDelegate.http.requestHeaders = jest.fn();
     session.registerResource({
       tabId: '1',
       browserRequestId: '25.123',
@@ -358,7 +358,7 @@ describe('basic MitM tests', () => {
 
     await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
 
-    expect(session.delegate.modifyHeadersBeforeSend).toHaveBeenCalledTimes(1);
+    expect(session.networkInterceptorDelegate.http.requestHeaders).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 
     const [responseEvent] = onresponse.mock.calls[0];

@@ -1,5 +1,5 @@
 # Keyboard
-Keyboard provides an api for managing the user's input. The high level api is keyboard.type(), which takes raw characters and generates proper keydown, keypress/input, and keyup events on your page. It also uses our [Huminoids](../advanced-functionality/humanoids) plugins to create realistic, human-like interactions.
+Keyboard provides an api for managing the user's input. The high level api is keyboard.type(), which takes raw characters and generates proper keydown, keypress/input, and keyup events on your page. It also uses our [HumanEmulators](../advanced-functionality/human-emulators) to create realistic, human-like interactions.
 
 Alternatively, you can use keyboard.down, keyboard.up, and keyboard.sendCharacter to manually fire events.
 

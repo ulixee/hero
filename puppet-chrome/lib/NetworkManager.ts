@@ -1,11 +1,12 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetNetworkEvents } from '@secret-agent/puppet/interfaces/IPuppetNetworkEvents';
-import IBrowserEmulation from '@secret-agent/puppet/interfaces/IBrowserEmulation';
-import { IBoundLog } from '@secret-agent/commons/Logger';
+import {  TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { IPuppetNetworkEvents } from '@secret-agent/puppet-interfaces/IPuppetNetworkEvents';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -21,7 +22,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly cdpSession: CDPSession;
   private readonly attemptedAuthentications = new Set<string>();
   private readonly publishedResources = new Set<string>();
-  private emulation?: IBrowserEmulation;
+  private emulation?: IBrowserEmulationSettings;
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
@@ -52,7 +53,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return super.emit(eventType, event);
   }
 
-  public async initialize(emulation: IBrowserEmulation) {
+  public async initialize(emulation: IBrowserEmulationSettings) {
     this.emulation = emulation;
 
     await Promise.all([

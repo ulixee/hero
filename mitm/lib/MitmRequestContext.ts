@@ -4,7 +4,7 @@ import * as http2 from 'http2';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
 import MitmSocket from '@secret-agent/mitm-socket';
-import OriginType, { isOriginType } from '@secret-agent/commons/interfaces/OriginType';
+import OriginType, { isOriginType } from '@secret-agent/core-interfaces/OriginType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
 import HttpResponseCache from './HttpResponseCache';

@@ -1,16 +1,19 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
-import Emulators, { EmulatorPlugin } from '@secret-agent/emulators';
 import Puppet from '@secret-agent/puppet';
+import Os from 'os';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import Session from './Session';
+import BrowserEmulators from './BrowserEmulators';
 
 const { log } = Log(module);
-let sessionsDir = process.env.CACHE_DIR || '.sessions'; // transferred to GlobalPool below class definition
+let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
   public static maxConcurrentSessionsCount = 10;
@@ -31,16 +34,16 @@ export default class GlobalPool {
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start(emulatorIds: string[]) {
+  public static async start(browserEmulatorIds: string[]) {
     log.info('StartingGlobalPool', {
       sessionId: null,
-      emulatorIds,
+      browserEmulatorIds,
     });
     await this.startMitm();
 
-    for (const emulatorId of emulatorIds) {
-      const emulator = Emulators.create(emulatorId);
-      this.addPuppet(emulator);
+    for (const emulatorId of browserEmulatorIds) {
+      const browserEmulator = BrowserEmulators.getClass(emulatorId);
+      this.addPuppet(browserEmulator.engine);
     }
 
     this.resolveWaitingConnection();
@@ -97,11 +100,11 @@ export default class GlobalPool {
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
-  private static addPuppet(emulator: EmulatorPlugin) {
-    const existing = this.getPuppet(emulator);
+  private static addPuppet(engine: IBrowserEngine) {
+    const existing = this.getPuppet(engine);
     if (existing) return existing;
 
-    const puppet = new Puppet(emulator);
+    const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
     const showBrowser = !!process.env.SHOW_BROWSER;
@@ -110,14 +113,14 @@ export default class GlobalPool {
     return puppet;
   }
 
-  private static getPuppet(emulator?: EmulatorPlugin) {
-    if (!emulator) return this.puppets[0];
-    return this.puppets.find(x => x.executablePath === emulator.engineExecutablePath);
+  private static getPuppet(engine?: IBrowserEngine) {
+    if (!engine) return this.puppets[0];
+    return this.puppets.find(x => x.engine === engine);
   }
 
   private static async startMitm() {
     if (this.mitmServer) return;
-    this.mitmServer = await MitmServer.start(this.localProxyPortStart);
+    this.mitmServer = await MitmServer.start(this.localProxyPortStart, this.sessionsDir);
   }
 
   private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
@@ -128,7 +131,7 @@ export default class GlobalPool {
     try {
       const session = new Session(options);
 
-      puppet = this.getPuppet(session.emulator) ?? this.addPuppet(session.emulator);
+      puppet = this.getPuppet(session.browserEngine) ?? this.addPuppet(session.browserEngine);
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

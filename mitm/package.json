@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@secret-agent/testing": "1.1.0-alpha.1",
+    "@secret-agent/core": "1.1.0-alpha.1",
     "@types/node-forge": "^0.9.5",
     "@types/ws": "^7.2.4",
     "agent-base": "4.3.0",

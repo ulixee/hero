@@ -38,10 +38,12 @@ export default class HeadersHandler {
       ctx.hasUserGesture = resource.hasUserGesture;
       ctx.isUserNavigation = resource.isUserNavigation;
       ctx.documentUrl = resource.documentUrl;
-      if (session.delegate?.documentHasUserActivity) {
+      if (session.networkInterceptorDelegate?.http.onOriginHasFirstPartyInteraction) {
         const hasUserActivity = !!ctx.requestLowerHeaders['sec-fetch-user'];
         if (hasUserActivity) {
-          await session.delegate?.documentHasUserActivity(resource.documentUrl);
+          await session.networkInterceptorDelegate.http.onOriginHasFirstPartyInteraction(
+            resource.documentUrl,
+          );
         }
       }
     }
@@ -54,8 +56,8 @@ export default class HeadersHandler {
       ctx.requestHeaders.Host = ctx.url.host;
       ctx.requestLowerHeaders.host = ctx.url.host;
     }
-    if (session.delegate?.modifyHeadersBeforeSend) {
-      const updatedHeaders = session.delegate.modifyHeadersBeforeSend({
+    if (session.networkInterceptorDelegate?.http.requestHeaders) {
+      const updatedHeaders = session.networkInterceptorDelegate.http.requestHeaders({
         method: ctx.method,
         resourceType: ctx.resourceType,
         isClientHttp2: ctx.isClientHttp2,

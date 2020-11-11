@@ -1,4 +1,4 @@
-import { IResolvablePromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from './IResolvablePromise';
 import { IPipelineStatus } from './Location';
 
 export default interface INavigation {

@@ -1,4 +1,5 @@
 import * as Path from 'path';
+import * as Os from 'os';
 import { app, dialog, ipcMain, Menu, protocol } from 'electron';
 import * as Fs from 'fs';
 import OverlayManager from './managers/OverlayManager';
@@ -252,6 +253,7 @@ export default class Application {
     ipcMain.on('open-file', async () => {
       const result = await dialog.showOpenDialog({
         properties: ['openFile', 'showHiddenFiles'],
+        defaultPath: Path.join(Os.tmpdir(), '.secret-agent'),
         filters: [
           { name: 'All Files', extensions: ['js', 'ts', 'db'] },
           { name: 'Session Database', extensions: ['db'] },

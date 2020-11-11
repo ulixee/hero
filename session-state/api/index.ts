@@ -2,6 +2,7 @@ import * as http2 from 'http2';
 import Logger from '@secret-agent/commons/Logger';
 import { AddressInfo } from 'net';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import SessionLoader from './SessionLoader';
 import SessionDb from '../lib/SessionDb';
 import ISessionReplayServer from '../interfaces/ISessionReplayServer';
@@ -14,7 +15,7 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
     activeClients.add(res);
     const sessionId = req.headers['session-id'] as string;
 
-    const listeners: eventUtils.IRegisteredEventListener[] = [];
+    const listeners: IRegisteredEventListener[] = [];
     try {
       const lookupArgs = {
         scriptInstanceId: req.headers['script-instance-id'] as string,

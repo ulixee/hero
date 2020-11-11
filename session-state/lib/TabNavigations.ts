@@ -2,7 +2,8 @@ import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INa
 import { IPipelineStatus, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { createPromise } from '@secret-agent/commons/utils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
 import SessionDb from './SessionDb';
 
 interface TabNavigationEvents {

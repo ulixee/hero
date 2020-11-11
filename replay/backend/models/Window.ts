@@ -44,6 +44,7 @@ export default class Window {
       minHeight: 450,
       width: 900,
       height: 700,
+      transparent: false,
       titleBarStyle: 'hiddenInset',
       webPreferences: {
         nodeIntegration: true,

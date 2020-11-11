@@ -15,7 +15,7 @@ export default class NetworkDb {
   private readonly tables: SqliteTable<any>[] = [];
 
   constructor(baseDir: string) {
-    this.db = new Database(`${baseDir}/.network.db`);
+    this.db = new Database(`${baseDir}/network.db`);
     this.certificates = new CertificatesTable(this.db);
     this.pki = new PkiTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();

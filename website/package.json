@@ -36,6 +36,7 @@
     "gridsome-plugin-typescript": "git://github.com/calebjclark/gridsome-plugin-typescript.git",
     "json2md": "^1.7.0",
     "node-sass": "^4.12.0",
+    "vue-template-compiler": "^2.6.12",
     "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
     "pug": "^2.0.3",
     "sass-loader": "^8.0.0",

@@ -51,14 +51,14 @@ describe('basic Dom Replay tests', () => {
  const child2 = document.createElement('li');
  const child3 = document.createElement('li');
  const parent = document.querySelector('ul');
- 
+
  function clicky(){
    clicks += 1;
-   
+
    if (clicks === 1) {
      child.textContent = 'Another one ' + parent.children.length;
      parent.append(child, child2, child3);
-   } 
+   }
    if (clicks === 2) {
      parent.removeChild(child2);
    }
@@ -92,7 +92,7 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const session = core.session;
 
-    const mirrorChrome = new Puppet(session.emulator);
+    const mirrorChrome = new Puppet(session.browserEngine);
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
@@ -120,8 +120,6 @@ describe('basic Dom Replay tests', () => {
       const [changes] = Object.values(pageChanges);
       const records = changes.map(DomChangesTable.toRecord);
       await mirrorPage.mainFrame.evaluate(`window.replayEvents(${JSON.stringify(records)})`, false);
-      // replay happens on animation tick now
-      await new Promise(setImmediate);
     }
 
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
@@ -198,7 +196,7 @@ describe('basic Dom Replay tests', () => {
     // @ts-ignore
     const session = core.session;
 
-    const mirrorChrome = new Puppet(session.emulator);
+    const mirrorChrome = new Puppet(session.browserEngine);
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
@@ -239,24 +237,27 @@ describe('basic Dom Replay tests', () => {
     const newTab = newTabCore.tab;
     await newTab.waitForLoad('AllContentLoaded');
     const newTabHtml = await newTab.puppetPage.mainFrame.evaluate(getContentScript, false);
+    await newTab.domRecorder.flush();
+    // @ts-ignore
+    const pages = newTab.navigationTracker;
+    const pageChanges = await newTab.sessionState.getMainFrameDomChanges(pages.history);
+    const [changes] = Object.values(pageChanges);
+    expect(changes.length).toBeGreaterThan(10);
 
     const mirrorNewTab = await mirrorContext.newPage();
     await mirrorNewTab.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
-    await mirrorNewTab.navigate(`${koaServer.baseUrl}/empty`);
-    {
-      await newTab.domRecorder.flush();
-      // @ts-ignore
-      const pages = newTab.navigationTracker;
-      const state = newTab.sessionState;
-      const pageChanges = await state.getMainFrameDomChanges(pages.history);
-      const [changes] = Object.values(pageChanges);
-      await mirrorNewTab.mainFrame.evaluate(
-        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
-        false,
-      );
-      // replay happens on animation tick now
-      await new Promise(setImmediate);
-    }
+    await Promise.all([
+      mirrorNewTab.navigate(`${koaServer.baseUrl}/empty`),
+      mirrorNewTab.waitOn('load'),
+    ]);
+
+    await mirrorNewTab.mainFrame.evaluate(
+      `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+      false,
+    );
+    // replay happens on animation tick now
+    await new Promise(setImmediate);
+
     const mirrorNewTabHtml = await mirrorNewTab.mainFrame.evaluate(getContentScript, false);
     expect(mirrorNewTabHtml).toBe(newTabHtml);
   });

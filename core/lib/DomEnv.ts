@@ -1,14 +1,15 @@
 import * as fs from 'fs';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Log, { IBoundLog } from '@secret-agent/commons/Logger';
+import Log  from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
 import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedStateCopy';
-import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import DomEnvError from './DomEnvError';
 import { Serializable } from '../interfaces/ISerializable';
 

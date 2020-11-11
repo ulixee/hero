@@ -1,43 +1,34 @@
 // setup must go first
-import './lib/SetupAwaitedHandler';
+import "./lib/SetupAwaitedHandler";
 
-import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import { RenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
-import os from 'os';
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import StateMachine from 'awaited-dom/base/StateMachine';
-import Request from 'awaited-dom/impl/official-klasses/Request';
-import { bindFunctions } from '@secret-agent/commons/utils';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import ICreateSecretAgentOptions from './interfaces/ICreateSecretAgentOptions';
-import CoreClient from './lib/CoreClient';
-import ISecretAgentClass, { SecretAgentStatics, ISecretAgentConfigureOptions } from "./interfaces/ISecretAgentClass";
-import ISecretAgent, { ISecretAgentEvents } from './interfaces/ISecretAgent';
-import CoreTab from './lib/CoreTab';
-import Tab, { createTab, getCoreTab } from './lib/Tab';
-import IInteractions, {
-  Command,
-  IMousePosition,
-  ITypeInteraction,
-} from './interfaces/IInteractions';
-import Interactor from './lib/Interactor';
-import IWaitForResourceFilter from './interfaces/IWaitForResourceFilter';
-import AwaitedEventTarget from './lib/AwaitedEventTarget';
-import ScriptInstance from './lib/ScriptInstance';
+import { ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
+import { RenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
+import initializeConstantsAndProperties from "awaited-dom/base/initializeConstantsAndProperties";
+import { IRequestInit } from "awaited-dom/base/interfaces/official";
+import { ISuperElement } from "awaited-dom/base/interfaces/super";
+import IDomStorage from "@secret-agent/core-interfaces/IDomStorage";
+import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
+import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
+import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
+import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
+import StateMachine from "awaited-dom/base/StateMachine";
+import Request from "awaited-dom/impl/official-klasses/Request";
+import { bindFunctions } from "@secret-agent/commons/utils";
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import ICreateSecretAgentOptions from "./interfaces/ICreateSecretAgentOptions";
+import CoreClient from "./lib/CoreClient";
+import ISecretAgentClass, { ISecretAgentConfigureOptions, SecretAgentStatics } from "./interfaces/ISecretAgentClass";
+import ISecretAgent, { ISecretAgentEvents } from "./interfaces/ISecretAgent";
+import CoreTab from "./lib/CoreTab";
+import Tab, { createTab, getCoreTab } from "./lib/Tab";
+import IInteractions, { Command, IMousePosition, ITypeInteraction } from "./interfaces/IInteractions";
+import Interactor from "./lib/Interactor";
+import IWaitForResourceFilter from "./interfaces/IWaitForResourceFilter";
+import AwaitedEventTarget from "./lib/AwaitedEventTarget";
+import ScriptInstance from "./lib/ScriptInstance";
 import Signals = NodeJS.Signals;
 
 const DefaultOptions = {
-  maxConcurrentSessionCount: 10,
-  localProxyPortStart: 10e3,
-  sessionsDir: os.tmpdir(),
   defaultRenderingOptions: [RenderingOption.All],
   defaultUserProfile: {},
 };
@@ -283,12 +274,12 @@ export function SecretAgentClientGenerator(
 
     public static async configure(options: Partial<ISecretAgentConfigureOptions>): Promise<void> {
       this.options = { ...DefaultOptions, ...this.options, ...options };
-      await coreClient.configure(options as IConfigureOptions);
+      await coreClient.configure(options);
     }
 
     public static async prewarm(options: Partial<ISecretAgentConfigureOptions> = {}) {
       this.options = { ...DefaultOptions, ...this.options, ...options };
-      await coreClient.prewarm(options as IConfigureOptions);
+      await coreClient.prewarm(options);
     }
 
     public static async recordUnhandledError(error: Error) {

@@ -1,7 +1,7 @@
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
 import Log from '@secret-agent/commons/Logger';
-import { IPuppetPage } from '@secret-agent/puppet/interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { assert } from '@secret-agent/commons/utils';
 import Session from './Session';
 import DomEnv from './DomEnv';
@@ -89,7 +89,9 @@ export default class UserProfile {
       // reinstall session storage for the
       for (const [origin, storage] of Object.entries(userProfile?.storage ?? {})) {
         if (!storage.sessionStorage.length) continue;
+        const load = page.waitOn('load');
         await page.navigate(origin);
+        await load;
         await page.mainFrame.evaluate(
           `${JSON.stringify(
             storage.sessionStorage,

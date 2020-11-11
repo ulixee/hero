@@ -1,8 +1,8 @@
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import IConfigureOptions from '@secret-agent/core-interfaces/IConfigureOptions';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import CoreCommandQueue from './CoreCommandQueue';
-import CoreTab from './CoreTab';
+import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
+import ISessionMeta from "@secret-agent/core-interfaces/ISessionMeta";
+import CoreCommandQueue from "./CoreCommandQueue";
+import CoreTab from "./CoreTab";
+import { ISecretAgentConfigureOptions } from "../interfaces/ISecretAgentClass";
 
 export default class CoreClient {
   public readonly commandQueue: CoreCommandQueue;
@@ -17,7 +17,7 @@ export default class CoreClient {
     this.commandQueue = new CoreCommandQueue(null, this);
   }
 
-  public async configure(options: IConfigureOptions): Promise<void> {
+  public async configure(options: Partial<ISecretAgentConfigureOptions>): Promise<void> {
     await this.commandQueue.run('configure', options);
   }
 
@@ -57,7 +57,7 @@ export default class CoreClient {
     await this.commandQueue.run('logUnhandledError', error);
   }
 
-  public async prewarm(options?: IConfigureOptions): Promise<void> {
+  public async prewarm(options?: Partial<ISecretAgentConfigureOptions>): Promise<void> {
     await this.commandQueue.run('prewarm', options);
   }
 

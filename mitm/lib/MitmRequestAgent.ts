@@ -3,7 +3,8 @@ import http2, { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 
 import Log from '@secret-agent/commons/Logger';
 import https, { RequestOptions } from 'https';
 import http from 'http';
-import { createPromise, IResolvablePromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
 import Queue from '@secret-agent/commons/Queue';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
@@ -26,7 +27,8 @@ export default class MitmRequestAgent {
   constructor(session: RequestSession) {
     this.session = session;
     this.maxConnectionsPerOrigin =
-      session.delegate?.maxConnectionsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
+      session.networkInterceptorDelegate?.connections?.socketsPerOrigin ??
+      MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
   public async request(ctx: IMitmRequestContext) {
@@ -92,7 +94,7 @@ export default class MitmRequestAgent {
 
   private async createSocketConnection(ctx: IMitmRequestContext, options: RequestOptions) {
     const session = this.session;
-    const tlsProfileId = session.delegate.tlsProfileId;
+    const tlsProfileId = session.networkInterceptorDelegate.tls?.emulatorProfileId;
     const isKeepAlive = ((options.headers.connection ??
       options.headers.Connection) as string)?.match(/keep-alive/i);
 
@@ -109,7 +111,7 @@ export default class MitmRequestAgent {
       keepAlive: !!isKeepAlive,
     });
 
-    const tcpVars = session.delegate.tcpVars;
+    const tcpVars = session.networkInterceptorDelegate.tcp;
     if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
 
     const proxyUrl = session.getUpstreamProxyUrl();

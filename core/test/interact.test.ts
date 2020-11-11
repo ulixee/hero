@@ -31,7 +31,7 @@ describe('basic Interaction tests', () => {
     const session = core.session;
     await core.goto(mouseUrl);
 
-    const spy = jest.spyOn(session.humanoid, 'playInteractions');
+    const spy = jest.spyOn(session.humanEmulator, 'playInteractions');
     await core.interact([
       {
         command: InteractionCommand.click,

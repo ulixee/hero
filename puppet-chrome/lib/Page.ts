@@ -14,22 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Protocol from 'devtools-protocol';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet/interfaces/IPuppetPage';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { IRegisteredEventListener, TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { createPromise } from '@secret-agent/commons/utils';
-import { IBoundLog } from '@secret-agent/commons/Logger';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { CDPSession } from './CDPSession';
-import { NetworkManager } from './NetworkManager';
-import { Keyboard } from './Keyboard';
-import Mouse from './Mouse';
-import FramesManager from './FramesManager';
-import { BrowserContext } from './BrowserContext';
-import { Worker } from './Worker';
-import ConsoleMessage from './ConsoleMessage';
+import Protocol from "devtools-protocol";
+import { IPuppetPage, IPuppetPageEvents } from "@secret-agent/puppet-interfaces/IPuppetPage";
+import * as eventUtils from "@secret-agent/commons/eventUtils";
+import {  TypedEventEmitter } from "@secret-agent/commons/eventUtils";
+import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import { createPromise } from "@secret-agent/commons/utils";
+import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
+import IViewport from "@secret-agent/core-interfaces/IViewport";
+import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import { CDPSession } from "./CDPSession";
+import { NetworkManager } from "./NetworkManager";
+import { Keyboard } from "./Keyboard";
+import Mouse from "./Mouse";
+import FramesManager from "./FramesManager";
+import { BrowserContext } from "./BrowserContext";
+import { Worker } from "./Worker";
+import ConsoleMessage from "./ConsoleMessage";
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;

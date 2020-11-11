@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { IMouseButton } from '@secret-agent/core-interfaces/IInteractions';
-import { IMouseOptions } from '@secret-agent/puppet/interfaces/IPuppetInput';
+import { IMouseOptions } from '@secret-agent/puppet-interfaces/IPuppetInput';
 import { CDPSession } from './CDPSession';
 import { Keyboard } from './Keyboard';
 
