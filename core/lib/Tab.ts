@@ -27,13 +27,13 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
 import DomEnv from './DomEnv';
 import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 import DomRecorder from './DomRecorder';
-import IWebsocketResourceMessage from '../interfaces/IWebsocketResourceMessage';
 
 const { log } = Log(module);
 

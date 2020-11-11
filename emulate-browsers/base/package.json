@@ -8,7 +8,6 @@
   "dependencies": {
     "@secret-agent/commons": "1.2.0-alpha.0",
     "@secret-agent/core-interfaces": "1.2.0-alpha.0",
-    "@secret-agent/emulators": "1.1.0-alpha.1",
     "@secret-agent/puppet": "1.2.0-alpha.0",
     "ua-parser-js": "^0.7.21",
     "user-agents": "^1.0.559"

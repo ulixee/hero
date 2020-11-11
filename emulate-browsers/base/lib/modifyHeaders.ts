@@ -1,4 +1,4 @@
-import IUserAgent from '@secret-agent/emulators/interfaces/IUserAgent';
+import IUserAgent from '@secret-agent/core-interfaces/IUserAgent';
 import OriginType from '@secret-agent/core-interfaces/OriginType';
 import Log from '@secret-agent/commons/Logger';
 import { IResourceToModify } from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';

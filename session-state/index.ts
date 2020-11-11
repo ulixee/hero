@@ -13,7 +13,7 @@ import { IMouseEvent } from "@secret-agent/injected-scripts/interfaces/IMouseEve
 import { IFocusEvent } from "@secret-agent/injected-scripts/interfaces/IFocusEvent";
 import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollEvent";
 import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
-import IWebsocketResourceMessage from "@secret-agent/core/interfaces/IWebsocketResourceMessage";
+import IWebsocketResourceMessage from "@secret-agent/core-interfaces/IWebsocketResourceMessage";
 import type { IPuppetContextEvents } from "@secret-agent/puppet-interfaces/IPuppetContext";
 import ResourceState from "@secret-agent/mitm/interfaces/ResourceState";
 import TabNavigations from "./lib/TabNavigations";

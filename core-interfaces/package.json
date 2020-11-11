@@ -3,7 +3,6 @@
   "version": "1.2.0-alpha.0",
   "description": "Core interfaces used by SecretAgent",
   "dependencies": {
-    "@secret-agent/commons": "1.2.0-alpha.0",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.0",
     "awaited-dom": "^1.1.7"
   },

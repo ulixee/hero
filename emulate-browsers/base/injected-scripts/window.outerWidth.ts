@@ -1,3 +1,3 @@
 if (!window.outerWidth) {
-  proxyGetter(window, 'outerWidth', () => window.innerWidth);
+  proxyGetter(window, 'outerWidth', () => window.innerWidth, true);
 }

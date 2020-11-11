@@ -1,8 +1,8 @@
-import { Helpers } from "@secret-agent/testing";
-import { GlobalPool } from "@secret-agent/core";
-import { ITestKoaServer } from "@secret-agent/testing/helpers";
-import Viewport from "@secret-agent/emulators/lib/Viewport";
-import SecretAgent from "../index";
+import { Helpers } from '@secret-agent/testing';
+import { GlobalPool } from '@secret-agent/core';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
+import SecretAgent from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
