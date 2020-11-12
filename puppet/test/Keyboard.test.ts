@@ -50,17 +50,17 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       })()`);
       await page.click('textarea');
       const text = 'Hello world. I am the text that was typed!';
-      await page.keyboard.type(text);
+      await page.type(text);
       expect(await page.evaluate(`(() => document.querySelector('textarea').value)()`)).toBe(text);
     });
 
     it('should move with the arrow keys', async () => {
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
-      await page.keyboard.type('Hello World!');
+      await page.type('Hello World!');
       expect(await page.evaluate(`document.querySelector('textarea').value`)).toBe('Hello World!');
       for (let i = 0; i < 'World!'.length; i += 1) await page.keyboard.press('ArrowLeft');
-      await page.keyboard.type('inserted ');
+      await page.type('inserted ');
       expect(await page.evaluate(`document.querySelector('textarea').value`)).toBe(
         'Hello inserted World!',
       );
@@ -131,13 +131,13 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
 
     it('should send proper codes while typing', async () => {
       await page.goto(`${server.baseUrl}/input/keyboard.html`);
-      await page.keyboard.type('!');
+      await page.type('!');
       expect(await page.evaluate('getResult()')).toBe(
         ['Keydown: ! Digit1 49 []', 'Keypress: ! Digit1 33 33 []', 'Keyup: ! Digit1 49 []'].join(
           '\n',
         ),
       );
-      await page.keyboard.type('^');
+      await page.type('^');
       expect(await page.evaluate('getResult()')).toBe(
         ['Keydown: ^ Digit6 54 []', 'Keypress: ^ Digit6 94 94 []', 'Keyup: ^ Digit6 54 []'].join(
           '\n',
@@ -149,7 +149,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       await page.goto(`${server.baseUrl}/input/keyboard.html`);
       const keyboard = page.keyboard;
       await keyboard.down('Shift');
-      await page.keyboard.type('~');
+      await page.type('~');
       expect(await page.evaluate('getResult()')).toBe(
         [
           'Keydown: Shift ShiftLeft 16 [Shift]',
@@ -174,7 +174,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
             event.preventDefault();
         }, false);
       })()`);
-      await page.keyboard.type('Hello World!');
+      await page.type('Hello World!');
       expect(await page.evaluate(`document.querySelector('textarea').value`)).toBe('He Wrd!');
     });
 
@@ -204,7 +204,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
       const text = 'This text goes onto two lines.\nThis character is 嗨.';
-      await page.keyboard.type(text);
+      await page.type(text);
       expect(await page.evaluate(`document.querySelector('textarea').value`)).toBe(text);
     });
 
@@ -264,7 +264,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     it('should type emoji', async () => {
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
-      await page.keyboard.type('👹 Tokyo street Japan 🇯🇵');
+      await page.type('👹 Tokyo street Japan 🇯🇵');
       expect(await page.evaluate(`document.querySelector('textarea').value`)).toBe(
         '👹 Tokyo street Japan 🇯🇵',
       );
@@ -279,7 +279,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
 
       const rect = ${textArea}.focus()
     })()`);
-      await page.keyboard.type('👹 Tokyo street Japan 🇯🇵');
+      await page.type('👹 Tokyo street Japan 🇯🇵');
 
       expect(await page.evaluate(`${textArea}.value`)).toBe('👹 Tokyo street Japan 🇯🇵');
     });
@@ -289,7 +289,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     it.skip('should handle selectAll', async () => {
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
-      await page.keyboard.type('some text');
+      await page.type('some text');
       const modifier = MAC ? 'Meta' : 'Control';
       await page.keyboard.down(modifier);
       await page.keyboard.press('a');
@@ -301,7 +301,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     it('should be able to prevent selectAll', async () => {
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
-      await page.keyboard.type('some text');
+      await page.type('some text');
       await page.evaluate(`(() => {
         document.querySelector('textarea').addEventListener(
           'keydown',

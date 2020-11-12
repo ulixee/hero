@@ -16,6 +16,7 @@
  */
 import { IMouseButton } from '@secret-agent/core-interfaces/IInteractions';
 import { IMouseOptions } from '@secret-agent/puppet-interfaces/IPuppetInput';
+import IPoint from '@secret-agent/core-interfaces/IPoint';
 import { CDPSession } from './CDPSession';
 import { Keyboard } from './Keyboard';
 
@@ -47,10 +48,10 @@ import { Keyboard } from './Keyboard';
  * @public
  */
 export default class Mouse {
+  public position: IPoint = { x: 0, y: 0 };
+
   private cdpSession: CDPSession;
   private keyboard: Keyboard;
-  private x = 0;
-  private y = 0;
   private button: IMouseButton | 'none' = 'none';
 
   constructor(cdpSession: CDPSession, keyboard: Keyboard) {
@@ -59,13 +60,16 @@ export default class Mouse {
   }
 
   async move(x: number, y: number): Promise<void> {
-    this.x = Math.floor(x ?? 0);
-    this.y = Math.floor(y ?? 0);
+    const roundedX = Math.round(x ?? 0);
+    const roundedY = Math.round(y ?? 0);
+    if (roundedX === this.position.x && roundedY === this.position.y) return;
+    this.position.x = roundedX;
+    this.position.y = roundedY;
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mouseMoved',
       button: this.button,
-      x: this.x,
-      y: this.y,
+      x: this.position.x,
+      y: this.position.y,
       modifiers: this.keyboard.modifiers,
     });
   }
@@ -90,8 +94,8 @@ export default class Mouse {
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mousePressed',
       button,
-      x: this.x,
-      y: this.y,
+      x: this.position.x,
+      y: this.position.y,
       modifiers: this.keyboard.modifiers,
       clickCount,
     });
@@ -103,22 +107,25 @@ export default class Mouse {
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mouseReleased',
       button,
-      x: this.x,
-      y: this.y,
+      x: this.position.x,
+      y: this.position.y,
       modifiers: this.keyboard.modifiers,
       clickCount,
     });
   }
 
   async wheel(options: { deltaX?: number; deltaY?: number } = {}): Promise<void> {
-    const { deltaX = 0, deltaY = 0 } = options;
+    const deltaX = Math.round(options.deltaX ?? 0);
+    const deltaY = Math.round(options.deltaY ?? 0);
+
+    if (deltaY === 0 && deltaY === 0) return;
 
     await this.cdpSession.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel',
-      x: this.x,
-      y: this.y,
-      deltaX: Math.round(deltaX ?? 0),
-      deltaY: Math.round(deltaY ?? 0),
+      x: 0,
+      y: 0, // don't scroll relative to points... not included in mouse events and just confusing
+      deltaX,
+      deltaY,
       modifiers: this.keyboard.modifiers,
       pointerType: 'mouse',
     });

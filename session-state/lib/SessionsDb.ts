@@ -29,10 +29,11 @@ export default class SessionsDb {
     const { sessionName, scriptEntrypoint, scriptInstanceId } = script;
     if (sessionName && scriptInstanceId) {
       const sessionRecord = this.sessions.findByName(sessionName, scriptInstanceId);
-      return sessionRecord.id;
+      return sessionRecord?.id;
     }
     if (scriptEntrypoint) {
       const sessionRecords = this.sessions.findByScriptEntrypoint(scriptEntrypoint);
+      if (!sessionRecords.length) return undefined;
       return sessionRecords[0].id;
     }
   }

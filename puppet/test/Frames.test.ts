@@ -437,7 +437,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     </form>`);
 
         await page.click('input[type=text]');
-        await page.keyboard.type('admin');
+        await page.type('admin');
         await page.click('input[type=submit]');
 
         await expect(page.navigate(server.emptyPage)).resolves.toBe(undefined);

@@ -108,6 +108,7 @@ class PageEventsRecorder {
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
+    if (window.location?.href === 'about:blank') return;
     if (document && document.childNodes.length) {
       const mutations: MutationRecord[] = [
         {
@@ -176,6 +177,9 @@ class PageEventsRecorder {
       eventType,
       mouseEvent.pageX,
       mouseEvent.pageY,
+      // might not want to do this - causes reflow
+      mouseEvent.offsetX,
+      mouseEvent.offsetY,
       mouseEvent.buttons,
       nodeId,
       relatedNodeId,

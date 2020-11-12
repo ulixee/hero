@@ -16,6 +16,7 @@
  */
 import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { assert } from '@secret-agent/commons/utils';
+import { IPuppetKeyboard } from '@secret-agent/puppet-interfaces/IPuppetInput';
 import { IKeyDefinition, keyDefinitions } from '../interfaces/USKeyboardLayout';
 import { CDPSession } from './CDPSession';
 
@@ -23,7 +24,7 @@ type KeyDescription = Required<Pick<IKeyDefinition, 'key' | 'text' | 'code' | 'l
   keyCode: number;
 };
 
-export class Keyboard {
+export class Keyboard implements IPuppetKeyboard {
   public modifiers = 0;
   private cdpSession: CDPSession;
   private pressedKeys = new Set<string>();
@@ -32,14 +33,14 @@ export class Keyboard {
     this.cdpSession = cdpSession;
   }
 
-  async down(key: IKeyboardKey, options: { text?: string } = {}): Promise<void> {
+  async down(key: IKeyboardKey): Promise<void> {
     const description = this.keyDescriptionForString(key);
 
     const autoRepeat = this.pressedKeys.has(description.code);
     this.pressedKeys.add(description.code);
     this.modifiers |= Keyboard.modifierBit(description.key);
 
-    const text = options.text === undefined ? description.text : options.text;
+    const text = description.text;
     await this.cdpSession.send('Input.dispatchKeyEvent', {
       type: text ? 'keyDown' : 'rawKeyDown',
       modifiers: this.modifiers,
@@ -73,22 +74,9 @@ export class Keyboard {
     await this.cdpSession.send('Input.insertText', { text: char });
   }
 
-  async type(text: string, options: { delay?: number } = {}): Promise<void> {
-    const delay = options.delay || null;
-    for (const char of text) {
-      if (Keyboard.charIsKey(char)) {
-        await this.press(char, { delay });
-      } else {
-        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
-        await this.sendCharacter(char);
-      }
-    }
-  }
-
-  async press(key: IKeyboardKey, options: { delay?: number; text?: string } = {}): Promise<void> {
-    const delay = options.delay || null;
-    await this.down(key, options);
-    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+  async press(key: IKeyboardKey, keyupDelay?: number): Promise<void> {
+    await this.down(key);
+    if (keyupDelay) await new Promise(resolve => setTimeout(resolve, keyupDelay));
     await this.up(key);
   }
 
@@ -124,10 +112,6 @@ export class Keyboard {
     if (this.modifiers & ~8) description.text = '';
 
     return description;
-  }
-
-  private static charIsKey(char: string): char is IKeyboardKey {
-    return !!keyDefinitions[char];
   }
 
   private static modifierBit(key: string): number {

@@ -105,7 +105,7 @@ export default class Application {
       replayApi = await ReplayApi.connect(replay);
     } catch (err) {
       console.log('ERROR launching replay', err);
-      dialog.showErrorBox('Whoops, something blew up loading this replay!', err.stack);
+      dialog.showErrorBox(`Unable to Load Replay`, err.message);
       return;
     }
 
@@ -223,11 +223,11 @@ export default class Application {
 
     // TICKS
     let tickDebounce: NodeJS.Timeout;
-    ipcMain.on('on-tick', (e, tickValue) => {
+    ipcMain.on('on-tick-drag', (e, tickValue) => {
       clearTimeout(tickDebounce);
       const replayView = Window.current?.replayView;
       if (!replayView) return;
-      tickDebounce = setTimeout(() => replayView.onTick(tickValue), 10);
+      tickDebounce = setTimeout(() => replayView.onTickDrag(tickValue), 10);
     });
 
     ipcMain.handle('next-tick', () => {

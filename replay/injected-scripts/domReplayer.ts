@@ -428,17 +428,82 @@ function highlightNodes(nodeIds: number[]) {
 let lastMouseEvent: IFrontendMouseEvent;
 let mouse: HTMLElement;
 
+const elementAbsolutes = new Map<HTMLElement, { top: number; left: number }>();
+const elementDisplayCache = new Map<HTMLElement, string>();
+const offsetsAtPageY = new Map<number, { pageOffset: number; elementOffset: number }>();
+const offsetBlock = 100;
+
 function updateMouse(mouseEvent: IFrontendMouseEvent) {
   lastMouseEvent = mouseEvent;
   if (mouseEvent.pageX !== undefined) {
+    const targetNode = getNode(mouseEvent.targetNodeId) as HTMLElement;
+
+    let pageY = mouseEvent.pageY;
+
+    if (mouseEvent.targetNodeId && targetNode) {
+      const pageOffsetsYKey = pageY - (pageY % offsetBlock);
+      // try last two offset zones
+      const pageOffsetsAtHeight =
+        offsetsAtPageY.get(pageOffsetsYKey) ?? offsetsAtPageY.get(pageOffsetsYKey - offsetBlock);
+      // if there's a page translation we've found that's closer than this one, use it
+      if (
+        pageOffsetsAtHeight &&
+        Math.abs(pageOffsetsAtHeight.elementOffset) < Math.abs(mouseEvent.offsetY)
+      ) {
+        pageY = mouseEvent.pageY + pageOffsetsAtHeight.pageOffset;
+      } else {
+        const { top } = getElementAbsolutePosition(targetNode);
+        pageY = Math.round(mouseEvent.offsetY + top);
+        const offsetAtYHeightEntry = offsetsAtPageY.get(pageOffsetsYKey);
+        if (
+          !offsetAtYHeightEntry ||
+          Math.abs(offsetAtYHeightEntry.elementOffset) > Math.abs(mouseEvent.offsetY)
+        ) {
+          offsetsAtPageY.set(pageOffsetsYKey, {
+            elementOffset: mouseEvent.offsetY,
+            pageOffset: pageY - mouseEvent.pageY,
+          });
+        }
+      }
+    }
+
     mouse.style.left = `${mouseEvent.pageX}px`;
-    mouse.style.top = `${mouseEvent.pageY}px`;
+    mouse.style.top = `${pageY}px`;
+    mouse.style.display = 'block';
   }
   if (mouseEvent.buttons !== undefined) {
     for (let i = 0; i < 5; i += 1) {
       mouse.classList.toggle(`button-${i}`, (mouseEvent.buttons & (1 << i)) !== 0);
     }
   }
+}
+
+function getElementAbsolutePosition(element: HTMLElement) {
+  const offsetElement = getOffsetElement(element);
+  if (!elementAbsolutes.has(offsetElement)) {
+    const rect = offsetElement.getBoundingClientRect();
+    const absoluteX = Math.round(rect.left + window.scrollX);
+    const absoluteY = Math.round(rect.top + window.scrollY);
+    elementAbsolutes.set(offsetElement, { top: absoluteY, left: absoluteX });
+  }
+  return elementAbsolutes.get(offsetElement);
+}
+
+function getOffsetElement(element: HTMLElement) {
+  while (element.tagName !== 'BODY') {
+    if (!elementDisplayCache.has(element)) {
+      elementDisplayCache.set(element, getComputedStyle(element).display);
+    }
+    const display = elementDisplayCache.get(element);
+    if (display === 'inline') {
+      const offsetParent = element.parentElement as HTMLElement;
+      if (!offsetParent) break;
+      element = offsetParent;
+    } else {
+      break;
+    }
+  }
+  return element;
 }
 
 function updateScroll(scrollEvent: IScrollRecord) {
@@ -474,21 +539,21 @@ function createReplayItems() {
   sa-overflow-bar {
     width: 500px;
     background-color:#3498db;
-    margin:0 auto; 
+    margin:0 auto;
     height: 100%;
     box-shadow: 3px 0 0 0 #3498db;
     display:block;
   }
-  
+
   sa-overflow {
     z-index:10000;
     display:block;
-    width:100%; 
-    height:8px; 
+    width:100%;
+    height:8px;
     position:fixed;
     pointer-events: none;
   }
-  
+
   sa-highlight {
     z-index:10000;
     position:absolute;
@@ -498,7 +563,7 @@ function createReplayItems() {
     padding:5px;
     pointer-events: none;
   }
-  
+
   sa-mouse-pointer {
     pointer-events: none;
     position: absolute;
@@ -538,6 +603,7 @@ function createReplayItems() {
   replayShadow.appendChild(styleElement);
 
   mouse = document.createElement('sa-mouse-pointer');
+  mouse.style.display = 'none';
   replayShadow.appendChild(mouse);
 
   function cancelEvent(e: Event) {

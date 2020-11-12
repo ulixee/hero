@@ -40,7 +40,6 @@ export default class Playbar extends Vue {
   private ticks: number[] = [];
   private currentTickValue = 0;
   private isPlaying = false;
-  private intervalTime = 50;
 
   private nextTimeout: number;
 
@@ -107,12 +106,14 @@ export default class Playbar extends Vue {
 
   private async playbackTick() {
     console.log('playback tick', this.currentTickValue);
-    this.currentTickValue = await ipcRenderer.invoke('next-tick');
+    const next = await ipcRenderer.invoke('next-tick');
+    this.currentTickValue = next.playbarOffset;
     if (this.currentTickValue === 100) {
       this.pause();
     }
     if (this.isPlaying) {
-      this.nextTimeout = setTimeout(() => this.playbackTick(), this.intervalTime) as any;
+      clearTimeout(this.nextTimeout);
+      this.nextTimeout = setTimeout(() => this.playbackTick(), next.millisToNextTick ?? 50) as any;
     }
   }
 
@@ -149,7 +150,7 @@ export default class Playbar extends Vue {
   private onValueChange(value: number) {
     // this is called when someone clicks, so pause the playback
     this.pause();
-    ipcRenderer.send('on-tick', value);
+    ipcRenderer.send('on-tick-drag', value);
   }
 
   private closestTick(pos: number) {

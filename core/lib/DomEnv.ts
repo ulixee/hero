@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import Log  from '@secret-agent/commons/Logger';
+import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
@@ -10,6 +10,7 @@ import IAttachedState from '@secret-agent/injected-scripts/interfaces/IAttachedS
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
 import DomEnvError from './DomEnvError';
 import { Serializable } from '../interfaces/ISerializable';
 
@@ -146,12 +147,7 @@ export default class DomEnv {
   }
 
   public getWindowOffset() {
-    return this.runIsolatedFn<{
-      innerWidth: number;
-      innerHeight: number;
-      pageXOffset: number;
-      pageYOffset: number;
-    }>('window.SecretAgent.JsPath.getWindowOffset');
+    return this.runIsolatedFn<IWindowOffset>('window.SecretAgent.JsPath.getWindowOffset');
   }
 
   public locationHref() {

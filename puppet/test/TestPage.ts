@@ -1,8 +1,11 @@
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
+import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { keyDefinitions } from '@secret-agent/puppet-chrome/interfaces/USKeyboardLayout';
 
 export interface ITestPage extends IPuppetPage {
   click(selector: string): Promise<void>;
+  type(text: string): Promise<void>;
   attachFrame(frameId: string, url: string): Promise<IPuppetFrame>;
   detachFrame(frameId: string): Promise<void>;
   goto(url: string, waitOnLifecycle?: string): Promise<void>;
@@ -15,14 +18,22 @@ export function createTestPage(page: IPuppetPage) {
   castPage.attachFrame = attachFrame.bind(page, page);
   castPage.detachFrame = detachFrame.bind(page, page);
   castPage.click = click.bind(page, page);
+  castPage.type = type.bind(page, page);
   castPage.setContent = setContent.bind(page, page);
   castPage.waitForPopup = waitForPopup.bind(page, page);
   castPage.goto = goto.bind(page, page);
   return castPage;
 }
 
+export async function type(page: IPuppetPage, text: string) {
+  for (const char of text) {
+    if (char in keyDefinitions) await page.keyboard.press(char as IKeyboardKey);
+    else await page.keyboard.sendCharacter(char);
+  }
+}
+
 export async function click(page: IPuppetPage, selector: string) {
-  const coordinates: any = await page.evaluate(`(()=>{ 
+  const coordinates: any = await page.evaluate(`(()=>{
     const rect = document.querySelector('${selector}').getBoundingClientRect();
     return {
       x: rect.x,

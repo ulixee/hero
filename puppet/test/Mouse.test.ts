@@ -97,7 +97,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       await page.goto(`${server.baseUrl}/input/textarea.html`);
       await page.click('textarea');
       const text = "This is the text that we are going to try to select. Let's see how it goes.";
-      await page.keyboard.type(text);
+      await page.type(text);
       // Firefox needs an extra frame here after typing or it will fail to set the scrollTop
       await page.evaluate(`new Promise(requestAnimationFrame)`);
       await page.evaluate(`(document.querySelector('textarea').scrollTop = 0)`);

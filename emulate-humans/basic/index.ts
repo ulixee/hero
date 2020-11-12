@@ -1,9 +1,8 @@
-import { IInteractionGroups, IInteractionStep } from "@secret-agent/core-interfaces/IInteractions";
-import IHumanEmulator from "@secret-agent/core-interfaces/IHumanEmulator";
-import { HumanEmulatorClassDecorator } from "@secret-agent/core-interfaces/IHumanEmulatorClass";
+import { IInteractionGroups, IInteractionStep } from '@secret-agent/core-interfaces/IInteractions';
+import { HumanEmulatorClassDecorator } from '@secret-agent/core-interfaces/IHumanEmulatorClass';
 
 @HumanEmulatorClassDecorator
-export default class HumanEmulatorBasic implements IHumanEmulator {
+export default class HumanEmulatorBasic {
   public static id = 'basic';
 
   public async playInteractions(

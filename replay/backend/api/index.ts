@@ -120,7 +120,8 @@ export default class ReplayApi {
     const tabId = headers['resource-tabid'];
     const url = headers['resource-url'];
 
-    this.resources.onResource(data, {
+    this.resources.onResource({
+      data,
       url,
       tabId,
       headers: JSON.parse(headers['resource-headers']),

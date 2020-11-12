@@ -319,6 +319,7 @@ export default class Core implements ICore {
       const promises: Promise<void>[] = [];
       for (const key of tabIds ?? Object.keys(Core.byTabId)) {
         const core = Core.byTabId[key];
+        if (!core) continue;
         delete Core.byTabId[key];
         promises.push(core.close());
       }
