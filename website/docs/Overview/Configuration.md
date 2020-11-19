@@ -22,7 +22,7 @@ Configurable via `Core.configure()`.
 
 ### Replay Session Port <div class="specs"><i>Core</i></div>
 
-Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
+Configures the port Replay uses to serve Session data.
 
 Configurable via [`Core.configure()`](#core-configure) or [`Core.prewarm()`](#core-prewarm).
 
