@@ -46,7 +46,7 @@ export default class Chrome80 {
 
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
-  public locale = 'en-US,en;0.9';
+  public locale = 'en-US,en';
   public userProfile: IUserProfile;
 
   protected domOverrides = new DomOverridesBuilder();

@@ -47,7 +47,7 @@ export default class Chrome83 {
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
-  public locale = 'en-US,en;0.9';
+  public locale = 'en-US,en';
   public userProfile: IUserProfile;
 
   protected domOverrides = new DomOverridesBuilder();
@@ -152,9 +152,10 @@ export default class Chrome83 {
         videoCodecs: agentCodecs.videoSupport,
       });
       domOverrides.add('MediaRecorder.isTypeSupported', {
-        supportedCodecs: agentCodecs.audioSupport.recordingFormats.concat(
-          agentCodecs.videoSupport.recordingFormats,
-        ),
+        supportedCodecs: [
+          ...agentCodecs.audioSupport.recordingFormats,
+          ...agentCodecs.videoSupport.recordingFormats
+        ],
       });
       domOverrides.add('RTCRtpSender.getCapabilities', {
         videoCodecs: agentCodecs.webRtcVideoCodecs,
