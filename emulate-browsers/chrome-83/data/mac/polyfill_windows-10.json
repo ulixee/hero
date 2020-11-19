@@ -1,0 +1,63 @@
+{
+  "osKey": "windows-10",
+  "removals": [],
+  "additions": [
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "requestVideoFrameCallback",
+      "prevProperty": "requestPictureInPicture",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "requestVideoFrameCallback"
+        },
+        "_function": "function requestVideoFrameCallback() { [native code] }",
+        "_flags": "cew"
+      }
+    },
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "cancelVideoFrameCallback",
+      "prevProperty": "requestVideoFrameCallback",
+      "property": {
+        "length": {
+          "_type": "number",
+          "_flags": "c",
+          "_value": 1
+        },
+        "name": {
+          "_type": "string",
+          "_flags": "c",
+          "_value": "cancelVideoFrameCallback"
+        },
+        "_function": "function cancelVideoFrameCallback() { [native code] }",
+        "_flags": "cew"
+      }
+    },
+    {
+      "path": "window.Notification.prototype",
+      "propertyName": "image",
+      "prevProperty": "close",
+      "property": {
+        "_flags": "ce",
+        "_accessException": "TypeError: Illegal invocation",
+        "_get": "function get image() { [native code] }",
+        "_getToStringToString": "function toString() { [native code] }"
+      }
+    }
+  ],
+  "order": [],
+  "changes": [
+    {
+      "path": "window.BarcodeDetector.getSupportedFormats",
+      "propertyName": "_invocation",
+      "property": ""
+    }
+  ]
+}

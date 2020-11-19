@@ -15,15 +15,15 @@ import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import UserAgents from '@secret-agent/emulate-browsers-base/lib/UserAgents';
 import { pickRandom } from '@secret-agent/commons/utils';
-import navigator from './navigator.json';
-import chrome from './chrome.json';
-import codecs from './codecs.json';
 import pkg from './package.json';
-import headerProfiles from './headers.json';
-import defaultUseragents from './user-agents.json';
-import frame from './frame.json';
+import navigator from './data/navigator.json';
+import chrome from './data/chrome.json';
+import codecs from './data/codecs.json';
+import headerProfiles from './data/headers.json';
+import defaultUseragents from './data/user-agents.json';
+import frame from './data/frame.json';
 
-const polyfillSet = readPolyfills(__dirname);
+const polyfillSet = readPolyfills(`${__dirname}/data`);
 const agents = UserAgents.getSupportedAgents('Chrome', 80, defaultUseragents);
 
 @BrowserEmulatorClassDecorator

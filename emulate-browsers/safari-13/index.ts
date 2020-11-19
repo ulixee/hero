@@ -25,12 +25,12 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import headerProfiles from './headers.json';
 import pkg from './package.json';
-import defaultAgents from './user-agents.json';
-import codecs from './codecs.json';
-import frame from './frame.json';
-import navigator from './navigator.json';
+import headerProfiles from './data/headers.json';
+import defaultAgents from './data/user-agents.json';
+import codecs from './data/codecs.json';
+import frame from './data/frame.json';
+import navigator from './data/navigator.json';
 
 // NOTE: runs on Chrome83 since we don't support webkit yet
 const agents = UserAgents.getSupportedAgents('Chrome', 83, defaultAgents);
