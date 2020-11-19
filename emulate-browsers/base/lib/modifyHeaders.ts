@@ -10,6 +10,7 @@ const { log } = Log(module);
 export default function modifyHeaders(
   userAgent: IUserAgent,
   headerProfiles: IResourceHeaderDefaults,
+  hasCustomLocale: boolean,
   resource: IResourceToModify,
 ) {
   const defaultOrder = getOrderAndDefaults(headerProfiles, resource);
@@ -24,13 +25,15 @@ export default function modifyHeaders(
     return headers;
   }
 
-  const headerlist: [string, string | string[]][] = [];
+  const headerList: [string, string | string[]][] = [];
   for (const headerName of defaultOrder.order) {
     const defaults = defaultOrder.defaults[headerName];
     let value = lowerHeaders[headerName.toLowerCase()];
 
     // if header is an Sec-Fetch header, trust Chrome
     if (value && headerName.toLowerCase().startsWith('sec-fetch')) {
+      // keep given value
+    } else if (value && headerName.toLowerCase() === 'accept-language' && hasCustomLocale) {
       // keep given value
     } else if (defaults && defaults.length) {
       // trust that it's doing it's thing
@@ -43,7 +46,7 @@ export default function modifyHeaders(
       value = userAgent.raw;
     }
     if (value) {
-      headerlist.push([headerName, value]);
+      headerList.push([headerName, value]);
     }
   }
 
@@ -68,14 +71,14 @@ export default function modifyHeaders(
     if (isDefaultHeader && lowerHeader !== 'cookie' && !shouldIncludeOrigin) continue;
 
     // if past the end, reset the index to the last spot
-    if (index >= headerlist.length) index = headerlist.length - 1;
+    if (index >= headerList.length) index = headerList.length - 1;
 
     // insert at same index it would have been otherwise (unless past end)
-    headerlist.splice(index, 0, [header, value]);
+    headerList.splice(index, 0, [header, value]);
   }
 
   const newHeaders: IResourceHeaders = {};
-  for (const entry of headerlist) newHeaders[entry[0]] = entry[1];
+  for (const entry of headerList) newHeaders[entry[0]] = entry[1];
 
   return newHeaders;
 }

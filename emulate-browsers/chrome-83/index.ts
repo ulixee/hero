@@ -47,10 +47,21 @@ export default class Chrome83 {
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
-  public locale = 'en-US,en';
+  public set locale(value: string) {
+    this._locale = value;
+    this.hasCustomLocale = true;
+  }
+
+  public get locale() {
+    return this._locale;
+  }
+
   public userProfile: IUserProfile;
 
   protected domOverrides = new DomOverridesBuilder();
+
+  private _locale = 'en-US,en';
+  private hasCustomLocale = false;
 
   constructor(userAgent?: IUserAgent) {
     this.userAgent = userAgent ?? pickRandom(agents);
@@ -63,7 +74,7 @@ export default class Chrome83 {
         dnsOverTlsConnection: Chrome83.dnsOverTlsConnectOptions,
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
       },
     };
     this.loadDomOverrides();

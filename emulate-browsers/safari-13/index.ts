@@ -50,7 +50,16 @@ export default class Safari13 {
 
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
-  public locale = 'en-US';
+
+  public set locale(value: string) {
+    this._locale = value;
+    this.hasCustomLocale = true;
+  }
+
+  public get locale() {
+    return this._locale;
+  }
+
   public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
   public sitesWithUserInteraction: string[] = [];
@@ -81,6 +90,9 @@ export default class Safari13 {
   protected domOverrides = new DomOverridesBuilder();
   private _userProfile: IUserProfile;
 
+  private _locale = 'en-US';
+  private hasCustomLocale = false;
+
   private readonly userInteractionTrigger: {
     [site: string]: IResolvablePromise;
   } = {};
@@ -93,7 +105,7 @@ export default class Safari13 {
         emulatorProfileId: 'Safari13',
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
         cookieHeader: this.getCookieHeader.bind(this),
         onSetCookie: this.setCookie.bind(this),
         onOriginHasFirstPartyInteraction: this.documentHasUserActivity.bind(this),
