@@ -4,8 +4,11 @@ import resolutionData from '../data/resolution.json';
 
 const resolutionsDistribution: [number, number][] = [];
 for (const resolution of resolutionData.sizes) {
+  const [width, height] = resolution.resolution as [number, number];
+  // filter out vertically oriented and infrequently used
+  if (width < height || resolution.percent <= 5) continue;
   for (let i = 0; i < resolution.percent * 10; i += 1) {
-    resolutionsDistribution.push(resolution.resolution as [number, number]);
+    resolutionsDistribution.push([width, height]);
   }
 }
 
