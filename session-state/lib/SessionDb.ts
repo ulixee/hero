@@ -158,6 +158,7 @@ export default class SessionDb {
     const sessionsDb = SessionsDb.find(dataLocation);
     if (!sessionId) {
       sessionId = sessionsDb.findLatestSessionId(scriptArgs);
+      if (!sessionId) return null;
     }
 
     const activeSession = SessionState.registry.get(sessionId);

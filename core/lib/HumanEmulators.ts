@@ -1,6 +1,6 @@
 import { pickRandom } from '@secret-agent/commons/utils';
 import IHumanEmulatorClass from '@secret-agent/core-interfaces/IHumanEmulatorClass';
-import HumanEmulatorBasic from '@secret-agent/emulate-humans-basic';
+import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
 
 export default class HumanEmulators {
   private static readonly emulatorsById: { [id: string]: IHumanEmulatorClass } = {};
@@ -35,4 +35,4 @@ export default class HumanEmulators {
   }
 }
 
-HumanEmulators.load(HumanEmulatorBasic);
+HumanEmulators.load(HumanEmulatorGhost);

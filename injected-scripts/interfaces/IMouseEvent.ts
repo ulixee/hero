@@ -11,6 +11,8 @@ import { CommandId, ISOTimestamp } from './GenericTypes';
 
 type PageX = number;
 type PageY = number;
+type OffsetX = number;
+type OffsetY = number;
 type NodeId = number;
 type Buttons = number;
 type RelatedNodeId = NodeId;
@@ -21,6 +23,8 @@ export type IMouseEvent = [
   MouseEventType,
   PageX,
   PageY,
+  OffsetX,
+  OffsetY,
   Buttons,
   NodeId,
   RelatedNodeId,

@@ -113,30 +113,42 @@ export default class ReplayView extends ViewBackend {
     this.playbarView.detach();
   }
 
-  public async onTick(tickValue: number) {
+  public async onTickDrag(tickValue: number) {
     if (!this.isAttached || !this.tabState) return;
     const events = this.tabState.setTickValue(tickValue);
     await this.publishTickChanges(events);
   }
 
   public async gotoNextTick() {
-    const offset = await this.nextTick();
-    this.playbarView.changeTickOffset(offset);
+    const nextTick = await this.nextTick();
+    this.playbarView.changeTickOffset(nextTick?.playbarOffset);
   }
 
   public async gotoPreviousTick() {
-    const state = this.tabState.gotoPreviousTick();
+    const state = this.tabState.transitionToPreviousTick();
     await this.publishTickChanges(state);
     this.playbarView.changeTickOffset(this.tabState.currentPlaybarOffsetPct);
   }
 
   public async nextTick() {
-    if (!this.tabState) return 0;
-    const events = this.tabState.gotoNextTick();
+    if (!this.tabState) return { playbarOffset: 0 };
+    const startTime = new Date();
+    // calculate when client should request the next tick
+    let millisToNextTick = 50;
+
+    const events = this.tabState.transitionToNextTick();
     await this.publishTickChanges(events);
     setImmediate(() => this.checkResponsive());
 
-    return this.tabState.currentPlaybarOffsetPct;
+    if (this.tabState.currentTick && this.tabState.nextTick) {
+      const nextTickTime = new Date(this.tabState.nextTick.timestamp);
+      const currentTickTime = new Date(this.tabState.currentTick.timestamp);
+      const diff = nextTickTime.getTime() - currentTickTime.getTime();
+      const fnDuration = new Date().getTime() - startTime.getTime();
+      millisToNextTick = Math.max(diff - fnDuration, 0);
+    }
+
+    return { playbarOffset: this.tabState.currentPlaybarOffsetPct, millisToNextTick };
   }
 
   public destroy() {

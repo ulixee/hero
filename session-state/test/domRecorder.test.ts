@@ -29,7 +29,9 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
+    const meta = await Core.createTab({
+      humanEmulatorId: 'skipper',
+    });
     const core = Core.byTabId[meta.tabId];
     await core.goto(`${koaServer.baseUrl}/test1`);
     await core.waitForLoad('DomContentLoaded');
@@ -404,7 +406,17 @@ describe('basic Mouse Event tests', () => {
 
 </body>`;
     });
-    const meta = await Core.createTab();
+    const meta = await Core.createTab({
+      humanEmulatorId: 'basic',
+      viewport: {
+        height: 800,
+        width: 1000,
+        positionY: 0,
+        positionX: 0,
+        screenHeight: 800,
+        screenWidth: 1000,
+      },
+    });
     const core = Core.byTabId[meta.tabId];
     // @ts-ignore
     const tab = core.tab;

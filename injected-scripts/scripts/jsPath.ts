@@ -56,12 +56,33 @@ class JsPath {
   }
 
   public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
-    const [left, top] = coordinates;
-    const start = new Date().getTime();
+    let left = Math.max(coordinates[0], 0);
+    const scrollWidth = document.body.scrollWidth || document.documentElement.scrollWidth;
+    const maxScrollX = Math.max(scrollWidth - window.innerWidth, window.innerWidth);
+    if (left >= maxScrollX) {
+      left = maxScrollX;
+    }
+
+    let top = Math.max(coordinates[1], 0);
+    const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+    const maxScrollY = Math.max(scrollHeight - window.innerHeight, window.innerHeight);
+    if (top >= maxScrollY) {
+      top = maxScrollY;
+    }
+
+    const endTime = new Date().getTime() + (timeoutMillis ?? 50);
+    let count = 0;
     do {
-      if (window.scrollX >= left && window.scrollY >= top) return true;
-      await new Promise(resolve => setTimeout(resolve, 20));
-    } while (new Date().getTime() - start < timeoutMillis);
+      if (Math.abs(window.scrollX - left) <= 1 && Math.abs(window.scrollY - top) <= 1) {
+        return true;
+      }
+      if (count === 2) {
+        window.scroll({ behavior: 'auto', left, top });
+      }
+      await new Promise(requestAnimationFrame);
+      count += 1;
+    } while (new Date().getTime() < endTime);
+
     return false;
   }
 

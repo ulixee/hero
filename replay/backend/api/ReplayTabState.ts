@@ -43,6 +43,10 @@ export default class ReplayTabState extends EventEmitter {
     return this.ticks[this.currentTickIdx];
   }
 
+  public get nextTick() {
+    return this.ticks[this.currentTickIdx + 1];
+  }
+
   public isReady = getResolvable<void>();
 
   private currentTickIdx = -1;
@@ -76,12 +80,12 @@ export default class ReplayTabState extends EventEmitter {
     return this.ticks.find(x => x.commandId === pageToLoad.commandId)?.playbarOffsetPercent ?? 0;
   }
 
-  public gotoPreviousTick() {
+  public transitionToPreviousTick() {
     const prevTickIdx = this.currentTickIdx > 0 ? this.currentTickIdx - 1 : this.currentTickIdx;
     return this.loadTick(prevTickIdx);
   }
 
-  public gotoNextTick() {
+  public transitionToNextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
     if (
       this.replayTime.close &&
@@ -203,6 +207,9 @@ export default class ReplayTabState extends EventEmitter {
       frontendMouseEvent = {
         pageX: mouseEvent.pageX,
         pageY: mouseEvent.pageY,
+        offsetX: mouseEvent.offsetX,
+        offsetY: mouseEvent.offsetY,
+        targetNodeId: mouseEvent.targetNodeId,
         buttons: mouseEvent.buttons,
         viewportHeight: this.viewportHeight,
         viewportWidth: this.viewportWidth,

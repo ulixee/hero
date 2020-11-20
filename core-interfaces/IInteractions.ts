@@ -13,6 +13,7 @@ export interface IInteractionStep {
   mouseButton?: IMouseButton;
   keyboardCommands?: IKeyboardCommand[];
   keyboardDelayBetween?: number;
+  keyboardKeyupDelay?: number;
   delayNode?: IJsPath;
   delayElement?: IJsPath;
   delayMillis?: number;

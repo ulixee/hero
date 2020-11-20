@@ -461,6 +461,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return await this.waitForElement(pathToNode);
   }
 
+  public async moveMouseToStartLocation() {
+    return this.interactor.initialize();
+  }
+
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async toJSON() {
@@ -497,6 +501,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         });
       });
     }
+
+    await this.interactor.initialize();
   }
 
   private listen() {

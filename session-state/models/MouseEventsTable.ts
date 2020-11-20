@@ -10,6 +10,8 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       ['commandId', 'INTEGER'],
       ['pageX', 'INTEGER'],
       ['pageY', 'INTEGER'],
+      ['offsetX', 'INTEGER'],
+      ['offsetY', 'INTEGER'],
       ['buttons', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
       ['relatedTargetNodeId', 'INTEGER'],
@@ -23,6 +25,8 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       event,
       pageX,
       pageY,
+      offsetX,
+      offsetY,
       buttons,
       targetNodeId,
       relatedTargetNodeId,
@@ -34,6 +38,8 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       commandId,
       pageX,
       pageY,
+      offsetX,
+      offsetY,
       buttons,
       targetNodeId,
       relatedTargetNodeId,
@@ -49,6 +55,8 @@ export interface IMouseEventRecord {
   commandId: number;
   pageX: number;
   pageY: number;
+  offsetX: number;
+  offsetY: number;
   buttons: number;
   targetNodeId?: number;
   relatedTargetNodeId?: number;

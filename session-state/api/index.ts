@@ -28,6 +28,13 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
 
       const session = SessionDb.findWithRelated(lookupArgs);
 
+      if (!session) {
+        res.writeHead(404);
+        return res.end(
+          JSON.stringify({ message: "There aren't any stored sessions for this script." }),
+        );
+      }
+
       const sessionLoader = new SessionLoader(session.sessionDb, session.sessionState);
 
       let hasSentSession = false;
@@ -173,12 +180,7 @@ async function http2PushResources(res: http2.Http2ServerResponse, resources: any
             return;
           }
           pushResponse.stream.respond({ ':status': 200 });
-          if (resource.type === 'Document') {
-            // body won't be rendered from resource, so just send back empty
-            pushResponse.stream.end(Buffer.from(''), resolve);
-          } else {
-            pushResponse.stream.end(resource.data, resolve);
-          }
+          pushResponse.stream.end(resource.data, resolve);
         },
       );
     });

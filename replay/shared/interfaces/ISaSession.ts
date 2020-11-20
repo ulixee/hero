@@ -28,16 +28,16 @@ export interface IMouseEvent {
   commandId: number;
   pageX: number;
   pageY: number;
+  offsetX: number;
+  offsetY: number;
   buttons: number;
   targetNodeId: number;
   event: number;
   timestamp: string;
 }
 
-export interface IFrontendMouseEvent {
-  pageX: number;
-  pageY: number;
-  buttons: number;
+export interface IFrontendMouseEvent
+  extends Omit<IMouseEvent, 'commandId' | 'timestamp' | 'event'> {
   viewportWidth: number;
   viewportHeight: number;
 }
