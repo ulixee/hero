@@ -93,11 +93,12 @@ async function getDoctype(resource: IReplayResource) {
   }
   readable.destroy();
 
-  const htmlIndex = str.toLowerCase().indexOf('<html>');
-  if (htmlIndex !== -1) {
-    resource.doctype = str.substr(0, htmlIndex);
+  const doctype = str.toLowerCase().match(/^\s*<!DOCTYPE([^>]*?)>/i);
+  if (doctype) {
+    resource.doctype = `<!DOCTYPE ${doctype[1]}>\n`;
+  } else {
+    resource.doctype = '';
   }
-  resource.doctype = '';
   return resource.doctype;
 }
 

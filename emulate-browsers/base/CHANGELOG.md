@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.0...v1.2.0-alpha.1) (2020-11-20)
+
+
+### Bug Fixes
+
+* emulators should not use accept-language values from json if using custom locale ([fc00660](https://github.com/ulixee/secret-agent/commit/fc0066009a95bba60df2d7de6ed9a5435a807d4b))
+* emulators were failing some double-agent tests ([5ae4f55](https://github.com/ulixee/secret-agent/commit/5ae4f5507662ed91d19086d9dbab192e50a8f5c5))
+* unwind some dependencies ([240bea6](https://github.com/ulixee/secret-agent/commit/240bea6ac7cb87bfcccbc56fb54043f5c2ff7b4b))
+
+
+
+
+
 # [1.2.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.1.0-alpha.1...v1.2.0-alpha.0) (2020-11-11)
 
 

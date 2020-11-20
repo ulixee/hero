@@ -1,13 +1,13 @@
 {
   "name": "@secret-agent/core-interfaces",
-  "version": "1.2.0-alpha.0",
+  "version": "1.2.0-alpha.1",
   "description": "Core interfaces used by SecretAgent",
   "dependencies": {
-    "@secret-agent/puppet-interfaces": "1.2.0-alpha.0",
+    "@secret-agent/puppet-interfaces": "1.2.0-alpha.1",
     "awaited-dom": "^1.1.7"
   },
   "devDependencies": {
-    "@secret-agent/injected-scripts": "1.2.0-alpha.0",
+    "@secret-agent/injected-scripts": "1.2.0-alpha.1",
     "@types/node": "^12.7.11",
     "devtools-protocol": "^0.0.799653"
   }
