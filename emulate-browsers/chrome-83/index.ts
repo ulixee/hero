@@ -47,10 +47,21 @@ export default class Chrome83 {
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
-  public locale = 'en-US,en;0.9';
+  public set locale(value: string) {
+    this._locale = value;
+    this.hasCustomLocale = true;
+  }
+
+  public get locale() {
+    return this._locale;
+  }
+
   public userProfile: IUserProfile;
 
   protected domOverrides = new DomOverridesBuilder();
+
+  private _locale = 'en-US,en';
+  private hasCustomLocale = false;
 
   constructor(userAgent?: IUserAgent) {
     this.userAgent = userAgent ?? pickRandom(agents);
@@ -63,7 +74,7 @@ export default class Chrome83 {
         dnsOverTlsConnection: Chrome83.dnsOverTlsConnectOptions,
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
       },
     };
     this.loadDomOverrides();
@@ -152,9 +163,10 @@ export default class Chrome83 {
         videoCodecs: agentCodecs.videoSupport,
       });
       domOverrides.add('MediaRecorder.isTypeSupported', {
-        supportedCodecs: agentCodecs.audioSupport.recordingFormats.concat(
-          agentCodecs.videoSupport.recordingFormats,
-        ),
+        supportedCodecs: [
+          ...agentCodecs.audioSupport.recordingFormats,
+          ...agentCodecs.videoSupport.recordingFormats
+        ],
       });
       domOverrides.add('RTCRtpSender.getCapabilities', {
         videoCodecs: agentCodecs.webRtcVideoCodecs,

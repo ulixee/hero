@@ -317,6 +317,10 @@ Update existing settings.
   - defaultRenderingOptions `string[]` defaults to `[All]`. Controls enabled browser rendering features.
   - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
   - browserEmulatorIds `string[]`. Ids of [BrowserEmulators](../advanced/browser-emulators) to prewarm.
+  - maxConcurrentSessionsCount `number`. Limit number of concurrent sessions.
+  - localProxyPortStart `number`. Port to use for the internal MitM proxy.
+  - replayServerPort `number`. Port to use for serving Replay session data.
+  - sessionsDir `string`. Directory for storing session data.
 
 #### **Returns**: `Promise`
 

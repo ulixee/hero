@@ -4,7 +4,7 @@ import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
 import ICreateSecretAgentOptions from "./ICreateSecretAgentOptions";
 import ISecretAgent from "./ISecretAgent";
 
-export interface ISecretAgentConfigureOptions extends Pick<ICoreConfigureOptions, 'browserEmulatorIds'> {
+export interface ISecretAgentConfigureOptions extends ICoreConfigureOptions  {
   defaultRenderingOptions: IRenderingOption[];
   defaultUserProfile: IUserProfile;
 }

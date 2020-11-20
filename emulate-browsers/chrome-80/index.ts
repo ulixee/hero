@@ -44,12 +44,23 @@ export default class Chrome80 {
     return polyfillSet?.canPolyfill(this);
   }
 
+  public set locale(value: string) {
+    this._locale = value;
+    this.hasCustomLocale = true;
+  }
+
+  public get locale() {
+    return this._locale;
+  }
+
   public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
-  public locale = 'en-US,en;0.9';
   public userProfile: IUserProfile;
 
   protected domOverrides = new DomOverridesBuilder();
+
+  private _locale = 'en-US,en';
+  private hasCustomLocale = false;
 
   constructor(userAgent?: IUserAgent) {
     this.userAgent = userAgent ?? pickRandom(agents);
@@ -62,7 +73,7 @@ export default class Chrome80 {
         dnsOverTlsConnection: Chrome80.dnsOverTlsConnectOptions,
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles),
+        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
       },
     };
     this.loadDomOverrides();
