@@ -34,7 +34,7 @@ This can only be set on SecretAgent during the first instantiation or [`SecretAg
 
 Configurable via [`Core.configure()`](#core-configure) or [`Core.prewarm()`](#core-prewarm).
 
-### Rendering Options <div class="specs"><i>Class</i><i>Instance</i></div>
+### Rendering Options <div class="specs"><i>Class</i><i>Instance</i></div> {#rendering}
 
 One of the best ways to optimize SecretAgent's memory and CPU is limiting the `renderingOptions` to only what you need. The following are valid options.
 

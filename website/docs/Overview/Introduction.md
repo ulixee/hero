@@ -7,7 +7,7 @@
 - **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
 - **Powered by Chromium** - The powerful Chromium engine sits under the hood, allowing for lightning fast rendering.
-- **Emulates any modern browser** - BrowserEmulator plugins make it easy to disguise your script as practically any browser.
+- **Emulates any modern browser** - Browser emulators make it easy to disguise your script as practically any browser.
 - **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 
 ## How It Works

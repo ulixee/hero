@@ -13,9 +13,13 @@ const SecretAgent = require('secret-agent');
 })();
 ```
 
-Unlike most other browsers, SecretAgent is initialized with a single window that can spawn tabs. Only a single tab can be focused at a time, meaning clicks and other user interaction will go to the active tab.
+A SecretAgent instance can be thought of as a single user browsing session. An instance has a [replayable](../advanced/session-replay) [Session](../advanced/session) that will record all commands, dom changes, interaction and page events. 
 
-Each SecretAgent instance has its own cache, cookies, session data, and [BrowserEmulator](../advanced-features/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
+Instances are very lightweight, sharing a pool of browsers underneath. You should create a new instance for activity that would benefit from parallelization by multiple "users".
+
+SecretAgent instances can have multiple [Tabs](./tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable). 
+
+Each SecretAgent instance creates a private environment with its own cache, cookies, session data, and [BrowserEmulator](../advanced-features/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Constructor
 
