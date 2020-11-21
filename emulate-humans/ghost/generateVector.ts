@@ -35,10 +35,13 @@ function path(start: IPoint, end: IPoint, targetWidth = 100, spreadOverride?: nu
   const baseTime = Math.random() * minSteps;
   const steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
 
-  return curve.getLUT(steps).map(vector => ({
-    x: Number.isNaN(vector.x ?? 0) ? 0 : vector.x,
-    y: Number.isNaN(vector.y ?? 0) ? 0 : vector.y,
-  }));
+  return curve
+    .getLUT(steps)
+    .map(vector => ({
+      x: vector.x,
+      y: vector.y,
+    }))
+    .filter(({ x, y }) => !Number.isNaN(x) && !Number.isNaN(y));
 }
 
 function bezierCurve(start: IPoint, finish: IPoint, overrideSpread?: number) {

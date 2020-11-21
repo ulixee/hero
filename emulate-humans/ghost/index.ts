@@ -255,7 +255,6 @@ export default class HumanEmulatorGhost {
         x: scrollX,
         y: scrollY,
       };
-      const newPoints: IPoint[] = [point];
 
       const scrollYPixels = Math.abs(scrollY - lastPoint.y);
       // if too big a jump, backfill smaller jumps
@@ -267,22 +266,24 @@ export default class HumanEmulatorGhost {
         );
         for (const chunk of chunks) {
           const deltaY = isNegative ? -chunk : chunk;
-          if (deltaY === 0) continue;
-          newPoints.unshift({
+          const scrollYChunk = Math.max(lastPoint.y + deltaY, 0);
+          if (scrollYChunk === lastPoint.y) continue;
+
+          const newPoint = {
             x: scrollX,
-            y: newPoints[0].y - deltaY,
-          });
+            y: scrollYChunk,
+          };
+          points.push(newPoint);
+          lastPoint = newPoint;
         }
       }
 
       const lastEntry = points[points.length - 1];
       // if same point added, yank it now
-      if (lastEntry && lastEntry.x === newPoints[0].x && lastEntry.y === newPoints[0].y) {
-        newPoints.shift();
+      if (!lastEntry || lastEntry.x !== point.x || lastEntry.y !== point.y) {
+        points.push(point);
+        lastPoint = point;
       }
-      points.push(...newPoints);
-
-      lastPoint = point;
     }
     if (lastPoint.y !== scrollToPoint.y || lastPoint.x !== scrollToPoint.x) {
       points.push(scrollToPoint);

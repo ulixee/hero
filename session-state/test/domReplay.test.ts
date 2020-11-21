@@ -153,7 +153,7 @@ describe('basic Dom Replay tests', () => {
       const mirrorHtmlNext = await mirrorPage.mainFrame.evaluate(getContentScript, false);
       expect(mirrorHtmlNext).toBe(sourceHtmlNext);
     }
-  });
+  }, 45e3);
 
   it('should support multiple tabs', async () => {
     koaServer.get('/tab1', ctx => {
@@ -260,5 +260,5 @@ describe('basic Dom Replay tests', () => {
 
     const mirrorNewTabHtml = await mirrorNewTab.mainFrame.evaluate(getContentScript, false);
     expect(mirrorNewTabHtml).toBe(newTabHtml);
-  });
+  }, 45e3);
 });

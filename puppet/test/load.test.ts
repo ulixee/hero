@@ -52,6 +52,6 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         }
       });
       await Promise.all(concurrent);
-    }, 30e3);
+    }, 60e3);
   },
 );

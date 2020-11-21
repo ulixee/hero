@@ -80,7 +80,7 @@ export default class Session {
     this.timezoneId = options.timezoneId;
     this.viewport = options.viewport;
     if (!this.viewport) {
-      this.viewport = Viewport.getRandom();
+      this.viewport = Viewport.getMostPopular();
     }
 
     const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();

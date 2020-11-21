@@ -114,7 +114,7 @@ jobs:
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Run tests
-        run: yarn jest --testTimeout=15000 --maxConcurrency=3
+        run: yarn jest --testTimeout=15000 --maxConcurrency=2
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false

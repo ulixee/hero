@@ -11,6 +11,8 @@ for (const resolution of resolutionData.sizes) {
     resolutionsDistribution.push([width, height]);
   }
 }
+const mostPopularResolution = resolutionData.sizes.sort((a, b) => b.percent - a.percent)[0]
+  .resolution;
 
 export default class Viewport {
   static getRandomResolution() {
@@ -19,6 +21,21 @@ export default class Viewport {
       width: resolution[0],
       height: resolution[1],
     };
+  }
+
+  static getMostPopular() {
+    const [width, height] = mostPopularResolution;
+    const positionX = Math.floor(Math.random() * 20);
+    const positionY = Math.floor(Math.random() * 20);
+    return {
+      positionX,
+      positionY,
+      screenWidth: width,
+      screenHeight: height,
+      width: width - positionX,
+      height: height - positionY,
+      deviceScaleFactor: 1,
+    } as IViewport;
   }
 
   static getRandom() {

@@ -15,6 +15,7 @@ import {
 import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelper';
 import IRect from '@secret-agent/core-interfaces/IRect';
 import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Tab from './Tab';
 
 const commandsNeedingScroll = [
@@ -73,6 +74,9 @@ export default class Interactor implements IInteractionsHelper {
     await humanEmulator.playInteractions(
       finalInteractions,
       async interaction => {
+        if (this.tab.isClosing) {
+          throw new CanceledPromiseError('Canceling interaction - tab closing');
+        }
         switch (interaction.command) {
           case InteractionCommand.move: {
             const { x, y } = await this.getPositionXY(interaction.mousePosition);
