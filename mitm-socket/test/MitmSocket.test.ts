@@ -36,7 +36,7 @@ test('should handle http2 requests', async () => {
   const client = http2.connect('https://secretagent.dev', {
     createConnection: () => tlsConnection.socket,
   });
-  Helpers.onClose(() => new Promise(resolve => client.close(resolve)));
+  closeAfterTest(client);
 
   const request = client.request({ ':path': '/' });
   const httpResponse = await readResponse(request);
@@ -58,7 +58,7 @@ test('should be able to hit google using a Chrome79 Emulator', async () => {
   const client = http2.connect('https://www.google.com', {
     createConnection: () => tlsConnection.socket,
   });
-  Helpers.onClose(() => new Promise(resolve => client.close(resolve)));
+  closeAfterTest(client);
 
   const request = client.request({ ':path': '/' });
   const httpResponse = await readResponse(request);
@@ -67,7 +67,7 @@ test('should be able to hit google using a Chrome79 Emulator', async () => {
 });
 
 test('should be able to hit optimove using a Chrome79 Emulator', async () => {
-  const tlsConnection = new MitmSocket('2', {
+  const tlsConnection = new MitmSocket('optimove', {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
@@ -82,7 +82,7 @@ test('should be able to hit optimove using a Chrome79 Emulator', async () => {
   const client = http2.connect('https://www.gstatic.com', {
     createConnection: () => tlsConnection.socket,
   });
-  Helpers.onClose(() => new Promise(resolve => client.close(resolve)));
+  closeAfterTest(client);
 
   const request = client.request({
     ':path': '/firebasejs/4.9.1/firebase.js',
@@ -108,7 +108,7 @@ test.skip('should be able to get scripts from unpkg using Chrome79 emulator', as
   const client = http2.connect('https://unpkg.com', {
     createConnection: () => tlsConnection.socket,
   });
-  trackClose(client);
+  closeAfterTest(client);
 
   {
     const request = client.request({ ':path': '/react@16.7.0/umd/react.production.min.js' });
@@ -322,12 +322,12 @@ async function startProxy() {
   });
   proxy.unref();
 
-  trackClose(proxy);
+  closeAfterTest(proxy);
   await proxyPromise.promise;
   return proxy;
 }
 
-function trackClose(closable: { close: (...args: any[]) => any }) {
+function closeAfterTest(closable: { close: (...args: any[]) => any }) {
   Helpers.onClose(() => new Promise(resolve => closable.close(() => process.nextTick(resolve))));
 }
 

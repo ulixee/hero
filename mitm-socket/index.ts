@@ -1,36 +1,51 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as net from 'net';
 import { promises as fs, unlink } from 'fs';
-import Log from '@secret-agent/commons/Logger';
-import {  IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import { EventEmitter } from 'events';
-import { createPromise } from '@secret-agent/commons/utils';
 import * as os from 'os';
-
 import { v1 as uuid } from 'uuid';
+import Log from '@secret-agent/commons/Logger';
+import { createPromise } from '@secret-agent/commons/utils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 
 const { log } = Log(module);
 
 const ext = os.platform() === 'win32' ? '.exe' : '';
 const libPath = `${__dirname}/dist/connect${ext}`;
 
-export default class MitmSocket {
+let idCounter = 0;
+
+export default class MitmSocket extends TypedEventEmitter<{
+  connect: void;
+  dial: void;
+  close: void;
+}> {
   public readonly socketPath: string;
   public alpn = 'http/1.1';
   public socket: net.Socket;
   public remoteAddress: string;
   public localAddress: string;
+  public serverName: string;
+
+  public id = (idCounter += 1);
+
+  public spawnTime: Date;
+  public dialTime: Date;
+  public connectTime: Date;
+  public closeTime: Date;
+
+  public get pid() {
+    return this.child?.pid;
+  }
 
   private isClosing = false;
   private isConnected = false;
   private child: ChildProcess;
-  private emitter = new EventEmitter();
   private connectError?: string;
 
-  private readonly logger: IBoundLog;
-
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
+    super();
     const id = uuid();
+    this.serverName = connectOpts.servername;
     this.socketPath =
       os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
     this.logger = log.createChild(module, { sessionId });
@@ -55,18 +70,15 @@ export default class MitmSocket {
     this.connectOpts.tcpWindowSize = tcpVars.windowSize;
   }
 
-  public on(event: 'close', listener: (socket: net.Socket) => any) {
-    this.emitter.on(event, listener);
-  }
-
   public isHttp2() {
     return this.alpn === 'h2';
   }
 
   public close() {
     if (this.isClosing) return;
+    this.closeTime = new Date();
     this.isClosing = true;
-    this.emitter.emit('close');
+    this.emit('close');
     this.cleanupSocket();
     this.closeChild();
   }
@@ -94,6 +106,7 @@ export default class MitmSocket {
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
+    this.spawnTime = new Date();
     this.child = child;
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
@@ -168,19 +181,23 @@ export default class MitmSocket {
   private onChildProcessMessage(messages: string) {
     for (const message of messages.split(/\r?\n/)) {
       if (message.startsWith('[DomainSocketPiper.Dialed]')) {
+        this.dialTime = new Date();
         const matches = message.match(/Remote: (.+), Local: (.+)/);
         if (matches?.length) {
           this.remoteAddress = matches[1];
           this.localAddress = matches[2];
         }
+        this.emit('dial');
       } else if (message === '[DomainSocketPiper.ReadyForConnect]') {
         this.onListening();
       } else if (message.startsWith('[DomainSocketPiper.Connected]')) {
         this.isConnected = true;
+        this.connectTime = new Date();
         const matches = message.match(/ALPN: (.+)/);
         if (matches?.length) {
           this.alpn = matches[1];
         }
+        this.emit('connect');
         this.logger.stats('SocketHandler.Connected', {
           alpn: this.alpn,
           host: this.connectOpts?.host,

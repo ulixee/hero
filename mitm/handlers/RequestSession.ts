@@ -13,6 +13,7 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import MitmSocket from '@secret-agent/mitm-socket/index';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
@@ -339,6 +340,12 @@ interface IRequestSessionEvents {
   request: IRequestSessionRequestEvent;
   'http-error': IRequestSessionHttpErrorEvent;
   'resource-state': IResourceStateChangeEvent;
+  'socket-connect': ISocketEvent;
+  'socket-close': ISocketEvent;
+}
+
+export interface ISocketEvent {
+  socket: MitmSocket;
 }
 
 export interface IResourceStateChangeEvent {
@@ -362,6 +369,7 @@ export interface IRequestSessionRequestEvent {
   request: IResourceRequest;
   serverAlpn: string;
   clientAlpn: string;
+  socketId: number;
   isHttp2Push: boolean;
   didBlockResource: boolean;
   originalHeaders: IResourceHeaders;

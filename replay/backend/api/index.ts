@@ -82,7 +82,7 @@ export default class ReplayApi {
     if (this.tabs.some(x => x.isActive)) return;
 
     this.http2Session.removeAllListeners();
-    this.http2Session.close();
+    this.http2Session.destroy();
     ReplayApi.sessions.delete(this.http2Session);
   }
 

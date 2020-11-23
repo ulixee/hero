@@ -65,7 +65,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: [12, 13]
+        node-version: [12, 14]
 
     runs-on: ${{ matrix.os }}
 
@@ -102,6 +102,8 @@ jobs:
       - name: Install mitm
         run: yarn run build
         working-directory: ./mitm-socket
+        env:
+          SA_REBUILD_MITM_SOCKET: true
 
       - name: Copy built mitm
         run: cp -r mitm-socket/dist build/mitm-socket
@@ -114,7 +116,7 @@ jobs:
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Run tests
-        run: yarn jest --testTimeout=15000 --maxConcurrency=2
+        run: yarn jest --testTimeout=15000 --runInBand
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false

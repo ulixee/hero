@@ -8,6 +8,7 @@ import RequestSession, {
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
   IResourceStateChangeEvent,
+  ISocketEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
 import IPuppetContext, {
@@ -131,6 +132,8 @@ export default class Session {
     requestSession.on('response', this.onMitmResponse.bind(this));
     requestSession.on('http-error', this.onMitmError.bind(this));
     requestSession.on('resource-state', this.onResourceStates.bind(this));
+    requestSession.on('socket-close', this.onSocketClose.bind(this));
+    requestSession.on('socket-connect', this.onSocketConnect.bind(this));
   }
 
   public async createTab() {
@@ -206,6 +209,14 @@ export default class Session {
 
   private onResourceStates(event: IResourceStateChangeEvent) {
     this.sessionState.captureResourceState(event.context.id, event.context.stateChanges);
+  }
+
+  private onSocketClose(event: ISocketEvent) {
+    this.sessionState.captureSocketEvent(event);
+  }
+
+  private onSocketConnect(event: ISocketEvent) {
+    this.sessionState.captureSocketEvent(event);
   }
 
   private async onNewTab(
