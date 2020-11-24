@@ -58,14 +58,14 @@ class JsPath {
   public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
     let left = Math.max(coordinates[0], 0);
     const scrollWidth = document.body.scrollWidth || document.documentElement.scrollWidth;
-    const maxScrollX = Math.max(scrollWidth - window.innerWidth, window.innerWidth);
+    const maxScrollX = Math.max(scrollWidth - window.innerWidth, 0);
     if (left >= maxScrollX) {
       left = maxScrollX;
     }
 
     let top = Math.max(coordinates[1], 0);
     const scrollHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
-    const maxScrollY = Math.max(scrollHeight - window.innerHeight, window.innerHeight);
+    const maxScrollY = Math.max(scrollHeight - window.innerHeight, 0);
     if (top >= maxScrollY) {
       top = maxScrollY;
     }
