@@ -23,8 +23,12 @@ for (const change of args.changes || []) {
     const { descriptor } = descriptorInHierarchy;
 
     if (change.propertyName === '_value') {
-      descriptor.value = change.property;
-      Object.defineProperty(parent, property, descriptor);
+      if (descriptor.get) {
+        descriptor.get = proxyGetter(parent, property, () => change.property);
+      } else {
+        descriptor.value = change.property;
+        Object.defineProperty(parent, property, descriptor);
+      }
     }
 
     if (change.propertyName === '_get') {

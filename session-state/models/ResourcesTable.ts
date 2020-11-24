@@ -31,11 +31,9 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['responseTimestamp', 'TEXT'],
         ['responseEncoding', 'TEXT'],
         ['responseData', 'BLOB'],
+        ['socketId', 'INTEGER'],
         ['clientAlpn', 'TEXT'],
-        ['serverAlpn', 'TEXT'],
-        ['localAddress', 'TEXT'],
         ['dnsResolvedIp', 'TEXT'],
-        ['remoteAddress', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
         ['didBlockResource', 'INTEGER'],
@@ -51,11 +49,10 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     meta: IResourceMeta,
     body: Buffer,
     extras: {
+      socketId: number;
       redirectedToUrl?: string;
       originalHeaders: IResourceHeaders;
       clientAlpn: string;
-      serverAlpn: string;
-      localAddress: string;
       dnsResolvedIp?: string;
       wasCached?: boolean;
       didBlockResource: boolean;
@@ -96,11 +93,9 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.response?.timestamp,
       meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
       meta.response ? body : undefined,
+      extras.socketId,
       extras.clientAlpn,
-      extras.serverAlpn,
-      extras.localAddress,
       extras.dnsResolvedIp,
-      meta.response?.remoteAddress,
       extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
       extras.didBlockResource ? 1 : 0,
@@ -153,11 +148,9 @@ export interface IResourcesRecord {
   responseTimestamp: string;
   responseEncoding: string;
   responseData?: Buffer;
+  socketId: number;
   clientAlpn: string;
-  serverAlpn: string;
-  localAddress: string;
-  dnsResolvedIp: string;
-  remoteAddress: string;
+  dnsResolvedIp?: string;
   usedArtificialCache: boolean;
   didBlockResource: boolean;
   isHttp2Push: boolean;

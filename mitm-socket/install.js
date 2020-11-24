@@ -12,7 +12,7 @@ if (!fs.existsSync(outDir)) {
   fs.mkdirSync(outDir);
 }
 const { version } = packageJson;
-const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/download/v${version}/`;
+const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/download/v${version}`;
 
 // tslint:disable:no-console
 

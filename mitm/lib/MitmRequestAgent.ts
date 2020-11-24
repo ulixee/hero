@@ -110,6 +110,8 @@ export default class MitmRequestAgent {
       clientHelloId: tlsProfileId,
       keepAlive: !!isKeepAlive,
     });
+    mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
+    mitmSocket.on('connect', () => session.emit('socket-connect', { socket: mitmSocket }));
 
     const tcpVars = session.networkInterceptorDelegate.tcp;
     if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
@@ -122,8 +124,6 @@ export default class MitmRequestAgent {
 
     ctx.setState(ResourceState.SocketConnect);
     await mitmSocket.connect();
-
-    mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
 
     if (ctx.isUpgrade) {
       mitmSocket.socket.setNoDelay(true);
@@ -167,7 +167,7 @@ export default class MitmRequestAgent {
       sessionId: this.session.sessionId,
       origin,
     });
-
+    ctx.requestSession.emit('socket-close', { socket: socketConnect });
     const pool = this.getSocketPoolByOrigin(origin);
 
     pool.all.delete(socketConnect);

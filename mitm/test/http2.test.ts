@@ -277,7 +277,9 @@ async function createH2Connection(sessionId: string, url: string, proxyCredentia
   });
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect();
-  return http2.connect(url, {
+  const client = http2.connect(url, {
     createConnection: () => tlsConnection.socket,
   });
+  Helpers.onClose(async () => client.close());
+  return client;
 }

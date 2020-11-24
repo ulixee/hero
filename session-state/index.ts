@@ -1,25 +1,29 @@
-import fs from "fs";
-import { IRequestSessionRequestEvent, IRequestSessionResponseEvent } from "@secret-agent/mitm/handlers/RequestSession";
-import IWebsocketMessage from "@secret-agent/core-interfaces/IWebsocketMessage";
-import IResourceMeta from "@secret-agent/core-interfaces/IResourceMeta";
-import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
-import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
-import Log, {  ILogEntry, LogEvents } from "@secret-agent/commons/Logger";
-import { IDomChangeEvent } from "@secret-agent/injected-scripts/interfaces/IDomChangeEvent";
-import { LocationStatus } from "@secret-agent/core-interfaces/Location";
-import IViewport from "@secret-agent/core-interfaces/IViewport";
-import INavigation from "@secret-agent/core-interfaces/INavigation";
-import { IMouseEvent } from "@secret-agent/injected-scripts/interfaces/IMouseEvent";
-import { IFocusEvent } from "@secret-agent/injected-scripts/interfaces/IFocusEvent";
-import { IScrollEvent } from "@secret-agent/injected-scripts/interfaces/IScrollEvent";
-import IScriptInstanceMeta from "@secret-agent/core-interfaces/IScriptInstanceMeta";
-import IWebsocketResourceMessage from "@secret-agent/core-interfaces/IWebsocketResourceMessage";
-import type { IPuppetContextEvents } from "@secret-agent/puppet-interfaces/IPuppetContext";
-import ResourceState from "@secret-agent/mitm/interfaces/ResourceState";
-import TabNavigations from "./lib/TabNavigations";
-import { IFrameRecord } from "./models/FramesTable";
-import SessionsDb from "./lib/SessionsDb";
-import SessionDb from "./lib/SessionDb";
+import fs from 'fs';
+import {
+  IRequestSessionRequestEvent,
+  IRequestSessionResponseEvent,
+  ISocketEvent,
+} from '@secret-agent/mitm/handlers/RequestSession';
+import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
+import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
+import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
+import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import INavigation from '@secret-agent/core-interfaces/INavigation';
+import { IMouseEvent } from '@secret-agent/injected-scripts/interfaces/IMouseEvent';
+import { IFocusEvent } from '@secret-agent/injected-scripts/interfaces/IFocusEvent';
+import { IScrollEvent } from '@secret-agent/injected-scripts/interfaces/IScrollEvent';
+import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
+import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
+import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
+import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
+import TabNavigations from './lib/TabNavigations';
+import { IFrameRecord } from './models/FramesTable';
+import SessionsDb from './lib/SessionsDb';
+import SessionDb from './lib/SessionDb';
 
 const { log } = Log(module);
 
@@ -49,7 +53,10 @@ export default class SessionState {
 
   private readonly logger: IBoundLog;
 
-  private readonly browserRequestIdToResources: { [browserRequestId: string]: { resourceId: number; url:string }[] } = {};
+  private readonly browserRequestIdToResources: {
+    [browserRequestId: string]: { resourceId: number; url: string }[];
+  } = {};
+
   private lastErrorTime?: Date;
   private closeDate?: Date;
 
@@ -173,7 +180,7 @@ export default class SessionState {
       return;
     }
 
-    const finalRedirect = resources[resources.length-1];
+    const finalRedirect = resources[resources.length - 1];
 
     const resourceMessage = {
       resourceId: finalRedirect.resourceId,
@@ -195,10 +202,14 @@ export default class SessionState {
   }
 
   public captureResourceState(id: number, state: Map<ResourceState, Date>) {
-    this.db.resourceStates.insert(id, state)
+    this.db.resourceStates.insert(id, state);
   }
 
-  public captureResourceError(tabId: string, resourceEvent: IRequestSessionResponseEvent, error: Error) {
+  public captureResourceError(
+    tabId: string,
+    resourceEvent: IRequestSessionResponseEvent,
+    error: Error,
+  ) {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
   }
@@ -223,8 +234,10 @@ export default class SessionState {
     return resource;
   }
 
-
-  public resourceEventToMeta(tabId: string, resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent) {
+  public resourceEventToMeta(
+    tabId: string,
+    resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
+  ) {
     const {
       request,
       response,
@@ -240,7 +253,7 @@ export default class SessionState {
       }
       this.browserRequestIdToResources[browserRequestId].push({
         resourceId: resourceEvent.id,
-        url: request.url
+        url: request.url,
       });
     }
 
@@ -280,7 +293,11 @@ export default class SessionState {
 
   ///////   FRAMES ///////
 
-  public captureFrameCreated(tabId: string, createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>, domNodeId: number ) {
+  public captureFrameCreated(
+    tabId: string,
+    createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
+    domNodeId: number,
+  ) {
     const frame = {
       id: createdFrame.id,
       tabId,
@@ -295,8 +312,14 @@ export default class SessionState {
     this.db.frames.insert(frame);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public captureSubFrameNavigated(tabId: string, frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & { navigationReason?: string}, navigatedInDocument: boolean) {
+  public captureSubFrameNavigated(
+    tabId: string,
+    frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & {
+      navigationReason?: string;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    navigatedInDocument: boolean,
+  ) {
     const existing = this.frames[frame.id];
     if (existing) {
       existing.name = frame.name;
@@ -318,7 +341,7 @@ export default class SessionState {
     message: string,
     location?: string,
   ) {
-    if (message.match(/error/ig)) {
+    if (message.match(/error/gi)) {
       this.logger.error('Window.error', { message });
     } else {
       this.logger.info('Window.console', { message });
@@ -388,10 +411,7 @@ export default class SessionState {
     };
   }
 
-  public async getMainFrameDomChanges(
-    frameLifecycles: INavigation[],
-    sinceCommandId?: number,
-  ) {
+  public async getMainFrameDomChanges(frameLifecycles: INavigation[], sinceCommandId?: number) {
     return this.db.getDomChanges(
       frameLifecycles.map(x => x.frameId),
       sinceCommandId,
@@ -455,8 +475,16 @@ export default class SessionState {
     this.db.devtoolsMessages.insert(event);
   }
 
-  public captureTab(tabId: string, pageId: string, devtoolsSessionId: string, openerTabId?: string, ) {
+  public captureTab(
+    tabId: string,
+    pageId: string,
+    devtoolsSessionId: string,
+    openerTabId?: string,
+  ) {
     this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
   }
 
+  public captureSocketEvent(socketEvent: ISocketEvent) {
+    this.db.sockets.insert(socketEvent.socket);
+  }
 }

@@ -156,6 +156,7 @@ export default class MitmRequestContext {
       localAddress: ctx.localAddress,
       dnsResolvedIp: ctx.dnsResolvedIp,
       originalHeaders: ctx.requestOriginalHeaders,
+      socketId: ctx.proxyToServerMitmSocket?.id,
       clientAlpn: ctx.clientAlpn,
       serverAlpn: ctx.proxyToServerMitmSocket?.alpn,
       didBlockResource: ctx.didBlockResource,

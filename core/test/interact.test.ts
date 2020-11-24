@@ -11,7 +11,7 @@ beforeAll(async () => {
   HumanEmulatorGhost.maxScrollDelayMillis = 0;
   koaServer = await Helpers.runKoaServer();
 });
-afterAll(Helpers.afterAll);
+afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach);
 
 describe.each([['ghost'], ['basic'], ['skipper']])(
@@ -32,6 +32,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       });
       const meta = await Core.createTab({ humanEmulatorId });
       const core = Core.byTabId[meta.tabId];
+      Helpers.needsClosing.push(core);
       // @ts-ignore
       const session = core.session;
       await core.goto(`${koaServer.baseUrl}/mouse`);
@@ -70,6 +71,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       });
       const meta = await Core.createTab({ humanEmulatorId });
       const core = Core.byTabId[meta.tabId];
+      Helpers.needsClosing.push(core);
 
       await core.goto(`${koaServer.baseUrl}/input`);
       await core.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
@@ -114,6 +116,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       });
       const meta = await Core.createTab({ humanEmulatorId });
       const core = Core.byTabId[meta.tabId];
+      Helpers.needsClosing.push(core);
       await core.goto(`${koaServer.baseUrl}/longpage`);
 
       const click = async (selector: string) => {
