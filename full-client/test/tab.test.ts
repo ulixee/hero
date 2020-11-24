@@ -53,7 +53,7 @@ describe('Multi-tab scenarios', () => {
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
     const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.userAgent.raw);
+    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -155,7 +155,7 @@ describe('Multi-tab scenarios', () => {
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
     const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.userAgent.raw);
+    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -207,7 +207,7 @@ document.querySelector('a').addEventListener('click', event => {
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
     const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.userAgent.raw);
+    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
 
     await agent.closeTab(newTab);
   });

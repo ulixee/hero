@@ -133,10 +133,10 @@ const polyfill = args.polyfill;
 const { prevProperty, property } = polyfill;
 if (args.updateLoadTimes) {
   for (const [name, func] of Object.entries(loadTimeConversion)) {
-    property.loadTimes['new()'][name]['_value()'] = func;
+    property.loadTimes['new()'][name]['_$$value()'] = func;
   }
   for (const [name, func] of Object.entries(csiConversion)) {
-    property.csi['new()'][name]['_value()'] = func;
+    property.csi['new()'][name]['_$$value()'] = func;
   }
 }
 const descriptor = buildDescriptor(property);

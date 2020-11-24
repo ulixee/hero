@@ -1,10 +1,10 @@
 import INetworkInterceptorDelegate from './INetworkInterceptorDelegate';
 import IUserProfile from './IUserProfile';
-import IUserAgent from './IUserAgent';
 import INewDocumentInjectedScript from './INewDocumentInjectedScript';
 
 export default interface IBrowserEmulator {
-  readonly userAgent: IUserAgent;
+  readonly navigatorUserAgent: string;
+  readonly navigatorPlatform: string;
   readonly canPolyfill: boolean;
   readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   locale: string;

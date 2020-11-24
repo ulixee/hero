@@ -52,10 +52,10 @@ test('should be able to override a function', async () => {
   if (debug) console.log(inspect(afterHierarchy, false, null, true));
 
   expect(win.holder.tester.doSomeWork('oh')).toBe('oh nope yep');
-  expect(afterHierarchy.TestClass.prototype.doSomeWork._invocation).toBe('undefined nope yep');
+  expect(afterHierarchy.TestClass.prototype.doSomeWork._$invocation).toBe('undefined nope yep');
   // these 2 will now be different in the structure
-  delete hierarchy.TestClass.prototype.doSomeWork._invocation;
-  delete afterHierarchy.TestClass.prototype.doSomeWork._invocation;
+  delete hierarchy.TestClass.prototype.doSomeWork._$invocation;
+  delete afterHierarchy.TestClass.prototype.doSomeWork._$invocation;
   expect(hierarchy).toStrictEqual(afterHierarchy);
 });
 

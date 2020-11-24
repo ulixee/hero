@@ -5,11 +5,9 @@ import {
   DomOverridesBuilder,
   getEngineExecutablePath,
   getTcpSettingsForOs,
-  IUserAgent,
   modifyHeaders,
   parseNavigatorPlugins,
-  StatcounterBrowserUsage,
-  UserAgents,
+  DataLoader,
 } from '@secret-agent/emulate-browsers-base';
 import {
   canonicalDomain,
@@ -20,6 +18,7 @@ import {
   permuteDomain,
 } from 'tough-cookie';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
+import IUserAgentOption from '@secret-agent/emulate-browsers-base/interfaces/IUserAgentOption';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
@@ -27,29 +26,27 @@ import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
-import defaultAgents from './data/user-agents.json';
-import codecs from './data/codecs.json';
-import frame from './data/frame.json';
-import navigator from './data/navigator.json';
+import userAgentOptions from './data/user-agent-options.json';
 
-// NOTE: runs on Chrome83 since we don't support webkit yet
-const agents = UserAgents.getSupportedAgents('Chrome', 83, defaultAgents);
+const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
+const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');
+const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
+
 const cookieCallbackName = 'SecretAgentSetCookie';
 
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
   public static id = pkg.name;
-  public static roundRobinPercent = StatcounterBrowserUsage.getConsumerUsageForBrowser(
-    'Safari 13.1',
-  );
+  public static roundRobinPercent = 0; // TODO: Import from json
 
   public static engine = {
     ...pkg.engine,
     executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
   };
 
-  public readonly userAgent: IUserAgent;
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
+
+  public canPolyfill: boolean = false;
 
   public set locale(value: string) {
     this._locale = value;
@@ -59,6 +56,9 @@ export default class Safari13 {
   public get locale() {
     return this._locale;
   }
+
+  public readonly navigatorUserAgent: string;
+  public readonly navigatorPlatform: string;
 
   public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
@@ -71,10 +71,6 @@ export default class Safari13 {
   public cookiesPendingSiteInteraction: {
     [site: string]: { cookie: Cookie; sourceUrl: string; sameSiteContext: SameSiteContext }[];
   } = {};
-
-  public get canPolyfill() {
-    return false;
-  }
 
   public get userProfile(): IUserProfile {
     return this._userProfile;
@@ -93,25 +89,39 @@ export default class Safari13 {
   private _locale = 'en-US';
   private hasCustomLocale = false;
 
+  private userAgentVersion: { major: string; minor: string; patch?: string };
+
   private readonly userInteractionTrigger: {
     [site: string]: IResolvablePromise;
   } = {};
 
-  constructor(userAgent?: IUserAgent) {
-    this.userAgent = userAgent ?? pickRandom(agents);
+  constructor() {
+    const userAgentOption = pickRandom(
+      (this.constructor as any).userAgentOptions as IUserAgentOption[],
+    );
+    const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
+    this.navigatorPlatform = windowNavigator.navigator.platform._$value;
+    this.navigatorUserAgent = userAgentOption.string;
+    this.userAgentVersion = userAgentOption.version;
+
     this.networkInterceptorDelegate = {
-      tcp: getTcpSettingsForOs(this.userAgent.os),
+      tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
       tls: {
         emulatorProfileId: 'Safari13',
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
+        requestHeaders: modifyHeaders.bind(
+          this,
+          userAgentOption.string,
+          headerProfiles,
+          this.hasCustomLocale,
+        ),
         cookieHeader: this.getCookieHeader.bind(this),
         onSetCookie: this.setCookie.bind(this),
         onOriginHasFirstPartyInteraction: this.documentHasUserActivity.bind(this),
       },
     };
-    this.loadDomOverrides();
+    this.loadDomOverrides(userAgentOption.operatingSystemId);
   }
 
   public async newDocumentInjectedScripts() {
@@ -125,7 +135,7 @@ export default class Safari13 {
     return result;
   }
 
-  protected loadDomOverrides() {
+  protected loadDomOverrides(operatingSystemId: string) {
     const domOverrides = this.domOverrides;
     domOverrides.add('Error.captureStackTrace');
     domOverrides.add('Error.constructor');
@@ -145,7 +155,8 @@ export default class Safari13 {
     domOverrides.add('Notification.permission');
     domOverrides.add('Permission.prototype.query');
 
-    domOverrides.add('navigator.plugins', parseNavigatorPlugins(navigator.navigator));
+    const windowNavigator = windowNavigatorData.get(operatingSystemId);
+    domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
     domOverrides.add('WebGLRenderingContext.prototype.getParameter', {
       // UNMASKED_VENDOR_WEBGL
       37445: 'Intel Inc.',
@@ -158,14 +169,15 @@ export default class Safari13 {
 
     domOverrides.add('window.outerWidth');
 
-    const windowFrame = this.getFrameHeight();
+    const windowFraming = windowFramingData.get(operatingSystemId);
+    const windowFrame = windowFraming.height;
     if (windowFrame) {
       domOverrides.add('window.outerHeight', {
         windowFrame,
       });
     }
 
-    const agentCodecs = this.getCodecs();
+    const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {
       domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
         audioCodecs: agentCodecs.audioSupport,
@@ -185,22 +197,6 @@ export default class Safari13 {
     domOverrides.add('Document.prototype.cookie', {
       callbackName: cookieCallbackName,
     });
-  }
-
-  private getFrameHeight() {
-    const os = this.userAgent.os;
-    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
-    return frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
-  }
-
-  private getCodecs() {
-    const os = this.userAgent.os;
-    let osCodecs = codecs.find(x => x.opSyses.includes(`${os.family} ${os.major}`));
-    if (!osCodecs) {
-      // just match on os
-      osCodecs = codecs.find(x => x.opSyses.some(y => y.includes(os.family)));
-    }
-    return osCodecs?.profile;
   }
 
   private loadProfileCookies() {
@@ -370,7 +366,13 @@ export default class Safari13 {
   }
 
   private isMinimumVersion(minor: number, patch = 0) {
-    return this.userAgent.version.minor >= minor && this.userAgent.version.patch >= patch;
+    return (
+      Number(this.userAgentVersion.minor) >= minor && Number(this.userAgentVersion.patch) >= patch
+    );
+  }
+
+  public static get userAgentOptions() {
+    return userAgentOptions;
   }
 }
 

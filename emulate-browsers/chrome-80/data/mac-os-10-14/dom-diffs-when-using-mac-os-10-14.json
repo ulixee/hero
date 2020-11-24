@@ -1,0 +1,177 @@
+{
+  "removals": [],
+  "additions": [
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "getInstalledRelatedApps",
+      "prevProperty": "requestMediaKeySystemAccess",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": ""
+        },
+        "_$type": "function",
+        "_$function": "function () { [native code] }",
+        "_$invocation": "TypeError: Failed to execute 'getInstalledRelatedApps' on 'Navigator': Illegal invocation",
+        "_$flags": [
+          "c",
+          "e",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "getVideoPlaybackQuality",
+      "prevProperty": "onleavepictureinpicture",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "getVideoPlaybackQuality"
+        },
+        "_$type": "function",
+        "_$function": "function getVideoPlaybackQuality() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": [
+          "c",
+          "e",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "VideoPlaybackQuality",
+      "prevProperty": "OffscreenCanvasRenderingContext2D",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "VideoPlaybackQuality"
+        },
+        "arguments": {
+          "_$type": "object",
+          "_$flags": [],
+          "_$value": null
+        },
+        "caller": {
+          "_$type": "object",
+          "_$flags": [],
+          "_$value": null
+        },
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "creationTime": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get creationTime() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "totalVideoFrames": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get totalVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "droppedVideoFrames": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get droppedVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "corruptedVideoFrames": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get corruptedVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": [
+              "c"
+            ],
+            "_$value": "VideoPlaybackQuality"
+          },
+          "_$type": "object",
+          "_$flags": []
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function VideoPlaybackQuality() { [native code] }",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    }
+  ],
+  "order": [],
+  "changes": [
+    {
+      "path": "window.webkitMediaStream.new().id",
+      "propertyName": "_$value",
+      "property": "49e9ade4-99c6-4b15-a35b-593b7ae1bf23"
+    },
+    {
+      "path": "window.document.readyState",
+      "propertyName": "_$value",
+      "property": "complete"
+    },
+    {
+      "path": "window.navigator.hardwareConcurrency",
+      "propertyName": "_$value",
+      "property": 4
+    },
+    {
+      "path": "window.navigator.connection.rtt",
+      "propertyName": "_$value",
+      "property": 100
+    }
+  ]
+}

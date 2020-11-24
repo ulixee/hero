@@ -1,0 +1,4439 @@
+{
+  "removals": [
+    "window.document.documentElement.style.scrollBehavior",
+    "window.document.documentElement.style.textOrientation",
+    "window.document.documentElement.ownerDocument.body.accessKeyLabel",
+    "window.document.documentElement.ownerDocument.head.accessKeyLabel",
+    "window.document.documentElement.accessKeyLabel",
+    "window.navigator.plugins.0.application/pdf",
+    "window.navigator.plugins.0.application/postscript",
+    "window.navigator.plugins.0.text/pdf",
+    "window.GestureEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitPlaybackTargetAvailabilityEvent.prototype[Symbol.toStringTag]",
+    "window.ApplePayError.prototype[Symbol.toStringTag]",
+    "window.Geolocation.prototype[Symbol.toStringTag]",
+    "window.GeolocationCoordinates.prototype[Symbol.toStringTag]",
+    "window.GeolocationPosition.prototype[Symbol.toStringTag]",
+    "window.GeolocationPositionError.prototype[Symbol.toStringTag]",
+    "window.IDBCursor.prototype[Symbol.toStringTag]",
+    "window.IDBCursorWithValue.prototype[Symbol.toStringTag]",
+    "window.IDBDatabase.prototype[Symbol.toStringTag]",
+    "window.IDBFactory.prototype.databases",
+    "window.IDBFactory.prototype[Symbol.toStringTag]",
+    "window.IDBIndex.prototype[Symbol.toStringTag]",
+    "window.IDBKeyRange.prototype[Symbol.toStringTag]",
+    "window.IDBObjectStore.prototype[Symbol.toStringTag]",
+    "window.IDBOpenDBRequest.prototype[Symbol.toStringTag]",
+    "window.IDBRequest.prototype[Symbol.toStringTag]",
+    "window.IDBTransaction.prototype[Symbol.toStringTag]",
+    "window.IDBVersionChangeEvent.prototype[Symbol.toStringTag]",
+    "window.SourceBuffer.prototype[Symbol.toStringTag]",
+    "window.SourceBufferList.prototype[Symbol.toStringTag]",
+    "window.CanvasCaptureMediaStreamTrack.prototype[Symbol.toStringTag]",
+    "window.MediaDeviceInfo.prototype[Symbol.toStringTag]",
+    "window.MediaStream.prototype[Symbol.toStringTag]",
+    "window.MediaStreamTrack.prototype[Symbol.toStringTag]",
+    "window.MediaStreamTrackEvent.prototype[Symbol.toStringTag]",
+    "window.OverconstrainedError.prototype[Symbol.toStringTag]",
+    "window.OverconstrainedErrorEvent.prototype[Symbol.toStringTag]",
+    "window.Notification.prototype[Symbol.toStringTag]",
+    "window.SpeechSynthesisEvent.prototype[Symbol.toStringTag]",
+    "window.SpeechSynthesisUtterance.prototype[Symbol.toStringTag]",
+    "window.ByteLengthQueuingStrategy.prototype[Symbol.toStringTag]",
+    "window.CountQueuingStrategy.prototype[Symbol.toStringTag]",
+    "window.ReadableStream.prototype[Symbol.toStringTag]",
+    "window.AnalyserNode.prototype[Symbol.toStringTag]",
+    "window.AudioBuffer.prototype[Symbol.toStringTag]",
+    "window.AudioBufferSourceNode.prototype[Symbol.toStringTag]",
+    "window.AudioDestinationNode.prototype[Symbol.toStringTag]",
+    "window.AudioListener.prototype[Symbol.toStringTag]",
+    "window.AudioNode.prototype[Symbol.toStringTag]",
+    "window.AudioParam.prototype[Symbol.toStringTag]",
+    "window.AudioProcessingEvent.prototype[Symbol.toStringTag]",
+    "window.BiquadFilterNode.prototype[Symbol.toStringTag]",
+    "window.ChannelMergerNode.prototype[Symbol.toStringTag]",
+    "window.ChannelSplitterNode.prototype[Symbol.toStringTag]",
+    "window.ConvolverNode.prototype[Symbol.toStringTag]",
+    "window.DelayNode.prototype[Symbol.toStringTag]",
+    "window.DynamicsCompressorNode.prototype[Symbol.toStringTag]",
+    "window.GainNode.prototype[Symbol.toStringTag]",
+    "window.MediaElementAudioSourceNode.prototype[Symbol.toStringTag]",
+    "window.MediaStreamAudioDestinationNode.prototype[Symbol.toStringTag]",
+    "window.MediaStreamAudioSourceNode.prototype[Symbol.toStringTag]",
+    "window.OfflineAudioCompletionEvent.prototype[Symbol.toStringTag]",
+    "window.webkitOfflineAudioContext.prototype[Symbol.toStringTag]",
+    "window.webkitAudioPannerNode.prototype[Symbol.toStringTag]",
+    "window.PeriodicWave.prototype[Symbol.toStringTag]",
+    "window.ScriptProcessorNode.prototype[Symbol.toStringTag]",
+    "window.WaveShaperNode.prototype[Symbol.toStringTag]",
+    "window.SQLTransaction.prototype[Symbol.toStringTag]",
+    "window.CloseEvent.prototype[Symbol.toStringTag]",
+    "window.CryptoKey.prototype[Symbol.toStringTag]",
+    "window.SubtleCrypto.prototype[Symbol.toStringTag]",
+    "window.CSSFontFaceRule.prototype[Symbol.toStringTag]",
+    "window.CSSImportRule.prototype[Symbol.toStringTag]",
+    "window.CSSKeyframeRule.prototype[Symbol.toStringTag]",
+    "window.CSSKeyframesRule.prototype[Symbol.toStringTag]",
+    "window.CSSMediaRule.prototype[Symbol.toStringTag]",
+    "window.CSSNamespaceRule.prototype[Symbol.toStringTag]",
+    "window.CSSPageRule.prototype[Symbol.toStringTag]",
+    "window.CSSRule.prototype[Symbol.toStringTag]",
+    "window.CSSRuleList.prototype[Symbol.toStringTag]",
+    "window.CSSStyleDeclaration.prototype[Symbol.toStringTag]",
+    "window.CSSStyleRule.prototype[Symbol.toStringTag]",
+    "window.CSSStyleSheet.prototype[Symbol.toStringTag]",
+    "window.CSSSupportsRule.prototype[Symbol.toStringTag]",
+    "window.CSS.prototype[Symbol.toStringTag]",
+    "window.DOMMatrix.prototype[Symbol.toStringTag]",
+    "window.DOMMatrixReadOnly.prototype[Symbol.toStringTag]",
+    "window.Counter.prototype[Symbol.toStringTag]",
+    "window.CSSPrimitiveValue.prototype[Symbol.toStringTag]",
+    "window.RGBColor.prototype[Symbol.toStringTag]",
+    "window.Rect.prototype[Symbol.toStringTag]",
+    "window.CSSValue.prototype[Symbol.toStringTag]",
+    "window.CSSValueList.prototype[Symbol.toStringTag]",
+    "window.FontFace.prototype[Symbol.toStringTag]",
+    "window.FontFaceSet.prototype[Symbol.toStringTag]",
+    "window.MediaList.prototype[Symbol.toStringTag]",
+    "window.StyleSheet.prototype[Symbol.toStringTag]",
+    "window.StyleSheetList.prototype[Symbol.toStringTag]",
+    "window.WebKitCSSMatrix.prototype[Symbol.toStringTag]",
+    "window.AbortController.prototype[Symbol.toStringTag]",
+    "window.AbortSignal.prototype[Symbol.toStringTag]",
+    "window.AnimationEvent.prototype[Symbol.toStringTag]",
+    "window.Attr.prototype[Symbol.toStringTag]",
+    "window.BeforeUnloadEvent.prototype[Symbol.toStringTag]",
+    "window.CDATASection.prototype[Symbol.toStringTag]",
+    "window.CharacterData.prototype[Symbol.toStringTag]",
+    "window.ClipboardEvent.prototype[Symbol.toStringTag]",
+    "window.Comment.prototype[Symbol.toStringTag]",
+    "window.CompositionEvent.prototype[Symbol.toStringTag]",
+    "window.CustomEvent.prototype[Symbol.toStringTag]",
+    "window.DOMException.prototype[Symbol.toStringTag]",
+    "window.DOMImplementation.prototype[Symbol.toStringTag]",
+    "window.DOMPoint.prototype[Symbol.toStringTag]",
+    "window.DOMPointReadOnly.prototype[Symbol.toStringTag]",
+    "window.DOMQuad.prototype[Symbol.toStringTag]",
+    "window.DOMRect.prototype[Symbol.toStringTag]",
+    "window.DOMRectList.prototype[Symbol.toStringTag]",
+    "window.DOMRectReadOnly.prototype[Symbol.toStringTag]",
+    "window.DOMStringList.prototype[Symbol.toStringTag]",
+    "window.DOMStringMap.prototype[Symbol.toStringTag]",
+    "window.DataTransfer.prototype[Symbol.toStringTag]",
+    "window.Document.prototype.onwebkitanimationend",
+    "window.Document.prototype.onwebkitanimationiteration",
+    "window.Document.prototype.onwebkitanimationstart",
+    "window.Document.prototype.onwebkittransitionend",
+    "window.Document.prototype[Symbol.toStringTag]",
+    "window.DocumentFragment.prototype[Symbol.toStringTag]",
+    "window.DocumentType.prototype[Symbol.toStringTag]",
+    "window.Element.prototype[Symbol.toStringTag]",
+    "window.ErrorEvent.prototype[Symbol.toStringTag]",
+    "window.Event.prototype[Symbol.toStringTag]",
+    "window.EventTarget.prototype[Symbol.toStringTag]",
+    "window.FocusEvent.prototype[Symbol.toStringTag]",
+    "window.HashChangeEvent.prototype[Symbol.toStringTag]",
+    "window.KeyboardEvent.prototype[Symbol.toStringTag]",
+    "window.MessageChannel.prototype[Symbol.toStringTag]",
+    "window.MessageEvent.prototype[Symbol.toStringTag]",
+    "window.MessagePort.prototype[Symbol.toStringTag]",
+    "window.MouseEvent.prototype[Symbol.toStringTag]",
+    "window.MutationEvent.prototype[Symbol.toStringTag]",
+    "window.MutationObserver.prototype[Symbol.toStringTag]",
+    "window.MutationRecord.prototype[Symbol.toStringTag]",
+    "window.NamedNodeMap.prototype[Symbol.toStringTag]",
+    "window.Node.prototype[Symbol.toStringTag]",
+    "window.NodeIterator.prototype[Symbol.toStringTag]",
+    "window.NodeList.prototype[Symbol.toStringTag]",
+    "window.OverflowEvent.prototype[Symbol.toStringTag]",
+    "window.PageTransitionEvent.prototype[Symbol.toStringTag]",
+    "window.PopStateEvent.prototype[Symbol.toStringTag]",
+    "window.ProcessingInstruction.prototype[Symbol.toStringTag]",
+    "window.ProgressEvent.prototype[Symbol.toStringTag]",
+    "window.PromiseRejectionEvent.prototype[Symbol.toStringTag]",
+    "window.Range.prototype[Symbol.toStringTag]",
+    "window.SecurityPolicyViolationEvent.prototype[Symbol.toStringTag]",
+    "window.Text.prototype[Symbol.toStringTag]",
+    "window.TextDecoder.prototype[Symbol.toStringTag]",
+    "window.TextEncoder.prototype[Symbol.toStringTag]",
+    "window.TextEvent.prototype[Symbol.toStringTag]",
+    "window.TransitionEvent.prototype[Symbol.toStringTag]",
+    "window.TreeWalker.prototype[Symbol.toStringTag]",
+    "window.UIEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitAnimationEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitTransitionEvent.prototype[Symbol.toStringTag]",
+    "window.WheelEvent.prototype[Symbol.toStringTag]",
+    "window.XMLDocument.prototype[Symbol.toStringTag]",
+    "window.Blob.prototype[Symbol.toStringTag]",
+    "window.File.prototype[Symbol.toStringTag]",
+    "window.FileList.prototype[Symbol.toStringTag]",
+    "window.FileReader.prototype[Symbol.toStringTag]",
+    "window.FormData.prototype[Symbol.toStringTag]",
+    "window.DOMTokenList.prototype[Symbol.toStringTag]",
+    "window.URL.prototype[Symbol.toStringTag]",
+    "window.HTMLAllCollection.prototype[Symbol.toStringTag]",
+    "window.HTMLAnchorElement.prototype.referrerPolicy",
+    "window.HTMLAnchorElement.prototype[Symbol.toStringTag]",
+    "window.HTMLAppletElement.prototype[Symbol.toStringTag]",
+    "window.HTMLAreaElement.prototype[Symbol.toStringTag]",
+    "window.HTMLAudioElement.prototype[Symbol.toStringTag]",
+    "window.HTMLBRElement.prototype[Symbol.toStringTag]",
+    "window.HTMLBaseElement.prototype[Symbol.toStringTag]",
+    "window.HTMLBodyElement.prototype[Symbol.toStringTag]",
+    "window.HTMLButtonElement.prototype[Symbol.toStringTag]",
+    "window.HTMLCanvasElement.prototype[Symbol.toStringTag]",
+    "window.HTMLCollection.prototype[Symbol.toStringTag]",
+    "window.HTMLDListElement.prototype[Symbol.toStringTag]",
+    "window.HTMLDataElement.prototype[Symbol.toStringTag]",
+    "window.HTMLDetailsElement.prototype[Symbol.toStringTag]",
+    "window.HTMLDirectoryElement.prototype[Symbol.toStringTag]",
+    "window.HTMLDivElement.prototype[Symbol.toStringTag]",
+    "window.HTMLDocument.prototype[Symbol.toStringTag]",
+    "window.HTMLElement.prototype.accessKeyLabel",
+    "window.HTMLElement.prototype[Symbol.toStringTag]",
+    "window.HTMLEmbedElement.prototype[Symbol.toStringTag]",
+    "window.HTMLFieldSetElement.prototype[Symbol.toStringTag]",
+    "window.HTMLFontElement.prototype[Symbol.toStringTag]",
+    "window.HTMLFormControlsCollection.prototype[Symbol.toStringTag]",
+    "window.HTMLFormElement.prototype[Symbol.toStringTag]",
+    "window.HTMLFrameElement.prototype[Symbol.toStringTag]",
+    "window.HTMLFrameSetElement.prototype[Symbol.toStringTag]",
+    "window.HTMLHRElement.prototype[Symbol.toStringTag]",
+    "window.HTMLHeadElement.prototype[Symbol.toStringTag]",
+    "window.HTMLHeadingElement.prototype[Symbol.toStringTag]",
+    "window.HTMLHtmlElement.prototype[Symbol.toStringTag]",
+    "window.HTMLIFrameElement.prototype.referrerPolicy",
+    "window.HTMLIFrameElement.prototype[Symbol.toStringTag]",
+    "window.HTMLImageElement.prototype.referrerPolicy",
+    "window.HTMLImageElement.prototype[Symbol.toStringTag]",
+    "window.HTMLInputElement.prototype[Symbol.toStringTag]",
+    "window.HTMLLIElement.prototype[Symbol.toStringTag]",
+    "window.HTMLLabelElement.prototype[Symbol.toStringTag]",
+    "window.HTMLLegendElement.prototype[Symbol.toStringTag]",
+    "window.HTMLLinkElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMapElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMarqueeElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMediaElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMenuElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMetaElement.prototype[Symbol.toStringTag]",
+    "window.HTMLMeterElement.prototype[Symbol.toStringTag]",
+    "window.HTMLModElement.prototype[Symbol.toStringTag]",
+    "window.HTMLOListElement.prototype[Symbol.toStringTag]",
+    "window.HTMLObjectElement.prototype[Symbol.toStringTag]",
+    "window.HTMLOptGroupElement.prototype[Symbol.toStringTag]",
+    "window.HTMLOptionElement.prototype[Symbol.toStringTag]",
+    "window.HTMLOptionsCollection.prototype[Symbol.toStringTag]",
+    "window.HTMLOutputElement.prototype[Symbol.toStringTag]",
+    "window.HTMLParagraphElement.prototype[Symbol.toStringTag]",
+    "window.HTMLParamElement.prototype[Symbol.toStringTag]",
+    "window.HTMLPictureElement.prototype[Symbol.toStringTag]",
+    "window.HTMLPreElement.prototype[Symbol.toStringTag]",
+    "window.HTMLProgressElement.prototype[Symbol.toStringTag]",
+    "window.HTMLQuoteElement.prototype[Symbol.toStringTag]",
+    "window.HTMLScriptElement.prototype.referrerPolicy",
+    "window.HTMLScriptElement.prototype[Symbol.toStringTag]",
+    "window.HTMLSelectElement.prototype[Symbol.toStringTag]",
+    "window.HTMLSourceElement.prototype[Symbol.toStringTag]",
+    "window.HTMLSpanElement.prototype[Symbol.toStringTag]",
+    "window.HTMLStyleElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableCaptionElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableCellElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableColElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableRowElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTableSectionElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTemplateElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTextAreaElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTimeElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTitleElement.prototype[Symbol.toStringTag]",
+    "window.HTMLTrackElement.prototype[Symbol.toStringTag]",
+    "window.HTMLUListElement.prototype[Symbol.toStringTag]",
+    "window.HTMLUnknownElement.prototype[Symbol.toStringTag]",
+    "window.HTMLVideoElement.prototype[Symbol.toStringTag]",
+    "window.ImageData.prototype[Symbol.toStringTag]",
+    "window.MediaController.prototype[Symbol.toStringTag]",
+    "window.MediaError.prototype[Symbol.toStringTag]",
+    "window.RadioNodeList.prototype[Symbol.toStringTag]",
+    "window.TextMetrics.prototype[Symbol.toStringTag]",
+    "window.TimeRanges.prototype[Symbol.toStringTag]",
+    "window.URLSearchParams.prototype[Symbol.toStringTag]",
+    "window.ValidityState.prototype[Symbol.toStringTag]",
+    "window.CanvasGradient.prototype[Symbol.toStringTag]",
+    "window.CanvasPattern.prototype[Symbol.toStringTag]",
+    "window.CanvasRenderingContext2D.prototype[Symbol.toStringTag]",
+    "window.Path2D.prototype[Symbol.toStringTag]",
+    "window.WebGLActiveInfo.prototype[Symbol.toStringTag]",
+    "window.WebGLBuffer.prototype[Symbol.toStringTag]",
+    "window.WebGLContextEvent.prototype[Symbol.toStringTag]",
+    "window.WebGLFramebuffer.prototype[Symbol.toStringTag]",
+    "window.WebGLProgram.prototype[Symbol.toStringTag]",
+    "window.WebGLQuery.prototype[Symbol.toStringTag]",
+    "window.WebGLRenderbuffer.prototype[Symbol.toStringTag]",
+    "window.WebGLRenderingContext.prototype[Symbol.toStringTag]",
+    "window.WebGLSampler.prototype[Symbol.toStringTag]",
+    "window.WebGLShader.prototype[Symbol.toStringTag]",
+    "window.WebGLShaderPrecisionFormat.prototype[Symbol.toStringTag]",
+    "window.WebGLSync.prototype[Symbol.toStringTag]",
+    "window.WebGLTexture.prototype[Symbol.toStringTag]",
+    "window.WebGLUniformLocation.prototype[Symbol.toStringTag]",
+    "window.AudioTrack.prototype[Symbol.toStringTag]",
+    "window.AudioTrackList.prototype[Symbol.toStringTag]",
+    "window.DataCue.prototype[Symbol.toStringTag]",
+    "window.TextTrack.prototype[Symbol.toStringTag]",
+    "window.TextTrackCue.prototype[Symbol.toStringTag]",
+    "window.TextTrackCueList.prototype[Symbol.toStringTag]",
+    "window.TextTrackList.prototype[Symbol.toStringTag]",
+    "window.TrackEvent.prototype[Symbol.toStringTag]",
+    "window.VTTCue.prototype[Symbol.toStringTag]",
+    "window.VTTRegion.prototype[Symbol.toStringTag]",
+    "window.VideoTrack.prototype[Symbol.toStringTag]",
+    "window.VideoTrackList.prototype[Symbol.toStringTag]",
+    "window.ApplicationCache.prototype[Symbol.toStringTag]",
+    "window.MathMLElement.prototype.onwebkitanimationend",
+    "window.MathMLElement.prototype.onwebkitanimationiteration",
+    "window.MathMLElement.prototype.onwebkitanimationstart",
+    "window.MathMLElement.prototype.onwebkittransitionend",
+    "window.MathMLElement.prototype[Symbol.toStringTag]",
+    "window.MathMLMathElement.prototype[Symbol.toStringTag]",
+    "window.BarProp.prototype[Symbol.toStringTag]",
+    "window.Crypto.prototype[Symbol.toStringTag]",
+    "window.Selection.prototype[Symbol.toStringTag]",
+    "window.Window.prototype[Symbol.toStringTag]",
+    "window.EventSource.prototype[Symbol.toStringTag]",
+    "window.History.prototype[Symbol.toStringTag]",
+    "window.Location.prototype[Symbol.toStringTag]",
+    "window.Navigator.prototype.canShare",
+    "window.Navigator.prototype[Symbol.toStringTag]",
+    "window.Performance.prototype[Symbol.toStringTag]",
+    "window.PerformanceNavigation.prototype[Symbol.toStringTag]",
+    "window.PerformanceTiming.prototype[Symbol.toStringTag]",
+    "window.Screen.prototype[Symbol.toStringTag]",
+    "window.UserMessageHandler.prototype[Symbol.toStringTag]",
+    "window.UserMessageHandlersNamespace.prototype[Symbol.toStringTag]",
+    "window.WebKitNamespace.prototype[Symbol.toStringTag]",
+    "window.WebKitPoint.prototype[Symbol.toStringTag]",
+    "window.MimeType.prototype[Symbol.toStringTag]",
+    "window.MimeTypeArray.prototype[Symbol.toStringTag]",
+    "window.Plugin.prototype[Symbol.toStringTag]",
+    "window.PluginArray.prototype[Symbol.toStringTag]",
+    "window.Storage.prototype[Symbol.toStringTag]",
+    "window.StorageEvent.prototype[Symbol.toStringTag]",
+    "window.SVGAElement.prototype.rel",
+    "window.SVGAElement.prototype.relList",
+    "window.SVGAElement.prototype[Symbol.toStringTag]",
+    "window.SVGAltGlyphDefElement.prototype[Symbol.toStringTag]",
+    "window.SVGAltGlyphElement.prototype[Symbol.toStringTag]",
+    "window.SVGAltGlyphItemElement.prototype[Symbol.toStringTag]",
+    "window.SVGAngle.prototype[Symbol.toStringTag]",
+    "window.SVGAnimateColorElement.prototype[Symbol.toStringTag]",
+    "window.SVGAnimateElement.prototype[Symbol.toStringTag]",
+    "window.SVGAnimateMotionElement.prototype[Symbol.toStringTag]",
+    "window.SVGAnimateTransformElement.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedAngle.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedBoolean.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedEnumeration.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedInteger.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedLength.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedLengthList.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedNumber.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedNumberList.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedPreserveAspectRatio.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedRect.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedString.prototype[Symbol.toStringTag]",
+    "window.SVGAnimatedTransformList.prototype[Symbol.toStringTag]",
+    "window.SVGAnimationElement.prototype[Symbol.toStringTag]",
+    "window.SVGCircleElement.prototype[Symbol.toStringTag]",
+    "window.SVGClipPathElement.prototype[Symbol.toStringTag]",
+    "window.SVGComponentTransferFunctionElement.prototype[Symbol.toStringTag]",
+    "window.SVGCursorElement.prototype[Symbol.toStringTag]",
+    "window.SVGDefsElement.prototype[Symbol.toStringTag]",
+    "window.SVGDescElement.prototype[Symbol.toStringTag]",
+    "window.SVGElement.prototype[Symbol.toStringTag]",
+    "window.SVGEllipseElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEBlendElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEColorMatrixElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEComponentTransferElement.prototype[Symbol.toStringTag]",
+    "window.SVGFECompositeElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEConvolveMatrixElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEDiffuseLightingElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEDisplacementMapElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEDistantLightElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEDropShadowElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEFloodElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEFuncAElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEFuncBElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEFuncGElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEFuncRElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEGaussianBlurElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEImageElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEMergeElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEMergeNodeElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEMorphologyElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEOffsetElement.prototype[Symbol.toStringTag]",
+    "window.SVGFEPointLightElement.prototype[Symbol.toStringTag]",
+    "window.SVGFESpecularLightingElement.prototype[Symbol.toStringTag]",
+    "window.SVGFESpotLightElement.prototype[Symbol.toStringTag]",
+    "window.SVGFETileElement.prototype[Symbol.toStringTag]",
+    "window.SVGFETurbulenceElement.prototype[Symbol.toStringTag]",
+    "window.SVGFilterElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontFaceElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontFaceFormatElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontFaceNameElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontFaceSrcElement.prototype[Symbol.toStringTag]",
+    "window.SVGFontFaceUriElement.prototype[Symbol.toStringTag]",
+    "window.SVGForeignObjectElement.prototype[Symbol.toStringTag]",
+    "window.SVGGElement.prototype[Symbol.toStringTag]",
+    "window.SVGGeometryElement.prototype[Symbol.toStringTag]",
+    "window.SVGGlyphElement.prototype[Symbol.toStringTag]",
+    "window.SVGGlyphRefElement.prototype[Symbol.toStringTag]",
+    "window.SVGGradientElement.prototype[Symbol.toStringTag]",
+    "window.SVGGraphicsElement.prototype[Symbol.toStringTag]",
+    "window.SVGHKernElement.prototype[Symbol.toStringTag]",
+    "window.SVGImageElement.prototype[Symbol.toStringTag]",
+    "window.SVGLength.prototype[Symbol.toStringTag]",
+    "window.SVGLengthList.prototype[Symbol.toStringTag]",
+    "window.SVGLineElement.prototype[Symbol.toStringTag]",
+    "window.SVGLinearGradientElement.prototype[Symbol.toStringTag]",
+    "window.SVGMPathElement.prototype[Symbol.toStringTag]",
+    "window.SVGMarkerElement.prototype[Symbol.toStringTag]",
+    "window.SVGMaskElement.prototype[Symbol.toStringTag]",
+    "window.SVGMatrix.prototype[Symbol.toStringTag]",
+    "window.SVGMetadataElement.prototype[Symbol.toStringTag]",
+    "window.SVGMissingGlyphElement.prototype[Symbol.toStringTag]",
+    "window.SVGNumber.prototype[Symbol.toStringTag]",
+    "window.SVGNumberList.prototype[Symbol.toStringTag]",
+    "window.SVGPathElement.prototype[Symbol.toStringTag]",
+    "window.SVGPathSeg.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegArcAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegArcRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegClosePath.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoCubicAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoCubicRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoCubicSmoothAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoCubicSmoothRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoQuadraticAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoQuadraticRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoQuadraticSmoothAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegCurvetoQuadraticSmoothRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoHorizontalAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoHorizontalRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoVerticalAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegLinetoVerticalRel.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegList.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegMovetoAbs.prototype[Symbol.toStringTag]",
+    "window.SVGPathSegMovetoRel.prototype[Symbol.toStringTag]",
+    "window.SVGPatternElement.prototype[Symbol.toStringTag]",
+    "window.SVGPoint.prototype[Symbol.toStringTag]",
+    "window.SVGPointList.prototype[Symbol.toStringTag]",
+    "window.SVGPolygonElement.prototype[Symbol.toStringTag]",
+    "window.SVGPolylineElement.prototype[Symbol.toStringTag]",
+    "window.SVGPreserveAspectRatio.prototype[Symbol.toStringTag]",
+    "window.SVGRadialGradientElement.prototype[Symbol.toStringTag]",
+    "window.SVGRect.prototype[Symbol.toStringTag]",
+    "window.SVGRectElement.prototype[Symbol.toStringTag]",
+    "window.SVGRenderingIntent.prototype[Symbol.toStringTag]",
+    "window.SVGSVGElement.prototype[Symbol.toStringTag]",
+    "window.SVGScriptElement.prototype[Symbol.toStringTag]",
+    "window.SVGSetElement.prototype[Symbol.toStringTag]",
+    "window.SVGStopElement.prototype[Symbol.toStringTag]",
+    "window.SVGStringList.prototype[Symbol.toStringTag]",
+    "window.SVGStyleElement.prototype[Symbol.toStringTag]",
+    "window.SVGSwitchElement.prototype[Symbol.toStringTag]",
+    "window.SVGSymbolElement.prototype[Symbol.toStringTag]",
+    "window.SVGTRefElement.prototype[Symbol.toStringTag]",
+    "window.SVGTSpanElement.prototype[Symbol.toStringTag]",
+    "window.SVGTextContentElement.prototype[Symbol.toStringTag]",
+    "window.SVGTextElement.prototype[Symbol.toStringTag]",
+    "window.SVGTextPathElement.prototype[Symbol.toStringTag]",
+    "window.SVGTextPositioningElement.prototype[Symbol.toStringTag]",
+    "window.SVGTitleElement.prototype[Symbol.toStringTag]",
+    "window.SVGTransform.prototype[Symbol.toStringTag]",
+    "window.SVGTransformList.prototype[Symbol.toStringTag]",
+    "window.SVGUnitTypes.prototype[Symbol.toStringTag]",
+    "window.SVGUseElement.prototype[Symbol.toStringTag]",
+    "window.SVGVKernElement.prototype[Symbol.toStringTag]",
+    "window.SVGViewElement.prototype[Symbol.toStringTag]",
+    "window.SVGViewSpec.prototype[Symbol.toStringTag]",
+    "window.SVGZoomEvent.prototype[Symbol.toStringTag]",
+    "window.Worker.prototype[Symbol.toStringTag]",
+    "window.DOMParser.prototype[Symbol.toStringTag]",
+    "window.XMLHttpRequest.prototype[Symbol.toStringTag]",
+    "window.XMLHttpRequestEventTarget.prototype[Symbol.toStringTag]",
+    "window.XMLHttpRequestProgressEvent.prototype[Symbol.toStringTag]",
+    "window.XMLHttpRequestUpload.prototype[Symbol.toStringTag]",
+    "window.XMLSerializer.prototype[Symbol.toStringTag]",
+    "window.XPathEvaluator.prototype[Symbol.toStringTag]",
+    "window.XPathExpression.prototype[Symbol.toStringTag]",
+    "window.XPathResult.prototype[Symbol.toStringTag]",
+    "window.XSLTProcessor.prototype[Symbol.toStringTag]",
+    "window.Reflect[Symbol.toStringTag]",
+    "window.console[Symbol.toStringTag]",
+    "window.Promise.any",
+    "window.Intl.Locale",
+    "window.Intl.RelativeTimeFormat",
+    "window.WebAssembly.CompileError.prototype.name",
+    "window.WebAssembly.CompileError.prototype.message",
+    "window.WebAssembly.CompileError.stackTraceLimit",
+    "window.WebAssembly.Global.prototype[Symbol.toStringTag]",
+    "window.WebAssembly.Instance.prototype[Symbol.toStringTag]",
+    "window.WebAssembly.LinkError.prototype.name",
+    "window.WebAssembly.LinkError.prototype.message",
+    "window.WebAssembly.LinkError.stackTraceLimit",
+    "window.WebAssembly.Memory.prototype[Symbol.toStringTag]",
+    "window.WebAssembly.Module.prototype[Symbol.toStringTag]",
+    "window.WebAssembly.RuntimeError.prototype.name",
+    "window.WebAssembly.RuntimeError.prototype.message",
+    "window.WebAssembly.RuntimeError.stackTraceLimit",
+    "window.WebAssembly.Table.prototype[Symbol.toStringTag]",
+    "window.WebAssembly[Symbol.toStringTag]",
+    "window.ApplePaySetup.prototype[Symbol.toStringTag]",
+    "window.ApplePaySetupFeature.prototype[Symbol.toStringTag]",
+    "window.ApplePaySession.prototype[Symbol.toStringTag]",
+    "window.Clipboard.prototype[Symbol.toStringTag]",
+    "window.ClipboardItem.prototype[Symbol.toStringTag]",
+    "window.Cache.prototype[Symbol.toStringTag]",
+    "window.CacheStorage.prototype[Symbol.toStringTag]",
+    "window.Credential.prototype[Symbol.toStringTag]",
+    "window.CredentialsContainer.prototype[Symbol.toStringTag]",
+    "window.MediaKeyMessageEvent.prototype[Symbol.toStringTag]",
+    "window.MediaKeySession.prototype[Symbol.toStringTag]",
+    "window.MediaKeyStatusMap.prototype[Symbol.toStringTag]",
+    "window.MediaKeySystemAccess.prototype[Symbol.toStringTag]",
+    "window.MediaKeys.prototype[Symbol.toStringTag]",
+    "window.WebKitMediaKeyMessageEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitMediaKeyNeededEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitMediaKeySession.prototype[Symbol.toStringTag]",
+    "window.WebKitMediaKeys.prototype[Symbol.toStringTag]",
+    "window.FileSystem.prototype[Symbol.toStringTag]",
+    "window.FileSystemDirectoryEntry.prototype[Symbol.toStringTag]",
+    "window.FileSystemDirectoryReader.prototype[Symbol.toStringTag]",
+    "window.FileSystemEntry.prototype[Symbol.toStringTag]",
+    "window.FileSystemFileEntry.prototype[Symbol.toStringTag]",
+    "window.Headers.prototype[Symbol.toStringTag]",
+    "window.Request.prototype[Symbol.toStringTag]",
+    "window.Response.prototype[Symbol.toStringTag]",
+    "window.Gamepad.prototype[Symbol.toStringTag]",
+    "window.GamepadButton.prototype[Symbol.toStringTag]",
+    "window.GamepadEvent.prototype[Symbol.toStringTag]",
+    "window.MediaCapabilities.prototype[Symbol.toStringTag]",
+    "window.MediaSource.prototype[Symbol.toStringTag]",
+    "window.MediaDevices.prototype[Symbol.toStringTag]",
+    "window.RTCCertificate.prototype[Symbol.toStringTag]",
+    "window.RTCDTMFSender.prototype[Symbol.toStringTag]",
+    "window.RTCDTMFToneChangeEvent.prototype[Symbol.toStringTag]",
+    "window.RTCDataChannel.prototype[Symbol.toStringTag]",
+    "window.RTCDataChannelEvent.prototype[Symbol.toStringTag]",
+    "window.RTCIceCandidate.prototype[Symbol.toStringTag]",
+    "window.RTCIceTransport.prototype[Symbol.toStringTag]",
+    "window.RTCPeerConnection.prototype[Symbol.toStringTag]",
+    "window.RTCPeerConnectionIceEvent.prototype[Symbol.toStringTag]",
+    "window.RTCRtpReceiver.prototype[Symbol.toStringTag]",
+    "window.RTCRtpSender.prototype[Symbol.toStringTag]",
+    "window.RTCRtpTransceiver.prototype[Symbol.toStringTag]",
+    "window.RTCSessionDescription.prototype[Symbol.toStringTag]",
+    "window.RTCStatsReport.prototype[Symbol.toStringTag]",
+    "window.RTCTrackEvent.prototype[Symbol.toStringTag]",
+    "window.MerchantValidationEvent.prototype[Symbol.toStringTag]",
+    "window.PaymentAddress.prototype[Symbol.toStringTag]",
+    "window.PaymentMethodChangeEvent.prototype[Symbol.toStringTag]",
+    "window.PaymentRequest.prototype[Symbol.toStringTag]",
+    "window.PaymentRequestUpdateEvent.prototype[Symbol.toStringTag]",
+    "window.PaymentResponse.prototype[Symbol.toStringTag]",
+    "window.EnterPictureInPictureEvent.prototype[Symbol.toStringTag]",
+    "window.PictureInPictureWindow.prototype[Symbol.toStringTag]",
+    "window.RemotePlayback.prototype[Symbol.toStringTag]",
+    "window.webkitAudioContext.prototype[Symbol.toStringTag]",
+    "window.webkitAudioContext.prototype._$type",
+    "window.webkitAudioContext.prototype._$flags",
+    "window.AuthenticatorAssertionResponse.prototype[Symbol.toStringTag]",
+    "window.AuthenticatorAttestationResponse.prototype[Symbol.toStringTag]",
+    "window.AuthenticatorResponse.prototype[Symbol.toStringTag]",
+    "window.PublicKeyCredential.prototype[Symbol.toStringTag]",
+    "window.WebSocket.prototype[Symbol.toStringTag]",
+    "window.AnimationEffect.prototype[Symbol.toStringTag]",
+    "window.AnimationPlaybackEvent.prototype[Symbol.toStringTag]",
+    "window.AnimationTimeline.prototype[Symbol.toStringTag]",
+    "window.CSSAnimation.prototype[Symbol.toStringTag]",
+    "window.CSSTransition.prototype[Symbol.toStringTag]",
+    "window.DocumentTimeline.prototype[Symbol.toStringTag]",
+    "window.KeyframeEffect.prototype.pseudoElement",
+    "window.KeyframeEffect.prototype[Symbol.toStringTag]",
+    "window.Animation.prototype[Symbol.toStringTag]",
+    "window.CustomElementRegistry.prototype[Symbol.toStringTag]",
+    "window.DataTransferItem.prototype[Symbol.toStringTag]",
+    "window.DataTransferItemList.prototype[Symbol.toStringTag]",
+    "window.InputEvent.prototype[Symbol.toStringTag]",
+    "window.PointerEvent.prototype[Symbol.toStringTag]",
+    "window.ShadowRoot.prototype.getAnimations",
+    "window.ShadowRoot.prototype[Symbol.toStringTag]",
+    "window.StaticRange.prototype[Symbol.toStringTag]",
+    "window.HTMLDataListElement.prototype[Symbol.toStringTag]",
+    "window.HTMLSlotElement.prototype[Symbol.toStringTag]",
+    "window.MediaEncryptedEvent.prototype[Symbol.toStringTag]",
+    "window.WebKitMediaKeyError.prototype[Symbol.toStringTag]",
+    "window.IntersectionObserver.prototype[Symbol.toStringTag]",
+    "window.IntersectionObserverEntry.prototype[Symbol.toStringTag]",
+    "window.PerformanceEntry.prototype[Symbol.toStringTag]",
+    "window.PerformanceMark.prototype[Symbol.toStringTag]",
+    "window.PerformanceMeasure.prototype[Symbol.toStringTag]",
+    "window.PerformanceObserver.prototype[Symbol.toStringTag]",
+    "window.PerformanceObserverEntryList.prototype[Symbol.toStringTag]",
+    "window.PerformanceResourceTiming.prototype[Symbol.toStringTag]",
+    "window.ResizeObserver.prototype[Symbol.toStringTag]",
+    "window.ResizeObserverEntry.prototype[Symbol.toStringTag]",
+    "window.VisualViewport.prototype[Symbol.toStringTag]",
+    "window.ServiceWorker.prototype[Symbol.toStringTag]",
+    "window.ServiceWorkerContainer.prototype[Symbol.toStringTag]",
+    "window.ServiceWorkerRegistration.prototype[Symbol.toStringTag]",
+    "window.AudioScheduledSourceNode",
+    "window.MediaQueryList",
+    "window.MediaQueryListEvent",
+    "window.DragEvent",
+    "window.AggregateError",
+    "window.BigInt"
+  ],
+  "additions": [
+    {
+      "path": "window.document",
+      "propertyName": "origin",
+      "prevProperty": "documentURI",
+      "property": {
+        "_$type": "string",
+        "_$value": "https://<host>"
+      }
+    },
+    {
+      "path": "window.document.documentElement.ownerDocument",
+      "propertyName": "origin",
+      "prevProperty": "documentURI",
+      "property": {
+        "_$type": "string",
+        "_$value": "https://<host>"
+      }
+    },
+    {
+      "path": "window.document.documentElement.ownerDocument.styleSheets",
+      "propertyName": "0",
+      "property": {
+        "_$type": "object",
+        "_$skipped": "SKIPPED DEPTH"
+      }
+    },
+    {
+      "path": "window.AudioBufferSourceNode.prototype",
+      "propertyName": "onended",
+      "prevProperty": "loopEnd",
+      "property": {
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$accessException": "TypeError: The AudioBufferSourceNode.onended getter can only be used on instances of AudioBufferSourceNode",
+        "_$get": "function onended() {\n    [native code]\n}",
+        "_$set": "function onended() {\n    [native code]\n}",
+        "_$getToStringToString": "function toString() {\n    [native code]\n}",
+        "_$setToStringToString": "function toString() {\n    [native code]\n}"
+      }
+    },
+    {
+      "path": "window.AudioBufferSourceNode.prototype",
+      "propertyName": "stop",
+      "prevProperty": "start",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "stop"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function stop() {\n    [native code]\n}",
+        "_$invocation": "TypeError: Can only call AudioBufferSourceNode.stop on instances of AudioBufferSourceNode",
+        "_$flags": [
+          "c",
+          "e",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "OscillatorNode",
+      "prevProperty": "webkitOfflineAudioContext",
+      "property": {
+        "prototype": {
+          "_$protos": [
+            "AudioNode.prototype",
+            "EventTarget.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The OscillatorNode.type getter can only be used on instances of OscillatorNode",
+            "_$get": "function type() {\n    [native code]\n}",
+            "_$set": "function type() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}",
+            "_$setToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "playbackState": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The OscillatorNode.playbackState getter can only be used on instances of OscillatorNode",
+            "_$get": "function playbackState() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "frequency": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The OscillatorNode.frequency getter can only be used on instances of OscillatorNode",
+            "_$get": "function frequency() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "detune": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The OscillatorNode.detune getter can only be used on instances of OscillatorNode",
+            "_$get": "function detune() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "onended": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The OscillatorNode.onended getter can only be used on instances of OscillatorNode",
+            "_$get": "function onended() {\n    [native code]\n}",
+            "_$set": "function onended() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}",
+            "_$setToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "start": {
+            "name": {
+              "_$type": "string",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": "start"
+            },
+            "length": {
+              "_$type": "number",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": 0
+            },
+            "_$type": "function",
+            "_$function": "function start() {\n    [native code]\n}",
+            "_$invocation": "TypeError: Can only call OscillatorNode.start on instances of OscillatorNode",
+            "_$flags": [
+              "c",
+              "e",
+              "w"
+            ]
+          },
+          "stop": {
+            "name": {
+              "_$type": "string",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": "stop"
+            },
+            "length": {
+              "_$type": "number",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": 0
+            },
+            "_$type": "function",
+            "_$function": "function stop() {\n    [native code]\n}",
+            "_$invocation": "TypeError: Can only call OscillatorNode.stop on instances of OscillatorNode",
+            "_$flags": [
+              "c",
+              "e",
+              "w"
+            ]
+          },
+          "setPeriodicWave": {
+            "name": {
+              "_$type": "string",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": "setPeriodicWave"
+            },
+            "length": {
+              "_$type": "number",
+              "_$flags": [
+                "c"
+              ],
+              "_$value": 1
+            },
+            "_$type": "function",
+            "_$function": "function setPeriodicWave() {\n    [native code]\n}",
+            "_$invocation": "TypeError: Can only call OscillatorNode.setPeriodicWave on instances of OscillatorNode",
+            "_$flags": [
+              "c",
+              "e",
+              "w"
+            ]
+          },
+          "UNSCHEDULED_STATE": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 0
+          },
+          "SCHEDULED_STATE": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 1
+          },
+          "PLAYING_STATE": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 2
+          },
+          "FINISHED_STATE": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 3
+          },
+          "_$type": "object",
+          "_$flags": []
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "OscillatorNode"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "UNSCHEDULED_STATE": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 0
+        },
+        "SCHEDULED_STATE": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 1
+        },
+        "PLAYING_STATE": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 2
+        },
+        "FINISHED_STATE": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 3
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: function is not a constructor (evaluating 'new obj()')"
+        },
+        "_$type": "function",
+        "_$function": "function OscillatorNode() {\n    [native code]\n}",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "VRPose",
+      "prevProperty": "CloseEvent",
+      "property": {
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "position": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.position getter can only be used on instances of VRPose",
+            "_$get": "function position() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "linearVelocity": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.linearVelocity getter can only be used on instances of VRPose",
+            "_$get": "function linearVelocity() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "linearAcceleration": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.linearAcceleration getter can only be used on instances of VRPose",
+            "_$get": "function linearAcceleration() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "orientation": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.orientation getter can only be used on instances of VRPose",
+            "_$get": "function orientation() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "angularVelocity": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.angularVelocity getter can only be used on instances of VRPose",
+            "_$get": "function angularVelocity() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "angularAcceleration": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The VRPose.angularAcceleration getter can only be used on instances of VRPose",
+            "_$get": "function angularAcceleration() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "_$type": "object",
+          "_$flags": []
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "VRPose"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: function is not a constructor (evaluating 'new obj()')"
+        },
+        "_$type": "function",
+        "_$function": "function VRPose() {\n    [native code]\n}",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "BeforeLoadEvent",
+      "prevProperty": "Attr",
+      "property": {
+        "prototype": {
+          "_$protos": [
+            "Event.prototype",
+            "Object.prototype"
+          ],
+          "url": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The BeforeLoadEvent.url getter can only be used on instances of BeforeLoadEvent",
+            "_$get": "function url() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "NONE": {
+            "_$type": "number",
+            "_$value": 0
+          },
+          "CAPTURING_PHASE": {
+            "_$type": "number",
+            "_$value": 1
+          },
+          "AT_TARGET": {
+            "_$type": "number",
+            "_$value": 2
+          },
+          "BUBBLING_PHASE": {
+            "_$type": "number",
+            "_$value": 3
+          },
+          "_$type": "object",
+          "_$flags": []
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "BeforeLoadEvent"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 1
+        },
+        "NONE": {
+          "_$type": "number",
+          "_$value": 0
+        },
+        "CAPTURING_PHASE": {
+          "_$type": "number",
+          "_$value": 1
+        },
+        "AT_TARGET": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "BUBBLING_PHASE": {
+          "_$type": "number",
+          "_$value": 3
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Not enough arguments"
+        },
+        "_$type": "function",
+        "_$function": "function BeforeLoadEvent() {\n    [native code]\n}",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "origin",
+      "prevProperty": "documentURI",
+      "property": {
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$accessException": "TypeError: The Document.origin getter can only be used on instances of Document",
+        "_$get": "function origin() {\n    [native code]\n}",
+        "_$getToStringToString": "function toString() {\n    [native code]\n}"
+      }
+    },
+    {
+      "path": "window.Document.new()",
+      "propertyName": "origin",
+      "prevProperty": "documentURI",
+      "property": {
+        "_$type": "string",
+        "_$value": "https://<host>"
+      }
+    },
+    {
+      "path": "window.EventTarget.new()",
+      "propertyName": "_$constructorException",
+      "prevProperty": "_$type",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MouseEvent.prototype",
+      "propertyName": "dataTransfer",
+      "prevProperty": "toElement",
+      "property": {
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$accessException": "TypeError: The MouseEvent.dataTransfer getter can only be used on instances of MouseEvent",
+        "_$get": "function dataTransfer() {\n    [native code]\n}",
+        "_$getToStringToString": "function toString() {\n    [native code]\n}"
+      }
+    },
+    {
+      "path": "window.MouseEvent.prototype",
+      "propertyName": "_$type",
+      "prevProperty": "BUBBLING_PHASE",
+      "property": "object"
+    },
+    {
+      "path": "window.MouseEvent.prototype",
+      "propertyName": "_$flags",
+      "prevProperty": "_$type",
+      "property": []
+    },
+    {
+      "path": "window",
+      "propertyName": "FileError",
+      "prevProperty": "File",
+      "property": {
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "code": {
+            "_$flags": [
+              "c",
+              "e"
+            ],
+            "_$accessException": "TypeError: The FileError.code getter can only be used on instances of FileError",
+            "_$get": "function code() {\n    [native code]\n}",
+            "_$getToStringToString": "function toString() {\n    [native code]\n}"
+          },
+          "NOT_FOUND_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 1
+          },
+          "SECURITY_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 2
+          },
+          "ABORT_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 3
+          },
+          "NOT_READABLE_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 4
+          },
+          "ENCODING_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 5
+          },
+          "NO_MODIFICATION_ALLOWED_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 6
+          },
+          "INVALID_STATE_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 7
+          },
+          "SYNTAX_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 8
+          },
+          "INVALID_MODIFICATION_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 9
+          },
+          "QUOTA_EXCEEDED_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 10
+          },
+          "TYPE_MISMATCH_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 11
+          },
+          "PATH_EXISTS_ERR": {
+            "_$type": "number",
+            "_$flags": [
+              "e"
+            ],
+            "_$value": 12
+          },
+          "_$type": "object",
+          "_$flags": []
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "FileError"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "NOT_FOUND_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 1
+        },
+        "SECURITY_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 2
+        },
+        "ABORT_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 3
+        },
+        "NOT_READABLE_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 4
+        },
+        "ENCODING_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 5
+        },
+        "NO_MODIFICATION_ALLOWED_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 6
+        },
+        "INVALID_STATE_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 7
+        },
+        "SYNTAX_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 8
+        },
+        "INVALID_MODIFICATION_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 9
+        },
+        "QUOTA_EXCEEDED_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 10
+        },
+        "TYPE_MISMATCH_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 11
+        },
+        "PATH_EXISTS_ERR": {
+          "_$type": "number",
+          "_$flags": [
+            "e"
+          ],
+          "_$value": 12
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: function is not a constructor (evaluating 'new obj()')"
+        },
+        "_$type": "function",
+        "_$function": "function FileError() {\n    [native code]\n}",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "WebGLTransformFeedback",
+      "prevProperty": "WebGLTexture",
+      "property": {
+        "prototype": {
+          "_$protos": [
+            "Object.prototype"
+          ],
+          "_$type": "object",
+          "_$flags": []
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "WebGLTransformFeedback"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: function is not a constructor (evaluating 'new obj()')"
+        },
+        "_$type": "function",
+        "_$function": "function WebGLTransformFeedback() {\n    [native code]\n}",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.ApplePaySetupFeature.prototype",
+      "propertyName": "supportsInstallments",
+      "prevProperty": "state",
+      "property": {
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$accessException": "TypeError: The ApplePaySetupFeature.supportsInstallments getter can only be used on instances of ApplePaySetupFeature",
+        "_$get": "function supportsInstallments() {\n    [native code]\n}",
+        "_$getToStringToString": "function toString() {\n    [native code]\n}"
+      }
+    }
+  ],
+  "order": [
+    {
+      "path": "detached.TypedArray.prototype.entries",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "detached.TypedArray.prototype.entries",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "detached.TypedArray.prototype.keys",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "detached.TypedArray.prototype.keys",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "detached.TypedArray.prototype.values",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "detached.TypedArray.prototype.values",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window",
+      "propertyName": "Infinity",
+      "throughProperty": "Infinity",
+      "prevProperty": "window"
+    },
+    {
+      "path": "window",
+      "propertyName": "document",
+      "throughProperty": "document",
+      "prevProperty": null
+    },
+    {
+      "path": "window",
+      "propertyName": "CryptoKey",
+      "throughProperty": "Attr",
+      "prevProperty": "VRPose"
+    },
+    {
+      "path": "window",
+      "propertyName": "BeforeUnloadEvent",
+      "throughProperty": "File",
+      "prevProperty": "BeforeLoadEvent"
+    },
+    {
+      "path": "window",
+      "propertyName": "FileList",
+      "throughProperty": "WebGLTexture",
+      "prevProperty": "FileError"
+    },
+    {
+      "path": "window",
+      "propertyName": "WebGLUniformLocation",
+      "throughProperty": "visualViewport",
+      "prevProperty": "WebGLTransformFeedback"
+    },
+    {
+      "path": "window",
+      "propertyName": "webkitAudioPannerNode",
+      "throughProperty": "webkitAudioPannerNode",
+      "prevProperty": "OscillatorNode"
+    },
+    {
+      "path": "window",
+      "propertyName": "webkitOfflineAudioContext",
+      "throughProperty": "webkitOfflineAudioContext",
+      "prevProperty": "OfflineAudioCompletionEvent"
+    },
+    {
+      "path": "window",
+      "propertyName": "NaN",
+      "throughProperty": "undefined",
+      "prevProperty": "Infinity"
+    },
+    {
+      "path": "window",
+      "propertyName": "PeriodicWave",
+      "throughProperty": "CloseEvent",
+      "prevProperty": "webkitAudioPannerNode"
+    },
+    {
+      "path": "window",
+      "propertyName": "ApplePaySetup",
+      "throughProperty": "ApplePaySetupFeature",
+      "prevProperty": "visualViewport"
+    },
+    {
+      "path": "window",
+      "propertyName": "ApplePaySession",
+      "throughProperty": "ApplePaySession",
+      "prevProperty": "ApplePaySetupFeature"
+    },
+    {
+      "path": "window",
+      "propertyName": "Clipboard",
+      "throughProperty": "webkitAudioContext",
+      "prevProperty": "ApplePaySession"
+    },
+    {
+      "path": "window",
+      "propertyName": "AuthenticatorAssertionResponse",
+      "throughProperty": "safari",
+      "prevProperty": "webkitAudioContext"
+    },
+    {
+      "path": "window.Array.prototype",
+      "propertyName": "entries",
+      "throughProperty": "entries",
+      "prevProperty": "map"
+    },
+    {
+      "path": "window.Array.prototype",
+      "propertyName": "keys",
+      "throughProperty": "keys",
+      "prevProperty": "entries"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "compatMode",
+      "throughProperty": "releaseEvents",
+      "prevProperty": "origin"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "getAnimations",
+      "throughProperty": "getAnimations",
+      "prevProperty": "releaseEvents"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "exitPictureInPicture",
+      "throughProperty": "elementsFromPoint",
+      "prevProperty": "getAnimations"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "hasStorageAccess",
+      "throughProperty": "querySelectorAll",
+      "prevProperty": "elementsFromPoint"
+    },
+    {
+      "path": "window.DOMStringList.prototype.Symbol(Symbol.iterator)",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.DOMStringList.prototype.Symbol(Symbol.iterator)",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.DOMTokenList.prototype.entries",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.DOMTokenList.prototype.entries",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.DOMTokenList.prototype.keys",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.DOMTokenList.prototype.keys",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "onwebkitfullscreenchange",
+      "throughProperty": "onbeforepaste",
+      "prevProperty": "onwebkittransitionend"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "onwebkitanimationend",
+      "throughProperty": "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC",
+      "prevProperty": "onselectstart"
+    },
+    {
+      "path": "window.Intl.DateTimeFormat.prototype",
+      "propertyName": "resolvedOptions",
+      "throughProperty": "resolvedOptions",
+      "prevProperty": "format"
+    },
+    {
+      "path": "window.Intl.DateTimeFormat.prototype",
+      "propertyName": "formatToParts",
+      "throughProperty": "formatToParts",
+      "prevProperty": "resolvedOptions"
+    },
+    {
+      "path": "window.Intl.NumberFormat.prototype",
+      "propertyName": "resolvedOptions",
+      "throughProperty": "resolvedOptions",
+      "prevProperty": "format"
+    },
+    {
+      "path": "window.Intl.NumberFormat.prototype",
+      "propertyName": "formatToParts",
+      "throughProperty": "formatToParts",
+      "prevProperty": "resolvedOptions"
+    },
+    {
+      "path": "window.Map.prototype",
+      "propertyName": "values",
+      "throughProperty": "values",
+      "prevProperty": "forEach"
+    },
+    {
+      "path": "window.Map.prototype",
+      "propertyName": "keys",
+      "throughProperty": "keys",
+      "prevProperty": "values"
+    },
+    {
+      "path": "window.Map.prototype",
+      "propertyName": "clear",
+      "throughProperty": "set",
+      "prevProperty": "keys"
+    },
+    {
+      "path": "window.Map.prototype.entries",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Map.prototype.entries",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.Map.prototype.keys",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Map.prototype.keys",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.Map.prototype.values",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Map.prototype.values",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "plugins",
+      "throughProperty": "mimeTypes",
+      "prevProperty": null
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "cookieEnabled",
+      "throughProperty": "onLine",
+      "prevProperty": "mimeTypes"
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "text/pdf",
+      "throughProperty": "text/pdf",
+      "prevProperty": "application/pdf"
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "application/postscript",
+      "throughProperty": "application/postscript",
+      "prevProperty": "text/pdf"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "plugins",
+      "throughProperty": "mimeTypes",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "javaEnabled",
+      "throughProperty": "javaEnabled",
+      "prevProperty": "serviceWorker"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "cookieEnabled",
+      "throughProperty": "onLine",
+      "prevProperty": "mimeTypes"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "getStorageUpdates",
+      "throughProperty": "getGamepads",
+      "prevProperty": "javaEnabled"
+    },
+    {
+      "path": "window.Set.prototype",
+      "propertyName": "entries",
+      "throughProperty": "entries",
+      "prevProperty": "forEach"
+    },
+    {
+      "path": "window.Set.prototype",
+      "propertyName": "add",
+      "throughProperty": "has",
+      "prevProperty": "entries"
+    },
+    {
+      "path": "window.Set.prototype.entries",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Set.prototype.entries",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.Set.prototype.values",
+      "propertyName": "length",
+      "throughProperty": "length",
+      "prevProperty": null
+    },
+    {
+      "path": "window.Set.prototype.values",
+      "propertyName": "name",
+      "throughProperty": "name",
+      "prevProperty": "length"
+    },
+    {
+      "path": "window.WebGLRenderingContext.prototype",
+      "propertyName": "texImage2D",
+      "throughProperty": "compressedTexImage2D",
+      "prevProperty": "drawingBufferHeight"
+    },
+    {
+      "path": "window.WebGLRenderingContext.prototype",
+      "propertyName": "activeTexture",
+      "throughProperty": "compileShader",
+      "prevProperty": "compressedTexImage2D"
+    }
+  ],
+  "changes": [
+    {
+      "path": "window.navigator.plugins.0.1.type",
+      "propertyName": "_$value",
+      "property": "text/pdf"
+    },
+    {
+      "path": "window.navigator.plugins.0.1.suffixes",
+      "propertyName": "_$value",
+      "property": "pdf"
+    },
+    {
+      "path": "window.navigator.plugins.0.1.description",
+      "propertyName": "_$value",
+      "property": "Portable Document Format"
+    },
+    {
+      "path": "window.navigator.plugins.0.2.type",
+      "propertyName": "_$value",
+      "property": "application/postscript"
+    },
+    {
+      "path": "window.navigator.plugins.0.2.suffixes",
+      "propertyName": "_$value",
+      "property": "ps"
+    },
+    {
+      "path": "window.navigator.plugins.0.2.description",
+      "propertyName": "_$value",
+      "property": "PostScript"
+    },
+    {
+      "path": "window.navigator.plugins",
+      "propertyName": "WebKit built-in PDF",
+      "property": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": [
+            "c",
+            "e"
+          ],
+          "_$value": "[object MimeType]"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": [
+            "c",
+            "e"
+          ],
+          "_$value": "[object MimeType]"
+        },
+        "2": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/postscript"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "ps"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "PostScript"
+          },
+          "_$type": "object",
+          "_$flags": [
+            "c",
+            "e"
+          ],
+          "_$value": "[object MimeType]"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "name": {
+          "_$type": "string",
+          "_$value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 3
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c"
+        ],
+        "_$value": "[object Plugin]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "0",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "1",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "text/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "2",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/postscript"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "ps"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "PostScript"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "application/pdf",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "text/pdf",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "text/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.mimeTypes",
+      "propertyName": "application/postscript",
+      "property": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/postscript"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "ps"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "PostScript"
+        },
+        "_$type": "object",
+        "_$flags": [
+          "c"
+        ],
+        "_$value": "[object MimeType]"
+      }
+    },
+    {
+      "path": "window.navigator.webdriver",
+      "propertyName": "_$value",
+      "property": true
+    },
+    {
+      "path": "window.navigator.language",
+      "propertyName": "_$value",
+      "property": "en"
+    },
+    {
+      "path": "window.navigator.languages.0",
+      "propertyName": "_$value",
+      "property": "en"
+    },
+    {
+      "path": "window.navigator.languages",
+      "propertyName": "_$value",
+      "property": "en"
+    },
+    {
+      "path": "window.GestureEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Geolocation.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.GeolocationCoordinates.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.GeolocationPosition.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.GeolocationPositionError.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBCursor.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBCursorWithValue.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBDatabase.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBFactory.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBIndex.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBKeyRange.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBObjectStore.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBOpenDBRequest.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBRequest.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.IDBTransaction.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SourceBuffer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SourceBufferList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CanvasCaptureMediaStreamTrack.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaDeviceInfo.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaStream.new().id",
+      "propertyName": "_$value",
+      "property": "7c0f67ca-3550-4780-8098-da4b965e0b32"
+    },
+    {
+      "path": "window.MediaStreamTrack.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SpeechSynthesisEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AnalyserNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioBuffer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioBufferSourceNode.prototype._$protos",
+      "propertyName": "0",
+      "property": "AudioNode.prototype"
+    },
+    {
+      "path": "window.AudioBufferSourceNode.prototype._$protos",
+      "propertyName": "1",
+      "property": "EventTarget.prototype"
+    },
+    {
+      "path": "window.AudioBufferSourceNode.prototype._$protos",
+      "propertyName": "2",
+      "property": "Object.prototype"
+    },
+    {
+      "path": "window.AudioBufferSourceNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioDestinationNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioListener.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioParam.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioProcessingEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.BiquadFilterNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ChannelMergerNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ChannelSplitterNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ConvolverNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DelayNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DynamicsCompressorNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.GainNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaElementAudioSourceNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaStreamAudioDestinationNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaStreamAudioSourceNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.OfflineAudioCompletionEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.webkitAudioPannerNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PeriodicWave.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ScriptProcessorNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WaveShaperNode.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SQLTransaction.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CryptoKey.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SubtleCrypto.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSFontFaceRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSImportRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSKeyframeRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSKeyframesRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSMediaRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSNamespaceRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSPageRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSRuleList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSStyleDeclaration.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSStyleRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSStyleSheet.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSSupportsRule.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSS.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Counter.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSPrimitiveValue.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RGBColor.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Rect.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSValue.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSValueList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.StyleSheet.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.StyleSheetList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AbortSignal.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Attr.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.BeforeUnloadEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CDATASection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CharacterData.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DOMImplementation.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DOMRectList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DOMStringList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DOMStringMap.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DataTransfer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DocumentType.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Element.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MessagePort.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MutationEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MutationRecord.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.NamedNodeMap.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Node.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.NodeIterator.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.NodeList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ProcessingInstruction.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TextEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TreeWalker.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XMLDocument.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DOMTokenList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLAllCollection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLAnchorElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLAppletElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLAreaElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLAudioElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLBRElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLBaseElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLBodyElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLButtonElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLCanvasElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLCollection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDListElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDataElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDetailsElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDirectoryElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDivElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDocument.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLEmbedElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFieldSetElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFontElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFormControlsCollection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFormElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFrameElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLFrameSetElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLHRElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLHeadElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLHeadingElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLHtmlElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLIFrameElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLImageElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLInputElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLLIElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLLabelElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLLegendElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLLinkElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMapElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMarqueeElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMediaElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMenuElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMetaElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLMeterElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLModElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLOListElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLObjectElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLOptGroupElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLOptionElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLOptionsCollection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLOutputElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLParagraphElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLParamElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLPictureElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLPreElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLProgressElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLQuoteElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLScriptElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLSelectElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLSourceElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLSpanElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLStyleElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableCaptionElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableCellElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableColElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableRowElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTableSectionElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTemplateElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTextAreaElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTimeElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTitleElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLTrackElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLUListElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLUnknownElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLVideoElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaError.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RadioNodeList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TextMetrics.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TimeRanges.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ValidityState.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CanvasGradient.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CanvasPattern.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CanvasRenderingContext2D.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLActiveInfo.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLBuffer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLFramebuffer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLProgram.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLQuery.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLRenderbuffer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLRenderingContext.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLSampler.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLShader.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLShaderPrecisionFormat.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLSync.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLTexture.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebGLUniformLocation.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioTrack.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AudioTrackList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TextTrack.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TextTrackCueList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.TextTrackList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.VideoTrack.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.VideoTrackList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ApplicationCache.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MathMLElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MathMLMathElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.BarProp.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Crypto.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Selection.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Window.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.History.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Location.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Navigator.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Performance.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceNavigation.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceTiming.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Screen.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.UserMessageHandler.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.UserMessageHandlersNamespace.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebKitNamespace.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MimeType.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MimeTypeArray.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Plugin.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PluginArray.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Storage.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAltGlyphDefElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAltGlyphElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAltGlyphItemElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAngle.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimateColorElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimateElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimateMotionElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimateTransformElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedAngle.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedBoolean.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedEnumeration.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedInteger.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedLength.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedLengthList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedNumber.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedNumberList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedPreserveAspectRatio.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedRect.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedString.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimatedTransformList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGAnimationElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGCircleElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGClipPathElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGComponentTransferFunctionElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGCursorElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGDefsElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGDescElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGEllipseElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEBlendElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEColorMatrixElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEComponentTransferElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFECompositeElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEConvolveMatrixElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEDiffuseLightingElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEDisplacementMapElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEDistantLightElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEDropShadowElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEFloodElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEFuncAElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEFuncBElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEFuncGElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEFuncRElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEGaussianBlurElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEImageElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEMergeElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEMergeNodeElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEMorphologyElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEOffsetElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFEPointLightElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFESpecularLightingElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFESpotLightElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFETileElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFETurbulenceElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFilterElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontFaceElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontFaceFormatElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontFaceNameElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontFaceSrcElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGFontFaceUriElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGForeignObjectElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGeometryElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGlyphElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGlyphRefElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGradientElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGGraphicsElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGHKernElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGImageElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGLength.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGLengthList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGLineElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGLinearGradientElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMPathElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMarkerElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMaskElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMatrix.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMetadataElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGMissingGlyphElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGNumber.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGNumberList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSeg.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegArcAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegArcRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegClosePath.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoCubicAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoCubicRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoCubicSmoothAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoCubicSmoothRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoQuadraticAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoQuadraticRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoQuadraticSmoothAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegCurvetoQuadraticSmoothRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoHorizontalAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoHorizontalRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoVerticalAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegLinetoVerticalRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegMovetoAbs.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPathSegMovetoRel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPatternElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPoint.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPointList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPolygonElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPolylineElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGPreserveAspectRatio.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGRadialGradientElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGRect.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGRectElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGRenderingIntent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGSVGElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGScriptElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGSetElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGStopElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGStringList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGStyleElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGSwitchElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGSymbolElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTRefElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTSpanElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTextContentElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTextElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTextPathElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTextPositioningElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTitleElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTransform.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGTransformList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGUnitTypes.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGUseElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGVKernElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGViewElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGViewSpec.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.SVGZoomEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XMLHttpRequestEventTarget.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XMLHttpRequestProgressEvent.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XMLHttpRequestUpload.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XPathExpression.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.XPathResult.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.speechSynthesis.getVoices",
+      "propertyName": "_$invocation",
+      "property": ""
+    },
+    {
+      "path": "window.EvalError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "EvalError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.EvalError.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.RangeError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "RangeError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.RangeError.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.ReferenceError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "ReferenceError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.ReferenceError.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.SyntaxError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "SyntaxError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.SyntaxError.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.TypeError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "TypeError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.TypeError.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.URIError.prototype",
+      "propertyName": "toString",
+      "property": {
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "toString"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 0
+        },
+        "_$type": "function",
+        "_$function": "function toString() {\n    [native code]\n}",
+        "_$invocation": "URIError",
+        "_$flags": [
+          "c",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.Error.new().stack",
+      "propertyName": "_$value",
+      "property": "<url>:135:35\nasyncFunctionResume@[native code]\n[native code]\npromiseReactionJobWithoutPromise@[native code]\npromiseReactionJob@[native code]"
+    },
+    {
+      "path": "window.Map.prototype.values",
+      "propertyName": "_$invocation",
+      "property": "TypeError: Map.prototype.values requires that |this| be Map"
+    },
+    {
+      "path": "window.Map.prototype.keys",
+      "propertyName": "_$invocation",
+      "property": "TypeError: Map.prototype.keys requires that |this| be Map"
+    },
+    {
+      "path": "window.Map.prototype.entries",
+      "propertyName": "_$invocation",
+      "property": "TypeError: Map.prototype.entries requires that |this| be Map"
+    },
+    {
+      "path": "window.Set.prototype.entries",
+      "propertyName": "_$invocation",
+      "property": "TypeError: Set.prototype.entries requires that |this| be Set"
+    },
+    {
+      "path": "window.Set.prototype.values",
+      "propertyName": "_$invocation",
+      "property": "TypeError: Set.prototype.values requires that |this| be Set"
+    },
+    {
+      "path": "window.Intl.Collator.prototype",
+      "propertyName": "Symbol.toStringTag._$value",
+      "property": "Object"
+    },
+    {
+      "path": "window.Intl.DateTimeFormat.prototype",
+      "propertyName": "Symbol.toStringTag._$value",
+      "property": "Object"
+    },
+    {
+      "path": "window.Intl.NumberFormat.prototype",
+      "propertyName": "Symbol.toStringTag._$value",
+      "property": "Object"
+    },
+    {
+      "path": "window.Intl.PluralRules.prototype",
+      "propertyName": "Symbol.toStringTag._$value",
+      "property": "Object"
+    },
+    {
+      "path": "window.ApplePaySetupFeature.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ApplePaySession.canMakePayments",
+      "propertyName": "_$invocation",
+      "property": false
+    },
+    {
+      "path": "window.Clipboard.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Cache.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CacheStorage.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Credential.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CredentialsContainer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaKeySession.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaKeyStatusMap.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaKeySystemAccess.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaKeys.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebKitMediaKeySession.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileSystem.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileSystemDirectoryEntry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileSystemDirectoryReader.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileSystemEntry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.FileSystemFileEntry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.Gamepad.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.GamepadButton.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaCapabilities.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.MediaDevices.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCCertificate.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCDTMFSender.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCDataChannel.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCIceTransport.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCRtpReceiver.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCRtpSender.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCRtpTransceiver.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RTCStatsReport.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PaymentAddress.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PaymentResponse.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PictureInPictureWindow.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.RemotePlayback.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AuthenticatorAssertionResponse.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AuthenticatorAttestationResponse.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AuthenticatorResponse.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PublicKeyCredential.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AnimationEffect.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.AnimationTimeline.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSAnimation.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CSSTransition.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.CustomElementRegistry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DataTransferItem.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.DataTransferItemList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ShadowRoot.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLDataListElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.HTMLSlotElement.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.WebKitMediaKeyError.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceEntry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceMark.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceMeasure.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceObserverEntryList.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.PerformanceResourceTiming.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ResizeObserverEntry.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.VisualViewport.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ServiceWorker.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ServiceWorkerContainer.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    },
+    {
+      "path": "window.ServiceWorkerRegistration.new()",
+      "propertyName": "_$constructorException",
+      "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "removals": [],
+  "additions": [
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "requestVideoFrameCallback",
+      "prevProperty": "requestPictureInPicture",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 1
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "requestVideoFrameCallback"
+        },
+        "_$type": "function",
+        "_$function": "function requestVideoFrameCallback() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": [
+          "c",
+          "e",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "cancelVideoFrameCallback",
+      "prevProperty": "requestVideoFrameCallback",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": 1
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": [
+            "c"
+          ],
+          "_$value": "cancelVideoFrameCallback"
+        },
+        "_$type": "function",
+        "_$function": "function cancelVideoFrameCallback() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": [
+          "c",
+          "e",
+          "w"
+        ]
+      }
+    },
+    {
+      "path": "window.Notification.prototype",
+      "propertyName": "image",
+      "prevProperty": "close",
+      "property": {
+        "_$flags": [
+          "c",
+          "e"
+        ],
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get image() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      }
+    }
+  ],
+  "order": [],
+  "changes": []
+}

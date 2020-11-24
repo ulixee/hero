@@ -1,5 +1,4 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import navigatorJson from '@secret-agent/emulate-chrome-80/navigator.json';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import Core from '@secret-agent/core';
@@ -8,6 +7,7 @@ import Log from '@secret-agent/commons/Logger';
 import pluginsChrome from './plugins-Chrome.json';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
+import navigatorJson from '@secret-agent/emulate-chrome-80/data/mac-os-10-14/window-navigator.json';
 
 const { log } = Log(module);
 

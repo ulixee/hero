@@ -52,49 +52,53 @@ test('it should be able to add polyfills', async () => {
 
   const objectTestProperties = {
     length: {
-      _type: 'number',
-      _flags: 'c',
-      _value: 0,
+      _$type: 'number',
+      _$flags: ['c'],
+      _$value: 0,
     },
     name: {
-      _type: 'string',
-      _flags: 'c',
-      _value: 'ObjectTest',
+      _$type: 'string',
+      _$flags: ['c'],
+      _$value: 'ObjectTest',
     },
     arguments: {
-      _type: 'object',
-      _flags: '',
-      _value: null,
+      _$type: 'object',
+      _$flags: [],
+      _$value: null,
     },
     caller: {
-      _type: 'object',
-      _flags: '',
-      _value: null,
+      _$type: 'object',
+      _$flags: [],
+      _$value: null,
     },
     prototype: {
-      _protos: ['Object.prototype'],
+      _$protos: ['Object.prototype'],
       creationTime: {
-        _flags: 'ce',
-        _accessException: 'TypeError: Illegal invocation',
-        _get: 'function get creationTime() { [native code] }',
-        _getToStringToString: 'function toString() { [native code] }',
+        _$flags: ['c', 'e'],
+        _$accessException: 'TypeError: Illegal invocation',
+        _$get: 'function get creationTime() { [native code] }',
+        _$getToStringToString: 'function toString() { [native code] }',
       },
       'Symbol(Symbol.toStringTag)': {
-        _type: 'string',
-        _flags: 'c',
-        _value: 'ObjectTest',
+        _$type: 'string',
+        _$flags: ['c'],
+        _$value: 'ObjectTest',
       },
-      _type: 'object',
-      _flags: '',
+      _$type: 'object',
+      _$flags: [],
     },
-    'new()': 'TypeError: Illegal constructor',
-    _function: 'function ObjectTest() { [native code] }',
-    _flags: 'cw',
+    'new()': {
+      _$constructorException: "TypeError: Cannot read property '0' of undefined",
+      _$type: 'constructor',
+    },
+    _$type: 'function',
+    _$function: 'function ObjectTest() { [native code] }',
+    _$flags: ['c', 'w'],
   };
   const chromeProperty = {
-    _flags: 'ce',
-    _type: 'string',
-    _value: 'I am chrome',
+    _$flags: ['c', 'e'],
+    _$type: 'string',
+    _$value: 'I am chrome',
   };
   await page.addNewDocumentScript(
     getOverrideScript('polyfill.additions', {
@@ -163,12 +167,12 @@ test('it should be able to change properties', async () => {
       changes: [
         {
           path: 'window.Navigator.prototype.registerProtocolHandler.name',
-          propertyName: '_value',
+          propertyName: '_$value',
           property: 'notTheRightName',
         },
         {
           path: 'window.Navigator.prototype.registerProtocolHandler',
-          propertyName: '_function',
+          propertyName: '_$function',
           property: 'function registerProtocolHandler() { [unnative code] }',
         },
       ],

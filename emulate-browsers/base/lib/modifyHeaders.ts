@@ -1,4 +1,3 @@
-import IUserAgent from '@secret-agent/core-interfaces/IUserAgent';
 import OriginType from '@secret-agent/core-interfaces/OriginType';
 import Log from '@secret-agent/commons/Logger';
 import { IResourceToModify } from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
@@ -8,7 +7,7 @@ import { pickRandom } from '@secret-agent/commons/utils';
 const { log } = Log(module);
 
 export default function modifyHeaders(
-  userAgent: IUserAgent,
+  userAgent: string,
   headerProfiles: IResourceHeaderDefaults,
   hasCustomLocale: boolean,
   resource: IResourceToModify,
@@ -18,7 +17,7 @@ export default function modifyHeaders(
   const { headers, lowerHeaders } = resource;
   if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
     for (const [header, value] of Object.entries(headers)) {
-      if (header.match(/user-agent/i) && value !== userAgent.raw) {
+      if (header.match(/user-agent/i) && value !== userAgent) {
         headers[header] = value;
       }
     }
@@ -42,8 +41,8 @@ export default function modifyHeaders(
       }
     }
 
-    if (headerName.match(/user-agent/i) && value !== userAgent.raw) {
-      value = userAgent.raw;
+    if (headerName.match(/user-agent/i) && value !== userAgent) {
+      value = userAgent;
     }
     if (value) {
       headerList.push([headerName, value]);
