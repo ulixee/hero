@@ -34,6 +34,12 @@ export default class ReplayView extends ViewBackend {
     this.interceptHttpRequests();
     this.playbarView = new PlaybarView(window);
     this.checkResponsive = this.checkResponsive.bind(this);
+
+    let resizeTimeout;
+    this.window.browserWindow.on('resize', () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => this.sizeWebContentsToFit(), 20);
+    });
   }
 
   public async load(replayApi: ReplayApi) {
@@ -67,15 +73,12 @@ export default class ReplayView extends ViewBackend {
 
     this.browserView.setBackgroundColor('#ffffff');
 
-    // eslint-disable-next-line promise/always-return
-    await this.webContents
-      .loadURL(this.tabState.startOrigin)
-      .then(() => this.sizeWebContentsToFit());
-    let resizeTimeout;
-    this.window.browserWindow.on('resize', () => {
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => this.sizeWebContentsToFit(), 20);
-    });
+    await Promise.race([
+      this.webContents.loadURL(this.tabState.startOrigin),
+      new Promise(resolve => setTimeout(resolve, 500)),
+    ]);
+
+    this.sizeWebContentsToFit();
 
     if (this.tabState.currentPlaybarOffsetPct > 0) {
       console.log('Resetting playbar offset to %s%', this.tabState.currentPlaybarOffsetPct);
@@ -131,24 +134,29 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async nextTick() {
-    if (!this.tabState) return { playbarOffset: 0 };
-    const startTime = new Date();
-    // calculate when client should request the next tick
-    let millisToNextTick = 50;
+    try {
+      if (!this.tabState) return { playbarOffset: 0, millisToNextTick: 100 };
+      const startTime = new Date();
+      // calculate when client should request the next tick
+      let millisToNextTick = 50;
 
-    const events = this.tabState.transitionToNextTick();
-    await this.publishTickChanges(events);
-    setImmediate(() => this.checkResponsive());
+      const events = this.tabState.transitionToNextTick();
+      await this.publishTickChanges(events);
+      setImmediate(() => this.checkResponsive());
 
-    if (this.tabState.currentTick && this.tabState.nextTick) {
-      const nextTickTime = new Date(this.tabState.nextTick.timestamp);
-      const currentTickTime = new Date(this.tabState.currentTick.timestamp);
-      const diff = nextTickTime.getTime() - currentTickTime.getTime();
-      const fnDuration = new Date().getTime() - startTime.getTime();
-      millisToNextTick = Math.max(diff - fnDuration, 0);
+      if (this.tabState.currentTick && this.tabState.nextTick) {
+        const nextTickTime = new Date(this.tabState.nextTick.timestamp);
+        const currentTickTime = new Date(this.tabState.currentTick.timestamp);
+        const diff = nextTickTime.getTime() - currentTickTime.getTime();
+        const fnDuration = new Date().getTime() - startTime.getTime();
+        millisToNextTick = Math.max(diff - fnDuration, 0);
+      }
+
+      return { playbarOffset: this.tabState.currentPlaybarOffsetPct, millisToNextTick };
+    } catch (err) {
+      console.log('ERROR getting next tick', err);
+      return { playbarOffset: this.tabState.currentPlaybarOffsetPct, millisToNextTick: 100 };
     }
-
-    return { playbarOffset: this.tabState.currentPlaybarOffsetPct, millisToNextTick };
   }
 
   public destroy() {
@@ -158,6 +166,7 @@ export default class ReplayView extends ViewBackend {
   }
 
   public sizeWebContentsToFit() {
+    if (!this.tabState) return;
     const screenSize = this.browserView.getBounds();
 
     const viewSize = {
@@ -198,8 +207,10 @@ export default class ReplayView extends ViewBackend {
       domChanges[0].frameIdPath === 'main'
     ) {
       const nav = domChanges.shift();
-      console.log('Navigating to url', nav.textContent);
-      await this.webContents.loadURL(nav.textContent);
+      await Promise.race([
+        this.webContents.loadURL(nav.textContent),
+        new Promise(resolve => setTimeout(resolve, 500)),
+      ]);
     }
     this.webContents.send('dom:apply', ...events);
     this.window.setAddressBarUrl(this.tabState.urlOrigin);
