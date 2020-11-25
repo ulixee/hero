@@ -36,8 +36,13 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
     });
   }
 
-  public resourceLoadedForLocation(resourceId: number) {
+  public resourceLoadedForLocation(resourceId: number, statusCode: number, error?: Error) {
     if (!this.top || this.top.resourceId.isResolved) return;
+    if (statusCode >= 400 || error) {
+      // since we don't know if there are listeners yet, we need to just set the error on the return value
+      // otherwise, get unhandledrejections
+      this.top.navigationError = error ?? new Error('Failed to load url');
+    }
     this.top.resourceId.resolve(resourceId);
   }
 

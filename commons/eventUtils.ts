@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
 import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
-import { IBoundLog} from "@secret-agent/core-interfaces/ILog";
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { createPromise } from './utils';
 import IPendingWaitEvent, { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
-
 
 export function addEventListener(
   emitter: EventEmitter,
@@ -246,7 +245,18 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   private logEvent<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]) {
     if (this.eventsToLog.has(eventType)) {
       const data: any = { eventType };
-      if (event) data.eventBody = event;
+      if (event) {
+        data.eventBody = event;
+        if (typeof event === 'object') {
+          data.eventBody = { ...event };
+          for (const [key, val] of Object.entries(data.eventBody)) {
+            if (!val) continue;
+            if ((val as any).toJSON) {
+              data.eventBody[key] = (val as any).toJSON();
+            }
+          }
+        }
+      }
       this.logger?.stats('emit', data);
     }
   }

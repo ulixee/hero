@@ -356,7 +356,7 @@ export default class Core implements ICore {
   }
 
   public static registerSignalHandlers() {
-    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+    ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
       process.once(name as Signals, async () => {
         await Core.shutdown();
         process.exit(0);

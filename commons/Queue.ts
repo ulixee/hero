@@ -4,7 +4,7 @@ import { createPromise } from './utils';
 type Callback<T> = (value?: any) => Promise<T>;
 
 export default class Queue {
-  private queue: { promise: IResolvablePromise; cb: Callback<any> }[] = [];
+  private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
   private active = false;
 
   public run<T>(cb: Callback<T>) {
@@ -13,6 +13,10 @@ export default class Queue {
     this.queue.push({
       promise,
       cb,
+      startStack: new Error('').stack
+        .split('\n')
+        .slice(1)
+        .join('\n'),
     });
     setImmediate(() => this.next());
     return promise.promise;
@@ -35,6 +39,7 @@ export default class Queue {
       const res = await next.cb();
       next.promise.resolve(res);
     } catch (error) {
+      error.stack = `${error.stack}\n-----QUEUE-----\n${next.startStack}`;
       next.promise.reject(error);
     } finally {
       this.active = false;

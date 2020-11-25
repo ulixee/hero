@@ -5,6 +5,7 @@ export default interface INavigation {
   id: number;
   frameId: string;
   resourceId: IResolvablePromise<number>;
+  navigationError?: Error;
   startCommandId: number;
   requestedUrl: string;
   initiatedTime: Date;
@@ -13,7 +14,12 @@ export default interface INavigation {
   stateChanges: Map<IPipelineStatus, Date>;
 }
 
-export type NavigationReason = DevToolsNavigationReason | 'goto' | 'userGesture' | 'inPage' | 'newTab';
+export type NavigationReason =
+  | DevToolsNavigationReason
+  | 'goto'
+  | 'userGesture'
+  | 'inPage'
+  | 'newTab';
 
 type DevToolsNavigationReason =
   | 'formSubmissionGet'

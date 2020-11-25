@@ -1,31 +1,38 @@
 // setup must go first
-import "./lib/SetupAwaitedHandler";
+import './lib/SetupAwaitedHandler';
 
-import { ILocationTrigger, LocationStatus } from "@secret-agent/core-interfaces/Location";
-import { RenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
-import initializeConstantsAndProperties from "awaited-dom/base/initializeConstantsAndProperties";
-import { IRequestInit } from "awaited-dom/base/interfaces/official";
-import { ISuperElement } from "awaited-dom/base/interfaces/super";
-import IDomStorage from "@secret-agent/core-interfaces/IDomStorage";
-import ISessionOptions from "@secret-agent/core-interfaces/ISessionOptions";
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import IWaitForResourceOptions from "@secret-agent/core-interfaces/IWaitForResourceOptions";
-import IWaitForElementOptions from "@secret-agent/core-interfaces/IWaitForElementOptions";
-import StateMachine from "awaited-dom/base/StateMachine";
-import Request from "awaited-dom/impl/official-klasses/Request";
-import { bindFunctions } from "@secret-agent/commons/utils";
-import ICreateSessionOptions from "@secret-agent/core-interfaces/ICreateSessionOptions";
-import ICreateSecretAgentOptions from "./interfaces/ICreateSecretAgentOptions";
-import CoreClient from "./lib/CoreClient";
-import ISecretAgentClass, { ISecretAgentConfigureOptions, SecretAgentStatics } from "./interfaces/ISecretAgentClass";
-import ISecretAgent, { ISecretAgentEvents } from "./interfaces/ISecretAgent";
-import CoreTab from "./lib/CoreTab";
-import Tab, { createTab, getCoreTab } from "./lib/Tab";
-import IInteractions, { Command, IMousePosition, ITypeInteraction } from "./interfaces/IInteractions";
-import Interactor from "./lib/Interactor";
-import IWaitForResourceFilter from "./interfaces/IWaitForResourceFilter";
-import AwaitedEventTarget from "./lib/AwaitedEventTarget";
-import ScriptInstance from "./lib/ScriptInstance";
+import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { RenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
+import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import { IRequestInit } from 'awaited-dom/base/interfaces/official';
+import { ISuperElement } from 'awaited-dom/base/interfaces/super';
+import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
+import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import StateMachine from 'awaited-dom/base/StateMachine';
+import Request from 'awaited-dom/impl/official-klasses/Request';
+import { bindFunctions } from '@secret-agent/commons/utils';
+import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateSecretAgentOptions from './interfaces/ICreateSecretAgentOptions';
+import CoreClient from './lib/CoreClient';
+import ISecretAgentClass, {
+  ISecretAgentConfigureOptions,
+  SecretAgentStatics,
+} from './interfaces/ISecretAgentClass';
+import ISecretAgent, { ISecretAgentEvents } from './interfaces/ISecretAgent';
+import CoreTab from './lib/CoreTab';
+import Tab, { createTab, getCoreTab } from './lib/Tab';
+import IInteractions, {
+  Command,
+  IMousePosition,
+  ITypeInteraction,
+} from './interfaces/IInteractions';
+import Interactor from './lib/Interactor';
+import IWaitForResourceFilter from './interfaces/IWaitForResourceFilter';
+import AwaitedEventTarget from './lib/AwaitedEventTarget';
+import ScriptInstance from './lib/ScriptInstance';
 import Signals = NodeJS.Signals;
 
 const DefaultOptions = {
@@ -211,19 +218,19 @@ export function SecretAgentClientGenerator(
 
     /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-    public async goto(href: string) {
+    public goto(href: string) {
       return this.activeTab.goto(href);
     }
 
-    public async goBack() {
+    public goBack() {
       return this.activeTab.goBack();
     }
 
-    public async goForward() {
+    public goForward() {
       return this.activeTab.goForward();
     }
 
-    public async fetch(request: Request | string, init?: IRequestInit) {
+    public fetch(request: Request | string, init?: IRequestInit) {
       return this.activeTab.fetch(request, init);
     }
 
@@ -235,30 +242,27 @@ export function SecretAgentClientGenerator(
       return this.activeTab.isElementVisible(element);
     }
 
-    public async waitForAllContentLoaded() {
+    public waitForAllContentLoaded() {
       return this.activeTab.waitForAllContentLoaded();
     }
 
-    public async waitForResource(
-      filter: IWaitForResourceFilter,
-      options?: IWaitForResourceOptions,
-    ) {
+    public waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
       return this.activeTab.waitForResource(filter, options);
     }
 
-    public async waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
+    public waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
       return this.activeTab.waitForElement(element, options);
     }
 
-    public async waitForLocation(trigger: ILocationTrigger) {
+    public waitForLocation(trigger: ILocationTrigger) {
       return this.activeTab.waitForLocation(trigger);
     }
 
-    public async waitForMillis(millis: number) {
+    public waitForMillis(millis: number) {
       return this.activeTab.waitForMillis(millis);
     }
 
-    public async waitForWebSocket(url: string | RegExp) {
+    public waitForWebSocket(url: string | RegExp) {
       return this.activeTab.waitForWebSocket(url);
     }
 
@@ -291,13 +295,13 @@ export function SecretAgentClientGenerator(
     }
   }
 
-  if (initArgs?.handleShutdownSignals ?? true) {
+  if (initArgs?.handleShutdownSignals) {
     ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
       process.once(name as Signals, async () => await SecretAgent.shutdown());
     });
   }
 
-  if (initArgs?.captureUncaughtClientErrors ?? true) {
+  if (initArgs?.captureUncaughtClientErrors) {
     process.on('uncaughtException', async (error: Error) => {
       // keep core node behavior intact
       process.stderr.write(`${error.stack}\n`);

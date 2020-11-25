@@ -212,6 +212,11 @@ export default class SessionState {
   ) {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
+
+    const navigations = this.navigationsByTabId[tabId];
+    if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
+      navigations.resourceLoadedForLocation(resource.id, resource.response?.statusCode, error);
+    }
   }
 
   public captureResource(
@@ -227,7 +232,7 @@ export default class SessionState {
     if (isResponse) {
       const navigations = this.navigationsByTabId[tabId];
       if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
-        navigations.resourceLoadedForLocation(resource.id);
+        navigations.resourceLoadedForLocation(resource.id, resource.response?.statusCode);
       }
       this.resources.push(resource);
     }

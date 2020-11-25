@@ -1,15 +1,15 @@
-import { assert } from "@secret-agent/commons/utils";
+import { assert } from '@secret-agent/commons/utils';
 import {
   ILocationStatus,
   IPipelineStatus,
   IPipelineStep,
   LocationStatus,
   LocationTrigger,
-  PipelineStatus
-} from "@secret-agent/core-interfaces/Location";
-import INavigation, { NavigationReason } from "@secret-agent/core-interfaces/INavigation";
-import ICommandMeta from "@secret-agent/core-interfaces/ICommandMeta";
-import TabNavigations from "@secret-agent/session-state/lib/TabNavigations";
+  PipelineStatus,
+} from '@secret-agent/core-interfaces/Location';
+import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
+import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
+import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
 
 const READY = 'READY';
 
@@ -63,8 +63,12 @@ export default class LocationTracker {
     }
   }
 
-  public waitForLocationResourceId() {
-    return this.navigations.top?.resourceId.promise;
+  public async waitForLocationResourceId() {
+    const resourceId = await this.navigations.top?.resourceId?.promise;
+    if (this.navigations.top?.navigationError) {
+      throw this.navigations.top.navigationError;
+    }
+    return resourceId;
   }
 
   public waitFor(
