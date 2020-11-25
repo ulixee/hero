@@ -69,6 +69,7 @@ const platformToOsName = {
   sunos: 'linux',
 }
 
+// pulled the following from https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
 const darwinToMacOsVersionMap = {
   '7.0': '10.3.0',
   '7.9': '10.3.9',
