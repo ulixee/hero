@@ -27,6 +27,7 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
+import config from './data/config.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');
@@ -37,7 +38,7 @@ const cookieCallbackName = 'SecretAgentSetCookie';
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
   public static id = pkg.name;
-  public static roundRobinPercent = 0; // TODO: Import from json
+  public static roundRobinPercent: number = (config as any).marketshare;
 
   public static engine = {
     ...pkg.engine,
@@ -46,7 +47,7 @@ export default class Safari13 {
 
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
-  public canPolyfill: boolean = false;
+  public canPolyfill = false;
 
   public set locale(value: string) {
     this._locale = value;

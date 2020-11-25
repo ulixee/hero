@@ -17,6 +17,7 @@ import { pickRandom } from '@secret-agent/commons/utils';
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
+import config from './data/config.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowChromeData = new DataLoader(`${__dirname}/data`, 'window-chrome');
@@ -27,7 +28,7 @@ const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 @BrowserEmulatorClassDecorator
 export default class Chrome80 {
   public static id = pkg.name;
-  public static roundRobinPercent = 0; // TODO; Import from json
+  public static roundRobinPercent: number = (config as any).marketshare;
 
   public static engine = {
     ...pkg.engine,
