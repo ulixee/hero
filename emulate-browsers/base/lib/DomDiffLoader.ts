@@ -30,7 +30,7 @@ function extractFilename(filenames: string[]) {
   for (const filename of filenames) {
     const matches = filename.match(/^dom-diffs-when-using-([a-z-]+)(-([0-9-]+))?.json$/);
     if (!matches) continue;
-    const [osName, _, osVersion] = matches.slice(1);
+    const [osName, _, osVersion] = matches.slice(1); // eslint-disable-line @typescript-eslint/naming-convention
     filenameMap[osName] = filenameMap[osName] || {};
     filenameMap[osName][osVersion || 'ALL'] = filename;
   }
