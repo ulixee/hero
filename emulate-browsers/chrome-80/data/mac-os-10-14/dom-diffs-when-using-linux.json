@@ -12,10 +12,7 @@
       "propertyName": "bluetooth",
       "prevProperty": "presentation",
       "property": {
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$accessException": "TypeError: Illegal invocation",
         "_$get": "function get bluetooth() { [native code] }",
         "_$getToStringToString": "function toString() { [native code] }"
@@ -28,16 +25,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothUUID"
         },
         "arguments": {
@@ -51,14 +44,10 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothUUID"
           },
           "_$type": "object",
@@ -67,98 +56,66 @@
         "getService": {
           "length": {
             "_$type": "number",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": 1
           },
           "name": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "getService"
           },
           "_$type": "function",
           "_$function": "function getService() { [native code] }",
           "_$invocation": "TypeError: Failed to execute 'getService' on 'BluetoothUUID': 1 argument required, but only 0 present.",
-          "_$flags": [
-            "c",
-            "e",
-            "w"
-          ]
+          "_$flags": ["c", "e", "w"]
         },
         "getCharacteristic": {
           "length": {
             "_$type": "number",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": 1
           },
           "name": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "getCharacteristic"
           },
           "_$type": "function",
           "_$function": "function getCharacteristic() { [native code] }",
           "_$invocation": "TypeError: Failed to execute 'getCharacteristic' on 'BluetoothUUID': 1 argument required, but only 0 present.",
-          "_$flags": [
-            "c",
-            "e",
-            "w"
-          ]
+          "_$flags": ["c", "e", "w"]
         },
         "getDescriptor": {
           "length": {
             "_$type": "number",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": 1
           },
           "name": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "getDescriptor"
           },
           "_$type": "function",
           "_$function": "function getDescriptor() { [native code] }",
           "_$invocation": "TypeError: Failed to execute 'getDescriptor' on 'BluetoothUUID': 1 argument required, but only 0 present.",
-          "_$flags": [
-            "c",
-            "e",
-            "w"
-          ]
+          "_$flags": ["c", "e", "w"]
         },
         "canonicalUUID": {
           "length": {
             "_$type": "number",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": 1
           },
           "name": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "canonicalUUID"
           },
           "_$type": "function",
           "_$function": "function canonicalUUID() { [native code] }",
           "_$invocation": "TypeError: Failed to execute 'canonicalUUID' on 'BluetoothUUID': 1 argument required, but only 0 present.",
-          "_$flags": [
-            "c",
-            "e",
-            "w"
-          ]
+          "_$flags": ["c", "e", "w"]
         },
         "new()": {
           "_$type": "constructor",
@@ -166,10 +123,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothUUID() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -179,16 +133,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "Bluetooth"
         },
         "arguments": {
@@ -202,63 +152,42 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "EventTarget.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["EventTarget.prototype", "Object.prototype"],
           "getAvailability": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getAvailability' on 'Bluetooth': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "requestDevice": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'requestDevice' on 'Bluetooth': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "Bluetooth"
           }
         },
@@ -268,10 +197,7 @@
         },
         "_$type": "function",
         "_$function": "function Bluetooth() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -281,16 +207,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothCharacteristicProperties"
         },
         "arguments": {
@@ -304,95 +226,64 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "authenticatedSignedWrites": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get authenticatedSignedWrites() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "broadcast": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get broadcast() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "indicate": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get indicate() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "notify": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get notify() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "read": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get read() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "reliableWrite": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get reliableWrite() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "writableAuxiliaries": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get writableAuxiliaries() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "write": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get write() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "writeWithoutResponse": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get writeWithoutResponse() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothCharacteristicProperties"
           },
           "_$type": "object",
@@ -404,10 +295,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothCharacteristicProperties() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -417,16 +305,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothDevice"
         },
         "arguments": {
@@ -440,42 +324,27 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "EventTarget.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["EventTarget.prototype", "Object.prototype"],
           "id": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get id() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "name": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get name() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "gatt": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get gatt() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "ongattserverdisconnected": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get ongattserverdisconnected() { [native code] }",
             "_$set": "function set ongattserverdisconnected() { [native code] }",
@@ -484,9 +353,7 @@
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothDevice"
           },
           "_$type": "object",
@@ -498,10 +365,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothDevice() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -511,16 +375,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothRemoteGATTCharacteristic"
         },
         "arguments": {
@@ -534,51 +394,33 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "EventTarget.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["EventTarget.prototype", "Object.prototype"],
           "uuid": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get uuid() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "properties": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get properties() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "service": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get service() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "value": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get value() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "oncharacteristicvaluechanged": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get oncharacteristicvaluechanged() { [native code] }",
             "_$set": "function set oncharacteristicvaluechanged() { [native code] }",
@@ -588,152 +430,102 @@
           "getDescriptor": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getDescriptor' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "getDescriptors": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getDescriptors' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "readValue": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'readValue' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "writeValue": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'writeValue' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "startNotifications": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'startNotifications' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "stopNotifications": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'stopNotifications' on 'BluetoothRemoteGATTCharacteristic': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothRemoteGATTCharacteristic"
           },
           "_$type": "object",
@@ -745,10 +537,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothRemoteGATTCharacteristic() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -758,16 +547,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothRemoteGATTDescriptor"
         },
         "arguments": {
@@ -781,32 +566,21 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "uuid": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get uuid() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "characteristic": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get characteristic() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "value": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get value() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
@@ -814,56 +588,38 @@
           "readValue": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'readValue' on 'BluetoothRemoteGATTDescriptor': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "writeValue": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'writeValue' on 'BluetoothRemoteGATTDescriptor': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothRemoteGATTDescriptor"
           },
           "_$type": "object",
@@ -875,10 +631,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothRemoteGATTDescriptor() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -888,16 +641,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothRemoteGATTServer"
         },
         "arguments": {
@@ -911,23 +660,15 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "connected": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get connected() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "device": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get device() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
@@ -935,104 +676,70 @@
           "connect": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'connect' on 'BluetoothRemoteGATTServer': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "disconnect": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "getPrimaryService": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getPrimaryService' on 'BluetoothRemoteGATTServer': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "getPrimaryServices": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getPrimaryServices' on 'BluetoothRemoteGATTServer': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothRemoteGATTServer"
           },
           "_$type": "object",
@@ -1044,10 +751,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothRemoteGATTServer() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -1057,16 +761,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BluetoothRemoteGATTService"
         },
         "arguments": {
@@ -1080,32 +780,21 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "isPrimary": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get isPrimary() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "uuid": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get uuid() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "device": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get device() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
@@ -1113,56 +802,38 @@
           "getCharacteristic": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getCharacteristic' on 'BluetoothRemoteGATTService': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "getCharacteristics": {
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": ""
             },
             "_$type": "function",
             "_$function": "function () { [native code] }",
             "_$invocation": "TypeError: Failed to execute 'getCharacteristics' on 'BluetoothRemoteGATTService': Illegal invocation",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "BluetoothRemoteGATTService"
           },
           "_$type": "object",
@@ -1174,10 +845,7 @@
         },
         "_$type": "function",
         "_$function": "function BluetoothRemoteGATTService() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -1185,31 +853,11 @@
       "propertyName": "bluetooth",
       "prevProperty": "presentation",
       "property": {
-        "_$protos": [
-          "Bluetooth.prototype",
-          "EventTarget.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["Bluetooth.prototype", "EventTarget.prototype", "Object.prototype"],
         "_$type": "object"
       }
     }
   ],
   "order": [],
-  "changes": [
-    {
-      "path": "window.webkitMediaStream.new().id",
-      "propertyName": "_$value",
-      "property": "49e9ade4-99c6-4b15-a35b-593b7ae1bf23"
-    },
-    {
-      "path": "window.document.readyState",
-      "propertyName": "_$value",
-      "property": "complete"
-    },
-    {
-      "path": "window.navigator.connection.rtt",
-      "propertyName": "_$value",
-      "property": 100
-    }
-  ]
+  "changes": []
 }

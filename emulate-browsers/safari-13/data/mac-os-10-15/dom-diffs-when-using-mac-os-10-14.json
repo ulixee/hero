@@ -627,10 +627,7 @@
       "propertyName": "onended",
       "prevProperty": "loopEnd",
       "property": {
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$accessException": "TypeError: The AudioBufferSourceNode.onended getter can only be used on instances of AudioBufferSourceNode",
         "_$get": "function onended() {\n    [native code]\n}",
         "_$set": "function onended() {\n    [native code]\n}",
@@ -645,26 +642,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "stop"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function stop() {\n    [native code]\n}",
         "_$invocation": "TypeError: Can only call AudioBufferSourceNode.stop on instances of AudioBufferSourceNode",
-        "_$flags": [
-          "c",
-          "e",
-          "w"
-        ]
+        "_$flags": ["c", "e", "w"]
       }
     },
     {
@@ -673,16 +662,9 @@
       "prevProperty": "webkitOfflineAudioContext",
       "property": {
         "prototype": {
-          "_$protos": [
-            "AudioNode.prototype",
-            "EventTarget.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["AudioNode.prototype", "EventTarget.prototype", "Object.prototype"],
           "type": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The OscillatorNode.type getter can only be used on instances of OscillatorNode",
             "_$get": "function type() {\n    [native code]\n}",
             "_$set": "function type() {\n    [native code]\n}",
@@ -690,37 +672,25 @@
             "_$setToStringToString": "function toString() {\n    [native code]\n}"
           },
           "playbackState": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The OscillatorNode.playbackState getter can only be used on instances of OscillatorNode",
             "_$get": "function playbackState() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "frequency": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The OscillatorNode.frequency getter can only be used on instances of OscillatorNode",
             "_$get": "function frequency() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "detune": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The OscillatorNode.detune getter can only be used on instances of OscillatorNode",
             "_$get": "function detune() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "onended": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The OscillatorNode.onended getter can only be used on instances of OscillatorNode",
             "_$get": "function onended() {\n    [native code]\n}",
             "_$set": "function onended() {\n    [native code]\n}",
@@ -730,101 +700,69 @@
           "start": {
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": "start"
             },
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "_$type": "function",
             "_$function": "function start() {\n    [native code]\n}",
             "_$invocation": "TypeError: Can only call OscillatorNode.start on instances of OscillatorNode",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "stop": {
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": "stop"
             },
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 0
             },
             "_$type": "function",
             "_$function": "function stop() {\n    [native code]\n}",
             "_$invocation": "TypeError: Can only call OscillatorNode.stop on instances of OscillatorNode",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "setPeriodicWave": {
             "name": {
               "_$type": "string",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": "setPeriodicWave"
             },
             "length": {
               "_$type": "number",
-              "_$flags": [
-                "c"
-              ],
+              "_$flags": ["c"],
               "_$value": 1
             },
             "_$type": "function",
             "_$function": "function setPeriodicWave() {\n    [native code]\n}",
             "_$invocation": "TypeError: Can only call OscillatorNode.setPeriodicWave on instances of OscillatorNode",
-            "_$flags": [
-              "c",
-              "e",
-              "w"
-            ]
+            "_$flags": ["c", "e", "w"]
           },
           "UNSCHEDULED_STATE": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 0
           },
           "SCHEDULED_STATE": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 1
           },
           "PLAYING_STATE": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 2
           },
           "FINISHED_STATE": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 3
           },
           "_$type": "object",
@@ -832,44 +770,32 @@
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "OscillatorNode"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "UNSCHEDULED_STATE": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 0
         },
         "SCHEDULED_STATE": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 1
         },
         "PLAYING_STATE": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 2
         },
         "FINISHED_STATE": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 3
         },
         "new()": {
@@ -878,10 +804,7 @@
         },
         "_$type": "function",
         "_$function": "function OscillatorNode() {\n    [native code]\n}",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -890,59 +813,39 @@
       "prevProperty": "CloseEvent",
       "property": {
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "position": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.position getter can only be used on instances of VRPose",
             "_$get": "function position() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "linearVelocity": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.linearVelocity getter can only be used on instances of VRPose",
             "_$get": "function linearVelocity() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "linearAcceleration": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.linearAcceleration getter can only be used on instances of VRPose",
             "_$get": "function linearAcceleration() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "orientation": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.orientation getter can only be used on instances of VRPose",
             "_$get": "function orientation() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "angularVelocity": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.angularVelocity getter can only be used on instances of VRPose",
             "_$get": "function angularVelocity() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "angularAcceleration": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The VRPose.angularAcceleration getter can only be used on instances of VRPose",
             "_$get": "function angularAcceleration() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
@@ -952,16 +855,12 @@
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "VRPose"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "new()": {
@@ -970,10 +869,7 @@
         },
         "_$type": "function",
         "_$function": "function VRPose() {\n    [native code]\n}",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -982,15 +878,9 @@
       "prevProperty": "Attr",
       "property": {
         "prototype": {
-          "_$protos": [
-            "Event.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["Event.prototype", "Object.prototype"],
           "url": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The BeforeLoadEvent.url getter can only be used on instances of BeforeLoadEvent",
             "_$get": "function url() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
@@ -1016,16 +906,12 @@
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "BeforeLoadEvent"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 1
         },
         "NONE": {
@@ -1050,10 +936,7 @@
         },
         "_$type": "function",
         "_$function": "function BeforeLoadEvent() {\n    [native code]\n}",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -1061,10 +944,7 @@
       "propertyName": "origin",
       "prevProperty": "documentURI",
       "property": {
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$accessException": "TypeError: The Document.origin getter can only be used on instances of Document",
         "_$get": "function origin() {\n    [native code]\n}",
         "_$getToStringToString": "function toString() {\n    [native code]\n}"
@@ -1090,10 +970,7 @@
       "propertyName": "dataTransfer",
       "prevProperty": "toElement",
       "property": {
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$accessException": "TypeError: The MouseEvent.dataTransfer getter can only be used on instances of MouseEvent",
         "_$get": "function dataTransfer() {\n    [native code]\n}",
         "_$getToStringToString": "function toString() {\n    [native code]\n}"
@@ -1117,100 +994,71 @@
       "prevProperty": "File",
       "property": {
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "code": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: The FileError.code getter can only be used on instances of FileError",
             "_$get": "function code() {\n    [native code]\n}",
             "_$getToStringToString": "function toString() {\n    [native code]\n}"
           },
           "NOT_FOUND_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 1
           },
           "SECURITY_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 2
           },
           "ABORT_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 3
           },
           "NOT_READABLE_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 4
           },
           "ENCODING_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 5
           },
           "NO_MODIFICATION_ALLOWED_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 6
           },
           "INVALID_STATE_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 7
           },
           "SYNTAX_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 8
           },
           "INVALID_MODIFICATION_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 9
           },
           "QUOTA_EXCEEDED_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 10
           },
           "TYPE_MISMATCH_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 11
           },
           "PATH_EXISTS_ERR": {
             "_$type": "number",
-            "_$flags": [
-              "e"
-            ],
+            "_$flags": ["e"],
             "_$value": 12
           },
           "_$type": "object",
@@ -1218,100 +1066,72 @@
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "FileError"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "NOT_FOUND_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 1
         },
         "SECURITY_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 2
         },
         "ABORT_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 3
         },
         "NOT_READABLE_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 4
         },
         "ENCODING_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 5
         },
         "NO_MODIFICATION_ALLOWED_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 6
         },
         "INVALID_STATE_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 7
         },
         "SYNTAX_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 8
         },
         "INVALID_MODIFICATION_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 9
         },
         "QUOTA_EXCEEDED_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 10
         },
         "TYPE_MISMATCH_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 11
         },
         "PATH_EXISTS_ERR": {
           "_$type": "number",
-          "_$flags": [
-            "e"
-          ],
+          "_$flags": ["e"],
           "_$value": 12
         },
         "new()": {
@@ -1320,10 +1140,7 @@
         },
         "_$type": "function",
         "_$function": "function FileError() {\n    [native code]\n}",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -1332,24 +1149,18 @@
       "prevProperty": "WebGLTexture",
       "property": {
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "_$type": "object",
           "_$flags": []
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "WebGLTransformFeedback"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "new()": {
@@ -1358,10 +1169,7 @@
         },
         "_$type": "function",
         "_$function": "function WebGLTransformFeedback() {\n    [native code]\n}",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -1369,10 +1177,7 @@
       "propertyName": "supportsInstallments",
       "prevProperty": "state",
       "property": {
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$accessException": "TypeError: The ApplePaySetupFeature.supportsInstallments getter can only be used on instances of ApplePaySetupFeature",
         "_$get": "function supportsInstallments() {\n    [native code]\n}",
         "_$getToStringToString": "function toString() {\n    [native code]\n}"
@@ -1795,10 +1600,7 @@
       "propertyName": "WebKit built-in PDF",
       "property": {
         "0": {
-          "_$protos": [
-            "MimeType.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
           "type": {
             "_$type": "string",
             "_$value": "application/pdf"
@@ -1812,17 +1614,11 @@
             "_$value": "Portable Document Format"
           },
           "_$type": "object",
-          "_$flags": [
-            "c",
-            "e"
-          ],
+          "_$flags": ["c", "e"],
           "_$value": "[object MimeType]"
         },
         "1": {
-          "_$protos": [
-            "MimeType.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
           "type": {
             "_$type": "string",
             "_$value": "text/pdf"
@@ -1836,17 +1632,11 @@
             "_$value": "Portable Document Format"
           },
           "_$type": "object",
-          "_$flags": [
-            "c",
-            "e"
-          ],
+          "_$flags": ["c", "e"],
           "_$value": "[object MimeType]"
         },
         "2": {
-          "_$protos": [
-            "MimeType.prototype",
-            "Object.prototype"
-          ],
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
           "type": {
             "_$type": "string",
             "_$value": "application/postscript"
@@ -1860,16 +1650,10 @@
             "_$value": "PostScript"
           },
           "_$type": "object",
-          "_$flags": [
-            "c",
-            "e"
-          ],
+          "_$flags": ["c", "e"],
           "_$value": "[object MimeType]"
         },
-        "_$protos": [
-          "Plugin.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["Plugin.prototype", "Object.prototype"],
         "name": {
           "_$type": "string",
           "_$value": "WebKit built-in PDF"
@@ -1887,9 +1671,7 @@
           "_$value": 3
         },
         "_$type": "object",
-        "_$flags": [
-          "c"
-        ],
+        "_$flags": ["c"],
         "_$value": "[object Plugin]"
       }
     },
@@ -1897,10 +1679,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "0",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "application/pdf"
@@ -1914,10 +1693,7 @@
           "_$value": "Portable Document Format"
         },
         "_$type": "object",
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$value": "[object MimeType]"
       }
     },
@@ -1925,10 +1701,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "1",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "text/pdf"
@@ -1942,10 +1715,7 @@
           "_$value": "Portable Document Format"
         },
         "_$type": "object",
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$value": "[object MimeType]"
       }
     },
@@ -1953,10 +1723,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "2",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "application/postscript"
@@ -1970,10 +1737,7 @@
           "_$value": "PostScript"
         },
         "_$type": "object",
-        "_$flags": [
-          "c",
-          "e"
-        ],
+        "_$flags": ["c", "e"],
         "_$value": "[object MimeType]"
       }
     },
@@ -1981,10 +1745,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "application/pdf",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "application/pdf"
@@ -1998,9 +1759,7 @@
           "_$value": "Portable Document Format"
         },
         "_$type": "object",
-        "_$flags": [
-          "c"
-        ],
+        "_$flags": ["c"],
         "_$value": "[object MimeType]"
       }
     },
@@ -2008,10 +1767,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "text/pdf",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "text/pdf"
@@ -2025,9 +1781,7 @@
           "_$value": "Portable Document Format"
         },
         "_$type": "object",
-        "_$flags": [
-          "c"
-        ],
+        "_$flags": ["c"],
         "_$value": "[object MimeType]"
       }
     },
@@ -2035,10 +1789,7 @@
       "path": "window.navigator.mimeTypes",
       "propertyName": "application/postscript",
       "property": {
-        "_$protos": [
-          "MimeType.prototype",
-          "Object.prototype"
-        ],
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
         "type": {
           "_$type": "string",
           "_$value": "application/postscript"
@@ -2052,9 +1803,7 @@
           "_$value": "PostScript"
         },
         "_$type": "object",
-        "_$flags": [
-          "c"
-        ],
+        "_$flags": ["c"],
         "_$value": "[object MimeType]"
       }
     },
@@ -2172,11 +1921,6 @@
       "path": "window.MediaDeviceInfo.new()",
       "propertyName": "_$constructorException",
       "property": "TypeError: function is not a constructor (evaluating 'new obj()')"
-    },
-    {
-      "path": "window.MediaStream.new().id",
-      "propertyName": "_$value",
-      "property": "7c0f67ca-3550-4780-8098-da4b965e0b32"
     },
     {
       "path": "window.MediaStreamTrack.new()",
@@ -3914,25 +3658,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "EvalError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -3946,25 +3683,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "RangeError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -3978,25 +3708,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "ReferenceError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -4010,25 +3733,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "SyntaxError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -4042,25 +3758,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "TypeError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {
@@ -4074,25 +3783,18 @@
       "property": {
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "toString"
         },
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "_$type": "function",
         "_$function": "function toString() {\n    [native code]\n}",
         "_$invocation": "URIError",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     },
     {

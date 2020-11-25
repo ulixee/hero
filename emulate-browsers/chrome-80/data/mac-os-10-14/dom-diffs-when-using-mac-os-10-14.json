@@ -8,26 +8,18 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": ""
         },
         "_$type": "function",
         "_$function": "function () { [native code] }",
         "_$invocation": "TypeError: Failed to execute 'getInstalledRelatedApps' on 'Navigator': Illegal invocation",
-        "_$flags": [
-          "c",
-          "e",
-          "w"
-        ]
+        "_$flags": ["c", "e", "w"]
       }
     },
     {
@@ -37,26 +29,18 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "getVideoPlaybackQuality"
         },
         "_$type": "function",
         "_$function": "function getVideoPlaybackQuality() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
-        "_$flags": [
-          "c",
-          "e",
-          "w"
-        ]
+        "_$flags": ["c", "e", "w"]
       }
     },
     {
@@ -66,16 +50,12 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": [
-            "c"
-          ],
+          "_$flags": ["c"],
           "_$value": "VideoPlaybackQuality"
         },
         "arguments": {
@@ -89,50 +69,34 @@
           "_$value": null
         },
         "prototype": {
-          "_$protos": [
-            "Object.prototype"
-          ],
+          "_$protos": ["Object.prototype"],
           "creationTime": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get creationTime() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "totalVideoFrames": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get totalVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "droppedVideoFrames": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get droppedVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "corruptedVideoFrames": {
-            "_$flags": [
-              "c",
-              "e"
-            ],
+            "_$flags": ["c", "e"],
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get corruptedVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": [
-              "c"
-            ],
+            "_$flags": ["c"],
             "_$value": "VideoPlaybackQuality"
           },
           "_$type": "object",
@@ -144,34 +108,10 @@
         },
         "_$type": "function",
         "_$function": "function VideoPlaybackQuality() { [native code] }",
-        "_$flags": [
-          "c",
-          "w"
-        ]
+        "_$flags": ["c", "w"]
       }
     }
   ],
   "order": [],
-  "changes": [
-    {
-      "path": "window.webkitMediaStream.new().id",
-      "propertyName": "_$value",
-      "property": "49e9ade4-99c6-4b15-a35b-593b7ae1bf23"
-    },
-    {
-      "path": "window.document.readyState",
-      "propertyName": "_$value",
-      "property": "complete"
-    },
-    {
-      "path": "window.navigator.hardwareConcurrency",
-      "propertyName": "_$value",
-      "property": 4
-    },
-    {
-      "path": "window.navigator.connection.rtt",
-      "propertyName": "_$value",
-      "property": 100
-    }
-  ]
+  "changes": []
 }
