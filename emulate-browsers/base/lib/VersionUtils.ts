@@ -4,7 +4,8 @@ export function getClosestNumberMatch(numToMatch: number, nums: number[]) {
   for (const num of sortedNums) {
     if (num === numToMatch) {
       return num;
-    } else if (num < numToMatch) {
+    }
+    if (num < numToMatch) {
       closest = num;
     } else if (num > numToMatch) {
       break;
