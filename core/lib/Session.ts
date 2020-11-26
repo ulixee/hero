@@ -18,9 +18,9 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
-import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import Viewports from './Viewports';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -82,7 +82,7 @@ export default class Session {
     this.timezoneId = options.timezoneId;
     this.viewport = options.viewport;
     if (!this.viewport) {
-      this.viewport = Viewport.getMostPopular();
+      this.viewport = Viewports.getDefault(this.browserEmulator.windowFramingBase, this.browserEmulator.windowFraming);
     }
 
     const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();

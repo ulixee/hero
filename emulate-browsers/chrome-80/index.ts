@@ -14,10 +14,12 @@ import IUserAgentOption from '@secret-agent/emulate-browsers-base/interfaces/IUs
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
+import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
 import config from './data/config.json';
+import windowFramingBase from './data/window-framing.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowChromeData = new DataLoader(`${__dirname}/data`, 'window-chrome');
@@ -54,6 +56,9 @@ export default class Chrome80 {
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   public userProfile: IUserProfile;
 
+  public windowFramingBase: IWindowFraming = windowFramingBase;
+  public windowFraming: IWindowFraming;
+
   protected domOverrides = new DomOverridesBuilder();
 
   private _locale = 'en-US,en';
@@ -67,6 +72,7 @@ export default class Chrome80 {
     this.navigatorPlatform = windowNavigator.navigator.platform._$value;
     this.navigatorUserAgent = userAgentOption.string;
     this.canPolyfill = !!domDiffsData.get(userAgentOption.operatingSystemId);
+    this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
     this.networkInterceptorDelegate = {
       tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
@@ -156,15 +162,8 @@ export default class Chrome80 {
     domOverrides.add('HTMLIFrameElement.prototype');
     domOverrides.add('Element.prototype.attachShadow');
 
-    domOverrides.add('window.outerWidth');
-
-    const windowFraming = windowFramingData.get(operatingSystemId);
-    const windowFrame = windowFraming.height;
-    if (windowFrame) {
-      domOverrides.add('window.outerHeight', {
-        windowFrame,
-      });
-    }
+    domOverrides.add('window.outerWidth', { frameBorderWidth: this.windowFraming.frameBorderWidth });
+    domOverrides.add('window.outerHeight', { frameBorderHeight: this.windowFraming.frameBorderHeight });
 
     const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {

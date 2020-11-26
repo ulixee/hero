@@ -1,4 +1,8 @@
 {
-  "width": 0,
-  "height": 79
+  "screenGapLeft": 0,
+  "screenGapTop": 23,
+  "screenGapRight": 0,
+  "screenGapBottom": 4,
+  "frameBorderWidth": 0,
+  "frameBorderHeight": 79
 }

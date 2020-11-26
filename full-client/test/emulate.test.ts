@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import { GlobalPool } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
+import Viewports from '@secret-agent/core/lib/Viewports';
 import SecretAgent from '../index';
 
 let koaServer: ITestKoaServer;
@@ -105,7 +105,15 @@ describe('basic Emulator tests', () => {
 
 describe('setScreensize', () => {
   it('should set the proper viewport size', async () => {
-    const viewport = Viewport.getRandom();
+    const windowFraming = {
+      screenGapLeft: 0,
+      screenGapTop: 0,
+      screenGapRight: 0,
+      screenGapBottom: 0,
+      frameBorderWidth: 0,
+      frameBorderHeight: 0,
+    };
+    const viewport = Viewports.getDefault(windowFraming, windowFraming);
     const agent = await new SecretAgent({
       viewport,
     });

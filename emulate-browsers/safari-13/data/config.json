@@ -1,4 +1,4 @@
 {
-  "browserEngine": ["safari-14-0"],
+  "browserEngine": ["chrome-80-0", "headless"],
   "marketshare": 11.8
 }

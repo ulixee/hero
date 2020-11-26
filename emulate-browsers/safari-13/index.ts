@@ -17,17 +17,19 @@ import {
   getPublicSuffix,
   permuteDomain,
 } from 'tough-cookie';
+import { randomBytes } from 'crypto';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
 import IUserAgentOption from '@secret-agent/emulate-browsers-base/interfaces/IUserAgentOption';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
-import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
 import config from './data/config.json';
+import windowFramingBase from './data/window-framing.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');
@@ -84,6 +86,9 @@ export default class Safari13 {
     }
   }
 
+  public windowFramingBase: IWindowFraming = windowFramingBase;
+  public windowFraming: IWindowFraming;
+
   protected domOverrides = new DomOverridesBuilder();
   private _userProfile: IUserProfile;
 
@@ -104,6 +109,7 @@ export default class Safari13 {
     this.navigatorPlatform = windowNavigator.navigator.platform._$value;
     this.navigatorUserAgent = userAgentOption.string;
     this.userAgentVersion = userAgentOption.version;
+    this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
     this.networkInterceptorDelegate = {
       tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
@@ -168,15 +174,8 @@ export default class Safari13 {
 
     domOverrides.add('Element.prototype.attachShadow');
 
-    domOverrides.add('window.outerWidth');
-
-    const windowFraming = windowFramingData.get(operatingSystemId);
-    const windowFrame = windowFraming.height;
-    if (windowFrame) {
-      domOverrides.add('window.outerHeight', {
-        windowFrame,
-      });
-    }
+    domOverrides.add('window.outerWidth', { frameBorderWidth: this.windowFraming.frameBorderWidth });
+    domOverrides.add('window.outerHeight', { frameBorderHeight: this.windowFraming.frameBorderHeight });
 
     const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {

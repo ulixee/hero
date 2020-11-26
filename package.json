@@ -5,7 +5,7 @@
   "scripts": {
     "start:website": "yarn workspace @secret-agent/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
-    "build": "yarn tsc && yarn workspace @secret-agent/replay build:frontend && cd build && yarn",
+    "build": "NODE_OPTIONS=--max_old_space_size=4096 yarn tsc && yarn workspace @secret-agent/replay build:frontend && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
     "build:dist-local": "yarn build && yarn build:dist && yarn workspace @secret-agent/replay build:pack && cd build-dist && SA_REBUILD_MITM_SOCKET=1 yarn",
     "rebuild:dist": "tsc -b tsconfig.dist.json",
@@ -15,7 +15,7 @@
     "copy:build": "copyfiles \"testing/*/**\" \"examples/*.mjs\" \"injected-scripts/package.json\" \"full-client/index.mjs\" \"puppet/test/*/**\" \"yarn.lock\" \"mitm-socket/dist/*\" -a build && shx cp package.build.json build/package.json",
     "copy:dist": "copyfiles \"mitm-socket/lib/*\" -e \"mitm-socket/dist\" \"injected-scripts/package.json\" \"**/.gitignore\" \"**/.npmignore\" build-dist",
     "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @secret-agent/replay build:backend",
-    "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay build:backend-paths\"",
+    "watch": "NODE_OPTIONS=--max_old_space_size=4096 tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay build:backend-paths\"",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay clean",
     "test": "yarn copy:build && cd build && yarn test",
