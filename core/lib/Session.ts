@@ -82,7 +82,7 @@ export default class Session {
     this.timezoneId = options.timezoneId;
     this.viewport = options.viewport;
     if (!this.viewport) {
-      this.viewport = Viewports.getDefault(this.browserEmulator.windowFramingBase, this.browserEmulator.windowFraming);
+      this.viewport = Viewports.getDefault(this.browserEmulator.windowFraming, this.browserEmulator.windowFramingBase);
     }
 
     const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
