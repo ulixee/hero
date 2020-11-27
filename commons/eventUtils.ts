@@ -248,11 +248,15 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       if (event) {
         data.eventBody = event;
         if (typeof event === 'object') {
-          data.eventBody = { ...event };
-          for (const [key, val] of Object.entries(data.eventBody)) {
-            if (!val) continue;
-            if ((val as any).toJSON) {
-              data.eventBody[key] = (val as any).toJSON();
+          if (data.eventBody.toJSON) {
+            data.eventBody = data.eventBody.toJSON();
+          } else {
+            data.eventBody = { ...event };
+            for (const [key, val] of Object.entries(data.eventBody)) {
+              if (!val) continue;
+              if ((val as any).toJSON) {
+                data.eventBody[key] = (val as any).toJSON();
+              }
             }
           }
         }

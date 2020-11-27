@@ -1,7 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
@@ -22,6 +21,7 @@ import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
 import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IUpstreamProxy from '@secret-agent/core-interfaces/IUpstreamProxy';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -38,7 +38,7 @@ export default class Session {
   public browserEngine: IBrowserEngine;
   public browserEmulator: IBrowserEmulator;
   public humanEmulator: IHumanEmulator;
-  public proxy: MitmUpstreamProxy;
+  public upstreamProxy: IUpstreamProxy | null;
   public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
   public browserContext?: IPuppetContext;
@@ -66,6 +66,11 @@ export default class Session {
     if (options.userProfile) {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
+    }
+    if (options.upstreamProxy) {
+      this.upstreamProxy = {
+        ...options.upstreamProxy,
+      };
     }
     if (options.locale) this.browserEmulator.locale = options.locale;
 
@@ -99,11 +104,10 @@ export default class Session {
       this.viewport,
       this.timezoneId,
     );
-    this.proxy = new MitmUpstreamProxy(this.id);
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.browserEmulator.userAgent.raw,
-      this.proxy.isReady(),
+      this.upstreamProxy,
       this.browserEmulator.networkInterceptorDelegate,
     );
   }
@@ -162,7 +166,6 @@ export default class Session {
     this.pendingNavigationMitmResponses.forEach(x => this.onMitmResponse(x));
 
     await this.mitmRequestSession.close();
-    await this.proxy.close();
     await Promise.all(Object.values(this.tabs).map(x => x.close()));
     try {
       await this.browserContext?.close();

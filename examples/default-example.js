@@ -1,14 +1,10 @@
 const SecretAgent = require('@secret-agent/full-client');
 
 (async () => {
-  const agent = await new SecretAgent();
-  await browser.goto('https://example.org');
-  await browser.waitForAllContentLoaded();
-  const title = await browser.document.title;
-  const intro = await browser.document.querySelector('p').textContent;
-  console.log('Loaded https://example.org', {
-    title,
-    intro,
+  const agent = await new SecretAgent({
+    upstreamProxyUrl: `socks5://raxILwHll:iX4quHWDCDP@iad.socks.ipvanish.com:1080`,
   });
-  await browser.close();
-})();
+  await agent.goto('https://whatismyipaddress.com/');
+  await agent.waitForAllContentLoaded();
+  await agent.close();
+})().catch(err => console.log('Caught error in script', err));

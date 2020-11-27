@@ -60,9 +60,7 @@ export default class MitmSocket extends TypedEventEmitter<{
 
   public setProxy(url: string, auth?: string) {
     this.connectOpts.proxyUrl = url;
-    if (auth) {
-      this.connectOpts.proxyAuthBase64 = Buffer.from(auth).toString('base64');
-    }
+    this.connectOpts.proxyAuth = auth;
   }
 
   public setTcpSettings(tcpVars: { windowSize: number; ttl: number }) {
@@ -101,7 +99,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
 
-  public async connect() {
+  public async connect(connectTimeoutMillis = 30e3) {
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -111,7 +109,12 @@ export default class MitmSocket extends TypedEventEmitter<{
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
 
-    const promise = createPromise(30e3);
+    const promise = createPromise(
+      connectTimeoutMillis,
+      `Timeout connecting to ${this.serverName ?? 'host'} at ${this.connectOpts.host}:${
+        this.connectOpts.port
+      }`,
+    );
     child.on('exit', () => {
       promise.reject(this.connectError ?? new Error(`Socket process exited during connect`));
       this.cleanupSocket();
@@ -238,7 +241,7 @@ export interface IGoTlsSocketConnectOpts {
   servername: string;
   rejectUnauthorized?: boolean;
   proxyUrl?: string;
-  proxyAuthBase64?: string;
+  proxyAuth?: string;
   tcpTtl?: number;
   tcpWindowSize?: number;
   debug?: boolean;

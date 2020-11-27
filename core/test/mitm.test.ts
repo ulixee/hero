@@ -1,5 +1,4 @@
 import GlobalPool from '@secret-agent/core/lib/GlobalPool';
-import { UpstreamProxy } from '@secret-agent/mitm';
 import { Helpers } from '@secret-agent/testing';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
@@ -26,29 +25,6 @@ beforeEach(async () => {
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
-
-test('should be able to run multiple pages each with their own upstream proxy', async () => {
-  const acquireUpstreamProxyUrl = jest.spyOn<any, any>(UpstreamProxy.prototype, 'acquireProxyUrl');
-
-  koa.get('/page1', ctx => (ctx.body = 'ok'));
-  koa.get('/page2', ctx => (ctx.body = 'ok'));
-
-  const url1 = `${koa.baseUrl}/page1`;
-  const browserSession1 = await GlobalPool.createSession({});
-  Helpers.needsClosing.push(browserSession1);
-  const tab1 = await browserSession1.createTab();
-  await tab1.goto(url1);
-  await tab1.waitForMillis(100);
-  expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url1);
-
-  const url2 = `${koa.baseUrl}/page2`;
-  const browserSession2 = await GlobalPool.createSession({});
-  Helpers.needsClosing.push(browserSession2);
-  const tab2 = await browserSession2.createTab();
-  await tab2.goto(url2);
-  await tab2.waitForMillis(100);
-  expect(acquireUpstreamProxyUrl).toHaveBeenLastCalledWith(url2);
-});
 
 test('should send a Host header to secure http1 Chrome requests', async () => {
   let rawHeaders: string[] = [];
@@ -100,7 +76,7 @@ const xhr = new XMLHttpRequest();
 xhr.open('POST', '${koa.baseUrl}/preflightPost');
 xhr.setRequestHeader('X-PINGOTHER', 'pingpong');
 xhr.setRequestHeader('Content-Type', 'application/xml');
-xhr.send('<person><name>DLF</name></person>'); 
+xhr.send('<person><name>DLF</name></person>');
 </script>
 </body>
 </html>
@@ -128,7 +104,7 @@ test('should proxy requests from worker threads', async () => {
 onmessage = function(e) {
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '${koa.baseUrl}/xhr');
-  xhr.send('FromWorker'); 
+  xhr.send('FromWorker');
 }`;
   });
   koa.get('/testWorker', ctx => {
@@ -168,10 +144,10 @@ self.addEventListener('fetch', event => {
   event.respondWith(async function(){
     return fetch(event.request.url, {
       method: event.request.method,
-      credentials: 'include', 
+      credentials: 'include',
       headers: {
         'Intercepted': true,
-        'original-proxy-auth': event.request.headers['proxy-authorization'] 
+        'original-proxy-auth': event.request.headers['proxy-authorization']
       },
       body: event.request.headers['proxy-authorization'] ? 'ProxyAuth' : 'LooksGoodFromPage'
     });
@@ -215,13 +191,13 @@ window.addEventListener('load', function() {
       }
     });
     navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data === 'start-app') {    
+      if (event.data === 'start-app') {
         fetch('/xhr', {
           method: 'POST',
           body: 'FromPage'
         });
       }
-   });  
+   });
   });
 
 </script>

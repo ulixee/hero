@@ -272,7 +272,7 @@ async function createH2Connection(sessionId: string, url: string, proxyCredentia
     clientHelloId: 'Chrome72',
     isSsl: url.startsWith('https'),
     proxyUrl: proxyHost,
-    proxyAuthBase64: Buffer.from(proxyCredentials).toString('base64'),
+    proxyAuth: proxyCredentials,
     rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());

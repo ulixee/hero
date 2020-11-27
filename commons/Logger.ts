@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import ILog, { ILogData } from "@secret-agent/core-interfaces/ILog";
+import ILog, { ILogData } from '@secret-agent/core-interfaces/ILog';
 
 let logId = 0;
 class Log implements ILog {
@@ -79,6 +79,8 @@ class Log implements ILog {
         if (value === undefined || value === null) continue;
         if (value instanceof Error) {
           printData[key] = value.toString();
+        } else if ((value as any).toJSON) {
+          printData[key] = (value as any).toJSON();
         } else {
           printData[key] = value;
         }

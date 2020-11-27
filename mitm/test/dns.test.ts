@@ -29,7 +29,6 @@ beforeAll(() => {
         dnsOverTlsConnection: Quad9,
       },
     } as INetworkInterceptorDelegate,
-    getUpstreamProxyUrl: () => null,
   } as RequestSession);
 });
 

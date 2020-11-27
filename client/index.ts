@@ -7,7 +7,6 @@ import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstan
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
@@ -169,11 +168,6 @@ export function SecretAgentClientGenerator(
 
     public async closeTab(tab: Tab): Promise<void> {
       await tab.close();
-    }
-
-    public async configure(options: ISessionOptions): Promise<void> {
-      const clientTabSession = await getCoreTab(this.activeTab);
-      return clientTabSession.configure(options);
     }
 
     public async focusTab(tab: Tab): Promise<void> {

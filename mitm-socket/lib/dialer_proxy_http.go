@@ -13,33 +13,22 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"golang.org/x/net/proxy"
 )
 
-func DialAddrThroughProxy(dialer net.Dialer, addr string, proxyUrl string, proxyAuth string, allowInsecure bool) (net.Conn, error) {
+func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, proxyAuth string, allowInsecure bool) (net.Conn, error) {
 
-	parsedProxyUrl, err := url.Parse(proxyUrl)
-	if err != nil {
-		log.Fatalf("Could not parse proxy url %#v\n", err)
-	}
-	isSecure, proxyHost, err := getCleanHost(parsedProxyUrl)
-
-	if parsedProxyUrl.Scheme == "socks5" {
-		socksAuth := getSocks5Auth(proxyAuth, parsedProxyUrl.User)
-		return dialAddrThroughSocks5(dialer, addr, proxyHost, socksAuth)
-	}
+	isSecure, proxyHost, err := getCleanHost(proxyUrl)
 
 	fmt.Printf("Dialing proxy connect %s to %s\n", proxyHost, addr)
 	connectReq := &http.Request{
 		Method: "CONNECT",
-		URL:    parsedProxyUrl,
+		URL:    proxyUrl,
 		Host:   addr,
 		Header: make(http.Header),
 	}
 
-	if proxyAuth == "" && parsedProxyUrl.User != nil {
-		proxyAuth = parsedProxyUrl.User.String()
+	if proxyAuth == "" && proxyUrl.User != nil {
+		proxyAuth = proxyUrl.User.String()
 	}
 
 	if proxyAuth != "" {
@@ -91,47 +80,6 @@ func DialAddrThroughProxy(dialer net.Dialer, addr string, proxyUrl string, proxy
 	return conn, nil
 }
 
-func dialAddrThroughSocks5(dialer net.Dialer, addr string, proxyHost string, socksAuth *proxy.Auth) (net.Conn, error) {
-	fmt.Printf("Connecting via socks5 proxy %s to %s\n", proxyHost, addr)
-
-	socksDialer, err := proxy.SOCKS5("tcp", proxyHost, socksAuth, proxy.Direct)
-	if err != nil {
-		return nil, fmt.Errorf("Can't connect to the socks proxy: %s", err)
-	}
-	fmt.Printf("Got socks5 dialer %s to %s\n", proxyHost, addr)
-
-	conn, err := socksDialer.Dial("tcp", addr)
-	if err != nil {
-		fmt.Printf("Error with socks5 dial %#v\n", err)
-		return nil, err
-	}
-
-	return conn, nil
-}
-
-func getSocks5Auth(proxyAuth string, proxyUrlUser *url.Userinfo) *proxy.Auth {
-	var socksAuth *proxy.Auth = nil
-
-	if proxyAuth != "" {
-		var authParts = strings.Split(proxyAuth, ":")
-		socksAuth = &proxy.Auth{
-			User: authParts[0],
-		}
-		if len(authParts) > 1 {
-			socksAuth.Password = authParts[1]
-		}
-	}
-
-	if proxyUrlUser != nil {
-		password, _ := proxyUrlUser.Password()
-		socksAuth = &proxy.Auth{
-			User:     proxyUrlUser.Username(),
-			Password: password,
-		}
-	}
-	return socksAuth
-}
-
 func getCleanHost(proxyUrl *url.URL) (bool, string, error) {
 	var isSecure = false
 
@@ -147,12 +95,6 @@ func getCleanHost(proxyUrl *url.URL) (bool, string, error) {
 		isSecure = true
 		if strings.IndexRune(proxyHost, ':') == -1 {
 			proxyHost += ":443"
-		}
-	}
-
-	if proxyUrl.Scheme == "socks" || proxyUrl.Scheme == "socks5" {
-		if strings.IndexRune(proxyHost, ':') == -1 {
-			proxyHost += ":1080"
 		}
 	}
 

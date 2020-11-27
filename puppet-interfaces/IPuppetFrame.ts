@@ -12,6 +12,7 @@ export interface IPuppetFrame {
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
   evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
+  toJSON(): object;
 }
 
 export interface ILifecycleEvents {

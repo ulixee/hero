@@ -117,12 +117,11 @@ describe('basic MitM tests', () => {
       upstreamProxyConnected = true;
       socket.end();
     });
+    const sessionId = `${(sessionCounter += 1)}`;
 
-    const session = new RequestSession(
-      `${(sessionCounter += 1)}`,
-      'any agent',
-      Promise.resolve(upstreamProxyHost),
-    );
+    const session = new RequestSession(sessionId, 'any agent', {
+      url: upstreamProxyHost,
+    });
 
     const proxyCredentials = session.getProxyCredentials();
 
