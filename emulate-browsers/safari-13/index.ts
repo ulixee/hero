@@ -19,7 +19,7 @@ import {
 } from 'tough-cookie';
 import { randomBytes } from 'crypto';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
-import IUserAgentOption from '@secret-agent/emulate-browsers-base/interfaces/IUserAgentOption';
+import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';

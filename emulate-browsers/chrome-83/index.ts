@@ -10,7 +10,7 @@ import {
   DataLoader,
   DomDiffLoader,
 } from '@secret-agent/emulate-browsers-base';
-import IUserAgentOption from '@secret-agent/emulate-browsers-base/interfaces/IUserAgentOption';
+import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
