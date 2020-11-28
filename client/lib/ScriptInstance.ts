@@ -19,7 +19,7 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreTab: Promise<CoreTab>) {
+  public launchReplay(sessionName: string, coreTab: Promise<CoreTab>): void {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
     coreTab
@@ -37,7 +37,7 @@ export default class ScriptInstance {
       });
   }
 
-  public generateSessionName(name: string, shouldCleanName = true) {
+  public generateSessionName(name: string, shouldCleanName = true): string {
     if (name && shouldCleanName) {
       name = cleanupSessionName(name);
     }
@@ -58,7 +58,7 @@ export default class ScriptInstance {
   }
 }
 
-function cleanupSessionName(name: string) {
+function cleanupSessionName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9-]+/gi, '-')

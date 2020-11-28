@@ -256,7 +256,7 @@ export const KeyboardKeys = {
   VolumeUp: 254,
 } as const;
 
-export function getKeyboardKey(keyCode: IKeyboardKeyCode) {
+export function getKeyboardKey(keyCode: IKeyboardKeyCode): IKeyboardKey | undefined {
   for (const [key, code] of Object.entries(KeyboardKeys)) {
     if (code === keyCode) {
       return key as IKeyboardKey;

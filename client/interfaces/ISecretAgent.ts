@@ -29,7 +29,7 @@ export default interface ISecretAgent extends IAwaitedEventTarget<ISecretAgentEv
   exportUserProfile(): Promise<IUserProfile>;
   fetch(request: Request | string, init?: IRequestInit): Promise<Response>;
   focusTab(tab: Tab): Promise<void>;
-  getJsValue<T = any>(path: string): Promise<T>;
+  getJsValue<T = any>(path: string): Promise<{ value: T; type: string }>;
   goBack(): Promise<string>;
   goForward(): Promise<string>;
   goto(url: string): Promise<Resource>;

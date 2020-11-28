@@ -48,6 +48,15 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['*client/**/*.ts', '*interfaces/**/*.ts', 'commons/**/*.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': [
+          'error',
+          { allowExpressions: true, allowHigherOrderFunctions: true },
+        ],
+      },
+    },
+    {
       files: 'emulate-browsers/base/test/*.ts',
       rules: {
         'no-console': 'off',
@@ -80,6 +89,7 @@ module.exports = {
       files: '**/test/*.ts',
       rules: {
         'promise/valid-params': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
       },
     },
     {

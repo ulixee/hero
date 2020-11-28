@@ -48,7 +48,7 @@ export default class AwaitedEventTarget<T, IState extends IAwaitedEventTargetSta
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    const wrappedListener = (event: T[K]) => {
+    const wrappedListener = (event: T[K]): void => {
       listenerFn.call(this, event);
       this.removeEventListener(eventType, listenerFn);
       return null;

@@ -52,7 +52,7 @@ const SecretAgent = require('secret-agent');
   - renderingOptions `string[]`. Controls browser functionality.
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
-  - upstreamProxy `IUpstreamProxy`. A socks5 or http proxy url (and optional username) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. Auth should be formatted as `user:password`. Http proxy auth will be converted to base64 basic authentication.
+  - upstreamProxy `IUpstreamProxy`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. Auth should be formatted as `user:password`. Http proxy auth will be converted to base64 basic authentication.
 
 ## Properties
 

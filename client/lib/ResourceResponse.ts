@@ -63,7 +63,10 @@ export default class ResourceResponse {
   }
 }
 
-export function createResourceResponse(coreTab: Promise<CoreTab>, resourceId?: number) {
+export function createResourceResponse(
+  coreTab: Promise<CoreTab>,
+  resourceId?: number,
+): ResourceResponse {
   const response = new ResourceResponse();
   setState(response, { coreTab, resourceId });
   return response;
@@ -72,7 +75,7 @@ export function createResourceResponse(coreTab: Promise<CoreTab>, resourceId?: n
 function getResponseProperty<T>(
   container: ResourceResponse,
   name: keyof IResourceResponse | 'data',
-) {
+): Promise<T> {
   const state = getState(container);
   const id = state.resourceId;
   return state.coreTab.then(x => x.getResourceProperty<T>(id, `response.${name}`));

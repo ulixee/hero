@@ -10,4 +10,4 @@ export default interface IBrowserEmulatorClass {
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function BrowserEmulatorClassDecorator(constructor: IBrowserEmulatorClass) {}
+export function BrowserEmulatorClassDecorator(constructor: IBrowserEmulatorClass): void {}

@@ -59,7 +59,7 @@ describe('events', () => {
     });
 
     const agent = await new SecretAgent();
-    const onResourceFn = resource => {
+    const onResourceFn = (resource): void => {
       expect(resource).toBeInstanceOf(Resource);
       eventCount += 1;
     };

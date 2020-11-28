@@ -45,13 +45,19 @@ export default class ResourceRequest {
   }
 }
 
-export function createResourceRequest(coreTab: Promise<CoreTab>, resourceId?: number) {
+export function createResourceRequest(
+  coreTab: Promise<CoreTab>,
+  resourceId?: number,
+): ResourceRequest {
   const request = new ResourceRequest();
   setState(request, { coreTab, resourceId });
   return request;
 }
 
-function getRequestProperty<T>(container: ResourceRequest, name: keyof IResourceRequest) {
+function getRequestProperty<T>(
+  container: ResourceRequest,
+  name: keyof IResourceRequest,
+): Promise<T> {
   const state = getState(container);
   const id = state.resourceId;
   return state.coreTab.then(x => x.getResourceProperty<T>(id, `request.${name}`));

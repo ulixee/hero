@@ -7,7 +7,7 @@ export default class Queue {
   private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
   private active = false;
 
-  public run<T>(cb: Callback<T>) {
+  public run<T>(cb: Callback<T>): Promise<T> {
     const promise = createPromise<T>();
 
     this.queue.push({
@@ -22,13 +22,13 @@ export default class Queue {
     return promise.promise;
   }
 
-  public stop() {
+  public stop(): void {
     while (this.queue.length) {
       this.queue.pop().promise.reject();
     }
   }
 
-  private async next() {
+  private async next(): Promise<void> {
     if (this.active) return;
 
     const next = this.queue.shift();

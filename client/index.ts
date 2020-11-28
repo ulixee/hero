@@ -14,6 +14,8 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import { bindFunctions } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import Response from 'awaited-dom/impl/official-klasses/Response';
+import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import ICreateSecretAgentOptions from './interfaces/ICreateSecretAgentOptions';
 import CoreClient from './lib/CoreClient';
 import ISecretAgentClass, {
@@ -32,6 +34,8 @@ import Interactor from './lib/Interactor';
 import IWaitForResourceFilter from './interfaces/IWaitForResourceFilter';
 import AwaitedEventTarget from './lib/AwaitedEventTarget';
 import ScriptInstance from './lib/ScriptInstance';
+import Resource from './lib/Resource';
+import WebsocketResource from './lib/WebsocketResource';
 import Signals = NodeJS.Signals;
 
 const DefaultOptions = {
@@ -113,15 +117,15 @@ export function SecretAgentClientGenerator(
       });
     }
 
-    public get activeTab() {
+    public get activeTab(): Tab {
       return getState(this).activeTab;
     }
 
-    public get document() {
+    public get document(): SuperDocument {
       return this.activeTab.document;
     }
 
-    public get lastCommandId() {
+    public get lastCommandId(): Promise<number> {
       return this.activeTab.lastCommandId;
     }
 
@@ -131,8 +135,8 @@ export function SecretAgentClientGenerator(
       return getCoreTab(activeTab).then(x => x.sessionId);
     }
 
-    public get sessionName() {
-      return getState(this).sessionName;
+    public get sessionName(): Promise<string> {
+      return Promise.resolve(getState(this).sessionName);
     }
 
     public get storage(): Promise<IDomStorage> {
@@ -143,15 +147,15 @@ export function SecretAgentClientGenerator(
       });
     }
 
-    public get tabs() {
+    public get tabs(): Promise<Tab[]> {
       return getSessionTabs(this);
     }
 
-    public get url() {
+    public get url(): Promise<string> {
       return this.activeTab.url;
     }
 
-    public get Request() {
+    public get Request(): typeof Request {
       return this.activeTab.Request;
     }
 
@@ -174,7 +178,7 @@ export function SecretAgentClientGenerator(
       await tab.focus();
     }
 
-    public async waitForNewTab() {
+    public async waitForNewTab(): Promise<Tab> {
       const coreTab = await getCoreTab(this.activeTab);
       const newCoreTab = coreTab.waitForNewTab();
       return createTab(this, newCoreTab);
@@ -182,22 +186,22 @@ export function SecretAgentClientGenerator(
 
     // INTERACT METHODS
 
-    public async click(mousePosition: IMousePosition) {
+    public async click(mousePosition: IMousePosition): Promise<void> {
       const coreTab = await getCoreTab(this.activeTab);
       await Interactor.run(coreTab, [{ click: mousePosition }]);
     }
 
-    public async interact(...interactions: IInteractions) {
+    public async interact(...interactions: IInteractions): Promise<void> {
       const coreTab = await getCoreTab(this.activeTab);
       await Interactor.run(coreTab, interactions);
     }
 
-    public async scrollTo(mousePosition: IMousePosition) {
+    public async scrollTo(mousePosition: IMousePosition): Promise<void> {
       const coreTab = await getCoreTab(this.activeTab);
       await Interactor.run(coreTab, [{ [Command.scroll]: mousePosition }]);
     }
 
-    public async type(...typeInteractions: ITypeInteraction[]) {
+    public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
       const coreTab = await getCoreTab(this.activeTab);
       await Interactor.run(
         coreTab,
@@ -212,51 +216,54 @@ export function SecretAgentClientGenerator(
 
     /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-    public goto(href: string) {
+    public async goto(href: string): Promise<Resource> {
       return this.activeTab.goto(href);
     }
 
-    public goBack() {
+    public goBack(): Promise<string> {
       return this.activeTab.goBack();
     }
 
-    public goForward() {
+    public goForward(): Promise<string> {
       return this.activeTab.goForward();
     }
 
-    public fetch(request: Request | string, init?: IRequestInit) {
+    public fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
       return this.activeTab.fetch(request, init);
     }
 
-    public getJsValue<T>(path: string) {
+    public getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
       return this.activeTab.getJsValue<T>(path);
     }
 
-    public isElementVisible(element: ISuperElement) {
+    public isElementVisible(element: ISuperElement): Promise<boolean> {
       return this.activeTab.isElementVisible(element);
     }
 
-    public waitForAllContentLoaded() {
+    public waitForAllContentLoaded(): Promise<void> {
       return this.activeTab.waitForAllContentLoaded();
     }
 
-    public waitForResource(filter: IWaitForResourceFilter, options?: IWaitForResourceOptions) {
+    public waitForResource(
+      filter: IWaitForResourceFilter,
+      options?: IWaitForResourceOptions,
+    ): Promise<(Resource | WebsocketResource)[]> {
       return this.activeTab.waitForResource(filter, options);
     }
 
-    public waitForElement(element: ISuperElement, options?: IWaitForElementOptions) {
+    public waitForElement(element: ISuperElement, options?: IWaitForElementOptions): Promise<void> {
       return this.activeTab.waitForElement(element, options);
     }
 
-    public waitForLocation(trigger: ILocationTrigger) {
+    public waitForLocation(trigger: ILocationTrigger): Promise<void> {
       return this.activeTab.waitForLocation(trigger);
     }
 
-    public waitForMillis(millis: number) {
+    public waitForMillis(millis: number): Promise<void> {
       return this.activeTab.waitForMillis(millis);
     }
 
-    public waitForWebSocket(url: string | RegExp) {
+    public waitForWebSocket(url: string | RegExp): Promise<void> {
       return this.activeTab.waitForWebSocket(url);
     }
 
@@ -275,16 +282,18 @@ export function SecretAgentClientGenerator(
       await coreClient.configure(options);
     }
 
-    public static async prewarm(options: Partial<ISecretAgentConfigureOptions> = {}) {
+    public static async prewarm(
+      options: Partial<ISecretAgentConfigureOptions> = {},
+    ): Promise<void> {
       this.options = { ...DefaultOptions, ...this.options, ...options };
       await coreClient.prewarm(options);
     }
 
-    public static async recordUnhandledError(error: Error) {
+    public static async recordUnhandledError(error: Error): Promise<void> {
       await coreClient.logUnhandledError(error);
     }
 
-    public static async shutdown(error?: Error) {
+    public static async shutdown(error?: Error): Promise<void> {
       await coreClient.shutdown(error);
     }
   }
@@ -310,7 +319,7 @@ export function SecretAgentClientGenerator(
     });
   }
 
-  async function getSessionTabs(agent: SecretAgent) {
+  async function getSessionTabs(agent: SecretAgent): Promise<Tab[]> {
     const state = getState(agent);
     const tabs = state.tabs;
     const sessionId = await agent.sessionId;

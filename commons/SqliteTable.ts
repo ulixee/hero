@@ -26,18 +26,18 @@ export default abstract class SqliteTable<T> {
     }
   }
 
-  public hasPending() {
-    return this.pendingInserts.length;
+  public hasPending(): boolean {
+    return !!this.pendingInserts.length;
   }
 
-  public subscribe(callbackFn: (records: T[]) => void) {
+  public subscribe(callbackFn: (records: T[]) => void): void {
     this.insertCallbackFn = callbackFn;
     const pendingRecords = this.pendingInserts.map(x => this.insertToObject(x));
     this.lastSubscriptionPublishTime = new Date();
     process.nextTick(callbackFn, this.all().concat(pendingRecords));
   }
 
-  public flush() {
+  public flush(): void {
     const records = [...this.pendingInserts];
     this.pendingInserts.length = 0;
 
@@ -46,22 +46,22 @@ export default abstract class SqliteTable<T> {
     }
   }
 
-  public insertNow(record: IRecord) {
+  public insertNow(record: IRecord): void {
     this.insertStatement.run(...record);
     this.addRecordToPublish(record);
   }
 
-  public all() {
+  public all(): T[] {
     const sort = this.defaultSortOrder ? ` ORDER BY ${this.defaultSortOrder}` : '';
     return this.db.prepare(`select * from ${this.tableName}${sort}`).all() as T[];
   }
 
-  protected queuePendingInsert(record: IRecord) {
+  protected queuePendingInsert(record: IRecord): void {
     this.pendingInserts.push(record);
     this.addRecordToPublish(record);
   }
 
-  protected buildInsertStatement() {
+  protected buildInsertStatement(): string {
     const keys = this.columns.map(x => x[0]);
     const params = keys.map(() => '?').join(', ');
     const insertOrReplace = this.insertOrReplace ? ' OR REPLACE' : '';
@@ -70,7 +70,7 @@ export default abstract class SqliteTable<T> {
     )}) VALUES (${params})`;
   }
 
-  private addRecordToPublish(record: IRecord) {
+  private addRecordToPublish(record: IRecord): void {
     if (!this.insertCallbackFn) return;
     this.insertSubscriptionRecords.push(this.insertToObject(record));
     if (new Date().getTime() - this.lastSubscriptionPublishTime.getTime() > 500) {
@@ -80,14 +80,14 @@ export default abstract class SqliteTable<T> {
     this.subscriptionThrottle = setTimeout(this.publishPendingRecords.bind(this), 100).unref();
   }
 
-  private publishPendingRecords() {
+  private publishPendingRecords(): void {
     const records = [...this.insertSubscriptionRecords];
     this.insertSubscriptionRecords.length = 0;
     this.lastSubscriptionPublishTime = new Date();
     this.insertCallbackFn(records);
   }
 
-  private createTableStatement() {
+  private createTableStatement(): string {
     const definitions = this.columns.map(x => {
       let columnDef = `${x[0]} ${x[1]}`;
       if (x.length > 2) columnDef = `${columnDef} ${x[2]}`;

@@ -16,11 +16,11 @@ export default class Timer {
     }
   }
 
-  public setMessage(message: string) {
+  public setMessage(message: string): void {
     this.timeoutMessage = message;
   }
 
-  public clear() {
+  public clear(): void {
     if (this.registry) {
       const idx = this.registry.findIndex(x => x.timeout === this.timeout);
       if (idx >= 0) this.registry.splice(idx, 1);
@@ -28,42 +28,42 @@ export default class Timer {
     clearTimeout(this.timeout);
   }
 
-  public throwIfExpired(message?: string) {
+  public throwIfExpired(message?: string): void {
     if (this.isExpired()) {
       this.clear();
       throw new TimeoutError(message ?? this.timeoutMessage);
     }
   }
 
-  public isExpired() {
+  public isExpired(): boolean {
     return this.elapsedMillis() > this.timeoutMillis;
   }
 
-  public isResolved() {
+  public isResolved(): boolean {
     return this.expirePromise.isResolved;
   }
 
-  public elapsedMillis() {
+  public elapsedMillis(): number {
     const time = process.hrtime(this.time);
     return time[0] * 1000 + time[1] / 1000000;
   }
 
-  public waitForPromise<Z>(promise: Promise<Z>, message: string) {
+  public waitForPromise<Z>(promise: Promise<Z>, message: string): Promise<Z> {
     this.timeoutMessage = message;
     return Promise.race([promise, this.expirePromise]) as Promise<Z>;
   }
 
-  public waitForTimeout() {
+  public waitForTimeout(): Promise<void> {
     // wait for promise to expire
     return this.expirePromise.promise.catch(() => {});
   }
 
-  private expire() {
+  private expire(): void {
     this.expirePromise.reject(new TimeoutError(this.timeoutMessage));
     this.clear();
   }
 
-  public static expireAll(registry: IRegistry[], error: Error) {
+  public static expireAll(registry: IRegistry[], error: Error): void {
     // clear any pending timeouts
     while (registry.length) {
       const next = registry.shift();

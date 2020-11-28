@@ -38,7 +38,7 @@ export async function setProperty<T, TClass>(
   instance: TClass,
   name: string,
   value: T,
-) {
+): Promise<void> {
   await awaitRemoteInitializer(self.getState(instance));
   self.setState(instance, { [name]: value });
 }
@@ -63,7 +63,7 @@ export async function loadState<TClass>(
   self: AwaitedHandler<TClass>,
   instance: TClass,
   properties?: string[],
-) {
+): Promise<IAttachedState> {
   await awaitRemoteInitializer(instance);
   const state = self.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
@@ -92,7 +92,7 @@ async function execJsPath<TClass, T>(
   coreTab: CoreTab,
   instance: TClass,
   path: IJsPath,
-) {
+): Promise<IExecJsPathResult<T>> {
   for (const part of path) {
     // if part is method call, see if any params need to be remotely initialized first
     if (Array.isArray(part)) {
@@ -115,7 +115,7 @@ function cleanResult<T, TClass>(
   self: AwaitedHandler<TClass>,
   instance: TClass,
   result: IExecJsPathResult<T>,
-) {
+): T {
   if (!result) return null;
   if (!result?.attachedState) return result?.value;
 
@@ -127,7 +127,7 @@ function cleanResult<T, TClass>(
   return result.value;
 }
 
-async function awaitRemoteInitializer(state: any) {
+async function awaitRemoteInitializer(state: any): Promise<void> {
   if (state?.remoteInitializerPromise) {
     await state.remoteInitializerPromise;
   }

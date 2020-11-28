@@ -4,11 +4,11 @@ export = class PendingMessages {
   private pending: { [id: string]: IPendingPromise } = {};
   private lastId = 0;
 
-  public has(id) {
+  public has(id): boolean {
     return !!this.pending[id];
   }
 
-  public createId() {
+  public createId(): string {
     this.lastId += 1;
     return this.lastId.toString();
   }
@@ -17,13 +17,13 @@ export = class PendingMessages {
     id: string,
     resolve: (value?: any | PromiseLike<any>) => void,
     reject: (reason?: any) => void,
-  ) {
+  ): IPendingPromise {
     if (this.pending[id]) throw new Error(`Id already exists in pending messages: ${id}`);
     this.pending[id] = { id, resolve, reject };
     return this.pending[id];
   }
 
-  public respond(id: string, message: IResponsePayload) {
+  public respond(id: string, message: IResponsePayload): void {
     if (!this.pending[id]) return;
     if (message.isError) {
       const error = new Error(message.data?.message);

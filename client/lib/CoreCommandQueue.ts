@@ -37,13 +37,13 @@ export default class CoreCommandQueue {
     return promise;
   }
 
-  public clearPending() {
+  public clearPending(): void {
     this.items.length = 0;
   }
 
   // PRIVATE
 
-  private async processQueue() {
+  private async processQueue(): Promise<void> {
     if (this.isProcessing) return;
     this.isProcessing = true;
     try {

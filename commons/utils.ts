@@ -1,6 +1,6 @@
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 
-export function assert(value: unknown, message?: string, reject?) {
+export function assert(value: unknown, message?: string, reject?): void {
   if (value) return;
   const error = new Error(message);
   if (reject) {
@@ -10,12 +10,12 @@ export function assert(value: unknown, message?: string, reject?) {
   }
 }
 
-export function pickRandom<T>(array: T[]) {
+export function pickRandom<T>(array: T[]): T {
   if (!array.length) throw new Error('Empty array provided to "pickRandom"');
   return array[Math.floor(Math.random() * array.length)];
 }
 
-export function bindFunctions(self: any) {
+export function bindFunctions(self: any): void {
   let object = self;
   do {
     for (const key of Reflect.ownKeys(object)) {

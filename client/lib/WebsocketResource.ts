@@ -66,7 +66,10 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType, IS
   }
 }
 
-export function createWebsocketResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>) {
+export function createWebsocketResource(
+  resourceMeta: IResourceMeta,
+  coreTab: Promise<CoreTab>,
+): WebsocketResource {
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);
   const response = createResourceResponse(coreTab, resourceMeta.id);
