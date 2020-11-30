@@ -116,9 +116,9 @@ export default class MitmRequestAgent {
     const tcpVars = session.networkInterceptorDelegate.tcp;
     if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
 
-    if (session.upstreamProxy) {
+    if (session.upstreamProxyUrl) {
       ctx.setState(ResourceState.GetUpstreamProxyUrl);
-      mitmSocket.setProxy(session.upstreamProxy.url, session.upstreamProxy.auth);
+      mitmSocket.setProxyUrl(session.upstreamProxyUrl);
     }
 
     ctx.setState(ResourceState.SocketConnect);

@@ -63,7 +63,7 @@ test('should be able to send a request through a secure proxy with auth', async 
 
   const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
   const tlsConnection = getTlsConnection(server.port);
-  tlsConnection.setProxy(proxyServer.baseUrl, password);
+  tlsConnection.setProxyUrl(`https://${password}@localhost:${proxyServer.port}`);
 
   await tlsConnection.connect();
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
@@ -127,8 +127,7 @@ test('should be able to use a socks5 proxy with auth', async () => {
     port: String(server.port),
     clientHelloId: 'Chrome83',
     servername: 'localhost',
-    proxyUrl: `socks5://localhost:${proxyPort}`,
-    proxyAuth: 'foo:bar',
+    proxyUrl: `socks5://foo:bar@localhost:${proxyPort}`,
     rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());
@@ -163,7 +162,7 @@ test('should handle websockets over proxies', async () => {
 
   const tlsConnection = getTlsConnection(serverPort);
   tlsConnection.connectOpts.keepAlive = true;
-  tlsConnection.setProxy(`http://localhost:${proxyPort}`);
+  tlsConnection.setProxyUrl(`http://localhost:${proxyPort}`);
   await tlsConnection.connect();
 
   const wsClient = new WebSocket(`wss://localhost:${serverPort}`, {

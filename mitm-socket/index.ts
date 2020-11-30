@@ -58,9 +58,8 @@ export default class MitmSocket extends TypedEventEmitter<{
     return this.socket.writable && !this.socket.destroyed;
   }
 
-  public setProxy(url: string, auth?: string) {
+  public setProxyUrl(url: string) {
     this.connectOpts.proxyUrl = url;
-    this.connectOpts.proxyAuth = auth;
   }
 
   public setTcpSettings(tcpVars: { windowSize: number; ttl: number }) {

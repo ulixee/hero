@@ -21,7 +21,6 @@ import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
 import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import IUpstreamProxy from '@secret-agent/core-interfaces/IUpstreamProxy';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -38,7 +37,7 @@ export default class Session {
   public browserEngine: IBrowserEngine;
   public browserEmulator: IBrowserEmulator;
   public humanEmulator: IHumanEmulator;
-  public upstreamProxy: IUpstreamProxy | null;
+  public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
   public browserContext?: IPuppetContext;
@@ -67,11 +66,8 @@ export default class Session {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
     }
-    if (options.upstreamProxy) {
-      this.upstreamProxy = {
-        ...options.upstreamProxy,
-      };
-    }
+    this.upstreamProxyUrl = options.upstreamProxyUrl;
+
     if (options.locale) this.browserEmulator.locale = options.locale;
 
     if (!this.browserEmulator.canPolyfill) {
@@ -107,7 +103,7 @@ export default class Session {
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.browserEmulator.userAgent.raw,
-      this.upstreamProxy,
+      this.upstreamProxyUrl,
       this.browserEmulator.networkInterceptorDelegate,
     );
   }

@@ -263,7 +263,7 @@ async function createH2Connection(sessionId: string, url: string, proxyCredentia
   const hostUrl = new URL(url);
   const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
-  const proxyHost = `http://localhost:${mitmServer.port}`;
+  const proxyHost = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
 
   const tlsConnection = new MitmSocket(sessionId, {
     host: 'localhost',
@@ -272,7 +272,6 @@ async function createH2Connection(sessionId: string, url: string, proxyCredentia
     clientHelloId: 'Chrome72',
     isSsl: url.startsWith('https'),
     proxyUrl: proxyHost,
-    proxyAuth: proxyCredentials,
     rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());

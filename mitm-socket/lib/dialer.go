@@ -22,10 +22,10 @@ func Dial(addr string, connectArgs ConnectArgs) (net.Conn, error) {
 		}
 
 		if proxyUrl.Scheme == "socks5" {
-			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl, connectArgs.ProxyAuth)
+			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl)
 		}
 
-		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, connectArgs.ProxyAuth, !connectArgs.RejectUnauthorized)
+		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !connectArgs.RejectUnauthorized)
 	}
 
 	dialConn, err := dialer.Dial("tcp", addr)

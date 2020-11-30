@@ -14,7 +14,6 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import MitmSocket from '@secret-agent/mitm-socket/index';
-import IUpstreamProxy from '@secret-agent/core-interfaces/IUpstreamProxy';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
@@ -60,7 +59,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   constructor(
     readonly sessionId: string,
     readonly useragent: string,
-    readonly upstreamProxy?: IUpstreamProxy,
+    readonly upstreamProxyUrl?: string,
     readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
   ) {
     super();

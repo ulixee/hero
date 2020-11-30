@@ -85,7 +85,6 @@ type ConnectArgs struct {
 	Servername         string
 	RejectUnauthorized bool
 	ProxyUrl           string
-	ProxyAuth          string
 	ClientHelloId      string
 	TcpTtl             int
 	TcpWindowSize      int

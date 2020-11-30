@@ -119,9 +119,7 @@ describe('basic MitM tests', () => {
     });
     const sessionId = `${(sessionCounter += 1)}`;
 
-    const session = new RequestSession(sessionId, 'any agent', {
-      url: upstreamProxyHost,
-    });
+    const session = new RequestSession(sessionId, 'any agent', upstreamProxyHost);
 
     const proxyCredentials = session.getProxyCredentials();
 
