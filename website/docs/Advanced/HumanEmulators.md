@@ -25,13 +25,14 @@ Load a human emulator into your environment.
 #### **Returns** `null`
 
 ## Preloaded Plugins
-We've included two very simple human emulator plugins to get you started. They are pre-loaded into the HumanEmulators registry and are ready to use.
+We've included three human emulator plugins to get you started. They are pre-loaded into the HumanEmulators registry and are ready to use.
 
 <p class="show-table-header"></p>
 
 | ID | Description |
 | --- | --- |
 | basic | It's the most basic of human-like interactions. |
+| ghost | It's our most advanced emulator - types at 34 words per minute, moves mouse in loops and scrolls like a human. It's also our slowest emulator. <br/><br/> NOTE: If you need speed over evasion, use one of the simpler ones. |
 | skipper | It's an anti-human-emulator with no delays. It just runs the commands. |
 
 Note: Use the `skipper` emulator when you want to turn OFF human-emulator functionality. It disables all emulator effects, allowing you to run mouse and keyboard commands as if there were no human translation layer.

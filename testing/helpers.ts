@@ -13,7 +13,9 @@ import * as net from 'net';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core from '@secret-agent/core';
-import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import MitmSocket from '@secret-agent/mitm-socket';
+import { Helpers } from './index';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
 
@@ -302,6 +304,55 @@ export async function runHttp2Server(
   };
   needsClosing.push(httpServer);
   return httpServer;
+}
+
+export async function httpGetWithSocket(
+  url: string,
+  clientOptions: https.RequestOptions,
+  socket: net.Socket,
+) {
+  return await new Promise<string>((resolve, reject) => {
+    let isResolved = false;
+    socket.once('close', err => {
+      if (isResolved) return;
+      reject(err);
+    });
+    socket.once('error', err => {
+      if (isResolved) return;
+      reject(err);
+    });
+    const request = https.get(
+      url,
+      {
+        ...clientOptions,
+        agent: null,
+        createConnection: () => socket,
+      },
+      async res => {
+        isResolved = true;
+        const buffer = await readableToBuffer(res);
+        resolve(buffer.toString('utf8'));
+      },
+    );
+    request.on('error', err => {
+      if (isResolved) return;
+      reject(err);
+    });
+  });
+}
+
+let sessionId = 0;
+
+export function getTlsConnection(serverPort: number, host = 'localhost', clientHello = 'Chrome83') {
+  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
+    host,
+    port: String(serverPort),
+    clientHelloId: clientHello,
+    servername: host,
+    rejectUnauthorized: false,
+  });
+  Helpers.onClose(async () => tlsConnection.close());
+  return tlsConnection;
 }
 
 export function getLogo() {

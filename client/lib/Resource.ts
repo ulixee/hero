@@ -91,7 +91,7 @@ export default class Resource {
     } as IWaitForResourceOptions;
 
     let isComplete = false;
-    const done = () => (isComplete = true);
+    const done = (): boolean => (isComplete = true);
 
     do {
       let foundResources: IResourceMeta[] = [];
@@ -139,7 +139,7 @@ export default class Resource {
   }
 }
 
-export function createResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>) {
+export function createResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>): Resource {
   if (resourceMeta.type === 'Websocket') {
     return createWebsocketResource(resourceMeta, coreTab);
   }

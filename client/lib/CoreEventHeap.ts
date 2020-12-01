@@ -20,11 +20,11 @@ export default class CoreEventHeap {
     this.coreClient = coreClient;
   }
 
-  public hasEventInterceptors(type: string) {
+  public hasEventInterceptors(type: string): boolean {
     return this.eventInterceptors.has(type);
   }
 
-  public registerEventInterceptor(type: string, interceptor: IInterceptorFn) {
+  public registerEventInterceptor(type: string, interceptor: IInterceptorFn): void {
     const events = this.eventInterceptors.get(type) ?? [];
     events.push(interceptor);
     this.eventInterceptors.set(type, events);
@@ -67,7 +67,7 @@ export default class CoreEventHeap {
     jsPath: IJsPath | null,
     type: string,
     listenerFn: (...args: any[]) => void,
-  ) {
+  ): void {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     const listenerId = this.listenerIdByHandle.get(handle);
     if (!listenerId) return;
@@ -81,7 +81,7 @@ export default class CoreEventHeap {
     this.listenerIdByHandle.delete(handle);
   }
 
-  public incomingEvent(meta: ISessionMeta, listenerId: string, eventArgs: any[]) {
+  public incomingEvent(meta: ISessionMeta, listenerId: string, eventArgs: any[]): void {
     const listenerFn = this.listenerFnById.get(listenerId);
     if (!listenerFn) return;
     listenerFn(...eventArgs);
@@ -91,7 +91,7 @@ export default class CoreEventHeap {
     jsPath: IJsPath | null,
     type: string,
     listenerFn: (...args: any[]) => void,
-  ) {
+  ): string {
     const parts = [jsPath ? JSON.stringify(jsPath) : 'BASE'];
     parts.push(type);
     parts.push(listenerFn.toString());

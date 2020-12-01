@@ -5,7 +5,7 @@ import IRequestPayload from '@secret-agent/remote-interfaces/IRequestPayload';
 import IResponsePayload from '@secret-agent/remote-interfaces/IResponsePayload';
 import IEventPayload from '@secret-agent/remote-interfaces/IEventPayload';
 import { createPromise } from '@secret-agent/commons/utils';
-import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgentClass";
+import ISecretAgentClass from '@secret-agent/client/interfaces/ISecretAgentClass';
 import PendingMessages from './lib/PendingMessages';
 
 // tslint:disable:variable-name
@@ -31,13 +31,13 @@ export default class RemoteClient {
   }
 
   // Attach the fn you want called every time a payload needs to be sent to core-server
-  public pipeOutgoing(fn: (payload: IRequestPayload) => void) {
+  public pipeOutgoing(fn: (payload: IRequestPayload) => void): void {
     this.sendToOutgoingFn = fn;
   }
 
   // Send any payloads that come from core-server into SA. Only Response and Event payloads
   // should be coming from the server.
-  public pipeIncoming(payload: IResponsePayload | IEventPayload) {
+  public pipeIncoming(payload: IResponsePayload | IEventPayload): void {
     if ((payload as IResponsePayload).responseId) {
       this.processIncomingResponse(payload as IResponsePayload);
     } else if ((payload as IEventPayload).listenerId) {
@@ -50,7 +50,7 @@ export default class RemoteClient {
 
   // PRIVATE
 
-  private bindPipes() {
+  private bindPipes(): void {
     this.coreClient.pipeOutgoingCommand = (
       meta: ISessionMeta | null,
       command: string,
@@ -63,13 +63,13 @@ export default class RemoteClient {
     };
   }
 
-  private processIncomingResponse(payload: IResponsePayload) {
+  private processIncomingResponse(payload: IResponsePayload): void {
     if (this.pendingMessages.has(payload.responseId)) {
       this.pendingMessages.respond(payload.responseId, payload);
     }
   }
 
-  private sendToOutgoing(payload: IRequestPayload, resolveAndReject = null) {
+  private sendToOutgoing(payload: IRequestPayload, resolveAndReject = null): void {
     const messageId = (payload as IRequestPayload).messageId;
     if (resolveAndReject) {
       const { resolve, reject } = resolveAndReject;

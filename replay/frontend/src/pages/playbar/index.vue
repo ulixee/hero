@@ -100,26 +100,25 @@ export default class Playbar extends Vue {
 
   private play() {
     this.isPlaying = true;
-    clearTimeout(this.nextTimeout);
     this.playbackTick();
   }
 
   private async playbackTick() {
-    console.log('playback tick', this.currentTickValue);
     const next = await ipcRenderer.invoke('next-tick');
-    this.currentTickValue = next.playbarOffset;
+    this.currentTickValue = next.playbarOffset || 0;
+    const nextTickMillis = Number(next.millisToNextTick || 50);
+    console.log('Playbar at %s. Next tick in %s', this.currentTickValue, nextTickMillis, this.isPlaying);
     if (this.currentTickValue === 100) {
-      this.pause();
+      this.isPlaying = false;
     }
+
     if (this.isPlaying) {
-      clearTimeout(this.nextTimeout);
-      this.nextTimeout = setTimeout(() => this.playbackTick(), next.millisToNextTick ?? 50) as any;
+      this.nextTimeout = setTimeout(this.playbackTick.bind(this), nextTickMillis) as any;
     }
   }
 
   private pause() {
     this.isPlaying = false;
-    clearTimeout(this.nextTimeout);
   }
 
   private isHovered(value: number) {

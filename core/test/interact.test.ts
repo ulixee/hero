@@ -142,6 +142,6 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       expect(lastClicked.value).toBe('click1');
 
       await core.close();
-    }, 30e3);
+    }, 60e3);
   },
 );

@@ -251,19 +251,19 @@ export default class MitmProxy {
   }
 
   private onConnectError(hostname: string, errorKind: string, error: Error) {
-    const errorCode = (error as any).errno ?? (error as any).code;
-    if (errorCode === 'ECONNRESET') {
+    const errorCodes = [(error as any).errno, (error as any).code];
+    if (errorCodes.includes('ECONNRESET')) {
       log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
         sessionId: null,
         hostname,
       });
-    } else if (errorCode === 'ERR_STREAM_UNSHIFT_AFTER_END_EVENT') {
+    } else if (errorCodes.includes('ERR_STREAM_UNSHIFT_AFTER_END_EVENT')) {
       log.info(`Got ERR_STREAM_UNSHIFT_AFTER_END_EVENT on Proxy Connect, ignoring.`, {
         sessionId: null,
         hostname,
         errorKind,
       });
-    } else if (errorCode === 'EPIPE') {
+    } else if (errorCodes.includes('EPIPE')) {
       log.info(`Got EPIPE on Proxy Connect, ignoring.`, {
         sessionId: null,
         hostname,
@@ -275,6 +275,7 @@ export default class MitmProxy {
         sessionId: null,
         errorKind,
         error,
+        errorCodes,
         hostname,
       });
     }

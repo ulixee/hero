@@ -14,6 +14,7 @@ interface IState {
 
 const { getState, setState } = StateMachine<FetchRequest, IState>();
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function RequestGenerator(coreTab: Promise<CoreTab>) {
   return class Request extends FetchRequest {
     constructor(input: IRequestInfo, init?: IRequestInit) {
@@ -32,7 +33,7 @@ async function createRemoteInitializer(
   coreTabPromise: Promise<CoreTab>,
   input: IRequestInfo,
   init?: IRequestInit,
-) {
+): Promise<void> {
   const requestInput = await getRequestIdOrUrl(input);
   const coreTab = await coreTabPromise;
   const attachedState = await coreTab.createRequest(requestInput, init);
@@ -43,7 +44,7 @@ async function createRemoteInitializer(
   });
 }
 
-export async function getRequestIdOrUrl(input: IRequestInfo) {
+export async function getRequestIdOrUrl(input: IRequestInfo): Promise<number | string> {
   let requestInput: number | string;
   if (typeof input === 'string') {
     requestInput = input;

@@ -7,7 +7,6 @@ import {
   LocationTrigger,
 } from '@secret-agent/core-interfaces/Location';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ICore from '@secret-agent/core-interfaces/ICore';
@@ -149,10 +148,6 @@ export default class Core implements ICore {
     init?: IRequestInit,
   ): Promise<IAttachedState> {
     return this.tab.runCommand('createRequest', input, init);
-  }
-
-  public async configure(options: ISessionOptions) {
-    return this.tab.config(options);
   }
 
   public async addEventListener(jsPath: IJsPath | null, type: string) {
@@ -356,7 +351,7 @@ export default class Core implements ICore {
   }
 
   public static registerSignalHandlers() {
-    ['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
+    ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
       process.once(name as Signals, async () => {
         await Core.shutdown();
         process.exit(0);

@@ -2,35 +2,35 @@ package main
 
 import (
 	"net"
+	"net/url"
 	"time"
 )
 
 func Dial(addr string, connectArgs ConnectArgs) (net.Conn, error) {
-	if connectArgs.ProxyUrl != "" {
-		return DialAddrThroughProxy(
-			addr,
-			connectArgs.ProxyUrl,
-			connectArgs.ProxyAuthBase64,
-			!connectArgs.RejectUnauthorized,
-		)
-	} else {
-		return dialAddr(addr, connectArgs.TcpTtl, connectArgs.TcpWindowSize)
-	}
-}
-
-func dialAddr(addr string, ttl int, windowSize int) (net.Conn, error) {
 	var dialTimeout = time.Duration(15) * time.Second
 
 	/// Dial the server
 	dialer := net.Dialer{
-		Control: ConfigureSocket(ttl, windowSize),
+		Control: ConfigureSocket(connectArgs.TcpTtl, connectArgs.TcpWindowSize),
 		Timeout: dialTimeout,
+	}
+
+	if connectArgs.ProxyUrl != "" {
+		proxyUrl, err := url.Parse(connectArgs.ProxyUrl)
+		if err != nil {
+			return nil, err
+		}
+
+		if proxyUrl.Scheme == "socks5" {
+			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl)
+		}
+
+		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !connectArgs.RejectUnauthorized)
 	}
 
 	dialConn, err := dialer.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
-
 	return dialConn, nil
 }

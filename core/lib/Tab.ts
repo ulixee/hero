@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import ITabOptions from '@secret-agent/core-interfaces/ITabOptions';
+import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
 import {
   ILocationStatus,
   ILocationTrigger,
@@ -119,10 +119,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.isReady = this.install();
   }
 
-  public async config(options: ITabOptions) {
+  public async setRenderingOptions(renderingOptions: IRenderingOption[]) {
     const mitmSession = this.session.mitmRequestSession;
     const blockedResources = mitmSession.blockedResources.types;
-    const renderingOptions = options?.renderingOptions ?? [];
     let enableJs = true;
 
     if (renderingOptions.includes('All')) {
@@ -247,7 +246,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async goto(url: string) {
     const formattedUrl = Url.format(url);
-    this.session.proxy.start(formattedUrl);
 
     this.navigationTracker.navigationRequested(
       'goto',
@@ -258,9 +256,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     await this.puppetPage.navigate(formattedUrl);
 
-    return this.locationTracker
-      .waitForLocationResourceId()
-      .then(x => this.sessionState.getResourceMeta(x));
+    const resource = await this.locationTracker.waitForLocationResourceId();
+    return this.sessionState.getResourceMeta(resource);
   }
 
   public async goBack() {
@@ -467,7 +464,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public async toJSON() {
+  public toJSON() {
     return {
       id: this.id,
       parentTabId: this.parentTabId,
@@ -503,6 +500,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     await this.interactor.initialize();
+    if (this.session.options?.renderingOptions) {
+      await this.setRenderingOptions(this.session.options.renderingOptions);
+    }
   }
 
   private listen() {

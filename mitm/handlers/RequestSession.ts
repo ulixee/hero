@@ -59,7 +59,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   constructor(
     readonly sessionId: string,
     readonly useragent: string,
-    readonly upstreamProxyUrlProvider: Promise<string>,
+    readonly upstreamProxyUrl?: string,
     readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
   ) {
     super();
@@ -176,10 +176,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         }
       }
     }
-  }
-
-  public async getUpstreamProxyUrl() {
-    return this.upstreamProxyUrlProvider ? this.upstreamProxyUrlProvider : null;
   }
 
   public async lookupDns(host: string) {

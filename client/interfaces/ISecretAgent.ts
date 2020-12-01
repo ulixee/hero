@@ -1,7 +1,6 @@
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -27,11 +26,10 @@ export default interface ISecretAgent extends IAwaitedEventTarget<ISecretAgentEv
   click(mousePosition: IMousePosition): Promise<void>;
   close(): Promise<void>;
   closeTab(tab: Tab): Promise<void>;
-  configure(options: ISessionOptions): Promise<void>;
   exportUserProfile(): Promise<IUserProfile>;
   fetch(request: Request | string, init?: IRequestInit): Promise<Response>;
   focusTab(tab: Tab): Promise<void>;
-  getJsValue<T = any>(path: string): Promise<T>;
+  getJsValue<T = any>(path: string): Promise<{ value: T; type: string }>;
   goBack(): Promise<string>;
   goForward(): Promise<string>;
   goto(url: string): Promise<Resource>;

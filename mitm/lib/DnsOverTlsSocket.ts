@@ -18,7 +18,7 @@ export default class DnsOverTlsSocket {
 
   private dnsServer: ConnectionOptions;
   private readonly mitmSocket: MitmSocket;
-  private readonly isConnected: Promise<void>;
+  private isConnected: Promise<void>;
 
   private pending = new Map<number, IResolvablePromise<IDnsResponse>>();
 
@@ -42,11 +42,11 @@ export default class DnsOverTlsSocket {
     });
     this.dnsServer = dnsServer;
     this.onClose = onClose;
-    this.isConnected = this.connect();
   }
 
   public async lookupARecords(host: string): Promise<IDnsResponse> {
     const resolvable = createPromise<IDnsResponse>();
+    if (!this.isConnected) this.isConnected = this.connect();
     await this.isConnected;
     const id = this.query({
       name: host,
@@ -65,10 +65,11 @@ export default class DnsOverTlsSocket {
   }
 
   protected async connect() {
-    const proxyUrl = await this.requestSession?.getUpstreamProxyUrl();
-    if (proxyUrl) this.mitmSocket.setProxy(proxyUrl);
-
-    await this.mitmSocket.connect();
+    const upstreamProxy = this.requestSession?.upstreamProxyUrl;
+    if (upstreamProxy) {
+      this.mitmSocket.setProxyUrl(upstreamProxy);
+    }
+    await this.mitmSocket.connect(10e3);
 
     this.mitmSocket.socket.on('data', this.onData.bind(this));
     this.mitmSocket.on('close', () => {

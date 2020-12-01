@@ -52,6 +52,7 @@ const SecretAgent = require('secret-agent');
   - renderingOptions `string[]`. Controls browser functionality.
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
+  - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 
 ## Properties
 
@@ -142,21 +143,6 @@ Close a single Tab. The first opened Tab will become the focused tab.
 #### **Returns**: `Promise<void>`
 
 Alias for [Tab.close()](./tab#close)
-
-### agent.configure*(\[options])* {#configure}
-
-Update existing configuration settings.
-
-#### **Arguments**:
-
-- options `object` Accepts any of the following:
-  - browserEmulatorId `string`. Emulate a specific browser version.
-  - humanEmulatorId `string`. Create human-like mouse/keyboard movements.
-  - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
-  - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
-  - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
-  - renderingOptions `string[]`. Controls enabled browser rendering features.
-  - showReplay `boolean`. Whether or not to show the [Replay UI](../advanced/session-replay). Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
 
 #### **Returns**: `Promise`
 

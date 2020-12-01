@@ -33,6 +33,7 @@ describe('basic Emulator tests', () => {
     let acceptLanguage = '';
     koaServer.get('/headers', ctx => {
       acceptLanguage = ctx.get('accept-language');
+      ctx.body = '<html></html>';
     });
 
     await agent.goto(`${koaServer.baseUrl}/headers`);

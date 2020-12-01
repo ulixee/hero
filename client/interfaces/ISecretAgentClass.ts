@@ -1,10 +1,10 @@
-import ICoreConfigureOptions from "@secret-agent/core-interfaces/ICoreConfigureOptions";
-import { IRenderingOption } from "@secret-agent/core-interfaces/ITabOptions";
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import ICreateSecretAgentOptions from "./ICreateSecretAgentOptions";
-import ISecretAgent from "./ISecretAgent";
+import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import ICreateSecretAgentOptions from './ICreateSecretAgentOptions';
+import ISecretAgent from './ISecretAgent';
 
-export interface ISecretAgentConfigureOptions extends ICoreConfigureOptions  {
+export interface ISecretAgentConfigureOptions extends ICoreConfigureOptions {
   defaultRenderingOptions: IRenderingOption[];
   defaultUserProfile: IUserProfile;
 }
@@ -19,4 +19,4 @@ export default interface ISecretAgentClass {
 
 // hacky way to check the class implements statics we need
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function SecretAgentStatics(constructor: ISecretAgentClass) {}
+export function SecretAgentStatics(constructor: ISecretAgentClass): void {}

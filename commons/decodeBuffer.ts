@@ -6,7 +6,7 @@ export default async function decodeBuffer(buffer: Buffer, encoding: string): Pr
   if (!encoding) return buffer;
 
   const promise = createPromise<Buffer>();
-  const handler = (error, result) => {
+  const handler = (error, result): void => {
     if (error) promise.reject(error);
     else promise.resolve(result);
   };

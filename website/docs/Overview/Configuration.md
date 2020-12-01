@@ -87,6 +87,15 @@ const latestUserProfile = await agent.exportUserProfile();
 fs.writeFileSync('profile.json', JSON.stringify(latestUserProfile, null, 2));
 ```
 
+### Upstream Proxy <div class="specs"><i>Instance</i></div>
+
+Configures a proxy url to route traffic through for a given session. This function supports two types of proxies:
+
+- `Socks5` - many VPN providers allow you to use a socks5 configuration to send traffic through one of their VPNs behind the scenes. You can pass any required username and password through the `UserInfo` portion of the url, e.g., `socks5://username:password@sockshost.com:1080`.
+- `Http` - an http proxy will create secure TLS socket to an upstream server using the HTTP connect verb. Services like [luminati](https://luminati.io) provide highly configurable Http proxies that can route traffic from various geographic locations and "grade" of IP - ie, consumer IP vs datacenter.
+
+An upstream proxy url should be a fully formatted url to the proxy. If your proxy is socks5, start it with `socks5://`, http `http://` or `https://` as needed. An upstream proxy url can optionally include the user authentication parameters in the url. It will be parsed out and used as the authentication.
+
 ### Browsers Emulator Ids <div class="specs"><i>Class</i><i>Instance</i><i>Core</i></div>
 
 Configures which [BrowserEmulators](../advanced/browser-emulators) to prewarm.

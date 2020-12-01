@@ -10,6 +10,7 @@ import Request from 'awaited-dom/impl/official-klasses/Request';
 import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import Response from 'awaited-dom/impl/official-klasses/Response';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -94,7 +95,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   // METHODS
 
-  public async fetch(request: Request | string, init?: IRequestInit) {
+  public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     const requestInput = await getRequestIdOrUrl(request);
     const coreTab = await getCoreTab(this);
     const attachedState = await coreTab.fetch(requestInput, init);
@@ -103,23 +104,23 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
-  public async goto(href: string) {
+  public async goto(href: string): Promise<Resource> {
     const coreTab = await getCoreTab(this);
     const resource = await coreTab.goto(href);
     return createResource(resource, Promise.resolve(coreTab));
   }
 
-  public async goBack() {
+  public async goBack(): Promise<string> {
     const coreTab = await getCoreTab(this);
     return coreTab.goBack();
   }
 
-  public async goForward() {
+  public async goForward(): Promise<string> {
     const coreTab = await getCoreTab(this);
     return coreTab.goForward();
   }
 
-  public async getJsValue<T>(path: string) {
+  public async getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
     const coreTab = await getCoreTab(this);
     return coreTab.getJsValue<T>(path);
   }
@@ -171,7 +172,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     await coreTab.waitForWebSocket(url);
   }
 
-  public async focus() {
+  public async focus(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
     agentState.setState(secretAgent, {
       activeTab: this,
@@ -179,7 +180,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return coreTab.then(x => x.focusTab());
   }
 
-  public async close() {
+  public async close(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
     const { tabs } = agentState.getState(secretAgent);
     const updatedTabs = tabs.filter(x => x !== this);

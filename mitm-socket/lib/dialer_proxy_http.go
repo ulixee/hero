@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -14,22 +15,23 @@ import (
 	"strings"
 )
 
-func DialAddrThroughProxy(addr string, proxyUrl string, proxyAuth string, allowInsecure bool) (net.Conn, error) {
+func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, allowInsecure bool) (net.Conn, error) {
+  	isSecure, proxyHost, err := getCleanHost(proxyUrl)
 
-	isSecure, proxyHost, err := getCleanHost(proxyUrl)
 	fmt.Printf("Dialing proxy connect %s to %s\n", proxyHost, addr)
 	connectReq := &http.Request{
 		Method: "CONNECT",
-		URL:    &url.URL{Opaque: addr},
+		URL:    proxyUrl,
 		Host:   addr,
 		Header: make(http.Header),
 	}
 
-	if proxyAuth != "" {
-		connectReq.Header.Set("Proxy-Authorization", fmt.Sprintf("Basic %s", proxyAuth))
+    if proxyUrl.User != nil {
+		proxyAuth := proxyUrl.User.String()
+		connectReq.Header.Set("Proxy-Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(proxyAuth))))
 	}
 
-	conn, err := net.Dial("tcp", proxyHost)
+	conn, err := dialer.Dial("tcp", proxyHost)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +51,6 @@ func DialAddrThroughProxy(addr string, proxyUrl string, proxyAuth string, allowI
 	err = connectReq.Write(conn)
 	if err != nil {
 		log.Fatalf("Writing CONNECT failed %#v\n", err)
-
 	}
 	// Read response.
 	// Okay to use and discard buffered reader here, because
@@ -69,34 +70,29 @@ func DialAddrThroughProxy(addr string, proxyUrl string, proxyAuth string, allowI
 			return nil, err
 		}
 		conn.Close()
-		fmt.Printf("Non 200")
-		return nil, errors.New("proxy refused connection" + string(body))
+		responseMessage := fmt.Sprintf("proxy refused connection(%d)\n%s", resp.StatusCode, string(body))
+		return nil, errors.New(responseMessage)
 	}
 	return conn, nil
 }
 
-func getCleanHost(proxyUrl string) (bool, string, error) {
-	parsedProxyUrl, err := url.Parse(proxyUrl)
-	if err != nil {
-		return false, "", err
-	}
-
+func getCleanHost(proxyUrl *url.URL) (bool, string, error) {
 	var isSecure = false
 
-	proxyHost := parsedProxyUrl.Host
+	proxyHost := proxyUrl.Host
 
-	if parsedProxyUrl.Scheme == "" || parsedProxyUrl.Scheme == "http" {
+	if proxyUrl.Scheme == "" || proxyUrl.Scheme == "http" {
 		if strings.IndexRune(proxyHost, ':') == -1 {
 			proxyHost += ":80"
 		}
 	}
 
-	if parsedProxyUrl.Scheme == "https" || parsedProxyUrl.Scheme == "wss" {
+	if proxyUrl.Scheme == "https" || proxyUrl.Scheme == "wss" {
 		isSecure = true
 		if strings.IndexRune(proxyHost, ':') == -1 {
 			proxyHost += ":443"
 		}
 	}
 
-	return isSecure, parsedProxyUrl.Host, nil
+	return isSecure, proxyHost, nil
 }

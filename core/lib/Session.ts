@@ -1,7 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import { UpstreamProxy as MitmUpstreamProxy } from '@secret-agent/mitm';
 import SessionState from '@secret-agent/session-state';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
@@ -38,7 +37,7 @@ export default class Session {
   public browserEngine: IBrowserEngine;
   public browserEmulator: IBrowserEmulator;
   public humanEmulator: IHumanEmulator;
-  public proxy: MitmUpstreamProxy;
+  public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
   public browserContext?: IPuppetContext;
@@ -67,6 +66,8 @@ export default class Session {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
     }
+    this.upstreamProxyUrl = options.upstreamProxyUrl;
+
     if (options.locale) this.browserEmulator.locale = options.locale;
 
     if (!this.browserEmulator.canPolyfill) {
@@ -99,11 +100,10 @@ export default class Session {
       this.viewport,
       this.timezoneId,
     );
-    this.proxy = new MitmUpstreamProxy(this.id);
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.browserEmulator.userAgent.raw,
-      this.proxy.isReady(),
+      this.upstreamProxyUrl,
       this.browserEmulator.networkInterceptorDelegate,
     );
   }
@@ -162,7 +162,6 @@ export default class Session {
     this.pendingNavigationMitmResponses.forEach(x => this.onMitmResponse(x));
 
     await this.mitmRequestSession.close();
-    await this.proxy.close();
     await Promise.all(Object.values(this.tabs).map(x => x.close()));
     try {
       await this.browserContext?.close();

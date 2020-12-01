@@ -4,27 +4,31 @@ import { createPromise } from './utils';
 type Callback<T> = (value?: any) => Promise<T>;
 
 export default class Queue {
-  private queue: { promise: IResolvablePromise; cb: Callback<any> }[] = [];
+  private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
   private active = false;
 
-  public run<T>(cb: Callback<T>) {
+  public run<T>(cb: Callback<T>): Promise<T> {
     const promise = createPromise<T>();
 
     this.queue.push({
       promise,
       cb,
+      startStack: new Error('').stack
+        .split('\n')
+        .slice(1)
+        .join('\n'),
     });
     setImmediate(() => this.next());
     return promise.promise;
   }
 
-  public stop() {
+  public stop(): void {
     while (this.queue.length) {
       this.queue.pop().promise.reject();
     }
   }
 
-  private async next() {
+  private async next(): Promise<void> {
     if (this.active) return;
 
     const next = this.queue.shift();
@@ -35,6 +39,7 @@ export default class Queue {
       const res = await next.cb();
       next.promise.resolve(res);
     } catch (error) {
+      error.stack = `${error.stack}\n-----QUEUE-----\n${next.startStack}`;
       next.promise.reject(error);
     } finally {
       this.active = false;

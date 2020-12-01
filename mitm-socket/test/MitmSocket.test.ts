@@ -1,12 +1,9 @@
 import { Helpers } from '@secret-agent/testing';
-import * as https from 'https';
-import * as net from 'net';
 import { createPromise } from '@secret-agent/commons/utils';
 import http2 from 'http2';
 import * as stream from 'stream';
-import Proxy from 'proxy';
-import * as http from 'http';
 import WebSocket from 'ws';
+import { getTlsConnection, httpGetWithSocket } from '@secret-agent/testing/helpers';
 import MitmSocket from '../index';
 
 afterAll(Helpers.afterAll);
@@ -126,60 +123,6 @@ test.skip('should be able to get scripts from unpkg using Chrome79 emulator', as
   }
 });
 
-test('should be able to send a request through a proxy', async () => {
-  const htmlString = 'Proxy proxy echo echo';
-  const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
-  const connect = jest.fn();
-  proxy.once('connect', connect);
-
-  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
-  const tlsConnection = new MitmSocket('4', {
-    host: 'localhost',
-    port: String(server.port),
-    clientHelloId: 'Chrome79',
-    servername: 'localhost',
-    proxyUrl: `http://localhost:${proxyPort}`,
-    rejectUnauthorized: false,
-  });
-  Helpers.onClose(async () => tlsConnection.close());
-  await tlsConnection.connect();
-
-  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
-  expect(httpResponse).toBe(htmlString);
-  expect(connect).toHaveBeenCalledTimes(1);
-});
-
-test('should be able to send a request through a secure proxy with auth', async () => {
-  const htmlString = 'Proxy secure proxy echo echo';
-  const password = `u:password`;
-  const pass64 = Buffer.from(password).toString('base64');
-  const proxyServer = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
-  const proxy = new Proxy(proxyServer.server);
-  proxy.authenticate = (
-    req: http.IncomingMessage,
-    cb: (req: http.IncomingMessage, success: boolean) => any,
-  ) => {
-    const auth = req.headers['proxy-authorization'];
-    const isValid = auth === `Basic ${pass64}`;
-    if (!isValid) {
-      return cb(null, false);
-    }
-    cb(null, true);
-  };
-  const connect = jest.fn();
-  proxy.once('connect', connect);
-
-  const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
-  const tlsConnection = getTlsConnection(server.port);
-  tlsConnection.setProxy(proxyServer.baseUrl, password);
-
-  await tlsConnection.connect();
-  const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
-  expect(httpResponse).toBe(htmlString);
-  expect(connect).toHaveBeenCalledTimes(1);
-});
-
 test('should handle websockets', async () => {
   const htmlString = 'Secure as anything!';
   const server = await Helpers.runHttpsServer((req, res) => res.end(htmlString));
@@ -221,40 +164,6 @@ test('should handle websockets', async () => {
   expect(messages.length).toBe(messageCount);
 }, 35e3);
 
-test('should handle websockets over proxies', async () => {
-  const proxy = await startProxy();
-  const proxyPort = proxy.address().port;
-  const connect = jest.fn();
-  proxy.once('connect', connect);
-
-  const server = await Helpers.runHttpsServer((req, res) => res.end(''));
-  const serverPort = server.port;
-
-  const wsServer = new WebSocket.Server({ server: server.server });
-  wsServer.on('connection', async (ws: WebSocket) => {
-    ws.send('ola');
-  });
-
-  const tlsConnection = getTlsConnection(serverPort);
-  tlsConnection.connectOpts.keepAlive = true;
-  tlsConnection.setProxy(`http://localhost:${proxyPort}`);
-  await tlsConnection.connect();
-
-  const wsClient = new WebSocket(`wss://localhost:${serverPort}`, {
-    rejectUnauthorized: false,
-    createConnection: () => tlsConnection.socket,
-  });
-
-  Helpers.onClose(async () => wsClient.close());
-  await new Promise(resolve => {
-    wsClient.once('message', msg => {
-      expect(msg).toBe('ola');
-      resolve();
-    });
-  });
-  expect(connect).toHaveBeenCalledTimes(1);
-});
-
 test('should handle upstream disconnects', async () => {
   const server = await Helpers.runHttpsServer((req, res) => {
     res.connection.end();
@@ -267,65 +176,6 @@ test('should handle upstream disconnects', async () => {
     httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket),
   ).rejects.toThrow();
 });
-
-async function httpGetWithSocket(
-  url: string,
-  clientOptions: https.RequestOptions,
-  socket: net.Socket,
-) {
-  return await new Promise<string>((resolve, reject) => {
-    let isResolved = false;
-    socket.once('close', err => {
-      if (isResolved) return;
-      reject(err);
-    });
-    socket.once('error', err => {
-      if (isResolved) return;
-      reject(err);
-    });
-    const request = https.get(
-      url,
-      {
-        ...clientOptions,
-        agent: null,
-        createConnection: () => socket,
-      },
-      async res => {
-        isResolved = true;
-        resolve(await readResponse(res));
-      },
-    );
-    request.on('error', err => {
-      if (isResolved) return;
-      reject(err);
-    });
-  });
-}
-
-function getTlsConnection(serverPort: number, clientHello = 'Chrome79') {
-  const tlsConnection = new MitmSocket('5', {
-    host: 'localhost',
-    port: String(serverPort),
-    clientHelloId: clientHello,
-    servername: 'localhost',
-    rejectUnauthorized: false,
-  });
-  Helpers.onClose(async () => tlsConnection.close());
-  return tlsConnection;
-}
-
-async function startProxy() {
-  const proxyPromise = createPromise();
-  const proxy = new Proxy(http.createServer());
-  proxy.listen(0, () => {
-    proxyPromise.resolve();
-  });
-  proxy.unref();
-
-  closeAfterTest(proxy);
-  await proxyPromise.promise;
-  return proxy;
-}
 
 function closeAfterTest(closable: { close: (...args: any[]) => any }) {
   Helpers.onClose(() => new Promise(resolve => closable.close(() => process.nextTick(resolve))));

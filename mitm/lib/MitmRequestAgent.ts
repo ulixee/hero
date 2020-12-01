@@ -116,14 +116,13 @@ export default class MitmRequestAgent {
     const tcpVars = session.networkInterceptorDelegate.tcp;
     if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
 
-    const proxyUrl = session.getUpstreamProxyUrl();
-    if (proxyUrl) {
+    if (session.upstreamProxyUrl) {
       ctx.setState(ResourceState.GetUpstreamProxyUrl);
-      mitmSocket.setProxy(await proxyUrl);
+      mitmSocket.setProxyUrl(session.upstreamProxyUrl);
     }
 
     ctx.setState(ResourceState.SocketConnect);
-    await mitmSocket.connect();
+    await mitmSocket.connect(10e3);
 
     if (ctx.isUpgrade) {
       mitmSocket.socket.setNoDelay(true);

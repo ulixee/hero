@@ -73,6 +73,7 @@ describe('basic Full Client tests', () => {
       ctx.cookies.set('Cookie1', 'This is a test', {
         httpOnly: true,
       });
+      ctx.body = '';
     });
 
     await agent.goto(`${koaServer.baseUrl}/cookies`);

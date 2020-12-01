@@ -184,7 +184,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         );
         process.off('warning', warningHandler);
         expect(warning).toBe(null);
-      });
+      }, 30e3);
 
       it('should not leak listeners during 20 frameNavigated', async () => {
         let warning = null;
