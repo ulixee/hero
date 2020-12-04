@@ -115,7 +115,7 @@ function buildFilename() {
   return `connect_${version}_${platform}_${arch}.gz`;
 }
 
-async function download(filepath) {
+function download(filepath) {
   return new Promise((resolve, reject) => {
     const req = https.get(filepath, async res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {

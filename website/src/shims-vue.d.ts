@@ -5,7 +5,7 @@ declare module '*.vue' {
 }
 
 declare module 'vue/types/options' {
-  // tslint:disable-next-line:interface-name
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ComponentOptions<V extends Vue> {
     metaInfo?: any;
   }

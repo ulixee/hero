@@ -1,10 +1,10 @@
 import * as http2 from 'http2';
+import { ClientHttp2Stream, IncomingHttpHeaders, IncomingHttpStatusHeader } from 'http2';
 import { ChildProcess, spawn } from 'child_process';
 import * as Path from 'path';
-import { ClientHttp2Stream, IncomingHttpHeaders, IncomingHttpStatusHeader } from 'http2';
 import ISaSession from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
-import ReplayResources from '~backend/api/ReplayResources';
+import ReplayResources, { IReplayHttpResource } from '~backend/api/ReplayResources';
 import getResolvable from '~shared/utils/promise';
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ReplayTime from '~backend/api/ReplayTime';
@@ -74,11 +74,11 @@ export default class ReplayApi {
       });
   }
 
-  public async getResource(url: string) {
+  public getResource(url: string): Promise<IReplayHttpResource> {
     return this.resources.get(url);
   }
 
-  public close() {
+  public close(): void {
     if (this.tabs.some(x => x.isActive)) return;
 
     this.http2Session.removeAllListeners();
@@ -86,14 +86,14 @@ export default class ReplayApi {
     ReplayApi.sessions.delete(this.http2Session);
   }
 
-  public getTab(tabId: string) {
+  public getTab(tabId: string): ReplayTabState {
     return this.tabs.find(x => x.tabId === tabId);
   }
 
   private async onStream(
     stream: ClientHttp2Stream,
     headers: IncomingHttpHeaders & IncomingHttpStatusHeader,
-  ) {
+  ): Promise<void> {
     const path = headers[':path'];
 
     if (path === '/session') {
@@ -114,7 +114,7 @@ export default class ReplayApi {
     }
   }
 
-  private onResource(data: Buffer, headers: { [key: string]: string }) {
+  private onResource(data: Buffer, headers: { [key: string]: string }): void {
     const type = headers['resource-type'];
     const statusCode = parseInt(headers['resource-status-code'] ?? '404', 10);
     const tabId = headers['resource-tabid'];

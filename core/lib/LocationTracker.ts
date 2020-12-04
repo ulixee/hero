@@ -99,7 +99,7 @@ export default class LocationTracker {
       }
     }
 
-    return new Promise<void>(async resolve => {
+    return new Promise<void>(resolve => {
       this.waitForCbs[status].push(resolve);
     });
   }

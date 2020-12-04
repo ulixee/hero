@@ -10,7 +10,7 @@ import ViewBackend from '~backend/models/ViewBackend';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import generateContextMenu from '~backend/menus/generateContextMenu';
-import ISaSession, { ISessionTab } from '~shared/interfaces/ISaSession';
+import { ISessionTab } from '~shared/interfaces/ISaSession';
 
 export default class Window {
   public static list: Window[] = [];
@@ -88,13 +88,13 @@ export default class Window {
     this.webContents.send(channel, ...args);
   }
 
-  public async goBack() {
+  public goBack() {
     if (this.hasBack()) {
       return this.goToHistory(this.navCursor - 1);
     }
   }
 
-  public async goForward() {
+  public goForward() {
     if (this.hasNext()) {
       return this.goToHistory(this.navCursor + 1);
     }

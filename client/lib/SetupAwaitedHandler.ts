@@ -87,7 +87,7 @@ export function construct<TClass>(self: AwaitedHandler<TClass>): TClass {
   throw new NotImplementedError(`${self.className} constructor not implemented`);
 }
 
-async function execJsPath<TClass, T>(
+function execJsPath<TClass, T>(
   self: AwaitedHandler<TClass>,
   coreTab: CoreTab,
   instance: TClass,

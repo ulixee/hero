@@ -64,7 +64,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     this.isReady = this.initialize(parentNetworkManager).catch(err => err);
   }
 
-  async initialize(pageNetworkManager: NetworkManager) {
+  async initialize(pageNetworkManager: NetworkManager): Promise<void> {
     await this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
       // web workers can use parent network
       if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
@@ -95,7 +95,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     return remote.value as T;
   }
 
-  async close() {
+  close(): void {
     this.networkManager.close();
     this.cancelPendingEvents('Worker closing', ['close']);
     eventUtils.removeEventListeners(this.registeredEvents);
@@ -109,11 +109,11 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     };
   }
 
-  private onContextCreated(event: ExecutionContextCreatedEvent) {
+  private onContextCreated(event: ExecutionContextCreatedEvent): void {
     this.executionContextId.resolve(event.context.id);
   }
 
-  private onRuntimeException(msg: ExceptionThrownEvent) {
+  private onRuntimeException(msg: ExceptionThrownEvent): void {
     const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
 
     this.emit('page-error', {
@@ -121,7 +121,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     });
   }
 
-  private async onRuntimeConsole(event: ConsoleAPICalledEvent) {
+  private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
     const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = `${this.type}:${this.url}`; // TBD
 

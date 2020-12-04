@@ -1,4 +1,6 @@
 import Log from '@secret-agent/commons/Logger';
+import http from 'http';
+import http2 from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import BlockHandler from './BlockHandler';
 import HeadersHandler from './HeadersHandler';
@@ -25,7 +27,9 @@ export default abstract class BaseHttpHandler {
     this.context = MitmRequestContext.create({ ...request, isUpgrade }, responseCache);
   }
 
-  protected async createProxyToServerRequest() {
+  protected async createProxyToServerRequest(): Promise<
+    http.ClientRequest | http2.ClientHttp2Stream
+  > {
     const context = this.context;
     const session = context.requestSession;
 

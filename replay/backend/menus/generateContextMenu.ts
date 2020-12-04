@@ -136,14 +136,14 @@ export default function generateContextMenu(
       {
         label: 'Save as...',
         accelerator: 'CmdOrCtrl+S',
-        click: async () => {
+        click: () => {
           saveAs();
         },
       },
       {
         label: 'Print',
         accelerator: 'CmdOrCtrl+P',
-        click: async () => {
+        click: () => {
           printPage();
         },
       },

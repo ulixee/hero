@@ -20,7 +20,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     this.clientSocket.on('error', this.onError.bind(this, 'ClientToProxy.UpgradeSocketError'));
   }
 
-  public async onUpgrade() {
+  public async onUpgrade(): Promise<void> {
     try {
       const proxyToServerRequest = await this.createProxyToServerRequest();
       if (!proxyToServerRequest) return;
@@ -32,7 +32,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     }
   }
 
-  protected onError(errorType: string, error: Error) {
+  protected onError(errorType: string, error: Error): void {
     const socket = this.clientSocket;
     const context = this.context;
     const url = context.url.href;
@@ -56,7 +56,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     serverResponse: http.IncomingMessage,
     serverSocket: net.Socket,
     serverHead: Buffer,
-  ) {
+  ): Promise<void> {
     this.context.setState(ResourceState.ServerToProxyOnResponse);
     serverSocket.pause();
     MitmRequestContext.readHttp1Response(this.context, serverResponse);
@@ -119,7 +119,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
       socket: net.Socket;
       head: Buffer;
     },
-  ) {
+  ): Promise<void> {
     const handler = new HttpUpgradeHandler(request, request.socket, request.head);
     await handler.onUpgrade();
   }

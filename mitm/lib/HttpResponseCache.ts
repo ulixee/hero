@@ -1,4 +1,4 @@
-import IResourceHeaders from "@secret-agent/core-interfaces/IResourceHeaders";
+import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 // TODO: implement max-age and last-modified cache control https://tools.ietf.org/id/draft-ietf-httpbis-cache-01.html
 export default class HttpResponseCache {
@@ -7,7 +7,7 @@ export default class HttpResponseCache {
 
   constructor(readonly maxItems = 500) {}
 
-  public get(url: string) {
+  public get(url: string): IResource | null {
     const entry = this.cache.get(url);
     if (entry) {
       this.recordAccess(url);
@@ -15,7 +15,7 @@ export default class HttpResponseCache {
     return entry;
   }
 
-  public add(url: string, file: Buffer, headers: IResourceHeaders) {
+  public add(url: string, file: Buffer, headers: IResourceHeaders): void {
     const resource = { file } as IResource;
     for (const [key, value] of Object.entries(headers)) {
       const lower = key.toLowerCase();
@@ -50,7 +50,7 @@ export default class HttpResponseCache {
     this.cleanCache();
   }
 
-  private recordAccess(url: string) {
+  private recordAccess(url: string): void {
     const idx = this.accessList.indexOf(url);
     if (idx >= 0) {
       this.accessList.splice(idx, 1);
@@ -58,7 +58,7 @@ export default class HttpResponseCache {
     this.accessList.unshift(url);
   }
 
-  private cleanCache() {
+  private cleanCache(): void {
     if (this.accessList.length > this.maxItems) {
       const toDelete = this.accessList.slice(this.maxItems);
       this.accessList.length = this.maxItems;

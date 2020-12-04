@@ -4,8 +4,6 @@ import INodeTracker from '../interfaces/INodeTracker';
 import IAttachedState from '../interfaces/IAttachedStateCopy';
 import IExecJsPathResult from '../interfaces/IExecJsPathResult';
 
-declare type TSON = any;
-
 // / COPIED FROM NODERDOM! DO NOT EDIT HERE
 type IJsPath = IPathStep[];
 type IPathStep = IPropertyName | IMethod | IAttachedId;
@@ -86,8 +84,7 @@ class JsPath {
     return false;
   }
 
-  public static async getWindowOffset() {
-    // @ts-ignore
+  public static getWindowOffset() {
     return TSON.stringify({
       innerHeight: window.innerHeight || document.documentElement.clientHeight,
       innerWidth: window.innerWidth || document.documentElement.clientWidth,

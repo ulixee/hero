@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -33,7 +32,8 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 
 	conn, err := dialer.Dial("tcp", proxyHost)
 	if err != nil {
-		return nil, err
+		responseMessage := fmt.Sprintf("HTTP_PROXY_ERR dial failed (%s)", err)
+		return nil, errors.New(responseMessage)
 	}
 
 	if isSecure {
@@ -50,7 +50,8 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 
 	err = connectReq.Write(conn)
 	if err != nil {
-		log.Fatalf("Writing CONNECT failed %#v\n", err)
+		responseMessage := fmt.Sprintf("HTTP_PROXY_ERR writing CONNECT request failed (%s)", err)
+		return nil, errors.New(responseMessage)
 	}
 	// Read response.
 	// Okay to use and discard buffered reader here, because
@@ -60,7 +61,8 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 	resp, err := http.ReadResponse(br, connectReq)
 	if err != nil {
 		conn.Close()
-		return nil, err
+		responseMessage := fmt.Sprintf("HTTP_PROXY_ERR reading CONNECT response failed (%s)", err)
+		return nil, errors.New(responseMessage)
 	}
 	defer resp.Body.Close()
 
@@ -70,7 +72,7 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 			return nil, err
 		}
 		conn.Close()
-		responseMessage := fmt.Sprintf("proxy refused connection(%d)\n%s", resp.StatusCode, string(body))
+		responseMessage := fmt.Sprintf("HTTP_PROXY_ERR connection refused (%d)\n%s", resp.StatusCode, string(body))
 		return nil, errors.New(responseMessage)
 	}
 	return conn, nil

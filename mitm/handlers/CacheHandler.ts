@@ -7,18 +7,18 @@ export default class CacheHandler {
   public shouldServeCachedData = false;
   private readonly data: Buffer[] = [];
 
-  public get buffer() {
+  public get buffer(): Buffer {
     return Buffer.concat(this.data);
   }
 
-  public get cacheData() {
+  public get cacheData(): Buffer | null {
     if (!this.shouldServeCachedData) return null;
     return this.buffer;
   }
 
   constructor(readonly responseCache: HttpResponseCache, readonly ctx: IMitmRequestContext) {}
 
-  public onRequest() {
+  public onRequest(): void {
     const ctx = this.ctx;
     ctx.setState(ResourceState.CheckCacheOnRequest);
 
@@ -34,7 +34,7 @@ export default class CacheHandler {
     }
   }
 
-  public onHttp2PushStream() {
+  public onHttp2PushStream(): void {
     this.ctx.setState(ResourceState.CheckCacheOnRequest);
     if (this.ctx.method === 'GET') {
       const cached = this.responseCache?.get(this.ctx.url.href);
@@ -45,7 +45,7 @@ export default class CacheHandler {
     }
   }
 
-  public onResponseData(chunk: Buffer) {
+  public onResponseData(chunk: Buffer): Buffer {
     let data = chunk;
     if (this.shouldServeCachedData) {
       data = null;
@@ -55,14 +55,14 @@ export default class CacheHandler {
     return data;
   }
 
-  public onResponseHeaders() {
+  public onResponseHeaders(): void {
     if (this.didProposeCachedResource && this.ctx.status === 304) {
       this.useCached();
       this.ctx.status = 200;
     }
   }
 
-  public onResponseEnd() {
+  public onResponseEnd(): void {
     const ctx = this.ctx;
     ctx.setState(ResourceState.CheckCacheOnResponseEnd);
     if (
@@ -76,7 +76,7 @@ export default class CacheHandler {
     }
   }
 
-  private useCached() {
+  private useCached(): void {
     const { responseHeaders, url } = this.ctx;
     const cached = this.responseCache?.get(url.href);
     let isLowerKeys = false;

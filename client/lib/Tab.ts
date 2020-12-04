@@ -141,7 +141,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     await coreTab.waitForLoad(status);
   }
 
-  public async waitForResource(
+  public waitForResource(
     filter: IWaitForResourceFilter,
     options?: IWaitForResourceOptions,
   ): Promise<(Resource | WebsocketResource)[]> {
@@ -172,7 +172,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     await coreTab.waitForWebSocket(url);
   }
 
-  public async focus(): Promise<void> {
+  public focus(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
     agentState.setState(secretAgent, {
       activeTab: this,
@@ -180,7 +180,7 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
     return coreTab.then(x => x.focusTab());
   }
 
-  public async close(): Promise<void> {
+  public close(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
     const { tabs } = agentState.getState(secretAgent);
     const updatedTabs = tabs.filter(x => x !== this);

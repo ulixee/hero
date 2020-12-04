@@ -19,7 +19,7 @@ export default class PkiTable extends SqliteTable<IPkiRecord> {
     this.getQuery = db.prepare(`select * from ${this.tableName} where host = ? limit 1`);
   }
 
-  public insert(record: IPkiRecord) {
+  public insert(record: IPkiRecord): void {
     const { host, privateKey, publicKey, beginDate, expireDate } = record;
     this.queuePendingInsert([
       host,
@@ -30,7 +30,7 @@ export default class PkiTable extends SqliteTable<IPkiRecord> {
     ]);
   }
 
-  public get(host: string) {
+  public get(host: string): IPkiRecord {
     const record = this.getQuery.get(host) as IPkiRecord;
     if (!record) return record;
     record.beginDate = new Date(record.beginDate);

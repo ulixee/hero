@@ -270,7 +270,7 @@ export default class ReplayView extends ViewBackend {
     }
   }
 
-  private async clearTabState() {
+  private clearTabState() {
     if (this.tabState) {
       this.tabState.off('tick:changes', this.checkResponsive);
       this.tabState = null;

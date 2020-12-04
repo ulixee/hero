@@ -14,23 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Protocol from "devtools-protocol";
-import { IPuppetPage, IPuppetPageEvents } from "@secret-agent/puppet-interfaces/IPuppetPage";
-import * as eventUtils from "@secret-agent/commons/eventUtils";
-import {  TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
-import { createPromise } from "@secret-agent/commons/utils";
-import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
-import IViewport from "@secret-agent/core-interfaces/IViewport";
-import { CanceledPromiseError } from "@secret-agent/commons/interfaces/IPendingWaitEvent";
-import { CDPSession } from "./CDPSession";
-import { NetworkManager } from "./NetworkManager";
-import { Keyboard } from "./Keyboard";
-import Mouse from "./Mouse";
-import FramesManager from "./FramesManager";
-import { BrowserContext } from "./BrowserContext";
-import { Worker } from "./Worker";
-import ConsoleMessage from "./ConsoleMessage";
+import Protocol from 'devtools-protocol';
+import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import * as eventUtils from '@secret-agent/commons/eventUtils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { createPromise } from '@secret-agent/commons/utils';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { CDPSession } from './CDPSession';
+import { NetworkManager } from './NetworkManager';
+import { Keyboard } from './Keyboard';
+import Mouse from './Mouse';
+import FramesManager from './FramesManager';
+import { BrowserContext } from './BrowserContext';
+import { Worker } from './Worker';
+import ConsoleMessage from './ConsoleMessage';
+import Frame from './Frame';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
@@ -55,23 +56,23 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public readonly isReady: Promise<void>;
   public windowOpenParams: Protocol.Page.WindowOpenEvent;
 
-  public get id() {
+  public get id(): string {
     return this.targetId;
   }
 
-  public get devtoolsSessionId() {
+  public get devtoolsSessionId(): string {
     return this.cdpSession.id;
   }
 
-  public get mainFrame() {
+  public get mainFrame(): Frame {
     return this.framesManager.main;
   }
 
-  public get frames() {
+  public get frames(): Frame[] {
     return this.framesManager.activeFrames;
   }
 
-  public get workers() {
+  public get workers(): Worker[] {
     return [...this.workersById.values()];
   }
 
@@ -149,15 +150,20 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  addNewDocumentScript(script: string, isolatedEnvironment: boolean) {
+  addNewDocumentScript(script: string, isolatedEnvironment: boolean): Promise<void> {
     return this.framesManager.addNewDocumentScript(script, isolatedEnvironment);
   }
 
-  async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
+  addPageCallback(
+    name: string,
+    onCallback: (payload: any, frameId: string) => any,
+  ): Promise<IRegisteredEventListener> {
     return this.framesManager.addPageCallback(name, onCallback);
   }
 
-  public async getIndexedDbDatabaseNames() {
+  public async getIndexedDbDatabaseNames(): Promise<
+    { frameId: string; origin: string; databases: string[] }[]
+  > {
     const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
     for (const { origin, frameId } of this.framesManager.getSecurityOrigins()) {
       const { databaseNames } = await this.cdpSession.send('IndexedDB.requestDatabaseNames', {
@@ -174,11 +180,11 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  async evaluate<T>(expression: string): Promise<T> {
+  evaluate<T>(expression: string): Promise<T> {
     return this.mainFrame.evaluate<T>(expression, false);
   }
 
-  async navigate(url: string, options: { referrer?: string } = {}) {
+  async navigate(url: string, options: { referrer?: string } = {}): Promise<void> {
     const navigationResponse = await this.cdpSession.send('Page.navigate', {
       url,
       referrer: options.referrer,
@@ -188,11 +194,11 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.framesManager.waitForFrame(navigationResponse, url, true);
   }
 
-  async goBack(): Promise<void> {
+  goBack(): Promise<void> {
     return this.navigateToHistory(-1);
   }
 
-  async goForward(): Promise<void> {
+  goForward(): Promise<void> {
     return this.navigateToHistory(+1);
   }
 
@@ -214,7 +220,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.closePromise.promise;
   }
 
-  didClose() {
+  didClose(): void {
     this.isClosed = true;
     this.framesManager.close();
     this.networkManager.close();
@@ -276,7 +282,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
   }
 
-  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
+  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent): Promise<void> {
     const { sessionId, targetInfo, waitingForDebugger } = event;
 
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
@@ -299,7 +305,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
       // TODO: pause for initialization by core/Tab?
       this.emit('worker', { worker });
-      return;
+      return Promise.resolve();
     }
 
     if (waitingForDebugger) {
@@ -324,7 +330,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     }
   }
 
-  private onRuntimeException(msg: ExceptionThrownEvent) {
+  private onRuntimeException(msg: ExceptionThrownEvent): void {
     const error = ConsoleMessage.exceptionToError(msg.exceptionDetails);
     const frameId = this.framesManager.getFrameIdForExecutionContext(
       msg.exceptionDetails.executionContextId,
@@ -335,7 +341,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  private onRuntimeConsole(event: ConsoleAPICalledEvent) {
+  private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
     const message = ConsoleMessage.create(this.cdpSession, event);
     const frameId = this.framesManager.getFrameIdForExecutionContext(event.executionContextId);
 
@@ -345,15 +351,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  private onTargetCrashed() {
+  private onTargetCrashed(): void {
     this.emit('crashed', { error: new Error('Target Crashed') });
   }
 
-  private onWindowOpen(event: WindowOpenEvent) {
+  private onWindowOpen(event: WindowOpenEvent): void {
     this.windowOpenParams = event;
   }
 
-  private async setScreensize(viewport: IViewport) {
+  private async setScreensize(viewport: IViewport): Promise<void> {
     if (!viewport) return;
     await this.cdpSession.send('Emulation.setDeviceMetricsOverride', {
       width: viewport.width,
@@ -367,7 +373,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  private async setTimezone(timezoneId = '') {
+  private async setTimezone(timezoneId = ''): Promise<void> {
     try {
       await this.cdpSession.send('Emulation.setTimezoneOverride', { timezoneId });
     } catch (error) {
@@ -378,7 +384,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     }
   }
 
-  private async setLocale(locale = 'en-US') {
+  private async setLocale(locale = 'en-US'): Promise<void> {
     try {
       await this.cdpSession.send('Emulation.setLocaleOverride', { locale });
     } catch (error) {

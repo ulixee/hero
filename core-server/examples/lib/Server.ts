@@ -16,7 +16,7 @@ export default class SecretAgentSocketServer {
   }
 
   public listen(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.netServer = Net.createServer(this.handleNetConnection.bind(this));
       this.netServer.on('error', error => reject(error));
       this.netServer.listen(this.port, () => resolve());
@@ -38,14 +38,14 @@ export default class SecretAgentSocketServer {
     });
   }
 
-  private async handleNetConnection(netConnection: Net.Socket) {
+  private handleNetConnection(netConnection: Net.Socket) {
     const jsonSocket = new JsonSocket(netConnection);
     const coreConnection = this.coreServer.addConnection(netConnection);
     const id = (this.lastConnectionId += 1).toString();
 
     this.netConnectionsById[id] = netConnection;
 
-    coreConnection.pipeOutgoing(async payload => jsonSocket.write(payload));
+    coreConnection.pipeOutgoing(payload => jsonSocket.write(payload));
     jsonSocket.on('message', payload => coreConnection.pipeIncoming(payload));
     jsonSocket.on('end', () => {
       delete this.netConnectionsById[id];

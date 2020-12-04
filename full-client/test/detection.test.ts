@@ -114,7 +114,7 @@ test('should not be denied for notifications, but prompt for permissions', async
   expect(permissions.permissionState).toBe('prompt');
 });
 
-test('should not leave markers on permissions.query.toString ', async () => {
+test('should not leave markers on permissions.query.toString', async () => {
   const agent = await new SecretAgent();
   const tabid = await agent.activeTab.tabId;
   await agent.goto(`${koaServer.baseUrl}`);

@@ -16,6 +16,7 @@ const { getState, setState } = StateMachine<FetchRequest, IState>();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default function RequestGenerator(coreTab: Promise<CoreTab>) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return class Request extends FetchRequest {
     constructor(input: IRequestInfo, init?: IRequestInit) {
       super(input, init);

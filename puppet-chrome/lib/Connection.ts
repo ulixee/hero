@@ -14,13 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ProtocolMapping } from "devtools-protocol/types/protocol-mapping";
-import { addTypedEventListener, removeEventListeners, TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import IConnectionTransport, { IConnectionTransportEvents } from "@secret-agent/puppet-interfaces/IConnectionTransport";
-import { IPuppetConnectionEvents } from "@secret-agent/puppet-interfaces/IPuppetConnection";
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
-import Log from "@secret-agent/commons/Logger";
-import { CDPSession } from "./CDPSession";
+import {
+  addTypedEventListener,
+  removeEventListeners,
+  TypedEventEmitter,
+} from '@secret-agent/commons/eventUtils';
+import IConnectionTransport, {
+  IConnectionTransportEvents,
+} from '@secret-agent/puppet-interfaces/IConnectionTransport';
+import { IPuppetConnectionEvents } from '@secret-agent/puppet-interfaces/IPuppetConnection';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import Log from '@secret-agent/commons/Logger';
+import { CDPSession } from './CDPSession';
 
 const { log } = Log(module);
 
@@ -46,14 +51,14 @@ export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
     this.sessionsById.set('', this.rootSession);
   }
 
-  public sendMessage<T extends keyof ProtocolMapping.Commands>(message: object): number {
+  public sendMessage(message: object): number {
     this.lastId += 1;
     const id = this.lastId;
     this.transport.send(JSON.stringify({ ...message, id }));
     return id;
   }
 
-  public getSession(sessionId: string) {
+  public getSession(sessionId: string): CDPSession | undefined {
     return this.sessionsById.get(sessionId);
   }
 
@@ -62,7 +67,7 @@ export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
     this.transport.close();
   }
 
-  private async onMessage(message: string): Promise<void> {
+  private onMessage(message: string): void {
     const object = JSON.parse(message);
     const cdpSessionId = object.params?.sessionId;
 
@@ -87,7 +92,7 @@ export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
     }
   }
 
-  private onClosed() {
+  private onClosed(): void {
     if (this.isClosed) return;
     this.isClosed = true;
     for (const [id, session] of this.sessionsById) {

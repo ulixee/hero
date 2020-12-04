@@ -40,7 +40,7 @@ test('should handle http2 requests', async () => {
   expect(httpResponse).toBe('I am h2');
 });
 
-test('should be able to hit google using a Chrome79 Emulator', async () => {
+test('should be able to hit google using a Chrome Emulator', async () => {
   const tlsConnection = new MitmSocket('1', {
     host: 'google.com',
     port: '443',
@@ -63,13 +63,12 @@ test('should be able to hit google using a Chrome79 Emulator', async () => {
   expect(httpResponse).toMatch(/<\/body><\/html>$/);
 });
 
-test('should be able to hit optimove using a Chrome79 Emulator', async () => {
+test('should be able to hit gstatic using a Chrome Emulator', async () => {
   const tlsConnection = new MitmSocket('optimove', {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
     clientHelloId: 'Chrome72',
-    debug: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 
@@ -90,7 +89,7 @@ test('should be able to hit optimove using a Chrome79 Emulator', async () => {
 
 // only test this manually
 // eslint-disable-next-line jest/no-disabled-tests
-test.skip('should be able to get scripts from unpkg using Chrome79 emulator', async () => {
+test.skip('should be able to get scripts from unpkg using Chrome emulator', async () => {
   const tlsConnection = new MitmSocket('3', {
     host: 'unpkg.com',
     port: '443',
@@ -177,8 +176,10 @@ test('should handle upstream disconnects', async () => {
   ).rejects.toThrow();
 });
 
-function closeAfterTest(closable: { close: (...args: any[]) => any }) {
-  Helpers.onClose(() => new Promise(resolve => closable.close(() => process.nextTick(resolve))));
+function closeAfterTest(session: http2.ClientHttp2Session) {
+  Helpers.onClose(() => {
+    session.destroy();
+  });
 }
 
 async function readResponse(res: stream.Readable) {

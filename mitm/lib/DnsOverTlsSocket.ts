@@ -8,11 +8,11 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import RequestSession from '../handlers/RequestSession';
 
 export default class DnsOverTlsSocket {
-  public get host() {
+  public get host(): string {
     return this.dnsServer.host;
   }
 
-  public get isActive() {
+  public get isActive(): boolean {
     return this.mitmSocket.isReusable() && !this.isClosing;
   }
 
@@ -27,7 +27,7 @@ export default class DnsOverTlsSocket {
 
   private readonly onClose?: () => void;
 
-  private requestSession: RequestSession;
+  private requestSession: RequestSession | undefined;
 
   constructor(dnsServer: ConnectionOptions, requestSession?: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
@@ -57,17 +57,19 @@ export default class DnsOverTlsSocket {
     return resolvable.promise;
   }
 
-  public close() {
+  public close(): void {
     if (this.isClosing) return;
     this.isClosing = true;
     this.mitmSocket.close();
     if (this.onClose) this.onClose();
   }
 
-  protected async connect() {
-    const upstreamProxy = this.requestSession?.upstreamProxyUrl;
-    if (upstreamProxy) {
-      this.mitmSocket.setProxyUrl(upstreamProxy);
+  protected async connect(): Promise<void> {
+    if (this.requestSession?.networkInterceptorDelegate?.dns?.useUpstreamProxy) {
+      const upstreamProxy = this.requestSession.upstreamProxyUrl;
+      if (upstreamProxy) {
+        this.mitmSocket.setProxyUrl(upstreamProxy);
+      }
     }
     await this.mitmSocket.connect(10e3);
 
@@ -78,14 +80,14 @@ export default class DnsOverTlsSocket {
     });
   }
 
-  private disconnect() {
+  private disconnect(): void {
     for (const [, entry] of this.pending) {
       entry.reject(new CanceledPromiseError('Disconnecting Dns Socket'));
     }
     this.close();
   }
 
-  private query(...questions: IQuestion[]) {
+  private query(...questions: IQuestion[]): number {
     const id = randomBytes(2).readUInt16BE(0);
     const dnsQuery = dnsPacket.streamEncode({
       flags: dnsPacket.RECURSION_DESIRED,
@@ -97,7 +99,7 @@ export default class DnsOverTlsSocket {
     return id;
   }
 
-  private onData(data: Buffer) {
+  private onData(data: Buffer): void {
     if (this.buffer === null) {
       this.buffer = Buffer.from(data);
     } else {
@@ -121,7 +123,7 @@ export default class DnsOverTlsSocket {
     }
   }
 
-  private getMessageLength() {
+  private getMessageLength(): number | undefined {
     if (this.buffer.byteLength >= 2) {
       // https://tools.ietf.org/html/rfc7858#section-3.3
       // https://tools.ietf.org/html/rfc1035#section-4.2.2

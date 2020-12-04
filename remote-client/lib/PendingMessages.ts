@@ -1,6 +1,6 @@
 import IResponsePayload from '@secret-agent/remote-interfaces/IResponsePayload';
 
-export = class PendingMessages {
+export default class PendingMessages {
   private pending: { [id: string]: IPendingPromise } = {};
   private lastId = 0;
 
@@ -34,7 +34,7 @@ export = class PendingMessages {
     } else this.pending[id].resolve({ data: message.data, commandId: message.commandId });
     delete this.pending[id];
   }
-};
+}
 
 interface IPendingPromise {
   id: string;

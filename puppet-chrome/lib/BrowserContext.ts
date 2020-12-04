@@ -13,7 +13,7 @@ import {
 } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -22,7 +22,8 @@ import Frame from './Frame';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
 
-export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
+export class BrowserContext
+  extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
   public emulation: IBrowserEmulationSettings;
   public logger: IBoundLog;
@@ -204,10 +205,10 @@ export class BrowserContext extends TypedEventEmitter<IPuppetContextEvents>
     });
   }
 
-  private async cdpRootSessionSend<T extends keyof ProtocolMapping.Commands>(
+  private cdpRootSessionSend<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
-  ) {
+  ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     return this.browser.cdpSession.send(method, params, this);
   }
 

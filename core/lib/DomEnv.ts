@@ -155,7 +155,7 @@ export default class DomEnv {
     return this.puppetPage.mainFrame.evaluate<string>('location.href', false);
   }
 
-  private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
+  private runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
     const callFn = `${fnName}(${args
       .map(x => {
         if (!x) return 'undefined';

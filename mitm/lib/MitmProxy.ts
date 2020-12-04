@@ -23,15 +23,15 @@ const defaultStorageDirectory =
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
  */
 export default class MitmProxy {
-  public get port() {
+  public get port(): number {
     return this.httpPort;
   }
 
-  public get httpPort() {
+  public get httpPort(): number | undefined {
     return (this.httpServer.address() as net.AddressInfo)?.port;
   }
 
-  public get http2Port() {
+  public get http2Port(): number | undefined {
     return (this.http2Server.address() as net.AddressInfo)?.port;
   }
 
@@ -66,7 +66,7 @@ export default class MitmProxy {
     this.http2Server.on('upgrade', this.onHttpUpgrade.bind(this, true));
   }
 
-  public async listen() {
+  public async listen(): Promise<this> {
     await startServer(this.httpServer, this.options.port ?? 0);
 
     await startServer(this.http2Server);
@@ -77,7 +77,7 @@ export default class MitmProxy {
     return this;
   }
 
-  public async close() {
+  public async close(): Promise<this> {
     if (this.isClosing) return;
     this.isClosing = true;
     this.db.close();
@@ -100,7 +100,7 @@ export default class MitmProxy {
     isSSL: boolean,
     clientToProxyRequest: http2.Http2ServerRequest,
     proxyToClientResponse: http2.Http2ServerResponse,
-  ) {
+  ): Promise<void> {
     const sessionId = RequestSession.readSessionId(
       clientToProxyRequest.headers,
       clientToProxyRequest.socket.remotePort,
@@ -140,7 +140,7 @@ export default class MitmProxy {
     clientToProxyRequest: IncomingMessage,
     socket: Socket,
     head: Buffer,
-  ) {
+  ): Promise<void> {
     // socket resumes in HttpUpgradeHandler.upgradeResponseHandler
     socket.pause();
     const sessionId = RequestSession.readSessionId(
@@ -172,7 +172,11 @@ export default class MitmProxy {
     });
   }
 
-  private async onHttpConnect(request: http.IncomingMessage, socket: net.Socket, head: Buffer) {
+  private async onHttpConnect(
+    request: http.IncomingMessage,
+    socket: net.Socket,
+    head: Buffer,
+  ): Promise<void> {
     const sessionId = RequestSession.readSessionId(request.headers, request.socket.remotePort);
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
@@ -228,7 +232,7 @@ export default class MitmProxy {
 
   /////// ERROR HANDLING ///////////////////////////////////////////////////////
 
-  private onGenericHttpError(isHttp2: boolean, error: Error) {
+  private onGenericHttpError(isHttp2: boolean, error: Error): void {
     const logLevel = this.isClosing ? 'stats' : 'error';
     log[logLevel](`Mitm.Http${isHttp2 ? '2' : ''}ServerError`, {
       sessionId: null,
@@ -236,7 +240,7 @@ export default class MitmProxy {
     });
   }
 
-  private onClientError(isHttp2: boolean, error: Error, socket: net.Socket) {
+  private onClientError(isHttp2: boolean, error: Error, socket: net.Socket): void {
     if ((error as any).code === 'ECONNRESET' || !socket.writable) {
       return;
     }
@@ -250,7 +254,7 @@ export default class MitmProxy {
     socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
   }
 
-  private onConnectError(hostname: string, errorKind: string, error: Error) {
+  private onConnectError(hostname: string, errorKind: string, error: Error): void {
     const errorCodes = [(error as any).errno, (error as any).code];
     if (errorCodes.includes('ECONNRESET')) {
       log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
@@ -281,13 +285,13 @@ export default class MitmProxy {
     }
   }
 
-  private removeSocketConnect(socket: net.Socket) {
+  private removeSocketConnect(socket: net.Socket): void {
     const idx = this.serverConnects.indexOf(socket);
     if (idx < 0) return;
     this.serverConnects.splice(idx, 1);
   }
 
-  private async addSecureContext(hostname: string) {
+  private async addSecureContext(hostname: string): Promise<void> {
     const credentials = await this.ca.getCertificateKeys(hostname);
     this.http2Server.addContext(hostname, credentials);
   }
@@ -301,13 +305,16 @@ export default class MitmProxy {
     return proxy;
   }
 
-  private static isTlsByte(buffer: Buffer) {
+  private static isTlsByte(buffer: Buffer): boolean {
     // check for clienthello byte
     return buffer[0] === 0x16;
   }
 }
 
-async function startServer(server: http.Server | http2.Http2SecureServer, listenPort?: number) {
+function startServer(
+  server: http.Server | http2.Http2SecureServer,
+  listenPort?: number,
+): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     try {
       server.once('error', reject);
@@ -321,7 +328,7 @@ async function startServer(server: http.Server | http2.Http2SecureServer, listen
   });
 }
 
-async function closeServer(server: http.Server | http2.Http2SecureServer) {
+function closeServer(server: http.Server | http2.Http2SecureServer): Promise<void> {
   return new Promise<void>(resolve => {
     server.close(() => resolve());
   });

@@ -22,6 +22,8 @@ import Queue from '@secret-agent/commons/Queue';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
+import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IListenerObject from './interfaces/IListenerObject';
 import UserProfile from './lib/UserProfile';
 import Session from './lib/Session';
@@ -56,101 +58,97 @@ export default class Core implements ICore {
     this.tab = tab;
   }
 
-  public get lastCommandId() {
+  public get lastCommandId(): number {
     return this.tab.lastCommandId;
   }
 
-  public async getResourceProperty(resourceId: number, propertyPath: string) {
-    return this.tab.getResourceProperty(resourceId, propertyPath);
+  public getResourceProperty<T>(resourceId: number, propertyPath: string): Promise<T> {
+    return this.tab.getResourceProperty<T>(resourceId, propertyPath);
   }
 
-  public async goto(url: string) {
+  public goto(url: string): Promise<IResourceMeta> {
     return this.tab.runCommand<IResourceMeta>('goto', url);
   }
 
-  public async goBack() {
+  public goBack(): Promise<string> {
     return this.tab.runCommand<string>('goBack');
   }
 
-  public async goForward() {
+  public goForward(): Promise<string> {
     return this.tab.runCommand<string>('goForward');
   }
 
-  public async isElementVisible(jsPath: IJsPath) {
+  public isElementVisible(jsPath: IJsPath): Promise<boolean> {
     return this.tab.runCommand<boolean>('isElementVisible', jsPath);
   }
 
-  public async waitForResource(filter: IResourceFilterProperties, opts?: IWaitForResourceOptions) {
-    return await this.tab.runCommand('waitForResource', filter, opts);
+  public waitForResource(
+    filter: IResourceFilterProperties,
+    opts?: IWaitForResourceOptions,
+  ): Promise<void> {
+    return this.tab.runCommand('waitForResource', filter, opts);
   }
 
-  public async waitForElement(jsPath: IJsPath, opts?: IWaitForElementOptions) {
+  public async waitForElement(jsPath: IJsPath, opts?: IWaitForElementOptions): Promise<void> {
     await this.tab.runCommand('waitForElement', jsPath, opts);
   }
 
-  public async waitForLoad(status: ILocationStatus) {
+  public async waitForLoad(status: ILocationStatus): Promise<void> {
     await this.tab.runCommand('waitForLoad', status);
   }
 
-  public async waitForLocation(trigger: ILocationTrigger) {
+  public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
     await this.tab.runCommand('waitForLocation', trigger);
   }
 
-  public async waitForMillis(millis: number) {
+  public async waitForMillis(millis: number): Promise<void> {
     await this.tab.runCommand('waitForMillis', millis);
   }
 
-  public async getJsValue<T = any>(path: string): Promise<{ value: T; type: string }> {
+  public getJsValue<T = any>(path: string): Promise<{ value: T; type: string }> {
     return this.tab.runCommand('getJsValue', path);
   }
 
-  public async execJsPath<T = any>(
+  public execJsPath<T = any>(
     jsPath: IJsPath,
     propertiesToExtract?: string[],
   ): Promise<IExecJsPathResult<T>> {
     return this.tab.runCommand('execJsPath', jsPath, propertiesToExtract);
   }
 
-  public async getLocationHref() {
+  public getLocationHref(): Promise<string> {
     return this.tab.runCommand('getLocationHref');
   }
 
-  public async interact(...interactionGroups: IInteractionGroups) {
+  public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
     await this.tab.runCommand('interact', interactionGroups);
   }
 
-  public async getTabCookies() {
-    return await this.tab.runCommand('getCookies');
+  public getTabCookies(): Promise<ICookie[]> {
+    return this.tab.runCommand('getCookies');
   }
 
-  public async setTabCookie(
-    name: string,
-    value: string,
-    options?: ISetCookieOptions,
-  ): Promise<boolean> {
-    return await this.tab.runCommand('setCookie', name, value, options);
+  public setTabCookie(name: string, value: string, options?: ISetCookieOptions): Promise<boolean> {
+    return this.tab.runCommand('setCookie', name, value, options);
   }
 
-  public async removeTabCookie(name: string): Promise<boolean> {
-    return await this.tab.runCommand('removeCookie', name);
+  public removeTabCookie(name: string): Promise<boolean> {
+    return this.tab.runCommand('removeCookie', name);
   }
 
-  public async exportUserProfile() {
-    return await UserProfile.export(this.session);
+  public exportUserProfile(): Promise<IUserProfile> {
+    return UserProfile.export(this.session);
   }
 
-  public async fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
+  public fetch(request: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
     return this.tab.runCommand('fetch', request, init);
   }
 
-  public async createRequest(
-    input: IAttachedId | string,
-    init?: IRequestInit,
-  ): Promise<IAttachedState> {
+  public createRequest(input: IAttachedId | string, init?: IRequestInit): Promise<IAttachedState> {
     return this.tab.runCommand('createRequest', input, init);
   }
 
-  public async addEventListener(jsPath: IJsPath | null, type: string) {
+  public addEventListener(jsPath: IJsPath | null, type: string): Promise<{ listenerId: string }> {
     const id = uuidv1();
     const listener: IListenerObject = { id, type, jsPath };
     this.eventListenersById[id] = listener;
@@ -169,13 +167,13 @@ export default class Core implements ICore {
         this.bindResourceListeners();
       }
     }
-    return { listenerId: listener.id };
+    return Promise.resolve({ listenerId: listener.id });
   }
 
-  public async removeEventListener(id) {
+  public removeEventListener(id): Promise<void> {
     const listener = this.eventListenersById[id];
     delete this.eventListenersById[id];
-    if (!listener.type) return; // ToDo: need to unbind listeners in DOM
+    if (!listener.type) return Promise.resolve(); // ToDo: need to unbind listeners in DOM
 
     if (listener.type === 'resource') {
       this.bindResourceListeners(false);
@@ -189,34 +187,35 @@ export default class Core implements ICore {
         delete this.eventListenerIdsByType[listener.type];
       }
     }
+    return Promise.resolve();
   }
 
-  public async close() {
+  public async close(): Promise<void> {
     if (!this.session || this.session.isClosing) return;
     await GlobalPool.closeSession(this.session);
     this.emitEvent('close');
     Core.checkForAutoShutdown();
   }
 
-  public async closeTab() {
+  public async closeTab(): Promise<void> {
     await this.tab.close();
     if (this.session.tabs.length === 0) {
       await this.close();
     }
   }
 
-  public async focusTab() {
+  public async focusTab(): Promise<void> {
     await this.tab.runCommand('focus');
   }
 
-  public async waitForNewTab(sinceCommandId?: number) {
+  public async waitForNewTab(sinceCommandId?: number): Promise<ISessionMeta> {
     const lastCommandId = sinceCommandId ?? this.lastCommandId;
     const tab = await this.tab.runCommand<Tab>('waitForNewTab', lastCommandId);
     await tab.locationTracker.waitForLocationResourceId();
     return Core.registerSessionTab(this.session, tab);
   }
 
-  private bindResourceListeners(enable = true) {
+  private bindResourceListeners(enable = true): void {
     const listenerFn = (...args) => {
       this.emitEvent('resource', ...args);
     };
@@ -227,7 +226,7 @@ export default class Core implements ICore {
     }
   }
 
-  private emitEvent(name: string, ...args) {
+  private emitEvent(name: string, ...args): void {
     const listenerIds = this.eventListenerIdsByType[name];
     if (!listenerIds) return;
     for (const listenerId of listenerIds) {
@@ -241,11 +240,11 @@ export default class Core implements ICore {
     }
   }
 
-  private bindWebsocketEvents(resourceId: number, listener: IListenerObject) {
+  private bindWebsocketEvents(resourceId: number, listener: IListenerObject): void {
     this.tab.sessionState.onWebsocketMessages(resourceId, listener.listenFn);
   }
 
-  private buildEventIdTrigger(id: string, ...args) {
+  private buildEventIdTrigger(id: string, ...args): void {
     const sessionMeta: ISessionMeta = {
       sessionId: this.session.id,
       tabId: this.tab.id,
@@ -257,7 +256,7 @@ export default class Core implements ICore {
 
   /////// STATIC /////////////////////////////////////
 
-  public static async prewarm(options?: ICoreConfigureOptions) {
+  public static prewarm(options?: ICoreConfigureOptions): Promise<void> {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       this.wasManuallyStarted = true;
@@ -273,7 +272,7 @@ export default class Core implements ICore {
     });
   }
 
-  public static async configure(options: ICoreConfigureOptions) {
+  public static async configure(options: ICoreConfigureOptions): Promise<void> {
     const {
       maxConcurrentSessionsCount,
       localProxyPortStart,
@@ -287,12 +286,12 @@ export default class Core implements ICore {
     if (browserEmulatorIds?.length) await GlobalPool.start(browserEmulatorIds);
   }
 
-  public static async getTabsForSession(sessionId: string) {
+  public static getTabsForSession(sessionId: string): Promise<ISessionMeta[]> {
     const session = Session.get(sessionId);
-    return session.tabs.map(tab => Core.registerSessionTab(session, tab));
+    return Promise.resolve(session.tabs.map(tab => Core.registerSessionTab(session, tab)));
   }
 
-  public static async createTab(options: ICreateSessionOptions = {}) {
+  public static createTab(options: ICreateSessionOptions = {}): Promise<ISessionMeta> {
     return this.startQueue.run(async () => {
       clearTimeout(this.autoShutdownTimer);
       if (!BrowserEmulators.defaultEmulatorId) {
@@ -308,7 +307,7 @@ export default class Core implements ICore {
     });
   }
 
-  public static async disconnect(tabIds?: string[], fatalError?: Error) {
+  public static disconnect(tabIds?: string[], fatalError?: Error): Promise<void> {
     if (fatalError) this.logUnhandledError(fatalError, true);
     return this.startQueue.run(async () => {
       const promises: Promise<void>[] = [];
@@ -329,7 +328,7 @@ export default class Core implements ICore {
     });
   }
 
-  public static logUnhandledError(clientError: Error, fatalError = false) {
+  public static logUnhandledError(clientError: Error, fatalError = false): void {
     if (fatalError) {
       log.error('UnhandledError(fatal)', { clientError, sessionId: null });
     } else {
@@ -337,7 +336,7 @@ export default class Core implements ICore {
     }
   }
 
-  public static async shutdown(force = false) {
+  public static async shutdown(force = false): Promise<void> {
     // runs own queue, don't put inside this loop
     await Core.disconnect();
     return this.startQueue.run(async () => {
@@ -346,11 +345,11 @@ export default class Core implements ICore {
       const replayServer = this.replayServer;
       this.replayServer = null;
       this.wasManuallyStarted = false;
-      return Promise.all([GlobalPool.close(), replayServer?.close(!force)]);
+      await Promise.all([GlobalPool.close(), replayServer?.close(!force)]);
     });
   }
 
-  public static registerSignalHandlers() {
+  public static registerSignalHandlers(): void {
     ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
       process.once(name as Signals, async () => {
         await Core.shutdown();
@@ -359,7 +358,7 @@ export default class Core implements ICore {
     });
   }
 
-  public static registerExceptionHandlers() {
+  public static registerExceptionHandlers(): void {
     process.on('uncaughtException', async (error: Error) => {
       await Core.logUnhandledError(error, true);
       await Core.shutdown();
@@ -371,12 +370,12 @@ export default class Core implements ICore {
     });
   }
 
-  public static async startReplayServer(port?: number) {
+  public static async startReplayServer(port?: number): Promise<void> {
     if (this.replayServer) return;
     this.replayServer = await createReplayServer(port);
   }
 
-  private static registerSessionTab(session: Session, tab: Tab) {
+  private static registerSessionTab(session: Session, tab: Tab): ISessionMeta {
     let core = this.byTabId[tab.id];
     if (!core) {
       core = new Core(session, tab);
@@ -390,14 +389,14 @@ export default class Core implements ICore {
     } as ISessionMeta;
   }
 
-  private static checkForAutoShutdown() {
+  private static checkForAutoShutdown(): void {
     clearTimeout(Core.autoShutdownTimer);
     if (Core.wasManuallyStarted || GlobalPool.activeSessionCount > 0) return;
 
     Core.autoShutdownTimer = setTimeout(Core.shouldShutdown.bind(this), Core.autoShutdownMillis);
   }
 
-  private static shouldShutdown() {
+  private static shouldShutdown(): void {
     if (Core.wasManuallyStarted || GlobalPool.activeSessionCount > 0) return;
 
     Core.shutdown().catch(error => {

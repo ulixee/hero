@@ -6,13 +6,14 @@ import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Core from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
+import * as http from 'http';
 import inspectScript from './inspectHierarchy';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
 let puppet: Puppet;
-let httpServer: ITestHttpServer;
+let httpServer: ITestHttpServer<http.Server>;
 let context: IPuppetContext;
 beforeAll(async () => {
   const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;

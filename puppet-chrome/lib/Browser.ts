@@ -1,13 +1,13 @@
-import { Protocol } from "devtools-protocol";
-import { TypedEventEmitter } from "@secret-agent/commons/eventUtils";
-import { assert } from "@secret-agent/commons/utils";
-import IBrowserEmulationSettings from "@secret-agent/puppet-interfaces/IBrowserEmulationSettings";
-import IPuppetBrowser from "@secret-agent/puppet-interfaces/IPuppetBrowser";
-import Log from "@secret-agent/commons/Logger";
-import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
-import { Connection } from "./Connection";
-import { BrowserContext } from "./BrowserContext";
-import { CDPSession } from "./CDPSession";
+import { Protocol } from 'devtools-protocol';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { assert } from '@secret-agent/commons/utils';
+import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
+import Log from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { Connection } from './Connection';
+import { BrowserContext } from './BrowserContext';
+import { CDPSession } from './CDPSession';
 
 interface IBrowserEvents {
   disconnected: void;
@@ -102,7 +102,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
   }
 
-  private async onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent) {
+  private onTargetDestroyed(event: Protocol.Target.TargetDestroyedEvent) {
     const { targetId } = event;
     for (const context of this.browserContextsById.values()) {
       context.targetDestroyed(targetId);

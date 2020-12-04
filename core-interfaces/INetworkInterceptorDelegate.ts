@@ -11,6 +11,7 @@ export default interface INetworkInterceptorDelegate {
   };
   dns?: {
     dnsOverTlsConnection: ConnectionOptions;
+    useUpstreamProxy?: boolean;
   };
   connections?: {
     socketsPerOrigin: number;

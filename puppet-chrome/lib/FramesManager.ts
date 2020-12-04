@@ -85,7 +85,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     }
   }
 
-  public async addPageCallback(name: string, onCallback: (payload: any, frameId: string) => any) {
+  public async addPageCallback(
+    name: string,
+    onCallback: (payload: any, frameId: string) => any,
+  ): Promise<IRegisteredEventListener> {
     // add binding to every new context automatically
     await this.cdpSession.send('Runtime.addBinding', {
       name,

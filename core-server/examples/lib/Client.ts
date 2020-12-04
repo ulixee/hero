@@ -28,7 +28,7 @@ export default class SecretAgentSocketClient {
   private bindPipes() {
     this.netSocket = Net.connect({ port: this.port });
 
-    this.netSocket.once('connect', async () => {
+    this.netSocket.once('connect', () => {
       this.isOpen = true;
     });
 

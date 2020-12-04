@@ -49,7 +49,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*client/**/*.ts', '*interfaces/**/*.ts', 'commons/**/*.ts'],
+      files: ['*client/**/*.ts', '*interfaces/**/*.ts', 'commons/**/*.ts', 'mitm*/**/*.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -64,6 +64,12 @@ module.exports = {
       },
     },
     {
+      files: 'emulate-browsers/**/*.ts',
+      rules: {
+        'require-await': 'off', // Turn off while waiting
+      },
+    },
+    {
       files: [
         '**/injected-scripts/**/*.js',
         '**/injected-scripts/**/*.ts',
@@ -75,6 +81,7 @@ module.exports = {
         'prefer-rest-params': 'off',
         'max-classes-per-file': 'off',
         'func-names': 'off',
+        '@typescript-eslint/no-unused-vars': 'off',
       },
     },
     {
@@ -91,6 +98,7 @@ module.exports = {
       rules: {
         'promise/valid-params': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
+        'require-await': 'off',
       },
     },
     {
@@ -164,6 +172,8 @@ module.exports = {
     'class-methods-use-this': 'off',
     'consistent-return': ['off', { treatUndefinedAsUnspecified: true }],
     'spaced-comment': ['error', 'always', { markers: ['/////'] }],
+    'require-await': 'error',
+    'jest/no-conditional-expect': 'off',
     '@typescript-eslint/no-implied-eval': 'off', // false positives for setTimeout with bind fn
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
@@ -174,6 +184,10 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/ordered-imports': 'off',
+    '@typescript-eslint/no-shadow': [
+      'error',
+      { ignoreTypeValueShadow: true, ignoreFunctionTypeParameterNameValueShadow: true },
+    ],
     '@typescript-eslint/object-literal-shorthand': 'off',
     '@typescript-eslint/object-shorthand-properties-first': 'off',
     '@typescript-eslint/no-var-requires': 'off',
