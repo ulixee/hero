@@ -253,7 +253,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         await page.waitOn('frame-created');
         const frame = page.frames[1];
         const loaded = page.waitOn('load');
-        await new Promise(resolve => {
+        await new Promise<void>(resolve => {
           page.on('frame-navigated', f => {
             if (f.frame.id === frame.id) resolve();
           });

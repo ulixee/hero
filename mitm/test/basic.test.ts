@@ -143,7 +143,7 @@ describe('basic MitM tests', () => {
       .unref();
     Helpers.onClose(
       () =>
-        new Promise(resolve => {
+        new Promise<void>(resolve => {
           server.close(() => resolve());
         }),
     );

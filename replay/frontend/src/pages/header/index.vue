@@ -19,7 +19,7 @@
           .text {{scriptInstanceDate}}
         .window-section.section(@mousedown="showLocationOverlay($event, 'sessions-menu')" v-if="saSession.relatedSessions.length > 1")
           Icon(:src="ICON_NUMBER" :size=16 iconStyle="transform: 'scale(-1,1)'")
-          .text {{1}} of {{saSession.relatedSessions.length}}
+          .text ({{sessionIndex}} of {{saSession.relatedSessions.length}}) {{sessionName}}
       template(v-else-if="location")
         .name-section.section(@mousedown="showLocationOverlay($event, 'locations-menu')")
           .text SecretAgent
@@ -89,6 +89,18 @@ export default class HeaderPage extends Vue {
   hasBack = false;
   hasNext = false;
 
+  get sessionIndex() {
+    return this.saSession.relatedSessions.findIndex(x => x.id === this.saSession.id) + 1;
+  }
+
+  get sessionName() {
+    let name = this.saSession.name;
+    if (name.length > 30) {
+      return name.substr(0, 30) + '... ';
+    }
+    return name;
+  }
+
   get activeTabIdx() {
     return this.saSession.tabs.findIndex(x => x.tabId === this.activeTabId);
   }
@@ -131,11 +143,7 @@ export default class HeaderPage extends Vue {
   }
 
   get scriptName() {
-    return this.saSession.scriptEntrypoint
-      .split(Path.sep)
-      .filter(Boolean)
-      .slice(-2)
-      .join('/');
+    return this.saSession.scriptEntrypoint.split(Path.sep).filter(Boolean).slice(-2).join('/');
   }
 
   @NoCache
@@ -149,6 +157,7 @@ export default class HeaderPage extends Vue {
       '--toolbarHeight': `${TOOLBAR_HEIGHT}px`,
       '--toolbarBackgroundColor': theme.toolbarBackgroundColor,
       '--toolbarBorderBottomColor': theme.toolbarBottomLineBackgroundColor,
+      '--navbarWidth': this.saSession?.relatedSessions?.length > 1 ? '60%' : '40%',
     };
   }
 
@@ -244,7 +253,12 @@ export default class HeaderPage extends Vue {
         'overlay:show',
         'list-menu',
         overlayRect,
-        this.saSession.relatedSessions,
+        this.saSession.relatedSessions.map((x, i) => ({
+          id: x.id,
+          title: x.name,
+          isActive: this.saSession.name === x.name,
+          name: x.name,
+        })),
         'ICON_NUMBER',
         'navigate-to-session',
       );
@@ -268,7 +282,7 @@ export default class HeaderPage extends Vue {
     display: flex;
     align-items: center;
     margin: 0 auto;
-    width: 40%;
+    width: var(--navbarWidth);
     min-width: 400px;
     position: relative;
     z-index: 2;

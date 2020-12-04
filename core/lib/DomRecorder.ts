@@ -1,9 +1,9 @@
-import fs from "fs";
-import Log from "@secret-agent/commons/Logger";
-import { PageRecorderResultSet } from "@secret-agent/injected-scripts/scripts/pageEventsRecorder";
-import { removeEventListeners } from "@secret-agent/commons/eventUtils";
-import { IPuppetPage } from "@secret-agent/puppet-interfaces/IPuppetPage";
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
+import fs from 'fs';
+import Log from '@secret-agent/commons/Logger';
+import { PageRecorderResultSet } from '@secret-agent/injected-scripts/scripts/pageEventsRecorder';
+import { removeEventListeners } from '@secret-agent/commons/eventUtils';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 
 const domObserver = fs.readFileSync(
   require.resolve('@secret-agent/injected-scripts/scripts/pageEventsRecorder.js'),
@@ -40,7 +40,10 @@ export default class DomRecorder {
     this.listeners.push(callback);
 
     await this.puppetPage.addNewDocumentScript(
-      `(function installDomRecorder(runtimeFunction) { \n\n ${domObserver.toString()} \n\n })('${runtimeFunction}');`,
+      `(function installDomRecorder(runtimeFunction) {
+    const exports = {}; // workaround for ts adding an exports variable
+    ${domObserver.toString()}
+})('${runtimeFunction}');`,
       true,
     );
     // delete binding from every context also

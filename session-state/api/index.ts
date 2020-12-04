@@ -135,6 +135,7 @@ async function closeServer(
 
 function http2PushJson(res: http2.Http2ServerResponse, event: string, data: any) {
   if (res.stream.closed) return;
+  if (Array.isArray(data) && data.length === 0) return;
 
   const json = JSON.stringify(data, (_, value) => {
     if (value !== null) return value;
@@ -164,7 +165,7 @@ async function http2PushResources(res: http2.Http2ServerResponse, resources: any
       'resource-headers': JSON.stringify(resource.headers),
       'resource-tabid': resource.tabId,
     };
-    const promise = new Promise(resolve => {
+    const promise = new Promise<void>(resolve => {
       res.createPushResponse(
         {
           ':path': '/resource',

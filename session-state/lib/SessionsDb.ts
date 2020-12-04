@@ -28,7 +28,10 @@ export default class SessionsDb {
   }) {
     const { sessionName, scriptEntrypoint, scriptInstanceId } = script;
     if (sessionName && scriptInstanceId) {
-      const sessionRecord = this.sessions.findByName(sessionName, scriptInstanceId);
+      // find default session if current not available
+      const sessionRecord =
+        this.sessions.findByName(sessionName, scriptInstanceId) ??
+        this.sessions.findByName('default-session', scriptInstanceId);
       return sessionRecord?.id;
     }
     if (scriptEntrypoint) {
@@ -46,15 +49,20 @@ export default class SessionsDb {
       defaultSessionId: string;
     }[] = [];
     const relatedSessions: { id: string; name: string }[] = [];
+    const scriptDates = new Set<string>();
     for (const otherSession of otherSessions) {
-      relatedScriptInstances.push({
-        id: otherSession.scriptInstanceId,
-        startDate: otherSession.scriptStartDate,
-        defaultSessionId: otherSession.id,
-      });
-      if (otherSession.scriptInstanceId === session.scriptInstanceId) {
-        relatedSessions.push({ id: otherSession.id, name: otherSession.name });
+      const key = `${otherSession.scriptInstanceId}_${otherSession.scriptStartDate}`;
+      if (!scriptDates.has(key)) {
+        relatedScriptInstances.push({
+          id: otherSession.scriptInstanceId,
+          startDate: otherSession.scriptStartDate,
+          defaultSessionId: otherSession.id,
+        });
       }
+      if (otherSession.scriptInstanceId === session.scriptInstanceId) {
+        relatedSessions.unshift({ id: otherSession.id, name: otherSession.name });
+      }
+      scriptDates.add(key);
     }
     return {
       relatedSessions,

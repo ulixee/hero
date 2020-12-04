@@ -196,12 +196,13 @@ export default class Playbar extends Vue {
     flex-flow: row;
     height: 100%;
     color: rgba(0, 0, 0, 0.8);
+    -webkit-app-region: no-drag;
 
     .start {
       border: 1px solid var(--toolbarBorderColor);
       border-radius: 4px;
       padding: 4px 10px;
-
+      white-space: nowrap;
       cursor: pointer;
 
       .label {

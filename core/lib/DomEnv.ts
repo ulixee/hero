@@ -34,6 +34,7 @@ const pageScripts = {
 };
 
 const domEnvScript = `(function installDomEnv() {
+const exports = {}; // workaround for ts adding an exports variable
 ${pageScripts.typeson};
 ${pageScripts.typesonRegistry};
 const TSON = new Typeson().register(Typeson.presets.builtin);
@@ -74,12 +75,12 @@ export default class DomEnv {
       'getJsValue',
       `(async function execNonIsolatedExpression() {
   const value = await ${expression};
-  
+
   let type = typeof value;
   if (value && value.constructor) {
     type = value.constructor.name;
   }
-  
+
   return JSON.stringify({
     value,
     type,

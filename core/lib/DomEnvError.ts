@@ -1,4 +1,4 @@
-import { IPathStep } from '@secret-agent/injected-scripts/scripts/jsPath';
+import { IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 export default class DomEnvError extends Error {
   private readonly pathState: { step: IPathStep; index: number };

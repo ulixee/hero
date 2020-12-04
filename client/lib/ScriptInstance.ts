@@ -26,10 +26,11 @@ export default class ScriptInstance {
       .then(tab => {
         return replay({
           scriptInstanceId: this.id,
-          sessionName,
+          scriptStartDate: this.startDate,
           sessionsDataLocation: tab.sessionsDataLocation,
           replayApiServer: tab.replayApiServer,
           sessionId: tab.sessionId,
+          sessionName,
         });
       })
       .catch(err => {

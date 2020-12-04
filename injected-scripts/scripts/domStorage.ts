@@ -72,7 +72,7 @@ async function exportIndexedDbs(dbNames: string[]) {
 
 async function readStoreData(store: IDBObjectStore) {
   const data: string[] = [];
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     const cursorQuery = store.openCursor();
     cursorQuery.onsuccess = event => {
       const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
@@ -95,7 +95,7 @@ async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
   if (!restoreDBs || !restoreDBs.length) return;
 
   for (const restoreDB of restoreDBs) {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const openDBRequest = indexedDB.open(restoreDB.name, restoreDB.version);
       // only run changes when the db doesn't already exist
       openDBRequest.onupgradeneeded = event => {

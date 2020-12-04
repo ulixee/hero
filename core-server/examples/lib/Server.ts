@@ -10,7 +10,7 @@ export default class SecretAgentSocketServer {
   private netConnectionsById: { [id: string]: Net.Socket } = {};
   private lastConnectionId = 0;
 
-  constructor(config: { ip?: string, port: number, proxyPort?: number }) {
+  constructor(config: { ip?: string; port: number; proxyPort?: number }) {
     this.port = config.port;
     this.proxyPort = config.proxyPort;
   }
@@ -24,7 +24,7 @@ export default class SecretAgentSocketServer {
   }
 
   public close() {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       try {
         const promises = Object.values(this.netConnectionsById).map(netSocket => netSocket.end());
         this.netServer.close(async () => {

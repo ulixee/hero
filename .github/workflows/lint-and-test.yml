@@ -116,7 +116,7 @@ jobs:
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Run tests
-        run: yarn jest --testTimeout=15000 --runInBand
+        run: yarn jest --testTimeout=60000 --runInBand
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false

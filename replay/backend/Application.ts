@@ -78,6 +78,9 @@ export default class Application {
       if (key === '--replay-script-instance-id') {
         replayMeta.scriptInstanceId = value;
       }
+      if (key === '--replay-script-start-date') {
+        replayMeta.scriptStartDate = value;
+      }
       if (key === '--replay-session-id') {
         replayMeta.sessionId = value;
       }
@@ -89,8 +92,30 @@ export default class Application {
       }
     }
 
+    if (this.shouldAppendToOpenReplayScript(replayMeta)) return;
+
     const window = await this.loadSessionReplay(replayMeta, true);
-    window.replayOnFocus();
+    window?.replayOnFocus();
+  }
+
+  private shouldAppendToOpenReplayScript(replay: IReplayMeta) {
+    const { scriptInstanceId, scriptStartDate } = replay;
+    const windowWithScriptRun = Window.list.find(x => {
+      const session = x.replayApi?.saSession;
+      if (!session) return false;
+      return (
+        session.scriptInstanceId === scriptInstanceId &&
+        session.scriptStartDate === scriptStartDate &&
+        // make sure this isn't the current id
+        session.id !== replay.sessionId
+      );
+    });
+    if (windowWithScriptRun) {
+      windowWithScriptRun.addRelatedSession({ id: replay.sessionId, name: replay.sessionName });
+      console.log('Adding session to script instance', { replay });
+      return true;
+    }
+    return false;
   }
 
   private createWindowIfNeeded() {
@@ -215,7 +240,17 @@ export default class Application {
       await this.loadSessionReplay(replayMeta);
     });
 
-    ipcMain.on('navigate-to-session', () => {});
+    ipcMain.on('navigate-to-session', (e, session: { id: string; name: string }) => {
+      const current = Window.current.replayApi.saSession;
+      const replayMeta: IReplayMeta = {
+        sessionId: session.id,
+        sessionName: session.name,
+        scriptInstanceId: current.scriptInstanceId,
+        dataLocation: current.dataLocation,
+      };
+      console.log('navigate-to-session', replayMeta);
+      return this.loadSessionReplay(replayMeta, true);
+    });
 
     ipcMain.on('navigate-to-session-tab', (e, tab: { id: string }) => {
       Window.current?.loadReplayTab(tab.id);

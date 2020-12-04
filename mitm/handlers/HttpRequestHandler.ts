@@ -2,6 +2,7 @@ import * as http from 'http';
 import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
+import { URL } from 'url';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -92,7 +93,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     if (redirectCodes.has(context.status)) {
       const redirectLocation = context.responseHeaders.location || context.responseHeaders.Location;
       if (redirectLocation) {
-        context.redirectedToUrl = redirectLocation as string;
+        const redirectUrl = new URL(redirectLocation as string, context.url);
+        context.redirectedToUrl = redirectUrl.href;
         context.responseUrl = context.redirectedToUrl;
       }
     }

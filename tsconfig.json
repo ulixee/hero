@@ -15,11 +15,11 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "rootDir": ".",
+    "baseUrl": ".",
     "outDir": "./build",
     "preserveSymlinks": false,
     "experimentalDecorators": true
   },
-  "baseUrl": ".",
   "references": [
     {
       "path": "injected-scripts/tsconfig.json"

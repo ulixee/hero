@@ -278,7 +278,7 @@ export default class MitmRequestAgent {
     }
 
     HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
-    const onResponseHeaders = new Promise(resolve => {
+    const onResponseHeaders = new Promise<void>(resolve => {
       serverPushStream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
         MitmRequestContext.readHttp2Response(
           pushContext,

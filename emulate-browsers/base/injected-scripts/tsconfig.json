@@ -8,11 +8,20 @@
     "lib": ["ES2018", "DOM", "DOM.Iterable"],
     "noImplicitAny": false,
     "esModuleInterop": false,
-    "resolveJsonModule": false,
+    "resolveJsonModule": true,
     "sourceMap": false,
     "declaration": true,
     "allowJs": true
   },
+  "references": [],
   "include": ["*.ts", "*.js", ".eslintrc.js"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "**/tsconfig*.json",
+    "**/node_modules",
+    "**/dist",
+    "**/build*",
+    "**/replay",
+    "**/website",
+    "**/injected-scripts"
+  ]
 }

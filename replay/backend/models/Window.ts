@@ -10,7 +10,7 @@ import ViewBackend from '~backend/models/ViewBackend';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import generateContextMenu from '~backend/menus/generateContextMenu';
-import { ISessionTab } from '~shared/interfaces/ISaSession';
+import ISaSession, { ISessionTab } from '~shared/interfaces/ISaSession';
 
 export default class Window {
   public static list: Window[] = [];
@@ -138,6 +138,22 @@ export default class Window {
 
     this.sendToRenderer('location:updated', {
       saSession: replayApi.saSession,
+      hasNext: this.hasNext(),
+      hasBack: this.hasBack(),
+    });
+  }
+
+  public addRelatedSession(related: { id: string; name: string }) {
+    if (
+      !this.replayApi ||
+      this.replayApi.saSession.relatedSessions.some(x => x.id === related.id)
+    ) {
+      return;
+    }
+
+    this.replayApi.saSession.relatedSessions.push(related);
+    this.sendToRenderer('location:updated', {
+      saSession: this.replayApi.saSession,
       hasNext: this.hasNext(),
       hasBack: this.hasBack(),
     });

@@ -35,6 +35,7 @@ module.exports = {
   plugins: ['monorepo-cop'],
   parserOptions: {
     project: 'tsconfig.json',
+    extraFileExtensions: ['.mjs'],
   },
   settings: {
     'import/core-modules': ['electron'],
@@ -127,6 +128,7 @@ module.exports = {
       {
         js: 'never',
         ts: 'never',
+        mjs: 'always',
       },
     ],
     // 'import/no-default-export': 'error',

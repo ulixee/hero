@@ -103,7 +103,7 @@ export default class MitmProxy {
   ) {
     const sessionId = RequestSession.readSessionId(
       clientToProxyRequest.headers,
-      clientToProxyRequest.socket.localPort,
+      clientToProxyRequest.socket.remotePort,
     );
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(proxyToClientResponse.socket);
@@ -145,7 +145,7 @@ export default class MitmProxy {
     socket.pause();
     const sessionId = RequestSession.readSessionId(
       clientToProxyRequest.headers,
-      clientToProxyRequest.socket.localPort,
+      clientToProxyRequest.socket.remotePort,
     );
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
@@ -173,7 +173,7 @@ export default class MitmProxy {
   }
 
   private async onHttpConnect(request: http.IncomingMessage, socket: net.Socket, head: Buffer) {
-    const sessionId = RequestSession.readSessionId(request.headers, request.socket.localPort);
+    const sessionId = RequestSession.readSessionId(request.headers, request.socket.remotePort);
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
     }
@@ -322,7 +322,7 @@ async function startServer(server: http.Server | http2.Http2SecureServer, listen
 }
 
 async function closeServer(server: http.Server | http2.Http2SecureServer) {
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     server.close(() => resolve());
   });
 }

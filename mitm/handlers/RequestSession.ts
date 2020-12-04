@@ -313,14 +313,13 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       return RequestSession.proxyPortSessionIds[remotePort];
     }
 
-    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64')
-      .toString()
-      .split(':');
+    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
     return sessionId;
   }
 
-  public static registerProxySession(socket: net.Socket, sessionId: string) {
-    this.proxyPortSessionIds[socket.remotePort] = sessionId;
+  public static registerProxySession(loopbackProxySocket: net.Socket, sessionId: string) {
+    // local port is the side that originates from our http server
+    this.proxyPortSessionIds[loopbackProxySocket.localPort] = sessionId;
   }
 
   public static sendNeedsAuth(socket: net.Socket) {

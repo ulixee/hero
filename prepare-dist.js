@@ -12,7 +12,7 @@ const defaults = {
   contributors: rootPackageJson.contributors,
   homepage: rootPackageJson.homepage,
   engines: {
-    node: '>=12.0.0',
+    node: '>=13.2.0',
   },
   publishConfig: {
     access: 'public',

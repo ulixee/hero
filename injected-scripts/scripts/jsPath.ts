@@ -7,8 +7,8 @@ import IExecJsPathResult from '../interfaces/IExecJsPathResult';
 declare type TSON = any;
 
 // / COPIED FROM NODERDOM! DO NOT EDIT HERE
-export type IJsPath = IPathStep[];
-export type IPathStep = IPropertyName | IMethod | IAttachedId;
+type IJsPath = IPathStep[];
+type IPathStep = IPropertyName | IMethod | IAttachedId;
 type IPropertyName = string;
 type IMethod = [IMethodName, ...IMethodArgs];
 type IMethodName = string;
@@ -23,7 +23,7 @@ class JsPath {
     const element = new ObjectAtPath(jsPath).lookup().closestElement;
     if (!element) return;
 
-    const visibleRatio = await new Promise(resolve => {
+    const visibleRatio = await new Promise<number>(resolve => {
       const observer = new IntersectionObserver(entries => {
         resolve(entries[0].intersectionRatio);
         observer.disconnect();
@@ -37,7 +37,7 @@ class JsPath {
         behavior: 'auto',
       });
       // wait until in-view
-      return new Promise(resolve => {
+      return new Promise<void>(resolve => {
         let observer: IntersectionObserver;
         const timeout = setTimeout(() => {
           resolve();
