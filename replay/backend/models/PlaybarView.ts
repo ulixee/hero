@@ -4,7 +4,6 @@ import IRectangle from '~shared/interfaces/IRectangle';
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ViewBackend from '~backend/models/ViewBackend';
 
-
 export default class PlaybarView extends ViewBackend {
   private readonly isReady: Promise<void>;
   private tabState: ReplayTabState;
@@ -89,7 +88,7 @@ export default class PlaybarView extends ViewBackend {
     );
   }
 
-  private async updateFrontendTicks() {
+  private updateFrontendTicks() {
     this.browserView.webContents.send('ticks:updated', this.tabState.getTickState());
   }
 }

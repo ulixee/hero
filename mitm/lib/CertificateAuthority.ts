@@ -24,18 +24,20 @@ export default class CertificateAuthority {
     }
   }
 
-  public async getCertificateKeys(hostname: string) {
+  public getCertificateKeys(hostname: string): Promise<{ cert: string; key: string }> {
     const key = this.db.pki.get(hostname);
     if (key) {
       const cert = this.db.certificates.get(hostname);
-      return { key: key.privateKey, cert: cert.pem };
+      return Promise.resolve({ key: key.privateKey, cert: cert.pem });
     }
 
     const hosts = [hostname];
     return this.generateServerCertificateKeys(hosts);
   }
 
-  private async generateServerCertificateKeys(hostParam: string | string[]) {
+  private async generateServerCertificateKeys(
+    hostParam: string | string[],
+  ): Promise<{ cert: string; key: string }> {
     let hosts = hostParam;
     if (typeof hosts === 'string') hosts = [hosts];
 
@@ -49,12 +51,8 @@ export default class CertificateAuthority {
     const cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
     cert.serialNumber = randomSerialNumber();
-    cert.validity.notBefore = moment()
-      .subtract(1, 'day')
-      .toDate();
-    cert.validity.notAfter = moment()
-      .add(2, 'years')
-      .toDate();
+    cert.validity.notBefore = moment().subtract(1, 'day').toDate();
+    cert.validity.notAfter = moment().add(2, 'years').toDate();
 
     cert.setSubject([
       {
@@ -71,18 +69,14 @@ export default class CertificateAuthority {
     return { cert: certPem, key: privateKey };
   }
 
-  private generateCA() {
+  private generateCA(): void {
     const keys = pki.rsa.generateKeyPair(2048);
 
     const cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
     cert.serialNumber = randomSerialNumber();
-    cert.validity.notBefore = moment()
-      .subtract(1, 'days')
-      .toDate();
-    cert.validity.notAfter = moment()
-      .add(10, 'years')
-      .toDate();
+    cert.validity.notBefore = moment().subtract(1, 'days').toDate();
+    cert.validity.notAfter = moment().add(10, 'years').toDate();
     cert.setSubject(CaAttrs);
     cert.setIssuer(CaAttrs);
     cert.setExtensions(CaExtensions);
@@ -92,7 +86,11 @@ export default class CertificateAuthority {
     this.recordPem('ca', cert, keys);
   }
 
-  private recordPem(host: string, cert: pki.Certificate, keyPair: pki.KeyPair) {
+  private recordPem(
+    host: string,
+    cert: pki.Certificate,
+    keyPair: pki.KeyPair,
+  ): { certPem: string; privateKey: string; publicKey: string } {
     const certPem = pki.certificateToPem(cert);
     const privateKey = pki.privateKeyToPem(keyPair.privateKey);
     const publicKey = pki.publicKeyToPem(keyPair.publicKey);
@@ -200,7 +198,7 @@ const ServerAttrs = [
   },
 ];
 
-function getServerExtensions(hosts: string[]) {
+function getServerExtensions(hosts: string[]): any[] {
   return [
     {
       name: 'basicConstraints',
@@ -247,7 +245,7 @@ function getServerExtensions(hosts: string[]) {
   ];
 }
 
-function randomSerialNumber() {
+function randomSerialNumber(): string {
   // generate random 16 bytes hex string
   let sn = '';
   for (let i = 0; i < 4; i += 1) {

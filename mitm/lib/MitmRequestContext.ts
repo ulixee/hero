@@ -24,7 +24,7 @@ export default class MitmRequestContext {
       'requestSession' | 'isSSL' | 'clientToProxyRequest' | 'proxyToClientResponse' | 'isUpgrade'
     >,
     responseCache: HttpResponseCache,
-  ) {
+  ): IMitmRequestContext {
     const {
       isSSL,
       proxyToClientResponse,
@@ -45,7 +45,7 @@ export default class MitmRequestContext {
     const state = new Map<ResourceState, Date>();
     const requestHeaders = parseRawHeaders(clientToProxyRequest.rawHeaders);
     const ctx: IMitmRequestContext = {
-      id: this.contextIdCounter += 1,
+      id: (this.contextIdCounter += 1),
       isSSL,
       isUpgrade,
       isClientHttp2: clientToProxyRequest instanceof http2.Http2ServerRequest,
@@ -80,14 +80,17 @@ export default class MitmRequestContext {
     return ctx;
   }
 
-  public static createFromHttp2Push(parentContext: IMitmRequestContext, rawHeaders: string[]) {
+  public static createFromHttp2Push(
+    parentContext: IMitmRequestContext,
+    rawHeaders: string[],
+  ): IMitmRequestContext {
     const requestHeaders = parseRawHeaders(rawHeaders);
     const url = new URL(
       `${parentContext.url.protocol}//${requestHeaders[':authority']}${requestHeaders[':path']}`,
     );
     const state = new Map<ResourceState, Date>();
     const ctx = {
-      id: this.contextIdCounter += 1,
+      id: (this.contextIdCounter += 1),
       url,
       method: requestHeaders[':method'],
       isServerHttp2: parentContext.isServerHttp2,
@@ -165,7 +168,7 @@ export default class MitmRequestContext {
     };
   }
 
-  public static assignMitmSocket(ctx: IMitmRequestContext, mitmSocket: MitmSocket) {
+  public static assignMitmSocket(ctx: IMitmRequestContext, mitmSocket: MitmSocket): void {
     ctx.proxyToServerMitmSocket = mitmSocket;
     ctx.isServerHttp2 = mitmSocket.isHttp2();
     ctx.localAddress = mitmSocket.localAddress;
@@ -196,7 +199,7 @@ export default class MitmRequestContext {
     return originType;
   }
 
-  public static readHttp1Response(ctx: IMitmRequestContext, response: http.IncomingMessage) {
+  public static readHttp1Response(ctx: IMitmRequestContext, response: http.IncomingMessage): void {
     ctx.status = response.statusCode;
     ctx.originalStatus = response.statusCode;
     ctx.statusMessage = response.statusMessage;
@@ -213,7 +216,7 @@ export default class MitmRequestContext {
     response: http2.ClientHttp2Stream,
     statusCode: number,
     rawHeaders: string[],
-  ) {
+  ): void {
     const headers = parseRawHeaders(rawHeaders);
     ctx.status = statusCode;
     ctx.originalStatus = statusCode;

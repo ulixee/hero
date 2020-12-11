@@ -1,8 +1,6 @@
 import { IDomStorageForOrigin, IStorageEntry } from '@secret-agent/core-interfaces/IDomStorage';
 import { IIndexedDB } from '@secret-agent/core-interfaces/IIndexedDB';
 
-declare type TSON = any;
-
 function dumpStorage(storage: Storage) {
   const store: [string, string][] = [];
   for (let i = 0; i < storage.length; i += 1) {
@@ -29,7 +27,7 @@ async function exportIndexedDbs(dbNames: string[]) {
       const openDBRequest = window.indexedDB.open(name);
 
       const idbDatabase = await new Promise<IDBDatabase>(resolve => {
-        openDBRequest.onsuccess = async event => {
+        openDBRequest.onsuccess = event => {
           resolve((event.target as IDBRequest).result as IDBDatabase);
         };
       });
@@ -72,14 +70,13 @@ async function exportIndexedDbs(dbNames: string[]) {
 
 async function readStoreData(store: IDBObjectStore) {
   const data: string[] = [];
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     const cursorQuery = store.openCursor();
     cursorQuery.onsuccess = event => {
       const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
       if (cursor) {
         const key = store.keyPath === null ? cursor.key : undefined;
         const value = cursor.value;
-        // @ts-ignore
         data.push(TSON.stringify({ key, value }));
         cursor.continue();
       } else {
@@ -95,7 +92,7 @@ async function restoreIndexedDb(restoreDBs: IIndexedDB[]) {
   if (!restoreDBs || !restoreDBs.length) return;
 
   for (const restoreDB of restoreDBs) {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const openDBRequest = indexedDB.open(restoreDB.name, restoreDB.version);
       // only run changes when the db doesn't already exist
       openDBRequest.onupgradeneeded = event => {
@@ -137,7 +134,6 @@ async function restoreData(db: IDBDatabase, restoreDB: IIndexedDB) {
       .transaction(objectStoreToRestore.name, 'readwrite')
       .objectStore(objectStoreToRestore.name);
     for (const record of data) {
-      // @ts-ignore
       const { key, value } = TSON.parse(record);
       insertStore.add(value, key);
     }

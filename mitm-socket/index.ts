@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import { ChildProcess, spawn } from 'child_process';
 import * as net from 'net';
 import { promises as fs, unlink } from 'fs';
@@ -33,7 +34,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public connectTime: Date;
   public closeTime: Date;
 
-  public get pid() {
+  public get pid(): number | undefined {
     return this.child?.pid;
   }
 
@@ -41,10 +42,12 @@ export default class MitmSocket extends TypedEventEmitter<{
   private isConnected = false;
   private child: ChildProcess;
   private connectError?: string;
+  private readonly callStack: string;
 
   constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     super();
     const id = uuid();
+    this.callStack = new Error().stack.replace('Error:', '').trim();
     this.serverName = connectOpts.servername;
     this.socketPath =
       os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
@@ -53,25 +56,25 @@ export default class MitmSocket extends TypedEventEmitter<{
     if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
   }
 
-  public isReusable() {
+  public isReusable(): boolean {
     if (!this.socket || this.isClosing || !this.isConnected) return false;
     return this.socket.writable && !this.socket.destroyed;
   }
 
-  public setProxyUrl(url: string) {
+  public setProxyUrl(url: string): void {
     this.connectOpts.proxyUrl = url;
   }
 
-  public setTcpSettings(tcpVars: { windowSize: number; ttl: number }) {
+  public setTcpSettings(tcpVars: { windowSize: number; ttl: number }): void {
     this.connectOpts.tcpTtl = tcpVars.ttl;
     this.connectOpts.tcpWindowSize = tcpVars.windowSize;
   }
 
-  public isHttp2() {
+  public isHttp2(): boolean {
     return this.alpn === 'h2';
   }
 
-  public close() {
+  public close(): void {
     if (this.isClosing) return;
     this.closeTime = new Date();
     this.isClosing = true;
@@ -80,7 +83,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     this.closeChild();
   }
 
-  public onListening() {
+  public onListening(): void {
     const socket = net.connect(this.socketPath);
     this.socket = socket;
     socket.on('error', error => {
@@ -98,7 +101,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     socket.on('close', this.onSocketClose.bind(this, 'close'));
   }
 
-  public async connect(connectTimeoutMillis = 30e3) {
+  public async connect(connectTimeoutMillis = 30e3): Promise<void> {
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -115,7 +118,12 @@ export default class MitmSocket extends TypedEventEmitter<{
       }`,
     );
     child.on('exit', () => {
-      promise.reject(this.connectError ?? new Error(`Socket process exited during connect`));
+      promise.reject(
+        buildConnectError(
+          this.connectError ?? `Socket process exited during connect`,
+          this.callStack,
+        ),
+      );
       this.cleanupSocket();
     });
 
@@ -136,11 +144,17 @@ export default class MitmSocket extends TypedEventEmitter<{
       }
     });
     // if error logs during connect window, we got a connect error
-    child.stderr.on('data', this.onChildProcessStderr.bind(this));
+    child.stderr.on('data', message => {
+      this.onChildProcessStderr(message);
+      if (!this.isConnected && this.connectError) {
+        promise.reject(buildConnectError(this.connectError, this.callStack));
+        this.close();
+      }
+    });
     await promise.promise;
   }
 
-  private async cleanSocketPathIfNeeded() {
+  private async cleanSocketPathIfNeeded(): Promise<void> {
     try {
       await fs.unlink(this.socketPath);
     } catch (err) {
@@ -148,7 +162,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     }
   }
 
-  private closeChild() {
+  private closeChild(): void {
     if (!this.child || this.child.killed) return;
     try {
       // fix for node 13 throwing errors on closed sockets
@@ -167,20 +181,21 @@ export default class MitmSocket extends TypedEventEmitter<{
     this.child.unref();
   }
 
-  private cleanupSocket() {
+  private cleanupSocket(): void {
     if (!this.socket) return;
-    if (this.connectError) this.socket.destroy(new Error(this.connectError));
+    if (this.connectError)
+      this.socket.destroy(buildConnectError(this.connectError, this.callStack));
     this.socket.end();
     this.isConnected = false;
     unlink(this.socketPath, () => null);
     delete this.socket;
   }
 
-  private onSocketClose() {
+  private onSocketClose(): void {
     this.close();
   }
 
-  private onChildProcessMessage(messages: string) {
+  private onChildProcessMessage(messages: string): void {
     for (const message of messages.split(/\r?\n/)) {
       if (message.startsWith('[DomainSocketPiper.Dialed]')) {
         this.dialTime = new Date();
@@ -215,15 +230,23 @@ export default class MitmSocket extends TypedEventEmitter<{
     }
   }
 
-  private onChildProcessStderr(message: string) {
+  private onChildProcessStderr(message: string): void {
     if (
       message.includes('panic: runtime error:') ||
       message.includes('tlsConn.Handshake error') ||
       message.includes('connection refused') ||
-      message.includes('no such host')
+      message.includes('no such host') ||
+      message.includes('Dial (proxy/remote)') ||
+      message.includes('PROXY_ERR')
     ) {
       this.connectError = message.trim();
-      this.close();
+      if (this.connectError.includes('Error:')) {
+        this.connectError = this.connectError.split('Error:').pop().trim();
+      }
+
+      if (this.isConnected) {
+        this.close();
+      }
     } else if (message.includes('DomainSocket -> EOF') && !this.connectOpts.keepAlive) {
       this.close();
     } else {
@@ -245,4 +268,23 @@ export interface IGoTlsSocketConnectOpts {
   tcpWindowSize?: number;
   debug?: boolean;
   keepAlive?: boolean;
+}
+
+class Socks5ProxyConnectError extends Error {}
+class HttpProxyConnectError extends Error {}
+class SocketConnectError extends Error {}
+
+function buildConnectError(connectError = 'Error connecting to host', callStack: string): Error {
+  let error: Error;
+  if (connectError.includes('SOCKS5_PROXY_ERR')) {
+    error = new Socks5ProxyConnectError(connectError.replace('SOCKS5_PROXY_ERR', '').trim());
+  } else if (connectError.includes('HTTP_PROXY_ERR')) {
+    error = new HttpProxyConnectError(connectError.replace('HTTP_PROXY_ERR', '').trim());
+  } else {
+    error = new SocketConnectError(connectError.trim());
+  }
+
+  error.stack += `\n----DIAL----\n    `;
+  error.stack += callStack;
+  return error;
 }

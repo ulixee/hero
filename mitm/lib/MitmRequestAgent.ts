@@ -31,7 +31,9 @@ export default class MitmRequestAgent {
       MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
-  public async request(ctx: IMitmRequestContext) {
+  public async request(
+    ctx: IMitmRequestContext,
+  ): Promise<http2.ClientHttp2Stream | http.ClientRequest> {
     const url = ctx.url;
     const requestSettings: https.RequestOptions = {
       method: ctx.method,
@@ -63,7 +65,7 @@ export default class MitmRequestAgent {
     return this.http1Request(ctx, requestSettings);
   }
 
-  public async freeSocket(ctx: IMitmRequestContext) {
+  public freeSocket(ctx: IMitmRequestContext): void {
     if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
@@ -83,7 +85,7 @@ export default class MitmRequestAgent {
     }
   }
 
-  public close() {
+  public close(): void {
     this.http2Sessions.map(x => x.client.destroy());
     this.http2Sessions.length = 0;
     for (const socket of this.sockets) {
@@ -92,7 +94,10 @@ export default class MitmRequestAgent {
     this.sockets.clear();
   }
 
-  private async createSocketConnection(ctx: IMitmRequestContext, options: RequestOptions) {
+  private async createSocketConnection(
+    ctx: IMitmRequestContext,
+    options: RequestOptions,
+  ): Promise<MitmSocket> {
     const session = this.session;
     const tlsProfileId = session.networkInterceptorDelegate.tls?.emulatorProfileId;
     const isKeepAlive = ((options.headers.connection ??
@@ -140,7 +145,7 @@ export default class MitmRequestAgent {
     return pending.promise;
   }
 
-  private getSocketPoolByOrigin(origin: string) {
+  private getSocketPoolByOrigin(origin: string): ISocketPool {
     if (!this.socketPoolByOrigin[origin]) {
       this.socketPoolByOrigin[origin] = {
         alpn: null,
@@ -158,7 +163,7 @@ export default class MitmRequestAgent {
     socketConnect: MitmSocket,
     ctx: IMitmRequestContext,
     options: RequestOptions,
-  ) {
+  ): Promise<void> {
     const origin = ctx.url.origin;
     this.sockets.delete(socketConnect);
 
@@ -192,7 +197,10 @@ export default class MitmRequestAgent {
     }
   }
 
-  private getAvailableSocket(ctx: IMitmRequestContext, options: RequestOptions) {
+  private getAvailableSocket(
+    ctx: IMitmRequestContext,
+    options: RequestOptions,
+  ): Promise<MitmSocket> {
     const origin = ctx.url.origin;
     const isUpgrade = ctx.isUpgrade;
 
@@ -223,7 +231,10 @@ export default class MitmRequestAgent {
     });
   }
 
-  private http1Request(ctx: IMitmRequestContext, requestSettings: http.RequestOptions) {
+  private http1Request(
+    ctx: IMitmRequestContext,
+    requestSettings: http.RequestOptions,
+  ): http.ClientRequest {
     const httpModule = ctx.isSSL ? https : http;
     ctx.setState(ResourceState.CreateProxyToServerRequest);
     return httpModule.request(requestSettings);
@@ -231,7 +242,10 @@ export default class MitmRequestAgent {
 
   /////// ////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
-  private http2Request(ctx: IMitmRequestContext, connectResult: MitmSocket) {
+  private http2Request(
+    ctx: IMitmRequestContext,
+    connectResult: MitmSocket,
+  ): http2.ClientHttp2Stream {
     const client = this.createHttp2Session(ctx, connectResult);
     ctx.setState(ResourceState.CreateProxyToServerRequest);
     return client.request(ctx.requestHeaders, { waitForTrailers: true });
@@ -243,7 +257,7 @@ export default class MitmRequestAgent {
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
     flags: number,
     rawHeaders: string[],
-  ) {
+  ): void {
     const session = this.session;
     const sessionId = session.sessionId;
     log.info('Http2Client.pushReceived', { sessionId, headers, flags });
@@ -278,7 +292,7 @@ export default class MitmRequestAgent {
     }
 
     HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
-    const onResponseHeaders = new Promise(resolve => {
+    const onResponseHeaders = new Promise<void>(resolve => {
       serverPushStream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
         MitmRequestContext.readHttp2Response(
           pushContext,
@@ -308,7 +322,7 @@ export default class MitmRequestAgent {
     onResponseHeaders: Promise<void>,
     error: Error,
     proxyToClientPushStream: ServerHttp2Stream,
-  ) {
+  ): Promise<void> {
     pushContext.setState(ResourceState.ProxyToClientPushResponse);
     const serverToProxyPushStream = pushContext.serverToProxyResponse as ClientHttp2Stream;
     const cache = pushContext.cacheHandler;
@@ -353,7 +367,7 @@ export default class MitmRequestAgent {
       }
     } else {
       proxyToClientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
-      proxyToClientPushStream.on('wantTrailers', async () => {
+      proxyToClientPushStream.on('wantTrailers', (): void => {
         pushContext.responseTrailers = trailers;
         proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
       });
@@ -374,14 +388,14 @@ export default class MitmRequestAgent {
     this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
   }
 
-  private getHttp2Session(origin: string) {
+  private getHttp2Session(origin: string): IHttp2Session | undefined {
     return this.http2Sessions.find(x => {
       if (x.origin === origin) return true;
       return x.client.originSet?.includes(origin);
     });
   }
 
-  private createHttp2Session(ctx: IMitmRequestContext, mitmSocket: MitmSocket) {
+  private createHttp2Session(ctx: IMitmRequestContext, mitmSocket: MitmSocket): ClientHttp2Session {
     const origin = ctx.url.origin;
     const existing = this.getHttp2Session(origin);
     if (existing) return existing.client;
@@ -453,7 +467,7 @@ export default class MitmRequestAgent {
     return proxyToServerH2Client;
   }
 
-  private closeHttp2Session(client: ClientHttp2Session) {
+  private closeHttp2Session(client: ClientHttp2Session): void {
     const index = this.http2Sessions.findIndex(x => x.client === client);
     if (index < 0) return;
 

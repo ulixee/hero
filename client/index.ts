@@ -216,7 +216,7 @@ export function SecretAgentClientGenerator(
 
     /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-    public async goto(href: string): Promise<Resource> {
+    public goto(href: string): Promise<Resource> {
       return this.activeTab.goto(href);
     }
 

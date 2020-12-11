@@ -7,28 +7,28 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
-import IResolvablePromise from "@secret-agent/core-interfaces/IResolvablePromise";
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
 
 export default class Frame extends TypedEventEmitter<IFrameEvents> implements IPuppetFrame {
-  public get id() {
+  public get id(): string {
     return this.internalFrame.id;
   }
 
-  public get name() {
+  public get name(): string {
     return this.internalFrame.name ?? '';
   }
 
-  public get parentId() {
+  public get parentId(): string {
     return this.internalFrame.parentId;
   }
 
   public url: string;
 
-  public get securityOrigin() {
+  public get securityOrigin(): string {
     if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url || this.url === ':') return '';
     const origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
@@ -37,7 +37,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return origin;
   }
 
-  public get isLoaded() {
+  public get isLoaded(): boolean {
     if (!this.activeLoaderId) return true;
     return this.activeLoader.isResolved;
   }
@@ -45,7 +45,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   public navigationReason?: string;
 
   public disposition?: string;
-  public get lifecycleEvents() {
+  public get lifecycleEvents(): ILifecycleEvents {
     return this.loaderLifecycles.get(this.activeLoaderId);
   }
 
@@ -61,7 +61,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
   private readonly cdpSession: CDPSession;
   private readonly isAttached: () => boolean;
 
-  private get activeLoader() {
+  private get activeLoader(): IResolvablePromise<Error | null> {
     return this.loaderIdResolvers.get(this.activeLoaderId);
   }
 
@@ -86,7 +86,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.onLoaded(internalFrame);
   }
 
-  public async evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean) {
+  public async evaluate<T>(
+    expression: string,
+    isolateFromWebPageEnvironment?: boolean,
+  ): Promise<T> {
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     const result = await this.cdpSession.send(
       'Runtime.evaluate',
@@ -107,7 +110,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return remote.value as T;
   }
 
-  public async evaluateOnIsolatedFrameElement<T>(expression: string) {
+  public async evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T> {
     const objectId = await this.getParentElementId();
     if (!objectId) return;
     try {
@@ -133,19 +136,19 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   /////// NAVIGATION ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public initiateNavigation(url: string, loaderId: string) {
+  public initiateNavigation(url: string, loaderId: string): void {
     // chain current listeners to new promise
     this.setLoader(loaderId);
   }
 
-  public requestedNavigation(url: string, reason: NavigationReason, disposition: string) {
+  public requestedNavigation(url: string, reason: NavigationReason, disposition: string): void {
     this.navigationReason = reason;
     this.disposition = disposition;
 
     this.emit('frame-requested-navigation', { url, reason });
   }
 
-  public onLoaded(internalFrame: PageFrame) {
+  public onLoaded(internalFrame: PageFrame): void {
     this.internalFrame = internalFrame;
     this.updateUrl();
     this.setLoader(internalFrame.loaderId);
@@ -158,7 +161,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     }
   }
 
-  public onNavigated(frame: PageFrame) {
+  public onNavigated(frame: PageFrame): void {
     this.internalFrame = frame;
     this.updateUrl();
 
@@ -175,7 +178,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.emit('frame-navigated');
   }
 
-  public onNavigatedWithinDocument(url: string) {
+  public onNavigatedWithinDocument(url: string): void {
     this.url = url;
 
     // clear out any active one
@@ -188,14 +191,14 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public onStoppedLoading() {
+  public onStoppedLoading(): void {
     if (!this.lifecycleEvents.load) {
       this.onLifecycleEvent('DOMContentLoaded');
       this.onLifecycleEvent('load');
     }
   }
 
-  public async waitForLoader(loaderId?: string) {
+  public async waitForLoader(loaderId?: string): Promise<Error | null> {
     const hasLoaderError = await this.loaderIdResolvers.get(loaderId ?? this.activeLoaderId)
       ?.promise;
     if (hasLoaderError) return hasLoaderError;
@@ -205,7 +208,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     }
   }
 
-  public onLifecycleEvent(name: string, pageLoaderId?: string) {
+  public onLifecycleEvent(name: string, pageLoaderId?: string): void {
     const loaderId = pageLoaderId ?? this.activeLoaderId;
     if (name === 'init') {
       if (!this.loaderIdResolvers.has(loaderId)) {
@@ -244,24 +247,24 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
 
   /////// CONTEXT ID  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public hasContextId(executionContextId: number) {
+  public hasContextId(executionContextId: number): boolean {
     return (
       this.defaultContextIds.has(executionContextId) ||
       this.isolatedContextIds.has(executionContextId)
     );
   }
 
-  public removeContextId(executionContextId: number) {
+  public removeContextId(executionContextId: number): void {
     this.defaultContextIds.delete(executionContextId);
     this.isolatedContextIds.delete(executionContextId);
   }
 
-  public clearContextIds() {
+  public clearContextIds(): void {
     this.defaultContextIds.clear();
     this.isolatedContextIds.clear();
   }
 
-  public addContextId(executionContextId: number, isDefault: boolean) {
+  public addContextId(executionContextId: number, isDefault: boolean): void {
     if (isDefault) {
       this.defaultContextIds.add(executionContextId);
       this.emit('default-context-created', { executionContextId });
@@ -288,7 +291,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return this.getActiveContextId(isolatedContext);
   }
 
-  public getActiveContextId(isolatedContext: boolean) {
+  public getActiveContextId(isolatedContext: boolean): number | undefined {
     if (isolatedContext) {
       for (const id of this.isolatedContextIds) {
         if (this.activeContexts.has(id)) return id;
@@ -318,7 +321,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     await this.waitOn('frame-lifecycle', x => x.name === 'load');
   }
 
-  private setLoader(loaderId: string) {
+  private setLoader(loaderId: string): void {
     if (!loaderId) return;
     if (loaderId === this.activeLoaderId) return;
     if (loaderId === 'inpage' || !this.loaderIdResolvers.has(loaderId)) {
@@ -338,7 +341,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.activeLoaderId = loaderId;
   }
 
-  private async createIsolatedWorld() {
+  private async createIsolatedWorld(): Promise<number> {
     try {
       if (!this.isAttached()) return;
       const isolatedWorld = await this.cdpSession.send(
@@ -376,7 +379,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     }
   }
 
-  private async getParentElementId() {
+  private async getParentElementId(): Promise<string> {
     try {
       if (!this.parentFrame || this.isolatedWorldElementObjectId)
         return this.isolatedWorldElementObjectId;
@@ -397,21 +400,21 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     }
   }
 
-  private async waitForDefaultContext() {
+  private async waitForDefaultContext(): Promise<void> {
     if (this.getActiveContextId(false)) return;
 
     // don't time out this event, we'll just wait for the page to shut down
-    return this.waitOn('default-context-created', null, null).catch(err => {
+    await this.waitOn('default-context-created', null, null).catch(err => {
       if (err instanceof CanceledPromiseError) return;
       throw err;
     });
   }
 
-  private isDefaultPage() {
+  private isDefaultPage(): boolean {
     return !this.url || this.url === DEFAULT_PAGE;
   }
 
-  private updateUrl() {
+  private updateUrl(): void {
     if (this.internalFrame.url) {
       this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
     }

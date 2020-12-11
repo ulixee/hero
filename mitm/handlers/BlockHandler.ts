@@ -1,13 +1,12 @@
-import IMitmRequestContext from "../interfaces/IMitmRequestContext";
-import ResourceState from "../interfaces/ResourceState";
+import IMitmRequestContext from '../interfaces/IMitmRequestContext';
+import ResourceState from '../interfaces/ResourceState';
 
 export default class BlockHandler {
-  public static shouldBlockRequest(ctx: IMitmRequestContext) {
+  public static shouldBlockRequest(ctx: IMitmRequestContext): boolean {
     ctx.setState(ResourceState.BlockHandler);
     const session = ctx.requestSession;
     if (!session) return false;
     if (session.isClosing) return true;
-
 
     const shouldBlock =
       (ctx.resourceType && session.blockedResources?.types?.includes(ctx.resourceType)) ||

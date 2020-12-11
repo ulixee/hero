@@ -15,7 +15,7 @@ export class Dns {
     this.dnsServer = requestSession?.networkInterceptorDelegate?.dns?.dnsOverTlsConnection;
   }
 
-  public async lookupIp(host: string, retries = 3) {
+  public async lookupIp(host: string, retries = 3): Promise<string> {
     if (!this.dnsServer || host === 'localhost' || net.isIP(host)) return host;
 
     try {
@@ -33,11 +33,11 @@ export class Dns {
     return this.nextIp(dnsEntry);
   }
 
-  public close() {
+  public close(): void {
     this.socket?.close();
   }
 
-  private async lookupDnsEntry(host: string) {
+  private async lookupDnsEntry(host: string): Promise<IDnsEntry> {
     const existing = this.dnsEntries.get(host);
     if (existing && !existing.isResolved) return existing.promise;
 
@@ -60,9 +60,7 @@ export class Dns {
           .filter(x => x.type === 'A') // gives non-query records sometimes
           .map(x => ({
             ip: x.data,
-            expiry: moment()
-              .add(x.ttl, 'seconds')
-              .toDate(),
+            expiry: moment().add(x.ttl, 'seconds').toDate(),
           })),
       };
       dnsEntry.resolve(entry);
@@ -74,7 +72,7 @@ export class Dns {
     }
   }
 
-  private nextIp(dnsEntry: IDnsEntry) {
+  private nextIp(dnsEntry: IDnsEntry): string {
     // implement rotating
     for (let i = 0; i < dnsEntry.aRecords.length; i += 1) {
       const record = dnsEntry.aRecords[i];
@@ -88,7 +86,7 @@ export class Dns {
     return null;
   }
 
-  private async getNextCachedARecord(name: string) {
+  private async getNextCachedARecord(name: string): Promise<string> {
     const cached = await this.dnsEntries.get(name)?.promise;
     if (cached?.aRecords?.length) {
       return this.nextIp(cached);

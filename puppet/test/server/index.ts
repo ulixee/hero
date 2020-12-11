@@ -23,7 +23,7 @@ import * as Path from 'path';
 import { Server as WebSocketServer } from 'ws';
 import { AddressInfo, Socket } from 'net';
 import { gzip } from 'zlib';
-import Log from "@secret-agent/commons/Logger";
+import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
 const fulfillSymbol = Symbol('fulfill callback');
@@ -68,7 +68,7 @@ export class TestServer {
   }
 
   start(preferredPort: number) {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       this.server.listen(preferredPort, () => {
         const protocol = this.protocol;
         const port = (this.server.address() as AddressInfo).port;

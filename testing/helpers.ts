@@ -3,7 +3,7 @@ import * as Path from 'path';
 import Url, { URL } from 'url';
 import querystring from 'querystring';
 import http, { IncomingMessage, RequestListener, Server } from 'http';
-import https from 'https';
+import https, { Agent } from 'https';
 import { createPromise } from '@secret-agent/commons/utils';
 import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
@@ -28,7 +28,7 @@ export interface ITestKoaServer extends KoaRouter {
   baseHost: string;
   baseUrl: string;
 }
-export interface ITestHttpServer {
+export interface ITestHttpServer<T> {
   isClosing: boolean;
   onlyCloseOnFinal: boolean;
   url: string;
@@ -36,7 +36,7 @@ export interface ITestHttpServer {
   baseUrl: string;
   close: () => Promise<any>;
   on: (eventName: string, fn: (...args: any[]) => void) => any;
-  server: http.Server | https.Server;
+  server: T;
 }
 
 export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaServer> {
@@ -87,25 +87,25 @@ export function sslCerts() {
   };
 }
 
-export async function runHttpsServer(handler: RequestListener, onlyCloseOnFinal = false) {
+export async function runHttpsServer(
+  handler: RequestListener,
+  onlyCloseOnFinal = false,
+): Promise<ITestHttpServer<https.Server>> {
   const options = {
     ...sslCerts(),
   };
 
-  const server = https
-    .createServer(options, handler)
-    .listen(0)
-    .unref();
+  const server = https.createServer(options, handler).listen(0).unref();
   await new Promise(resolve => server.once('listening', resolve));
 
   const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
-  const httpServer: ITestHttpServer = {
+  const httpServer: ITestHttpServer<https.Server> = {
     isClosing: false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },
-    async close() {
+    close(): Promise<void> {
       if (httpServer.isClosing) {
         return null;
       }
@@ -133,7 +133,7 @@ export async function runHttpServer(
     addToResponse?: (response: http.ServerResponse) => void;
     onlyCloseOnFinal?: boolean;
   } = {},
-) {
+): Promise<ITestHttpServer<http.Server>> {
   const { onRequest, onPost, addToResponse } = params;
   const server = http.createServer().unref();
   server.on('request', async (request, response) => {
@@ -165,7 +165,7 @@ export async function runHttpServer(
       for await (const chunk of request) {
         body += chunk;
       }
-      // eslint-disable-next-line no-shadow
+      // eslint-disable-next-line no-shadow,@typescript-eslint/no-shadow
       const params = querystring.parse(body);
       pageBody = params.thisText as string;
       if (onPost) onPost(params.thisText as string);
@@ -177,13 +177,13 @@ export async function runHttpServer(
   const port = (server.address() as net.AddressInfo).port;
 
   const baseUrl = `http://localhost:${port}`;
-  const httpServer: ITestHttpServer = {
+  const httpServer: ITestHttpServer<http.Server> = {
     isClosing: false,
     onlyCloseOnFinal: params.onlyCloseOnFinal ?? false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },
-    async close() {
+    close() {
       if (httpServer.isClosing) {
         return null;
       }
@@ -211,7 +211,7 @@ export function httpRequest(
   headers: { [name: string]: string } = {},
   response?: (res: IncomingMessage) => any,
   postData?: Buffer,
-) {
+): Promise<string> {
   const createdPromise = createPromise();
   const { promise, resolve, reject } = createdPromise;
   const url = new URL(urlStr);
@@ -231,7 +231,7 @@ export function httpRequest(
   }
 
   const client = url.protocol === 'https:' ? https : http;
-  const req = client.request(options, async res => {
+  const req = client.request(options, (res): void => {
     if (createdPromise.isResolved) return;
     let data = '';
     if (response) response(res);
@@ -245,7 +245,7 @@ export function httpRequest(
   return promise;
 }
 
-export function getProxyAgent(url: URL, proxyHost: string, auth?: string) {
+export function getProxyAgent(url: URL, proxyHost: string, auth?: string): Agent {
   const ProxyAgent = url.protocol === 'https:' ? HttpsProxyAgent : HttpProxyAgent;
   const opts = Url.parse(proxyHost);
   opts.auth = auth;
@@ -263,7 +263,7 @@ export function httpGet(
 
 export async function runHttp2Server(
   handler: (request: http2.Http2ServerRequest, response: http2.Http2ServerResponse) => void,
-) {
+): Promise<ITestHttpServer<http2.Http2SecureServer>> {
   const h2ServerStarted = createPromise();
   const sessions = new Set<http2.ServerHttp2Session>();
   const server = http2
@@ -279,12 +279,13 @@ export async function runHttp2Server(
   const port = (server.address() as net.AddressInfo).port;
 
   const baseUrl = `https://localhost:${port}`;
-  const httpServer = {
+  const httpServer: ITestHttpServer<http2.Http2SecureServer> = {
     isClosing: false,
+    onlyCloseOnFinal: false,
     on(eventName, fn) {
       server.on(eventName, fn);
     },
-    async close() {
+    close() {
       if (httpServer.isClosing) {
         return null;
       }
@@ -306,12 +307,12 @@ export async function runHttp2Server(
   return httpServer;
 }
 
-export async function httpGetWithSocket(
+export function httpGetWithSocket(
   url: string,
   clientOptions: https.RequestOptions,
   socket: net.Socket,
-) {
-  return await new Promise<string>((resolve, reject) => {
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
     let isResolved = false;
     socket.once('close', err => {
       if (isResolved) return;
@@ -343,7 +344,11 @@ export async function httpGetWithSocket(
 
 let sessionId = 0;
 
-export function getTlsConnection(serverPort: number, host = 'localhost', clientHello = 'Chrome83') {
+export function getTlsConnection(
+  serverPort: number,
+  host = 'localhost',
+  clientHello = 'Chrome83',
+): MitmSocket {
   const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
     host,
     port: String(serverPort),
@@ -351,15 +356,15 @@ export function getTlsConnection(serverPort: number, host = 'localhost', clientH
     servername: host,
     rejectUnauthorized: false,
   });
-  Helpers.onClose(async () => tlsConnection.close());
+  Helpers.onClose(() => tlsConnection.close());
   return tlsConnection;
 }
 
-export function getLogo() {
+export function getLogo(): Buffer {
   return Fs.readFileSync(`${__dirname}/html/img.png`);
 }
 
-export async function readableToBuffer(res: stream.Readable) {
+export async function readableToBuffer(res: stream.Readable): Promise<Buffer> {
   const buffer: Buffer[] = [];
   for await (const data of res) {
     buffer.push(data);
@@ -373,16 +378,16 @@ export async function http2StreamToJson<T>(http2Stream: http2.Http2Stream): Prom
   return JSON.parse(json);
 }
 
-export async function afterEach() {
+export function afterEach(): Promise<void> {
   return closeAll(false);
 }
 
-export async function afterAll() {
+export async function afterAll(): Promise<void> {
   await closeAll(true);
   await Core.shutdown(true);
 }
 
-async function closeAll(isFinal = false) {
+async function closeAll(isFinal = false): Promise<void> {
   const closeList = [...needsClosing];
   needsClosing.length = 0;
 
@@ -409,7 +414,7 @@ async function closeAll(isFinal = false) {
   );
 }
 
-export function onClose(closeFn: () => Promise<any>, onlyCloseOnFinal = false) {
+export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOnFinal = false) {
   needsClosing.push({ close: closeFn, onlyCloseOnFinal });
 }
 

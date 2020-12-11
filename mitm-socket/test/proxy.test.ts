@@ -171,7 +171,7 @@ test('should handle websockets over proxies', async () => {
   });
 
   Helpers.onClose(async () => wsClient.close());
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     wsClient.once('message', msg => {
       expect(msg).toBe('ola');
       resolve();

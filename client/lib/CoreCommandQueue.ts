@@ -21,7 +21,7 @@ export default class CoreCommandQueue {
     }
   }
 
-  public async run<T>(command: string, ...args: any[]): Promise<T> {
+  public run<T>(command: string, ...args: any[]): Promise<T> {
     const { resolve, reject, promise } = createPromise<T>();
     this.items.push({
       resolve,

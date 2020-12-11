@@ -71,7 +71,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.dns = new Dns(this);
   }
 
-  public async waitForBrowserResourceRequest(ctx: IMitmRequestContext) {
+  public async waitForBrowserResourceRequest(ctx: IMitmRequestContext): Promise<ILoadedResource> {
     const referer = ctx.requestLowerHeaders.referer as string;
     const origin = ctx.requestLowerHeaders.origin as string;
     const url = ctx.url.href;
@@ -123,7 +123,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     };
   }
 
-  public registerResource(params: Omit<IPendingResourceLoad, 'load'>) {
+  public registerResource(params: Omit<IPendingResourceLoad, 'load'>): void {
     if (this.isClosing) return;
 
     this.browserRequestIdToTabId.set(params.browserRequestId, params.tabId);
@@ -154,7 +154,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     resource.load.resolve(resource);
   }
 
-  public trackResource(resource: IHttpResourceLoadDetails) {
+  public trackResource(resource: IHttpResourceLoadDetails): void {
     this.requests.push(resource);
     const redirect = this.requests.find(x => x.redirectedToUrl === resource.url.href);
     resource.isFromRedirect = !!redirect;
@@ -163,7 +163,9 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       resource.firstRedirectingUrl = redirect.url.href;
       if (redirect.isFromRedirect) {
         const seen = new Set();
-        const findRequest = req => this.requests.find(x => x.redirectedToUrl === req.url.href);
+        const findRequest = (req): IHttpResourceLoadDetails | undefined => {
+          return this.requests.find(x => x.redirectedToUrl === req.url.href);
+        };
         let prev = redirect;
         while (prev.isFromRedirect) {
           prev = findRequest(prev);
@@ -178,7 +180,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     }
   }
 
-  public async lookupDns(host: string) {
+  public lookupDns(host: string): Promise<string> {
     if (this.dns) {
       try {
         return this.dns.lookupIp(host);
@@ -190,14 +192,14 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         // if fails, pass through to returning host untouched
       }
     }
-    return host;
+    return Promise.resolve(host);
   }
 
-  public getProxyCredentials() {
+  public getProxyCredentials(): string {
     return `secret-agent:${this.sessionId}`;
   }
 
-  public async close() {
+  public close(): void {
     this.logger.info('MitmRequestSession.Closing');
     this.isClosing = true;
     for (const pending of this.pendingResources) {
@@ -210,7 +212,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3).unref();
   }
 
-  public shouldBlockRequest(url: string) {
+  public shouldBlockRequest(url: string): boolean {
     if (!this.blockedResources?.urls) {
       return false;
     }
@@ -226,12 +228,12 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   public blockHandler(
     request: http.IncomingMessage | http2.Http2ServerRequest,
     response: http.ServerResponse | http2.Http2ServerResponse,
-  ) {
+  ): boolean {
     if (this.blockedResources?.handlerFn) return this.blockedResources.handlerFn(request, response);
     return false;
   }
 
-  public recordDocumentUserActivity(documentUrl: string) {
+  public recordDocumentUserActivity(documentUrl: string): void {
     if (this.networkInterceptorDelegate?.http.onOriginHasFirstPartyInteraction) {
       this.networkInterceptorDelegate.http.onOriginHasFirstPartyInteraction(documentUrl);
     }
@@ -239,7 +241,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   /////// Websockets ///////////////////////////////////////////////////////////
 
-  public async getWebsocketUpgradeRequestId(headers: IResourceHeaders) {
+  public getWebsocketUpgradeRequestId(headers: IResourceHeaders): Promise<string> {
     const key = this.getWebsocketHeadersKey(headers);
     if (!this.websocketBrowserResourceIds[key]) {
       this.websocketBrowserResourceIds[key] = createPromise<string>(30e3);
@@ -254,7 +256,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       browserRequestId: string;
       headers: IResourceHeaders;
     },
-  ) {
+  ): void {
     this.browserRequestIdToTabId.set(message.browserRequestId, tabId);
     const key = this.getWebsocketHeadersKey(message.headers);
     if (!this.websocketBrowserResourceIds[key]) {
@@ -263,7 +265,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.websocketBrowserResourceIds[key].resolve(message.browserRequestId);
   }
 
-  private getWebsocketHeadersKey(headers: IResourceHeaders) {
+  private getWebsocketHeadersKey(headers: IResourceHeaders): string {
     let websocketKey: string;
     let host: string;
     for (const key of Object.keys(headers)) {
@@ -280,7 +282,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     origin: string,
     referer: string,
     isHttp2Push?: boolean,
-  ) {
+  ): IPendingResourceLoad | null {
     const matches = this.pendingResources.filter(x => {
       return x.url === url && x.method === method;
     });
@@ -300,30 +302,29 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return matches.find(x => x.referer === referer);
   }
 
-  public static async close() {
+  public static async close(): Promise<void> {
     await Promise.all(Object.values(RequestSession.sessions).map(x => x.close()));
   }
 
   public static readSessionId(
     requestHeaders: { [key: string]: string | string[] | undefined },
     remotePort: number,
-  ) {
+  ): string {
     const authHeader = requestHeaders['proxy-authorization'] as string;
     if (!authHeader) {
       return RequestSession.proxyPortSessionIds[remotePort];
     }
 
-    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64')
-      .toString()
-      .split(':');
+    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
     return sessionId;
   }
 
-  public static registerProxySession(socket: net.Socket, sessionId: string) {
-    this.proxyPortSessionIds[socket.remotePort] = sessionId;
+  public static registerProxySession(loopbackProxySocket: net.Socket, sessionId: string): void {
+    // local port is the side that originates from our http server
+    this.proxyPortSessionIds[loopbackProxySocket.localPort] = sessionId;
   }
 
-  public static sendNeedsAuth(socket: net.Socket) {
+  public static sendNeedsAuth(socket: net.Socket): void {
     socket.end(
       'HTTP/1.1 407 Proxy Authentication Required\r\n' +
         'Proxy-Authenticate: Basic realm="sa"\r\n\r\n',
@@ -375,6 +376,15 @@ export interface IRequestSessionRequestEvent {
 export interface IRequestSessionHttpErrorEvent {
   request: IRequestSessionResponseEvent;
   error: Error;
+}
+
+interface ILoadedResource {
+  browserRequestId: string;
+  resourceType: ResourceType;
+  originType: string;
+  hasUserGesture: boolean;
+  isUserNavigation: boolean;
+  documentUrl: string;
 }
 
 interface IPendingResourceLoad {

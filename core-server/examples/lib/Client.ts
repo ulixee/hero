@@ -1,7 +1,7 @@
-import RemoteClient from "@secret-agent/remote-client";
-import JsonSocket from "json-socket";
-import Net from "net";
-import ISecretAgentClass from "@secret-agent/client/interfaces/ISecretAgentClass";
+import RemoteClient from '@secret-agent/remote-client';
+import JsonSocket from 'json-socket';
+import Net from 'net';
+import ISecretAgentClass from '@secret-agent/client/interfaces/ISecretAgentClass';
 
 export default class SecretAgentSocketClient {
   public remoteClient: RemoteClient;
@@ -19,7 +19,7 @@ export default class SecretAgentSocketClient {
 
   public close() {
     this.isOpen = false;
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       if (this.netSocket.destroyed) return resolve();
       this.netSocket.end(() => setTimeout(resolve, 0));
     });
@@ -28,7 +28,7 @@ export default class SecretAgentSocketClient {
   private bindPipes() {
     this.netSocket = Net.connect({ port: this.port });
 
-    this.netSocket.once('connect', async () => {
+    this.netSocket.once('connect', () => {
       this.isOpen = true;
     });
 

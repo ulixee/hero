@@ -20,6 +20,14 @@ describe('basic Full Client tests', () => {
     expect(url).toBe(koaServer.baseHost);
   });
 
+  it('should get unreachable proxy errors in the client', async () => {
+    const agent = await new SecretAgent({
+      upstreamProxyUrl: koaServer.baseUrl,
+    });
+    Helpers.needsClosing.push(agent);
+    await expect(agent.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
+  });
+
   it('runs goto with no document loaded', async () => {
     const agent = await new SecretAgent();
     Helpers.needsClosing.push(agent);

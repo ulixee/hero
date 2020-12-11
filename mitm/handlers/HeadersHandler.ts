@@ -4,13 +4,14 @@ import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
 import http2 from 'http2';
+import OriginType from '@secret-agent/core-interfaces/OriginType';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 export default class HeadersHandler {
-  public static async waitForBrowserRequest(ctx: IMitmRequestContext) {
+  public static async waitForBrowserRequest(ctx: IMitmRequestContext): Promise<void> {
     ctx.setState(ResourceState.WaitForBrowserRequest);
     const session = ctx.requestSession;
 
@@ -34,7 +35,7 @@ export default class HeadersHandler {
       if (method === 'OPTIONS') {
         ctx.resourceType = 'Preflight';
       }
-      ctx.originType = resource.originType;
+      ctx.originType = resource.originType as OriginType;
       ctx.hasUserGesture = resource.hasUserGesture;
       ctx.isUserNavigation = resource.isUserNavigation;
       ctx.documentUrl = resource.documentUrl;
@@ -49,7 +50,7 @@ export default class HeadersHandler {
     }
   }
 
-  public static modifyHeaders(ctx: IMitmRequestContext) {
+  public static modifyHeaders(ctx: IMitmRequestContext): void {
     ctx.setState(ResourceState.ModifyHeaders);
     const session = ctx.requestSession;
     if (ctx.isServerHttp2 === false && !ctx.requestLowerHeaders.host) {
@@ -76,8 +77,8 @@ export default class HeadersHandler {
   public static cleanResponseHeaders(
     ctx: IMitmRequestContext,
     originalRawHeaders: IResourceHeaders,
-  ) {
-    const headers: { [name: string]: string | string[] } = {};
+  ): IResourceHeaders {
+    const headers: IResourceHeaders = {};
     for (const [key, value] of Object.entries(originalRawHeaders)) {
       const canonizedKey = key.trim();
       if (
@@ -116,7 +117,7 @@ export default class HeadersHandler {
     return headers;
   }
 
-  public static sendRequestTrailers(ctx: IMitmRequestContext) {
+  public static sendRequestTrailers(ctx: IMitmRequestContext): void {
     const clientRequest = ctx.clientToProxyRequest;
     if (!clientRequest.trailers) return;
 
@@ -133,7 +134,7 @@ export default class HeadersHandler {
     }
   }
 
-  public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext) {
+  public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext): void {
     const url = ctx.url;
     if (ctx.isServerHttp2 && ctx.isClientHttp2 === false) {
       if (!ctx.requestHeaders[':path']) ctx.requestHeaders[':path'] = url.pathname + url.search;
@@ -146,7 +147,7 @@ export default class HeadersHandler {
     this.stripHttp1HeadersForHttp2(ctx);
   }
 
-  public static stripHttp1HeadersForHttp2(ctx: IMitmRequestContext) {
+  public static stripHttp1HeadersForHttp2(ctx: IMitmRequestContext): void {
     // TODO: should be part of an emulator for h2 headers
     for (const key of Object.keys(ctx.requestHeaders)) {
       const lowerKey = key.toLowerCase();
@@ -160,7 +161,7 @@ export default class HeadersHandler {
     }
   }
 
-  private static cleanRequestHeaders(ctx: IMitmRequestContext) {
+  private static cleanRequestHeaders(ctx: IMitmRequestContext): void {
     const headers = ctx.requestHeaders;
     const removeH2Headers = ctx.isServerHttp2 === false && ctx.isClientHttp2 === true;
     for (const header of Object.keys(headers)) {

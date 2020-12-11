@@ -51,7 +51,7 @@ export default class CoreTab {
     }
   }
 
-  public async getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
+  public getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
     return this.commandQueue.run('getResourceProperty', id, propertyPath);
   }
 

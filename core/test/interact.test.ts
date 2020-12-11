@@ -93,10 +93,10 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
           <div style="height:500px">
             <button id="button-1" onclick="click1(event)">Test</button>
           </div>
-          <div style="margin-top:1500px; flex: content; justify-content: center">
+          <div style="margin-top:1100px; flex: content; justify-content: center">
             <button id="button-2" onclick="click2()" style="width: 30px; height: 20px;">Test 2</button>
           </div>
-          <div style="margin-top:3105px; float:right;clear:both: width:20px; height: 20px;">
+          <div style="margin-top:2161px; float:right;clear:both: width:20px; height: 20px;">
             <button id="button-3" onclick="click3()">Test 3</button>
           </div>
           <script>
@@ -114,7 +114,17 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
         </body>
       `;
       });
-      const meta = await Core.createTab({ humanEmulatorId });
+      const meta = await Core.createTab({
+        humanEmulatorId,
+        viewport: {
+          width: 1920,
+          height: 1080,
+          screenWidth: 1920,
+          screenHeight: 1080,
+          positionX: 0,
+          positionY: 0,
+        },
+      });
       const core = Core.byTabId[meta.tabId];
       Helpers.needsClosing.push(core);
       await core.goto(`${koaServer.baseUrl}/longpage`);

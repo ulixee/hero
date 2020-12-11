@@ -1,12 +1,12 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
-import {  TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IPuppetNetworkEvents } from '@secret-agent/puppet-interfaces/IPuppetNetworkEvents';
 import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from "@secret-agent/core-interfaces/IRegisteredEventListener";
-import { IBoundLog } from "@secret-agent/core-interfaces/ILog";
+import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { CDPSession } from './CDPSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -53,7 +53,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return super.emit(eventType, event);
   }
 
-  public async initialize(emulation: IBrowserEmulationSettings) {
+  public async initialize(emulation: IBrowserEmulationSettings): Promise<void> {
     this.emulation = emulation;
 
     await Promise.all([
@@ -73,12 +73,12 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     ]);
   }
 
-  public close() {
+  public close(): void {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('NetworkManager closed');
   }
 
-  public async initializeFromParent(parentManager: NetworkManager) {
+  public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
     return this.initialize(parentManager.emulation);
   }
@@ -112,7 +112,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       });
   }
 
-  private onRequestPaused(networkRequest: RequestPausedEvent) {
+  private onRequestPaused(networkRequest: RequestPausedEvent): void {
     this.cdpSession
       .send('Fetch.continueRequest', {
         requestId: networkRequest.requestId,
@@ -149,7 +149,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     }
   }
 
-  private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent) {
+  private onNetworkRequestWillBeSent(networkRequest: RequestWillBeSentEvent): void {
     const isNavigation =
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
 
@@ -176,7 +176,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     }
   }
 
-  private emitResource(event: IPuppetNetworkEvents['resource-will-be-requested']) {
+  private emitResource(event: IPuppetNetworkEvents['resource-will-be-requested']): boolean {
     // NOTE: same requestId will be used in devtools for redirected resources
     if (this.publishedResources.has(`${event.browserRequestId}_${event.url}`)) return false;
     this.publishedResources.add(`${event.browserRequestId}_${event.url}`);
@@ -185,7 +185,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return true;
   }
 
-  private async onNetworkResponseReceived(event: ResponseReceivedEvent) {
+  private onNetworkResponseReceived(event: ResponseReceivedEvent): void {
     const { response, requestId, loaderId, frameId, type } = event;
 
     const isNavigation = requestId === loaderId && type === 'Document';
@@ -202,7 +202,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
-  private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent) {
+  private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent): void {
     this.emit('websocket-handshake', {
       browserRequestId: handshake.requestId,
       headers: handshake.request.headers,
@@ -212,7 +212,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private onWebsocketFrame(
     isFromServer: boolean,
     event: WebSocketFrameSentEvent | WebSocketFrameReceivedEvent,
-  ) {
+  ): void {
     const browserRequestId = event.requestId;
     const { opcode, payloadData } = event.response;
     const message = opcode === 1 ? payloadData : Buffer.from(payloadData, 'base64');

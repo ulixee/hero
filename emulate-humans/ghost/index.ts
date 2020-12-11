@@ -31,14 +31,16 @@ export default class HumanEmulatorGhost {
 
   private millisPerCharacter: number;
 
-  public async getStartingMousePoint(helper: IInteractionsHelper) {
+  public getStartingMousePoint(helper: IInteractionsHelper): Promise<IPoint> {
     const viewport = helper.viewport;
-    return getRandomRectPoint({
-      x: 0,
-      y: 0,
-      width: viewport.width,
-      height: viewport.height,
-    });
+    return Promise.resolve(
+      getRandomRectPoint({
+        x: 0,
+        y: 0,
+        width: viewport.width,
+        height: viewport.height,
+      }),
+    );
   }
 
   public async playInteractions(

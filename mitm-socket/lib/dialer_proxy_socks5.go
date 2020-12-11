@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"errors"
 	"net/url"
 	"strings"
 
@@ -30,14 +31,15 @@ func DialAddrViaSock5Proxy(dialer net.Dialer, addr string, proxyUrl *url.URL) (n
 
 	socksDialer, err := proxy.SOCKS5("tcp", proxyHost, socksAuth, proxy.Direct)
 	if err != nil {
-		return nil, fmt.Errorf("Can't connect to the socks proxy: %s", err)
+		responseMessage := fmt.Sprintf("SOCKS5_PROXY_ERR connection failed (%s)", err)
+		return nil, errors.New(responseMessage)
 	}
 	fmt.Printf("Got socks5 dialer %s to %s\n", proxyHost, addr)
 
 	conn, err := socksDialer.Dial("tcp", addr)
 	if err != nil {
-		fmt.Printf("Error with socks5 dial %#v\n", err)
-		return nil, err
+		responseMessage := fmt.Sprintf("SOCKS5_PROXY_ERR dial failed (%s)", err)
+		return nil, errors.New(responseMessage)
 	}
 
 	return conn, nil

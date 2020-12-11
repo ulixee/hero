@@ -37,7 +37,7 @@ export default class NetworkDb {
     });
   }
 
-  public close() {
+  public close(): void {
     if (this.db) {
       clearInterval(this.saveInterval);
       this.flush();
@@ -46,7 +46,7 @@ export default class NetworkDb {
     this.db = null;
   }
 
-  public flush() {
+  public flush(): void {
     this.batchInsert.immediate();
   }
 }

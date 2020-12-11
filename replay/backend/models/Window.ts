@@ -88,13 +88,13 @@ export default class Window {
     this.webContents.send(channel, ...args);
   }
 
-  public async goBack() {
+  public goBack() {
     if (this.hasBack()) {
       return this.goToHistory(this.navCursor - 1);
     }
   }
 
-  public async goForward() {
+  public goForward() {
     if (this.hasNext()) {
       return this.goToHistory(this.navCursor + 1);
     }
@@ -138,6 +138,22 @@ export default class Window {
 
     this.sendToRenderer('location:updated', {
       saSession: replayApi.saSession,
+      hasNext: this.hasNext(),
+      hasBack: this.hasBack(),
+    });
+  }
+
+  public addRelatedSession(related: { id: string; name: string }) {
+    if (
+      !this.replayApi ||
+      this.replayApi.saSession.relatedSessions.some(x => x.id === related.id)
+    ) {
+      return;
+    }
+
+    this.replayApi.saSession.relatedSessions.push(related);
+    this.sendToRenderer('location:updated', {
+      saSession: this.replayApi.saSession,
       hasNext: this.hasNext(),
       hasBack: this.hasBack(),
     });

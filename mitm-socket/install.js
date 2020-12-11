@@ -28,7 +28,7 @@ const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
   const installed = getInstalledVersion();
   if (!forceBuild && installed && installed.startsWith(version) && isBinaryInstalled(programName)) {
     console.log('Latest SecretAgent connect library already installed');
-    process.exit();
+    process.exit(0);
   }
 
   const checksum = await getSourceChecksum(filename);
@@ -38,7 +38,7 @@ const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
     if (tryBuild(programName)) {
       saveVersion();
       console.log('Successfully compiled Secret Agent connect library');
-      process.exit();
+      process.exit(0);
     }
 
     const goVersionNeeded = getGoVersionNeeded();
@@ -67,7 +67,7 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
   fs.chmodSync(`${outDir}/${programName}`, 0o755);
   saveVersion();
   console.log('Successfully downloaded');
-  process.exit();
+  process.exit(0);
 })();
 
 function tryBuild(programName) {
@@ -115,13 +115,11 @@ function buildFilename() {
   return `connect_${version}_${platform}_${arch}.gz`;
 }
 
-async function download(filepath) {
+function download(filepath) {
   return new Promise((resolve, reject) => {
     const req = https.get(filepath, async res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return download(res.headers.location)
-          .then(resolve)
-          .catch(reject);
+        return download(res.headers.location).then(resolve).catch(reject);
       }
 
       try {
@@ -143,10 +141,7 @@ async function download(filepath) {
 }
 
 function getFileChecksum(file) {
-  return createHash('sha256')
-    .update(file)
-    .digest()
-    .toString('hex');
+  return createHash('sha256').update(file).digest().toString('hex');
 }
 
 async function getSourceChecksum(filename) {

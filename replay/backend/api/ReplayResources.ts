@@ -35,7 +35,7 @@ export default class ReplayResources {
     });
   }
 
-  public async get(urlStr: string) {
+  public async get(urlStr: string): Promise<IReplayHttpResource> {
     const url = urlStr.split('#').shift();
     this.initResource(url);
     const resource = await this.resources[url].promise;
@@ -71,6 +71,12 @@ export default class ReplayResources {
       this.resources[url] = getResolvable<IReplayResource>();
     }
   }
+}
+
+export interface IReplayHttpResource {
+  data: PassThrough;
+  headers: { [key: string]: string | string[] };
+  statusCode: number;
 }
 
 function getResourceStream(resource: IReplayResource) {

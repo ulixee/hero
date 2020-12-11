@@ -11,6 +11,7 @@ export function replay(launchArgs: IReplayLaunchArgs) {
     sessionName,
     scriptInstanceId,
     sessionId,
+    scriptStartDate,
   } = launchArgs;
 
   const spawnArgs = [
@@ -20,6 +21,7 @@ export function replay(launchArgs: IReplayLaunchArgs) {
     `--replay-script-instance-id="${scriptInstanceId}"`,
     `--replay-session-id="${sessionId}"`,
     `--replay-api-path="${apiPath}"`,
+    `--replay-script-start-date="${scriptStartDate}"`,
     `--replay-api-server="${replayApiServer}"`,
   ];
 
@@ -53,5 +55,6 @@ interface IReplayLaunchArgs {
   sessionsDataLocation: string;
   sessionName: string;
   sessionId: string;
+  scriptStartDate: string;
   scriptInstanceId: string;
 }

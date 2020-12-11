@@ -30,7 +30,7 @@ const { log } = Log(module);
 export default class SessionState {
   public static registry = new Map<string, SessionState>();
   public readonly commands: ICommandMeta[] = [];
-  public get lastCommand() {
+  public get lastCommand(): ICommandMeta | undefined {
     if (this.commands.length === 0) return;
     return this.commands[this.commands.length - 1];
   }
@@ -117,11 +117,11 @@ export default class SessionState {
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public registerTab(tabId: string) {
+  public registerTab(tabId: string): void {
     this.navigationsByTabId[tabId] = new TabNavigations(this.db);
   }
 
-  public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta) {
+  public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta): Promise<T> {
     this.commands.push(commandMeta);
 
     let result: T;
@@ -142,7 +142,10 @@ export default class SessionState {
     }
   }
 
-  public onWebsocketMessages(resourceId: number, listenerFn: (message: IWebsocketMessage) => any) {
+  public onWebsocketMessages(
+    resourceId: number,
+    listenerFn: (message: IWebsocketMessage) => any,
+  ): void {
     if (!this.websocketListeners[resourceId]) {
       this.websocketListeners[resourceId] = [];
     }
@@ -158,7 +161,7 @@ export default class SessionState {
   public stopWebsocketMessages(
     resourceId: string,
     listenerFn: (message: IWebsocketMessage) => any,
-  ) {
+  ): void {
     const listeners = this.websocketListeners[resourceId];
     if (!listeners) return;
     const idx = listeners.indexOf(listenerFn);
@@ -169,7 +172,7 @@ export default class SessionState {
     browserRequestId: string;
     isFromServer: boolean;
     message: string | Buffer;
-  }) {
+  }): IWebsocketResourceMessage | undefined {
     const { browserRequestId, isFromServer, message } = event;
     const resources = this.browserRequestIdToResources[browserRequestId];
     if (!resources?.length) {
@@ -185,7 +188,7 @@ export default class SessionState {
     const resourceMessage = {
       resourceId: finalRedirect.resourceId,
       message,
-      messageId: this.websocketMessageIdCounter += 1,
+      messageId: (this.websocketMessageIdCounter += 1),
       source: isFromServer ? 'server' : 'client',
     } as IWebsocketResourceMessage;
 
@@ -201,7 +204,7 @@ export default class SessionState {
     return resourceMessage;
   }
 
-  public captureResourceState(id: number, state: Map<ResourceState, Date>) {
+  public captureResourceState(id: number, state: Map<ResourceState, Date>): void {
     this.db.resourceStates.insert(id, state);
   }
 
@@ -209,7 +212,7 @@ export default class SessionState {
     tabId: string,
     resourceEvent: IRequestSessionResponseEvent,
     error: Error,
-  ) {
+  ): void {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
@@ -242,7 +245,7 @@ export default class SessionState {
   public resourceEventToMeta(
     tabId: string,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
-  ) {
+  ): IResourceMeta {
     const {
       request,
       response,
@@ -284,15 +287,15 @@ export default class SessionState {
     return resource;
   }
 
-  public getResources(tabId: string) {
+  public getResources(tabId: string): IResourceMeta[] {
     return this.resources.filter(x => x.tabId === tabId);
   }
 
-  public async getResourceData(id: number) {
+  public getResourceData(id: number): Promise<Buffer> {
     return this.db.getResourceData(id);
   }
 
-  public getResourceMeta(id: number) {
+  public getResourceMeta(id: number): IResourceMeta {
     return this.resources.find(x => x.id === id);
   }
 
@@ -302,7 +305,7 @@ export default class SessionState {
     tabId: string,
     createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
     domNodeId: number,
-  ) {
+  ): void {
     const frame = {
       id: createdFrame.id,
       tabId,
@@ -324,7 +327,7 @@ export default class SessionState {
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     navigatedInDocument: boolean,
-  ) {
+  ): void {
     const existing = this.frames[frame.id];
     if (existing) {
       existing.name = frame.name;
@@ -334,7 +337,7 @@ export default class SessionState {
     // TODO: capture frame navigations
   }
 
-  public captureError(tabId: string, frameId: string, source: string, error: Error) {
+  public captureError(tabId: string, frameId: string, source: string, error: Error): void {
     this.logger.error('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
@@ -345,7 +348,7 @@ export default class SessionState {
     consoleType: string,
     message: string,
     location?: string,
-  ) {
+  ): void {
     if (message.match(/error/gi)) {
       this.logger.error('Window.error', { message });
     } else {
@@ -354,7 +357,7 @@ export default class SessionState {
     this.db.pageLogs.insert(tabId, frameId, consoleType, message, new Date(), location);
   }
 
-  public onLogEvent(entry: ILogEntry) {
+  public onLogEvent(entry: ILogEntry): void {
     if (entry.sessionId === this.sessionId || !entry.sessionId) {
       if (entry.action === 'Window.runCommand') entry.data = { id: entry.data.id };
       if (entry.action === 'Window.ranCommand') entry.data = null;
@@ -365,7 +368,7 @@ export default class SessionState {
     }
   }
 
-  public close() {
+  public close(): void {
     this.logger.info('SessionState.Closing');
     this.closeDate = new Date();
     this.db.session.close(this.sessionId, this.closeDate);
@@ -375,7 +378,12 @@ export default class SessionState {
     SessionState.registry.delete(this.sessionId);
   }
 
-  public checkForResponsive() {
+  public checkForResponsive(): {
+    hasRecentErrors: boolean;
+    lastActivityDate: Date;
+    lastCommandName: string;
+    closeDate: Date | null;
+  } {
     let lastSuccessDate = this.createDate;
     for (const navigation of Object.values(this.navigationsByTabId)) {
       const allContentLoaded = navigation.top?.stateChanges?.get('AllContentLoaded');
@@ -416,7 +424,10 @@ export default class SessionState {
     };
   }
 
-  public async getMainFrameDomChanges(frameLifecycles: INavigation[], sinceCommandId?: number) {
+  public getMainFrameDomChanges(
+    frameLifecycles: INavigation[],
+    sinceCommandId?: number,
+  ): { [frameId: string]: IDomChangeEvent[] } {
     return this.db.getDomChanges(
       frameLifecycles.map(x => x.frameId),
       sinceCommandId,
@@ -430,7 +441,7 @@ export default class SessionState {
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
-  ) {
+  ): void {
     this.logger.stats('State.onPageEvents', {
       tabId,
       frameId,
@@ -476,7 +487,7 @@ export default class SessionState {
     }
   }
 
-  public captureDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
+  public captureDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {
     this.db.devtoolsMessages.insert(event);
   }
 
@@ -485,11 +496,11 @@ export default class SessionState {
     pageId: string,
     devtoolsSessionId: string,
     openerTabId?: string,
-  ) {
+  ): void {
     this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
   }
 
-  public captureSocketEvent(socketEvent: ISocketEvent) {
+  public captureSocketEvent(socketEvent: ISocketEvent): void {
     this.db.sockets.insert(socketEvent.socket);
   }
 }

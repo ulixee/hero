@@ -6,7 +6,7 @@ import ResourceState from '../interfaces/ResourceState';
 const { log } = Log(module);
 
 export default class CookieHandler {
-  public static async setProxyToServerCookies(ctx: IMitmRequestContext) {
+  public static async setProxyToServerCookies(ctx: IMitmRequestContext): Promise<void> {
     ctx.setState(ResourceState.SetCookieHeader);
     const session = ctx.requestSession;
     if (!session || !session.networkInterceptorDelegate?.http.cookieHeader) return;
@@ -17,7 +17,7 @@ export default class CookieHandler {
     setCookies(ctx.requestHeaders, cookieHeader);
   }
 
-  public static async readServerResponseCookies(ctx: IMitmRequestContext) {
+  public static async readServerResponseCookies(ctx: IMitmRequestContext): Promise<void> {
     ctx.setState(ResourceState.ReadResponseCookies);
     const session = ctx.requestSession;
     if (!session || !session.networkInterceptorDelegate?.http.onSetCookie) return;
@@ -39,7 +39,7 @@ export default class CookieHandler {
   }
 }
 
-function setCookies(headers: IResourceHeaders, cookieHeader: string) {
+function setCookies(headers: IResourceHeaders, cookieHeader: string): void {
   const existingCookies = (headers.Cookie ?? headers.cookie) || '';
   if (existingCookies !== cookieHeader) {
     if (cookieHeader) {

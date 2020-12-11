@@ -1,9 +1,9 @@
 import zlib from 'zlib';
 import { createPromise } from './utils';
 
-export default async function decodeBuffer(buffer: Buffer, encoding: string): Promise<Buffer> {
+export default function decodeBuffer(buffer: Buffer, encoding: string): Promise<Buffer> {
   if (!buffer) return null;
-  if (!encoding) return buffer;
+  if (!encoding) return Promise.resolve(buffer);
 
   const promise = createPromise<Buffer>();
   const handler = (error, result): void => {

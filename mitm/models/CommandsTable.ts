@@ -18,12 +18,12 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
     this.getQuery = db.prepare(`select * from ${this.tableName} where host = ? limit 1`);
   }
 
-  public insert(record: ICertificateRecord) {
+  public insert(record: ICertificateRecord): void {
     const { host, pem, beginDate, expireDate } = record;
     this.queuePendingInsert([host, pem, beginDate.toISOString(), expireDate.toISOString()]);
   }
 
-  public get(host: string) {
+  public get(host: string): ICertificateRecord {
     const record = this.getQuery.get(host) as ICertificateRecord;
     if (!record) return record;
     record.beginDate = new Date(record.beginDate);

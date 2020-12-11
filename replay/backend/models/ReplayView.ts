@@ -31,7 +31,6 @@ export default class ReplayView extends ViewBackend {
       javascript: false,
     });
 
-    this.interceptHttpRequests();
     this.playbarView = new PlaybarView(window);
     this.checkResponsive = this.checkResponsive.bind(this);
 
@@ -43,11 +42,7 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async load(replayApi: ReplayApi) {
-    if (this.browserView.isDestroyed()) return;
     this.clearReplayApi();
-    await this.window.webContents.session.clearCache();
-
-    this.attach();
 
     this.replayApi = replayApi;
     this.replayApi.onNewTab = this.onNewTab.bind(this);
@@ -60,7 +55,9 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async loadTab(id?: string) {
-    this.clearTabState();
+    await this.clearTabState();
+    this.attach();
+
     this.window.setAddressBarUrl('Loading session...');
 
     this.tabState = id ? this.replayApi.getTab(id) : this.replayApi.getStartTab;
@@ -92,28 +89,33 @@ export default class ReplayView extends ViewBackend {
   }
 
   public fixBounds(newBounds: { x: number; width: number; y: any; height: number }) {
-    super.fixBounds(newBounds);
-    this.sizeWebContentsToFit();
-
+    console.log('fixing bounds', newBounds, this.browserView.getBounds());
     this.playbarView.fixBounds({
       x: 0,
       y: newBounds.height + newBounds.y,
       width: newBounds.width,
       height: TOOLBAR_HEIGHT,
     });
+    super.fixBounds(newBounds);
+    this.sizeWebContentsToFit();
+    this.window.browserWindow.addBrowserView(this.playbarView.browserView);
   }
 
   public attach() {
+    if (this.isAttached) return;
+    console.log('attaching replay');
     super.attach();
+    this.playbarView.attach();
+    this.interceptHttpRequests();
     this.webContents.openDevTools({ mode: 'detach', activate: false });
   }
 
-  public detach() {
-    if (this.isAttached) {
-      this.webContents.closeDevTools();
-    }
+  public detach(detachPlaybar = true) {
+    this.webContents.closeDevTools();
     super.detach();
-    this.playbarView.detach();
+    // clear out everytime we detach
+    this._browserView = null;
+    if (detachPlaybar) this.playbarView.detach();
   }
 
   public async onTickDrag(tickValue: number) {
@@ -272,6 +274,7 @@ export default class ReplayView extends ViewBackend {
     if (this.tabState) {
       this.tabState.off('tick:changes', this.checkResponsive);
       this.tabState = null;
+      this.detach(false);
     }
   }
 

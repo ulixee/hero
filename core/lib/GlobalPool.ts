@@ -49,7 +49,7 @@ export default class GlobalPool {
     this.resolveWaitingConnection();
   }
 
-  public static async createSession(options: ICreateSessionOptions) {
+  public static createSession(options: ICreateSessionOptions) {
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,

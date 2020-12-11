@@ -34,6 +34,7 @@ const pageScripts = {
 };
 
 const domEnvScript = `(function installDomEnv() {
+const exports = {}; // workaround for ts adding an exports variable
 ${pageScripts.typeson};
 ${pageScripts.typesonRegistry};
 const TSON = new Typeson().register(Typeson.presets.builtin);
@@ -74,12 +75,12 @@ export default class DomEnv {
       'getJsValue',
       `(async function execNonIsolatedExpression() {
   const value = await ${expression};
-  
+
   let type = typeof value;
   if (value && value.constructor) {
     type = value.constructor.name;
   }
-  
+
   return JSON.stringify({
     value,
     type,
@@ -154,7 +155,7 @@ export default class DomEnv {
     return this.puppetPage.mainFrame.evaluate<string>('location.href', false);
   }
 
-  private async runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
+  private runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {
     const callFn = `${fnName}(${args
       .map(x => {
         if (!x) return 'undefined';

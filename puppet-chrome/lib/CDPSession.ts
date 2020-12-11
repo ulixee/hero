@@ -48,7 +48,7 @@ export class CDPSession extends EventEmitter {
     this.sessionId = sessionId;
   }
 
-  async send<T extends keyof ProtocolMapping.Commands>(
+  send<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
     sendInitiator?: object,

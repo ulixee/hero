@@ -2,6 +2,7 @@ import * as http from 'http';
 import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
+import { URL } from 'url';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -42,7 +43,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
   }
 
-  public async onRequest() {
+  public async onRequest(): Promise<void> {
     const { clientToProxyRequest } = this.context;
 
     try {
@@ -66,7 +67,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     response: http.IncomingMessage | (http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader),
     flags?: number,
     rawHeaders?: string[],
-  ) {
+  ): Promise<void> {
     const context = this.context;
     context.setState(ResourceState.ServerToProxyOnResponse);
 
@@ -92,7 +93,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     if (redirectCodes.has(context.status)) {
       const redirectLocation = context.responseHeaders.location || context.responseHeaders.Location;
       if (redirectLocation) {
-        context.redirectedToUrl = redirectLocation as string;
+        const redirectUrl = new URL(redirectLocation as string, context.url);
+        context.redirectedToUrl = redirectUrl.href;
         context.responseUrl = context.redirectedToUrl;
       }
     }
@@ -105,7 +107,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     process.nextTick(agent => agent.freeSocket(context), context.requestSession.requestAgent);
   }
 
-  protected onError(kind: string, error: Error) {
+  protected onError(kind: string, error: Error): void {
     const url = this.context.url.href;
     const { method, requestSession, proxyToClientResponse } = this.context;
     const sessionId = requestSession.sessionId;
@@ -131,11 +133,11 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     }
   }
 
-  private async writeRequest() {
+  private async writeRequest(): Promise<void> {
     this.context.setState(ResourceState.WriteProxyToServerRequestBody);
     const { proxyToServerRequest, clientToProxyRequest } = this.context;
 
-    const onWriteError = error => {
+    const onWriteError = (error): void => {
       if (error) this.onError('ProxyToServer.WriteError', error);
     };
 
@@ -149,7 +151,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     this.context.requestPostData = Buffer.concat(data);
   }
 
-  private async writeResponse() {
+  private async writeResponse(): Promise<void> {
     const context = this.context;
     if (!context.proxyToClientResponse) {
       log.warn('Error.NoProxyToClientResponse', {
@@ -204,7 +206,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       IMitmRequestContext,
       'requestSession' | 'isSSL' | 'clientToProxyRequest' | 'proxyToClientResponse'
     >,
-  ) {
+  ): Promise<void> {
     const handler = new HttpRequestHandler(request);
     await handler.onRequest();
   }

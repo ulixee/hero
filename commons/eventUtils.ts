@@ -86,7 +86,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     this.eventsToLog = new Set<string | symbol>(events);
   }
 
-  public async waitOn<K extends keyof T & (string | symbol)>(
+  public waitOn<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn?: (this: this, event?: T[K]) => boolean,
     timeoutMillis = 30e3,
