@@ -52,8 +52,8 @@ describe('Multi-tab scenarios', () => {
     // @ts-ignore
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
-    const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
+    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -154,8 +154,8 @@ describe('Multi-tab scenarios', () => {
     // @ts-ignore
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
-    const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
+    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -206,8 +206,8 @@ document.querySelector('a').addEventListener('click', event => {
     // @ts-ignore
     const browserEmulator = core.session.browserEmulator;
     // make sure user agent is wired up
-    const userAgent = await agent.getJsValue('navigator.userAgent');
-    expect(userAgent.value).toBe(browserEmulator.navigatorUserAgent);
+    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
 
     await agent.closeTab(newTab);
   });

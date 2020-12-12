@@ -60,8 +60,8 @@ export default class Safari13 {
     return this._locale;
   }
 
-  public readonly navigatorUserAgent: string;
-  public readonly navigatorPlatform: string;
+  public readonly userAgentString: string;
+  public readonly osPlatform: string;
 
   public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
@@ -106,8 +106,8 @@ export default class Safari13 {
       (this.constructor as any).userAgentOptions as IUserAgentOption[],
     );
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
-    this.navigatorPlatform = windowNavigator.navigator.platform._$value;
-    this.navigatorUserAgent = userAgentOption.string;
+    this.osPlatform = windowNavigator.navigator.platform._$value;
+    this.userAgentString = userAgentOption.string;
     this.userAgentVersion = userAgentOption.version;
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 

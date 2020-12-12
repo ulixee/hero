@@ -68,16 +68,16 @@ describe('basic Tab tests', () => {
   });
 
   it('can wait for another tab', async () => {
-    let useragent1: string;
-    let useragent2: string;
+    let userAgentString1: string;
+    let userAgentString2: string;
     koaServer.get('/tabTest', ctx => {
-      useragent1 = ctx.get('user-agent');
+      userAgentString1 = ctx.get('user-agent');
       ctx.body = `<body>
 <a target="_blank" href="/tabTestDest">Nothing really here</a>
 </body>`;
     });
     koaServer.get('/tabTestDest', ctx => {
-      useragent2 = ctx.get('user-agent');
+      userAgentString2 = ctx.get('user-agent');
       ctx.body = `<body><h1 id="newTabHeader">You are here</h1></body>`;
     });
     const meta = await Core.createTab();
@@ -104,7 +104,7 @@ describe('basic Tab tests', () => {
       'textContent',
     ]);
     expect(header.value).toBe('You are here');
-    expect(useragent1).toBe(useragent2);
+    expect(userAgentString1).toBe(userAgentString2);
     await newTabCore.closeTab();
   });
 });

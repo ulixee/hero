@@ -74,7 +74,7 @@ export default class Session {
       log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
         browserEmulatorId,
-        userAgent: this.browserEmulator.navigatorUserAgent,
+        userAgentString: this.browserEmulator.userAgentString,
         runtimeOs: Os.platform(),
       });
     }
@@ -102,7 +102,7 @@ export default class Session {
     );
     this.mitmRequestSession = new RequestSession(
       this.id,
-      this.browserEmulator.navigatorUserAgent,
+      this.browserEmulator.userAgentString,
       this.upstreamProxyUrl,
       this.browserEmulator.networkInterceptorDelegate,
     );
@@ -112,8 +112,8 @@ export default class Session {
     const browserEmulator = this.browserEmulator;
     return {
       locale: browserEmulator.locale,
-      userAgent: browserEmulator.navigatorUserAgent,
-      platform: browserEmulator.navigatorPlatform,
+      userAgent: browserEmulator.userAgentString,
+      platform: browserEmulator.osPlatform,
       proxyPassword: this.id,
       viewport: this.viewport,
       timezoneId: this.timezoneId,

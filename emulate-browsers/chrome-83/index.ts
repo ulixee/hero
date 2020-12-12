@@ -50,8 +50,8 @@ export default class Chrome83 {
     return this._locale;
   }
 
-  public readonly navigatorUserAgent: string;
-  public readonly navigatorPlatform: string;
+  public readonly userAgentString: string;
+  public readonly osPlatform: string;
 
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   public userProfile: IUserProfile;
@@ -69,8 +69,8 @@ export default class Chrome83 {
       (this.constructor as any).userAgentOptions as IUserAgentOption[],
     );
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
-    this.navigatorPlatform = windowNavigator.navigator.platform._$value;
-    this.navigatorUserAgent = userAgentOption.string;
+    this.osPlatform = windowNavigator.navigator.platform._$value;
+    this.userAgentString = userAgentOption.string;
     this.canPolyfill = !!domDiffsData.get(userAgentOption.operatingSystemId);
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 

@@ -4,8 +4,8 @@ import INewDocumentInjectedScript from './INewDocumentInjectedScript';
 import IWindowFraming from "./IWindowFraming";
 
 export default interface IBrowserEmulator {
-  readonly navigatorUserAgent: string;
-  readonly navigatorPlatform: string;
+  readonly userAgentString: string;
+  readonly osPlatform: string;
   readonly windowFramingBase: IWindowFraming;
   readonly windowFraming: IWindowFraming;
   readonly canPolyfill: boolean;

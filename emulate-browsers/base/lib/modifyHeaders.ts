@@ -7,7 +7,7 @@ import { pickRandom } from '@secret-agent/commons/utils';
 const { log } = Log(module);
 
 export default function modifyHeaders(
-  userAgent: string,
+  userAgentString: string,
   headerProfiles: IResourceHeaderDefaults,
   hasCustomLocale: boolean,
   resource: IResourceToModify,
@@ -17,7 +17,7 @@ export default function modifyHeaders(
   const { headers, lowerHeaders } = resource;
   if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
     for (const [header, value] of Object.entries(headers)) {
-      if (header.match(/user-agent/i) && value !== userAgent) {
+      if (header.match(/user-agent/i) && value !== userAgentString) {
         headers[header] = value;
       }
     }
@@ -41,8 +41,8 @@ export default function modifyHeaders(
       }
     }
 
-    if (headerName.match(/user-agent/i) && value !== userAgent) {
-      value = userAgent;
+    if (headerName.match(/user-agent/i) && value !== userAgentString) {
+      value = userAgentString;
     }
     if (value) {
       headerList.push([headerName, value]);
