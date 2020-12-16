@@ -4,6 +4,60 @@
 
 ## Properties
 
+### elem.acceptCharset <div class="specs"><i>W3C</i></div> {#acceptCharset}
+
+A `string` reflecting the value of the form's <code>accept-charset</code>&nbsp;HTML&nbsp;attribute, representing the character encoding that the server accepts.
+
+#### **Type**: `Promise<string>`
+
+### elem.action <div class="specs"><i>W3C</i></div> {#action}
+
+A `string` reflecting the value of the form's <code>action</code> HTML attribute, containing the URI&nbsp;of a program that processes the information submitted by the form.
+
+#### **Type**: `Promise<string>`
+
+### elem.autocomplete <div class="specs"><i>W3C</i></div> {#autocomplete}
+
+A `string` reflecting the value of the form's <code>autocomplete</code> HTML&nbsp;attribute, indicating whether the controls in this form can have their values automatically populated by the browser.
+
+#### **Type**: `Promise<string>`
+
+### elem.encoding <div class="specs"><i>W3C</i></div> {#encoding}
+
+A `string` reflecting the value of the form's <code>enctype</code>&nbsp;HTML&nbsp;attribute, indicating the type of content that is used to transmit the form to the server. Only specified values can be set. The two properties are synonyms.
+
+#### **Type**: `Promise<string>`
+
+### elem.enctype <div class="specs"><i>W3C</i></div> {#enctype}
+
+A `string` reflecting the value of the form's <code>enctype</code>&nbsp;HTML&nbsp;attribute, indicating the type of content that is used to transmit the form to the server. Only specified values can be set. The two properties are synonyms.
+
+#### **Type**: `Promise<string>`
+
+### elem.length <div class="specs"><i>W3C</i></div> {#length}
+
+A <code>long</code> reflecting&nbsp; the number of controls in the form.
+
+#### **Type**: `Promise<number>`
+
+### elem.name <div class="specs"><i>W3C</i></div> {#name}
+
+A `string` reflecting the value of the form's <code>name</code>&nbsp;HTML&nbsp;attribute, containing the name of the form.
+
+#### **Type**: `Promise<string>`
+
+### elem.noValidate <div class="specs"><i>W3C</i></div> {#noValidate}
+
+A `boolean` reflecting the value of the form's &nbsp;<code>novalidate</code> HTML attribute, indicating whether the form should not be validated.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.target <div class="specs"><i>W3C</i></div> {#target}
+
+A `string` reflecting the value of the form's <code>target</code> HTML attribute, indicating where to display the results received from submitting the form.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -415,6 +469,30 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
+### elem.checkValidity*()* <div class="specs"><i>W3C</i></div> {#checkValidity}
+
+Returns <code>true</code> if the element's child controls are subject to constraint validation and satisfy those contraints; returns <code>false</code> if some controls do not satisfy their constraints. Fires an event named <code>invalid</code> at any control that does not satisfy its constraints; such controls are considered invalid if the event is not canceled. It is up to the programmer to decide how to respond to <code>false</code>.
+
+#### **Returns**: `Promise<boolean>`
+
+### elem.reportValidity*()* <div class="specs"><i>W3C</i></div> {#reportValidity}
+
+Returns <code>true</code> if the element's child controls satisfy their validation constraints. When <code>false</code> is returned, cancelable <code>invalid</code> events are fired for each invalid child and validation problems are reported to the user.
+
+#### **Returns**: `Promise<boolean>`
+
+### elem.reset*()* <div class="specs"><i>W3C</i></div> {#reset}
+
+Resets the form to its initial state.
+
+#### **Returns**: `Promise<void>`
+
+### elem.submit*()* <div class="specs"><i>W3C</i></div> {#submit}
+
+Submits the form to the server.
+
+#### **Returns**: `Promise<void>`
+
 ### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
@@ -432,6 +510,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
+
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -771,79 +855,72 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `acceptCharset` | `action`
-`autocomplete` | `elements`
-`encoding` | `enctype`
-`length` | `method`
-`name` | `noValidate`
-`target` | `onfullscreenchange`
-`onfullscreenerror` | `oncopy`
-`oncut` | `onpaste`
-`style` | `contentEditable`
-`isContentEditable` | `onabort`
-`onanimationend` | `onanimationiteration`
-`onanimationstart` | `onauxclick`
-`onblur` | `oncancel`
-`oncanplay` | `oncanplaythrough`
-`onchange` | `onclick`
-`onclose` | `oncontextmenu`
-`oncuechange` | `ondblclick`
-`ondrag` | `ondragend`
-`ondragenter` | `ondragleave`
-`ondragover` | `ondragstart`
-`ondrop` | `ondurationchange`
-`onemptied` | `onended`
-`onerror` | `onfocus`
-`onformdata` | `ongotpointercapture`
-`oninput` | `oninvalid`
-`onkeydown` | `onkeypress`
-`onkeyup` | `onload`
-`onloadeddata` | `onloadedmetadata`
-`onloadstart` | `onlostpointercapture`
-`onmousedown` | `onmouseenter`
-`onmouseleave` | `onmousemove`
-`onmouseout` | `onmouseover`
-`onmouseup` | `onpause`
-`onplay` | `onplaying`
-`onpointercancel` | `onpointerdown`
-`onpointerenter` | `onpointerleave`
-`onpointermove` | `onpointerout`
-`onpointerover` | `onpointerup`
-`onprogress` | `onratechange`
-`onreset` | `onresize`
-`onscroll` | `onseeked`
-`onseeking` | `onselect`
-`onselectionchange` | `onselectstart`
-`onstalled` | `onsubmit`
-`onsuspend` | `ontimeupdate`
-`ontouchcancel` | `ontouchend`
-`ontouchmove` | `ontouchstart`
-`ontransitionend` | `onvolumechange`
-`onwaiting` | `onwheel`
-`dataset` | `nonce`
-`tabIndex` | `assignedSlot` | 
+ | `elements` | `method`
+`onfullscreenchange` | `onfullscreenerror`
+`oncopy` | `oncut`
+`onpaste` | `style`
+`contentEditable` | `isContentEditable`
+`onabort` | `onanimationend`
+`onanimationiteration` | `onanimationstart`
+`onauxclick` | `onblur`
+`oncancel` | `oncanplay`
+`oncanplaythrough` | `onchange`
+`onclick` | `onclose`
+`oncontextmenu` | `oncuechange`
+`ondblclick` | `ondrag`
+`ondragend` | `ondragenter`
+`ondragleave` | `ondragover`
+`ondragstart` | `ondrop`
+`ondurationchange` | `onemptied`
+`onended` | `onerror`
+`onfocus` | `onformdata`
+`ongotpointercapture` | `oninput`
+`oninvalid` | `onkeydown`
+`onkeypress` | `onkeyup`
+`onload` | `onloadeddata`
+`onloadedmetadata` | `onloadstart`
+`onlostpointercapture` | `onmousedown`
+`onmouseenter` | `onmouseleave`
+`onmousemove` | `onmouseout`
+`onmouseover` | `onmouseup`
+`onpause` | `onplay`
+`onplaying` | `onpointercancel`
+`onpointerdown` | `onpointerenter`
+`onpointerleave` | `onpointermove`
+`onpointerout` | `onpointerover`
+`onpointerup` | `onprogress`
+`onratechange` | `onreset`
+`onresize` | `onscroll`
+`onseeked` | `onseeking`
+`onselect` | `onselectionchange`
+`onselectstart` | `onstalled`
+`onsubmit` | `onsuspend`
+`ontimeupdate` | `ontouchcancel`
+`ontouchend` | `ontouchmove`
+`ontouchstart` | `ontransitionend`
+`onvolumechange` | `onwaiting`
+`onwheel` | `dataset`
+`nonce` | `tabIndex`
+`assignedSlot` |  | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `checkValidity()` | `reportValidity()`
-`requestSubmit()` | `reset()`
-`submit()` | `attachShadow()`
-`computedStyleMap()` | `insertAdjacentElement()`
-`insertAdjacentHTML()` | `insertAdjacentText()`
-`releasePointerCapture()` | `removeAttribute()`
-`removeAttributeNode()` | `removeAttributeNS()`
-`scroll()` | `scrollBy()`
-`scrollTo()` | `setAttribute()`
-`setAttributeNode()` | `setAttributeNodeNS()`
-`setAttributeNS()` | `setPointerCapture()`
-`toggleAttribute()` | `appendChild()`
-`cloneNode()` | `insertBefore()`
-`removeChild()` | `replaceChild()`
-`addEventListener()` | `dispatchEvent()`
-`removeEventListener()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+ | `requestSubmit()` | `attachShadow()`
+`insertAdjacentElement()` | `insertAdjacentHTML()`
+`insertAdjacentText()` | `releasePointerCapture()`
+`removeAttribute()` | `removeAttributeNode()`
+`removeAttributeNS()` | `scroll()`
+`scrollBy()` | `scrollTo()`
+`setAttribute()` | `setAttributeNode()`
+`setAttributeNodeNS()` | `setAttributeNS()`
+`setPointerCapture()` | `toggleAttribute()`
+`appendChild()` | `cloneNode()`
+`insertBefore()` | `removeChild()`
+`replaceChild()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()`
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` | 

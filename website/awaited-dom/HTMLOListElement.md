@@ -4,6 +4,38 @@
 
 ## Properties
 
+### elem.compact <div class="specs"><i>W3C</i></div> {#compact}
+
+Is a `boolean` indicating that spacing between list items should be reduced. This property reflects the <code>compact</code> attribute only, it doesn't consider the <code>line-height</code> CSS property used for that behavior in modern pages.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.reversed <div class="specs"><i>W3C</i></div> {#reversed}
+
+Is a `boolean` value reflecting the <code>reversed</code> and defining if the numbering is descending, that is its value is <code>true</code>, or ascending (<code>false</code>).
+
+#### **Type**: `Promise<boolean>`
+
+### elem.start <div class="specs"><i>W3C</i></div> {#start}
+
+Is a <code>long</code> value reflecting the <code>start</code> and defining the value of the first number of the first element of the list.
+
+#### **Type**: `Promise<number>`
+
+### elem.type <div class="specs"><i>W3C</i></div> {#type}
+
+Is a `string` value reflecting the <code>type</code> and defining the kind of marker to be used to display. It can have the following values:
+ <ul>
+  <li><code>'1'</code> meaning that decimal numbers are used: <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code>, …</li>
+  <li><code>'a'</code> meaning that the lowercase latin alphabet is used:&nbsp; <code>a</code>, <code>b</code>, <code>c</code>, <code>d</code>, <code>e</code>, …</li>
+  <li><code>'A'</code> meaning that the uppercase latin alphabet is used: <code>A</code>, <code>B</code>, <code>C</code>, <code>D</code>, <code>E</code>, …</li>
+  <li><code>'i'</code> meaning that the lowercase latin numerals are used: <code>i</code>, <code>ii</code>, <code>iii</code>, <code>iv</code>, <code>v</code>, …</li>
+  <li><code>'I'</code> meaning that the uppercase latin numerals are used: <code>I</code>, <code>II</code>, <code>III</code>, <code>IV</code>, <code>V</code>, …</li>
+ </ul>
+ 
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +465,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,9 +809,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `compact` | `reversed`
-`start` | `type`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -824,20 +860,20 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

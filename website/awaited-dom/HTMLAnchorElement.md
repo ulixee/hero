@@ -4,6 +4,54 @@
 
 ## Properties
 
+### elem.download <div class="specs"><i>W3C</i></div> {#download}
+
+Is a `string` indicating that the linked resource is intended to be downloaded rather than displayed in the browser. The value represent the proposed name of the file. If the name is not a valid filename of the underlying OS, browser will adapt it.
+
+#### **Type**: `Promise<string>`
+
+### elem.hreflang <div class="specs"><i>W3C</i></div> {#hreflang}
+
+Is a `string` that reflects the <code>hreflang</code> HTML attribute, indicating the language of the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
+
+Is a `string` that reflects the <code>referrerpolicy</code> HTML attribute indicating which referrer to use.
+
+#### **Type**: `Promise<string>`
+
+### elem.rel <div class="specs"><i>W3C</i></div> {#rel}
+
+Is a `string` that reflects the <code>rel</code> HTML attribute, specifying the relationship of the target object to the linked object.
+
+#### **Type**: `Promise<string>`
+
+### elem.relList <div class="specs"><i>W3C</i></div> {#relList}
+
+Returns a <code>DOMTokenList</code> that reflects the <code>rel</code> HTML attribute, as a list of tokens.
+
+#### **Type**: `DOMTokenList`
+
+### elem.target <div class="specs"><i>W3C</i></div> {#target}
+
+Is a `string` that reflects the <code>target</code> HTML attribute, indicating where to display the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.text <div class="specs"><i>W3C</i></div> {#text}
+
+Is a `string` being a synonym for the <code>Node.textContent</code> property.
+
+#### **Type**: `Promise<string>`
+
+### elem.type <div class="specs"><i>W3C</i></div> {#type}
+
+Is a `string` that reflects the <code>type</code> HTML attribute, indicating the MIME type of the linked resource.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +481,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,11 +825,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `download` | `hreflang`
-`referrerPolicy` | `rel`
-`relList` | `target`
-`text` | `type`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `hash` | `host`
 `hostname` | `href`
 `origin` | `password`
@@ -831,21 +881,20 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`toString()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `toString()`
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` | 

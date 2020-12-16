@@ -4,6 +4,36 @@
 
 ## Properties
 
+### elem.align <div class="specs"><i>W3C</i></div> {#align}
+
+Is a `string` containing an enumerated value reflecting the <code>align</code> attribute. It indicates the alignment of the element's contents with respect to the surrounding context. The possible values are <code>"left"</code>, <code>"right"</code>, and <code>"center"</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.ch <div class="specs"><i>W3C</i></div> {#ch}
+
+Is a `string` containing one single chararcter. This character is the one to align all the cell of a column on. It reflects the <code>char</code> and default to the decimal points associated with the language, e.g. <code>'.'</code> for English, or <code>','</code> for French. This property was optional and was not very well supported.
+
+#### **Type**: `Promise<string>`
+
+### elem.chOff <div class="specs"><i>W3C</i></div> {#chOff}
+
+Is a `string` containing a integer indicating how many characters must be left at the right (for left-to-right scripts; or at the left for right-to-left scripts) of the character defined by <code>HTMLTableRowElement.ch</code>. This property was optional and was not very well supported.
+
+#### **Type**: `Promise<string>`
+
+### elem.rows <div class="specs"><i>W3C</i></div> {#rows}
+
+Returns a live <code>HTMLCollection</code> containing the rows in the section. The <code>HTMLCollection</code> is live and is automatically updated when rows are added or removed.
+
+#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+
+### elem.vAlign <div class="specs"><i>W3C</i></div> {#vAlign}
+
+Is a `string` representing an enumerated value indicating how the content of the cell must be vertically aligned. It reflects the <code>valign</code> attribute and can have one of the following values: <code>"top"</code>, <code>"middle"</code>, <code>"bottom"</code>, or <code>"baseline"</code>.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +463,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,74 +807,72 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `align` | `ch`
-`chOff` | `rows`
-`vAlign` | `onfullscreenchange`
-`onfullscreenerror` | `oncopy`
-`oncut` | `onpaste`
-`style` | `contentEditable`
-`isContentEditable` | `onabort`
-`onanimationend` | `onanimationiteration`
-`onanimationstart` | `onauxclick`
-`onblur` | `oncancel`
-`oncanplay` | `oncanplaythrough`
-`onchange` | `onclick`
-`onclose` | `oncontextmenu`
-`oncuechange` | `ondblclick`
-`ondrag` | `ondragend`
-`ondragenter` | `ondragleave`
-`ondragover` | `ondragstart`
-`ondrop` | `ondurationchange`
-`onemptied` | `onended`
-`onerror` | `onfocus`
-`onformdata` | `ongotpointercapture`
-`oninput` | `oninvalid`
-`onkeydown` | `onkeypress`
-`onkeyup` | `onload`
-`onloadeddata` | `onloadedmetadata`
-`onloadstart` | `onlostpointercapture`
-`onmousedown` | `onmouseenter`
-`onmouseleave` | `onmousemove`
-`onmouseout` | `onmouseover`
-`onmouseup` | `onpause`
-`onplay` | `onplaying`
-`onpointercancel` | `onpointerdown`
-`onpointerenter` | `onpointerleave`
-`onpointermove` | `onpointerout`
-`onpointerover` | `onpointerup`
-`onprogress` | `onratechange`
-`onreset` | `onresize`
-`onscroll` | `onseeked`
-`onseeking` | `onselect`
-`onselectionchange` | `onselectstart`
-`onstalled` | `onsubmit`
-`onsuspend` | `ontimeupdate`
-`ontouchcancel` | `ontouchend`
-`ontouchmove` | `ontouchstart`
-`ontransitionend` | `onvolumechange`
-`onwaiting` | `onwheel`
-`dataset` | `nonce`
-`tabIndex` | `assignedSlot` | 
+ | `onfullscreenchange` | `onfullscreenerror`
+`oncopy` | `oncut`
+`onpaste` | `style`
+`contentEditable` | `isContentEditable`
+`onabort` | `onanimationend`
+`onanimationiteration` | `onanimationstart`
+`onauxclick` | `onblur`
+`oncancel` | `oncanplay`
+`oncanplaythrough` | `onchange`
+`onclick` | `onclose`
+`oncontextmenu` | `oncuechange`
+`ondblclick` | `ondrag`
+`ondragend` | `ondragenter`
+`ondragleave` | `ondragover`
+`ondragstart` | `ondrop`
+`ondurationchange` | `onemptied`
+`onended` | `onerror`
+`onfocus` | `onformdata`
+`ongotpointercapture` | `oninput`
+`oninvalid` | `onkeydown`
+`onkeypress` | `onkeyup`
+`onload` | `onloadeddata`
+`onloadedmetadata` | `onloadstart`
+`onlostpointercapture` | `onmousedown`
+`onmouseenter` | `onmouseleave`
+`onmousemove` | `onmouseout`
+`onmouseover` | `onmouseup`
+`onpause` | `onplay`
+`onplaying` | `onpointercancel`
+`onpointerdown` | `onpointerenter`
+`onpointerleave` | `onpointermove`
+`onpointerout` | `onpointerover`
+`onpointerup` | `onprogress`
+`onratechange` | `onreset`
+`onresize` | `onscroll`
+`onseeked` | `onseeking`
+`onselect` | `onselectionchange`
+`onselectstart` | `onstalled`
+`onsubmit` | `onsuspend`
+`ontimeupdate` | `ontouchcancel`
+`ontouchend` | `ontouchmove`
+`ontouchstart` | `ontransitionend`
+`onvolumechange` | `onwaiting`
+`onwheel` | `dataset`
+`nonce` | `tabIndex`
+`assignedSlot` |  | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
  | `deleteRow()` | `insertRow()`
-`attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+`attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

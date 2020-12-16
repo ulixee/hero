@@ -2,6 +2,12 @@
 
 > The AwaitedDOM is a NodeJs implementation of W3C's DOM specification that makes it easy to call properties and methods located in a remote browser engine as if they were local to your scraper script context.
 
+## What Properties and Methods Can I Use?
+
+<div>
+  <input type="text" placeholder="Search any DOM property, method, or interface..." />
+</div>
+
 ## Introducing Supers
 
 Supers give you access to all properties and methods of dependent classes.
@@ -93,8 +99,9 @@ Supers give you access to all properties and methods of dependent classes.
 
  |   |   | 
  | --- | --- | 
- | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathExpression](/docs/awaited-dom/x-path-expression)
-[XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver) | [XPathResult](/docs/awaited-dom/x-path-result) | 
+ | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathEvaluatorBase](/docs/awaited-dom/x-path-evaluator-base)
+[XPathExpression](/docs/awaited-dom/x-path-expression) | [XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver)
+[XPathResult](/docs/awaited-dom/x-path-result) |  | 
 
 
 ## Miscellaneous Interfaces

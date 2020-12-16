@@ -6,6 +6,75 @@
 
 ## Properties
 
+### elem.async <div class="specs"><i>W3C</i></div> {#async}
+
+<p>The <code>async</code> and <code>defer</code> attributes are boolean attributes that control how the script should be executed. <strong>The <code>defer</code> and <code>async</code> attributes must not be specified if the <code>src</code> attribute is absent.</strong></p>
+    <p>There are three possible execution modes:</p>
+    <ol>
+     <li>If the <code>async</code> attribute is present, then the script will be executed asynchronously as soon as it downloads.</li>
+     <li>If the <code>async</code> attribute is absent but the <code>defer</code> attribute is present, then the script is executed when the page has finished parsing.</li>
+     <li>If neither attribute is present, then the script is fetched and executed immediately, blocking further parsing of the page.</li>
+    </ol>
+    <p>The <code>defer</code> attribute may be specified with the <code>async</code> attribute, so legacy browsers that only support <code>defer</code> (and not <code>async</code>) fall back to the <code>defer</code> behavior instead of the default blocking behavior.</p>
+    <div class="note"><strong>Note:</strong> The exact processing details for these attributes are complex, involving many different aspects of HTML, and therefore are scattered throughout the specification. <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/scripting-1.html#prepare-a-script" rel="noopener">These algorithms</a> describe the core ideas, but they rely on the parsing rules for <code>&lt;script&gt;</code>&nbsp;<a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptTag" rel="noopener">start</a> and <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptEndTag" rel="noopener">end</a> tags in HTML, <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/syntax.html#scriptForeignEndTag" rel="noopener">in foreign content</a>, and <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/the-xhtml-syntax.html#scriptTagXML" rel="noopener">in XML</a>; the rules for the <code>document.write()</code> method; the handling of <a class="external" href="http://www.w3.org/html/wg/drafts/html/master/webappapis.html#scripting" rel="noopener">scripting</a>; and so on.</div>
+
+#### **Type**: `Promise<boolean>`
+
+### elem.charset <div class="specs"><i>W3C</i></div> {#charset}
+
+Represents the character encoding of an external script. It reflects the <code>charset</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.crossOrigin <div class="specs"><i>W3C</i></div> {#crossOrigin}
+
+A `string` reflecting the CORS setting for the script element. For scripts from other origins, this controls if error information will be exposed.
+
+#### **Type**: `Promise<string>`
+
+### elem.defer <div class="specs"><i>W3C</i></div> {#defer}
+
+Needs content.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.event <div class="specs"><i>W3C</i></div> {#event}
+
+An old, quirky way of registering event handlers on elements in an HTML document.
+
+#### **Type**: `Promise<string>`
+
+### elem.noModule <div class="specs"><i>W3C</i></div> {#noModule}
+
+This Boolean property stops the script's execution in browsers that support<a class="external" href="https://hacks.mozilla.org/2015/08/es6-in-depth-modules/" rel="noopener"> ES2015 modules</a> — used to run fallback scripts in older browsers that do <em>not</em> support JavaScript modules.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
+
+A `string` that reflects the <code>referrerpolicy</code> HTML attribute indicating which referrer to use when fetching the script, and fetches done by that script.
+
+#### **Type**: `Promise<string>`
+
+### elem.src <div class="specs"><i>W3C</i></div> {#src}
+
+Gets and sets the URL of an external script. It reflects the <code>src</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.text <div class="specs"><i>W3C</i></div> {#text}
+
+<p>The IDL attribute <code>text</code> joins and returns the contents of all <code>Text</code> nodes inside the <code>&lt;script&gt;</code> element (ignoring other nodes like comments) in tree order. On setting, it acts the same way as the <code>textContent</code> IDL attribute.</p>
+    <div class="note"><strong>Note:</strong> When inserted using the <code>document.write()</code> method, <code>&lt;script&gt;</code> elements execute (typically synchronously), but when inserted using <code>innerHTML</code> or <code>outerHTML</code>, they do not execute at all.</div>
+
+#### **Type**: `Promise<string>`
+
+### elem.type <div class="specs"><i>W3C</i></div> {#type}
+
+Represents the MIME type of the script. It reflects the <code>type</code> attribute.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -435,6 +504,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -773,12 +848,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `async` | `charset`
-`crossOrigin` | `defer`
-`event` | `noModule`
-`referrerPolicy` | `src`
-`text` | `type`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -829,20 +899,20 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

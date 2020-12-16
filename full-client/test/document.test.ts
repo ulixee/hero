@@ -218,6 +218,57 @@ describe('basic Document tests', () => {
     await expect(agent.isElementVisible(document.querySelector('#elem-7'))).resolves.toBe(true);
     await expect(agent.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
   });
+
+  it('can get a data url of a canvas', async () => {
+    koaServer.get('/canvas', ctx => {
+      ctx.body = `
+        <body>
+          <canvas id="canvas"></canvas>
+          <script>
+            const c = document.getElementById("canvas");
+            const ctx = c.getContext("2d");
+            ctx.moveTo(0, 0);
+            ctx.lineTo(200, 100);
+            ctx.stroke();
+          </script>
+        </body>
+      `;
+    });
+    const agent = await openBrowser(`/canvas`);
+    const { document } = agent;
+    const dataUrl = await document.querySelector('canvas').toDataURL();
+    expect(dataUrl).toMatch(/data:image\/png.+/);
+  });
+
+  it('allows you to run shadow dom query selectors', async () => {
+    koaServer.get('/shadow', ctx => {
+      ctx.body = `
+        <body>
+          <header id="header"></header>
+          <script>
+            const header = document.getElementById('header');
+            const shadowRoot = header.attachShadow({ mode: 'closed' });
+            shadowRoot.innerHTML = \`<div>
+             <h1>Hello Shadow DOM</h1>
+             <ul>
+              <li>1</li>
+              <li>2</li>
+              <li>3</li>
+             </ul>
+            </div>\`;
+          </script>
+        </body>
+      `;
+    });
+    const agent = await openBrowser(`/shadow`);
+    const { document } = agent;
+    const shadowRoot = document.querySelector('#header').shadowRoot;
+    const h1Text = await shadowRoot.querySelector('h1').textContent;
+    expect(h1Text).toBe('Hello Shadow DOM');
+
+    const lis = await shadowRoot.querySelectorAll('li').length;
+    expect(lis).toBe(3);
+  });
 });
 
 async function openBrowser(path: string) {

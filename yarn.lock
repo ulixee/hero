@@ -3073,6 +3073,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.54.tgz#a4b58d8df3a4677b6c08bfbc94b7ad7a7a5f82d1"
   integrity sha512-ge4xZ3vSBornVYlDnk7yZ0gK6ChHf/CHB7Gl1I0Jhah8DDnEQqBzgohYG4FX4p81TNirSETOiSyn+y1r9/IR6w==
 
+"@types/node@^13.13.34":
+  version "13.13.36"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.36.tgz#0c4d3c4e365396c84b1c595524e2faff7dd45b26"
+  integrity sha512-ctzZJ+XsmHQwe3xp07gFUq4JxBaRSYzKHPgblR76//UanGST7vfFNF0+ty5eEbgTqsENopzoDK090xlha9dccQ==
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
@@ -4463,10 +4468,10 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.7.tgz#194abc09e1ffc9b25393d43e0ec595fe5cc20f02"
-  integrity sha512-FiA7OsMUJRkGpsP4fanHL9L+NNe5cXud9kIebCd+PULdV0m2pUf8W3DgtE6r64/ErVbGIHFamM0Xljg92xSLWQ==
+awaited-dom@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.8.tgz#6d1b9a4c5ff654e744208aaed07cee1438e17e54"
+  integrity sha512-LFezs6pkkIMw4m2NXW159UsJjhgPSDvp2h0axlPe7rekQVjGmgqppGP70FwpdCf2QRrJVZE0TBsQjrHVt3UVnw==
 
 aws-sign2@~0.7.0:
   version "0.7.0"

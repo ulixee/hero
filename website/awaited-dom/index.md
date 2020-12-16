@@ -99,8 +99,9 @@ Supers give you access to all properties and methods of dependent classes.
 
  |   |   | 
  | --- | --- | 
- | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathExpression](/docs/awaited-dom/x-path-expression)
-[XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver) | [XPathResult](/docs/awaited-dom/x-path-result) | 
+ | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathEvaluatorBase](/docs/awaited-dom/x-path-evaluator-base)
+[XPathExpression](/docs/awaited-dom/x-path-expression) | [XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver)
+[XPathResult](/docs/awaited-dom/x-path-result) |  | 
 
 
 ## Miscellaneous Interfaces

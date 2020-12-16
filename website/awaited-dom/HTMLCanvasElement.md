@@ -4,6 +4,18 @@
 
 ## Properties
 
+### elem.height <div class="specs"><i>W3C</i></div> {#height}
+
+Is a positive <code>integer</code> reflecting the <code>height</code> HTML attribute of the <code>&lt;canvas&gt;</code> element interpreted in CSS pixels. When the attribute is not specified, or if it is set to an invalid value, like a negative, the default value of <code>150</code> is used.
+
+#### **Type**: `Promise<number>`
+
+### elem.width <div class="specs"><i>W3C</i></div> {#width}
+
+Is a positive <code>integer</code> reflecting the <code>width</code> HTML attribute of the <code>&lt;canvas&gt;</code> element interpreted in CSS pixels. When the attribute is not specified, or if it is set to an invalid value, like a negative, the default value of <code>300</code> is used.
+
+#### **Type**: `Promise<number>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -415,6 +427,36 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
+### elem.captureStream*(frameRequestRate?)* <div class="specs"><i>W3C</i></div> {#captureStream}
+
+Returns a <code>CanvasCaptureMediaStream</code> that is a real-time video capture of the surface of the canvas.
+
+#### **Arguments**:
+
+
+ - frameRequestRate `number`. A double-precision floating-point value that indicates the rate of capture of each frame. If not set, a new frame will be captured each time the canvas changes; if set to <code>0</code>, frames will not be captured automatically; instead, they will only be captured when the returned track's <code>requestFrame()</code> method is called.
+
+#### **Returns**: `MediaStream`
+
+### elem.toDataURL*(type?, quality?)* <div class="specs"><i>W3C</i></div> {#toDataURL}
+
+Returns a data-URL containing a representation of the image in the format specified by the <code>type</code> parameter (defaults to <code>png</code>). The returned image is in a resolution of 96dpi.
+
+#### **Arguments**:
+
+
+ - type `string`. A `string` indicating the image format. The default format type is <code>image/png</code>.
+ - quality `any`. A `number` between <code>0</code> and <code>1</code> indicating the image quality to use for image formats that use lossy compression such as <code>image/jpeg</code> and <code>image/webp</code>.<br>
+     If this argument is anything else, the default value for image quality is used. The default value is <code>0.92</code>. Other arguments are ignored.
+
+#### **Returns**: `Promise<string>`
+
+### elem.transferControlToOffscreen*()* <div class="specs"><i>W3C</i></div> {#transferControlToOffscreen}
+
+Transfers control to an <code>OffscreenCanvas</code> object, either on the main thread or on a worker.
+
+#### **Returns**: `OffscreenCanvas`
+
 ### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
@@ -432,6 +474,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
+
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -771,8 +819,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `height` | `width`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -823,10 +870,8 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `captureStream()` | `getContext()`
-`toBlob()` | `toDataURL()`
-`transferControlToOffscreen()` | `attachShadow()`
-`computedStyleMap()` | `insertAdjacentElement()`
+ | `getContext()` | `toBlob()`
+`attachShadow()` | `insertAdjacentElement()`
 `insertAdjacentHTML()` | `insertAdjacentText()`
 `releasePointerCapture()` | `removeAttribute()`
 `removeAttributeNode()` | `removeAttributeNS()`

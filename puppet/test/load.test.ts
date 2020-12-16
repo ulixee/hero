@@ -33,7 +33,23 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     afterAll(async () => {
-      await Promise.all([server.stop(), context.close(), puppet.close()]).catch();
+      try {
+        await server.stop();
+      } catch (err) {
+        // no action
+      }
+
+      try {
+        await context.close();
+      } catch (err) {
+        // no action
+      }
+
+      try {
+        await puppet.close();
+      } catch (err) {
+        // no action
+      }
     }, 30e3);
 
     it('should be able to capture navigation events under load', async () => {

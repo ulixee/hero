@@ -48,7 +48,7 @@ export class CDPSession extends EventEmitter {
     this.sessionId = sessionId;
   }
 
-  send<T extends keyof ProtocolMapping.Commands>(
+  async send<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
     sendInitiator?: object,
@@ -74,7 +74,7 @@ export class CDPSession extends EventEmitter {
       sendInitiator,
     );
 
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       this.pendingMessages.set(id, { resolve, reject, error: new CanceledPromiseError(), method });
     });
   }

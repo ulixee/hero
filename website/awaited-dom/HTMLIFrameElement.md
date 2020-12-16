@@ -4,6 +4,120 @@
 
 ## Properties
 
+### elem.align <div class="specs"><i>W3C</i></div> {#align}
+
+Is a `string` that specifies the alignment of the frame with respect to the surrounding context.
+
+#### **Type**: `Promise<string>`
+
+### elem.allow <div class="specs"><i>W3C</i></div> {#allow}
+
+Is a list of origins the the frame is allowed to display content from. This attribute also accepts the values <code>self</code> and&nbsp;<code>src</code> which represent&nbsp;the origin in the iframe's src attribute. The default value is <code>src</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.allowFullscreen <div class="specs"><i>W3C</i></div> {#allowFullscreen}
+
+Is a `boolean` indicating whether the inline frame is willing to be placed into full screen mode. See Using full-screen mode for details.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.allowPaymentRequest <div class="specs"><i>W3C</i></div> {#allowPaymentRequest}
+
+Is a `boolean` indicating whether the Payment Request API&nbsp;may be invoked inside a cross-origin iframe.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.contentDocument <div class="specs"><i>W3C</i></div> {#contentDocument}
+
+Returns a <code>Document</code>, the active document in the inline frame's nested browsing context.
+
+#### **Type**: [`SuperDocument`](./super-document)
+
+### elem.csp <div class="specs"><i>W3C</i></div> {#csp}
+
+Specifies the Content Security Policy that an embedded document must agree to enforce upon itself.
+
+#### **Type**: `Promise<string>`
+
+### elem.featurePolicy <div class="specs"><i>W3C</i></div> {#featurePolicy}
+
+Returns the <code>FeaturePolicy</code> interface which provides a simple API for introspecting the feature policies applied to a specific document.
+
+#### **Type**: `FeaturePolicy`
+
+### elem.frameBorder <div class="specs"><i>W3C</i></div> {#frameBorder}
+
+Is a `string` that indicates whether to create borders between frames.
+
+#### **Type**: `Promise<string>`
+
+### elem.height <div class="specs"><i>W3C</i></div> {#height}
+
+Is a `string` that reflects the <code>height</code> HTML&nbsp;attribute, indicating the height of the frame.
+
+#### **Type**: `Promise<string>`
+
+### elem.longDesc <div class="specs"><i>W3C</i></div> {#longDesc}
+
+Is a `string` that contains the URI of a long description of the frame.
+
+#### **Type**: `Promise<string>`
+
+### elem.marginHeight <div class="specs"><i>W3C</i></div> {#marginHeight}
+
+Is a `string` being the height of the frame margin.
+
+#### **Type**: `Promise<string>`
+
+### elem.marginWidth <div class="specs"><i>W3C</i></div> {#marginWidth}
+
+Is a `string` being the width of the frame margin.
+
+#### **Type**: `Promise<string>`
+
+### elem.name <div class="specs"><i>W3C</i></div> {#name}
+
+Is a `string` that reflects the <code>name</code> HTML&nbsp;attribute, containing a name by which to refer to the frame.
+
+#### **Type**: `Promise<string>`
+
+### elem.referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
+
+Is a `string` that reflects the <code>referrerpolicy</code> HTML attribute indicating which referrer to use when fetching the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.sandbox <div class="specs"><i>W3C</i></div> {#sandbox}
+
+Is a <code>DOMSettableTokenList</code> that reflects the <code>sandbox</code> HTML&nbsp;attribute, indicating extra restrictions on the behavior of the nested content.
+
+#### **Type**: `DOMTokenList`
+
+### elem.scrolling <div class="specs"><i>W3C</i></div> {#scrolling}
+
+Is a `string` that indicates whether the browser should provide scrollbars for the frame.
+
+#### **Type**: `Promise<string>`
+
+### elem.src <div class="specs"><i>W3C</i></div> {#src}
+
+Is a `string` that reflects the <code>src</code> HTML&nbsp;attribute, containing the address of the content to be embedded. Note that programatically removing an <code>&lt;iframe&gt;</code>'s src attribute (e.g. via <code>Element.removeAttribute()</code>) causes <code>about:blank</code> to be loaded in the frame in Firefox (from version 65), Chromium-based browsers, and Safari/iOS.
+
+#### **Type**: `Promise<string>`
+
+### elem.srcdoc <div class="specs"><i>W3C</i></div> {#srcdoc}
+
+Is a `string` that represents the content to display in the frame.
+
+#### **Type**: `Promise<string>`
+
+### elem.width <div class="specs"><i>W3C</i></div> {#width}
+
+Is a `string` that reflects the <code>width</code>&nbsp;HTML&nbsp;attribute, indicating the width of the frame.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +547,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,81 +891,71 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `align` | `allow`
-`allowFullscreen` | `allowPaymentRequest`
-`contentDocument` | `contentWindow`
-`csp` | `featurePolicy`
-`frameBorder` | `height`
-`longDesc` | `marginHeight`
-`marginWidth` | `name`
-`referrerPolicy` | `sandbox`
-`scrolling` | `src`
-`srcdoc` | `width`
-`onfullscreenchange` | `onfullscreenerror`
-`oncopy` | `oncut`
-`onpaste` | `style`
-`contentEditable` | `isContentEditable`
-`onabort` | `onanimationend`
-`onanimationiteration` | `onanimationstart`
-`onauxclick` | `onblur`
-`oncancel` | `oncanplay`
-`oncanplaythrough` | `onchange`
-`onclick` | `onclose`
-`oncontextmenu` | `oncuechange`
-`ondblclick` | `ondrag`
-`ondragend` | `ondragenter`
-`ondragleave` | `ondragover`
-`ondragstart` | `ondrop`
-`ondurationchange` | `onemptied`
-`onended` | `onerror`
-`onfocus` | `onformdata`
-`ongotpointercapture` | `oninput`
-`oninvalid` | `onkeydown`
-`onkeypress` | `onkeyup`
-`onload` | `onloadeddata`
-`onloadedmetadata` | `onloadstart`
-`onlostpointercapture` | `onmousedown`
-`onmouseenter` | `onmouseleave`
-`onmousemove` | `onmouseout`
-`onmouseover` | `onmouseup`
-`onpause` | `onplay`
-`onplaying` | `onpointercancel`
-`onpointerdown` | `onpointerenter`
-`onpointerleave` | `onpointermove`
-`onpointerout` | `onpointerover`
-`onpointerup` | `onprogress`
-`onratechange` | `onreset`
-`onresize` | `onscroll`
-`onseeked` | `onseeking`
-`onselect` | `onselectionchange`
-`onselectstart` | `onstalled`
-`onsubmit` | `onsuspend`
-`ontimeupdate` | `ontouchcancel`
-`ontouchend` | `ontouchmove`
-`ontouchstart` | `ontransitionend`
-`onvolumechange` | `onwaiting`
-`onwheel` | `dataset`
-`nonce` | `tabIndex`
-`assignedSlot` |  | 
+ | `contentWindow` | `onfullscreenchange`
+`onfullscreenerror` | `oncopy`
+`oncut` | `onpaste`
+`style` | `contentEditable`
+`isContentEditable` | `onabort`
+`onanimationend` | `onanimationiteration`
+`onanimationstart` | `onauxclick`
+`onblur` | `oncancel`
+`oncanplay` | `oncanplaythrough`
+`onchange` | `onclick`
+`onclose` | `oncontextmenu`
+`oncuechange` | `ondblclick`
+`ondrag` | `ondragend`
+`ondragenter` | `ondragleave`
+`ondragover` | `ondragstart`
+`ondrop` | `ondurationchange`
+`onemptied` | `onended`
+`onerror` | `onfocus`
+`onformdata` | `ongotpointercapture`
+`oninput` | `oninvalid`
+`onkeydown` | `onkeypress`
+`onkeyup` | `onload`
+`onloadeddata` | `onloadedmetadata`
+`onloadstart` | `onlostpointercapture`
+`onmousedown` | `onmouseenter`
+`onmouseleave` | `onmousemove`
+`onmouseout` | `onmouseover`
+`onmouseup` | `onpause`
+`onplay` | `onplaying`
+`onpointercancel` | `onpointerdown`
+`onpointerenter` | `onpointerleave`
+`onpointermove` | `onpointerout`
+`onpointerover` | `onpointerup`
+`onprogress` | `onratechange`
+`onreset` | `onresize`
+`onscroll` | `onseeked`
+`onseeking` | `onselect`
+`onselectionchange` | `onselectstart`
+`onstalled` | `onsubmit`
+`onsuspend` | `ontimeupdate`
+`ontouchcancel` | `ontouchend`
+`ontouchmove` | `ontouchstart`
+`ontransitionend` | `onvolumechange`
+`onwaiting` | `onwheel`
+`dataset` | `nonce`
+`tabIndex` | `assignedSlot` | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

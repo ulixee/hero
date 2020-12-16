@@ -4,6 +4,90 @@
 
 ## Properties
 
+### elem.align <div class="specs"><i>W3C</i></div> {#align}
+
+Is a `string` containing an enumerated value reflecting the <code>align</code> attribute. It indicates the alignment of the element's contents with respect to the surrounding context. The possible values are <code>"left"</code>, <code>"right"</code>, and <code>"center"</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.bgColor <div class="specs"><i>W3C</i></div> {#bgColor}
+
+Is a `string` containing the background color of the cells. It reflects the obsolete <code>bgcolor</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.border <div class="specs"><i>W3C</i></div> {#border}
+
+Is a `string` containing the width in pixels of the border of the table. It reflects the obsolete <code>border</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.caption <div class="specs"><i>W3C</i></div> {#caption}
+
+Is a&nbsp;<code>HTMLTableCaptionElement</code> representing the first <code>&lt;caption&gt;</code> that is a child of the element, or <code>null</code> if none is found. When set, if the object doesn't represent a <code>&lt;caption&gt;</code>, a <code>DOMException</code> with the <code>HierarchyRequestError</code> name is thrown. If a correct object is given, it is inserted in the tree as the first child of this element and the first <code>&lt;caption&gt;</code> that is a child of this element is removed from the tree, if any.
+
+#### **Type**: [`HTMLTableCaptionElement`](./html-table-caption-element)
+
+### elem.cellPadding <div class="specs"><i>W3C</i></div> {#cellPadding}
+
+Is a `string` containing the width in pixels of the horizontal and vertical sapce between cell content and cell borders. It reflects the obsolete <code>cellpadding</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.cellSpacing <div class="specs"><i>W3C</i></div> {#cellSpacing}
+
+Is a `string` containing the width in pixels of the horizontal and vertical separation between cells. It reflects the obsolete <code>cellspacing</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.frame <div class="specs"><i>W3C</i></div> {#frame}
+
+Is a `string` containing the type of the external borders of the table. It reflects the obsolete <code>frame</code> attribute and can take one of the following values: <code>"void"</code>, <code>"above"</code>, <code>"below"</code>, <code>"hsides"</code>, <code>"vsides"</code>, <code>"lhs"</code>, <code>"rhs"</code>, <code>"box"</code>, or <code>"border"</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.rows <div class="specs"><i>W3C</i></div> {#rows}
+
+Returns a live <code>HTMLCollection</code> containing all the rows of the element, that is all <code>&lt;tr&gt;</code> that are a child of the element, or a child or one of its <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code> and <code>&lt;tfoot&gt;</code> children. The rows members of a <code>&lt;thead&gt;</code> appear first, in tree order, and those members of a <code>&lt;tbody&gt;</code> last, also in tree order. The <code>HTMLCollection</code> is live and is automatically updated when the <code>HTMLTableElement</code> changes.
+
+#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+
+### elem.rules <div class="specs"><i>W3C</i></div> {#rules}
+
+Is a `string` containing the type of the internal borders of the table. It reflects the obsolete <code>rules</code> attribute and can take one of the following values: <code>"none"</code>, <code>"groups"</code>, <code>"rows"</code>, <code>"cols"</code>, or <code>"all"</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.summary <div class="specs"><i>W3C</i></div> {#summary}
+
+Is a `string` containing a description of the purpose or the structure of the table. It reflects the obsolete <code>summary</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.tBodies <div class="specs"><i>W3C</i></div> {#tBodies}
+
+Returns a live <code>HTMLCollection</code> containing all the <code>&lt;tbody&gt;</code> of the element. The <code>HTMLCollection</code> is live and is automatically updated when the <code>HTMLTableElement</code> changes.
+
+#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+
+### elem.tFoot <div class="specs"><i>W3C</i></div> {#tFoot}
+
+Is a&nbsp;<code>HTMLTableSectionElement</code> representing the first <code>&lt;tfoot&gt;</code> that is a child of the element, or <code>null</code> if none is found. When set, if the object doesn't represent a <code>&lt;tfoot&gt;</code>, a <code>DOMException</code> with the <code>HierarchyRequestError</code> name is thrown. If a correct object is given, it is inserted in the tree immediately before the first element that is neither a <code>&lt;caption&gt;</code>, a <code>&lt;colgroup&gt;</code>, nor a <code>&lt;thead&gt;</code>, or as the last child if there is no such element, and the first <code>&lt;tfoot&gt;</code> that is a child of this element is removed from the tree, if any.
+
+#### **Type**: [`HTMLTableSectionElement`](./html-table-section-element)
+
+### elem.tHead <div class="specs"><i>W3C</i></div> {#tHead}
+
+Is a&nbsp;<code>HTMLTableSectionElement</code> representing the first <code>&lt;thead&gt;</code> that is a child of the element, or <code>null</code> if none is found. When set, if the object doesn't represent a <code>&lt;thead&gt;</code>, a <code>DOMException</code> with the <code>HierarchyRequestError</code> name is thrown. If a correct object is given, it is inserted in the tree immediately before the first element that is neither a <code>&lt;caption&gt;</code>, nor a <code>&lt;colgroup&gt;</code>, or as the last child if there is no such element, and the first <code>&lt;thead&gt;</code> that is a child of this element is removed from the tree, if any.
+
+#### **Type**: [`HTMLTableSectionElement`](./html-table-section-element)
+
+### elem.width <div class="specs"><i>W3C</i></div> {#width}
+
+Is a `string` containing the length in pixels or in percentage of the desired width fo the entire table. It reflects the obsolete <code>width</code> attribute.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +517,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,14 +861,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `align` | `bgColor`
-`border` | `caption`
-`cellPadding` | `cellSpacing`
-`frame` | `rows`
-`rules` | `summary`
-`tBodies` | `tFoot`
-`tHead` | `width`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -834,20 +917,19 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 `deleteCaption()` | `deleteRow()`
 `deleteTFoot()` | `deleteTHead()`
 `insertRow()` | `attachShadow()`
-`computedStyleMap()` | `insertAdjacentElement()`
-`insertAdjacentHTML()` | `insertAdjacentText()`
-`releasePointerCapture()` | `removeAttribute()`
-`removeAttributeNode()` | `removeAttributeNS()`
-`scroll()` | `scrollBy()`
-`scrollTo()` | `setAttribute()`
-`setAttributeNode()` | `setAttributeNodeNS()`
-`setAttributeNS()` | `setPointerCapture()`
-`toggleAttribute()` | `appendChild()`
-`cloneNode()` | `insertBefore()`
-`removeChild()` | `replaceChild()`
-`addEventListener()` | `dispatchEvent()`
-`removeEventListener()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+`insertAdjacentElement()` | `insertAdjacentHTML()`
+`insertAdjacentText()` | `releasePointerCapture()`
+`removeAttribute()` | `removeAttributeNode()`
+`removeAttributeNS()` | `scroll()`
+`scrollBy()` | `scrollTo()`
+`setAttribute()` | `setAttributeNode()`
+`setAttributeNodeNS()` | `setAttributeNS()`
+`setPointerCapture()` | `toggleAttribute()`
+`appendChild()` | `cloneNode()`
+`insertBefore()` | `removeChild()`
+`replaceChild()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()`
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` | 
