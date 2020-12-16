@@ -4,6 +4,183 @@
 
 ## Properties
 
+### elem.audioTracks <div class="specs"><i>W3C</i></div> {#audioTracks}
+
+A <code>AudioTrackList</code> that lists the <code>AudioTrack</code> objects contained in the element.
+
+#### **Type**: `AudioTrackList`
+
+### elem.autoplay <div class="specs"><i>W3C</i></div> {#autoplay}
+
+
+ <p>A `boolean` that reflects the <code>autoplay</code> HTML attribute, indicating whether playback should automatically begin as soon as enough media is available to do so without interruption.</p>
+ <div class="note"><strong>Note</strong>: Automatically playing audio when the user doesn't expect or desire it is a poor user experience and should be avoided in most cases, though there are exceptions. See the Autoplay guide for media and Web Audio APIs for more information. Keep in mind that browsers may ignore autoplay requests, so you should ensure that your code isn't dependent on autoplay working.</div>
+ 
+
+#### **Type**: `Promise<boolean>`
+
+### elem.buffered <div class="specs"><i>W3C</i></div> {#buffered}
+
+Returns a <code>TimeRanges</code> object that indicates the ranges of the media source that the browser has buffered (if any) at the moment the <code>buffered</code> property is accessed.
+
+#### **Type**: `TimeRanges`
+
+### elem.controls <div class="specs"><i>W3C</i></div> {#controls}
+
+Is a `boolean` that reflects the <code>controls</code> HTML attribute, indicating whether user interface items for controlling the resource should be displayed.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.controlsList <div class="specs"><i>W3C</i></div> {#controlsList}
+
+Returns a <code>DOMTokenList</code> that helps the user agent select what controls to show on the media element whenever the user agent shows its own set of controls. The <code>DOMTokenList</code> takes one or more of three possible values: <code>nodownload</code>, <code>nofullscreen</code>, and <code>noremoteplayback</code>.
+
+#### **Type**: `DOMTokenList`
+
+### elem.crossOrigin <div class="specs"><i>W3C</i></div> {#crossOrigin}
+
+A `string` indicating the CORS setting for this media element.
+
+#### **Type**: `Promise<string>`
+
+### elem.currentSrc <div class="specs"><i>W3C</i></div> {#currentSrc}
+
+Returns a `string` with the absolute URL of the chosen media resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.currentTime <div class="specs"><i>W3C</i></div> {#currentTime}
+
+A double-precision floating-point value indicating the current playback time in seconds; if the media has not started to play and has not been seeked, this value is the media's initial playback time. Setting this value seeks the media to the new time. The time is specified relative to the media's timeline.
+
+#### **Type**: `Promise<number>`
+
+### elem.defaultMuted <div class="specs"><i>W3C</i></div> {#defaultMuted}
+
+A `boolean` that reflects the <code>muted</code> HTML attribute, which indicates whether the media element's audio output should be muted by default.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.defaultPlaybackRate <div class="specs"><i>W3C</i></div> {#defaultPlaybackRate}
+
+A <code>double</code> indicating the default playback rate for the media.
+
+#### **Type**: `Promise<number>`
+
+### elem.disableRemotePlayback <div class="specs"><i>W3C</i></div> {#disableRemotePlayback}
+
+A `boolean` that sets or returns the remote playback state, indicating whether the media element is allowed to have a remote playback UI.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.duration <div class="specs"><i>W3C</i></div> {#duration}
+
+A read-only double-precision floating-point value indicating the total duration of the media in seconds. If no media data is available, the returned value is <code>NaN</code>. If the media is of indefinite length (such as streamed live media, a WebRTC call's media, or similar), the value is <code>+Infinity</code>.
+
+#### **Type**: `Promise<number>`
+
+### elem.ended <div class="specs"><i>W3C</i></div> {#ended}
+
+Returns a `boolean` that indicates whether the media element has finished playing.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.error <div class="specs"><i>W3C</i></div> {#error}
+
+Returns a <code>MediaError</code> object for the most recent error, or <code>null</code> if there has not been an error.
+
+#### **Type**: `MediaError`
+
+### elem.loop <div class="specs"><i>W3C</i></div> {#loop}
+
+A `boolean` that reflects the <code>loop</code> HTML attribute, which indicates whether the media element should start over when it reaches the end.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.mediaKeys <div class="specs"><i>W3C</i></div> {#mediaKeys}
+
+Returns a <code>MediaKeys</code> object or <code>null</code>. MediaKeys is a set of keys that an associated HTMLMediaElement can use for decryption of media data during playback.
+
+#### **Type**: `MediaKeys`
+
+### elem.muted <div class="specs"><i>W3C</i></div> {#muted}
+
+Is a `boolean` that determines whether audio is muted. <code>true</code> if the audio is muted and <code>false</code> otherwise.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.networkState <div class="specs"><i>W3C</i></div> {#networkState}
+
+Returns a <code>unsigned short</code> (enumeration) indicating the current state of fetching the media over the network.
+
+#### **Type**: `Promise<number>`
+
+### elem.playbackRate <div class="specs"><i>W3C</i></div> {#playbackRate}
+
+Is a <code>double</code> that indicates the rate at which the media is being played back.
+
+#### **Type**: `Promise<number>`
+
+### elem.played <div class="specs"><i>W3C</i></div> {#played}
+
+Returns a <code>TimeRanges</code> object that contains the ranges of the media source that the browser has played, if any.
+
+#### **Type**: `TimeRanges`
+
+### elem.preload <div class="specs"><i>W3C</i></div> {#preload}
+
+Is a `string` that reflects the <code>preload</code> HTML attribute, indicating what data should be preloaded, if any. Possible values are: <code>none</code>, <code>metadata</code>, <code>auto</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.readyState <div class="specs"><i>W3C</i></div> {#readyState}
+
+Returns a <code>unsigned short</code> (enumeration) indicating the readiness state of the media.
+
+#### **Type**: `Promise<number>`
+
+### elem.seekable <div class="specs"><i>W3C</i></div> {#seekable}
+
+Returns a <code>TimeRanges</code> object that contains the time ranges that the user is able to seek to, if any.
+
+#### **Type**: `TimeRanges`
+
+### elem.seeking <div class="specs"><i>W3C</i></div> {#seeking}
+
+Returns a `boolean` that indicates whether the media is in the process of seeking to a new position.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.sinkId <div class="specs"><i>W3C</i></div> {#sinkId}
+
+Returns a `string` that is the unique ID of the audio device delivering output, or an empty string if it is using the user agent default. This ID should be one of the <code>MediaDeviceInfo.deviceid</code> values returned from <code>MediaDevices.enumerateDevices()</code>, <code>id-multimedia</code>, or <code>id-communications</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.src <div class="specs"><i>W3C</i></div> {#src}
+
+Is a `string` that reflects the <code>src</code> HTML attribute, which contains the URL of a media resource to use.
+
+#### **Type**: `Promise<string>`
+
+### elem.textTracks <div class="specs"><i>W3C</i></div> {#textTracks}
+
+Returns the list of <code>TextTrack</code> objects contained in the element.
+
+#### **Type**: `TextTrackList`
+
+### elem.videoTracks <div class="specs"><i>W3C</i></div> {#videoTracks}
+
+Returns the list of <code>VideoTrack</code> objects contained in the element.
+
+#### **Type**: `VideoTrackList`
+
+### elem.volume <div class="specs"><i>W3C</i></div> {#volume}
+
+Is a <code>double</code> indicating the audio volume, from 0.0 (silent) to 1.0 (loudest).
+
+#### **Type**: `Promise<number>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -415,6 +592,52 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
+### elem.canPlayType*(type)* <div class="specs"><i>W3C</i></div> {#canPlayType}
+
+Given a string specifying a MIME media type (potentially with the&nbsp;<code>codecs</code>&nbsp;parameter included),&nbsp;<code>canPlayType()</code>&nbsp;returns the string&nbsp;<code>probably</code>&nbsp;if the media should be playable,&nbsp;<code>maybe</code>&nbsp;if there's not enough information to determine whether the media will play or not, or an empty string if the media cannot be played.
+
+#### **Arguments**:
+
+
+ - type `string`. A `string` containing the MIME type of the media.
+
+#### **Returns**: `Promise<CanPlayTypeResult>`
+
+### elem.captureStream*()* <div class="specs"><i>W3C</i></div> {#captureStream}
+
+Returns <code>MediaStream</code>, captures a stream of the media content.
+
+#### **Returns**: `MediaStream`
+
+### elem.load*()* <div class="specs"><i>W3C</i></div> {#load}
+
+Resets the media to the beginning and selects the best available source from the sources provided using the <code>src</code> attribute or the <code>&lt;source&gt;</code> element.
+
+#### **Returns**: `Promise<void>`
+
+### elem.pause*()* <div class="specs"><i>W3C</i></div> {#pause}
+
+Pauses the media playback.
+
+#### **Returns**: `Promise<void>`
+
+### elem.play*()* <div class="specs"><i>W3C</i></div> {#play}
+
+Begins playback of the media.
+
+#### **Returns**: `Promise<void>`
+
+### elem.setSinkId*(sinkId)* <div class="specs"><i>W3C</i></div> {#setSinkId}
+
+Sets the ID of the audio device to use for output and returns a <code>Promise</code>. This only works when the application is authorized to use the specified device.
+
+#### **Arguments**:
+
+
+ - sinkId `string`. The <code>MediaDeviceInfo.deviceId</code>&nbsp;of the audio output device.
+
+#### **Returns**: `Promise<void>`
+
 ### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
@@ -432,6 +655,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
+
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -771,91 +1000,73 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `audioTracks` | `autoplay`
-`buffered` | `controls`
-`controlsList` | `crossOrigin`
-`currentSrc` | `currentTime`
-`defaultMuted` | `defaultPlaybackRate`
-`disableRemotePlayback` | `duration`
-`ended` | `error`
-`loop` | `mediaKeys`
-`muted` | `networkState`
-`onencrypted` | `onwaitingforkey`
-`paused` | `playbackRate`
-`played` | `preload`
-`readyState` | `seekable`
-`seeking` | `sinkId`
-`src` | `textTracks`
-`videoTracks` | `volume`
-`onfullscreenchange` | `onfullscreenerror`
-`oncopy` | `oncut`
-`onpaste` | `style`
-`contentEditable` | `isContentEditable`
-`onabort` | `onanimationend`
-`onanimationiteration` | `onanimationstart`
-`onauxclick` | `onblur`
-`oncancel` | `oncanplay`
-`oncanplaythrough` | `onchange`
-`onclick` | `onclose`
-`oncontextmenu` | `oncuechange`
-`ondblclick` | `ondrag`
-`ondragend` | `ondragenter`
-`ondragleave` | `ondragover`
-`ondragstart` | `ondrop`
-`ondurationchange` | `onemptied`
-`onended` | `onerror`
-`onfocus` | `onformdata`
-`ongotpointercapture` | `oninput`
-`oninvalid` | `onkeydown`
-`onkeypress` | `onkeyup`
-`onload` | `onloadeddata`
-`onloadedmetadata` | `onloadstart`
-`onlostpointercapture` | `onmousedown`
-`onmouseenter` | `onmouseleave`
-`onmousemove` | `onmouseout`
-`onmouseover` | `onmouseup`
-`onpause` | `onplay`
-`onplaying` | `onpointercancel`
-`onpointerdown` | `onpointerenter`
-`onpointerleave` | `onpointermove`
-`onpointerout` | `onpointerover`
-`onpointerup` | `onprogress`
-`onratechange` | `onreset`
-`onresize` | `onscroll`
-`onseeked` | `onseeking`
-`onselect` | `onselectionchange`
-`onselectstart` | `onstalled`
-`onsubmit` | `onsuspend`
-`ontimeupdate` | `ontouchcancel`
-`ontouchend` | `ontouchmove`
-`ontouchstart` | `ontransitionend`
-`onvolumechange` | `onwaiting`
-`onwheel` | `dataset`
-`nonce` | `tabIndex`
-`assignedSlot` |  | 
+ | `onencrypted` | `onwaitingforkey`
+`paused` | `onfullscreenchange`
+`onfullscreenerror` | `oncopy`
+`oncut` | `onpaste`
+`style` | `contentEditable`
+`isContentEditable` | `onabort`
+`onanimationend` | `onanimationiteration`
+`onanimationstart` | `onauxclick`
+`onblur` | `oncancel`
+`oncanplay` | `oncanplaythrough`
+`onchange` | `onclick`
+`onclose` | `oncontextmenu`
+`oncuechange` | `ondblclick`
+`ondrag` | `ondragend`
+`ondragenter` | `ondragleave`
+`ondragover` | `ondragstart`
+`ondrop` | `ondurationchange`
+`onemptied` | `onended`
+`onerror` | `onfocus`
+`onformdata` | `ongotpointercapture`
+`oninput` | `oninvalid`
+`onkeydown` | `onkeypress`
+`onkeyup` | `onload`
+`onloadeddata` | `onloadedmetadata`
+`onloadstart` | `onlostpointercapture`
+`onmousedown` | `onmouseenter`
+`onmouseleave` | `onmousemove`
+`onmouseout` | `onmouseover`
+`onmouseup` | `onpause`
+`onplay` | `onplaying`
+`onpointercancel` | `onpointerdown`
+`onpointerenter` | `onpointerleave`
+`onpointermove` | `onpointerout`
+`onpointerover` | `onpointerup`
+`onprogress` | `onratechange`
+`onreset` | `onresize`
+`onscroll` | `onseeked`
+`onseeking` | `onselect`
+`onselectionchange` | `onselectstart`
+`onstalled` | `onsubmit`
+`onsuspend` | `ontimeupdate`
+`ontouchcancel` | `ontouchend`
+`ontouchmove` | `ontouchstart`
+`ontransitionend` | `onvolumechange`
+`onwaiting` | `onwheel`
+`dataset` | `nonce`
+`tabIndex` | `assignedSlot` | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `addTextTrack()` | `canPlayType()`
-`captureStream()` | `load()`
-`pause()` | `play()`
-`setMediaKeys()` | `setSinkId()`
-`attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `addTextTrack()` | `setMediaKeys()`
+`attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

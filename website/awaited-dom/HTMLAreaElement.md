@@ -4,6 +4,72 @@
 
 ## Properties
 
+### elem.alt <div class="specs"><i>W3C</i></div> {#alt}
+
+Is a `string` that reflects the <code>alt</code> HTML attribute, containing alternative text for the element.
+
+#### **Type**: `Promise<string>`
+
+### elem.coords <div class="specs"><i>W3C</i></div> {#coords}
+
+Is a `string` that reflects the <code>coords</code> HTML attribute, containing coordinates to define the hot-spot region.
+
+#### **Type**: `Promise<string>`
+
+### elem.download <div class="specs"><i>W3C</i></div> {#download}
+
+Is a `string` indicating that the linked resource is intended to be downloaded rather than displayed in the browser. The value represent the proposed name of the file. If the name is not a valid filename of the underlying OS, browser will adapt it.
+
+#### **Type**: `Promise<string>`
+
+### elem.hreflang <div class="specs"><i>W3C</i></div> {#hreflang}
+
+Is a `string` containing that reflects the <code>hreflang</code> HTML attribute, indicating the language of the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.noHref <div class="specs"><i>W3C</i></div> {#noHref}
+
+Is a `boolean` flag indicating if the area is inactive (<code>true</code>) or active (<code>false</code>).
+
+#### **Type**: `Promise<boolean>`
+
+### elem.referrerPolicy <div class="specs"><i>W3C</i></div> {#referrerPolicy}
+
+Is a `string` that reflects the <code>referrerpolicy</code> HTML attribute indicating which referrer to use when fetching the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.rel <div class="specs"><i>W3C</i></div> {#rel}
+
+Is a `string` that reflects the <code>rel</code> HTML attribute, indicating relationships of the current document to the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.relList <div class="specs"><i>W3C</i></div> {#relList}
+
+Returns a <code>DOMTokenList</code> that reflects the <code>rel</code> HTML attribute, indicating relationships of the current document to the linked resource, as a list of tokens.
+
+#### **Type**: `DOMTokenList`
+
+### elem.shape <div class="specs"><i>W3C</i></div> {#shape}
+
+Is a `string` that reflects the <code>shape</code> HTML attribute, indicating the shape of the hot-spot, limited to known values.
+
+#### **Type**: `Promise<string>`
+
+### elem.target <div class="specs"><i>W3C</i></div> {#target}
+
+Is a `string` that reflects the <code>target</code> HTML attribute, indicating the browsing context in which to open the linked resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.type <div class="specs"><i>W3C</i></div> {#type}
+
+Is a `string` that reflects the <code>type</code> HTML attribute, indicating the MIME type of the linked resource.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +499,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,83 +843,76 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `alt` | `coords`
-`download` | `hreflang`
-`noHref` | `referrerPolicy`
-`rel` | `relList`
-`shape` | `target`
-`type` | `onfullscreenchange`
-`onfullscreenerror` | `hash`
-`host` | `hostname`
-`href` | `origin`
-`password` | `pathname`
-`port` | `protocol`
-`search` | `username`
-`oncopy` | `oncut`
-`onpaste` | `style`
-`contentEditable` | `isContentEditable`
-`onabort` | `onanimationend`
-`onanimationiteration` | `onanimationstart`
-`onauxclick` | `onblur`
-`oncancel` | `oncanplay`
-`oncanplaythrough` | `onchange`
-`onclick` | `onclose`
-`oncontextmenu` | `oncuechange`
-`ondblclick` | `ondrag`
-`ondragend` | `ondragenter`
-`ondragleave` | `ondragover`
-`ondragstart` | `ondrop`
-`ondurationchange` | `onemptied`
-`onended` | `onerror`
-`onfocus` | `onformdata`
-`ongotpointercapture` | `oninput`
-`oninvalid` | `onkeydown`
-`onkeypress` | `onkeyup`
-`onload` | `onloadeddata`
-`onloadedmetadata` | `onloadstart`
-`onlostpointercapture` | `onmousedown`
-`onmouseenter` | `onmouseleave`
-`onmousemove` | `onmouseout`
-`onmouseover` | `onmouseup`
-`onpause` | `onplay`
-`onplaying` | `onpointercancel`
-`onpointerdown` | `onpointerenter`
-`onpointerleave` | `onpointermove`
-`onpointerout` | `onpointerover`
-`onpointerup` | `onprogress`
-`onratechange` | `onreset`
-`onresize` | `onscroll`
-`onseeked` | `onseeking`
-`onselect` | `onselectionchange`
-`onselectstart` | `onstalled`
-`onsubmit` | `onsuspend`
-`ontimeupdate` | `ontouchcancel`
-`ontouchend` | `ontouchmove`
-`ontouchstart` | `ontransitionend`
-`onvolumechange` | `onwaiting`
-`onwheel` | `dataset`
-`nonce` | `tabIndex`
-`assignedSlot` |  | 
+ | `onfullscreenchange` | `onfullscreenerror`
+`hash` | `host`
+`hostname` | `href`
+`origin` | `password`
+`pathname` | `port`
+`protocol` | `search`
+`username` | `oncopy`
+`oncut` | `onpaste`
+`style` | `contentEditable`
+`isContentEditable` | `onabort`
+`onanimationend` | `onanimationiteration`
+`onanimationstart` | `onauxclick`
+`onblur` | `oncancel`
+`oncanplay` | `oncanplaythrough`
+`onchange` | `onclick`
+`onclose` | `oncontextmenu`
+`oncuechange` | `ondblclick`
+`ondrag` | `ondragend`
+`ondragenter` | `ondragleave`
+`ondragover` | `ondragstart`
+`ondrop` | `ondurationchange`
+`onemptied` | `onended`
+`onerror` | `onfocus`
+`onformdata` | `ongotpointercapture`
+`oninput` | `oninvalid`
+`onkeydown` | `onkeypress`
+`onkeyup` | `onload`
+`onloadeddata` | `onloadedmetadata`
+`onloadstart` | `onlostpointercapture`
+`onmousedown` | `onmouseenter`
+`onmouseleave` | `onmousemove`
+`onmouseout` | `onmouseover`
+`onmouseup` | `onpause`
+`onplay` | `onplaying`
+`onpointercancel` | `onpointerdown`
+`onpointerenter` | `onpointerleave`
+`onpointermove` | `onpointerout`
+`onpointerover` | `onpointerup`
+`onprogress` | `onratechange`
+`onreset` | `onresize`
+`onscroll` | `onseeked`
+`onseeking` | `onselect`
+`onselectionchange` | `onselectstart`
+`onstalled` | `onsubmit`
+`onsuspend` | `ontimeupdate`
+`ontouchcancel` | `ontouchend`
+`ontouchmove` | `ontouchstart`
+`ontransitionend` | `onvolumechange`
+`onwaiting` | `onwheel`
+`dataset` | `nonce`
+`tabIndex` | `assignedSlot` | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`toString()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `toString()`
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` | 

@@ -4,6 +4,18 @@
 
 ## Properties
 
+### elem.open <div class="specs"><i>W3C</i></div> {#open}
+
+A `boolean` reflecting the <code>open</code> HTML attribute, indicating whether the dialog is available for interaction.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.returnValue <div class="specs"><i>W3C</i></div> {#returnValue}
+
+A `string` that sets or returns the return value for the dialog.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -415,6 +427,29 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
+### elem.close*(returnValue?)* <div class="specs"><i>W3C</i></div> {#close}
+
+Closes the dialog. An optional `string` may be passed as an argument, updating the <code>returnValue</code> of the the dialog.
+
+#### **Arguments**:
+
+
+ - returnValue `string`. A `string` representing an updated value for the <code>HTMLDialogElement.returnValue</code> of the dialog.
+
+#### **Returns**: `Promise<void>`
+
+### elem.show*()* <div class="specs"><i>W3C</i></div> {#show}
+
+Displays the dialog modelessly, i.e. still allowing interaction with content outside of the dialog.
+
+#### **Returns**: `Promise<void>`
+
+### elem.showModal*()* <div class="specs"><i>W3C</i></div> {#showModal}
+
+Displays the dialog as a modal, over the top of any other dialogs that might be present. Interaction outside the dialog is blocked.
+
+#### **Returns**: `Promise<void>`
+
 ### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
@@ -432,6 +467,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
+
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -771,8 +812,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `open` | `returnValue`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -823,9 +863,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `close()` | `show()`
-`showModal()` | `attachShadow()`
-`computedStyleMap()` | `insertAdjacentElement()`
+ | `attachShadow()` | `insertAdjacentElement()`
 `insertAdjacentHTML()` | `insertAdjacentText()`
 `releasePointerCapture()` | `removeAttribute()`
 `removeAttributeNode()` | `removeAttributeNS()`

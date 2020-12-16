@@ -4,6 +4,38 @@
 
 ## Properties
 
+### elem.media <div class="specs"><i>W3C</i></div> {#media}
+
+Is a `string` reflecting the <code>media</code> HTML attribute, containing the intended type of the media resource.
+
+#### **Type**: `Promise<string>`
+
+### elem.sizes <div class="specs"><i>W3C</i></div> {#sizes}
+
+Is a `string` representing&nbsp;image sizes between breakpoints
+
+#### **Type**: `Promise<string>`
+
+### elem.src <div class="specs"><i>W3C</i></div> {#src}
+
+Is a `string` reflecting the <code>src</code> HTML attribute, containing the URL for the media resource. The <code>HTMLSourceElement.src</code> property has a meaning only when the associated <code>&lt;source&gt;</code> element is nested in a media element that is a <code>&lt;video&gt;</code> or an <code>&lt;audio&gt;</code> element. It has no meaning and is ignored when it is nested in a <code>&lt;picture&gt;</code> element.&nbsp;
+ <div class="note"><strong>Note</strong>: If the&nbsp;<code>src</code>&nbsp;property is updated (along with any siblings), the parent&nbsp;<code>HTMLMediaElement</code>'s&nbsp;<code>load</code> method should be called when done, since&nbsp;<code>&lt;source&gt;</code>&nbsp;elements are not re-scanned automatically.</div>
+ 
+
+#### **Type**: `Promise<string>`
+
+### elem.srcset <div class="specs"><i>W3C</i></div> {#srcset}
+
+Is a `string` reflecting the <code>srcset</code> HTML attribute, containing a list of candidate images, separated by a comma (<code>',', U+002C COMMA</code>). A candidate image is a URL followed by a <code>'w'</code> with the width of the images, or an <code>'x'</code> followed by the pixel density.
+
+#### **Type**: `Promise<string>`
+
+### elem.type <div class="specs"><i>W3C</i></div> {#type}
+
+Is a `string` reflecting the <code>type</code> HTML attribute, containing the type of the media resource.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +465,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,73 +809,71 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `media` | `sizes`
-`src` | `srcset`
-`type` | `onfullscreenchange`
-`onfullscreenerror` | `oncopy`
-`oncut` | `onpaste`
-`style` | `contentEditable`
-`isContentEditable` | `onabort`
-`onanimationend` | `onanimationiteration`
-`onanimationstart` | `onauxclick`
-`onblur` | `oncancel`
-`oncanplay` | `oncanplaythrough`
-`onchange` | `onclick`
-`onclose` | `oncontextmenu`
-`oncuechange` | `ondblclick`
-`ondrag` | `ondragend`
-`ondragenter` | `ondragleave`
-`ondragover` | `ondragstart`
-`ondrop` | `ondurationchange`
-`onemptied` | `onended`
-`onerror` | `onfocus`
-`onformdata` | `ongotpointercapture`
-`oninput` | `oninvalid`
-`onkeydown` | `onkeypress`
-`onkeyup` | `onload`
-`onloadeddata` | `onloadedmetadata`
-`onloadstart` | `onlostpointercapture`
-`onmousedown` | `onmouseenter`
-`onmouseleave` | `onmousemove`
-`onmouseout` | `onmouseover`
-`onmouseup` | `onpause`
-`onplay` | `onplaying`
-`onpointercancel` | `onpointerdown`
-`onpointerenter` | `onpointerleave`
-`onpointermove` | `onpointerout`
-`onpointerover` | `onpointerup`
-`onprogress` | `onratechange`
-`onreset` | `onresize`
-`onscroll` | `onseeked`
-`onseeking` | `onselect`
-`onselectionchange` | `onselectstart`
-`onstalled` | `onsubmit`
-`onsuspend` | `ontimeupdate`
-`ontouchcancel` | `ontouchend`
-`ontouchmove` | `ontouchstart`
-`ontransitionend` | `onvolumechange`
-`onwaiting` | `onwheel`
-`dataset` | `nonce`
-`tabIndex` | `assignedSlot` | 
+ | `onfullscreenchange` | `onfullscreenerror`
+`oncopy` | `oncut`
+`onpaste` | `style`
+`contentEditable` | `isContentEditable`
+`onabort` | `onanimationend`
+`onanimationiteration` | `onanimationstart`
+`onauxclick` | `onblur`
+`oncancel` | `oncanplay`
+`oncanplaythrough` | `onchange`
+`onclick` | `onclose`
+`oncontextmenu` | `oncuechange`
+`ondblclick` | `ondrag`
+`ondragend` | `ondragenter`
+`ondragleave` | `ondragover`
+`ondragstart` | `ondrop`
+`ondurationchange` | `onemptied`
+`onended` | `onerror`
+`onfocus` | `onformdata`
+`ongotpointercapture` | `oninput`
+`oninvalid` | `onkeydown`
+`onkeypress` | `onkeyup`
+`onload` | `onloadeddata`
+`onloadedmetadata` | `onloadstart`
+`onlostpointercapture` | `onmousedown`
+`onmouseenter` | `onmouseleave`
+`onmousemove` | `onmouseout`
+`onmouseover` | `onmouseup`
+`onpause` | `onplay`
+`onplaying` | `onpointercancel`
+`onpointerdown` | `onpointerenter`
+`onpointerleave` | `onpointermove`
+`onpointerout` | `onpointerover`
+`onpointerup` | `onprogress`
+`onratechange` | `onreset`
+`onresize` | `onscroll`
+`onseeked` | `onseeking`
+`onselect` | `onselectionchange`
+`onselectstart` | `onstalled`
+`onsubmit` | `onsuspend`
+`ontimeupdate` | `ontouchcancel`
+`ontouchend` | `ontouchmove`
+`ontouchstart` | `ontransitionend`
+`onvolumechange` | `onwaiting`
+`onwheel` | `dataset`
+`nonce` | `tabIndex`
+`assignedSlot` |  | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

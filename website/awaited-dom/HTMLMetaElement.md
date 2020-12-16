@@ -4,6 +4,30 @@
 
 ## Properties
 
+### elem.content <div class="specs"><i>W3C</i></div> {#content}
+
+Gets or sets the value of meta-data property.
+
+#### **Type**: `Promise<string>`
+
+### elem.httpEquiv <div class="specs"><i>W3C</i></div> {#httpEquiv}
+
+Gets or sets the name of an HTTP&nbsp;response header to define for a document.
+
+#### **Type**: `Promise<string>`
+
+### elem.name <div class="specs"><i>W3C</i></div> {#name}
+
+Gets or sets the name of a meta-data property to define for a document.
+
+#### **Type**: `Promise<string>`
+
+### elem.scheme <div class="specs"><i>W3C</i></div> {#scheme}
+
+Gets or sets the name of a scheme used to interpret the value of a meta-data property.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +457,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,9 +801,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `content` | `httpEquiv`
-`name` | `scheme`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -824,20 +852,20 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

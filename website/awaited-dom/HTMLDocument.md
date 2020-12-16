@@ -337,6 +337,24 @@ Returns / Sets the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 
+### doc.activeElement <div class="specs"><i>W3C</i></div> {#activeElement}
+
+Returns the <code>Element</code> within the shadow tree that has focus.
+
+#### **Type**: [`SuperElement`](./super-element)
+
+### doc.fullscreenElement <div class="specs"><i>W3C</i></div> {#fullscreenElement}
+
+Returns the <code>Element</code> that's currently in full screen mode for this document.
+
+#### **Type**: [`SuperElement`](./super-element)
+
+### doc.pointerLockElement <div class="specs"><i>W3C</i></div> {#pointerLockElement}
+
+Returns the element set as the target for mouse events while the pointer is locked. It returns&nbsp;<code>null</code> if lock is pending, the pointer is unlocked, or if the target is in another document.
+
+#### **Type**: [`SuperElement`](./super-element)
+
 ### doc.childElementCount <div class="specs"><i>W3C</i></div> {#childElementCount}
 
 Returns the number of children of this <code>ParentNode</code> which are elements.
@@ -529,6 +547,36 @@ Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### **Returns**: `Promise<void>`
 
+### doc.caretPositionFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#caretPositionFromPoint}
+
+Returns a <code>CaretPosition</code> object containing the DOM node containing the caret, and caret's character offset within that node.
+
+#### **Arguments**:
+
+
+ - x `number`. The horizontal coordinate of a point.
+ - y `number`. The vertical coordinate of a point.
+
+#### **Returns**: `CaretPosition`
+
+### doc.elementFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#elementFromPoint}
+
+Returns the topmost element at the specified coordinates.
+
+#### **Arguments**:
+
+
+ - x `number`. The horizontal coordinate of a point, relative to the left edge of the current viewport.
+ - y `number`. The vertical coordinate of a point, relative to the top edge of the current viewport.
+
+#### **Returns**: [`SuperElement`](./super-element)
+
+### doc.getSelection*()* <div class="specs"><i>W3C</i></div> {#getSelection}
+
+Returns a <code>Selection</code> object representing the range of text selected by the user, or the current position of the caret.
+
+#### **Returns**: `Selection`
+
 ### doc.getElementById*(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
 
 Needs content.
@@ -600,48 +648,47 @@ Evaluates an XPath expression string and returns a result of the specified type 
 `onpointerlockchange` | `onpointerlockerror`
 `onreadystatechange` | `onvisibilitychange`
 `oncopy` | `oncut`
-`onpaste` | `activeElement`
-`fullscreenElement` | `pointerLockElement`
-`fonts` | `onabort`
-`onanimationend` | `onanimationiteration`
-`onanimationstart` | `onauxclick`
-`onblur` | `oncancel`
-`oncanplay` | `oncanplaythrough`
-`onchange` | `onclick`
-`onclose` | `oncontextmenu`
-`oncuechange` | `ondblclick`
-`ondrag` | `ondragend`
-`ondragenter` | `ondragleave`
-`ondragover` | `ondragstart`
-`ondrop` | `ondurationchange`
-`onemptied` | `onended`
-`onerror` | `onfocus`
-`onformdata` | `ongotpointercapture`
-`oninput` | `oninvalid`
-`onkeydown` | `onkeypress`
-`onkeyup` | `onload`
-`onloadeddata` | `onloadedmetadata`
-`onloadstart` | `onlostpointercapture`
-`onmousedown` | `onmouseenter`
-`onmouseleave` | `onmousemove`
-`onmouseout` | `onmouseover`
-`onmouseup` | `onpause`
-`onplay` | `onplaying`
-`onpointercancel` | `onpointerdown`
-`onpointerenter` | `onpointerleave`
-`onpointermove` | `onpointerout`
-`onpointerover` | `onpointerup`
-`onprogress` | `onratechange`
-`onreset` | `onresize`
-`onscroll` | `onseeked`
-`onseeking` | `onselect`
-`onselectionchange` | `onselectstart`
-`onstalled` | `onsubmit`
-`onsuspend` | `ontimeupdate`
-`ontouchcancel` | `ontouchend`
-`ontouchmove` | `ontouchstart`
-`ontransitionend` | `onvolumechange`
-`onwaiting` | `onwheel` | 
+`onpaste` | `fonts`
+`onabort` | `onanimationend`
+`onanimationiteration` | `onanimationstart`
+`onauxclick` | `onblur`
+`oncancel` | `oncanplay`
+`oncanplaythrough` | `onchange`
+`onclick` | `onclose`
+`oncontextmenu` | `oncuechange`
+`ondblclick` | `ondrag`
+`ondragend` | `ondragenter`
+`ondragleave` | `ondragover`
+`ondragstart` | `ondrop`
+`ondurationchange` | `onemptied`
+`onended` | `onerror`
+`onfocus` | `onformdata`
+`ongotpointercapture` | `oninput`
+`oninvalid` | `onkeydown`
+`onkeypress` | `onkeyup`
+`onload` | `onloadeddata`
+`onloadedmetadata` | `onloadstart`
+`onlostpointercapture` | `onmousedown`
+`onmouseenter` | `onmouseleave`
+`onmousemove` | `onmouseout`
+`onmouseover` | `onmouseup`
+`onpause` | `onplay`
+`onplaying` | `onpointercancel`
+`onpointerdown` | `onpointerenter`
+`onpointerleave` | `onpointermove`
+`onpointerout` | `onpointerover`
+`onpointerup` | `onprogress`
+`onratechange` | `onreset`
+`onresize` | `onscroll`
+`onseeked` | `onseeking`
+`onselect` | `onselectionchange`
+`onselectstart` | `onstalled`
+`onsubmit` | `onsuspend`
+`ontimeupdate` | `ontouchcancel`
+`ontouchend` | `ontouchmove`
+`ontouchstart` | `ontransitionend`
+`onvolumechange` | `onwaiting`
+`onwheel` |  | 
 
 #### Methods
 
@@ -662,7 +709,5 @@ Evaluates an XPath expression string and returns a result of the specified type 
 `insertBefore()` | `removeChild()`
 `replaceChild()` | `addEventListener()`
 `dispatchEvent()` | `removeEventListener()`
-`caretPositionFromPoint()` | `elementFromPoint()`
-`elementsFromPoint()` | `getSelection()`
-`append()` | `prepend()`
-`createNSResolver()` |  | 
+`elementsFromPoint()` | `append()`
+`prepend()` | `createNSResolver()` | 

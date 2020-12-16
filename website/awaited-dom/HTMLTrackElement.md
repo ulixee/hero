@@ -4,6 +4,82 @@
 
 ## Properties
 
+### elem.default <div class="specs"><i>W3C</i></div> {#default}
+
+A `boolean` reflecting the <code>default</code>&nbsp; attribute,&nbsp;indicating&nbsp;that the track is to be enabled if the user's preferences do not indicate that another track would be more appropriate.
+
+#### **Type**: `Promise<boolean>`
+
+### elem.kind <div class="specs"><i>W3C</i></div> {#kind}
+
+Is a `string` that reflects the <code>kind</code>&nbsp;HTML attribute,&nbsp;indicating&nbsp;how the text track is meant to be used. Possible values are: <code>subtitles</code>, <code>captions</code>, <code>descriptions</code>, <code>chapters</code>, or <code>metadata</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.label <div class="specs"><i>W3C</i></div> {#label}
+
+Is a `string` that reflects the&nbsp;<code>label</code>&nbsp;HTML attribute,&nbsp;indicating&nbsp;a user-readable title for the track.
+
+#### **Type**: `Promise<string>`
+
+### elem.readyState <div class="specs"><i>W3C</i></div> {#readyState}
+
+Returns&nbsp; an <code>unsigned short</code> that show the readiness state of the track:
+ 
+<code class="language-html">
+    <table class="standard-table">
+  <tbody>
+   <tr>
+    <td class="header">Constant</td>
+    <td class="header">Value</td>
+    <td class="header">Description</td>
+   </tr>
+   <tr>
+    <td><code>NONE</code></td>
+    <td>0</td>
+    <td>Indicates that the text track's cues have not been obtained.</td>
+   </tr>
+   <tr>
+    <td><code>LOADING</code></td>
+    <td>1</td>
+    <td>Indicates that the text track is loading and there have been no fatal errors encountered so far. Further cues might still be added to the track by the parser.</td>
+   </tr>
+   <tr>
+    <td><code>LOADED</code></td>
+    <td>2</td>
+    <td>Indicates that the text track has been loaded with no fatal errors.</td>
+   </tr>
+   <tr>
+    <td><code>ERROR</code></td>
+    <td>3</td>
+    <td>Indicates that the text track was enabled, but when the user agent attempted to obtain it, this failed in some way. Some or all of the cues are likely missing and will not be obtained.</td>
+   </tr>
+  </tbody>
+ </table>
+</code>
+
+ 
+
+#### **Type**: `Promise<number>`
+
+### elem.src <div class="specs"><i>W3C</i></div> {#src}
+
+Is a `string` that reflects the&nbsp;<code>src</code>&nbsp;HTML attribute, indicating the address of the text track data.
+
+#### **Type**: `Promise<string>`
+
+### elem.srclang <div class="specs"><i>W3C</i></div> {#srclang}
+
+Is a `string` that reflects the&nbsp;<code>srclang</code>&nbsp;HTML attribute,&nbsp;indicating the language of the text track data.
+
+#### **Type**: `Promise<string>`
+
+### elem.track <div class="specs"><i>W3C</i></div> {#track}
+
+Returns <code>TextTrack</code> is the track element's text track data.
+
+#### **Type**: `Promise<TextTrack>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -433,6 +509,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
 
 #### **Returns**: [`SuperElement`](./super-element)
 
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
+
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
 Retrieves the value of the named attribute from the current node and returns it as an <code>Object</code>.
@@ -771,74 +853,71 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `default` | `kind`
-`label` | `readyState`
-`src` | `srclang`
-`track` | `onfullscreenchange`
-`onfullscreenerror` | `oncopy`
-`oncut` | `onpaste`
-`style` | `contentEditable`
-`isContentEditable` | `onabort`
-`onanimationend` | `onanimationiteration`
-`onanimationstart` | `onauxclick`
-`onblur` | `oncancel`
-`oncanplay` | `oncanplaythrough`
-`onchange` | `onclick`
-`onclose` | `oncontextmenu`
-`oncuechange` | `ondblclick`
-`ondrag` | `ondragend`
-`ondragenter` | `ondragleave`
-`ondragover` | `ondragstart`
-`ondrop` | `ondurationchange`
-`onemptied` | `onended`
-`onerror` | `onfocus`
-`onformdata` | `ongotpointercapture`
-`oninput` | `oninvalid`
-`onkeydown` | `onkeypress`
-`onkeyup` | `onload`
-`onloadeddata` | `onloadedmetadata`
-`onloadstart` | `onlostpointercapture`
-`onmousedown` | `onmouseenter`
-`onmouseleave` | `onmousemove`
-`onmouseout` | `onmouseover`
-`onmouseup` | `onpause`
-`onplay` | `onplaying`
-`onpointercancel` | `onpointerdown`
-`onpointerenter` | `onpointerleave`
-`onpointermove` | `onpointerout`
-`onpointerover` | `onpointerup`
-`onprogress` | `onratechange`
-`onreset` | `onresize`
-`onscroll` | `onseeked`
-`onseeking` | `onselect`
-`onselectionchange` | `onselectstart`
-`onstalled` | `onsubmit`
-`onsuspend` | `ontimeupdate`
-`ontouchcancel` | `ontouchend`
-`ontouchmove` | `ontouchstart`
-`ontransitionend` | `onvolumechange`
-`onwaiting` | `onwheel`
-`dataset` | `nonce`
-`tabIndex` | `assignedSlot` | 
+ | `onfullscreenchange` | `onfullscreenerror`
+`oncopy` | `oncut`
+`onpaste` | `style`
+`contentEditable` | `isContentEditable`
+`onabort` | `onanimationend`
+`onanimationiteration` | `onanimationstart`
+`onauxclick` | `onblur`
+`oncancel` | `oncanplay`
+`oncanplaythrough` | `onchange`
+`onclick` | `onclose`
+`oncontextmenu` | `oncuechange`
+`ondblclick` | `ondrag`
+`ondragend` | `ondragenter`
+`ondragleave` | `ondragover`
+`ondragstart` | `ondrop`
+`ondurationchange` | `onemptied`
+`onended` | `onerror`
+`onfocus` | `onformdata`
+`ongotpointercapture` | `oninput`
+`oninvalid` | `onkeydown`
+`onkeypress` | `onkeyup`
+`onload` | `onloadeddata`
+`onloadedmetadata` | `onloadstart`
+`onlostpointercapture` | `onmousedown`
+`onmouseenter` | `onmouseleave`
+`onmousemove` | `onmouseout`
+`onmouseover` | `onmouseup`
+`onpause` | `onplay`
+`onplaying` | `onpointercancel`
+`onpointerdown` | `onpointerenter`
+`onpointerleave` | `onpointermove`
+`onpointerout` | `onpointerover`
+`onpointerup` | `onprogress`
+`onratechange` | `onreset`
+`onresize` | `onscroll`
+`onseeked` | `onseeking`
+`onselect` | `onselectionchange`
+`onselectstart` | `onstalled`
+`onsubmit` | `onsuspend`
+`ontimeupdate` | `ontouchcancel`
+`ontouchend` | `ontouchmove`
+`ontouchstart` | `ontransitionend`
+`onvolumechange` | `onwaiting`
+`onwheel` | `dataset`
+`nonce` | `tabIndex`
+`assignedSlot` |  | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 

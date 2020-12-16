@@ -4,6 +4,54 @@
 
 ## Properties
 
+### elem.align <div class="specs"><i>W3C</i></div> {#align}
+
+Is a `string` containing an enumerated value reflecting the <code>align</code> attribute. It indicates the alignment of the element's contents with respect to the surrounding context. The possible values are <code>"left"</code>, <code>"right"</code>, and <code>"center"</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.bgColor <div class="specs"><i>W3C</i></div> {#bgColor}
+
+Is a `string` containing the background color of the cells. It reflects the obsolete <code>bgcolor</code> attribute.
+
+#### **Type**: `Promise<string>`
+
+### elem.cells <div class="specs"><i>W3C</i></div> {#cells}
+
+Returns a live <code>HTMLCollection</code> containing the cells in the row. The <code>HTMLCollection</code> is live and is automatically updated when cells are added or removed.
+
+#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+
+### elem.ch <div class="specs"><i>W3C</i></div> {#ch}
+
+Is a `string` containing one single character. This character is the one to align all the cell of a column on. It reflects the <code>char</code> and default to the decimal points associated with the language, e.g. <code>'.'</code> for English, or <code>','</code> for French. This property was optional and was not very well supported.
+
+#### **Type**: `Promise<string>`
+
+### elem.chOff <div class="specs"><i>W3C</i></div> {#chOff}
+
+Is a `string` containing a integer indicating how many characters must be left at the right (for left-to-right scripts; or at the left for right-to-left scripts) of the character defined by <code>HTMLTableRowElement.ch</code>. This property was optional and was not very well supported.
+
+#### **Type**: `Promise<string>`
+
+### elem.rowIndex <div class="specs"><i>W3C</i></div> {#rowIndex}
+
+Returns a <code>long</code> value which gives the logical position of the row within the entire table. If the row is not part of a table, returns <code>-1</code>.
+
+#### **Type**: `Promise<number>`
+
+### elem.sectionRowIndex <div class="specs"><i>W3C</i></div> {#sectionRowIndex}
+
+Returns a <code>long</code> value which gives the logical position of the row within the table section it belongs to. If the row is not part of a section, returns <code>-1</code>.
+
+#### **Type**: `Promise<number>`
+
+### elem.vAlign <div class="specs"><i>W3C</i></div> {#vAlign}
+
+Is a `string` representing an enumerated value indicating how the content of the cell must be vertically aligned. It reflects the <code>valign</code> attribute and can have one of the following values: <code>"top"</code>, <code>"middle"</code>, <code>"bottom"</code>, or <code>"baseline"</code>.
+
+#### **Type**: `Promise<string>`
+
 ### elem.accessKey <div class="specs"><i>W3C</i></div> {#accessKey}
 
 Is a `string` representing the access key assigned to the element.
@@ -415,6 +463,28 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 ## Methods
 
+### elem.deleteCell*(index)* <div class="specs"><i>W3C</i></div> {#deleteCell}
+
+Removes the cell at the given position in the row. If the given position is greater (or equal as it starts at zero) than the amount of cells in the row, or is smaller than <code>0</code>, it raises a <code>DOMException</code> with the <code>IndexSizeError</code> value.
+
+#### **Arguments**:
+
+
+ - index `number`. Needs content.
+
+#### **Returns**: `Promise<void>`
+
+### elem.insertCell*(index?)* <div class="specs"><i>W3C</i></div> {#insertCell}
+
+Inserts a new cell just before the given position in the row. If the given position is not given or is <code>-1</code>, it appends the cell to the row. If the given position is greater (or equal as it starts at zero) than the amount of cells in the row, or is smaller than <code>-1</code>, it raises a <code>DOMException</code> with the <code>IndexSizeError</code> value. Returns a reference to a HTMLTableCellElement [en-US].
+
+#### **Arguments**:
+
+
+ - index `number`. <code>index</code> is the cell index of the new cell. If <code>index</code> is <code>-1</code> or equal to the number of cells, the cell is appended as the last cell in the row. If <code>index</code> is greater than the number of cells, an <code>IndexSizeError</code> exception will result. If <code>index</code> is omitted it defaults to <code>-1</code>.
+
+#### **Returns**: [`HTMLTableCellElement`](./html-table-cell-element)
+
 ### elem.click*()* <div class="specs"><i>W3C</i></div> {#click}
 
 Sends a mouse click event to the element.
@@ -432,6 +502,12 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
+
+### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
+
+Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
+
+#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -771,11 +847,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `align` | `bgColor`
-`cells` | `ch`
-`chOff` | `rowIndex`
-`sectionRowIndex` | `vAlign`
-`onfullscreenchange` | `onfullscreenerror`
+ | `onfullscreenchange` | `onfullscreenerror`
 `oncopy` | `oncut`
 `onpaste` | `style`
 `contentEditable` | `isContentEditable`
@@ -826,21 +898,20 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `deleteCell()` | `insertCell()`
-`attachShadow()` | `computedStyleMap()`
-`insertAdjacentElement()` | `insertAdjacentHTML()`
-`insertAdjacentText()` | `releasePointerCapture()`
-`removeAttribute()` | `removeAttributeNode()`
-`removeAttributeNS()` | `scroll()`
-`scrollBy()` | `scrollTo()`
-`setAttribute()` | `setAttributeNode()`
-`setAttributeNodeNS()` | `setAttributeNS()`
-`setPointerCapture()` | `toggleAttribute()`
-`appendChild()` | `cloneNode()`
-`insertBefore()` | `removeChild()`
-`replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()`
-`animate()` | `getAnimations()`
-`after()` | `before()`
-`remove()` | `replaceWith()`
-`append()` | `prepend()` | 
+ | `attachShadow()` | `insertAdjacentElement()`
+`insertAdjacentHTML()` | `insertAdjacentText()`
+`releasePointerCapture()` | `removeAttribute()`
+`removeAttributeNode()` | `removeAttributeNS()`
+`scroll()` | `scrollBy()`
+`scrollTo()` | `setAttribute()`
+`setAttributeNode()` | `setAttributeNodeNS()`
+`setAttributeNS()` | `setPointerCapture()`
+`toggleAttribute()` | `appendChild()`
+`cloneNode()` | `insertBefore()`
+`removeChild()` | `replaceChild()`
+`addEventListener()` | `dispatchEvent()`
+`removeEventListener()` | `animate()`
+`getAnimations()` | `after()`
+`before()` | `remove()`
+`replaceWith()` | `append()`
+`prepend()` |  | 
