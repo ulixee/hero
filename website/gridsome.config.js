@@ -60,5 +60,23 @@ module.exports = {
         },
       },
     },
+    {
+      use: '@gridsome/vue-remark',
+      options: {
+        baseDir: './blog',
+        pathPrefix: '/blog',
+        typeName: 'Post',
+        template: './src/templates/BlogPost.vue',
+        plugins: ['@gridsome/remark-prismjs'],
+        remark: {
+          autolinkHeadings: {
+            content: {
+              type: 'text',
+              value: '#',
+            },
+          },
+        },
+      },
+    },
   ],
 };

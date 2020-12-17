@@ -19,7 +19,7 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   message: ICoreResponsePayload | ICoreEventPayload;
 }> {
   public isClosing = false;
-  public isPersistent = false;
+  public isPersistent = true;
   public autoShutdownMillis = 500;
 
   private autoShutdownTimer: NodeJS.Timer;
@@ -78,7 +78,7 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   public async connect(
     options: ICoreConfigureOptions & { isPersistent?: boolean } = {},
   ): Promise<{ maxConcurrency: number; browserEmulatorIds: string[] }> {
-    this.isPersistent = options.isPersistent ?? false;
+    this.isPersistent = options.isPersistent ?? true;
     this.isClosing = false;
     await Core.start(options, false);
     return {

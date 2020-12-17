@@ -31,10 +31,11 @@ describe('basic Core tests', () => {
     await Core.shutdown();
   });
 
-  it('shuts down if connect not called manually and Core.start not called', async () => {
+  it('shuts down if connect set to be not persistent and Core.start not called', async () => {
     shutdownSpy.mockClear();
 
     const connection = Core.addConnection();
+    await connection.connect({ isPersistent: false });
     Helpers.onClose(() => connection.disconnect());
     const connectionCloseSpy = jest.spyOn(connection, 'disconnect');
     connection.autoShutdownMillis = 0;

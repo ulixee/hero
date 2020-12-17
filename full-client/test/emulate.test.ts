@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import { GlobalPool } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
+import Viewports from '@secret-agent/core/lib/Viewports';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -117,7 +117,7 @@ describe('setScreensize', () => {
       frameBorderHeight: 0,
     };
     const viewport = Viewports.getDefault(windowFraming, windowFraming);
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       viewport,
     });
     Helpers.needsClosing.push(agent);

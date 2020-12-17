@@ -16,8 +16,8 @@ import { Handler, Agent } from '@secret-agent/full-client';
 
   handler.dispatchAgent(async agent => {
     await agent.goto('https://ulixee.org');
-    const links = await agent.document.querySelectorAll('a.DatasetSummary');
-    for (const link of links) {
+    const datasetLinks = await agent.document.querySelectorAll('a.DatasetSummary');
+    for (const link of datasetLinks) {
       const name = await link.querySelector('.title').textContent;
       const href = await link.getAttribute('href');
       const dataset = { name, href };

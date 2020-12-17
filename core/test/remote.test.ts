@@ -66,11 +66,11 @@ describe('basic remote connection tests', () => {
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await agent.goto(url);
+    await customAgent.goto(url);
 
-    const html = await agent.document.documentElement.outerHTML;
+    const html = await customAgent.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await agent.close();
+    await customAgent.close();
   });
 });

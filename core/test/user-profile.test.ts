@@ -13,6 +13,7 @@ let connection: CoreServerConnection;
 beforeAll(async () => {
   connection = Core.addConnection();
   await connection.connect();
+  Helpers.onClose(() => connection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -174,7 +175,7 @@ describe('UserProfile cookie tests', () => {
 describe('UserProfile Dom storage tests', () => {
   it('should be able to save and restore local/session storage', async () => {
     const meta = await connection.createSession();
-    const core = Session.getTab(meta);
+    const tab = Session.getTab(meta);
 
     koaServer.get('/local', ctx => {
       ctx.body = `<body>
@@ -211,8 +212,8 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
 </body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/local`);
-    await core.waitForLoad('AllContentLoaded');
+    await tab.goto(`${koaServer.baseUrl}/local`);
+    await tab.waitForLoad('AllContentLoaded');
 
     const profile = await connection.exportUserProfile(meta);
     expect(profile.cookies).toHaveLength(0);
@@ -222,26 +223,26 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     const meta2 = await connection.createSession({
       userProfile: profile,
     });
-    const core2 = Session.getTab(meta2);
+    const tab2 = Session.getTab(meta2);
 
-    await core2.goto(`${koaServer.baseUrl}/localrestore`);
-    await core2.waitForLoad('AllContentLoaded');
+    await tab2.goto(`${koaServer.baseUrl}/localrestore`);
+    await tab2.waitForLoad('AllContentLoaded');
 
-    const localContent = await core2.execJsPath([
+    const localContent = await tab2.execJsPath([
       'document',
       ['querySelector', '#local'],
       'textContent',
     ]);
     expect(localContent.value).toBe('value1,,value3');
-    const sessionContent = await core2.execJsPath([
+    const sessionContent = await tab2.execJsPath([
       'document',
       ['querySelector', '#session'],
       'textContent',
     ]);
     expect(sessionContent.value).toBe('value1,value2,');
 
-    await core.close();
-    await core2.close();
+    await tab.close();
+    await tab2.close();
   });
 
   it('should not make requests to end sites during profile "install"', async () => {
@@ -279,7 +280,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
         cookies: [],
       },
     });
-    const core = Session.getTab(meta);
+    const tab = Session.getTab(meta);
 
     koaServer.get('/local-change-pre', ctx => {
       ctx.body = `<body>
@@ -300,28 +301,28 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
 </body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/local-change-pre`);
-    await core.waitForLoad('AllContentLoaded');
+    await tab.goto(`${koaServer.baseUrl}/local-change-pre`);
+    await tab.waitForLoad('AllContentLoaded');
 
     const profile = await connection.exportUserProfile(meta);
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
     expect(profile.storage[koaServer.baseUrl]?.localStorage[0][1]).toBe('changed');
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
 
-    const localContent = await core.execJsPath([
+    const localContent = await tab.execJsPath([
       'document',
       ['querySelector', '#local'],
       'textContent',
     ]);
     expect(localContent.value).toBe('changed');
 
-    await core.close();
+    await tab.close();
   });
 
   it('should store cross domain domStorage items', async () => {
