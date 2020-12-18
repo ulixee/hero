@@ -94,7 +94,7 @@ export default class BaseOverlay {
   }
 
   public hide() {
-    if (!this.browserWindow) return;
+    if (!this.browserWindow || this.browserWindow.isDestroyed()) return;
     if (!this.visible) return;
 
     this.browserWindow.removeBrowserView(this.browserView);

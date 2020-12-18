@@ -89,7 +89,6 @@ export default class ReplayView extends ViewBackend {
   }
 
   public fixBounds(newBounds: { x: number; width: number; y: any; height: number }) {
-    console.log('fixing bounds', newBounds, this.browserView.getBounds());
     this.playbarView.fixBounds({
       x: 0,
       y: newBounds.height + newBounds.y,
@@ -103,7 +102,6 @@ export default class ReplayView extends ViewBackend {
 
   public attach() {
     if (this.isAttached) return;
-    console.log('attaching replay');
     super.attach();
     this.playbarView.attach();
     this.interceptHttpRequests();

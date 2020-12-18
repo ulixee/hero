@@ -90,6 +90,9 @@ export default class Application {
       if (key === '--replay-api-path') {
         ReplayApi.serverStartPath = value;
       }
+      if (key === '--replay-node-path') {
+        ReplayApi.nodePath = value;
+      }
     }
 
     if (this.shouldAppendToOpenReplayScript(replayMeta)) return;

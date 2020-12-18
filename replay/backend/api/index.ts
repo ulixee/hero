@@ -12,6 +12,7 @@ import ReplayTime from '~backend/api/ReplayTime';
 export default class ReplayApi {
   public static serverProcess: ChildProcess;
   public static serverStartPath: string;
+  public static nodePath: string;
   private static sessions = new Set<http2.ClientHttp2Session>();
   private static localApiHost: string;
 
@@ -21,6 +22,7 @@ export default class ReplayApi {
   public lastActivityDate: Date;
   public lastCommandName: string;
   public showUnresponsiveMessage = true;
+  public hasAllData = false;
 
   public onNewTab?: (tab: ReplayTabState) => any;
 
@@ -52,25 +54,34 @@ export default class ReplayApi {
     ReplayApi.sessions.add(this.http2Session);
     this.http2Session.on('close', () => {
       ReplayApi.sessions.delete(this.http2Session);
+      this.http2Session.unref();
       console.log('Http2 Session closed');
     });
     this.http2Session.on('stream', this.onStream.bind(this));
 
     const request = this.http2Session
-      .request({
-        ':path': `/`,
-        'data-location': this.saSession.dataLocation,
-        'session-name': this.saSession.name,
-        'session-id': this.saSession.id,
-        'script-instance-id': this.saSession.scriptInstanceId,
-        'script-entrypoint': this.saSession.scriptEntrypoint,
-      })
+      .request(
+        {
+          ':path': `/`,
+          'data-location': this.saSession.dataLocation,
+          'session-name': this.saSession.name,
+          'session-id': this.saSession.id,
+          'script-instance-id': this.saSession.scriptInstanceId,
+          'script-entrypoint': this.saSession.scriptEntrypoint,
+        },
+        { waitForTrailers: true },
+      )
       .on('response', async headers => {
         const status = headers[':status'];
         if (status !== 200) {
           const data = await streamToJson<{ message: string }>(request);
           this.isReadyResolvable.reject(new Error(data.message ?? 'Unexpected Error'));
         }
+      })
+      .on('trailers', trailers => {
+        console.log('Got Replay API Trailer', trailers);
+        this.hasAllData = true;
+        for (const tab of this.tabs) tab.hasAllData = true;
       });
   }
 
@@ -194,8 +205,8 @@ export default class ReplayApi {
       !!ReplayApi.serverProcess,
       ReplayApi.sessions.size,
     );
-    if (ReplayApi.serverProcess) ReplayApi.serverProcess.kill();
     for (const session of ReplayApi.sessions) session.destroy();
+    if (ReplayApi.serverProcess) ReplayApi.serverProcess.kill();
   }
 
   public static async connect(replay: IReplayMeta) {
@@ -217,8 +228,9 @@ export default class ReplayApi {
       const replayDir = __dirname.split(`${Path.sep}replay${Path.sep}`).shift();
       this.serverStartPath = Path.resolve(replayDir, 'session-state/api/start');
     }
+    if (!this.nodePath) this.nodePath = 'node';
     console.log('Launching Replay API Server at %s', this.serverStartPath);
-    const child = spawn(`node "${this.serverStartPath}"`, args, {
+    const child = spawn(`${this.nodePath} "${this.serverStartPath}"`, args, {
       stdio: ['ignore', 'pipe', 'inherit'],
       shell: true,
       windowsHide: true,
@@ -229,6 +241,9 @@ export default class ReplayApi {
       },
     });
     this.serverProcess = child;
+    this.serverProcess.once('exit', () => {
+      this.serverProcess = null;
+    });
 
     child.stdout.setEncoding('utf8');
     const promise = await new Promise(resolve => {
