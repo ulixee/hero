@@ -18,6 +18,7 @@ export default class ReplayView extends ViewBackend {
   public tabState: ReplayTabState;
   public readonly playbarView: PlaybarView;
 
+  private isTabLoaded = false;
   private lastInactivityMillis = 0;
 
   public constructor(window: Window) {
@@ -55,6 +56,7 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async loadTab(id?: string) {
+    this.isTabLoaded = false;
     await this.clearTabState();
     this.attach();
 
@@ -75,6 +77,7 @@ export default class ReplayView extends ViewBackend {
       new Promise(resolve => setTimeout(resolve, 500)),
     ]);
 
+    this.isTabLoaded = true;
     this.sizeWebContentsToFit();
 
     if (this.tabState.currentPlaybarOffsetPct > 0) {
@@ -166,7 +169,7 @@ export default class ReplayView extends ViewBackend {
   }
 
   public sizeWebContentsToFit() {
-    if (!this.tabState) return;
+    if (!this.tabState || !this.isTabLoaded) return;
     const screenSize = this.browserView.getBounds();
 
     const viewSize = {

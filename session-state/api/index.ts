@@ -159,7 +159,10 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
       for (const pending of allPending) resolvedPromises.add(pending);
       await new Promise(setImmediate);
     }
-    stream.sendTrailers({ 'pushes-sent': resolvedPromises.size });
+
+    if (!stream.destroyed) {
+      stream.sendTrailers({ 'pushes-sent': resolvedPromises.size });
+    }
     activeClients.delete(sessionId);
   }
 
