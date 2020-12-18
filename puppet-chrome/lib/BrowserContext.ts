@@ -113,11 +113,11 @@ export class BrowserContext
     }
   }
 
-  onWorkerAttached(cdpSession: CDPSession, worker: Worker, pageTargetId: string) {
+  onWorkerAttached(cdpSession: CDPSession, workerTargetId: string, pageTargetId: string) {
     this.subscribeToDevtoolsMessages(cdpSession, {
       sessionType: 'worker' as const,
       pageTargetId,
-      workerTargetId: worker.id,
+      workerTargetId,
     });
   }
 

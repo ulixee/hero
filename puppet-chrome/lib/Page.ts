@@ -288,6 +288,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
     if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
+      this.browserContext.onWorkerAttached(cdpSession, targetInfo.targetId, this.targetId);
       const worker = new Worker(
         this.browserContext,
         this.networkManager,
@@ -295,7 +296,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         this.logger,
         targetInfo,
       );
-      this.browserContext.onWorkerAttached(cdpSession, worker, this.targetId);
       const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 
