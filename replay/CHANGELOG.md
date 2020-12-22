@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
+
+
+### Bug Fixes
+
+* **replay:** replay crashes on win10 during load ([b6e517b](https://github.com/ulixee/secret-agent/commit/b6e517bcd6a66bf206c8a2436374cca401f5b00d))
+* **replay:** shutting down before example load ([937fd9b](https://github.com/ulixee/secret-agent/commit/937fd9b3452053687c13760c643141b7eab6534a))
+
+
+
+
+
 # [1.2.0-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.2...v1.2.0-alpha.3) (2020-12-16)
 
 

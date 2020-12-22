@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/emulate-humans-ghost",
-  "version": "1.2.0-alpha.3",
+  "version": "1.2.0-alpha.4",
   "description": "HumanEmulator based on Xetera/ghost-cursor for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.2.0-alpha.3",
+    "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "bezier-js": "^2.6.1"
   }
 }
