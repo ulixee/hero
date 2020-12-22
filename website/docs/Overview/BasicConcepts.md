@@ -11,7 +11,7 @@
 - screen details
 - 100s more
 
-Node: IP addresses are set through UpstreamProxy.
+Note: IP addresses are set through UpstreamProxy.
 
 ## The DOM Has Finally Been Awaited
 
