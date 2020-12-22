@@ -407,7 +407,7 @@ export default class SessionState {
     const hasRecentErrors = this.lastErrorTime >= lastSuccessDate;
 
     const lastCommand = this.lastCommand;
-    let lastActivityDate = lastSuccessDate;
+    let lastActivityDate = lastSuccessDate ? new Date(lastSuccessDate) : null;
     let lastCommandName: string;
     if (lastCommand) {
       lastCommandName = lastCommand.name;

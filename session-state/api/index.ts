@@ -3,6 +3,7 @@ import Logger from '@secret-agent/commons/Logger';
 import { AddressInfo } from 'net';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { createPromise } from '@secret-agent/commons/utils';
 import SessionLoader from './SessionLoader';
 import SessionDb from '../lib/SessionDb';
 import ISessionReplayServer from '../interfaces/ISessionReplayServer';
@@ -10,88 +11,128 @@ import ISessionReplayServer from '../interfaces/ISessionReplayServer';
 const { log } = Logger(module);
 
 export async function createReplayServer(listenPort?: number): Promise<ISessionReplayServer> {
-  const activeClients = new Set<http2.Http2ServerResponse>();
-  const server = http2.createServer((req, res) => {
-    activeClients.add(res);
-    const sessionId = req.headers['session-id'] as string;
+  const activeClients = new Map<
+    string,
+    { stream: http2.ServerHttp2Stream; pendingPushes: Promise<any>[] }
+  >();
+  const server = http2.createServer();
 
+  server.on('error', err => {
+    log.error('Replay server error', {
+      error: err,
+      sessionId: null,
+    });
+  });
+
+  server.on('stream', (stream, headers) => {
+    const pendingPushes: Promise<any>[] = [];
+    const sessionId = headers['session-id'] as string;
+
+    activeClients.set(sessionId, { stream, pendingPushes });
     const listeners: IRegisteredEventListener[] = [];
-    try {
-      const lookupArgs = {
-        scriptInstanceId: req.headers['script-instance-id'] as string,
-        scriptEntrypoint: req.headers['script-entrypoint'] as string,
-        sessionName: req.headers['session-name'] as string,
-        dataLocation: req.headers['data-location'] as string,
-        sessionId,
-      };
-      log.stats('ReplayApi', lookupArgs);
+    const lookupArgs = {
+      scriptInstanceId: headers['script-instance-id'] as string,
+      scriptEntrypoint: headers['script-entrypoint'] as string,
+      sessionName: headers['session-name'] as string,
+      dataLocation: headers['data-location'] as string,
+      sessionId,
+    };
+    log.stats('ReplayApi', lookupArgs);
 
+    try {
       const session = SessionDb.findWithRelated(lookupArgs);
 
       if (!session) {
-        res.writeHead(404);
-        return res.end(
+        stream.respond({ ':status': 404 });
+        stream.end(
           JSON.stringify({ message: "There aren't any stored sessions for this script." }),
         );
+        stream.close();
+        return;
       }
 
       const sessionLoader = new SessionLoader(session.sessionDb, session.sessionState);
 
+      const closedPromise = createPromise();
+      pendingPushes.push(closedPromise.promise);
+
       let hasSentSession = false;
 
       listeners.push(
-        eventUtils.addEventListener(sessionLoader, 'resources', http2PushResources.bind(this, res)),
+        eventUtils.addEventListener(sessionLoader, 'resources', resource => {
+          const promise = http2PushResources(stream, resource);
+          pendingPushes.push(promise);
+        }),
       );
 
       for (const event of SessionLoader.eventStreams) {
-        listeners.push(
-          eventUtils.addEventListener(sessionLoader, event, http2PushJson.bind(this, res, event)),
-        );
+        const registration = eventUtils.addEventListener(sessionLoader, event, data => {
+          const promise = http2PushJson(stream, event, data);
+          pendingPushes.push(promise);
+          if (event === 'script-state') {
+            if (data?.closeDate) {
+              closedPromise.resolve();
+            }
+          }
+        });
+
+        listeners.push(registration);
       }
 
-      res.stream.session.on('error', err =>
-        log.error('Replay Http2Session Error', {
-          error: err,
-          sessionId,
-        }),
-      );
-
-      res.stream.on('error', err =>
+      stream.on('error', err => {
+        activeClients.delete(sessionId);
         log.error('Replay Server Error', {
           error: err,
           sessionId,
-        }),
-      );
+        });
+      });
 
-      res.on('close', () => {
+      stream.on('close', () => {
         log.info('Replay Server Closed', { sessionId });
         eventUtils.removeEventListeners(listeners);
-        activeClients.delete(res);
-        if (res.socket) {
-          res.socket.unref();
-          res.socket.destroy();
-        }
+        activeClients.delete(sessionId);
+        stream.session?.close();
+        stream.session?.unref();
       });
 
       sessionLoader.on('tab-ready', () => {
         if (hasSentSession) return;
         hasSentSession = true;
 
-        http2PushJson(res, 'session', {
+        const promise = http2PushJson(stream, 'session', {
           ...sessionLoader.session,
           tabs: [...sessionLoader.tabs.values()],
           dataLocation: session.dataLocation,
           relatedScriptInstances: session.relatedScriptInstances,
           relatedSessions: session.relatedSessions,
         });
+        pendingPushes.push(promise);
+      });
+
+      const readyForTrailers = createPromise();
+      pendingPushes.push(readyForTrailers.promise);
+      stream.on('wantTrailers', () => {
+        readyForTrailers.resolve();
+        // need this even so http2 doesn't auto-close the session
       });
 
       sessionLoader.listen();
+
+      if (sessionLoader.session.closeDate) {
+        closedPromise.resolve();
+      }
+      // wait for trailers will stop connection from closing pre-emptively
+      stream.respond({ ':status': 200 }, { waitForTrailers: true });
+      stream.end();
+
+      return checkForClose(sessionId);
     } catch (error) {
-      res.writeHead(500).end(JSON.stringify({ message: `ERROR loading session ${error.stack}` }));
+      stream.respond({ ':status': 500 });
+      stream.end(JSON.stringify({ message: `ERROR loading session ${error.stack}` }));
+      stream.close();
       log.error('SessionState.ErrorLoadingSession', {
         error,
-        ...req.headers,
+        ...headers,
         sessionId,
       });
     }
@@ -103,8 +144,30 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
     }),
   );
 
+  async function checkForClose(sessionId: string) {
+    const client = activeClients.get(sessionId);
+    if (!client) return;
+
+    const { pendingPushes, stream } = client;
+
+    const resolvedPromises: Set<Promise<any>> = new Set();
+    // this can get called 2x, so if you take out of pendingPromises, it might not get waited for
+    // on Core.close -> ReplayServer.close
+    while (pendingPushes.length > resolvedPromises.size) {
+      const allPending = [...pendingPushes];
+      await Promise.all(allPending.map(x => x.catch(err => err)));
+      for (const pending of allPending) resolvedPromises.add(pending);
+      await new Promise(setImmediate);
+    }
+
+    if (!stream.destroyed) {
+      stream.sendTrailers({ 'pushes-sent': resolvedPromises.size });
+    }
+    activeClients.delete(sessionId);
+  }
+
   return {
-    close: closeServer.bind(this, server, activeClients),
+    close: closeServer.bind(this, server, activeClients, checkForClose.bind(this)),
     hasClients() {
       return activeClients.size > 0;
     },
@@ -115,47 +178,41 @@ export async function createReplayServer(listenPort?: number): Promise<ISessionR
 
 async function closeServer(
   server: http2.Http2Server,
-  activeClients: Set<http2.Http2ServerResponse>,
+  activeClients: Map<string, { stream: http2.ServerHttp2Stream; pendingPushes: Promise<any>[] }>,
+  checkForClose: (sessionId: string) => Promise<any>,
   waitForOpenConnections = false,
 ) {
-  if (!waitForOpenConnections) {
-    for (const client of activeClients) {
-      client.end();
-      if (client.socket) {
-        client.socket.unref();
-        client.socket.destroy();
-      }
-      client.stream.destroy();
+  log.info('ReplayServer.closeSessions', { waitForOpenConnections, sessionId: null });
+  for (const [id, { stream }] of activeClients) {
+    if (waitForOpenConnections) {
+      await checkForClose(id);
     }
-    server.unref().close();
-  } else {
-    await new Promise(resolve => server.close(resolve));
+    stream.session?.unref();
+    stream.session?.close();
+    stream.destroy();
   }
+  server.unref().close();
 }
 
-function http2PushJson(res: http2.Http2ServerResponse, event: string, data: any) {
-  if (res.stream.closed) return;
-  if (Array.isArray(data) && data.length === 0) return;
-
+function http2PushJson(stream: http2.ServerHttp2Stream, event: string, data: any): Promise<void> {
+  if (Array.isArray(data) && data.length === 0) return Promise.resolve();
   const json = JSON.stringify(data, (_, value) => {
     if (value !== null) return value;
   });
-
-  res.createPushResponse({ ':path': `/${event}` }, (err, pushResponse) => {
-    if (err) {
-      log.warn(`Error sending ${event} to Replay`, {
-        err,
-        sessionId: this.sessionId,
-      });
-      return;
-    }
-    pushResponse.stream.respond({ ':status': 200 });
-    pushResponse.stream.end(json);
+  return sendHttp2Push(stream, event, json).catch(error => {
+    log.warn(`Error sending event to Replay`, {
+      error,
+      event,
+      sessionId: this.sessionId,
+    });
   });
 }
 
-async function http2PushResources(res: http2.Http2ServerResponse, resources: any[]) {
-  if (res.stream.closed) return;
+async function http2PushResources(
+  stream: http2.ServerHttp2Stream,
+  resources: any[],
+): Promise<void> {
+  if (stream.closed) return;
   let promises: Promise<any>[] = [];
   for (const resource of resources) {
     const headers: any = {
@@ -165,25 +222,12 @@ async function http2PushResources(res: http2.Http2ServerResponse, resources: any
       'resource-headers': JSON.stringify(resource.headers),
       'resource-tabid': resource.tabId,
     };
-    const promise = new Promise<void>(resolve => {
-      res.createPushResponse(
-        {
-          ':path': '/resource',
-          ...headers,
-        },
-        (err, pushResponse) => {
-          if (err) {
-            log.warn(`Error sending resource to Replay`, {
-              err,
-              url: resource.url,
-              sessionId: this.sessionId,
-            });
-            return;
-          }
-          pushResponse.stream.respond({ ':status': 200 });
-          pushResponse.stream.end(resource.data, resolve);
-        },
-      );
+    const promise = sendHttp2Push(stream, 'resource', resource.data, headers).catch(error => {
+      log.warn(`Error sending resource to Replay`, {
+        error,
+        url: resource.url,
+        sessionId: this.sessionId,
+      });
     });
     promises.push(promise);
     if (promises.length === 10) {
@@ -191,4 +235,23 @@ async function http2PushResources(res: http2.Http2ServerResponse, resources: any
       promises = [];
     }
   }
+  await Promise.all(promises);
+}
+
+function sendHttp2Push(
+  stream: http2.ServerHttp2Stream,
+  event: string,
+  data: any,
+  headers: object = {},
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    if (stream.closed) return;
+    stream.pushStream({ ':path': `/${event}`, ...headers }, (error, pushStream) => {
+      if (error) return reject(error);
+
+      pushStream.once('error', reject);
+      pushStream.respond({ ':status': 200 });
+      pushStream.end(data, resolve);
+    });
+  });
 }

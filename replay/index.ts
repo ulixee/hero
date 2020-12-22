@@ -23,6 +23,7 @@ export function replay(launchArgs: IReplayLaunchArgs) {
     `--replay-api-path="${apiPath}"`,
     `--replay-script-start-date="${scriptStartDate}"`,
     `--replay-api-server="${replayApiServer}"`,
+    `--replay-node-path="${process.execPath}"`,
   ];
 
   if (isBinaryInstalled()) {

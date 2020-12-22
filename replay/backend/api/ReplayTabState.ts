@@ -14,7 +14,6 @@ import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
 import getResolvable from '~shared/utils/promise';
 
-const loadWaitTime = 5e3;
 let pageCounter = 0;
 
 export default class ReplayTabState extends EventEmitter {
@@ -34,6 +33,7 @@ export default class ReplayTabState extends EventEmitter {
   public currentPlaybarOffsetPct = 0;
   public replayTime: ReplayTime;
   public tabCreatedTime: string;
+  public hasAllData = false;
 
   public get isActive() {
     return this.listenerCount('tick:changes') > 0;
@@ -87,13 +87,7 @@ export default class ReplayTabState extends EventEmitter {
 
   public transitionToNextTick() {
     const result = this.loadTick(this.currentTickIdx + 1);
-    if (
-      this.replayTime.close &&
-      // give it a few seconds to get the rest of the data.
-      // TODO: figure out how to confirm via http2 that all data is sent
-      new Date().getTime() - this.replayTime.close.getTime() > loadWaitTime &&
-      this.currentTickIdx === this.ticks.length - 1
-    ) {
+    if (this.replayTime.close && this.hasAllData && this.currentTickIdx === this.ticks.length - 1) {
       this.currentPlaybarOffsetPct = 100;
     }
     return result;
@@ -188,7 +182,7 @@ export default class ReplayTabState extends EventEmitter {
     if (!newTick) return;
     if (!this.replayTime.close) {
       // give ticks time to load. TODO: need a better strategy for this
-      if (new Date().getTime() - new Date(newTick.timestamp).getTime() < loadWaitTime) return;
+      if (new Date().getTime() - new Date(newTick.timestamp).getTime() < 2e3) return;
     }
 
     console.log('Loading tick %s', newTickIdx);
@@ -322,7 +316,7 @@ export default class ReplayTabState extends EventEmitter {
         tick.isNewDocumentTick = true;
         tick.documentOrigin = textContent;
         this.pages.push({
-          id: pageCounter += 1,
+          id: (pageCounter += 1),
           url: textContent,
           commandId,
         });

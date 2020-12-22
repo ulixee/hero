@@ -46,7 +46,7 @@
     "build": "yarn build:dist",
     "build:pack": "yarn build:icons && shx cp pack.sh ../build/replay/pack.sh && cd ../build/replay && electron-builder -mwl && ./pack.sh",
     "clean": "shx rm -rf ../build/replay/static && shx rm -rf ../build/replay/dist && tsc -b --clean tsconfig.json && tsc -b --clean frontend/tsconfig.json",
-    "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"cd frontend && yarn serve\"",
+    "dev": "yarn build:backend && concurrently -k -n backend,frontend -c blue,green \"yarn start:backend\" \"cd frontend && yarn dev\"",
     "start:backend": "cross-env CLEAR_LOGS=true WEBPACK_DEV_SERVER_URL=http://localhost:8080 NODE_ENV=development electron ../build/replay",
     "start:frontend": "cd frontend && yarn dev",
     "start": "electron ../build/replay",
