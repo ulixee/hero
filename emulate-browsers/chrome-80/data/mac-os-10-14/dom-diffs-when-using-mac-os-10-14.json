@@ -1,5 +1,8 @@
 {
-  "removals": [],
+  "removals": [
+    "window.Text.prototype.getDestinationInsertionPoints",
+    "window.Element.prototype.getDestinationInsertionPoints"
+  ],
   "additions": [
     {
       "path": "window.Navigator.prototype",
@@ -8,18 +11,18 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": ""
         },
         "_$type": "function",
         "_$function": "function () { [native code] }",
         "_$invocation": "TypeError: Failed to execute 'getInstalledRelatedApps' on 'Navigator': Illegal invocation",
-        "_$flags": ["c", "e", "w"]
+        "_$flags": "cew"
       }
     },
     {
@@ -29,18 +32,18 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": "getVideoPlaybackQuality"
         },
         "_$type": "function",
         "_$function": "function getVideoPlaybackQuality() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
-        "_$flags": ["c", "e", "w"]
+        "_$flags": "cew"
       }
     },
     {
@@ -50,57 +53,57 @@
       "property": {
         "length": {
           "_$type": "number",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": 0
         },
         "name": {
           "_$type": "string",
-          "_$flags": ["c"],
+          "_$flags": "c",
           "_$value": "VideoPlaybackQuality"
         },
         "arguments": {
           "_$type": "object",
-          "_$flags": [],
+          "_$flags": "",
           "_$value": null
         },
         "caller": {
           "_$type": "object",
-          "_$flags": [],
+          "_$flags": "",
           "_$value": null
         },
         "prototype": {
           "_$protos": ["Object.prototype"],
           "creationTime": {
-            "_$flags": ["c", "e"],
+            "_$flags": "ce",
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get creationTime() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "totalVideoFrames": {
-            "_$flags": ["c", "e"],
+            "_$flags": "ce",
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get totalVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "droppedVideoFrames": {
-            "_$flags": ["c", "e"],
+            "_$flags": "ce",
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get droppedVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "corruptedVideoFrames": {
-            "_$flags": ["c", "e"],
+            "_$flags": "ce",
             "_$accessException": "TypeError: Illegal invocation",
             "_$get": "function get corruptedVideoFrames() { [native code] }",
             "_$getToStringToString": "function toString() { [native code] }"
           },
           "Symbol(Symbol.toStringTag)": {
             "_$type": "string",
-            "_$flags": ["c"],
+            "_$flags": "c",
             "_$value": "VideoPlaybackQuality"
           },
           "_$type": "object",
-          "_$flags": []
+          "_$flags": ""
         },
         "new()": {
           "_$type": "constructor",
@@ -108,7 +111,7 @@
         },
         "_$type": "function",
         "_$function": "function VideoPlaybackQuality() { [native code] }",
-        "_$flags": ["c", "w"]
+        "_$flags": "cw"
       }
     }
   ],

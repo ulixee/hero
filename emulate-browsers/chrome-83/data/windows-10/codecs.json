@@ -1,12 +1,9 @@
 {
   "audioSupport": {
-    "recordingFormats": [
-      "audio/webm",
-      "audio/webm;codecs=opus",
-      "audio/webm;codecs=pcm"
-    ],
+    "recordingFormats": ["audio/webm", "audio/webm;codecs=opus", "audio/webm;codecs=pcm"],
     "probablyPlays": [
       "application/ogg;codecs=opus",
+      "application/ogg;codecs=theora",
       "application/ogg;codecs=vorbis",
       "application/ogg;codecs=vp8",
       "application/ogg;codecs=vp8,opus",
@@ -93,6 +90,7 @@
     ],
     "probablyPlays": [
       "application/ogg;codecs=opus",
+      "application/ogg;codecs=theora",
       "application/ogg;codecs=vorbis",
       "application/ogg;codecs=vp8",
       "application/ogg;codecs=vp8,opus",
@@ -121,6 +119,7 @@
       "video/mp4;codecs=mp4a.6B",
       "video/mp4;codecs=opus",
       "video/ogg;codecs=opus",
+      "video/ogg;codecs=theora",
       "video/ogg;codecs=vorbis",
       "video/ogg;codecs=vp8",
       "video/ogg;codecs=vp8,opus",

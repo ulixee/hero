@@ -1,7 +1,7 @@
 {
   "version": "0x303 (TLS 1.2)",
   "ciphers": [
-    "{0xCA, 0xCA} GREASE",
+    "{0x3A, 0x3A} GREASE",
     "{0x13, 0x01} TLS_AES_128_GCM_SHA256",
     "{0x13, 0x02} TLS_AES_256_GCM_SHA384",
     "{0x13, 0x03} TLS_CHACHA20_POLY1305_SHA256",
@@ -48,7 +48,7 @@
       "type": "supported_groups",
       "decimal": 10,
       "values": [
-        "GREASE (47802)",
+        "GREASE (31354)",
         "ecdh_x25519 (29)",
         "secp256r1 (P-256) (23)",
         "secp384r1 (P-384) (24)"
@@ -98,10 +98,10 @@
       "type": "key_share",
       "decimal": 51,
       "values": [
-        "NamedGroup: GREASE (47802)",
+        "NamedGroup: GREASE (31354)",
         "key_exchange:  (len=1): 00",
         "NamedGroup: ecdh_x25519 (29)",
-        "key_exchange:  (len=32): A6AF2A03699BC9094ED38C1C9513C945859DBA316DF1FA9EA3D76B201175191F"
+        "key_exchange:  (len=32): 5DF940E3AAF9899BEF49B649CFF67C89CA1B067CE3543471FC4EF6E7A860B872"
       ]
     },
     {
@@ -113,7 +113,7 @@
       "type": "supported_versions",
       "decimal": 43,
       "values": [
-        "GREASE (56026)",
+        "GREASE (64250)",
         "TLS 1.3 (772)",
         "TLS 1.2 (771)",
         "TLS 1.1 (770)",
@@ -127,7 +127,7 @@
     },
     {
       "type": "GREASE",
-      "decimal": 6682,
+      "decimal": 35466,
       "values": ["0000 - 00                                             ."]
     },
     {

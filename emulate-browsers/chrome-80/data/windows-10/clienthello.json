@@ -23,7 +23,7 @@
   "extensions": [
     {
       "type": "GREASE",
-      "decimal": 43690,
+      "decimal": 23130,
       "values": []
     },
     {
@@ -48,7 +48,7 @@
       "type": "supported_groups",
       "decimal": 10,
       "values": [
-        "GREASE (19018)",
+        "GREASE (47802)",
         "ecdh_x25519 (29)",
         "secp256r1 (P-256) (23)",
         "secp384r1 (P-384) (24)"
@@ -98,10 +98,10 @@
       "type": "key_share",
       "decimal": 51,
       "values": [
-        "NamedGroup: GREASE (19018)",
+        "NamedGroup: GREASE (47802)",
         "key_exchange:  (len=1): 00",
         "NamedGroup: ecdh_x25519 (29)",
-        "key_exchange:  (len=32): F4B56D1A5F02E5F3337C5846666390A05D2BF951484E08EB079AB3D39E54D100"
+        "key_exchange:  (len=32): E032E4D16E2B94B1382141A1014E19B1CD264C510F5D88FB4993D9CA88751144"
       ]
     },
     {
@@ -113,7 +113,7 @@
       "type": "supported_versions",
       "decimal": 43,
       "values": [
-        "GREASE (14906)",
+        "GREASE (39578)",
         "TLS 1.3 (772)",
         "TLS 1.2 (771)",
         "TLS 1.1 (770)",
@@ -127,7 +127,7 @@
     },
     {
       "type": "GREASE",
-      "decimal": 51914,
+      "decimal": 47802,
       "values": ["0000 - 00                                             ."]
     },
     {
