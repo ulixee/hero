@@ -104,7 +104,7 @@ export default class HeadersHandler {
       if (nodeCommon._checkInvalidHeaderChar(value)) continue;
 
       if (Array.isArray(value)) {
-        if (singleValueHttp2Headers.has(key)) {
+        if (singleValueHttp2Headers.has(key.toLowerCase())) {
           headers[canonizedKey] = value[0];
         } else {
           headers[canonizedKey] = [...value];

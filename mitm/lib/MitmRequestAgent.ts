@@ -15,6 +15,11 @@ import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
 
+// TODO: this is off by default because golang 1.14 has an issue verifying certain certificate authorities:
+// https://github.com/golang/go/issues/24652
+// https://github.com/golang/go/issues/38365
+const allowUnverifiedCertificates = Boolean(JSON.parse(process.env.MITM_ALLOW_INSECURE ?? 'true'));
+
 export default class MitmRequestAgent {
   public static defaultMaxConnectionsPerOrigin = 6;
   private readonly session: RequestSession;
@@ -35,13 +40,14 @@ export default class MitmRequestAgent {
     ctx: IMitmRequestContext,
   ): Promise<http2.ClientHttp2Stream | http.ClientRequest> {
     const url = ctx.url;
+
     const requestSettings: https.RequestOptions = {
       method: ctx.method,
       path: url.pathname + url.search,
       host: url.hostname,
       port: url.port || (ctx.isSSL ? 443 : 80),
       headers: ctx.requestHeaders,
-      rejectUnauthorized: process.env.MITM_ALLOW_INSECURE !== 'true',
+      rejectUnauthorized: allowUnverifiedCertificates === false,
     };
 
     ctx.setState(ResourceState.GetSocket);
