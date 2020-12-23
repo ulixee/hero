@@ -1,5 +1,7 @@
 import Os from 'os';
 import { convertVersionsToTree, getClosestNumberMatch } from "./VersionUtils";
+import darwinToMacOsVersionMap from '../data/darwinToMacOsVersionMap.json';
+import windowsToWindowsVersionMap from '../data/windowsToWindowsVersionMap.json';
 
 export default function getLocalOperatingSystemMeta() {
   const platform = Os.platform();
@@ -69,45 +71,6 @@ const platformToOsName = {
   sunos: 'linux',
 }
 
-// pulled the following from https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
-const darwinToMacOsVersionMap = {
-  '7.0': '10.3.0',
-  '7.9': '10.3.9',
-  '8.0': '10.4.0',
-  '8.11': '10.4.11',
-  '9.0': '10.5.0',
-  '9.8': '10.5.8',
-  '10.0': '10.6.0',
-  '10.8': '10.6.8',
-  '11.0.0': '10.7.0',
-  '11.4.2': '10.7.5',
-  '12.0.0': '10.8.0',
-  '12.6.0': '10.8.5',
-  '13.0.0': '10.9.0',
-  '13.4.0': '10.9.5',
-  '14.0.0': '10.10.0',
-  '14.5.0': '10.10.5',
-  '15.0.0': '10.11.0',
-  '15.6.0': '10.11.6',
-  '16.0.0': '10.12.0',
-  '16.5.0': '10.12.4',
-  '16.6.0': '10.12.6',
-  '17.5.0': '10.13.4',
-  '17.6.0': '10.13.5',
-  '17.7.0': '10.13.6',
-  '18.2.0': '10.14.1',
-  '19.2.0': '10.15.2',
-  '19.3.0': '10.15.3',
-  '19.5.0': '10.15.5',
-};
-
 const darwinVersionTree = convertVersionsToTree(Object.keys(darwinToMacOsVersionMap));
-
-const windowsToWindowsVersionMap = {
-  '6.1': '10',
-  '6.2': '8',
-  '6.3': '8.1',
-  '10.0': '10',
-}
 const windowsVersionTree = convertVersionsToTree(Object.keys(windowsToWindowsVersionMap));
 
