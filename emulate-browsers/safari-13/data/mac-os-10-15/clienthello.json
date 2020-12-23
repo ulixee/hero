@@ -28,16 +28,12 @@
     "{0xC0, 0x12} TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",
     "{0x00, 0x0A} TLS_RSA_WITH_3DES_EDE_CBC_SHA"
   ],
-  "compressionMethods": [
-    "No Compression (0x00)"
-  ],
+  "compressionMethods": ["No Compression (0x00)"],
   "extensions": [
     {
       "type": "renegotiate",
       "decimal": 65281,
-      "values": [
-        "<EMPTY>"
-      ]
+      "values": ["<EMPTY>"]
     },
     {
       "type": "server_name",
@@ -72,9 +68,7 @@
     {
       "type": "status_request",
       "decimal": 5,
-      "values": [
-        "0000 - 01 00 00 00 00                                 ....."
-      ]
+      "values": ["0000 - 01 00 00 00 00                                 ....."]
     },
     {
       "type": "signed_certificate_timestamps",
@@ -84,42 +78,30 @@
     {
       "type": "application_layer_protocol_negotiation",
       "decimal": 16,
-      "values": [
-        "h2",
-        "http/1.1"
-      ]
+      "values": ["h2", "http/1.1"]
     },
     {
       "type": "ec_point_formats",
       "decimal": 11,
-      "values": [
-        "uncompressed (0)"
-      ]
+      "values": ["uncompressed (0)"]
     },
     {
       "type": "key_share",
       "decimal": 51,
       "values": [
         "NamedGroup: ecdh_x25519 (29)",
-        "key_exchange:  (len=32): 274F038EE0DFAF08E3F3DD387163B53868EC04E3A238A39B61674FAE8F8BA60A"
+        "key_exchange:  (len=32): 725D1460FEA0D9B0DEB1831769187878A95083A9457A0E76741154D1CDA56A63"
       ]
     },
     {
       "type": "psk_key_exchange_modes",
       "decimal": 45,
-      "values": [
-        "psk_dhe_ke (1)"
-      ]
+      "values": ["psk_dhe_ke (1)"]
     },
     {
       "type": "supported_versions",
       "decimal": 43,
-      "values": [
-        "TLS 1.3 (772)",
-        "TLS 1.2 (771)",
-        "TLS 1.1 (770)",
-        "TLS 1.0 (769)"
-      ]
+      "values": ["TLS 1.3 (772)", "TLS 1.2 (771)", "TLS 1.1 (770)", "TLS 1.0 (769)"]
     },
     {
       "type": "supported_groups",

@@ -320,7 +320,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
         _$type: type,
         _$function: functionDetails.func,
         _$invocation: functionDetails.invocation,
-        _$flags: flags,
+        _$flags: flags.join(''),
         _$accessException: accessException ? accessException.toString() : undefined,
         _$value: value,
         _$get: objDesc.get ? objDesc.get.toString() : undefined,

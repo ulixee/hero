@@ -1,9 +1,7 @@
 {
   "Document": [
     {
-      "originTypes": [
-        "none"
-      ],
+      "originTypes": ["none"],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -16,28 +14,15 @@
         "Connection"
       ],
       "defaults": {
-        "Upgrade-Insecure-Requests": [
-          "1"
-        ],
-        "Accept": [
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        ],
-        "Accept-Language": [
-          "en-us"
-        ],
-        "Accept-Encoding": [
-          "gzip, deflate"
-        ],
-        "Connection": [
-          "keep-alive"
-        ]
+        "Upgrade-Insecure-Requests": ["1"],
+        "Accept": ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+        "Accept-Language": ["en-us"],
+        "Accept-Encoding": ["gzip, deflate"],
+        "Connection": ["keep-alive"]
       }
     },
     {
-      "originTypes": [
-        "cross-site",
-        "same-origin"
-      ],
+      "originTypes": ["cross-site", "same-origin"],
       "secureDomain": false,
       "method": "GET",
       "order": [
@@ -51,81 +36,52 @@
         "Accept-Encoding"
       ],
       "defaults": {
-        "Connection": [
-          "keep-alive"
-        ],
-        "Upgrade-Insecure-Requests": [
-          "1"
-        ],
-        "Accept": [
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        ],
-        "Accept-Language": [
-          "en-us"
-        ],
-        "Accept-Encoding": [
-          "gzip, deflate"
-        ]
+        "Connection": ["keep-alive"],
+        "Upgrade-Insecure-Requests": ["1"],
+        "Accept": ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+        "Accept-Language": ["en-us"],
+        "Accept-Encoding": ["gzip, deflate"]
       }
     },
     {
-      "originTypes": [
-        "none"
-      ],
+      "originTypes": ["none"],
       "secureDomain": true,
       "method": "GET",
       "order": [
         "Host",
         "Accept",
+        "Cookie",
+        "User-Agent",
         "Accept-Language",
-        "Connection",
         "Accept-Encoding",
-        "User-Agent"
+        "Connection"
       ],
       "defaults": {
-        "Accept": [
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        ],
-        "Accept-Language": [
-          "en-us"
-        ],
-        "Connection": [
-          "keep-alive"
-        ],
-        "Accept-Encoding": [
-          "gzip, deflate, br"
-        ]
+        "Accept": ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+        "Accept-Language": ["en-us"],
+        "Accept-Encoding": ["gzip, deflate, br"],
+        "Connection": ["keep-alive"]
       }
     },
     {
-      "originTypes": [
-        "cross-site",
-        "same-origin"
-      ],
+      "originTypes": ["cross-site", "same-origin"],
       "secureDomain": true,
       "method": "GET",
       "order": [
         "Host",
-        "Connection",
         "Accept",
+        "Connection",
+        "Cookie",
         "User-Agent",
         "Accept-Language",
         "Referer",
         "Accept-Encoding"
       ],
       "defaults": {
-        "Connection": [
-          "keep-alive"
-        ],
-        "Accept": [
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        ],
-        "Accept-Language": [
-          "en-us"
-        ],
-        "Accept-Encoding": [
-          "gzip, deflate, br"
-        ]
+        "Accept": ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+        "Connection": ["keep-alive"],
+        "Accept-Language": ["en-us"],
+        "Accept-Encoding": ["gzip, deflate, br"]
       }
     }
   ]

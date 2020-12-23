@@ -53,39 +53,39 @@ test('it should be able to add polyfills', async () => {
   const objectTestProperties = {
     length: {
       _$type: 'number',
-      _$flags: ['c'],
+      _$flags: 'c',
       _$value: 0,
     },
     name: {
       _$type: 'string',
-      _$flags: ['c'],
+      _$flags: 'c',
       _$value: 'ObjectTest',
     },
     arguments: {
       _$type: 'object',
-      _$flags: [],
+      _$flags: '',
       _$value: null,
     },
     caller: {
       _$type: 'object',
-      _$flags: [],
+      _$flags: '',
       _$value: null,
     },
     prototype: {
       _$protos: ['Object.prototype'],
       creationTime: {
-        _$flags: ['c', 'e'],
+        _$flags: 'ce',
         _$accessException: 'TypeError: Illegal invocation',
         _$get: 'function get creationTime() { [native code] }',
         _$getToStringToString: 'function toString() { [native code] }',
       },
       'Symbol(Symbol.toStringTag)': {
         _$type: 'string',
-        _$flags: ['c'],
+        _$flags: 'c',
         _$value: 'ObjectTest',
       },
       _$type: 'object',
-      _$flags: [],
+      _$flags: '',
     },
     'new()': {
       _$constructorException: "TypeError: Cannot read property '0' of undefined",
@@ -93,10 +93,10 @@ test('it should be able to add polyfills', async () => {
     },
     _$type: 'function',
     _$function: 'function ObjectTest() { [native code] }',
-    _$flags: ['c', 'w'],
+    _$flags: 'cw',
   };
   const chromeProperty = {
-    _$flags: ['c', 'e'],
+    _$flags: 'ce',
     _$type: 'string',
     _$value: 'I am chrome',
   };
