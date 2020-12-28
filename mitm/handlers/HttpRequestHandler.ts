@@ -40,6 +40,16 @@ export default class HttpRequestHandler extends BaseHttpHandler {
         http2Session.on('error', this.onError.bind(this, 'ClientToProxy.Http2SessionError'));
       }
     }
+    if (proxyToClientResponse instanceof Http2ServerResponse) {
+      proxyToClientResponse.stream.on(
+        'error',
+        this.onError.bind(this, 'ProxyToClient.Http2StreamError'),
+      );
+      const http2Session = proxyToClientResponse.stream.session;
+      if (!http2Session.listenerCount('error')) {
+        http2Session.on('error', this.onError.bind(this, 'ProxyToClient.Http2SessionError'));
+      }
+    }
     proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
   }
 
@@ -173,7 +183,14 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       context.responseTrailers = headers;
     });
 
+    try {
+      proxyToClientResponse.writeHead(proxyToClientResponse.statusCode);
+    } catch (err) {
+      return this.onError('ServerToProxy.WriteResponseHeadError', err);
+    }
+
     context.setState(ResourceState.WriteProxyToClientResponseBody);
+
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
       if (data && !(proxyToClientResponse as Http2ServerResponse).stream?.destroyed) {

@@ -1,7 +1,7 @@
 /////// MASK TO STRING  ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // eslint-disable-next-line prefer-const -- must be let: could change for different browser (ie, Safari)
-let nativeToStringFunctionString = Error.toString.toString();
+let nativeToStringFunctionString = `${Function.toString}`;
 // when functions are re-bound to work around the loss of scope issue in chromium, they blow up their native toString
 const overriddenFns = new Map<Function, string>();
 
@@ -11,9 +11,16 @@ Function.prototype.toString = new Proxy(Function.prototype.toString, {
     if (overriddenFns.has(thisArg)) {
       return overriddenFns.get(thisArg);
     }
-    if (target === Function.prototype.toString) {
-      return nativeToStringFunctionString;
+    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
+    // if not indicates that we are doing a check across different windows
+    const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
+      thisArg.toString,
+    );
+    if (hasSameProto === false) {
+      // Pass the call on to the local Function.prototype.toString instead
+      return thisArg.toString(...(args ?? []));
     }
+
     return target.apply(thisArg, args);
   },
 });

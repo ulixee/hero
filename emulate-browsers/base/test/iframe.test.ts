@@ -26,6 +26,27 @@ test('should have a chrome object on iframes', async () => {
   expect(frameType).toBe('object');
 });
 
+test('should not break toString across frames', async () => {
+  const page = await createPage();
+
+  const toStrings = await page.evaluate(`(() => {
+  const iframe = document.createElement('iframe');
+  document.body.appendChild(iframe);
+
+  const contentWindow = iframe.contentWindow;
+  const fnCallWithFrame = contentWindow.Function.prototype.toString.call(Function.prototype.toString);
+  const fnToString = Function.toString + '';
+
+  return {
+    fnToString,
+    fnCallWithFrame
+  }
+})();`);
+
+  const { fnToString, fnCallWithFrame } = toStrings as any;
+  expect(fnToString).toBe(fnCallWithFrame);
+});
+
 test('should not break iframe functions', async () => {
   const page = await createPage();
 
