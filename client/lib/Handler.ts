@@ -1,18 +1,14 @@
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
-import Log from '@secret-agent/commons/Logger';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
 import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
-import CoreClient from './CoreClient';
 import Agent from './Agent';
-import CoreClientConnection from './CoreClientConnection';
-import RemoteCoreConnection from './RemoteCoreConnection';
+import CoreClientConnection from '../connections/CoreClientConnection';
+import createConnection from '../connections/createConnection';
 import Signals = NodeJS.Signals;
-
-const { log } = Log(module);
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
-  private readonly coreClients: CoreClient[] = [];
+  private readonly connections: CoreClientConnection[] = [];
   private readonly dispatches: Promise<Error | void>[] = [];
 
   constructor(...connectionOptions: (ICoreConnectionOptions | CoreClientConnection)[]) {
@@ -22,10 +18,10 @@ export default class Handler {
 
     let needsHandlers = false;
     for (const options of connectionOptions) {
-      const coreClient = this.createCoreClient(options);
-      this.coreClients.push(coreClient);
+      const connection = createConnection(options);
+      this.connections.push(connection);
 
-      if (coreClient.hasRemoteConnection()) needsHandlers = true;
+      if (connection.isRemoteConnection()) needsHandlers = true;
     }
 
     if (needsHandlers) {
@@ -43,10 +39,10 @@ export default class Handler {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
-    const coreClient = pickRandom(this.coreClients);
+    const connection = pickRandom(this.connections);
 
     // NOTE: keep await to ensure dispatch stays in stack trace
-    const promise = coreClient
+    const promise = connection
       .useAgent(options, async agent => {
         try {
           return await runFn(agent, args);
@@ -65,9 +61,9 @@ export default class Handler {
     };
     const promise = createPromise<Agent>();
 
-    const coreClient = pickRandom(this.coreClients);
+    const connection = pickRandom(this.connections);
 
-    coreClient
+    connection
       .useAgent(options, agent => {
         // don't return until agent is closed
         const onClose = new Promise<void>(resolve => agent.on('close', resolve));
@@ -95,7 +91,7 @@ export default class Handler {
 
   public async close(error?: Error): Promise<void> {
     // eslint-disable-next-line promise/no-promise-in-callback
-    await Promise.all(this.coreClients.map(x => x.disconnect(error)));
+    await Promise.all(this.connections.map(x => x.disconnect(error)));
   }
 
   public registerShutdownHandlers(): void {
@@ -111,34 +107,6 @@ export default class Handler {
 
   private async logUnhandledError(error: Error): Promise<void> {
     // eslint-disable-next-line promise/no-promise-in-callback
-    await Promise.all(this.coreClients.map(x => x.logUnhandledError(error)));
-  }
-
-  private createCoreClient(options: ICoreConnectionOptions | CoreClientConnection): CoreClient {
-    if (options instanceof CoreClientConnection) {
-      // NOTE: don't run connect on an instance
-      return new CoreClient(options);
-    }
-
-    let connection: CoreClientConnection;
-    if (options.host) {
-      connection = new RemoteCoreConnection(options);
-    } else {
-      if (!CoreClient.LocalCoreConnectionCreator) {
-        throw new Error(
-          `You need to install the full "npm i secret-agent" installation to use local connections.
-
-If you meant to connect to a remote host, include the "host" parameter for your connection`,
-        );
-      }
-      connection = CoreClient.LocalCoreConnectionCreator(options);
-    }
-    connection.connect().catch(error =>
-      log.error('Error connecting to core', {
-        error,
-        sessionId: null,
-      }),
-    );
-    return new CoreClient(connection);
+    await Promise.all(this.connections.map(x => x.logUnhandledError(error)));
   }
 }

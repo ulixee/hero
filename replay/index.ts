@@ -21,6 +21,7 @@ export function replay(launchArgs: IReplayLaunchArgs) {
     `--replay-script-instance-id="${scriptInstanceId}"`,
     `--replay-session-id="${sessionId}"`,
     `--replay-api-path="${apiPath}"`,
+    `--replay-node-path="${process.execPath}"`,
     `--replay-script-start-date="${scriptStartDate}"`,
     `--replay-api-server="${replayApiServer}"`,
     `--replay-node-path="${process.execPath}"`,

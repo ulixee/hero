@@ -54,9 +54,7 @@ export class CDPSession extends EventEmitter {
     sendInitiator?: object,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (!this.isConnected()) {
-      throw new Error(
-        `Protocol error (${method}): Session closed. Most likely the ${this.targetType} has been closed.`,
-      );
+      throw new CanceledPromiseError(`Session closed before api call (${method})`);
     }
 
     const message = {

@@ -12,12 +12,12 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
-import CoreClient from './CoreClient';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { createResource } from './Resource';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: string;
@@ -26,18 +26,18 @@ export default class CoreTab implements IJsPathEventTarget {
   public eventHeap: CoreEventHeap;
 
   protected readonly meta: ISessionMeta;
-  private readonly coreClient: CoreClient;
+  private readonly connection: CoreClientConnection;
 
-  constructor({ tabId, sessionId }: ISessionMeta, coreClient: CoreClient) {
+  constructor({ tabId, sessionId }: ISessionMeta, connection: CoreClientConnection) {
     this.tabId = tabId;
     this.sessionId = sessionId;
     this.meta = {
       sessionId,
       tabId,
     };
-    this.coreClient = coreClient;
-    this.commandQueue = new CoreCommandQueue(this.meta, coreClient, coreClient.commandQueue);
-    this.eventHeap = new CoreEventHeap(this.meta, coreClient);
+    this.connection = connection;
+    this.commandQueue = new CoreCommandQueue(this.meta, connection, connection.commandQueue);
+    this.eventHeap = new CoreEventHeap(this.meta, connection);
 
     if (!this.eventHeap.hasEventInterceptors('resource')) {
       this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
@@ -143,9 +143,9 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async waitForNewTab(): Promise<CoreTab> {
     const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab');
-    const session = this.coreClient.sessionsById.get(sessionMeta.sessionId);
+    const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
-    return new CoreTab(sessionMeta, this.coreClient);
+    return new CoreTab(sessionMeta, this.connection);
   }
 
   public async focusTab(): Promise<void> {
@@ -171,7 +171,7 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async close(): Promise<void> {
     await this.commandQueue.run('close');
-    const session = this.coreClient.sessionsById.get(this.sessionId);
+    const session = this.connection.getSession(this.sessionId);
     session?.removeTab(this);
   }
 }

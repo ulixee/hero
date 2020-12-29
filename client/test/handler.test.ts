@@ -1,13 +1,12 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import { Helpers } from '@secret-agent/testing/index';
-import { runKoaServer } from '@secret-agent/testing/helpers';
 import { Handler } from '../index';
-import CoreClientConnection from '../lib/CoreClientConnection';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 const outgoing = jest.fn();
 
 class Piper extends CoreClientConnection {
-  async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+  async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     const response = await outgoing(payload);
     this.onMessage({
       responseId: payload.messageId,

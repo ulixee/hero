@@ -2,7 +2,7 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import { Handler } from '../index';
-import CoreClientConnection from '../lib/CoreClientConnection';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 const sessionMeta = {
   tabId: 'tab-id',
@@ -14,7 +14,7 @@ let testConnection: CoreClientConnection;
 let spy: jest.SpyInstance;
 beforeEach(() => {
   class TestConnection extends CoreClientConnection {
-    async sendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
+    async internalSendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
       if (command === 'createSession') {
         this.onMessage({ data: sessionMeta, responseId: messageId });
       } else if (command === 'addEventListener') {
@@ -25,7 +25,7 @@ beforeEach(() => {
     }
   }
   testConnection = new TestConnection();
-  spy = jest.spyOn(testConnection, 'sendRequest');
+  spy = jest.spyOn<any, any>(testConnection, 'internalSendRequest');
 });
 
 describe('events', () => {

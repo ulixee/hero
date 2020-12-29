@@ -1,7 +1,7 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreClient from './CoreClient';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 const { log } = Log(module);
 
@@ -13,7 +13,7 @@ export default class CoreCommandQueue {
 
   constructor(
     private readonly meta: ISessionMeta | null,
-    private readonly coreClient: CoreClient,
+    private readonly connection: CoreClientConnection,
     parentCommandQueue?: CoreCommandQueue,
   ) {
     if (parentCommandQueue) {
@@ -50,11 +50,11 @@ export default class CoreCommandQueue {
       while (this.items.length) {
         const item: IItem = this.items.shift();
         try {
-          const response = await this.coreClient.pipeOutgoingCommand(
-            item.meta,
-            item.command,
-            item.args,
-          );
+          const response = await this.connection.sendRequest({
+            meta: item.meta,
+            command: item.command,
+            args: item.args,
+          });
           let data = null;
           if (response) {
             this.lastCommandId = response.commandId;
@@ -62,7 +62,7 @@ export default class CoreCommandQueue {
           }
           item.resolve(data);
         } catch (error) {
-          error.stack += `\n${'------CORE'.padEnd(50, '-')}${item.stack}`;
+          error.stack += `\n${'------CORE COMMANDS'.padEnd(50, '-')}${item.stack}`;
           item.reject(error);
         }
         // force next loop so promises don't simulate synchronous-ity when local core

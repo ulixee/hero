@@ -11,7 +11,7 @@
 - screen details
 - 100s more
 
-Note: IP addresses are set through UpstreamProxy.
+Note: IP addresses are set through upstreamProxyUrl on each Agent.
 
 ## The DOM Has Finally Been Awaited
 

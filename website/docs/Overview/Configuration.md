@@ -2,29 +2,41 @@
 
 Configuration variables can be defined at a few levels:
 
-- `Agent` At an Agent instance level, configured on the default instance via [agent.configure()](../basic-interfaces/agent#configure), or when creating [Handler](../basic-interfaces/handler) agents using [handler.createAgent()](../basic-interfaces/handler#create-agent) or [handler.dispatchAgent()](../basic-interfaces/handler#dispatch-agent).
-- `Connection` At a "Connection to Core" level, which can be configured when creating a new [connection](../basic-interfaces/Handler#connection) to a full SecretAgent runtime (called Core) in the [new Handler(...connections)](../basic-interfaces/handler) constructor.
+- `Agent` At an instance level, configured via [agent.configure()](../basic-interfaces/agent#configure) or [new Agent()](../basic-interfaces/agent#constructor), or when creating [Handler](../basic-interfaces/handler) agents using [handler.createAgent()](../basic-interfaces/handler#create-agent) or [handler.dispatchAgent()](../basic-interfaces/handler#dispatch-agent).
+- `Connection` At a connection level, which can be configured when creating a new [CoreConnection](../advanced/core-connection#configuration).
 - `Core` At an internal level, using the `@secret-agent/core` module of SecretAgent. This must be run in the environment where your Browser Engine(s) and `@secret-agent/core` module are running. If you're running remote, this will be your server.
 
-The internal `@secret-agent/core` module can receive several configuration options on [start](#core-start), or when a [Handler](../basic-interfaces/handler) establishes a connection.
+The internal `@secret-agent/core` module can receive several configuration options on [start](#core-start), or when a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent) establishes a [connection](../advanced/core-connection).
+
+### Core Connection <div class="specs"><i>Agent</i></div>
+
+The [CoreConnection](../advanced/core-connection) to be used by a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent).
+
+All [configurations](../advanced/core-connection#configurations) accept both an `options` object and a  [`CoreConnection`](../advanced/core-connection) instance.
+
+Configuration is accepted in the following methods and constructors:
+
+- [agent.configure()](../basic-interfaces/agent#configure) - apply the connection to the default agent, or to a an agent constructed prior to the first connection.
+- [new Agent()](../basic-interfaces/agent#constructor) - the new agent will use this connection.
+- [new Handler(...connections)](../basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.
 
 ### Max Concurrent Agents Count <div class="specs"><i>Core</i></div>
 
-Limit concurrent Agents operating at any given time across all [connections](../basic-interfaces/handler#connection) to a "Core". Defaults to `10`.
+Limit concurrent Agents operating at any given time across all [connections](../advanced/core-connection) to a "Core". Defaults to `10`.
 
-Configurable via [`Core.start()`](#core-start) or [`new Handler()`](../basic-interfaces/handler#constructor).
+Configurable via [`Core.start()`](#core-start) or [`CoreConnection`](../advanced/core-connection#configuration).
 
 ### Local Proxy Port Start <div class="specs"><i>Connection</i><i>Core</i></div>
 
 Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
 
-Configurable via `Core.start()` or [`new Handler()`](../basic-interfaces/handler#constructor)
+Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection#configuration).
 
 ### Replay Session Port <div class="specs"><i>Connection</i><i>Core</i></div>
 
 Configures the port Replay uses to serve Session data.
 
-Configurable via [`Core.start()`](#core-start) or [`new Handler()`](../basic-interfaces/handler#constructor)
+Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection#configuration).
 
 ### Sessions Dir <div class="specs"><i>Connection</i><i>Core</i></div>
 
@@ -35,7 +47,7 @@ Configures the storage location for files created by Core.
 
 `Environmental variable`: `SA_SESSIONS_DIR=/your-absolute-dir-path`
 
-Configurable via [`Core.start()`](#core-start) or [`new Handler()`](../basic-interfaces/handler#constructor).
+Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection).
 
 ### Rendering Options <div class="specs"><i>Connection</i><i>Agent</i></div> {#rendering}
 
@@ -96,19 +108,11 @@ At an Agent level, `browserEmulatorId` configures the module to use.
 
 At a Connection or Core level, `browserEmulatorIds` indicates a list of modules to initialize before any Agents are created.
 
-- Configurable via [`Core.start()`](#core-start) or [`new Handler(...connections)`](../basic-interfaces/handler).
+- Configurable via [`Core.start()`](#core-start) or [`CoreConnection`](../advanced/core-connection).
 
-### HumanEmulators <div class="specs"><i>Connection</i><i>Agent</i></div>
+### Human Emulator Id <div class="specs"><i>Agent</i></div>
 
-Configures which [HumanEmulators](../advanced/human-emulators) to use in an Agent instance.
-
-At an Agent level, `browserEmulatorId` configures the module to use.
-
-- Configurable via [`Handler.createAgent()`](../basic-interfaces/handler#create-agent) or [`Handler.dispatchAgent()`](../basic-interfaces/handler#dispatch-agent).
-
-At a Connection or Core level, `browserEmulatorIds` indicates a list of modules to initialize before any Agents are created.
-
-- Configurable via [`Core.start()`](#core-start) or [`new Handler(...connections)`](../basic-interfaces/handler).
+Configures which [HumanEmulator](../advanced/human-emulators) to use in an Agent instance.
 
 ## Core Configuration
 

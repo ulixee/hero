@@ -15,7 +15,7 @@ export default class RemoteCoreConnection extends CoreClientConnection {
     if (!options.host) throw new Error('A remote core connection needs a host parameter!');
   }
 
-  public sendRequest(payload: ICoreRequestPayload): Promise<void> {
+  public internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     return new Promise((resolve, reject) =>
       this.jsonSocket.sendMessage(payload, err => {
         if (err) reject(err);
@@ -24,21 +24,27 @@ export default class RemoteCoreConnection extends CoreClientConnection {
     );
   }
 
-  public async close(): Promise<void> {
-    if (!(this.netSocket?.destroyed ?? false)) {
+  public async disconnect(): Promise<void> {
+    if (this.netSocket && !this.netSocket.destroyed) {
+      await super.disconnect();
       await new Promise<void>(resolve => {
         this.netSocket.end(() => process.nextTick(resolve));
       });
     }
-    await super.close();
+    this.netSocket = null;
+    this.netConnectPromise = null;
   }
 
   public connect(): Promise<Error | null> {
     if (!this.netConnectPromise) {
-      this.netConnectPromise = this.netConnect();
+      this.netConnectPromise = this.netConnect().catch(err => err);
     }
 
-    return this.netConnectPromise.then(() => super.connect()).catch(err => err);
+    return this.netConnectPromise;
+  }
+
+  public isRemoteConnection(): boolean {
+    return false;
   }
 
   private async netConnect(): Promise<void> {
@@ -49,14 +55,11 @@ export default class RemoteCoreConnection extends CoreClientConnection {
     const parsedUrl = new URL(host);
     const connect = { host: parsedUrl.hostname, port: parseInt(parsedUrl.port, 10) };
     this.netSocket = Net.connect(connect);
-    await new Promise<void>(resolve => {
-      this.netSocket.once('connect', () => {
-        resolve();
-      });
-    });
+    await new Promise<void>(resolve => this.netSocket.once('connect', resolve));
 
-    this.netSocket.once('close', this.close.bind(this));
+    this.netSocket.once('close', this.disconnect.bind(this));
     this.jsonSocket = new JsonSocket(this.netSocket);
     this.jsonSocket.on('message', payload => this.onMessage(payload));
+    await super.connect();
   }
 }

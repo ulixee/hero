@@ -1,7 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Session } from '@secret-agent/core/index';
-import Tab from '@secret-agent/core/lib/Tab';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;

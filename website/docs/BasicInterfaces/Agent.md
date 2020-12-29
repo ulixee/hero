@@ -12,35 +12,58 @@ const agent = require('secret-agent');
 })();
 ```
 
-An Agent instance can be thought of as a single user-browsing session. An instance has a [replayable](../advanced/session-replay)&nbsp;[Session](../advanced/session) that will record all commands, dom changes, interaction and page events.
+An Agent instance can be thought of as a single user-browsing session. A default instance is automatically initialized and available as the default export of `secret-agent`. Each additional instance you create has the following attributes:
 
-A default instance is automatically initialized and available as the default export.
+#### Replayable
 
-Instances are very lightweight, sharing a pool of browsers underneath. To generate multiple "scrapes" in a single script, you'll want to create a [Handler](./handler).
+An instance has a [replayable](../advanced/session-replay)&nbsp;[Session](../advanced/session) that will record all commands, dom changes, interaction and page events.
 
-```js
-const { Handler } = require('secret-agent');
+#### Lightweight
 
-(async () => {
-  const handler = new Handler();
-  handler.dispatchAgent(async agent => {
-    await agent.goto('https://www.google.com/search?q=secret-agent');
-  });
-  handler.dispatchAgent(async agent => {
-    await agent.goto('https://www.bing.com/search?q=secret+agent');
-  });
-  await handler.waitForAllDispatches();
-})();
-```
+Instances are very lightweight, sharing a pool of browsers underneath. To manage concurrent scrapes in a single script, you can create one Agent for each scrape, or manage load and concurrency with a [Handler](./handler).
+
+#### Single Active Tab
 
 Agent instances can have multiple [Tabs](./tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable).
+
+#### Sandboxed
 
 Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](../advanced/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Constructor
 
-Agents cannot be directly instantiated. You can use the default agent, or create a [Handler](./handler) to create multiple agents.
+### new Agent*(options)* {#constructor}
 
+Creates a new sandboxed browser instance with [unique user session and fingerprints](../overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
+
+You can optionally await an instance (or constructor) to cause the connection to the underlying SecretAgent to be initialized. If you don't await, the connection will be established on the first call.
+
+Note: If you provide a `name` that has already been used to name another instance then a counter will be appended to your string to ensure its uniqueness. However, it's only unique within a single NodeJs process (i.e., rerunning your script will reset the counter).
+
+```js
+const { Agent } = require('secret-agent');
+
+(async () => {
+  // connection established here
+  const agent = await new Agent();
+})();
+```
+
+#### **Arguments**:
+
+- options `object` Accepts any of the following:
+  - coreConnection `options | CoreClientConnection`. An object containing `ICoreConnectionOptions` used to connect, or an already created `CoreClientConnection` instance. Defaults to automatically connecting to a local `Core`.
+  - name `string`. This is used to generate a unique sessionName.
+  - browserEmulatorId `string` defaults to `chrome-83`. Emulates a specific browser engine version.
+  - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
+  - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
+  - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
+  - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
+  - renderingOptions `string[]`. Controls browser functionality.
+  - userProfile `IUserProfile`. Previous user's cookies, session, etc.
+  - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
+  - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
+  
 ## Properties
 
 ### agent.activeTab {#active-tab}
@@ -75,7 +98,7 @@ An identifier used for storing logs, snapshots, and other assets associated with
 
 A human-readable identifier of the current Agent session.
 
-You can set this property when calling [Handler.dispatchAgent()](./handler#dipatch-agent) or  [Handler.createAgent()](./handler#create-agent).
+You can set this property when calling [Handler.dispatchAgent()](./handler#dipatch-agent) or [Handler.createAgent()](./handler#create-agent).
 
 #### **Type**: `Promise<string>`
 
@@ -144,6 +167,8 @@ Update existing configuration settings.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
   - renderingOptions `string[]`. Controls enabled browser rendering features.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
+  - coreConnection `options | CoreClientConnection`. An object containing `ICoreConnectionOptions` used to connect, or an already created `CoreClientConnection` instance. Defaults to automatically connecting to a local `Core`.
+
 
 #### **Returns**: `Promise`
 

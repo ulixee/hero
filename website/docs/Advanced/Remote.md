@@ -10,28 +10,30 @@ Below is code you can use or modify to run a server
 
 ```javascript
 // SERVER ip is 122.22.232.1
-const { Server: SecretAgentServer } = require('@secret-agent/core');
+const { RemoteServer } = require('@secret-agent/core');
 
 (async () => {
-  const server = new SecretAgentServer();
+  const server = new RemoteServer();
   await server.listen(7007);
 })().catch(console.log);
 ```
 
 ## Setting Up the Client
 
-Your [Handler](../basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
+Your [Agent](../basic-interfaces/agent) or [Handler](../basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
 
 NOTE: you can use the `@secret-agent/client` npm package if you don't want to install a full browser engine on the machine coordinating all your scrapes. That example is shown below.
 
 ```javascript
-const { Handler } = require('@secret-agent/client');
+const agent = require('@secret-agent/client');
 
 (async () => {
-  const handler = new Handler({
-    host: '122.22.232.1:7007',
+  await agent.configure({
+    coreConnection: {
+      host: 'localhost:7007',
+    },
   });
-  handler.dispatchAgent(...);
-  // etc
+
+  await agent.goto('https://ulixee.org');
 })().catch(console.log);
 ```

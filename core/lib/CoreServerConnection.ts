@@ -19,8 +19,8 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   message: ICoreResponsePayload | ICoreEventPayload;
 }> {
   public isClosing = false;
+  public isPersistent = false;
   public autoShutdownMillis = 500;
-  public didConnect = false;
 
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIds = new Set<string>();
@@ -31,20 +31,34 @@ export default class CoreServerConnection extends TypedEventEmitter<{
     const { messageId, command, meta, args } = payload;
 
     let data: any;
-    if (command in this) {
-      if (meta) {
-        data = await this[command](meta, ...args);
+    let isError = false;
+    try {
+      if (command in this) {
+        if (meta) {
+          data = await this[command](meta, ...args);
+        } else {
+          data = await this[command](...args);
+        }
       } else {
-        data = await this[command](...args);
+        // if not on this function, assume we're sending on to tab
+        const tab = Session.getTab(meta);
+        if (typeof tab[command] === 'function') {
+          data = await tab[command](...args);
+        } else {
+          isError = true;
+          data = new Error(`Command not available on tab (${command} - ${typeof tab[command]})`);
+        }
       }
-    } else {
-      // if not on this function, assume we're sending on to tab
-      const tab = Session.getTab(meta);
-      if (typeof tab[command] !== 'function') {
-        throw new Error(`Command not available on tab (${command} - ${typeof tab[command]})`);
-      }
-
-      data = await tab[command](...args);
+    } catch (error) {
+      isError = true;
+      data =
+        error instanceof Error
+          ? {
+              message: error.message,
+              stack: error.stack,
+              ...error,
+            }
+          : new Error(`Unknown error occurred ${error}`);
     }
 
     let commandId: number;
@@ -56,14 +70,15 @@ export default class CoreServerConnection extends TypedEventEmitter<{
       responseId: messageId,
       commandId,
       data,
+      isError,
     };
     this.emit('message', response);
   }
 
   public async connect(
-    options: ICoreConfigureOptions = {},
+    options: ICoreConfigureOptions & { isPersistent?: boolean } = {},
   ): Promise<{ maxConcurrency: number; browserEmulatorIds: string[] }> {
-    this.didConnect = true;
+    this.isPersistent = options.isPersistent ?? false;
     this.isClosing = false;
     await Core.start(options, false);
     return {
@@ -86,12 +101,12 @@ export default class CoreServerConnection extends TypedEventEmitter<{
       if (promise) closeAll.push(promise);
     }
     await Promise.all(closeAll);
-    this.didConnect = false;
+    this.isPersistent = false;
     this.emit('close', { fatalError });
   }
 
   public isActive() {
-    return this.sessionIds.size > 0 || this.didConnect;
+    return this.sessionIds.size > 0 || this.isPersistent;
   }
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -18,9 +18,11 @@ import { Handler, Agent } from '@secret-agent/full-client';
     await agent.goto('https://ulixee.org');
     const links = await agent.document.querySelectorAll('a.DatasetSummary');
     for (const link of links) {
-      const datasetName = await link.querySelector('.title').textContent;
-      const datasetUrl = await link.getAttribute('href');
-      handler.dispatchAgent(getDatasetCost, { name: datasetName, href: datasetUrl });
+      const name = await link.querySelector('.title').textContent;
+      const href = await link.getAttribute('href');
+      const dataset = { name, href };
+      const agentOptions = { name };
+      handler.dispatchAgent(getDatasetCost, dataset, agentOptions);
     }
   });
 

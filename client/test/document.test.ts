@@ -8,7 +8,7 @@ import { Helpers } from '@secret-agent/testing';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
-import CoreClientConnection from '../lib/CoreClientConnection';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 afterAll(Helpers.afterAll);
 
@@ -44,7 +44,7 @@ describe('document tests', () => {
     );
 
     class Piper extends CoreClientConnection {
-      async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+      async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
         const data = await outgoing(payload);
 
         this.onMessage({

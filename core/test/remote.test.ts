@@ -1,12 +1,16 @@
 import { Helpers } from '@secret-agent/testing';
-import { Handler } from '@secret-agent/client';
+import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
 import RemoteServer from '../lib/RemoteServer';
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
+let remoteServer: RemoteServer;
 
 beforeAll(async () => {
-  httpServer = await Helpers.runHttpServer();
+  httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
+  remoteServer = new RemoteServer();
+  Helpers.onClose(() => remoteServer.close(), true);
+  await remoteServer.listen({ port: 0, host: '127.0.0.1' });
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -14,14 +18,31 @@ afterEach(Helpers.afterEach);
 describe('basic remote connection tests', () => {
   it('should goto and waitForLocation', async () => {
     // bind a core server to core
-    const coreServer = new RemoteServer();
-    Helpers.needsClosing.push(coreServer);
-    await coreServer.listen({ port: 0, host: '127.0.0.1' });
 
     const handler = new Handler({
-      host: `127.0.0.1:${coreServer.port}`,
+      host: `127.0.0.1:${remoteServer.port}`,
     });
-    const agent = await handler.createAgent();
+    const handlerAgent = await handler.createAgent();
+    const sessionId = await handlerAgent.sessionId;
+    expect(sessionId).toBeTruthy();
+
+    const { url } = httpServer;
+    await handlerAgent.goto(url);
+
+    const html = await handlerAgent.document.documentElement.outerHTML;
+    expect(html).toBe('<html><head></head><body>Hello world</body></html>');
+
+    await handlerAgent.close();
+    await handler.close();
+  });
+
+  it('should be able to set a remote connection on the default agent', async () => {
+    // bind a core server to core
+    await agent.configure({
+      coreConnection: {
+        host: `127.0.0.1:${remoteServer.port}`,
+      },
+    });
     const sessionId = await agent.sessionId;
     expect(sessionId).toBeTruthy();
 
@@ -32,6 +53,24 @@ describe('basic remote connection tests', () => {
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
     await agent.close();
-    await handler.close();
-  }, 10e3);
+  });
+
+  it('should be able to configure a new agent', async () => {
+    // bind a core server to core
+    const customAgent = new Agent({
+      coreConnection: {
+        host: `127.0.0.1:${remoteServer.port}`,
+      },
+    });
+    const sessionId = await customAgent.sessionId;
+    expect(sessionId).toBeTruthy();
+
+    const { url } = httpServer;
+    await agent.goto(url);
+
+    const html = await agent.document.documentElement.outerHTML;
+    expect(html).toBe('<html><head></head><body>Hello world</body></html>');
+
+    await agent.close();
+  });
 });

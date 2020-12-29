@@ -5,4 +5,5 @@ export default interface ICoreConnectionOptions
   host?: string;
   maxConcurrency?: number;
   agentTimeoutMillis?: number;
+  isPersistent?: boolean; // variable to tell server to keep around connection. Defaults to true
 }

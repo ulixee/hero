@@ -183,11 +183,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public close(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
     const { connection } = agentState.getState(secretAgent);
-    const tabIdx = connection.tabs.indexOf(this);
-    connection.tabs.splice(tabIdx, 1);
-    if (connection.tabs.length) {
-      connection.activeTab = connection.tabs[0];
-    }
+    connection.closeTab(this);
     return coreTab.then(x => x.close());
   }
 }

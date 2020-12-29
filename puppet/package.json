@@ -16,6 +16,7 @@
   "devDependencies": {
     "@secret-agent/emulate-chrome-80": "1.2.0-alpha.5",
     "@secret-agent/emulate-chrome-83": "1.2.0-alpha.5",
+    "@secret-agent/testing": "1.2.0-alpha.5",
     "ws": "^7.3.1"
   }
 }

@@ -1,6 +1,6 @@
 # Handler
 
-Handlers provide a simple interface to manage many concurrent Agent sessions across one or more `SecretAgent Cores`.
+Handlers provide a simple interface to load-balance many concurrent Agent sessions across one or more `SecretAgent Cores`.
 
 ```js
 import { Handler } from 'secret-agent';
@@ -49,14 +49,14 @@ Every connection controls how many maximum concurrent Agents should be open at a
 
 Connections can be either:
 
-- options `object`. A set of settings that controls the creation of a "connection" to a `SecretAgent Core`.
+- options `object`. A set of settings that controls the creation of a [`connection`](../advanced/core-connection#options) to a `SecretAgent Core`.
   - host `string`. An optional `hostname:port` url that will be used to establish a connection to a SecretAgent Core running on another machine. If no host is provided, a connection to a "locally" running `Core` will be attempted.
   - maxConcurrency `number`. The max number of Agents to allow to be dispatched and created at the same time. Agents are "active" until the dispatchAgent callback is complete, or the created Agent is closed. If not provided, this number will match the max allowed by a `Core`.
   - agentTimeoutMillis `number`. The number of milliseconds to give each Agent in this connection to complete a session. A TimeoutError will be thrown if this time is exceeded.
   - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
   - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
   - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
-- connection `Connection`. A pre-initialized connection to a `SecretAgent Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
+- connection [`CoreConnection`](../advanced/core-connection#options). A pre-initialized connection to a `SecretAgent Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
 
 ```js
 const { Handler } = require('secret-agent');

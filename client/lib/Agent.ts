@@ -6,7 +6,6 @@ import { bindFunctions } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
-import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -27,11 +26,11 @@ import IInteractions, {
 import Tab, { createTab, getCoreTab } from './Tab';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
 import ScriptInstance from './ScriptInstance';
-import CoreClient from './CoreClient';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import CoreTab from './CoreTab';
 import IAgentDefaults from '../interfaces/IAgentDefaults';
 import CoreSession from './CoreSession';
+import createConnection from '../connections/createConnection';
+import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 
 export const DefaultOptions = {
   defaultRenderingOptions: [RenderingOption.All],
@@ -46,7 +45,7 @@ const { getState, setState } = StateMachine<Agent, IState>();
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  sessionOptions: ICreateSessionOptions;
+  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'coreConnection' | 'showReplay'>;
 }
 
 const propertyKeys: (keyof Agent)[] = [
@@ -63,10 +62,7 @@ const propertyKeys: (keyof Agent)[] = [
 export default class Agent extends AwaitedEventTarget<{ close: void }> {
   protected static options: IAgentDefaults = { ...DefaultOptions };
 
-  constructor(
-    getCoreClient: () => Promise<CoreClient> | CoreClient,
-    options: IAgentCreateOptions = {},
-  ) {
+  constructor(options: IAgentCreateOptions = {}) {
     super(() => {
       return {
         target: getState(this).connection.coreSession,
@@ -80,16 +76,12 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
-    const connection = new SessionConnection(
-      this,
-      getCoreClient,
-      options.showReplay ?? !shouldHideReplay,
-    );
+    const connection = new SessionConnection(this);
 
     setState(this, {
       connection,
       isClosing: false,
-      sessionOptions: {
+      options: {
         ...options,
         sessionName,
         scriptInstanceMeta: scriptInstance.meta,
@@ -115,7 +107,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public get sessionName(): Promise<string> {
-    return Promise.resolve(getState(this).sessionOptions.sessionName);
+    return Promise.resolve(getState(this).options.sessionName);
   }
 
   public get storage(): Promise<IDomStorage> {
@@ -152,18 +144,27 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     await tab.close();
   }
 
-  public async configure(options: IConfigureSessionOptions): Promise<void> {
-    const sessionOptions = getState(this).sessionOptions;
+  public async configure(configureOptions: IAgentConfigureOptions): Promise<void> {
+    const { options } = getState(this);
     setState(this, {
-      sessionOptions: {
-        ...sessionOptions,
+      options: {
         ...options,
+        ...configureOptions,
       },
     });
 
     const connection = getState(this).connection;
     // if already setup, call configure
     if (connection.hasConnected) {
+      if (
+        configureOptions.showReplay !== undefined ||
+        configureOptions.coreConnection !== undefined
+      ) {
+        throw new Error(
+          'This agent has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
+        );
+      }
+    } else {
       const session = await connection.coreSession;
       await session.configure(options);
     }
@@ -177,7 +178,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     const coreTab = await getCoreTab(this.activeTab);
     const newCoreTab = coreTab.waitForNewTab();
     const tab = createTab(this, newCoreTab);
-    getState(this).connection.tabs.push(tab);
+    getState(this).connection.addTab(tab);
     return tab;
   }
 
@@ -286,6 +287,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 // This class will lazily connect to core on first access of the tab properties
 class SessionConnection {
   public hasConnected = false;
+
   public get coreSession(): Promise<CoreSession> {
     return this._coreSession ?? this.connectSession();
   }
@@ -299,33 +301,24 @@ class SessionConnection {
     this._activeTab = value;
   }
 
-  public get tabs(): Tab[] {
-    if (!this._tabs) this._tabs = [this.activeTab];
-    return this._tabs;
-  }
-
   private _coreSession: Promise<CoreSession>;
   private _activeTab: Tab;
-  private _tabs: Tab[];
+  private _tabs: Tab[] = [];
 
-  constructor(
-    private agent: Agent,
-    private getCoreClient: () => Promise<CoreClient> | CoreClient,
-    private showReplay: boolean,
-  ) {}
+  constructor(private agent: Agent) {}
 
   public async refreshedTabs(): Promise<Tab[]> {
     const session = await this.coreSession;
     const coreTabs = await session.getTabs();
-    const tabIds = await Promise.all(this.tabs.map(x => x.tabId));
+    const tabIds = await Promise.all(this._tabs.map(x => x.tabId));
     for (const coreTab of coreTabs) {
       const hasTab = tabIds.includes(coreTab.tabId);
       if (!hasTab) {
         const tab = createTab(this.agent, Promise.resolve(coreTab));
-        this.tabs.push(tab);
+        this._tabs.push(tab);
       }
     }
-    return this.tabs;
+    return this._tabs;
   }
 
   public async close(): Promise<void> {
@@ -333,27 +326,34 @@ class SessionConnection {
     return session.close();
   }
 
-  public getCoreTab(): Promise<CoreTab> {
-    return getCoreTab(this.activeTab);
+  public closeTab(tab: Tab): void {
+    const tabIdx = this._tabs.indexOf(tab);
+    this._tabs.splice(tabIdx, 1);
+    if (this._tabs.length) {
+      this._activeTab = this._tabs[0];
+    }
+  }
+
+  public addTab(tab: Tab): void {
+    this._tabs.push(tab);
   }
 
   private connectSession(): Promise<CoreSession> {
     if (this.hasConnected) return this._coreSession;
     this.hasConnected = true;
-    const sessionOptions = getState(this.agent).sessionOptions;
+    const { showReplay, coreConnection, ...options } = getState(this.agent).options;
 
-    const newSession = Promise.resolve(this.getCoreClient()).then(x =>
-      x.createSession(sessionOptions),
-    );
-    this._coreSession = newSession;
+    const connection = createConnection(coreConnection ?? { isPersistent: false });
 
-    if (this.showReplay) {
-      scriptInstance.launchReplay(sessionOptions.sessionName, newSession);
+    this._coreSession = connection.createSession(options);
+
+    if (showReplay ?? !shouldHideReplay) {
+      scriptInstance.launchReplay(options.sessionName, this._coreSession);
     }
 
-    const coreTab = newSession.then(x => x.firstTab);
+    const coreTab = this._coreSession.then(x => x.firstTab);
     this._activeTab = createTab(this.agent, coreTab);
     this._tabs = [this._activeTab];
-    return newSession;
+    return this._coreSession;
   }
 }
