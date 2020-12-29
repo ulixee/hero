@@ -38,13 +38,13 @@ jobs:
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Run "build" step
-        run: yarn tsc
+        run: NODE_OPTIONS=--max-old-space-size=4096 yarn tsc
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Run  Lint
-        run: yarn lint
+        run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
 
       - name: 'Tar files'
         run: tar -cvf js_files.tar --exclude=node_modules --exclude=dist ./build
