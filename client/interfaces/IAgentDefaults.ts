@@ -1,7 +1,7 @@
-import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
+import { IBlockedResourceType } from '@secret-agent/core-interfaces/ITabOptions';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 
 export default interface IAgentDefaults {
-  defaultRenderingOptions?: IRenderingOption[];
+  defaultBlockedResourceTypes?: IBlockedResourceType[];
   defaultUserProfile?: IUserProfile;
 }

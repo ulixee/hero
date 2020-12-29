@@ -1,4 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
+import Resource from '@secret-agent/client/lib/Resource';
 import { Handler } from '../index';
 
 let koaServer;
@@ -20,6 +21,42 @@ describe('basic Full Client tests', () => {
     await agent.goto(exampleUrl);
     const url = await agent.document.location.host;
     expect(url).toBe(koaServer.baseHost);
+  });
+
+  it('allows you to block resources', async () => {
+    koaServer.get('/block', ctx => {
+      ctx.body = `<html>
+<head>
+  <link rel="stylesheet" href="/test.css" />
+</head>
+<body>
+  <img src="/img.png" alt="Image"/>
+</body>
+</html>`;
+    });
+
+    koaServer.get('/img.png', ctx => {
+      ctx.statusCode = 500;
+    });
+    koaServer.get('/test.css', ctx => {
+      ctx.statusCode = 500;
+    });
+
+    const agent = await handler.createAgent({
+      blockedResourceTypes: ['BlockAssets'],
+    });
+    Helpers.needsClosing.push(agent);
+
+    const resources: Resource[] = [];
+    await agent.activeTab.on('resource', event => resources.push(event));
+    await agent.goto(`${koaServer.baseUrl}/block`);
+    await agent.waitForAllContentLoaded();
+    expect(resources).toHaveLength(3);
+    for (const resource of resources) {
+      const status = await resource.response.statusCode;
+      if (resource.type === 'Document') expect(status).toBe(200);
+      else expect(status).toBe(404);
+    }
   });
 
   it('should get unreachable proxy errors in the client', async () => {

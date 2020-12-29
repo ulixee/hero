@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import { IRenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
+import { IBlockedResourceType } from '@secret-agent/core-interfaces/ITabOptions';
 import {
   ILocationStatus,
   ILocationTrigger,
@@ -143,27 +143,31 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     ]);
   }
 
-  public async setRenderingOptions(renderingOptions: IRenderingOption[]): Promise<void> {
+  public async setBlockedResourceTypes(
+    blockedResourceTypes: IBlockedResourceType[],
+  ): Promise<void> {
     const mitmSession = this.session.mitmRequestSession;
     const blockedResources = mitmSession.blockedResources.types;
     let enableJs = true;
 
-    if (renderingOptions.includes('All')) {
+    if (blockedResourceTypes.includes('None')) {
       blockedResources.length = 0;
-    } else if (renderingOptions.includes('None')) {
+    } else if (blockedResourceTypes.includes('All')) {
       blockedResources.push('Image', 'Stylesheet', 'Script', 'Font', 'Ico', 'Media');
       enableJs = false;
+    } else if (blockedResourceTypes.includes('BlockAssets')) {
+      blockedResources.push('Image', 'Stylesheet', 'Script');
     } else {
-      if (!renderingOptions.includes('LoadImages')) {
+      if (blockedResourceTypes.includes('BlockImages')) {
         blockedResources.push('Image');
       }
-      if (!renderingOptions.includes('LoadCssResources')) {
+      if (blockedResourceTypes.includes('BlockCssResources')) {
         blockedResources.push('Stylesheet');
       }
-      if (!renderingOptions.includes('LoadJsResources')) {
+      if (blockedResourceTypes.includes('BlockJsResources')) {
         blockedResources.push('Script');
       }
-      if (!renderingOptions.includes('JsRuntime')) {
+      if (blockedResourceTypes.includes('JsRuntime')) {
         enableJs = false;
       }
     }
@@ -513,8 +517,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     await this.interactor.initialize();
-    if (this.session.options?.renderingOptions) {
-      await this.setRenderingOptions(this.session.options.renderingOptions);
+    if (this.session.options?.blockedResourceTypes) {
+      await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
   }
 

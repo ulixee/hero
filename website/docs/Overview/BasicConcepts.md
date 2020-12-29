@@ -62,13 +62,13 @@ When used in a simple example as show above, Puppeteer's approach seems okay. Ho
 
 ## Headless Browsers Need Not Always Render
 
-When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. SecretAgent allows you to [turn off](./configuration#rendering) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
+When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. SecretAgent allows you to [turn off](./configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
 
 ```js
 import agent from 'secret-agent';
 
 await agent.configure({
-  renderingOptions: ['None'],
+  blockedResourceTypes: ['All'],
 });
 await agent.goto('https://secretagent.dev');
 // referer will be https://secretagent.dev
