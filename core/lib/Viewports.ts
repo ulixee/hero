@@ -1,8 +1,20 @@
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IWindowFraming from '../../core-interfaces/IWindowFraming';
 
+const defaultWindowFraming = {
+  screenGapLeft: 0,
+  screenGapTop: 0,
+  screenGapRight: 0,
+  screenGapBottom: 0,
+  frameBorderWidth: 0,
+  frameBorderHeight: 0,
+}
+
 export default class Viewports {
   static getDefault(windowFraming: IWindowFraming, base: IWindowFraming) {
+    windowFraming = windowFraming || { ...defaultWindowFraming };
+    base = base || { ...defaultWindowFraming };
+
     const screenWidth = 1440;
     const screenHeight = 900;
 

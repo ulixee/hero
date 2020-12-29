@@ -7,7 +7,7 @@
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "NODE_OPTIONS=--max_old_space_size=4096 yarn tsc && yarn workspace @secret-agent/replay build:frontend && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
-    "build:dist-local": "yarn build && yarn build:dist && yarn workspace @secret-agent/replay build:pack && cd build-dist && SA_REBUILD_MITM_SOCKET=1 yarn",
+    "build:dist-local": "NODE_OPTIONS=--max_old_space_size=4096 yarn build && yarn build:dist && yarn workspace @secret-agent/replay build:pack && cd build-dist && SA_REBUILD_MITM_SOCKET=1 yarn",
     "rebuild:dist": "tsc -b tsconfig.dist.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
     "build:ci": "yarn tsc && cd build && yarn install",

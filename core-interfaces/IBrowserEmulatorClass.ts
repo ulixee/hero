@@ -6,7 +6,7 @@ export default interface IBrowserEmulatorClass {
   roundRobinPercent: number;
   engine: { browser: string; executablePath: string; revision: string };
   new (): IBrowserEmulator;
-  userAgentOptions: IUserAgentOption[];
+  userAgentOptions?: IUserAgentOption[];
 }
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need
