@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
+
+
+### Bug Fixes
+
+* **emulate-browsers:** fix cross frame tostring ([27a69d9](https://github.com/ulixee/secret-agent/commit/27a69d9703766d653c0e841e6d69458e643faba2))
+* **mitm:** bug with duplicate header on response ([ba3c015](https://github.com/ulixee/secret-agent/commit/ba3c015db4f62af5c7e77d6694fec9ad7679882c)), closes [#111](https://github.com/ulixee/secret-agent/issues/111)
+* **puppet:** workers not tracking devtools calls ([b339758](https://github.com/ulixee/secret-agent/commit/b339758c8bb5b2076f1337dee3d0deefaf3fb7ad))
+
+
+
+
+
 # [1.2.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
 

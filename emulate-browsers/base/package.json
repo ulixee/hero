@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/emulate-browsers-base",
-  "version": "1.2.0-alpha.4",
+  "version": "1.2.0-alpha.5",
   "description": "SecretAgent client that runs remotely",
   "scripts": {
     "updateStats": "node -e 'require(\"./data-scripts/updateBrowserStats\").default()' && node -e 'require(\"./data-scripts/updateScreenSizesStats\").default()'"
@@ -8,15 +8,15 @@
   "dependencies": {
     "@secret-agent/commons": "1.2.0-alpha.4",
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
-    "@secret-agent/puppet": "1.2.0-alpha.4",
+    "@secret-agent/puppet": "1.2.0-alpha.5",
     "ua-parser-js": "^0.7.21",
     "user-agents": "^1.0.559"
   },
   "devDependencies": {
-    "@secret-agent/core": "1.2.0-alpha.4",
-    "@secret-agent/emulate-chrome-80": "1.2.0-alpha.4",
+    "@secret-agent/core": "1.2.0-alpha.5",
+    "@secret-agent/emulate-chrome-80": "1.2.0-alpha.5",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
-    "@secret-agent/testing": "1.2.0-alpha.4",
+    "@secret-agent/testing": "1.2.0-alpha.5",
     "@types/ua-parser-js": "^0.7.33",
     "axios": "^0.19.2",
     "csv-parser": "^2.3.2",

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
+
+
+### Bug Fixes
+
+* **puppet:** workers not tracking devtools calls ([b339758](https://github.com/ulixee/secret-agent/commit/b339758c8bb5b2076f1337dee3d0deefaf3fb7ad))
+
+
+
+
+
 # [1.2.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
 **Note:** Version bump only for package @secret-agent/puppet-chrome

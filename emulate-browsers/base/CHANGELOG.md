@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
+
+
+### Bug Fixes
+
+* **emulate-browsers:** fix cross frame tostring ([27a69d9](https://github.com/ulixee/secret-agent/commit/27a69d9703766d653c0e841e6d69458e643faba2))
+
+
+
+
+
 # [1.2.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
 **Note:** Version bump only for package @secret-agent/emulate-browsers-base
