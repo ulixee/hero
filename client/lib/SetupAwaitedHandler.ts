@@ -2,10 +2,10 @@ import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHan
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
-import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreTab';
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = {
@@ -89,7 +89,7 @@ export function construct<TClass>(self: AwaitedHandler<TClass>): TClass {
 
 function execJsPath<TClass, T>(
   self: AwaitedHandler<TClass>,
-  coreTab: CoreTab,
+  coreTab: CoreSession,
   instance: TClass,
   path: IJsPath,
 ): Promise<IExecJsPathResult<T>> {

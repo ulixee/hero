@@ -1,10 +1,12 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import SecretAgent from '../index';
+import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -15,7 +17,7 @@ describe('Fetch tests', () => {
     koaServer.get('/fetch', ctx => {
       ctx.body = { got: 'it' };
     });
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
     await agent.waitForAllContentLoaded();
@@ -35,7 +37,7 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: '2' };
     });
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
     await agent.waitForAllContentLoaded();
@@ -60,7 +62,7 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: 'request' };
     });
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
     await agent.waitForAllContentLoaded();
@@ -82,7 +84,7 @@ describe('Fetch tests', () => {
     koaServer.get('/buffer', ctx => {
       ctx.body = Buffer.from('This is a test');
     });
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
     await agent.waitForAllContentLoaded();

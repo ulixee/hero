@@ -17,7 +17,7 @@ import IInteractions, {
   IInteraction,
   IMousePosition,
 } from '../interfaces/IInteractions';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreTab';
 
 const { getState } = StateMachine<ISuperElement | ISuperNode, { awaitedPath: AwaitedPath }>();
 
@@ -39,7 +39,7 @@ const COMMAND_POS: { [k: string]: number } = {
 const MAX_COMMAND_POS = Object.keys(COMMAND_POS).length;
 
 export default class Interactor {
-  public static async run(coreTab: CoreTab, interactions: IInteractions): Promise<void> {
+  public static async run(coreTab: CoreSession, interactions: IInteractions): Promise<void> {
     const interactionGroups = convertToInteractionGroups(interactions);
     await coreTab.interact(interactionGroups);
   }

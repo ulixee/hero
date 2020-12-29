@@ -1,7 +1,7 @@
 import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import Core from '@secret-agent/core';
+import { GlobalPool } from '@secret-agent/core';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
@@ -15,7 +15,7 @@ const { log } = Log(module);
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  const engine = BrowserEmulators.getClass(GlobalPool.defaultBrowserEmulatorId).engine;
   puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();

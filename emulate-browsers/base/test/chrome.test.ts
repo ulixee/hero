@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import windowChrome from '@secret-agent/emulate-chrome-80/data/mac-os-10-14/window-chrome.json';
 import { inspect } from 'util';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
-import Core from '@secret-agent/core';
+import { GlobalPool } from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import inspectScript from './inspectHierarchy';
@@ -14,7 +14,7 @@ const { chrome, prevProperty } = windowChrome as any;
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const engine = BrowserEmulators.getClass(Core.defaultBrowserEmulatorId).engine;
+  const engine = BrowserEmulators.getClass(GlobalPool.defaultBrowserEmulatorId).engine;
   puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();

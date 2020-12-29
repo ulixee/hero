@@ -2,19 +2,22 @@ import { Helpers } from '@secret-agent/testing';
 import { GlobalPool } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Viewports from '@secret-agent/core/lib/Viewports';
-import SecretAgent from '../index';
+import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentSessionsCount = 3;
+  GlobalPool.maxConcurrentAgentsCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('basic Emulator tests', () => {
   it('should be able to set a timezoneId', async () => {
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       timezoneId: 'America/Los_Angeles',
     });
     Helpers.needsClosing.push(agent);
@@ -27,7 +30,7 @@ describe('basic Emulator tests', () => {
   });
 
   it('should affect accept-language header', async () => {
-    const agent = await new SecretAgent({ locale: 'en-US,en;q=0.9' });
+    const agent = await handler.createAgent({ locale: 'en-US,en;q=0.9' });
     Helpers.needsClosing.push(agent);
 
     let acceptLanguage = '';
@@ -41,7 +44,7 @@ describe('basic Emulator tests', () => {
   });
 
   it('should affect navigator.language', async () => {
-    const agent = await new SecretAgent({ locale: 'fr-CH,fr-CA' });
+    const agent = await handler.createAgent({ locale: 'fr-CH,fr-CA' });
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}`);
@@ -54,7 +57,7 @@ describe('basic Emulator tests', () => {
 
   it('should format number', async () => {
     {
-      const agent = await new SecretAgent({ locale: 'en-US,en;q=0.9' });
+      const agent = await handler.createAgent({ locale: 'en-US,en;q=0.9' });
       Helpers.needsClosing.push(agent);
 
       await agent.goto(`${koaServer.baseUrl}`);
@@ -62,7 +65,7 @@ describe('basic Emulator tests', () => {
       expect(result.value).toBe('1,000,000.5');
     }
     {
-      const agent = await new SecretAgent({ locale: 'fr-CH' });
+      const agent = await handler.createAgent({ locale: 'fr-CH' });
       Helpers.needsClosing.push(agent);
 
       await agent.goto(`${koaServer.baseUrl}`);
@@ -74,7 +77,7 @@ describe('basic Emulator tests', () => {
 
   it('should format date', async () => {
     {
-      const agent = await new SecretAgent({
+      const agent = await handler.createAgent({
         locale: 'en-US',
         timezoneId: 'America/Los_Angeles',
       });
@@ -88,7 +91,7 @@ describe('basic Emulator tests', () => {
       expect(result.value).toBe(formatted);
     }
     {
-      const agent = await new SecretAgent({
+      const agent = await handler.createAgent({
         locale: 'de-DE',
         timezoneId: 'Europe/Berlin',
       });
@@ -114,7 +117,7 @@ describe('setScreensize', () => {
       frameBorderHeight: 0,
     };
     const viewport = Viewports.getDefault(windowFraming, windowFraming);
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       viewport,
     });
     Helpers.needsClosing.push(agent);
@@ -137,7 +140,7 @@ describe('setScreensize', () => {
   });
 
   it('should support Media Queries', async () => {
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       viewport: {
         width: 200,
         height: 200,

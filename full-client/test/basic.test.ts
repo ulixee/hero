@@ -1,9 +1,11 @@
 import { Helpers } from '@secret-agent/testing';
-import SecretAgent from '../index';
+import { Handler } from '../index';
 
 let koaServer;
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler({ maxConcurrency: 1 });
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -12,7 +14,7 @@ afterEach(Helpers.afterEach);
 describe('basic Full Client tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(exampleUrl);
@@ -21,15 +23,29 @@ describe('basic Full Client tests', () => {
   });
 
   it('should get unreachable proxy errors in the client', async () => {
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       upstreamProxyUrl: koaServer.baseUrl,
     });
     Helpers.needsClosing.push(agent);
     await expect(agent.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
   });
 
+  it('should get errors in dispatch', async () => {
+    handler.dispatchAgent(
+      async agent => {
+        await agent.goto(`${koaServer.baseUrl}/`);
+      },
+      null,
+      {
+        upstreamProxyUrl: koaServer.baseUrl,
+      },
+    );
+
+    await expect(handler.waitForAllDispatches()).rejects.toThrow();
+  });
+
   it('runs goto with no document loaded', async () => {
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
     const url = await agent.document.location.host;
     expect(url).toBe(null);
@@ -37,7 +53,7 @@ describe('basic Full Client tests', () => {
 
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const agent = await new SecretAgent({
+    const agent = await handler.createAgent({
       locale: 'en-US,en;q=0.9',
     });
     Helpers.needsClosing.push(agent);
@@ -74,7 +90,7 @@ describe('basic Full Client tests', () => {
   });
 
   it('can get and set cookies', async () => {
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     koaServer.get('/cookies', ctx => {
@@ -117,7 +133,7 @@ describe('basic Full Client tests', () => {
   });
 
   it('can get and set localStorage', async () => {
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/`);

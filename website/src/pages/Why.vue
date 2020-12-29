@@ -81,13 +81,16 @@ BasicLayout.Why
         of all the page assets, DOM, http requests, etc. You can pull up the Replay agent and watch until the script breaks..
         then <i>fix it</i> inside Replay until you're back up and running.
 
-      video(width="100%", height=500, style="background:black")
+      img(src="@/assets/replay@2x.png")
 </template>
 
 <style lang="scss">
 .Why {
   h2 {
     margin-top: 40px;
+  }
+  img {
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.12), 0 -4px 10px rgba(0, 0, 0, 0.16);
   }
 }
 </style>

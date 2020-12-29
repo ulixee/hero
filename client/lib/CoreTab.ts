@@ -1,48 +1,43 @@
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { ILocationStatus, ILocationTrigger } from '@secret-agent/core-interfaces/Location';
-import ISessionOptions from '@secret-agent/core-interfaces/ISessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
-import CoreClient from './CoreClient';
+import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { createResource } from './Resource';
+import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
-export default class CoreTab {
+export default class CoreTab implements IJsPathEventTarget {
   public tabId: string;
   public sessionId: string;
-  public sessionsDataLocation: string;
-  public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
-  protected readonly meta: ISessionMeta;
-  private readonly coreClient: CoreClient;
 
-  constructor(
-    { tabId, sessionId, sessionsDataLocation, replayApiServer }: ISessionMeta,
-    coreClient: CoreClient,
-  ) {
+  protected readonly meta: ISessionMeta;
+  private readonly connection: CoreClientConnection;
+
+  constructor({ tabId, sessionId }: ISessionMeta, connection: CoreClientConnection) {
     this.tabId = tabId;
     this.sessionId = sessionId;
-    this.sessionsDataLocation = sessionsDataLocation;
-    this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
       tabId,
     };
-    this.coreClient = coreClient;
-    this.commandQueue = new CoreCommandQueue(this.meta, coreClient, coreClient.commandQueue);
-    this.eventHeap = new CoreEventHeap(this.meta, coreClient);
+    this.connection = connection;
+    this.commandQueue = new CoreCommandQueue(this.meta, connection, connection.commandQueue);
+    this.eventHeap = new CoreEventHeap(this.meta, connection);
 
     if (!this.eventHeap.hasEventInterceptors('resource')) {
       this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
@@ -55,7 +50,7 @@ export default class CoreTab {
     return this.commandQueue.run('getResourceProperty', id, propertyPath);
   }
 
-  public async configure(options: ISessionOptions): Promise<void> {
+  public async configure(options: IConfigureSessionOptions): Promise<void> {
     await this.commandQueue.run('configure', options);
   }
 
@@ -100,7 +95,7 @@ export default class CoreTab {
   }
 
   public async getCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run('getTabCookies');
+    return await this.commandQueue.run('getCookies');
   }
 
   public async setCookie(
@@ -108,11 +103,11 @@ export default class CoreTab {
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    return await this.commandQueue.run('setTabCookie', name, value, options);
+    return await this.commandQueue.run('setCookie', name, value, options);
   }
 
   public async removeCookie(name: string): Promise<boolean> {
-    return await this.commandQueue.run('removeTabCookie', name);
+    return await this.commandQueue.run('removeCookie', name);
   }
 
   public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
@@ -148,11 +143,13 @@ export default class CoreTab {
 
   public async waitForNewTab(): Promise<CoreTab> {
     const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab');
-    return new CoreTab(sessionMeta, this.coreClient);
+    const session = this.connection.getSession(sessionMeta.sessionId);
+    session.addTab(sessionMeta);
+    return new CoreTab(sessionMeta, this.connection);
   }
 
   public async focusTab(): Promise<void> {
-    await this.commandQueue.run('focusTab');
+    await this.commandQueue.run('focus');
   }
 
   public async addEventListener(
@@ -173,20 +170,8 @@ export default class CoreTab {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run('closeTab');
-    process.nextTick(() => {
-      delete this.coreClient.tabsById[this.meta.tabId];
-    });
-  }
-
-  public async closeSession(): Promise<void> {
     await this.commandQueue.run('close');
-    process.nextTick(() => {
-      for (const [tabId, tab] of Object.entries(this.coreClient.tabsById)) {
-        if (tab.sessionId === this.sessionId) {
-          delete this.coreClient.tabsById[tabId];
-        }
-      }
-    });
+    const session = this.connection.getSession(this.sessionId);
+    session?.removeTab(this);
   }
 }

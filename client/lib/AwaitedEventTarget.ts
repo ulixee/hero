@@ -1,29 +1,27 @@
-import StateMachine from 'awaited-dom/base/StateMachine';
-import IAwaitedEventTarget, { IAwaitedEventTargetState } from '../interfaces/IAwaitedEventTarget';
+import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import IAwaitedEventTarget from '../interfaces/IAwaitedEventTarget';
+import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 
-const { getState } = StateMachine<any, any>();
+export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
+  constructor(
+    readonly getEventTarget: () => { target: Promise<IJsPathEventTarget>; jsPath?: IJsPath },
+  ) {}
 
-export default class AwaitedEventTarget<T, IState extends IAwaitedEventTargetState>
-  implements IAwaitedEventTarget<T> {
   public async addEventListener<K extends keyof T>(
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    const { awaitedPath, coreTab } = getState(this) as IState;
-    const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
-    const tab = await coreTab;
-    return tab.addEventListener(jsPath, eventType as string, listenerFn, options);
+    const { target, jsPath } = await this.getEventTarget();
+    return (await target).addEventListener(jsPath, eventType as string, listenerFn, options);
   }
 
   public async removeEventListener<K extends keyof T>(
     eventType: K,
     listenerFn: (this: this, event: T[K]) => any,
   ): Promise<void> {
-    const { awaitedPath, coreTab } = getState(this) as IState;
-    const jsPath = awaitedPath ? awaitedPath.toJSON() : null;
-    const tab = await coreTab;
-    return tab.removeEventListener(jsPath, eventType as string, listenerFn);
+    const { target, jsPath } = await this.getEventTarget();
+    return (await target).removeEventListener(jsPath, eventType as string, listenerFn);
   }
 
   // aliases
@@ -48,10 +46,9 @@ export default class AwaitedEventTarget<T, IState extends IAwaitedEventTargetSta
     listenerFn: (this: this, event: T[K]) => any,
     options?,
   ): Promise<void> {
-    const wrappedListener = (event: T[K]): void => {
+    const wrappedListener = (event: T[K]): Promise<void> => {
       listenerFn.call(this, event);
-      this.removeEventListener(eventType, listenerFn);
-      return null;
+      return this.removeEventListener(eventType, listenerFn);
     };
     return this.addEventListener(eventType, wrappedListener, options);
   }

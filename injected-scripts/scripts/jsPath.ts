@@ -1,8 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
+import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import IElementRect from '../interfaces/IElementRect';
 import INodeTracker from '../interfaces/INodeTracker';
 import IAttachedState from '../interfaces/IAttachedStateCopy';
-import IExecJsPathResult from '../interfaces/IExecJsPathResult';
 
 // / COPIED FROM NODERDOM! DO NOT EDIT HERE
 type IJsPath = IPathStep[];

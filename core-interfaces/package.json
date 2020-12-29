@@ -8,7 +8,6 @@
   },
   "devDependencies": {
     "@secret-agent/injected-scripts": "1.2.0-alpha.4",
-    "@types/node": "^12.7.11",
     "devtools-protocol": "^0.0.799653"
   }
 }

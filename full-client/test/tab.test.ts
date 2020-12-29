@@ -1,13 +1,16 @@
 import { Helpers } from '@secret-agent/testing';
-import Core from '@secret-agent/core';
+import { Session } from '@secret-agent/core';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import os from 'os';
-import SecretAgent from '../index';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Handler } from '../index';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/tabTest', ctx => {
     ctx.body = `<body>
@@ -26,7 +29,7 @@ afterEach(Helpers.afterEach);
 
 describe('Multi-tab scenarios', () => {
   it('can wait for another tab', async () => {
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/tabTest`);
@@ -37,6 +40,7 @@ describe('Multi-tab scenarios', () => {
     await agent.click(agent.document.querySelector('a'));
     const newTab = await agent.waitForNewTab();
 
+    expect(await agent.tabs).toHaveLength(2);
     expect(newTab.tabId).not.toBe(agent.activeTab.tabId);
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/newTab`);
     await agent.focusTab(newTab);
@@ -47,10 +51,11 @@ describe('Multi-tab scenarios', () => {
     await agent.click(agent.document.querySelector('a'));
     expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
-    const core = Core.byTabId[await newTab.tabId];
+    const sessionId = await agent.sessionId;
+    const tabId = await newTab.tabId;
+    const tab = Session.getTab({ sessionId, tabId });
 
-    // @ts-ignore
-    const browserEmulator = core.session.browserEmulator;
+    const browserEmulator = tab.session.browserEmulator;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
     expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
@@ -60,7 +65,8 @@ describe('Multi-tab scenarios', () => {
     expect(csi.value.startE).toBeTruthy();
 
     await agent.closeTab(newTab);
-    expect(await agent.tabs).toHaveLength(1);
+    const newTabList = await agent.tabs;
+    expect(newTabList).toHaveLength(1);
     expect(agent.activeTab).toBe(tab1);
   });
 
@@ -89,7 +95,7 @@ describe('Multi-tab scenarios', () => {
       ctx.body = `<body><h1>Final</h1></body>`;
     });
 
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/page1`);
@@ -127,7 +133,7 @@ describe('Multi-tab scenarios', () => {
 </body>`;
     });
 
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/tabTest2`);
@@ -148,11 +154,9 @@ describe('Multi-tab scenarios', () => {
     expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
     const sessionId = await agent.sessionId;
-    // @ts-ignore
-    const core = Object.values(Core.byTabId).find(x => x.tab.sessionId === sessionId);
+    const session = Session.get(sessionId);
 
-    // @ts-ignore
-    const browserEmulator = core.session.browserEmulator;
+    const browserEmulator = session.browserEmulator;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
     expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
@@ -187,7 +191,7 @@ document.querySelector('a').addEventListener('click', event => {
 </body>`;
     });
 
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/ajaxTab`);
@@ -201,10 +205,7 @@ document.querySelector('a').addEventListener('click', event => {
     expect(await document.querySelector('h1').textContent).toBe('Overridden Result');
 
     const sessionId = await agent.sessionId;
-    // @ts-ignore
-    const core = Object.values(Core.byTabId).find(x => x.tab.sessionId === sessionId);
-    // @ts-ignore
-    const browserEmulator = core.session.browserEmulator;
+    const browserEmulator = Session.get(sessionId).browserEmulator;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
     expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);

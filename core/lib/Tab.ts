@@ -8,7 +8,6 @@ import {
 } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { AllowedNames } from '@secret-agent/commons/AllowedNames';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import * as Url from 'url';
@@ -19,7 +18,7 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { createPromise } from '@secret-agent/commons/utils';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@secret-agent/injected-scripts/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
@@ -58,7 +57,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private readonly interactor: Interactor;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
 
-  private get navigationTracker(): TabNavigations {
+  public get navigationTracker(): TabNavigations {
     return this.sessionState.navigationsByTabId[this.id];
   }
 
@@ -120,6 +119,28 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
     this.listen();
     this.isReady = this.install();
+    this.wrapCommandLoggers([
+      this.createRequest,
+      this.execJsPath,
+      this.fetch,
+      this.focus,
+      this.goto,
+      this.goBack,
+      this.goForward,
+      this.getCookies,
+      this.getJsValue,
+      this.getLocationHref,
+      this.interact,
+      this.isElementVisible,
+      this.removeCookie,
+      this.setCookie,
+      this.waitForMillis,
+      this.waitForElement,
+      this.waitForLoad,
+      this.waitForLocation,
+      this.waitForNewTab,
+      this.waitForResource,
+    ]);
   }
 
   public async setRenderingOptions(renderingOptions: IRenderingOption[]): Promise<void> {
@@ -171,32 +192,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         this.logger.error('Tab.ClosingError', { error });
       }
     }
-  }
-
-  public async runCommand<T>(functionName: TabFunctionNames, ...args: any[]): Promise<T> {
-    const commandHistory = this.sessionState.commands;
-
-    const commandMeta = {
-      id: commandHistory.length + 1,
-      tabId: this.id,
-      frameId: this.mainFrameId,
-      name: functionName,
-      args: args.length ? JSON.stringify(args) : undefined,
-    } as ICommandMeta;
-
-    this.locationTracker.willRunCommand(commandMeta, commandHistory);
-    if (functionName !== 'goto') {
-      await this.domRecorder.setCommandIdForPage(commandMeta.id);
-    }
-    const id = this.logger.info('Tab.runCommand', commandMeta);
-    let result: T;
-    try {
-      const commandFn = this[functionName].bind(this, ...args);
-      result = await this.sessionState.runCommand<T>(commandFn, commandMeta);
-    } finally {
-      this.logger.stats('Tab.ranCommand', { result, parentLogId: id });
-    }
-    return result;
   }
 
   public async setOrigin(origin: string): Promise<void> {
@@ -278,7 +273,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.navigationTracker.currentUrl;
   }
 
-  public async interact(interactionGroups: IInteractionGroups): Promise<void> {
+  public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
     await this.locationTracker.waitFor('READY');
     await this.interactor.play(interactionGroups);
   }
@@ -355,15 +350,21 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return isVisible.value;
   }
 
-  public waitForNewTab(sinceCommandId: number): Promise<Tab> {
-    if (sinceCommandId >= 0) {
+  public async waitForNewTab(sinceCommandId?: number): Promise<Tab> {
+    // last command is the one running right now
+    const startCommandId = sinceCommandId ?? this.lastCommandId - 1;
+    let newTab: Tab;
+    if (startCommandId >= 0) {
       for (const tab of this.session.tabs) {
-        if (tab.parentTabId === this.id && tab.createdAtCommandId >= sinceCommandId) {
-          return Promise.resolve(tab);
+        if (tab.parentTabId === this.id && tab.createdAtCommandId >= startCommandId) {
+          newTab = tab;
+          break;
         }
       }
     }
-    return this.waitOn('child-tab-created');
+    if (!newTab) newTab = await this.waitOn('child-tab-created');
+    await newTab.locationTracker.waitForLocationResourceId();
+    return newTab;
   }
 
   public async waitForResource(
@@ -420,7 +421,25 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return resourceMetas;
   }
 
-  public async waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+  public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
+    return this.waitForDom(jsPath, options);
+  }
+
+  public waitForLoad(status: ILocationStatus | 'READY'): Promise<void> {
+    return this.locationTracker.waitFor(status);
+  }
+
+  public waitForLocation(trigger: ILocationTrigger): Promise<void> {
+    return this.locationTracker.waitFor(trigger);
+  }
+
+  public waitForMillis(millis: number): Promise<void> {
+    return new Timer(millis, this.waitTimeouts).waitForTimeout();
+  }
+
+  // NOTE: don't add this function to commands. It will record extra commands when called from interactor, which
+  // can break waitForLocation
+  public async waitForDom(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
     const waitForVisible = options?.waitForVisible ?? false;
     const timeoutMs = options?.timeoutMs ?? 30e3;
     const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
@@ -450,22 +469,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       timer.clear();
     }
     return false;
-  }
-
-  public waitForLoad(status: ILocationStatus | 'READY'): Promise<void> {
-    return this.locationTracker.waitFor(status);
-  }
-
-  public waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    return this.locationTracker.waitFor(trigger);
-  }
-
-  public waitForMillis(millis: number): Promise<void> {
-    return new Timer(millis, this.waitTimeouts).waitForTimeout();
-  }
-
-  public waitForNode(pathToNode: IJsPath): Promise<boolean> {
-    return this.waitForElement(pathToNode);
   }
 
   public moveMouseToStartLocation(): Promise<void> {
@@ -663,6 +666,45 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
   }
 
+  /////// BIND COMMAND FUNCTIONS /////
+
+  private wrapCommandLoggers<Func extends (...args: any[]) => Promise<any>>(
+    functionsToWrap: Func[],
+  ) {
+    for (const func of functionsToWrap) {
+      this[func.name] = (...args) => this.runCommandFn(func, ...args);
+    }
+  }
+
+  private async runCommandFn<T, Func extends (...args: any[]) => Promise<T>>(
+    fn: Func,
+    ...args: any[]
+  ): Promise<T> {
+    const commandHistory = this.sessionState.commands;
+
+    const commandMeta = {
+      id: commandHistory.length + 1,
+      tabId: this.id,
+      frameId: this.mainFrameId,
+      name: fn.name,
+      args: args.length ? JSON.stringify(args) : undefined,
+    } as ICommandMeta;
+
+    this.locationTracker.willRunCommand(commandMeta, commandHistory);
+    if (fn.name !== 'goto') {
+      await this.domRecorder.setCommandIdForPage(commandMeta.id);
+    }
+    const id = this.logger.info('Tab.runCommand', commandMeta);
+    let result: T;
+    try {
+      const commandFn = fn.bind(this, ...args);
+      result = await this.sessionState.runCommand(commandFn, commandMeta);
+    } finally {
+      this.logger.stats('Tab.ranCommand', { result, parentLogId: id });
+    }
+    return result;
+  }
+
   // CREATE
 
   public static create(
@@ -679,9 +721,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return tab;
   }
 }
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-type TabFunctionNames = AllowedNames<Tab, Function>;
 
 interface ITabEventParams {
   close: null;

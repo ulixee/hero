@@ -53,92 +53,108 @@ CoreLayout.has-sidebar.DocsPage(:footer="false")
 </page-query>
 
 <script lang="ts">
-  import { Vue, Component } from 'vue-property-decorator';
-  import GithubLogo from '~/assets/logos/github.svg';
-  import generateLinks from '../lib/generateLinks';
+import { Vue, Component } from 'vue-property-decorator';
+import GithubLogo from '~/assets/logos/github.svg';
+import generateLinks from '../lib/generateLinks';
 
-  const links = generateLinks();
+const links = generateLinks();
 
-  @Component({
-    metaInfo() {
-      // @ts-ignore
-      const { title, headings } = this.$page.record;
-      return {
-        title: title || (headings.length ? headings[0].value : undefined),
-      };
-    },
-    components: {
-      GithubLogo
-    },
-  })
-  export default class DocsPage extends Vue {
-    public $page: any;
-    public $route: any;
-    public links: any[] = links;
+@Component({
+  metaInfo() {
+    // @ts-ignore
+    const { title, headings } = this.$page.record;
+    return {
+      title: title || (headings.length ? headings[0].value : undefined),
+    };
+  },
+  components: {
+    GithubLogo,
+  },
+})
+export default class DocsPage extends Vue {
+  public $page: any;
+  public $route: any;
+  public links: any[] = links;
 
-    private get subtitles() {
-      // Remove h1, h4, h5, h6 titles
-      let subtitles = this.$page.record.subtitles.filter(function(value: any, index: any, arr: any) {
-        return [2, 3].includes(value.depth);
-      });
-      return subtitles;
-    }
+  private get subtitles() {
+    // Remove h1, h4, h5, h6 titles
+    let subtitles = this.$page.record.subtitles.filter(function (value: any, index: any, arr: any) {
+      return [2, 3].includes(value.depth);
+    });
+    return subtitles;
+  }
 
-    private get currentPath() {
-      return this.$route.matched[0].path;
-    }
+  private get currentPath() {
+    return this.$route.matched[0].path;
+  }
 
-    private get editLink() {
-      let path = this.currentPath;
-      if ((path.match(new RegExp('/', 'g')) || []).length == 1) path = path + '/README';
-      return `https://github.com/ulixee/secret-agent/blob/master/website${path}.md`;
-    }
+  private get editLink() {
+    let path = this.items[this.currentIndex]?.editLink ?? this.currentPath;
+    return `https://github.com/ulixee/secret-agent/tree/master/website${path}.md`;
+  }
 
-    private get items() {
-      const items = [];
-      for (const group of this.links) {
-        items.push({ title: group.title, link: group.link });
-        for (const item of group.items) {
-          items.push({ title: item.title, link: item.link });
-          if (item.items) items.push(...item.items);
-        }
+  private get items() {
+    const items = [];
+    for (const group of this.links) {
+      items.push({ title: group.title, link: group.link, isHeader: true });
+      for (const item of group.items) {
+        items.push({ title: item.title, link: item.link, editLink: item.editLink });
+        if (item.items) items.push(...item.items);
       }
-      return items;
     }
+    return items;
+  }
 
-    private get currentIndex() {
-      return this.items.findIndex(item => {
+  private get currentIndex() {
+    if (this.currentPath === '/docs') return 1;
+    return (
+      this.items.findIndex(item => {
         return item.link.replace(/\/$/, '') === this.$route.path.replace(/\/$/, '');
-      });
-    }
+      }) ?? this.items.findIndex(x => !x.isHeader)
+    );
+  }
 
-    private get nextPage() {
-      return this.items[this.currentIndex + 1];
-    }
-
-    private get previousPage() {
-      return this.items[this.currentIndex - 1];
+  private get nextPage() {
+    for (let i = this.currentIndex + 1; i < this.items.length; i += 1) {
+      const next = this.items[i];
+      if (next.isHeader) continue;
+      return next;
     }
   }
+
+  private get previousPage() {
+    for (let i = this.currentIndex - 1; i >= 0; i -= 1) {
+      const prev = this.items[i];
+      if (prev.isHeader) continue;
+      return prev;
+    }
+  }
+}
 </script>
 
 <style lang="scss">
-  @import "../assets/style/reset";
+@import '../assets/style/reset';
 
-  .DocsPage {
-    ul.methods, ul.properties {
-      @include reset-ul();
-      & > li {
-        margin-bottom: 20px;
-        & > a {
-          font-weight: bold;
-          background-color: rgba(220,220,220,.5);
-          font-size: 1rem;
-        }
-        & > div {
-          margin-left: 10px;
-        }
+.DocsPage {
+  img {
+    width: 100%;
+    margin: 0;
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.12), 0 -4px 10px rgba(0, 0, 0, 0.16);
+  }
+  ul.methods,
+  ul.properties {
+    @include reset-ul();
+    & > li {
+      margin-bottom: 20px;
+      & > a {
+        font-weight: bold;
+        background-color: rgba(220, 220, 220, 0.5);
+        font-size: 1rem;
+      }
+      & > div {
+        margin-left: 10px;
       }
     }
   }
+}
 </style>

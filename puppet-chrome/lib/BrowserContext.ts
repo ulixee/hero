@@ -25,8 +25,22 @@ import TargetInfo = Protocol.Target.TargetInfo;
 export class BrowserContext
   extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
-  public emulation: IBrowserEmulationSettings;
   public logger: IBoundLog;
+  public get emulation(): IBrowserEmulationSettings {
+    return this._emulation;
+  }
+
+  public set emulation(value: IBrowserEmulationSettings) {
+    this._emulation = value;
+    for (const page of this.pages) {
+      page.updateEmulationSettings().catch(err => {
+        this.logger.error('ERROR setting emulation settings', err);
+      });
+    }
+  }
+
+  private _emulation: IBrowserEmulationSettings;
+
   private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;

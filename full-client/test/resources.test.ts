@@ -1,9 +1,12 @@
 import { Helpers } from '@secret-agent/testing';
-import SecretAgent from '../index';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Handler } from '../index';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler({ maxConcurrency: 2 });
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/test', ctx => {
     ctx.body = `<html>
@@ -30,7 +33,7 @@ afterEach(Helpers.afterEach);
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(exampleUrl);
     const elem = agent.document.querySelector('a');
@@ -38,11 +41,12 @@ describe('basic resource tests', () => {
 
     const resources = await agent.waitForResource({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
+    await agent.close();
   });
 
   it('waits for a resource loaded since a previous command id', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const agent = new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(exampleUrl);
     let lastCommandId: number;
@@ -57,5 +61,6 @@ describe('basic resource tests', () => {
       expect(resources).toHaveLength(1);
       expect(resources[0].url).toContain(`counter=${i}`);
     }
+    await agent.close();
   });
 });

@@ -1,7 +1,7 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreSession';
 
 const { log } = Log(module);
 
@@ -19,17 +19,17 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreTab: Promise<CoreTab>): void {
+  public launchReplay(sessionName: string, coreSession: Promise<CoreSession>): void {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
-    coreTab
-      .then(tab => {
+    coreSession
+      .then(session => {
         return replay({
           scriptInstanceId: this.id,
           scriptStartDate: this.startDate,
-          sessionsDataLocation: tab.sessionsDataLocation,
-          replayApiServer: tab.replayApiServer,
-          sessionId: tab.sessionId,
+          sessionsDataLocation: session.sessionsDataLocation,
+          replayApiServer: session.replayApiServer,
+          sessionId: session.sessionId,
           sessionName,
         });
       })

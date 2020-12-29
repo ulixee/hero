@@ -20,7 +20,12 @@ import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
+import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Viewports from './Viewports';
+import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -29,9 +34,14 @@ import HumanEmulators from './HumanEmulators';
 
 const { log } = Log(module);
 
-export default class Session {
+export default class Session extends TypedEventEmitter<{
+  closing: void;
+  closed: void;
+  'awaited-event': ICoreEventPayload;
+}> {
   private static readonly byId: { [id: string]: Session } = {};
 
+  public awaitedEventListener: AwaitedEventListener;
   public readonly id: string;
   public readonly baseDir: string;
   public browserEngine: IBrowserEngine;
@@ -54,12 +64,16 @@ export default class Session {
 
   private _isClosing = false;
   private pendingNavigationMitmResponses: IRequestSessionResponseEvent[] = [];
+  private humanEmulatorId: string;
+  private browserEmulatorId: string;
 
   constructor(readonly options: ICreateTabOptions) {
+    super();
     this.id = uuidv1();
     Session.byId[this.id] = this;
-    const browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
-    const BrowserEmulator = BrowserEmulators.getClass(browserEmulatorId);
+    this.awaitedEventListener = new AwaitedEventListener(this);
+    this.browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
+    const BrowserEmulator = BrowserEmulators.getClass(this.browserEmulatorId);
     this.browserEngine = BrowserEmulator.engine;
     this.browserEmulator = new BrowserEmulator();
     if (options.userProfile) {
@@ -73,8 +87,8 @@ export default class Session {
     if (!this.browserEmulator.canPolyfill) {
       log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
-        browserEmulatorId,
-        userAgentString: this.browserEmulator.userAgentString,
+        browserEmulatorId: this.browserEmulatorId,
+    userAgentString: this.browserEmulator.userAgentString,
         runtimeOs: Os.platform(),
       });
     }
@@ -85,8 +99,8 @@ export default class Session {
       this.viewport = Viewports.getDefault(this.browserEmulator.windowFraming, this.browserEmulator.windowFramingBase);
     }
 
-    const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
-    this.humanEmulator = HumanEmulators.create(humanEmulatorId);
+    this.humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
+    this.humanEmulator = HumanEmulators.create(this.humanEmulatorId);
 
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
@@ -94,8 +108,8 @@ export default class Session {
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-      browserEmulatorId,
-      humanEmulatorId,
+      this.browserEmulatorId,
+      this.humanEmulatorId,
       this.browserEmulator.canPolyfill,
       this.viewport,
       this.timezoneId,
@@ -106,6 +120,30 @@ export default class Session {
       this.upstreamProxyUrl,
       this.browserEmulator.networkInterceptorDelegate,
     );
+  }
+
+  public getTab(id: string): Tab {
+    return this.tabs.find(x => x.id === id);
+  }
+
+  public async configure(options: IConfigureSessionOptions) {
+    if (options.upstreamProxyUrl !== undefined) {
+      this.upstreamProxyUrl = options.upstreamProxyUrl;
+      this.mitmRequestSession.upstreamProxyUrl = options.upstreamProxyUrl;
+    }
+    if (options.renderingOptions !== undefined) {
+      for (const tab of this.tabs) await tab.setRenderingOptions(options.renderingOptions);
+    }
+    if (options.viewport !== undefined) this.viewport = options.viewport;
+    if (options.userProfile !== undefined) {
+      this.userProfile = options.userProfile;
+      this.browserEmulator.userProfile = this.userProfile;
+    }
+    if (options.locale) this.browserEmulator.locale = options.locale;
+    if (options.timezoneId) this.timezoneId = options.timezoneId;
+    if (this.browserContext) {
+      this.browserContext.emulation = this.getBrowserEmulation();
+    }
   }
 
   public getBrowserEmulation() {
@@ -154,6 +192,7 @@ export default class Session {
   public async close() {
     delete Session.byId[this.id];
     if (this._isClosing) return;
+    this.emit('closing');
     this._isClosing = true;
     const start = log.info('Session.Closing', {
       sessionId: this.id,
@@ -172,7 +211,12 @@ export default class Session {
       sessionId: this.id,
       parentLogId: start,
     });
+    this.emit('closed');
     this.sessionState.close();
+  }
+
+  public onAwaitedEvent(payload: ICoreEventPayload) {
+    this.emit('awaited-event', payload);
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
@@ -254,6 +298,9 @@ export default class Session {
   private removeTab(tab: Tab) {
     const tabIdx = this.tabs.indexOf(tab);
     if (tabIdx >= 0) this.tabs.splice(tabIdx, 1);
+    if (this.tabs.length === 0) {
+      return this.close();
+    }
   }
 
   private async newPage() {
@@ -263,5 +310,10 @@ export default class Session {
 
   public static get(sessionId: string): Session {
     return this.byId[sessionId];
+  }
+
+  public static getTab(meta: ISessionMeta): Tab | undefined {
+    if (!meta) return undefined;
+    return this.get(meta.sessionId)?.getTab(meta.tabId);
   }
 }

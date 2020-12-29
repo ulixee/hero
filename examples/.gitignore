@@ -1,5 +1,6 @@
 *.ts
 *.js
 !example.org.ts
-!proxy-example.js
+!proxy-example.mjs
 !news.ycombinator.com.ts
+!ulixee.org.ts

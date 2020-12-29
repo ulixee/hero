@@ -1,5 +1,5 @@
 export default interface ICoreConfigureOptions {
-  maxConcurrentSessionsCount?: number;
+  maxConcurrentAgentsCount?: number;
   localProxyPortStart?: number;
   replayServerPort?: number;
   sessionsDir?: string;

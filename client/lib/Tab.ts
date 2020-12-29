@@ -18,15 +18,15 @@ import WebsocketResource from './WebsocketResource';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import ISecretAgent from '../interfaces/ISecretAgent';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
+import Agent, { IState as IAgentState } from './Agent';
 
 const { getState, setState } = StateMachine<Tab, IState>();
-const agentState = StateMachine<ISecretAgent, { activeTab: Tab; tabs: Tab[] }>();
+const agentState = StateMachine<Agent, IAgentState>();
 const awaitedPathState = StateMachine<any, { awaitedPath: AwaitedPath }>();
 
 export interface IState {
-  secretAgent: ISecretAgent;
+  secretAgent: Agent;
   coreTab: Promise<CoreTab>;
 }
 
@@ -45,9 +45,11 @@ const propertyKeys: (keyof Tab)[] = [
   'Request',
 ];
 
-export default class Tab extends AwaitedEventTarget<IEventType, IState> {
-  constructor(secretAgent: ISecretAgent, coreTab: Promise<CoreTab>) {
-    super();
+export default class Tab extends AwaitedEventTarget<IEventType> {
+  constructor(secretAgent: Agent, coreTab: Promise<CoreTab>) {
+    super(() => {
+      return { target: coreTab };
+    });
     initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
       secretAgent,
@@ -174,22 +176,14 @@ export default class Tab extends AwaitedEventTarget<IEventType, IState> {
 
   public focus(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
-    agentState.setState(secretAgent, {
-      activeTab: this,
-    });
+    agentState.getState(secretAgent).connection.activeTab = this;
     return coreTab.then(x => x.focusTab());
   }
 
   public close(): Promise<void> {
     const { secretAgent, coreTab } = getState(this);
-    const { tabs } = agentState.getState(secretAgent);
-    const updatedTabs = tabs.filter(x => x !== this);
-    if (updatedTabs.length) {
-      agentState.setState(secretAgent, {
-        activeTab: updatedTabs[0],
-        tabs: updatedTabs,
-      });
-    }
+    const { connection } = agentState.getState(secretAgent);
+    connection.closeTab(this);
     return coreTab.then(x => x.close());
   }
 }
@@ -200,6 +194,6 @@ export function getCoreTab(tab: Tab): Promise<CoreTab> {
 
 // CREATE
 
-export function createTab(secretAgent: ISecretAgent, coreTab: Promise<CoreTab>): Tab {
+export function createTab(secretAgent: Agent, coreTab: Promise<CoreTab>): Tab {
   return new Tab(secretAgent, coreTab);
 }

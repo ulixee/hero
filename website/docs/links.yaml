@@ -7,7 +7,8 @@
 
 - title: Basic Interfaces
   items:
-    - SecretAgent
+    - Agent
+    - Handler
     - Tab
     - Interactions
     - AwaitedDOM
@@ -19,11 +20,11 @@
     - HumanEmulators
     - UserProfile
     - CookieStorage
-    - UpstreamProxy
     - Resource
     - ResourceRequest
     - ResourceResponse
     - WebsocketResource
+    - CoreConnection
     - Remote
     - Session
     - SessionReplay

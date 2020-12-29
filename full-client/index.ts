@@ -1,34 +1,18 @@
 import 'source-map-support/register';
+import agent, {
+  Handler,
+  Agent,
+  IAgentCreateOptions,
+  ICoreConnectionOptions,
+  RemoteCoreConnection,
+  LocalCoreConnection,
+} from '@secret-agent/client';
 import Core from '@secret-agent/core';
-import { SecretAgentClientGenerator } from '@secret-agent/client';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 
-process.title = 'SecretAgent';
-
-const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-// OUTGOING ////////////////////////////////////////////////////////////////////
-
-coreClient.pipeOutgoingCommand = async (
-  sessionMeta: ISessionMeta | null,
-  command: string,
-  args: any[],
-) => {
-  if (sessionMeta) {
-    const core = Core.byTabId[sessionMeta.tabId];
-    const data = await core[command](...args);
-    const commandId = core.lastCommandId;
-    return { data, commandId };
-  }
-  return { data: await Core[command](...args) };
+LocalCoreConnection.create = (options: ICoreConnectionOptions) => {
+  const coreServerConnection = Core.addConnection();
+  return new LocalCoreConnection(options, coreServerConnection);
 };
 
-// INCOMING ////////////////////////////////////////////////////////////////////
-
-Core.onEventFn = (meta: ISessionMeta, listenerId: string, ...args: any[]) => {
-  coreClient.pipeIncomingEvent(meta, listenerId, args);
-};
-
-// EXPORT SecretAgent //////////////////////////////////////////////////////////
-
-export = SecretAgent;
+export { IAgentCreateOptions, ICoreConnectionOptions, Handler, Agent, RemoteCoreConnection };
+export default agent;

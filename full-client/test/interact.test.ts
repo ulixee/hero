@@ -3,12 +3,15 @@ import { GlobalPool } from '@secret-agent/core';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import SecretAgent from '../index';
+import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentSessionsCount = 3;
+  GlobalPool.maxConcurrentAgentsCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -22,7 +25,7 @@ describe('basic Interact tests', () => {
     const httpServer = await Helpers.runHttpServer({ onPost });
     const url = httpServer.url;
 
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${url}page1`);
@@ -46,23 +49,23 @@ describe('basic Interact tests', () => {
         response.setHeader('Set-Cookie', 'ulixee=test1');
       },
     });
-    expect(GlobalPool.maxConcurrentSessionsCount).toBe(3);
+    expect(GlobalPool.maxConcurrentAgentsCount).toBe(3);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
-    const browser1 = await new SecretAgent();
+    const browser1 = await handler.createAgent();
     Helpers.needsClosing.push(browser1);
     // #1
     await browser1.goto(httpServer.url);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
-    const browser2 = await new SecretAgent();
+    const browser2 = await handler.createAgent();
     Helpers.needsClosing.push(browser2);
 
     // #2
     await browser2.goto(httpServer.url);
     expect(GlobalPool.activeSessionCount).toBe(2);
 
-    const browser3 = await new SecretAgent();
+    const browser3 = await handler.createAgent();
     Helpers.needsClosing.push(browser3);
 
     // #3
@@ -70,7 +73,7 @@ describe('basic Interact tests', () => {
     expect(GlobalPool.activeSessionCount).toBe(3);
 
     // #4
-    const browser4Promise = new SecretAgent();
+    const browser4Promise = handler.createAgent();
     expect(GlobalPool.activeSessionCount).toBe(3);
     await browser1.close();
     const browser4 = await browser4Promise;
@@ -88,7 +91,7 @@ describe('basic Interact tests', () => {
   }, 15e3);
 
   it('should clean up cookies between runs', async () => {
-    const agent1 = await new SecretAgent();
+    const agent1 = await handler.createAgent();
     let setCookieValue = 'ulixee=test1';
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
@@ -120,7 +123,7 @@ describe('basic Interact tests', () => {
     {
       setCookieValue = 'ulixee3=test3';
       // should be able to get a second agent out of the pool
-      const agent2 = await new SecretAgent();
+      const agent2 = await handler.createAgent();
       Helpers.needsClosing.push(agent2);
       await agent2.goto(url);
 
@@ -149,7 +152,7 @@ describe('basic Interact tests', () => {
       `;
     });
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
     await agent.goto(`${koaServer.baseUrl}/waitTest`);
     await agent.waitForAllContentLoaded();
@@ -170,7 +173,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
     await agent.goto(`${koaServer.baseUrl}/keys`);
     await agent.waitForAllContentLoaded();

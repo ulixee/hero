@@ -1,7 +1,7 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreClient from './CoreClient';
+import CoreClientConnection from '../connections/CoreClientConnection';
 
 const { log } = Log(module);
 
@@ -9,15 +9,15 @@ type IListenerFn = (...args: any[]) => void;
 type IInterceptorFn = (...args: any[]) => any[];
 
 export default class CoreEventHeap {
-  private readonly coreClient: CoreClient;
+  private readonly connection: CoreClientConnection;
   private readonly listenerFnById: Map<string, IListenerFn> = new Map();
   private readonly listenerIdByHandle: Map<string, string> = new Map();
   private readonly eventInterceptors: Map<string, IInterceptorFn[]> = new Map();
   private readonly meta: ISessionMeta;
 
-  constructor(meta: ISessionMeta | null, coreClient: CoreClient) {
+  constructor(meta: ISessionMeta | null, connection: CoreClientConnection) {
     this.meta = meta;
-    this.coreClient = coreClient;
+    this.connection = connection;
   }
 
   public hasEventInterceptors(type: string): boolean {
@@ -39,14 +39,13 @@ export default class CoreEventHeap {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
 
-    const {
-      data: { listenerId },
-    } = await this.coreClient.pipeOutgoingCommand(this.meta, 'addEventListener', [
-      jsPath,
-      type,
-      options,
-    ]);
+    const response = await this.connection.sendRequest({
+      meta: this.meta,
+      command: 'addEventListener',
+      args: [jsPath, type, options],
+    });
 
+    const { listenerId } = response.data;
     let wrapped = listenerFn;
     if (this.eventInterceptors.has(type)) {
       const interceptorFns = this.eventInterceptors.get(type);
@@ -72,8 +71,12 @@ export default class CoreEventHeap {
     const listenerId = this.listenerIdByHandle.get(handle);
     if (!listenerId) return;
 
-    this.coreClient
-      .pipeOutgoingCommand(this.meta, 'removeEventListener', [listenerId])
+    this.connection
+      .sendRequest({
+        meta: this.meta,
+        command: 'removeEventListener',
+        args: [listenerId],
+      })
       .catch(error => {
         log.error('removeEventListener Error: ', { error, sessionId: this.meta?.sessionId });
       });

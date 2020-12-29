@@ -1,8 +1,10 @@
 import { Helpers } from '@secret-agent/testing';
-import SecretAgent from '../index';
+import { Handler } from '../index';
 
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -26,7 +28,7 @@ describe('basic waitForLocation change detections', () => {
 
     const startUrl = `${koaServer.baseUrl}/start`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(startUrl);
     const firstUrl = await agent.url;
@@ -71,7 +73,7 @@ describe('basic waitForLocation change detections', () => {
     });
 
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
     await agent.goto(`${koaServer.baseUrl}/page1`);
     const startlink = agent.document.querySelector('a');
     await agent.interact({ click: startlink, waitForElementVisible: startlink });
@@ -108,7 +110,7 @@ describe('basic waitForLocation change detections', () => {
     const startUrl = `${koaServer.baseUrl}/page1`;
     const page2Url = `${koaServer.baseUrl}/page2`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const agent = await new SecretAgent();
+    const agent = await handler.createAgent();
 
     await agent.goto(startUrl);
     const firstUrl = await agent.url;

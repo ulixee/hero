@@ -27,10 +27,9 @@ yarn add secret-agent
 SecretAgent provides access to the W3C DOM specification without the need for Puppeteer's complicated evaluate callbacks and multi-context switching:
 
 ```js
-const SecretAgent = require('secret-agent');
+const agent = require('secret-agent');
 
 (async () => {
-  const agent = await new SecretAgent();
   await agent.goto('https://example.org');
   const title = await agent.document.title;
   const intro = await agent.document.querySelector('p').textContent;

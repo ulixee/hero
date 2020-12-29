@@ -235,6 +235,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       });
   }
 
+  async updateEmulationSettings(): Promise<void> {
+    await Promise.all([
+      this.networkManager.setUserAgentOverrides(this.browserContext.emulation),
+      this.setTimezone(this.browserContext.emulation.timezoneId),
+      this.setLocale(this.browserContext.emulation.locale),
+      this.setScreensize(this.browserContext.emulation.viewport),
+    ]);
+  }
+
   private async navigateToHistory(delta: number): Promise<void> {
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
@@ -247,7 +256,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   private async initialize(): Promise<void> {
     await Promise.all([
-      this.networkManager.initialize(this.browserContext.emulation),
+      this.updateEmulationSettings(),
+      this.networkManager.initialize(),
       this.framesManager.initialize(),
       this.cdpSession.send('Target.setAutoAttach', {
         autoAttach: true,
@@ -255,9 +265,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         flatten: true,
       }),
       this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
-      this.setTimezone(this.browserContext.emulation.timezoneId),
-      this.setLocale(this.browserContext.emulation.locale),
-      this.setScreensize(this.browserContext.emulation.viewport),
     ]);
 
     if (this.opener && this.opener.popupInitializeFn) {

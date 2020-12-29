@@ -141,7 +141,7 @@ export default class LocationTracker {
   ) {
     for (const history of this.navigations.history) {
       let isMatch = history.startCommandId > sinceCommandId;
-      if (inclusive) isMatch = isMatch || history.startCommandId === sinceCommandId;
+      if (inclusive) isMatch = isMatch || history.startCommandId >= sinceCommandId;
       if (isMatch) {
         const previousState = LocationTracker.getTriggerForNavigationReason(
           history.navigationReason,

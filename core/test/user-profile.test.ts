@@ -1,13 +1,19 @@
-import { Helpers } from "@secret-agent/testing";
-import { InteractionCommand } from "@secret-agent/core-interfaces/IInteractions";
-import IUserProfile from "@secret-agent/core-interfaces/IUserProfile";
-import HttpRequestHandler from "@secret-agent/mitm/handlers/HttpRequestHandler";
-import Safari13 from "@secret-agent/emulate-safari-13";
-import Core from "../index";
+import { Helpers } from '@secret-agent/testing';
+import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Safari13 from '@secret-agent/emulate-safari-13';
+import Core from '../index';
+import CoreServerConnection from '../lib/CoreServerConnection';
+import Session from '../lib/Session';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let connection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  connection = Core.addConnection();
+  await connection.connect();
+  Helpers.onClose(() => connection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -15,8 +21,9 @@ afterEach(Helpers.afterEach);
 
 describe('UserProfile cookie tests', () => {
   it('should be able to save and restore cookies', async () => {
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
 
     koaServer.get('/cookie', ctx => {
       ctx.cookies.set('cookietest', 'Is Set');
@@ -29,47 +36,44 @@ describe('UserProfile cookie tests', () => {
       ctx.body = `<body><h1>cookie page 2</h1></body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/cookie`);
-    await core.waitForLoad('AllContentLoaded');
+    await tab.goto(`${koaServer.baseUrl}/cookie`);
+    await tab.waitForLoad('AllContentLoaded');
 
-    const profile = await core.exportUserProfile();
+    const profile = await connection.exportUserProfile(meta);
     expect(profile.cookies).toHaveLength(1);
     expect(profile.cookies[0].name).toBe('cookietest');
     expect(profile.cookies[0].value).toBe('Is Set');
 
     // try loading an empty session now to confirm cookies are gone without reloading
-    const meta2 = await Core.createTab();
-    const core2 = Core.byTabId[meta2.tabId];
-    const core2Cookies = await core2.exportUserProfile();
+    const meta2 = await connection.createSession();
+    const tab2 = Session.getTab(meta2);
+    Helpers.needsClosing.push(tab2.session);
+    const core2Cookies = await connection.exportUserProfile(meta2);
     expect(core2Cookies.cookies).toHaveLength(0);
 
-    await core2.goto(`${koaServer.baseUrl}/cookie2`);
-    await core2.waitForLoad('AllContentLoaded');
+    await tab2.goto(`${koaServer.baseUrl}/cookie2`);
+    await tab2.waitForLoad('AllContentLoaded');
     expect(cookie).not.toBeTruthy();
 
-    const meta3 = await Core.createTab({
+    const meta3 = await connection.createSession({
       userProfile: profile,
     });
-    const core3 = Core.byTabId[meta3.tabId];
-    const cookiesBefore = await core3.exportUserProfile();
+    const tab3 = Session.getTab(meta3);
+    Helpers.needsClosing.push(tab3.session);
+    const cookiesBefore = await connection.exportUserProfile(meta3);
     expect(cookiesBefore.cookies).toHaveLength(1);
 
-    await core3.goto(`${koaServer.baseUrl}/cookie2`);
-    await core3.waitForLoad('AllContentLoaded');
+    await tab3.goto(`${koaServer.baseUrl}/cookie2`);
+    await tab3.waitForLoad('AllContentLoaded');
     expect(cookie).toBe('Is Set');
-
-    await core.close();
-    await core2.close();
-    await core3.close();
   });
 
   it('should track cookies from other domains', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createTab();
-      const core = Core.byTabId[meta.tabId];
-      // @ts-ignore
-      const session = core.session;
+      const meta = await connection.createSession();
+      const tab = Session.getTab(meta);
+      const session = tab.session;
       session.mitmRequestSession.blockedResources = {
         urls: ['https://dataliberationfoundation.org/cookie'],
         types: [],
@@ -87,24 +91,23 @@ describe('UserProfile cookie tests', () => {
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie"/></body>`;
       });
 
-      await core.goto(`${koaServer.baseUrl}/cross-cookie`);
-      await core.waitForLoad('AllContentLoaded');
+      await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
+      await tab.waitForLoad('AllContentLoaded');
 
-      profile = await core.exportUserProfile();
+      profile = await connection.exportUserProfile(meta);
       expect(profile.cookies).toHaveLength(3);
       expect(profile.cookies[0].name).toBe('cookietest');
       expect(profile.cookies[0].value).toBe('mainsite');
       expect(profile.cookies[1].name).toBe('cross1');
       expect(profile.cookies[1].value).toBe('1');
-      await core.close();
+      await tab.close();
     }
     {
-      const meta = await Core.createTab({
+      const meta = await connection.createSession({
         userProfile: profile,
       });
-      const core = Core.byTabId[meta.tabId];
-      // @ts-ignore
-      const session = core.session;
+      const tab = Session.getTab(meta);
+      const session = tab.session;
 
       session.mitmRequestSession.blockedResources = {
         urls: ['https://dataliberationfoundation.org/cookie2'],
@@ -121,22 +124,22 @@ describe('UserProfile cookie tests', () => {
         sameCookies = ctx.cookies.get('cookietest');
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
       });
-      await core.goto(`${koaServer.baseUrl}/cross-cookie2`);
-      await core.waitForLoad('AllContentLoaded');
+      await tab.goto(`${koaServer.baseUrl}/cross-cookie2`);
+      await tab.waitForLoad('AllContentLoaded');
 
       expect(dlfCookies).toBe('cross1=1; cross2=2');
       expect(sameCookies).toBe('mainsite');
-      await core.close();
+      await tab.close();
     }
   });
 
   it('restores cookies for safari', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createTab({
+      const meta = await connection.createSession({
         browserEmulatorId: Safari13.id,
       });
-      const core = Core.byTabId[meta.tabId];
+      const core = Session.getTab(meta);
       koaServer.get('/safari-cookie', ctx => {
         ctx.cookies.set('safari', 'cookie');
         ctx.body = `<body><h1>safari page</h1></body>`;
@@ -144,16 +147,16 @@ describe('UserProfile cookie tests', () => {
 
       await core.goto(`${koaServer.baseUrl}/safari-cookie`);
       await core.waitForLoad('AllContentLoaded');
-      profile = await core.exportUserProfile();
+      profile = await connection.exportUserProfile(meta);
       expect(profile.cookies).toHaveLength(1);
       await core.close();
     }
     {
-      const meta = await Core.createTab({
+      const meta = await connection.createSession({
         userProfile: profile,
         browserEmulatorId: Safari13.id,
       });
-      const core = Core.byTabId[meta.tabId];
+      const core = Session.getTab(meta);
 
       let cookie = '';
       koaServer.get('/safari-cookie2', ctx => {
@@ -171,8 +174,8 @@ describe('UserProfile cookie tests', () => {
 
 describe('UserProfile Dom storage tests', () => {
   it('should be able to save and restore local/session storage', async () => {
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
 
     koaServer.get('/local', ctx => {
       ctx.body = `<body>
@@ -209,42 +212,42 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
 </body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/local`);
-    await core.waitForLoad('AllContentLoaded');
+    await tab.goto(`${koaServer.baseUrl}/local`);
+    await tab.waitForLoad('AllContentLoaded');
 
-    const profile = await core.exportUserProfile();
+    const profile = await connection.exportUserProfile(meta);
     expect(profile.cookies).toHaveLength(0);
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(2);
     expect(profile.storage[koaServer.baseUrl]?.sessionStorage).toHaveLength(2);
 
-    const meta2 = await Core.createTab({
+    const meta2 = await connection.createSession({
       userProfile: profile,
     });
-    const core2 = Core.byTabId[meta2.tabId];
+    const tab2 = Session.getTab(meta2);
 
-    await core2.goto(`${koaServer.baseUrl}/localrestore`);
-    await core2.waitForLoad('AllContentLoaded');
+    await tab2.goto(`${koaServer.baseUrl}/localrestore`);
+    await tab2.waitForLoad('AllContentLoaded');
 
-    const localContent = await core2.execJsPath([
+    const localContent = await tab2.execJsPath([
       'document',
       ['querySelector', '#local'],
       'textContent',
     ]);
     expect(localContent.value).toBe('value1,,value3');
-    const sessionContent = await core2.execJsPath([
+    const sessionContent = await tab2.execJsPath([
       'document',
       ['querySelector', '#session'],
       'textContent',
     ]);
     expect(sessionContent.value).toBe('value1,value2,');
 
-    await core.close();
-    await core2.close();
+    await tab.close();
+    await tab2.close();
   });
 
   it('should not make requests to end sites during profile "install"', async () => {
     const mitmSpy = jest.spyOn(HttpRequestHandler, 'onRequest');
-    await Core.createTab({
+    await connection.createSession({
       userProfile: {
         cookies: [],
         storage: {
@@ -265,7 +268,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
   });
 
   it('should not override changed variables on a second page load in a domain', async () => {
-    const meta = await Core.createTab({
+    const meta = await connection.createSession({
       userProfile: {
         storage: {
           [koaServer.baseUrl]: {
@@ -277,7 +280,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
         cookies: [],
       },
     });
-    const core = Core.byTabId[meta.tabId];
+    const tab = Session.getTab(meta);
 
     koaServer.get('/local-change-pre', ctx => {
       ctx.body = `<body>
@@ -298,37 +301,36 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
 </body>`;
     });
 
-    await core.goto(`${koaServer.baseUrl}/local-change-pre`);
-    await core.waitForLoad('AllContentLoaded');
+    await tab.goto(`${koaServer.baseUrl}/local-change-pre`);
+    await tab.waitForLoad('AllContentLoaded');
 
-    const profile = await core.exportUserProfile();
+    const profile = await connection.exportUserProfile(meta);
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
     expect(profile.storage[koaServer.baseUrl]?.localStorage[0][1]).toBe('changed');
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
 
-    const localContent = await core.execJsPath([
+    const localContent = await tab.execJsPath([
       'document',
       ['querySelector', '#local'],
       'textContent',
     ]);
     expect(localContent.value).toBe('changed');
 
-    await core.close();
+    await tab.close();
   });
 
   it('should store cross domain domStorage items', async () => {
     let profile: IUserProfile;
     {
-      const meta = await Core.createTab();
-      const core = Core.byTabId[meta.tabId];
-      // @ts-ignore
-      const session = core.session;
+      const meta = await connection.createSession();
+      const tab = Session.getTab(meta);
+      const session = tab.session;
       session.mitmRequestSession.blockedResources = {
         urls: ['http://dataliberationfoundation.org/storage'],
         types: [],
@@ -352,20 +354,19 @@ localStorage.setItem('cross', '1');
 </body>`;
       });
 
-      await core.goto(`${koaServer.baseUrl}/cross-storage`);
-      await core.waitForLoad('AllContentLoaded');
-      profile = await core.exportUserProfile();
+      await tab.goto(`${koaServer.baseUrl}/cross-storage`);
+      await tab.waitForLoad('AllContentLoaded');
+      profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
-      await core.close();
+      await tab.close();
     }
     {
-      const meta = await Core.createTab({
+      const meta = await connection.createSession({
         userProfile: profile,
       });
-      const core = Core.byTabId[meta.tabId];
-      // @ts-ignore
-      const session = core.session;
+      const tab = Session.getTab(meta);
+      const session = tab.session;
 
       session.mitmRequestSession.blockedResources = {
         urls: ['http://dataliberationfoundation.org/storage2'],
@@ -395,26 +396,25 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
 </script>
 </body>`;
       });
-      await core.goto(`${koaServer.baseUrl}/cross-storage2`);
-      await core.waitForLoad('AllContentLoaded');
-      const localContent = await core.execJsPath([
+      await tab.goto(`${koaServer.baseUrl}/cross-storage2`);
+      await tab.waitForLoad('AllContentLoaded');
+      const localContent = await tab.execJsPath([
         'document',
         ['querySelector', '#local'],
         'textContent',
       ]);
       expect(localContent.value).toBe('2');
 
-      await core.waitForElement(['document', ['querySelector', '#cross.ready']]);
-      const crossContent = await core.execJsPath([
+      await tab.waitForElement(['document', ['querySelector', '#cross.ready']]);
+      const crossContent = await tab.execJsPath([
         'document',
         ['querySelector', '#cross'],
         'textContent',
       ]);
       expect(crossContent.value).toBe('1');
-      await core.close();
+      await tab.close();
 
-      // @ts-ignore
-      const history = core.tab.navigationTracker.history;
+      const history = tab.navigationTracker.history;
       expect(history).toHaveLength(1);
       expect(history[0].finalUrl).toBe(`${koaServer.baseUrl}/cross-storage2`);
     }
@@ -440,19 +440,19 @@ describe('UserProfile IndexedDb tests', () => {
       store1.createIndex('store1_index2', 'id', {
         unique: true,
       });
-      
-      
+
+
       db.createObjectStore('store2');
       function createStore2() {
         const insertStore = db
           .transaction('store2', 'readwrite')
           .objectStore('store2');
         insertStore.add(new Date(), '1');
-        insertStore.transaction.oncomplete = () => { 
+        insertStore.transaction.oncomplete = () => {
          document.body.classList.add('ready');
         }
       }
-      
+
       store1.transaction.oncomplete = function() {
         const insertStore = db
           .transaction('store1', 'readwrite')
@@ -463,7 +463,7 @@ describe('UserProfile IndexedDb tests', () => {
           createStore2();
         }
       };
-      
+
     }
 </script>
 </body>`;
@@ -482,9 +482,9 @@ describe('UserProfile IndexedDb tests', () => {
   openDBRequest.onsuccess = function(ev) {
     const db = ev.target.result;
     const tx = db.transaction('store1', 'readonly').objectStore('store1');
-    
+
     const recordQuery = tx.getAll();
-    
+
     const completed = new Set();
     recordQuery.onsuccess = function({ target }) {
       document.querySelector('#records').innerHTML = JSON.stringify(target.result);
@@ -493,7 +493,7 @@ describe('UserProfile IndexedDb tests', () => {
         ready();
       }
     };
-    
+
     const indexQuery = tx.index('store1_index2').get(1);
     indexQuery.onsuccess = function({ target }) {
       document.querySelector('#richard').innerHTML = JSON.stringify(target.result);
@@ -510,14 +510,14 @@ describe('UserProfile IndexedDb tests', () => {
 
     let profile: IUserProfile;
     {
-      const meta = await Core.createTab();
-      const core = Core.byTabId[meta.tabId];
+      const meta = await connection.createSession();
+      const core = Session.getTab(meta);
       Helpers.needsClosing.push(core);
       await core.goto(`${koaServer.baseUrl}/db`);
       await core.waitForLoad('AllContentLoaded');
       await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-      profile = await core.exportUserProfile();
+      profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
       const db = profile.storage[koaServer.baseUrl]?.indexedDB[0];
       expect(db.name).toBe('db1');
@@ -533,17 +533,17 @@ describe('UserProfile IndexedDb tests', () => {
       expect(db.data.store1).toHaveLength(2);
     }
     {
-      const meta = await Core.createTab({
+      const meta = await connection.createSession({
         userProfile: profile,
       });
-      const core = Core.byTabId[meta.tabId];
+      const core = Session.getTab(meta);
       Helpers.needsClosing.push(core);
 
       await core.goto(`${koaServer.baseUrl}/dbrestore`);
       await core.waitForLoad('AllContentLoaded');
       await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-      const recordsJson = await core.execJsPath([
+      const recordsJson = await core.execJsPath<string>([
         'document',
         ['querySelector', '#records'],
         'textContent',
@@ -552,7 +552,7 @@ describe('UserProfile IndexedDb tests', () => {
 
       expect(records).toHaveLength(2);
       expect(records[0].child.name).toBe('Richard');
-      const indexLookupJson = await core.execJsPath([
+      const indexLookupJson = await core.execJsPath<string>([
         'document',
         ['querySelector', '#richard'],
         'textContent',

@@ -284,7 +284,7 @@ function buildConnectError(connectError = 'Error connecting to host', callStack:
     error = new SocketConnectError(connectError.trim());
   }
 
-  error.stack += `\n----DIAL----\n    `;
+  error.stack += `\n${'------DIAL'.padEnd(50, '-')}\n    `;
   error.stack += callStack;
   return error;
 }

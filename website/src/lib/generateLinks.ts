@@ -8,6 +8,7 @@ export default function generateLinks() {
     group.items = group.items.map((item: any) => {
       if (item.items) {
         item.link = `${group.link}/${kebabCase(item.title)}`;
+        item.editLink = `/docs/${group.title}/${item.title}`;
         item.items = item.items.map((itm: any) => {
           if (typeof itm === 'string') {
             return {
@@ -21,6 +22,7 @@ export default function generateLinks() {
         return {
           title: item,
           link: `${group.link}/${kebabCase(item)}`,
+          editLink: `/docs/${group.title}/${item}`,
         };
       }
       return item;

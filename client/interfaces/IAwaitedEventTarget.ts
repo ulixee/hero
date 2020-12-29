@@ -1,11 +1,3 @@
-import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import CoreTab from '../lib/CoreTab';
-
-export interface IAwaitedEventTargetState {
-  awaitedPath?: AwaitedPath;
-  coreTab: Promise<CoreTab>;
-}
-
 export default interface IAwaitedEventTarget<T> {
   addEventListener<K extends keyof T>(
     eventType: K,

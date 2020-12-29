@@ -1,10 +1,13 @@
 import { Helpers } from '@secret-agent/testing';
 import { XPathResult } from '@secret-agent/core-interfaces/AwaitedDom';
-import SecretAgent from '../index';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Handler } from '../index';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let handler: Handler;
 beforeAll(async () => {
-  await SecretAgent.prewarm();
+  handler = new Handler();
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -47,11 +50,11 @@ describe('basic Document tests', () => {
       ctx.body = `
         <body>
           <a href="javascript:void(0);" onclick="clicker()">Click Me</a>
-          
+
           <script>
           function clicker() {
             const elem = document.createElement('A');
-            document.querySelector('a').after(elem)  
+            document.querySelector('a').after(elem)
           }
           </script>
         </body>
@@ -110,12 +113,12 @@ describe('basic Document tests', () => {
       ctx.body = `
         <body>
           <a id="first" href="javascript:void(0);" onclick="clicker()">Click Me</a>
-          
+
           <script>
           function clicker() {
             const elem = document.createElement('A');
             elem.setAttribute('id', 'number2');
-            document.body.prepend(elem)  
+            document.body.prepend(elem)
           }
           </script>
         </body>
@@ -272,7 +275,7 @@ describe('basic Document tests', () => {
 });
 
 async function openBrowser(path: string) {
-  const agent = new SecretAgent();
+  const agent = await handler.createAgent();
   Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}${path}`);
   await agent.waitForAllContentLoaded();

@@ -20,6 +20,7 @@
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
     "typeson": "^5.18.2",
+    "json-socket": "^0.3.0",
     "typeson-registry": "^1.0.0-alpha.38",
     "uuid": "^8.1.0"
   },
@@ -29,6 +30,7 @@
     "@secret-agent/emulate-safari-13": "1.2.0-alpha.5",
     "@secret-agent/puppet-chrome": "1.2.0-alpha.5",
     "@secret-agent/testing": "1.2.0-alpha.5",
+    "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1"
   }
 }

@@ -4,7 +4,7 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
@@ -15,7 +15,7 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreTab: Promise<CoreTab>;
+  coreTab: Promise<CoreSession>;
   awaitedPath: AwaitedPath;
 }
 
@@ -27,9 +27,15 @@ const propertyKeys: (keyof WebsocketResource)[] = ['url', 'request', 'response']
 
 const subscribeErrorMessage = `Websocket responses do not have a body. To retrieve messages, subscribe to events: on('message', ...)`;
 
-export default class WebsocketResource extends AwaitedEventTarget<IEventType, IState> {
+export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
   constructor() {
-    super();
+    super(() => {
+      const state = getState(this);
+      return {
+        target: state.coreTab,
+        jsPath: state.awaitedPath.toJSON(),
+      };
+    });
     initializeConstantsAndProperties(this, [], propertyKeys);
   }
 
@@ -68,7 +74,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType, IS
 
 export function createWebsocketResource(
   resourceMeta: IResourceMeta,
-  coreTab: Promise<CoreTab>,
+  coreTab: Promise<CoreSession>,
 ): WebsocketResource {
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);
