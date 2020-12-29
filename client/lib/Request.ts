@@ -3,19 +3,19 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreTab';
 
 interface IState {
   awaitedPath: AwaitedPath;
   attachedState: IAttachedState;
   remoteInitializerPromise: Promise<void>;
-  coreTab: Promise<CoreTab>;
+  coreTab: Promise<CoreSession>;
 }
 
 const { getState, setState } = StateMachine<FetchRequest, IState>();
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default function RequestGenerator(coreTab: Promise<CoreTab>) {
+export default function RequestGenerator(coreTab: Promise<CoreSession>) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return class Request extends FetchRequest {
     constructor(input: IRequestInfo, init?: IRequestInit) {
@@ -31,7 +31,7 @@ export default function RequestGenerator(coreTab: Promise<CoreTab>) {
 
 async function createRemoteInitializer(
   instance: FetchRequest,
-  coreTabPromise: Promise<CoreTab>,
+  coreTabPromise: Promise<CoreSession>,
   input: IRequestInfo,
   init?: IRequestInit,
 ): Promise<void> {

@@ -1,44 +1,62 @@
-import { SecretAgentClientGenerator } from "../index";
+import Core from '@secret-agent/core/index';
+import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import { Handler } from '../index';
+import CoreClientConnection from '../lib/CoreClientConnection';
 
 describe('basic SecretAgent tests', () => {
-  it('starts, configures, and shuts down', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+  it("doesn't connect until an agent is used for a pre-established connection", async () => {
+    const outgoing = jest.fn<any, any>(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    await SecretAgent.prewarm();
-    await SecretAgent.configure({});
-    await SecretAgent.shutdown();
+    class Empty extends CoreClientConnection {
+      async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+        return outgoing(payload);
+      }
+    }
 
-    const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
-    expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
-      [null, 'prewarm'],
-      [null, 'configure'],
-      // no shutdown call if no browsers created
-    ]);
+    const handler = new Handler(new Empty());
+    await handler.close();
+
+    expect(outgoing).toHaveBeenCalledTimes(0);
+    expect(Object.keys(Core.connections)).toHaveLength(0);
   });
 
-  it('opens a browser', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
+  it('creates and closes an agent', async () => {
+    const outgoing = jest.fn(
+      async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+        if (command === 'createSession') {
+          return {
+            data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          };
+        }
+      },
+    );
 
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
+    class Piper extends CoreClientConnection {
+      async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+        const response = await outgoing(payload);
+        this.onMessage({
+          responseId: payload.messageId,
+          data: response?.data ?? {},
+          ...(response ?? {}),
+        });
       }
-    });
+    }
+    const handler = new Handler(new Piper());
 
-    await new SecretAgent();
-    await SecretAgent.shutdown();
+    const agent = await handler.createAgent();
+    await agent.close();
+    await handler.close();
 
-    const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
-    expect(outgoingCommands.map(c => c.slice(0, 2))).toMatchObject([
-      [null, 'createTab'],
-      [null, 'disconnect'],
+    const outgoingCommands = outgoing.mock.calls;
+    expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
+      'connect',
+      'createSession',
+      'addEventListener',
+      'closeSession',
+      'disconnect',
     ]);
   });
 });

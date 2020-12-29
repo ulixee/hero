@@ -1,10 +1,15 @@
 import { Helpers } from '@secret-agent/testing';
-import Core from '@secret-agent/core';
+import Core, { Session } from '@secret-agent/core';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let coreServerConnection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  coreServerConnection = Core.addConnection();
+  Helpers.onClose(() => coreServerConnection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -175,15 +180,14 @@ test('should emulate contentWindow features', async () => {
 // only run this test manually
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip('should not break recaptcha popup', async () => {
-  const tab = await Core.createTab();
-  const core = Core.byTabId[tab.tabId];
-  Helpers.needsClosing.push(core);
-  // @ts-ignore
-  const page = core.tab.puppetPage;
+  const meta = await coreServerConnection.createSession();
+  const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session);
+  const page = tab.puppetPage;
 
-  await core.goto('https://www.fbdemo.com/invisible-captcha/index.html');
+  await tab.goto('https://www.fbdemo.com/invisible-captcha/index.html');
 
-  await core.interact([
+  await tab.interact([
     {
       command: InteractionCommand.click,
       mousePosition: ['window', 'document', ['querySelector', '#tswname']],
@@ -193,7 +197,7 @@ test.skip('should not break recaptcha popup', async () => {
       keyboardCommands: [{ string: 'foo' }],
     },
   ]);
-  await core.interact([
+  await tab.interact([
     {
       command: InteractionCommand.click,
       mousePosition: ['window', 'document', ['querySelector', '#tswemail']],
@@ -203,7 +207,7 @@ test.skip('should not break recaptcha popup', async () => {
       keyboardCommands: [{ string: 'foo@foo.foo' }],
     },
   ]);
-  await core.interact([
+  await tab.interact([
     {
       command: InteractionCommand.click,
       mousePosition: ['window', 'document', ['querySelector', '#tswcomments']],
@@ -218,13 +222,13 @@ test.skip('should not break recaptcha popup', async () => {
       ],
     },
   ]);
-  await core.interact([
+  await tab.interact([
     {
       command: InteractionCommand.click,
       mousePosition: ['window', 'document', ['querySelector', '#tswsubmit']],
     },
   ]);
-  await core.waitForMillis(1000);
+  await tab.waitForMillis(1000);
 
   const { hasRecaptchaPopup } = await page.evaluate(`(() => {
     const hasRecaptchaPopup = !!document.querySelectorAll('iframe[title="recaptcha challenge"]')
@@ -232,17 +236,16 @@ test.skip('should not break recaptcha popup', async () => {
     return { hasRecaptchaPopup };
   })()`);
 
-  await core.close();
+  await tab.close();
 
   expect(hasRecaptchaPopup).toBe(true);
 });
 
-async function createPage() {
-  const tab = await Core.createTab();
-  const core = Core.byTabId[tab.tabId];
-  Helpers.needsClosing.push(core);
-  await core.goto(koaServer.baseUrl);
-  await core.waitForLoad('AllContentLoaded');
-  // @ts-ignore
-  return core.tab.puppetPage;
+async function createPage(): Promise<IPuppetPage> {
+  const meta = await coreServerConnection.createSession();
+  const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session);
+  await tab.goto(koaServer.baseUrl);
+  await tab.waitForLoad('AllContentLoaded');
+  return tab.puppetPage;
 }

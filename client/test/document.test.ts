@@ -2,39 +2,61 @@
 import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
-import IExecJsPathResult from '@secret-agent/core/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import { Helpers } from '@secret-agent/testing';
-import { SecretAgentClientGenerator } from '../index';
+import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import { Handler } from '../index';
+import CoreClientConnection from '../lib/CoreClientConnection';
 
 afterAll(Helpers.afterAll);
 
 describe('document tests', () => {
   it('runs querySelector', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string, args) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-      if (command === 'execJsPath') {
-        const [jsPath] = args;
-        const lastPath = jsPath[jsPath.length - 1];
-        if (lastPath && lastPath[0] === getAttachedStateFnName) {
+    const outgoing = jest.fn(
+      async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+        const { command, args } = payload;
+        await new Promise(resolve => setTimeout(resolve, 5));
+        if (command === 'createSession') {
           return {
-            data: {
-              value: null,
-              attachedState: { id: 1 },
-            } as IExecJsPathResult,
+            data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
           };
         }
-      }
-    });
+        if (command === 'addEventListener') {
+          return {
+            data: { listenerId: '1' },
+          };
+        }
+        if (command === 'execJsPath') {
+          const [jsPath] = args;
+          const lastPath = jsPath[jsPath.length - 1];
+          if (lastPath && lastPath[0] === getAttachedStateFnName) {
+            return {
+              data: {
+                value: null,
+                attachedState: { id: 1 },
+              } as IExecJsPathResult,
+            };
+          }
+        }
+      },
+    );
 
-    const agent = await new SecretAgent();
+    class Piper extends CoreClientConnection {
+      async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+        const data = await outgoing(payload);
+
+        this.onMessage({
+          responseId: payload.messageId,
+          data: data?.data,
+          ...(data ?? {}),
+        });
+      }
+    }
+
+    const handler = new Handler(new Piper());
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     const element = agent.document.querySelector('h1');
@@ -46,16 +68,21 @@ describe('document tests', () => {
     await superElement.tagName;
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
 
-    const outgoingCommands = (coreClient.pipeOutgoingCommand as any).mock.calls;
-    expect(outgoingCommands).toMatchObject([
-      [null, 'createTab', expect.any(Array)],
-      [expect.any(Object), 'execJsPath', [[...jsPath, [getAttachedStateFnName, undefined]]]],
-      [expect.any(Object), 'execJsPath', [[1, 'tagName']]],
-      [expect.any(Object), 'close', []],
-      [null, 'disconnect', [['tab-id'], undefined]],
+    const outgoingCommands = outgoing.mock.calls;
+    expect(outgoingCommands.map(x => x[0].command)).toMatchObject([
+      'connect',
+      'createSession',
+      'addEventListener',
+      'execJsPath',
+      'execJsPath',
+      'closeSession',
+      'disconnect',
     ]);
-    expect(await agent.sessionId).toBe('session-id');
+    expect(outgoingCommands[3][0].args).toMatchObject([
+      [...jsPath, [getAttachedStateFnName, undefined]],
+    ]);
+    expect(outgoingCommands[4][0].args).toMatchObject([[1, 'tagName']]);
   });
 });

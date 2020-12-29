@@ -14,7 +14,7 @@ export default class CommandFormatter {
       return formatJsPath(args[0]);
     }
     if (command.name === 'interact') {
-      const interacts = args[0].map((x: IInteractionGroup) => {
+      const interacts = args.map((x: IInteractionGroup) => {
         return x
           .map(y => {
             const extras: any = {};

@@ -1,6 +1,6 @@
 # Basic Concepts
 
-## Each SecretAgent Instance Has a Unique User
+## Each Agent instance Has a Unique User
 
 - user-agent
 - ip address
@@ -22,9 +22,8 @@ The easiest way to explain Dynamic DOM is with some comparison examples. Let's s
 Here's how you would do it with SecretAgent:
 
 ```js
-const SecretAgent = require('secret-agent');
+import agent from 'secret-agent';
 
-const agent = new SecretAgent();
 const { document } = agent;
 
 const elems = document.querySelectorAll('ul');
@@ -66,9 +65,9 @@ When used in a simple example as show above, Puppeteer's approach seems okay. Ho
 When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. SecretAgent allows you to [turn off](./configuration#rendering) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
 
 ```js
-const SecretAgent = require('secret-agent');
+import agent from 'secret-agent';
 
-const agent = new SecretAgent({
+await agent.configure({
   renderingOptions: ['None'],
 });
 await agent.goto('https://secretagent.dev');

@@ -5,7 +5,7 @@ import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import { createPromise } from '@secret-agent/commons/utils';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Core from '../index';
+import Core, { Session } from '../index';
 
 const mocks = {
   MitmRequestContext: {
@@ -238,11 +238,13 @@ window.addEventListener('load', function() {
 });
 
 test('should proxy iframe requests', async () => {
-  const meta = await Core.createTab();
-  const core = Core.byTabId[meta.tabId];
+  const connection = Core.addConnection();
+  Helpers.onClose(() => connection.disconnect());
 
-  // @ts-ignore
-  const session = core.session;
+  const meta = await connection.createSession();
+  const tab = Session.getTab(meta);
+
+  const session = tab.session;
 
   session.mitmRequestSession.blockedResources.urls = [
     'https://dataliberationfoundation.org/iframe',
@@ -264,8 +266,8 @@ This is the main body
 </body>
 </html>`;
   });
-  await core.goto(`${koa.baseUrl}/iframe-test`);
-  await core.waitForLoad(LocationStatus.AllContentLoaded);
+  await tab.goto(`${koa.baseUrl}/iframe-test`);
+  await tab.waitForLoad(LocationStatus.AllContentLoaded);
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([

@@ -13,7 +13,7 @@ For example:
 ```js
 const debug = require('debug')("MySecretAgent");
 
-SecretAgent.injectLogger({
+Agent.injectLogger({
   stats(action, data, parentMessageId) {
     debug(`STATS ${action}`, parentMessageId, data);
   },

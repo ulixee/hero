@@ -1,9 +1,8 @@
-import SecretAgent from '@secret-agent/full-client';
+import agent from '@secret-agent/full-client';
 
 process.env.SA_SHOW_REPLAY = 'true';
 
 async function run() {
-  const agent = await new SecretAgent();
   await agent.goto('https://news.ycombinator.com/');
   await agent.waitForAllContentLoaded();
 
@@ -82,7 +81,7 @@ async function run() {
   console.log('-------------------------------------');
   console.log('DONE');
 
-  await SecretAgent.shutdown();
+  await agent.close();
 }
 
 run().catch(error => console.log(error));

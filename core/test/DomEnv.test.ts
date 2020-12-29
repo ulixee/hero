@@ -1,9 +1,13 @@
 import { Helpers } from '@secret-agent/testing/index';
-import Core from '../index';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
+import Core, { Session } from '../index';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let coreServerConnection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  coreServerConnection = Core.addConnection() as CoreServerConnection;
+  Helpers.onClose(() => coreServerConnection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -19,15 +23,16 @@ it('can operate when unsafe eval not on', async () => {
       `;
   });
   const inputUrl = `${koaServer.baseUrl}/unsafe`;
-  const meta = await Core.createTab();
-  const core = Core.byTabId[meta.tabId];
+  const meta = await coreServerConnection.createSession();
+  const session = Session.get(meta.sessionId);
+  const tab = session.getTab(meta.tabId);
 
-  await core.goto(inputUrl);
-  const input = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
+  await tab.goto(inputUrl);
+  const input = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
   expect(input.value).toBe('');
-  const x = await core.execJsPath([['document.querySelector', 'body'], 'scrollTop']);
+  const x = await tab.execJsPath([['document.querySelector', 'body'], 'scrollTop']);
   expect(x.value).toBe(0);
-  await core.close();
+  await session.close();
 });
 
 it('should be able to get window variables', async () => {
@@ -45,17 +50,18 @@ it('should be able to get window variables', async () => {
       `;
   });
 
-  const meta = await Core.createTab();
-  const core = Core.byTabId[meta.tabId];
-  await core.goto(`${koaServer.baseUrl}/vars`);
-  await core.waitForLoad('DomContentLoaded');
+  const meta = await coreServerConnection.createSession();
+  const session = Session.get(meta.sessionId);
+  const tab = session.getTab(meta.tabId);
+  await tab.goto(`${koaServer.baseUrl}/vars`);
+  await tab.waitForLoad('DomContentLoaded');
 
-  const pageClicks = await core.getJsValue('pageClicks');
+  const pageClicks = await tab.getJsValue('pageClicks');
   expect(pageClicks.value).toStrictEqual([1, 2, 3]);
 
-  await core.getJsValue(`add('item4')`);
-  const pageClicks2 = await core.getJsValue('pageClicks');
+  await tab.getJsValue(`add('item4')`);
+  const pageClicks2 = await tab.getJsValue('pageClicks');
 
   expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
-  await core.close();
+  await session.close();
 });

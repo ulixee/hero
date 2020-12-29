@@ -4,9 +4,9 @@ A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying d
 
 ## Constructor
 
-A default tab is provided in each SecretAgent instance. Navigate by using the [secretAgent.goto](./secret-agent#goto) method.
+A default tab is provided in each Agent instance. Navigate by using the [secretAgent.goto](./secret-agent#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the SecretAgent instance. These can be discovered using the [secretAgent.tabs](./secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](./secret-agent#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [secretAgent.tabs](./secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](./secret-agent#wait-for-new-tab).
 
 ## Properties
 
@@ -24,7 +24,7 @@ Returns a reference to the document of the tab.
 
 ### tab.lastCommandId {#lastCommandId}
 
-An execution point that refers to a command run on this SecretAgent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
+An execution point that refers to a command run on this Agent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
 
 #### **Type**: `Promise<number>`
 
@@ -57,7 +57,6 @@ The url of the active tab.
 Returns a constructor for a [Request](../awaited-dom/request) object that can be sent to [tab.fetch(request)](#fetch).
 
 ```js
-const agent = await new SecretAgent();
 const { Request, fetch } = agent;
 const url = 'https://dataliberationfoundation.org';
 const request = new Request(url, {
@@ -74,7 +73,7 @@ const response = await fetch(request);
 
 ### tab.close*()* {#close}
 
-Closes the current tab only (will close the whole SecretAgent instance if there are no open tabs).
+Closes the current tab only (will close the whole Agent instance if there are no open tabs).
 
 #### **Returns**: `Promise`
 
@@ -92,7 +91,6 @@ Perform a native "fetch" request in the current tab context.
 #### **Returns**: [`Promise<Response>`](../awaited-dom/response)
 
 ```js
-const agent = new SecretAgent();
 const url = 'https://dataliberationfoundation.org';
 const response = await agent.fetch(url);
 ```
@@ -100,7 +98,6 @@ const response = await agent.fetch(url);
 Http Post example with a body:
 
 ```js
-const agent = new SecretAgent();
 const url = 'https://dataliberationfoundation.org/nopost';
 const response = await agent.fetch(url, {
   method: 'post',
@@ -130,7 +127,6 @@ Extract any publicly accessible javascript value from the webpage context.
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-const agent = new SecretAgent();
 await agent.goto('https://dataliberationfoundation.org');
 const navigatorAgent = await agent.activeTab.getJsValue(`navigator.userAgent`);
 ```
@@ -149,7 +145,7 @@ Navigates forward in the navigation history stack.
 
 ### tab.goto*(locationHref)* {#goto}
 
-Executes a navigation request for the document associated with the parent Secret Agent instance.
+Executes a navigation request for the document associated with the parent SecretAgent instance.
 
 #### **Arguments**:
 
@@ -194,7 +190,6 @@ Wait until a specific element is present in the dom.
 If at the moment of calling this method, the selector already exists, the method will return immediately.
 
 ```js
-const agent = new SecretAgent();
 const { activeTab, document } = agent;
 
 const elem = document.querySelector('a.visible');
@@ -248,7 +243,6 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const agent = new SecretAgent();
 const { user, activeTab, document } = agent;
 await activeTab.goto('http://example.com');
 
@@ -276,7 +270,6 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
 #### **Returns**: [`Promise<Resource[]>`](../advanced/resource)
 
 ```js
-const agent = new SecretAgent();
 const { user, activeTab, document } = agent;
 
 await activeTab.goto('http://example.com');

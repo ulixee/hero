@@ -96,6 +96,7 @@ module.exports = {
     {
       files: '**/test/*.ts',
       rules: {
+        'max-classes-per-file': 'off',
         'promise/valid-params': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         'require-await': 'off',
@@ -130,15 +131,7 @@ module.exports = {
     'import/no-named-as-default-member': 'off',
     'import/prefer-default-export': 'off',
     'import/no-cycle': 'off', // TODO:we need to work through this!!
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        ts: 'never',
-        mjs: 'always',
-      },
-    ],
+    'import/extensions': 'off',
     // 'import/no-default-export': 'error',
     'import/no-extraneous-dependencies': [
       'error',

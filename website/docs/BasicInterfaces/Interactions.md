@@ -1,6 +1,6 @@
 # Interactions
 
-Every SecretAgent instance has an `interact()` method, which allow you to control the mouse and keyboard. `Interactions` are simple key/value objects you pass into this method:
+Every Agent instance has an `interact()` method, which allow you to control the mouse and keyboard. `Interactions` are simple key/value objects you pass into this method:
 
 ```js
 agent.interact({ move: [100, 356] });

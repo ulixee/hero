@@ -1,14 +1,17 @@
 import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
 import { pickRandom } from '@secret-agent/commons/utils';
+import GlobalPool from './GlobalPool';
 
 export default class BrowserEmulators {
-  public static defaultEmulatorId: string;
+  public static get emulatorIds(): string[] {
+    return Object.keys(this.emulatorsById);
+  }
+
   private static readonly emulatorsById: { [emulatorId: string]: IBrowserEmulatorClass } = {};
 
   private static readonly emulatorPublicUsageDistribution: string[] = [];
 
   public static load(BrowserEmulatorClass: IBrowserEmulatorClass) {
-    if (!this.defaultEmulatorId) this.defaultEmulatorId = BrowserEmulatorClass.id;
     this.emulatorsById[BrowserEmulatorClass.id] = BrowserEmulatorClass;
 
     const usagePct = BrowserEmulatorClass.roundRobinPercent ?? 1;
@@ -39,7 +42,7 @@ export default class BrowserEmulators {
 
   public static getId(emulatorId?: string) {
     if (!emulatorId) {
-      return this.defaultEmulatorId;
+      return GlobalPool.defaultBrowserEmulatorId;
     }
     if (emulatorId === 'random') {
       return this.getRandomId();

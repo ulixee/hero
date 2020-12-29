@@ -1,8 +1,6 @@
-import SecretAgent from '@secret-agent/full-client';
+import agent from '@secret-agent/full-client';
 
 (async () => {
-  const agent = await new SecretAgent();
-
   const url = `https://dataliberationfoundation.org/`;
   console.log('Opened Browser');
 

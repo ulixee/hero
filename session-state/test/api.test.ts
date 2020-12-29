@@ -1,15 +1,14 @@
-import Core from '@secret-agent/core';
+import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import * as http2 from 'http2';
-import { http2StreamToJson } from '@secret-agent/testing/helpers';
+import { http2StreamToJson, ITestKoaServer } from '@secret-agent/testing/helpers';
 import { createPromise } from '@secret-agent/commons/utils';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 
-let koaServer;
+let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await Core.prewarm();
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -32,7 +31,9 @@ describe('basic Replay API tests', () => {
       `;
     });
     await Core.startReplayServer();
-    const meta = await Core.createTab();
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    const meta = await connection.createSession();
 
     const api = http2.connect(meta.replayApiServer);
     const commandMap: { [id: string]: ICommandWithResult } = {};
@@ -48,7 +49,7 @@ describe('basic Replay API tests', () => {
         for (const command of json) {
           commandMap[command.id] = command;
         }
-        if (Object.keys(commandMap).length === 8) {
+        if (Object.keys(commandMap).length >= 8) {
           gotCommandsPromise.resolve();
         }
       } else if (path === '/dom-changes') {
@@ -64,27 +65,27 @@ describe('basic Replay API tests', () => {
       'data-location': meta.sessionsDataLocation,
       'session-id': meta.sessionId,
     });
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test1`);
-    await core.waitForLoad('AllContentLoaded');
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test1`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 100));
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.type,
         keyboardCommands: [{ string: 'test' }],
         mousePosition: ['window', 'document', ['querySelector', 'input']],
       },
     ]);
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
-    await core.waitForMillis(100);
-    await core.waitForLoad('AllContentLoaded');
-    const location = await core.execJsPath(['location', 'href']);
+    await tab.waitForMillis(100);
+    await tab.waitForLoad('AllContentLoaded');
+    const location = await tab.execJsPath(['location', 'href']);
     expect(location.value).toBe(`${koaServer.baseUrl}/test2`);
 
     await gotCommandsPromise.promise;

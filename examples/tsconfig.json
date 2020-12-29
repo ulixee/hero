@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["ES2018", "DOM", "DOM.Iterable"],
+    "composite": true,
+    "allowJs": true,
+    "outDir": "../build/examples",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
+  },
+  "include": ["*.js", "*.ts"],
+  "exclude": ["**/node_modules", "**/build"]
+}

@@ -1,10 +1,16 @@
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core from '../index';
+import CoreServerConnection from '../lib/CoreServerConnection';
+import Session from '../lib/Session';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let connection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  connection = Core.addConnection();
+  await connection.connect();
+  Helpers.onClose(() => connection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -23,25 +29,26 @@ describe('basic Tab tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test1`);
 
-    await expect(core.waitForElement(['document', ['querySelector', 'a']])).resolves.toBe(
-      undefined,
-    );
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/test1`);
+
+    await expect(tab.waitForElement(['document', ['querySelector', 'a']])).resolves.toBe(true);
   });
 
   it('times out waiting for an element', async () => {
     koaServer.get('/test2', ctx => {
       ctx.body = `<body><a>Nothing really here</a></body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test2`);
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/test2`);
 
     await expect(
-      core.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 }),
+      tab.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 }),
     ).rejects.toThrowError(/Timeout waiting for element .* to be visible/);
   });
 
@@ -56,15 +63,16 @@ describe('basic Tab tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test3`);
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/test3`);
 
     await expect(
-      core.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
+      tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
         waitForVisible: true,
       }),
-    ).resolves.toBe(undefined);
+    ).resolves.toBe(true);
   });
 
   it('can wait for another tab', async () => {
@@ -80,31 +88,29 @@ describe('basic Tab tests', () => {
       userAgentString2 = ctx.get('user-agent');
       ctx.body = `<body><h1 id="newTabHeader">You are here</h1></body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/tabTest`);
-    await core.interact([
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/tabTest`);
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
 
-    // @ts-ignore
-    const session = core.session;
+    const session = tab.session;
 
-    const newTab = await core.waitForNewTab();
-    const newTabCore = Core.byTabId[newTab.tabId];
-    expect(newTab).toBeTruthy();
+    const newTab = await tab.waitForNewTab();
     expect(session.tabs).toHaveLength(2);
-    await newTabCore.waitForLoad('AllContentLoaded');
-    const header = await newTabCore.execJsPath([
+    await newTab.waitForLoad('AllContentLoaded');
+    const header = await newTab.execJsPath([
       'document',
       ['querySelector', '#newTabHeader'],
       'textContent',
     ]);
     expect(header.value).toBe('You are here');
     expect(userAgentString1).toBe(userAgentString2);
-    await newTabCore.closeTab();
+    await newTab.close();
   });
 });

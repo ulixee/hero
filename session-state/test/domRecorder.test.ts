@@ -1,13 +1,17 @@
-import Core from '@secret-agent/core';
+import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
 import { MouseEventType } from '../models/MouseEventsTable';
 import DomChangesTable from '../models/DomChangesTable';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let coreServerConnection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  coreServerConnection = Core.addConnection();
+  Helpers.onClose(() => coreServerConnection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -29,32 +33,27 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab({
+    const meta = await coreServerConnection.createSession({
       humanEmulatorId: 'skipper',
     });
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test1`);
-    await core.waitForLoad('DomContentLoaded');
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test1`);
+    await tab.waitForLoad('DomContentLoaded');
 
-    // @ts-ignore
-    const tab = core.tab;
-    // @ts-ignore
     const pages = tab.navigationTracker;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
     const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
-    // @ts-ignore
-    const commandId = core.tab.lastCommandId;
+
+    const commandId = tab.lastCommandId;
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(12);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForElement(['document', ['querySelector', 'a#link2']]);
+    await tab.waitForElement(['document', ['querySelector', 'a#link2']]);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history, commandId);
@@ -77,14 +76,12 @@ function removeMe() {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test2`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test2`);
+    await tab.waitForLoad('DomContentLoaded');
+
+    const pages = tab.navigationTracker;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
@@ -92,14 +89,12 @@ function removeMe() {
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(12);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
-    const loadCommand = core.lastCommandId;
+    const loadCommand = tab.lastCommandId;
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForMillis(100);
+    await tab.waitForMillis(100);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
@@ -107,7 +102,7 @@ function removeMe() {
     expect(changes[key]).toHaveLength(2);
     expect(changes[key][0][1]).toBe('removed');
 
-    await core.close();
+    await tab.close();
   });
 
   it('detects reordered nodes', async () => {
@@ -133,13 +128,11 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test3`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
-    // @ts-ignore
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test3`);
+    await tab.waitForLoad('DomContentLoaded');
+
     const pages = tab.navigationTracker;
 
     const state = tab.sessionState;
@@ -149,14 +142,12 @@ function sort() {
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(30);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
-    const loadCommand = core.lastCommandId;
+    const loadCommand = tab.lastCommandId;
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForMillis(100);
+    await tab.waitForMillis(100);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
@@ -174,7 +165,7 @@ function sort() {
     expect(lastChange[2].id).toBe(elem1[2].id);
     expect(lastChange[2].previousSiblingId).toBe(elem3[2].id);
 
-    await core.close();
+    await tab.close();
   });
 
   it('detects attribute changes', async () => {
@@ -189,14 +180,13 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test4`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test4`);
+    await tab.waitForLoad('DomContentLoaded');
+
     const state = tab.sessionState;
-    // @ts-ignore
+
     const pages = tab.navigationTracker;
 
     await tab.domRecorder.flush();
@@ -204,14 +194,12 @@ function sort() {
     const [frameId] = Object.keys(changesAfterLoad);
     expect(changesAfterLoad[frameId]).toHaveLength(15);
     expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
-    const loadCommand = core.lastCommandId;
+    const loadCommand = tab.lastCommandId;
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForMillis(100);
+    await tab.waitForMillis(100);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
@@ -220,7 +208,7 @@ function sort() {
     expect(changes[key][0][1]).toBe('attribute');
     expect(changes[key][0][2].attributes['new-attr']).toBe('1');
 
-    await core.close();
+    await tab.close();
   });
 
   it('records frame dom ids', async () => {
@@ -241,12 +229,10 @@ function sort() {
       ctx.body = `<body><h1>This is deep</h1></body>`;
     });
 
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/iframe`);
-    await core.waitForLoad('AllContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/iframe`);
+    await tab.waitForLoad('AllContentLoaded');
     const state = tab.sessionState;
 
     expect(tab.puppetPage.frames).toHaveLength(4);
@@ -276,7 +262,7 @@ function sort() {
     expect(subframe.domNodeId).toBe(domFrames[2].nodeId);
     expect(subframe.parentId).toBe(srcTest.id);
 
-    await core.close();
+    await tab.close();
   });
 
   it('supports recording CSSOM', async () => {
@@ -294,22 +280,19 @@ function clickIt() {
 </body>`;
     });
 
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/cssom`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/cssom`);
+    await tab.waitForLoad('DomContentLoaded');
+
     const state = tab.sessionState;
-    // @ts-ignore
+
     const pages = tab.navigationTracker;
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForMillis(100);
+    await tab.waitForMillis(100);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history);
@@ -321,7 +304,7 @@ function clickIt() {
     expect(propChange).toBeTruthy();
 
     expect(propChange[2].properties['sheet.cssRules']).toStrictEqual(['body { color: red; }']);
-    await core.close();
+    await tab.close();
   });
 
   it('supports recording closed shadow dom roots', async () => {
@@ -351,22 +334,19 @@ customElements.define('image-list', class extends HTMLElement {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test5`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab = core.tab;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test5`);
+    await tab.waitForLoad('DomContentLoaded');
+
     const state = tab.sessionState;
-    // @ts-ignore
+
     const pages = tab.navigationTracker;
 
-    await core.waitForElement(['document', ['querySelector', 'a']]);
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.waitForElement(['document', ['querySelector', 'a']]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
-    await core.waitForMillis(100);
+    await tab.waitForMillis(100);
 
     await tab.domRecorder.flush();
     const changes = await state.getMainFrameDomChanges(pages.history);
@@ -381,7 +361,7 @@ customElements.define('image-list', class extends HTMLElement {
 
     expect(shadowImg[2].tagName).toBe('IMG');
     expect(shadowImg[2].attributes.alt).toBe(' new image is closed ');
-    await core.close();
+    await tab.close();
   });
 });
 
@@ -406,7 +386,7 @@ describe('basic Mouse Event tests', () => {
 
 </body>`;
     });
-    const meta = await Core.createTab({
+    const meta = await coreServerConnection.createSession({
       humanEmulatorId: 'basic',
       viewport: {
         height: 800,
@@ -417,15 +397,13 @@ describe('basic Mouse Event tests', () => {
         screenWidth: 1000,
       },
     });
-    const core = Core.byTabId[meta.tabId];
-    // @ts-ignore
-    const tab = core.tab;
+    const tab = Session.getTab(meta);
     const state = tab.sessionState;
 
-    await core.goto(`${koaServer.baseUrl}/mouse1`);
-    await core.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.goto(`${koaServer.baseUrl}/mouse1`);
+    await tab.waitForLoad(LocationStatus.AllContentLoaded);
 
-    await core.interact([
+    await tab.interact([
       { command: 'click', mousePosition: ['document', ['querySelector', 'BUTTON']] },
     ]);
 
@@ -442,7 +420,6 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    // @ts-ignore
     const pages = tab.navigationTracker;
     const changes = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changes);
@@ -453,7 +430,7 @@ describe('basic Mouse Event tests', () => {
     const scrollRecords = state.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
 
-    await core.close();
+    await tab.close();
   });
 });
 
@@ -471,16 +448,15 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/input`);
-    await core.waitForLoad('AllContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/input`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
-    // @ts-ignore
-    const tab = core.tab;
+
     const state = tab.sessionState;
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'input']],
@@ -491,22 +467,22 @@ describe('basic Form element tests', () => {
       },
     ]);
 
-    const textValue = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
+    const textValue = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(textValue.value).toBe('Hello world!');
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'button']],
       },
     ]);
-    const textValue2 = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
+    const textValue2 = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
     expect(textValue2.value).toBe('test');
 
     await state.db.flush();
     await tab.domRecorder.flush();
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+
+    const pages = tab.navigationTracker;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -518,7 +494,7 @@ describe('basic Form element tests', () => {
     const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
-    await core.close();
+    await tab.close();
   });
 
   it('detects typing in a textarea', async () => {
@@ -534,15 +510,15 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/textarea`);
-    await core.waitForLoad('AllContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/textarea`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
-    // @ts-ignore
-    const state = core.tab.sessionState;
 
-    await core.interact([
+    const state = tab.sessionState;
+
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'textarea']],
@@ -553,23 +529,22 @@ describe('basic Form element tests', () => {
       },
     ]);
 
-    const textValue = await core.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
+    const textValue = await tab.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue.value).toBe('Hello world!');
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'button']],
       },
     ]);
-    const textValue2 = await core.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
+    const textValue2 = await tab.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    // @ts-ignore
-    await core.tab.domRecorder.flush();
+    await tab.domRecorder.flush();
     await state.db.flush();
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+
+    const pages = tab.navigationTracker;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -581,7 +556,7 @@ describe('basic Form element tests', () => {
     const inputNode = domChanges.find(x => x[2].tagName === 'TEXTAREA')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
-    await core.close();
+    await tab.close();
   });
 
   it('detects checking a checkbox', async () => {
@@ -599,35 +574,34 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/cbox`);
-    await core.waitForLoad('AllContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/cbox`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
-    // @ts-ignore
-    const state = core.tab.sessionState;
 
-    await core.interact([
+    const state = tab.sessionState;
+
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', '#cbox1']],
       },
     ]);
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'button']],
       },
     ]);
-    const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
+    const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(2);
 
-    // @ts-ignore
-    await core.tab.domRecorder.flush();
+    await tab.domRecorder.flush();
     await state.db.flush();
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+
+    const pages = tab.navigationTracker;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -639,7 +613,7 @@ describe('basic Form element tests', () => {
     const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
-    await core.close();
+    await tab.close();
   });
 
   it('detects changing a radio', async () => {
@@ -657,35 +631,35 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/radio`);
-    await core.waitForLoad('AllContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/radio`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
-    // @ts-ignore
-    const state = core.tab.sessionState;
 
-    await core.interact([
+    const state = tab.sessionState;
+
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', '#radio2']],
       },
     ]);
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'button']],
       },
     ]);
-    const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
+    const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
-    // @ts-ignore
-    await core.tab.domRecorder.flush();
+
+    await tab.domRecorder.flush();
 
     await state.db.flush();
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+
+    const pages = tab.navigationTracker;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -699,7 +673,7 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = domChanges.find(x => x[2].attributes?.id === 'radio2')[2];
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
-    await core.close();
+    await tab.close();
   });
 
   it('detects changing a select', async () => {
@@ -718,15 +692,15 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/select`);
-    await core.waitForLoad('AllContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/select`);
+    await tab.waitForLoad('AllContentLoaded');
     await new Promise(resolve => setTimeout(resolve, 250));
-    // @ts-ignore
-    const state = core.tab.sessionState;
 
-    await core.interact([
+    const state = tab.sessionState;
+
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'select']],
@@ -737,20 +711,20 @@ describe('basic Form element tests', () => {
       },
     ]);
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['document', ['querySelector', 'button']],
       },
     ]);
-    const values = await core.execJsPath(['document', ['querySelectorAll', ':checked']]);
+    const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
-    // @ts-ignore
-    await core.tab.domRecorder.flush();
+
+    await tab.domRecorder.flush();
 
     await state.db.flush();
-    // @ts-ignore
-    const pages = core.tab.navigationTracker;
+
+    const pages = tab.navigationTracker;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -765,7 +739,7 @@ describe('basic Form element tests', () => {
     expect(domChanges.filter(x => x[1] === 'property')).toHaveLength(6);
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === select.id)).toHaveLength(2);
     expect(domChanges.filter(x => x[1] === 'property' && x[2].id === opt2.id)).toHaveLength(2);
-    await core.close();
+    await tab.close();
   });
 });
 
@@ -800,33 +774,25 @@ function addMe2() {
 </body>
 `;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/page1`);
-    await core.waitForLoad('DomContentLoaded');
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/page1`);
+    await tab.waitForLoad('DomContentLoaded');
 
-    // @ts-ignore
-    const tab = core.tab;
-    // @ts-ignore
     const pages = tab.navigationTracker;
 
-    await core.interact([
-      { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
-    ]);
+    await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.domRecorder.flush();
 
-    const meta2 = await core.waitForNewTab();
-    const core2 = Core.byTabId[meta2.tabId];
-    await core2.waitForLoad('AllContentLoaded');
-    await core2.interact([
+    const tab2 = await tab.waitForNewTab();
+    await tab2.waitForLoad('AllContentLoaded');
+    await tab2.interact([
       { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
     ]);
 
-    // @ts-ignore
-    const tab2 = core2.tab;
     await tab2.domRecorder.flush();
-    // @ts-ignore
+
     const pages2 = tab2.navigationTracker;
 
     const tab1Changes = await tab.sessionState.getMainFrameDomChanges(pages.history);
@@ -874,6 +840,6 @@ function addMe2() {
       attributes: { id: 'divPage2' },
       textContent: null,
     });
-    await core.close();
+    await tab.close();
   });
 });

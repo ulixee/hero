@@ -53,15 +53,17 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return super.emit(eventType, event);
   }
 
-  public async initialize(emulation: IBrowserEmulationSettings): Promise<void> {
+  public setUserAgentOverrides(emulation: IBrowserEmulationSettings): Promise<void> {
     this.emulation = emulation;
+    return this.cdpSession.send('Network.setUserAgentOverride', {
+      userAgent: emulation.userAgent,
+      acceptLanguage: emulation.locale,
+      platform: emulation.platform,
+    });
+  }
 
+  public async initialize(): Promise<void> {
     await Promise.all([
-      this.cdpSession.send('Network.setUserAgentOverride', {
-        userAgent: emulation.userAgent,
-        acceptLanguage: emulation.locale,
-        platform: emulation.platform,
-      }),
       this.cdpSession.send('Network.enable', {
         maxPostDataSize: 0,
         maxResourceBufferSize: 0,
@@ -78,9 +80,9 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.cancelPendingEvents('NetworkManager closed');
   }
 
-  public initializeFromParent(parentManager: NetworkManager): Promise<void> {
+  public async initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
-    return this.initialize(parentManager.emulation);
+    await Promise.all([this.setUserAgentOverrides(parentManager.emulation), this.initialize()]);
   }
 
   private onAuthRequired(event: Protocol.Fetch.AuthRequiredEvent): void {

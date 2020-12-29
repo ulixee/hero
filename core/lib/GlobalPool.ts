@@ -9,6 +9,7 @@ import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Puppet from '@secret-agent/puppet';
 import Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import Chrome83 from '@secret-agent/emulate-chrome-83';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
 
@@ -16,14 +17,15 @@ const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
-  public static maxConcurrentSessionsCount = 10;
+  public static defaultBrowserEmulatorId = Chrome83.id;
+  public static maxConcurrentAgentsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
 
   public static get hasAvailability() {
-    return this.activeSessionCount < GlobalPool.maxConcurrentSessionsCount;
+    return this.activeSessionCount < GlobalPool.maxConcurrentAgentsCount;
   }
 
   private static _activeSessionCount = 0;
@@ -34,7 +36,8 @@ export default class GlobalPool {
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start(browserEmulatorIds: string[]) {
+  public static async start(browserEmulatorIds?: string[]) {
+    browserEmulatorIds = browserEmulatorIds ?? [GlobalPool.defaultBrowserEmulatorId];
     log.info('StartingGlobalPool', {
       sessionId: null,
       browserEmulatorIds,
@@ -54,7 +57,7 @@ export default class GlobalPool {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
-      maxConcurrentSessionsCount: this.maxConcurrentSessionsCount,
+      maxConcurrentAgentsCount: this.maxConcurrentAgentsCount,
     });
 
     if (!this.hasAvailability) {
@@ -63,20 +66,6 @@ export default class GlobalPool {
       return resolvablePromise.promise;
     }
     return this.createSessionNow(options);
-  }
-
-  public static async closeSession(session: Session) {
-    this._activeSessionCount -= 1;
-
-    const wasTransferred = this.resolveWaitingConnection();
-    await session.close();
-    if (wasTransferred) {
-      log.info('ReleasingChrome', {
-        sessionId: null,
-        activeSessionCount: this.activeSessionCount,
-        waitingForAvailability: this.waitingForAvailability.length,
-      });
-    }
   }
 
   public static async close() {
@@ -130,6 +119,7 @@ export default class GlobalPool {
     let puppet: Puppet;
     try {
       const session = new Session(options);
+      session.on('closing', this.releaseConnection.bind(this));
 
       puppet = this.getPuppet(session.browserEngine) ?? this.addPuppet(session.browserEngine);
 
@@ -146,6 +136,19 @@ export default class GlobalPool {
       this._activeSessionCount -= 1;
 
       throw err;
+    }
+  }
+
+  private static releaseConnection() {
+    this._activeSessionCount -= 1;
+
+    const wasTransferred = this.resolveWaitingConnection();
+    if (wasTransferred) {
+      log.info('ReleasingChrome', {
+        sessionId: null,
+        activeSessionCount: this.activeSessionCount,
+        waitingForAvailability: this.waitingForAvailability.length,
+      });
     }
   }
 

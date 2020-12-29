@@ -4,19 +4,24 @@ import { createPromise } from './utils';
 type Callback<T> = (value?: any) => Promise<T>;
 
 export default class Queue {
-  private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
-  private active = false;
+  public concurrency = 1;
+  public idletimeMillis = 500;
+  public idlePromise = createPromise();
 
-  public run<T>(cb: Callback<T>): Promise<T> {
-    const promise = createPromise<T>();
+  private idleTimout: NodeJS.Timeout;
+  private activeCount = 0;
+
+  private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
+
+  constructor(readonly stacktraceMarker = 'QUEUE') {}
+
+  public run<T>(cb: Callback<T>, timeoutMillis?: number): Promise<T> {
+    const promise = createPromise<T>(timeoutMillis);
 
     this.queue.push({
       promise,
       cb,
-      startStack: new Error('').stack
-        .split('\n')
-        .slice(1)
-        .join('\n'),
+      startStack: new Error('').stack.split('\n').slice(1).join('\n'),
     });
     setImmediate(() => this.next());
     return promise.promise;
@@ -29,21 +34,37 @@ export default class Queue {
   }
 
   private async next(): Promise<void> {
-    if (this.active) return;
+    clearTimeout(this.idleTimout);
+
+    if (this.activeCount >= this.concurrency) return;
 
     const next = this.queue.shift();
-    if (!next) return;
+    if (!next) {
+      if (this.activeCount === 0) {
+        this.idleTimout = setTimeout(() => this.idlePromise.resolve(), this.idletimeMillis).unref();
+      }
+      return;
+    }
 
-    this.active = true;
+    if (this.activeCount === 0 && this.idlePromise.isResolved) {
+      const newPromise = createPromise();
+      this.idlePromise?.resolve(newPromise.promise);
+      this.idlePromise = newPromise;
+    }
+
+    this.activeCount += 1;
     try {
       const res = await next.cb();
       next.promise.resolve(res);
     } catch (error) {
-      error.stack = `${error.stack}\n-----QUEUE-----\n${next.startStack}`;
+      const marker = `------${this.stacktraceMarker}`.padEnd(50, '-');
+
+      error.stack = `${error.stack}\n${marker}\n${next.startStack}`;
       next.promise.reject(error);
     } finally {
-      this.active = false;
+      this.activeCount -= 1;
     }
+
     setImmediate(() => this.next());
   }
 }

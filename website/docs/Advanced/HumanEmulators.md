@@ -37,15 +37,18 @@ We've included three human emulator plugins to get you started. They are pre-loa
 
 Note: Use the `skipper` emulator when you want to turn OFF human-emulator functionality. It disables all emulator effects, allowing you to run mouse and keyboard commands as if there were no human translation layer.
 
-To use a specific emulator, pass your chosen ID into `new SecretAgent({ humanEmulatorId... )`:
+To use a specific emulator, pass your chosen ID into `handler.createAgent({ humanEmulatorId... )`:
 
 ```js
-const SecretAgent = 'secret-agent';
+const { Handler } = 'secret-agent';
 
 (async () => {
-  const agent = await new SecretAgent({ humanEmulatorId: 'basic' });
+  const handler = new Handler();
+  const agent = await handler.createAgent({ 
+    humanEmulatorId: 'basic' 
+  });
 })();
-````
+```
 
 ## Building Your Own Plugins
 Documentation coming soon.

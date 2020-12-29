@@ -1,39 +1,64 @@
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import { SecretAgentClientGenerator } from '../index';
+import { Helpers } from '@secret-agent/testing/index';
+import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import { Handler } from '../index';
+import CoreClientConnection from '../lib/CoreClientConnection';
+
+let payloadHandler: (payload: ICoreRequestPayload) => ICoreResponsePayload = () => null;
+const outgoing = jest.fn(
+  async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+    const { command } = payload;
+    const response = payloadHandler(payload);
+    if (response) return response;
+    if (command === 'createSession') {
+      return {
+        data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+      };
+    }
+    if (command === 'addEventListener') {
+      return {
+        data: { listenerId: 1 },
+      };
+    }
+  },
+);
+class Piper extends CoreClientConnection {
+  async sendRequest(payload: ICoreRequestPayload): Promise<void> {
+    const responsePayload = await outgoing(payload);
+    const response = <ICoreResponsePayload>{
+      responseId: payload.messageId,
+      ...(responsePayload ?? {}),
+    };
+    this.onMessage(response);
+  }
+}
+
+beforeAll(() => {});
+
+afterEach(Helpers.afterEach);
+afterAll(Helpers.afterAll);
 
 describe('waitForResource', () => {
   it('should break after finding one resource', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         return { data: [{ id: 1, url: '/test.js' } as IResourceMeta] };
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({ url: '/test.js' });
     expect(resources).toHaveLength(1);
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 
   it('should try more than once to get files', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
     let attempts = 0;
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         attempts += 1;
         if (attempts === 3) {
@@ -41,30 +66,21 @@ describe('waitForResource', () => {
         }
         return { data: [] };
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({ url: '/test2.js' });
     expect(resources).toHaveLength(1);
     expect(attempts).toBe(3);
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 
   it('should return multiple files if many match on one round trip', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         return {
           data: [
@@ -73,29 +89,20 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({ type: 'Xhr' });
     expect(resources).toHaveLength(2);
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 
   it('should match multiple files by url', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         return {
           data: [
@@ -104,29 +111,20 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({ url: '/test3.js' });
     expect(resources).toHaveLength(2);
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 
   it('should allow a user to specify a match function', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         return {
           data: [
@@ -137,17 +135,11 @@ describe('waitForResource', () => {
           ],
         };
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test1.js') {
@@ -160,15 +152,12 @@ describe('waitForResource', () => {
     expect(resources[0].url).toBe('/test1.js');
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 
   it('should run multiple batches when a match function is provided', async () => {
-    const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
     let counter = 0;
-    coreClient.pipeOutgoingCommand = jest.fn<any, any>(async (_, command: string) => {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
       if (command === 'waitForResource') {
         counter += 1;
         if (counter === 1) {
@@ -188,17 +177,11 @@ describe('waitForResource', () => {
           return { data: [{ id: 5, url: '/test5.js' } as IResourceMeta] };
         }
       }
-      if (command === 'getTabsForSession') {
-        return { data: [{ tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' }] };
-      }
-      if (command === 'createTab') {
-        return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-        };
-      }
-    });
+    };
 
-    const agent = await new SecretAgent();
+    const handler = new Handler(new Piper());
+    Helpers.needsClosing.push(handler);
+    const agent = await handler.createAgent();
     const resources = await agent.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test5.js') {
@@ -213,6 +196,6 @@ describe('waitForResource', () => {
     expect(resources).toHaveLength(4);
 
     await agent.close();
-    await SecretAgent.shutdown();
+    await handler.close();
   });
 });

@@ -1,11 +1,16 @@
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
-import Core from '../index';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Core, { Session } from '../index';
+import CoreServerConnection from '../lib/CoreServerConnection';
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let connection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  connection = Core.addConnection();
+  await connection.connect();
+  Helpers.onClose(() => connection.disconnect(), true);
 
   HumanEmulatorGhost.maxDelayBetweenInteractions = 0;
   HumanEmulatorGhost.maxScrollDelayMillis = 0;
@@ -30,15 +35,14 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
         </body>
       `;
       });
-      const meta = await Core.createTab({ humanEmulatorId });
-      const core = Core.byTabId[meta.tabId];
-      Helpers.needsClosing.push(core);
-      // @ts-ignore
-      const session = core.session;
-      await core.goto(`${koaServer.baseUrl}/mouse`);
+      const meta = await connection.createSession({ humanEmulatorId });
+      const session = Session.get(meta.sessionId);
+      Helpers.needsClosing.push(session);
+      const tab = Session.getTab(meta);
+      await tab.goto(`${koaServer.baseUrl}/mouse`);
 
       const spy = jest.spyOn(session.humanEmulator, 'playInteractions');
-      await core.interact([
+      await tab.interact([
         {
           command: InteractionCommand.click,
           mousePosition: ['window', 'document', ['querySelector', 'button']],
@@ -51,13 +55,12 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       expect(interactGroups[0]).toHaveLength(2);
       expect(interactGroups[0][0].command).toBe('scroll');
 
-      const buttonClass = await core.execJsPath([
+      const buttonClass = await tab.execJsPath([
         'document',
         ['querySelector', 'button.clicked'],
         'classList',
       ]);
       expect(buttonClass.value).toStrictEqual({ 0: 'clicked' });
-      await core.close();
     });
 
     it('executes basic type command', async () => {
@@ -69,21 +72,21 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
         </body>
       `;
       });
-      const meta = await Core.createTab({ humanEmulatorId });
-      const core = Core.byTabId[meta.tabId];
-      Helpers.needsClosing.push(core);
+      const meta = await connection.createSession({ humanEmulatorId });
+      const session = Session.get(meta.sessionId);
+      Helpers.needsClosing.push(session);
+      const tab = Session.getTab(meta);
 
-      await core.goto(`${koaServer.baseUrl}/input`);
-      await core.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
-      await core.interact([
+      await tab.goto(`${koaServer.baseUrl}/input`);
+      await tab.execJsPath(['document', ['querySelector', 'input'], ['focus']]);
+      await tab.interact([
         {
           command: InteractionCommand.type,
           keyboardCommands: [{ string: 'Hello world!' }],
         },
       ]);
-      const inputValue = await core.execJsPath(['document', ['querySelector', 'input'], 'value']);
+      const inputValue = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
       expect(inputValue.value).toBe('Hello world!');
-      await core.close();
     });
 
     it('should be able to click elements off screen', async () => {
@@ -114,7 +117,8 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
         </body>
       `;
       });
-      const meta = await Core.createTab({
+
+      const meta = await connection.createSession({
         humanEmulatorId,
         viewport: {
           width: 1920,
@@ -125,18 +129,19 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
           positionY: 0,
         },
       });
-      const core = Core.byTabId[meta.tabId];
-      Helpers.needsClosing.push(core);
-      await core.goto(`${koaServer.baseUrl}/longpage`);
+      const session = Session.get(meta.sessionId);
+      Helpers.needsClosing.push(session);
+      const tab = Session.getTab(meta);
+      await tab.goto(`${koaServer.baseUrl}/longpage`);
 
       const click = async (selector: string) => {
-        await core.interact([
+        await tab.interact([
           {
             command: InteractionCommand.click,
             mousePosition: ['window', 'document', ['querySelector', selector]],
           },
         ]);
-        return await core.getJsValue('lastClicked');
+        return await tab.getJsValue('lastClicked');
       };
 
       let lastClicked = await click('#button-1');
@@ -150,8 +155,6 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
 
       lastClicked = await click('#button-1');
       expect(lastClicked.value).toBe('click1');
-
-      await core.close();
     }, 60e3);
   },
 );

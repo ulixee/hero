@@ -8,10 +8,10 @@
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "@secret-agent/replay": "1.2.0-alpha.4",
     "awaited-dom": "^1.1.8",
+    "json-socket": "^0.3.0",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@secret-agent/testing": "1.2.0-alpha.5",
-    "@types/node": "^12.7.11"
+    "@secret-agent/testing": "1.2.0-alpha.5"
   }
 }

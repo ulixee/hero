@@ -1,9 +1,11 @@
-import Core, { Tab } from '@secret-agent/core';
+import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import * as fs from 'fs';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
 import DomChangesTable from '../models/DomChangesTable';
 
 const { log } = Log(module);
@@ -22,9 +24,11 @@ const getContentScript = `(() => {
   return retVal;
 })()`;
 
-let koaServer;
+let koaServer: ITestKoaServer;
+let coreServerConnection: CoreServerConnection;
 beforeAll(async () => {
-  await Core.prewarm();
+  coreServerConnection = Core.addConnection();
+  Helpers.onClose(() => coreServerConnection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/empty', ctx => {
     ctx.body = `<html></html>`;
@@ -83,14 +87,11 @@ describe('basic Dom Replay tests', () => {
 </script>
 </body>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/test1`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab: Tab = core.tab;
-    // @ts-ignore
-    const session = core.session;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/test1`);
+    await tab.waitForLoad('DomContentLoaded');
+    const session = tab.session;
 
     const mirrorChrome = new Puppet(session.browserEngine);
     mirrorChrome.start();
@@ -114,7 +115,6 @@ describe('basic Dom Replay tests', () => {
 
     {
       await tab.domRecorder.flush();
-      // @ts-ignore
       const pages = tab.navigationTracker;
       const pageChanges = await state.getMainFrameDomChanges(pages.history);
       const [changes] = Object.values(pageChanges);
@@ -125,9 +125,9 @@ describe('basic Dom Replay tests', () => {
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
     expect(mirrorHtml).toBe(sourceHtml);
 
-    let lastCommandId = core.lastCommandId;
+    let lastCommandId = tab.lastCommandId;
     for (let i = 1; i <= 6; i += 1) {
-      await core.interact([
+      await tab.interact([
         {
           command: InteractionCommand.click,
           mousePosition: ['window', 'document', ['querySelector', 'a']],
@@ -137,10 +137,9 @@ describe('basic Dom Replay tests', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       await tab.domRecorder.flush();
-      // @ts-ignore
       const pages = tab.navigationTracker;
       const pageChangesByFrame = await state.getMainFrameDomChanges(pages.history, lastCommandId);
-      lastCommandId = core.lastCommandId;
+      lastCommandId = tab.lastCommandId;
       const [changes] = Object.values(pageChangesByFrame);
       await mirrorPage.mainFrame.evaluate(
         `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
@@ -187,14 +186,11 @@ describe('basic Dom Replay tests', () => {
 </body>
 </html>`;
     });
-    const meta = await Core.createTab();
-    const core = Core.byTabId[meta.tabId];
-    await core.goto(`${koaServer.baseUrl}/tab1`);
-    await core.waitForLoad('DomContentLoaded');
-    // @ts-ignore
-    const tab: Tab = core.tab;
-    // @ts-ignore
-    const session = core.session;
+    const meta = await coreServerConnection.createSession();
+    const tab = Session.getTab(meta);
+    await tab.goto(`${koaServer.baseUrl}/tab1`);
+    await tab.waitForLoad('DomContentLoaded');
+    const session = tab.session;
 
     const mirrorChrome = new Puppet(session.browserEngine);
     mirrorChrome.start();
@@ -209,7 +205,6 @@ describe('basic Dom Replay tests', () => {
 
     {
       await tab.domRecorder.flush();
-      // @ts-ignore
       const pages = tab.navigationTracker;
       const state = tab.sessionState;
       const pageChanges = await state.getMainFrameDomChanges(pages.history);
@@ -225,20 +220,16 @@ describe('basic Dom Replay tests', () => {
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
     expect(mirrorHtml).toBe(sourceHtml);
 
-    await core.interact([
+    await tab.interact([
       {
         command: InteractionCommand.click,
         mousePosition: ['window', 'document', ['querySelector', 'a']],
       },
     ]);
-    const newTabMeta = await core.waitForNewTab();
-    const newTabCore = Core.byTabId[newTabMeta.tabId];
-    // @ts-ignore
-    const newTab = newTabCore.tab;
+    const newTab = await tab.waitForNewTab();
     await newTab.waitForLoad('AllContentLoaded');
     const newTabHtml = await newTab.puppetPage.mainFrame.evaluate(getContentScript, false);
     await newTab.domRecorder.flush();
-    // @ts-ignore
     const pages = newTab.navigationTracker;
     const pageChanges = await newTab.sessionState.getMainFrameDomChanges(pages.history);
     const [changes] = Object.values(pageChanges);

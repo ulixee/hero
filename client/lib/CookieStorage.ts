@@ -2,12 +2,12 @@ import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstan
 import StateMachine from 'awaited-dom/base/StateMachine';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import CoreTab from './CoreTab';
+import CoreSession from './CoreTab';
 
 const { getState, setState } = StateMachine<CookieStorage, IState>();
 
 interface IState {
-  coreTab: Promise<CoreTab>;
+  coreTab: Promise<CoreSession>;
 }
 
 export default class CookieStorage {
@@ -53,7 +53,7 @@ export default class CookieStorage {
   }
 }
 
-export function createCookieStorage(coreTab: Promise<CoreTab>): CookieStorage {
+export function createCookieStorage(coreTab: Promise<CoreSession>): CookieStorage {
   const cookieStorage = new CookieStorage();
   setState(cookieStorage, { coreTab });
   return cookieStorage;

@@ -9,12 +9,14 @@
     "lerna": "^3.4.3",
     "source-map-support": "^0.5.16"
   },
+  "engines": {
+    "node": ">=13.0.0"
+  },
   "workspaces": {
     "packages": [
       "client",
       "core",
       "core-interfaces",
-      "core-server",
       "emulate-browsers/*",
       "emulate-humans/*",
       "full-client",
@@ -24,8 +26,6 @@
       "injected-scripts",
       "mitm",
       "mitm-socket",
-      "remote-client",
-      "remote-interfaces",
       "replay",
       "session-state",
       "commons"

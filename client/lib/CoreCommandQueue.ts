@@ -62,7 +62,7 @@ export default class CoreCommandQueue {
           }
           item.resolve(data);
         } catch (error) {
-          error.stack += `\n-----CORE-----${item.stack}`;
+          error.stack += `\n${'------CORE'.padEnd(50, '-')}${item.stack}`;
           item.reject(error);
         }
         // force next loop so promises don't simulate synchronous-ity when local core

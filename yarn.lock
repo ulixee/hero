@@ -2986,6 +2986,13 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.5.tgz#dcce4430e64b443ba8945f0290fb564ad5bac6dd"
   integrity sha512-7+2BITlgjgDhH0vvwZU/HZJVyk+2XUlvxXe8dFMedNX/aMkaOq++rMAFXc0tM7ij15QaWlbdQASBR9dihi+bDQ==
 
+"@types/json-socket@^0.1.17":
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/@types/json-socket/-/json-socket-0.1.17.tgz#ce147a17c625c3acb2f2b68adfd3cc0f048c7e1d"
+  integrity sha512-zBCcTx21ts99HNBOdPb0LmdUipXPu4rvVAcntEAnAS+fvQ7lXI1xdVYPkjSC9dYrnXUQNYDFAWYCWz2hR+Bi5Q==
+  dependencies:
+    "@types/node" "*"
+
 "@types/json2md@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@types/json2md/-/json2md-1.5.0.tgz#0d940ac45f2ad19ff68fc43747953f53b1782204"
@@ -3068,7 +3075,7 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.0.tgz#7d4411bf5157339337d7cff864d9ff45f177b499"
   integrity sha512-mikldZQitV94akrc4sCcSjtJfsTKt4p+e/s0AGscVA6XArQ9kFclP+ZiYUMnq987rc6QlYxXv/EivqlfSLxpKA==
 
-"@types/node@^12.0.12", "@types/node@^12.7.11":
+"@types/node@^12.0.12":
   version "12.12.54"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.54.tgz#a4b58d8df3a4677b6c08bfbc94b7ad7a7a5f82d1"
   integrity sha512-ge4xZ3vSBornVYlDnk7yZ0gK6ChHf/CHB7Gl1I0Jhah8DDnEQqBzgohYG4FX4p81TNirSETOiSyn+y1r9/IR6w==

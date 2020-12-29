@@ -160,11 +160,11 @@ export default class Interactor implements IInteractionsHelper {
           }
 
           case InteractionCommand.waitForNode: {
-            await this.tab.waitForNode(interaction.delayNode);
+            await this.tab.waitForDom(interaction.delayNode);
             break;
           }
           case InteractionCommand.waitForElementVisible: {
-            await this.tab.waitForElement(interaction.delayElement, { waitForVisible: true });
+            await this.tab.waitForDom(interaction.delayElement, { waitForVisible: true });
             break;
           }
           case InteractionCommand.waitForMillis: {

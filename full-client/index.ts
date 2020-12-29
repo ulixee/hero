@@ -1,34 +1,39 @@
 import 'source-map-support/register';
+import { Handler, ICoreConnectionOptions } from '@secret-agent/client';
+import Agent from '@secret-agent/client/lib/Agent';
+import CoreClient from '@secret-agent/client/lib/CoreClient';
+import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import CoreClientConnection from '@secret-agent/client/lib/CoreClientConnection';
 import Core from '@secret-agent/core';
-import { SecretAgentClientGenerator } from '@secret-agent/client';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
 
-process.title = 'SecretAgent';
+export { Handler, Agent };
 
-const { SecretAgent, coreClient } = SecretAgentClientGenerator();
-
-// OUTGOING ////////////////////////////////////////////////////////////////////
-
-coreClient.pipeOutgoingCommand = async (
-  sessionMeta: ISessionMeta | null,
-  command: string,
-  args: any[],
-) => {
-  if (sessionMeta) {
-    const core = Core.byTabId[sessionMeta.tabId];
-    const data = await core[command](...args);
-    const commandId = core.lastCommandId;
-    return { data, commandId };
+class LocalCoreConnection extends CoreClientConnection {
+  constructor(
+    options: ICoreConnectionOptions,
+    readonly coreServerConnection: CoreServerConnection,
+  ) {
+    super(options);
+    coreServerConnection.on('message', payload => this.onMessage(payload));
   }
-  return { data: await Core[command](...args) };
+
+  sendRequest(payload: ICoreRequestPayload): void | Promise<void> {
+    return this.coreServerConnection.handleRequest(payload);
+  }
+}
+
+CoreClient.LocalCoreConnectionCreator = (options: ICoreConnectionOptions) => {
+  const coreServerConnection = Core.addConnection();
+  return new LocalCoreConnection(options, coreServerConnection);
 };
 
-// INCOMING ////////////////////////////////////////////////////////////////////
+const serverConnection = Core.addConnection();
+const connection = new LocalCoreConnection({}, serverConnection);
+const client = new CoreClient(connection);
 
-Core.onEventFn = (meta: ISessionMeta, listenerId: string, ...args: any[]) => {
-  coreClient.pipeIncomingEvent(meta, listenerId, args);
-};
-
-// EXPORT SecretAgent //////////////////////////////////////////////////////////
-
-export = SecretAgent;
+const agent = new Agent(async () => {
+  await connection.connect();
+  return client;
+});
+export default agent;

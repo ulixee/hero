@@ -39,14 +39,13 @@ export default class CoreEventHeap {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
 
-    const {
-      data: { listenerId },
-    } = await this.coreClient.pipeOutgoingCommand(this.meta, 'addEventListener', [
+    const response = await this.coreClient.pipeOutgoingCommand(this.meta, 'addEventListener', [
       jsPath,
       type,
       options,
     ]);
 
+    const { listenerId } = response.data;
     let wrapped = listenerFn;
     if (this.eventInterceptors.has(type)) {
       const interceptorFns = this.eventInterceptors.get(type);
