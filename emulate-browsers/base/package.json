@@ -2,9 +2,7 @@
   "name": "@secret-agent/emulate-browsers-base",
   "version": "1.2.0-alpha.5",
   "description": "SecretAgent client that runs remotely",
-  "scripts": {
-    "updateStats": "node -e 'require(\"./data-scripts/updateBrowserStats\").default()' && node -e 'require(\"./data-scripts/updateScreenSizesStats\").default()'"
-  },
+  "scripts": {},
   "dependencies": {
     "@secret-agent/commons": "1.2.0-alpha.4",
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",

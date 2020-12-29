@@ -1,0 +1,275 @@
+{
+  "chrome": {
+    "_$protos": ["Object.prototype"],
+    "loadTimes": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "requestTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234.551
+        },
+        "startLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234.551
+        },
+        "commitLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234.677
+        },
+        "finishDocumentLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234.712
+        },
+        "finishLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "firstPaintTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234.778
+        },
+        "firstPaintAfterLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "navigationType": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "Other"
+        },
+        "wasFetchedViaSpdy": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "wasNpnNegotiated": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": true
+        },
+        "npnNegotiatedProtocol": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "wasAlternateProtocolAvailable": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "connectionInfo": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$flags": "cew"
+    },
+    "csi": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "startE": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234551
+        },
+        "onloadT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1607428234712
+        },
+        "pageT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 5260.023
+        },
+        "tran": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 15
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$flags": "cew"
+    },
+    "app": {
+      "_$protos": ["Object.prototype"],
+      "isInstalled": {
+        "_$type": "boolean",
+        "_$flags": "cew",
+        "_$value": false
+      },
+      "getDetails": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getDetails"
+        },
+        "_$type": "function",
+        "_$function": "function getDetails() { [native code] }",
+        "_$invocation": null,
+        "_$flags": "cew"
+      },
+      "getIsInstalled": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getIsInstalled"
+        },
+        "_$type": "function",
+        "_$function": "function getIsInstalled() { [native code] }",
+        "_$invocation": false,
+        "_$flags": "cew"
+      },
+      "installState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "installState"
+        },
+        "_$type": "function",
+        "_$function": "function installState() { [native code] }",
+        "_$invocation": "TypeError: Error in invocation of app.installState(function callback): ",
+        "_$flags": "cew"
+      },
+      "runningState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "runningState"
+        },
+        "_$type": "function",
+        "_$function": "function runningState() { [native code] }",
+        "_$invocation": "cannot_run",
+        "_$flags": "cew"
+      },
+      "InstallState": {
+        "_$protos": ["Object.prototype"],
+        "DISABLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "disabled"
+        },
+        "INSTALLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "installed"
+        },
+        "NOT_INSTALLED": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "not_installed"
+        },
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "RunningState": {
+        "_$protos": ["Object.prototype"],
+        "CANNOT_RUN": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "cannot_run"
+        },
+        "READY_TO_RUN": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "ready_to_run"
+        },
+        "RUNNING": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "running"
+        },
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "_$type": "object",
+      "_$flags": "cew"
+    },
+    "_$type": "object",
+    "_$flags": "ew"
+  },
+  "prevProperty": "Atomics"
+}

@@ -1,11 +1,12 @@
-import IUserAgent from './IUserAgent';
 import IBrowserEmulator from './IBrowserEmulator';
+import IUserAgentOption from './IUserAgentOption';
 
 export default interface IBrowserEmulatorClass {
   id: string;
   roundRobinPercent: number;
   engine: { browser: string; executablePath: string; revision: string };
-  new (userAgent?: IUserAgent): IBrowserEmulator;
+  new (): IBrowserEmulator;
+  userAgentOptions?: IUserAgentOption[];
 }
 
 // decorator for browser emulator classes. hacky way to check the class implements statics we need

@@ -18,9 +18,9 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
-import Viewport from '@secret-agent/emulate-browsers-base/lib/Viewport';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import Viewports from './Viewports';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
@@ -74,7 +74,7 @@ export default class Session {
       log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
         browserEmulatorId,
-        userAgent: this.browserEmulator.userAgent,
+        userAgentString: this.browserEmulator.userAgentString,
         runtimeOs: Os.platform(),
       });
     }
@@ -82,7 +82,7 @@ export default class Session {
     this.timezoneId = options.timezoneId;
     this.viewport = options.viewport;
     if (!this.viewport) {
-      this.viewport = Viewport.getMostPopular();
+      this.viewport = Viewports.getDefault(this.browserEmulator.windowFraming, this.browserEmulator.windowFramingBase);
     }
 
     const humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
@@ -102,7 +102,7 @@ export default class Session {
     );
     this.mitmRequestSession = new RequestSession(
       this.id,
-      this.browserEmulator.userAgent.raw,
+      this.browserEmulator.userAgentString,
       this.upstreamProxyUrl,
       this.browserEmulator.networkInterceptorDelegate,
     );
@@ -112,8 +112,8 @@ export default class Session {
     const browserEmulator = this.browserEmulator;
     return {
       locale: browserEmulator.locale,
-      userAgent: browserEmulator.userAgent.raw,
-      platform: browserEmulator.userAgent.platform,
+      userAgent: browserEmulator.userAgentString,
+      platform: browserEmulator.osPlatform,
       proxyPassword: this.id,
       viewport: this.viewport,
       timezoneId: this.timezoneId,

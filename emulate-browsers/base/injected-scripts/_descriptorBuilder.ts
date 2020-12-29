@@ -29,11 +29,11 @@ function newObjectConstructor(newProps: IDescriptor) {
     if (typeof newProps === 'string') {
       throw createError(newProps);
     }
-    Object.setPrototypeOf(this, getObjectAtPath(newProps._protos[0]));
+    Object.setPrototypeOf(this, getObjectAtPath(newProps._$protos[0]));
     const props = Object.entries(newProps);
     const obj = {};
     for (const [prop, value] of props) {
-      if (prop.startsWith('_')) continue;
+      if (prop.startsWith('_$')) continue;
       let propName: string | symbol = prop;
       if (propName.startsWith('Symbol(')) {
         propName = Symbol.for(propName.match(/Symbol\((.+)\)/)[1]);
@@ -46,65 +46,65 @@ function newObjectConstructor(newProps: IDescriptor) {
 
 function buildDescriptor(entry: IDescriptor) {
   const attrs: PropertyDescriptor = {};
-  const flags = entry._flags || '';
+  const flags = entry._$flags || '';
   if (flags.includes('c')) attrs.configurable = true;
   if (flags.includes('w')) attrs.writable = true;
   if (flags.includes('e')) attrs.enumerable = true;
 
-  if (entry._get) {
+  if (entry._$get) {
     attrs.get = new Proxy(Function.prototype.call.bind({}), {
       apply() {
-        if (entry._accessException) throw createError(entry._accessException);
-        if (entry._value) return entry._value;
-        if (entry['_value()']) return entry['_value()']();
+        if (entry._$accessException) throw createError(entry._$accessException);
+        if (entry._$value) return entry._$value;
+        if (entry['_$$value()']) return entry['_$$value()']();
       },
     });
-    overriddenFns.set(attrs.get, entry._get);
-  } else if (entry['_value()']) {
-    attrs.value = entry['_value()']();
-  } else if (entry._value !== undefined) {
-    attrs.value = entry._value;
+    overriddenFns.set(attrs.get, entry._$get);
+  } else if (entry['_$$value()']) {
+    attrs.value = entry['_$$value()']();
+  } else if (entry._$value !== undefined) {
+    attrs.value = entry._$value;
   }
 
-  if (entry._set) {
+  if (entry._$set) {
     attrs.set = new Proxy(Function.prototype.call.bind({}), {
       apply() {},
     });
-    overriddenFns.set(attrs.set, entry._set);
+    overriddenFns.set(attrs.set, entry._$set);
   }
 
-  if (entry._function) {
+  if (entry._$function) {
     const newProps = entry['new()'];
     if (!newProps) {
       // use function call just to get a function that doesn't create prototypes on new
       // bind to an empty object so we don't modify the original
       attrs.value = new Proxy(Function.prototype.call.bind({}), {
         apply() {
-          return entry._invocation;
+          return entry._$invocation;
         },
       });
     } else {
       attrs.value = newObjectConstructor(newProps);
     }
-    if (entry._invocation !== undefined) {
+    if (entry._$invocation !== undefined) {
       Object.setPrototypeOf(attrs.value, Function.prototype);
       delete attrs.value.prototype;
       delete attrs.value.constructor;
     }
-    overriddenFns.set(attrs.value, entry._function);
+    overriddenFns.set(attrs.value, entry._$function);
   }
 
   if (typeof entry === 'object') {
-    const props = Object.entries(entry).filter(([prop]) => prop[0] !== '_');
-    if (!attrs.value && (props.length || entry._protos)) {
+    const props = Object.entries(entry).filter(([prop]) => !prop.startsWith('_$'));
+    if (!attrs.value && (props.length || entry._$protos)) {
       attrs.value = {};
     }
-    if (entry._protos) {
-      attrs.value = Object.setPrototypeOf(attrs.value, getObjectAtPath(entry._protos[0]));
+    if (entry._$protos) {
+      attrs.value = Object.setPrototypeOf(attrs.value, getObjectAtPath(entry._$protos[0]));
     }
 
     for (const [prop, value] of props) {
-      if (prop[0] === '_') continue;
+      if (prop.startsWith('_$')) continue;
       if (prop === 'arguments' || prop === 'caller') continue;
       let propName: string | number | symbol = prop;
       if (propName.startsWith('Symbol(')) {
@@ -123,11 +123,11 @@ function buildDescriptor(entry: IDescriptor) {
           enumerable: false,
           configurable: true,
         });
-        if (!entry.prototype._flags || !entry.prototype._flags.includes('w')) {
+        if (!entry.prototype._$flags || !entry.prototype._$flags.includes('w')) {
           descriptor.writable = false;
         }
-        if (entry._function) {
-          overriddenFns.set(descriptor.value.constructor, entry._function);
+        if (entry._$function) {
+          overriddenFns.set(descriptor.value.constructor, entry._$function);
         }
       }
       Object.defineProperty(attrs.value, propName, descriptor);
@@ -171,16 +171,16 @@ function getObjectAtPath(path) {
 }
 
 declare interface IDescriptor {
-  _flags: string;
-  _type: string;
-  _get?: any;
-  _set?: any;
-  _accessException?: string;
-  _value?: string;
-  '_value()'?: () => string;
-  _function?: string;
-  _invocation?: string;
-  _protos?: string[];
+  _$flags: string;
+  _$type: string;
+  _$get?: any;
+  _$set?: any;
+  _$accessException?: string;
+  _$value?: string;
+  '_$$value()'?: () => string;
+  _$function?: string;
+  _$invocation?: string;
+  _$protos?: string[];
   'new()'?: IDescriptor;
   prototype: IDescriptor;
 }

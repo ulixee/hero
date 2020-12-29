@@ -1,0 +1,12 @@
+[
+  {
+    "operatingSystemId": "mac-os-10-15",
+    "browserId": "safari-13-1",
+    "version": {
+      "major": "13",
+      "minor": "1",
+      "patch": "2"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.2 Safari/605.1.15"
+  }
+]

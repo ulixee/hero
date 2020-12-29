@@ -1,0 +1,4 @@
+{
+  "browserEngine": ["chrome-80-0", "headless"],
+  "marketshare": 0.4
+}

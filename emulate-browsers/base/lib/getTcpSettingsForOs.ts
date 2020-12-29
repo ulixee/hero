@@ -1,17 +1,16 @@
-export default function getTcpSettingsForOs(os?: { family: string; major: string }) {
-  if (!os) return null;
+export default function getTcpSettingsForOs(operatingSystemId: string) {
+  if (!operatingSystemId) return null;
 
-  const osFamily = os.family;
-  const osVersion = os.major;
-  const ttl = expectedTtlValues[osFamily] ?? 64;
+  const [osName, osVersion] = operatingSystemId.match(/^([a-z-]+)-([0-9-]+)$/).slice(1);
+  const ttl = expectedTtlValues[osName] ?? 64;
 
-  let windowSize = expectedWindowSizes[osFamily];
+  let windowSize = expectedWindowSizes[osName];
   if (!windowSize || !windowSize.length) {
-    if (osFamily === 'Windows') {
+    if (osName === 'windows') {
       if (parseInt(osVersion, 10) >= 10) {
-        windowSize = expectedWindowSizes.Windows10;
+        windowSize = expectedWindowSizes['windows-10'];
       } else {
-        windowSize = expectedWindowSizes.Windows7;
+        windowSize = expectedWindowSizes['windows-7'];
       }
     }
   }
@@ -27,14 +26,14 @@ export default function getTcpSettingsForOs(os?: { family: string; major: string
 }
 
 const expectedTtlValues = {
-  'Mac OS X': 64,
-  Linux: 64,
-  Windows: 128,
+  'mac-os': 64,
+  'linux': 64,
+  'windows': 128,
 };
 
 const expectedWindowSizes = {
-  'Mac OS X': [65535],
-  Linux: [5840, 29200, 5720],
-  Windows7: [8192],
-  Windows10: [64240, 65535],
+  'mac-os': [65535],
+  'linux': [5840, 29200, 5720],
+  'windows-7': [8192],
+  'Windows-10': [64240, 65535],
 };

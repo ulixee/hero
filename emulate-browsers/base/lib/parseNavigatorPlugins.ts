@@ -34,17 +34,17 @@ export default function parseNavigatorPlugins(navigator: any) {
 }
 
 function readDomOutput(entry) {
-  if (entry._type === 'object') {
+  if (entry._$type === 'object') {
     const obj = {};
     const props = Object.entries(entry);
     for (const [prop, value] of props) {
-      if (prop.startsWith('_')) continue;
+      if (prop.startsWith('_$')) continue;
       obj[prop] = readDomOutput(value);
     }
     return obj;
   }
-  if (entry._value !== undefined) {
-    return entry._value;
+  if (entry._$value !== undefined) {
+    return entry._$value;
   }
   return entry;
 }

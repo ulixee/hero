@@ -5,33 +5,32 @@ import {
   DomOverridesBuilder,
   getEngineExecutablePath,
   getTcpSettingsForOs,
-  IUserAgent,
   modifyHeaders,
   parseNavigatorPlugins,
-  readPolyfills,
-  StatcounterBrowserUsage,
+  DataLoader,
+  DomDiffLoader,
 } from '@secret-agent/emulate-browsers-base';
+import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import UserAgents from '@secret-agent/emulate-browsers-base/lib/UserAgents';
 import { pickRandom } from '@secret-agent/commons/utils';
-import navigator from './navigator.json';
-import chrome from './chrome.json';
-import codecs from './codecs.json';
+import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
 import pkg from './package.json';
-import headerProfiles from './headers.json';
-import defaultUseragents from './user-agents.json';
-import frame from './frame.json';
+import headerProfiles from './data/headers.json';
+import userAgentOptions from './data/user-agent-options.json';
+import config from './data/config.json';
+import windowFramingBase from './data/window-framing.json';
 
-const polyfillSet = readPolyfills(__dirname);
-const agents = UserAgents.getSupportedAgents('Chrome', 80, defaultUseragents);
+const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
+const windowChromeData = new DataLoader(`${__dirname}/data`, 'window-chrome');
+const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');
+const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
+const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 
 @BrowserEmulatorClassDecorator
 export default class Chrome80 {
   public static id = pkg.name;
-  public static roundRobinPercent = StatcounterBrowserUsage.getConsumerUsageForBrowser(
-    'Chrome 80.0',
-  );
+  public static roundRobinPercent: number = (config as any).marketshare;
 
   public static engine = {
     ...pkg.engine,
@@ -40,9 +39,7 @@ export default class Chrome80 {
 
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 
-  public get canPolyfill() {
-    return polyfillSet?.canPolyfill(this);
-  }
+  public canPolyfill: boolean;
 
   public set locale(value: string) {
     this._locale = value;
@@ -53,19 +50,32 @@ export default class Chrome80 {
     return this._locale;
   }
 
-  public readonly userAgent: IUserAgent;
+  public readonly userAgentString: string;
+  public readonly osPlatform: string;
+
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
   public userProfile: IUserProfile;
+
+  public windowFramingBase: IWindowFraming = windowFramingBase;
+  public windowFraming: IWindowFraming;
 
   protected domOverrides = new DomOverridesBuilder();
 
   private _locale = 'en-US,en';
   private hasCustomLocale = false;
 
-  constructor(userAgent?: IUserAgent) {
-    this.userAgent = userAgent ?? pickRandom(agents);
+  constructor() {
+    const userAgentOption = pickRandom(
+      (this.constructor as any).userAgentOptions as IUserAgentOption[],
+    );
+    const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
+    this.osPlatform = windowNavigator.navigator.platform._$value;
+    this.userAgentString = userAgentOption.string;
+    this.canPolyfill = !!domDiffsData.get(userAgentOption.operatingSystemId);
+    this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
+
     this.networkInterceptorDelegate = {
-      tcp: getTcpSettingsForOs(this.userAgent.os),
+      tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
       tls: {
         emulatorProfileId: 'Chrome80',
       },
@@ -73,17 +83,22 @@ export default class Chrome80 {
         dnsOverTlsConnection: Chrome80.dnsOverTlsConnectOptions,
       },
       http: {
-        requestHeaders: modifyHeaders.bind(this, this.userAgent, headerProfiles, this.hasCustomLocale),
+        requestHeaders: modifyHeaders.bind(
+          this,
+          userAgentOption.string,
+          headerProfiles,
+          this.hasCustomLocale,
+        ),
       },
     };
-    this.loadDomOverrides();
+    this.loadDomOverrides(userAgentOption.operatingSystemId);
   }
 
   public async newDocumentInjectedScripts() {
     return this.domOverrides.build();
   }
 
-  protected loadDomOverrides() {
+  protected loadDomOverrides(operatingSystemId: string) {
     const domOverrides = this.domOverrides;
 
     domOverrides.add('Error.captureStackTrace');
@@ -104,15 +119,16 @@ export default class Chrome80 {
     domOverrides.add('Notification.permission');
     domOverrides.add('Permission.prototype.query');
 
+    const windowChrome = windowChromeData.get(operatingSystemId);
     domOverrides.add('window.chrome', {
       updateLoadTimes: true,
       polyfill: {
-        property: chrome.chrome,
-        prevProperty: chrome.prevProperty,
+        property: windowChrome.chrome,
+        prevProperty: windowChrome.prevProperty,
       },
     });
 
-    const polyfills = polyfillSet.get(this);
+    const polyfills = domDiffsData.get(operatingSystemId);
     if (polyfills?.removals?.length) {
       domOverrides.add('polyfill.removals', {
         removals: polyfills.removals,
@@ -134,7 +150,8 @@ export default class Chrome80 {
       });
     }
 
-    domOverrides.add('navigator.plugins', parseNavigatorPlugins(navigator.navigator));
+    const windowNavigator = windowNavigatorData.get(operatingSystemId);
+    domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
     domOverrides.add('WebGLRenderingContext.prototype.getParameter', {
       // UNMASKED_VENDOR_WEBGL
       37445: 'Intel Inc.',
@@ -145,16 +162,10 @@ export default class Chrome80 {
     domOverrides.add('HTMLIFrameElement.prototype');
     domOverrides.add('Element.prototype.attachShadow');
 
-    domOverrides.add('window.outerWidth');
+    domOverrides.add('window.outerWidth', { frameBorderWidth: this.windowFraming.frameBorderWidth });
+    domOverrides.add('window.outerHeight', { frameBorderHeight: this.windowFraming.frameBorderHeight });
 
-    const windowFrame = this.getFrameHeight();
-    if (windowFrame) {
-      domOverrides.add('window.outerHeight', {
-        windowFrame,
-      });
-    }
-
-    const agentCodecs = this.getCodecs();
+    const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {
       domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
         audioCodecs: agentCodecs.audioSupport,
@@ -172,19 +183,7 @@ export default class Chrome80 {
     }
   }
 
-  private getFrameHeight() {
-    const os = this.userAgent.os;
-    const osFamilyLower = os.family.match(/mac/i) ? 'mac-os-x' : 'windows';
-    return frame[osFamilyLower] ?? frame[`${osFamilyLower}-${os.major}`];
-  }
-
-  private getCodecs() {
-    const os = this.userAgent.os;
-    let osCodecs = codecs.find(x => x.opSyses.includes(`${os.family} ${os.major}`));
-    if (!osCodecs) {
-      // just match on os
-      osCodecs = codecs.find(x => x.opSyses.some(y => y.includes(os.family)));
-    }
-    return osCodecs?.profile;
+  public static get userAgentOptions() {
+    return userAgentOptions;
   }
 }

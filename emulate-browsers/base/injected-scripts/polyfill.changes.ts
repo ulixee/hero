@@ -1,12 +1,12 @@
 for (const change of args.changes || []) {
   try {
-    if (change.propertyName === '_function') {
+    if (change.propertyName === '_$function') {
       const func = getObjectAtPath(change.path);
       overriddenFns.set(func, change.property);
     }
     if (
-      change.propertyName === '_setToStringToString' ||
-      change.propertyName === '_getToStringToString'
+      change.propertyName === '_$setToStringToString' ||
+      change.propertyName === '_$getToStringToString'
     ) {
       nativeToStringFunctionString = change.property;
       continue;
@@ -22,20 +22,16 @@ for (const change of args.changes || []) {
     }
     const { descriptor } = descriptorInHierarchy;
 
-    if (change.propertyName === '_value') {
+    if (change.propertyName === '_$value') {
       if (descriptor.get) {
         descriptor.get = proxyGetter(parent, property, () => change.property);
       } else {
         descriptor.value = change.property;
         Object.defineProperty(parent, property, descriptor);
       }
-    }
-
-    if (change.propertyName === '_get') {
+    } else if (change.propertyName === '_$get') {
       overriddenFns.set(descriptor.get, change.property);
-    }
-
-    if (change.propertyName === '_set') {
+    } else if (change.propertyName === '_$set') {
       overriddenFns.set(descriptor.set, change.property);
     }
   } catch (err) {

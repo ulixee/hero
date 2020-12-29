@@ -1,7 +1,7 @@
 for (const addition of args.additions || []) {
   try {
     if (addition.propertyName === 'getVideoPlaybackQuality') {
-      addition.property['_value()'] = function() {
+      addition.property['_$$value()'] = function() {
         return Promise.resolve([]);
       };
     }

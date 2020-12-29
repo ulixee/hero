@@ -1,5 +1,5 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import ChromeJson from '@secret-agent/emulate-chrome-80/chrome.json';
+import windowChrome from '@secret-agent/emulate-chrome-80/data/mac-os-10-14/window-chrome.json';
 import { inspect } from 'util';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Core from '@secret-agent/core';
@@ -10,7 +10,7 @@ import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
 
-const { chrome, prevProperty } = ChromeJson as any;
+const { chrome, prevProperty } = windowChrome as any;
 
 let puppet: Puppet;
 beforeAll(async () => {
@@ -71,16 +71,16 @@ test('it should update loadtimes and csi values', async () => {
     (await page.mainFrame.evaluate(`JSON.stringify(chrome.loadTimes())`, false)) as any,
   );
   if (debug) console.log(inspect(loadTimes, false, null, true));
-  expect(loadTimes.requestTime).not.toBe(chrome.loadTimes['new()'].requestTime._value);
+  expect(loadTimes.requestTime).not.toBe(chrome.loadTimes['new()'].requestTime._$value);
 
   const csi = JSON.parse(
     (await page.mainFrame.evaluate(`JSON.stringify(chrome.csi())`, false)) as any,
   );
   if (debug) console.log(inspect(csi, false, null, true));
-  expect(csi.pageT).not.toBe(chrome.csi['new()'].pageT._value);
+  expect(csi.pageT).not.toBe(chrome.csi['new()'].pageT._$value);
 
-  expect(csi.onloadT).not.toBe(chrome.csi['new()'].onloadT._value);
-  expect(String(csi.onloadT).length).toBe(String(chrome.csi['new()'].onloadT._value).length);
+  expect(csi.onloadT).not.toBe(chrome.csi['new()'].onloadT._$value);
+  expect(String(csi.onloadT).length).toBe(String(chrome.csi['new()'].onloadT._$value).length);
   expect(Object.keys(csi)).toHaveLength(4);
 }, 60e3);
 

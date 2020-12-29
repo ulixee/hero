@@ -1,0 +1,11 @@
+{
+  "removals": [
+    "window.HTMLLinkElement.prototype.import",
+    "window.Document.prototype.registerElement",
+    "window.Text.prototype.getDestinationInsertionPoints",
+    "window.Element.prototype.getDestinationInsertionPoints"
+  ],
+  "additions": [],
+  "order": [],
+  "changes": []
+}
