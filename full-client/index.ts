@@ -1,12 +1,5 @@
 import 'source-map-support/register';
-import agent, {
-  Handler,
-  Agent,
-  IAgentCreateOptions,
-  ICoreConnectionOptions,
-  RemoteCoreConnection,
-  LocalCoreConnection,
-} from '@secret-agent/client';
+import agent, { ICoreConnectionOptions, LocalCoreConnection } from '@secret-agent/client';
 import Core from '@secret-agent/core';
 
 LocalCoreConnection.create = (options: ICoreConnectionOptions) => {
@@ -14,5 +7,5 @@ LocalCoreConnection.create = (options: ICoreConnectionOptions) => {
   return new LocalCoreConnection(options, coreServerConnection);
 };
 
-export { IAgentCreateOptions, ICoreConnectionOptions, Handler, Agent, RemoteCoreConnection };
+export * from '@secret-agent/client';
 export default agent;

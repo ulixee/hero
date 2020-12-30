@@ -1,11 +1,5 @@
 import fullClient from './index.js';
 
-export const {
-  IAgentCreateOptions,
-  ICoreConnectionOptions,
-  Handler,
-  Agent,
-  RemoteCoreConnection,
-} = fullClient;
+export * from './index.js';
 
 export default fullClient.default;
