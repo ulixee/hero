@@ -141,7 +141,7 @@ export default class SessionLoader extends EventEmitter {
   public checkState() {
     if (!this.sessionState || this.session.closeDate) return;
     const scriptState = this.sessionState.checkForResponsive();
-    const lastState = { ...(this.lastScriptState ?? {}) };
+    const lastState = <IScriptState>{ ...(this.lastScriptState ?? {}) };
 
     this.lastScriptState = scriptState;
     if (

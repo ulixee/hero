@@ -1,12 +1,5 @@
 import client from './index.js';
 
-export const {
-  IAgentCreateOptions,
-  ICoreConnectionOptions,
-  Handler,
-  Agent,
-  LocalCoreConnection,
-  RemoteCoreConnection,
-} = client;
+export * from './index.js';
 
 export default client.default;
