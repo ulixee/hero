@@ -290,7 +290,7 @@ setTimeout(function() {
 
   it.todo('handles going to about:blank');
 
-  it('correctly triggers location change for new tabs', async () => {
+  it('should not trigger location change for first navigation of new tabs', async () => {
     const { tab } = await createSession();
 
     koaServer.get('/newTab', ctx => {
@@ -310,14 +310,10 @@ setTimeout(function() {
 
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
-    const jestSpy = jest.fn();
-    // eslint-disable-next-line jest/valid-expect-in-promise
-    popupTab
-      .waitForLocation('change')
-      .then(jestSpy)
-      .catch(err => expect(err).not.toBeTruthy());
+    const waitForChange = popupTab.waitForLocation('change', { timeoutMs: 1e3 });
     await popupTab.waitForLoad('AllContentLoaded');
-    expect(jestSpy).toHaveBeenCalledTimes(0);
+    // should not trigger a change for this
+    await expect(waitForChange).rejects.toThrowError('Timeout');
   });
 
   it('handles a new tab that redirects', async () => {

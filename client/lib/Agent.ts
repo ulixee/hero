@@ -14,6 +14,7 @@ import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResou
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -175,9 +176,9 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     await tab.focus();
   }
 
-  public async waitForNewTab(): Promise<Tab> {
+  public async waitForNewTab(options?: IWaitForOptions): Promise<Tab> {
     const coreTab = await getCoreTab(this.activeTab);
-    const newCoreTab = coreTab.waitForNewTab();
+    const newCoreTab = coreTab.waitForNewTab(options);
     const tab = createTab(this, newCoreTab);
     getState(this).connection.addTab(tab);
     return tab;
@@ -239,8 +240,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.isElementVisible(element);
   }
 
-  public waitForAllContentLoaded(): Promise<void> {
-    return this.activeTab.waitForAllContentLoaded();
+  public waitForAllContentLoaded(options?: IWaitForOptions): Promise<void> {
+    return this.activeTab.waitForAllContentLoaded(options);
   }
 
   public waitForResource(
@@ -254,8 +255,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.waitForElement(element, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    return this.activeTab.waitForLocation(trigger);
+  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+    return this.activeTab.waitForLocation(trigger, options);
   }
 
   public waitForMillis(millis: number): Promise<void> {

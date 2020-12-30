@@ -12,6 +12,7 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -125,12 +126,12 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.run('waitForElement', jsPath, opts);
   }
 
-  public async waitForLoad(status: ILocationStatus): Promise<void> {
-    await this.commandQueue.run('waitForLoad', status);
+  public async waitForLoad(status: ILocationStatus, opts: IWaitForOptions): Promise<void> {
+    await this.commandQueue.run('waitForLoad', status, opts);
   }
 
-  public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    await this.commandQueue.run('waitForLocation', trigger);
+  public async waitForLocation(trigger: ILocationTrigger, opts: IWaitForOptions): Promise<void> {
+    await this.commandQueue.run('waitForLocation', trigger, opts);
   }
 
   public async waitForMillis(millis: number): Promise<void> {
@@ -141,8 +142,8 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.commandQueue.run('waitForWebSocket', url);
   }
 
-  public async waitForNewTab(): Promise<CoreTab> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab');
+  public async waitForNewTab(opts: IWaitForOptions): Promise<CoreTab> {
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab', opts);
     const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
     return new CoreTab(sessionMeta, this.connection);
