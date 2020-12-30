@@ -305,7 +305,9 @@ class ObjectAtPath {
       if (this.isBehindOtherElement) return false;
 
       const rect = this.boundingClientRect;
-      return !!(rect.top || rect.bottom || rect.width || rect.height);
+      const hasDimensions = rect.width && rect.height;
+      if (!hasDimensions) return false;
+      return rect.bottom < window.innerHeight && rect.right < window.innerWidth;
     }
     return false;
   }
