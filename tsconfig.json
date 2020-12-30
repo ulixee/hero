@@ -44,6 +44,7 @@
     "replay/injected-scripts",
     "website",
     "injected-scripts",
-    "emulate-browsers/base/injected-scripts"
+    "emulate-browsers/base/injected-scripts",
+    "emulate-browsers/**/data"
   ]
 }

@@ -5,7 +5,6 @@
     "sourceMap": true,
     "inlineSourceMap": false
   },
-  "baseUrl": ".",
   "references": [
     {
       "path": "injected-scripts/tsconfig.dist.json"
@@ -32,6 +31,7 @@
     "examples",
     "website",
     "injected-scripts",
-    "emulate-browsers/base/injected-scripts"
+    "emulate-browsers/base/injected-scripts",
+    "emulate-browsers/**/data"
   ]
 }
