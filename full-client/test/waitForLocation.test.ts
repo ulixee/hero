@@ -1,9 +1,12 @@
 import { Helpers } from '@secret-agent/testing';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Handler } from '../index';
 
 let handler: Handler;
+let koaServer: ITestKoaServer;
 beforeAll(async () => {
   handler = new Handler();
+  koaServer = await Helpers.runKoaServer(true);
   Helpers.onClose(() => handler.close(), true);
 });
 afterAll(Helpers.afterAll);
@@ -11,7 +14,6 @@ afterEach(Helpers.afterEach);
 
 describe('basic waitForLocation change detections', () => {
   it('runs basic flow', async () => {
-    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/start', ctx => {
       ctx.body = `
         <body>
@@ -44,11 +46,9 @@ describe('basic waitForLocation change detections', () => {
     expect(lastUrl).toBe(finishUrl);
 
     await agent.close();
-    await koaServer.close();
   });
 
   it('should trigger a location change if location changed but also redirected', async () => {
-    const koaServer = await Helpers.runKoaServer(false);
     koaServer.get('/page1', ctx => {
       ctx.body = `
         <body>
@@ -86,30 +86,28 @@ describe('basic waitForLocation change detections', () => {
     expect(await agent.url).toBe(`${koaServer.baseUrl}/finish`);
 
     await agent.close();
-    await koaServer.close();
   });
 
   it('should support 2 location changes', async () => {
-    const koaServer = await Helpers.runKoaServer(false);
-    koaServer.get('/page1', ctx => {
+    koaServer.get('/loc1', ctx => {
       ctx.body = `
         <body>
-          <a href="/page2">Click Me</a>
+          <a href="/loc2">Click Me</a>
         </body>
       `;
     });
-    koaServer.get('/page2', ctx => {
+    koaServer.get('/loc2', ctx => {
       ctx.body = `
         <body>
-          <a href="/finish">Click Me</a>
+          <a href="/loc3">Click Me</a>
         </body>
       `;
     });
-    koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
+    koaServer.get('/loc3', ctx => (ctx.body = `Finished!`));
 
-    const startUrl = `${koaServer.baseUrl}/page1`;
-    const page2Url = `${koaServer.baseUrl}/page2`;
-    const finishUrl = `${koaServer.baseUrl}/finish`;
+    const startUrl = `${koaServer.baseUrl}/loc1`;
+    const page2Url = `${koaServer.baseUrl}/loc2`;
+    const finishUrl = `${koaServer.baseUrl}/loc3`;
     const agent = await handler.createAgent();
 
     await agent.goto(startUrl);
@@ -132,6 +130,33 @@ describe('basic waitForLocation change detections', () => {
     expect(lastUrl).toBe(finishUrl);
 
     await agent.close();
-    await koaServer.close();
+  });
+
+  it('should support timing out a location change', async () => {
+    koaServer.get('/loaded1', ctx => {
+      ctx.body = `
+        <body>
+          <a href="/loaded2">Click Me</a>
+        </body>
+      `;
+    });
+    koaServer.get('/loaded2', ctx => {
+      ctx.body = `<body></body>`;
+    });
+
+    const agent = await handler.createAgent();
+
+    await agent.goto(`${koaServer.baseUrl}/loaded1`);
+    await agent.waitForAllContentLoaded();
+    const link = agent.document.querySelector('a');
+    await agent.click(link);
+    await agent.waitForLocation('change', { timeoutMs: 500 });
+    await agent.waitForAllContentLoaded();
+    expect(await agent.url).toBe(`${koaServer.baseUrl}/loaded2`);
+
+    await expect(agent.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrowError(
+      'Timeout',
+    );
+    await agent.close();
   });
 });

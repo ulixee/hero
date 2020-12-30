@@ -1,4 +1,4 @@
-import { assert } from '@secret-agent/commons/utils';
+import { assert, createPromise } from '@secret-agent/commons/utils';
 import {
   ILocationStatus,
   IPipelineStatus,
@@ -10,6 +10,9 @@ import {
 import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 
 const READY = 'READY';
 
@@ -26,20 +29,14 @@ export default class LocationTracker {
   }
 
   private readonly waitForCbs: {
-    [status in ILocationStatus]: (() => void)[];
+    [status in ILocationStatus]: IResolvablePromise<void>[];
   };
 
   constructor(navigations: TabNavigations) {
-    this.waitForCbs = {
-      reload: [],
-      change: [],
-      NavigationRequested: [],
-      HttpRequested: [],
-      HttpRedirected: [],
-      HttpResponded: [],
-      DomContentLoaded: [],
-      AllContentLoaded: [],
-    };
+    this.waitForCbs = {} as any;
+    for (const key in LocationStatus) {
+      if (LocationStatus[key]) this.waitForCbs[key] = [];
+    }
     this.navigations = navigations;
     navigations.on('navigation-requested', this.onNavigation.bind(this));
     navigations.on('status-change', this.onPipelineStatusChange.bind(this));
@@ -73,7 +70,7 @@ export default class LocationTracker {
 
   public waitFor(
     status: ILocationStatus | 'READY',
-    sinceCommandId?: number,
+    options: IWaitForOptions = {},
     inclusiveOfCommandId = true,
   ) {
     if (status === READY) {
@@ -85,7 +82,7 @@ export default class LocationTracker {
     if (LocationTrigger[status]) {
       const hasPreviousTrigger = this.hasTriggerSinceCommand(
         LocationTrigger[status],
-        sinceCommandId ?? this.defaultWaitForLocationCommandId,
+        options.sinceCommandId ?? this.defaultWaitForLocationCommandId,
         inclusiveOfCommandId,
       );
       if (hasPreviousTrigger) {
@@ -99,9 +96,20 @@ export default class LocationTracker {
       }
     }
 
-    return new Promise<void>(resolve => {
-      this.waitForCbs[status].push(resolve);
-    });
+    const resolvablePromise = createPromise<void>(options.timeoutMs);
+    this.waitForCbs[status].push(resolvablePromise);
+    return resolvablePromise.promise;
+  }
+
+  public cancelWaiting(cancelMessage: string) {
+    for (const waitingForStatus of Object.values(this.waitForCbs)) {
+      while (waitingForStatus.length) {
+        const resolvable = waitingForStatus.shift();
+        const canceled = new CanceledPromiseError(cancelMessage);
+        canceled.stack += `\n${'------LOCATION'.padEnd(50, '-')}\n${resolvable.stack}`;
+        resolvable.reject(canceled);
+      }
+    }
   }
 
   private onNavigation(lifecycle: INavigation) {
@@ -129,8 +137,8 @@ export default class LocationTracker {
 
   private runWaitForCbs(status: ILocationStatus) {
     while (this.waitForCbs[status].length) {
-      const resolve = this.waitForCbs[status].shift();
-      resolve();
+      const resolvablePromise = this.waitForCbs[status].shift();
+      resolvablePromise.resolve();
     }
   }
 

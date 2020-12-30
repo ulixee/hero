@@ -30,6 +30,7 @@ import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketR
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
 import SessionState from '@secret-agent/session-state/index';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import LocationTracker from './LocationTracker';
 import Interactor from './Interactor';
 import Session from './Session';
@@ -187,6 +188,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
+      this.locationTracker.cancelWaiting(cancelMessage);
       this.cancelPendingEvents(cancelMessage);
       await this.puppetPage.close();
 
@@ -354,9 +356,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return isVisible.value;
   }
 
-  public async waitForNewTab(sinceCommandId?: number): Promise<Tab> {
+  public async waitForNewTab(options: IWaitForOptions = {}): Promise<Tab> {
     // last command is the one running right now
-    const startCommandId = sinceCommandId ?? this.lastCommandId - 1;
+    const startCommandId = options?.sinceCommandId ?? this.lastCommandId - 1;
     let newTab: Tab;
     if (startCommandId >= 0) {
       for (const tab of this.session.tabs) {
@@ -366,7 +368,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         }
       }
     }
-    if (!newTab) newTab = await this.waitOn('child-tab-created');
+    if (!newTab) newTab = await this.waitOn('child-tab-created', undefined, options?.timeoutMs);
     await newTab.locationTracker.waitForLocationResourceId();
     return newTab;
   }
@@ -429,12 +431,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILocationStatus | 'READY'): Promise<void> {
-    return this.locationTracker.waitFor(status);
+  public waitForLoad(status: ILocationStatus | 'READY', options?: IWaitForOptions): Promise<void> {
+    return this.locationTracker.waitFor(status, options);
   }
 
-  public waitForLocation(trigger: ILocationTrigger): Promise<void> {
-    return this.locationTracker.waitFor(trigger);
+  public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
+    return this.locationTracker.waitFor(trigger, options);
   }
 
   public waitForMillis(millis: number): Promise<void> {

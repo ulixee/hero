@@ -92,7 +92,10 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     timeoutMillis = 30e3,
     includeUnhandledEvents = false,
   ): Promise<T[K]> {
-    const promise = createPromise<T[K]>(timeoutMillis, `Timeout waiting for ${String(eventType)}`);
+    const promise = createPromise<T[K]>(
+      timeoutMillis ?? 30e3,
+      `Timeout waiting for ${String(eventType)}`,
+    );
 
     this.pendingIdCounter += 1;
     const id = this.pendingIdCounter;

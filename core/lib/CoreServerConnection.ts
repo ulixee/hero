@@ -7,6 +7,7 @@ import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPaylo
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import Session from './Session';
 import Tab from './Tab';
 import GlobalPool from './GlobalPool';
@@ -143,9 +144,12 @@ export default class CoreServerConnection extends TypedEventEmitter<{
     return session.configure(options);
   }
 
-  public async waitForNewTab(sessionMeta: ISessionMeta): Promise<ISessionMeta> {
+  public async waitForNewTab(
+    sessionMeta: ISessionMeta,
+    opts: IWaitForOptions,
+  ): Promise<ISessionMeta> {
     const tab = Session.getTab(sessionMeta);
-    const newTab = await tab.waitForNewTab();
+    const newTab = await tab.waitForNewTab(opts);
     return this.getSessionMeta(newTab);
   }
 

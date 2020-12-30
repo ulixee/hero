@@ -11,6 +11,7 @@ import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
+import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -133,14 +134,14 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return coreTab.isElementVisible(awaitedPath.toJSON());
   }
 
-  public async waitForAllContentLoaded(): Promise<void> {
+  public async waitForAllContentLoaded(options?: IWaitForOptions): Promise<void> {
     const coreTab = await getCoreTab(this);
-    await coreTab.waitForLoad(LocationStatus.AllContentLoaded);
+    await coreTab.waitForLoad(LocationStatus.AllContentLoaded, options);
   }
 
-  public async waitForLoad(status: LocationStatus): Promise<void> {
+  public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {
     const coreTab = await getCoreTab(this);
-    await coreTab.waitForLoad(status);
+    await coreTab.waitForLoad(status, options);
   }
 
   public waitForResource(
@@ -159,9 +160,12 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     await coreTab.waitForElement(awaitedPath.toJSON(), options);
   }
 
-  public async waitForLocation(trigger: ILocationTrigger): Promise<void> {
+  public async waitForLocation(
+    trigger: ILocationTrigger,
+    options?: IWaitForOptions,
+  ): Promise<void> {
     const coreTab = await getCoreTab(this);
-    await coreTab.waitForLocation(trigger);
+    await coreTab.waitForLocation(trigger, options);
   }
 
   public async waitForMillis(millis: number): Promise<void> {
