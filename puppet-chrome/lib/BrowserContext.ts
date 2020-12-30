@@ -17,7 +17,6 @@ import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredE
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
-import { Worker } from './Worker';
 import Frame from './Frame';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;

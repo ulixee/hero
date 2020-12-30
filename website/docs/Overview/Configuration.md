@@ -12,7 +12,7 @@ The internal `@secret-agent/core` module can receive several configuration optio
 
 The [CoreConnection](../advanced/core-connection) to be used by a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent).
 
-All [configurations](../advanced/core-connection#configurations) accept both an `options` object and a  [`CoreConnection`](../advanced/core-connection) instance.
+All [configurations](../advanced/core-connection#configurations) accept both an `options` object and a [`CoreConnection`](../advanced/core-connection) instance.
 
 Configuration is accepted in the following methods and constructors:
 
@@ -49,22 +49,21 @@ Configures the storage location for files created by Core.
 
 Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection).
 
-### Rendering Options <div class="specs"><i>Connection</i><i>Agent</i></div> {#rendering}
+### Blocked Resource Types <div class="specs"><i>Connection</i><i>Agent</i></div> {#blocked-resources}
 
-One of the best ways to optimize SecretAgent's memory and CPU is limiting the `renderingOptions` to only what you need. The following are valid options.
+One of the best ways to optimize SecretAgent's memory and CPU is setting `blockedResourceTypes` to block resources you don't need. The following are valid options.
 
 <p class="show-table-header show-bottom-border minimal-row-height"></p>
 
-| Options         | Description                                                    |
-| --------------- | -------------------------------------------------------------- |
-| `AwaitedDOM`    | Uses Chromium to attach AwaitedDOM to window.document.         |
-| `JsRuntime`     | Executes JS in webpage. Requires `AwaitedDOM`.                 |
-| `LoadJsAssets`  | Loads all referenced script assets. Requires `JsRuntime`.      |
-| `LoadCssAssets` | Loads all referenced CSS assets. Requires `JsRuntime`.         |
-| `LoadImages`    | Loads all referenced images on page. Requires `JsRuntime`.     |
-| `LoadAssets`    | Shortcut for `LoadJsAssets`, `LoadCssAssets` and `LoadImages`. |
-| `All`           | Activates all features listed above.                           |
-| `None`          | No AwaitedDOM or assets. Only retrieves window.response.       |
+| Options          | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| `JsRuntime`      | Executes JS in webpage. Requires `AwaitedDOM`.                     |
+| `BlockJsAssets`  | Loads all referenced script assets. Requires `JsRuntime`.          |
+| `BlockCssAssets` | Loads all referenced CSS assets. Requires `JsRuntime`.             |
+| `BlockImages`    | Loads all referenced images on page. Requires `JsRuntime`.         |
+| `BlockAssets`    | Shortcut for `LoadJsAssets`, `LoadCssAssets` and `LoadImages`.     |
+| `All`            | Blocks all of the resources above. Only retrieves window.response. |
+| `None`           | No assets are blocked. `default`                                   |
 
 As you'll notice above, some features are dependent on others and therefore automatically enable other features.
 
@@ -128,7 +127,7 @@ Update existing settings.
   - maxConcurrentAgentsCount `number` defaults to `10`. Limit concurrent Agent sessions running at any given time.
   - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
   - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
-  - defaultRenderingOptions `string[]` defaults to `[All]`. Controls enabled browser rendering features.
+  - defaultBlockedResourceTypes `string[]` defaults to `[None]`. Controls enabled browser resources.
   - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
   - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
 

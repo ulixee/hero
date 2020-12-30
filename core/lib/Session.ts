@@ -88,7 +88,7 @@ export default class Session extends TypedEventEmitter<{
       log.warn('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
         browserEmulatorId: this.browserEmulatorId,
-    userAgentString: this.browserEmulator.userAgentString,
+        userAgentString: this.browserEmulator.userAgentString,
         runtimeOs: Os.platform(),
       });
     }
@@ -96,7 +96,10 @@ export default class Session extends TypedEventEmitter<{
     this.timezoneId = options.timezoneId;
     this.viewport = options.viewport;
     if (!this.viewport) {
-      this.viewport = Viewports.getDefault(this.browserEmulator.windowFraming, this.browserEmulator.windowFramingBase);
+      this.viewport = Viewports.getDefault(
+        this.browserEmulator.windowFraming,
+        this.browserEmulator.windowFramingBase,
+      );
     }
 
     this.humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
@@ -131,8 +134,8 @@ export default class Session extends TypedEventEmitter<{
       this.upstreamProxyUrl = options.upstreamProxyUrl;
       this.mitmRequestSession.upstreamProxyUrl = options.upstreamProxyUrl;
     }
-    if (options.renderingOptions !== undefined) {
-      for (const tab of this.tabs) await tab.setRenderingOptions(options.renderingOptions);
+    if (options.blockedResourceTypes !== undefined) {
+      for (const tab of this.tabs) await tab.setBlockedResourceTypes(options.blockedResourceTypes);
     }
     if (options.viewport !== undefined) this.viewport = options.viewport;
     if (options.userProfile !== undefined) {

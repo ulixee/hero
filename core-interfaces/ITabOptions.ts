@@ -1,16 +1,15 @@
 export default interface ITabOptions {
-  renderingOptions?: IRenderingOption[];
+  blockedResourceTypes?: IBlockedResourceType[];
 }
 
-export enum RenderingOption {
-  AwaitedDOM = 'AwaitedDOM',
+export enum BlockedResourceType {
   JsRuntime = 'JsRuntime',
-  LoadJsResources = 'LoadJsResources',
-  LoadCssResources = 'LoadCssResources',
-  LoadImages = 'LoadImages',
-  LoadResources = 'LoadResources',
+  BlockJsResources = 'BlockJsResources',
+  BlockCssResources = 'BlockCssResources',
+  BlockImages = 'BlockImages',
+  BlockAssets = 'BlockAssets',
   All = 'All',
   None = 'None',
 }
 
-export type IRenderingOption = keyof typeof RenderingOption;
+export type IBlockedResourceType = keyof typeof BlockedResourceType;

@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { RenderingOption } from '@secret-agent/core-interfaces/ITabOptions';
+import { BlockedResourceType } from '@secret-agent/core-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import { bindFunctions } from '@secret-agent/commons/utils';
@@ -33,7 +33,7 @@ import createConnection from '../connections/createConnection';
 import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 
 export const DefaultOptions = {
-  defaultRenderingOptions: [RenderingOption.All],
+  defaultBlockedResourceTypes: [BlockedResourceType.None],
   defaultUserProfile: {},
 };
 const scriptInstance = new ScriptInstance();
@@ -71,7 +71,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     initializeConstantsAndProperties(this, [], propertyKeys);
     bindFunctions(this);
 
-    options.renderingOptions = options.renderingOptions || Agent.options.defaultRenderingOptions;
+    options.blockedResourceTypes =
+      options.blockedResourceTypes || Agent.options.defaultBlockedResourceTypes;
     options.userProfile = options.userProfile || Agent.options.defaultUserProfile;
 
     const sessionName = scriptInstance.generateSessionName(options.name);
