@@ -226,7 +226,7 @@ function cleanupHTML(html: string) {
     const href = link.getAttribute('href');
     const body = link.innerHTML;
     const text = link.textContent;
-    if (text === 'DOMString') html = html.replace(outer, '`string`');
+    if (text === 'DOMString' || text === 'USVString') html = html.replace(outer, '`string`');
     else if (text === 'Boolean') html = html.replace(outer, '`boolean`');
     else if (text === 'Number') html = html.replace(outer, '`number`');
     else if (href?.startsWith('/')) {

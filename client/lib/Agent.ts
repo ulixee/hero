@@ -15,6 +15,8 @@ import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElemen
 import { ILocationTrigger } from '@secret-agent/core-interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
+import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -232,11 +234,15 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.fetch(request, init);
   }
 
+  public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
+    return this.activeTab.getComputedStyle(element, pseudoElement);
+  }
+
   public getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
     return this.activeTab.getJsValue<T>(path);
   }
 
-  public isElementVisible(element: ISuperElement): Promise<boolean> {
+  public isElementVisible(element: IElementIsolate): Promise<boolean> {
     return this.activeTab.isElementVisible(element);
   }
 

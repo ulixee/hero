@@ -10,13 +10,13 @@
 
 Returns a <code>NamedNodeMap</code> object containing the assigned attributes of the corresponding HTML element.
 
-#### **Type**: `NamedNodeMap`
+#### **Type**: [`NamedNodeMap`](./named-node-map)
 
 ### elem.classList <div class="specs"><i>W3C</i></div> {#classList}
 
 Returns a <code>DOMTokenList</code> containing the list of class attributes.
 
-#### **Type**: `DOMTokenList`
+#### **Type**: [`DOMTokenList`](./dom-token-list)
 
 ### elem.className <div class="specs"><i>W3C</i></div> {#className}
 
@@ -86,7 +86,7 @@ Is a `string` representing the markup of the element including its content. When
 
 Represents the part identifier(s) of the element (i.e. set using the <code>part</code> attribute), returned as a <code>DOMTokenList</code>.
 
-#### **Type**: `DOMTokenList`
+#### **Type**: [`DOMTokenList`](./dom-token-list)
 
 ### elem.prefix <div class="specs"><i>W3C</i></div> {#prefix}
 
@@ -122,7 +122,7 @@ Returns a `number` representing the scroll view width of the element.
 
 Returns the open shadow root that is hosted by the element, or null if no open shadow root is present.
 
-#### **Type**: `ShadowRoot`
+#### **Type**: [`ShadowRoot`](./shadow-root)
 
 ### elem.slot <div class="specs"><i>W3C</i></div> {#slot}
 
@@ -319,6 +319,12 @@ Returns the last node which is both a child of this <code>ParentNode</code> <em>
 
 #### **Type**: [`SuperElement`](./super-element)
 
+### elem.assignedSlot <div class="specs"><i>W3C</i></div> {#assignedSlot}
+
+Returns the <code>&lt;slot&gt;</code> the node is inserted in.
+
+#### **Type**: [`HTMLSlotElement`](./html-slot-element)
+
 ## Methods
 
 ### elem.closest*(selectors)* <div class="specs"><i>W3C</i></div> {#closest}
@@ -332,12 +338,6 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
       ex: <code>p:hover, .toto + q</code>
 
 #### **Returns**: [`SuperElement`](./super-element)
-
-### elem.computedStyleMap*()* <div class="specs"><i>W3C</i></div> {#computedStyleMap}
-
-Returns a <code>StylePropertyMapReadOnly</code> interface which provides a read-only representation of a CSS declaration block that is an alternative to <code>CSSStyleDeclaration</code>.
-
-#### **Returns**: `StylePropertyMapReadOnly`
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -665,27 +665,26 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  |   |   | 
  | --- | --- | 
- | `onfullscreenchange` | `onfullscreenerror`
-`assignedSlot` |  | 
+ | `onfullscreenchange` | `onfullscreenerror` | 
 
 #### Methods
 
  |   |   | 
  | --- | --- | 
- | `attachShadow()` | `insertAdjacentElement()`
-`insertAdjacentHTML()` | `insertAdjacentText()`
-`releasePointerCapture()` | `removeAttribute()`
-`removeAttributeNode()` | `removeAttributeNS()`
-`scroll()` | `scrollBy()`
-`scrollTo()` | `setAttribute()`
-`setAttributeNode()` | `setAttributeNodeNS()`
-`setAttributeNS()` | `setPointerCapture()`
-`toggleAttribute()` | `appendChild()`
-`cloneNode()` | `insertBefore()`
-`removeChild()` | `replaceChild()`
-`addEventListener()` | `dispatchEvent()`
-`removeEventListener()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+ | `attachShadow()` | `computedStyleMap()`
+`insertAdjacentElement()` | `insertAdjacentHTML()`
+`insertAdjacentText()` | `releasePointerCapture()`
+`removeAttribute()` | `removeAttributeNode()`
+`removeAttributeNS()` | `scroll()`
+`scrollBy()` | `scrollTo()`
+`setAttribute()` | `setAttributeNode()`
+`setAttributeNodeNS()` | `setAttributeNS()`
+`setPointerCapture()` | `toggleAttribute()`
+`appendChild()` | `cloneNode()`
+`insertBefore()` | `removeChild()`
+`replaceChild()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()`
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` | 

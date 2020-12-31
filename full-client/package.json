@@ -19,7 +19,7 @@
     "@secret-agent/emulate-chrome-80": "1.2.0-alpha.5",
     "@secret-agent/mitm": "1.2.0-alpha.5",
     "@secret-agent/testing": "1.2.0-alpha.5",
-    "awaited-dom": "^1.1.8",
+    "awaited-dom": "^1.1.10",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "ws": "^7.3.1"

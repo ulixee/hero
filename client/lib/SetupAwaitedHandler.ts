@@ -87,6 +87,10 @@ export function construct<TClass>(self: AwaitedHandler<TClass>): TClass {
   throw new NotImplementedError(`${self.className} constructor not implemented`);
 }
 
+export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
+  return `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
+}
+
 function execJsPath<TClass, T>(
   self: AwaitedHandler<TClass>,
   coreTab: CoreSession,
@@ -102,7 +106,7 @@ function execJsPath<TClass, T>(
         if (typeof param === 'object') {
           const awaitedPath = self.getState(param)?.awaitedPath;
           if (awaitedPath) {
-            part[i] = `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
+            part[i] = getAwaitedPathAsMethodArg(awaitedPath);
           }
         }
       }

@@ -10,7 +10,7 @@
 
 The <code>Headers</code> object associated with the response.
 
-#### **Type**: `Headers`
+#### **Type**: [`Headers`](./headers)
 
 ### .ok <div class="specs"><i>W3C</i></div> {#ok}
 
@@ -70,7 +70,7 @@ Takes a <code>Response</code> stream and reads it to completion. It returns a pr
 
 ### .text*()* <div class="specs"><i>W3C</i></div> {#text}
 
-Takes a <code>Response</code> stream and reads it to completion. It returns a promise that resolves with a <code>USVString</code> (text). The response is <em>always</em> decoded using UTF-8.
+Takes a <code>Response</code> stream and reads it to completion. It returns a promise that resolves with a `string` (text). The response is <em>always</em> decoded using UTF-8.
 
 #### **Returns**: `Promise<string>`
 

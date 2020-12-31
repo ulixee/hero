@@ -222,6 +222,24 @@ describe('basic Document tests', () => {
     await expect(agent.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
   });
 
+  it('can get computed styles', async () => {
+    koaServer.get('/computedStyle', ctx => {
+      ctx.body = `<body>
+          <div style="opacity: 0" id="elem-1">Opacity 0</div>
+          <div style="opacity: 0.1" id="elem-2">Opacity 0.1</div>
+        </body>`;
+    });
+    const agent = await openBrowser(`/computedStyle`);
+    const { document } = agent;
+    const elem1Style = agent.activeTab.getComputedStyle(document.querySelector('#elem-1'));
+    const opacity = await elem1Style.getPropertyValue('opacity');
+    expect(opacity).toBe('0');
+
+    const elem2Style = agent.activeTab.getComputedStyle(document.querySelector('#elem-2'));
+    const opacity2 = await elem2Style.getPropertyValue('opacity');
+    expect(opacity2).toBe('0.1');
+  });
+
   it('can get a data url of a canvas', async () => {
     koaServer.get('/canvas', ctx => {
       ctx.body = `
