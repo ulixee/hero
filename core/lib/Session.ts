@@ -80,6 +80,7 @@ export default class Session extends TypedEventEmitter<{
     if (options.userProfile) {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
+      this.browserEmulator.sessionId = this.id;
     }
     this.upstreamProxyUrl = options.upstreamProxyUrl;
 

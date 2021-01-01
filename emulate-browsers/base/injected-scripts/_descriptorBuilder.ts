@@ -26,8 +26,8 @@ function createError(message: string, type?: { new (message: string): any }) {
 
 function newObjectConstructor(newProps: IDescriptor) {
   return function() {
-    if (typeof newProps === 'string') {
-      throw createError(newProps);
+    if (newProps._$constructorException) {
+      throw createError(newProps._$constructorException);
     }
     Object.setPrototypeOf(this, getObjectAtPath(newProps._$protos[0]));
     const props = Object.entries(newProps);
@@ -176,6 +176,7 @@ declare interface IDescriptor {
   _$get?: any;
   _$set?: any;
   _$accessException?: string;
+  _$constructorException?: string;
   _$value?: string;
   '_$$value()'?: () => string;
   _$function?: string;

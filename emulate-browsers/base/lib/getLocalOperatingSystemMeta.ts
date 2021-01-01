@@ -1,6 +1,7 @@
 import Os from 'os';
-import { convertVersionsToTree, getClosestNumberMatch } from "./VersionUtils";
+import { convertVersionsToTree, getClosestNumberMatch } from './VersionUtils';
 import darwinToMacOsVersionMap from '../data/darwinToMacOsVersionMap.json';
+import macOsVersionAliasMap from '../data/macOsVersionAliasMap.json';
 import windowsToWindowsVersionMap from '../data/windowsToWindowsVersionMap.json';
 
 export default function getLocalOperatingSystemMeta() {
@@ -58,7 +59,8 @@ function extractMacOsVersion(release: string) {
     versionMatch += `.${buildMatch}`;
   }
 
-  return darwinToMacOsVersionMap[versionMatch];
+  const versionString = darwinToMacOsVersionMap[versionMatch];
+  return macOsVersionAliasMap[versionString] || versionString;
 }
 
 const platformToOsName = {
@@ -69,8 +71,7 @@ const platformToOsName = {
   freebsd: 'linux',
   openbsd: 'linux',
   sunos: 'linux',
-}
+};
 
 const darwinVersionTree = convertVersionsToTree(Object.keys(darwinToMacOsVersionMap));
 const windowsVersionTree = convertVersionsToTree(Object.keys(windowsToWindowsVersionMap));
-

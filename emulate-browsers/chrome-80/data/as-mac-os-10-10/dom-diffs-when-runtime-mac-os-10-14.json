@@ -1,0 +1,125 @@
+{
+  "removals": [
+    "window.NavigatorUAData",
+    "window.Text.prototype.getDestinationInsertionPoints",
+    "window.Element.prototype.getDestinationInsertionPoints"
+  ],
+  "additions": [
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "getInstalledRelatedApps",
+      "prevProperty": "requestMediaKeySystemAccess",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": ""
+        },
+        "_$type": "function",
+        "_$function": "function () { [native code] }",
+        "_$invocation": "TypeError: Failed to execute 'getInstalledRelatedApps' on 'Navigator': Illegal invocation",
+        "_$flags": "cew",
+        "_$value": "function () { [native code] }"
+      }
+    },
+    {
+      "path": "window.HTMLVideoElement.prototype",
+      "propertyName": "getVideoPlaybackQuality",
+      "prevProperty": "onleavepictureinpicture",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getVideoPlaybackQuality"
+        },
+        "_$type": "function",
+        "_$function": "function getVideoPlaybackQuality() { [native code] }",
+        "_$invocation": "TypeError: Illegal invocation",
+        "_$flags": "cew",
+        "_$value": "function getVideoPlaybackQuality() { [native code] }"
+      }
+    },
+    {
+      "path": "window",
+      "propertyName": "VideoPlaybackQuality",
+      "prevProperty": "OffscreenCanvasRenderingContext2D",
+      "property": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "VideoPlaybackQuality"
+        },
+        "arguments": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "caller": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "prototype": {
+          "_$protos": ["Object.prototype"],
+          "creationTime": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get creationTime() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "totalVideoFrames": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get totalVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "droppedVideoFrames": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get droppedVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "corruptedVideoFrames": {
+            "_$flags": "ce",
+            "_$accessException": "TypeError: Illegal invocation",
+            "_$get": "function get corruptedVideoFrames() { [native code] }",
+            "_$getToStringToString": "function toString() { [native code] }"
+          },
+          "Symbol(Symbol.toStringTag)": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": "VideoPlaybackQuality"
+          },
+          "_$type": "object",
+          "_$flags": ""
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "TypeError: Illegal constructor"
+        },
+        "_$type": "function",
+        "_$function": "function VideoPlaybackQuality() { [native code] }",
+        "_$invocation": "TypeError: Illegal constructor",
+        "_$flags": "cw",
+        "_$value": "function VideoPlaybackQuality() { [native code] }"
+      }
+    }
+  ],
+  "order": [],
+  "changes": []
+}

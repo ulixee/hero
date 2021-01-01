@@ -8,7 +8,6 @@
     "build": "yarn tsc && yarn workspace @secret-agent/replay build:frontend && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && node copy-dist.js && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
     "build:dist-local": "yarn build:dist && yarn workspace @secret-agent/replay build:dist-local && cd build-dist && SA_REBUILD_MITM_SOCKET=1 yarn",
-    "rebuild:dist": "tsc -b tsconfig.dist.json",
     "build:docker": "yarn build:dist && docker build -t secret-agent .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",

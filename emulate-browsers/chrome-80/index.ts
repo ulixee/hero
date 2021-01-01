@@ -16,10 +16,11 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
 import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
 import pkg from './package.json';
-import headerProfiles from './data/headers.json';
-import userAgentOptions from './data/user-agent-options.json';
-import config from './data/config.json';
-import windowFramingBase from './data/window-framing.json';
+
+const config = require('./config.json');
+const headerProfiles = require('./data/headers.json');
+const userAgentOptions = require('./data/user-agent-options.json');
+const windowFramingBase = require('./data/window-framing.json');
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowChromeData = new DataLoader(`${__dirname}/data`, 'window-chrome');
@@ -27,14 +28,19 @@ const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigato
 const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
 const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 
+const engineObj = {
+  browser: config.browserEngine.name,
+  revision: config.browserEngine.revision,
+}
+
 @BrowserEmulatorClassDecorator
 export default class Chrome80 {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
   public static engine = {
-    ...pkg.engine,
-    executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
+    ...engineObj,
+    executablePath: process.env.CHROMIUM_80_BIN ?? getEngineExecutablePath(engineObj),
   };
 
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
@@ -172,9 +178,10 @@ export default class Chrome80 {
         videoCodecs: agentCodecs.videoSupport,
       });
       domOverrides.add('MediaRecorder.isTypeSupported', {
-        supportedCodecs: agentCodecs.audioSupport.recordingFormats.concat(
-          agentCodecs.videoSupport.recordingFormats,
-        ),
+        supportedCodecs: [
+          ...agentCodecs.audioSupport.recordingFormats,
+          ...agentCodecs.videoSupport.recordingFormats,
+        ],
       });
       domOverrides.add('RTCRtpSender.getCapabilities', {
         videoCodecs: agentCodecs.webRtcVideoCodecs,

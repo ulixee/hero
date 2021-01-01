@@ -23,14 +23,18 @@ export default class BrowserEmulators {
   public static getClass(browserEmulatorId: string) {
     let BrowserEmulator = this.emulatorsById[browserEmulatorId];
     if (!BrowserEmulator) {
-      const fromShortId = `@secret-agent/emulate-${browserEmulatorId}`;
       try {
+        const fromShortId = `@secret-agent/emulate-${browserEmulatorId}`;
         // eslint-disable-next-line global-require,import/no-dynamic-require
         BrowserEmulator = require(fromShortId)?.default;
       } catch (err) {
-        // try as full package name
-        // eslint-disable-next-line global-require,import/no-dynamic-require
-        BrowserEmulator = require(browserEmulatorId)?.default;
+        try {
+          // try as full package name
+          // eslint-disable-next-line global-require,import/no-dynamic-require
+          BrowserEmulator = require(browserEmulatorId)?.default;
+        } catch (e) {
+          // silently fail
+        }
       }
       if (BrowserEmulator) this.load(BrowserEmulator);
     }

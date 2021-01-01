@@ -29,7 +29,7 @@ import Log from '@secret-agent/commons/Logger';
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
-import config from './data/config.json';
+import config from './config.json';
 import windowFramingBase from './data/window-framing.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
@@ -52,6 +52,8 @@ export default class Safari13 {
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
   public canPolyfill = false;
+
+  public sessionId: string;
 
   public set locale(value: string) {
     this._locale = value;
@@ -142,7 +144,7 @@ export default class Safari13 {
         } catch (error) {
           log.warn('Error setting cookie from page', {
             error,
-            sessionId: null, // TODO: @caleb - can you plug in sessionid to the emulators (or a child logger)
+            sessionId: this.sessionId,
           });
         }
       },
@@ -334,7 +336,7 @@ export default class Safari13 {
 
   private hasFirstPartyInteractionForDomain(domain: string) {
     for (const site of this.sitesWithUserInteraction) {
-      const permutations = permuteDomain(site);
+      const permutations = permuteDomain(site) ?? [site.split('.').slice(-2).join('.'), site];
       for (const perm of permutations) {
         if (domainMatch(perm, domain)) return true;
       }

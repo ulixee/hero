@@ -6840,6 +6840,1146 @@
     "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.0 Safari/537.36"
   },
   {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.99 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.98 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.96 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.95 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.94 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.93 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.92 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.91 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.90 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.9 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.89 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.88 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.87 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.86 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.85 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.84 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.83 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.82 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.81 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.80 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.8 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.79 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.78 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.77 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.76 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.75 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.7 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.64 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.63 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.62 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.60 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.6 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.59 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.58 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.57 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.56 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.55 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.54 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.52 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.51 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.50 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.5 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.49 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.48 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.47 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.46 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.45 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.44 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.43 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.42 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.41 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.40 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.4 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.39 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.38 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.37 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.36 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.35 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.34 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.33 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.32 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.31 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.30 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.3 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.29 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.28 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.27 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.26 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.25 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.24 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.23 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.22 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.21 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.20 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.2 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.19 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.18 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.17 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.16 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.15 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.14 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.13 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.122 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.121 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.120 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.12 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.119 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.118 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.117 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.115 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.114 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.113 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.112 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.111 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.110 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.11 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.109 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.108 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.107 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.105 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.104 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.103 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.102 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.101 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.100 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.10 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.1 Safari/537.36"
+  },
+  {
+    "operatingSystemId": "mac-os-11",
+    "browserId": "chrome-83-0",
+    "version": {
+      "major": "83",
+      "minor": "0",
+      "patch": "4103"
+    },
+    "string": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.0 Safari/537.36"
+  },
+  {
     "operatingSystemId": "windows-10",
     "browserId": "chrome-83-0",
     "version": {
