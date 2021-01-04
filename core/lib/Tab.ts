@@ -141,6 +141,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.waitForLocation,
       this.waitForNewTab,
       this.waitForResource,
+      // DO NOT ADD waitForReady
     ]);
   }
 
@@ -226,7 +227,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     let finalResourceId = resourceid;
     // if no resource id, this is a request for the default resource (page)
     if (!resourceid) {
-      await this.waitForLoad('READY');
+      await this.locationTracker.waitFor('READY');
       finalResourceId = await this.locationTracker.waitForLocationResourceId();
     }
 
@@ -294,7 +295,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   ): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
     if (!this.navigationTracker.top) return null;
-    await this.waitForLoad('READY');
+    await this.locationTracker.waitFor('READY');
     return this.domEnv.execJsPath<T>(jsPath, propertiesToExtract);
   }
 
@@ -307,12 +308,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async getLocationHref(): Promise<string> {
-    await this.waitForLoad('READY');
+    await this.locationTracker.waitFor('READY');
     return this.domEnv.locationHref();
   }
 
   public async getCookies(): Promise<ICookie[]> {
-    await this.waitForLoad('READY');
+    await this.locationTracker.waitFor('READY');
     return await this.session.browserContext.getCookies(
       new URL(this.puppetPage.mainFrame.securityOrigin ?? this.puppetPage.mainFrame.url),
     );
@@ -323,7 +324,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    await this.waitForLoad('READY');
+    await this.locationTracker.waitFor('READY');
     await this.session.browserContext.addCookies([
       {
         name,
@@ -431,7 +432,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILocationStatus | 'READY', options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILocationStatus, options?: IWaitForOptions): Promise<void> {
     return this.locationTracker.waitFor(status, options);
   }
 

@@ -307,7 +307,12 @@ class ObjectAtPath {
       const rect = this.boundingClientRect;
       const hasDimensions = rect.width && rect.height;
       if (!hasDimensions) return false;
-      return rect.bottom < window.innerHeight && rect.right < window.innerWidth;
+      return (
+        rect.top > 0 &&
+        rect.bottom < window.innerHeight &&
+        rect.left > 0 &&
+        rect.right < window.innerWidth
+      );
     }
     return false;
   }
