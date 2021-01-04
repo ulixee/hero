@@ -201,9 +201,11 @@ class JsPath {
           // eslint-disable-next-line promise/param-names
           await new Promise(resolve1 => setTimeout(resolve1, 20));
         }
+
         resolve(<IExecJsPathResult>{
           attachedState: objectAtPath.extractAttachedState(),
           overlappingElementId: objectAtPath.overlappingElementId,
+          ...objectAtPath.visibilityParts,
           value: false,
         });
       });
@@ -297,24 +299,36 @@ class ObjectAtPath {
   public get isVisible() {
     const element = this.closestElement;
     if (element) {
-      const style = getComputedStyle(element);
-      if (style?.visibility === 'hidden' || style?.display === 'none' || style?.opacity === '0') {
-        return false;
-      }
+      const { isHiddenStyle, onScreen, hasDimensions, isBehindOtherElement } = this.visibilityParts;
 
-      if (this.isBehindOtherElement) return false;
+      const isOnScreen = onScreen.vertical && onScreen.horizontal;
+      const isVisible = !isHiddenStyle && !isBehindOtherElement && hasDimensions && isOnScreen;
 
-      const rect = this.boundingClientRect;
-      const hasDimensions = rect.width && rect.height;
-      if (!hasDimensions) return false;
-      return (
-        rect.top > 0 &&
-        rect.bottom < window.innerHeight &&
-        rect.left > 0 &&
-        rect.right < window.innerWidth
-      );
+      return isVisible;
     }
     return false;
+  }
+
+  public get visibilityParts() {
+    const element = this.closestElement;
+    const visibility: any = {
+      hasElement: !!element,
+    };
+    if (element) {
+      const style = getComputedStyle(element);
+      visibility.isHiddenStyle =
+        style?.visibility === 'hidden' || style?.display === 'none' || style?.opacity === '0';
+
+      visibility.isBehindOtherElement = this.isBehindOtherElement;
+
+      const rect = this.boundingClientRect;
+      visibility.hasDimensions = rect.width && rect.height;
+      visibility.onScreen = {
+        vertical: rect.top + rect.height > 0 && rect.top < window.innerHeight,
+        horizontal: rect.left + rect.width > 0 && rect.left < window.innerWidth,
+      };
+    }
+    return visibility;
   }
 
   public get overlappingElement() {

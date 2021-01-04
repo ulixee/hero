@@ -75,6 +75,54 @@ describe('basic Tab tests', () => {
     ).resolves.toBe(true);
   });
 
+  it('will wait for an element above the fold to be on screen', async () => {
+    koaServer.get('/testOnScreen', ctx => {
+      ctx.body = `<body>
+    <a id="waitToShow" href="/anywhere" style="display:block; position: absolute; top: -100px">Link</a>
+<script>
+    setTimeout(function() {
+      document.querySelector('a#waitToShow').style.top = 0;
+    }, 150);
+</script>
+</body>`;
+    });
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/testOnScreen`);
+
+    await expect(
+      tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
+        waitForVisible: true,
+      }),
+    ).resolves.toBe(true);
+  });
+
+  it('will wait until an element off the bottom of the page', async () => {
+    koaServer.get('/testOffBottom', ctx => {
+      ctx.body = `<body>
+<div style="height: 2000px; position: relative">
+    <a id="waitToShow" href="/anywhere" style="position: relative; top: 1990px">Link</a>
+ </div>
+<script>
+    setTimeout(function() {
+      document.querySelector('a#waitToShow').scrollIntoView({ behavior: 'smooth'})
+    }, 150);
+</script>
+</body>`;
+    });
+    const meta = await connection.createSession();
+    const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(`${koaServer.baseUrl}/testOffBottom`);
+
+    await expect(
+      tab.waitForElement(['document', ['querySelector', 'a#waitToShow']], {
+        waitForVisible: true,
+      }),
+    ).resolves.toBe(true);
+  });
+
   it('can wait for another tab', async () => {
     let userAgentString1: string;
     let userAgentString2: string;
