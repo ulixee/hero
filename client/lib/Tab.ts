@@ -5,13 +5,20 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
-import { createResponse, createStorage, createSuperDocument } from 'awaited-dom/impl/create';
+import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
+import {
+  createCSSStyleDeclaration,
+  createResponse,
+  createStorage,
+  createSuperDocument,
+} from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -21,6 +28,7 @@ import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent, { IState as IAgentState } from './Agent';
+import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 
 const { getState, setState } = StateMachine<Tab, IState>();
 const agentState = StateMachine<Agent, IAgentState>();
@@ -107,6 +115,20 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
+  public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
+    const { awaitedPath: elementAwaitedPath } = awaitedPathState.getState(element);
+    const awaitedPath = new AwaitedPath('window', [
+      'getComputedStyle',
+      getAwaitedPathAsMethodArg(elementAwaitedPath),
+      pseudoElement,
+    ]);
+    const awaitedOptions = { ...getState(this) };
+    return createCSSStyleDeclaration<IAwaitedOptions>(
+      awaitedPath,
+      awaitedOptions,
+    ) as CSSStyleDeclaration;
+  }
+
   public async goto(href: string): Promise<Resource> {
     const coreTab = await getCoreTab(this);
     const resource = await coreTab.goto(href);
@@ -128,7 +150,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return coreTab.getJsValue<T>(path);
   }
 
-  public async isElementVisible(element: ISuperElement): Promise<boolean> {
+  public async isElementVisible(element: IElementIsolate): Promise<boolean> {
     const { awaitedPath } = awaitedPathState.getState(element);
     const coreTab = await getCoreTab(this);
     return coreTab.isElementVisible(awaitedPath.toJSON());

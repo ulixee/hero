@@ -56,7 +56,7 @@ Gets/sets directionality (rtl/ltr) of the document.
 
 Returns the Document Type Definition (DTD) of the current document.
 
-#### **Type**: `DocumentType`
+#### **Type**: [`DocumentType`](./document-type)
 
 ### doc.documentElement <div class="specs"><i>W3C</i></div> {#documentElement}
 
@@ -122,7 +122,7 @@ Returns a list of the images in the current document.
 
 Returns the DOM implementation associated with the current document.
 
-#### **Type**: `DOMImplementation`
+#### **Type**: [`DOMImplementation`](./dom-implementation)
 
 ### doc.lastModified <div class="specs"><i>W3C</i></div> {#lastModified}
 
@@ -140,7 +140,7 @@ Returns a list of all the hyperlinks in the document.
 
 Returns the URI of the current document.
 
-#### **Type**: `Location`
+#### **Type**: [`Location`](./location)
 
 ### doc.plugins <div class="specs"><i>W3C</i></div> {#plugins}
 
@@ -557,7 +557,7 @@ Returns a <code>CaretPosition</code> object containing the DOM node containing t
  - x `number`. The horizontal coordinate of a point.
  - y `number`. The vertical coordinate of a point.
 
-#### **Returns**: `CaretPosition`
+#### **Returns**: [`CaretPosition`](./caret-position)
 
 ### doc.elementFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#elementFromPoint}
 
@@ -575,7 +575,7 @@ Returns the topmost element at the specified coordinates.
 
 Returns a <code>Selection</code> object representing the range of text selected by the user, or the current position of the caret.
 
-#### **Returns**: `Selection`
+#### **Returns**: [`Selection`](./selection)
 
 ### doc.getElementById*(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
 

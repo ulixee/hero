@@ -67,7 +67,7 @@ One of the best ways to optimize SecretAgent's memory and CPU is setting `blocke
 
 As you'll notice above, some features are dependent on others and therefore automatically enable other features.
 
-Setting an empty features array is the same as setting its default.
+Setting an empty array is the same as setting to `None`.
 
 ### User Profile <div class="specs"><i>Connection</i><i>Agent</i></div>
 

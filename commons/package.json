@@ -5,6 +5,6 @@
   "main": "index.js",
   "dependencies": {
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
-    "better-sqlite3": "^7.1.1"
+    "better-sqlite3": "^7.1.2"
   }
 }

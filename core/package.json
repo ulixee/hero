@@ -15,7 +15,7 @@
     "@secret-agent/puppet": "1.2.0-alpha.5",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
     "@secret-agent/session-state": "1.2.0-alpha.5",
-    "awaited-dom": "^1.1.8",
+    "awaited-dom": "^1.1.10",
     "core-js-bundle": "^3.7.0",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",

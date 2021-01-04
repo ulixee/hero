@@ -59,11 +59,11 @@ const { Agent } = require('secret-agent');
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
-  - blockedResourceTypes `string[]`. Controls browser resource loading.
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
-  
+
 ## Properties
 
 ### agent.activeTab {#active-tab}
@@ -154,7 +154,7 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 Alias for [Tab.close()](./tab#close)
 
-### agent.configure*(\[options])* {#configure}
+### agent.configure*(options)* {#configure}
 
 Update existing configuration settings.
 
@@ -165,10 +165,9 @@ Update existing configuration settings.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
-  - blockedResourceTypes `string[]`. Controls browser resource loading.
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - coreConnection `options | CoreClientConnection`. An object containing `ICoreConnectionOptions` used to connect, or an already created `CoreClientConnection` instance. Defaults to automatically connecting to a local `Core`.
-
 
 #### **Returns**: `Promise`
 
@@ -254,21 +253,13 @@ Agent instances have aliases to all top-level Tab methods. They will be routed t
 
 ### agent.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
-Perform a native "fetch" request in the `activeTab` context.
-
-#### **Returns**: `Promise<Response>`
-
 Alias for [Tab.fetch()](./tab#fetch)
 
+### agent.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#get-computed-style}
+
+Alias for [Tab.getComputedStyle()](./tab#get-computed-style)
+
 ### agent.getJsValue*(path)* {#get-js-value}
-
-Extract any publicly accessible javascript value from the `activeTab` webpage context.
-
-#### **Arguments**:
-
-- path `string`
-
-#### **Returns**: `Promise<SerializedValue>`
 
 Alias for [Tab.getJsValue()](./tab#get-js-value)
 
@@ -296,11 +287,11 @@ Alias for [Tab.waitForLoad(AllContentLoaded)](./tab#wait-for-load)
 
 Alias for [Tab.waitForResource](./tab#wait-for-resource)
 
-### agent.waitForElement*(element)*
+### agent.waitForElement*(element, options)*
 
 Alias for [Tab.waitForElement](./tab#wait-for-element)
 
-### agent.waitForLocation*(trigger)*
+### agent.waitForLocation*(trigger, options)*
 
 Alias for [Tab.waitForLocation](./tab#wait-for-location)
 

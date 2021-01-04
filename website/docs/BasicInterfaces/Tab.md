@@ -116,6 +116,25 @@ Make this tab the `activeTab` within a browser, which directs many SecretAgent m
 
 #### **Returns**: `Promise`
 
+### tab.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
+
+Perform a native `Window.getComputedStyle` request in the current tab context - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
+
+#### **Arguments**:
+
+- element [`SuperElement`](../awaited-dom/super-element) An element loaded in this tab environment.
+- pseudoElement `string?` Optional string specifying the pseudo-element to match (eg, ::before, ::after, etc). More information can be found on [w3c](https://www.w3.org/TR/css-pseudo-4/).
+
+#### **Returns**: [`Promise<CssStyleDeclaration>`](../awaited-dom/cssstyledeclaration)
+
+```js
+await agent.goto('https://dataliberationfoundation.org');
+const { document, getComputedStyle } = agent.activeTab;
+const selector = document.querySelector('h1');
+const style = await getComputedStyle(selector);
+const opacity = await style.getProperty('opacity');
+```
+
 ### tab.getJsValue*(path)* {#get-js-value}
 
 Extract any publicly accessible javascript value from the webpage context.
@@ -168,9 +187,15 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
-### tab.waitForAllContentLoaded*()* {#wait-for-all-content}
+### tab.waitForAllContentLoaded*(options)* {#wait-for-all-content}
 
 Wait for the "load" DOM event. We renamed this to be more explicit because we're always mixing up DOMContentLoaded and load.
+
+#### **Arguments**:
+
+- options `object`
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+  - sinceCommandId `number`. A `commandId` from which to look for load status changes.
 
 #### **Returns**: `Promise<void>`
 
@@ -182,7 +207,7 @@ Wait until a specific element is present in the dom.
 
 - element [`SuperElement`](../awaited-dom/super-element)
 - options `object` Accepts any of the following:
-  - timeoutMs `number`. Timeout in milliseconds.
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
 
 #### **Returns**: `Promise`
@@ -198,13 +223,16 @@ await activeTab.waitForElement(elem, {
 });
 ```
 
-### tab.waitForLoad*(status)* {#wait-for-load}
+### tab.waitForLoad*(status, options)* {#wait-for-load}
 
 Wait for the load status to occur on a page.
 
 #### **Arguments**:
 
 - status `NavigationRequested | HttpRequested | HttpResponsed | HttpRedirected | DomContentLoaded | AllContentLoaded` The load status event to wait for.
+- options `object`
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+  - sinceCommandId `number`. A `commandId` from which to look for status changed.
 
 #### **Returns**: `Promise<void>`
 
@@ -221,13 +249,16 @@ The following are possible statuses and their meanings:
 | `DomContentLoaded`    | The dom content has been received and loaded into the document                                                                                                                      |
 | `AllContentLoaded`    | All dependent resources such as stylesheets and images. This is similar to the traditional [window load event](https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event). |
 
-### tab.waitForLocation*(trigger)* {#wait-for-location}
+### tab.waitForLocation*(trigger, options)* {#wait-for-location}
 
 Waits for a navigational change to document.location either because of a `reload` event or changes to the URL.
 
 #### **Arguments**:
 
 - trigger `change | reload` The same url has been reloaded, or it's a new url.
+- options `object`
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+  - sinceCommandId `number`. A `commandId` from which to look for changes.
 
 #### **Returns**: `Promise`
 
@@ -263,9 +294,9 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
   - type [`ResourceType`](../advanced/resource#type) A resource type to filter on
   - filterFn `function(resource: Resource, done: Callback): boolean` A function to allow further filtering of returned resources. Return true to include resources, false to exclude. Calling `done` finishes execution.
 - options `object` Accepts any of the following:
-  - timeoutMs `number`. Timeout in milliseconds
-  - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`
+  - timeoutMs `number`. Timeout in milliseconds. Default `60,000`.
   - sinceCommandId `number`. A `commandId` from which to look for resources.
+  - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`.
 
 #### **Returns**: [`Promise<Resource[]>`](../advanced/resource)
 

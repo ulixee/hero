@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import ILog, { ILogData } from '@secret-agent/core-interfaces/ILog';
+import { inspect } from 'util';
 
 let logId = 0;
 class Log implements ILog {
@@ -91,7 +92,7 @@ class Log implements ILog {
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${
           entry.action
         }`,
-        ...params,
+        ...params.map(x => inspect(x, false, null, true)),
       );
     }
     LogEvents.broadcast(entry);

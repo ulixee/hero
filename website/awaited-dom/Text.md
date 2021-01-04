@@ -173,6 +173,12 @@ Returns / Sets the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 
+### node.assignedSlot <div class="specs"><i>W3C</i></div> {#assignedSlot}
+
+Returns the <code>&lt;slot&gt;</code> the node is inserted in.
+
+#### **Type**: [`HTMLSlotElement`](./html-slot-element)
+
 ### node.nextElementSibling <div class="specs"><i>W3C</i></div> {#nextElementSibling}
 
 Returns the <code>Element</code> immediately following this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list following this node.
@@ -314,12 +320,6 @@ Clean up all the text nodes under this element (merge adjacent, remove empty).
 #### **Returns**: `Promise<void>`
 
 ## Unimplemented Specs
-
-#### Properties
-
- |   |   | 
- | --- | --- | 
- | `assignedSlot` |  | 
 
 #### Methods
 

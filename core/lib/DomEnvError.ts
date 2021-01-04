@@ -7,7 +7,7 @@ export default class DomEnvError extends Error {
     this.pathState = pathState;
   }
 
-  public toJSON() {
+  public toJSON(): object {
     return {
       message: this.message,
       pathState: this.pathState,

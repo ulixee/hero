@@ -4,9 +4,9 @@
 
 ## What Properties and Methods Can I Use?
 
-<div>
-  <input type="text" placeholder="Search any DOM property, method, or interface..." />
-</div>
+Many readonly properties and methods have been implemented. We haven't added DOM manipulation APIs because we believe they are easy to detect by the website. We recommend performing actions as a human as much as possible (click, type, move the mouse, etc).
+
+On each documented class, you can find a list of the unimplemented methods and properties at the bottom.
 
 ## Introducing Supers
 

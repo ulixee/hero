@@ -7,7 +7,7 @@
     "@secret-agent/commons": "1.2.0-alpha.4",
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "@secret-agent/mitm-socket": "1.2.0-alpha.5",
-    "better-sqlite3": "^7.1.1",
+    "better-sqlite3": "^7.1.2",
     "devtools-protocol": "^0.0.799653",
     "dns-packet": "^5.2.1",
     "moment": "^2.24.1",
