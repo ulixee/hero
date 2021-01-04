@@ -252,6 +252,7 @@ export default class HumanEmulatorGhost {
       const scrollX = shouldScrollX ? Math.round(point.x) : startScrollOffset.x;
       const scrollY = shouldScrollY ? Math.round(point.y) : startScrollOffset.y;
       if (scrollY === lastPoint.y && scrollX === lastPoint.x) continue;
+      if (scrollY < 0 || scrollX < 0) continue;
 
       point = {
         x: scrollX,
