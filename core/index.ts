@@ -11,7 +11,6 @@ import GlobalPool from './lib/GlobalPool';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
-const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
 export { GlobalPool, Tab, Session, LocationTrigger, RemoteServer };
 
@@ -55,6 +54,7 @@ export default class Core {
 
     await GlobalPool.start(browserEmulatorIds);
 
+    const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
     if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
       await this.startReplayServer(options.replayServerPort);
     }

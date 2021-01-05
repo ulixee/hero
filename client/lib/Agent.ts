@@ -40,8 +40,6 @@ export const DefaultOptions = {
   defaultUserProfile: {},
 };
 const scriptInstance = new ScriptInstance();
-const shouldHideReplay =
-  process.env.SA_SHOW_REPLAY === 'false' || process.env.SA_SHOW_REPLAY === '0';
 
 const { getState, setState } = StateMachine<Agent, IState>();
 
@@ -355,7 +353,9 @@ class SessionConnection {
 
     this._coreSession = connection.createSession(options);
 
-    if (showReplay ?? !shouldHideReplay) {
+    const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
+
+    if (showReplay ?? defaultShowReplay) {
       scriptInstance.launchReplay(options.sessionName, this._coreSession);
     }
 
