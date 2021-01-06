@@ -26,18 +26,20 @@ export default class CoreTab implements IJsPathEventTarget {
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
 
-  protected readonly meta: ISessionMeta;
+  protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly connection: CoreClientConnection;
 
-  constructor({ tabId, sessionId }: ISessionMeta, connection: CoreClientConnection) {
+  constructor(meta: ISessionMeta & { sessionName: string }, connection: CoreClientConnection) {
+    const { tabId, sessionId, sessionName } = meta;
     this.tabId = tabId;
     this.sessionId = sessionId;
     this.meta = {
       sessionId,
       tabId,
+      sessionName,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(this.meta, connection, connection.commandQueue);
+    this.commandQueue = new CoreCommandQueue(meta, connection, connection.commandQueue);
     this.eventHeap = new CoreEventHeap(this.meta, connection);
 
     if (!this.eventHeap.hasEventInterceptors('resource')) {
@@ -146,7 +148,7 @@ export default class CoreTab implements IJsPathEventTarget {
     const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab', opts);
     const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
-    return new CoreTab(sessionMeta, this.connection);
+    return new CoreTab({ ...this.meta, tabId: sessionMeta.tabId }, this.connection);
   }
 
   public async focusTab(): Promise<void> {

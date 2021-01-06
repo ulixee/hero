@@ -101,7 +101,7 @@ export default abstract class CoreClientConnection {
 
   public async createSession(options: ICreateSessionOptions): Promise<CoreSession> {
     const sessionMeta = await this.commandQueue.run<ISessionMeta>('createSession', options);
-    const session = new CoreSession(sessionMeta, this);
+    const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
     this.coreSessions.track(session);
     return session;
   }

@@ -75,7 +75,7 @@ class Log implements ILog {
         .replace('.js', '')
         .replace('.ts', '')
         .replace('build/', '');
-      const printData = {};
+      const printData: any = {};
       for (const [key, value] of Object.entries(entry.data)) {
         if (value === undefined || value === null) continue;
         if (value instanceof Error) {
@@ -86,6 +86,12 @@ class Log implements ILog {
           printData[key] = value;
         }
       }
+
+      if (level === 'warn' || level === 'error') {
+        printData.sessionId = sessionId;
+        printData.sessionName = loggerSessionIdNames.get(sessionId) ?? undefined;
+      }
+
       const params = Object.keys(printData).length ? [printData] : [];
       // eslint-disable-next-line no-console
       console.log(
@@ -116,6 +122,8 @@ export default function logger(module: NodeModule): ILogBuilder {
 
 let idCounter = 0;
 
+const loggerSessionIdNames = new Map<string, string>();
+
 class LogEvents {
   private static subscriptions: { [id: number]: (log: ILogEntry) => any } = {};
 
@@ -135,7 +143,7 @@ class LogEvents {
   }
 }
 
-export { LogEvents };
+export { LogEvents, loggerSessionIdNames };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
   logCreator = builder;
