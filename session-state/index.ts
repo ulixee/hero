@@ -8,7 +8,7 @@ import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import Log, { ILogEntry, LogEvents } from '@secret-agent/commons/Logger';
+import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
 import { IDomChangeEvent } from '@secret-agent/injected-scripts/interfaces/IDomChangeEvent';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
@@ -113,6 +113,8 @@ export default class SessionState {
       timezoneId,
       viewport,
     );
+
+    loggerSessionIdNames.set(sessionId, sessionName);
 
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
@@ -373,6 +375,7 @@ export default class SessionState {
     this.closeDate = new Date();
     this.db.session.close(this.sessionId, this.closeDate);
     LogEvents.unsubscribe(this.logSubscriptionId);
+    loggerSessionIdNames.delete(this.sessionId);
     this.db.flush();
     this.db.close();
     SessionState.registry.delete(this.sessionId);

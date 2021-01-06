@@ -1,9 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import Log from '@secret-agent/commons/Logger';
 import CoreSession from './CoreSession';
-
-const { log } = Log(module);
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();

@@ -1,6 +1,7 @@
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
+import { loggerSessionIdNames } from '@secret-agent/commons/Logger';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -10,6 +11,7 @@ import CoreClientConnection from '../connections/CoreClientConnection';
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<string, CoreTab>();
   public sessionId: string;
+  public sessionName: string;
   public sessionsDataLocation: string;
   public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
@@ -22,17 +24,23 @@ export default class CoreSession implements IJsPathEventTarget {
   protected readonly meta: ISessionMeta;
   private readonly connection: CoreClientConnection;
 
-  constructor(sessionMeta: ISessionMeta, connection: CoreClientConnection) {
-    const { sessionId, sessionsDataLocation, replayApiServer } = sessionMeta;
+  constructor(
+    sessionMeta: ISessionMeta & { sessionName: string },
+    connection: CoreClientConnection,
+  ) {
+    const { sessionId, sessionsDataLocation, replayApiServer, sessionName } = sessionMeta;
     this.sessionId = sessionId;
+    this.sessionName = sessionName;
     this.sessionsDataLocation = sessionsDataLocation;
     this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(this.meta, connection);
+    loggerSessionIdNames.set(sessionId, sessionName);
+    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connection);
     this.eventHeap = new CoreEventHeap(this.meta, connection);
+
     this.addTab(sessionMeta);
   }
 
@@ -59,7 +67,10 @@ export default class CoreSession implements IJsPathEventTarget {
 
   public addTab(tabMeta: ISessionMeta): void {
     if (!this.tabsById.has(tabMeta.tabId)) {
-      this.tabsById.set(tabMeta.tabId, new CoreTab(tabMeta, this.connection));
+      this.tabsById.set(
+        tabMeta.tabId,
+        new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connection),
+      );
     }
   }
 
@@ -70,6 +81,7 @@ export default class CoreSession implements IJsPathEventTarget {
   public async close(): Promise<void> {
     await this.commandQueue.run('closeSession');
     process.nextTick(() => this.connection.closeSession(this));
+    loggerSessionIdNames.delete(this.sessionId);
   }
 
   public async addEventListener(

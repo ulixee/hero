@@ -11,13 +11,24 @@ export default class CoreCommandQueue {
   public lastCommandId = 0;
   private isProcessing = false;
 
+  private readonly sessionMarker: string = '';
+
   constructor(
-    private readonly meta: ISessionMeta | null,
+    private readonly meta: (ISessionMeta & { sessionName: string }) | null,
     private readonly connection: CoreClientConnection,
     parentCommandQueue?: CoreCommandQueue,
   ) {
     if (parentCommandQueue) {
       this.type = parentCommandQueue.type;
+    }
+    if (meta) {
+      const markers = [
+        ''.padEnd(50, '-'),
+        `------${meta.sessionName ?? ''}`.padEnd(50, '-'),
+        `------${meta.sessionId ?? ''}`.padEnd(50, '-'),
+        ''.padEnd(50, '-'),
+      ].join('\n');
+      this.sessionMarker = `\n\n${markers}`;
     }
   }
 
@@ -62,7 +73,9 @@ export default class CoreCommandQueue {
           }
           item.resolve(data);
         } catch (error) {
-          error.stack += `\n${'------CORE COMMANDS'.padEnd(50, '-')}${item.stack}`;
+          error.stack += `\n${'------CORE COMMANDS'.padEnd(50, '-')}${item.stack}${
+            this.sessionMarker
+          }`;
           item.reject(error);
         }
         // force next loop so promises don't simulate synchronous-ity when local core
