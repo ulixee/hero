@@ -17,6 +17,7 @@ import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -286,7 +287,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
         this.then = null;
         return this;
       })
-      .then(onfulfilled, onrejected);
+      .then(onfulfilled, onrejected)
+      .catch(onrejected);
   }
 }
 
@@ -295,7 +297,8 @@ class SessionConnection {
   public hasConnected = false;
 
   public get coreSession(): Promise<CoreSession> {
-    return this._coreSession ?? this.connectSession();
+    if (this._coreSession) return this.getCoreSessionOrReject();
+    return this.connectSession();
   }
 
   public get activeTab(): Tab {
@@ -307,14 +310,14 @@ class SessionConnection {
     this._activeTab = value;
   }
 
-  private _coreSession: Promise<CoreSession>;
+  private _coreSession: Promise<CoreSession | Error>;
   private _activeTab: Tab;
   private _tabs: Tab[] = [];
 
   constructor(private agent: Agent) {}
 
   public async refreshedTabs(): Promise<Tab[]> {
-    const session = await this.coreSession;
+    const session = await this.getCoreSessionOrReject();
     const coreTabs = await session.getTabs();
     const tabIds = await Promise.all(this._tabs.map(x => x.tabId));
     for (const coreTab of coreTabs) {
@@ -328,7 +331,8 @@ class SessionConnection {
   }
 
   public async close(): Promise<void> {
-    const session = await this.coreSession;
+    if (!this.hasConnected) return;
+    const session = await this.getCoreSessionOrReject();
     return session.close();
   }
 
@@ -344,24 +348,38 @@ class SessionConnection {
     this._tabs.push(tab);
   }
 
+  private async getCoreSessionOrReject(): Promise<CoreSession> {
+    if (!this._coreSession) return undefined;
+    const session = await this._coreSession;
+    if (session instanceof Error) return Promise.reject(session);
+    return session;
+  }
+
   private connectSession(): Promise<CoreSession> {
-    if (this.hasConnected) return this._coreSession;
+    if (this.hasConnected) {
+      return this.getCoreSessionOrReject();
+    }
     this.hasConnected = true;
     const { showReplay, coreConnection, ...options } = getState(this.agent).options;
 
     const connection = createConnection(coreConnection ?? { isPersistent: false });
 
-    this._coreSession = connection.createSession(options);
+    this._coreSession = connection.createSession(options).catch(err => {
+      if (err instanceof CanceledPromiseError) return;
+      return err;
+    });
+
+    const session = this.getCoreSessionOrReject();
 
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
-      scriptInstance.launchReplay(options.sessionName, this._coreSession);
+      scriptInstance.launchReplay(options.sessionName, session);
     }
 
-    const coreTab = this._coreSession.then(x => x.firstTab);
+    const coreTab = session.then(x => x.firstTab);
     this._activeTab = createTab(this.agent, coreTab);
     this._tabs = [this._activeTab];
-    return this._coreSession;
+    return session;
   }
 }
