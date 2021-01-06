@@ -22,20 +22,17 @@ export default class ScriptInstance {
   public launchReplay(sessionName: string, coreSession: Promise<CoreSession>): void {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
-    coreSession
-      .then(session => {
-        return replay({
-          scriptInstanceId: this.id,
-          scriptStartDate: this.startDate,
-          sessionsDataLocation: session.sessionsDataLocation,
-          replayApiServer: session.replayApiServer,
-          sessionId: session.sessionId,
-          sessionName,
-        });
-      })
-      .catch(err => {
-        log.warn('Unable to connect to CoreTab', { error: err, sessionId: this.id });
+    // eslint-disable-next-line promise/catch-or-return
+    coreSession.then(session => {
+      return replay({
+        scriptInstanceId: this.id,
+        scriptStartDate: this.startDate,
+        sessionsDataLocation: session.sessionsDataLocation,
+        replayApiServer: session.replayApiServer,
+        sessionId: session.sessionId,
+        sessionName,
       });
+    });
   }
 
   public generateSessionName(name: string, shouldCleanName = true): string {

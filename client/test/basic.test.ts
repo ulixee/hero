@@ -44,7 +44,7 @@ describe('basic SecretAgent tests', () => {
         });
       }
     }
-    const agent = new Agent({ coreConnection: new Piper() });
+    const agent = await new Agent({ coreConnection: new Piper() });
     await agent.close();
 
     const outgoingCommands = outgoing.mock.calls;
