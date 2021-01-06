@@ -16,7 +16,6 @@
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
     "@secret-agent/testing": "1.2.0-alpha.5",
     "@types/ua-parser-js": "^0.7.33",
-    "axios": "^0.19.2",
     "csv-parser": "^2.3.2",
     "moment": "^2.27.0"
   }

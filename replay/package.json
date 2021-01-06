@@ -55,7 +55,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "electron-log": "^4.2.1",
     "moment": "^2.24.0",
