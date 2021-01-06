@@ -374,8 +374,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       deviceScaleFactor: viewport.deviceScaleFactor ?? 1,
       positionX: viewport.positionX,
       positionY: viewport.positionY,
-      screenHeight: viewport.screenHeight,
       screenWidth: viewport.screenWidth,
+      screenHeight: viewport.screenHeight,
       mobile: false,
     });
   }
