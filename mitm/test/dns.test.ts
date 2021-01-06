@@ -1,4 +1,5 @@
 import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import { LookupAddress, promises as nodeDns } from 'dns';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
 import RequestSession from '../handlers/RequestSession';
@@ -81,9 +82,9 @@ test('should cache and round robin results', async () => {
   const spy = jest.spyOn<any, any>(dns, 'lookupDnsEntry');
   const ip = await dns.lookupIp(domain);
   expect(ip).toBeTruthy();
-  expect(dns.dnsEntries.get(domain).isResolved).toBeTruthy();
+  expect(Dns.dnsEntries.get(domain).isResolved).toBeTruthy();
 
-  const cached = await dns.dnsEntries.get(domain).promise;
+  const cached = await Dns.dnsEntries.get(domain).promise;
   expect(cached.aRecords).toHaveLength(2);
 
   const ip2 = await dns.lookupIp(domain);
@@ -91,4 +92,26 @@ test('should cache and round robin results', async () => {
   // should round robin
   expect(ip).not.toBe(ip2);
   expect(spy).toHaveBeenCalledTimes(1);
+});
+
+test('should lookup in the local machine if not found in DoT', async () => {
+  const lookupSpy = jest.spyOn(nodeDns, 'lookup').mockImplementationOnce(async () => {
+    return [
+      <LookupAddress>{
+        address: '127.0.0.1',
+        family: 4,
+      },
+    ] as any;
+  });
+  const domain = 'double-agent.collect';
+  const systemLookupSpy = jest.spyOn<any, any>(dns, 'systemLookup');
+
+  const ip = await dns.lookupIp(domain);
+  expect(ip).toBeTruthy();
+  expect(Dns.dnsEntries.get(domain).isResolved).toBeTruthy();
+
+  const cached = await Dns.dnsEntries.get(domain).promise;
+  expect(cached.aRecords).toHaveLength(1);
+  expect(lookupSpy).toHaveBeenCalledTimes(1);
+  expect(systemLookupSpy).toHaveBeenCalledTimes(1);
 });
