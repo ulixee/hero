@@ -2809,6 +2809,13 @@
   dependencies:
     "@types/integer" "*"
 
+"@types/better-sqlite3@^5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-5.4.1.tgz#d45600bc19f8f41397263d037ca9b0d05df85e58"
+  integrity sha512-8hje3Rhsg/9veTkALfCwiWn7VMrP1QDwHhBSgerttYPABEvrHsMQnU9dlqoM6QX3x4uw3Y06dDVz8uDQo1J4Ng==
+  dependencies:
+    "@types/integer" "*"
+
 "@types/body-parser@*":
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.0.tgz#0685b3c47eb3006ffed117cdd55164b61f80538f"

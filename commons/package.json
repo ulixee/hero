@@ -4,7 +4,9 @@
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.2.0-alpha.4",
-    "better-sqlite3": "^7.1.2"
+    "@secret-agent/core-interfaces": "1.2.0-alpha.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^5.4.1"
   }
 }
