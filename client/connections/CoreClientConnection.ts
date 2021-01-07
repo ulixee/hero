@@ -19,7 +19,7 @@ export default abstract class CoreClientConnection {
   public readonly commandQueue: CoreCommandQueue;
   public options: ICoreConnectionOptions;
 
-  protected connectPromise: Promise<Error | null>;
+  private connectPromise: Promise<Error | null>;
 
   private coreSessions: CoreSessions;
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();

@@ -1,14 +1,11 @@
-import JsonSocket from 'json-socket';
-import Net from 'net';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import { URL } from 'url';
+import WebSocket from 'ws';
 import CoreClientConnection from './CoreClientConnection';
 import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
 
 export default class RemoteCoreConnection extends CoreClientConnection {
-  protected netConnectPromise: Promise<any>;
-  private netSocket: Net.Socket;
-  private jsonSocket: JsonSocket;
+  private wsConnectPromise: Promise<any>;
+  private webSocket: WebSocket;
 
   constructor(options: ICoreConnectionOptions) {
     super(options);
@@ -16,8 +13,9 @@ export default class RemoteCoreConnection extends CoreClientConnection {
   }
 
   public internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
+    const message = JSON.stringify(payload);
     return new Promise((resolve, reject) =>
-      this.jsonSocket.sendMessage(payload, err => {
+      this.webSocket.send(message, err => {
         if (err) reject(err);
         else resolve();
       }),
@@ -25,41 +23,49 @@ export default class RemoteCoreConnection extends CoreClientConnection {
   }
 
   public async disconnect(): Promise<void> {
-    if (this.netSocket && !this.netSocket.destroyed) {
+    if (
+      this.webSocket &&
+      this.webSocket.readyState !== WebSocket.CLOSED &&
+      this.webSocket.readyState !== WebSocket.CLOSING
+    ) {
       await super.disconnect();
-      await new Promise<void>(resolve => {
-        this.netSocket.end(() => process.nextTick(resolve));
-      });
+      this.webSocket.terminate();
     }
-    this.netSocket = null;
-    this.netConnectPromise = null;
+    this.webSocket = null;
   }
 
   public connect(): Promise<Error | null> {
-    if (!this.netConnectPromise) {
-      this.netConnectPromise = this.netConnect().catch(err => err);
+    if (!this.wsConnectPromise) {
+      this.wsConnectPromise = this.wsConnect().catch(err => err);
     }
 
-    return this.netConnectPromise;
+    return this.wsConnectPromise;
   }
 
   public isRemoteConnection(): boolean {
     return false;
   }
 
-  private async netConnect(): Promise<void> {
+  private async wsConnect(): Promise<void> {
     let host = this.options.host;
     if (!host.includes('://')) {
-      host = `tcp://${host}`;
+      host = `ws://${host}`;
     }
-    const parsedUrl = new URL(host);
-    const connect = { host: parsedUrl.hostname, port: parseInt(parsedUrl.port, 10) };
-    this.netSocket = Net.connect(connect);
-    await new Promise<void>(resolve => this.netSocket.once('connect', resolve));
 
-    this.netSocket.once('close', this.disconnect.bind(this));
-    this.jsonSocket = new JsonSocket(this.netSocket);
-    this.jsonSocket.on('message', payload => this.onMessage(payload));
+    this.webSocket = new WebSocket(host);
+    await new Promise<void>((resolve, reject) => {
+      this.webSocket.on('error', reject);
+      this.webSocket.once('open', () => {
+        this.webSocket.off('error', reject);
+        resolve();
+      });
+    });
+    this.webSocket.once('close', this.disconnect.bind(this));
+    this.webSocket.on('message', message => {
+      const payload = JSON.parse(message.toString());
+      this.onMessage(payload);
+    });
+
     await super.connect();
   }
 }

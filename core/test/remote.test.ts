@@ -10,7 +10,7 @@ beforeAll(async () => {
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
   remoteServer = new RemoteServer();
   Helpers.onClose(() => remoteServer.close(), true);
-  await remoteServer.listen({ port: 0, host: '127.0.0.1' });
+  await remoteServer.listen({ port: 0 });
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -20,7 +20,7 @@ describe('basic remote connection tests', () => {
     // bind a core server to core
 
     const handler = new Handler({
-      host: `127.0.0.1:${remoteServer.port}`,
+      host: `ws://127.0.0.1:${remoteServer.port}`,
     });
     const handlerAgent = await handler.createAgent();
     const sessionId = await handlerAgent.sessionId;

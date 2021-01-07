@@ -20,7 +20,7 @@
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
     "typeson": "^5.18.2",
-    "json-socket": "^0.3.0",
+    "ws": "^7.4.2",
     "typeson-registry": "^1.0.0-alpha.38",
     "uuid": "^8.1.0"
   },
