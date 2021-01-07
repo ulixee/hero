@@ -85,7 +85,7 @@ export default class Session extends TypedEventEmitter<{
     if (options.locale) this.browserEmulator.locale = options.locale;
 
     if (!this.browserEmulator.canPolyfill) {
-      log.warn('BrowserEmulators.PolyfillNotSupported', {
+      log.info('BrowserEmulators.PolyfillNotSupported', {
         sessionId: this.id,
         browserEmulatorId: this.browserEmulatorId,
         userAgentString: this.browserEmulator.userAgentString,

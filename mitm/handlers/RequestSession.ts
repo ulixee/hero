@@ -22,8 +22,9 @@ import ResourceState from '../interfaces/ResourceState';
 const { log } = Log(module);
 
 export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
-  public static sessions: { [sessionId: string]: RequestSession } = {};
-  public static proxyPortSessionIds: { [port: number]: string } = {};
+  public static sessionById: { [sessionId: string]: RequestSession } = {};
+  public static sessionIdByPort: { [port: number]: string } = {};
+  public static portsBySessionId: { [sessionId: number]: Set<number> } = {};
 
   public websocketBrowserResourceIds: {
     [headersHash: string]: IResolvablePromise<string>;
@@ -63,7 +64,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
   ) {
     super();
-    RequestSession.sessions[sessionId] = this;
+    RequestSession.sessionById[sessionId] = this;
     this.logger = log.createChild(module, {
       sessionId,
     });
@@ -209,7 +210,18 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.dns.close();
 
     // give it a second for lingering requests to finish
-    setTimeout(() => delete RequestSession.sessions[this.sessionId], 1e3).unref();
+    setTimeout(
+      sessionId => {
+        const ports = RequestSession.portsBySessionId[sessionId] || [];
+        for (const port of ports) {
+          delete RequestSession.sessionIdByPort[port];
+        }
+        delete RequestSession.portsBySessionId[sessionId];
+        delete RequestSession.sessionById[sessionId];
+      },
+      1e3,
+      this.sessionId,
+    ).unref();
   }
 
   public shouldBlockRequest(url: string): boolean {
@@ -303,7 +315,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public static async close(): Promise<void> {
-    await Promise.all(Object.values(RequestSession.sessions).map(x => x.close()));
+    await Promise.all(Object.values(RequestSession.sessionById).map(x => x.close()));
   }
 
   public static readSessionId(
@@ -312,7 +324,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   ): string {
     const authHeader = requestHeaders['proxy-authorization'] as string;
     if (!authHeader) {
-      return RequestSession.proxyPortSessionIds[remotePort];
+      return RequestSession.sessionIdByPort[remotePort];
     }
 
     const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
@@ -321,7 +333,9 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public static registerProxySession(loopbackProxySocket: net.Socket, sessionId: string): void {
     // local port is the side that originates from our http server
-    this.proxyPortSessionIds[loopbackProxySocket.localPort] = sessionId;
+    this.portsBySessionId[sessionId] = this.portsBySessionId[sessionId] || new Set();
+    this.portsBySessionId[sessionId].add(loopbackProxySocket.localPort);
+    this.sessionIdByPort[loopbackProxySocket.localPort] = sessionId;
   }
 
   public static sendNeedsAuth(socket: net.Socket): void {
