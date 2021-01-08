@@ -1,16 +1,27 @@
-import IPuppetBrowser from "@secret-agent/puppet-interfaces/IPuppetBrowser";
-import ILaunchedProcess from "@secret-agent/puppet-interfaces/ILaunchedProcess";
-import IPuppetLauncher from "@secret-agent/puppet-interfaces/IPuppetLauncher";
-import os from "os";
-import { Browser } from "./lib/Browser";
-import { Connection } from "./lib/Connection";
+import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
+import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
+import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
+import os from 'os';
+import Path from 'path';
+import { Browser } from './lib/Browser';
+import { Connection } from './lib/Connection';
+
+let counter = 0;
 
 const PuppetLauncher: IPuppetLauncher = {
   getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean }) {
     const chromeArguments = [...defaultArgs];
     if (!options.showBrowser) {
-      chromeArguments.push('--headless', '--hide-scrollbars', '--mute-audio');
+      chromeArguments.push(
+        '--headless',
+        '--hide-scrollbars',
+        '--mute-audio',
+        '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4',
+      );
     } else {
+      chromeArguments.push(
+        `--user-data-dir=${Path.join(os.tmpdir(), 'chromium-headed-data', String((counter += 1)))}`,
+      );
       chromeArguments.push('--auto-open-devtools-for-tabs');
     }
 
@@ -64,11 +75,13 @@ const defaultArgs = [
   '--disable-renderer-backgrounding',
   '--disable-sync',
   '--disable-gpu',
-
+  '--enable-logging',
   '--force-color-profile=srgb',
   '--use-gl=swiftshader-webgl',
   '--use-gl=swiftshader',
   '--use-gl=osmesa',
+
+  '--incognito',
 
   '--metrics-recording-only',
   '--no-first-run',
@@ -82,8 +95,6 @@ const defaultArgs = [
   '--allow-running-insecure-content',
 
   '--lang=en-US,en;q=0.9',
-  '--window-size=1920,1080',
-  '--window-position=0,0',
 
   // don't leak private ip
   '--force-webrtc-ip-handling-policy=default_public_interface_only',
