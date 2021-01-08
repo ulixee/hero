@@ -8,6 +8,7 @@ import SessionState from '../index';
 
 export default class SessionLoader extends EventEmitter {
   public static eventStreams = [
+    'resources',
     'dom-changes',
     'mouse-events',
     'scroll-events',
@@ -129,13 +130,27 @@ export default class SessionLoader extends EventEmitter {
       if (resourcesToSend.length) this.emit('resources', resourcesToSend);
     });
 
+    if (this.session.closeDate) {
+      this.emit('closed');
+    }
+
     // don't close a live db
     if (db.readonly) {
-      setImmediate(() => {
-        db.close();
-        this.emit('close');
-      });
+      setImmediate(() => db.close());
     }
+  }
+
+  public close() {
+    const db = this.sessionDb;
+    db.focusEvents.unsubscribe();
+    db.resources.unsubscribe();
+    db.scrollEvents.unsubscribe();
+    db.mouseEvents.unsubscribe();
+    db.session.unsubscribe();
+    db.frameNavigations.unsubscribe();
+    db.tabs.unsubscribe();
+    db.domChanges.unsubscribe();
+    db.frames.unsubscribe();
   }
 
   public checkState() {
@@ -151,6 +166,10 @@ export default class SessionLoader extends EventEmitter {
       lastState.lastCommandName !== scriptState.lastCommandName
     ) {
       this.emit('script-state', scriptState);
+      if (scriptState.closeDate) {
+        // give sqlite time to flush out published changes
+        setTimeout(() => this.emit('closed'), 500);
+      }
     }
   }
 

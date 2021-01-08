@@ -1,4 +1,4 @@
-import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
+import type { Database as SqliteDatabase, Statement } from 'better-sqlite3';
 
 type SqliteTypes = 'INTEGER' | 'TEXT' | 'BLOB';
 type IRecord = (string | number | Buffer)[];
@@ -35,6 +35,10 @@ export default abstract class SqliteTable<T> {
     const pendingRecords = this.pendingInserts.map(x => this.insertToObject(x));
     this.lastSubscriptionPublishTime = new Date();
     process.nextTick(callbackFn, this.all().concat(pendingRecords));
+  }
+
+  public unsubscribe(): void {
+    this.insertCallbackFn = null;
   }
 
   public flush(): void {
@@ -81,6 +85,7 @@ export default abstract class SqliteTable<T> {
   }
 
   private publishPendingRecords(): void {
+    if (!this.insertCallbackFn) return;
     const records = [...this.insertSubscriptionRecords];
     this.insertSubscriptionRecords.length = 0;
     this.lastSubscriptionPublishTime = new Date();

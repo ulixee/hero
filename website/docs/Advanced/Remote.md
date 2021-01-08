@@ -1,6 +1,6 @@
 # Remote
 
-SecretAgent comes out of the box ready to act as a remote process that can communicate over a tcp socket to a client.
+SecretAgent comes out of the box ready to act as a remote process that can communicate over a WebSocket to a client.
 
 You'll need a simple script to start the server on the machine where the `secret-agent` npm package is installed. Make sure to open the port you allocate on any firewall that a client might have to pass through:
 

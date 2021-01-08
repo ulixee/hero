@@ -1,8 +1,8 @@
 import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import * as http2 from 'http2';
-import { http2StreamToJson, ITestKoaServer } from '@secret-agent/testing/helpers';
+import WebSocket from 'ws';
+import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { createPromise } from '@secret-agent/commons/utils';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
@@ -35,35 +35,33 @@ describe('basic Replay API tests', () => {
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession();
 
-    const api = http2.connect(meta.replayApiServer);
+    const api = new WebSocket(meta.replayApiServer, {
+      headers: {
+        'data-location': meta.sessionsDataLocation,
+        'session-id': meta.sessionId,
+      },
+    });
     const commandMap: { [id: string]: ICommandWithResult } = {};
     const paintMap: {
       [timestamp: string]: IDomChangeRecord[];
     } = {};
     const gotCommandsPromise = createPromise();
-    api.on('stream', async (stream, headers) => {
-      const path = headers[':path'];
+    api.on('message', async message => {
+      const { event, data } = JSON.parse(message.toString());
 
-      if (path === '/commands') {
-        const json = await http2StreamToJson<ICommandWithResult[]>(stream);
-        for (const command of json) {
+      if (event === 'commands') {
+        for (const command of data) {
           commandMap[command.id] = command;
         }
         if (Object.keys(commandMap).length >= 8) {
           gotCommandsPromise.resolve();
         }
-      } else if (path === '/dom-changes') {
-        const json = await http2StreamToJson<IDomChangeRecord[]>(stream);
-        for (const change of json) {
+      } else if (event === 'dom-changes') {
+        for (const change of data) {
           if (!paintMap[change.timestamp]) paintMap[change.timestamp] = [];
           paintMap[change.timestamp].push(change);
         }
       }
-    });
-    api.request({
-      ':path': `/`,
-      'data-location': meta.sessionsDataLocation,
-      'session-id': meta.sessionId,
     });
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
@@ -101,6 +99,6 @@ describe('basic Replay API tests', () => {
     expect(paintEvents[1]).toHaveLength(14);
 
     await Core.shutdown(true);
-    api.destroy();
+    if (api.readyState === WebSocket.OPEN) api.terminate();
   }, 20e3);
 });
