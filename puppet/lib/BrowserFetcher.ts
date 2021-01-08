@@ -15,10 +15,9 @@
  */
 
 import * as os from 'os';
-import * as fs from 'fs';
+import { createWriteStream, existsSync, promises as fs } from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import { promisify } from 'util';
 import * as childProcess from 'child_process';
 import * as https from 'https';
 import * as http from 'http';
@@ -64,15 +63,11 @@ function downloadURL(platform: Platform, host: string, revision: string): string
   return util.format(downloadURLs[platform], host, revision, archiveName(platform, revision));
 }
 
-const readdirAsync = promisify(fs.readdir.bind(fs));
-const mkdirAsync = promisify(fs.mkdir.bind(fs));
-const unlinkAsync = promisify(fs.unlink.bind(fs));
-const chmodAsync = promisify(fs.chmod.bind(fs));
-
 function existsAsync(filePath: string): Promise<boolean> {
-  return new Promise(resolve => {
-    fs.access(filePath, err => resolve(!err));
-  });
+  return fs
+    .access(filePath)
+    .then(() => true)
+    .catch(() => false);
 }
 
 /**
@@ -183,7 +178,8 @@ export class BrowserFetcher {
     const archivePath = path.join(this._downloadsFolder, fileName);
     const outputPath = this._getFolderPath(revision);
     if (await existsAsync(outputPath)) return this.revisionInfo(revision);
-    if (!(await existsAsync(this._downloadsFolder))) await mkdirAsync(this._downloadsFolder);
+    if (!(await existsAsync(this._downloadsFolder)))
+      await fs.mkdir(this._downloadsFolder, { recursive: true });
     if (os.arch() === 'arm64') {
       throw new Error('The chromium binary is not available for arm64');
     }
@@ -191,10 +187,10 @@ export class BrowserFetcher {
       await downloadFile(url, archivePath, progressCallback);
       await install(archivePath, outputPath);
     } finally {
-      if (await existsAsync(archivePath)) await unlinkAsync(archivePath);
+      if (await existsAsync(archivePath)) await fs.unlink(archivePath);
     }
     const revisionInfo = this.revisionInfo(revision);
-    if (revisionInfo) await chmodAsync(revisionInfo.executablePath, 0o755);
+    if (revisionInfo) await fs.chmod(revisionInfo.executablePath, 0o755);
     return revisionInfo;
   }
 
@@ -206,7 +202,7 @@ export class BrowserFetcher {
    */
   public async localRevisions(): Promise<string[]> {
     if (!(await existsAsync(this._downloadsFolder))) return [];
-    const fileNames = await readdirAsync(this._downloadsFolder);
+    const fileNames = await fs.readdir(this._downloadsFolder);
     return fileNames
       .map(fileName => parseFolderPath(fileName))
       .filter(entry => entry && entry.platform === this._platform)
@@ -252,7 +248,7 @@ export class BrowserFetcher {
     else throw new Error(`Unsupported platform: ${this._platform}`);
 
     const url = downloadURL(this._platform, this._downloadHost, revision);
-    const local = fs.existsSync(folderPath);
+    const local = existsSync(folderPath);
     const revisionInfo = {
       revision,
       executablePath,
@@ -325,7 +321,7 @@ function downloadFile(
       downloadReject(error);
       return;
     }
-    const file = fs.createWriteStream(destinationPath);
+    const file = createWriteStream(destinationPath);
     file.on('finish', () => downloadResolve());
     file.on('error', error => downloadReject(error));
     response.pipe(file);
@@ -345,7 +341,9 @@ function install(archivePath: string, folderPath: string): Promise<unknown> {
   npmlog(`Installing ${archivePath} to ${folderPath}`);
   if (archivePath.endsWith('.zip')) return extractZip(archivePath, { dir: folderPath });
   if (archivePath.endsWith('.dmg')) {
-    return mkdirAsync(folderPath).then(() => installDMG(archivePath, folderPath));
+    return fs
+      .mkdir(folderPath, { recursive: true })
+      .then(() => installDMG(archivePath, folderPath));
   }
   throw new Error(`Unsupported archive format: ${archivePath}`);
 }
@@ -364,7 +362,7 @@ async function installDMG(dmgPath: string, folderPath: string): Promise<void> {
     if (!volumes) throw new Error(`Could not find volume path in ${stdout}`);
     mountPath = volumes[0];
 
-    const fileNames = await readdirAsync(mountPath);
+    const fileNames = await fs.readdir(mountPath);
 
     const appName = fileNames.filter(item => typeof item === 'string' && item.endsWith('.app'))[0];
     if (!appName) throw new Error(`Cannot find app in ${mountPath}`);

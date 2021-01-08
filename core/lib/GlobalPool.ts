@@ -46,7 +46,8 @@ export default class GlobalPool {
 
     for (const emulatorId of browserEmulatorIds) {
       const browserEmulator = BrowserEmulators.getClass(emulatorId);
-      this.addPuppet(browserEmulator.engine);
+      const puppet = await this.addPuppet(browserEmulator.engine);
+      await puppet.isReady;
     }
 
     this.resolveWaitingConnection();
@@ -89,16 +90,21 @@ export default class GlobalPool {
     log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
   }
 
-  private static addPuppet(engine: IBrowserEngine) {
+  private static async addPuppet(engine: IBrowserEngine): Promise<Puppet> {
     const existing = this.getPuppet(engine);
-    if (existing) return existing;
+    if (existing) return Promise.resolve(existing);
 
     const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
     const showBrowser = !!process.env.SHOW_BROWSER;
     const showBrowserLogs = !!process.env.DEBUG;
-    puppet.start({ proxyPort: this.mitmServer.port, showBrowser, pipeBrowserIo: showBrowserLogs });
+    const browserOrError = await puppet.start({
+      proxyPort: this.mitmServer.port,
+      showBrowser,
+      pipeBrowserIo: showBrowserLogs,
+    });
+    if (browserOrError instanceof Error) throw browserOrError;
     return puppet;
   }
 
@@ -121,7 +127,8 @@ export default class GlobalPool {
       const session = new Session(options);
       session.on('closing', this.releaseConnection.bind(this));
 
-      puppet = this.getPuppet(session.browserEngine) ?? this.addPuppet(session.browserEngine);
+      puppet =
+        this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

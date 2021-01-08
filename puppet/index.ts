@@ -5,7 +5,9 @@ import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
 import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import { existsSync } from 'fs';
 import launchProcess from './lib/launchProcess';
+import { getExecutablePath } from './lib/browserPaths';
 
 const { log } = Log(module);
 
@@ -14,30 +16,32 @@ export default class Puppet {
   public readonly id: number;
   public readonly engine: IBrowserEngine;
   public isShuttingDown: boolean;
-  private browser: Promise<IPuppetBrowser>;
+  private browserOrError: Promise<IPuppetBrowser | Error>;
+
+  public get isReady(): Promise<IPuppetBrowser> {
+    return this.browserOrError.then(x => {
+      if (x instanceof Error) throw x;
+      return x;
+    });
+  }
 
   constructor(engine: IBrowserEngine) {
     this.engine = engine;
     this.isShuttingDown = false;
     this.id = puppBrowserCounter;
-    this.browser = null;
+    this.browserOrError = null;
     puppBrowserCounter += 1;
   }
 
   public start(
-    args: {
-      proxyPort?: number;
-      showBrowser?: boolean;
-      pipeBrowserIo?: boolean;
-    } = {
+    args: ILaunchArgs = {
       showBrowser: false,
       pipeBrowserIo: false,
     },
-  ) {
-    if (this.browser) {
-      return;
+  ): Promise<IPuppetBrowser | Error> {
+    if (this.browserOrError) {
+      return this.browserOrError;
     }
-    const { proxyPort, showBrowser, pipeBrowserIo } = args;
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
@@ -45,18 +49,13 @@ export default class Puppet {
       launcher = PuppetChrome;
     }
 
-    const launchArgs = launcher.getLaunchArgs({ proxyPort, showBrowser });
-    const launchedProcess = launchProcess(
-      this.engine.executablePath,
-      launchArgs,
-      {},
-      pipeBrowserIo,
-    );
-    this.browser = launcher.createPuppet(launchedProcess, this.engine.revision);
+    this.browserOrError = this.launchEngine(launcher, args).catch(err => err);
+    return this.browserOrError;
   }
 
   public async newContext(emulation: IBrowserEmulationSettings, logger: IBoundLog) {
-    const browser = await this.browser;
+    const browser = await this.browserOrError;
+    if (browser instanceof Error) throw browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
     return browser.newContext(emulation, logger);
   }
@@ -66,14 +65,50 @@ export default class Puppet {
     this.isShuttingDown = true;
     log.stats('Puppet.Closing');
 
-    const browserPromise = this.browser;
-    this.browser = null;
+    const browserPromise = this.browserOrError;
+    this.browserOrError = null;
 
     try {
       const browser = await browserPromise;
-      if (browser) await browser.close();
+      if (browser && !(browser instanceof Error)) await browser.close();
     } catch (error) {
       log.error('Puppet.Closing:Error', { sessionId: null, error });
     }
   }
+
+  private async launchEngine(
+    launcher: IPuppetLauncher,
+    args: ILaunchArgs,
+  ): Promise<IPuppetBrowser> {
+    const executablePath = this.engine.executablePath;
+
+    if (!existsSync(executablePath)) {
+      const errorMessageLines = [
+        `Failed to launch ${this.engine.browser}@${this.engine.revision} because executable doesn't exist at ${executablePath}`,
+      ];
+
+      const packagedPath = getExecutablePath(this.engine.browser, this.engine.revision);
+      // If we tried using stock downloaded browser, suggest re-installing SecretAgent.
+      if (executablePath === packagedPath)
+        errorMessageLines.push(
+          `Try re-installing SecretAgent with "npm install secret-agent" or re-install any custom BrowserEmulators.`,
+        );
+      throw new Error(errorMessageLines.join('\n'));
+    }
+
+    try {
+      const { pipeBrowserIo, proxyPort, showBrowser } = args;
+      const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
+      const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
+      return launcher.createPuppet(launchedProcess, this.engine.revision);
+    } catch (err) {
+      throw launcher.translateLaunchError(err);
+    }
+  }
+}
+
+interface ILaunchArgs {
+  proxyPort?: number;
+  showBrowser?: boolean;
+  pipeBrowserIo?: boolean;
 }

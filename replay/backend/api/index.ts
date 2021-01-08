@@ -64,7 +64,6 @@ export default class ReplayApi {
     });
 
     this.websocket.once('open', () => {
-      this.isReadyResolvable.resolve();
       this.websocket.off('error', this.isReadyResolvable.reject);
     });
     this.websocket.once('error', this.isReadyResolvable.reject);
@@ -72,7 +71,7 @@ export default class ReplayApi {
     ReplayApi.websockets.add(this.websocket);
     this.websocket.on('close', () => {
       ReplayApi.websockets.delete(this.websocket);
-      console.log('Ws Session closed');
+      console.log('Ws Session closed', this.saSession.id);
     });
     this.websocket.on('message', this.onMessage.bind(this));
   }

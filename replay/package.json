@@ -55,7 +55,6 @@
   "license": "MIT",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
-    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "electron-log": "^4.2.1",
     "moment": "^2.24.0",
@@ -63,11 +62,15 @@
     "source-map-support": "^0.5.19",
     "tar-fs": "^2.1.0",
     "ws": "^7.4.2",
-    "uuid": "^8.3.1"
+    "proper-lockfile": "^4.1.1",
+    "uuid": "^8.3.1",
+    "semver": "^7.3.4"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.113",
     "@types/node": "^13.13.34",
+    "@types/semver": "^7.3.4",
+    "@types/proper-lockfile": "^4.1.1",
     "concurrently": "^5.2.0",
     "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
