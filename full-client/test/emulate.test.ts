@@ -172,3 +172,24 @@ describe('setScreensize', () => {
     expect(await getQueryValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
   });
 });
+
+describe('mouse', () => {
+  it('should emulate the hover media feature', async () => {
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+
+    async function getQueryValue(mediaQuery: string) {
+      const result = await agent.getJsValue(mediaQuery);
+      return result.value;
+    }
+
+    expect(await getQueryValue(`matchMedia('(hover: none)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(hover: hover)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(any-hover: none)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(any-hover: hover)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(pointer: coarse)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(pointer: fine)').matches`)).toBe(true);
+    expect(await getQueryValue(`matchMedia('(any-pointer: coarse)').matches`)).toBe(false);
+    expect(await getQueryValue(`matchMedia('(any-pointer: fine)').matches`)).toBe(true);
+  });
+});

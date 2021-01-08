@@ -9,7 +9,7 @@ import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Puppet from '@secret-agent/puppet';
 import Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import Chrome83 from '@secret-agent/emulate-chrome-83';
+import DefaultBrowser from '@secret-agent/emulate-chrome-83';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
 
@@ -17,7 +17,7 @@ const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
-  public static defaultBrowserEmulatorId = Chrome83.id;
+  public static defaultBrowserEmulatorId = DefaultBrowser.id;
   public static maxConcurrentAgentsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
