@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import * as Fs from 'fs';
+import * as Https from 'https';
 import * as TarFs from 'tar-fs';
-import Axios from 'axios';
 import * as ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import * as os from 'os';
 import * as Path from 'path';
-import { distDir, isBinaryInstalled, recordVersion, version } from './Utils';
+import { IncomingMessage } from 'http';
+import { getInstallDirectory, isBinaryInstalled, recordVersion, version } from './Utils';
 
 if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
   process.exit(0);
@@ -26,11 +27,8 @@ if (isBinaryInstalled()) {
     win32: 'win',
   };
 
-  const response = await Axios.get(
+  const response = await download(
     `https://github.com/ulixee/secret-agent/releases/download/v${version}/replay-${version}-${platformNames[platform]}.tar.gz`,
-    {
-      responseType: 'stream',
-    },
   );
   const length = parseInt(response.headers['content-length'], 10);
 
@@ -43,7 +41,7 @@ if (isBinaryInstalled()) {
     width: 20,
     total: length,
   });
-  for await (const chunk of response.data) {
+  for await (const chunk of response) {
     bar.tick(chunk.length);
     output.write(chunk);
   }
@@ -51,7 +49,7 @@ if (isBinaryInstalled()) {
   await new Promise(resolve => {
     Fs.createReadStream(tmpFile)
       .pipe(createGunzip())
-      .pipe(TarFs.extract(distDir))
+      .pipe(TarFs.extract(getInstallDirectory()))
       .on('finish', resolve);
   });
 
@@ -60,3 +58,23 @@ if (isBinaryInstalled()) {
   console.error(err.stack);
   process.exit(1);
 });
+
+function download(filepath: string): Promise<IncomingMessage> {
+  return new Promise<IncomingMessage>((resolve, reject) => {
+    const req = Https.get(filepath, res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return download(res.headers.location).then(resolve).catch(reject);
+      }
+
+      try {
+        resolve(res);
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', err => {
+      console.log('ERROR downloading needed Secret Agent library %s', filepath, err);
+      reject(err);
+    });
+  });
+}

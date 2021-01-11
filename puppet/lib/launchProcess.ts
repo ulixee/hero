@@ -32,7 +32,7 @@ export default function launchProcess(
   processArguments: string[],
   env: NodeJS.ProcessEnv,
   pipeIo = true,
-) {
+): Promise<ILaunchedProcess> {
   const stdio: StdioOptions = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
   if (!pipeIo) {
     stdio[1] = 'ignore';
@@ -49,19 +49,18 @@ export default function launchProcess(
     env,
     stdio,
   });
+  // Prevent Unhandled 'error' event.
+  launchedProcess.on('error', () => {});
+
   if (!launchedProcess.pid) {
-    launchedProcess.once('error', error => {
-      if (logProcessExit) {
-        log.error('Puppet.LaunchError', { error, sessionId: null });
-      }
+    return new Promise<ILaunchedProcess>((resolve, reject) => {
+      launchedProcess.once('error', error => {
+        reject(new Error(`Failed to launch browser: ${error}`));
+      });
     });
-    throw new Error('Failed to launch');
   }
 
-  let exe = executablePath
-    .split(Path.sep)
-    .pop()
-    .toLowerCase();
+  let exe = executablePath.split(Path.sep).pop().toLowerCase();
   exe = exe[0].toUpperCase() + exe.slice(1);
 
   if (pipeIo) {
@@ -90,10 +89,10 @@ export default function launchProcess(
     launchedProcess.stdio[4] as Readable,
   );
 
-  return {
+  return Promise.resolve(<ILaunchedProcess>{
     transport,
     close,
-  } as ILaunchedProcess;
+  });
 
   function close() {
     if (launchedProcess.killed || processKilled) return;

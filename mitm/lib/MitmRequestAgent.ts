@@ -92,7 +92,11 @@ export default class MitmRequestAgent {
   }
 
   public close(): void {
-    this.http2Sessions.map(x => x.client.destroy());
+    for (const session of this.http2Sessions) {
+      session.mitmSocket.close();
+      session.client.destroy();
+      session.client.unref();
+    }
     this.http2Sessions.length = 0;
     for (const socket of this.sockets) {
       socket.close();

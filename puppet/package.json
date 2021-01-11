@@ -9,7 +9,7 @@
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "5.0.0",
-    "progress": "^2.0.1",
+    "progress": "^2.0.3",
     "proxy-from-env": "^1.1.0",
     "rimraf": "^3.0.2"
   },

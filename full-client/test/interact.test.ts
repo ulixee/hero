@@ -41,7 +41,7 @@ describe('basic Interact tests', () => {
 
     await agent.close();
     await httpServer.close();
-  }, 20e3);
+  }, 30e3);
 
   it('should be able to get multiple entries out of the pool', async () => {
     const httpServer = await Helpers.runHttpServer({

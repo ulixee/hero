@@ -29,7 +29,8 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         ...defaultBrowserOptions,
         executablePath: 'random-invalid-path',
       });
-      expect(browser.start.bind(browser)).toThrow('Failed to launch');
+      await browser.start();
+      await expect(browser.isReady).rejects.toThrowError('Failed to launch');
     });
 
     it('should be callable twice', async () => {

@@ -54,6 +54,27 @@ const PuppetLauncher: IPuppetLauncher = {
       throw error;
     }
   },
+  translateLaunchError(error: Error): Error {
+    // These error messages are taken from Chromium source code as of July, 2020:
+    // https://github.com/chromium/chromium/blob/70565f67e79f79e17663ad1337dc6e63ee207ce9/content/browser/zygote_host/zygote_host_impl_linux.cc
+    if (
+      !error.message.includes('crbug.com/357670') &&
+      !error.message.includes('No usable sandbox!') &&
+      !error.message.includes('crbug.com/638180')
+    ) {
+      return error;
+    }
+    error.stack += [
+      `\nChromium sandboxing failed!`,
+      `================================`,
+      `To workaround sandboxing issues, do either of the following:`,
+      `  - (preferred): Configure environment to support sandboxing (eg: in Docker, use custom seccomp profile + non-root user + --ipc=host)`,
+      `  - (alternative): Launch Chromium without sandbox using 'chromiumSandbox: false' option`,
+      `================================`,
+      ``,
+    ].join('\n');
+    return error;
+  },
 };
 export default PuppetLauncher;
 

@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "@secret-agent/commons": "1.2.0-alpha.4",
-    "@secret-agent/core": "1.2.0-alpha.5",
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "@secret-agent/replay": "1.2.0-alpha.4",
     "awaited-dom": "^1.1.10",
@@ -17,6 +16,7 @@
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@secret-agent/testing": "1.2.0-alpha.5"
+    "@secret-agent/testing": "1.2.0-alpha.5",
+    "@secret-agent/core": "1.2.0-alpha.5"
   }
 }

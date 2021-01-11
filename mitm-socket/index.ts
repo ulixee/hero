@@ -186,6 +186,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     if (this.connectError)
       this.socket.destroy(buildConnectError(this.connectError, this.callStack));
     this.socket.end();
+    this.socket.unref();
     this.isConnected = false;
     unlink(this.socketPath, () => null);
     delete this.socket;

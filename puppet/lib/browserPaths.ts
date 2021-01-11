@@ -20,7 +20,7 @@ export function getExecutablePath(browser: string, revision: string) {
 }
 
 export function getInstallDirectory(browser: string, revision: string) {
-  return `${getCacheDirectory()}/${browser}-${revision}`;
+  return `${getCacheDirectory()}/secret-agent/${browser}-${revision}`;
 }
 
 function getCacheDirectory() {

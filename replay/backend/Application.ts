@@ -8,6 +8,7 @@ import ReplayApi from './api';
 import storage from './storage';
 import Window from './models/Window';
 import IReplayMeta from '../shared/interfaces/IReplayMeta';
+import ScriptRegistrationServer from '~backend/api/ScriptRegistrationServer';
 
 // NOTE: this has to come before app load
 protocol.registerSchemesAsPrivileged([
@@ -18,6 +19,7 @@ export default class Application {
   public static instance = new Application();
   public static devServerUrl = process.env.WEBPACK_DEV_SERVER_URL;
   public overlayManager = new OverlayManager();
+  public registrationServer: ScriptRegistrationServer;
 
   public async start() {
     const gotTheLock = app.requestSingleInstanceLock();
@@ -27,12 +29,13 @@ export default class Application {
       return;
     }
 
-    app.on('second-instance', async (e, argv) => {
-      await this.loadLocationFromArgv(argv);
+    app.on('second-instance', () => {
+      console.log('CLOSING SECOND APP');
     });
 
     app.on('quit', () => {
       ReplayApi.quit();
+      this.registrationServer?.close();
 
       storage.persistAll();
     });
@@ -42,8 +45,7 @@ export default class Application {
     await app.whenReady();
     this.registerFileProtocol();
     await this.overlayManager.start();
-    await this.loadLocationFromArgv(process.argv);
-
+    this.registrationServer = new ScriptRegistrationServer(this.registerScript.bind(this));
     Menu.setApplicationMenu(generateAppMenu());
   }
 
@@ -54,47 +56,7 @@ export default class Application {
     return `app://./${page}.html`;
   }
 
-  private async loadLocationFromArgv(argv: string[]) {
-    const args = argv.slice(2);
-    console.log('Launched with args', argv.slice(2));
-    if (!args.length) {
-      return this.createWindowIfNeeded();
-    }
-
-    const replayMeta: IReplayMeta = {} as any;
-    for (const arg of args) {
-      if (!arg || !arg.startsWith('--replay')) continue;
-      const [key, val] = arg.split('=');
-      let value = val;
-      if (value.startsWith('"')) {
-        value = value.slice(1, value.length - 1);
-      }
-      if (key === '--replay-data-location') {
-        replayMeta.dataLocation = value;
-      }
-      if (key === '--replay-session-name') {
-        replayMeta.sessionName = value;
-      }
-      if (key === '--replay-script-instance-id') {
-        replayMeta.scriptInstanceId = value;
-      }
-      if (key === '--replay-script-start-date') {
-        replayMeta.scriptStartDate = value;
-      }
-      if (key === '--replay-session-id') {
-        replayMeta.sessionId = value;
-      }
-      if (key === '--replay-api-server') {
-        replayMeta.sessionStateApi = value;
-      }
-      if (key === '--replay-api-path') {
-        ReplayApi.serverStartPath = value;
-      }
-      if (key === '--replay-node-path') {
-        ReplayApi.nodePath = value;
-      }
-    }
-
+  public async registerScript(replayMeta: IReplayMeta) {
     if (this.shouldAppendToOpenReplayScript(replayMeta)) return;
 
     const window = await this.loadSessionReplay(replayMeta, true);
