@@ -17,6 +17,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['type', 'TEXT'],
         ['receivedAtCommandId', 'INTEGER'],
         ['seenAtCommandId', 'INTEGER'],
+        ['requestMethod', 'TEXT'],
         ['requestUrl', 'TEXT'],
         ['requestHeaders', 'TEXT'],
         ['requestTrailers', 'TEXT'],
@@ -79,6 +80,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.type,
       meta.receivedAtCommandId,
       null,
+      meta.request.method,
       meta.request.url,
       JSON.stringify(meta.request.headers ?? {}),
       JSON.stringify(meta.request.trailers ?? {}),
@@ -134,6 +136,7 @@ export interface IResourcesRecord {
   type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;
+  requestMethod: string;
   requestUrl: string;
   requestHeaders: string;
   requestTrailers?: string;
