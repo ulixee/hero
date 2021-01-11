@@ -129,7 +129,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       });
 
     const resource = <IPuppetNetworkEvents['resource-will-be-requested']>{
-      browserRequestId: networkRequest.networkId,
+      browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
       url: networkRequest.request.url,
       method: networkRequest.request.method,
