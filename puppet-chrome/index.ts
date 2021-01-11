@@ -89,7 +89,7 @@ const defaultArgs = [
   '--disable-default-apps',
   '--disable-dev-shm-usage',
   '--disable-extensions',
-  '--disable-features=TranslateUI,site-per-process',
+  '--disable-features=TranslateUI,site-per-process,OutOfBlinkCors',
   '--disable-hang-monitor',
   '--disable-ipc-flooding-protection',
   '--disable-prompt-on-repost',
