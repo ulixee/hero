@@ -172,9 +172,9 @@ function proxySetter<T, K extends keyof T>(
   const { descriptorOwner, descriptor } = descriptorInHierarchy;
   const toString = descriptor.set.toString();
   descriptor.set = new Proxy(descriptor.set, {
-    apply(_, thisArg) {
+    apply(target, thisArg, args) {
       if (!overrideOnlyForInstance || thisArg === thisObject) {
-        const result = overrideFn(...arguments);
+        const result = overrideFn(target as any, thisArg, ...args);
         if (result !== ProxyOverride.callOriginal) return result;
       }
       return ReflectCached.apply(...arguments);

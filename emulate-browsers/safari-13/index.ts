@@ -24,7 +24,8 @@ import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourc
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
+import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
+import Log from '@secret-agent/commons/Logger';
 import pkg from './package.json';
 import headerProfiles from './data/headers.json';
 import userAgentOptions from './data/user-agent-options.json';
@@ -36,6 +37,7 @@ const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigato
 const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
 
 const cookieCallbackName = 'SecretAgentSetCookie';
+const { log } = Log(module);
 
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
@@ -135,7 +137,14 @@ export default class Safari13 {
     const result = this.domOverrides.build();
     Object.assign(result[0], {
       callback: ({ cookie, origin }) => {
-        this.cookieJar.setCookie(cookie, origin);
+        try {
+          this.cookieJar.setCookie(cookie, origin);
+        } catch (error) {
+          log.warn('Error setting cookie from page', {
+            error,
+            sessionId: null, // TODO: @caleb - can you plug in sessionid to the emulators (or a child logger)
+          });
+        }
       },
       callbackWindowName: cookieCallbackName,
     });
