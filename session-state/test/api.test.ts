@@ -30,12 +30,12 @@ describe('basic Replay API tests', () => {
         </body>
       `;
     });
-    await Core.startReplayServer();
+    await Core.start();
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession();
 
-    const api = new WebSocket(meta.replayApiServer, {
+    const api = new WebSocket(`${await Core.server.address}/replay`, {
       headers: {
         'data-location': meta.sessionsDataLocation,
         'session-id': meta.sessionId,

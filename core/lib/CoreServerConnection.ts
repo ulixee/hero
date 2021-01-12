@@ -30,7 +30,10 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const { messageId, command, meta, args } = payload;
+    const { messageId, command, meta } = payload;
+
+    // json converts args to null which breaks undefined argument handlers
+    const args = payload.args.map(x => (x === null ? undefined : x));
 
     let data: any;
     let isError = false;
@@ -113,9 +116,9 @@ export default class CoreServerConnection extends TypedEventEmitter<{
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public getTabs(meta: ISessionMeta): Promise<ISessionMeta[]> {
+  public getTabs(meta: ISessionMeta): ISessionMeta[] {
     const session = Session.get(meta.sessionId);
-    return Promise.all(session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x)));
+    return session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x));
   }
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
@@ -193,13 +196,12 @@ export default class CoreServerConnection extends TypedEventEmitter<{
     }, this.autoShutdownMillis).unref();
   }
 
-  private async getSessionMeta(tab: Tab): Promise<ISessionMeta> {
+  private getSessionMeta(tab: Tab): ISessionMeta {
     const session = tab.session;
     return {
       sessionId: session.id,
       sessionsDataLocation: session.baseDir,
       tabId: tab.id,
-      replayApiServer: (await Core.replayServer)?.url,
     };
   }
 }

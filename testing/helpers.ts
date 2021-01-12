@@ -15,6 +15,7 @@ import * as stream from 'stream';
 import Core from '@secret-agent/core';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import MitmSocket from '@secret-agent/mitm-socket';
+import CoreProcess from '@secret-agent/core/lib/CoreProcess';
 import { Helpers } from './index';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
@@ -385,6 +386,7 @@ export function afterEach(): Promise<void> {
 export async function afterAll(): Promise<void> {
   await closeAll(true);
   await Core.shutdown(true);
+  await CoreProcess.kill();
 }
 
 async function closeAll(isFinal = false): Promise<void> {

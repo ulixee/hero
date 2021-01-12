@@ -16,20 +16,21 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreSession: Promise<CoreSession>): void {
+  public launchReplay(coreSession: Promise<CoreSession>): void {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
-    // eslint-disable-next-line promise/catch-or-return
-    coreSession.then(session => {
-      return replay({
-        scriptInstanceId: this.id,
-        scriptStartDate: this.startDate,
-        sessionsDataLocation: session.sessionsDataLocation,
-        replayApiServer: session.replayApiServer,
-        sessionId: session.sessionId,
-        sessionName,
-      });
-    });
+    coreSession
+      .then(async session => {
+        return replay({
+          scriptInstanceId: this.id,
+          scriptStartDate: this.startDate,
+          sessionsDataLocation: session.sessionsDataLocation,
+          replayApiUrl: await session.replayApiUrl,
+          sessionId: session.sessionId,
+          sessionName: session.sessionName,
+        });
+      })
+      .catch(() => null);
   }
 
   public generateSessionName(name: string, shouldCleanName = true): string {

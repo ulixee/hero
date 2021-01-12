@@ -34,8 +34,8 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IAgentDefaults from '../interfaces/IAgentDefaults';
 import CoreSession from './CoreSession';
-import createConnection from '../connections/createConnection';
 import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
+import ConnectionFactory from '../connections/ConnectionFactory';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -339,8 +339,10 @@ class SessionConnection {
 
   public async close(): Promise<void> {
     if (!this.hasConnected) return;
-    const session = await this.getCoreSessionOrReject();
-    return session.close();
+    const sessionOrError = await this.getCoreSessionOrReject();
+    if (sessionOrError instanceof CoreSession) {
+      await sessionOrError.close();
+    }
   }
 
   public closeTab(tab: Tab): void {
@@ -357,9 +359,9 @@ class SessionConnection {
 
   private async getCoreSessionOrReject(): Promise<CoreSession> {
     if (!this._coreSession) return undefined;
-    const session = await this._coreSession;
-    if (session instanceof Error) return Promise.reject(session);
-    return session;
+    const sessionOrError = await this._coreSession;
+    if (sessionOrError instanceof CoreSession) return sessionOrError;
+    throw sessionOrError;
   }
 
   private connectSession(): Promise<CoreSession> {
@@ -369,10 +371,12 @@ class SessionConnection {
     this.hasConnected = true;
     const { showReplay, coreConnection, ...options } = getState(this.agent).options;
 
-    const connection = createConnection(coreConnection ?? { isPersistent: false });
+    const connection = ConnectionFactory.createConnection(
+      coreConnection ?? { isPersistent: false },
+    );
 
     this._coreSession = connection.createSession(options).catch(err => {
-      if (err instanceof CanceledPromiseError) return;
+      if (err instanceof CanceledPromiseError) return null;
       return err;
     });
 
@@ -381,7 +385,7 @@ class SessionConnection {
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
-      scriptInstance.launchReplay(options.sessionName, session);
+      scriptInstance.launchReplay(session);
     }
 
     const coreTab = session.then(x => x.firstTab);

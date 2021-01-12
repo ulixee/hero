@@ -37,7 +37,7 @@ export default class GlobalPool {
   }[] = [];
 
   public static async start(browserEmulatorIds?: string[]) {
-    browserEmulatorIds = browserEmulatorIds ?? [GlobalPool.defaultBrowserEmulatorId];
+    browserEmulatorIds = browserEmulatorIds ?? [];
     log.info('StartingGlobalPool', {
       sessionId: null,
       browserEmulatorIds,
@@ -69,7 +69,7 @@ export default class GlobalPool {
     return this.createSessionNow(options);
   }
 
-  public static async close() {
+  public static close(): Promise<void> {
     const logId = log.info('InitiatingGlobalPoolShutdown');
 
     for (const { promise } of this.waitingForAvailability) {
@@ -86,13 +86,22 @@ export default class GlobalPool {
       this.mitmServer = null;
     }
     SessionsDb.shutdown();
-    await Promise.all(closePromises);
-    log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+    return Promise.all(closePromises)
+      .then(() => {
+        log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+        return null;
+      })
+      .catch(error => {
+        log.error('Error in GlobalPoolShutdown', { parentLogId: logId, sessionId: null, error });
+      });
   }
 
   private static async addPuppet(engine: IBrowserEngine): Promise<Puppet> {
     const existing = this.getPuppet(engine);
-    if (existing) return Promise.resolve(existing);
+    if (existing) {
+      if (existing instanceof Error) throw existing;
+      return existing;
+    }
 
     const puppet = new Puppet(engine);
     this.puppets.push(puppet);

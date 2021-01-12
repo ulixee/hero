@@ -1,16 +1,16 @@
 import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
-import RemoteServer from '../lib/RemoteServer';
+import CoreServer from '../lib/CoreServer';
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
-let remoteServer: RemoteServer;
+let coreServer: CoreServer;
 
 beforeAll(async () => {
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
-  remoteServer = new RemoteServer();
-  Helpers.onClose(() => remoteServer.close(), true);
-  await remoteServer.listen({ port: 0 });
+  coreServer = new CoreServer();
+  Helpers.onClose(() => coreServer.close(), true);
+  await coreServer.listen({ port: 0 });
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -20,7 +20,7 @@ describe('basic remote connection tests', () => {
     // bind a core server to core
 
     const handler = new Handler({
-      host: `ws://127.0.0.1:${remoteServer.port}`,
+      host: await coreServer.address,
     });
     const handlerAgent = await handler.createAgent();
     const sessionId = await handlerAgent.sessionId;
@@ -40,7 +40,7 @@ describe('basic remote connection tests', () => {
     // bind a core server to core
     await agent.configure({
       coreConnection: {
-        host: `127.0.0.1:${remoteServer.port}`,
+        host: await coreServer.address,
       },
     });
     const sessionId = await agent.sessionId;
@@ -59,7 +59,7 @@ describe('basic remote connection tests', () => {
     // bind a core server to core
     const customAgent = new Agent({
       coreConnection: {
-        host: `127.0.0.1:${remoteServer.port}`,
+        host: await coreServer.address,
       },
     });
     const sessionId = await customAgent.sessionId;

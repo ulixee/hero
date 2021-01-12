@@ -10,9 +10,9 @@ const launchLockPath = `${replayDir}/launch`;
 
 if (!Fs.existsSync(replayDir)) Fs.mkdirSync(replayDir, { recursive: true });
 
-let sessionApiPath: string;
+let apiStartPath: string;
 try {
-  sessionApiPath = require.resolve('@secret-agent/session-state/api/start');
+  apiStartPath = require.resolve('@secret-agent/core/start');
 } catch (err) {
   // not installed locally (not full-client)
 }
@@ -30,7 +30,7 @@ let replayRegistrationHost: string;
 export async function replay(launchArgs: IReplayScriptRegistration): Promise<any> {
   const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const {
-    replayApiServer,
+    replayApiUrl,
     sessionsDataLocation,
     sessionName,
     scriptInstanceId,
@@ -39,13 +39,13 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
   } = launchArgs;
 
   const scriptMeta = {
-    sessionStateApi: replayApiServer,
+    replayApiUrl,
     dataLocation: sessionsDataLocation,
     sessionName,
     sessionId,
     scriptStartDate,
     scriptInstanceId,
-    apiStartPath: sessionApiPath,
+    apiStartPath,
     nodePath: process.execPath,
   };
 
@@ -147,7 +147,7 @@ async function registerScript(data: any): Promise<boolean> {
 }
 
 interface IReplayScriptRegistration {
-  replayApiServer: string;
+  replayApiUrl: string;
   sessionsDataLocation: string;
   sessionName: string;
   sessionId: string;

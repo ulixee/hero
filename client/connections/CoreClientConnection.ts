@@ -19,6 +19,8 @@ export default abstract class CoreClientConnection {
   public readonly commandQueue: CoreCommandQueue;
   public options: ICoreConnectionOptions;
 
+  public hostOrError: Promise<string | Error>;
+
   private connectPromise: Promise<Error | null>;
 
   private coreSessions: CoreSessions;
@@ -64,7 +66,9 @@ export default abstract class CoreClientConnection {
   public async sendRequest(
     payload: Omit<ICoreRequestPayload, 'messageId'>,
   ): Promise<ICoreResponsePayload> {
-    await this.connect();
+    const result = await this.connect();
+    if (result) throw result;
+
     const { promise, id } = this.createPendingResult();
     await this.internalSendRequest({
       messageId: id,
@@ -116,10 +120,6 @@ export default abstract class CoreClientConnection {
 
   public async logUnhandledError(error: Error): Promise<void> {
     await this.commandQueue.run('logUnhandledError', error);
-  }
-
-  public isRemoteConnection(): boolean {
-    return false;
   }
 
   protected onEvent(payload: ICoreEventPayload): void {

@@ -1,10 +1,8 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import Log from '@secret-agent/commons/Logger';
-import { createReplayServer } from '@secret-agent/session-state/api';
-import ISessionReplayServer from '@secret-agent/session-state/interfaces/ISessionReplayServer';
 import CoreServerConnection from './lib/CoreServerConnection';
-import RemoteServer from './lib/RemoteServer';
+import CoreServer from './lib/CoreServer';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
@@ -12,13 +10,17 @@ import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 
-export { GlobalPool, Tab, Session, LocationTrigger, RemoteServer };
+export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core {
-  public static replayServer: Promise<ISessionReplayServer> = null;
+  public static server = new CoreServer();
   public static readonly connections: CoreServerConnection[] = [];
+
+  public static onShutdown: () => void;
+
   private static wasManuallyStarted = false;
   private static isClosing = false;
+  private static isStarting = false;
 
   public static addConnection(): CoreServerConnection {
     const connection = new CoreServerConnection();
@@ -31,8 +33,10 @@ export default class Core {
     options: ICoreConfigureOptions = {},
     isExplicitlyStarted = true,
   ): Promise<void> {
+    if (this.isStarting) return;
     log.info('Core.start');
     this.isClosing = false;
+    this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
     const {
@@ -54,25 +58,22 @@ export default class Core {
 
     await GlobalPool.start(browserEmulatorIds);
 
-    const shouldStartReplayServer = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
-    if (options?.replayServerPort !== undefined || shouldStartReplayServer) {
-      await this.startReplayServer(options.replayServerPort);
-    }
+    await this.server.listen({ port: options.coreServerPort });
+
+    await this;
   }
 
   public static async shutdown(force = false): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
+    this.isStarting = false;
     log.info('Core.shutdown');
-    await Promise.all(this.connections.map(x => x.disconnect()));
 
-    const promises: Promise<any>[] = [GlobalPool.close()];
-    if (this.replayServer) {
-      promises.push(this.replayServer.then(x => x.close(!force)));
-    }
-    this.replayServer = null;
+    await Promise.all(this.connections.map(x => x.disconnect()));
+    await Promise.all([GlobalPool.close(), this.server.close(!force)]);
+
     this.wasManuallyStarted = false;
-    await Promise.all(promises);
+    if (Core.onShutdown) Core.onShutdown();
   }
 
   public static logUnhandledError(clientError: Error, fatalError = false): void {
@@ -81,11 +82,6 @@ export default class Core {
     } else {
       log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
     }
-  }
-
-  public static startReplayServer(port?: number): void {
-    if (this.replayServer) return;
-    this.replayServer = createReplayServer(port);
   }
 
   private static checkForAutoShutdown(): void {

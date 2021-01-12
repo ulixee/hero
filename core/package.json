@@ -19,10 +19,11 @@
     "core-js-bundle": "^3.7.0",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
+    "source-map-support": "^0.5.19",
     "typeson": "^5.18.2",
-    "ws": "^7.4.2",
     "typeson-registry": "^1.0.0-alpha.38",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@secret-agent/client": "1.2.0-alpha.5",

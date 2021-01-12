@@ -14,12 +14,20 @@ export default class CoreSession implements IJsPathEventTarget {
   public sessionId: string;
   public sessionName: string;
   public sessionsDataLocation: string;
-  public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
 
   public get firstTab(): CoreTab {
     return [...this.tabsById.values()][0];
+  }
+
+  public get replayApiUrl(): Promise<string> {
+    return this.connection.hostOrError.then(x => {
+      if (x instanceof Error) {
+        throw x;
+      }
+      return `${x}/replay`;
+    });
   }
 
   protected readonly meta: ISessionMeta;
@@ -29,11 +37,10 @@ export default class CoreSession implements IJsPathEventTarget {
     sessionMeta: ISessionMeta & { sessionName: string },
     connection: CoreClientConnection,
   ) {
-    const { sessionId, sessionsDataLocation, replayApiServer, sessionName } = sessionMeta;
+    const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.sessionsDataLocation = sessionsDataLocation;
-    this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
     };

@@ -1,22 +1,23 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { Session } from '@secret-agent/core/index';
+import Core, { Session } from '@secret-agent/core/index';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
+  await Core.start();
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
-afterEach(Helpers.afterEach);
 
 describe('Full client Handler', () => {
   it('allows you to run concurrent tasks', async () => {
     const concurrency = 5;
     const handler = new Handler({
       maxConcurrency: concurrency,
+      host: await Core.server.address,
     });
-    Helpers.onClose(() => handler.close(), true);
+    Helpers.onClose(() => handler.close());
     const sessionsRunning = new Map<string, boolean>();
     let hasReachedMax = false;
     const runningAtSameTime: string[][] = [];
@@ -53,6 +54,7 @@ describe('Full client Handler', () => {
   it('waits for an agent to close that is checked out', async () => {
     const handler = new Handler({
       maxConcurrency: 2,
+      host: await Core.server.address,
     });
     Helpers.needsClosing.push(handler);
 
@@ -77,10 +79,12 @@ describe('Full client Handler', () => {
     await expect(isAgent3Available(1e3)).resolves.toBe(true);
   });
 });
+
 describe('waitForAllDispatches', () => {
   it('should not wait for an agent created through createAgent', async () => {
     const handler = new Handler({
       maxConcurrency: 2,
+      host: await Core.server.address,
     });
     Helpers.onClose(() => handler.close(), true);
 
@@ -106,6 +110,7 @@ describe('waitForAllDispatches', () => {
   it('should bubble up errors that occur when waiting for all', async () => {
     const handler = new Handler({
       maxConcurrency: 2,
+      host: await Core.server.address,
     });
     Helpers.onClose(() => handler.close(), true);
 

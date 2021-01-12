@@ -87,6 +87,9 @@ describe('events', () => {
         } as IResourceMeta,
       ],
     });
+
+    // need to wait since events are handled on a promise resolution
+    await new Promise(setImmediate);
     expect(eventCount).toBe(2);
 
     await agent.activeTab.off('resource', onResourceFn);

@@ -10,10 +10,10 @@ Below is code you can use or modify to run a server
 
 ```javascript
 // SERVER ip is 122.22.232.1
-const { RemoteServer } = require('@secret-agent/core');
+const { CoreServer } = require('@secret-agent/core');
 
 (async () => {
-  const server = new RemoteServer();
+  const server = new CoreServer();
   await server.listen(7007);
 })().catch(console.log);
 ```

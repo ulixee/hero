@@ -15,7 +15,7 @@ import ICoreConnectionOptions from './interfaces/ICoreConnectionOptions';
 import Handler from './lib/Handler';
 import Agent from './lib/Agent';
 import RemoteCoreConnection from './connections/RemoteCoreConnection';
-import LocalCoreConnection from './connections/LocalCoreConnection';
+import ConnectionFactory from './connections/ConnectionFactory';
 
 export default new Agent();
 
@@ -23,7 +23,7 @@ export {
   Handler,
   Agent,
   RemoteCoreConnection,
-  LocalCoreConnection,
+  ConnectionFactory,
   InteractionCommand,
   MouseButton,
   ResourceType,

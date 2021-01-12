@@ -1,8 +1,9 @@
 import agent from '@secret-agent/full-client';
 
-process.env.SA_SHOW_REPLAY = 'true';
+// process.env.SHOW_BROWSER = 'true';
 
 async function run() {
+  await agent.configure({ browserEmulatorId: 'chrome-80' });
   await agent.goto('https://news.ycombinator.com/');
   await agent.waitForAllContentLoaded();
 

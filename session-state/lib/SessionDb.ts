@@ -29,7 +29,10 @@ interface IDbOptions {
 }
 
 export default class SessionDb {
-  public readonly readonly: boolean;
+  public get readonly() {
+    return this.db?.readonly;
+  }
+
   public readonly commands: CommandsTable;
   public readonly frames: FramesTable;
   public readonly frameNavigations: FrameNavigationsTable;
@@ -61,7 +64,6 @@ export default class SessionDb {
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
-    this.readonly = readonly;
 
     this.commands = new CommandsTable(this.db);
     this.tabs = new TabsTable(this.db);
@@ -149,7 +151,7 @@ export default class SessionDb {
     scriptEntrypoint: string;
     dataLocation: string;
     sessionId?: string;
-  }) {
+  }): ISessionLookup {
     let { dataLocation, sessionId } = scriptArgs;
 
     const ext = Path.extname(dataLocation);
@@ -184,4 +186,12 @@ export default class SessionDb {
       sessionState: activeSession,
     };
   }
+}
+
+export interface ISessionLookup {
+  sessionDb: SessionDb;
+  dataLocation: string;
+  sessionState: SessionState;
+  relatedSessions: { id: string; name: string }[];
+  relatedScriptInstances: { id: string; startDate: string; defaultSessionId: string }[];
 }

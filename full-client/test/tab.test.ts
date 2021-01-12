@@ -104,7 +104,12 @@ describe('Multi-tab scenarios', () => {
       url: '/logo.png',
     });
     expect(page1Logos).toHaveLength(2);
-    expect(await page1Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page1`);
+    const urls = await Promise.all([page1Logos[0].request.url, page1Logos[1].request.url]);
+    urls.sort();
+    expect(urls).toStrictEqual([
+      `${koaServer.baseUrl}/logo.png`,
+      `${koaServer.baseUrl}/logo.png?page=page1`,
+    ]);
 
     const tabs = await agent.tabs;
     expect(tabs).toHaveLength(2);

@@ -6,12 +6,15 @@ import HttpUpgradeHandler from '@secret-agent/mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@secret-agent/client/lib/WebsocketResource';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { AddressInfo } from 'net';
+import Core from '@secret-agent/core/index';
 import { Handler } from '../index';
 
 let handler: Handler;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  handler = new Handler();
+  await Core.start();
+  handler = new Handler({ host: await Core.server.address });
+  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 

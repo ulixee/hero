@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import Fs from 'fs';
 import fpscanner from 'fpscanner';
-import { Session } from '@secret-agent/core';
+import Core, { Session } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Handler } from '../index';
 
@@ -10,7 +10,8 @@ const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 let handler: Handler;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  handler = new Handler();
+  await Core.start();
+  handler = new Handler({ host: await Core.server.address });
   Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 
