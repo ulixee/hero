@@ -4,7 +4,6 @@ import * as Http from 'http';
 import * as Lockfile from 'proper-lockfile';
 import { getBinaryPath, getInstallDirectory, isBinaryInstalled } from './install/Utils';
 
-const showLogs = !!process.env.SA_REPLAY_DEBUG;
 const replayDir = getInstallDirectory();
 const replayRegistrationApiPath = `${replayDir}/api.txt`;
 const launchLockPath = `${replayDir}/launch`;
@@ -18,9 +17,18 @@ try {
   // not installed locally (not full-client)
 }
 
+let hasLocalReplay = false;
+try {
+  require.resolve('./app');
+  hasLocalReplay = !process.env.SA_USE_REPLAY_BINARY;
+} catch (err) {
+  // not installed locally
+}
+
 let replayRegistrationHost: string;
 
 export async function replay(launchArgs: IReplayScriptRegistration): Promise<any> {
+  const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const {
     replayApiServer,
     sessionsDataLocation,
@@ -46,41 +54,41 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
   }
 
   // cross-process lock around the launch process so we don't open multiple instances
-  const release = await Lockfile.lock(launchLockPath, {
-    retries: 5,
-    stale: 30e3,
-    fs: Fs,
-    realpath: false,
-  });
+  let release: () => Promise<void>;
   try {
+    release = await Lockfile.lock(launchLockPath, {
+      retries: 5,
+      stale: 30e3,
+      fs: Fs,
+      realpath: false,
+    });
     // make sure last "lock holder" didn't write the
     if (await registerScript(scriptMeta)) {
       return;
     }
 
     if (Fs.existsSync(replayRegistrationApiPath)) Fs.unlinkSync(replayRegistrationApiPath);
-    if (isBinaryInstalled()) {
+    if (hasLocalReplay) {
+      const replayPath = require.resolve('@secret-agent/replay');
+      await launchReplay('yarn electron', [replayPath, '--electron-launch'], true);
+    } else if (isBinaryInstalled()) {
       await launchReplay(getBinaryPath(), ['--binary-launch']);
-    } else {
-      try {
-        const replayPath = require.resolve('@secret-agent/replay');
-        await launchReplay('yarn electron', [replayPath, '--electron-launch'], true);
-      } catch (error) {
-        if (showLogs) {
-          console.log('Replay app not found', error);
-        }
-      }
     }
 
     if (!(await registerScript(scriptMeta))) {
-      console.log("Couldn't register this script with the Replay app.");
+      console.log("Couldn't register this script with the Replay app.", scriptMeta);
+    }
+  } catch (err) {
+    if (showLogs) {
+      console.log('Error launching Replay', scriptMeta, err);
     }
   } finally {
-    await release();
+    if (release) await release();
   }
 }
 
 async function launchReplay(appPath: string, args: string[], needsShell = false): Promise<void> {
+  const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const child = ChildProcess.spawn(appPath, args, {
     detached: true,
     stdio: ['ignore', showLogs ? 'inherit' : 'ignore', 'pipe'],
