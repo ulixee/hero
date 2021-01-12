@@ -142,13 +142,18 @@ describe('UserProfile cookie tests', () => {
       const core = Session.getTab(meta);
       koaServer.get('/safari-cookie', ctx => {
         ctx.cookies.set('safari', 'cookie');
-        ctx.body = `<body><h1>safari page</h1></body>`;
+        ctx.body = `<body><h1>safari page</h1>
+<script type="text/javascript">
+document.cookie = 'secondcookie=1'
+</script>
+
+</body>`;
       });
 
       await core.goto(`${koaServer.baseUrl}/safari-cookie`);
       await core.waitForLoad('AllContentLoaded');
       profile = await connection.exportUserProfile(meta);
-      expect(profile.cookies).toHaveLength(1);
+      expect(profile.cookies).toHaveLength(2);
       await core.close();
     }
     {
