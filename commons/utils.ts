@@ -40,7 +40,7 @@ export function createPromise<T = any>(
   };
   // get parent stack
   const error = new Error(timeoutMessage || 'Timeout waiting for promise');
-  response.stack = error.stack.split(/\r?\n/).slice(1).join('\n');
+  response.stack = error.stack.split(/\r?\n/).slice(2).join('\n');
 
   response.promise = new Promise((resolve, reject) => {
     response.resolve = (...args) => {

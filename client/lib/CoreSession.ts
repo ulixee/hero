@@ -2,6 +2,7 @@ import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { loggerSessionIdNames } from '@secret-agent/commons/Logger';
+import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -51,6 +52,10 @@ export default class CoreSession implements IJsPathEventTarget {
     } else {
       this.eventHeap.incomingEvent(meta, listenerId, eventData);
     }
+  }
+
+  public getAgentMeta(): Promise<IAgentMeta> {
+    return this.commandQueue.run('getAgentMeta');
   }
 
   public async configure(options?: Partial<IConfigureSessionOptions>): Promise<void> {

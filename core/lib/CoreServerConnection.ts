@@ -8,6 +8,7 @@ import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePay
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import Session from './Session';
 import Tab from './Tab';
 import GlobalPool from './GlobalPool';
@@ -115,6 +116,22 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   public getTabs(meta: ISessionMeta): Promise<ISessionMeta[]> {
     const session = Session.get(meta.sessionId);
     return Promise.all(session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x)));
+  }
+
+  public getAgentMeta(meta: ISessionMeta): IAgentMeta {
+    const session = Session.get(meta.sessionId);
+    return <IAgentMeta>{
+      sessionId: session.id,
+      sessionName: session.options.sessionName,
+      browserEmulatorId: session.browserEmulatorId,
+      humanEmulatorId: session.humanEmulatorId,
+      viewport: session.viewport,
+      locale: session.browserEmulator.locale,
+      timezoneId: session.timezoneId,
+      blockedResourceTypes: session.options.blockedResourceTypes,
+      upstreamProxyUrl: session.upstreamProxyUrl,
+      userAgentString: session.browserEmulator.userAgentString,
+    };
   }
 
   public async exportUserProfile(meta: ISessionMeta) {

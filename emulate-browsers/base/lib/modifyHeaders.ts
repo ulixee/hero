@@ -16,10 +16,15 @@ export default function modifyHeaders(
 
   const { headers, lowerHeaders } = resource;
   if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
+    let hasKeepAlive = false;
     for (const [header, value] of Object.entries(headers)) {
       if (header.match(/user-agent/i) && value !== userAgentString) {
         headers[header] = value;
       }
+      if (header.match(/connection/i)) hasKeepAlive = true;
+    }
+    if (!defaultOrder && !hasKeepAlive && !resource.isServerHttp2) {
+      headers.Connection = 'keep-alive';
     }
     return headers;
   }
