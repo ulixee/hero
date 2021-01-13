@@ -2,7 +2,13 @@ import * as ChildProcess from 'child_process';
 import * as Fs from 'fs';
 import * as Http from 'http';
 import * as Lockfile from 'proper-lockfile';
-import { getBinaryPath, getInstallDirectory, isBinaryInstalled } from '~install/Utils';
+import {
+  getBinaryPath,
+  getInstallDirectory,
+  getLocalBuildPath,
+  isBinaryInstalled,
+  isLocalBuildPresent,
+} from './install/Utils';
 
 const replayDir = getInstallDirectory();
 const registrationApiFilepath = `${replayDir}/api.txt`;
@@ -92,6 +98,8 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
     if (hasLocalReplay) {
       const replayPath = require.resolve('@secret-agent/replay');
       await launchReplay('yarn electron', [replayPath, '--electron-launch'], true);
+    } else if (isLocalBuildPresent()) {
+      await launchReplay(getLocalBuildPath(), ['--local-build-launch']);
     } else if (isBinaryInstalled()) {
       await launchReplay(getBinaryPath(), ['--binary-launch']);
     }

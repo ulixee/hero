@@ -29,6 +29,35 @@ export function recordVersion() {
   Fs.writeFileSync(`${getInstallDirectory()}/version`, version);
 }
 
+export function isLocalBuildPresent() {
+  return Fs.existsSync(getLocalBuildPath());
+}
+
+export function getLocalBuildPath() {
+  const platformPath = getPlatformExecutable();
+
+  const distDir = Path.join(__dirname, '..', 'dist', getDistDir());
+
+  return Path.join(distDir, platformPath);
+}
+
+function getDistDir() {
+  const platform = process.env.npm_config_platform || os.platform();
+
+  switch (platform) {
+    case 'mas':
+    case 'darwin':
+      return 'mac';
+    case 'freebsd':
+    case 'openbsd':
+    case 'linux':
+      return `linux-unpacked`;
+    case 'win32':
+      return `win-unpacked`;
+    default:
+      return '';
+  }
+}
 export function getBinaryPath() {
   const platformPath = getPlatformExecutable();
   return Path.join(getInstallDirectory(), platformPath);
