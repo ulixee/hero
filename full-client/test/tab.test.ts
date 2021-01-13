@@ -1,5 +1,4 @@
 import { Helpers } from '@secret-agent/testing';
-import { Session } from '@secret-agent/core';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import os from 'os';
@@ -51,14 +50,10 @@ describe('Multi-tab scenarios', () => {
     await agent.click(agent.document.querySelector('a'));
     expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
-    const sessionId = await agent.sessionId;
-    const tabId = await newTab.tabId;
-    const tab = Session.getTab({ sessionId, tabId });
-
-    const browserEmulator = tab.session.browserEmulator;
+    const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
+    expect(navigatorAgent.value).toBe(meta.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -153,13 +148,10 @@ describe('Multi-tab scenarios', () => {
     await agent.click(document.querySelector('a'));
     expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
-    const sessionId = await agent.sessionId;
-    const session = Session.get(sessionId);
-
-    const browserEmulator = session.browserEmulator;
+    const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
+    expect(navigatorAgent.value).toBe(meta.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
@@ -204,11 +196,10 @@ document.querySelector('a').addEventListener('click', event => {
     const { document } = newTab;
     expect(await document.querySelector('h1').textContent).toBe('Overridden Result');
 
-    const sessionId = await agent.sessionId;
-    const browserEmulator = Session.get(sessionId).browserEmulator;
+    const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(browserEmulator.userAgentString);
+    expect(navigatorAgent.value).toBe(meta.userAgentString);
 
     await agent.closeTab(newTab);
   });

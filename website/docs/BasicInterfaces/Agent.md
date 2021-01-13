@@ -88,6 +88,23 @@ An execution point that refers to a command run on this instance (`waitForElemen
 
 Alias for [activeTab.lastCommandId](./tab#lastCommandId)
 
+### agent.meta {#meta}
+
+Retrieves metadata about the agent configuration:
+  - sessionId `string`. The session identifier.
+  - sessionName `string`. The unique session name that will be visible in Replay.
+  - browserEmulatorId `string`. The id of the [Browser Emulator](../advanced/browser-emulators) in use.
+  - humanEmulatorId `string`. The id of the [Human Emulator](../advanced/human-emulators) in use.
+  - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
+  - locale `string`. The configured locale in use (eg, en-US).
+  - viewport `IViewport`. The emulated viewport size and location.
+  - blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
+  - upstreamProxyUrl `string`. The proxy url in use for this agent.
+  - userAgentString `string`. The user agent string used in Http requests and within the DOM.
+
+#### **Type**: `Promise<IAgentMeta>`
+
+
 ### agent.sessionId {#sessionId}
 
 An identifier used for storing logs, snapshots, and other assets associated with the current session.

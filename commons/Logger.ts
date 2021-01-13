@@ -76,10 +76,12 @@ class Log implements ILog {
         .replace('.ts', '')
         .replace('build/', '');
       const printData: any = {};
+      let error: Error;
       for (const [key, value] of Object.entries(entry.data)) {
         if (value === undefined || value === null) continue;
         if (value instanceof Error) {
           printData[key] = value.toString();
+          error = value;
         } else if ((value as any).toJSON) {
           printData[key] = (value as any).toJSON();
         } else {
@@ -93,6 +95,7 @@ class Log implements ILog {
       }
 
       const params = Object.keys(printData).length ? [printData] : [];
+      if (error) params.push(error);
       // eslint-disable-next-line no-console
       console.log(
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${

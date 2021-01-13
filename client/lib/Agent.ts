@@ -18,6 +18,7 @@ import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -53,6 +54,7 @@ export interface IState {
 const propertyKeys: (keyof Agent)[] = [
   'document',
   'sessionId',
+  'meta',
   'tabs',
   'activeTab',
   'sessionName',
@@ -111,6 +113,11 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   public get sessionName(): Promise<string> {
     return Promise.resolve(getState(this).options.sessionName);
+  }
+
+  public get meta(): Promise<IAgentMeta> {
+    const { coreSession } = getState(this).connection;
+    return coreSession.then(x => x.getAgentMeta());
   }
 
   public get storage(): Promise<IDomStorage> {

@@ -58,14 +58,15 @@ export default class Session extends TypedEventEmitter<{
 
   public tabs: Tab[] = [];
 
+  public readonly humanEmulatorId: string;
+  public readonly browserEmulatorId: string;
+
   public get isClosing() {
     return this._isClosing;
   }
 
   private _isClosing = false;
   private pendingNavigationMitmResponses: IRequestSessionResponseEvent[] = [];
-  private humanEmulatorId: string;
-  private browserEmulatorId: string;
 
   constructor(readonly options: ICreateTabOptions) {
     super();
@@ -93,7 +94,7 @@ export default class Session extends TypedEventEmitter<{
       });
     }
 
-    this.timezoneId = options.timezoneId;
+    this.timezoneId = options.timezoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
     this.viewport = options.viewport;
     if (!this.viewport) {
       this.viewport = Viewports.getDefault(
