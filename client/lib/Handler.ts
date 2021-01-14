@@ -1,17 +1,17 @@
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
-import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
+import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import Agent from './Agent';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import Signals = NodeJS.Signals;
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
-  private readonly connections: CoreClientConnection[] = [];
+  private readonly connections: ConnectionToCore[] = [];
   private readonly dispatches: Promise<Error | void>[] = [];
 
-  constructor(...connectionOptions: (ICoreConnectionOptions | CoreClientConnection)[]) {
+  constructor(...connectionOptions: (IConnectionToCoreOptions | ConnectionToCore)[]) {
     if (!connectionOptions.length) {
       connectionOptions.push({});
     }

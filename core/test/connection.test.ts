@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
-import CoreServer from '../lib/CoreServer';
+import CoreServer from '../server';
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
 let coreServer: CoreServer;
@@ -15,7 +15,7 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-describe('basic remote connection tests', () => {
+describe('basic connection tests', () => {
   it('should goto and waitForLocation', async () => {
     // bind a core server to core
 
@@ -36,10 +36,10 @@ describe('basic remote connection tests', () => {
     await handler.close();
   });
 
-  it('should be able to set a remote connection on the default agent', async () => {
+  it('should be able to set a new connection on the default agent', async () => {
     // bind a core server to core
     await agent.configure({
-      coreConnection: {
+      connectionToCore: {
         host: await coreServer.address,
       },
     });
@@ -58,7 +58,7 @@ describe('basic remote connection tests', () => {
   it('should be able to configure a new agent', async () => {
     // bind a core server to core
     const customAgent = new Agent({
-      coreConnection: {
+      connectionToCore: {
         host: await coreServer.address,
       },
     });

@@ -4,7 +4,7 @@ import { createPromise } from '@secret-agent/commons/utils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
-import SessionDb from './SessionDb';
+import SessionDb from '../dbs/SessionDb';
 
 interface TabNavigationEvents {
   'navigation-requested': INavigation;

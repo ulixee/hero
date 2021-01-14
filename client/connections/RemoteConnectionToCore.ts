@@ -1,17 +1,17 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import WebSocket from 'ws';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-import CoreClientConnection from './CoreClientConnection';
-import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
+import ConnectionToCore from './ConnectionToCore';
+import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 
-export default class RemoteCoreConnection extends CoreClientConnection {
+export default class RemoteConnectionToCore extends ConnectionToCore {
   private wsConnectPromise: Promise<any>;
   private webSocket: WebSocket;
 
-  constructor(options: ICoreConnectionOptions) {
+  constructor(options: IConnectionToCoreOptions) {
     super(options);
     const host = options.host;
-    if (!host) throw new Error('A remote core connection needs a host parameter!');
+    if (!host) throw new Error('A remote connection to core needs a host parameter!');
 
     this.hostOrError = Promise.resolve(host)
       .then(x => {
@@ -34,10 +34,11 @@ export default class RemoteCoreConnection extends CoreClientConnection {
   }
 
   public async disconnect(): Promise<void> {
-    if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
+    if (this.wsConnectPromise && this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
+      this.wsConnectPromise = null;
       await super.disconnect();
       try {
-        this.webSocket.close();
+        this.webSocket.terminate();
       } catch (_) {
         // ignore errors terminating
       }

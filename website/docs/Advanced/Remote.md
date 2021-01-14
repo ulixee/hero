@@ -1,21 +1,24 @@
 # Remote
 
-SecretAgent comes out of the box ready to act as a remote process that can communicate over a WebSocket to a client.
+SecretAgent operates out of the box over WebSockets. You'll eventually want to launch Core on a server where clients can remotely access it.
 
 You'll need a simple script to start the server on the machine where the `secret-agent` npm package is installed. Make sure to open the port you allocate on any firewall that a client might have to pass through:
 
-## Setting Up the Server
+## Setting Up a Server Process
 
-Below is code you can use or modify to run a server
+Below is code you can use to start Core in your own server process.
 
 ```javascript
 // SERVER ip is 122.22.232.1
-const { CoreServer } = require('@secret-agent/core');
+const Core = require('@secret-agent/core');
 
 (async () => {
-  const server = new CoreServer();
-  await server.listen(7007);
-})().catch(console.log);
+  Core.onShutdown = () => {
+    log.info('Exiting Core Process');
+    process.exit();
+  };
+  await Core.start({ port: 7007 });
+})();
 ```
 
 ## Setting Up the Client
@@ -29,7 +32,7 @@ const agent = require('@secret-agent/client');
 
 (async () => {
   await agent.configure({
-    coreConnection: {
+    connectionToCore: {
       host: 'localhost:7007',
     },
   });

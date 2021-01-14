@@ -20,10 +20,10 @@ import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMe
 import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
 import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
 import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
-import TabNavigations from './lib/TabNavigations';
-import { IFrameRecord } from './models/FramesTable';
-import SessionsDb from './lib/SessionsDb';
-import SessionDb from './lib/SessionDb';
+import TabNavigations from './TabNavigations';
+import { IFrameRecord } from '../models/FramesTable';
+import SessionsDb from '../dbs/SessionsDb';
+import SessionDb from '../dbs/SessionDb';
 
 const { log } = Log(module);
 

@@ -48,7 +48,7 @@ const { getState, setState } = StateMachine<Agent, IState>();
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'coreConnection' | 'showReplay'>;
+  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
 }
 
 const propertyKeys: (keyof Agent)[] = [
@@ -168,7 +168,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     if (connection.hasConnected) {
       if (
         configureOptions.showReplay !== undefined ||
-        configureOptions.coreConnection !== undefined
+        configureOptions.connectionToCore !== undefined
       ) {
         throw new Error(
           'This agent has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
@@ -369,10 +369,10 @@ class SessionConnection {
       return this.getCoreSessionOrReject();
     }
     this.hasConnected = true;
-    const { showReplay, coreConnection, ...options } = getState(this.agent).options;
+    const { showReplay, connectionToCore, ...options } = getState(this.agent).options;
 
     const connection = ConnectionFactory.createConnection(
-      coreConnection ?? { isPersistent: false },
+      connectionToCore ?? { isPersistent: false },
     );
 
     this._coreSession = connection.createSession(options).catch(err => {

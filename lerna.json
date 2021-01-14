@@ -14,7 +14,6 @@
     "puppet-interfaces",
     "mitm",
     "replay",
-    "session-state",
     "testing",
     "commons",
     "website"

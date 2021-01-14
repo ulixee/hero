@@ -1,6 +1,6 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 
-export default interface ICoreConnectionOptions
+export default interface IConnectionToCoreOptions
   extends Omit<ICoreConfigureOptions, 'maxConcurrentAgentsCount'> {
   host?: string | Promise<string>;
   maxConcurrency?: number;

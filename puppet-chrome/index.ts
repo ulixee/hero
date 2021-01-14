@@ -98,7 +98,7 @@ const defaultArgs = [
   '--disable-renderer-backgrounding', // This disables non-foreground tabs from getting a lower process priority This doesn't (on its own) affect timers or painting behavior. karma-chrome-launcher#123
   '--disable-sync', // Disable syncing to a Google account
   '--disable-gpu',
-  '--enable-logging=stderr', //  Logging behavior slightly more appropriate for a server-type process.
+  '--enable-logging',
   '--force-color-profile=srgb', // Force all monitors to be treated as though they have the specified color profile.
   '--use-gl=swiftshader-webgl',
   '--use-gl=swiftshader', // Select which implementation of GL the GPU process should use. Options are: desktop: whatever desktop OpenGL the user has installed (Linux and Mac default). egl: whatever EGL / GLES2 the user has installed (Windows default - actually ANGLE). swiftshader: The SwiftShader software renderer.
@@ -118,8 +118,6 @@ const defaultArgs = [
   '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs
   '--ignore-certificate-errors',
   '--allow-running-insecure-content',
-
-  '--lang=en-US,en;q=0.9',
 
   // don't leak private ip
   '--force-webrtc-ip-handling-policy=default_public_interface_only',

@@ -1,10 +1,10 @@
-import GlobalPool from '@secret-agent/core/lib/GlobalPool';
 import { Helpers } from '@secret-agent/testing';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import { createPromise } from '@secret-agent/commons/utils';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import GlobalPool from '../lib/GlobalPool';
 import Core, { Session } from '../index';
 
 const mocks = {

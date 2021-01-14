@@ -1,13 +1,13 @@
 import { Helpers } from '@secret-agent/testing/index';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
-let coreServerConnection: CoreServerConnection;
+let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  coreServerConnection = Core.addConnection() as CoreServerConnection;
-  Helpers.onClose(() => coreServerConnection.disconnect(), true);
+  connectionToClient = Core.addConnection() as ConnectionToClient;
+  Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -23,7 +23,7 @@ it('can operate when unsafe eval not on', async () => {
       `;
   });
   const inputUrl = `${koaServer.baseUrl}/unsafe`;
-  const meta = await coreServerConnection.createSession();
+  const meta = await connectionToClient.createSession();
   const session = Session.get(meta.sessionId);
   const tab = session.getTab(meta.tabId);
 
@@ -50,7 +50,7 @@ it('should be able to get window variables', async () => {
       `;
   });
 
-  const meta = await coreServerConnection.createSession();
+  const meta = await connectionToClient.createSession();
   const session = Session.get(meta.sessionId);
   const tab = session.getTab(meta.tabId);
   await tab.goto(`${koaServer.baseUrl}/vars`);

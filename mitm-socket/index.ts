@@ -105,6 +105,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     await this.cleanSocketPathIfNeeded();
     const child = spawn(libPath, [this.socketPath, JSON.stringify(this.connectOpts)], {
       stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
     });
     this.spawnTime = new Date();
     this.child = child;

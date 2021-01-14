@@ -1,24 +1,24 @@
 import Log from '@secret-agent/commons/Logger';
-import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
-import CoreClientConnection from './CoreClientConnection';
-import RemoteCoreConnection from './RemoteCoreConnection';
+import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
+import ConnectionToCore from './ConnectionToCore';
+import RemoteConnectionToCore from './RemoteConnectionToCore';
 
 const { log } = Log(module);
 
 export default class ConnectionFactory {
-  public static createLocalConnection?: (options: ICoreConnectionOptions) => CoreClientConnection;
+  public static createLocalConnection?: (options: IConnectionToCoreOptions) => ConnectionToCore;
 
   public static createConnection(
-    options: ICoreConnectionOptions | CoreClientConnection,
-  ): CoreClientConnection {
-    if (options instanceof CoreClientConnection) {
+    options: IConnectionToCoreOptions | ConnectionToCore,
+  ): ConnectionToCore {
+    if (options instanceof ConnectionToCore) {
       // NOTE: don't run connect on an instance
       return options;
     }
 
-    let connection: CoreClientConnection;
+    let connection: ConnectionToCore;
     if (options.host) {
-      connection = new RemoteCoreConnection(options);
+      connection = new RemoteConnectionToCore(options);
     } else {
       if (!this.createLocalConnection) {
         throw new Error(

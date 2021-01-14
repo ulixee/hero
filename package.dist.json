@@ -27,7 +27,6 @@
       "mitm",
       "mitm-socket",
       "replay",
-      "session-state",
       "commons"
     ]
   },

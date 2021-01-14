@@ -15,7 +15,7 @@ import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
-import SessionState from '../index';
+import SessionState from '../lib/SessionState';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
@@ -145,13 +145,11 @@ export default class SessionDb {
     if (this.batchInsert) this.batchInsert.immediate();
   }
 
-  public static findWithRelated(scriptArgs: {
-    scriptInstanceId: string;
-    sessionName: string;
-    scriptEntrypoint: string;
-    dataLocation: string;
-    sessionId?: string;
-  }): ISessionLookup {
+  public unsubscribeToChanges() {
+    for (const table of this.tables) table.unsubscribe();
+  }
+
+  public static findWithRelated(scriptArgs: ISessionLookupArgs): ISessionLookup {
     let { dataLocation, sessionId } = scriptArgs;
 
     const ext = Path.extname(dataLocation);
@@ -194,4 +192,12 @@ export interface ISessionLookup {
   sessionState: SessionState;
   relatedSessions: { id: string; name: string }[];
   relatedScriptInstances: { id: string; startDate: string; defaultSessionId: string }[];
+}
+
+export interface ISessionLookupArgs {
+  scriptInstanceId: string;
+  sessionName: string;
+  scriptEntrypoint: string;
+  dataLocation: string;
+  sessionId: string;
 }

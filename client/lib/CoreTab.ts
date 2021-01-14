@@ -18,7 +18,7 @@ import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { createResource } from './Resource';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: string;
@@ -27,9 +27,9 @@ export default class CoreTab implements IJsPathEventTarget {
   public eventHeap: CoreEventHeap;
 
   protected readonly meta: ISessionMeta & { sessionName: string };
-  private readonly connection: CoreClientConnection;
+  private readonly connection: ConnectionToCore;
 
-  constructor(meta: ISessionMeta & { sessionName: string }, connection: CoreClientConnection) {
+  constructor(meta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
     const { tabId, sessionId, sessionName } = meta;
     this.tabId = tabId;
     this.sessionId = sessionId;

@@ -7,7 +7,7 @@ import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<string, CoreTab>();
@@ -31,12 +31,9 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   protected readonly meta: ISessionMeta;
-  private readonly connection: CoreClientConnection;
+  private readonly connection: ConnectionToCore;
 
-  constructor(
-    sessionMeta: ISessionMeta & { sessionName: string },
-    connection: CoreClientConnection,
-  ) {
+  constructor(sessionMeta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
     const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;

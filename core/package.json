@@ -14,8 +14,8 @@
     "@secret-agent/mitm": "1.2.0-alpha.5",
     "@secret-agent/puppet": "1.2.0-alpha.5",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
-    "@secret-agent/session-state": "1.2.0-alpha.5",
     "awaited-dom": "^1.1.10",
+    "better-sqlite3": "^7.1.2",
     "core-js-bundle": "^3.7.0",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
@@ -31,6 +31,7 @@
     "@secret-agent/emulate-safari-13": "1.2.0-alpha.5",
     "@secret-agent/puppet-chrome": "1.2.0-alpha.5",
     "@secret-agent/testing": "1.2.0-alpha.5",
+    "@types/better-sqlite3": "^5.4.0",
     "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1"
   }

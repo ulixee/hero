@@ -1,8 +1,8 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import Log from '@secret-agent/commons/Logger';
-import CoreServerConnection from './lib/CoreServerConnection';
-import CoreServer from './lib/CoreServer';
+import ConnectionToClient from './server/ConnectionToClient';
+import CoreServer from './server';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
@@ -14,7 +14,7 @@ export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core {
   public static server = new CoreServer();
-  public static readonly connections: CoreServerConnection[] = [];
+  public static readonly connections: ConnectionToClient[] = [];
 
   public static onShutdown: () => void;
 
@@ -22,8 +22,8 @@ export default class Core {
   private static isClosing = false;
   private static isStarting = false;
 
-  public static addConnection(): CoreServerConnection {
-    const connection = new CoreServerConnection();
+  public static addConnection(): ConnectionToClient {
+    const connection = new ConnectionToClient();
     connection.on('close', this.checkForAutoShutdown.bind(this));
     this.connections.push(connection);
     return connection;
@@ -34,7 +34,11 @@ export default class Core {
     isExplicitlyStarted = true,
   ): Promise<void> {
     if (this.isStarting) return;
-    log.info('Core.start');
+    log.info('Core.start', {
+      options,
+      isExplicitlyStarted,
+      sessionId: null,
+    });
     this.isClosing = false;
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
@@ -60,7 +64,10 @@ export default class Core {
 
     await this.server.listen({ port: options.coreServerPort });
 
-    await this;
+    const host = await this.server.address;
+
+    // if started as a subprocess, send back the host
+    if (process.ppid) process.send(host);
   }
 
   public static async shutdown(force = false): Promise<void> {

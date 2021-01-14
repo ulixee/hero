@@ -2,7 +2,7 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import { Handler } from '../index';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 const sessionMeta = {
   tabId: 'tab-id',
@@ -10,10 +10,10 @@ const sessionMeta = {
   sessionsDataLocation: '',
 };
 
-let testConnection: CoreClientConnection;
+let testConnection: ConnectionToCore;
 let spy: jest.SpyInstance;
 beforeEach(() => {
-  class TestConnection extends CoreClientConnection {
+  class TestConnection extends ConnectionToCore {
     async internalSendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
       if (command === 'createSession') {
         this.onMessage({ data: sessionMeta, responseId: messageId });

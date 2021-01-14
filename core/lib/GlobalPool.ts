@@ -5,11 +5,11 @@ import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Puppet from '@secret-agent/puppet';
 import Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import DefaultBrowser from '@secret-agent/emulate-chrome-83';
+import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
 
@@ -107,7 +107,7 @@ export default class GlobalPool {
     this.puppets.push(puppet);
 
     const showBrowser = Boolean(JSON.parse(process.env.SHOW_BROWSER ?? 'false'));
-    const showBrowserLogs = Boolean(JSON.parse(process.env.DEBUG ?? 'false'));
+    const showBrowserLogs = !!(process.env.DEBUG ?? 'false').match(/[1|true|yes]/i);
     const browserOrError = await puppet.start({
       proxyPort: this.mitmServer.port,
       showBrowser,

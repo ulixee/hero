@@ -1,7 +1,7 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);
 
@@ -9,14 +9,14 @@ type IListenerFn = (...args: any[]) => void;
 type IInterceptorFn = (...args: any[]) => any[];
 
 export default class CoreEventHeap {
-  private readonly connection: CoreClientConnection;
+  private readonly connection: ConnectionToCore;
   private readonly listenerFnById: Map<string, IListenerFn> = new Map();
   private readonly listenerIdByHandle: Map<string, string> = new Map();
   private readonly eventInterceptors: Map<string, IInterceptorFn[]> = new Map();
   private readonly meta: ISessionMeta;
   private pendingRegistrations: Promise<any> = Promise.resolve();
 
-  constructor(meta: ISessionMeta | null, connection: CoreClientConnection) {
+  constructor(meta: ISessionMeta | null, connection: ConnectionToCore) {
     this.meta = meta;
     this.connection = connection;
   }

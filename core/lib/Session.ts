@@ -1,7 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import SessionState from '@secret-agent/session-state';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -24,6 +23,7 @@ import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSe
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import SessionState from './SessionState';
 import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';

@@ -33,7 +33,6 @@
       "replay",
       "replay/frontend",
       "testing",
-      "session-state",
       "commons",
       "website"
     ]

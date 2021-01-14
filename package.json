@@ -91,7 +91,6 @@
       "puppet-chrome",
       "replay",
       "replay/frontend",
-      "session-state",
       "testing",
       "commons",
       "website"
