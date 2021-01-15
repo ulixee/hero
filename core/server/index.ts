@@ -46,7 +46,10 @@ export default class CoreServer {
 
   public async close(waitForOpenConnections = true): Promise<void> {
     try {
-      log.info('ReplayServer.closeSessions', { waitForOpenConnections, sessionId: null });
+      const logid = log.info('CoreServer.ClosingSessions', {
+        waitForOpenConnections,
+        sessionId: null,
+      });
 
       const closeReplayPromises = [...this.wsServer.clients].map(async ws => {
         if (waitForOpenConnections) {
@@ -61,6 +64,7 @@ export default class CoreServer {
           this.httpServer.close(() => setImmediate(resolve));
         }),
       ]);
+      log.info('CoreServer.ClosedSessions', { parentLogId: logid, sessionId: null });
     } catch (error) {
       log.error('Error closing socket connections', {
         error,
@@ -119,9 +123,11 @@ function isOpen(ws: WebSocket) {
   return ws.readyState === WebSocket.OPEN;
 }
 
-function wsSend(ws: WebSocket, json: string): Promise<void> {
-  if (!isOpen(ws)) return null;
-  return new Promise<void>((resolve, reject) => {
+async function wsSend(ws: WebSocket, json: string): Promise<void> {
+  // give it a second to breath
+  await new Promise(process.nextTick);
+  if (!isOpen(ws)) return;
+  await new Promise<void>((resolve, reject) => {
     ws.send(json, error => {
       if (error) reject(error);
       else resolve();

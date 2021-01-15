@@ -380,13 +380,17 @@ class SessionConnection {
       return err;
     });
 
-    const session = this.getCoreSessionOrReject();
-
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
-      scriptInstance.launchReplay(session);
+      this._coreSession = this._coreSession.then(async x => {
+        if (x instanceof Error) return x;
+        await scriptInstance.launchReplay(x);
+        return x;
+      });
     }
+
+    const session = this.getCoreSessionOrReject();
 
     const coreTab = session.then(x => x.firstTab);
     this._activeTab = createTab(this.agent, coreTab);

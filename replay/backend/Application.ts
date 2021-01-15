@@ -47,6 +47,7 @@ export default class Application {
     await this.overlayManager.start();
     this.registrationServer = new ScriptRegistrationServer(this.registerScript.bind(this));
     Menu.setApplicationMenu(generateAppMenu());
+    if (process.argv.length <= 2) this.createWindowIfNeeded();
   }
 
   public getPageUrl(page: string) {

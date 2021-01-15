@@ -47,7 +47,13 @@ export default class ConnectionToReplay {
 
       this.subscribeToTables();
 
-      await waitUntilAllComplete(this.pendingPushes);
+      let resolved = -1;
+      // sort of complicated, but we're checking that everything has been sent and completed
+      while (this.pendingPushes.length > resolved) {
+        resolved = this.pendingPushes.length;
+        await Promise.all([...this.pendingPushes]).catch(() => null);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
 
       await this.send('trailer', { messages: this.pendingPushes.length });
     } catch (error) {
@@ -57,6 +63,8 @@ export default class ConnectionToReplay {
         ...this.lookupArgs,
       });
     }
+    // do one last wait to catch errors and everything else
+    await Promise.all(this.pendingPushes).catch(() => null);
   }
 
   public close(error?: Error) {
@@ -82,12 +90,6 @@ export default class ConnectionToReplay {
     const sessionLookup = this.sessionLookup;
     const db = sessionLookup.sessionDb;
     this.session = db.session.get();
-
-    if (!this.session.closeDate) {
-      db.frameNavigations.subscribe(() => this.checkState());
-      db.session.subscribe(() => this.checkState());
-      this.checkState();
-    }
 
     db.tabs.subscribe(tabs => {
       for (const tab of tabs) {
@@ -192,21 +194,29 @@ export default class ConnectionToReplay {
           headers: resource.responseHeaders ? JSON.parse(resource.responseHeaders) : {},
         });
       }
-      if (resourcesToSend.length) this.send('resources', resourcesToSend);
+      while (resourcesToSend.length) {
+        const toSend = resourcesToSend.splice(0, 50);
+        this.send('resources', toSend);
+      }
     });
 
+    db.frameNavigations.subscribe(() => this.checkState());
+    db.session.subscribe(() => this.checkState());
+    this.checkState();
     if (this.session.closeDate) {
-      this.sessionClosedPromise.resolve();
+      setImmediate(() => this.sessionClosedPromise.resolve());
     }
   }
 
   private checkState(): void {
-    if (!this.sessionLookup?.sessionState || this.sessionClosedPromise.isResolved) return;
+    if (!this.sessionLookup?.sessionState) return;
     const scriptState = this.sessionLookup.sessionState.checkForResponsive();
 
     if (scriptState.closeDate && !this.sessionClosedPromise.isResolved) {
+      this.send('script-state', scriptState);
       // give sqlite time to flush out published changes
       setTimeout(() => this.sessionClosedPromise.resolve(), 500);
+      return;
     }
 
     this.lastScriptState = scriptState;
@@ -234,25 +244,16 @@ export default class ConnectionToReplay {
   }
 
   private send(event: string, data: any): void {
-    if (Array.isArray(data) && data.length === 0) return;
+    if (Array.isArray(data) && data.length === 0) {
+      return;
+    }
 
     const json = JSON.stringify({ event, data }, (_, value) => {
       if (value !== null) return value;
     });
 
-    const sendPromise = this.sendMessage(json);
+    const sendPromise = this.sendMessage(json).catch(err => err);
     if (sendPromise) this.pendingPushes.push(sendPromise);
-  }
-}
-
-async function waitUntilAllComplete(pendingPushes: Promise<any>[]) {
-  const resolvedPromises = new Set<Promise<any>>();
-  // sort of complicated, but we're checking that everything has been sent and completed
-  while (pendingPushes.length > resolvedPromises.size) {
-    const allPending = [...pendingPushes];
-    await Promise.all(allPending.map(x => x.catch(err => err)));
-    for (const pending of allPending) resolvedPromises.add(pending);
-    await new Promise(setImmediate);
   }
 }
 

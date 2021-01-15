@@ -66,8 +66,12 @@ export default class Core {
 
     const host = await this.server.address;
 
+    log.info('Core started', {
+      coreHost: await Core.server.address,
+      sessionId: null,
+    });
     // if started as a subprocess, send back the host
-    if (process.ppid) process.send(host);
+    if (process.send) process.send(host);
   }
 
   public static async shutdown(force = false): Promise<void> {
