@@ -40,7 +40,8 @@ export async function click(page: IPuppetPage, selector: string) {
       y: rect.y
     };
 })();`);
-  await page.mouse.click(coordinates.x, coordinates.y);
+  await page.mouse.move(coordinates.x, coordinates.y);
+  await page.mouse.click();
 }
 
 export async function attachFrame(page: IPuppetPage, frameId: string, url: string) {

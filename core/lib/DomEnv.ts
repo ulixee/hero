@@ -11,6 +11,7 @@ import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
+import IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
 import DomEnvError from './DomEnvError';
 import { Serializable } from '../interfaces/ISerializable';
 
@@ -31,6 +32,14 @@ const pageScripts = {
     require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
     'utf8',
   ),
+  Fetcher: fs.readFileSync(
+    require.resolve(`@secret-agent/injected-scripts/scripts/Fetcher.js`),
+    'utf8',
+  ),
+  MouseEvents: fs.readFileSync(
+    require.resolve(`@secret-agent/injected-scripts/scripts/MouseEvents.js`),
+    'utf8',
+  ),
 };
 
 const domEnvScript = `(function installDomEnv() {
@@ -40,9 +49,12 @@ ${pageScripts.typesonRegistry};
 const TSON = new Typeson().register(Typeson.presets.builtin);
 
 ${pageScripts.jsPath};
+${pageScripts.Fetcher};
+${pageScripts.MouseEvents};
 
 window.SecretAgent = {
   JsPath,
+  MouseEvents,
   Fetcher,
 };
 
@@ -153,6 +165,58 @@ export default class DomEnv {
 
   public locationHref() {
     return this.puppetPage.mainFrame.evaluate<string>('location.href', false);
+  }
+
+  /////// MOUSE EVENTS /////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public registerMouseoverListener(nodeId: number): Promise<void> {
+    return this.runIsolatedFn<void>(
+      'window.SecretAgent.MouseEvents.listenFor',
+      'mouseover',
+      nodeId,
+    );
+  }
+
+  public waitForMouseover(nodeId: number, timeoutMillis: number): Promise<boolean> {
+    return this.runIsolatedFn<boolean>(
+      'window.SecretAgent.MouseEvents.waitFor',
+      'mouseover',
+      nodeId,
+      timeoutMillis,
+    )
+      .then(x => {
+        if ((x as any) === 'timeout') {
+          return false;
+        }
+        return x;
+      })
+      .catch(err => {
+        throw err;
+      });
+  }
+
+  public registerMouseupListener(nodeId: number): Promise<void> {
+    return this.runIsolatedFn<void>('window.SecretAgent.MouseEvents.listenFor', 'mouseup', nodeId);
+  }
+
+  public waitForMouseup(nodeId: number, timeoutMillis: number): Promise<IMouseUpResult> {
+    return this.runIsolatedFn<IMouseUpResult>(
+      'window.SecretAgent.MouseEvents.waitFor',
+      'mouseup',
+      nodeId,
+      timeoutMillis,
+    )
+      .then(x => {
+        if ((x as any) === 'timeout') {
+          return {
+            didClickLocation: false,
+          } as IMouseUpResult;
+        }
+        return x;
+      })
+      .catch(err => {
+        throw err;
+      });
   }
 
   private runIsolatedFn<T>(fnName: string, ...args: Serializable[]) {

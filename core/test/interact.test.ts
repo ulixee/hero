@@ -1,9 +1,10 @@
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
+import Interactor from '../lib/Interactor';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -155,6 +156,62 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
 
       lastClicked = await click('#button-1');
       expect(lastClicked.value).toBe('click1');
+    }, 60e3);
+
+    it('should be able to click elements that move on load', async () => {
+      koaServer.get('/img.png', async ctx => {
+        ctx.set('Content-Type', 'image/png');
+        await new Promise(resolve => setTimeout(resolve, 50));
+        ctx.body = getLogo();
+      });
+
+      // test putting next to an image that will only space after it loads
+      koaServer.get('/move-on-load', ctx => {
+        ctx.body = `
+        <body>
+            <div style="height: 1000px"></div>
+            <div>
+              <img src="/img.png" />
+              <img src="/img.png?test=1" />
+              <img src="/img.png?test=3" />
+              <button onclick="clickit()" id="button-1">Click me</button>
+          </div>
+          <script>
+
+            let lastClicked = '';
+            function clickit() {
+              lastClicked = 'clickedit';
+            }
+          </script>
+        </body>
+      `;
+      });
+
+      const lookupSpy = jest.spyOn(Interactor.prototype, 'lookupBoundingRect');
+      lookupSpy.mockImplementationOnce(async () => {
+        return {
+          x: 0,
+          y: 6,
+          height: 50,
+          width: 100,
+          elementTag: 'button',
+          nodeId: 1,
+        };
+      });
+
+      const meta = await connection.createSession({ humanEmulatorId });
+      const session = Session.get(meta.sessionId);
+      Helpers.needsClosing.push(session);
+      const tab = Session.getTab(meta);
+      await tab.goto(`${koaServer.baseUrl}/move-on-load`);
+      await tab.interact([
+        {
+          command: InteractionCommand.click,
+          mousePosition: ['window', 'document', ['querySelector', '#button-1']],
+        },
+      ]);
+      const lastClicked = await tab.getJsValue('lastClicked');
+      expect(lastClicked.value).toBe('clickedit');
     }, 60e3);
   },
 );

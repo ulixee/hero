@@ -47,7 +47,7 @@ export default class ConsoleMessage {
       message += this.printStackTrace(exceptionDetails.stackTrace);
     }
     const error = new Error(message);
-    error.stack = '';
+    error.stack = message;
     return error;
   }
 

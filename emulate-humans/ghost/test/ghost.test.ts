@@ -1,6 +1,9 @@
 import { IInteractionStep, InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
+import Log from '@secret-agent/commons/Logger';
 import HumanEmulatorGhost, { isVisible } from '../index';
+
+const { log } = Log(module);
 
 beforeAll(() => {
   HumanEmulatorGhost.maxDelayBetweenInteractions = 0;
@@ -95,6 +98,17 @@ describe('move', () => {
           };
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
+        logger: log,
+        startMouseupListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+          });
+        },
+        startMouseoverListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve(true),
+          });
+        },
       },
     );
 
@@ -131,6 +145,17 @@ describe('scroll', () => {
           };
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
+        logger: log,
+        startMouseupListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+          });
+        },
+        startMouseoverListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve(true),
+          });
+        },
       },
     );
 
@@ -165,6 +190,17 @@ describe('scroll', () => {
           };
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
+        logger: log,
+        startMouseupListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+          });
+        },
+        startMouseoverListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve(true),
+          });
+        },
       },
     );
 
@@ -199,6 +235,17 @@ describe('scroll', () => {
           };
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
+        logger: log,
+        startMouseupListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+          });
+        },
+        startMouseoverListener() {
+          return Promise.resolve({
+            onTriggered: Promise.resolve(true),
+          });
+        },
       },
     );
 

@@ -6,5 +6,8 @@
   "dependencies": {
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "bezier-js": "^2.6.1"
+  },
+  "devDependencies": {
+    "@secret-agent/commons": "1.2.0-alpha.4"
   }
 }

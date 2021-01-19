@@ -1,7 +1,7 @@
 import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 import Log from '@secret-agent/commons/Logger';
-import CertificatesTable from '../models/CommandsTable';
+import CertificatesTable from '../models/CertificatesTable';
 import PkiTable from '../models/PkiTable';
 
 const { log } = Log(module);

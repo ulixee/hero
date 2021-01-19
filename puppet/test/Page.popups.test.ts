@@ -88,7 +88,8 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     };
 })();`);
         const popupPromise = page.waitForPopup();
-        await page.mouse.click(coordinates.x, coordinates.y);
+        await page.mouse.move(coordinates.x, coordinates.y);
+        await page.mouse.click();
         const popup = await popupPromise;
         needsClosing.push(popup);
         expect(await popup.evaluate(`navigator.userAgent`)).toBe('popupcity');
