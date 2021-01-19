@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
-import { replay } from './index';
+import { openReplayApp } from './index';
 
-replay({} as any).catch(console.error);
+openReplayApp('--sa-show-dashboard', `--sa-default-node-path="${process.execPath}"`).catch(
+  console.error,
+);

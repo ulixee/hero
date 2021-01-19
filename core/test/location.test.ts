@@ -3,7 +3,6 @@ import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/L
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import { Readable } from 'stream';
 import Core, { Tab } from '../index';
 import LocationTracker from '../lib/LocationTracker';
 import ConnectionToClient from '../server/ConnectionToClient';

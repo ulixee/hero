@@ -47,7 +47,17 @@ export default class Application {
     await this.overlayManager.start();
     this.registrationServer = new ScriptRegistrationServer(this.registerScript.bind(this));
     Menu.setApplicationMenu(generateAppMenu());
-    if (process.argv.length <= 2) this.createWindowIfNeeded();
+
+    const defaultNodePath = process.argv.find(x => x.startsWith('--sa-default-node-path='));
+
+    if (defaultNodePath) {
+      const nodePath = defaultNodePath.split('--sa-default-node-path=').pop();
+      console.log('Default nodePath provided', nodePath);
+      ReplayApi.nodePath = nodePath;
+    }
+    if (process.argv.length <= 2 || process.argv.includes('--sa-show-dashboard')) {
+      this.createWindowIfNeeded();
+    }
   }
 
   public getPageUrl(page: string) {
@@ -96,7 +106,7 @@ export default class Application {
       replayApi = await ReplayApi.connect(replay);
     } catch (err) {
       console.log('ERROR launching replay', err);
-      dialog.showErrorBox(`Unable to Load Replay`, err.message);
+      dialog.showErrorBox(`Unable to Load Replay`, err.message ?? String(err));
       return;
     }
 

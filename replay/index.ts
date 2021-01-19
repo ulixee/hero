@@ -93,30 +93,7 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
       return;
     }
 
-    Fs.writeFileSync(registrationApiFilepath, '');
-
-    if (hasLocalReplay) {
-      const replayPath = require.resolve('@secret-agent/replay');
-      await launchReplay('yarn electron', [replayPath, '--electron-launch'], true);
-    } else if (isLocalBuildPresent()) {
-      await launchReplay(getLocalBuildPath(), ['--local-build-launch']);
-    } else if (isBinaryInstalled()) {
-      await launchReplay(getBinaryPath(), ['--binary-launch']);
-    }
-
-    // wait for change
-    await new Promise<void>(resolve => {
-      const watcher = Fs.watch(
-        registrationApiFilepath,
-        { persistent: false, recursive: false },
-        () => {
-          if (resolveHost()) {
-            resolve();
-            watcher.close();
-          }
-        },
-      );
-    });
+    await openReplayApp();
 
     if (!(await registerScript(scriptMeta))) {
       console.log("Couldn't register this script with the Replay app.", scriptMeta);
@@ -128,6 +105,33 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
   } finally {
     if (release) await release();
   }
+}
+
+export async function openReplayApp(...extraArgs: string[]) {
+  Fs.writeFileSync(registrationApiFilepath, '');
+
+  if (isLocalBuildPresent()) {
+    await launchReplay(getLocalBuildPath(), ['--local-build-launch', ...extraArgs]);
+  } else if (hasLocalReplay) {
+    const replayPath = require.resolve('@secret-agent/replay');
+    await launchReplay('yarn electron', [replayPath, '--electron-launch', ...extraArgs], true);
+  } else if (isBinaryInstalled()) {
+    await launchReplay(getBinaryPath(), ['--binary-launch', ...extraArgs]);
+  }
+
+  // wait for change
+  await new Promise<void>(resolve => {
+    const watcher = Fs.watch(
+      registrationApiFilepath,
+      { persistent: false, recursive: false },
+      () => {
+        if (resolveHost()) {
+          resolve();
+          watcher.close();
+        }
+      },
+    );
+  });
 }
 
 function launchReplay(appPath: string, args: string[], needsShell = false): void {
