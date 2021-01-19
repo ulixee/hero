@@ -91,19 +91,19 @@ Alias for [activeTab.lastCommandId](./tab#lastCommandId)
 ### agent.meta {#meta}
 
 Retrieves metadata about the agent configuration:
-  - sessionId `string`. The session identifier.
-  - sessionName `string`. The unique session name that will be visible in Replay.
-  - browserEmulatorId `string`. The id of the [Browser Emulator](../advanced/browser-emulators) in use.
-  - humanEmulatorId `string`. The id of the [Human Emulator](../advanced/human-emulators) in use.
-  - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
-  - locale `string`. The configured locale in use (eg, en-US).
-  - viewport `IViewport`. The emulated viewport size and location.
-  - blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
-  - upstreamProxyUrl `string`. The proxy url in use for this agent.
-  - userAgentString `string`. The user agent string used in Http requests and within the DOM.
+
+- sessionId `string`. The session identifier.
+- sessionName `string`. The unique session name that will be visible in Replay.
+- browserEmulatorId `string`. The id of the [Browser Emulator](../advanced/browser-emulators) in use.
+- humanEmulatorId `string`. The id of the [Human Emulator](../advanced/human-emulators) in use.
+- timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
+- locale `string`. The configured locale in use (eg, en-US).
+- viewport `IViewport`. The emulated viewport size and location.
+- blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
+- upstreamProxyUrl `string`. The proxy url in use for this agent.
+- userAgentString `string`. The user agent string used in Http requests and within the DOM.
 
 #### **Type**: `Promise<IAgentMeta>`
-
 
 ### agent.sessionId {#sessionId}
 
@@ -280,21 +280,25 @@ Alias for [Tab.getComputedStyle()](./tab#get-computed-style)
 
 Alias for [Tab.getJsValue()](./tab#get-js-value)
 
-### agent.goBack*()*
+### agent.goBack*(timeoutMs?)*
 
 Alias for [Tab.goBack](./tab#back)
 
-### agent.goForward*()*
+### agent.goForward*(timeoutMs?)*
 
 Alias for [Tab.goForward](./tab#forward)
 
-### agent.goto*(href)* {#goto}
+### agent.goto*(href, timeoutMs?)* {#goto}
 
 Alias for [Tab.goto](./tab#goto)
 
 ### agent.isElementVisible*(element)*
 
 Alias for [Tab.isElementVisible](./tab#is-element-visible)
+
+### agent.reload*(timeoutMs?)*
+
+Alias for [Tab.reload](./tab#reload)
 
 ### agent.waitForAllContentLoaded*()*
 
@@ -315,7 +319,3 @@ Alias for [Tab.waitForLocation](./tab#wait-for-location)
 ### agent.waitForMillis*(millis)*
 
 Alias for [Tab.waitForMillis](./tab#wait-for-millis)
-
-### agent.waitForWebSocket*(filename)*
-
-Alias for [Tab.waitForWebSocket](./tab#wait-for-websocket)

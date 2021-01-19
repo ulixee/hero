@@ -3,11 +3,13 @@ import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/L
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import { Readable } from 'stream';
 import Core, { Tab } from '../index';
 import LocationTracker from '../lib/LocationTracker';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
 
+const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
 beforeAll(async () => {
@@ -15,6 +17,10 @@ beforeAll(async () => {
   await connection.connect();
   Helpers.onClose(() => connection.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
+});
+
+beforeEach(() => {
+  runWaitForCbsSpy.mockClear();
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -46,6 +52,16 @@ describe('basic LocationTracker tests', () => {
     await tab.close();
   });
 
+  it('times out a goto', async () => {
+    const startingUrl = `${koaServer.baseUrl}/timeout`;
+    koaServer.get('/timeout', async ctx => {
+      await new Promise(resolve => setTimeout(resolve, 101));
+      ctx.body = 'done';
+    });
+    const { tab } = await createSession();
+    await expect(tab.goto(startingUrl, 100)).rejects.toThrowError('Timeout');
+  });
+
   it('handles page reloading itself', async () => {
     const startingUrl = `${koaServer.baseUrl}/reload`;
     const { tab } = await createSession();
@@ -60,7 +76,6 @@ describe('basic LocationTracker tests', () => {
       }
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
     await tab.waitForLocation(LocationTrigger.reload);
 
@@ -79,7 +94,51 @@ describe('basic LocationTracker tests', () => {
       'AllContentLoaded',
     ]);
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
+  });
+
+  it('can reload a page', async () => {
+    const startingUrl = `${koaServer.baseUrl}/pagex`;
+    const { tab } = await createSession();
+
+    let counter = 0;
+    koaServer.get('/pagex', ctx => {
+      if (counter === 0) {
+        ctx.body = '<body>First Load</body>';
+      } else {
+        ctx.body = '<body>Second Load</body>';
+      }
+      counter += 1;
+    });
+
+    const gotoResource = await tab.goto(startingUrl);
+    await tab.waitForLoad('AllContentLoaded');
+
+    const text = await tab.execJsPath(['document', 'body', 'textContent']);
+    expect(text.value).toBe('First Load');
+
+    const reloadResource = await tab.reload();
+    const text2 = await tab.execJsPath(['document', 'body', 'textContent']);
+    expect(text2.value).toBe('Second Load');
+    expect(reloadResource.id).not.toBe(gotoResource.id);
+    expect(reloadResource.url).toBe(gotoResource.url);
+
+    await tab.waitForLoad('AllContentLoaded');
+
+    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
+
+    expect(locationStatusHistory).toMatchObject([
+      'change',
+      'HttpRequested',
+      'HttpResponded',
+      'DomContentLoaded',
+      'AllContentLoaded',
+      'reload',
+      'HttpRequested',
+      'HttpResponded',
+      'DomContentLoaded',
+      'AllContentLoaded',
+    ]);
+    await tab.close();
   });
 
   it('handles page that navigates to another url', async () => {
@@ -91,7 +150,6 @@ describe('basic LocationTracker tests', () => {
       ctx.body = `<body><script>window.location = '${navigateToUrl}'</script></body>`;
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
     await tab.waitForLocation(LocationTrigger.change);
 
@@ -111,7 +169,6 @@ describe('basic LocationTracker tests', () => {
     ]);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 
   it('handles submitting a form', async () => {
@@ -123,7 +180,6 @@ describe('basic LocationTracker tests', () => {
       ctx.body = `<body><form action="${navigateToUrl}" method="post"><input type="submit" id="button"></form></body>`;
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
 
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
@@ -154,7 +210,6 @@ describe('basic LocationTracker tests', () => {
     ]);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 
   it('handles page that navigates via click', async () => {
@@ -166,7 +221,6 @@ describe('basic LocationTracker tests', () => {
       ctx.body = `<body><a href='${navigateToUrl}'>Clicker</a></body>`;
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
 
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
@@ -197,7 +251,6 @@ describe('basic LocationTracker tests', () => {
     ]);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 
   it('handles an in-page navigation change', async () => {
@@ -216,7 +269,6 @@ describe('basic LocationTracker tests', () => {
 </body>`;
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
 
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
@@ -247,7 +299,6 @@ describe('basic LocationTracker tests', () => {
     expect(pages.history).toHaveLength(2);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 
   it('handles an in-page navigation change that happens before page load', async () => {
@@ -267,7 +318,6 @@ setTimeout(function() {
 </body>`;
     });
 
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     await tab.goto(startingUrl);
 
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
@@ -285,7 +335,6 @@ setTimeout(function() {
     expect(currentUrl).toBe(pages.top.finalUrl);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 
   it.todo('handles going to about:blank');
@@ -317,7 +366,6 @@ setTimeout(function() {
   });
 
   it('handles a new tab that redirects', async () => {
-    const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
     const { tab } = await createSession();
 
     koaServer.get('/popup-redirect', ctx => {
@@ -403,7 +451,6 @@ setTimeout(() => {
     ]);
 
     await tab.close();
-    runWaitForCbsSpy.mockRestore();
   });
 });
 

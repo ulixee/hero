@@ -30,11 +30,11 @@ describe('Websocket tests', () => {
     const serverMessagePromise = createPromise();
     const wss = new WebSocket.Server({ noServer: true });
 
-    let receivedMessages = 0;
+    const receivedMessages: string[] = [];
     koaServer.server.on('upgrade', (request, socket, head) => {
       wss.handleUpgrade(request, socket, head, async (ws: WebSocket) => {
         ws.on('message', msg => {
-          receivedMessages += 1;
+          receivedMessages.push(msg.toString());
           if (msg === 'Echo Message19') {
             serverMessagePromise.resolve();
           }
@@ -69,7 +69,7 @@ describe('Websocket tests', () => {
 
     await agent.waitForElement(agent.document.querySelector('h1'));
     await serverMessagePromise.promise;
-    expect(receivedMessages).toBe(20);
+    expect(receivedMessages).toHaveLength(20);
 
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
 

@@ -19,6 +19,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   navigate(url: string, options?: { referrer?: string }): Promise<void>;
   goBack(): Promise<void>;
   goForward(): Promise<void>;
+  reload(): Promise<void>;
   close(): Promise<void>;
   bringToFront(): Promise<void>;
   popupInitializeFn?: (

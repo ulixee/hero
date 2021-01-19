@@ -30,6 +30,7 @@
     "shared/**/*.ts",
     "frontend/src/constants",
     "app.ts",
+    "bin.ts",
     "index.ts",
     "install/*.ts",
     ".eslintrc.js"

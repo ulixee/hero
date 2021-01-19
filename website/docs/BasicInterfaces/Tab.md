@@ -150,25 +150,34 @@ await agent.goto('https://dataliberationfoundation.org');
 const navigatorAgent = await agent.activeTab.getJsValue(`navigator.userAgent`);
 ```
 
-### tab.goBack*()* {#back}
+### tab.goBack*(timeoutMs)* {#back}
 
 Navigates to a previous url in the navigation history.
 
+#### **Arguments**:
+
+- timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
+
 #### **Returns**: `Promise<string>` The new document url.
 
-### tab.goForward*()* {#forward}
+### tab.goForward*(timeoutMs)* {#forward}
 
 Navigates forward in the navigation history stack.
 
+#### **Arguments**:
+
+- timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
+
 #### **Returns**: `Promise<string>` The new document url.
 
-### tab.goto*(locationHref)* {#goto}
+### tab.goto*(locationHref, timeoutMs?)* {#goto}
 
 Executes a navigation request for the document associated with the parent SecretAgent instance.
 
 #### **Arguments**:
 
 - locationHref `string` The location to navigate to.
+- timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
 
 #### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
 
@@ -187,13 +196,23 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
+### tab.reload*(timeoutMs?)* {#reload}
+
+Reload the currently loaded url.
+
+#### **Arguments**:
+
+- timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
+
+#### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
+
 ### tab.waitForAllContentLoaded*(options)* {#wait-for-all-content}
 
 Wait for the "load" DOM event. We renamed this to be more explicit because we're always mixing up DOMContentLoaded and load.
 
 #### **Arguments**:
 
-- options `object`
+- options `object` Optional
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for load status changes.
 
@@ -337,16 +356,6 @@ Waits for the specified number of milliseconds.
 - millis `number`
 
 #### **Returns**: `Promise`
-
-### tab.waitForWebSocket*(filename)* {#wait-for-websocket}
-
-Waits until the specified web socket has been received.
-
-#### **Arguments**:
-
-- filename `number | RegExp`
-
-#### **Returns**: [`Promise<WebSocketResource>`](../advanced/websocket-resource)
 
 ## Events
 

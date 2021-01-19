@@ -5,12 +5,16 @@
     "Caleb Clark",
     "Blake Byrnes"
   ],
+  "bin": {
+    "replay": "./bin.js"
+  },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
   "version": "1.2.0-alpha.4",
   "main": "./app.js",
   "files": [
     "index.js",
+    "bin.js",
     "install/*"
   ],
   "build": {
