@@ -3,10 +3,10 @@ import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import Core, { Session } from '../index';
-import CoreServerConnection from '../lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 
 let koaServer: ITestKoaServer;
-let connection: CoreServerConnection;
+let connection: ConnectionToClient;
 const onEventFn = jest.fn();
 
 beforeAll(async () => {

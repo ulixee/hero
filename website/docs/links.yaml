@@ -24,7 +24,7 @@
     - ResourceRequest
     - ResourceResponse
     - WebsocketResource
-    - CoreConnection
+    - ConnectionToCore
     - Remote
     - Session
     - SessionReplay

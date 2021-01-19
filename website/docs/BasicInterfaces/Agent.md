@@ -52,7 +52,7 @@ const { Agent } = require('secret-agent');
 #### **Arguments**:
 
 - options `object` Accepts any of the following:
-  - coreConnection `options | CoreClientConnection`. An object containing `ICoreConnectionOptions` used to connect, or an already created `CoreClientConnection` instance. Defaults to automatically connecting to a local `Core`.
+  - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
   - browserEmulatorId `string` defaults to `chrome-83`. Emulates a specific browser engine version.
   - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
@@ -184,7 +184,7 @@ Update existing configuration settings.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
-  - coreConnection `options | CoreClientConnection`. An object containing `ICoreConnectionOptions` used to connect, or an already created `CoreClientConnection` instance. Defaults to automatically connecting to a local `Core`.
+  - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to booting up and connecting to a local `Core`.
 
 #### **Returns**: `Promise`
 

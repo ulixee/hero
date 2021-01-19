@@ -1,8 +1,8 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 
-export default interface ICoreConnectionOptions
+export default interface IConnectionToCoreOptions
   extends Omit<ICoreConfigureOptions, 'maxConcurrentAgentsCount'> {
-  host?: string;
+  host?: string | Promise<string>;
   maxConcurrency?: number;
   agentTimeoutMillis?: number;
   isPersistent?: boolean; // variable to tell server to keep around connection. Defaults to true

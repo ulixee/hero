@@ -1,6 +1,9 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
+import Log from '@secret-agent/commons/Logger';
 import CoreSession from './CoreSession';
+
+const { log } = Log(module);
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
@@ -16,20 +19,21 @@ export default class ScriptInstance {
     };
   }
 
-  public launchReplay(sessionName: string, coreSession: Promise<CoreSession>): void {
+  public async launchReplay(session: CoreSession): Promise<void> {
     // eslint-disable-next-line global-require
     const { replay } = require('@secret-agent/replay/index');
-    // eslint-disable-next-line promise/catch-or-return
-    coreSession.then(session => {
-      return replay({
+    try {
+      await replay({
         scriptInstanceId: this.id,
         scriptStartDate: this.startDate,
         sessionsDataLocation: session.sessionsDataLocation,
-        replayApiServer: session.replayApiServer,
+        replayApiUrl: await session.replayApiUrl,
         sessionId: session.sessionId,
-        sessionName,
+        sessionName: session.sessionName,
       });
-    });
+    } catch (error) {
+      log.warn('Error launching Replay application', { sessionId: session.sessionId, error });
+    }
   }
 
   public generateSessionName(name: string, shouldCleanName = true): string {

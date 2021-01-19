@@ -64,7 +64,7 @@
     "ws": "^7.4.2",
     "proper-lockfile": "^4.1.1",
     "uuid": "^8.3.1",
-    "semver": "^7.3.4"
+    "compare-versions": "^3.6.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.113",
@@ -74,7 +74,6 @@
     "concurrently": "^5.2.0",
     "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
-    "devtron": "^1.4.0",
     "electron": "10.1.5",
     "electron-builder": "^22.9.1",
     "electron-icon-builder": "^1.0.2",

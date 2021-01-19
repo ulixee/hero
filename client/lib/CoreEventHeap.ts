@@ -1,7 +1,7 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);
 
@@ -9,13 +9,14 @@ type IListenerFn = (...args: any[]) => void;
 type IInterceptorFn = (...args: any[]) => any[];
 
 export default class CoreEventHeap {
-  private readonly connection: CoreClientConnection;
+  private readonly connection: ConnectionToCore;
   private readonly listenerFnById: Map<string, IListenerFn> = new Map();
   private readonly listenerIdByHandle: Map<string, string> = new Map();
   private readonly eventInterceptors: Map<string, IInterceptorFn[]> = new Map();
   private readonly meta: ISessionMeta;
+  private pendingRegistrations: Promise<any> = Promise.resolve();
 
-  constructor(meta: ISessionMeta | null, connection: CoreClientConnection) {
+  constructor(meta: ISessionMeta | null, connection: ConnectionToCore) {
     this.meta = meta;
     this.connection = connection;
   }
@@ -39,12 +40,15 @@ export default class CoreEventHeap {
     const handle = this.generateListenerHandle(jsPath, type, listenerFn);
     if (this.listenerIdByHandle.has(handle)) return;
 
-    const response = await this.connection.sendRequest({
+    const subscriptionPromise = this.connection.sendRequest({
       meta: this.meta,
       command: 'addEventListener',
       args: [jsPath, type, options],
     });
 
+    this.pendingRegistrations = this.pendingRegistrations.then(() => subscriptionPromise);
+
+    const response = await subscriptionPromise;
     const { listenerId } = response.data;
     let wrapped = listenerFn;
     if (this.eventInterceptors.has(type)) {
@@ -85,9 +89,15 @@ export default class CoreEventHeap {
   }
 
   public incomingEvent(meta: ISessionMeta, listenerId: string, eventArgs: any[]): void {
-    const listenerFn = this.listenerFnById.get(listenerId);
-    if (!listenerFn) return;
-    listenerFn(...eventArgs);
+    this.pendingRegistrations
+      .then(() => {
+        const listenerFn = this.listenerFnById.get(listenerId);
+        if (listenerFn) listenerFn(...eventArgs);
+        return null;
+      })
+      .catch(error => {
+        log.error('incomingEvent Error: ', { error, sessionId: this.meta?.sessionId });
+      });
   }
 
   private generateListenerHandle(

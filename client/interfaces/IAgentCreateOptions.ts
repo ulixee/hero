@@ -1,10 +1,10 @@
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import CoreClientConnection from '../connections/CoreClientConnection';
-import ICoreConnectionOptions from './ICoreConnectionOptions';
+import ConnectionToCore from '../connections/ConnectionToCore';
+import IConnectionToCoreOptions from './IConnectionToCoreOptions';
 
 export default interface IAgentCreateOptions
   extends Partial<Omit<ICreateSessionOptions, 'scriptInstanceMeta' | 'sessionName'>> {
   name?: string;
   showReplay?: boolean;
-  coreConnection?: ICoreConnectionOptions | CoreClientConnection;
+  connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
 }

@@ -66,4 +66,56 @@ describe('basic Core tests', () => {
     expect(connectionCloseSpy).toHaveBeenCalledTimes(1);
     await Core.shutdown();
   });
+
+  it('should be able to get multiple entries out of the pool', async () => {
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    GlobalPool.maxConcurrentAgentsCount = 3;
+    await connection.connect({ maxConcurrentAgentsCount: 3 });
+    const httpServer = await Helpers.runHttpServer({
+      addToResponse: response => {
+        response.setHeader('Set-Cookie', 'ulixee=test1');
+      },
+    });
+    expect(GlobalPool.maxConcurrentAgentsCount).toBe(3);
+    expect(GlobalPool.activeSessionCount).toBe(0);
+
+    const tab1 = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab1.session);
+    // #1
+    await tab1.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(1);
+
+    const tab2 = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab2.session);
+
+    // #2
+    await tab2.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(2);
+
+    const tab3 = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab3.session);
+
+    // #3
+    await tab3.goto(httpServer.url);
+    expect(GlobalPool.activeSessionCount).toBe(3);
+
+    // #4
+    const tab4Promise = connection.createSession();
+    expect(GlobalPool.activeSessionCount).toBe(3);
+    await tab1.close();
+    const tab4Meta = await tab4Promise;
+    const tab4 = Session.getTab(tab4Meta);
+    Helpers.needsClosing.push(tab4.session);
+
+    // should give straight to this waiting promise
+    expect(GlobalPool.activeSessionCount).toBe(3);
+    await tab4.goto(httpServer.url);
+    await tab4.close();
+    expect(GlobalPool.activeSessionCount).toBe(2);
+
+    await Promise.all([tab1.close(), tab2.close(), tab3.close()]);
+    expect(GlobalPool.activeSessionCount).toBe(0);
+    await httpServer.close();
+  }, 15e3);
 });

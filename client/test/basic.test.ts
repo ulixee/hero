@@ -2,7 +2,7 @@ import Core from '@secret-agent/core/index';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
 import { Agent, Handler } from '../index';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 describe('basic SecretAgent tests', () => {
   it("doesn't connect until an agent is used for a pre-established connection", async () => {
@@ -10,7 +10,7 @@ describe('basic SecretAgent tests', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
-    class Empty extends CoreClientConnection {
+    class Empty extends ConnectionToCore {
       async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
         return outgoing(payload);
       }
@@ -34,7 +34,7 @@ describe('basic SecretAgent tests', () => {
       },
     );
 
-    class Piper extends CoreClientConnection {
+    class Piper extends ConnectionToCore {
       async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
         const response = await outgoing(payload);
         this.onMessage({
@@ -44,7 +44,7 @@ describe('basic SecretAgent tests', () => {
         });
       }
     }
-    const agent = await new Agent({ coreConnection: new Piper() });
+    const agent = await new Agent({ connectionToCore: new Piper() });
     await agent.close();
 
     const outgoingCommands = outgoing.mock.calls;

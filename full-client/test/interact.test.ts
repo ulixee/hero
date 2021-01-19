@@ -1,5 +1,4 @@
 import { Helpers } from '@secret-agent/testing';
-import { GlobalPool } from '@secret-agent/core';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
@@ -11,7 +10,6 @@ beforeAll(async () => {
   handler = new Handler();
   Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentAgentsCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -42,53 +40,6 @@ describe('basic Interact tests', () => {
     await agent.close();
     await httpServer.close();
   }, 30e3);
-
-  it('should be able to get multiple entries out of the pool', async () => {
-    const httpServer = await Helpers.runHttpServer({
-      addToResponse: response => {
-        response.setHeader('Set-Cookie', 'ulixee=test1');
-      },
-    });
-    expect(GlobalPool.maxConcurrentAgentsCount).toBe(3);
-    expect(GlobalPool.activeSessionCount).toBe(0);
-
-    const browser1 = await handler.createAgent();
-    Helpers.needsClosing.push(browser1);
-    // #1
-    await browser1.goto(httpServer.url);
-    expect(GlobalPool.activeSessionCount).toBe(1);
-
-    const browser2 = await handler.createAgent();
-    Helpers.needsClosing.push(browser2);
-
-    // #2
-    await browser2.goto(httpServer.url);
-    expect(GlobalPool.activeSessionCount).toBe(2);
-
-    const browser3 = await handler.createAgent();
-    Helpers.needsClosing.push(browser3);
-
-    // #3
-    await browser3.goto(httpServer.url);
-    expect(GlobalPool.activeSessionCount).toBe(3);
-
-    // #4
-    const browser4Promise = handler.createAgent();
-    expect(GlobalPool.activeSessionCount).toBe(3);
-    await browser1.close();
-    const browser4 = await browser4Promise;
-    Helpers.needsClosing.push(browser4);
-
-    // should give straight to this waiting promise
-    expect(GlobalPool.activeSessionCount).toBe(3);
-    await browser4.goto(httpServer.url);
-    await browser4.close();
-    expect(GlobalPool.activeSessionCount).toBe(2);
-
-    await Promise.all([browser1.close(), browser2.close(), browser3.close()]);
-    expect(GlobalPool.activeSessionCount).toBe(0);
-    await httpServer.close();
-  }, 15e3);
 
   it('should clean up cookies between runs', async () => {
     const agent1 = await handler.createAgent();

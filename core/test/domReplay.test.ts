@@ -5,7 +5,7 @@ import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions'
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 import DomChangesTable from '../models/DomChangesTable';
 
 const { log } = Log(module);
@@ -25,10 +25,10 @@ const getContentScript = `(() => {
 })()`;
 
 let koaServer: ITestKoaServer;
-let coreServerConnection: CoreServerConnection;
+let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  coreServerConnection = Core.addConnection();
-  Helpers.onClose(() => coreServerConnection.disconnect(), true);
+  connectionToClient = Core.addConnection();
+  Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/empty', ctx => {
     ctx.body = `<html></html>`;
@@ -87,7 +87,7 @@ describe('basic Dom Replay tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
@@ -186,7 +186,7 @@ describe('basic Dom Replay tests', () => {
 </body>
 </html>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/tab1`);
     await tab.waitForLoad('DomContentLoaded');

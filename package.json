@@ -13,6 +13,7 @@
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
     "copy:build": "node copy-build.js",
+    "replay": "yarn workspace @secret-agent/replay start",
     "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @secret-agent/replay build:backend",
     "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay build:backend-paths\"",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
@@ -91,7 +92,6 @@
       "puppet-chrome",
       "replay",
       "replay/frontend",
-      "session-state",
       "testing",
       "commons",
       "website"

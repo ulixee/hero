@@ -84,7 +84,7 @@ async function getDatasetCost(agent, dataset) {
 
 #### Step 3: Add Scraping Machines
 
-You might find that you need to increase the speed of your scrapes. So the next transition you'll likely want to make is to add remote machines. Handlers are built to round-robin between multiple [`CoreConnections`](/docs/advanced/core-connection).
+You might find that you need to increase the speed of your scrapes. So the next transition you'll likely want to make is to add remote machines. Handlers are built to round-robin between multiple [`ConnectionToCore`](/docs/advanced/connection-to-core) instances.
 
 ```js
 import { Handler } from 'secret-agent';
@@ -114,7 +114,7 @@ import { Handler } from 'secret-agent';
 
 To get to this setup, you'll notice some changes in the default exports when you install SecretAgent 1.3.0-alpha.1. The default exports that come out of the `secret-agent` and `@secret-agent/client` packages is now a pre-initialized instance of the `Agent` class (`SecretAgent` was renamed to `Agent`).
 
-[`Handler`](/docs/basic-interfaces/handler) and [`Agent`](/docs/basic-interfaces/agent) are available as exports from both the `secret-agent` and `@secret-agent/client` if you'd like to continue to use those. To customize a "Remote" `SecretAgent` for an [`Agent`](/docs/basic-interfaces/agent), you can create a new instance with a [`coreConnection`](/docs/basic-interfaces/agent#constructor) parameter, or use the [`.configure()`](/docs/basic-interfaces/agent#configure) function.
+[`Handler`](/docs/basic-interfaces/handler) and [`Agent`](/docs/basic-interfaces/agent) are available as exports from both the `secret-agent` and `@secret-agent/client` if you'd like to continue to use those. To customize a "Remote" `SecretAgent` for an [`Agent`](/docs/basic-interfaces/agent), you can create a new instance with a [`connectionToCore`](/docs/basic-interfaces/agent#constructor) parameter, or use the [`.configure()`](/docs/basic-interfaces/agent#configure) function.
 
 
 #### That's it!

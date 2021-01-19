@@ -5,11 +5,11 @@ import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Safari13 from '@secret-agent/emulate-safari-13';
 import Core from '../index';
-import CoreServerConnection from '../lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
 
 let koaServer: ITestKoaServer;
-let connection: CoreServerConnection;
+let connection: ConnectionToClient;
 beforeAll(async () => {
   connection = Core.addConnection();
   await connection.connect();

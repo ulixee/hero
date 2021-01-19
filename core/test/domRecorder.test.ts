@@ -3,15 +3,15 @@ import { Helpers } from '@secret-agent/testing';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import CoreServerConnection from '@secret-agent/core/lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 import DomChangesTable from '../models/DomChangesTable';
 
 let koaServer: ITestKoaServer;
-let coreServerConnection: CoreServerConnection;
+let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  coreServerConnection = Core.addConnection();
-  Helpers.onClose(() => coreServerConnection.disconnect(), true);
+  connectionToClient = Core.addConnection();
+  Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -33,7 +33,7 @@ function addMe() {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession({
+    const meta = await connectionToClient.createSession({
       humanEmulatorId: 'skipper',
     });
     const tab = Session.getTab(meta);
@@ -76,7 +76,7 @@ function removeMe() {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test2`);
     await tab.waitForLoad('DomContentLoaded');
@@ -128,7 +128,7 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test3`);
     await tab.waitForLoad('DomContentLoaded');
@@ -180,7 +180,7 @@ function sort() {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test4`);
     await tab.waitForLoad('DomContentLoaded');
@@ -229,7 +229,7 @@ function sort() {
       ctx.body = `<body><h1>This is deep</h1></body>`;
     });
 
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/iframe`);
     await tab.waitForLoad('AllContentLoaded');
@@ -280,7 +280,7 @@ function clickIt() {
 </body>`;
     });
 
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/cssom`);
     await tab.waitForLoad('DomContentLoaded');
@@ -334,7 +334,7 @@ customElements.define('image-list', class extends HTMLElement {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test5`);
     await tab.waitForLoad('DomContentLoaded');
@@ -386,7 +386,7 @@ describe('basic Mouse Event tests', () => {
 
 </body>`;
     });
-    const meta = await coreServerConnection.createSession({
+    const meta = await connectionToClient.createSession({
       humanEmulatorId: 'basic',
       viewport: {
         height: 800,
@@ -448,7 +448,7 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/input`);
     await tab.waitForLoad('AllContentLoaded');
@@ -510,7 +510,7 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/textarea`);
     await tab.waitForLoad('AllContentLoaded');
@@ -574,7 +574,7 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/cbox`);
     await tab.waitForLoad('AllContentLoaded');
@@ -631,7 +631,7 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/radio`);
     await tab.waitForLoad('AllContentLoaded');
@@ -692,7 +692,7 @@ describe('basic Form element tests', () => {
 </script>
 </body>`;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/select`);
     await tab.waitForLoad('AllContentLoaded');
@@ -774,7 +774,7 @@ function addMe2() {
 </body>
 `;
     });
-    const meta = await coreServerConnection.createSession();
+    const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad('DomContentLoaded');

@@ -3,7 +3,7 @@ import { Helpers } from '@secret-agent/testing/index';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 let payloadHandler: (payload: ICoreRequestPayload) => ICoreResponsePayload = () => null;
 const outgoing = jest.fn(
@@ -23,7 +23,7 @@ const outgoing = jest.fn(
     }
   },
 );
-class Piper extends CoreClientConnection {
+class Piper extends ConnectionToCore {
   async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     const responsePayload = await outgoing(payload);
     const response = <ICoreResponsePayload>{

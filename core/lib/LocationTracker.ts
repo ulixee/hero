@@ -9,10 +9,10 @@ import {
 } from '@secret-agent/core-interfaces/Location';
 import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import TabNavigations from '@secret-agent/session-state/lib/TabNavigations';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import TabNavigations from './TabNavigations';
 
 const READY = 'READY';
 

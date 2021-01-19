@@ -19,7 +19,8 @@
     "paths": {
       "~frontend/*": ["frontend/src/*"],
       "~backend/*": ["backend/*"],
-      "~shared/*": ["shared/*"]
+      "~shared/*": ["shared/*"],
+      "~install/*": ["install/*"]
     }
   },
   "include": [

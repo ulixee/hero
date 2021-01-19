@@ -34,8 +34,8 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IAgentDefaults from '../interfaces/IAgentDefaults';
 import CoreSession from './CoreSession';
-import createConnection from '../connections/createConnection';
 import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
+import ConnectionFactory from '../connections/ConnectionFactory';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -48,7 +48,7 @@ const { getState, setState } = StateMachine<Agent, IState>();
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'coreConnection' | 'showReplay'>;
+  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
 }
 
 const propertyKeys: (keyof Agent)[] = [
@@ -168,7 +168,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     if (connection.hasConnected) {
       if (
         configureOptions.showReplay !== undefined ||
-        configureOptions.coreConnection !== undefined
+        configureOptions.connectionToCore !== undefined
       ) {
         throw new Error(
           'This agent has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
@@ -339,8 +339,10 @@ class SessionConnection {
 
   public async close(): Promise<void> {
     if (!this.hasConnected) return;
-    const session = await this.getCoreSessionOrReject();
-    return session.close();
+    const sessionOrError = await this.getCoreSessionOrReject();
+    if (sessionOrError instanceof CoreSession) {
+      await sessionOrError.close();
+    }
   }
 
   public closeTab(tab: Tab): void {
@@ -357,9 +359,9 @@ class SessionConnection {
 
   private async getCoreSessionOrReject(): Promise<CoreSession> {
     if (!this._coreSession) return undefined;
-    const session = await this._coreSession;
-    if (session instanceof Error) return Promise.reject(session);
-    return session;
+    const sessionOrError = await this._coreSession;
+    if (sessionOrError instanceof CoreSession) return sessionOrError;
+    throw sessionOrError;
   }
 
   private connectSession(): Promise<CoreSession> {
@@ -367,22 +369,28 @@ class SessionConnection {
       return this.getCoreSessionOrReject();
     }
     this.hasConnected = true;
-    const { showReplay, coreConnection, ...options } = getState(this.agent).options;
+    const { showReplay, connectionToCore, ...options } = getState(this.agent).options;
 
-    const connection = createConnection(coreConnection ?? { isPersistent: false });
+    const connection = ConnectionFactory.createConnection(
+      connectionToCore ?? { isPersistent: false },
+    );
 
     this._coreSession = connection.createSession(options).catch(err => {
-      if (err instanceof CanceledPromiseError) return;
+      if (err instanceof CanceledPromiseError) return null;
       return err;
     });
-
-    const session = this.getCoreSessionOrReject();
 
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
-      scriptInstance.launchReplay(options.sessionName, session);
+      this._coreSession = this._coreSession.then(async x => {
+        if (x instanceof Error) return x;
+        await scriptInstance.launchReplay(x);
+        return x;
+      });
     }
+
+    const session = this.getCoreSessionOrReject();
 
     const coreTab = session.then(x => x.firstTab);
     this._activeTab = createTab(this.agent, coreTab);

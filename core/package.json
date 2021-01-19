@@ -14,15 +14,16 @@
     "@secret-agent/mitm": "1.2.0-alpha.5",
     "@secret-agent/puppet": "1.2.0-alpha.5",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",
-    "@secret-agent/session-state": "1.2.0-alpha.5",
     "awaited-dom": "^1.1.10",
+    "better-sqlite3": "^7.1.2",
     "core-js-bundle": "^3.7.0",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
+    "source-map-support": "^0.5.19",
     "typeson": "^5.18.2",
-    "ws": "^7.4.2",
     "typeson-registry": "^1.0.0-alpha.38",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@secret-agent/client": "1.2.0-alpha.5",
@@ -30,6 +31,7 @@
     "@secret-agent/emulate-safari-13": "1.2.0-alpha.5",
     "@secret-agent/puppet-chrome": "1.2.0-alpha.5",
     "@secret-agent/testing": "1.2.0-alpha.5",
+    "@types/better-sqlite3": "^5.4.0",
     "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1"
   }

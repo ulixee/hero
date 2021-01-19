@@ -187,12 +187,12 @@ export default class ReplayApi {
   }
 
   public static async connect(replay: IReplayMeta) {
-    if (!replay.sessionStateApi && !this.serverProcess) {
+    if (!replay.replayApiUrl && !this.serverProcess) {
       await ReplayApi.startServer();
     }
 
-    console.log('Connecting to Replay API', replay.sessionStateApi || this.localApiHost);
-    const api = new ReplayApi(replay.sessionStateApi || this.localApiHost, replay);
+    console.log('Connecting to Replay API', replay.replayApiUrl || this.localApiHost);
+    const api = new ReplayApi(replay.replayApiUrl || this.localApiHost, replay);
     await api.isReady;
     return api;
   }
@@ -203,12 +203,12 @@ export default class ReplayApi {
     const args = [];
     if (!this.serverStartPath) {
       const replayDir = __dirname.split(`${Path.sep}replay${Path.sep}`).shift();
-      this.serverStartPath = Path.resolve(replayDir, 'session-state/api/start');
+      this.serverStartPath = Path.resolve(replayDir, 'core', 'start');
     }
     if (!this.nodePath) this.nodePath = 'node';
     console.log('Launching Replay API Server at %s', this.serverStartPath);
     const child = spawn(`${this.nodePath} "${this.serverStartPath}"`, args, {
-      stdio: ['ignore', 'pipe', 'inherit'],
+      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
       shell: true,
       windowsHide: true,
       env: {
@@ -217,23 +217,24 @@ export default class ReplayApi {
         DEBUG: process.env.DEBUG,
       },
     });
+
+    child.on('error', console.error);
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
     this.serverProcess = child;
     this.serverProcess.once('exit', () => {
       this.serverProcess = null;
     });
 
-    child.stdout.setEncoding('utf8');
-    const promise = await new Promise(resolve => {
-      child.stdout.on('data', msg => {
-        const match = msg.match(/REPLAY API SERVER LISTENING on \[(\d+)\]/);
-        if (match && match.length) {
-          resolve(match[1]);
-        }
-        console.log(msg.trim());
+    const promise = await new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('message', message => {
+        resolve(message as string);
+        child.off('error', reject);
       });
     });
 
-    this.localApiHost = `ws://localhost:${await promise}`;
+    this.localApiHost = `${await promise}/replay`;
     return child;
   }
 }

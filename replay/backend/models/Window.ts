@@ -173,6 +173,7 @@ export default class Window {
 
   public async loadReplayTab(id: string) {
     await this.replayView.loadTab(id);
+    await this.fixBounds();
   }
 
   public replayOnFocus() {

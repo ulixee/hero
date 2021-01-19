@@ -1,7 +1,7 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);
 
@@ -15,7 +15,7 @@ export default class CoreCommandQueue {
 
   constructor(
     private readonly meta: (ISessionMeta & { sessionName: string }) | null,
-    private readonly connection: CoreClientConnection,
+    private readonly connection: ConnectionToCore,
     parentCommandQueue?: CoreCommandQueue,
   ) {
     if (parentCommandQueue) {

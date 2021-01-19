@@ -12,8 +12,8 @@
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "@secret-agent/replay": "1.2.0-alpha.4",
     "awaited-dom": "^1.1.10",
-    "ws": "^7.4.2",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "ws": "^7.4.2"
   },
   "devDependencies": {
     "@secret-agent/testing": "1.2.0-alpha.5",

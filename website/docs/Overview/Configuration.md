@@ -3,16 +3,16 @@
 Configuration variables can be defined at a few levels:
 
 - `Agent` At an instance level, configured via [agent.configure()](../basic-interfaces/agent#configure) or [new Agent()](../basic-interfaces/agent#constructor), or when creating [Handler](../basic-interfaces/handler) agents using [handler.createAgent()](../basic-interfaces/handler#create-agent) or [handler.dispatchAgent()](../basic-interfaces/handler#dispatch-agent).
-- `Connection` At a connection level, which can be configured when creating a new [CoreConnection](../advanced/core-connection#configuration).
+- `Connection` At a connection level, which can be configured when creating a new [ConnectionToCore](../advanced/connection-to-core#configuration).
 - `Core` At an internal level, using the `@secret-agent/core` module of SecretAgent. This must be run in the environment where your Browser Engine(s) and `@secret-agent/core` module are running. If you're running remote, this will be your server.
 
-The internal `@secret-agent/core` module can receive several configuration options on [start](#core-start), or when a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent) establishes a [connection](../advanced/core-connection).
+The internal `@secret-agent/core` module can receive several configuration options on [start](#core-start), or when a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent) establishes a [connection](../advanced/connection-to-core).
 
-### Core Connection <div class="specs"><i>Agent</i></div>
+###  Connection To Core <div class="specs"><i>Agent</i></div>
 
-The [CoreConnection](../advanced/core-connection) to be used by a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent).
+The [ConnectionToCore](../advanced/connection-to-core) to be used by a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent).
 
-All [configurations](../advanced/core-connection#configurations) accept both an `options` object and a [`CoreConnection`](../advanced/core-connection) instance.
+All [configurations](../advanced/connection-to-core#configurations) accept both an `options` object and a [`ConnectionToCore`](../advanced/connection-to-core) instance.
 
 Configuration is accepted in the following methods and constructors:
 
@@ -22,21 +22,21 @@ Configuration is accepted in the following methods and constructors:
 
 ### Max Concurrent Agents Count <div class="specs"><i>Core</i></div>
 
-Limit concurrent Agents operating at any given time across all [connections](../advanced/core-connection) to a "Core". Defaults to `10`.
+Limit concurrent Agents operating at any given time across all [connections](../advanced/connection-to-core) to a "Core". Defaults to `10`.
 
-Configurable via [`Core.start()`](#core-start) or [`CoreConnection`](../advanced/core-connection#configuration).
+Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](../advanced/connection-to-core#configuration).
 
 ### Local Proxy Port Start <div class="specs"><i>Connection</i><i>Core</i></div>
 
 Configures the port the Man-In-the-Middle server will listen on locally. This server will correct headers and TLS signatures sent by requests to properly emulate the desired browser engine. Default port is `0`, which will find an open port locally.
 
-Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection#configuration).
+Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](../advanced/connection-to-core#configuration).
 
 ### Replay Session Port <div class="specs"><i>Connection</i><i>Core</i></div>
 
 Configures the port Replay uses to serve Session data.
 
-Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection#configuration).
+Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](../advanced/connection-to-core#configuration).
 
 ### Sessions Dir <div class="specs"><i>Connection</i><i>Core</i></div>
 
@@ -47,7 +47,7 @@ Configures the storage location for files created by Core.
 
 `Environmental variable`: `SA_SESSIONS_DIR=/your-absolute-dir-path`
 
-Configurable via [`Core.start()`](#core-start) or the first [`CoreConnection`](../advanced/core-connection).
+Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](../advanced/connection-to-core).
 
 ### Blocked Resource Types <div class="specs"><i>Connection</i><i>Agent</i></div> {#blocked-resources}
 
@@ -107,7 +107,7 @@ At an Agent level, `browserEmulatorId` configures the module to use.
 
 At a Connection or Core level, `browserEmulatorIds` indicates a list of modules to initialize before any Agents are created.
 
-- Configurable via [`Core.start()`](#core-start) or [`CoreConnection`](../advanced/core-connection).
+- Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](../advanced/connection-to-core).
 
 ### Human Emulator Id <div class="specs"><i>Agent</i></div>
 

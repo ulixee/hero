@@ -2,17 +2,39 @@ import * as ChildProcess from 'child_process';
 import * as Fs from 'fs';
 import * as Http from 'http';
 import * as Lockfile from 'proper-lockfile';
-import { getBinaryPath, getInstallDirectory, isBinaryInstalled } from './install/Utils';
+import { getBinaryPath, getInstallDirectory, isBinaryInstalled } from '~install/Utils';
 
 const replayDir = getInstallDirectory();
-const replayRegistrationApiPath = `${replayDir}/api.txt`;
+const registrationApiFilepath = `${replayDir}/api.txt`;
 const launchLockPath = `${replayDir}/launch`;
 
-if (!Fs.existsSync(replayDir)) Fs.mkdirSync(replayDir, { recursive: true });
+let registrationHost = '';
+function resolveHost() {
+  try {
+    registrationHost = Fs.readFileSync(registrationApiFilepath, 'utf8');
+  } catch (err) {
+    // no-op
+    registrationHost = '';
+  }
+  return registrationHost;
+}
 
-let sessionApiPath: string;
 try {
-  sessionApiPath = require.resolve('@secret-agent/session-state/api/start');
+  if (!Fs.existsSync(replayDir)) {
+    Fs.mkdirSync(replayDir, { recursive: true });
+  }
+  if (!Fs.existsSync(registrationApiFilepath)) {
+    Fs.writeFileSync(registrationApiFilepath, '');
+  } else {
+    resolveHost();
+  }
+} catch (err) {
+  // couldn't listen for file
+}
+
+let apiStartPath: string;
+try {
+  apiStartPath = require.resolve('@secret-agent/core/start');
 } catch (err) {
   // not installed locally (not full-client)
 }
@@ -25,12 +47,10 @@ try {
   // not installed locally
 }
 
-let replayRegistrationHost: string;
-
 export async function replay(launchArgs: IReplayScriptRegistration): Promise<any> {
   const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const {
-    replayApiServer,
+    replayApiUrl,
     sessionsDataLocation,
     sessionName,
     scriptInstanceId,
@@ -39,13 +59,13 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
   } = launchArgs;
 
   const scriptMeta = {
-    sessionStateApi: replayApiServer,
+    replayApiUrl,
     dataLocation: sessionsDataLocation,
     sessionName,
     sessionId,
     scriptStartDate,
     scriptInstanceId,
-    apiStartPath: sessionApiPath,
+    apiStartPath,
     nodePath: process.execPath,
   };
 
@@ -67,13 +87,28 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
       return;
     }
 
-    if (Fs.existsSync(replayRegistrationApiPath)) Fs.unlinkSync(replayRegistrationApiPath);
+    Fs.writeFileSync(registrationApiFilepath, '');
+
     if (hasLocalReplay) {
       const replayPath = require.resolve('@secret-agent/replay');
       await launchReplay('yarn electron', [replayPath, '--electron-launch'], true);
     } else if (isBinaryInstalled()) {
       await launchReplay(getBinaryPath(), ['--binary-launch']);
     }
+
+    // wait for change
+    await new Promise<void>(resolve => {
+      const watcher = Fs.watch(
+        registrationApiFilepath,
+        { persistent: false, recursive: false },
+        () => {
+          if (resolveHost()) {
+            resolve();
+            watcher.close();
+          }
+        },
+      );
+    });
 
     if (!(await registerScript(scriptMeta))) {
       console.log("Couldn't register this script with the Replay app.", scriptMeta);
@@ -87,45 +122,22 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
   }
 }
 
-async function launchReplay(appPath: string, args: string[], needsShell = false): Promise<void> {
+function launchReplay(appPath: string, args: string[], needsShell = false): void {
   const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const child = ChildProcess.spawn(appPath, args, {
     detached: true,
-    stdio: ['ignore', showLogs ? 'inherit' : 'ignore', 'pipe'],
+    stdio: ['ignore', showLogs ? 'inherit' : 'ignore', showLogs ? 'inherit' : 'ignore'],
     shell: needsShell,
     windowsHide: false,
   });
   child.unref();
-  child.stderr.setEncoding('utf8');
-
-  await new Promise<void>(resolve => {
-    child.stderr.on('data', message => {
-      const matches = message.match(/.*REPLAY REGISTRATION API \[(.+)\]/);
-      if (matches?.length) {
-        Fs.writeFileSync(replayRegistrationApiPath, matches[1]);
-        child.stderr.removeAllListeners('data');
-        resolve();
-      }
-    });
-  });
-}
-
-function didLoadReplayRegistrationHost(): boolean {
-  if (replayRegistrationHost) return true;
-  if (!Fs.existsSync(replayRegistrationApiPath)) return false;
-  try {
-    replayRegistrationHost = Fs.readFileSync(replayRegistrationApiPath, 'utf8').trim();
-    return true;
-  } catch (err) {
-    return false;
-  }
 }
 
 async function registerScript(data: any): Promise<boolean> {
-  if (!didLoadReplayRegistrationHost()) return false;
+  if (!resolveHost()) return false;
 
   try {
-    const url = new URL(replayRegistrationHost);
+    const url = new URL(registrationHost);
     const request = Http.request(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -142,12 +154,13 @@ async function registerScript(data: any): Promise<boolean> {
   } catch (err) {
     // doesn't exist
   }
-  replayRegistrationHost = null;
+  Fs.writeFileSync(registrationApiFilepath, '');
+  registrationHost = '';
   return false;
 }
 
 interface IReplayScriptRegistration {
-  replayApiServer: string;
+  replayApiUrl: string;
   sessionsDataLocation: string;
   sessionName: string;
   sessionId: string;

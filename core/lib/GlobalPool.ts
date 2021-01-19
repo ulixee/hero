@@ -5,11 +5,11 @@ import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import SessionsDb from '@secret-agent/session-state/lib/SessionsDb';
 import Puppet from '@secret-agent/puppet';
 import Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import DefaultBrowser from '@secret-agent/emulate-chrome-83';
+import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
 
@@ -37,7 +37,7 @@ export default class GlobalPool {
   }[] = [];
 
   public static async start(browserEmulatorIds?: string[]) {
-    browserEmulatorIds = browserEmulatorIds ?? [GlobalPool.defaultBrowserEmulatorId];
+    browserEmulatorIds = browserEmulatorIds ?? [];
     log.info('StartingGlobalPool', {
       sessionId: null,
       browserEmulatorIds,
@@ -69,7 +69,7 @@ export default class GlobalPool {
     return this.createSessionNow(options);
   }
 
-  public static async close() {
+  public static close(): Promise<void> {
     const logId = log.info('InitiatingGlobalPoolShutdown');
 
     for (const { promise } of this.waitingForAvailability) {
@@ -86,19 +86,28 @@ export default class GlobalPool {
       this.mitmServer = null;
     }
     SessionsDb.shutdown();
-    await Promise.all(closePromises);
-    log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+    return Promise.all(closePromises)
+      .then(() => {
+        log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+        return null;
+      })
+      .catch(error => {
+        log.error('Error in GlobalPoolShutdown', { parentLogId: logId, sessionId: null, error });
+      });
   }
 
   private static async addPuppet(engine: IBrowserEngine): Promise<Puppet> {
     const existing = this.getPuppet(engine);
-    if (existing) return Promise.resolve(existing);
+    if (existing) {
+      if (existing instanceof Error) throw existing;
+      return existing;
+    }
 
     const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
     const showBrowser = Boolean(JSON.parse(process.env.SHOW_BROWSER ?? 'false'));
-    const showBrowserLogs = Boolean(JSON.parse(process.env.DEBUG ?? 'false'));
+    const showBrowserLogs = !!(process.env.DEBUG ?? 'false').match(/[1|true|yes]/i);
     const browserOrError = await puppet.start({
       proxyPort: this.mitmServer.port,
       showBrowser,

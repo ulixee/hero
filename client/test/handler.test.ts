@@ -1,11 +1,11 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import { Helpers } from '@secret-agent/testing/index';
 import { Handler } from '../index';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 const outgoing = jest.fn();
 
-class Piper extends CoreClientConnection {
+class Piper extends ConnectionToCore {
   async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     const response = await outgoing(payload);
     this.onMessage({

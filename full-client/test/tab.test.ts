@@ -104,21 +104,28 @@ describe('Multi-tab scenarios', () => {
       url: '/logo.png',
     });
     expect(page1Logos).toHaveLength(2);
-    expect(await page1Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page1`);
+    const urls = await Promise.all([page1Logos[0].request.url, page1Logos[1].request.url]);
+    urls.sort();
+    expect(urls).toStrictEqual([
+      `${koaServer.baseUrl}/logo.png`,
+      `${koaServer.baseUrl}/logo.png?page=page1`,
+    ]);
 
     const tabs = await agent.tabs;
     expect(tabs).toHaveLength(2);
-    const page2Logos = await tabs[1].waitForResource({
+    const tab2 = tabs[1];
+    const page2Logos = await tab2.waitForResource({
       url: '/logo.png?page=page2',
     });
     expect(page2Logos).toHaveLength(1);
     expect(await page2Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page2`);
-    await tabs[1].focus();
-    await agent.click(agent.document.querySelector('#fwd'));
-    await tabs[1].waitForLocation('change');
+    await tab2.focus();
+    await tab2.waitForAllContentLoaded();
+    await agent.click(tab2.document.querySelector('#fwd'));
+    await tab2.waitForLocation('change');
     expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);
-    expect(await tabs[1].url).toBe(`${koaServer.baseUrl}/page3`);
-    expect(await tabs[0].url).toBe(`${koaServer.baseUrl}/page1`);
+    expect(await tab2.url).toBe(`${koaServer.baseUrl}/page3`);
+    expect(await tab1.url).toBe(`${koaServer.baseUrl}/page1`);
   }, 30e3);
 
   it('can command click on a link to get to a new tab', async () => {

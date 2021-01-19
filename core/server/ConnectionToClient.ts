@@ -9,14 +9,17 @@ import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureO
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
-import Session from './Session';
-import Tab from './Tab';
-import GlobalPool from './GlobalPool';
+import Log from '@secret-agent/commons/Logger';
+import Session from '../lib/Session';
+import Tab from '../lib/Tab';
+import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import UserProfile from './UserProfile';
-import BrowserEmulators from './BrowserEmulators';
+import UserProfile from '../lib/UserProfile';
+import BrowserEmulators from '../lib/BrowserEmulators';
 
-export default class CoreServerConnection extends TypedEventEmitter<{
+const { log } = Log(module);
+
+export default class ConnectionToClient extends TypedEventEmitter<{
   close: { fatalError?: Error };
   message: ICoreResponsePayload | ICoreEventPayload;
 }> {
@@ -30,7 +33,10 @@ export default class CoreServerConnection extends TypedEventEmitter<{
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const { messageId, command, meta, args } = payload;
+    const { messageId, command, meta } = payload;
+
+    // json converts args to null which breaks undefined argument handlers
+    const args = payload.args.map(x => (x === null ? undefined : x));
 
     let data: any;
     let isError = false;
@@ -89,8 +95,12 @@ export default class CoreServerConnection extends TypedEventEmitter<{
     };
   }
 
-  public async logUnhandledError(error: Error, fatalError = false): Promise<void> {
-    await Core.logUnhandledError(error, fatalError);
+  public logUnhandledError(error: Error, fatalError = false): void {
+    if (fatalError) {
+      log.error('Client.UnhandledError(fatal)', { clientError: error, sessionId: null });
+    } else {
+      log.error('Client.UnhandledErrorOrRejection', { clientError: error, sessionId: null });
+    }
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
@@ -113,9 +123,9 @@ export default class CoreServerConnection extends TypedEventEmitter<{
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public getTabs(meta: ISessionMeta): Promise<ISessionMeta[]> {
+  public getTabs(meta: ISessionMeta): ISessionMeta[] {
     const session = Session.get(meta.sessionId);
-    return Promise.all(session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x)));
+    return session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x));
   }
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
@@ -193,13 +203,12 @@ export default class CoreServerConnection extends TypedEventEmitter<{
     }, this.autoShutdownMillis).unref();
   }
 
-  private async getSessionMeta(tab: Tab): Promise<ISessionMeta> {
+  private getSessionMeta(tab: Tab): ISessionMeta {
     const session = tab.session;
     return {
       sessionId: session.id,
       sessionsDataLocation: session.baseDir,
       tabId: tab.id,
-      replayApiServer: (await Core.replayServer)?.url,
     };
   }
 }

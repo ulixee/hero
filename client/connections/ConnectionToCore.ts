@@ -6,7 +6,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import Log from '@secret-agent/commons/Logger';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import ICoreConnectionOptions from '../interfaces/ICoreConnectionOptions';
+import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import { IAgentCreateOptions } from '../index';
@@ -15,9 +15,11 @@ import CoreSessions from '../lib/CoreSessions';
 
 const { log } = Log(module);
 
-export default abstract class CoreClientConnection {
+export default abstract class ConnectionToCore {
   public readonly commandQueue: CoreCommandQueue;
-  public options: ICoreConnectionOptions;
+  public options: IConnectionToCoreOptions;
+
+  public hostOrError: Promise<string | Error>;
 
   private connectPromise: Promise<Error | null>;
 
@@ -25,7 +27,7 @@ export default abstract class CoreClientConnection {
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();
   private lastId = 0;
 
-  constructor(options?: ICoreConnectionOptions) {
+  constructor(options?: IConnectionToCoreOptions) {
     this.options = options ?? { isPersistent: true };
     this.commandQueue = new CoreCommandQueue(null, this);
     this.coreSessions = new CoreSessions(
@@ -64,7 +66,9 @@ export default abstract class CoreClientConnection {
   public async sendRequest(
     payload: Omit<ICoreRequestPayload, 'messageId'>,
   ): Promise<ICoreResponsePayload> {
-    await this.connect();
+    const result = await this.connect();
+    if (result) throw result;
+
     const { promise, id } = this.createPendingResult();
     await this.internalSendRequest({
       messageId: id,
@@ -93,7 +97,7 @@ export default abstract class CoreClientConnection {
     await this.coreSessions.waitForAvailable(() => {
       const agent = new Agent({
         ...options,
-        coreConnection: this,
+        connectionToCore: this,
       });
       return callbackFn(agent);
     });
@@ -116,10 +120,6 @@ export default abstract class CoreClientConnection {
 
   public async logUnhandledError(error: Error): Promise<void> {
     await this.commandQueue.run('logUnhandledError', error);
-  }
-
-  public isRemoteConnection(): boolean {
-    return false;
   }
 
   protected onEvent(payload: ICoreEventPayload): void {

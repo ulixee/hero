@@ -1,7 +1,7 @@
 export default interface ICoreConfigureOptions {
   maxConcurrentAgentsCount?: number;
   localProxyPortStart?: number;
-  replayServerPort?: number;
+  coreServerPort?: number;
   sessionsDir?: string;
   browserEmulatorIds?: string[];
 }

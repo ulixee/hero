@@ -7,14 +7,13 @@ import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
-import CoreClientConnection from '../connections/CoreClientConnection';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<string, CoreTab>();
   public sessionId: string;
   public sessionName: string;
   public sessionsDataLocation: string;
-  public replayApiServer: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
 
@@ -22,18 +21,23 @@ export default class CoreSession implements IJsPathEventTarget {
     return [...this.tabsById.values()][0];
   }
 
-  protected readonly meta: ISessionMeta;
-  private readonly connection: CoreClientConnection;
+  public get replayApiUrl(): Promise<string> {
+    return this.connection.hostOrError.then(x => {
+      if (x instanceof Error) {
+        throw x;
+      }
+      return `${x}/replay`;
+    });
+  }
 
-  constructor(
-    sessionMeta: ISessionMeta & { sessionName: string },
-    connection: CoreClientConnection,
-  ) {
-    const { sessionId, sessionsDataLocation, replayApiServer, sessionName } = sessionMeta;
+  protected readonly meta: ISessionMeta;
+  private readonly connection: ConnectionToCore;
+
+  constructor(sessionMeta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
+    const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
     this.sessionsDataLocation = sessionsDataLocation;
-    this.replayApiServer = replayApiServer;
     this.meta = {
       sessionId,
     };

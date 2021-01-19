@@ -1,6 +1,6 @@
-# CoreConnection
+# ConnectionToCore
 
-> CoreConnection is a built-in mechanism to stream commands to local and remote instances of SecretAgent using the same simple interface.
+> ConnectionToCore is a built-in mechanism to stream commands to local and remote instances of SecretAgent using the same simple interface.
 
 When you install SecretAgent, it comes ready to run locally with a Chromium engine and client all in your local codebase. However, as you begin to scale the number of concurrent scrapes, you will end up needing to manage a fleet of "engines" running on a number of computers.
 
@@ -11,7 +11,7 @@ const { Agent: FullAgent } = require('@secret-agent');
 (async () => {
   const local = new FullAgent(); // connects to full, local installation
   const remote = new BaseAgent({
-    coreConnection: new RemoteCoreConnection({
+    connectionToCore: new RemoteConnectionToCore({
       host: '192.168.1.1:3444',
     }),
   });
@@ -20,15 +20,15 @@ const { Agent: FullAgent } = require('@secret-agent');
 
 There are 2 built-in connections in SecretAgent:
 
-- `LocalCoreConnection` - connects to a locally install SecretAgent `Core`
-- `RemoteCoreConnection` - takes a host to dial remotely over tcp. See more [here](./remote)
+- `Default` - instantiates and connects to a locally install SecretAgent `Core`
+- `RemoteConnectionToCore` - takes a host to dial over tcp. See more [here](./remote)
 
 
 ### Configuration {#configuration}
 
-When you provide a coreConnection to a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent), SecretAgent will accept either an `options` object or a `LocalCoreConnection | RemoteCoreConnection` instance.
+When you provide a connectionToCore to a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent), SecretAgent will accept either an `options` object or a `RemoteConnectionToCore` instance.
 
-The following methods allow you to configure the coreConnection
+The following methods allow you to configure the `connectionToCore`
 - [agent.configure()](../basic-interfaces/agent#configure) - apply the connection to the default agent, or to a an agent constructed prior to the first connection.
 - [new Agent()](../basic-interfaces/agent#constructor) - the new agent will use this connection.
 - [new Handler(...connections)](../basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.  

@@ -5,11 +5,11 @@ import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import Core, { Tab } from '../index';
 import LocationTracker from '../lib/LocationTracker';
-import CoreServerConnection from '../lib/CoreServerConnection';
+import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
 
 let koaServer: ITestKoaServer;
-let connection: CoreServerConnection;
+let connection: ConnectionToClient;
 beforeAll(async () => {
   connection = Core.addConnection();
   await connection.connect();

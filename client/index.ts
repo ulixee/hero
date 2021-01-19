@@ -11,26 +11,26 @@ import {
   PipelineStatus,
 } from '@secret-agent/core-interfaces/Location';
 import IAgentCreateOptions from './interfaces/IAgentCreateOptions';
-import ICoreConnectionOptions from './interfaces/ICoreConnectionOptions';
+import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import Handler from './lib/Handler';
 import Agent from './lib/Agent';
-import RemoteCoreConnection from './connections/RemoteCoreConnection';
-import LocalCoreConnection from './connections/LocalCoreConnection';
+import RemoteConnectionToCore from './connections/RemoteConnectionToCore';
+import ConnectionFactory from './connections/ConnectionFactory';
 
 export default new Agent();
 
 export {
   Handler,
   Agent,
-  RemoteCoreConnection,
-  LocalCoreConnection,
+  RemoteConnectionToCore,
+  ConnectionFactory,
   InteractionCommand,
   MouseButton,
   ResourceType,
   KeyboardKeys,
   BlockedResourceType,
   IAgentCreateOptions,
-  ICoreConnectionOptions,
+  IConnectionToCoreOptions,
   Node,
   XPathResult,
   LocationStatus,

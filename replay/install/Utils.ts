@@ -1,7 +1,7 @@
 import * as Path from 'path';
 import * as Fs from 'fs';
 import * as os from 'os';
-import * as Semver from 'semver';
+import * as compareVersions from 'compare-versions';
 
 const packageJson = require('../package.json');
 
@@ -16,11 +16,8 @@ export { version };
 export function isBinaryInstalled() {
   try {
     const installedVersion = Fs.readFileSync(`${getInstallDirectory()}/version`, 'utf-8').trim();
-
-    const comparison = Semver.compare(installedVersion, version);
-    // 1 means installedVersion > version
-    // -1 means installedVersion < version
-    if (comparison >= 0) return true;
+    const isCurrentVersionValid = compareVersions.compare(installedVersion, version, '>=');
+    if (isCurrentVersionValid) return true;
   } catch (ignored) {
     return false;
   }
