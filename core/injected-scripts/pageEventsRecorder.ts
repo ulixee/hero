@@ -1,10 +1,11 @@
 // NOTE: do not use node dependencies
 
 // eslint-disable-next-line max-classes-per-file
-import { IDomChangeEvent, INodeData } from '../interfaces/IDomChangeEvent';
-import { IMouseEvent } from '../interfaces/IMouseEvent';
-import { IFocusEvent } from '../interfaces/IFocusEvent';
-import { IScrollEvent } from '../interfaces/IScrollEvent';
+import { IDomChangeEvent, INodeData } from '@secret-agent/core-interfaces/IDomChangeEvent';
+import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
+import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
+import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
+import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
 
 // exporting a type is ok. Don't export variables or will blow up the page
 export type PageRecorderResultSet = [
@@ -31,12 +32,13 @@ function upload(records: PageRecorderResultSet) {
     lastUploadDate = new Date();
     return true;
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(`ERROR calling page recorder callback: ${String(err)}`, err);
   }
   return false;
 }
 
-class NodeTracker {
+class NodeTracker implements INodeTracker {
   private nextId = 1;
   private nodeIds = new Map<Node, number>();
 
@@ -98,6 +100,7 @@ class PageEventsRecorder {
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
   private scrollEvents: IScrollEvent[] = [];
+  private loadEvents: ILoadEvent[] = [];
   private location = window.self.location.href;
 
   private commandId = -1;
@@ -190,6 +193,16 @@ class PageEventsRecorder {
 
   public trackScroll(scrollX: number, scrollY: number) {
     this.scrollEvents.push([this.commandId, scrollX, scrollY, new Date().toISOString()]);
+  }
+
+  public onLoadEvent(name: string) {
+    this.loadEvents.push([
+      this.commandId,
+      name,
+      window.self.location.href,
+      new Date().toISOString(),
+    ]);
+    this.uploadChanges();
   }
 
   public checkForLocationChange(changeTime?: string) {

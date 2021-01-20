@@ -21,7 +21,7 @@ import { EventEmitter } from 'events';
 import { IConnectionCallback } from '@secret-agent/puppet-interfaces/IConnectionCallback';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
+import ProtocolError from './ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;
 

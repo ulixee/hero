@@ -7,7 +7,6 @@ copyfiles(
     'emulate-browsers/**/data/**',
     'testing/*/**',
     'examples/*.mjs',
-    'injected-scripts/package.json',
     '*client/index.mjs',
     'puppet/test/*/**',
     'yarn.lock',

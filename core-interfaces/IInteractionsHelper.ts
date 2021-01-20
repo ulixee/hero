@@ -1,4 +1,4 @@
-import type IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
+import type IMouseUpResult from './IMouseUpResult';
 import { IMousePosition } from './IInteractions';
 import IRect from './IRect';
 import IPoint from './IPoint';

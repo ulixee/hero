@@ -11,7 +11,7 @@ import IRect from '@secret-agent/core-interfaces/IRect';
 import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelper';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
-import type IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
+import type IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import generateVector from './generateVector';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor

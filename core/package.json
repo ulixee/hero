@@ -10,7 +10,6 @@
     "@secret-agent/emulate-humans-basic": "1.2.0-alpha.4",
     "@secret-agent/emulate-humans-ghost": "1.2.0-alpha.4",
     "@secret-agent/emulate-humans-skipper": "1.2.0-alpha.4",
-    "@secret-agent/injected-scripts": "1.2.0-alpha.4",
     "@secret-agent/mitm": "1.2.0-alpha.5",
     "@secret-agent/puppet": "1.2.0-alpha.5",
     "@secret-agent/puppet-interfaces": "1.2.0-alpha.4",

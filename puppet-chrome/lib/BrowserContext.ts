@@ -14,6 +14,7 @@ import {
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -141,6 +142,9 @@ export class BrowserContext
     await Promise.all(this.pages.map(x => x.close()));
     await this.cdpRootSessionSend('Target.disposeBrowserContext', {
       browserContextId: this.id,
+    }).catch(err => {
+      if (err instanceof CanceledPromiseError) return;
+      throw err;
     });
     removeEventListeners(this.eventListeners);
     this.browser.browserContextsById.delete(this.id);

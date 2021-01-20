@@ -64,7 +64,7 @@ export default class ReplayTabState extends EventEmitter {
     this.viewportWidth = tabMeta.width;
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
-    this.ticks.push(new ReplayTick(this, 'load', 0, -1, replayTime.start.toISOString(), 'Load'));
+    this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.toISOString(), 'Load'));
   }
 
   public getTickState() {
@@ -133,7 +133,7 @@ export default class ReplayTabState extends EventEmitter {
     }
 
     const changeEvents: IFrontendDomChangeEvent[] = [];
-    if (newTick.eventType === 'load') {
+    if (newTick.eventType === 'init') {
       startIndex = -1;
       changeEvents.push({
         action: 'newDocument',
@@ -415,7 +415,7 @@ export default class ReplayTabState extends EventEmitter {
       tick.documentOrigin = documentOrigin;
       tick.highlightNodeIds = lastSelectedNodeIds;
 
-      if (tick.eventType === 'load') {
+      if (tick.eventType === 'init') {
         tick.documentLoadPaintIndex = -1;
         tick.documentOrigin = this.startOrigin;
         tick.paintEventIdx = -1;

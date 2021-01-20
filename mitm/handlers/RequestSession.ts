@@ -86,7 +86,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         origin,
         referer,
         isHttp2Push: ctx.isHttp2Push,
-        load: createPromise<IPendingResourceLoad>(),
+        pendingLoad: createPromise<IPendingResourceLoad>(),
       };
       this.pendingResources.push(resource);
 
@@ -109,7 +109,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       }
     }
 
-    await resource.load.promise;
+    await resource.pendingLoad.promise;
 
     const idx = this.pendingResources.indexOf(resource);
     if (idx >= 0) this.pendingResources.splice(idx, 1);
@@ -124,7 +124,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     };
   }
 
-  public registerResource(params: Omit<IPendingResourceLoad, 'load'>): void {
+  public registerResource(params: Omit<IPendingResourceLoad, 'pendingLoad'>): void {
     if (this.isClosing) return;
 
     this.browserRequestIdToTabId.set(params.browserRequestId, params.tabId);
@@ -133,7 +133,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     let resource = this.getPendingResource(url, method, origin, referer);
 
     // don't re-resolve same asset
-    if (resource?.load?.isResolved) resource = null;
+    if (resource?.pendingLoad?.isResolved) resource = null;
 
     if (!resource) {
       resource = {
@@ -141,7 +141,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         method,
         origin,
         referer,
-        load: createPromise<IPendingResourceLoad>(),
+        pendingLoad: createPromise<IPendingResourceLoad>(),
       } as IPendingResourceLoad;
       this.pendingResources.push(resource);
     }
@@ -152,7 +152,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     resource.resourceType = params.resourceType;
     resource.hasUserGesture = params.hasUserGesture;
     resource.isUserNavigation = params.isUserNavigation;
-    resource.load.resolve(resource);
+    resource.pendingLoad.resolve(resource);
   }
 
   public trackResource(resource: IHttpResourceLoadDetails): void {
@@ -204,7 +204,9 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     this.logger.info('MitmRequestSession.Closing');
     this.isClosing = true;
     for (const pending of this.pendingResources) {
-      pending.load.reject(new CanceledPromiseError('Canceling: Mitm Request Session Closing'));
+      pending.pendingLoad.reject(
+        new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
+      );
     }
     this.requestAgent.close();
     this.dns.close();
@@ -406,7 +408,7 @@ interface IPendingResourceLoad {
   method: string;
   origin: string;
   referer: string;
-  load: IResolvablePromise<IPendingResourceLoad>;
+  pendingLoad: IResolvablePromise<IPendingResourceLoad>;
   tabId?: string;
   browserRequestId?: string;
   resourceType?: ResourceType;

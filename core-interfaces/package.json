@@ -7,7 +7,6 @@
     "awaited-dom": "^1.1.10"
   },
   "devDependencies": {
-    "@secret-agent/injected-scripts": "1.2.0-alpha.4",
     "devtools-protocol": "^0.0.799653"
   }
 }

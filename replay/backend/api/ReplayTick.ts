@@ -1,7 +1,7 @@
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ReplayTime from '~backend/api/ReplayTime';
 
-export type IEventType = 'command' | 'paint' | 'focus' | 'mouse' | 'scroll' | 'page' | 'load';
+export type IEventType = 'command' | 'paint' | 'focus' | 'mouse' | 'scroll' | 'page' | 'init';
 export default class ReplayTick {
   public isNewDocumentTick = false;
   public documentOrigin: string;
@@ -38,7 +38,7 @@ export default class ReplayTick {
   }
 
   public isMajor() {
-    return this.eventType === 'command' || this.eventType === 'load';
+    return this.eventType === 'command' || this.eventType === 'init';
   }
 
   public toJSON() {
@@ -50,7 +50,7 @@ export default class ReplayTick {
   }
 
   public updateDuration(replayTime: ReplayTime) {
-    if (this.eventType === 'load') {
+    if (this.eventType === 'init') {
       this.playbarOffsetPercent = 0;
       return;
     }

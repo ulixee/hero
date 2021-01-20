@@ -83,7 +83,6 @@
       "emulate-browsers/*",
       "emulate-humans/*",
       "full-client",
-      "injected-scripts",
       "mitm",
       "mitm-socket",
       "puppet",

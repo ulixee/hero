@@ -4,14 +4,14 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Log from '@secret-agent/commons/Logger';
 import Typeson from 'typeson';
 import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
-import IElementRect from '@secret-agent/injected-scripts/interfaces/IElementRect';
 import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
-import IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
+import IElementRect from '@secret-agent/core-interfaces/IElementRect';
+import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import DomEnvError from './DomEnvError';
 import { Serializable } from '../interfaces/ISerializable';
 
@@ -24,22 +24,10 @@ const pageScripts = {
   typesonRegistry: fs
     .readFileSync(require.resolve('typeson-registry/dist/presets/builtin.js'), 'utf8')
     .replace(/\/\/# sourceMappingURL=.+\.map/g, ''),
-  domStorage: fs.readFileSync(
-    require.resolve(`@secret-agent/injected-scripts/scripts/domStorage.js`),
-    'utf8',
-  ),
-  jsPath: fs.readFileSync(
-    require.resolve(`@secret-agent/injected-scripts/scripts/jsPath.js`),
-    'utf8',
-  ),
-  Fetcher: fs.readFileSync(
-    require.resolve(`@secret-agent/injected-scripts/scripts/Fetcher.js`),
-    'utf8',
-  ),
-  MouseEvents: fs.readFileSync(
-    require.resolve(`@secret-agent/injected-scripts/scripts/MouseEvents.js`),
-    'utf8',
-  ),
+  domStorage: fs.readFileSync(require.resolve(`../injected-scripts/domStorage.js`), 'utf8'),
+  jsPath: fs.readFileSync(require.resolve(`../injected-scripts/jsPath.js`), 'utf8'),
+  Fetcher: fs.readFileSync(require.resolve(`../injected-scripts/Fetcher.js`), 'utf8'),
+  MouseEvents: fs.readFileSync(require.resolve(`../injected-scripts/MouseEvents.js`), 'utf8'),
 };
 
 const domEnvScript = `(function installDomEnv() {

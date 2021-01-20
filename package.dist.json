@@ -23,7 +23,6 @@
       "puppet",
       "puppet-interfaces",
       "puppet-chrome",
-      "injected-scripts",
       "mitm",
       "mitm-socket",
       "replay",

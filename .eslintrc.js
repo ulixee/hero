@@ -70,11 +70,13 @@ module.exports = {
       },
     },
     {
-      files: [
-        '**/injected-scripts/**/*.js',
-        '**/injected-scripts/**/*.ts',
-        'injected-scripts/scripts/*.ts',
-      ],
+      files: ['global.d.ts'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': 'off',
+      },
+    },
+    {
+      files: ['**/injected-scripts/**/*.js', '**/injected-scripts/**/*.ts'],
       rules: {
         'no-console': 'off',
         'no-undef': 'off',

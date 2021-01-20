@@ -6,8 +6,8 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import ProtocolError from '@secret-agent/puppet/lib/ProtocolError';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import ProtocolError from './ProtocolError';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';

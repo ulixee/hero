@@ -3,8 +3,8 @@
   "compilerOptions": {
     "incremental": true,
     "target": "ES2018",
-    "module": "commonjs",
-    "lib": ["es2018", "dom"],
+    "module": "CommonJS",
+    "lib": ["ES2018", "DOM", "DOM.Iterable"],
     "noImplicitAny": false,
     "sourceMap": true,
     "inlineSourceMap": false,
@@ -22,7 +22,7 @@
   },
   "references": [
     {
-      "path": "injected-scripts/tsconfig.json"
+      "path": "core/injected-scripts/tsconfig.json"
     },
     {
       "path": "replay/tsconfig.json"
@@ -43,7 +43,7 @@
     "replay",
     "replay/injected-scripts",
     "website",
-    "injected-scripts",
+    "core/injected-scripts",
     "emulate-browsers/base/injected-scripts",
     "emulate-browsers/**/data"
   ]

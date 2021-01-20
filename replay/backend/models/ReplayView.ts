@@ -204,17 +204,20 @@ export default class ReplayView extends ViewBackend {
   ) {
     if (!events || !events.length) return;
     const [domChanges] = events;
-    if (
-      domChanges?.length &&
-      (domChanges[0].action === 'newDocument' || (domChanges[0].action as any) === 'load') &&
-      domChanges[0].frameIdPath === 'main'
-    ) {
-      const nav = domChanges.shift();
-      await Promise.race([
-        this.webContents.loadURL(nav.textContent),
-        new Promise(resolve => setTimeout(resolve, 500)),
-      ]);
+
+    if (domChanges.length) {
+      const [{ action, frameIdPath }] = domChanges;
+      const hasNewUrlToLoad =
+        (action === 'newDocument' || (action as any) === 'load') && frameIdPath === 'main';
+      if (hasNewUrlToLoad) {
+        const nav = domChanges.shift();
+        await Promise.race([
+          this.webContents.loadURL(nav.textContent),
+          new Promise(resolve => setTimeout(resolve, 500)),
+        ]);
+      }
     }
+
     this.webContents.send('dom:apply', ...events);
     this.window.setAddressBarUrl(this.tabState.urlOrigin);
   }

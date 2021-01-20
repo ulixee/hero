@@ -8,7 +8,6 @@
     "emulate-browsers/*",
     "emulate-humans/*",
     "full-client",
-    "injected-scripts",
     "puppet",
     "puppet-chrome",
     "puppet-interfaces",

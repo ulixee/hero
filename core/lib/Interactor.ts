@@ -21,7 +21,7 @@ import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
-import IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
+import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import Tab from './Tab';
 
 const { log } = Log(module);

@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import IMouseUpResult from '../interfaces/IMouseUpResult';
+import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class MouseEvents {

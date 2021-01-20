@@ -1,12 +1,12 @@
 import fs from 'fs';
 import Log from '@secret-agent/commons/Logger';
-import { PageRecorderResultSet } from '@secret-agent/injected-scripts/scripts/pageEventsRecorder';
 import { removeEventListeners } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 
 const domObserver = fs.readFileSync(
-  require.resolve('@secret-agent/injected-scripts/scripts/pageEventsRecorder.js'),
+  require.resolve('../injected-scripts/pageEventsRecorder.js'),
   'utf8',
 );
 
