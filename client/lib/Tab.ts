@@ -129,20 +129,25 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     ) as CSSStyleDeclaration;
   }
 
-  public async goto(href: string): Promise<Resource> {
+  public async goto(href: string, timeoutMs?: number): Promise<Resource> {
     const coreTab = await getCoreTab(this);
-    const resource = await coreTab.goto(href);
+    const resource = await coreTab.goto(href, timeoutMs);
     return createResource(resource, Promise.resolve(coreTab));
   }
 
-  public async goBack(): Promise<string> {
+  public async goBack(timeoutMs?: number): Promise<string> {
     const coreTab = await getCoreTab(this);
-    return coreTab.goBack();
+    return coreTab.goBack(timeoutMs);
   }
 
-  public async goForward(): Promise<string> {
+  public async goForward(timeoutMs?: number): Promise<string> {
     const coreTab = await getCoreTab(this);
-    return coreTab.goForward();
+    return coreTab.goForward(timeoutMs);
+  }
+
+  public async reload(timeoutMs?: number): Promise<void> {
+    const coreTab = await getCoreTab(this);
+    return coreTab.reload(timeoutMs);
   }
 
   public async getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
@@ -193,11 +198,6 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async waitForMillis(millis: number): Promise<void> {
     const coreTab = await getCoreTab(this);
     await coreTab.waitForMillis(millis);
-  }
-
-  public async waitForWebSocket(url: string | RegExp): Promise<void> {
-    const coreTab = await getCoreTab(this);
-    await coreTab.waitForWebSocket(url);
   }
 
   public focus(): Promise<void> {

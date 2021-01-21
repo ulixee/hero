@@ -4,6 +4,7 @@ const copyfiles = require('copyfiles');
 copyfiles(
   [
     '-e "node_modules/**"',
+    '-e "**/node_modules/**"',
     '-e "build/**"',
     '-e "build-dist/**"',
     '-e "mitm-socket/dist"',

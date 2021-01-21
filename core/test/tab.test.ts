@@ -46,6 +46,7 @@ describe('basic Tab tests', () => {
     const tab = Session.getTab(meta);
     Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/test2`);
+    await tab.waitForLoad('DomContentLoaded');
 
     await expect(
       tab.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 }),

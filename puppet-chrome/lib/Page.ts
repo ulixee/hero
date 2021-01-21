@@ -202,6 +202,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.navigateToHistory(+1);
   }
 
+  reload(): Promise<void> {
+    return this.cdpSession.send('Page.reload');
+  }
+
   async bringToFront(): Promise<void> {
     await this.cdpSession.send('Page.bringToFront');
   }

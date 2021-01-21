@@ -109,7 +109,7 @@ export default class LocationTracker {
       }
     }
 
-    const resolvablePromise = createPromise<void>(options.timeoutMs);
+    const resolvablePromise = createPromise<void>(options.timeoutMs ?? 30e3);
     this.waitForCbs[status].push(resolvablePromise);
     return resolvablePromise.promise;
   }

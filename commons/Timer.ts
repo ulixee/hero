@@ -10,8 +10,9 @@ export default class Timer {
   private readonly expirePromise = createPromise();
 
   constructor(readonly timeoutMillis: number, readonly registry?: IRegistry[]) {
-    this.timeout = setTimeout(this.expire.bind(this), timeoutMillis).unref();
-    if (registry) {
+    this.timeout =
+      timeoutMillis > 0 ? setTimeout(this.expire.bind(this), timeoutMillis).unref() : null;
+    if (registry && this.timeout) {
       registry.push({ reject: this.expirePromise.reject, timeout: this.timeout });
     }
   }

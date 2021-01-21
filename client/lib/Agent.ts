@@ -224,16 +224,20 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
 
-  public goto(href: string): Promise<Resource> {
-    return this.activeTab.goto(href);
+  public goto(href: string, timeoutMs?: number): Promise<Resource> {
+    return this.activeTab.goto(href, timeoutMs);
   }
 
-  public goBack(): Promise<string> {
-    return this.activeTab.goBack();
+  public goBack(timeoutMs?: number): Promise<string> {
+    return this.activeTab.goBack(timeoutMs);
   }
 
-  public goForward(): Promise<string> {
-    return this.activeTab.goForward();
+  public goForward(timeoutMs?: number): Promise<string> {
+    return this.activeTab.goForward(timeoutMs);
+  }
+
+  public reload(timeoutMs?: number): Promise<void> {
+    return this.activeTab.reload(timeoutMs);
   }
 
   public fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
@@ -273,10 +277,6 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   public waitForMillis(millis: number): Promise<void> {
     return this.activeTab.waitForMillis(millis);
-  }
-
-  public waitForWebSocket(url: string | RegExp): Promise<void> {
-    return this.activeTab.waitForWebSocket(url);
   }
 
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////

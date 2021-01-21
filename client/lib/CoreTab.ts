@@ -77,16 +77,20 @@ export default class CoreTab implements IJsPathEventTarget {
     return await this.commandQueue.run('getLocationHref');
   }
 
-  public async goto(href: string): Promise<IResourceMeta> {
-    return await this.commandQueue.run('goto', href);
+  public async goto(href: string, timeoutMs?: number): Promise<IResourceMeta> {
+    return await this.commandQueue.run('goto', href, timeoutMs);
   }
 
-  public async goBack(): Promise<string> {
-    return await this.commandQueue.run('goBack');
+  public async goBack(timeoutMs?: number): Promise<string> {
+    return await this.commandQueue.run('goBack', timeoutMs);
   }
 
-  public async goForward(): Promise<string> {
-    return await this.commandQueue.run('goForward');
+  public async goForward(timeoutMs?: number): Promise<string> {
+    return await this.commandQueue.run('goForward', timeoutMs);
+  }
+
+  public async reload(timeoutMs?: number): Promise<void> {
+    return await this.commandQueue.run('reload', timeoutMs);
   }
 
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
@@ -138,10 +142,6 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async waitForMillis(millis: number): Promise<void> {
     await this.commandQueue.run('waitForMillis', millis);
-  }
-
-  public async waitForWebSocket(url: string | RegExp): Promise<void> {
-    await this.commandQueue.run('waitForWebSocket', url);
   }
 
   public async waitForNewTab(opts: IWaitForOptions): Promise<CoreTab> {

@@ -146,8 +146,10 @@ export default class ReplayApi {
 
         if (eventName === 'resources') this.resources.onResource(event);
         else if (eventName === 'dom-changes') tab.loadDomChange(event);
-        else if (eventName === 'commands') tab.loadCommand(event);
-        else if (eventName === 'mouse-events') tab.loadPageEvent('mouse', event);
+        else if (eventName === 'commands') {
+          if (!this.replayTime.close) this.replayTime.update();
+          tab.loadCommand(event);
+        } else if (eventName === 'mouse-events') tab.loadPageEvent('mouse', event);
         else if (eventName === 'focus-events') tab.loadPageEvent('focus', event);
         else if (eventName === 'scroll-events') tab.loadPageEvent('scroll', event);
       }

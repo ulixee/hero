@@ -128,6 +128,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.goto,
       this.goBack,
       this.goForward,
+      this.reload,
       this.getCookies,
       this.getJsValue,
       this.getLocationHref,
@@ -252,7 +253,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public async goto(url: string): Promise<IResourceMeta> {
+  public async goto(url: string, timeoutMs = 30e3): Promise<IResourceMeta> {
     const formattedUrl = Url.format(url);
 
     this.navigationTracker.navigationRequested(
@@ -262,22 +263,47 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.lastCommandId,
     );
 
-    await this.puppetPage.navigate(formattedUrl);
+    const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
-    const resource = await this.locationTracker.waitForLocationResourceId();
+    const timer = new Timer(timeoutMs, this.waitTimeouts);
+    await timer.waitForPromise(this.puppetPage.navigate(formattedUrl), timeoutMessage);
+
+    const resource = await timer.waitForPromise(
+      this.locationTracker.waitForLocationResourceId(),
+      timeoutMessage,
+    );
     return this.sessionState.getResourceMeta(resource);
   }
 
-  public async goBack(): Promise<string> {
+  public async goBack(timeoutMs?: number): Promise<string> {
     await this.puppetPage.goBack();
-    await this.locationTracker.waitFor('AllContentLoaded');
+    await this.locationTracker.waitFor('AllContentLoaded', { timeoutMs });
     return this.navigationTracker.currentUrl;
   }
 
-  public async goForward(): Promise<string> {
+  public async goForward(timeoutMs?: number): Promise<string> {
     await this.puppetPage.goForward();
-    await this.locationTracker.waitFor('AllContentLoaded');
+    await this.locationTracker.waitFor('AllContentLoaded', { timeoutMs });
     return this.navigationTracker.currentUrl;
+  }
+
+  public async reload(timeoutMs?: number): Promise<IResourceMeta> {
+    this.navigationTracker.navigationRequested(
+      'reload',
+      this.navigationTracker.currentUrl,
+      this.mainFrameId,
+      this.lastCommandId,
+    );
+
+    const timer = new Timer(timeoutMs, this.waitTimeouts);
+    const timeoutMessage = `Timeout waiting for "tab.reload()"`;
+
+    await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
+    const resource = await timer.waitForPromise(
+      this.locationTracker.waitForLocationResourceId(),
+      timeoutMessage,
+    );
+    return this.sessionState.getResourceMeta(resource);
   }
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
