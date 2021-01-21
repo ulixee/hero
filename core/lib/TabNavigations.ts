@@ -14,7 +14,7 @@ interface TabNavigationEvents {
 const { log } = Log(module);
 
 export default class TabNavigations extends TypedEventEmitter<TabNavigationEvents> {
-  public get top() {
+  public get top(): INavigation {
     return this.history.length > 0 ? this.history[this.history.length - 1] : null;
   }
 

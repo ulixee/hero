@@ -17,15 +17,28 @@ import TabNavigations from './TabNavigations';
 const READY = 'READY';
 
 export default class LocationTracker {
+  public get currentPipelineStatus(): IPipelineStatus {
+    let maxStep = 0;
+    let status: IPipelineStatus = 'HttpRequested';
+    for (const stateChange of this.navigations.top.stateChanges.keys()) {
+      const step = LocationTracker.getStepByStatus(stateChange);
+      if (step > maxStep) {
+        maxStep = step;
+        status = stateChange;
+      }
+    }
+    return status;
+  }
+
   // this is the default "starting" point for a wait-for location change if a previous command id is not specified
   private defaultWaitForLocationCommandId = 0;
   private navigations: TabNavigations;
 
-  private get currentStep() {
+  private get currentStep(): IPipelineStep {
     const location = this.navigations.top;
     if (!location) return 0;
 
-    return LocationTracker.getPipelineStatus(location);
+    return LocationTracker.getPipelineStep(location);
   }
 
   private readonly waitForCbs: {
@@ -43,7 +56,7 @@ export default class LocationTracker {
   }
 
   // this function will find the "starting command" to look for waitForLocation(change/reload)
-  public willRunCommand(newCommand: ICommandMeta, previousCommands: ICommandMeta[]) {
+  public willRunCommand(newCommand: ICommandMeta, previousCommands: ICommandMeta[]): void {
     let last: ICommandMeta;
     for (const command of previousCommands) {
       // if this is a goto, set this to the "waitForLocation(change/reload)" command marker
@@ -60,7 +73,7 @@ export default class LocationTracker {
     }
   }
 
-  public async waitForLocationResourceId() {
+  public async waitForLocationResourceId(): Promise<number> {
     const resourceId = await this.navigations.top?.resourceId?.promise;
     if (this.navigations.top?.navigationError) {
       throw this.navigations.top.navigationError;
@@ -72,7 +85,7 @@ export default class LocationTracker {
     status: ILocationStatus | 'READY',
     options: IWaitForOptions = {},
     inclusiveOfCommandId = true,
-  ) {
+  ): Promise<void> {
     if (status === READY) {
       if (!this.navigations.top) return;
       status = LocationStatus.DomContentLoaded;
@@ -101,7 +114,7 @@ export default class LocationTracker {
     return resolvablePromise.promise;
   }
 
-  public cancelWaiting(cancelMessage: string) {
+  public cancelWaiting(cancelMessage: string): void {
     for (const waitingForStatus of Object.values(this.waitForCbs)) {
       while (waitingForStatus.length) {
         const resolvable = waitingForStatus.shift();
@@ -112,14 +125,14 @@ export default class LocationTracker {
     }
   }
 
-  private onNavigation(lifecycle: INavigation) {
+  private onNavigation(lifecycle: INavigation): void {
     // don't trigger change for the first url on a new tab
     if (lifecycle.navigationReason === 'newTab') return;
     const trigger = LocationTracker.getTriggerForNavigationReason(lifecycle.navigationReason);
     this.runWaitForCbs(trigger);
   }
 
-  private onPipelineStatusChange(change: { newStatus: IPipelineStatus }) {
+  private onPipelineStatusChange(change: { newStatus: IPipelineStatus }): void {
     const incomingStep = LocationTracker.getStepByStatus(change.newStatus);
     const lastStep = this.currentStep ?? 0;
     const newStep = incomingStep > lastStep ? incomingStep : lastStep;
@@ -135,7 +148,7 @@ export default class LocationTracker {
     }
   }
 
-  private runWaitForCbs(status: ILocationStatus) {
+  private runWaitForCbs(status: ILocationStatus): void {
     while (this.waitForCbs[status].length) {
       const resolvablePromise = this.waitForCbs[status].shift();
       resolvablePromise.resolve();
@@ -146,7 +159,7 @@ export default class LocationTracker {
     trigger: LocationTrigger,
     sinceCommandId: number,
     inclusive: boolean,
-  ) {
+  ): boolean {
     for (const history of this.navigations.history) {
       let isMatch = history.startCommandId > sinceCommandId;
       if (inclusive) isMatch = isMatch || history.startCommandId >= sinceCommandId;
@@ -166,7 +179,7 @@ export default class LocationTracker {
     return Number(PipelineStatus[status]) as IPipelineStep;
   }
 
-  private static getPipelineStatus(page: INavigation): IPipelineStep {
+  private static getPipelineStep(page: INavigation): IPipelineStep {
     let maxStep: IPipelineStep = 0 as any;
     for (const status of page.stateChanges.keys()) {
       const step = LocationTracker.getStepByStatus(status);
@@ -175,7 +188,7 @@ export default class LocationTracker {
     return maxStep;
   }
 
-  private static getTriggerForNavigationReason(reason: NavigationReason) {
+  private static getTriggerForNavigationReason(reason: NavigationReason): LocationTrigger {
     if (reason === 'newTab') return null;
     const isReload =
       reason === 'httpHeaderRefresh' || reason === 'metaTagRefresh' || reason === 'reload';

@@ -1,6 +1,7 @@
 import {
   IInteractionGroup,
   IInteractionGroups,
+  IInteractionStep,
   IMousePosition,
   IMousePositionXY,
   InteractionCommand,
@@ -16,7 +17,14 @@ import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelp
 import IRect from '@secret-agent/core-interfaces/IRect';
 import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Log from '@secret-agent/commons/Logger';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
+import IPoint from '@secret-agent/core-interfaces/IPoint';
+import IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
 import Tab from './Tab';
+
+const { log } = Log(module);
 
 const commandsNeedingScroll = [
   InteractionCommand.click,
@@ -42,6 +50,8 @@ export default class Interactor implements IInteractionsHelper {
     return this.tab.session.viewport;
   }
 
+  public logger: IBoundLog;
+
   private readonly tab: Tab;
 
   private get mouse() {
@@ -58,6 +68,7 @@ export default class Interactor implements IInteractionsHelper {
 
   constructor(tab: Tab) {
     this.tab = tab;
+    this.logger = log.createChild(module, { sessionId: tab.session.id });
   }
 
   public async initialize() {
@@ -71,119 +82,17 @@ export default class Interactor implements IInteractionsHelper {
 
     const humanEmulator = this.humanEmulator;
 
-    await humanEmulator.playInteractions(
-      finalInteractions,
-      async interaction => {
-        if (this.tab.isClosing) {
-          throw new CanceledPromiseError('Canceling interaction - tab closing');
-        }
-        switch (interaction.command) {
-          case InteractionCommand.move: {
-            const { x, y } = await this.getPositionXY(interaction.mousePosition);
-            await this.mouse.move(x, y);
-            break;
-          }
-          case InteractionCommand.scroll: {
-            const windowBounds = await this.tab.domEnv.getWindowOffset();
-            const scroll = await this.getScrollOffset(interaction.mousePosition, windowBounds);
-
-            if (scroll) {
-              const { deltaY, deltaX } = scroll;
-              await this.mouse.wheel(scroll);
-              // need to check for offset since wheel event doesn't wait for scroll
-              await this.tab.domEnv.waitForScrollOffset(
-                Math.max(0, deltaX + windowBounds.pageXOffset),
-                Math.max(0, deltaY + windowBounds.pageYOffset),
-              );
-            }
-            break;
-          }
-
-          case InteractionCommand.click:
-          case InteractionCommand.doubleclick: {
-            const button = interaction.mouseButton || 'left';
-            const { x, y, simulateOptionClick } = await this.getPositionXY(
-              interaction.mousePosition,
-            );
-
-            if (simulateOptionClick) {
-              await this.tab.domEnv.simulateOptionClick(interaction.mousePosition as IJsPath);
-            } else {
-              const clickCount = interaction.command === InteractionCommand.doubleclick ? 2 : 1;
-              await this.mouse.click(x, y, { button, clickCount, delay: interaction.delayMillis });
-            }
-            break;
-          }
-          case InteractionCommand.clickUp: {
-            const button = interaction.mouseButton || 'left';
-            await this.mouse.up({ button });
-            break;
-          }
-          case InteractionCommand.clickDown: {
-            const button = interaction.mouseButton || 'left';
-            await this.mouse.down({ button });
-            break;
-          }
-
-          case InteractionCommand.type: {
-            let counter = 0;
-            for (const keyboardCommand of interaction.keyboardCommands) {
-              const delay = interaction.keyboardDelayBetween;
-              const keyupDelay = interaction.keyboardKeyupDelay;
-              if (counter > 0 && delay) {
-                await new Promise(resolve => setTimeout(resolve, delay));
-              }
-
-              if ('keyCode' in keyboardCommand) {
-                const key = getKeyboardKey(keyboardCommand.keyCode);
-                await this.keyboard.press(key, keyupDelay);
-              } else if ('up' in keyboardCommand) {
-                const key = getKeyboardKey(keyboardCommand.up);
-                await this.keyboard.up(key);
-              } else if ('down' in keyboardCommand) {
-                const key = getKeyboardKey(keyboardCommand.down);
-                await this.keyboard.down(key);
-              } else if ('string' in keyboardCommand) {
-                const text = keyboardCommand.string;
-                for (const char of text) {
-                  if (char in KeyboardKeys) {
-                    await this.keyboard.press(char as IKeyboardKey, keyupDelay);
-                  } else {
-                    await this.keyboard.sendCharacter(char);
-                  }
-                  if (delay) await new Promise(resolve => setTimeout(resolve, delay));
-                }
-              }
-              counter += 1;
-            }
-            break;
-          }
-
-          case InteractionCommand.waitForNode: {
-            await this.tab.waitForDom(interaction.delayNode);
-            break;
-          }
-          case InteractionCommand.waitForElementVisible: {
-            await this.tab.waitForDom(interaction.delayElement, { waitForVisible: true });
-            break;
-          }
-          case InteractionCommand.waitForMillis: {
-            await new Promise(resolve => setTimeout(resolve, interaction.delayMillis));
-            break;
-          }
-        }
-      },
-      this,
-    );
+    await humanEmulator.playInteractions(finalInteractions, this.playInteraction.bind(this), this);
   }
 
   public async lookupBoundingRect(
     mousePosition: IMousePosition,
-  ): Promise<IRect & { elementTag?: string }> {
+  ): Promise<IRect & { elementTag?: string; nodeId?: number }> {
     if (isMousePositionCoordinate(mousePosition)) {
       return { x: mousePosition[0] as number, y: mousePosition[1] as number, width: 1, height: 1 };
     }
     const rect = await this.tab.domEnv.getJsPathClientRect(mousePosition as IJsPath);
+    const attachedState = (rect as any).attachedState as IAttachedState;
 
     return {
       x: rect.left,
@@ -191,7 +100,207 @@ export default class Interactor implements IInteractionsHelper {
       height: rect.height,
       width: rect.width,
       elementTag: rect.tag,
+      nodeId: attachedState.id,
     };
+  }
+
+  public async startMouseupListener(
+    nodeId: number,
+    timeoutMs: number,
+  ): Promise<{ onTriggered: Promise<IMouseUpResult> }> {
+    assert(nodeId, 'nodeId should not be null');
+    await this.tab.domEnv.registerMouseupListener(nodeId);
+    return {
+      onTriggered: this.tab.domEnv.waitForMouseup(nodeId, timeoutMs),
+    };
+  }
+
+  public async startMouseoverListener(
+    nodeId: number,
+    timeoutMs: number,
+  ): Promise<{ onTriggered: Promise<boolean> }> {
+    assert(nodeId, 'nodeId should not be null');
+    await this.tab.domEnv.registerMouseoverListener(nodeId);
+
+    return {
+      onTriggered: this.tab.domEnv.waitForMouseover(nodeId, timeoutMs),
+    };
+  }
+
+  private async playInteraction(interaction: IInteractionStep): Promise<void> {
+    if (this.tab.isClosing) {
+      throw new CanceledPromiseError('Canceling interaction - tab closing');
+    }
+
+    switch (interaction.command) {
+      case InteractionCommand.move: {
+        const { x, y } = await this.getPositionXY(interaction.mousePosition);
+        await this.mouse.move(x, y);
+        break;
+      }
+      case InteractionCommand.scroll: {
+        const windowBounds = await this.tab.domEnv.getWindowOffset();
+        const scroll = await this.getScrollOffset(interaction.mousePosition, windowBounds);
+
+        if (scroll) {
+          const { deltaY, deltaX } = scroll;
+          await this.mouse.wheel(scroll);
+          // need to check for offset since wheel event doesn't wait for scroll
+          await this.tab.domEnv.waitForScrollOffset(
+            Math.max(0, deltaX + windowBounds.pageXOffset),
+            Math.max(0, deltaY + windowBounds.pageYOffset),
+          );
+        }
+        break;
+      }
+
+      case InteractionCommand.click:
+      case InteractionCommand.doubleclick: {
+        const button = interaction.mouseButton || 'left';
+        const clickCount = interaction.command === InteractionCommand.doubleclick ? 2 : 1;
+        const isCoordinates = isMousePositionCoordinate(interaction.mousePosition);
+
+        if (isCoordinates) {
+          const [x, y] = interaction.mousePosition as number[];
+          await this.mouse.move(x, y);
+          await this.mouse.click({
+            button,
+            clickCount,
+            delay: interaction.delayMillis,
+          });
+          return;
+        }
+
+        let nodeId: number;
+        let domCoordinates: IPoint;
+
+        const startStatus = this.tab.locationTracker.currentPipelineStatus;
+        // try 2x to hover over the expected target
+        for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
+          const position = await this.getPositionXY(interaction.mousePosition);
+          const { x, y, simulateOptionClick } = position;
+          nodeId = position.nodeId;
+          domCoordinates = { x, y };
+
+          if (simulateOptionClick) {
+            await this.tab.domEnv.simulateOptionClick(interaction.mousePosition as IJsPath);
+            return;
+          }
+
+          const waitForTarget = await this.startMouseoverListener(nodeId, 500);
+          // give mouse-over a tick to register
+          await new Promise(setImmediate);
+          await this.mouse.move(x, y);
+
+          const isOverTarget = await waitForTarget.onTriggered;
+          if (isOverTarget === true) break;
+
+          this.logger.info(
+            'Interaction.click - move did not hover over expected "Interaction.mousePosition" element.',
+            {
+              mousePosition: interaction.mousePosition,
+              expectedNodeId: nodeId,
+              domCoordinates,
+              retryNumber,
+            },
+          );
+
+          // give the page time to sort out
+          await new Promise(resolve => setTimeout(resolve, 500));
+          // make sure element is on screen
+          await this.playInteraction({
+            command: 'scroll',
+            mousePosition: interaction.mousePosition,
+          });
+        }
+
+        const mouseupListener = await this.startMouseupListener(nodeId, 5e3);
+        // give mouse-up a tick to register
+        await new Promise(setImmediate);
+        await this.mouse.click({
+          button,
+          clickCount,
+          delay: interaction.delayMillis,
+        });
+        const mouseupTriggered = await mouseupListener.onTriggered;
+        if (!mouseupTriggered.didClickLocation) {
+          const wasContentLoaded = startStatus === 'AllContentLoaded';
+          const suggestWaitingMessage = !wasContentLoaded
+            ? '\n\nYou might have more predictable results by waiting for all content loaded before triggering this click -- agent.waitForAllContentLoaded()'
+            : '';
+          this.logger.error(
+            `Interaction.click did not trigger mouseup on the requested node.${suggestWaitingMessage}`,
+            {
+              interaction,
+              jsPathNodeId: nodeId,
+              clickedNodeId: mouseupTriggered.targetNodeId,
+              domCoordinates,
+            },
+          );
+          throw new Error(
+            `Interaction.click did not trigger mouseup on the desired node.${suggestWaitingMessage}`,
+          );
+        }
+        break;
+      }
+      case InteractionCommand.clickUp: {
+        const button = interaction.mouseButton || 'left';
+        await this.mouse.up({ button });
+        break;
+      }
+      case InteractionCommand.clickDown: {
+        const button = interaction.mouseButton || 'left';
+        await this.mouse.down({ button });
+        break;
+      }
+
+      case InteractionCommand.type: {
+        let counter = 0;
+        for (const keyboardCommand of interaction.keyboardCommands) {
+          const delay = interaction.keyboardDelayBetween;
+          const keyupDelay = interaction.keyboardKeyupDelay;
+          if (counter > 0 && delay) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+
+          if ('keyCode' in keyboardCommand) {
+            const key = getKeyboardKey(keyboardCommand.keyCode);
+            await this.keyboard.press(key, keyupDelay);
+          } else if ('up' in keyboardCommand) {
+            const key = getKeyboardKey(keyboardCommand.up);
+            await this.keyboard.up(key);
+          } else if ('down' in keyboardCommand) {
+            const key = getKeyboardKey(keyboardCommand.down);
+            await this.keyboard.down(key);
+          } else if ('string' in keyboardCommand) {
+            const text = keyboardCommand.string;
+            for (const char of text) {
+              if (char in KeyboardKeys) {
+                await this.keyboard.press(char as IKeyboardKey, keyupDelay);
+              } else {
+                await this.keyboard.sendCharacter(char);
+              }
+              if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+            }
+          }
+          counter += 1;
+        }
+        break;
+      }
+
+      case InteractionCommand.waitForNode: {
+        await this.tab.waitForDom(interaction.delayNode);
+        break;
+      }
+      case InteractionCommand.waitForElementVisible: {
+        await this.tab.waitForDom(interaction.delayElement, { waitForVisible: true });
+        break;
+      }
+      case InteractionCommand.waitForMillis: {
+        await new Promise(resolve => setTimeout(resolve, interaction.delayMillis));
+        break;
+      }
+    }
   }
 
   private async getScrollOffset(targetPosition: IMousePosition, windowBounds: IWindowOffset) {
@@ -220,8 +329,9 @@ export default class Interactor implements IInteractionsHelper {
       return { x: round(x), y: round(y) };
     }
     const rect = await this.tab.domEnv.getJsPathClientRect(mousePosition as IJsPath);
+    const attachedState = (rect as any).attachedState as IAttachedState;
     if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {
-      return { x: 0, y: 0, simulateOptionClick: rect.tag === 'option' };
+      return { x: 0, y: 0, simulateOptionClick: rect.tag === 'option', nodeId: attachedState?.id };
     }
 
     // Default is to find exact middle. An emulator should replace an entry with a coordinate to avoid this functionality
@@ -230,7 +340,8 @@ export default class Interactor implements IInteractionsHelper {
     // if coordinates go out of screen, bring back
     if (x > this.viewport.width) x = this.viewport.width - 1;
     if (y > this.viewport.height) y = this.viewport.height - 1;
-    return { x, y };
+
+    return { x, y, nodeId: attachedState?.id };
   }
 
   private static injectScrollToPositions(interactions: IInteractionGroups) {
@@ -256,7 +367,12 @@ export default class Interactor implements IInteractionsHelper {
 }
 
 export function isMousePositionCoordinate(value: IMousePosition) {
-  return Array.isArray(value) && value.length === 2 && typeof value[0] === 'number';
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === 'number' &&
+    typeof value[0] === 'number'
+  );
 }
 
 export function deltaToFullyVisible(coordinate: number, length: number, boundaryLength: number) {

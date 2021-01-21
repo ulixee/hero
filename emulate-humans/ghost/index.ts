@@ -11,6 +11,7 @@ import IRect from '@secret-agent/core-interfaces/IRect';
 import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelper';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
+import type IMouseUpResult from '@secret-agent/injected-scripts/interfaces/IMouseUpResult';
 import generateVector from './generateVector';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
@@ -47,7 +48,7 @@ export default class HumanEmulatorGhost {
     interactionGroups: IInteractionGroups,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ) {
+  ): Promise<void> {
     const millisPerCharacter = this.calculateMillisPerChar();
 
     for (let i = 0; i < interactionGroups.length; i += 1) {
@@ -95,7 +96,7 @@ export default class HumanEmulatorGhost {
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ) {
+  ): Promise<void> {
     const scrollVector = await this.getScrollVector(interactionStep.mousePosition, helper);
 
     let counter = 0;
@@ -119,24 +120,83 @@ export default class HumanEmulatorGhost {
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ) {
+    retries = 0,
+  ): Promise<void> {
     interactionStep.delayMillis = Math.floor(Math.random() * 100);
     const targetRect = await helper.lookupBoundingRect(interactionStep.mousePosition);
     const targetPoint = getRandomRectPoint(targetRect, HumanEmulatorGhost.boxPaddingPercent);
+
     await this.moveToPoint(targetPoint, targetRect.width, run, helper);
 
-    // if this is an option element, we have to do a specialized click, so let the Interactor handle
+    const finalRect = await helper.lookupBoundingRect(interactionStep.mousePosition);
+
+    const isFinalRectVisible = this.isRectVisible(finalRect, helper);
+    // make sure target is still visible
+    if (!isFinalRectVisible || !isWithinRect(targetPoint, finalRect)) {
+      // need to try again
+      if (retries < 2) {
+        const isScroll = !isFinalRectVisible;
+        helper.logger.info(
+          `Click mousePosition not visible after mouse moves. Moving${
+            isScroll ? ' and scrolling' : ''
+          } to a new point.`,
+          {
+            interactionStep,
+            retries,
+          },
+        );
+        if (isScroll) await this.scroll(interactionStep, run, helper);
+        return this.moveAndClick(interactionStep, run, helper, retries + 1);
+      }
+      throw new Error(
+        'Element or mousePosition remains out of viewport after 2 attempts to move it into view',
+      );
+    }
+
+    const jsPath = interactionStep.mousePosition;
+
+    let clickConfirm: Promise<IMouseUpResult> = null;
+    if (targetRect.nodeId && targetRect.elementTag !== 'option') {
+      const listener = await helper.startMouseupListener(targetRect.nodeId, 5e3);
+      clickConfirm = listener.onTriggered;
+    }
+
     if (targetRect.elementTag !== 'option') {
+      // if this is an option element, we have to do a specialized click, so let the Interactor handle
       interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
     }
+
     await run(interactionStep);
+
+    if (clickConfirm !== null) {
+      const mouseUpResult = await clickConfirm;
+
+      if (mouseUpResult.didClickLocation === false) {
+        helper.logger.error(
+          'Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.',
+          {
+            mousePosition: jsPath,
+            jsPathNodeId: finalRect.nodeId,
+            clickedNodeId: mouseUpResult.targetNodeId,
+            expectedDomCoordinates: finalRect,
+            clickedDomCoordinates: {
+              x: mouseUpResult.pageX,
+              y: mouseUpResult.pageY,
+            },
+          },
+        );
+        throw new Error(
+          'Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.',
+        );
+      }
+    }
   }
 
   protected async move(
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ) {
+  ): Promise<void> {
     const rect = await helper.lookupBoundingRect(interactionStep.mousePosition);
     const targetPoint = getRandomRectPoint(rect, HumanEmulatorGhost.boxPaddingPercent);
 
@@ -148,7 +208,7 @@ export default class HumanEmulatorGhost {
     targetWidth: number,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ) {
+  ): Promise<void> {
     const mousePosition = helper.mousePosition;
     const vector = generateVector(mousePosition, targetPoint, targetWidth, {
       threshold: HumanEmulatorGhost.overshootThreshold,
@@ -167,7 +227,7 @@ export default class HumanEmulatorGhost {
   protected async jitterMouse(
     helper: IInteractionsHelper,
     run: (interactionStep: IInteractionStep) => Promise<void>,
-  ) {
+  ): Promise<void> {
     const mousePosition = helper.mousePosition;
     const jitterX = Math.max(mousePosition.x + Math.round(getRandomPositiveOrNegativeNumber()), 0);
     const jitterY = Math.max(mousePosition.y + Math.round(getRandomPositiveOrNegativeNumber()), 0);
@@ -194,7 +254,7 @@ export default class HumanEmulatorGhost {
     };
   }
 
-  protected calculateMillisPerChar() {
+  protected calculateMillisPerChar(): number {
     if (!this.millisPerCharacter) {
       const wpmRange =
         HumanEmulatorGhost.wordsPerMinuteRange[1] - HumanEmulatorGhost.wordsPerMinuteRange[0];
@@ -207,7 +267,10 @@ export default class HumanEmulatorGhost {
     return this.millisPerCharacter;
   }
 
-  private async getScrollVector(mousePosition: IMousePosition, helper: IInteractionsHelper) {
+  private async getScrollVector(
+    mousePosition: IMousePosition,
+    helper: IInteractionsHelper,
+  ): Promise<IPoint[]> {
     const isCoordinates =
       typeof mousePosition[0] === 'number' && typeof mousePosition[1] === 'number';
     let shouldScrollX: boolean;
@@ -246,7 +309,7 @@ export default class HumanEmulatorGhost {
       spread: HumanEmulatorGhost.overshootSpread,
     });
 
-    const points = [];
+    const points: IPoint[] = [];
     for (let point of scrollVector) {
       // convert points into deltas from previous scroll point
       const scrollX = shouldScrollX ? Math.round(point.x) : startScrollOffset.x;
@@ -293,9 +356,24 @@ export default class HumanEmulatorGhost {
     }
     return points;
   }
+
+  private isRectVisible(rect: IRect, helper: IInteractionsHelper): boolean {
+    const viewport = helper.viewport;
+    return (
+      isVisible(rect.y, rect.height, viewport.height) &&
+      isVisible(rect.x, rect.width, viewport.width)
+    );
+  }
 }
 
-export function isVisible(coordinate: number, length: number, boundaryLength: number) {
+function isWithinRect(targetPoint: IPoint, finalRect: IRect): boolean {
+  if (targetPoint.x < finalRect.x || targetPoint.x > finalRect.x + finalRect.width) return false;
+  if (targetPoint.y < finalRect.y || targetPoint.y > finalRect.y + finalRect.height) return false;
+
+  return true;
+}
+
+export function isVisible(coordinate: number, length: number, boundaryLength: number): boolean {
   if (length > boundaryLength) {
     length = boundaryLength;
   }
@@ -315,12 +393,12 @@ export function isVisible(coordinate: number, length: number, boundaryLength: nu
   return true;
 }
 
-async function delay(millis: number) {
+async function delay(millis: number): Promise<void> {
   if (!millis) return;
   await new Promise<void>(resolve => setTimeout(resolve, Math.floor(millis)));
 }
 
-function splitIntoMaxLengthSegments(total: number, maxValue: number) {
+function splitIntoMaxLengthSegments(total: number, maxValue: number): number[] {
   const values: number[] = [];
   let currentSum = 0;
   while (currentSum < total) {
@@ -334,13 +412,13 @@ function splitIntoMaxLengthSegments(total: number, maxValue: number) {
   return values;
 }
 
-function getRandomPositiveOrNegativeNumber() {
+function getRandomPositiveOrNegativeNumber(): number {
   const negativeMultiplier = Math.random() < 0.5 ? -1 : 1;
 
   return Math.random() * negativeMultiplier;
 }
 
-function getScrollRectPoint(targetRect: IRect, viewport: IViewport) {
+function getScrollRectPoint(targetRect: IRect, viewport: IViewport): IPoint {
   let { y, x } = targetRect;
   const fudge = 2 * Math.random();
   // target rect inside bounds
