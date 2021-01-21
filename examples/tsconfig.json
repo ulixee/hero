@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
-    "lib": ["ES2018", "DOM", "DOM.Iterable"],
+    "target": "ES2019",
+    "lib": ["ES2019", "DOM", "DOM.Iterable"],
     "composite": true,
     "allowJs": true,
     "outDir": "../build/examples",

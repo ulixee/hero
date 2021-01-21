@@ -256,8 +256,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.isElementVisible(element);
   }
 
-  public waitForAllContentLoaded(options?: IWaitForOptions): Promise<void> {
-    return this.activeTab.waitForAllContentLoaded(options);
+  public waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
+    return this.activeTab.waitForPaintingStable(options);
   }
 
   public waitForResource(

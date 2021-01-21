@@ -22,7 +22,8 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
         ['httpRespondedTime', 'TEXT'],
         ['httpRedirectedTime', 'TEXT'],
         ['domContentLoadedTime', 'TEXT'],
-        ['allContentLoadedTime', 'TEXT'],
+        ['loadTime', 'TEXT'],
+        ['contentPaintedTime', 'TEXT'],
       ],
       true,
     );
@@ -46,7 +47,8 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.stateChanges.get(LocationStatus.HttpResponded)?.toISOString(),
       navigation.stateChanges.get(LocationStatus.HttpRedirected)?.toISOString(),
       navigation.stateChanges.get(LocationStatus.DomContentLoaded)?.toISOString(),
-      navigation.stateChanges.get(LocationStatus.AllContentLoaded)?.toISOString(),
+      navigation.stateChanges.get('Load')?.toISOString(),
+      navigation.stateChanges.get('ContentPaint')?.toISOString(),
     ];
     this.queuePendingInsert(record);
   }
@@ -70,5 +72,6 @@ export interface IFrameNavigationRecord {
   httpRespondedTime: string;
   httpRedirectedTime?: string;
   domContentLoadedTime?: string;
-  allContentLoadedTime?: string;
+  loadTime?: string;
+  contentPaintedTime?: string;
 }

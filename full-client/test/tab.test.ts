@@ -94,7 +94,7 @@ describe('Multi-tab scenarios', () => {
     Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/page1`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     expect(await agent.tabs).toHaveLength(1);
     expect(await agent.url).toBe(`${koaServer.baseUrl}/page1`);
     await agent.click(agent.document.querySelector('a'));
@@ -120,7 +120,7 @@ describe('Multi-tab scenarios', () => {
     expect(page2Logos).toHaveLength(1);
     expect(await page2Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page2`);
     await tab2.focus();
-    await tab2.waitForAllContentLoaded();
+    await tab2.waitForPaintingStable();
     await agent.click(tab2.document.querySelector('#fwd'));
     await tab2.waitForLocation('change');
     expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);

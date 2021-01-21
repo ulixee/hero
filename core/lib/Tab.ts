@@ -2,8 +2,8 @@ import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import { IBlockedResourceType } from '@secret-agent/core-interfaces/ITabOptions';
 import {
-  ILocationStatus,
   ILocationTrigger,
+  IPipelineStatus,
   LocationStatus,
 } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
@@ -31,7 +31,7 @@ import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import TabNavigations from './TabNavigations';
 import SessionState from './SessionState';
-import LocationTracker from './LocationTracker';
+import TabNavigationObserver from './TabNavigationsObserver';
 import Interactor from './Interactor';
 import Session from './Session';
 import DomEnv from './DomEnv';
@@ -44,7 +44,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public readonly id: string;
   public readonly parentTabId?: string;
   public readonly session: Session;
-  public readonly locationTracker: LocationTracker;
+  public readonly navigationsObserver: TabNavigationObserver;
   public readonly domRecorder: DomRecorder;
   public readonly domEnv: DomEnv;
   public puppetPage: IPuppetPage;
@@ -58,12 +58,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private readonly interactor: Interactor;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
 
-  public get navigationTracker(): TabNavigations {
+  public get navigations(): TabNavigations {
     return this.sessionState.navigationsByTabId[this.id];
   }
 
   public get url(): string {
-    return this.navigationTracker.currentUrl;
+    return this.navigations.currentUrl;
   }
 
   public get sessionState(): SessionState {
@@ -101,7 +101,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
     this.puppetPage = puppetPage;
     this.interactor = new Interactor(this);
-    this.locationTracker = new LocationTracker(this.navigationTracker);
+    this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.domEnv = new DomEnv(this, this.puppetPage);
     this.domRecorder = new DomRecorder(
       session.id,
@@ -111,7 +111,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
 
     if (windowOpenParams) {
-      this.navigationTracker.navigationRequested(
+      this.navigations.onNavigationRequested(
         'newTab',
         windowOpenParams.url,
         this.mainFrameId,
@@ -183,14 +183,14 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.isClosing = true;
     this.logger.info('Tab.Closing');
 
-    if (this.navigationTracker.top?.frameId) {
+    if (this.navigations.top?.frameId) {
       await this.domRecorder.flush(true);
     }
 
     try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
-      this.locationTracker.cancelWaiting(cancelMessage);
+      this.navigationsObserver.cancelWaiting(cancelMessage);
       this.cancelPendingEvents(cancelMessage);
       await this.puppetPage.close();
 
@@ -228,8 +228,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     let finalResourceId = resourceid;
     // if no resource id, this is a request for the default resource (page)
     if (!resourceid) {
-      await this.locationTracker.waitFor('READY');
-      finalResourceId = await this.locationTracker.waitForLocationResourceId();
+      await this.navigationsObserver.waitForReady();
+      finalResourceId = await this.navigationsObserver.waitForNavigationResourceId();
     }
 
     if (propertyPath === 'data' || propertyPath === 'response.data') {
@@ -256,7 +256,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async goto(url: string, timeoutMs = 30e3): Promise<IResourceMeta> {
     const formattedUrl = Url.format(url);
 
-    this.navigationTracker.navigationRequested(
+    this.navigations.onNavigationRequested(
       'goto',
       formattedUrl,
       this.mainFrameId,
@@ -269,7 +269,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     await timer.waitForPromise(this.puppetPage.navigate(formattedUrl), timeoutMessage);
 
     const resource = await timer.waitForPromise(
-      this.locationTracker.waitForLocationResourceId(),
+      this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
     );
     return this.sessionState.getResourceMeta(resource);
@@ -277,20 +277,20 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async goBack(timeoutMs?: number): Promise<string> {
     await this.puppetPage.goBack();
-    await this.locationTracker.waitFor('AllContentLoaded', { timeoutMs });
-    return this.navigationTracker.currentUrl;
+    await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
+    return this.navigations.currentUrl;
   }
 
   public async goForward(timeoutMs?: number): Promise<string> {
     await this.puppetPage.goForward();
-    await this.locationTracker.waitFor('AllContentLoaded', { timeoutMs });
-    return this.navigationTracker.currentUrl;
+    await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
+    return this.navigations.currentUrl;
   }
 
   public async reload(timeoutMs?: number): Promise<IResourceMeta> {
-    this.navigationTracker.navigationRequested(
+    this.navigations.onNavigationRequested(
       'reload',
-      this.navigationTracker.currentUrl,
+      this.navigations.currentUrl,
       this.mainFrameId,
       this.lastCommandId,
     );
@@ -300,14 +300,14 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
     const resource = await timer.waitForPromise(
-      this.locationTracker.waitForLocationResourceId(),
+      this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
     );
     return this.sessionState.getResourceMeta(resource);
   }
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
-    await this.locationTracker.waitFor('READY');
+    await this.navigationsObserver.waitForReady();
     await this.interactor.play(interactionGroups);
   }
 
@@ -320,8 +320,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     propertiesToExtract?: string[],
   ): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
-    if (!this.navigationTracker.top) return null;
-    await this.locationTracker.waitFor('READY');
+    if (!this.navigations.top) return null;
+    await this.navigationsObserver.waitForReady();
     return this.domEnv.execJsPath<T>(jsPath, propertiesToExtract);
   }
 
@@ -334,12 +334,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async getLocationHref(): Promise<string> {
-    await this.locationTracker.waitFor('READY');
+    await this.navigationsObserver.waitForReady();
     return this.domEnv.locationHref();
   }
 
   public async getCookies(): Promise<ICookie[]> {
-    await this.locationTracker.waitFor('READY');
+    await this.navigationsObserver.waitForReady();
     return await this.session.browserContext.getCookies(
       new URL(this.puppetPage.mainFrame.securityOrigin ?? this.puppetPage.mainFrame.url),
     );
@@ -350,7 +350,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    await this.locationTracker.waitFor('READY');
+    await this.navigationsObserver.waitForReady();
     await this.session.browserContext.addCookies([
       {
         name,
@@ -396,7 +396,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }
     }
     if (!newTab) newTab = await this.waitOn('child-tab-created', undefined, options?.timeoutMs);
-    await newTab.locationTracker.waitForLocationResourceId();
+    await newTab.navigationsObserver.waitForNavigationResourceId();
     return newTab;
   }
 
@@ -458,12 +458,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: ILocationStatus, options?: IWaitForOptions): Promise<void> {
-    return this.locationTracker.waitFor(status, options);
+  public waitForLoad(status: IPipelineStatus, options?: IWaitForOptions): Promise<void> {
+    return this.navigationsObserver.waitForLoad(status, options);
   }
 
   public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {
-    return this.locationTracker.waitFor(trigger, options);
+    return this.navigationsObserver.waitForLocation(trigger, options);
   }
 
   public waitForMillis(millis: number): Promise<void> {
@@ -480,7 +480,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     await timer.waitForPromise(
-      this.locationTracker.waitFor('READY'),
+      this.navigationsObserver.waitForReady(),
       'Timeout waiting for DomContentLoaded',
     );
 
@@ -515,7 +515,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       id: this.id,
       parentTabId: this.parentTabId,
       sessionId: this.sessionId,
-      url: this.navigationTracker.currentUrl,
+      url: this.navigations.currentUrl,
       createdAtCommandId: this.createdAtCommandId,
     };
   }
@@ -578,39 +578,40 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']): void {
     const { session, lastCommandId } = this;
-    const { url, isDocumentNavigation, frameId, redirectedFromUrl } = event;
+    const { browserRequestId, url, isDocumentNavigation, frameId, redirectedFromUrl } = event;
 
-    if (isDocumentNavigation && !this.navigationTracker.top) {
-      this.navigationTracker.navigationRequested('newTab', url, frameId, lastCommandId);
+    if (isDocumentNavigation && !this.navigations.top) {
+      this.navigations.onNavigationRequested(
+        'newTab',
+        url,
+        frameId,
+        lastCommandId,
+        browserRequestId,
+      );
     }
 
     session.mitmRequestSession.registerResource({
       ...event,
       tabId: this.id,
-      isUserNavigation: event.hasUserGesture || this.navigationTracker.didGotoUrl(url),
+      isUserNavigation: event.hasUserGesture || this.navigations.didGotoUrl(url),
     });
 
     // only track main frame for now
     if (isDocumentNavigation && frameId === this.mainFrameId) {
-      this.navigationTracker.updatePipelineStatus({
-        incomingStatus: LocationStatus.HttpRequested,
+      this.navigations.onHttpRequested(
         url,
-        redirectedFromUrl,
-        lastCommandId,
         frameId,
-      });
+        lastCommandId,
+        redirectedFromUrl,
+        browserRequestId,
+      );
     }
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
     if (event.frameId !== this.mainFrameId) return;
 
-    this.navigationTracker.updatePipelineStatus({
-      incomingStatus: LocationStatus.HttpResponded,
-      url: event.url,
-      frameId: event.frameId,
-      lastCommandId: this.lastCommandId,
-    });
+    this.navigations.onHttpResponded(event.browserRequestId, event.url, event.frameId);
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
   }
 
@@ -623,20 +624,14 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {
     if (event.frame.id === this.mainFrameId) {
-      const eventName = event.name.toLowerCase();
-      const status = {
-        load: LocationStatus.AllContentLoaded,
-        domcontentloaded: LocationStatus.DomContentLoaded,
-      }[eventName];
+      const lowerEventName = event.name.toLowerCase();
+      let status: 'Load' | LocationStatus.DomContentLoaded;
+
+      if (lowerEventName === 'load') status = 'Load';
+      else if (lowerEventName === 'domcontentloaded') status = LocationStatus.DomContentLoaded;
 
       if (status) {
-        const frame = this.puppetPage.mainFrame;
-        this.navigationTracker.updatePipelineStatus({
-          incomingStatus: status,
-          url: frame.url,
-          frameId: frame.id,
-          lastCommandId: this.lastCommandId,
-        });
+        this.navigations.onLoadStateChanged(status, event.frame.url, event.frame.id);
       }
     }
   }
@@ -646,7 +641,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     if (this.mainFrameId === frame.id && navigatedInDocument) {
       this.logger.info('Page.navigatedWithinDocument', event);
       // set load state back to all loaded
-      this.navigationTracker.triggerInPageNavigation(frame.url, this.lastCommandId, frame.id);
+      this.navigations.onNavigationRequested('inPage', frame.url, frame.id, this.lastCommandId);
     } else if (this.mainFrameId !== frame.id) {
       this.sessionState.captureSubFrameNavigated(this.id, frame, navigatedInDocument);
     }
@@ -660,7 +655,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     // disposition options: currentTab, newTab, newWindow, download
     const { frame, url, reason } = event;
     if (this.mainFrameId === frame.id) {
-      this.navigationTracker.updateNavigationReason(frame.id, url, reason);
+      this.navigations.updateNavigationReason(frame.id, url, reason);
     }
   }
 
@@ -723,7 +718,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       args: args.length ? JSON.stringify(args) : undefined,
     } as ICommandMeta;
 
-    this.locationTracker.willRunCommand(commandMeta, commandHistory);
+    this.navigationsObserver.willRunCommand(commandMeta, commandHistory);
     if (fn.name !== 'goto') {
       await this.domRecorder.setCommandIdForPage(commandMeta.id);
     }

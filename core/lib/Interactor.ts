@@ -174,7 +174,7 @@ export default class Interactor implements IInteractionsHelper {
         let nodeId: number;
         let domCoordinates: IPoint;
 
-        const startStatus = this.tab.locationTracker.currentPipelineStatus;
+        const isPagePaintStable = this.tab.navigationsObserver.isPaintStable();
         // try 2x to hover over the expected target
         for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
           const position = await this.getPositionXY(interaction.mousePosition);
@@ -224,9 +224,8 @@ export default class Interactor implements IInteractionsHelper {
         });
         const mouseupTriggered = await mouseupListener.onTriggered;
         if (!mouseupTriggered.didClickLocation) {
-          const wasContentLoaded = startStatus === 'AllContentLoaded';
-          const suggestWaitingMessage = !wasContentLoaded
-            ? '\n\nYou might have more predictable results by waiting for all content loaded before triggering this click -- agent.waitForAllContentLoaded()'
+          const suggestWaitingMessage = isPagePaintStable.isStable
+            ? '\n\nYou might have more predictable results by waiting for the page to stabilize before triggering this click -- agent.waitForPaintingStable()'
             : '';
           this.logger.error(
             `Interaction.click did not trigger mouseup on the requested node.${suggestWaitingMessage}`,

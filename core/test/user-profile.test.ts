@@ -37,7 +37,7 @@ describe('UserProfile cookie tests', () => {
     });
 
     await tab.goto(`${koaServer.baseUrl}/cookie`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
 
     const profile = await connection.exportUserProfile(meta);
     expect(profile.cookies).toHaveLength(1);
@@ -52,7 +52,7 @@ describe('UserProfile cookie tests', () => {
     expect(core2Cookies.cookies).toHaveLength(0);
 
     await tab2.goto(`${koaServer.baseUrl}/cookie2`);
-    await tab2.waitForLoad('AllContentLoaded');
+    await tab2.waitForLoad('PaintingStable');
     expect(cookie).not.toBeTruthy();
 
     const meta3 = await connection.createSession({
@@ -64,7 +64,7 @@ describe('UserProfile cookie tests', () => {
     expect(cookiesBefore.cookies).toHaveLength(1);
 
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
-    await tab3.waitForLoad('AllContentLoaded');
+    await tab3.waitForLoad('PaintingStable');
     expect(cookie).toBe('Is Set');
   });
 
@@ -92,7 +92,7 @@ describe('UserProfile cookie tests', () => {
       });
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
-      await tab.waitForLoad('AllContentLoaded');
+      await tab.waitForLoad('PaintingStable');
 
       profile = await connection.exportUserProfile(meta);
       expect(profile.cookies).toHaveLength(3);
@@ -125,7 +125,7 @@ describe('UserProfile cookie tests', () => {
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
       });
       await tab.goto(`${koaServer.baseUrl}/cross-cookie2`);
-      await tab.waitForLoad('AllContentLoaded');
+      await tab.waitForLoad('PaintingStable');
 
       expect(dlfCookies).toBe('cross1=1; cross2=2');
       expect(sameCookies).toBe('mainsite');
@@ -151,7 +151,7 @@ document.cookie = 'secondcookie=1'
       });
 
       await core.goto(`${koaServer.baseUrl}/safari-cookie`);
-      await core.waitForLoad('AllContentLoaded');
+      await core.waitForLoad('PaintingStable');
       profile = await connection.exportUserProfile(meta);
       expect(profile.cookies).toHaveLength(2);
       await core.close();
@@ -169,7 +169,7 @@ document.cookie = 'secondcookie=1'
         ctx.body = `<body><h1>safari cookies page 2</h1></body>`;
       });
       await core.goto(`${koaServer.baseUrl}/safari-cookie2`);
-      await core.waitForLoad('AllContentLoaded');
+      await core.waitForLoad('PaintingStable');
 
       expect(cookie).toBe('cookie');
       await core.close();
@@ -218,7 +218,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     });
 
     await tab.goto(`${koaServer.baseUrl}/local`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
 
     const profile = await connection.exportUserProfile(meta);
     expect(profile.cookies).toHaveLength(0);
@@ -231,7 +231,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     const tab2 = Session.getTab(meta2);
 
     await tab2.goto(`${koaServer.baseUrl}/localrestore`);
-    await tab2.waitForLoad('AllContentLoaded');
+    await tab2.waitForLoad('PaintingStable');
 
     const localContent = await tab2.execJsPath([
       'document',
@@ -307,7 +307,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
     });
 
     await tab.goto(`${koaServer.baseUrl}/local-change-pre`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
 
     const profile = await connection.exportUserProfile(meta);
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
@@ -352,6 +352,7 @@ localStorage.setItem('cross', '1');
 
       koaServer.get('/cross-storage', ctx => {
         ctx.body = `<body>
+<div>Cross Storage</div>
 <iframe src="http://dataliberationfoundation.org/storage"></iframe>
 <script>
   localStorage.setItem('local', '2');
@@ -360,7 +361,7 @@ localStorage.setItem('cross', '1');
       });
 
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
-      await tab.waitForLoad('AllContentLoaded');
+      await tab.waitForLoad('PaintingStable');
       profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
@@ -402,7 +403,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
 </body>`;
       });
       await tab.goto(`${koaServer.baseUrl}/cross-storage2`);
-      await tab.waitForLoad('AllContentLoaded');
+      await tab.waitForLoad('PaintingStable');
       const localContent = await tab.execJsPath([
         'document',
         ['querySelector', '#local'],
@@ -419,7 +420,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
       expect(crossContent.value).toBe('1');
       await tab.close();
 
-      const history = tab.navigationTracker.history;
+      const history = tab.navigations.history;
       expect(history).toHaveLength(1);
       expect(history[0].finalUrl).toBe(`${koaServer.baseUrl}/cross-storage2`);
     }
@@ -519,7 +520,7 @@ describe('UserProfile IndexedDb tests', () => {
       const core = Session.getTab(meta);
       Helpers.needsClosing.push(core);
       await core.goto(`${koaServer.baseUrl}/db`);
-      await core.waitForLoad('AllContentLoaded');
+      await core.waitForLoad('PaintingStable');
       await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
       profile = await connection.exportUserProfile(meta);
@@ -545,7 +546,7 @@ describe('UserProfile IndexedDb tests', () => {
       Helpers.needsClosing.push(core);
 
       await core.goto(`${koaServer.baseUrl}/dbrestore`);
-      await core.waitForLoad('AllContentLoaded');
+      await core.waitForLoad('PaintingStable');
       await core.waitForElement(['document', ['querySelector', 'body.ready']]);
 
       const recordsJson = await core.execJsPath<string>([

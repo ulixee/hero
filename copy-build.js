@@ -8,6 +8,7 @@ copyfiles(
     'testing/*/**',
     'examples/*.mjs',
     '*client/index.mjs',
+    'core/test/html/**',
     'puppet/test/*/**',
     'yarn.lock',
     'mitm-socket/dist/*',

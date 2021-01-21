@@ -54,6 +54,9 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
       })
       .unref();
   });
+
+  const destroyer = destroyServerFn(server);
+
   const port = (server.address() as net.AddressInfo).port;
   router.baseHost = `localhost:${port}`;
   router.baseUrl = `http://${router.baseHost}`;
@@ -67,11 +70,7 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
       return;
     }
     router.isClosing = true;
-    return new Promise(resolve => {
-      server.close(() => {
-        setTimeout(resolve, 10);
-      });
-    });
+    return destroyer();
   };
   router.onlyCloseOnFinal = onlyCloseOnFinal;
   needsClosing.push(router);
@@ -99,6 +98,8 @@ export async function runHttpsServer(
   const server = https.createServer(options, handler).listen(0).unref();
   await new Promise(resolve => server.once('listening', resolve));
 
+  const destroyServer = destroyServerFn(server);
+
   const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
   const httpServer: ITestHttpServer<https.Server> = {
@@ -111,9 +112,7 @@ export async function runHttpsServer(
         return null;
       }
       httpServer.isClosing = true;
-      return new Promise(resolve => {
-        server.close(() => setTimeout(resolve, 10));
-      });
+      return destroyServer();
     },
     onlyCloseOnFinal,
     baseUrl,
@@ -137,6 +136,7 @@ export async function runHttpServer(
 ): Promise<ITestHttpServer<http.Server>> {
   const { onRequest, onPost, addToResponse } = params;
   const server = http.createServer().unref();
+  const destroyServer = destroyServerFn(server);
   server.on('request', async (request, response) => {
     if (onRequest) onRequest(request.url, request.method, request.headers);
     if (addToResponse) addToResponse(response);
@@ -189,9 +189,7 @@ export async function runHttpServer(
         return null;
       }
       httpServer.isClosing = true;
-      return new Promise(resolve => {
-        server.close(() => setTimeout(resolve, 10));
-      });
+      return destroyServer();
     },
     baseUrl,
     url: `${baseUrl}/`,
@@ -424,4 +422,25 @@ function extractPort(url: URL) {
   if (url.port) return url.port;
   if (url.protocol === 'https:') return 443;
   return 80;
+}
+
+function destroyServerFn(
+  server: http.Server | http2.Http2Server | https.Server,
+): () => Promise<void> {
+  const connections = new Set<net.Socket>();
+
+  server.on('connection', conn => {
+    connections.add(conn);
+    conn.on('close', () => connections.delete(conn));
+  });
+
+  return () =>
+    new Promise(resolve => {
+      server.close(() => {
+        setTimeout(resolve, 10);
+      });
+      for (const conn of connections) {
+        conn.destroy();
+      }
+    });
 }

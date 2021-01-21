@@ -3,6 +3,7 @@
   "compilerOptions": {
     "sourceMap": false,
     "inlineSourceMap": false,
-    "outDir": "../build-dist/core/injected-scripts"
+    "removeComments": true,
+    "outDir": "../../build-dist/core/injected-scripts"
   }
 }

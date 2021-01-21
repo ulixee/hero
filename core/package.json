@@ -32,6 +32,7 @@
     "@secret-agent/testing": "1.2.0-alpha.5",
     "@types/better-sqlite3": "^5.4.0",
     "@types/json-socket": "^0.1.17",
-    "http-proxy-agent": "^4.0.1"
+    "http-proxy-agent": "^4.0.1",
+    "vue": "^2.6.12"
   }
 }

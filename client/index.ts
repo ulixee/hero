@@ -5,11 +5,7 @@ import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import { InteractionCommand, MouseButton } from '@secret-agent/core-interfaces/IInteractions';
 import { Node, XPathResult } from '@secret-agent/core-interfaces/AwaitedDom';
-import {
-  LocationStatus,
-  LocationTrigger,
-  PipelineStatus,
-} from '@secret-agent/core-interfaces/Location';
+import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import IAgentCreateOptions from './interfaces/IAgentCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import Handler from './lib/Handler';
@@ -35,5 +31,4 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
-  PipelineStatus,
 };

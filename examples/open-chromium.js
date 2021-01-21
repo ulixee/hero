@@ -7,7 +7,7 @@ process.env.SHOW_BROWSER = 'true';
   console.log('Opened Browser');
 
   await agent.goto(url);
-  await agent.waitForAllContentLoaded();
+  await agent.waitForPaintingStable();
 
   await agent.waitForMillis(5e3);
   await agent.close();

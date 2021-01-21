@@ -152,7 +152,7 @@ describe('basic Tab tests', () => {
 
     const newTab = await tab.waitForNewTab();
     expect(session.tabs).toHaveLength(2);
-    await newTab.waitForLoad('AllContentLoaded');
+    await newTab.waitForLoad('PaintingStable');
     const header = await newTab.execJsPath([
       'document',
       ['querySelector', '#newTabHeader'],

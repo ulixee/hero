@@ -261,7 +261,7 @@ await agent.goto('http://example.com');
 await document.querySelector('#newTabLink').click();
 const newTab = await agent.waitForNewTab();
 
-await newTab.waitForAllContentLoaded();
+await newTab.waitForPaintingStable();
 ```
 
 ## Aliased Tab Methods
@@ -300,9 +300,9 @@ Alias for [Tab.isElementVisible](./tab#is-element-visible)
 
 Alias for [Tab.reload](./tab#reload)
 
-### agent.waitForAllContentLoaded*()*
+### agent.waitForPaintingStable*()*
 
-Alias for [Tab.waitForLoad(AllContentLoaded)](./tab#wait-for-load)
+Alias for [Tab.waitForLoad(PaintingStable)](./tab#wait-for-load)
 
 ### agent.waitForResource*(filter, options)*
 

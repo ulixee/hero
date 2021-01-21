@@ -8,7 +8,7 @@ export enum LocationStatus {
   HttpResponded = 'HttpResponded',
 
   DomContentLoaded = 'DomContentLoaded',
-  AllContentLoaded = 'AllContentLoaded',
+  PaintingStable = 'PaintingStable',
 }
 
 export enum LocationTrigger {
@@ -17,18 +17,16 @@ export enum LocationTrigger {
 }
 
 export enum PipelineStatus {
-  NavigationRequested = '0',
-  HttpRequested = '1',
-  HttpRedirected = '2',
-  HttpResponded = '3',
-  DomContentLoaded = '4',
-  AllContentLoaded = '5',
+  NavigationRequested = 0,
+  HttpRequested = 1,
+  HttpRedirected = 2,
+  HttpResponded = 3,
+  DomContentLoaded = 4,
+  PaintingStable = 5,
 }
 
 export type ILocationStatus = keyof typeof LocationStatus;
 
 export type ILocationTrigger = keyof typeof LocationTrigger;
 
-export type IPipelineStatus = keyof typeof PipelineStatus;
-
-export type IPipelineStep = 0 | 1 | 2 | 3 | 4 | 5;
+export type IPipelineStatus = keyof typeof PipelineStatus & string;

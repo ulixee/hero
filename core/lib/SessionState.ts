@@ -9,7 +9,7 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import { IPipelineStatus, LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import INavigation from '@secret-agent/core-interfaces/INavigation';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
@@ -220,8 +220,15 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
     const navigations = this.navigationsByTabId[tabId];
-    if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
-      navigations.resourceLoadedForLocation(resource.id, resource.response?.statusCode, error);
+
+    const isNavigationToCurrentUrl =
+      resource.url === navigations.currentUrl && resourceEvent.request.method !== 'OPTIONS';
+
+    if (
+      isNavigationToCurrentUrl ||
+      resourceEvent.browserRequestId === navigations.top?.browserRequestId
+    ) {
+      navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
     }
   }
 
@@ -237,8 +244,13 @@ export default class SessionState {
 
     if (isResponse) {
       const navigations = this.navigationsByTabId[tabId];
-      if (resource.url === navigations?.currentUrl && resourceEvent.request.method !== 'OPTIONS') {
-        navigations.resourceLoadedForLocation(resource.id, resource.response?.statusCode);
+      const isNavigationToCurrentUrl =
+        resource.url === navigations.currentUrl && resourceEvent.request.method !== 'OPTIONS';
+      if (
+        isNavigationToCurrentUrl ||
+        resourceResponseEvent.browserRequestId === navigations.top?.browserRequestId
+      ) {
+        navigations.onResourceLoaded(resource.id, resource.response?.statusCode);
       }
       this.resources.push(resource);
     }
@@ -390,19 +402,15 @@ export default class SessionState {
   } {
     let lastSuccessDate = this.createDate;
     for (const navigation of Object.values(this.navigationsByTabId)) {
-      const allContentLoaded = navigation.top?.stateChanges?.get('AllContentLoaded');
-      const lastPageTime = allContentLoaded ?? navigation.top?.initiatedTime;
+      const loadTime = navigation.top?.stateChanges?.get('Load');
+      const lastPageTime = loadTime ?? navigation.top?.initiatedTime;
       if (lastPageTime && lastPageTime > lastSuccessDate) {
         lastSuccessDate = lastPageTime;
       }
       for (const command of this.commands) {
         if (!command.endDate) continue;
         const endDate = new Date(command.endDate);
-        if (
-          allContentLoaded &&
-          endDate > lastSuccessDate &&
-          !command.resultType?.includes('Error')
-        ) {
+        if (loadTime && endDate > lastSuccessDate && !command.resultType?.includes('Error')) {
           lastSuccessDate = endDate;
         }
       }
@@ -445,6 +453,7 @@ export default class SessionState {
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
+    loadEvents: ILoadEvent[],
   ): void {
     this.logger.stats('State.onPageEvents', {
       tabId,
@@ -453,6 +462,7 @@ export default class SessionState {
       mouse: mouseEvents.length,
       focusEvents: focusEvents.length,
       scrollEvents: scrollEvents.length,
+      loadEvents,
     });
 
     let startCommandId = domChanges.reduce((max, change) => {
@@ -468,6 +478,21 @@ export default class SessionState {
         startCommandId = page.startCommandId;
         break;
       }
+    }
+
+    for (const loadEvent of loadEvents) {
+      const [, event, url, timestamp] = loadEvent;
+
+      let incomingStatus;
+      if (event === 'LargestContentfulPaint') {
+        incomingStatus = 'ContentPaint';
+      } else if (event === 'DOMContentLoaded') {
+        incomingStatus = LocationStatus.DomContentLoaded;
+      } else if (event === 'load') {
+        incomingStatus = 'Load';
+      }
+
+      navigations.onLoadStateChanged(incomingStatus, url, frameId, new Date(timestamp));
     }
 
     for (const domChange of domChanges) {

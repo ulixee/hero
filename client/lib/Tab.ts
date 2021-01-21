@@ -161,9 +161,9 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return coreTab.isElementVisible(awaitedPath.toJSON());
   }
 
-  public async waitForAllContentLoaded(options?: IWaitForOptions): Promise<void> {
+  public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
     const coreTab = await getCoreTab(this);
-    await coreTab.waitForLoad(LocationStatus.AllContentLoaded, options);
+    await coreTab.waitForLoad(LocationStatus.PaintingStable, options);
   }
 
   public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {

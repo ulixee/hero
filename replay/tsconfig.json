@@ -2,8 +2,8 @@
   "compilerOptions": {
     "outDir": "../build/replay",
     "module": "commonjs",
-    "target": "es2018",
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "target": "ES2019",
+    "lib": ["ESNext", "ES2019", "DOM", "DOM.Iterable", "ScriptHost"],
     "moduleResolution": "node",
     "strict": false,
     "importHelpers": true,

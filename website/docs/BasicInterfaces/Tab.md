@@ -206,9 +206,9 @@ Reload the currently loaded url.
 
 #### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
 
-### tab.waitForAllContentLoaded*(options)* {#wait-for-all-content}
+### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
 
-Wait for the "load" DOM event. We renamed this to be more explicit because we're always mixing up DOMContentLoaded and load.
+Wait for the page to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
 
 #### **Arguments**:
 
@@ -248,7 +248,7 @@ Wait for the load status to occur on a page.
 
 #### **Arguments**:
 
-- status `NavigationRequested | HttpRequested | HttpResponsed | HttpRedirected | DomContentLoaded | AllContentLoaded` The load status event to wait for.
+- status `NavigationRequested | HttpRequested | HttpResponsed | HttpRedirected | DomContentLoaded | PaintingStable` The load status event to wait for.
 - options `object`
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - sinceCommandId `number`. A `commandId` from which to look for status changed.
@@ -259,14 +259,14 @@ The following are possible statuses and their meanings:
 
 <div class="show-table-header show-bottom-border minimal-row-height"></div>
 
-| Status                | Description                                                                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NavigationRequested` | A navigation request is initiated by the page or user                                                                                                                               |
-| `HttpRequested`       | The http request for the document has been initiated                                                                                                                                |
-| `HttpResponded`       | The http response has been retrieved                                                                                                                                                |
-| `HttpRedirected`      | The original http request was redirected                                                                                                                                            |
-| `DomContentLoaded`    | The dom content has been received and loaded into the document                                                                                                                      |
-| `AllContentLoaded`    | All dependent resources such as stylesheets and images. This is similar to the traditional [window load event](https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event). |
+| Status                | Description                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `NavigationRequested` | A navigation request is initiated by the page or user                                    |
+| `HttpRequested`       | The http request for the document has been initiated                                     |
+| `HttpResponded`       | The http response has been retrieved                                                     |
+| `HttpRedirected`      | The original http request was redirected                                                 |
+| `DomContentLoaded`    | The dom content has been received and loaded into the document                           |
+| `PaintingStable`      | The page has loaded the main content above the fold. Works on javascript-rendered pages. |
 
 ### tab.waitForLocation*(trigger, options)* {#wait-for-location}
 

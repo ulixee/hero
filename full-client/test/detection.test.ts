@@ -193,6 +193,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
   koaServer.get('/marker', ctx => {
     ctx.body = `
 <body>
+<h1>Marker Page</h1>
 <script type="text/javascript">
   function errorCheck() {
     const err = new Error('This is from inside');
@@ -210,17 +211,17 @@ test('should not leave stack trace markers when calling in page functions', asyn
   });
   const url = `${koaServer.baseUrl}/marker`;
   await agent.goto(url);
-  await agent.waitForAllContentLoaded();
+  await agent.waitForPaintingStable();
   const tabId = await agent.activeTab.tabId;
   const sessionId = await agent.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
 
   const pageFunction = await tab.getJsValue('errorCheck()');
-  expect(pageFunction.value).toBe(`Error: This is from inside\n    at errorCheck (${url}:5:17)`);
+  expect(pageFunction.value).toBe(`Error: This is from inside\n    at errorCheck (${url}:6:17)`);
 
   // for something created
   const queryAllTest = await tab.getJsValue('document.querySelectorAll("h1")');
   expect(queryAllTest.value).toBe(
-    `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:10:19)`,
+    `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:11:19)`,
   );
 });

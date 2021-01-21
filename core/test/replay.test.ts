@@ -65,7 +65,7 @@ describe('basic Replay API tests', () => {
     });
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 100));
     await tab.interact([
       {
@@ -82,7 +82,7 @@ describe('basic Replay API tests', () => {
       },
     ]);
     await tab.waitForMillis(100);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     const location = await tab.execJsPath(['location', 'href']);
     expect(location.value).toBe(`${koaServer.baseUrl}/test2`);
 
@@ -91,7 +91,7 @@ describe('basic Replay API tests', () => {
     const commands = Object.values(commandMap);
     const firstCommand = commands[0];
     expect(firstCommand.name).toBe('goto');
-    expect(commands[1].label).toBe('waitForLoad("AllContentLoaded")');
+    expect(commands[1].label).toBe('waitForLoad("PaintingStable")');
 
     // 1 is just the new document
     const paintEvents = Object.values(paintMap);
