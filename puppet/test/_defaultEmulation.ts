@@ -10,6 +10,7 @@ const defaultEmulation = {
     positionX: 0,
     height: 900,
     width: 1024,
+    scale: 1,
   },
 };
 

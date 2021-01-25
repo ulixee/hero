@@ -1,5 +1,6 @@
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
+import IRect from '@secret-agent/core-interfaces/IRect';
 import { IPuppetFrame, IPuppetFrameEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
@@ -22,6 +23,11 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   reload(): Promise<void>;
   close(): Promise<void>;
   bringToFront(): Promise<void>;
+  screenshot(
+    format?: 'jpeg' | 'png',
+    clipRect?: IRect & { scale: number },
+    quality?: number,
+  ): Promise<Buffer>;
   popupInitializeFn?: (
     page: IPuppetPage,
     openParams: { url: string; windowName: string },

@@ -29,6 +29,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
 import TabNavigations from './TabNavigations';
 import SessionState from './SessionState';
 import TabNavigationObserver from './TabNavigationsObserver';
@@ -136,6 +137,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.isElementVisible,
       this.removeCookie,
       this.setCookie,
+      this.takeScreenshot,
       this.waitForMillis,
       this.waitForElement,
       this.waitForLoad,
@@ -381,6 +383,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
     const isVisible = await this.domEnv.isJsPathVisible(jsPath);
     return isVisible.value;
+  }
+
+  public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
+    return this.puppetPage.screenshot(options.format, options.rectangle, options.jpegQuality);
   }
 
   public async waitForNewTab(options: IWaitForOptions = {}): Promise<Tab> {

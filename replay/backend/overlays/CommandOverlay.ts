@@ -2,7 +2,7 @@ import BaseOverlay from '~backend/overlays/BaseOverlay';
 import IRectangle from '~shared/interfaces/IRectangle';
 
 const width = 416;
-const middle = width / 2;
+const containerOffset = width / 5;
 export default class CommandOverlay extends BaseOverlay {
   public static width = width;
   constructor() {
@@ -10,7 +10,7 @@ export default class CommandOverlay extends BaseOverlay {
       name: 'command-overlay',
       maxHeight: 250,
       calcBounds(bounds: IRectangle) {
-        let x = bounds.x - middle;
+        let x = bounds.x - containerOffset;
         if (x + width > bounds.right + 50) {
           x = bounds.right + 50 - width;
         }

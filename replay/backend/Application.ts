@@ -241,8 +241,8 @@ export default class Application {
       tickDebounce = setTimeout(() => replayView.onTickDrag(tickValue), 10);
     });
 
-    ipcMain.handle('next-tick', () => {
-      return Window.current?.replayView?.nextTick();
+    ipcMain.handle('next-tick', (e, startMillisDeficit) => {
+      return Window.current?.replayView?.nextTick(startMillisDeficit);
     });
 
     ipcMain.on('on-tick-hover', (e, containerRect, tickValue) => {

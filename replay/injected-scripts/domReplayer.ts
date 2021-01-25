@@ -14,20 +14,33 @@ let lastHighlightNodes: number[] = [];
 const idMap = new Map<number, Node>();
 const domChangeList = [];
 
+const logDebugToConsole = false;
+const debugLogs = [];
+
+window.debugLogs = debugLogs;
+window.idMap = idMap;
+
+function debugLog(message: string, ...args: any[]) {
+  if (logDebugToConsole) {
+    console.log(...arguments);
+  }
+  debugLogs.push({ message, args });
+}
+
 const isMainFrame = window.isMainFrame ?? true;
 if (isMainFrame) {
   frameNodePath = 'main';
 
   if (document && document.addEventListener) {
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOMContentLoaded');
+      debugLog('DOMContentLoaded');
     });
   }
 }
 
 window.replayEvents = function replayEvents(changeEvents, resultNodeIds, mouseEvent, scrollEvent) {
   createReplayItems();
-  console.log(
+  debugLog(
     'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
     changeEvents?.length ?? 0,
     resultNodeIds?.length ?? 0,
@@ -59,7 +72,7 @@ function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
     try {
       replayDomEvent(changeEvent);
     } catch (err) {
-      console.log('ERROR applying change', changeEvent, err);
+      debugLog('ERROR applying change', changeEvent, err);
     }
   }
 }
@@ -67,7 +80,7 @@ function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
 /////// DOM REPLAYER ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function replayDomEvent(event: IFrontendDomChangeEvent) {
-  const { action, textContent, frameIdPath } = event;
+  const { action, textContent, frameIdPath, nodeId } = event;
   if (frameIdPath && frameIdPath !== frameNodePath) {
     delegateToSubframe(event);
     return;
@@ -79,7 +92,7 @@ function replayDomEvent(event: IFrontendDomChangeEvent) {
   }
 
   if (action === 'location') {
-    console.log('Location: href=%s', event.textContent);
+    debugLog('Location: href=%s', event.textContent);
     window.history.replaceState({}, 'Replay', textContent);
     return;
   }
@@ -97,12 +110,13 @@ function replayDomEvent(event: IFrontendDomChangeEvent) {
   let parentNode: Node;
   try {
     parentNode = getNode(parentNodeId);
+    node = deserializeNode(event, parentNode as Element);
+
     if (!parentNode && (action === 'added' || action === 'removed')) {
-      console.log('WARN: parent node id not found', event);
+      debugLog('WARN: parent node id not found', event);
       return;
     }
 
-    node = deserializeNode(event, parentNode as Element);
     switch (action) {
       case 'added':
         if (!event.previousSiblingId) {
@@ -129,7 +143,7 @@ function replayDomEvent(event: IFrontendDomChangeEvent) {
         break;
     }
   } catch (error) {
-    console.log('ERROR: applying action', error.stack, parentNode, node, event);
+    console.error('ERROR: applying action', error.stack, parentNode, node, event);
   }
 }
 
@@ -153,7 +167,7 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
 
   const elem = document.querySelector(tagName);
   if (!elem) {
-    console.log('Preserved element doesnt exist!', tagName);
+    debugLog('Preserved element doesnt exist!', tagName);
     return true;
   }
 
@@ -164,7 +178,7 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
       elem.removeAttributeNS(attr.name, attr.namespaceURI);
       elem.removeAttribute(attr.name);
     }
-    console.log('WARN: script trying to remove preserved node', event, elem);
+    debugLog('WARN: script trying to remove preserved node', event, elem);
     return true;
   }
 
@@ -205,7 +219,7 @@ function delegateToSubframe(event: IFrontendDomChangeEvent) {
     pendingFrameCreationEvents
       .get(childFrameNodePath)
       .push({ frameNodePath: childFrameNodePath, event });
-    console.log('Frame: not loaded yet, queuing pending', childFrameNodePath);
+    debugLog('Frame: not loaded yet, queuing pending', childFrameNodePath);
     return;
   }
 
@@ -218,7 +232,7 @@ function delegateToSubframe(event: IFrontendDomChangeEvent) {
 
   const frame = node as HTMLIFrameElement;
   if (!frame.contentWindow) {
-    console.log('Frame: without window', frame);
+    debugLog('Frame: without window', frame);
     return;
   }
   if (pendingFrameCreationEvents.has(childFrameNodePath)) {
@@ -236,7 +250,7 @@ function onNewDocument(event: IFrontendDomChangeEvent) {
   const href = textContent;
   const newUrl = new URL(href);
 
-  console.log(
+  debugLog(
     'Location: (new document) %s, frame: %s, idx: %s',
     href,
     event.frameIdPath,
@@ -275,7 +289,10 @@ function setNodeAttributes(node: Element, data: IFrontendDomChangeEvent) {
     const ns = data.attributeNamespaces ? data.attributeNamespaces[name] : null;
     try {
       if (name === 'xmlns' || name.startsWith('xmlns') || node.tagName === 'HTML') {
-        node.setAttribute(name, value);
+        if (value === null) node.removeAttribute(name);
+        else node.setAttribute(name, value);
+      } else if (value === null) {
+        node.removeAttributeNS(ns || null, name);
       } else {
         node.setAttributeNS(ns || null, name, value);
       }
@@ -343,9 +360,9 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
         }
       }
       if (node instanceof HTMLIFrameElement) {
-        console.log('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
-        (node as any).nodeId = data.nodeId;
+        debugLog('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
       }
+      (node as any).nodeId = data.nodeId;
       setNodeAttributes(node as Element, data);
       setNodeProperties(node as Element, data);
       if (data.textContent) {
@@ -419,7 +436,7 @@ function highlightNodes(nodeIds: number[]) {
       highlightElements[i].remove();
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 

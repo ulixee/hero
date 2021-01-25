@@ -249,7 +249,7 @@ export default class ConnectionToReplay {
     }
 
     const json = JSON.stringify({ event, data }, (_, value) => {
-      if (value !== null) return value;
+      if (value !== undefined) return value;
     });
 
     const sendPromise = this.sendMessage(json).catch(err => err);

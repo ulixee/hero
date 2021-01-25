@@ -19,10 +19,11 @@ import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { createPromise } from '@secret-agent/commons/utils';
+import { assert, createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IRect from '@secret-agent/core-interfaces/IRect';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -208,6 +209,36 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   async bringToFront(): Promise<void> {
     await this.cdpSession.send('Page.bringToFront');
+  }
+
+  async screenshot(
+    format: 'jpeg' | 'png' = 'jpeg',
+    clipRect?: IRect & { scale: number },
+    quality = 100,
+  ): Promise<Buffer> {
+    assert(
+      quality >= 0 && quality <= 100,
+      `Expected options.quality to be between 0 and 100 (inclusive), got ${quality}`,
+    );
+    await this.cdpSession.send('Target.activateTarget', {
+      targetId: this.targetId,
+    });
+
+    const clip: Protocol.Page.Viewport = clipRect;
+
+    if (clip) {
+      clip.x = Math.round(clip.x);
+      clip.y = Math.round(clip.y);
+      clip.width = Math.round(clip.width);
+      clip.height = Math.round(clip.height);
+    }
+    const result = await this.cdpSession.send('Page.captureScreenshot', {
+      format,
+      quality,
+      clip,
+    });
+
+    return Buffer.from(result.data, 'base64');
   }
 
   async close(): Promise<void> {
