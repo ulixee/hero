@@ -11,7 +11,7 @@
     "declarationMap": false,
     "strict": true,
     "esModuleInterop": true,
-    "lib": ["es2018"]
+    "lib": ["es2019"]
   },
   "include": ["generateAwaitedDOM.ts", ".eslintrc.js"]
 }

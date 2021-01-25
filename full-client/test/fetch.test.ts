@@ -20,7 +20,7 @@ describe('Fetch tests', () => {
     const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const result = await agent.fetch('/fetch');
     const json = await result.json();
     expect(json).toStrictEqual({ got: 'it' });
@@ -40,7 +40,7 @@ describe('Fetch tests', () => {
     const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
 
     const response = await agent.fetch(`${koaServer.baseUrl}/post`, {
       method: 'post',
@@ -65,7 +65,7 @@ describe('Fetch tests', () => {
     const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
 
     const { Request, fetch } = agent;
     const request = new Request(`${koaServer.baseUrl}/request`, {
@@ -87,7 +87,7 @@ describe('Fetch tests', () => {
     const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
 
     const response = await agent.fetch(`${koaServer.baseUrl}/buffer`);
 

@@ -106,7 +106,7 @@ describe('basic Interact tests', () => {
     const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
     await agent.goto(`${koaServer.baseUrl}/waitTest`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const readyLink = agent.document.querySelector('a.ready');
     await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
     await agent.waitForLocation('change');
@@ -120,6 +120,7 @@ describe('basic Interact tests', () => {
     koaServer.get('/keys', ctx => {
       ctx.body = `
         <body>
+          <h1>Text Area</h1>
           <textarea></textarea>
         </body>
       `;
@@ -127,7 +128,7 @@ describe('basic Interact tests', () => {
     const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
     await agent.goto(`${koaServer.baseUrl}/keys`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const textarea = agent.document.querySelector('textarea');
     await agent.click(textarea);
     await agent.type('Test!');

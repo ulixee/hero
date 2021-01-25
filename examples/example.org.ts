@@ -2,7 +2,7 @@ import agent from '@secret-agent/full-client';
 
 async function run() {
   await agent.goto('https://example.org/');
-  await agent.waitForAllContentLoaded();
+  await agent.waitForPaintingStable();
 
   console.log('\n-- PRINTING location.href ---------');
   console.log(await agent.url);

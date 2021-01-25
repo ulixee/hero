@@ -44,10 +44,10 @@ describe('Core events tests', () => {
 
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/page1`);
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     await tab.goto(`${koaServer.baseUrl}/page2`);
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     // ToDo: this should really be 2; it's emitting base document as an resource
     expect(onEventFn.mock.calls.length).toBe(4);
@@ -64,12 +64,12 @@ describe('Core events tests', () => {
 
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/page1`);
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     await connection.removeEventListener(meta, listenerId);
 
     await tab.goto(`${koaServer.baseUrl}/page2`);
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     // ToDo: this should really be 1; it's emitting base document as an resource
     expect(onEventFn.mock.calls.length).toBe(2);

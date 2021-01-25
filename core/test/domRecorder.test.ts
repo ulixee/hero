@@ -40,7 +40,7 @@ function addMe() {
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
@@ -81,7 +81,7 @@ function removeMe() {
     await tab.goto(`${koaServer.baseUrl}/test2`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const state = tab.sessionState;
 
     await tab.domRecorder.flush();
@@ -133,7 +133,7 @@ function sort() {
     await tab.goto(`${koaServer.baseUrl}/test3`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
 
     const state = tab.sessionState;
 
@@ -187,7 +187,7 @@ function sort() {
 
     const state = tab.sessionState;
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
 
     await tab.domRecorder.flush();
     const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
@@ -232,7 +232,7 @@ function sort() {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/iframe`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     const state = tab.sessionState;
 
     expect(tab.puppetPage.frames).toHaveLength(4);
@@ -287,7 +287,7 @@ function clickIt() {
 
     const state = tab.sessionState;
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
 
     await tab.waitForElement(['document', ['querySelector', 'a']]);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
@@ -341,7 +341,7 @@ customElements.define('image-list', class extends HTMLElement {
 
     const state = tab.sessionState;
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
 
     await tab.waitForElement(['document', ['querySelector', 'a']]);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
@@ -401,7 +401,7 @@ describe('basic Mouse Event tests', () => {
     const state = tab.sessionState;
 
     await tab.goto(`${koaServer.baseUrl}/mouse1`);
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     await tab.interact([
       { command: 'click', mousePosition: ['document', ['querySelector', 'BUTTON']] },
@@ -420,7 +420,7 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changes = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changes);
     const linkNode = domChanges.find(x => x[2].tagName === 'BUTTON')[2];
@@ -451,7 +451,7 @@ describe('basic Form element tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/input`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
     const state = tab.sessionState;
@@ -482,7 +482,7 @@ describe('basic Form element tests', () => {
     await state.db.flush();
     await tab.domRecorder.flush();
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -513,7 +513,7 @@ describe('basic Form element tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/textarea`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
     const state = tab.sessionState;
@@ -544,7 +544,7 @@ describe('basic Form element tests', () => {
     await tab.domRecorder.flush();
     await state.db.flush();
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -577,7 +577,7 @@ describe('basic Form element tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/cbox`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
     const state = tab.sessionState;
@@ -601,7 +601,7 @@ describe('basic Form element tests', () => {
     await tab.domRecorder.flush();
     await state.db.flush();
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -634,7 +634,7 @@ describe('basic Form element tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/radio`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
     const state = tab.sessionState;
@@ -659,7 +659,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -695,7 +695,7 @@ describe('basic Form element tests', () => {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/select`);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
 
     const state = tab.sessionState;
@@ -724,7 +724,7 @@ describe('basic Form element tests', () => {
 
     await state.db.flush();
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     const changesAfterType = await state.getMainFrameDomChanges(pages.history);
     const [domChanges] = Object.values(changesAfterType);
 
@@ -779,21 +779,21 @@ function addMe2() {
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
 
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.domRecorder.flush();
 
     const tab2 = await tab.waitForNewTab();
-    await tab2.waitForLoad('AllContentLoaded');
+    await tab2.waitForLoad('PaintingStable');
     await tab2.interact([
       { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
     ]);
 
     await tab2.domRecorder.flush();
 
-    const pages2 = tab2.navigationTracker;
+    const pages2 = tab2.navigations;
 
     const tab1Changes = await tab.sessionState.getMainFrameDomChanges(pages.history);
     const tab2Changes = await tab2.sessionState.getMainFrameDomChanges(pages2.history);

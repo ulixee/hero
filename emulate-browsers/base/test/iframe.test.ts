@@ -246,6 +246,6 @@ async function createPage(): Promise<IPuppetPage> {
   const tab = Session.getTab(meta);
   Helpers.needsClosing.push(tab.session);
   await tab.goto(koaServer.baseUrl);
-  await tab.waitForLoad('AllContentLoaded');
+  await tab.waitForLoad('PaintingStable');
   return tab.puppetPage;
 }

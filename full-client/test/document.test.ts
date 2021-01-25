@@ -125,7 +125,7 @@ describe('basic Document tests', () => {
       `;
     });
     const agent = await openBrowser('/refresh-element');
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const lastChild = await agent.document.body.firstElementChild;
     expect(await lastChild.getAttribute('id')).toBe('first');
     await agent.click(lastChild);
@@ -244,6 +244,7 @@ describe('basic Document tests', () => {
     koaServer.get('/canvas', ctx => {
       ctx.body = `
         <body>
+          <label>This is a canvas</label>
           <canvas id="canvas"></canvas>
           <script>
             const c = document.getElementById("canvas");
@@ -296,6 +297,6 @@ async function openBrowser(path: string) {
   const agent = await handler.createAgent();
   Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}${path}`);
-  await agent.waitForAllContentLoaded();
+  await agent.waitForPaintingStable();
   return agent;
 }

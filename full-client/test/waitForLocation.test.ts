@@ -34,7 +34,7 @@ describe('basic waitForLocation change detections', () => {
 
     await agent.goto(startUrl);
     const firstUrl = await agent.url;
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const button = agent.document.querySelector('button');
     await agent.waitForElement(button);
 
@@ -112,17 +112,17 @@ describe('basic waitForLocation change detections', () => {
 
     await agent.goto(startUrl);
     const firstUrl = await agent.url;
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const readyLink = agent.document.querySelector('a');
     await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
     await agent.waitForLocation('change');
     const secondUrl = await agent.url;
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
 
     const readyLink2 = agent.document.querySelector('a');
     await agent.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
     await agent.waitForLocation('change');
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const lastUrl = await agent.url;
 
     expect(firstUrl).toBe(startUrl);
@@ -141,17 +141,17 @@ describe('basic waitForLocation change detections', () => {
       `;
     });
     koaServer.get('/loaded2', ctx => {
-      ctx.body = `<body></body>`;
+      ctx.body = `<body><h1>Loaded 2</h1></body>`;
     });
 
     const agent = await handler.createAgent();
 
     await agent.goto(`${koaServer.baseUrl}/loaded1`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     const link = agent.document.querySelector('a');
     await agent.click(link);
     await agent.waitForLocation('change', { timeoutMs: 500 });
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     expect(await agent.url).toBe(`${koaServer.baseUrl}/loaded2`);
 
     await expect(agent.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrowError(

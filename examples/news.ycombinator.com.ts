@@ -5,7 +5,7 @@ import agent from '@secret-agent/full-client';
 async function run() {
   await agent.configure({ browserEmulatorId: 'chrome-80' });
   await agent.goto('https://news.ycombinator.com/');
-  await agent.waitForAllContentLoaded();
+  await agent.waitForPaintingStable();
 
   console.log('\n-- PRINTING location.href ---------');
   console.log(await agent.url);

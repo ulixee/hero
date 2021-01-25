@@ -1,14 +1,14 @@
 import { Helpers } from '@secret-agent/testing';
 import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import * as Fs from 'fs';
 import Core, { Tab } from '../index';
-import LocationTracker from '../lib/LocationTracker';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
+import TabNavigationsObserver from '../lib/TabNavigationsObserver';
 
-const runWaitForCbsSpy = jest.spyOn<any, any>(LocationTracker.prototype, 'runWaitForCbs');
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
 beforeAll(async () => {
@@ -18,13 +18,10 @@ beforeAll(async () => {
   koaServer = await Helpers.runKoaServer();
 });
 
-beforeEach(() => {
-  runWaitForCbsSpy.mockClear();
-});
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
-describe('basic LocationTracker tests', () => {
+describe('basic Navigation tests', () => {
   it('handles unformatted urls', async () => {
     const unformattedUrl = koaServer.baseUrl;
     const { tab } = await createSession();
@@ -32,8 +29,6 @@ describe('basic LocationTracker tests', () => {
     const formattedUrl = await tab.getLocationHref();
 
     expect(formattedUrl).toBe(`${unformattedUrl}/`);
-
-    await tab.close();
   });
 
   it('works without explicit waitForLocation', async () => {
@@ -47,18 +42,20 @@ describe('basic LocationTracker tests', () => {
     const hrefAttribute = await tab.execJsPath(['document', ['querySelector', 'a'], 'href']);
     expect(elem.value).toMatchObject({ nodeName: 'A' });
     expect(hrefAttribute.value).toBe('https://www.iana.org/domains/example');
-
-    await tab.close();
   });
 
   it('times out a goto', async () => {
     const startingUrl = `${koaServer.baseUrl}/timeout`;
+    let timeoutResolve = () => null;
     koaServer.get('/timeout', async ctx => {
-      await new Promise(resolve => setTimeout(resolve, 101));
+      await new Promise<void>(resolve => {
+        timeoutResolve = resolve;
+      });
       ctx.body = 'done';
     });
     const { tab } = await createSession();
     await expect(tab.goto(startingUrl, 100)).rejects.toThrowError('Timeout');
+    timeoutResolve();
   });
 
   it('handles page reloading itself', async () => {
@@ -79,20 +76,8 @@ describe('basic LocationTracker tests', () => {
     await tab.waitForLocation(LocationTrigger.reload);
 
     const text = await tab.execJsPath(['document', 'body', 'textContent']);
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
     expect(text.value).toBe('Reloaded');
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'reload',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
-    await tab.close();
   });
 
   it('can reload a page', async () => {
@@ -110,7 +95,7 @@ describe('basic LocationTracker tests', () => {
     });
 
     const gotoResource = await tab.goto(startingUrl);
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad(LocationStatus.PaintingStable);
 
     const text = await tab.execJsPath(['document', 'body', 'textContent']);
     expect(text.value).toBe('First Load');
@@ -121,23 +106,35 @@ describe('basic LocationTracker tests', () => {
     expect(reloadResource.id).not.toBe(gotoResource.id);
     expect(reloadResource.url).toBe(gotoResource.url);
 
-    await tab.waitForLoad('AllContentLoaded');
+    await tab.waitForLoad(LocationStatus.PaintingStable);
+  });
 
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
+  it('can go back and forward', async () => {
+    const { tab } = await createSession();
 
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-      'reload',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
-    await tab.close();
+    koaServer.get('/backAndForth', ctx => {
+      ctx.body = `<html><body><h1>Page 2</h1></body></html>`;
+    });
+
+    await tab.goto(`${koaServer.baseUrl}/`);
+
+    expect(await tab.getLocationHref()).toBe(`${koaServer.baseUrl}/`);
+
+    await tab.goto(`${koaServer.baseUrl}/backAndForth`);
+    expect(await tab.getLocationHref()).toBe(`${koaServer.baseUrl}/backAndForth`);
+    // @ts-ignore
+    const pages = tab.navigations;
+    expect(pages.history).toHaveLength(2);
+    expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/backAndForth`);
+
+    await tab.goBack();
+    expect(pages.history).toHaveLength(3);
+    expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/`);
+
+    await tab.goForward();
+    expect(pages.history).toHaveLength(4);
+    expect(pages.top.stateChanges.has('Load')).toBe(true);
+    expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/backAndForth`);
   });
 
   it('handles page that navigates to another url', async () => {
@@ -153,21 +150,8 @@ describe('basic LocationTracker tests', () => {
     await tab.waitForLocation(LocationTrigger.change);
 
     const currentUrl = await tab.getLocationHref();
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
     expect(currentUrl).toBe(navigateToUrl);
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
-
-    await tab.close();
   });
 
   it('handles submitting a form', async () => {
@@ -181,7 +165,7 @@ describe('basic LocationTracker tests', () => {
 
     await tab.goto(startingUrl);
 
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.interact([
       {
         command: InteractionCommand.click,
@@ -192,26 +176,11 @@ describe('basic LocationTracker tests', () => {
     await tab.waitForLocation(LocationTrigger.change);
 
     const currentUrl = await tab.getLocationHref();
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
     expect(currentUrl).toBe(navigateToUrl);
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
-
-    await tab.close();
   });
 
-  it('handles page that navigates via click', async () => {
+  it('handles navigation via link clicks', async () => {
     const startingUrl = `${koaServer.baseUrl}/click`;
     const navigateToUrl = `${koaServer.baseUrl}/`;
     const { tab } = await createSession();
@@ -222,7 +191,7 @@ describe('basic LocationTracker tests', () => {
 
     await tab.goto(startingUrl);
 
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.interact([
       {
         command: InteractionCommand.click,
@@ -233,23 +202,8 @@ describe('basic LocationTracker tests', () => {
     await tab.waitForLocation(LocationTrigger.change);
 
     const currentUrl = await tab.getLocationHref();
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
     expect(currentUrl).toBe(navigateToUrl);
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
-
-    await tab.close();
   });
 
   it('handles an in-page navigation change', async () => {
@@ -270,7 +224,7 @@ describe('basic LocationTracker tests', () => {
 
     await tab.goto(startingUrl);
 
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.interact([
       {
         command: InteractionCommand.click,
@@ -281,23 +235,12 @@ describe('basic LocationTracker tests', () => {
     await tab.waitForLocation(LocationTrigger.change);
 
     const currentUrl = await tab.getLocationHref();
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
 
     expect(currentUrl).toBe(navigateToUrl);
-    expect(locationStatusHistory).toMatchObject([
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-      'change',
-    ]);
 
     // @ts-ignore
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     expect(pages.history).toHaveLength(2);
-
-    await tab.close();
   });
 
   it('handles an in-page navigation change that happens before page load', async () => {
@@ -307,6 +250,7 @@ describe('basic LocationTracker tests', () => {
 
     koaServer.get('/instant-hash', ctx => {
       ctx.body = `<body>
+<h1>Title</h1>
 <script>
 location.hash= '#id=12343';
 setTimeout(function() {
@@ -319,10 +263,10 @@ setTimeout(function() {
 
     await tab.goto(startingUrl);
 
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.waitForMillis(50);
     // @ts-ignore
-    const pages = tab.navigationTracker;
+    const pages = tab.navigations;
     expect(pages.history).toHaveLength(3);
     expect(pages.history.map(x => x.finalUrl ?? x.requestedUrl)).toStrictEqual([
       startingUrl,
@@ -332,8 +276,6 @@ setTimeout(function() {
 
     const currentUrl = await tab.getLocationHref();
     expect(currentUrl).toBe(pages.top.finalUrl);
-
-    await tab.close();
   });
 
   it.todo('handles going to about:blank');
@@ -356,12 +298,14 @@ setTimeout(function() {
       },
     ]);
 
+    const spy = jest.spyOn<any, any>(TabNavigationsObserver.prototype, 'onNavigation');
+
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
-    const waitForChange = popupTab.waitForLocation('change', { timeoutMs: 1e3 });
-    await popupTab.waitForLoad('AllContentLoaded');
-    // should not trigger a change for this
-    await expect(waitForChange).rejects.toThrowError('Timeout');
+    await popupTab.waitForLoad(LocationStatus.PaintingStable);
+
+    // should not have triggered a navigation change
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('handles a new tab that redirects', async () => {
@@ -392,8 +336,7 @@ setTimeout(() => {
 
     await tab.goto(`${koaServer.baseUrl}/popup-start`);
 
-    await tab.waitForLoad(LocationStatus.AllContentLoaded);
-    runWaitForCbsSpy.mockClear();
+    await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.interact([
       {
         command: InteractionCommand.click,
@@ -404,15 +347,13 @@ setTimeout(() => {
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
 
-    await popupTab.waitForLoad('DomContentLoaded');
+    await popupTab.waitForLoad(LocationStatus.DomContentLoaded);
     await popupTab.waitForLocation(LocationTrigger.change);
-    await popupTab.waitForLoad('AllContentLoaded');
+    await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     expect(await popupTab.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
 
-    const locationStatusHistory = runWaitForCbsSpy.mock.calls.map(x => x[0]);
-
-    const history = popupTab.navigationTracker.history;
+    const history = popupTab.navigations.history;
     expect(history).toHaveLength(4);
     expect(history.map(x => x.requestedUrl)).toStrictEqual([
       `${koaServer.baseUrl}/popup`,
@@ -426,30 +367,92 @@ setTimeout(() => {
       `${koaServer.baseUrl}/popup-redirect3`,
       `${koaServer.baseUrl}/popup-redirect3`,
     ]);
-    expect(history[0].stateChanges.has('AllContentLoaded')).toBe(true);
-    expect(history[1].stateChanges.has('HttpRedirected')).toBe(true);
-    expect(history[2].stateChanges.has('HttpRedirected')).toBe(true);
-    expect(history[3].stateChanges.has('AllContentLoaded')).toBe(true);
+    expect(history[0].stateChanges.has('ContentPaint')).toBe(true);
+    expect(history[1].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
+    expect(history[2].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
+    expect(history[3].stateChanges.has('ContentPaint')).toBe(true);
+  });
+});
 
-    expect(locationStatusHistory).toMatchObject([
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-      'change',
-      'HttpRequested',
-      'HttpRedirected',
-      'change',
-      'HttpRequested',
-      'HttpRedirected',
-      'change',
-      'HttpRequested',
-      'HttpResponded',
-      'DomContentLoaded',
-      'AllContentLoaded',
-    ]);
+describe('PaintingStable tests', () => {
+  it('should trigger a painting stable on a page that never triggers load', async () => {
+    const { tab } = await createSession();
 
-    await tab.close();
+    let completeLongScript: () => void;
+    koaServer.get('/long-script.js', async ctx => {
+      await new Promise<void>(resolve => {
+        completeLongScript = resolve;
+      });
+      ctx.body = '';
+    });
+    koaServer.get('/img.png', ctx => {
+      ctx.body = getLogo();
+    });
+    koaServer.get('/stable-paint1', ctx => {
+      ctx.body = `
+<html>
+<body>
+  <h1>This is a test</h1>
+  <img src="/img.png" alt="Image"/>
+  <script src="/long-script.js"></script>
+</body>
+</html>`;
+    });
+
+    await tab.goto(`${koaServer.baseUrl}/stable-paint1`);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
+    completeLongScript();
+    expect(tab.navigations.top.stateChanges.has('Load')).toBe(false);
+    expect(tab.navigations.top.stateChanges.has('ContentPaint')).toBe(true);
+  });
+
+  it('should trigger painting stable once a single page app is loaded', async () => {
+    const { tab } = await createSession();
+
+    koaServer.get('/grid/:filename', async ctx => {
+      const filename = ctx.params.filename;
+      if (filename === 'data.json') {
+        const records = [];
+        for (let i = 0; i < 200; i += 1) {
+          records.push(
+            { name: 'Chuck Norris', power: 10e3 },
+            { name: 'Bruce Lee', power: 9000 },
+            { name: 'Jackie Chan', power: 7000 },
+            { name: 'Jet Li', power: 8000 },
+          );
+        }
+        ctx.set('content-type', 'application/json');
+        ctx.body = JSON.stringify({ records });
+      }
+      if (filename === 'vue.min.js') {
+        ctx.set('content-type', 'application/javascript');
+        ctx.body = Fs.createReadStream(require.resolve('vue/dist/vue.min.js'));
+      }
+      if (filename === 'index.html') {
+        ctx.set('content-type', 'text/html');
+        ctx.body = Fs.createReadStream(`${__dirname}/html/grid/index.html`);
+      }
+      if (filename === 'style.css') {
+        ctx.set('content-type', 'text/css');
+        ctx.body = Fs.createReadStream(`${__dirname}/html/grid/style.css`);
+      }
+    });
+
+    await tab.goto(`${koaServer.baseUrl}/grid/index.html`);
+    const trs = await tab.execJsPath<{ length: number }>(
+      ['document', ['querySelectorAll', '.record']],
+      ['length'],
+    );
+
+    expect(trs.value.length).toBe(0);
+    await tab.waitForLoad(LocationStatus.PaintingStable);
+    const trs2 = await tab.execJsPath<{ length: number }>(
+      ['document', ['querySelectorAll', '.record']],
+      ['length'],
+    );
+    expect(trs2.value.length).toBe(200 * 4);
+    expect(tab.navigations.top.stateChanges.has('Load')).toBe(true);
+    expect(tab.navigations.top.stateChanges.has('ContentPaint')).toBe(true);
   });
 });
 

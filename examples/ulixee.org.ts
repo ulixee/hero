@@ -8,7 +8,7 @@ import { Handler, Agent } from '@secret-agent/full-client';
     if (!href.startsWith('http')) href = `https://ulixee.org${href}`;
     console.log(href);
     await agent.goto(href);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     console.log('Page Loaded', href);
     const cost = await agent.document.querySelector('.cost .large-text').textContent;
     console.log('Cost of %s is %s', dataset.name, cost);

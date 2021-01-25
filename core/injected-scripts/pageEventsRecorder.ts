@@ -13,6 +13,7 @@ export type PageRecorderResultSet = [
   IMouseEvent[],
   IFocusEvent[],
   IScrollEvent[],
+  ILoadEvent[],
 ];
 const SHADOW_NODE_TYPE = 40;
 
@@ -266,6 +267,7 @@ class PageEventsRecorder {
       [...this.mouseEvents],
       [...this.focusEvents],
       [...this.scrollEvents],
+      [...this.loadEvents],
     ];
   }
 
@@ -274,6 +276,7 @@ class PageEventsRecorder {
     this.mouseEvents.length = 0;
     this.focusEvents.length = 0;
     this.scrollEvents.length = 0;
+    this.loadEvents.length = 0;
   }
 
   public disconnect() {
@@ -592,8 +595,13 @@ window.addEventListener('beforeunload', () => {
   recorder.disconnect();
 });
 
-window.addEventListener('DOMContentLoaded', () => recorder.uploadChanges());
-window.addEventListener('load', () => recorder.uploadChanges());
+window.addEventListener('DOMContentLoaded', () => recorder.onLoadEvent('DOMContentLoaded'));
+window.addEventListener('load', () => recorder.onLoadEvent('load'));
+
+const perfObserver = new PerformanceObserver(() => {
+  recorder.onLoadEvent('LargestContentfulPaint');
+});
+perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 
 document.addEventListener('input', () => recorder.checkForPropertyChanges(), {
   capture: true,

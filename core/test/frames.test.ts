@@ -19,7 +19,7 @@ test('should handle opening a page', async () => {
   const meta = await connection.createSession();
   const tab = Session.getTab(meta);
   await tab.goto(koaServer.baseUrl);
-  await tab.waitForLoad(LocationStatus.AllContentLoaded);
+  await tab.waitForLoad(LocationStatus.PaintingStable);
 
   const page = tab.puppetPage as Page;
 
@@ -70,7 +70,7 @@ test('should track navigations and redirects', async () => {
     },
   ]);
 
-  await tab.waitForLoad(LocationStatus.AllContentLoaded);
+  await tab.waitForLoad(LocationStatus.PaintingStable);
 
   const page = tab.puppetPage as Page;
   const frames = page.framesManager;

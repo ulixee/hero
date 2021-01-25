@@ -109,6 +109,7 @@ onmessage = function(e) {
   });
   koa.get('/testWorker', ctx => {
     ctx.body = `<html lang="en">
+<h1>This is a visible page</h1>
 <script>
 const myWorker = new Worker("worker.js");
 myWorker.postMessage('send');
@@ -127,7 +128,7 @@ myWorker.postMessage('send');
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();
   await tab.goto(`${koa.baseUrl}/testWorker`);
-  await tab.waitForLoad('AllContentLoaded');
+  await tab.waitForLoad('PaintingStable');
   await expect(serviceXhr).resolves.toBe('FromWorker');
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
 });
@@ -225,7 +226,7 @@ window.addEventListener('load', function() {
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();
   await tab.goto(`${server.baseUrl}/service-worker`);
-  await tab.waitForLoad('AllContentLoaded');
+  await tab.waitForLoad('PaintingStable');
   const [originalHeaders, headersFromWorker] = await Promise.all([
     xhrHeaders.promise,
     xhrHeadersFromWorker.promise,
@@ -267,7 +268,7 @@ This is the main body
 </html>`;
   });
   await tab.goto(`${koa.baseUrl}/iframe-test`);
-  await tab.waitForLoad(LocationStatus.AllContentLoaded);
+  await tab.waitForLoad(LocationStatus.PaintingStable);
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([

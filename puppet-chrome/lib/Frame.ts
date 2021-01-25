@@ -312,6 +312,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       url: this.url,
       navigationReason: this.navigationReason,
       disposition: this.disposition,
+      isLoaderResolved: this.activeLoader?.isResolved,
       lifecycle: this.lifecycleEvents,
     };
   }

@@ -50,7 +50,7 @@ describe('basic Full Client tests', () => {
     const resources: Resource[] = [];
     await agent.activeTab.on('resource', event => resources.push(event));
     await agent.goto(`${koaServer.baseUrl}/block`);
-    await agent.waitForAllContentLoaded();
+    await agent.waitForPaintingStable();
     expect(resources).toHaveLength(3);
     for (const resource of resources) {
       const status = await resource.response.statusCode;
