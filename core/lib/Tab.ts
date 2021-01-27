@@ -183,9 +183,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async close(): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
-    this.logger.info('Tab.Closing');
+    const parentLogId = this.logger.stats('Tab.Closing');
 
-    if (this.navigations.top?.frameId) {
+    if (this.navigations.top?.frameId && this.puppetPage.mainFrame.isLoaded) {
       await this.domRecorder.flush(true);
     }
 
@@ -197,9 +197,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       await this.puppetPage.close();
 
       this.emit('close');
+      this.logger.stats('Tab.Closed', { parentLogId });
     } catch (error) {
       if (!error.message.includes('Target closed')) {
-        this.logger.error('Tab.ClosingError', { error });
+        this.logger.error('Tab.ClosingError', { error, parentLogId });
       }
     }
   }

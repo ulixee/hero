@@ -381,7 +381,7 @@ export default class SessionState {
   }
 
   public close(): void {
-    this.logger.info('SessionState.Closing');
+    this.logger.stats('SessionState.Closing');
     this.closeDate = new Date();
     this.db.session.close(this.sessionId, this.closeDate);
     LogEvents.unsubscribe(this.logSubscriptionId);

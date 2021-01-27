@@ -211,11 +211,12 @@ export default class Session extends TypedEventEmitter<{
     } catch (error) {
       log.error('ErrorClosingSession', { error, sessionId: this.id });
     }
-    log.info('Session.Closed', {
+    log.stats('Session.Closed', {
       sessionId: this.id,
       parentLogId: start,
     });
     this.emit('closed');
+    // should go last so we can capture logs
     this.sessionState.close();
   }
 

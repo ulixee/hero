@@ -201,7 +201,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public close(): void {
-    this.logger.info('MitmRequestSession.Closing');
+    const logid = this.logger.stats('MitmRequestSession.Closing');
     this.isClosing = true;
     for (const pending of this.pendingResources) {
       pending.pendingLoad.reject(
@@ -210,6 +210,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     }
     this.requestAgent.close();
     this.dns.close();
+    this.logger.stats('MitmRequestSession.Closed', logid);
 
     // give it a second for lingering requests to finish
     setTimeout(

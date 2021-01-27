@@ -185,7 +185,7 @@ export default class ReplayTabState extends EventEmitter {
       if (new Date().getTime() - new Date(newTick.timestamp).getTime() < 2e3) return;
     }
 
-    console.log('Loading tick %s', newTickIdx);
+    // console.log('Loading tick %s', newTickIdx);
 
     const playbarOffset = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
     this.currentTickIdx = newTickIdx;

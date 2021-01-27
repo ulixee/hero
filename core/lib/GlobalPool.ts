@@ -70,7 +70,7 @@ export default class GlobalPool {
   }
 
   public static close(): Promise<void> {
-    const logId = log.info('InitiatingGlobalPoolShutdown');
+    const logId = log.stats('GlobalPool.Closing');
 
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new Error('Shutting down'));
@@ -88,7 +88,7 @@ export default class GlobalPool {
     SessionsDb.shutdown();
     return Promise.all(closePromises)
       .then(() => {
-        log.stats('CompletedGlobalPoolShutdown', { parentLogId: logId, sessionId: null });
+        log.stats('GlobalPool.Closed', { parentLogId: logId, sessionId: null });
         return null;
       })
       .catch(error => {

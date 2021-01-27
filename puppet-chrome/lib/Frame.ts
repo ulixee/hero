@@ -291,6 +291,10 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return this.getActiveContextId(isolatedContext);
   }
 
+  public canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean {
+    return this.getActiveContextId(isolatedFromWebPageEnvironment) !== undefined;
+  }
+
   public getActiveContextId(isolatedContext: boolean): number | undefined {
     if (isolatedContext) {
       for (const id of this.isolatedContextIds) {

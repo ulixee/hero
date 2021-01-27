@@ -34,7 +34,7 @@ export default class Core {
     isExplicitlyStarted = true,
   ): Promise<void> {
     if (this.isStarting) return;
-    log.info('Core.start', {
+    const startLogId = log.info('Core.start', {
       options,
       isExplicitlyStarted,
       sessionId: null,
@@ -69,6 +69,7 @@ export default class Core {
     log.info('Core started', {
       coreHost: await Core.server.address,
       sessionId: null,
+      parentLogId: startLogId,
     });
     // if started as a subprocess, send back the host
     if (process.send) process.send(host);
@@ -78,13 +79,15 @@ export default class Core {
     if (this.isClosing) return;
     this.isClosing = true;
     this.isStarting = false;
-    log.info('Core.shutdown');
+    const logid = log.info('Core.shutdown');
 
     await Promise.all(this.connections.map(x => x.disconnect()));
     await Promise.all([GlobalPool.close(), this.server.close(!force)]);
 
     this.wasManuallyStarted = false;
     if (Core.onShutdown) Core.onShutdown();
+
+    log.info('Core.shutdownComplete', { parentLogId: logid, sessionId: null });
   }
 
   public static logUnhandledError(clientError: Error, fatalError = false): void {
