@@ -14,6 +14,9 @@ class Piper extends ConnectionToCore {
       ...(response ?? {}),
     });
   }
+
+  protected createConnection = () => Promise.resolve(null);
+  protected destroyConnection = () => Promise.resolve(null);
 }
 
 afterAll(Helpers.afterAll);

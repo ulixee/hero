@@ -32,6 +32,9 @@ class Piper extends ConnectionToCore {
     };
     this.onMessage(response);
   }
+
+  protected createConnection = () => Promise.resolve(null);
+  protected destroyConnection = () => Promise.resolve(null);
 }
 
 beforeAll(() => {});

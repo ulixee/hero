@@ -4,6 +4,7 @@ import http2 from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import Os from 'os';
 import Path from 'path';
+import { createPromise } from '@secret-agent/commons/utils';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
@@ -208,7 +209,11 @@ export default class MitmProxy {
     // for http, we are proxying to clear out the buffer (for websockets in particular)
     // NOTE: this probably can be optimized away for http
 
-    const proxyConnection = net.connect({ port: proxyToProxyPort, allowHalfOpen: false });
+    const connectedPromise = createPromise();
+    const proxyConnection = net.connect(
+      { port: proxyToProxyPort, allowHalfOpen: false },
+      connectedPromise.resolve,
+    );
     proxyConnection.on('error', error => {
       this.onConnectError(request.url, 'ProxyToProxy.ConnectError', error);
       if (!socket.destroyed && socket.writable && socket.readable) {
@@ -221,7 +226,7 @@ export default class MitmProxy {
     socket.on('close', () => proxyConnection.destroy());
     socket.on('end', this.removeSocketConnect.bind(this, socket));
 
-    await new Promise(resolve => proxyConnection.once('connect', resolve));
+    await connectedPromise;
     RequestSession.registerProxySession(proxyConnection, sessionId);
 
     // create a tunnel back to the same proxy

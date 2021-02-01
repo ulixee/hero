@@ -1,4 +1,5 @@
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import Resolvable from './Resolvable';
 
 export function assert(value: unknown, message?: string, reject?): void {
   if (value) return;
@@ -35,32 +36,5 @@ export function createPromise<T = any>(
   timeoutMillis?: number,
   timeoutMessage?: string,
 ): IResolvablePromise<T> {
-  const response: IResolvablePromise<T> = {
-    isResolved: false,
-  };
-  // get parent stack
-  const error = new Error(timeoutMessage || 'Timeout waiting for promise');
-  response.stack = error.stack.split(/\r?\n/).slice(2).join('\n');
-
-  response.promise = new Promise((resolve, reject) => {
-    response.resolve = (...args) => {
-      if (response.isResolved) return;
-      response.isResolved = true;
-      clearTimeout(response.timeout);
-      resolve(...args);
-    };
-    response.reject = err => {
-      if (response.isResolved) return;
-      response.isResolved = true;
-      clearTimeout(response.timeout);
-      reject(err);
-    };
-    if (timeoutMillis !== undefined && timeoutMillis !== null) {
-      response.timeout = setTimeout(() => response.reject(error), timeoutMillis).unref();
-    }
-  });
-  // bind `then` and `catch` to implement the same interface as Promise
-  (response as any).then = response.promise.then.bind(response.promise);
-  (response as any).catch = response.promise.catch.bind(response.promise);
-  return response;
+  return new Resolvable<T>(timeoutMillis, timeoutMessage);
 }

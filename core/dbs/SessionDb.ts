@@ -133,8 +133,8 @@ export default class SessionDb {
   }
 
   public close() {
+    clearInterval(this.saveInterval);
     if (this.db) {
-      clearInterval(this.saveInterval);
       this.flush();
       this.db.close();
     }

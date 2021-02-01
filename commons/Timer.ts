@@ -1,5 +1,5 @@
 import TimeoutError from './interfaces/TimeoutError';
-import { createPromise } from './utils';
+import Resolvable from './Resolvable';
 
 export default class Timer {
   public readonly [Symbol.toStringTag] = 'Timer';
@@ -7,9 +7,10 @@ export default class Timer {
 
   private readonly time = process.hrtime();
   private timeoutMessage = 'Timeout waiting';
-  private readonly expirePromise = createPromise();
+  private readonly expirePromise = new Resolvable();
 
   constructor(readonly timeoutMillis: number, readonly registry?: IRegistry[]) {
+    // NOTE: A zero value will NOT timeout. This is to give users an ability to not timeout certain requests
     this.timeout =
       timeoutMillis > 0 ? setTimeout(this.expire.bind(this), timeoutMillis).unref() : null;
     if (registry && this.timeout) {

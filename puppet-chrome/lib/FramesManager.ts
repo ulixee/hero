@@ -4,6 +4,7 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -64,15 +65,22 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   }
 
   public initialize() {
-    this.isReady = new Promise<void>(async resolve => {
-      await Promise.all([
-        this.cdpSession.send('Page.enable'),
-        this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-        this.cdpSession.send('Runtime.enable'),
-      ]);
-      const framesResponse = await this.cdpSession.send('Page.getFrameTree');
-      this.recurseFrameTree(framesResponse.frameTree);
-      resolve();
+    this.isReady = new Promise<void>(async (resolve, reject) => {
+      try {
+        await Promise.all([
+          this.cdpSession.send('Page.enable'),
+          this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
+          this.cdpSession.send('Runtime.enable'),
+        ]);
+        const framesResponse = await this.cdpSession.send('Page.getFrameTree');
+        this.recurseFrameTree(framesResponse.frameTree);
+        resolve();
+      } catch (error) {
+        if (error instanceof CanceledPromiseError) {
+          return;
+        }
+        reject(error);
+      }
     });
     return this.isReady;
   }

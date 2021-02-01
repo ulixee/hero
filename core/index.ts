@@ -24,7 +24,11 @@ export default class Core {
 
   public static addConnection(): ConnectionToClient {
     const connection = new ConnectionToClient();
-    connection.on('close', this.checkForAutoShutdown.bind(this));
+    connection.on('close', () => {
+      const idx = this.connections.indexOf(connection);
+      if (idx >= 0) this.connections.splice(idx, 1);
+      this.checkForAutoShutdown();
+    });
     this.connections.push(connection);
     return connection;
   }
@@ -82,7 +86,8 @@ export default class Core {
     const logid = log.info('Core.shutdown');
 
     await Promise.all(this.connections.map(x => x.disconnect()));
-    await Promise.all([GlobalPool.close(), this.server.close(!force)]);
+    await GlobalPool.close();
+    await this.server.close(!force);
 
     this.wasManuallyStarted = false;
     if (Core.onShutdown) Core.onShutdown();

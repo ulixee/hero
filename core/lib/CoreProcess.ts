@@ -9,6 +9,41 @@ export default class CoreProcess {
   private static coreHostPromise: Promise<string>;
 
   public static spawn(options: ICoreConfigureOptions): Promise<string> {
+    const processEnv = this.getEnvironmentVariables();
+
+    this.coreHostPromise ??= new Promise<string>((resolve, reject) => {
+      this.child = fork(start, [JSON.stringify(options)], {
+        detached: false,
+        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
+        env: processEnv,
+      });
+      this.child.once('error', reject);
+      this.child.once('message', message => {
+        resolve(message as string);
+        this.child.disconnect();
+        this.child.off('error', reject);
+      });
+      // now that it's set, if Core shuts down, clear out the host promise
+      this.child.once('exit', () => {
+        this.coreHostPromise = null;
+        this.child = null;
+      });
+    });
+    return this.coreHostPromise;
+  }
+
+  public static kill(signal?: NodeJS.Signals) {
+    const child = this.child;
+    this.child = null;
+
+    if (child && !child.killed) {
+      const closed = new Promise<void>(resolve => child.once('exit', resolve));
+      child.kill(signal);
+      return closed;
+    }
+  }
+
+  private static getEnvironmentVariables() {
     const processEnv: Dict<string> = {
       SA_TEMPORARY_CORE: 'true',
     };
@@ -28,28 +63,6 @@ export default class CoreProcess {
         processEnv[key] = value;
       }
     }
-
-    this.coreHostPromise ??= new Promise<string>((resolve, reject) => {
-      this.child = fork(start, [JSON.stringify(options)], {
-        detached: true,
-        stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
-        env: processEnv,
-      });
-      this.child.on('error', reject);
-      this.child.once('message', message => {
-        resolve(message as string);
-        this.child.off('error', reject);
-      });
-      // now that it's set, if Core shuts down, clear out the host promise
-      this.child.on('exit', () => {
-        this.coreHostPromise = null;
-        this.child = null;
-      });
-    });
-    return this.coreHostPromise;
-  }
-
-  public static kill() {
-    if (this.child) this.child.kill();
+    return processEnv;
   }
 }

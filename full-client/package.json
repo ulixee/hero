@@ -10,11 +10,11 @@
   "dependencies": {
     "@secret-agent/client": "1.2.0-alpha.5",
     "@secret-agent/core": "1.2.0-alpha.5",
+    "@secret-agent/commons": "1.2.0-alpha.4",
     "@secret-agent/core-interfaces": "1.2.0-alpha.4",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@secret-agent/commons": "1.2.0-alpha.4",
     "@secret-agent/emulate-browsers-base": "1.2.0-alpha.5",
     "@secret-agent/emulate-chrome-80": "1.2.0-alpha.5",
     "@secret-agent/mitm": "1.2.0-alpha.5",

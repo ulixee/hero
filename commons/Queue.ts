@@ -1,5 +1,6 @@
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from './utils';
+import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 
 type Callback<T> = (value?: any) => Promise<T>;
 
@@ -11,7 +12,7 @@ export default class Queue {
   private idleTimout: NodeJS.Timeout;
   private activeCount = 0;
 
-  private queue: { promise: IResolvablePromise; cb: Callback<any>; startStack: string }[] = [];
+  private queue: IQueueEntry[] = [];
 
   constructor(readonly stacktraceMarker = 'QUEUE') {}
 
@@ -29,7 +30,9 @@ export default class Queue {
 
   public stop(): void {
     while (this.queue.length) {
-      this.queue.pop().promise.reject();
+      const next = this.queue.pop();
+
+      this.reject(next, new CanceledPromiseError('Canceling Queue Item'));
     }
   }
 
@@ -57,14 +60,24 @@ export default class Queue {
       const res = await next.cb();
       next.promise.resolve(res);
     } catch (error) {
-      const marker = `------${this.stacktraceMarker}`.padEnd(50, '-');
-
-      error.stack = `${error.stack}\n${marker}\n${next.startStack}`;
-      next.promise.reject(error);
+      this.reject(next, error);
     } finally {
       this.activeCount -= 1;
     }
 
     setImmediate(() => this.next());
   }
+
+  private reject(entry: IQueueEntry, error: Error): void {
+    const marker = `------${this.stacktraceMarker}`.padEnd(50, '-');
+
+    error.stack = `${error.stack}\n${marker}\n${entry.startStack}`;
+    entry.promise.reject(error);
+  }
+}
+
+interface IQueueEntry {
+  promise: IResolvablePromise;
+  cb: Callback<any>;
+  startStack: string;
 }

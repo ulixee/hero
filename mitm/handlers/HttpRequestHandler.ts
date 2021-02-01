@@ -3,6 +3,7 @@ import Log from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import { URL } from 'url';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import CookieHandler from './CookieHandler';
@@ -118,6 +119,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
   }
 
   protected onError(kind: string, error: Error): void {
+    const isCanceled = error instanceof CanceledPromiseError;
+
     const url = this.context.url.href;
     const { method, requestSession, proxyToClientResponse } = this.context;
     const sessionId = requestSession.sessionId;
@@ -128,16 +131,23 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       error,
     });
 
-    const logLevel = requestSession.isClosing ? 'stats' : 'error';
+    let status = 504;
+    let message = String(error);
+    if (isCanceled) {
+      status = 444;
+      message = undefined;
+    }
+    if (!isCanceled && !requestSession.isClosing) {
+      log.error(`MitmHttpRequest.${kind}`, {
+        sessionId,
+        request: `${method}: ${url}`,
+        error,
+      });
+    }
 
-    log[logLevel](`MitmHttpRequest.${kind}`, {
-      sessionId,
-      request: `${method}: ${url}`,
-      error,
-    });
     try {
-      if (!proxyToClientResponse.headersSent) proxyToClientResponse.writeHead(504);
-      if (!proxyToClientResponse.finished) proxyToClientResponse.end(`${error}`);
+      if (!proxyToClientResponse.headersSent) proxyToClientResponse.writeHead(status);
+      if (!proxyToClientResponse.finished) proxyToClientResponse.end(message);
     } catch (e) {
       // drown errors
     }
@@ -148,7 +158,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     const { proxyToServerRequest, clientToProxyRequest } = this.context;
 
     const onWriteError = (error): void => {
-      if (error) this.onError('ProxyToServer.WriteError', error);
+      if (error) {
+        this.onError('ProxyToServer.WriteError', error);
+      }
     };
 
     const data: Buffer[] = [];
@@ -156,8 +168,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       data.push(chunk);
       proxyToServerRequest.write(chunk, onWriteError);
     }
+
     HeadersHandler.sendRequestTrailers(this.context);
-    proxyToServerRequest.end();
+    await new Promise(resolve => proxyToServerRequest.end(resolve));
     this.context.requestPostData = Buffer.concat(data);
   }
 

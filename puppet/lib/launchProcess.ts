@@ -78,11 +78,9 @@ export default function launchProcess(
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;
     if (logProcessExit) {
-      log.info(`${exe}.ProcessExited`, { exitCode, signal, sessionId: null });
+      log.stats(`${exe}.ProcessExited`, { exitCode, signal, sessionId: null });
     }
   });
-
-  process.once('exit', close.bind(this));
 
   const transport = new PipeTransport(
     launchedProcess.stdio[3] as Writable,
@@ -94,15 +92,17 @@ export default function launchProcess(
     close,
   });
 
-  function close() {
+  function close(): Promise<void> {
     if (launchedProcess.killed || processKilled) return;
 
     try {
+      const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
       if (process.platform === 'win32') {
         childProcess.execSync(`taskkill /pid ${launchedProcess.pid} /T /F`);
       } else {
         launchedProcess.kill('SIGKILL');
       }
+      return closed;
     } catch (error) {
       // might have already been kill off
     }
