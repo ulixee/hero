@@ -13,6 +13,7 @@ import IAttachedState from 'awaited-dom/base/IAttachedState';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -115,6 +116,10 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async removeCookie(name: string): Promise<boolean> {
     return await this.commandQueue.run('removeCookie', name);
+  }
+
+  public async takeScreenshot(options: IScreenshotOptions): Promise<Buffer> {
+    return await this.commandQueue.run('takeScreenshot', options);
   }
 
   public async isElementVisible(jsPath: IJsPath): Promise<boolean> {

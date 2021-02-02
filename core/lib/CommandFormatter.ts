@@ -9,7 +9,7 @@ export default class CommandFormatter {
     if (!command.args) {
       return `${command.name}()`;
     }
-    const args = JSON.parse(command.args);
+    const args = JSON.parse(command.args).filter(x => x !== null);
     if (command.name === 'execJsPath') {
       return formatJsPath(args[0]);
     }
@@ -64,7 +64,7 @@ export default class CommandFormatter {
       return `waitForElement( ${formatJsPath(args[0])} )`;
     }
 
-    return `${command.name}(${args.map(JSON.stringify)})`;
+    return `${command.name}(${args.map(JSON.stringify).join(', ')})`;
   }
 
   public static parseResult(meta: ICommandMeta) {
@@ -104,6 +104,14 @@ export default class CommandFormatter {
             command.resultNodeIds = result.attachedState.iterableIds;
           }
         }
+      }
+
+      if (result?.type === 'Buffer' && meta.name === 'takeScreenshot') {
+        const imageType = command.label.includes('jpeg') ? 'jpeg' : 'png';
+        command.result = `data:image/${imageType}; base64,${Buffer.from(result.data).toString(
+          'base64',
+        )}`;
+        command.resultType = 'image';
       }
 
       if (meta.resultType.toLowerCase().includes('error')) {

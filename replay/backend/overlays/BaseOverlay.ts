@@ -2,6 +2,7 @@ import { BrowserView, BrowserWindow } from 'electron';
 import IRectangle from '~shared/interfaces/IRectangle';
 import Application from '~backend/Application';
 import generateContextMenu from '~backend/menus/generateContextMenu';
+import Window from '../models/Window';
 import Rectangle = Electron.Rectangle;
 
 interface IOptions {
@@ -137,11 +138,28 @@ export default class BaseOverlay {
     this.browserView.setBounds(newRect as Rectangle);
   }
 
+  private async maximize() {
+    const bounds = await Window.current.getAvailableBounds();
+    // inset 10%
+    const inset = Math.round(bounds.width * 0.1);
+    bounds.width -= inset;
+    bounds.x += Math.round(inset / 2);
+    bounds.y += 50;
+    bounds.height -= 50 + 28;
+    this.browserView.setBounds(bounds);
+  }
+
   private async load() {
     await this.webContents.loadURL(Application.instance.getPageUrl(this.name));
     this.webContents.on('ipc-message', (e, message) => {
       if (message === 'resize-height') {
         this.adjustHeight();
+      }
+      if (message === 'zoomin-overlay') {
+        this.maximize();
+      }
+      if (message === 'zoomout-overlay') {
+        this.rearrange(this.browserView.getBounds());
       }
     });
 

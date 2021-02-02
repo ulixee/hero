@@ -19,6 +19,7 @@ import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
+import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -254,6 +255,10 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   public isElementVisible(element: IElementIsolate): Promise<boolean> {
     return this.activeTab.isElementVisible(element);
+  }
+
+  public takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
+    return this.activeTab.takeScreenshot(options);
   }
 
   public waitForPaintingStable(options?: IWaitForOptions): Promise<void> {

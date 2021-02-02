@@ -19,6 +19,7 @@ import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElemen
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
+import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -159,6 +160,11 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     const { awaitedPath } = awaitedPathState.getState(element);
     const coreTab = await getCoreTab(this);
     return coreTab.isElementVisible(awaitedPath.toJSON());
+  }
+
+  public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
+    const coreTab = await getCoreTab(this);
+    return coreTab.takeScreenshot(options);
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {

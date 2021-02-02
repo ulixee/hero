@@ -39,6 +39,7 @@ export default class Playbar extends Vue {
   private durationMillis = 0;
   private ticks: number[] = [];
   private currentTickValue = 0;
+  private tickRealtimeOffsetMs = 0;
   private isPlaying = false;
 
   private nextTimeout: number;
@@ -99,26 +100,40 @@ export default class Playbar extends Vue {
   }
 
   private play() {
+    this.tickRealtimeOffsetMs = 0;
     this.isPlaying = true;
     this.playbackTick();
   }
 
   private async playbackTick() {
-    const next = await ipcRenderer.invoke('next-tick');
+    const next = await ipcRenderer.invoke('next-tick', this.tickRealtimeOffsetMs ?? 0);
     this.currentTickValue = next.playbarOffset || 0;
-    const nextTickMillis = Number(next.millisToNextTick || 50);
-    console.log('Playbar at %s. Next tick in %s', this.currentTickValue, nextTickMillis, this.isPlaying);
+    let millisToNextTick = Number(next.millisToNextTick || 0);
+
+    console.log(
+      'Playbar at %s. Next tick in %s. Previous offset of %s',
+      this.currentTickValue,
+      millisToNextTick,
+      this.tickRealtimeOffsetMs,
+    );
+    if (millisToNextTick < 0) {
+      this.tickRealtimeOffsetMs = millisToNextTick;
+      millisToNextTick = 0;
+    } else {
+      this.tickRealtimeOffsetMs = 0;
+    }
     if (this.currentTickValue === 100) {
       this.isPlaying = false;
     }
 
     if (this.isPlaying) {
-      this.nextTimeout = setTimeout(this.playbackTick.bind(this), nextTickMillis) as any;
+      this.nextTimeout = setTimeout(this.playbackTick.bind(this), millisToNextTick) as any;
     }
   }
 
   private pause() {
     this.isPlaying = false;
+    clearTimeout(this.nextTimeout);
   }
 
   private isHovered(value: number) {
@@ -239,10 +254,17 @@ export default class Playbar extends Vue {
 
       &.hovered {
         .vue-slider-mark-step {
-          background-color: #6b96c0;
-          margin-top: -150%;
-          height: 400%;
-          width: 4px;
+          background-color: transparent;
+          margin-top: -50%;
+          margin-left: -50%;
+          border: solid #3498db;
+          opacity: 1;
+          border-width: 0 3px 3px 0;
+          display: inline-block;
+          height: 100%;
+          border-radius: 0;
+          transform: rotate(-45deg);
+          padding: 3px;
         }
       }
     }

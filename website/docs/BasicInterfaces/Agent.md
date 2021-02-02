@@ -300,6 +300,10 @@ Alias for [Tab.isElementVisible](./tab#is-element-visible)
 
 Alias for [Tab.reload](./tab#reload)
 
+### agent.takeScreenshot*(options?)*
+
+Alias for [Tab.takeScreenshot](./tab#take-screenshot)
+
 ### agent.waitForPaintingStable*()*
 
 Alias for [Tab.waitForLoad(PaintingStable)](./tab#wait-for-load)

@@ -168,7 +168,7 @@ class PageEventsRecorder {
     const time = new Date().toISOString();
     const event = [this.commandId, eventType, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
-    this.checkForPropertyChanges(time);
+    this.getPropertyChanges(time, this.domChanges);
   }
 
   public trackMouse(eventType: MouseEventType, mouseEvent: MouseEvent) {
@@ -206,59 +206,8 @@ class PageEventsRecorder {
     this.uploadChanges();
   }
 
-  public checkForLocationChange(changeTime?: string) {
-    const timestamp = changeTime || new Date().toISOString();
-    const currentLocation = window.self.location.href;
-    if (this.location !== currentLocation) {
-      this.location = currentLocation;
-      this.domChanges.push([
-        this.commandId,
-        'location',
-        { id: -1, textContent: currentLocation },
-        timestamp,
-        idx(),
-      ]);
-    }
-  }
-
-  public checkForStylesheetChanges(changeTime?: string) {
-    const timestamp = changeTime || new Date().toISOString();
-    for (const [style, current] of this.stylesheets) {
-      if (!style.sheet || !style.isConnected) continue;
-      const sheet = style.sheet as CSSStyleSheet;
-      const newPropValue = [...sheet.cssRules].map(x => x.cssText);
-      if (newPropValue.toString() !== current.toString()) {
-        const nodeId = nodeTracker.getId(style);
-        this.domChanges.push([
-          this.commandId,
-          'property',
-          { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
-          timestamp,
-          idx(),
-        ]);
-        this.stylesheets.set(style, newPropValue);
-      }
-    }
-  }
-
-  public checkForPropertyChanges(changeTime?: string) {
-    const timestamp = changeTime || new Date().toISOString();
-    for (const [input, propertyMap] of this.propertyTrackingElements) {
-      for (const [propertyName, value] of propertyMap) {
-        const newPropValue = input[propertyName];
-        if (newPropValue !== value) {
-          const nodeId = nodeTracker.getId(input);
-          this.domChanges.push([
-            this.commandId,
-            'property',
-            { id: nodeId, properties: { [propertyName]: newPropValue } },
-            timestamp,
-            idx(),
-          ]);
-          propertyMap.set(propertyName, newPropValue);
-        }
-      }
-    }
+  public checkForAllPropertyChanges() {
+    this.getPropertyChanges(new Date().toISOString(), this.domChanges);
   }
 
   public get pageResultset(): PageRecorderResultSet {
@@ -291,20 +240,75 @@ class PageEventsRecorder {
     }
   }
 
-  private trackStylesheet(element: HTMLLinkElement | HTMLStyleElement) {
+  private getLocationChange(changeTime: string, changes: IDomChangeEvent[]) {
+    const timestamp = changeTime || new Date().toISOString();
+    const currentLocation = window.self.location.href;
+    if (this.location !== currentLocation) {
+      this.location = currentLocation;
+      changes.push([
+        this.commandId,
+        'location',
+        { id: -1, textContent: currentLocation },
+        timestamp,
+        idx(),
+      ]);
+    }
+  }
+
+  private getPropertyChanges(changeTime: string, changes: IDomChangeEvent[]) {
+    const timestamp = changeTime;
+    for (const [input, propertyMap] of this.propertyTrackingElements) {
+      for (const [propertyName, value] of propertyMap) {
+        const newPropValue = input[propertyName];
+        if (newPropValue !== value) {
+          const nodeId = nodeTracker.getId(input);
+          changes.push([
+            this.commandId,
+            'property',
+            { id: nodeId, properties: { [propertyName]: newPropValue } },
+            timestamp,
+            idx(),
+          ]);
+          propertyMap.set(propertyName, newPropValue);
+        }
+      }
+    }
+  }
+
+  private trackStylesheet(element: HTMLStyleElement) {
     if (!element || this.stylesheets.has(element)) return;
     if (!element.sheet) return;
 
-    const shouldRecordInitialStyle = element.textContent || element instanceof HTMLStyleElement;
+    const shouldStoreCurrentStyleState = !!element.textContent;
     if (element.sheet instanceof CSSStyleSheet) {
       try {
         // if there's style text, record the current state
-        const startingStyle = shouldRecordInitialStyle
+        const startingStyle = shouldStoreCurrentStyleState
           ? [...element.sheet.cssRules].map(x => x.cssText)
           : [];
         this.stylesheets.set(element, startingStyle);
       } catch (err) {
         // can't track cors stylesheet rules
+      }
+    }
+  }
+
+  private checkForStylesheetChanges(changeTime: string, changes: IDomChangeEvent[]) {
+    const timestamp = changeTime || new Date().toISOString();
+    for (const [style, current] of this.stylesheets) {
+      if (!style.sheet || !style.isConnected) continue;
+      const sheet = style.sheet as CSSStyleSheet;
+      const newPropValue = [...sheet.cssRules].map(x => x.cssText);
+      if (newPropValue.toString() !== current.toString()) {
+        const nodeId = nodeTracker.getId(style);
+        changes.push([
+          this.commandId,
+          'property',
+          { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
+          timestamp,
+          idx(),
+        ]);
+        this.stylesheets.set(style, newPropValue);
       }
     }
   }
@@ -319,8 +323,8 @@ class PageEventsRecorder {
     const currentCommandId = this.commandId;
     const stamp = new Date().toISOString();
 
-    this.checkForLocationChange(stamp);
-    this.checkForPropertyChanges(stamp);
+    this.getLocationChange(stamp, changes);
+    this.getPropertyChanges(stamp, changes);
 
     const addedNodeMap = new Map<Node, INodeData>();
     const removedNodes = new Set<Node>();
@@ -411,7 +415,7 @@ class PageEventsRecorder {
       }
     }
 
-    this.checkForStylesheetChanges(stamp);
+    this.checkForStylesheetChanges(stamp, changes);
 
     return changes;
   }
@@ -451,10 +455,6 @@ class PageEventsRecorder {
     }
     changes.push([currentCommandId, 'added', serial, stamp, idx()]);
     addedNodeMap.set(node, serial);
-    const childRecords = this.serializeChildren(node, addedNodeMap);
-    for (const childData of childRecords) {
-      changes.push([currentCommandId, 'added', childData, stamp, idx()]);
-    }
     return serial;
   }
 
@@ -603,17 +603,17 @@ const perfObserver = new PerformanceObserver(() => {
 });
 perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 
-document.addEventListener('input', () => recorder.checkForPropertyChanges(), {
+document.addEventListener('input', () => recorder.checkForAllPropertyChanges(), {
   capture: true,
   passive: true,
 });
 
-document.addEventListener('keydown', () => recorder.checkForPropertyChanges(), {
+document.addEventListener('keydown', () => recorder.checkForAllPropertyChanges(), {
   capture: true,
   passive: true,
 });
 
-document.addEventListener('change', () => recorder.checkForPropertyChanges(), {
+document.addEventListener('change', () => recorder.checkForAllPropertyChanges(), {
   capture: true,
   passive: true,
 });

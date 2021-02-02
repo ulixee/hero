@@ -195,7 +195,19 @@ export default class ReplayApi {
 
     console.log('Connecting to Replay API', replay.replayApiUrl || this.localApiHost);
     const api = new ReplayApi(replay.replayApiUrl || this.localApiHost, replay);
-    await api.isReady;
+    try {
+      await api.isReady;
+    } catch (err) {
+      if (err.code === 'ECONNREFUSED') {
+        replay.replayApiUrl = null;
+        if (this.serverProcess) {
+          this.serverProcess.kill();
+          this.serverProcess = null;
+        }
+        return this.connect(replay);
+      }
+      throw err;
+    }
     return api;
   }
 
@@ -223,8 +235,13 @@ export default class ReplayApi {
     child.on('error', console.error);
     child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
+    process.once('exit', () => {
+      this.serverProcess?.kill();
+    });
     this.serverProcess = child;
     this.serverProcess.once('exit', () => {
+      child.stderr.unpipe();
+      child.stdout.unpipe();
       this.serverProcess = null;
     });
 

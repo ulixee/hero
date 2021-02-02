@@ -206,6 +206,19 @@ Reload the currently loaded url.
 
 #### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
 
+### tab.takeScreenshot*(options?)* {#take-screenshot}
+
+Takes a screenshot of the current contents rendered in the browser. 
+
+#### **Arguments**:
+
+- options `object` Optional
+  - format `jpeg | png`. Image format type to create. Default `jpeg`.
+  - jpegQuality `number`. Optional compression quality from 1 to 100 for jpeg images (100 is highest quality).
+  - rectangle `IRect`. Optionally clip the screenshot to the given rectangle (eg, x, y, width, height). Includes a pixel scale. 
+
+#### **Returns**: `Promise<Buffer>` Buffer with image bytes in base64.
+
 ### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
 
 Wait for the page to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.

@@ -220,6 +220,7 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
     const navigations = this.navigationsByTabId[tabId];
+    if (!navigations) return;
 
     const isNavigationToCurrentUrl =
       resource.url === navigations.currentUrl && resourceEvent.request.method !== 'OPTIONS';
@@ -353,7 +354,7 @@ export default class SessionState {
   }
 
   public captureError(tabId: string, frameId: string, source: string, error: Error): void {
-    this.logger.error('Window.error', { source, error });
+    this.logger.info('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
@@ -364,11 +365,7 @@ export default class SessionState {
     message: string,
     location?: string,
   ): void {
-    if (message.match(/error/gi)) {
-      this.logger.error('Window.error', { message });
-    } else {
-      this.logger.info('Window.console', { message });
-    }
+    this.logger.info('Window.console', { message });
     this.db.pageLogs.insert(tabId, frameId, consoleType, message, new Date(), location);
   }
 

@@ -136,7 +136,7 @@ export default class ReplayView extends ViewBackend {
     this.playbarView.changeTickOffset(this.tabState.currentPlaybarOffsetPct);
   }
 
-  public async nextTick() {
+  public async nextTick(startMillisDeficit = 0) {
     try {
       if (!this.tabState) return { playbarOffset: 0, millisToNextTick: 100 };
       const startTime = new Date();
@@ -152,7 +152,7 @@ export default class ReplayView extends ViewBackend {
         const currentTickTime = new Date(this.tabState.currentTick.timestamp);
         const diff = nextTickTime.getTime() - currentTickTime.getTime();
         const fnDuration = new Date().getTime() - startTime.getTime();
-        millisToNextTick = Math.max(diff - fnDuration, 0);
+        millisToNextTick = diff - fnDuration + startMillisDeficit;
       }
 
       return { playbarOffset: this.tabState.currentPlaybarOffsetPct, millisToNextTick };
@@ -190,7 +190,7 @@ export default class ReplayView extends ViewBackend {
     }
 
     this.browserView.webContents.enableDeviceEmulation({
-      deviceScaleFactor: 0,
+      deviceScaleFactor: 1,
       screenPosition: 'desktop',
       viewSize,
       scale,
@@ -205,7 +205,7 @@ export default class ReplayView extends ViewBackend {
     if (!events || !events.length) return;
     const [domChanges] = events;
 
-    if (domChanges.length) {
+    if (domChanges?.length) {
       const [{ action, frameIdPath }] = domChanges;
       const hasNewUrlToLoad =
         (action === 'newDocument' || (action as any) === 'load') && frameIdPath === 'main';
