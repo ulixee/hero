@@ -3,6 +3,81 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.5...v1.3.0-alpha.0) (2021-02-02)
+
+
+### Bug Fixes
+
+* **build:** ignore emulator json files for ts ([b64f208](https://github.com/ulixee/secret-agent/commit/b64f2087003502383643056f6db9257b98b231c8))
+* **client:** allow waiting on resources ([d3414a8](https://github.com/ulixee/secret-agent/commit/d3414a8f82b3c31c012953bf739d493076f0a759))
+* **client:** error handling for session connect ([82e58b8](https://github.com/ulixee/secret-agent/commit/82e58b826908d7e14d21f58673b1eb0044b4b9a2))
+* **core:** elements offscreen fail isVisible ([f0042fc](https://github.com/ulixee/secret-agent/commit/f0042fc79bc8006c34c2eae408e193ad3eea7fb7))
+* **core:** full close down of on premature exit ([aa53e85](https://github.com/ulixee/secret-agent/commit/aa53e85782a57da4d69f8750a5c3719c60683f5b))
+* **core:** handle visible for height > innerHeight ([b7a1e65](https://github.com/ulixee/secret-agent/commit/b7a1e65dced687fb3df0677a26e6b56cc1e34c97))
+* **core:** isVisible fix, scroll below 0 fix ([7c0c451](https://github.com/ulixee/secret-agent/commit/7c0c451a2bf4675fc07205649ca78bc56fe7890c))
+* **emulators:** safari cookie handling fix ([3507c26](https://github.com/ulixee/secret-agent/commit/3507c2665afd6e94b5f99633e748fa4d455d81db))
+* **mitm:** preflight requests not always sent ([45ebe22](https://github.com/ulixee/secret-agent/commit/45ebe224cd60c9e518139ff40786b90ee640be52))
+* **puppet:** assigning wrong id to network fetches ([c4b6746](https://github.com/ulixee/secret-agent/commit/c4b674655ceff4a4642fe9aada355709dc243e22))
+* **puppet:** fallback to requestid in fetch ([28ad324](https://github.com/ulixee/secret-agent/commit/28ad3242d679c8fa1d67e2f278f559a61fdd46ff))
+* **puppet:** launch non-default (83) headed chrome ([84a02aa](https://github.com/ulixee/secret-agent/commit/84a02aa48db41ecb3a1e831e56a4bf1fb805486e))
+* **replay:** fix replay launch in new setup on win ([add1b97](https://github.com/ulixee/secret-agent/commit/add1b97084d9d83f0cdad77362a238aeef92cf68))
+* added userAgentOptions() to @BrowserEmulatorClassDecorator ([0a2187c](https://github.com/ulixee/secret-agent/commit/0a2187ca3937618aa59f87045e03c34d13ff7cf0))
+* converted some props of IBrowserEmulator to optional ([8e74bed](https://github.com/ulixee/secret-agent/commit/8e74bed69d03bbc961292d4a3b89f9706cb1d555))
+* emulators only had partial data ([3dd86db](https://github.com/ulixee/secret-agent/commit/3dd86db74cdc6e3e02afc7556e1ba41716c37293))
+* mitm session ports were getting reused and conflicting ([0e11465](https://github.com/ulixee/secret-agent/commit/0e11465d3882234e1cc650f372155458ea8bd6e1))
+* **replay:** upgrade axios (dependabot) ([2f55df9](https://github.com/ulixee/secret-agent/commit/2f55df902cd7d3cf5e542c57c7df01f869340cf8))
+* added url in comments to show where darwinToMacOsVersionMap was pulled ([ed873b1](https://github.com/ulixee/secret-agent/commit/ed873b11965ab7255e32202b1b9e84d754178d89))
+* allow setting SA_SHOW_REPLAY in a script ([18d63d6](https://github.com/ulixee/secret-agent/commit/18d63d640dc69e83512908bbdec1263aba87d953))
+* disabled eslint rule for a failing line ([749ae1e](https://github.com/ulixee/secret-agent/commit/749ae1e65b86338ff9666b9e3e7dc9dadf114677))
+* increase node memory limit for yarn lint on github ([9c8a914](https://github.com/ulixee/secret-agent/commit/9c8a914d3b4b63aaa31812e014631770fbf95977))
+* tweaked a few lint issues ([ad9f17d](https://github.com/ulixee/secret-agent/commit/ad9f17da63bad824a7e2dba8d77c0ec0fe9ea9da))
+* updated dom diffs to include all oses supported by browserstack ([686a2e2](https://github.com/ulixee/secret-agent/commit/686a2e2c00dd4191db79824f29ac119a1e99715e))
+* updated some things to work with Slab ([51dada5](https://github.com/ulixee/secret-agent/commit/51dada5d267ec05a6dbe3d1da9f62b4f3754d5a1))
+* viewports window width/height must include frame border width/height ([cca0c8e](https://github.com/ulixee/secret-agent/commit/cca0c8ec66bee1eafd7dcac2564eb8e0fc18747c))
+
+
+### Features
+
+* **client:** add ability to get agent metadata ([55df775](https://github.com/ulixee/secret-agent/commit/55df775b3b9e78db99bc726ae54a683cc701a7e2))
+* **client:** add sessionid/name to logs + errors ([7d88f35](https://github.com/ulixee/secret-agent/commit/7d88f3555076647307dc1e9e6cea9b102033c756))
+* **client:** built-in remote + handlers ([bfaa739](https://github.com/ulixee/secret-agent/commit/bfaa739517a458db9dd1bd6374770840eb95b847))
+* **client:** coreConnection as configuration ([ac284ca](https://github.com/ulixee/secret-agent/commit/ac284cac3fa867a9623fd841edf96d04906e3072))
+* **client:** export required enums and consts ([4cce3a7](https://github.com/ulixee/secret-agent/commit/4cce3a769e41bba49ad8a8bc8c83de53711f091b))
+* **core:** add getComputedStyles to tab ([0e3bccd](https://github.com/ulixee/secret-agent/commit/0e3bccd9c27ac1e6b122238ca7292182c169ebe6))
+* **core:** add screenshot capability ([f075f89](https://github.com/ulixee/secret-agent/commit/f075f89636edb81c4626c51929665373069de31a))
+* **core:** confirm mouse clicks hit targets ([bf2b047](https://github.com/ulixee/secret-agent/commit/bf2b047ca9e49665f7f150e66780b79fd02b7972))
+* **core:** convert all connections to server ([a27fafd](https://github.com/ulixee/secret-agent/commit/a27fafd9a04e52f602a557f7304164c2308006c6))
+* **core:** convert closing logs to stats ([382979d](https://github.com/ulixee/secret-agent/commit/382979df1a758de82297169465be0e57c2c87b53))
+* **core:** convert server to use websockets ([2d1804c](https://github.com/ulixee/secret-agent/commit/2d1804ce7521fe065c01491e3f5e084852369f55))
+* **core:** merge injected scripts into core ([f674f7b](https://github.com/ulixee/secret-agent/commit/f674f7b85a9cf66dd3558d849a78f6b9aa1099dc))
+* **core:** merge session-state and core ([dcc6002](https://github.com/ulixee/secret-agent/commit/dcc6002c2003d981267e51c8dacf5201fe3b9fda))
+* **core:** timeouts for back/fwd/goto, add reload ([bae2a8e](https://github.com/ulixee/secret-agent/commit/bae2a8eaf20b2a855c98986d5c2c9b5e11b004ec))
+* **core:** waitForLocation/Load takes a timeout ([02758c7](https://github.com/ulixee/secret-agent/commit/02758c7fc1e5394db84f91aa8235c3364b6c0692))
+* **core:** waitForPaintingStable ([1955b79](https://github.com/ulixee/secret-agent/commit/1955b791ce8a7cf20a679986e63885950efa6813))
+* **dns:** global cache for dns ([55f253d](https://github.com/ulixee/secret-agent/commit/55f253d9be1fb8fb9e3bd410cc6bc58bb69fedba))
+* **replay:** ability to launch via bin ([518d320](https://github.com/ulixee/secret-agent/commit/518d320e157b4d28e0ce99864c4f53aa5fa439a8))
+* **replay:** allow running out of a dist dir ([e5bfe21](https://github.com/ulixee/secret-agent/commit/e5bfe211e0388bd4b1be1da97356046b983b80ea))
+* **replay:** convert api to use web sockets ([18c8008](https://github.com/ulixee/secret-agent/commit/18c80087d22f3ee95ee2eb5853b422219da6ceb1))
+* **replay:** move to lighter semver lib ([5c4d1dc](https://github.com/ulixee/secret-agent/commit/5c4d1dcfaf4a79d6457857647203addbbda8eba5))
+* **replay:** prefer local build to binary ([71589cf](https://github.com/ulixee/secret-agent/commit/71589cfc0ae8f31911e72b9f3e1fd3bcc4254c35))
+* **replay:** single install of replay ([5425bee](https://github.com/ulixee/secret-agent/commit/5425bee76488ac5bff4f46d8b99eb874dd7f5a35))
+* browser window size now takes into calculation os nav bars ([ab65a65](https://github.com/ulixee/secret-agent/commit/ab65a650e4b63e77ad5e165f7a60e3e024140f66))
+* emulators pull roundRobinPercent from config ([2590387](https://github.com/ulixee/secret-agent/commit/2590387d4ca7f79e6916e3321b5d27e19c6a1341))
+* mv renderingOptions => blockedResourceTypes ([ffa1b74](https://github.com/ulixee/secret-agent/commit/ffa1b74d0b470387ec104027667e8523a51bfa15)), closes [#113](https://github.com/ulixee/secret-agent/issues/113)
+* **website:** blog post on handlers ([8024f03](https://github.com/ulixee/secret-agent/commit/8024f0343e63689afd9aba589e80816a5880f838))
+* pull in os-version maps from Slab to reduce chance of stale data ([201b3c9](https://github.com/ulixee/secret-agent/commit/201b3c9d028b798ce4a88ec05fd9833c95d89a0b))
+* randomize the Viewports browser positionX/Y ([66c1f4a](https://github.com/ulixee/secret-agent/commit/66c1f4a89a434352ae5c8add46481c1f6d28f03f))
+* updated emulator data to handle more runtime OSes ([f57f3b5](https://github.com/ulixee/secret-agent/commit/f57f3b5f1b18bcdaf56bf7e9a4475bf2e0c0b1c6))
+
+
+### BREAKING CHANGES
+
+* renames “renderingOptions” to “blockedResourceTypes”. Default is now “None”
+
+
+
+
+
 # [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
 
 

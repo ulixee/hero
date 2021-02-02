@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.5...v1.3.0-alpha.0) (2021-02-02)
+
+
+### Bug Fixes
+
+* added userAgentOptions() to @BrowserEmulatorClassDecorator ([0a2187c](https://github.com/ulixee/secret-agent/commit/0a2187ca3937618aa59f87045e03c34d13ff7cf0))
+* emulators only had partial data ([3dd86db](https://github.com/ulixee/secret-agent/commit/3dd86db74cdc6e3e02afc7556e1ba41716c37293))
+* updated dom diffs to include all oses supported by browserstack ([686a2e2](https://github.com/ulixee/secret-agent/commit/686a2e2c00dd4191db79824f29ac119a1e99715e))
+* updated some things to work with Slab ([51dada5](https://github.com/ulixee/secret-agent/commit/51dada5d267ec05a6dbe3d1da9f62b4f3754d5a1))
+
+
+### Features
+
+* browser window size now takes into calculation os nav bars ([ab65a65](https://github.com/ulixee/secret-agent/commit/ab65a650e4b63e77ad5e165f7a60e3e024140f66))
+* emulators pull roundRobinPercent from config ([2590387](https://github.com/ulixee/secret-agent/commit/2590387d4ca7f79e6916e3321b5d27e19c6a1341))
+* updated emulator data to handle more runtime OSes ([f57f3b5](https://github.com/ulixee/secret-agent/commit/f57f3b5f1b18bcdaf56bf7e9a4475bf2e0c0b1c6))
+
+
+
+
+
 # [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
 
 **Note:** Version bump only for package @secret-agent/emulate-chrome-83

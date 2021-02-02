@@ -17,7 +17,9 @@ export function isBinaryInstalled() {
   try {
     const installedVersion = Fs.readFileSync(`${getInstallDirectory()}/version`, 'utf-8').trim();
     const isCurrentVersionValid = compareVersions.compare(installedVersion, version, '>=');
-    if (isCurrentVersionValid) return true;
+    if (!isCurrentVersionValid) {
+      return false;
+    }
   } catch (ignored) {
     return false;
   }

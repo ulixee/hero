@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.5...v1.3.0-alpha.0) (2021-02-02)
+
+
+### Bug Fixes
+
+* **emulators:** safari cookie handling fix ([3507c26](https://github.com/ulixee/secret-agent/commit/3507c2665afd6e94b5f99633e748fa4d455d81db))
+* **replay:** upgrade axios (dependabot) ([2f55df9](https://github.com/ulixee/secret-agent/commit/2f55df902cd7d3cf5e542c57c7df01f869340cf8))
+* added url in comments to show where darwinToMacOsVersionMap was pulled ([ed873b1](https://github.com/ulixee/secret-agent/commit/ed873b11965ab7255e32202b1b9e84d754178d89))
+* added userAgentOptions() to @BrowserEmulatorClassDecorator ([0a2187c](https://github.com/ulixee/secret-agent/commit/0a2187ca3937618aa59f87045e03c34d13ff7cf0))
+* disabled eslint rule for a failing line ([749ae1e](https://github.com/ulixee/secret-agent/commit/749ae1e65b86338ff9666b9e3e7dc9dadf114677))
+* emulators only had partial data ([3dd86db](https://github.com/ulixee/secret-agent/commit/3dd86db74cdc6e3e02afc7556e1ba41716c37293))
+* tweaked a few lint issues ([ad9f17d](https://github.com/ulixee/secret-agent/commit/ad9f17da63bad824a7e2dba8d77c0ec0fe9ea9da))
+* updated some things to work with Slab ([51dada5](https://github.com/ulixee/secret-agent/commit/51dada5d267ec05a6dbe3d1da9f62b4f3754d5a1))
+
+
+### Features
+
+* **client:** add ability to get agent metadata ([55df775](https://github.com/ulixee/secret-agent/commit/55df775b3b9e78db99bc726ae54a683cc701a7e2))
+* **client:** built-in remote + handlers ([bfaa739](https://github.com/ulixee/secret-agent/commit/bfaa739517a458db9dd1bd6374770840eb95b847))
+* **core:** merge session-state and core ([dcc6002](https://github.com/ulixee/secret-agent/commit/dcc6002c2003d981267e51c8dacf5201fe3b9fda))
+* **core:** waitForPaintingStable ([1955b79](https://github.com/ulixee/secret-agent/commit/1955b791ce8a7cf20a679986e63885950efa6813))
+* browser window size now takes into calculation os nav bars ([ab65a65](https://github.com/ulixee/secret-agent/commit/ab65a650e4b63e77ad5e165f7a60e3e024140f66))
+* mv renderingOptions => blockedResourceTypes ([ffa1b74](https://github.com/ulixee/secret-agent/commit/ffa1b74d0b470387ec104027667e8523a51bfa15)), closes [#113](https://github.com/ulixee/secret-agent/issues/113)
+* pull in os-version maps from Slab to reduce chance of stale data ([201b3c9](https://github.com/ulixee/secret-agent/commit/201b3c9d028b798ce4a88ec05fd9833c95d89a0b))
+
+
+### BREAKING CHANGES
+
+* renames “renderingOptions” to “blockedResourceTypes”. Default is now “None”
+
+
+
+
+
 # [1.2.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.4...v1.2.0-alpha.5) (2020-12-29)
 
 
