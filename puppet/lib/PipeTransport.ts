@@ -23,7 +23,8 @@ import IConnectionTransport, {
 
 const { log } = Log(module);
 
-export class PipeTransport extends TypedEventEmitter<IConnectionTransportEvents>
+export class PipeTransport
+  extends TypedEventEmitter<IConnectionTransportEvents>
   implements IConnectionTransport {
   pipeWrite: NodeJS.WritableStream;
   pendingMessage: string;
@@ -56,7 +57,7 @@ export class PipeTransport extends TypedEventEmitter<IConnectionTransportEvents>
   }
 
   private onReadClosed() {
-    log.info('PipeTransport.Closed');
+    log.stats('PipeTransport.Closed');
     this.emit('close');
   }
 

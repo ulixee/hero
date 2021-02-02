@@ -119,9 +119,8 @@ export default class Resource {
         const resource = createResource(resourceMeta, Promise.resolve(coreTab));
 
         if (filter.filterFn) {
-          if (filter.filterFn(resource, done)) {
-            resources.push(resource);
-          }
+          const shouldIncludeResource = await filter.filterFn(resource, done);
+          if (shouldIncludeResource) resources.push(resource);
         } else {
           resources.push(resource);
         }

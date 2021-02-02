@@ -6,6 +6,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import Log from '@secret-agent/commons/Logger';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -17,11 +18,11 @@ const { log } = Log(module);
 
 export default abstract class ConnectionToCore {
   public readonly commandQueue: CoreCommandQueue;
+  public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
 
-  public hostOrError: Promise<string | Error>;
-
   private connectPromise: Promise<Error | null>;
+  private isClosing = false;
 
   private coreSessions: CoreSessions;
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();
@@ -34,31 +35,57 @@ export default abstract class ConnectionToCore {
       this.options.maxConcurrency,
       this.options.agentTimeoutMillis,
     );
+
+    if (this.options.host) {
+      this.hostOrError = Promise.resolve(this.options.host)
+        .then(x => {
+          if (!x.includes('://')) {
+            return `ws://${x}`;
+          }
+          return x;
+        })
+        .catch(err => err);
+    } else {
+      this.hostOrError = Promise.resolve(new Error('No host provided'));
+    }
   }
 
-  protected abstract internalSendRequest(payload: ICoreRequestPayload): void | Promise<void>;
+  protected abstract internalSendRequest(payload: ICoreRequestPayload): Promise<void>;
+  protected abstract createConnection(): Promise<Error | null>;
+  protected abstract destroyConnection(): Promise<any>;
 
   public connect(): Promise<Error | null> {
-    if (this.connectPromise) return this.connectPromise;
-
-    const { promise, id } = this.createPendingResult();
-    this.connectPromise = promise.then(x => this.onConnected(x.data)).catch(err => err);
-    this.internalSendRequest({
-      command: 'connect',
-      args: [this.options],
-      messageId: id,
-    });
+    this.connectPromise ??= this.createConnection()
+      .then(err => {
+        if (err) throw err;
+        return this.internalSendRequestAndWait({
+          command: 'connect',
+          args: [this.options],
+        });
+      })
+      .then(result => this.onConnected(result.data))
+      .catch(err => err);
 
     return this.connectPromise;
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
-    this.commandQueue.clearPending();
-    this.coreSessions.close();
-    if (this.connectPromise || fatalError) {
-      await this.commandQueue.run('disconnect', [fatalError]);
-      this.connectPromise = null;
+    if (this.isClosing) return;
+    this.isClosing = true;
+    const logid = log.stats('ConnectionToCore.Disconnecting');
+
+    this.cancelPendingRequests();
+    if (this.connectPromise) {
+      await this.internalSendRequestAndWait({
+        command: 'disconnect',
+        args: [fatalError],
+      });
     }
+    await this.destroyConnection();
+    log.stats('RemoteConnectionToCore.Disconnected', {
+      parentLogId: logid,
+      sessionId: null,
+    });
   }
 
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,12 +96,7 @@ export default abstract class ConnectionToCore {
     const result = await this.connect();
     if (result) throw result;
 
-    const { promise, id } = this.createPendingResult();
-    await this.internalSendRequest({
-      messageId: id,
-      ...payload,
-    });
-    return promise;
+    return this.internalSendRequestAndWait(payload);
   }
 
   public onMessage(payload: ICoreResponsePayload | ICoreEventPayload): void {
@@ -122,6 +144,25 @@ export default abstract class ConnectionToCore {
     await this.commandQueue.run('logUnhandledError', error);
   }
 
+  protected async internalSendRequestAndWait(
+    payload: Omit<ICoreRequestPayload, 'messageId'>,
+  ): Promise<ICoreResponsePayload> {
+    const { promise, id } = this.createPendingResult();
+    try {
+      await this.internalSendRequest({
+        messageId: id,
+        ...payload,
+      });
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) {
+        this.pendingRequestsById.delete(id);
+        return;
+      }
+      throw error;
+    }
+    return promise;
+  }
+
   protected onEvent(payload: ICoreEventPayload): void {
     const { meta, listenerId, eventArgs } = payload as ICoreEventPayload;
     const session = this.getSession(meta.sessionId);
@@ -136,10 +177,19 @@ export default abstract class ConnectionToCore {
     if (message.isError) {
       const error = new Error(message.data?.message);
       Object.assign(error, message.data);
-      error.stack += `\n${'------CONNECTION'.padEnd(50, '-')}\n${pending.stack}`;
-      pending.reject(error);
+      this.rejectPendingRequest(pending, error);
     } else {
       pending.resolve({ data: message.data, commandId: message.commandId });
+    }
+  }
+
+  protected cancelPendingRequests(): void {
+    this.commandQueue.clearPending();
+    this.coreSessions.close();
+    const pending = [...this.pendingRequestsById.values()];
+    this.pendingRequestsById.clear();
+    for (const entry of pending) {
+      this.rejectPendingRequest(entry, new CanceledPromiseError('Disconnecting from Core'));
     }
   }
 
@@ -152,9 +202,15 @@ export default abstract class ConnectionToCore {
     return this.pendingRequestsById.get(id);
   }
 
+  private rejectPendingRequest(pending: IResolvablePromiseWithId, error: Error): void {
+    error.stack += `\n${'------CONNECTION'.padEnd(50, '-')}\n${pending.stack}`;
+    pending.reject(error);
+  }
+
   private onConnected(
     connectionParams: { maxConcurrency?: number; browserEmulatorIds?: string[] } = {},
   ): void {
+    this.isClosing = false;
     const { maxConcurrency, browserEmulatorIds } = connectionParams;
     if (!this.options.maxConcurrency || maxConcurrency < this.options.maxConcurrency) {
       log.info('Overriding max concurrency with Core value', {

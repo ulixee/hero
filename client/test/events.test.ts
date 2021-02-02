@@ -23,6 +23,9 @@ beforeEach(() => {
         this.onMessage({ data: {}, responseId: messageId });
       }
     }
+
+    protected createConnection = () => Promise.resolve(null);
+    protected destroyConnection = () => Promise.resolve(null);
   }
   testConnection = new TestConnection();
   spy = jest.spyOn<any, any>(testConnection, 'internalSendRequest');

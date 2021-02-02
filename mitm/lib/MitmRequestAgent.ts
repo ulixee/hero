@@ -418,7 +418,7 @@ export default class MitmRequestAgent {
     proxyToServerH2Client.on('stream', this.onHttp2ServerToProxyPush.bind(this, ctx));
 
     proxyToServerH2Client.on('remoteSettings', settings => {
-      log.info('Http2Client.remoteSettings', {
+      log.stats('Http2Client.remoteSettings', {
         sessionId: this.session.sessionId,
         origin,
         settings,
@@ -435,7 +435,7 @@ export default class MitmRequestAgent {
     });
 
     proxyToServerH2Client.on('goaway', args => {
-      log.info('Http2.goaway', {
+      log.stats('Http2.goaway', {
         sessionId: this.session.sessionId,
         origin,
         args,
@@ -444,7 +444,7 @@ export default class MitmRequestAgent {
     });
 
     proxyToServerH2Client.on('altsvc', (alt, altOrigin) => {
-      log.warn('Http2.altsvc', {
+      log.stats('Http2.altsvc', {
         sessionId: this.session.sessionId,
         origin,
         altOrigin,
@@ -453,7 +453,7 @@ export default class MitmRequestAgent {
     });
 
     proxyToServerH2Client.on('origin', origins => {
-      log.warn('Http2.origin', {
+      log.stats('Http2.origin', {
         sessionId: this.session.sessionId,
         origin,
         origins,
@@ -461,7 +461,7 @@ export default class MitmRequestAgent {
     });
 
     proxyToServerH2Client.on('close', () => {
-      log.info('Http2.close', {
+      log.stats('Http2.close', {
         sessionId: this.session.sessionId,
         origin,
       });

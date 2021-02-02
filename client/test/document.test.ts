@@ -53,6 +53,9 @@ describe('document tests', () => {
           ...(data ?? {}),
         });
       }
+
+      protected createConnection = () => Promise.resolve(null);
+      protected destroyConnection = () => Promise.resolve(null);
     }
 
     const handler = new Handler(new Piper());

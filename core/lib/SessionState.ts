@@ -60,6 +60,7 @@ export default class SessionState {
 
   private lastErrorTime?: Date;
   private closeDate?: Date;
+  private isClosing = false;
 
   private websocketMessageIdCounter = 0;
 
@@ -381,7 +382,9 @@ export default class SessionState {
   }
 
   public close(): void {
-    this.logger.info('SessionState.Closing');
+    if (this.isClosing) return;
+    this.isClosing = true;
+    this.logger.stats('SessionState.Closing');
     this.closeDate = new Date();
     this.db.session.close(this.sessionId, this.closeDate);
     LogEvents.unsubscribe(this.logSubscriptionId);

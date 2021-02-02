@@ -1,8 +1,11 @@
 import Core from '@secret-agent/core/index';
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import { Helpers } from '@secret-agent/testing';
 import { Agent, Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
+
+afterAll(Helpers.afterAll);
 
 describe('basic SecretAgent tests', () => {
   it("doesn't connect until an agent is used for a pre-established connection", async () => {
@@ -14,6 +17,9 @@ describe('basic SecretAgent tests', () => {
       async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
         return outgoing(payload);
       }
+
+      protected createConnection = () => Promise.resolve(null);
+      protected destroyConnection = () => Promise.resolve(null);
     }
 
     const handler = new Handler(new Empty());
@@ -43,6 +49,9 @@ describe('basic SecretAgent tests', () => {
           ...(response ?? {}),
         });
       }
+
+      protected createConnection = () => Promise.resolve(null);
+      protected destroyConnection = () => Promise.resolve(null);
     }
     const agent = await new Agent({ connectionToCore: new Piper() });
     await agent.close();

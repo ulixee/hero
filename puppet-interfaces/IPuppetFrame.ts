@@ -8,8 +8,10 @@ export interface IPuppetFrame {
   navigationReason?: string;
   disposition?: string;
   securityOrigin: string;
+  isLoaded: boolean;
   waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
+  canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
   evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
   evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
   toJSON(): object;

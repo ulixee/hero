@@ -5,14 +5,21 @@ import agent, {
   RemoteConnectionToCore,
 } from '@secret-agent/client';
 import CoreProcess from '@secret-agent/core/lib/CoreProcess';
+import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
 
 export * from '@secret-agent/client';
 export default agent;
 
+let coreHost: Promise<string>;
+
 ConnectionFactory.createLocalConnection = (options: IConnectionToCoreOptions) => {
-  const coreHost = CoreProcess.spawn(options);
-  return new RemoteConnectionToCore({
+  coreHost ??= CoreProcess.spawn(options);
+
+  const connection = new RemoteConnectionToCore({
     ...options,
     host: coreHost,
   });
+
+  ShutdownHandler.register(() => connection.disconnect());
+  return connection;
 };

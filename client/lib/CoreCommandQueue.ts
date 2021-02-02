@@ -1,6 +1,7 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);
@@ -49,7 +50,12 @@ export default class CoreCommandQueue {
   }
 
   public clearPending(): void {
-    this.items.length = 0;
+    while (this.items.length) {
+      const next = this.items.shift();
+      const cancel = new CanceledPromiseError(`Canceling pending ${next.command} command`);
+      cancel.stack = next.stack;
+      next.reject();
+    }
   }
 
   // PRIVATE

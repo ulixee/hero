@@ -1,4 +1,4 @@
-import { AddressInfo, ListenOptions } from 'net';
+import { AddressInfo, ListenOptions, Socket } from 'net';
 import WebSocket from 'ws';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
@@ -21,6 +21,7 @@ export default class CoreServer {
     return this.wsServer.clients.size > 0;
   }
 
+  private sockets = new Set<Socket>();
   private serverAddress = createPromise<AddressInfo>();
   private readonly addressHost: string;
   private readonly wsServer: WebSocket.Server;
@@ -30,12 +31,15 @@ export default class CoreServer {
   constructor(addressHost = 'localhost') {
     this.httpServer = new http.Server();
     this.httpServer.on('error', this.onHttpError.bind(this));
+    this.httpServer.on('connection', this.httpConnection.bind(this));
     this.addressHost = addressHost;
     this.wsServer = new WebSocket.Server({ server: this.httpServer });
     this.wsServer.on('connection', this.handleConnection.bind(this));
   }
 
   public listen(options: ListenOptions): Promise<AddressInfo> {
+    if (this.serverAddress.isResolved) return this.serverAddress.promise;
+
     this.httpServer.once('error', this.serverAddress.reject);
     this.httpServer.listen(options, () => {
       this.httpServer.off('error', this.serverAddress.reject);
@@ -46,25 +50,30 @@ export default class CoreServer {
 
   public async close(waitForOpenConnections = true): Promise<void> {
     try {
-      const logid = log.info('CoreServer.ClosingSessions', {
+      const logid = log.stats('CoreServer.Closing', {
         waitForOpenConnections,
         sessionId: null,
       });
 
-      const closeReplayPromises = [...this.wsServer.clients].map(async ws => {
-        if (waitForOpenConnections) {
-          await this.pendingReplaysByWebSocket.get(ws);
-        }
-        if (isOpen(ws)) ws.terminate();
-      });
-
-      await Promise.all([
-        ...closeReplayPromises,
-        new Promise(resolve => {
-          this.httpServer.close(() => setImmediate(resolve));
+      this.httpServer.unref();
+      await Promise.all(
+        [...this.wsServer.clients].map(async ws => {
+          if (waitForOpenConnections) {
+            await this.pendingReplaysByWebSocket.get(ws);
+          }
+          if (isOpen(ws)) {
+            ws.terminate();
+          }
         }),
-      ]);
-      log.info('CoreServer.ClosedSessions', { parentLogId: logid, sessionId: null });
+      );
+
+      for (const socket of this.sockets) {
+        socket.unref();
+        socket.destroy();
+      }
+
+      if (this.httpServer.listening) this.httpServer.close();
+      log.stats('CoreServer.Closed', { parentLogId: logid, sessionId: null });
     } catch (error) {
       log.error('Error closing socket connections', {
         error,
@@ -73,12 +82,21 @@ export default class CoreServer {
     }
   }
 
+  private httpConnection(socket: Socket): void {
+    this.sockets.add(socket);
+    socket.on('close', () => this.sockets.delete(socket));
+  }
+
   private async handleConnection(ws: WebSocket, request: http.IncomingMessage): Promise<void> {
     if (request.url === '/') {
       const connection = Core.addConnection();
       ws.on('message', message => {
         const payload = TypeSerializer.parse(message.toString());
         return connection.handleRequest(payload);
+      });
+
+      ws.on('close', () => {
+        return connection.disconnect();
       });
 
       connection.on('message', async payload => {

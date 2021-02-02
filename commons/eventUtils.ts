@@ -247,24 +247,23 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
 
   private logEvent<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]): void {
     if (this.eventsToLog.has(eventType)) {
-      const data: any = { eventType };
+      let data: any = event;
       if (event) {
-        data.eventBody = event;
         if (typeof event === 'object') {
-          if (data.eventBody.toJSON) {
-            data.eventBody = data.eventBody.toJSON();
+          if ((event as any).toJSON) {
+            data = (event as any).toJSON();
           } else {
-            data.eventBody = { ...event };
-            for (const [key, val] of Object.entries(data.eventBody)) {
+            data = { ...event };
+            for (const [key, val] of Object.entries(data)) {
               if (!val) continue;
               if ((val as any).toJSON) {
-                data.eventBody[key] = (val as any).toJSON();
+                data[key] = (val as any).toJSON();
               }
             }
           }
         }
       }
-      this.logger?.stats('emit', data);
+      this.logger?.stats(`emit:${eventType}`, data);
     }
   }
 }

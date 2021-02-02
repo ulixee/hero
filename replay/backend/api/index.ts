@@ -219,11 +219,15 @@ export default class ReplayApi {
       const replayDir = __dirname.split(`${Path.sep}replay${Path.sep}`).shift();
       this.serverStartPath = Path.resolve(replayDir, 'core', 'start');
     }
-    if (!this.nodePath) this.nodePath = 'node';
+    let needsShell = false;
+    if (!this.nodePath) {
+      this.nodePath = 'node';
+      needsShell = true;
+    }
     console.log('Launching Replay API Server at %s', this.serverStartPath);
     const child = spawn(`${this.nodePath} "${this.serverStartPath}"`, args, {
       stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-      shell: true,
+      shell: needsShell,
       windowsHide: true,
       env: {
         NODE_ENV: process.env.NODE_ENV,

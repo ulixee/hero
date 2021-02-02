@@ -68,9 +68,6 @@ export default class ConnectionToReplay {
   }
 
   public close(error?: Error) {
-    if (error) {
-      log.info('Replay Session Closed', { error, sessionId: this.lookupArgs.sessionId });
-    }
     if (!this.sessionLookup) return;
 
     const db = this.sessionLookup.sessionDb;
@@ -79,6 +76,7 @@ export default class ConnectionToReplay {
     if (db.readonly) {
       setImmediate(() => db.close());
     }
+    log.stats('ConnectionToReplay.Closed', { error, sessionId: this.lookupArgs.sessionId });
   }
 
   private subscribeToTables(): void {
@@ -190,7 +188,7 @@ export default class ConnectionToReplay {
           type: resource.type,
           data: resource.responseData,
           encoding: resource.responseEncoding,
-          status: resource.statusCode,
+          statusCode: resource.statusCode,
           headers: resource.responseHeaders ? JSON.parse(resource.responseHeaders) : {},
         });
       }

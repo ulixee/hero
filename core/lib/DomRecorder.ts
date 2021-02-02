@@ -66,6 +66,8 @@ export default class DomRecorder {
 
     await Promise.all(
       this.puppetPage.frames.map(async frame => {
+        // don't wait for env to be available
+        if (!frame.canEvaluate(true)) return;
         try {
           const results = await frame.evaluate<PageRecorderResultSet>(
             `window.flushPageRecorder()`,

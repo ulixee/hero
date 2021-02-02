@@ -17,7 +17,6 @@ import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
 import WebsocketResource from './WebsocketResource';
@@ -380,10 +379,7 @@ class SessionConnection {
       connectionToCore ?? { isPersistent: false },
     );
 
-    this._coreSession = connection.createSession(options).catch(err => {
-      if (err instanceof CanceledPromiseError) return null;
-      return err;
-    });
+    this._coreSession = connection.createSession(options).catch(err => err);
 
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 

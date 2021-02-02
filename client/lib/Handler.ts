@@ -1,10 +1,10 @@
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
+import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import Agent from './Agent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
-import Signals = NodeJS.Signals;
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
@@ -21,7 +21,7 @@ export default class Handler {
       this.connections.push(connection);
     }
 
-    this.registerShutdownHandlers();
+    ShutdownHandler.register(() => this.close());
     this.registerUnhandledExceptionHandlers();
   }
 
@@ -93,13 +93,7 @@ export default class Handler {
     await Promise.all(this.connections.map(x => x.disconnect(error)));
   }
 
-  public registerShutdownHandlers(): void {
-    for (const signal of ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT']) {
-      process.once(signal as Signals, this.close.bind(this));
-    }
-  }
-
-  public registerUnhandledExceptionHandlers(): void {
+  private registerUnhandledExceptionHandlers(): void {
     process.on('uncaughtExceptionMonitor', this.close.bind(this));
     process.on('unhandledRejection', this.logUnhandledError.bind(this));
   }

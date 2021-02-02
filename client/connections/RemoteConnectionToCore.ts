@@ -1,76 +1,93 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import WebSocket from 'ws';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import { createPromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from './ConnectionToCore';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 
 export default class RemoteConnectionToCore extends ConnectionToCore {
-  private wsConnectPromise: Promise<any>;
-  private webSocket: WebSocket;
+  private webSocketOrError: IResolvablePromise<WebSocket | Error>;
 
   constructor(options: IConnectionToCoreOptions) {
+    if (!options.host) throw new Error('A remote connection to core needs a host parameter!');
     super(options);
-    const host = options.host;
-    if (!host) throw new Error('A remote connection to core needs a host parameter!');
-
-    this.hostOrError = Promise.resolve(host)
-      .then(x => {
-        if (!x.includes('://')) {
-          return `ws://${x}`;
-        }
-        return x;
-      })
-      .catch(err => err);
+    this.disconnect = this.disconnect.bind(this);
   }
 
-  public internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
+  public async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
+    if (!this.webSocketOrError) return;
     const message = TypeSerializer.stringify(payload);
+
+    const webSocket = await this.getWebsocket();
+
+    if (webSocket?.readyState !== WebSocket.OPEN) {
+      throw new CanceledPromiseError('Websocket was not open');
+    }
+
     return new Promise((resolve, reject) =>
-      this.webSocket.send(message, err => {
+      webSocket.send(message, err => {
         if (err) reject(err);
         else resolve();
       }),
     );
   }
 
-  public async disconnect(): Promise<void> {
-    if (this.wsConnectPromise && this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
-      this.wsConnectPromise = null;
-      await super.disconnect();
+  protected async destroyConnection(): Promise<any> {
+    const webSocket = await this.getWebsocket(false);
+    if (webSocket?.readyState === WebSocket.OPEN) {
       try {
-        this.webSocket.terminate();
+        webSocket.off('close', this.disconnect);
+        webSocket.terminate();
       } catch (_) {
         // ignore errors terminating
       }
     }
   }
 
-  public connect(): Promise<Error | null> {
-    if (!this.wsConnectPromise) {
-      this.wsConnectPromise = this.wsConnect().catch(err => err);
-    }
-
-    return this.wsConnectPromise;
-  }
-
-  private async wsConnect(): Promise<void> {
+  protected async createConnection(): Promise<Error | null> {
+    // do this first to see if we can resolve the host
     const hostOrError = await this.hostOrError;
-    if (hostOrError instanceof Error) throw hostOrError;
+    if (hostOrError instanceof Error) return hostOrError;
 
-    this.webSocket = new WebSocket(hostOrError);
-    await new Promise<void>((resolve, reject) => {
-      this.webSocket.on('error', reject);
-      this.webSocket.once('open', () => {
-        this.webSocket.off('error', reject);
-        resolve();
-      });
-    });
-    this.webSocket.once('close', this.disconnect.bind(this));
-    this.webSocket.on('message', message => {
-      const payload = TypeSerializer.parse(message.toString());
-      this.onMessage(payload);
-    });
-
-    await super.connect();
+    if (!this.webSocketOrError) {
+      this.webSocketOrError = connectToWebsocketHost(hostOrError);
+      try {
+        const webSocket = await this.getWebsocket();
+        webSocket.once('close', this.disconnect);
+        webSocket.on('message', message => {
+          const payload = TypeSerializer.parse(message.toString());
+          this.onMessage(payload);
+        });
+      } catch (error) {
+        return error;
+      }
+    }
   }
+
+  private async getWebsocket(throwIfError = true): Promise<WebSocket> {
+    if (!this.webSocketOrError) return null;
+    const webSocketOrError = await this.webSocketOrError.promise;
+    if (webSocketOrError instanceof Error) {
+      if (throwIfError) throw webSocketOrError;
+      return null;
+    }
+    return webSocketOrError;
+  }
+}
+
+function connectToWebsocketHost(host: string): IResolvablePromise<WebSocket | Error> {
+  const resolvable = createPromise<WebSocket | Error>(30e3);
+  const webSocket = new WebSocket(host);
+  function onError(error: Error): void {
+    if (error instanceof Error) resolvable.resolve(error);
+    else resolvable.resolve(new Error(`Error connecting to Websocket host -> ${error}`));
+  }
+  webSocket.once('error', onError);
+  webSocket.once('open', () => {
+    webSocket.off('error', onError);
+    resolvable.resolve(webSocket);
+  });
+  return resolvable;
 }

@@ -10,7 +10,7 @@ const { log } = Log(module);
     process.argv.length > 2 ? JSON.parse(process.argv[2]) : {};
 
   Core.onShutdown = () => {
-    log.info('Exiting Core Process');
+    log.stats('Exiting Core Process');
     process.exit();
   };
   await Core.start(startOptions, !process.env.SA_TEMPORARY_CORE);
