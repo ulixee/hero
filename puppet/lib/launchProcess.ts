@@ -71,7 +71,7 @@ export default function launchProcess(
 
     const stderr = readline.createInterface({ input: launchedProcess.stderr });
     stderr.on('line', line => {
-      log.error(`${exe}.stderr`, { message: line, sessionId: null });
+      log.warn(`${exe}.stderr`, { message: line, sessionId: null });
     });
   }
   let processKilled = false;

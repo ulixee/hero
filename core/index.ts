@@ -99,6 +99,7 @@ export default class Core {
     if (fatalError) {
       log.error('UnhandledError(fatal)', { clientError, sessionId: null });
     } else {
+      if ((clientError as any).handled) return;
       log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
     }
   }
