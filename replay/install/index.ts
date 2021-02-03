@@ -2,7 +2,7 @@
 
 import * as Fs from 'fs';
 import * as Https from 'https';
-import * as TarFs from 'tar-fs';
+import * as Tar from 'tar';
 import * as ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import * as os from 'os';
@@ -46,10 +46,16 @@ if (isBinaryInstalled()) {
     output.write(chunk);
   }
 
+  const installDir = getInstallDirectory();
+  if (!Fs.existsSync(installDir)) Fs.mkdirSync(installDir, { recursive: true });
+
   await new Promise(resolve => {
     Fs.createReadStream(tmpFile)
-      .pipe(createGunzip())
-      .pipe(TarFs.extract(getInstallDirectory()))
+      .pipe(
+        Tar.extract({
+          cwd: installDir,
+        }),
+      )
       .on('finish', resolve);
   });
 
