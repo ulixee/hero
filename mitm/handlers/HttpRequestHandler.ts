@@ -119,6 +119,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
   }
 
   protected onError(kind: string, error: Error): void {
+    if ((error as any).handled) return;
+    (error as any).handled = true;
+
     const isCanceled = error instanceof CanceledPromiseError;
 
     const url = this.context.url.href;
@@ -204,19 +207,23 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
+    const http2Stream = (proxyToClientResponse as Http2ServerResponse).stream;
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
-      if (data && !(proxyToClientResponse as Http2ServerResponse).stream?.destroyed) {
+      if (data && http2Stream?.destroyed !== true) {
         proxyToClientResponse.write(data, error => {
-          if (error) this.onError('ServerToProxy.WriteResponseError', error);
+          if (error && !this.isClientConnectionDestroyed())
+            this.onError('ServerToProxy.WriteResponseError', error);
         });
       }
     }
 
     if (context.cacheHandler.shouldServeCachedData) {
-      proxyToClientResponse.write(context.cacheHandler.cacheData, error => {
-        if (error) this.onError('ServerToProxy.WriteCachedResponseError', error);
-      });
+      if (proxyToClientResponse.socket.destroyed)
+        proxyToClientResponse.write(context.cacheHandler.cacheData, error => {
+          if (error && !this.isClientConnectionDestroyed())
+            this.onError('ServerToProxy.WriteCachedResponseError', error);
+        });
     }
 
     if (serverToProxyResponse instanceof http.IncomingMessage) {
@@ -229,6 +236,14 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.cacheHandler.onResponseEnd();
     context.requestSession.emit('response', MitmRequestContext.toEmittedResource(context));
+  }
+
+  private isClientConnectionDestroyed(): boolean {
+    const proxyToClientResponse = this.context.proxyToClientResponse;
+    return (
+      (proxyToClientResponse as Http2ServerResponse).stream?.destroyed ||
+      proxyToClientResponse.socket?.destroyed
+    );
   }
 
   public static async onRequest(

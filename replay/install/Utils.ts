@@ -50,16 +50,11 @@ function getDistDir() {
     case 'mas':
     case 'darwin':
       return 'mac';
-    case 'freebsd':
-    case 'openbsd':
-    case 'linux':
-      return `linux-unpacked`;
-    case 'win32':
-      return `win-unpacked`;
     default:
       return '';
   }
 }
+
 export function getBinaryPath() {
   const platformPath = getPlatformExecutable();
   return Path.join(getInstallDirectory(), platformPath);

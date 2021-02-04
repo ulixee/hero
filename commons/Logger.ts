@@ -4,7 +4,7 @@ import { inspect } from 'util';
 
 let logId = 0;
 class Log implements ILog {
-  public readonly level: string = process.env.DEBUG ? 'stats' : 'warn';
+  public readonly level: string = process.env.DEBUG ? 'stats' : 'error';
   private readonly module: string;
   private readonly logLevel: number;
   private readonly boundContext: any = {};

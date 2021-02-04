@@ -5,7 +5,7 @@
   "main": "./index.js",
   "dependencies": {
     "progress": "^2.0.3",
-    "tar-fs": "^2.1.0",
+    "tar": "^6.0.5",
     "compare-versions": "^3.6.0",
     "proper-lockfile": "^4.1.1"
   }

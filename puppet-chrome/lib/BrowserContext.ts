@@ -169,7 +169,7 @@ export class BrowserContext
 
         if (url.hostname !== c.domain) return false;
         if (!url.pathname.startsWith(c.path)) return false;
-        if ((url.protocol === 'https:') !== c.secure) return false;
+        if (c.secure === true && url.protocol !== 'https:') return false;
         return true;
       });
   }

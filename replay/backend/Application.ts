@@ -45,6 +45,7 @@ export default class Application {
     await app.whenReady();
     this.registerFileProtocol();
     await this.overlayManager.start();
+    console.log('Launched with args', process.argv);
     this.registrationServer = new ScriptRegistrationServer(this.registerScript.bind(this));
     Menu.setApplicationMenu(generateAppMenu());
 
@@ -55,7 +56,8 @@ export default class Application {
       console.log('Default nodePath provided', nodePath);
       ReplayApi.nodePath = nodePath;
     }
-    if (process.argv.length <= 2 || process.argv.includes('--sa-show-dashboard')) {
+
+    if (!process.argv.includes('--sa-replay')) {
       this.createWindowIfNeeded();
     }
   }
