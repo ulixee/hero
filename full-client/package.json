@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/full-client",
+  "name": "secret-agent",
   "version": "1.3.0-alpha.0",
   "description": "The Web Browser Built for Scraping",
   "main": "./index.js",

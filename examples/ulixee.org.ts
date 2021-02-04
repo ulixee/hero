@@ -1,4 +1,4 @@
-import { Handler, Agent } from '@secret-agent/full-client';
+import { Handler, Agent } from 'secret-agent';
 
 (async () => {
   const handler = new Handler({ maxConcurrency: 2 });

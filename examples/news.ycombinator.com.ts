@@ -1,4 +1,4 @@
-import agent from '@secret-agent/full-client';
+import agent from 'secret-agent';
 
 // process.env.SHOW_BROWSER = 'true';
 
