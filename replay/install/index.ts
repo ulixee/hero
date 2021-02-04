@@ -51,6 +51,7 @@ if (isBinaryInstalled()) {
 
   await new Promise(resolve => {
     Fs.createReadStream(tmpFile)
+      .pipe(createGunzip())
       .pipe(
         Tar.extract({
           cwd: installDir,
