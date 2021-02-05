@@ -9,6 +9,7 @@ import {
   isBinaryInstalled,
   isLocalBuildPresent,
 } from './install/Utils';
+import getResolvable from '~shared/utils/promise';
 
 const replayDir = getInstallDirectory();
 const registrationApiFilepath = `${replayDir}/api.txt`;
@@ -110,31 +111,44 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
 export async function openReplayApp(...extraArgs: string[]) {
   Fs.writeFileSync(registrationApiFilepath, '');
 
+  let child: ChildProcess.ChildProcess;
   if (isLocalBuildPresent()) {
-    await launchReplay(getLocalBuildPath(), ['--local-build-launch', ...extraArgs]);
+    child = await launchReplay(getLocalBuildPath(), ['--local-build-launch', ...extraArgs]);
   } else if (hasLocalReplay) {
     const replayPath = require.resolve('@secret-agent/replay');
-    await launchReplay('yarn electron', [replayPath, '--electron-launch', ...extraArgs], true);
+    child = await launchReplay(
+      'yarn electron',
+      [replayPath, '--electron-launch', ...extraArgs],
+      true,
+    );
   } else if (isBinaryInstalled()) {
-    await launchReplay(getBinaryPath(), ['--binary-launch', ...extraArgs]);
+    child = await launchReplay(getBinaryPath(), ['--binary-launch', ...extraArgs]);
   }
 
+  const registrationComplete = getResolvable<void>();
+  const onPrematureExit = (code, signal) =>
+    registrationComplete.reject(new Error(`Replay shutdown with exit code ${code}: ${signal}`));
+  child.once('exit', onPrematureExit);
+  child.once('error', registrationComplete.reject);
+
   // wait for change
-  await new Promise<void>(resolve => {
-    const watcher = Fs.watch(
-      registrationApiFilepath,
-      { persistent: false, recursive: false },
-      () => {
-        if (resolveHost()) {
-          resolve();
-          watcher.close();
-        }
-      },
-    );
+  const watcher = Fs.watch(registrationApiFilepath, { persistent: false, recursive: false }, () => {
+    if (resolveHost()) {
+      registrationComplete.resolve();
+    }
+  });
+  return registrationComplete.promise.finally(() => {
+    watcher.close();
+    child.off('exit', onPrematureExit);
+    child.off('error', registrationComplete.reject);
   });
 }
 
-function launchReplay(appPath: string, args: string[], needsShell = false): void {
+function launchReplay(
+  appPath: string,
+  args: string[],
+  needsShell = false,
+): ChildProcess.ChildProcess {
   const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const child = ChildProcess.spawn(appPath, args, {
     detached: true,
@@ -143,6 +157,7 @@ function launchReplay(appPath: string, args: string[], needsShell = false): void
     windowsHide: false,
   });
   child.unref();
+  return child;
 }
 
 async function registerScript(data: any): Promise<boolean> {
