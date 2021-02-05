@@ -169,6 +169,15 @@ describe('basic Full Client tests', () => {
     }
   });
 
+  it('should send a friendly message if trying to set cookies before a url is loaded', async () => {
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+
+    await expect(agent.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
+      "Chrome won't allow you to set cookies on a blank tab.",
+    );
+  });
+
   it('can get and set localStorage', async () => {
     const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);

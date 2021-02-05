@@ -354,11 +354,20 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     options?: ISetCookieOptions,
   ): Promise<boolean> {
     await this.navigationsObserver.waitForReady();
+    const url = this.puppetPage.mainFrame.url;
+    if (url === 'about:blank') {
+      throw new Error(`Chrome won't allow you to set cookies on a blank tab.
+
+SecretAgent supports two options to set cookies:
+a) Goto a url first and then set cookies on the activeTab
+b) Use the UserProfile feature to set cookies for 1 or more domains before they're loaded (https://secretagent.dev/docs/advanced/user-profile)
+      `);
+    }
     await this.session.browserContext.addCookies([
       {
         name,
         value,
-        url: this.puppetPage.mainFrame.url,
+        url,
         ...options,
       },
     ]);
