@@ -136,6 +136,7 @@ test('it should override plugins in a browser window', async () => {
       false,
     )) as any,
   ).window;
+
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
     if (debug) console.log(proto, inspect(structure[proto], false, null, true));
     expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);

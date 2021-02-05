@@ -9,7 +9,6 @@ import {
   isBinaryInstalled,
   isLocalBuildPresent,
 } from './install/Utils';
-import getResolvable from '~shared/utils/promise';
 
 const replayDir = getInstallDirectory();
 const registrationApiFilepath = `${replayDir}/api.txt`;
@@ -125,22 +124,26 @@ export async function openReplayApp(...extraArgs: string[]) {
     child = await launchReplay(getBinaryPath(), ['--binary-launch', ...extraArgs]);
   }
 
-  const registrationComplete = getResolvable<void>();
+  let registrationResolve: () => any;
+  let registrationReject: (reason?: any) => any;
+  const registrationComplete = new Promise<void>((resolve, reject) => {
+    registrationResolve = resolve;
+    registrationReject = reject;
+  });
   const onPrematureExit = (code, signal) =>
-    registrationComplete.reject(new Error(`Replay shutdown with exit code ${code}: ${signal}`));
+    registrationReject(new Error(`Replay shutdown with exit code ${code}: ${signal}`));
   child.once('exit', onPrematureExit);
-  child.once('error', registrationComplete.reject);
-
+  child.once('error', registrationReject);
   // wait for change
   const watcher = Fs.watch(registrationApiFilepath, { persistent: false, recursive: false }, () => {
     if (resolveHost()) {
-      registrationComplete.resolve();
+      registrationResolve();
     }
   });
-  return registrationComplete.promise.finally(() => {
+  return registrationComplete.finally(() => {
     watcher.close();
     child.off('exit', onPrematureExit);
-    child.off('error', registrationComplete.reject);
+    child.off('error', registrationReject);
   });
 }
 

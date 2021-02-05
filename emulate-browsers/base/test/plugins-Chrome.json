@@ -60,6 +60,8 @@
     },
     "_$function": "function MimeType() { [native code] }",
     "_$type": "function",
+    "_$invocation": "TypeError: Illegal constructor",
+    "_$value": "function MimeType() { [native code] }",
     "_$flags": "cw"
   },
   "MimeTypeArray": {
@@ -140,6 +142,8 @@
     },
     "_$function": "function MimeTypeArray() { [native code] }",
     "_$type": "function",
+    "_$invocation": "TypeError: Illegal constructor",
+    "_$value": "function MimeTypeArray() { [native code] }",
     "_$flags": "cw"
   },
   "Plugin": {
@@ -202,6 +206,7 @@
         },
         "_$function": "function item() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function item() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -218,6 +223,7 @@
         },
         "_$function": "function namedItem() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function namedItem() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -235,7 +241,9 @@
       "_$type": "constructor"
     },
     "_$function": "function Plugin() { [native code] }",
+    "_$invocation": "TypeError: Illegal constructor",
     "_$type": "function",
+    "_$value": "function Plugin() { [native code] }",
     "_$flags": "cw"
   },
   "PluginArray": {
@@ -280,6 +288,7 @@
         },
         "_$function": "function item() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function item() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -296,6 +305,7 @@
         },
         "_$function": "function namedItem() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function namedItem() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -312,6 +322,7 @@
         },
         "_$function": "function refresh() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function refresh() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -330,7 +341,7 @@
     },
     "_$function": "function PluginArray() { [native code] }",
     "_$invocation": "TypeError: Illegal constructor",
-    "_$value": "function Plugin() { [native code] }",
+    "_$value": "function PluginArray() { [native code] }",
     "_$type": "function",
     "_$flags": "cw"
   }
