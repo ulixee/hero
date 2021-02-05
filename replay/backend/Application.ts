@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import * as Os from 'os';
-import { app, dialog, ipcMain, Menu, protocol } from 'electron';
+import { app, dialog, ipcMain, Menu, protocol, screen } from 'electron';
 import * as Fs from 'fs';
 import OverlayManager from './managers/OverlayManager';
 import generateAppMenu from './menus/generateAppMenu';
@@ -43,6 +43,12 @@ export default class Application {
     this.bindEventHandlers();
 
     await app.whenReady();
+
+    if (screen.getAllDisplays().length > 0) {
+      console.log('No displays are available to launch replay. Quitting');
+      process.exit(1);
+      return;
+    }
     this.registerFileProtocol();
     await this.overlayManager.start();
     console.log('Launched with args', process.argv);
