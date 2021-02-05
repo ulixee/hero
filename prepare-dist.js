@@ -42,6 +42,7 @@ function processPackageJson(packagePath) {
     description: overridesJson.description || packageJson.description,
     main: overridesJson.main || packageJson.main,
     types: overridesJson.types || packageJson.types,
+    exports: overridesJson.exports || packageJson.exports,
     files: overridesJson.files || packageJson.files,
     ...defaults,
     scripts: overridesJson.scripts,
