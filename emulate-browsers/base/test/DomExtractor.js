@@ -1,62 +1,65 @@
 // copied from double-agent. do not modify manually!
 
-module.exports = async function inspect(obj, parentPath, extractKeys = []) {
+function DomExtractor(selfName, pageMeta = {}) {
+  const { saveToUrl, pageUrl, pageHost, pageName } = pageMeta;
   const skipProps = [
     'Fingerprint2',
     'pageQueue',
-    'afterQueueComplete',
-    'extractPropsFromObject',
+    'runDomExtractor',
     'pageLoaded',
     'axios',
     'justAFunction',
   ];
+
   const skipValues = ['innerHTML', 'outerHTML', 'innerText', 'outerText'];
+
   const doNotInvoke = [
     'print',
     'alert',
     'prompt',
     'confirm',
     'open',
+    'close',
     'reload',
     'assert',
     'requestPermission',
     'screenshot',
     'pageLoaded',
+    'delete',
+    'clear',
+    'read',
+
+    'start',
+    'stop',
 
     'write',
     'writeln',
     'replaceWith',
     'remove',
 
-    'window.close',
+    'self.history.back',
+    'self.history.forward',
+    'self.history.go',
+    'self.history.pushState',
+    'self.history.replaceState',
 
-    'window.history.back',
-    'window.history.forward',
-    'window.history.go',
-    'window.history.pushState',
-    'window.history.replaceState',
-  ];
+    'getUserMedia',
+    'requestFullscreen',
+    'webkitRequestFullScreen',
+    'webkitRequestFullscreen',
+    'getDisplayMedia',
+  ].map(x => x.replace(/self\./g, `${selfName}.`));
+
   const doNotAccess = [
-    'window.CSSAnimation.prototype.timeline', // crashes Safari
-    'window.Animation.prototype.timeline', // crashes Safari
-    'window.CSSTransition.prototype.timeline', // crashes Safari
-  ];
-  const loadedObjects = new Map();
-  if (typeof window !== 'undefined') loadedObjects.set(window, 'window');
+    'self.CSSAnimation.prototype.timeline', // crashes Safari
+    'self.Animation.prototype.timeline', // crashes Safari
+    'self.CSSTransition.prototype.timeline', // crashes Safari
+  ].map(x => x.replace(/self\./g, `${selfName}.`));
+
+  const excludedInheritedKeys = ['name', 'length', 'constructor'];
+  const loadedObjects = new Map([[self, selfName]]);
   const hierarchyNav = new Map();
   const detached = {};
-
-  const result = await extractPropsFromObject(obj, parentPath);
-
-  if (extractKeys && extractKeys.length) {
-    const extracted = {};
-    for (const key of extractKeys) {
-      extracted[key] = result[key];
-    }
-    return JSON.stringify({ window: extracted, windowKeys: Object.keys(result) });
-  }
-  // NOTE: need to stringify to make sure this transfers same as it will from a browser window
-  return JSON.stringify({ window: result, detached });
 
   async function extractPropsFromObject(obj, parentPath) {
     let keys = [];
@@ -79,12 +82,14 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       }
     } catch (err) {}
 
-    const protos = await loadProtoHierarchy(obj, parentPath);
-
     const newObj = {
-      _$protos: protos,
+      _$protos: await loadProtoHierarchy(obj, parentPath),
     };
-    if (parentPath.includes('window.document.') && !parentPath.includes('window.document.documentElement') && newObj._$protos.includes('HTMLElement.prototype')) {
+    if (
+      parentPath.includes(`${selfName}.document.`) &&
+      !parentPath.includes(`${selfName}.document.documentElement`) &&
+      newObj._$protos.includes('HTMLElement.prototype')
+    ) {
       newObj._$skipped = 'SKIPPED ELEMENT';
       return newObj;
     }
@@ -109,6 +114,29 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
     if (Object.isSealed(obj)) newObj._$isSealed = true;
     if (!newObj._$protos.length) delete newObj._$protos;
 
+    const inheritedProps = [];
+    if (isNewObject) {
+      let proto = obj;
+      while (!!proto) {
+        proto = Object.getPrototypeOf(proto);
+        if (
+          !proto ||
+          proto === Object ||
+          proto === Object.prototype ||
+          proto === Function ||
+          proto === Function.prototype ||
+          proto === HTMLElement.prototype ||
+          proto === EventTarget.prototype
+        )
+          break;
+        for (const key of Object.getOwnPropertyNames(proto)) {
+          if (!keys.includes(key) && !excludedInheritedKeys.includes(key)) inheritedProps.push(key);
+        }
+      }
+    }
+    // TODO: re-enable inherited properties once we are on stable ground with chrome flags
+    // keys.push(...inheritedProps)
+
     for (const key of keys) {
       if (skipProps.includes(key)) {
         continue;
@@ -119,22 +147,30 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       if (path.endsWith('_GLOBAL_HOOK__')) continue;
 
       const prop = '' + String(key);
-      if (path.startsWith('window.document') &&
-        (typeof key === 'string' && (key.startsWith('child') || key.startsWith('first') || key.startsWith('last') || key.startsWith('next') || key.startsWith('prev')
-          || key === 'textContent' || key === 'text'))
+
+      if (
+        path.startsWith(`${selfName}.document`) &&
+        typeof key === 'string' &&
+        (key.startsWith('child') ||
+          key.startsWith('first') ||
+          key.startsWith('last') ||
+          key.startsWith('next') ||
+          key.startsWith('prev') ||
+          key === 'textContent' ||
+          key === 'text')
       ) {
-        newObj[prop] =  { _$type: 'dom', _$skipped: 'SKIPPED DOM' };
+        newObj[prop] = { _$type: 'dom', _$skipped: 'SKIPPED DOM' };
         continue;
       }
 
-      if (path.startsWith('window.document') && path.split('.').length > 5) {
-        newObj[prop] =  { _$type: 'object', _$skipped: 'SKIPPED DEPTH' };
+      if (path.startsWith(`${selfName}.document`) && path.split('.').length > 5) {
+        newObj[prop] = { _$type: 'object', _$skipped: 'SKIPPED DEPTH' };
         continue;
       }
 
       if (key === 'style') {
         if (isNewObject) {
-          newObj[prop] =  { _$type: 'object', _$skipped: 'SKIPPED STYLE' };
+          newObj[prop] = { _$type: 'object', _$skipped: 'SKIPPED STYLE' };
           continue;
         }
       }
@@ -146,10 +182,10 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       if (doNotAccess.includes(path)) {
         continue;
       }
-
       try {
-        const value = await extractPropValue(obj, key, path);
-        const isOwnProp = obj.hasOwnProperty && obj.hasOwnProperty(key);
+        const isOwnProp =
+          obj.hasOwnProperty && obj.hasOwnProperty(key) && !inheritedProps.includes(key);
+        const value = await extractPropValue(obj, key, path, !isOwnProp);
         if (value && typeof value === 'string' && value.startsWith('REF:') && !isOwnProp) {
           // don't assign here
           //console.log('skipping ref', value);
@@ -194,31 +230,30 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
 
       try {
         let name = getObjectName(proto);
-        hierarchy.push(name);
+        if (name && !hierarchy.includes(name)) hierarchy.push(name);
 
         if (loadedObjects.has(proto)) continue;
 
-        let path = 'window.' + name;
+        let path = `${selfName}.${name}`;
         let topType = name.split('.').shift();
-        if (!(topType in window)) {
+        if (!(topType in self)) {
           path = 'detached.' + name;
         }
 
-        if (!hierarchyNav.has(path)){
+        if (!hierarchyNav.has(path)) {
           hierarchyNav.set(path, {});
           const extracted = await extractPropsFromObject(proto, path);
           hierarchyNav.set(path, extracted);
-          if (!path.includes('window.')) {
+          if (!path.includes(`${selfName}.`)) {
             detached[name] = extracted;
           }
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     }
     return hierarchy;
   }
 
-  async function extractPropValue(obj, key, path) {
+  async function extractPropValue(obj, key, path, isInherited) {
     if (obj === null || obj === undefined || !key) {
       return undefined;
     }
@@ -234,7 +269,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
         didResolve = true;
         clearTimeout(t);
         resolve(p);
-      } catch(err) {
+      } catch (err) {
         if (didResolve) return;
         clearTimeout(t);
         reject(err);
@@ -244,15 +279,18 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
     });
 
     if (
-      value && path !== 'window.document' &&
+      value &&
+      path !== `${selfName}.document` &&
       (typeof value === 'function' || typeof value === 'object' || typeof value === 'symbol')
     ) {
       if (loadedObjects.has(value)) {
-        return 'REF: ' + loadedObjects.get(value);
+        // TODO: re-enable invoking re-used functions once we are on stable ground with chrome flags
+        const shouldContinue = false; //typeof value === 'function' && (isInherited || !path.replace(String(key), '').includes(String(key)));
+        if (!shouldContinue) return 'REF: ' + loadedObjects.get(value);
       }
       // safari will end up in an infinite loop since each plugin is a new object as your traverse
       if (path.includes('.navigator') && path.endsWith('.enabledPlugin')) {
-        return 'REF: window.navigator.plugins.X'
+        return `REF: ${selfName}.navigator.plugins.X`;
       }
       loadedObjects.set(value, path);
     }
@@ -275,29 +313,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
   async function getDescriptor(obj, key, accessException, path) {
     const objDesc = Object.getOwnPropertyDescriptor(obj, key);
 
-    if (!objDesc) {
-      const plainObject = {};
-
-      if (accessException && String(accessException).includes( 'Likely a Promise')) {
-        plainObject._$value = 'Likely a Promise';
-      }
-      else if (accessException) return plainObject;
-      let value;
-      try {
-        value = obj[key];
-      } catch (err) { }
-
-      let type = typeof value;
-      if (value && Array.isArray(value)) type = 'array';
-
-      const functionDetails = await getFunctionDetails(value, obj, key, type, path);
-      plainObject._$type = functionDetails.type;
-      plainObject._$value = getValueString(value, key);
-      plainObject._$function = functionDetails.func;
-      plainObject._$invocation = functionDetails.invocation;
-
-      return plainObject;
-    } else {
+    if (objDesc) {
       let value;
       try {
         value = objDesc.value;
@@ -307,7 +323,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       } catch (err) {}
 
       let type = typeof value;
-      value = getValueString(value, key);
+      value = getJsonUsableValue(value, key);
       const functionDetails = await getFunctionDetails(value, obj, key, type, path);
       type = functionDetails.type;
 
@@ -328,6 +344,27 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
         _$getToStringToString: objDesc.get ? objDesc.get.toString.toString() : undefined,
         _$setToStringToString: objDesc.set ? objDesc.set.toString.toString() : undefined,
       };
+    } else {
+      const plainObject = {};
+
+      if (accessException && String(accessException).includes('Likely a Promise')) {
+        plainObject._$value = 'Likely a Promise';
+      } else if (accessException) return plainObject;
+      let value;
+      try {
+        value = obj[key];
+      } catch (err) {}
+
+      let type = typeof value;
+      if (value && Array.isArray(value)) type = 'array';
+
+      const functionDetails = await getFunctionDetails(value, obj, key, type, path);
+      plainObject._$type = functionDetails.type;
+      plainObject._$value = getJsonUsableValue(value, key);
+      plainObject._$function = functionDetails.func;
+      plainObject._$invocation = functionDetails.invocation;
+
+      return plainObject;
     }
   }
 
@@ -350,8 +387,8 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
               let answer = obj[key]();
               if (answer && answer.on) {
                 answer.on('error', err => {
-                  console.log('Error', err, obj, key)
-                })
+                  console.log('Error', err, obj, key);
+                });
               }
               answer = await answer;
 
@@ -359,7 +396,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
               clearTimeout(c);
               didReply = true;
               resolve(answer);
-            } catch(err) {
+            } catch (err) {
               if (didReply) return;
               didReply = true;
               clearTimeout(c);
@@ -367,7 +404,7 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
             }
           });
         }
-      } catch(err) {
+      } catch (err) {
         invocation = err ? err.toString() : err;
       }
     }
@@ -375,11 +412,11 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
     return {
       type,
       func,
-      invocation: getValueString(invocation),
-    }
+      invocation: func || invocation !== undefined ? getJsonUsableValue(invocation) : undefined,
+    };
   }
 
-  function getValueString(value, key){
+  function getJsonUsableValue(value, key) {
     if (key && skipValues.includes(key)) {
       return 'SKIPPED VALUE';
     }
@@ -387,30 +424,47 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
     try {
       if (value && typeof value === 'symbol') {
         value = '' + String(value);
-      }
-      else if (value && (value instanceof Promise || typeof value.then === 'function'))  {
+      } else if (value && (value instanceof Promise || typeof value.then === 'function')) {
         value = 'Promise';
-      }
-      else if (value && typeof value === 'object') {
+      } else if (value && typeof value === 'object') {
+        const values = [];
+
         if (loadedObjects.has(value)) {
           return 'REF: ' + loadedObjects.get(value);
-        } else {
-          value = String(value);
         }
-      }
-      else if (value && typeof value === 'string') {
-        const url = '${ctx.url.href}';
-        const host = '${ctx.url.host}';
-        while (value.includes(url)) {
-          value = value.replace(url, '<url>')
+
+        if (value.join !== undefined) { // is array
+          for (const prop in value) {
+            values.push(getJsonUsableValue(value[prop]));
+          }
+          return `[${values.join(',')}]`;
         }
-        while (value.includes(host)) {
-          value = value.replace(host, '<host>')
+
+        for (const prop in value) {
+          if (value.hasOwnProperty(prop)) {
+            values.push(prop + ': ' + getJsonUsableValue(value[prop]));
+          }
+        }
+        return `{${values.map(x => x.toString()).join(',')}}`;
+      } else if (typeof(value) === 'function') {
+        return value.toString();
+      } else if (value && typeof value === 'string') {
+        if (pageUrl) {
+          while (value.includes(pageUrl)) {
+            value = value.replace(pageUrl, '<URL>');
+          }
+        }
+        if (pageHost) {
+          while (value.includes(pageHost)) {
+            value = value.replace(pageHost, '<HOST>');
+          }
         }
 
         value = value.replace(/<url>\:\d+\:\d+/g, '<url>:<lines>');
+      } else {
+        return value;
       }
-    } catch(err) {
+    } catch (err) {
       value = err.toString();
     }
     return value;
@@ -429,14 +483,18 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       if (!name) {
         try {
           name = obj.name;
-        } catch(err) {}
+        } catch (err) {}
       }
 
       if (obj.constructor) {
         const constructorName = obj.constructor.name;
 
-        if (constructorName && constructorName !== Function.name) {
-          name = constructorName
+        if (
+          constructorName &&
+          constructorName !== Function.name &&
+          constructorName !== Object.name
+        ) {
+          name = constructorName;
         }
       }
 
@@ -455,4 +513,45 @@ module.exports = async function inspect(obj, parentPath, extractKeys = []) {
       return name + '.prototype';
     } catch (err) {}
   }
-};
+
+  async function runAndSave() {
+    self.addEventListener('unhandledrejection', function(promiseRejectionEvent) {
+      console.log(promiseRejectionEvent);
+    });
+
+    const props = await extractPropsFromObject(self, selfName);
+
+    await fetch(saveToUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        [selfName]: props,
+        detached,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Page-Name': pageName,
+      },
+    });
+  }
+
+  async function run(obj, parentPath, extractKeys = []) {
+    const result = await extractPropsFromObject(obj, parentPath);
+
+    if (extractKeys && extractKeys.length) {
+      const extracted = {};
+      for (const key of extractKeys) {
+        extracted[key] = result[key];
+      }
+      return JSON.stringify({ window: extracted, windowKeys: Object.keys(result) });
+    }
+    // NOTE: need to stringify to make sure this transfers same as it will from a browser window
+    return JSON.stringify({ window: result, detached });
+  }
+
+  this.run = run;
+  this.runAndSave = runAndSave;
+
+  return this;
+}
+
+module.exports = DomExtractor;

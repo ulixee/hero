@@ -104,6 +104,7 @@
         },
         "_$function": "function item() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function item() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -120,6 +121,7 @@
         },
         "_$function": "function namedItem() { [native code] }",
         "_$invocation": "TypeError: Illegal invocation",
+        "_$value": "function namedItem() { [native code] }",
         "_$type": "function",
         "_$flags": "cew"
       },
@@ -327,6 +329,8 @@
       "_$type": "constructor"
     },
     "_$function": "function PluginArray() { [native code] }",
+    "_$invocation": "TypeError: Illegal constructor",
+    "_$value": "function Plugin() { [native code] }",
     "_$type": "function",
     "_$flags": "cw"
   }

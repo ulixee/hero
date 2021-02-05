@@ -5,7 +5,7 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import { GlobalPool } from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
-import inspectScript from './inspectHierarchy';
+import DomExtractor from './DomExtractor';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
@@ -41,11 +41,14 @@ test('it should mimic a chrome object', async () => {
 
   const structure = JSON.parse(
     (await page.mainFrame.evaluate(
-      `(${inspectScript.toString()})(window, 'window', ['chrome'])`,
+      `new (${DomExtractor.toString()})('window').run(window, 'window', ['chrome'])`,
       false,
     )) as any,
   ).window;
   if (debug) console.log(inspect(structure.chrome, false, null, true));
+  // must delete csi's invocation since it's different on each run
+  delete structure.chrome.csi._$invocation;
+  delete chrome.csi._$invocation;
   expect(structure.chrome).toStrictEqual(chrome);
 }, 60e3);
 
