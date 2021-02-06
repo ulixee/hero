@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.0...v1.3.0-alpha.1) (2021-02-06)
+
+
+### Bug Fixes
+
+* some tests were failing ([91217b2](https://github.com/ulixee/secret-agent/commit/91217b2e7d79a0d8a1a9b9c2e388b5dab7af3372))
+
+
+### Features
+
+* replaced chrome 80, 81, 83 emulators with more robust os-level data ([276b269](https://github.com/ulixee/secret-agent/commit/276b26923368c5ed5636f65ad14fb2b3a9f87e9e))
+* **replay:** don’t hang if screen not available ([22edc84](https://github.com/ulixee/secret-agent/commit/22edc8412216a50b98b7cf99f6a32e0bc4687e1d)), closes [#146](https://github.com/ulixee/secret-agent/issues/146)
+* **replay:** fix ubuntu loading dashboard over replay ([a9e633a](https://github.com/ulixee/secret-agent/commit/a9e633a19099d36385cc3cc5e90108543caa9867))
+
+
+
+
+
 # [1.3.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.5...v1.3.0-alpha.0) (2021-02-02)
 
 

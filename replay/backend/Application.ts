@@ -44,7 +44,7 @@ export default class Application {
 
     await app.whenReady();
 
-    if (screen.getAllDisplays().length > 0) {
+    if (screen.getAllDisplays().length === 0) {
       console.log('No displays are available to launch replay. Quitting');
       process.exit(1);
       return;

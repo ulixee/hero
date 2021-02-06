@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.0...v1.3.0-alpha.1) (2021-02-06)
+
+
+### Bug Fixes
+
+* ejs modules not being copied to dist ([606102e](https://github.com/ulixee/secret-agent/commit/606102e1a671b9a3dbab16b4411af8499aed3820))
+* fix some linting in DomExtractor + added it to eslint ignore ([952943f](https://github.com/ulixee/secret-agent/commit/952943ff3f7d50c475dc0c9de78bcf4b206f526a))
+* pulled latest DomExtractor from DA ([a599e05](https://github.com/ulixee/secret-agent/commit/a599e058560732aa6a83f2994d4b3dc9628e2d6f))
+* sessionId should be set on browserEmulator regardless of user Profile ([083260d](https://github.com/ulixee/secret-agent/commit/083260dcfd47037879bf2bec8bed56f47eae8a41))
+* some tests were failing ([91217b2](https://github.com/ulixee/secret-agent/commit/91217b2e7d79a0d8a1a9b9c2e388b5dab7af3372))
+
+
+### Features
+
+* replaced chrome 80, 81, 83 emulators with more robust os-level data ([276b269](https://github.com/ulixee/secret-agent/commit/276b26923368c5ed5636f65ad14fb2b3a9f87e9e))
+* **core:** friendly message setting cookies ([a9d9ecf](https://github.com/ulixee/secret-agent/commit/a9d9ecf054f6e21db037093fc255ae8fc26da3a7)), closes [#142](https://github.com/ulixee/secret-agent/issues/142)
+* **core:** tweak logging for not-really-errors ([bd5f9eb](https://github.com/ulixee/secret-agent/commit/bd5f9ebf38eb58adc14542dc4e32737b0ad8ff9e))
+* **replay:** don’t hang if screen not available ([22edc84](https://github.com/ulixee/secret-agent/commit/22edc8412216a50b98b7cf99f6a32e0bc4687e1d)), closes [#146](https://github.com/ulixee/secret-agent/issues/146)
+* **replay:** fix ubuntu loading dashboard over replay ([a9e633a](https://github.com/ulixee/secret-agent/commit/a9e633a19099d36385cc3cc5e90108543caa9867))
+
+
+
+
+
 # [1.3.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.5...v1.3.0-alpha.0) (2021-02-02)
 
 
