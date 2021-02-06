@@ -48,7 +48,7 @@ We've included a few browser emulators to get you started. These plugins are pre
 | Chrome 80 | @secret-agent/emulate-chrome-80 | chrome-80 |
 | Chrome 83 | @secret-agent/emulate-chrome-83 | chrome-83 |
 
-Note: You can use the full NPM Package Name or Short ID to reference the browser emulator you want when creating a [Handler](./handler).
+Note: You can use the full NPM Package Name or Short ID to reference the browser emulator you want when creating a [Handler](/docs/advanced/handler).
 
 For example, here's how to use chrome-80:
 

@@ -12,13 +12,13 @@ If an obtained Resource is a Websocket, a `WebsocketResource` is returned.
 
 Retrieve the network request used to retrieve this resource.
 
-#### **Returns** [`ResourceRequest`](./resource-request)
+#### **Returns** [`ResourceRequest`](/docs/advanced/resource-request)
 
 ### response
 
 Retrieve the network request used to retrieve this resource.
 
-#### **Returns** [`ResourceResponse`](./resource-response)
+#### **Returns** [`ResourceResponse`](/docs/advanced/resource-response)
 
 ### url
 

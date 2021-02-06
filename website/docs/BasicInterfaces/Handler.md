@@ -49,14 +49,14 @@ Every connection controls how many maximum concurrent Agents should be open at a
 
 Connections can be either:
 
-- options `object`. A set of settings that controls the creation of a [`connection`](../advanced/connection-to-core#options) to a `SecretAgent Core`.
+- options `object`. A set of settings that controls the creation of a [`connection`](/docs/advanced/connection-to-core#options) to a `SecretAgent Core`.
   - host `string`. An optional `hostname:port` url that will be used to establish a connection to a SecretAgent Core running on another machine. If no host is provided, a connection to a "locally" running `Core` will be attempted.
   - maxConcurrency `number`. The max number of Agents to allow to be dispatched and created at the same time. Agents are "active" until the dispatchAgent callback is complete, or the created Agent is closed. If not provided, this number will match the max allowed by a `Core`.
   - agentTimeoutMillis `number`. The number of milliseconds to give each Agent in this connection to complete a session. A TimeoutError will be thrown if this time is exceeded.
   - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
   - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
   - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
-- connectionToCore [`ConnectionToCore`](../advanced/connection-to-core#options). A pre-initialized connection to a `SecretAgent Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
+- connectionToCore [`ConnectionToCore`](/docs/advanced/connection-to-core#options). A pre-initialized connection to a `SecretAgent Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
 
 ```js
 const { Handler } = require('secret-agent');
@@ -85,9 +85,9 @@ Sets default properties to apply to any new Agent created. Accepts any of the co
 
 #### **Returns**: `IAgentCreateOptions`
 
-See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](../advanced/browser-emulators) and [HumanEmulators](../advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
 
-#### **Type**: [`Tab`](./tab)
+#### **Type**: [`Tab`](/docs/basic-interfaces/tab)
 
 ## Methods
 
@@ -99,9 +99,9 @@ Closes all underlying connections. NOTE: this function will "abort" any pending 
 
 ### handler.createAgent*(options)* {#create-agent}
 
-Creates a new [`Agent`](./agent) using one of the `Core` connections initialized in this Handler. If there are no connections with availability (based on `maxConcurrency` setting), the returned promise will not return until one is free.
+Creates a new [`Agent`](/docs/basic-interfaces/agent) using one of the `Core` connections initialized in this Handler. If there are no connections with availability (based on `maxConcurrency` setting), the returned promise will not return until one is free.
 
-NOTE: when using this method, you must call [`agent.close()`](./agent#close) explicitly to allow future Agents to be dispatched or created as needed.
+NOTE: when using this method, you must call [`agent.close()`](/docs/basic-interfaces/agent#close) explicitly to allow future Agents to be dispatched or created as needed.
 
 #### **Arguments**:
 
@@ -112,14 +112,14 @@ NOTE: when using this method, you must call [`agent.close()`](./agent#close) exp
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
-  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 
-See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](../advanced/browser-emulators) and [HumanEmulators](../advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
 
-#### **Returns**: [`Promise<Agent>`](./agent)
+#### **Returns**: [`Promise<Agent>`](/docs/basic-interfaces/agent)
 
 ```js
 const { Handler } = require('secret-agent');

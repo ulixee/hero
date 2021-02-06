@@ -1,7 +1,7 @@
 # How to contribute
 > SecretAgent is an open-source project built by core maintainers and contributors. We want to make it easy for anyone to participate. Contribute to core, build plugins, improve documentation or write a blog post. It all helps SecretAgent on its mission to keep the web open for innovation.
 
-Read the [code of conduct](./code-of-conduct).
+Read the [code of conduct](/docs/contribute/code-of-conduct).
 
 ## Contributing to the Code
 SecretAgent uses a **monorepo** pattern to manage its dependencies and core plugins. To contribute, you'll probably want to to setup the SecretAgent repository locally.

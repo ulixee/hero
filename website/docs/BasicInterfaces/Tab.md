@@ -4,23 +4,23 @@ A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying d
 
 ## Constructor
 
-A default tab is provided in each Agent instance. Navigate by using the [secretAgent.goto](./secret-agent#goto) method.
+A default tab is provided in each Agent instance. Navigate by using the [secretAgent.goto](/docs/basic-interfaces/secret-agent#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [secretAgent.tabs](./secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](./secret-agent#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [secretAgent.tabs](/docs/basic-interfaces/secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](/docs/basic-interfaces/secret-agent#wait-for-new-tab).
 
 ## Properties
 
 ### tab.cookieStorage {#cookie-storage}
 
-Returns a [CookieStorage](../advanced/cookie-storage) instance to get/set/delete Tab cookies.
+Returns a [CookieStorage](/docs/advanced/cookie-storage) instance to get/set/delete Tab cookies.
 
-#### **Type**: [`CookieStorage`](../advanced/cookie-storage)
+#### **Type**: [`CookieStorage`](/docs/advanced/cookie-storage)
 
 ### tab.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document of the tab.
 
-#### **Type**: [`SuperDocument`](../awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### tab.lastCommandId {#lastCommandId}
 
@@ -30,15 +30,15 @@ An execution point that refers to a command run on this Agent instance (`waitFor
 
 ### tab.localStorage <div class="specs"><i>W3C</i></div> {#local-storage}
 
-Returns a reference to the [Storage](../awaited-dom/storage) object managing localStorage for the tab.
+Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the tab.
 
-#### **Type**: [`Storage`](../awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
 ### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
-Returns a reference to the [Storage](../awaited-dom/storage) object managing sessionStorage for the tab.
+Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the tab.
 
-#### **Type**: [`Storage`](../awaited-dom/storage)
+#### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
 ### tab.tabId {#tabid}
 
@@ -54,7 +54,7 @@ The url of the active tab.
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a [Request](../awaited-dom/request) object that can be sent to [tab.fetch(request)](#fetch).
+Returns a constructor for a [Request](/docs/awaited-dom/request) object that can be sent to [tab.fetch(request)](#fetch).
 
 ```js
 const { Request, fetch } = agent;
@@ -67,7 +67,7 @@ const request = new Request(url, {
 const response = await fetch(request);
 ```
 
-#### **Type**: [`Request`](../awaited-dom/request)
+#### **Type**: [`Request`](/docs/awaited-dom/request)
 
 ## Methods
 
@@ -88,7 +88,7 @@ Perform a native "fetch" request in the current tab context.
   - Inbound Body currently supports: `string`, `ArrayBuffer`, `null`.
   - Not supported: `Blob`, `FormData`, `ReadableStream`, `URLSearchParams`
 
-#### **Returns**: [`Promise<Response>`](../awaited-dom/response)
+#### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
 
 ```js
 const url = 'https://dataliberationfoundation.org';
@@ -122,10 +122,10 @@ Perform a native `Window.getComputedStyle` request in the current tab context - 
 
 #### **Arguments**:
 
-- element [`SuperElement`](../awaited-dom/super-element) An element loaded in this tab environment.
+- element [`SuperElement`](/docs/awaited-dom/super-element) An element loaded in this tab environment.
 - pseudoElement `string?` Optional string specifying the pseudo-element to match (eg, ::before, ::after, etc). More information can be found on [w3c](https://www.w3.org/TR/css-pseudo-4/).
 
-#### **Returns**: [`Promise<CssStyleDeclaration>`](../awaited-dom/cssstyledeclaration)
+#### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/awaited-dom/cssstyledeclaration)
 
 ```js
 await agent.goto('https://dataliberationfoundation.org');
@@ -179,7 +179,7 @@ Executes a navigation request for the document associated with the parent Secret
 - locationHref `string` The location to navigate to.
 - timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
 
-#### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
+#### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The loaded resource representing this page.
 
 ### tab.isElementVisible*(element)* {#is-element-visible}
 
@@ -192,7 +192,7 @@ Determines if an element is visible to an end user. This method checks whether a
 
 #### **Arguments**:
 
-- element [`SuperElement`](../awaited-dom/super-element). The element to determine visibility.
+- element [`SuperElement`](/docs/awaited-dom/super-element). The element to determine visibility.
 
 #### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
 
@@ -204,7 +204,7 @@ Reload the currently loaded url.
 
 - timeoutMs `number`. Optional timeout milliseconds. Default `30,000`. A value of `0` will never timeout.
 
-#### **Returns**: [`Promise<Resource>`](../advanced/resource) The loaded resource representing this page.
+#### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The loaded resource representing this page.
 
 ### tab.takeScreenshot*(options?)* {#take-screenshot}
 
@@ -237,7 +237,7 @@ Wait until a specific element is present in the dom.
 
 #### **Arguments**:
 
-- element [`SuperElement`](../awaited-dom/super-element)
+- element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
   - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
@@ -323,14 +323,14 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
 
 - filter `object` Accepts any of the following:
   - url `string | RegExp` A string or regex to match a url on
-  - type [`ResourceType`](../advanced/resource#type) A resource type to filter on
+  - type [`ResourceType`](/docs/advanced/resource#type) A resource type to filter on
   - filterFn `function(resource: Resource, done: Callback): boolean` A function to allow further filtering of returned resources. Return true to include resources, false to exclude. Calling `done` finishes execution.
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `60,000`.
   - sinceCommandId `number`. A `commandId` from which to look for resources.
   - throwIfTimeout `boolean`. Throw an exception if a timeout occurs. Default `true`.
 
-#### **Returns**: [`Promise<Resource[]>`](../advanced/resource)
+#### **Returns**: [`Promise<Resource[]>`](/docs/advanced/resource)
 
 ```js
 const { user, activeTab, document } = agent;
@@ -372,7 +372,7 @@ Waits for the specified number of milliseconds.
 
 ## Events
 
-SecretAgent's [EventTarget](./event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](./event-target).
+SecretAgent's [EventTarget](/docs/basic-interfaces/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/basic-interfaces/event-target).
 
 ### 'resource' {#resource-event}
 
@@ -380,4 +380,4 @@ Emitted for each resource request received by the webpage.
 
 #### **Arguments in callback**:
 
-- [`Resource`](../advanced/resource) | [`WebsocketResource`](../advanced/websocket-resource)
+- [`Resource`](/docs/advanced/resource) | [`WebsocketResource`](/docs/advanced/websocket-resource)

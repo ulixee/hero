@@ -19,7 +19,7 @@ DetachedDOM stands alone outside the context of SecretAgent or BrowserInstance. 
 const fs = require('fs');
 const { DetachedDOM } = require('secret-agent');
 
-const html = fs.readFileSync('./saved.html', 'utf-8');
+const html = fs.readFileSync('/docs/basic-interfaces/saved.html', 'utf-8');
 const document = DetachedDOM.load(html);
 
 console.log(document.title);

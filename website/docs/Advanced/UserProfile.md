@@ -9,7 +9,7 @@ UserProfiles enable you to capture the full browser state of a user after perfor
 
 ## Constructor
 
-This "state" is not instantiated, but retrieved from an Agent instance: [agent.exportUserProfile()](../basic-interfaces/agent#export-profile).
+This "state" is not instantiated, but retrieved from an Agent instance: [agent.exportUserProfile()](/docs/basic-interfaces/agent#export-profile).
 
 State is stored for all domains (origins) that are loaded into a window at the time of export. The exported state is JSON with additional type information for IndexedDB ([typeson](https://github.com/dfahlander/typeson).
 
@@ -35,7 +35,7 @@ const agentWithProfile = await handler.createAgent({
 
 Cookies for all loaded "origins" for the browsing session.
 
-#### **Type**: [`Cookie[]`](./cookie-storage#cookie)
+#### **Type**: [`Cookie[]`](/docs/advanced/cookie-storage#cookie)
 
 ### storage
 

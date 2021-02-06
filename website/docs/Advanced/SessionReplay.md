@@ -4,7 +4,7 @@
 
 #### High Fidelity
 
-Everytime you create a new [Agent](../basic-interfaces/agent), a [Session](./session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, iFrame updates, and everything else we can measure on the page. 
+Everytime you create a new [Agent](/docs/basic-interfaces/agent), a [Session](/docs/advanced/session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, iFrame updates, and everything else we can measure on the page. 
 
 Replay "reconstructs" your page using all these events from every single micro-tick that occurred during your scrape.
 

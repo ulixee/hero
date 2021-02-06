@@ -21,17 +21,17 @@ const { Agent: FullAgent } = require('@secret-agent');
 There are 2 built-in connections in SecretAgent:
 
 - `Default` - instantiates and connects to a locally install SecretAgent `Core`
-- `RemoteConnectionToCore` - takes a host to dial over tcp. See more [here](./remote)
+- `RemoteConnectionToCore` - takes a host to dial over tcp. See more [here](/docs/advanced/remote)
 
 
 ### Configuration {#configuration}
 
-When you provide a connectionToCore to a [Handler](../basic-interfaces/handler) or [Agent](../basic-interfaces/agent), SecretAgent will accept either an `options` object or a `RemoteConnectionToCore` instance.
+When you provide a connectionToCore to a [Handler](/docs/basic-interfaces/handler) or [Agent](/docs/basic-interfaces/agent), SecretAgent will accept either an `options` object or a `RemoteConnectionToCore` instance.
 
 The following methods allow you to configure the `connectionToCore`
-- [agent.configure()](../basic-interfaces/agent#configure) - apply the connection to the default agent, or to a an agent constructed prior to the first connection.
-- [new Agent()](../basic-interfaces/agent#constructor) - the new agent will use this connection.
-- [new Handler(...connections)](../basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.  
+- [agent.configure()](/docs/basic-interfaces/agent#configure) - apply the connection to the default agent, or to a an agent constructed prior to the first connection.
+- [new Agent()](/docs/basic-interfaces/agent#constructor) - the new agent will use this connection.
+- [new Handler(...connections)](/docs/basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.  
 
 
 ### Options {#options}

@@ -34,7 +34,7 @@ yarn add secret-agent
 
 When you install SecretAgent, it also downloads a recent version of Chromium and an app call [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions.
 
-More details about installation can be found on the [troubleshooting](../help/troubleshooting) page.
+More details about installation can be found on the [troubleshooting](/docs/help/troubleshooting) page.
 
 ## Usage Example
 

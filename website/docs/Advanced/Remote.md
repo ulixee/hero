@@ -23,7 +23,7 @@ const Core = require('@secret-agent/core');
 
 ## Setting Up the Client
 
-Your [Agent](../basic-interfaces/agent) or [Handler](../basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
+Your [Agent](/docs/basic-interfaces/agent) or [Handler](/docs/basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
 
 NOTE: you can use the `@secret-agent/client` npm package if you don't want to install a full browser engine on the machine coordinating all your scrapes. That example is shown below.
 

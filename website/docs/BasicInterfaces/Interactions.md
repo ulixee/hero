@@ -12,7 +12,7 @@ Multiple Interactions can be passed through as multiple arguments:
 agent.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
-The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](../advanced-functionality/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
+The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](/docs/advanced/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
 
 Interaction Commands fall into three broad categories:
 
@@ -32,7 +32,7 @@ Interaction Commands fall into three broad categories:
 #### **MousePosition**:
 Every mouse command include a [`MousePosition`](#mouseposition) value, which specifies where the interaction takes place. It accepts three possible options:
 - `[x, y]` These are pixels relative to the top-left corner of the viewport.
-- [`SuperElement`](../awaited-dom/super-element) Any element from the AwaitedDOM, which are translated into x/y coordinates.
+- [`SuperElement`](/docs/awaited-dom/super-element) Any element from the AwaitedDOM, which are translated into x/y coordinates.
 - `null` Leave the mouse in its current position.
 
 For example, here's how to hover over a link:
@@ -65,8 +65,8 @@ Import KeyboardKeys from IKeyboardLayoutUS for all valid KeyboardChar values (e.
 
 ## The Three WaitFor Commands
 
-- waitForNode: [`SuperNode`](../awaited-dom/super-node)
-- waitForElementVisible: [`SuperElement`](../awaited-dom/super-element)
+- waitForNode: [`SuperNode`](/docs/awaited-dom/super-node)
+- waitForElementVisible: [`SuperElement`](/docs/awaited-dom/super-element)
 - waitForMillis: `number`
 
 Read [this StackOverflow discussion](https://stackoverflow.com/questions/9979172/difference-between-node-object-and-element-object) on the difference between Nodes and Elements.

@@ -16,25 +16,25 @@ An Agent instance can be thought of as a single user-browsing session. A default
 
 #### Replayable
 
-An instance has a [replayable](../advanced/session-replay)&nbsp;[Session](../advanced/session) that will record all commands, dom changes, interaction and page events.
+An instance has a [replayable](/docs/advanced/session-replay)&nbsp;[Session](/docs/advanced/session) that will record all commands, dom changes, interaction and page events.
 
 #### Lightweight
 
-Instances are very lightweight, sharing a pool of browsers underneath. To manage concurrent scrapes in a single script, you can create one Agent for each scrape, or manage load and concurrency with a [Handler](./handler).
+Instances are very lightweight, sharing a pool of browsers underneath. To manage concurrent scrapes in a single script, you can create one Agent for each scrape, or manage load and concurrency with a [Handler](/docs/basic-interfaces/handler).
 
 #### Single Active Tab
 
-Agent instances can have multiple [Tabs](./tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable).
+Agent instances can have multiple [Tabs](/docs/basic-interfaces/tab), but only a single tab can be focused at a time. Clicks and other user interaction will go to the active tab (interacting with multiple tabs at once by a single user is easily detectable).
 
 #### Sandboxed
 
-Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](../advanced/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
+Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/advanced/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Constructor
 
 ### new Agent*(options)* {#constructor}
 
-Creates a new sandboxed browser instance with [unique user session and fingerprints](../overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
+Creates a new sandboxed browser instance with [unique user session and fingerprints](/docs/overview/basic-concepts). Or pass in an existing UserProfile to reconstruct a previously used user session.
 
 You can optionally await an instance (or constructor) to cause the connection to the underlying SecretAgent to be initialized. If you don't await, the connection will be established on the first call.
 
@@ -59,7 +59,7 @@ const { Agent } = require('secret-agent');
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
-  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
@@ -70,15 +70,15 @@ const { Agent } = require('secret-agent');
 
 Returns a reference to the currently active tab.
 
-#### **Type**: [`Tab`](./tab)
+#### **Type**: [`Tab`](/docs/basic-interfaces/tab)
 
 ### agent.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document that the active tab contains.
 
-#### **Type**: [`SuperDocument`](../awaited-dom/super-document)
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
-Alias for [activeTab.document](./tab#document)
+Alias for [activeTab.document](/docs/basic-interfaces/tab#document)
 
 ### agent.lastCommandId {#lastCommandId}
 
@@ -86,7 +86,7 @@ An execution point that refers to a command run on this instance (`waitForElemen
 
 #### **Type**: `Promise<number>`
 
-Alias for [activeTab.lastCommandId](./tab#lastCommandId)
+Alias for [activeTab.lastCommandId](/docs/basic-interfaces/tab#lastCommandId)
 
 ### agent.meta {#meta}
 
@@ -94,8 +94,8 @@ Retrieves metadata about the agent configuration:
 
 - sessionId `string`. The session identifier.
 - sessionName `string`. The unique session name that will be visible in Replay.
-- browserEmulatorId `string`. The id of the [Browser Emulator](../advanced/browser-emulators) in use.
-- humanEmulatorId `string`. The id of the [Human Emulator](../advanced/human-emulators) in use.
+- browserEmulatorId `string`. The id of the [Browser Emulator](/docs/advanced/browser-emulators) in use.
+- humanEmulatorId `string`. The id of the [Human Emulator](/docs/advanced/human-emulators) in use.
 - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
 - locale `string`. The configured locale in use (eg, en-US).
 - viewport `IViewport`. The emulated viewport size and location.
@@ -115,7 +115,7 @@ An identifier used for storing logs, snapshots, and other assets associated with
 
 A human-readable identifier of the current Agent session.
 
-You can set this property when calling [Handler.dispatchAgent()](./handler#dipatch-agent) or [Handler.createAgent()](./handler#create-agent).
+You can set this property when calling [Handler.dispatchAgent()](/docs/basic-interfaces/handler#dipatch-agent) or [Handler.createAgent()](/docs/basic-interfaces/handler#create-agent).
 
 #### **Type**: `Promise<string>`
 
@@ -123,7 +123,7 @@ You can set this property when calling [Handler.dispatchAgent()](./handler#dipat
 
 Returns all open browser tabs.
 
-#### **Type**: [`Promise<Tab[]>`](./tab)
+#### **Type**: [`Promise<Tab[]>`](/docs/basic-interfaces/tab)
 
 ### agent.url {#url}
 
@@ -131,25 +131,25 @@ The url of the active tab.
 
 #### **Type**: `Promise<string>`
 
-Alias for [Tab.url](./tab#url)
+Alias for [Tab.url](/docs/basic-interfaces/tab#url)
 
 ### agent.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](./tab#request-type). These objects can be used to run browser-native [tab.fetch](./tab#fetch) requests from the context of the Tab document.
+Returns a constructor for a Request object bound to the `activeTab`. Proxies to [tab.Request](/docs/basic-interfaces/tab#request-type). These objects can be used to run browser-native [tab.fetch](/docs/basic-interfaces/tab#fetch) requests from the context of the Tab document.
 
-#### **Type**: [`Request`](../awaited-dom/request)
+#### **Type**: [`Request`](/docs/awaited-dom/request)
 
-Alias for [Tab.Request](./tab#request-tab)
+Alias for [Tab.Request](/docs/basic-interfaces/tab#request-tab)
 
 ## Methods
 
 ### agent.click*(mousePosition)* {#click}
 
-Executes a click interaction. This is a shortcut for `agent.interact({ click: mousePosition })`. See the [Interactions page](./interactions) for more details.
+Executes a click interaction. This is a shortcut for `agent.interact({ click: mousePosition })`. See the [Interactions page](/docs/basic-interfaces/interactions) for more details.
 
 #### **Arguments**:
 
-- mousePosition [`MousePosition`](./interactions#mouseposition)
+- mousePosition [`MousePosition`](/docs/basic-interfaces/interactions#mouseposition)
 
 #### **Returns**: `Promise`
 
@@ -169,7 +169,7 @@ Close a single Tab. The first opened Tab will become the focused tab.
 
 #### **Returns**: `Promise<void>`
 
-Alias for [Tab.close()](./tab#close)
+Alias for [Tab.close()](/docs/basic-interfaces/tab#close)
 
 ### agent.configure*(options)* {#configure}
 
@@ -182,19 +182,19 @@ Update existing configuration settings.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
-  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](../overview/configuration#blocked-resources).
+  - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to booting up and connecting to a local `Core`.
 
 #### **Returns**: `Promise`
 
-See the [Configuration](../overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](../advanced/browser-emulators) and [HumanEmulators](../advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
 
 ### agent.exportUserProfile*()* {#export-profile}
 
-Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `agent.configure({ userProfile: serialized })`. See the [UserProfile page](../advanced/user-profile) for more details.
+Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `agent.configure({ userProfile: serialized })`. See the [UserProfile page](/docs/advanced/user-profile) for more details.
 
-#### **Returns**: [`Promise<IUserProfile>`](../advanced/user-profile)
+#### **Returns**: [`Promise<IUserProfile>`](/docs/advanced/user-profile)
 
 ### agent.interact*(interaction\[, interaction, ...])* {#interact}
 
@@ -202,15 +202,15 @@ Executes a series of mouse and keyboard interactions.
 
 #### **Arguments**:
 
-- interaction [`Interaction`](./interactions)
+- interaction [`Interaction`](/docs/basic-interfaces/interactions)
 
 #### **Returns**: `Promise`
 
-Refer to the [Interactions page](./interactions) for details on how to construct an interaction.
+Refer to the [Interactions page](/docs/basic-interfaces/interactions) for details on how to construct an interaction.
 
 ### agent.scrollTo*(mousePosition)* {#click}
 
-Executes a scroll interaction. This is a shortcut for `agent.interact({ scroll: mousePosition })`. See the [Interactions page](./interactions) for more details.
+Executes a scroll interaction. This is a shortcut for `agent.interact({ scroll: mousePosition })`. See the [Interactions page](/docs/basic-interfaces/interactions) for more details.
 
 #### **Arguments**:
 
@@ -224,11 +224,11 @@ Executes a keyboard interactions. This is a shortcut for `agent.interact({ type:
 
 #### **Arguments**:
 
-- keyboardInteraction [`KeyboardInteraction`](./interactions#the-four-keyboard-commands)
+- keyboardInteraction [`KeyboardInteraction`](/docs/basic-interfaces/interactions#the-four-keyboard-commands)
 
 #### **Returns**: `Promise`
 
-Refer to the [Interactions page](./interactions) for details on how to construct keyboard interactions.
+Refer to the [Interactions page](/docs/basic-interfaces/interactions) for details on how to construct keyboard interactions.
 
 ### agent.focusTab*(tab)* {#focus-tab}
 
@@ -240,13 +240,13 @@ Bring a tab to the forefront. This will route all interaction (`click`, `type`, 
 
 #### **Returns**: `Promise<void>`
 
-Alias for [Tab.focus()](./tab#focus)
+Alias for [Tab.focus()](/docs/basic-interfaces/tab#focus)
 
 ### agent.waitForNewTab*()* {#wait-for-new-tab}
 
 Wait for a new tab to be created. This can occur either via a `window.open` from within the page javascript, or a Link with a target opening in a new tab or window.
 
-#### **Returns**: [`Promise<Tab>`](./tab)
+#### **Returns**: [`Promise<Tab>`](/docs/basic-interfaces/tab)
 
 ```js
 const url = 'https://dataliberationfoundation.org/nopost';
@@ -270,56 +270,56 @@ Agent instances have aliases to all top-level Tab methods. They will be routed t
 
 ### agent.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
-Alias for [Tab.fetch()](./tab#fetch)
+Alias for [Tab.fetch()](/docs/basic-interfaces/tab#fetch)
 
 ### agent.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#get-computed-style}
 
-Alias for [Tab.getComputedStyle()](./tab#get-computed-style)
+Alias for [Tab.getComputedStyle()](/docs/basic-interfaces/tab#get-computed-style)
 
 ### agent.getJsValue*(path)* {#get-js-value}
 
-Alias for [Tab.getJsValue()](./tab#get-js-value)
+Alias for [Tab.getJsValue()](/docs/basic-interfaces/tab#get-js-value)
 
 ### agent.goBack*(timeoutMs?)*
 
-Alias for [Tab.goBack](./tab#back)
+Alias for [Tab.goBack](/docs/basic-interfaces/tab#back)
 
 ### agent.goForward*(timeoutMs?)*
 
-Alias for [Tab.goForward](./tab#forward)
+Alias for [Tab.goForward](/docs/basic-interfaces/tab#forward)
 
 ### agent.goto*(href, timeoutMs?)* {#goto}
 
-Alias for [Tab.goto](./tab#goto)
+Alias for [Tab.goto](/docs/basic-interfaces/tab#goto)
 
 ### agent.isElementVisible*(element)*
 
-Alias for [Tab.isElementVisible](./tab#is-element-visible)
+Alias for [Tab.isElementVisible](/docs/basic-interfaces/tab#is-element-visible)
 
 ### agent.reload*(timeoutMs?)*
 
-Alias for [Tab.reload](./tab#reload)
+Alias for [Tab.reload](/docs/basic-interfaces/tab#reload)
 
 ### agent.takeScreenshot*(options?)*
 
-Alias for [Tab.takeScreenshot](./tab#take-screenshot)
+Alias for [Tab.takeScreenshot](/docs/basic-interfaces/tab#take-screenshot)
 
 ### agent.waitForPaintingStable*()*
 
-Alias for [Tab.waitForLoad(PaintingStable)](./tab#wait-for-load)
+Alias for [Tab.waitForLoad(PaintingStable)](/docs/basic-interfaces/tab#wait-for-load)
 
 ### agent.waitForResource*(filter, options)*
 
-Alias for [Tab.waitForResource](./tab#wait-for-resource)
+Alias for [Tab.waitForResource](/docs/basic-interfaces/tab#wait-for-resource)
 
 ### agent.waitForElement*(element, options)*
 
-Alias for [Tab.waitForElement](./tab#wait-for-element)
+Alias for [Tab.waitForElement](/docs/basic-interfaces/tab#wait-for-element)
 
 ### agent.waitForLocation*(trigger, options)*
 
-Alias for [Tab.waitForLocation](./tab#wait-for-location)
+Alias for [Tab.waitForLocation](/docs/basic-interfaces/tab#wait-for-location)
 
 ### agent.waitForMillis*(millis)*
 
-Alias for [Tab.waitForMillis](./tab#wait-for-millis)
+Alias for [Tab.waitForMillis](/docs/basic-interfaces/tab#wait-for-millis)
