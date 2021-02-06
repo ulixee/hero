@@ -12,6 +12,7 @@ export default interface IBrowserEmulator {
   readonly windowFraming?: IWindowFraming;
   locale: string;
   userProfile: IUserProfile;
+  sessionId?: string;
 
   newDocumentInjectedScripts(): Promise<INewDocumentInjectedScript[]>;
 }

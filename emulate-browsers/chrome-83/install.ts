@@ -1,4 +1,7 @@
 import install from '@secret-agent/emulate-browsers-base/install';
-import pkg from './package.json';
+import config from './config.json';
 
-install(pkg.engine);
+install({
+  browser: config.browserEngine.name,
+  revision: config.browserEngine.revision,
+});

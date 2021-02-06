@@ -77,6 +77,7 @@ export default class Session extends TypedEventEmitter<{
     const BrowserEmulator = BrowserEmulators.getClass(this.browserEmulatorId);
     this.browserEngine = BrowserEmulator.engine;
     this.browserEmulator = new BrowserEmulator();
+    this.browserEmulator.sessionId = this.id;
     if (options.userProfile) {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;

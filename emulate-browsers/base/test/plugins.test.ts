@@ -4,9 +4,9 @@ import Puppet from '@secret-agent/puppet';
 import { GlobalPool } from '@secret-agent/core';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import Log from '@secret-agent/commons/Logger';
-import navigatorJson from '@secret-agent/emulate-chrome-80/data/mac-os-10-14/window-navigator.json';
+import navigatorJson from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-navigator.json';
 import pluginsChrome from './plugins-Chrome.json';
-import inspectScript from './inspectHierarchy';
+import DomExtractor from './DomExtractor';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
@@ -132,10 +132,11 @@ test('it should override plugins in a browser window', async () => {
 
   const structure = JSON.parse(
     (await page.mainFrame.evaluate(
-      `(${inspectScript.toString()})(window, 'window',  ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray','navigator'])`,
+      `new (${DomExtractor.toString()})('window').run(window, 'window',  ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray','navigator'])`,
       false,
     )) as any,
   ).window;
+
   for (const proto of ['Plugin', 'PluginArray', 'MimeType', 'MimeTypeArray']) {
     if (debug) console.log(proto, inspect(structure[proto], false, null, true));
     expect(structure[proto]).toStrictEqual(pluginsChrome[proto]);

@@ -127,7 +127,7 @@ module.exports = {
     '**/dist/**',
     '**/*.md',
     '**/.temp',
-    '**/inspectHierarchy.js',
+    '**/DomExtractor.js',
   ],
   rules: {
     'import/no-named-as-default-member': 'off',

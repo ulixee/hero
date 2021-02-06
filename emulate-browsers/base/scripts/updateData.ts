@@ -6,7 +6,9 @@ const slabBasicsDir = Path.join(slabDataDir, 'basics');
 const dataDir = Path.resolve(__dirname, '../data');
 
 const darwinToMacOsVersionMap = Fs.readFileSync(`${slabBasicsDir}/darwinToMacOsVersionMap.json`, 'utf8');
+const macOsVersionAliasMap = Fs.readFileSync(`${slabBasicsDir}/macOsVersionAliasMap.json`, 'utf8');
 const windowsToWindowsVersionMap = Fs.readFileSync(`${slabBasicsDir}/windowsToWindowsVersionMap.json`, 'utf8');
 
 Fs.writeFileSync(`${dataDir}/darwinToMacOsVersionMap.json`, darwinToMacOsVersionMap);
+Fs.writeFileSync(`${dataDir}/macOsVersionAliasMap.json`, macOsVersionAliasMap);
 Fs.writeFileSync(`${dataDir}/windowsToWindowsVersionMap.json`, windowsToWindowsVersionMap);

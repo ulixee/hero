@@ -5,7 +5,7 @@ import { GlobalPool } from '@secret-agent/core';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
-import inspectHierarchy from './inspectHierarchy';
+import DomExtractor from './DomExtractor';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
 import { proxyFunction } from '../injected-scripts/_proxyUtils';
@@ -40,7 +40,9 @@ test('should be able to override a function', async () => {
     holder,
   };
 
-  const hierarchy = JSON.parse(await inspectHierarchy(win, 'win')).window;
+  // @ts-ignore
+  global.self = this;
+  const hierarchy = JSON.parse(await new DomExtractor('window').run(win, 'win')).window;
   if (debug) console.log(inspect(hierarchy, false, null, true));
   expect(win.holder.tester.doSomeWork('we')).toBe('we nope');
 
@@ -48,7 +50,7 @@ test('should be able to override a function', async () => {
     return `${target.apply(thisArg, args)} yep`;
   });
 
-  const afterHierarchy = JSON.parse(await inspectHierarchy(win, 'win')).window;
+  const afterHierarchy = JSON.parse(await new DomExtractor('window').run(win, 'win')).window;
   if (debug) console.log(inspect(afterHierarchy, false, null, true));
 
   expect(win.holder.tester.doSomeWork('oh')).toBe('oh nope yep');

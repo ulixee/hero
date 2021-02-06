@@ -14,7 +14,7 @@ export default class DomDiffLoader {
 
   public get(operatingSystemId: string) {
     if (!this.dataMap[operatingSystemId]) {
-      const dir = `${this.dataDir}/${operatingSystemId}`;
+      const dir = `${this.dataDir}/as-${operatingSystemId}`;
       const filename = extractFilename(Fs.readdirSync(dir));
       const data = JSON.parse(Fs.readFileSync(`${dir}/${filename}`, 'utf8'));
       this.dataMap[operatingSystemId] = data;
@@ -28,7 +28,7 @@ function extractFilename(filenames: string[]) {
   const localOsVersion = localOsMeta.version;
   const filenameMap = {};
   for (const filename of filenames) {
-    const matches = filename.match(/^dom-diffs-when-using-([a-z-]+)(-([0-9-]+))?.json$/);
+    const matches = filename.match(/^dom-diffs-when-runtime-([a-z-]+)(-([0-9-]+))?.json$/);
     if (!matches) continue;
 
     const [osName, _, osVersion] = matches.slice(1); // eslint-disable-line @typescript-eslint/naming-convention,@typescript-eslint/no-unused-vars
@@ -57,16 +57,23 @@ function findClosestVersionMatch(versionToMatch: string, versions: string[]) {
 
   // there is no guarantee we have an exact match, so let's get the closest
   const versionTree = convertVersionsToTree(versions);
-  const [major, minor] = versionToMatch.split('-');
+  const [major, minor] = versionToMatch.split('-').map(x => Number(x));
 
   const majors = Object.keys(versionTree).map(x => Number(x));
-  const majorMatch = getClosestNumberMatch(Number(major), majors);
+  const majorMatch = getClosestNumberMatch(major, majors);
   let versionMatch = `${majorMatch}`;
 
   if (minor) {
     const minors = Object.keys(versionTree[majorMatch]).map(x => Number(x));
-    const minorMatch = getClosestNumberMatch(Number(minor), minors);
+    const minorMatch = getClosestNumberMatch(minor, minors);
     versionMatch += `-${minorMatch}`;
+  } else if (!versions.includes(versionMatch)) {
+    const minors = Object.keys(versionTree[majorMatch]).map(x => Number(x));
+    if (minors.length) {
+      const minorMatch = major > majorMatch ? Math.max(...minors) : Math.min(...minors);
+      versionMatch += `-${minorMatch}`;
+    }
   }
+
   return versions.includes(versionMatch) ? versionMatch : null;
 }

@@ -5,6 +5,7 @@ const Fs = require('fs');
 copyfiles(
   [
     'emulate-browsers/**/data/**',
+    'emulate-browsers/**/config.json',
     'testing/*/**',
     'examples/*.mjs',
     '*client/index.mjs',

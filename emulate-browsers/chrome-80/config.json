@@ -1,0 +1,10 @@
+{
+  "browserId": "chrome-80-0",
+  "browserEngine": {
+    "id": "chromium-80-0",
+    "name": "chromium",
+    "revision": "722234",
+    "features": ["headless"]
+  },
+  "marketshare": 0.4
+}

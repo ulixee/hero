@@ -3,7 +3,7 @@ import * as Fs from 'fs';
 export default class DataLoader {
   private readonly dataDir: string;
   private readonly type: string;
-  private dataMap: {} = {};
+  private dataMap: { [operatingSystemId: string]: any } = {};
 
   constructor(dataDir: string, type: string) {
     this.dataDir = dataDir;
@@ -12,7 +12,7 @@ export default class DataLoader {
 
   public get(operatingSystemId: string) {
     if (!this.dataMap[operatingSystemId]) {
-      const path = `${this.dataDir}/${operatingSystemId}/${this.type}.json`;
+      const path = `${this.dataDir}/as-${operatingSystemId}/${this.type}.json`;
       const data = JSON.parse(Fs.readFileSync(path, 'utf8'));
       this.dataMap[operatingSystemId] = data;
     }

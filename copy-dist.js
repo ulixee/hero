@@ -9,6 +9,7 @@ copyfiles(
     '-e "build-dist/**"',
     '-e "mitm-socket/dist"',
     'emulate-browsers/**/data/**',
+    'emulate-browsers/**/data/config.json',
     'mitm-socket/lib/*',
     '**/.gitignore',
     '**/.npmignore',

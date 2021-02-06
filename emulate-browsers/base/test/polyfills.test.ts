@@ -7,7 +7,7 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import { GlobalPool } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
-import inspectScript from './inspectHierarchy';
+import DomExtractor from './DomExtractor';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 
 const { log } = Log(module);
@@ -94,6 +94,8 @@ test('it should be able to add polyfills', async () => {
     _$type: 'function',
     _$function: 'function ObjectTest() { [native code] }',
     _$flags: 'cw',
+    _$value: 'function ObjectTest() { [native code] }',
+    _$invocation: "TypeError: Cannot read property '0' of undefined",
   };
   const chromeProperty = {
     _$flags: 'ce',
@@ -122,7 +124,7 @@ test('it should be able to add polyfills', async () => {
   await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
 
   const json = await page.mainFrame.evaluate(
-    `(${inspectScript.toString()})(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
+    `new (${DomExtractor.toString()})('window').run(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
     false,
   );
   const result = JSON.parse(json as any);
