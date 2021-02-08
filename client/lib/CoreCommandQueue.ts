@@ -50,12 +50,7 @@ export default class CoreCommandQueue {
   }
 
   public clearPending(): void {
-    while (this.items.length) {
-      const next = this.items.shift();
-      const cancel = new CanceledPromiseError(`Canceling pending ${next.command} command`);
-      cancel.stack = next.stack;
-      next.reject();
-    }
+    this.items.length = 0;
   }
 
   // PRIVATE
