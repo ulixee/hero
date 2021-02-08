@@ -164,6 +164,40 @@ test('should not recurse the toString function', async () => {
   expect(isHeadless).toBe(false);
 });
 
+test('should properly maintain stack traces in toString', async () => {
+  const agent = await handler.createAgent();
+  await agent.goto(`${koaServer.baseUrl}`);
+  const tabId = await agent.activeTab.tabId;
+  const sessionId = await agent.sessionId;
+  const tab = Session.getTab({ tabId, sessionId });
+  const page = tab.puppetPage;
+  await page.evaluate(`(() => {
+      window.hasProperStackTrace = apiFunction => {
+        try {
+          Object.create(apiFunction).toString(); // native throws an error
+          return { stack: "Didn't Throw" };
+        } catch (error) {
+          return {
+            stack: error.stack,
+            name: error.constructor.name
+          };
+        }
+      };
+  })();`);
+
+  const fnStack = await page.evaluate<any>(
+    `window.hasProperStackTrace(Function.prototype.toString)`,
+  );
+  expect(fnStack.stack.split('\n').length).toBeGreaterThan(1);
+  expect(fnStack.name).toBe('TypeError');
+  expect(fnStack.stack.split('\n')[1]).toContain('at Function.toString');
+
+  const fnStack2 = await page.evaluate<any>(`window.hasProperStackTrace(() => {})`);
+  expect(fnStack2.stack.split('\n').length).toBeGreaterThan(1);
+  expect(fnStack2.name).toBe('TypeError');
+  expect(fnStack2.stack.split('\n')[1]).toContain('at Function.toString');
+});
+
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
   const agent = await handler.createAgent();
