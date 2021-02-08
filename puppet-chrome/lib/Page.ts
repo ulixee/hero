@@ -129,6 +129,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       'websocket-frame',
       'websocket-handshake',
       'resource-will-be-requested',
+      'resource-loaded',
+      'resource-failed',
     ] as const) {
       this.networkManager.on(event, this.emit.bind(this, event));
     }

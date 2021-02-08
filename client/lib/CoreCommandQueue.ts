@@ -1,7 +1,6 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);

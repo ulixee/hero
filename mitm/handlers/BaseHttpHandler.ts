@@ -35,7 +35,7 @@ export default abstract class BaseHttpHandler {
 
     try {
       // track request
-      session.trackResource(this.context);
+      session.trackResourceRedirects(this.context);
       session.emit('request', MitmRequestContext.toEmittedResource(this.context));
 
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);

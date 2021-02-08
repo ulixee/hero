@@ -259,6 +259,12 @@ export default class SessionState {
     return resource;
   }
 
+  public getBrowserRequestResources(
+    browserRequestId: string,
+  ): { resourceId: number; url: string }[] {
+    return this.browserRequestIdToResources[browserRequestId];
+  }
+
   public resourceEventToMeta(
     tabId: string,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,

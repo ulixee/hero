@@ -44,7 +44,12 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   };
 
   public requestAgent: MitmRequestAgent;
-  public requests: IHttpResourceLoadDetails[] = [];
+  public requestedUrls: {
+    url: string;
+    redirectedToUrl: string;
+    redirectChain: string[];
+    responseTime: Date;
+  }[] = [];
 
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
@@ -53,7 +58,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   protected readonly logger: IBoundLog;
 
-  private readonly pendingResources: IPendingResourceLoad[] = [];
+  private readonly resourcesRequestedByBrowser: IResourcePendingBrowserLoad[] = [];
 
   private readonly dns: Dns;
 
@@ -78,7 +83,13 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     const url = ctx.url.href;
     const method = ctx.method;
 
-    let resource = this.getPendingResource(url, method, origin, referer, ctx.isHttp2Push);
+    let resource = this.getResourceRequestedByBrowser(
+      url,
+      method,
+      origin,
+      referer,
+      ctx.isHttp2Push,
+    );
     if (!resource) {
       resource = {
         url,
@@ -86,16 +97,16 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         origin,
         referer,
         isHttp2Push: ctx.isHttp2Push,
-        pendingLoad: createPromise<IPendingResourceLoad>(),
+        isRequestedInBrowser: createPromise<IResourcePendingBrowserLoad>(),
       };
-      this.pendingResources.push(resource);
+      this.resourcesRequestedByBrowser.push(resource);
 
       // new tab anchor navigations have an issue where they won't trigger on the new tab, so we have to make it move forward
       if (
         ctx.requestLowerHeaders['sec-fetch-mode'] === 'navigate' &&
         ctx.requestLowerHeaders['sec-fetch-dest'] === 'document'
       ) {
-        this.registerResource({
+        this.browserRequestedResource({
           browserRequestId: 'fallback-navigation',
           resourceType: 'Document',
           referer,
@@ -109,10 +120,10 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       }
     }
 
-    await resource.pendingLoad.promise;
+    await resource.isRequestedInBrowser.promise;
 
-    const idx = this.pendingResources.indexOf(resource);
-    if (idx >= 0) this.pendingResources.splice(idx, 1);
+    const idx = this.resourcesRequestedByBrowser.indexOf(resource);
+    if (idx >= 0) this.resourcesRequestedByBrowser.splice(idx, 1);
 
     return {
       browserRequestId: resource.browserRequestId,
@@ -124,16 +135,18 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     };
   }
 
-  public registerResource(params: Omit<IPendingResourceLoad, 'pendingLoad'>): void {
+  public browserRequestedResource(
+    params: Omit<IResourcePendingBrowserLoad, 'isRequestedInBrowser'>,
+  ): void {
     if (this.isClosing) return;
 
     this.browserRequestIdToTabId.set(params.browserRequestId, params.tabId);
     const { url, method, referer, origin } = params;
 
-    let resource = this.getPendingResource(url, method, origin, referer);
+    let resource = this.getResourceRequestedByBrowser(url, method, origin, referer);
 
     // don't re-resolve same asset
-    if (resource?.pendingLoad?.isResolved) resource = null;
+    if (resource?.isRequestedInBrowser?.isResolved) resource = null;
 
     if (!resource) {
       resource = {
@@ -141,9 +154,9 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
         method,
         origin,
         referer,
-        pendingLoad: createPromise<IPendingResourceLoad>(),
-      } as IPendingResourceLoad;
-      this.pendingResources.push(resource);
+        isRequestedInBrowser: createPromise<IResourcePendingBrowserLoad>(),
+      } as IResourcePendingBrowserLoad;
+      this.resourcesRequestedByBrowser.push(resource);
     }
 
     resource.tabId = params.tabId;
@@ -152,39 +165,62 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     resource.resourceType = params.resourceType;
     resource.hasUserGesture = params.hasUserGesture;
     resource.isUserNavigation = params.isUserNavigation;
-    resource.pendingLoad.resolve(resource);
+    resource.isRequestedInBrowser.resolve(resource);
   }
 
-  public trackResource(resource: IHttpResourceLoadDetails): void {
-    this.requests.push(resource);
-    const redirect = this.requests.find(x => x.redirectedToUrl === resource.url.href);
-    resource.isFromRedirect = !!redirect;
-    if (redirect) {
-      resource.previousUrl = redirect.url.href;
-      resource.firstRedirectingUrl = redirect.url.href;
-      if (redirect.isFromRedirect) {
-        const seen = new Set();
-        const findRequest = (req): IHttpResourceLoadDetails | undefined => {
-          return this.requests.find(x => x.redirectedToUrl === req.url.href);
-        };
-        let prev = redirect;
-        while (prev.isFromRedirect) {
-          prev = findRequest(prev);
-          if (seen.has(prev)) break;
-          seen.add(prev);
-          if (!prev) break;
-        }
-        if (prev) {
-          resource.firstRedirectingUrl = prev.url.href;
-        }
-      }
+  public browserRequestFailed(event: {
+    resource: IHttpResourceLoadDetails;
+    tabId: string;
+    loadError: Error;
+  }): void {
+    const match =
+      this.resourcesRequestedByBrowser.find(
+        x => x.browserRequestId === event.resource.browserRequestId,
+      ) ??
+      this.getResourceRequestedByBrowser(
+        event.resource.url.href,
+        event.resource.method,
+        event.resource.requestHeaders.Origin as string,
+        event.resource.requestHeaders.Referer as string,
+      );
+    if (match) {
+      match.resourceType = event.resource.resourceType;
+      match.isRequestedInBrowser.reject(event.loadError);
+    } else {
+      log.warn('BrowserViewOfResourceLoad::Failed', {
+        sessionId: this.sessionId,
+        ...event,
+      });
     }
   }
 
-  public lookupDns(host: string): Promise<string> {
+  public trackResourceRedirects(resource: IHttpResourceLoadDetails): void {
+    const resourceRedirect = {
+      url: resource.url.href,
+      redirectedToUrl: resource.redirectedToUrl,
+      responseTime: resource.responseTime,
+      redirectChain: [],
+    };
+    this.requestedUrls.push(resourceRedirect);
+
+    const redirect = this.requestedUrls.find(
+      x =>
+        x.redirectedToUrl === resourceRedirect.url &&
+        resource.requestTime.getTime() - x.responseTime.getTime() < 5e3,
+    );
+    resource.isFromRedirect = !!redirect;
+    if (redirect) {
+      const redirectChain = [redirect.url, ...redirect.redirectChain];
+      resource.previousUrl = redirectChain[0];
+      resource.firstRedirectingUrl = redirectChain[redirectChain.length - 1];
+      resourceRedirect.redirectChain = redirectChain;
+    }
+  }
+
+  public async lookupDns(host: string): Promise<string> {
     if (this.dns) {
       try {
-        return this.dns.lookupIp(host);
+        return await this.dns.lookupIp(host);
       } catch (error) {
         log.error('DnsLookup.Error', {
           sessionId: this.sessionId,
@@ -203,8 +239,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   public close(): void {
     const logid = this.logger.stats('MitmRequestSession.Closing');
     this.isClosing = true;
-    for (const pending of this.pendingResources) {
-      pending.pendingLoad.reject(
+    for (const pending of this.resourcesRequestedByBrowser) {
+      pending.isRequestedInBrowser.reject(
         new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
       );
     }
@@ -291,14 +327,14 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return [host, websocketKey].join(',');
   }
 
-  private getPendingResource(
+  private getResourceRequestedByBrowser(
     url: string,
     method: string,
     origin: string,
     referer: string,
     isHttp2Push?: boolean,
-  ): IPendingResourceLoad | null {
-    const matches = this.pendingResources.filter(x => {
+  ): IResourcePendingBrowserLoad | null {
+    const matches = this.resourcesRequestedByBrowser.filter(x => {
       return x.url === url && x.method === method;
     });
 
@@ -376,6 +412,10 @@ export interface IRequestSessionResponseEvent extends IRequestSessionRequestEven
   body: Buffer;
   redirectedToUrl?: string;
   executionMillis: number;
+  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserLoadFailure?: string;
+  browserBlockedReason?: string;
+  browserCanceled?: boolean;
 }
 
 export interface IRequestSessionRequestEvent {
@@ -404,12 +444,12 @@ interface ILoadedResource {
   documentUrl: string;
 }
 
-interface IPendingResourceLoad {
+interface IResourcePendingBrowserLoad {
   url: string;
   method: string;
   origin: string;
   referer: string;
-  pendingLoad: IResolvablePromise<IPendingResourceLoad>;
+  isRequestedInBrowser: IResolvablePromise<IResourcePendingBrowserLoad>;
   tabId?: string;
   browserRequestId?: string;
   resourceType?: ResourceType;

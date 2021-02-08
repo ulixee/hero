@@ -58,6 +58,34 @@ describe('basic Navigation tests', () => {
     timeoutResolve();
   });
 
+  it('can load a cached page multiple times', async () => {
+    const startingUrl = `${koaServer.baseUrl}/etag`;
+    koaServer.get('/etag', ctx => {
+      ctx.set('ETag', `W/\\"d02-48a7cf4b62c40\\"`);
+      ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
+      ctx.body = `<html><body>
+<img src="/img.jpeg"/>
+<a href="/etagPage">Etag Page</a>
+</body></html>`;
+    });
+    koaServer.get('/img', async ctx => {
+      ctx.set('ETag', `W/\\"d02-48a7cf4b62c41\\"`);
+      ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
+      ctx.body = await getLogo();
+    });
+    const { tab } = await createSession();
+
+    for (let i = 0; i < 10; i += 1) {
+      await tab.goto(startingUrl);
+      await tab.waitForLoad('PaintingStable');
+      const hrefAttribute = await tab.execJsPath(['document', ['querySelector', 'a'], 'href']);
+      expect(hrefAttribute.value).toBe(`${koaServer.baseUrl}/etagPage`);
+    }
+
+    const resources = tab.sessionState.getResources(tab.id);
+    expect(resources).toHaveLength(20);
+  });
+
   it('handles page reloading itself', async () => {
     const startingUrl = `${koaServer.baseUrl}/reload`;
     const { tab } = await createSession();
