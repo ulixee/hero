@@ -61,7 +61,7 @@ import { Handler } from 'secret-agent';
 
       // add a name to each agent so we can find each scrape on Replay
       const agentOptions = { name };
-      handler.dispatchAgent(getDatasetCost, link, agentOptions);
+      handler.dispatchAgent(getDatasetCost, dataset, agentOptions);
     }
   });
 
@@ -72,7 +72,7 @@ import { Handler } from 'secret-agent';
 
 // my data gets passed in once an agent is available
 async function getDatasetCost(agent, dataset) {
-  const { name, href } = dataset;
+  let { name, href } = dataset;
   if (!href.startsWith('http')) href = `https://ulixee.org${href}`;
   console.log(href);
   await agent.goto(href);
