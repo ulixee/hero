@@ -62,7 +62,7 @@ Connections can be either:
 const { Handler } = require('secret-agent');
 
 (async () => {
-  const remote1 = new RemoteConnectionToCore({
+  const remote = new RemoteConnectionToCore({
     host: '10.10.1.1:1588',
   });
   await remote.connect();

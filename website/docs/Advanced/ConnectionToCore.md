@@ -23,16 +23,15 @@ There are 2 built-in connections in SecretAgent:
 - `Default` - instantiates and connects to a locally install SecretAgent `Core`
 - `RemoteConnectionToCore` - takes a host to dial over tcp. See more [here](/docs/advanced/remote)
 
-
 ### Configuration {#configuration}
 
 When you provide a connectionToCore to a [Handler](/docs/basic-interfaces/handler) or [Agent](/docs/basic-interfaces/agent), SecretAgent will accept either an `options` object or a `RemoteConnectionToCore` instance.
 
 The following methods allow you to configure the `connectionToCore`
+
 - [agent.configure()](/docs/basic-interfaces/agent#configure) - apply the connection to the default agent, or to a an agent constructed prior to the first connection.
 - [new Agent()](/docs/basic-interfaces/agent#constructor) - the new agent will use this connection.
-- [new Handler(...connections)](/docs/basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.  
-
+- [new Handler(...connections)](/docs/basic-interfaces/handler#constructor) - a handler takes one or more coreClientConnection options or instances.
 
 ### Options {#options}
 
@@ -46,3 +45,19 @@ The provided settings configure the connection to `Core`. Note: some configurati
   - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
   - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
 - connection `CoreClientConnection`. A pre-initialized connection to a `SecretAgent Core`. You can use this option to pre-check your connection to a remote connection, or to provide customization to the connection.
+
+## Methods
+
+### connection.connect*()* {#connect}
+
+Initializes the connection to the specified core. You can use this function if you would like to pre-connect to your remote host and ensure connections are properly established before continuing.
+
+NOTE: this will be automatically called when you use a Handler or Agent and pass in this connection.
+
+#### **Returns**: `Promise`
+
+### connection.disconnect*()* {#disconnect}
+
+Closes the connection and stops all pending requests.
+
+#### **Returns**: `Promise`
