@@ -6,7 +6,7 @@ import WebSocket from 'ws';
 import Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
-import RequestSession from '../handlers/RequestSession';
+import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
@@ -202,6 +202,9 @@ describe('basic MitM tests', () => {
 
     const proxyCredentials = session.getProxyCredentials();
 
+    const resourcePromise = new Promise<IRequestSessionRequestEvent>(resolve =>
+      session.on('response', resolve),
+    );
     await Helpers.httpRequest(
       `${httpServer.url}page2`,
       'POST',
@@ -214,9 +217,11 @@ describe('basic MitM tests', () => {
       Buffer.from(JSON.stringify({ gotData: true, isCompressed: 'no' })),
     );
 
-    expect(session.requests).toHaveLength(1);
-    expect(session.requests[0].requestPostData).toBeTruthy();
-    expect(session.requests[0].requestPostData.toString()).toBe(
+    expect(session.requestedUrls).toHaveLength(1);
+
+    const resource = await resourcePromise;
+    expect(resource.request.postData).toBeTruthy();
+    expect(resource.request.postData.toString()).toBe(
       JSON.stringify({ gotData: true, isCompressed: 'no' }),
     );
 
@@ -242,6 +247,9 @@ describe('basic MitM tests', () => {
 
     const largeBuffer = Buffer.concat(buffers);
 
+    const resourcePromise = new Promise<IRequestSessionRequestEvent>(resolve =>
+      session.on('response', resolve),
+    );
     await Helpers.httpRequest(
       `${httpServer.url}page2`,
       'POST',
@@ -254,8 +262,9 @@ describe('basic MitM tests', () => {
       Buffer.from(JSON.stringify({ largeBuffer: largeBuffer.toString('hex') })),
     );
 
-    expect(session.requests).toHaveLength(1);
-    expect(session.requests[0].requestPostData.toString()).toBe(
+    const resource = await resourcePromise;
+    expect(session.requestedUrls).toHaveLength(1);
+    expect(resource.request.postData.toString()).toBe(
       JSON.stringify({ largeBuffer: largeBuffer.toString('hex') }),
     );
 
@@ -334,7 +343,7 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
     session.networkInterceptorDelegate.http.requestHeaders = jest.fn();
-    session.registerResource({
+    session.browserRequestedResource({
       tabId: '1',
       browserRequestId: '25.123',
       url: `${httpServer.url}page1`,

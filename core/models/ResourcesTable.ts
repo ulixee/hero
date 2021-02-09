@@ -37,9 +37,13 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['dnsResolvedIp', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
-        ['didBlockResource', 'INTEGER'],
+        ['didUserScriptBlockResource', 'INTEGER'],
         ['requestOriginalHeaders', 'TEXT'],
         ['httpError', 'TEXT'],
+        ['browserServedFromCache', 'TEXT'],
+        ['browserLoadFailure', 'TEXT'],
+        ['browserBlockedReason', 'TEXT'],
+        ['browserCanceled', 'INTEGER'],
       ],
       true,
     );
@@ -59,6 +63,10 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       didBlockResource: boolean;
       browserRequestId?: string;
       isHttp2Push: boolean;
+      browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+      browserLoadFailure?: string;
+      browserBlockedReason?: string;
+      browserCanceled?: boolean;
     },
     error?: Error,
   ) {
@@ -103,6 +111,10 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.didBlockResource ? 1 : 0,
       JSON.stringify(extras.originalHeaders ?? {}),
       errorString,
+      extras.browserServedFromCache,
+      extras.browserLoadFailure,
+      extras.browserBlockedReason,
+      extras.browserCanceled ? 1 : 0,
     ]);
   }
 
@@ -155,8 +167,13 @@ export interface IResourcesRecord {
   clientAlpn: string;
   dnsResolvedIp?: string;
   usedArtificialCache: boolean;
-  didBlockResource: boolean;
+  didUserScriptBlockResource: boolean;
   isHttp2Push: boolean;
   requestOriginalHeaders: string;
   httpError: string;
+
+  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserLoadFailure?: string;
+  browserBlockedReason?: string;
+  browserCanceled?: boolean;
 }

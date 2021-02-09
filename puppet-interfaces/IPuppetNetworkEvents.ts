@@ -1,4 +1,4 @@
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 
 export interface IPuppetNetworkEvents {
   'navigation-response': {
@@ -18,16 +18,19 @@ export interface IPuppetNetworkEvents {
     headers: { [key: string]: string };
   };
   'resource-will-be-requested': {
-    browserRequestId: string;
-    redirectedFromUrl: string;
-    resourceType: ResourceType;
+    resource: IHttpResourceLoadDetails;
     url: string;
-    method: string;
-    hasUserGesture: boolean;
+    redirectedFromUrl: string;
     isDocumentNavigation: boolean;
     origin: string;
     referer: string;
-    documentUrl: string;
     frameId: string;
+  };
+  'resource-loaded': {
+    resource: IHttpResourceLoadDetails;
+    frameId?: string;
+  };
+  'resource-failed': {
+    resource: IHttpResourceLoadDetails;
   };
 }

@@ -1,7 +1,7 @@
-import { URL } from "url";
-import ResourceType from "./ResourceType";
-import IResourceHeaders from "./IResourceHeaders";
-import OriginType from "./OriginType";
+import { URL } from 'url';
+import ResourceType from './ResourceType';
+import IResourceHeaders from './IResourceHeaders';
+import OriginType from './OriginType';
 
 export default interface IHttpResourceLoadDetails {
   isSSL: boolean;
@@ -38,4 +38,9 @@ export default interface IHttpResourceLoadDetails {
   responseTime?: Date;
   responseTrailers?: IResourceHeaders;
   resourceType?: ResourceType;
+  browserRequestId?: string;
+  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserLoadFailure?: string;
+  browserBlockedReason?: string;
+  browserCanceled?: boolean;
 }

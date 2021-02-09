@@ -30,6 +30,7 @@ import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketR
 import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
+import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import TabNavigations from './TabNavigations';
 import SessionState from './SessionState';
 import TabNavigationObserver from './TabNavigationsObserver';
@@ -577,6 +578,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
+    page.on('resource-loaded', this.onResourceLoaded.bind(this), true);
+    page.on('resource-failed', this.onResourceFailed.bind(this), true);
     page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
 
     page.on('frame-navigated', this.onFrameNavigated.bind(this), true);
@@ -594,7 +597,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']): void {
     const { session, lastCommandId } = this;
-    const { browserRequestId, url, isDocumentNavigation, frameId, redirectedFromUrl } = event;
+    const { resource, isDocumentNavigation, frameId, redirectedFromUrl, url } = event;
+    const { browserRequestId } = resource;
 
     if (isDocumentNavigation && !this.navigations.top) {
       this.navigations.onNavigationRequested(
@@ -606,10 +610,12 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       );
     }
 
-    session.mitmRequestSession.registerResource({
+    session.mitmRequestSession.browserRequestedResource({
+      ...resource,
       ...event,
+      url,
       tabId: this.id,
-      isUserNavigation: event.hasUserGesture || this.navigations.didGotoUrl(url),
+      isUserNavigation: event.resource.hasUserGesture || this.navigations.didGotoUrl(url),
     });
 
     // only track main frame for now
@@ -620,6 +626,66 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         lastCommandId,
         redirectedFromUrl,
         browserRequestId,
+      );
+    }
+  }
+
+  private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
+    if (
+      !!event.resource.browserServedFromCache &&
+      event.resource.url?.href === this.navigations?.top?.requestedUrl &&
+      this.navigations?.top?.resourceId?.isResolved === false
+    ) {
+      this.navigations.onHttpResponded(
+        event.resource.browserRequestId,
+        event.resource.url?.href,
+        event.frameId ?? this.mainFrameId,
+      );
+    }
+
+    const resources = this.sessionState.getBrowserRequestResources(event.resource.browserRequestId);
+
+    if (!resources?.length) {
+      const ctx = MitmRequestContext.createFromLoadedResource(event.resource);
+      this.sessionState.captureResource(this.id, MitmRequestContext.toEmittedResource(ctx), true);
+    }
+  }
+
+  private onResourceFailed(event: IPuppetPageEvents['resource-failed']): void {
+    const { resource } = event;
+
+    let loadError: Error;
+    if (resource.browserLoadFailure) {
+      loadError = new Error(resource.browserLoadFailure);
+    } else if (resource.browserBlockedReason) {
+      loadError = new Error(`Resource blocked: "${resource.browserBlockedReason}"`);
+    } else if (resource.browserCanceled) {
+      loadError = new Error('Load canceled');
+    } else {
+      loadError = new Error(
+        'Resource failed to load, but the reason was not provided by devtools.',
+      );
+    }
+    if (
+      resource.resourceType === 'Document' &&
+      resource.browserRequestId === this.navigations.top?.browserRequestId &&
+      this.navigations?.top?.resourceId?.isResolved === false
+    ) {
+      this.navigations.top.navigationError = loadError;
+    }
+
+    this.session.mitmRequestSession.browserRequestFailed({
+      resource,
+      tabId: this.id,
+      loadError,
+    });
+
+    const resources = this.sessionState.getBrowserRequestResources(event.resource.browserRequestId);
+    if (resources?.length) {
+      this.sessionState.captureResourceError(
+        this.id,
+        MitmRequestContext.toEmittedResource({ id: resources[0].resourceId, ...resource } as any),
+        loadError,
       );
     }
   }

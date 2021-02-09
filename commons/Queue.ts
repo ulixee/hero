@@ -30,7 +30,8 @@ export default class Queue {
 
   public stop(): void {
     while (this.queue.length) {
-      const next = this.queue.pop();
+      const next = this.queue.shift();
+      if (!next) continue;
 
       this.reject(next, new CanceledPromiseError('Canceling Queue Item'));
     }

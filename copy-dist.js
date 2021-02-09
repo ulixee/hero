@@ -8,6 +8,7 @@ copyfiles(
     '-e "build/**"',
     '-e "build-dist/**"',
     '-e "mitm-socket/dist"',
+    '*client/index.mjs',
     'emulate-browsers/**/data/**',
     'emulate-browsers/**/data/config.json',
     'mitm-socket/lib/*',

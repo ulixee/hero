@@ -7,6 +7,7 @@ import MitmSocket from '@secret-agent/mitm-socket';
 import OriginType, { isOriginType } from '@secret-agent/core-interfaces/OriginType';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import HttpResponseCache from './HttpResponseCache';
 import HeadersHandler from '../handlers/HeadersHandler';
 import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
@@ -17,6 +18,20 @@ import ResourceState from '../interfaces/ResourceState';
 
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
+
+  public static createFromLoadedResource(
+    resourceLoadDetails: IHttpResourceLoadDetails,
+  ): IMitmRequestContext {
+    return {
+      id: (this.contextIdCounter += 1),
+      ...resourceLoadDetails,
+      didBlockResource: !!resourceLoadDetails.browserBlockedReason,
+      cacheHandler: null,
+      clientToProxyRequest: null,
+      stateChanges: new Map<ResourceState, Date>([[ResourceState.End, new Date()]]),
+      setState() {},
+    };
+  }
 
   public static create(
     params: Pick<
@@ -153,9 +168,9 @@ export default class MitmRequestContext {
       request,
       response,
       redirectedToUrl: ctx.redirectedToUrl,
-      wasCached: ctx.cacheHandler.didProposeCachedResource,
+      wasCached: ctx.cacheHandler?.didProposeCachedResource ?? false,
       resourceType: ctx.resourceType,
-      body: ctx.cacheHandler.buffer,
+      body: ctx.cacheHandler?.buffer,
       localAddress: ctx.localAddress,
       dnsResolvedIp: ctx.dnsResolvedIp,
       originalHeaders: ctx.requestOriginalHeaders,
@@ -165,6 +180,10 @@ export default class MitmRequestContext {
       didBlockResource: ctx.didBlockResource,
       executionMillis: (ctx.responseTime ?? new Date()).getTime() - ctx.requestTime.getTime(),
       isHttp2Push: ctx.isHttp2Push,
+      browserBlockedReason: ctx.browserBlockedReason,
+      browserServedFromCache: ctx.browserServedFromCache,
+      browserLoadFailure: ctx.browserLoadFailure,
+      browserCanceled: ctx.browserCanceled,
     };
   }
 

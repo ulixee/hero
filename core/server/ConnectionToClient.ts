@@ -10,6 +10,7 @@ import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import Log from '@secret-agent/commons/Logger';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -38,6 +39,8 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     // json converts args to null which breaks undefined argument handlers
     const args = payload.args.map(x => (x === null ? undefined : x));
 
+    const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
+
     let data: any;
     let isError = false;
     try {
@@ -58,6 +61,10 @@ export default class ConnectionToClient extends TypedEventEmitter<{
         }
       }
     } catch (error) {
+      // if we're closing, don't emit errors
+      if ((this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError) {
+        return;
+      }
       isError = true;
       data =
         error instanceof Error
@@ -69,10 +76,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
           : new Error(`Unknown error occurred ${error}`);
     }
 
-    let commandId: number;
-    if (meta?.sessionId) {
-      commandId = Session.get(meta.sessionId)?.sessionState?.lastCommand?.id;
-    }
+    const commandId = session?.sessionState?.lastCommand?.id;
 
     const response: ICoreResponsePayload = {
       responseId: messageId,

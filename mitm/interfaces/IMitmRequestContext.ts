@@ -11,7 +11,6 @@ export default interface IMitmRequestContext extends IHttpResourceLoadDetails {
   clientToProxyRequest: http.IncomingMessage | http2.Http2ServerRequest;
   cacheHandler: CacheHandler;
   didBlockResource: boolean;
-  browserRequestId?: string;
   proxyToClientResponse?: http.ServerResponse | http2.Http2ServerResponse;
   proxyToServerRequest?: http.ClientRequest | http2.ClientHttp2Stream;
   serverToProxyResponse?: http.IncomingMessage | http2.ClientHttp2Stream;
