@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.1...v1.3.0-alpha.2) (2021-02-09)
+
+
+### Bug Fixes
+
+* **blog:** fix some blog typos ([e85efb6](https://github.com/ulixee/secret-agent/commit/e85efb686a99bd1f9395e107aa528703de7b9259))
+* **docs:** document missing props ([58e6a68](https://github.com/ulixee/secret-agent/commit/58e6a68d1d1755fe459e9a1cb1151ce959e8c143)), closes [#156](https://github.com/ulixee/secret-agent/issues/156)
+
+
+
+
+
 # [1.3.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.0...v1.3.0-alpha.1) (2021-02-06)
 
 **Note:** Version bump only for package @secret-agent/website

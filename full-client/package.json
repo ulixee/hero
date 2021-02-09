@@ -1,6 +1,6 @@
 {
   "name": "secret-agent",
-  "version": "1.3.0-alpha.1",
+  "version": "1.3.0-alpha.2",
   "description": "The Web Browser Built for Scraping",
   "main": "./index.js",
   "exports": {
@@ -8,17 +8,17 @@
     "require": "./index.js"
   },
   "dependencies": {
-    "@secret-agent/client": "1.3.0-alpha.1",
-    "@secret-agent/commons": "1.3.0-alpha.1",
-    "@secret-agent/core": "1.3.0-alpha.1",
-    "@secret-agent/core-interfaces": "1.3.0-alpha.1",
+    "@secret-agent/client": "1.3.0-alpha.2",
+    "@secret-agent/commons": "1.3.0-alpha.2",
+    "@secret-agent/core": "1.3.0-alpha.2",
+    "@secret-agent/core-interfaces": "1.3.0-alpha.2",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@secret-agent/emulate-browsers-base": "1.3.0-alpha.1",
-    "@secret-agent/emulate-chrome-80": "1.3.0-alpha.1",
-    "@secret-agent/mitm": "1.3.0-alpha.1",
-    "@secret-agent/testing": "1.3.0-alpha.1",
+    "@secret-agent/emulate-browsers-base": "1.3.0-alpha.2",
+    "@secret-agent/emulate-chrome-80": "1.3.0-alpha.2",
+    "@secret-agent/mitm": "1.3.0-alpha.2",
+    "@secret-agent/testing": "1.3.0-alpha.2",
     "awaited-dom": "^1.1.10",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.1...v1.3.0-alpha.2) (2021-02-09)
+
+
+### Bug Fixes
+
+* **blog:** fix some blog typos ([e85efb6](https://github.com/ulixee/secret-agent/commit/e85efb686a99bd1f9395e107aa528703de7b9259))
+* **client:** correctly catch some canceled promise ([1d5906f](https://github.com/ulixee/secret-agent/commit/1d5906f5bff7e757bd084bb98883b56f3cf22bbe))
+* **client:** fix reviving stack traces in typeson ([7a0e38b](https://github.com/ulixee/secret-agent/commit/7a0e38b6e8efd30a2d70c0c3c73d8fc121e316a9))
+* **dist:** copy .mjs files properly to npm dist ([cc717e0](https://github.com/ulixee/secret-agent/commit/cc717e02ef94233ad867393640fc740b26038a95))
+* **docs:** document missing props ([58e6a68](https://github.com/ulixee/secret-agent/commit/58e6a68d1d1755fe459e9a1cb1151ce959e8c143)), closes [#156](https://github.com/ulixee/secret-agent/issues/156)
+* **mitm:** error reading destroyed from scoket ([f09e67f](https://github.com/ulixee/secret-agent/commit/f09e67f95ffa70c96e2c4a1c24fc4883c4aa2c50))
+* **mitm:** read failed/cached browser resources ([150db8b](https://github.com/ulixee/secret-agent/commit/150db8b3785705afdc54b915684ae0c828a5ecf8))
+
+
+
+
+
 # [1.3.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.0...v1.3.0-alpha.1) (2021-02-06)
 
 
