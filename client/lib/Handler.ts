@@ -1,10 +1,13 @@
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
+import Log from '@secret-agent/commons/Logger';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import Agent from './Agent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
+
+const { log } = Log(module);
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
@@ -99,6 +102,10 @@ export default class Handler {
   }
 
   private async logUnhandledError(error: Error): Promise<void> {
+    // if error and there are remote connections, log error here
+    if (error && this.connections.some(x => !!x.options.host)) {
+      log.error('UnhandledRejection', { error, sessionId: null });
+    }
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.logUnhandledError(error)));
   }
