@@ -22,6 +22,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import Tab from './Tab';
 
 const { log } = Log(module);
@@ -77,12 +78,14 @@ export default class Interactor implements IInteractionsHelper {
     }
   }
 
-  public async play(interactions: IInteractionGroups) {
+  public play(interactions: IInteractionGroups, resolvablePromise: IResolvablePromise<any>): void {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
     const humanEmulator = this.humanEmulator;
-
-    await humanEmulator.playInteractions(finalInteractions, this.playInteraction.bind(this), this);
+    humanEmulator
+      .playInteractions(finalInteractions, this.playInteraction.bind(this, resolvablePromise), this)
+      .then(resolvablePromise.resolve)
+      .catch(resolvablePromise.reject);
   }
 
   public async lookupBoundingRect(
@@ -127,7 +130,11 @@ export default class Interactor implements IInteractionsHelper {
     };
   }
 
-  private async playInteraction(interaction: IInteractionStep): Promise<void> {
+  private async playInteraction(
+    resolvable: IResolvablePromise<any>,
+    interaction: IInteractionStep,
+  ): Promise<void> {
+    if (resolvable.isResolved) return;
     if (this.tab.isClosing) {
       throw new CanceledPromiseError('Canceling interaction - tab closing');
     }
@@ -208,7 +215,7 @@ export default class Interactor implements IInteractionsHelper {
           // give the page time to sort out
           await new Promise(resolve => setTimeout(resolve, 500));
           // make sure element is on screen
-          await this.playInteraction({
+          await this.playInteraction(resolvable, {
             command: 'scroll',
             mousePosition: interaction.mousePosition,
           });

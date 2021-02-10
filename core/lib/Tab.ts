@@ -186,21 +186,25 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.isClosing = true;
     const parentLogId = this.logger.stats('Tab.Closing');
 
-    if (this.navigations.top?.frameId && this.puppetPage.mainFrame.isLoaded) {
-      await this.domRecorder.flush(true);
+    try {
+      if (this.navigations.top?.frameId && this.puppetPage.mainFrame.isLoaded) {
+        await this.domRecorder.flush(true);
+      }
+    } catch (error) {
+      // don't re-handle
     }
-
     try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
       this.navigationsObserver.cancelWaiting(cancelMessage);
       this.cancelPendingEvents(cancelMessage);
+
       await this.puppetPage.close();
 
       this.emit('close');
       this.logger.stats('Tab.Closed', { parentLogId });
     } catch (error) {
-      if (!error.message.includes('Target closed')) {
+      if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
         this.logger.error('Tab.ClosingError', { error, parentLogId });
       }
     }
@@ -226,12 +230,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async getResourceProperty<T = string | number | Buffer>(
-    resourceid: number,
+    resourceId: number,
     propertyPath: string,
   ): Promise<T> {
-    let finalResourceId = resourceid;
+    let finalResourceId = resourceId;
     // if no resource id, this is a request for the default resource (page)
-    if (!resourceid) {
+    if (!resourceId) {
       await this.navigationsObserver.waitForReady();
       finalResourceId = await this.navigationsObserver.waitForNavigationResourceId();
     }
@@ -312,7 +316,27 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
     await this.navigationsObserver.waitForReady();
-    await this.interactor.play(interactionGroups);
+    const interactionResolvable = createPromise<void>(120e3);
+    this.waitTimeouts.push({
+      timeout: interactionResolvable.timeout,
+      reject: interactionResolvable.reject,
+    });
+
+    const cancelForNavigation = new CanceledPromiseError('Frame navigated');
+    const cancelOnNavigate = () => {
+      interactionResolvable.reject(cancelForNavigation);
+    };
+    try {
+      this.interactor.play(interactionGroups, interactionResolvable);
+      this.puppetPage.once('frame-navigated', cancelOnNavigate);
+      await interactionResolvable.promise;
+    } catch (error) {
+      if (error === cancelForNavigation) return;
+      if (error instanceof CanceledPromiseError && this.isClosing) return;
+      throw error;
+    } finally {
+      this.puppetPage.off('frame-navigated', cancelOnNavigate);
+    }
   }
 
   public getJsValue<T>(path: string): Promise<{ value: T; type: string }> {

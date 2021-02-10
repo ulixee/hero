@@ -15,7 +15,6 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
