@@ -6,7 +6,7 @@ You'll need a simple script to start the server on the machine where the `secret
 
 ## Setting Up a Server Process
 
-Below is code you can use to start Core in your own server process.
+Below is code you can use to start Core in your own server process. NOTE: you can also simply run the 'start.js' script that is packaged with `@secret-agent/core` at `@secret-agent/core/start`;
 
 ```javascript
 // SERVER ip is 122.22.232.1
@@ -17,7 +17,7 @@ const Core = require('@secret-agent/core');
     log.info('Exiting Core Process');
     process.exit();
   };
-  await Core.start({ port: 7007 });
+  await Core.start({ coreServerPort: 7007 });
 })();
 ```
 
