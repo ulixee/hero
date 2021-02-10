@@ -77,7 +77,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { targetInfo, sessionId } = event;
 
-    assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
+    if (!targetInfo.browserContextId) {
+      assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
+    }
 
     if (targetInfo.type === 'page') {
       const cdpSession = this.connection.getSession(sessionId);

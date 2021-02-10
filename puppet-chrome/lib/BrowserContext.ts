@@ -15,6 +15,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -41,6 +42,7 @@ export class BrowserContext
 
   private _emulation: IBrowserEmulationSettings;
 
+  private readonly createdTargetIds = new Set<string>();
   private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;
@@ -76,6 +78,7 @@ export class BrowserContext
       url: 'about:blank',
       browserContextId: this.id,
     });
+    this.createdTargetIds.add(targetId);
 
     await this.attachToTarget(targetId);
 
@@ -111,7 +114,7 @@ export class BrowserContext
 
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
-    if (!opener && this.pages.length) opener = this.pages[0];
+    if (!opener && !this.createdTargetIds.has(targetInfo.targetId)) opener = this.pages[0];
     const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
     this.pages.push(page);
     // eslint-disable-next-line promise/catch-or-return

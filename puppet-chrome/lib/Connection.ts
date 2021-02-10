@@ -22,14 +22,13 @@ import {
 import IConnectionTransport, {
   IConnectionTransportEvents,
 } from '@secret-agent/puppet-interfaces/IConnectionTransport';
-import { IPuppetConnectionEvents } from '@secret-agent/puppet-interfaces/IPuppetConnection';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import Log from '@secret-agent/commons/Logger';
 import { CDPSession } from './CDPSession';
 
 const { log } = Log(module);
 
-export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
+export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   public readonly rootSession: CDPSession;
   public isClosed = false;
 
@@ -85,7 +84,6 @@ export class Connection extends TypedEventEmitter<IPuppetConnectionEvents> {
 
     const cdpSession = this.sessionsById.get(object.sessionId || '');
     if (cdpSession) {
-      // make asynchronous so we don't have accidental bugs where things are behaving synchronous until stack backs up
       cdpSession.onMessage(object);
     } else {
       log.warn('MessageWithUnknownSession', { sessionId: null, message: object });

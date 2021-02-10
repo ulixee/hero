@@ -4,6 +4,7 @@ export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
   id: string;
   url: string;
   type: string;
+  isReady: Promise<Error | null>;
   evaluate<T>(expression: string): Promise<T>;
 }
 
