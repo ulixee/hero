@@ -1,6 +1,7 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@secret-agent/core-interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
 import Session from './lib/Session';
@@ -19,7 +20,7 @@ export default class Core {
   public static onShutdown: () => void;
 
   private static wasManuallyStarted = false;
-  private static isClosing = false;
+  private static isClosing: Promise<void>;
   private static isStarting = false;
 
   public static addConnection(): ConnectionToClient {
@@ -43,7 +44,7 @@ export default class Core {
       isExplicitlyStarted,
       sessionId: null,
     });
-    this.isClosing = false;
+    this.isClosing = null;
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
@@ -80,19 +81,33 @@ export default class Core {
   }
 
   public static async shutdown(force = false): Promise<void> {
-    if (this.isClosing) return;
-    this.isClosing = true;
+    if (this.isClosing) return this.isClosing;
+
+    const isClosing = new Resolvable<void>();
+    this.isClosing = isClosing.promise;
+
     this.isStarting = false;
     const logid = log.info('Core.shutdown');
+    const shutDownErrors: Error[] = [];
+    try {
+      await Promise.all(this.connections.map(x => x.disconnect())).catch(error =>
+        shutDownErrors.push(error),
+      );
+      await GlobalPool.close().catch(error => shutDownErrors.push(error));
+      await this.server.close(!force).catch(error => shutDownErrors.push(error));
 
-    await Promise.all(this.connections.map(x => x.disconnect()));
-    await GlobalPool.close();
-    await this.server.close(!force);
-
-    this.wasManuallyStarted = false;
-    if (Core.onShutdown) Core.onShutdown();
-
-    log.info('Core.shutdownComplete', { parentLogId: logid, sessionId: null });
+      this.wasManuallyStarted = false;
+      if (Core.onShutdown) Core.onShutdown();
+      isClosing.resolve();
+    } catch (error) {
+      isClosing.reject(error);
+    } finally {
+      log.info('Core.shutdownComplete', {
+        parentLogId: logid,
+        sessionId: null,
+        errors: shutDownErrors.length ? shutDownErrors : undefined,
+      });
+    }
   }
 
   public static logUnhandledError(clientError: Error, fatalError = false): void {
