@@ -240,7 +240,7 @@ function addDescriptorAfterProperty(
   }
 }
 
-if (typeof window === 'undefined') {
+if (typeof module === 'object' && typeof module.exports === 'object') {
   module.exports = {
     proxyFunction,
   };

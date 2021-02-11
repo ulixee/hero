@@ -27,22 +27,23 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   private readonly registeredEvents: IRegisteredEventListener[];
   private readonly executionContextId = createPromise<number>();
 
-  public get id() {
+  public get id(): string {
     return this.targetInfo.targetId;
   }
 
-  public get url() {
+  public get url(): string {
     return this.targetInfo.url;
   }
 
-  public get type() {
-    return this.targetInfo.type;
+  public get type(): IPuppetWorker['type'] {
+    return this.targetInfo.type as IPuppetWorker['type'];
   }
 
   constructor(
     browserContext: BrowserContext,
     parentNetworkManager: NetworkManager,
     cdpSession: CDPSession,
+    workerInitializeFn: (worker: IPuppetWorker) => Promise<void>,
     logger: IBoundLog,
     targetInfo: TargetInfo,
   ) {
@@ -61,24 +62,30 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       ['Runtime.executionContextCreated', this.onContextCreated.bind(this)],
       ['disconnected', this.emit.bind(this, 'close')],
     ]);
-    this.isReady = this.initialize(parentNetworkManager).catch(err => err);
+    this.isReady = this.initialize(parentNetworkManager, workerInitializeFn).catch(err => err);
   }
 
-  async initialize(pageNetworkManager: NetworkManager): Promise<void> {
+  async initialize(
+    pageNetworkManager: NetworkManager,
+    initializeFn: (worker: IPuppetWorker) => Promise<void>,
+  ): Promise<void> {
     await this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
       // web workers can use parent network
       if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
       throw err;
     });
-    await Promise.all([
-      this.cdpSession.send('Runtime.enable'),
-      this.cdpSession.send('Runtime.runIfWaitingForDebugger'),
-    ]);
+
+    await this.cdpSession.send('Runtime.enable');
+    if (initializeFn) await initializeFn(this);
+
+    await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
   }
 
-  async evaluate<T>(expression: string): Promise<T> {
-    const didThrowError = await this.isReady;
-    if (didThrowError) throw didThrowError;
+  async evaluate<T>(expression: string, isInitializationScript = false): Promise<T> {
+    if (!isInitializationScript) {
+      const didThrowError = await this.isReady;
+      if (didThrowError) throw didThrowError;
+    }
     const contextId = await this.executionContextId.promise;
     const result = await this.cdpSession.send('Runtime.evaluate', {
       expression,
@@ -86,6 +93,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       contextId,
       returnByValue: true,
     });
+
     if (result.exceptionDetails) {
       throw ConsoleMessage.exceptionToError(result.exceptionDetails);
     }

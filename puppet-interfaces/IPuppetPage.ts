@@ -32,6 +32,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
   ) => Promise<void>;
+  workerInitializeFn?: (worker: IPuppetWorker) => Promise<void>;
 
   getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   setJavaScriptEnabled(enabled: boolean): Promise<void>;

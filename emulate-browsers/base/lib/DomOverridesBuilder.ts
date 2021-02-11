@@ -11,9 +11,16 @@ const utilsScript = [
 ].join('\n');
 
 export default class DomOverridesBuilder {
-  private readonly scripts: string[] = [];
+  private readonly scriptsByName = new Map<string, string>();
 
-  public build(): INewDocumentInjectedScript[] {
+  public build(scriptNames?: string[]): INewDocumentInjectedScript[] {
+    const scripts = [];
+    for (const [name, script] of this.scriptsByName) {
+      const shouldIncludeScript = scriptNames ? scriptNames.includes(name) : true;
+      if (shouldIncludeScript) {
+        scripts.push(script);
+      }
+    }
     return [
       {
         // NOTE: don't make this async. It can cause issues if you read a frame right after creation, for instance
@@ -21,7 +28,7 @@ export default class DomOverridesBuilder {
   const sourceUrl = '${injectedSourceUrl}';
   ${utilsScript}
 
-   ${this.scripts.join('\n\n')}
+   ${scripts.join('\n\n')}
 })();
 //# sourceURL=${injectedSourceUrl}`.replace(/\/\/# sourceMap.+/g, ''),
       },
@@ -60,7 +67,7 @@ export default class DomOverridesBuilder {
   }
 `;
     }
-    this.scripts.push(wrapper);
+    this.scriptsByName.set(name, wrapper);
   }
 }
 

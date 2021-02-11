@@ -105,9 +105,6 @@ const pluginList: Plugin[] = args.plugins.map(fakeP => {
     true,
   );
 
-  // @ts-ignore - Typescript has problems pulling in extensions like Symbol.iterator
-  // proxyFunction(plugin, Symbol.iterator, () => [...pluginMimes.map(createMime)], true);
-
   plugin = new Proxy(plugin, {
     get(target, p) {
       if (mimeProps.includes(p)) {
@@ -131,5 +128,5 @@ const navigatorPlugins = createNamedNodeMap(
   'name',
 ) as PluginArray;
 
-proxyGetter(window.navigator, 'mimeTypes', () => mimes, true);
-proxyGetter(window.navigator, 'plugins', () => navigatorPlugins, true);
+proxyGetter(navigator, 'mimeTypes', () => mimes, true);
+proxyGetter(navigator, 'plugins', () => navigatorPlugins, true);

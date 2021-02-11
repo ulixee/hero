@@ -1,7 +1,8 @@
+import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import INetworkInterceptorDelegate from './INetworkInterceptorDelegate';
 import IUserProfile from './IUserProfile';
 import INewDocumentInjectedScript from './INewDocumentInjectedScript';
-import IWindowFraming from "./IWindowFraming";
+import IWindowFraming from './IWindowFraming';
 
 export default interface IBrowserEmulator {
   readonly userAgentString: string;
@@ -15,4 +16,7 @@ export default interface IBrowserEmulator {
   sessionId?: string;
 
   newDocumentInjectedScripts(): Promise<INewDocumentInjectedScript[]>;
+  newWorkerInjectedScripts(
+    workerType: IPuppetWorker['type'],
+  ): Promise<INewDocumentInjectedScript[]>;
 }

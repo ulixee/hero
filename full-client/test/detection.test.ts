@@ -95,7 +95,7 @@ test('should pass FpScanner', async () => {
   expect(data).toBeTruthy();
 }, 30e3);
 
-test('should not be denied for notifications, but prompt for permissions', async () => {
+test('should not be denied for notifications but prompt for permissions', async () => {
   const agent = await handler.createAgent();
   await agent.goto(`${koaServer.baseUrl}`);
   const activeTab = await agent.activeTab;

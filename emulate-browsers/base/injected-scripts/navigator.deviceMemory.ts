@@ -1,4 +1,4 @@
-if (window.location?.protocol === 'https:') {
+if ('WorkerGlobalScope' in self || self.location.protocol === 'https:') {
   // @ts-ignore
-  proxyGetter(window.navigator, 'deviceMemory', () => args.memory, true);
+  proxyGetter(navigator, 'deviceMemory', () => args.memory, true);
 }

@@ -145,6 +145,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       blockedResourceTypes: session.options.blockedResourceTypes,
       upstreamProxyUrl: session.upstreamProxyUrl,
       userAgentString: session.browserEmulator.userAgentString,
+      osPlatform: session.browserEmulator.osPlatform,
     };
   }
 
