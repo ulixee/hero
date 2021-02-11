@@ -323,8 +323,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     });
 
     const cancelForNavigation = new CanceledPromiseError('Frame navigated');
-    const cancelOnNavigate = () => {
-      interactionResolvable.reject(cancelForNavigation);
+    const cancelOnNavigate = (ev: IPuppetFrameEvents['frame-navigated']) => {
+      if (ev.frame.id === this.mainFrameId) interactionResolvable.reject(cancelForNavigation);
     };
     try {
       this.interactor.play(interactionGroups, interactionResolvable);

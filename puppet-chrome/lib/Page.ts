@@ -285,9 +285,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
+    const frameId = this.mainFrame.id;
     await Promise.all([
       this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id }),
-      this.framesManager.waitOn('frame-navigated'),
+      this.framesManager.waitOn('frame-navigated', x => x.frame.id === frameId),
     ]);
   }
 
