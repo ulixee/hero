@@ -62,11 +62,12 @@ export default abstract class ConnectionToCore {
         return this.internalSendRequestAndWait({
           command: 'connect',
           args: [
-            <ICoreConfigureOptions>{
+            <ICoreConfigureOptions & { isPersistent: boolean }>{
               coreServerPort: this.options.coreServerPort,
               browserEmulatorIds: this.options.browserEmulatorIds,
               localProxyPortStart: this.options.localProxyPortStart,
               sessionsDir: this.options.sessionsDir,
+              isPersistent: this.options.isPersistent,
             },
           ],
         });
