@@ -273,7 +273,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const { requestId } = event;
     const resource = this.requestsById.get(requestId);
     if (resource) {
-      resource.browserServedFromCache = 'unspecified';
+      resource.browserServedFromCache = 'memory';
       this.emitLoaded(requestId);
     }
   }

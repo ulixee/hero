@@ -9,9 +9,9 @@ proxyGetter(HTMLIFrameElement.prototype, 'contentWindow', (target, iframe) => {
   return ProxyOverride.callOriginal;
 });
 
-proxySetter(HTMLIFrameElement.prototype, 'srcdoc', function(_, iframe) {
+proxySetter(HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
   if (!frameWindowProxies.has(iframe)) {
-    const proxy = new Proxy(window, {
+    const proxy = new Proxy(self, {
       get(target, key) {
         if (key === 'self') {
           return iframe.contentWindow;
@@ -23,7 +23,7 @@ proxySetter(HTMLIFrameElement.prototype, 'srcdoc', function(_, iframe) {
         if (key === 'frameElement') {
           return iframe;
         }
-        return ReflectCached.get(window, key);
+        return ReflectCached.get(self, key);
       },
     });
 

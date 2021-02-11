@@ -153,6 +153,17 @@ export default class Safari13 {
     return result;
   }
 
+  public async newWorkerInjectedScripts() {
+    const result = this.domOverrides.build([
+      'Error.captureStackTrace',
+      'Error.constructor',
+      'navigator.deviceMemory',
+      'navigator',
+      'WebGLRenderingContext.prototype.getParameter',
+    ]);
+    return result;
+  }
+
   protected loadDomOverrides(operatingSystemId: string) {
     const domOverrides = this.domOverrides;
     domOverrides.add('Error.captureStackTrace');
@@ -162,6 +173,10 @@ export default class Safari13 {
 
     const deviceMemory = Math.ceil(Math.random() * 4) * 2;
     domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
+    domOverrides.add('navigator', {
+      userAgentString: this.userAgentString,
+      platform: this.osPlatform,
+    });
 
     domOverrides.add('MediaDevices.prototype.enumerateDevices', {
       videoDevice: {
@@ -185,8 +200,12 @@ export default class Safari13 {
 
     domOverrides.add('Element.prototype.attachShadow');
 
-    domOverrides.add('window.outerWidth', { frameBorderWidth: this.windowFraming.frameBorderWidth });
-    domOverrides.add('window.outerHeight', { frameBorderHeight: this.windowFraming.frameBorderHeight });
+    domOverrides.add('window.outerWidth', {
+      frameBorderWidth: this.windowFraming.frameBorderWidth,
+    });
+    domOverrides.add('window.outerHeight', {
+      frameBorderHeight: this.windowFraming.frameBorderHeight,
+    });
 
     const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {

@@ -1,8 +1,13 @@
 const { supportedCodecs } = args;
 
-if ((window as any).MediaRecorder) {
-  proxyFunction((window as any).MediaRecorder, 'isTypeSupported', (func, thisArg, [type]) => {
+if ('MediaRecorder' in self) {
+  proxyFunction((self as any).MediaRecorder, 'isTypeSupported', (func, thisArg, [type]) => {
     if (type === undefined) return ProxyOverride.callOriginal;
     return supportedCodecs.includes(type);
   });
 }
+
+proxyFunction(self.MediaSource, 'isTypeSupported', (func, thisArg, [type]) => {
+  if (type === undefined) return ProxyOverride.callOriginal;
+  return supportedCodecs.includes(type);
+});

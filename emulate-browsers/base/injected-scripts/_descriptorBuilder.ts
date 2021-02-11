@@ -13,7 +13,7 @@ function createError(message: string, type?: { new (message: string): any }) {
     if (match.length) {
       message = message.replace(`${match[1]}: `, '');
       try {
-        type = window[match[1]];
+        type = self[match[1]];
       } catch (err) {
         // ignore
       }
@@ -151,7 +151,7 @@ function breakdownPath(path: string, propsToLeave) {
   }
 
   const parts = path.split(/\.Symbol\(([\w.]+)\)|\.(\w+)/).filter(Boolean);
-  let obj: any = window;
+  let obj: any = self;
   while (parts.length > propsToLeave) {
     let next: string | symbol = parts.shift();
     if (next === 'window') continue;

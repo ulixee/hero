@@ -6,23 +6,35 @@ let nativeToStringFunctionString = `${Function.toString}`;
 const overriddenFns = new Map<Function, string>();
 
 // eslint-disable-next-line no-extend-native
-Function.prototype.toString = new Proxy(Function.prototype.toString, {
-  apply(target: () => string, thisArg: any, args?: any): any {
-    if (overriddenFns.has(thisArg)) {
-      return overriddenFns.get(thisArg);
-    }
-    // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
-    // if not indicates that we are doing a check across different windows
-    const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
-      thisArg.toString,
-    );
-    if (hasSameProto === false) {
-      // Pass the call on to the local Function.prototype.toString instead
-      return thisArg.toString(...(args ?? []));
-    }
-
-    return target.apply(thisArg, args);
-  },
+Object.defineProperty(Function.prototype, 'toString', {
+  ...Object.getOwnPropertyDescriptor(Function.prototype, 'toString'),
+  value: new Proxy(Function.prototype.toString, {
+    apply(target: () => string, thisArg: any, args?: any): any {
+      if (overriddenFns.has(thisArg)) {
+        return overriddenFns.get(thisArg);
+      }
+      // from puppeteer-stealth: Check if the toString prototype of the context is the same as the global prototype,
+      // if not indicates that we are doing a check across different windows
+      const hasSameProto = Object.getPrototypeOf(Function.prototype.toString).isPrototypeOf(
+        thisArg.toString,
+      );
+      if (hasSameProto === false) {
+        // Pass the call on to the local Function.prototype.toString instead
+        return thisArg.toString(...(args ?? []));
+      }
+      try {
+        return target.apply(thisArg, args);
+      } catch (error) {
+        cleanErrorStack(error, (line, i) => {
+          if (line.includes('Object.toString') && i === 1) {
+            return line.replace('Object.toString', 'Function.toString');
+          }
+          return line;
+        });
+        throw error;
+      }
+    },
+  }),
 });
 overriddenFns.set(Function.prototype.toString, nativeToStringFunctionString);
 
@@ -44,18 +56,21 @@ enum ProxyOverride {
 
 declare let sourceUrl: string;
 
-function cleanErrorStack(error: Error) {
+function cleanErrorStack(error: Error, replaceLineFn?: (line: string, index: number) => string) {
   if (!error.stack) return error;
 
+  const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
   const stack = error.stack.split(/\r?\n/);
   const newStack = [];
   for (let i = 0; i < stack.length; i += 1) {
-    if (stack[i].includes(sourceUrl)) {
+    let line = stack[i];
+    if (line.includes(sourceUrl)) {
       continue;
     }
-    newStack.push(stack[i]);
+    if (replaceLineFn) line = replaceLineFn(line, i);
+    newStack.push(line);
   }
-  error.stack = newStack.join('\n');
+  error.stack = newStack.join(split);
   return error;
 }
 
@@ -240,7 +255,7 @@ function addDescriptorAfterProperty(
   }
 }
 
-if (typeof window === 'undefined') {
+if (typeof module === 'object' && typeof module.exports === 'object') {
   module.exports = {
     proxyFunction,
   };

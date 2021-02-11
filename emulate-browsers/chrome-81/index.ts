@@ -14,7 +14,7 @@ import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IWindowFraming from "@secret-agent/core-interfaces/IWindowFraming";
+import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import pkg from './package.json';
 
 const config = require('./config.json');
@@ -31,7 +31,7 @@ const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 const engineObj = {
   browser: config.browserEngine.name,
   revision: config.browserEngine.revision,
-}
+};
 
 @BrowserEmulatorClassDecorator
 export default class Chrome81 {
@@ -104,6 +104,22 @@ export default class Chrome81 {
     return this.domOverrides.build();
   }
 
+  public async newWorkerInjectedScripts() {
+    const result = this.domOverrides.build([
+      'Error.captureStackTrace',
+      'Error.constructor',
+      'navigator.deviceMemory',
+      'navigator',
+      'MediaDevices.prototype.enumerateDevices',
+      'Notification.permission',
+      'Permission.prototype.query',
+      'WebGLRenderingContext.prototype.getParameter',
+      'HTMLMediaElement.prototype.canPlayType',
+      'RTCRtpSender.getCapabilities',
+    ]);
+    return result;
+  }
+
   protected loadDomOverrides(operatingSystemId: string) {
     const domOverrides = this.domOverrides;
 
@@ -114,6 +130,10 @@ export default class Chrome81 {
 
     const deviceMemory = Math.ceil(Math.random() * 4) * 2;
     domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
+    domOverrides.add('navigator', {
+      userAgentString: this.userAgentString,
+      platform: this.osPlatform,
+    });
 
     domOverrides.add('MediaDevices.prototype.enumerateDevices', {
       videoDevice: {
@@ -168,8 +188,12 @@ export default class Chrome81 {
     domOverrides.add('HTMLIFrameElement.prototype');
     domOverrides.add('Element.prototype.attachShadow');
 
-    domOverrides.add('window.outerWidth', { frameBorderWidth: this.windowFraming.frameBorderWidth });
-    domOverrides.add('window.outerHeight', { frameBorderHeight: this.windowFraming.frameBorderHeight });
+    domOverrides.add('window.outerWidth', {
+      frameBorderWidth: this.windowFraming.frameBorderWidth,
+    });
+    domOverrides.add('window.outerHeight', {
+      frameBorderHeight: this.windowFraming.frameBorderHeight,
+    });
 
     const agentCodecs = codecsData.get(operatingSystemId);
     if (agentCodecs) {

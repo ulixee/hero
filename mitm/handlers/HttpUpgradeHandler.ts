@@ -1,6 +1,6 @@
 import net from 'net';
 import http from 'http';
-import Log from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import CookieHandler from './CookieHandler';
 import BaseHttpHandler from './BaseHttpHandler';
@@ -42,8 +42,8 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
 
     session.emit('http-error', { request: MitmRequestContext.toEmittedResource(context), error });
 
-    if (!(error as any)?.isLogged) {
-      log.error(`MitmWebSocket.${errorType}`, {
+    if (!error[hasBeenLoggedSymbol]) {
+      log.info(`MitmWebSocketUpgrade.${errorType}`, {
         sessionId,
         error,
         url,

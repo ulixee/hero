@@ -2,6 +2,8 @@
 import ILog, { ILogData } from '@secret-agent/core-interfaces/ILog';
 import { inspect } from 'util';
 
+const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
+
 let logId = 0;
 class Log implements ILog {
   public readonly level: string = process.env.DEBUG ? 'stats' : 'error';
@@ -81,6 +83,10 @@ class Log implements ILog {
         if (value === undefined || value === null) continue;
         if (value instanceof Error) {
           printData[key] = value.toString();
+          Object.defineProperty(value, hasBeenLoggedSymbol, {
+            enumerable: false,
+            value: true,
+          });
           error = value;
         } else if ((value as any).toJSON) {
           printData[key] = (value as any).toJSON();
@@ -96,12 +102,14 @@ class Log implements ILog {
 
       const params = Object.keys(printData).length ? [printData] : [];
       if (error) params.push(error);
+      const useColors =
+        process.env.NODE_DISABLE_COLORS !== 'true' && process.env.NODE_DISABLE_COLORS !== '1';
       // eslint-disable-next-line no-console
       console.log(
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${
           entry.action
         }`,
-        ...params.map(x => inspect(x, false, null, true)),
+        ...params.map(x => inspect(x, false, null, useColors)),
       );
     }
     LogEvents.broadcast(entry);
@@ -146,7 +154,7 @@ class LogEvents {
   }
 }
 
-export { LogEvents, loggerSessionIdNames };
+export { LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
   logCreator = builder;

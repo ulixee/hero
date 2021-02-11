@@ -39,7 +39,7 @@ export default interface IHttpResourceLoadDetails {
   responseTrailers?: IResourceHeaders;
   resourceType?: ResourceType;
   browserRequestId?: string;
-  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'memory';
   browserLoadFailure?: string;
   browserBlockedReason?: string;
   browserCanceled?: boolean;

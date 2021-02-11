@@ -1,4 +1,4 @@
-proxyFunction(window.Error, 'captureStackTrace', (target, thisArg, argArray) => {
+proxyFunction(self.Error, 'captureStackTrace', (target, thisArg, argArray) => {
   if (argArray.length < 1) return target.apply(thisArg, argArray);
 
   const [addToObject] = argArray;

@@ -246,6 +246,7 @@ function sort() {
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
+    await tab.puppetPage.frames[3].waitForLoad();
     const frames = state.db.frames.all();
     expect(frames).toHaveLength(4);
     const test1 = frames.find(x => x.name === 'test1');

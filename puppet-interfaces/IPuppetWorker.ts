@@ -3,9 +3,9 @@ import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter
 export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
   id: string;
   url: string;
-  type: string;
+  type: 'service_worker' | 'worker';
   isReady: Promise<Error | null>;
-  evaluate<T>(expression: string): Promise<T>;
+  evaluate<T>(expression: string, isInitializationScript?: boolean): Promise<T>;
 }
 
 export interface IPuppetWorkerEvents {

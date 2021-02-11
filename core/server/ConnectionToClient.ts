@@ -101,15 +101,22 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public logUnhandledError(error: Error, fatalError = false): void {
     if (fatalError) {
-      log.error('Client.UnhandledError(fatal)', { clientError: error, sessionId: null });
+      log.error('ConnectionToClient.UnhandledError(fatal)', {
+        clientError: error,
+        sessionId: null,
+      });
     } else {
-      log.error('Client.UnhandledErrorOrRejection', { clientError: error, sessionId: null });
+      log.error('ConnectionToClient.UnhandledErrorOrRejection', {
+        clientError: error,
+        sessionId: null,
+      });
     }
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
+    const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
     clearTimeout(this.autoShutdownTimer);
     const closeAll: Promise<any>[] = [];
     for (const id of this.sessionIds) {
@@ -119,6 +126,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     await Promise.all(closeAll);
     this.isPersistent = false;
     this.emit('close', { fatalError });
+    log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
   }
 
   public isActive() {
@@ -145,6 +153,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       blockedResourceTypes: session.options.blockedResourceTypes,
       upstreamProxyUrl: session.upstreamProxyUrl,
       userAgentString: session.browserEmulator.userAgentString,
+      osPlatform: session.browserEmulator.osPlatform,
     };
   }
 

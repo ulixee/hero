@@ -59,7 +59,7 @@ jobs:
   test:
     name: Test Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
     needs: lint
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false

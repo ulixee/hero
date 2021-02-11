@@ -47,6 +47,7 @@ describe('basic Core tests', () => {
 
     expect(shutdownSpy).toHaveBeenCalledTimes(1);
     expect(connectionCloseSpy).toHaveBeenCalled();
+    await Core.shutdown();
   });
 
   it('will not shutdown if start called and there are no open connections', async () => {

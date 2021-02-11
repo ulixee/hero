@@ -49,10 +49,13 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       const worker = page.workers[0];
       expect(worker.url).toContain('worker.js');
 
-      await worker.isReady;
-
+      // don't have a way to determine if the worker is loaded yet
+      for (let i = 0; i < 10; i += 1) {
+        const isReady = await worker.evaluate<boolean>('!!self.workerFunction');
+        if (isReady) break;
+        await new Promise(setImmediate);
+      }
       expect(await worker.evaluate(`self.workerFunction()`)).toBe('worker function result');
-
       await page.goto(server.emptyPage);
       expect(page.workers.length).toBe(0);
     });

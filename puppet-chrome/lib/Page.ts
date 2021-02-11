@@ -24,6 +24,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IRect from '@secret-agent/core-interfaces/IRect';
+import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import { CDPSession } from './CDPSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -50,6 +51,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
   ) => Promise<void>;
+
+  public workerInitializeFn?: (worker: IPuppetWorker) => Promise<void>;
 
   public cdpSession: CDPSession;
   public targetId: string;
@@ -327,30 +330,31 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
   }
 
-  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent): Promise<void> {
+  private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent): Promise<any> {
     const { sessionId, targetInfo, waitingForDebugger } = event;
 
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
 
     if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
-      this.browserContext.onWorkerAttached(cdpSession, targetInfo.targetId, this.targetId);
+      const targetId = targetInfo.targetId;
+
+      this.browserContext.onWorkerAttached(cdpSession, targetId, this.targetId);
       const worker = new Worker(
         this.browserContext,
         this.networkManager,
         cdpSession,
+        this.workerInitializeFn,
         this.logger,
         targetInfo,
       );
-      const targetId = targetInfo.targetId;
       this.workersById.set(targetId, worker);
 
       worker.on('console', this.emit.bind(this, 'console'));
       worker.on('page-error', this.emit.bind(this, 'page-error'));
       worker.on('close', () => this.workersById.delete(targetId));
 
-      // TODO: pause for initialization by core/Tab?
       this.emit('worker', { worker });
-      return Promise.resolve();
+      return worker.isReady;
     }
 
     if (waitingForDebugger) {

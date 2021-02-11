@@ -6,6 +6,18 @@ Instances of this class are associated with a resource returned from `window.wai
 
 ## Properties
 
+### browserServedFromCache
+
+Will have a value if http response was served from a browser cache.
+
+#### **Returns** `Promise<null | 'service-worker' | 'disk' | 'prefetch' | 'memory'>`
+
+### browserLoadFailure
+
+Will have a value if an http error occurred loading this request.
+
+#### **Returns** `Promise<string | null>`
+
 ### headers
 
 Retrieve the actual headers returned to the client (order and casing is preserved)
@@ -33,6 +45,8 @@ IPv4/6 and port of remote socket. `192.168.172.2:5001`
 ### statusCode
 
 Http response status code.
+
+NOTE: this value might be null if no HTTP response occurred, or an error occurred.
 
 #### **Returns** `Promise<number>`
 

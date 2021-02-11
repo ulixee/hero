@@ -23,6 +23,7 @@ import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSe
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import SessionState from './SessionState';
 import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
@@ -294,10 +295,21 @@ export default class Session extends TypedEventEmitter<{
     return tab;
   }
 
+  private async onNewWorker(_: Tab, worker: IPuppetWorker) {
+    const newWorkerInjectedScripts = await this.browserEmulator.newWorkerInjectedScripts(
+      worker.type,
+    );
+    for (const newDocumentScript of newWorkerInjectedScripts) {
+      // overrides happen in main frame
+      await worker.evaluate(newDocumentScript.script, true);
+    }
+  }
+
   private registerTab(tab: Tab, page: IPuppetPage) {
     this.tabs.push(tab);
     tab.on('close', this.removeTab.bind(this, tab));
     page.popupInitializeFn = this.onNewTab.bind(this, tab);
+    page.workerInitializeFn = this.onNewWorker.bind(this, tab);
     return tab;
   }
 
