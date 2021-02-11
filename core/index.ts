@@ -1,6 +1,6 @@
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@secret-agent/core-interfaces/Location';
-import Log from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
 import Session from './lib/Session';
@@ -98,8 +98,7 @@ export default class Core {
   public static logUnhandledError(clientError: Error, fatalError = false): void {
     if (fatalError) {
       log.error('UnhandledError(fatal)', { clientError, sessionId: null });
-    } else {
-      if ((clientError as any).handled) return;
+    } else if (!clientError[hasBeenLoggedSymbol]) {
       log.error('UnhandledErrorOrRejection', { clientError, sessionId: null });
     }
   }

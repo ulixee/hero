@@ -1,5 +1,5 @@
 import * as http from 'http';
-import Log from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import { URL } from 'url';
@@ -119,9 +119,6 @@ export default class HttpRequestHandler extends BaseHttpHandler {
   }
 
   protected onError(kind: string, error: Error): void {
-    if ((error as any).handled) return;
-    (error as any).handled = true;
-
     const isCanceled = error instanceof CanceledPromiseError;
 
     const url = this.context.url.href;
@@ -140,8 +137,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       status = 444;
       message = undefined;
     }
-    if (!isCanceled && !requestSession.isClosing) {
-      log.error(`MitmHttpRequest.${kind}`, {
+    if (!isCanceled && !requestSession.isClosing && !error[hasBeenLoggedSymbol]) {
+      log.info(`MitmHttpRequest.${kind}`, {
         sessionId,
         request: `${method}: ${url}`,
         error,

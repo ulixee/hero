@@ -2,6 +2,8 @@
 import ILog, { ILogData } from '@secret-agent/core-interfaces/ILog';
 import { inspect } from 'util';
 
+const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
+
 let logId = 0;
 class Log implements ILog {
   public readonly level: string = process.env.DEBUG ? 'stats' : 'error';
@@ -81,6 +83,10 @@ class Log implements ILog {
         if (value === undefined || value === null) continue;
         if (value instanceof Error) {
           printData[key] = value.toString();
+          Object.defineProperty(value, hasBeenLoggedSymbol, {
+            enumerable: false,
+            value: true,
+          });
           error = value;
         } else if ((value as any).toJSON) {
           printData[key] = (value as any).toJSON();
@@ -148,7 +154,7 @@ class LogEvents {
   }
 }
 
-export { LogEvents, loggerSessionIdNames };
+export { LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
   logCreator = builder;
