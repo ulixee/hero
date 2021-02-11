@@ -96,12 +96,13 @@ class Log implements ILog {
 
       const params = Object.keys(printData).length ? [printData] : [];
       if (error) params.push(error);
+      const useColors = process.env.NODE_DISABLE_COLORS !== 'true';
       // eslint-disable-next-line no-console
       console.log(
         `${entry.timestamp.toISOString()} ${entry.level.toUpperCase()} [${printablePath}] ${
           entry.action
         }`,
-        ...params.map(x => inspect(x, false, null, true)),
+        ...params.map(x => inspect(x, false, null, useColors)),
       );
     }
     LogEvents.broadcast(entry);

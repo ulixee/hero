@@ -7,6 +7,7 @@ import Log from '@secret-agent/commons/Logger';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -60,7 +61,14 @@ export default abstract class ConnectionToCore {
         if (err) throw err;
         return this.internalSendRequestAndWait({
           command: 'connect',
-          args: [this.options],
+          args: [
+            <ICoreConfigureOptions>{
+              coreServerPort: this.options.coreServerPort,
+              browserEmulatorIds: this.options.browserEmulatorIds,
+              localProxyPortStart: this.options.localProxyPortStart,
+              sessionsDir: this.options.sessionsDir,
+            },
+          ],
         });
       })
       .then(result => this.onConnected(result.data))
