@@ -220,6 +220,9 @@ export default class SessionState {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
+    if (!this.resources.some(x => x.id === resourceEvent.id)) {
+      this.resources.push(resource);
+    }
     const navigations = this.navigationsByTabId[tabId];
     if (!navigations) return;
 
@@ -301,7 +304,7 @@ export default class SessionState {
       },
     } as IResourceMeta;
 
-    if (response?.statusCode) {
+    if (response?.statusCode || response?.browserServedFromCache || response?.browserLoadFailure) {
       resource.response = response;
       if (response.url) resource.url = response.url;
       else resource.response.url = request.url;

@@ -159,6 +159,8 @@ export default class MitmRequestContext {
       headers: ctx.responseHeaders,
       trailers: ctx.responseTrailers,
       timestamp: ctx.responseTime?.toISOString(),
+      browserServedFromCache: ctx.browserServedFromCache,
+      browserLoadFailure: ctx.browserLoadFailure,
       remoteAddress: ctx.remoteAddress,
     } as IResourceResponse;
 
@@ -181,8 +183,6 @@ export default class MitmRequestContext {
       executionMillis: (ctx.responseTime ?? new Date()).getTime() - ctx.requestTime.getTime(),
       isHttp2Push: ctx.isHttp2Push,
       browserBlockedReason: ctx.browserBlockedReason,
-      browserServedFromCache: ctx.browserServedFromCache,
-      browserLoadFailure: ctx.browserLoadFailure,
       browserCanceled: ctx.browserCanceled,
     };
   }

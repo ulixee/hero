@@ -63,8 +63,6 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       didBlockResource: boolean;
       browserRequestId?: string;
       isHttp2Push: boolean;
-      browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
-      browserLoadFailure?: string;
       browserBlockedReason?: string;
       browserCanceled?: boolean;
     },
@@ -80,6 +78,12 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
           message: error.message,
           ...error,
         });
+    }
+    let contentEncoding: string;
+    if (meta.response && meta.response.headers) {
+      contentEncoding = <string>(
+        (meta.response.headers['Content-Encoding'] ?? meta.response.headers['content-encoding'])
+      );
     }
     return this.queuePendingInsert([
       meta.id,
@@ -101,7 +105,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.response ? JSON.stringify(meta.response.headers ?? {}) : undefined,
       meta.response ? JSON.stringify(meta.response.trailers ?? {}) : undefined,
       meta.response?.timestamp,
-      meta.response?.headers['Content-Encoding'] ?? meta.response?.headers['content-encoding'],
+      contentEncoding,
       meta.response ? body : undefined,
       extras.socketId,
       extras.clientAlpn,
@@ -111,8 +115,8 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.didBlockResource ? 1 : 0,
       JSON.stringify(extras.originalHeaders ?? {}),
       errorString,
-      extras.browserServedFromCache,
-      extras.browserLoadFailure,
+      meta.response?.browserServedFromCache,
+      meta.response?.browserLoadFailure,
       extras.browserBlockedReason,
       extras.browserCanceled ? 1 : 0,
     ]);

@@ -412,7 +412,7 @@ export interface IRequestSessionResponseEvent extends IRequestSessionRequestEven
   body: Buffer;
   redirectedToUrl?: string;
   executionMillis: number;
-  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserServedFromCache?: IHttpResourceLoadDetails['browserServedFromCache'];
   browserLoadFailure?: string;
   browserBlockedReason?: string;
   browserCanceled?: boolean;

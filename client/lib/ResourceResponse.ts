@@ -2,6 +2,7 @@ import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstan
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import CoreSession from './CoreTab';
 
 const { getState, setState } = StateMachine<ResourceResponse, IState>();
@@ -18,12 +19,24 @@ const propertyKeys: (keyof ResourceResponse)[] = [
   'remoteAddress',
   'statusCode',
   'statusMessage',
+  'browserLoadFailure',
+  'browserServedFromCache',
   'data',
 ];
 
 export default class ResourceResponse {
   constructor() {
     initializeConstantsAndProperties(this, [], propertyKeys);
+  }
+
+  public get browserServedFromCache(): Promise<
+    null | IHttpResourceLoadDetails['browserServedFromCache']
+  > {
+    return getResponseProperty(this, 'browserServedFromCache');
+  }
+
+  public get browserLoadFailure(): Promise<string> {
+    return getResponseProperty(this, 'browserLoadFailure');
   }
 
   public get headers(): Promise<IResourceHeaders> {
