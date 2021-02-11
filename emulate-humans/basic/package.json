@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/emulate-humans-basic",
-  "version": "1.3.0-alpha.2",
+  "version": "1.3.0-alpha.3",
   "description": "Very basic HumanEmulator for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.3.0-alpha.2"
+    "@secret-agent/core-interfaces": "1.3.0-alpha.3"
   }
 }

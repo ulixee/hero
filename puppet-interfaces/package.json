@@ -1,8 +1,8 @@
 {
   "name": "@secret-agent/puppet-interfaces",
-  "version": "1.3.0-alpha.2",
+  "version": "1.3.0-alpha.3",
   "description": "Puppet interfaces",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.3.0-alpha.2"
+    "@secret-agent/core-interfaces": "1.3.0-alpha.3"
   }
 }

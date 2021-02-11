@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.2...v1.3.0-alpha.3) (2021-02-11)
+
+
+### Bug Fixes
+
+* **docs:** fix port param in remote docs ([3b452d8](https://github.com/ulixee/secret-agent/commit/3b452d871e3778c6ca6fb1d19ec0b44bdbec4da7))
+
+
+
+
+
 # [1.3.0-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.1...v1.3.0-alpha.2) (2021-02-09)
 
 

@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/puppet",
-  "version": "1.3.0-alpha.2",
+  "version": "1.3.0-alpha.3",
   "description": "Puppet driver",
   "dependencies": {
-    "@secret-agent/commons": "1.3.0-alpha.2",
-    "@secret-agent/core-interfaces": "1.3.0-alpha.2",
-    "@secret-agent/puppet-chrome": "1.3.0-alpha.2",
-    "@secret-agent/puppet-interfaces": "1.3.0-alpha.2",
+    "@secret-agent/commons": "1.3.0-alpha.3",
+    "@secret-agent/core-interfaces": "1.3.0-alpha.3",
+    "@secret-agent/puppet-chrome": "1.3.0-alpha.3",
+    "@secret-agent/puppet-interfaces": "1.3.0-alpha.3",
     "extract-zip": "^2.0.1",
     "https-proxy-agent": "5.0.0",
     "progress": "^2.0.3",
@@ -14,9 +14,9 @@
     "rimraf": "^3.0.2"
   },
   "devDependencies": {
-    "@secret-agent/emulate-chrome-80": "1.3.0-alpha.2",
-    "@secret-agent/emulate-chrome-83": "1.3.0-alpha.2",
-    "@secret-agent/testing": "1.3.0-alpha.2",
+    "@secret-agent/emulate-chrome-80": "1.3.0-alpha.3",
+    "@secret-agent/emulate-chrome-83": "1.3.0-alpha.3",
+    "@secret-agent/testing": "1.3.0-alpha.3",
     "ws": "^7.3.1"
   }
 }
