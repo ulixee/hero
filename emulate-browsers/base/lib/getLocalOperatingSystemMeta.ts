@@ -1,8 +1,8 @@
-import Os from 'os';
+import * as Os from 'os';
 import { convertVersionsToTree, getClosestNumberMatch } from './VersionUtils';
-import darwinToMacOsVersionMap from '../data/darwinToMacOsVersionMap.json';
-import macOsVersionAliasMap from '../data/macOsVersionAliasMap.json';
-import windowsToWindowsVersionMap from '../data/windowsToWindowsVersionMap.json';
+import * as darwinToMacOsVersionMap from '../data/darwinToMacOsVersionMap.json';
+import * as macOsVersionAliasMap from '../data/macOsVersionAliasMap.json';
+import * as windowsToWindowsVersionMap from '../data/windowsToWindowsVersionMap.json';
 
 export default function getLocalOperatingSystemMeta() {
   const platform = Os.platform();

@@ -1,4 +1,4 @@
-import Bezier from 'bezier-js';
+import * as Bezier from 'bezier-js';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 
 const sub = (a: IPoint, b: IPoint): IPoint => ({ x: a.x - b.x, y: a.y - b.y });

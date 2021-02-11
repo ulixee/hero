@@ -1,5 +1,7 @@
 *.ts
 *.js
+!default-agent.js
+!show-browser.js
 !example.org.ts
 !proxy-example.mjs
 !news.ycombinator.com.ts

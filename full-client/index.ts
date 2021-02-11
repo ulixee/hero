@@ -1,4 +1,4 @@
-import 'source-map-support/register';
+import '@secret-agent/commons/SourceMapSupport';
 import agent, {
   ConnectionFactory,
   IConnectionToCoreOptions,

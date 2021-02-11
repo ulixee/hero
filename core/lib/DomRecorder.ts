@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import Log from '@secret-agent/commons/Logger';
 import { removeEventListeners } from '@secret-agent/commons/eventUtils';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';

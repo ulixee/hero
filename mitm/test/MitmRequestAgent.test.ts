@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import { runHttpsServer } from '@secret-agent/testing/helpers';
-import WebSocket from 'ws';
-import HttpProxyAgent from 'http-proxy-agent';
+import * as WebSocket from 'ws';
+import * as HttpProxyAgent from 'http-proxy-agent';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';

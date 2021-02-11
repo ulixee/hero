@@ -8,7 +8,7 @@ import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
 import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
-import net from 'net';
+import * as net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Log from '@secret-agent/commons/Logger';

@@ -1,9 +1,9 @@
 // @ts-ignore
-import nodeCommon from '_http_common';
+import * as nodeCommon from '_http_common';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
-import http2 from 'http2';
+import * as http2 from 'http2';
 import OriginType from '@secret-agent/core-interfaces/OriginType';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';

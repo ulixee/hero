@@ -1,6 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
-import Fs from 'fs';
-import fpscanner from 'fpscanner';
+import * as Fs from 'fs';
+import * as fpscanner from 'fpscanner';
 import Core, { Session } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Handler } from '../index';

@@ -123,6 +123,7 @@ module.exports = {
     '**/test/assets/**',
     'build',
     'build-dist',
+    'examples/*.js',
     '**/build/**',
     '**/dist/**',
     '**/*.md',

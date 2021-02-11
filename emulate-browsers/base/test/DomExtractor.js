@@ -433,7 +433,8 @@ function DomExtractor(selfName, pageMeta = {}) {
           return 'REF: ' + loadedObjects.get(value);
         }
 
-        if (value.join !== undefined) { // is array
+        if (value.join !== undefined) {
+          // is array
           for (const prop in value) {
             values.push(getJsonUsableValue(value[prop]));
           }
@@ -446,7 +447,7 @@ function DomExtractor(selfName, pageMeta = {}) {
           }
         }
         return `{${values.map(x => x.toString()).join(',')}}`;
-      } else if (typeof(value) === 'function') {
+      } else if (typeof value === 'function') {
         return value.toString();
       } else if (value && typeof value === 'string') {
         if (pageUrl) {
@@ -515,7 +516,7 @@ function DomExtractor(selfName, pageMeta = {}) {
   }
 
   async function runAndSave() {
-    self.addEventListener('unhandledrejection', function(promiseRejectionEvent) {
+    self.addEventListener('unhandledrejection', function (promiseRejectionEvent) {
       console.log(promiseRejectionEvent);
     });
 
@@ -555,3 +556,4 @@ function DomExtractor(selfName, pageMeta = {}) {
 }
 
 module.exports = DomExtractor;
+if (typeof exports !== 'undefined') exports.default = DomExtractor;

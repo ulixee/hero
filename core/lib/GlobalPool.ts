@@ -6,7 +6,7 @@ import Log from '@secret-agent/commons/Logger';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import Puppet from '@secret-agent/puppet';
-import Os from 'os';
+import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import DefaultBrowser from '@secret-agent/emulate-chrome-83';
 import SessionsDb from '../dbs/SessionsDb';

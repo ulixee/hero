@@ -1,4 +1,4 @@
-import Fs from 'fs';
+import * as Fs from 'fs';
 import getLocalOperatingSystemMeta from './getLocalOperatingSystemMeta';
 import { convertVersionsToTree, getClosestNumberMatch } from './VersionUtils';
 

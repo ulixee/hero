@@ -7,8 +7,8 @@ import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import { GlobalPool } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
-import DomExtractor from './DomExtractor';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
+import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
 

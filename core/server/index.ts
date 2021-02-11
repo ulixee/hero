@@ -1,5 +1,5 @@
 import { AddressInfo, ListenOptions, Socket } from 'net';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
 import { createPromise } from '@secret-agent/commons/utils';

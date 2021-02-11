@@ -1,8 +1,8 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { ConnectionOptions } from 'tls';
-import moment from 'moment';
-import net from 'net';
+import * as moment from 'moment';
+import * as net from 'net';
 import { promises as dns } from 'dns';
 import DnsOverTlsSocket from './DnsOverTlsSocket';
 import RequestSession from '../handlers/RequestSession';

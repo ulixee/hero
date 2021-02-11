@@ -1,4 +1,4 @@
-import 'source-map-support/register';
+import '@secret-agent/commons/SourceMapSupport';
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import Log from '@secret-agent/commons/Logger';
 import Core from '.';

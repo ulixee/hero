@@ -14,7 +14,7 @@ import type ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import type IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import type IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import moment from 'moment';
+import * as moment from 'moment';
 import type { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import type TabNavigations from './TabNavigations';
 

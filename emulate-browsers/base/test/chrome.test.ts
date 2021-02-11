@@ -1,12 +1,12 @@
 import * as Helpers from '@secret-agent/testing/helpers';
-import windowChrome from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-chrome.json';
+import * as windowChrome from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-chrome.json';
 import { inspect } from 'util';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import { GlobalPool } from '@secret-agent/core';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
-import DomExtractor from './DomExtractor';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
+import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
 

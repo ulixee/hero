@@ -1,8 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
 import { createPromise } from '@secret-agent/commons/utils';
-import http2 from 'http2';
+import * as http2 from 'http2';
 import * as stream from 'stream';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import { getTlsConnection, httpGetWithSocket } from '@secret-agent/testing/helpers';
 import MitmSocket from '../index';
 

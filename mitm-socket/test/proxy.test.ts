@@ -1,15 +1,15 @@
 import { Helpers } from '@secret-agent/testing';
-import Proxy from 'proxy';
+import * as Proxy from 'proxy';
 import * as http from 'http';
 import {
   getTlsConnection,
   httpGetWithSocket,
   readableToBuffer,
 } from '@secret-agent/testing/helpers';
-import WebSocket from 'ws';
-import socks5 from 'simple-socks';
+import * as WebSocket from 'ws';
+import * as socks5 from 'simple-socks';
 import { createPromise } from '@secret-agent/commons/utils';
-import http2 from 'http2';
+import * as http2 from 'http2';
 import MitmSocket from '../index';
 
 afterAll(Helpers.afterAll);

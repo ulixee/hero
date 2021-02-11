@@ -1,5 +1,5 @@
-import fullClient from './index.js';
+import cjsImport from './index.js';
 
 export * from './index.js';
 
-export default fullClient.default;
+export default cjsImport.default;

@@ -1,4 +1,5 @@
-import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
+import * as Database from 'better-sqlite3';
+import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 import Log from '@secret-agent/commons/Logger';
 import CertificatesTable from '../models/CertificatesTable';

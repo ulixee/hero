@@ -1,5 +1,5 @@
 import * as http from 'http';
-import http2 from 'http2';
+import * as http2 from 'http2';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import MitmSocket from '@secret-agent/mitm-socket';
 import RequestSession from '../handlers/RequestSession';

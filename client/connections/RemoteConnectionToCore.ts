@@ -1,5 +1,5 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import { createPromise } from '@secret-agent/commons/utils';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
