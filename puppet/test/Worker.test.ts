@@ -49,7 +49,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       const worker = page.workers[0];
       expect(worker.url).toContain('worker.js');
 
-      await new Promise(setImmediate);
+      await worker.isReady;
 
       expect(await worker.evaluate(`self.workerFunction()`)).toBe('worker function result');
 

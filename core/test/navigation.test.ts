@@ -440,6 +440,7 @@ describe('PaintingStable tests', () => {
     koaServer.get('/grid/:filename', async ctx => {
       const filename = ctx.params.filename;
       if (filename === 'data.json') {
+        await new Promise(resolve => setTimeout(resolve, 100));
         const records = [];
         for (let i = 0; i < 200; i += 1) {
           records.push(

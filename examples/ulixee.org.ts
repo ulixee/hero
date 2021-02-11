@@ -27,4 +27,5 @@ import { Handler, Agent } from 'secret-agent';
   });
 
   await handler.waitForAllDispatches();
+  await handler.close();
 })();

@@ -18,9 +18,10 @@
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
 import { EventEmitter } from 'events';
-import { IConnectionCallback } from '@secret-agent/puppet-interfaces/IConnectionCallback';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { createPromise } from '@secret-agent/commons/utils';
 import ProtocolError from './ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;
@@ -39,7 +40,10 @@ export class CDPSession extends EventEmitter {
 
   private readonly sessionId: string;
   private readonly targetType: string;
-  private readonly pendingMessages: Map<number, IConnectionCallback> = new Map();
+  private readonly pendingMessages: Map<
+    number,
+    { resolvable: IResolvablePromise<any>; method: string }
+  > = new Map();
 
   constructor(connection: Connection, targetType: string, sessionId: string) {
     super();
@@ -54,7 +58,7 @@ export class CDPSession extends EventEmitter {
     sendInitiator?: object,
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
     if (!this.isConnected()) {
-      throw new CanceledPromiseError(`Session closed before api call (${method})`);
+      throw new CanceledPromiseError(`${method} called after session closed (${this.sessionId})`);
     }
 
     const message = {
@@ -71,28 +75,29 @@ export class CDPSession extends EventEmitter {
       },
       sendInitiator,
     );
+    const resolvable = createPromise<ProtocolMapping.Commands[T]['returnType']>();
 
-    return await new Promise((resolve, reject) => {
-      this.pendingMessages.set(id, { resolve, reject, error: new CanceledPromiseError(), method });
-    });
+    this.pendingMessages.set(id, { resolvable, method });
+    return await resolvable.promise;
   }
 
   onMessage(object: ICDPSendResponseMessage & ICDPEventMessage): void {
     this.messageEvents.emit('receive', { ...object });
     if (!object.id) {
-      setImmediate(() => this.emit(object.method, object.params));
+      this.emit(object.method, object.params);
       return;
     }
 
-    const callback = this.pendingMessages.get(object.id);
-    if (!callback) return;
+    const pending = this.pendingMessages.get(object.id);
+    if (!pending) return;
+
+    const { resolvable, method } = pending;
 
     this.pendingMessages.delete(object.id);
     if (object.error) {
-      const protocolError = new ProtocolError(callback.error.stack, callback.method, object.error);
-      setImmediate(() => callback.reject(protocolError));
+      resolvable.reject(new ProtocolError(resolvable.stack, method, object.error));
     } else {
-      setImmediate(() => callback.resolve(object.result));
+      resolvable.resolve(object.result);
     }
   }
 
@@ -105,10 +110,13 @@ export class CDPSession extends EventEmitter {
   }
 
   onClosed(): void {
-    for (const callback of this.pendingMessages.values()) {
-      const error = callback.error;
-      error.message = `Cancel Pending Promise (${callback.method}): Target closed.`;
-      callback.reject(error);
+    for (const { resolvable, method } of this.pendingMessages.values()) {
+      const error = new CanceledPromiseError(`Cancel Pending Promise (${method}): Target closed.`);
+      error.stack += `\n${'------DEVTOOLS'.padEnd(
+        50,
+        '-',
+      )}\n${`------DEVTOOLS-SESSION-ID =${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
+      resolvable.reject(error);
     }
     this.pendingMessages.clear();
     this.connection = null;

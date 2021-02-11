@@ -213,5 +213,37 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       const lastClicked = await tab.getJsValue('lastClicked');
       expect(lastClicked.value).toBe('clickedit');
     }, 60e3);
+
+    it('should cancel pending interactions after a page clears', async () => {
+      koaServer.get('/redirect-on-move', ctx => {
+        ctx.body = `
+        <body>
+            <div style="height: 1000px"></div>
+            <div><button id="button-1">Click me</button></div>
+          <script>
+              document.addEventListener('mousemove', () => {
+                 window.location = '${koaServer.baseUrl}/';
+              })
+          </script>
+        </body>
+      `;
+      });
+      const meta = await connection.createSession({ humanEmulatorId });
+      const session = Session.get(meta.sessionId);
+      Helpers.needsClosing.push(session);
+      const tab = Session.getTab(meta);
+      await tab.goto(`${koaServer.baseUrl}/redirect-on-move`);
+      await tab.waitForLoad('DomContentLoaded');
+      await tab.interact([
+        {
+          command: InteractionCommand.click,
+          mousePosition: ['window', 'document', ['querySelector', '#button-1']],
+        },
+      ]);
+
+      await tab.waitForLocation('change');
+      const url = await tab.url;
+      expect(url).toBe(`${koaServer.baseUrl}/`);
+    });
   },
 );

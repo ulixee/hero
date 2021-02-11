@@ -44,6 +44,7 @@ export class PipeTransport
         log.error('PipeTransport.WriteError', { error, sessionId: null }),
       ),
     );
+    this.emit = this.emit.bind(this);
   }
 
   send(message: string) {
@@ -68,15 +69,19 @@ export class PipeTransport
       return;
     }
     const message = this.pendingMessage + buffer.toString(undefined, 0, end);
-    this.emit('message', message);
+    this.emitMessage(message);
 
     let start = end + 1;
     end = buffer.indexOf('\0', start);
     while (end !== -1) {
-      this.emit('message', buffer.toString(undefined, start, end));
+      this.emitMessage(buffer.toString(undefined, start, end));
       start = end + 1;
       end = buffer.indexOf('\0', start);
     }
     this.pendingMessage = buffer.toString(undefined, start);
+  }
+
+  private emitMessage(message: string): void {
+    setImmediate(this.emit, 'message', message);
   }
 }
