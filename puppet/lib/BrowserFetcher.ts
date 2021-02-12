@@ -23,7 +23,7 @@ import * as https from 'https';
 import * as http from 'http';
 
 import * as extractZip from 'extract-zip';
-import removeRecursive from 'rimraf';
+import * as removeRecursive from 'rimraf';
 import * as URL from 'url';
 import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
 import { getProxyForUrl } from 'proxy-from-env';

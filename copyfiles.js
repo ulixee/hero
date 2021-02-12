@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import/no-extraneous-dependencies,import/no-self-import
 const copyfiles = require('copyfiles');
 const Fs = require('fs');
 const pkg = require('./package.json');

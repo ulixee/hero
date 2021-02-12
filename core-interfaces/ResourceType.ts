@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import Protocol from 'devtools-protocol';
 import Network = Protocol.Network;
 import DevtoolsResourceType = Network.ResourceType;

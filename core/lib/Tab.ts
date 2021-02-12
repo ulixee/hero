@@ -690,13 +690,6 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         'Resource failed to load, but the reason was not provided by devtools.',
       );
     }
-    if (
-      resource.resourceType === 'Document' &&
-      resource.browserRequestId === this.navigations.top?.browserRequestId &&
-      this.navigations?.top?.resourceId?.isResolved === false
-    ) {
-      this.navigations.top.navigationError = loadError;
-    }
 
     this.session.mitmRequestSession.browserRequestFailed({
       resource,
@@ -706,6 +699,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
     const resources = this.sessionState.getBrowserRequestResources(event.resource.browserRequestId);
     if (resources?.length) {
+      // this function will resolve any pending resourceId for a navigation
       this.sessionState.captureResourceError(
         this.id,
         MitmRequestContext.toEmittedResource({ id: resources[0].resourceId, ...resource } as any),
