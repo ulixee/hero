@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.3.0-alpha.3",
+  "version": "1.3.0-alpha.4",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.3.0-alpha.3",
-    "typeson": "^5.18.2",
+    "@secret-agent/core-interfaces": "1.3.0-alpha.4",
     "source-map-support": "^0.5.19",
+    "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.38"
   },
   "devDependencies": {

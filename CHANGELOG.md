@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.3...v1.3.0-alpha.4) (2021-02-15)
+
+
+### Bug Fixes
+
+* **core:** fix core shutdown test ([28dd09a](https://github.com/ulixee/secret-agent/commit/28dd09af20572a1ac2962abcde20599f119a3508))
+* **core:** only reject navigation with errors ([7e7cfd3](https://github.com/ulixee/secret-agent/commit/7e7cfd37cff860422d8c46bed90eba31652df9d5)), closes [#153](https://github.com/ulixee/secret-agent/issues/153)
+* **core/client:** export usable mjs/cjs ([ca149ef](https://github.com/ulixee/secret-agent/commit/ca149efbfbdf03da0fda7d127348e5de6f2a4f8b))
+* **emulate:** clean toString stack trace ([21582b3](https://github.com/ulixee/secret-agent/commit/21582b31d891d19299c22ddf30e15a6c38bf242a))
+* **logger:** don’t use colors if disalbed in node ([c3af5a0](https://github.com/ulixee/secret-agent/commit/c3af5a07984865bfa6f5278fe442bea80f00166f))
+* **mitm:** change log level of mitm request errors ([da9f98f](https://github.com/ulixee/secret-agent/commit/da9f98fe3df7feb79585b686ab9fe0474dea9e27))
+* **puppet:** fix waiting for worker ready ([e511009](https://github.com/ulixee/secret-agent/commit/e51100900dd52c6962639bab240f1cdac24f5d50))
+
+
+### Features
+
+* **client:** add http cache and load failures ([571e64f](https://github.com/ulixee/secret-agent/commit/571e64f108df7a0cbfd32609c37ff76261014dc6))
+* **emulate:** workers run stealth scripts ([e6e845e](https://github.com/ulixee/secret-agent/commit/e6e845e68654c73ddaefe2110065a20d044f773d))
+
+
+
+
+
 # [1.3.0-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.2...v1.3.0-alpha.3) (2021-02-11)
 
 
