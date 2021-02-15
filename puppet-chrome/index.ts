@@ -3,6 +3,7 @@ import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
 import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
 import * as os from 'os';
 import * as Path from 'path';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 
@@ -44,11 +45,11 @@ const PuppetLauncher: IPuppetLauncher = {
     }
     return chromeArguments;
   },
-  async createPuppet(process: ILaunchedProcess, revision: string): Promise<IPuppetBrowser> {
+  async createPuppet(process: ILaunchedProcess, engine: IBrowserEngine): Promise<IPuppetBrowser> {
     const { transport, close } = process;
     try {
       const connection = new Connection(transport);
-      return await Browser.create(connection, revision, close);
+      return await Browser.create(connection, engine, close);
     } catch (error) {
       close();
       throw error;

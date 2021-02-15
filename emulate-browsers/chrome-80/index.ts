@@ -1,14 +1,14 @@
 import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
+  DataLoader,
   DnsOverTlsProviders,
+  DomDiffLoader,
   DomOverridesBuilder,
-  getEngineExecutablePath,
+  getEngine,
   getTcpSettingsForOs,
   modifyHeaders,
   parseNavigatorPlugins,
-  DataLoader,
-  DomDiffLoader,
 } from '@secret-agent/emulate-browsers-base';
 import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import { randomBytes } from 'crypto';
@@ -30,7 +30,7 @@ const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 
 const engineObj = {
   browser: config.browserEngine.name,
-  revision: config.browserEngine.revision,
+  version: config.browserEngine.version,
 };
 
 @BrowserEmulatorClassDecorator
@@ -38,10 +38,7 @@ export default class Chrome80 {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
-  public static engine = {
-    ...engineObj,
-    executablePath: process.env.CHROMIUM_80_BIN ?? getEngineExecutablePath(engineObj),
-  };
+  public static engine = getEngine(engineObj, process.env.CHROME_80_BIN);
 
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 

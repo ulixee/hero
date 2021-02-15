@@ -7,7 +7,8 @@
     "@secret-agent/core-interfaces": "1.3.1-alpha.0",
     "source-map-support": "^0.5.19",
     "typeson": "^5.18.2",
-    "typeson-registry": "^1.0.0-alpha.38"
+    "typeson-registry": "^1.0.0-alpha.38",
+    "https-proxy-agent": "^5.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^5.4.1"

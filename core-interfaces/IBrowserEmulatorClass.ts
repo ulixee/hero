@@ -4,7 +4,7 @@ import IUserAgentOption from './IUserAgentOption';
 export default interface IBrowserEmulatorClass {
   id: string;
   roundRobinPercent: number;
-  engine: { browser: string; executablePath: string; revision: string };
+  engine: { browser: string; executablePath: string; version: string };
   new (): IBrowserEmulator;
   userAgentOptions?: IUserAgentOption[];
 }

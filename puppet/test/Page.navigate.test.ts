@@ -52,7 +52,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     const options = {
-      CHROMIUM: browserEngine.browser === 'chromium',
+      CHROMIUM: browserEngine.browser === 'chromium' || browserEngine.browser === 'chrome',
       WEBKIT: browserEngine.browser === 'webkit',
       FIREFOX: browserEngine.browser === 'firefox',
     };
@@ -103,7 +103,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         let error = null;
         await page.goto(server.emptyPage).catch(e => (error = e));
         expect(error).not.toBe(null);
-        if (browserEngine.browser === 'chromium')
+        if (browserEngine.browser === 'chromium' || browserEngine.browser === 'chrome')
           expect(error.message).toContain('net::ERR_ABORTED');
         else if (browserEngine.browser === 'webkit')
           expect(error.message).toContain('Aborted: 204 No Content');

@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 14
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -65,7 +65,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: [12, 14]
+        node-version: [13, 14]
 
     runs-on: ${{ matrix.os }}
 
@@ -75,10 +75,12 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
-      - name: Download a single artifact
+
+      - name: Download built typescript files
         uses: actions/download-artifact@v2
         with:
           name: js-build
@@ -115,8 +117,18 @@ jobs:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
+      - name: Linux - Apt Install Chrome(s)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          set -x
+          for deb in /tmp/secret-agent/browser-installers/*.deb; do
+            sudo chown _apt "$deb"
+            echo "sudo apt -y install $deb"
+            sudo apt -y install "$deb"
+          done
+
       - name: Run tests
-        run: yarn jest --testTimeout=60000 --runInBand --detectOpenHandles
+        run: yarn jest --testTimeout=60000
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false
@@ -125,6 +137,6 @@ jobs:
       - name: Coverage
         run: npm -g install codecov && codecov
         working-directory: ./build
-        if: ${{ matrix.node-version == '12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.node-version == '14' && matrix.os == 'ubuntu-latest' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

@@ -1,5 +1,6 @@
 export default interface IBrowserEngine {
   browser: string;
-  revision: string;
+  version: string;
   executablePath: string;
+  extraLaunchArgs?: string[];
 }

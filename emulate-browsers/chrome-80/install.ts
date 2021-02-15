@@ -3,5 +3,5 @@ import * as config from './config.json';
 
 install({
   browser: config.browserEngine.name,
-  revision: config.browserEngine.revision,
+  version: config.browserEngine.version,
 });

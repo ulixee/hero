@@ -4,8 +4,8 @@
   "description": "EmulatorPlugin for Apple Safari version 13.0",
   "main": "index.js",
   "engine": {
-    "browser": "chromium",
-    "revision": "722234"
+    "browser": "chrome",
+    "version": "80.0.3987.162"
   },
   "dependencies": {
     "@secret-agent/commons": "1.3.1-alpha.0",

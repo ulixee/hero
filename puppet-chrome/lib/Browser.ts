@@ -5,6 +5,7 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
 import { CDPSession } from './CDPSession';
@@ -120,12 +121,18 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
 
   public static async create(
     connection: Connection,
-    revision: string,
+    engine: IBrowserEngine,
     closeCallback: () => void,
   ): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
 
-    const needsTargetDiscovery = revision === '722234';
+    let needsTargetDiscovery = false;
+    if (engine.browser === 'chromium') {
+      needsTargetDiscovery = Number(engine.version) <= Number('737027');
+    } else if (engine.browser === 'chrome') {
+      const versionParts = engine.version.split('.').map(Number);
+      needsTargetDiscovery = versionParts[0] < 83;
+    }
 
     return await browser.listen(needsTargetDiscovery);
   }

@@ -7,7 +7,8 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
 import launchProcess from './lib/launchProcess';
-import { getExecutablePath } from './lib/browserPaths';
+import { validateHostRequirements } from './lib/validateHostDependencies';
+import { EngineFetcher } from './lib/EngineFetcher';
 
 const { log } = Log(module);
 
@@ -83,27 +84,54 @@ export default class Puppet {
     const executablePath = this.engine.executablePath;
 
     if (!existsSync(executablePath)) {
-      const errorMessageLines = [
-        `Failed to launch ${this.engine.browser}@${this.engine.revision} because executable doesn't exist at ${executablePath}`,
-      ];
-
-      const packagedPath = getExecutablePath(this.engine.browser, this.engine.revision);
-      // If we tried using stock downloaded browser, suggest re-installing SecretAgent.
-      if (executablePath === packagedPath)
-        errorMessageLines.push(
-          `Try re-installing SecretAgent with "npm install secret-agent" or re-install any custom BrowserEmulators.`,
-        );
-      throw new Error(errorMessageLines.join('\n'));
+      throw this.getLaunchError(executablePath);
     }
 
     try {
       const { pipeBrowserIo, proxyPort, showBrowser } = args;
       const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
+
+      if (this.engine.extraLaunchArgs?.length) {
+        launchArgs.push(...this.engine.extraLaunchArgs);
+      }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
-      return launcher.createPuppet(launchedProcess, this.engine.revision);
+      return launcher.createPuppet(launchedProcess, this.engine);
     } catch (err) {
+      // exists, but can't launch, try to launch
+      await validateHostRequirements(this.engine.executablePath);
+
       throw launcher.translateLaunchError(err);
     }
+  }
+
+  private getLaunchError(executablePath: string): Error {
+    const engineFetcher = new EngineFetcher(this.engine.browser, this.engine.version);
+    if (engineFetcher.platform === 'linux') {
+      const installCommand = engineFetcher.getPendingInstallCommand();
+      if (installCommand) {
+        return new Error(`SecretAgent can't use ${this.engine.browser}@${this.engine.version} until you run the following apt installer:
+-------------- APT INSTALL NEEDED ---------------
+-------------------------------------------------
+
+${installCommand}
+
+-------------------------------------------------
+`);
+      }
+    }
+
+    const errorMessageLines = [
+      `Failed to launch ${this.engine.browser}@${this.engine.version} because executable doesn't exist at "${executablePath}"`,
+    ];
+
+    // If we tried using stock downloaded browser, suggest re-installing SecretAgent.
+    if (executablePath === engineFetcher.executablePath) {
+      const majorBrowserVersion = this.engine.version.split('.').shift();
+      errorMessageLines.push(
+        `Try re-installing SecretAgent with "npm install secret-agent" or re-install any custom BrowserEmulators (eg, @secret-agent/emulate-chrome-${majorBrowserVersion}).`,
+      );
+    }
+    return new Error(errorMessageLines.join('\n'));
   }
 }
 

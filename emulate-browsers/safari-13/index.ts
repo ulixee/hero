@@ -2,12 +2,12 @@ import { URL } from 'url';
 import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
+  DataLoader,
   DomOverridesBuilder,
-  getEngineExecutablePath,
+  getEngine,
   getTcpSettingsForOs,
   modifyHeaders,
   parseNavigatorPlugins,
-  DataLoader,
 } from '@secret-agent/emulate-browsers-base';
 import {
   canonicalDomain,
@@ -44,10 +44,7 @@ export default class Safari13 {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
-  public static engine = {
-    ...pkg.engine,
-    executablePath: process.env.CHROME_83_BIN ?? getEngineExecutablePath(pkg.engine),
-  };
+  public static engine = getEngine(pkg.engine, process.env.CHROME_83_BIN);
 
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
