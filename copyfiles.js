@@ -28,8 +28,8 @@ for (const workspace of workspaces) {
   copyArgs.push(
     `${workspace}/*.cjs`,
     `${workspace}/*.mjs`,
-    `${workspace}/*.gitignore`,
-    `${workspace}/*.npmignore`,
+    `${workspace}/**/.gitignore`,
+    `${workspace}/**/.npmignore`,
   );
 }
 
