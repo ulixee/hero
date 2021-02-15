@@ -1,4 +1,5 @@
-import Database, { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
+import * as Database from 'better-sqlite3';
+import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import SqliteTable from '@secret-agent/commons/SqliteTable';

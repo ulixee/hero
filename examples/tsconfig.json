@@ -7,11 +7,11 @@
     "outDir": "../build/examples",
     "module": "ES2020",
     "moduleResolution": "node",
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["*.js", "*.ts"],
+  "include": ["*.ts"],
   "exclude": ["**/node_modules", "**/build"]
 }

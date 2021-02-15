@@ -1,5 +1,5 @@
-import Typeson from 'typeson';
-import TypesonRegistry from 'typeson-registry/dist/presets/builtin';
+import * as Typeson from 'typeson';
+import * as TypesonRegistry from 'typeson-registry/dist/presets/builtin';
 
 const buffer = {
   buffer: {

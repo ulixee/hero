@@ -1,7 +1,7 @@
 import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { createPromise } from '@secret-agent/commons/utils';
 import ICommandWithResult from '../interfaces/ICommandWithResult';

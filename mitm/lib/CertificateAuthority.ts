@@ -1,5 +1,5 @@
-import Forge from 'node-forge';
-import moment from 'moment';
+import * as Forge from 'node-forge';
+import * as moment from 'moment';
 import NetworkDb from './NetworkDb';
 import pki = Forge.pki;
 

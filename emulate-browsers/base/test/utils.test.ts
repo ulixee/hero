@@ -5,11 +5,11 @@ import { GlobalPool } from '@secret-agent/core';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
-import DomExtractor from './DomExtractor';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
 import { proxyFunction } from '../injected-scripts/_proxyUtils';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
+import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
 

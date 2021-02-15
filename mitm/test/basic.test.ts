@@ -1,9 +1,10 @@
-import http, { IncomingHttpHeaders } from 'http';
+import * as http from 'http';
+import { IncomingHttpHeaders } from 'http';
 import { Helpers } from '@secret-agent/testing';
-import HttpProxyAgent from 'http-proxy-agent';
+import * as HttpProxyAgent from 'http-proxy-agent';
 import { AddressInfo } from 'net';
-import WebSocket from 'ws';
-import Url from 'url';
+import * as WebSocket from 'ws';
+import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';

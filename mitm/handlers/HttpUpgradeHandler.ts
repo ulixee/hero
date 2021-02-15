@@ -1,5 +1,5 @@
-import net from 'net';
-import http from 'http';
+import * as net from 'net';
+import * as http from 'http';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import CookieHandler from './CookieHandler';

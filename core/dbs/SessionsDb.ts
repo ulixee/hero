@@ -1,4 +1,5 @@
-import Database, { Database as SqliteDatabase } from 'better-sqlite3';
+import * as Database from 'better-sqlite3';
+import { Database as SqliteDatabase } from 'better-sqlite3';
 import SessionsTable from '../models/SessionsTable';
 
 interface IDbOptions {

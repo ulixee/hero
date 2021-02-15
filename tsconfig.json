@@ -7,8 +7,7 @@
     "lib": ["ES2019", "DOM", "DOM.Iterable"],
     "noImplicitAny": false,
     "sourceMap": true,
-    "inlineSourceMap": false,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "declaration": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -44,6 +43,7 @@
     "replay/injected-scripts",
     "website",
     "core/injected-scripts",
+    "examples/*.js",
     "emulate-browsers/base/injected-scripts",
     "emulate-browsers/**/data"
   ]

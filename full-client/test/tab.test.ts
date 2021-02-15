@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import os from 'os';
+import * as os from 'os';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Handler } from '../index';
 

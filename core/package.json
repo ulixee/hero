@@ -2,6 +2,15 @@
   "name": "@secret-agent/core",
   "version": "1.3.0-alpha.3",
   "description": "The core browser API used to run SecretAgent",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.cjs"
+    },
+    "./start": "./start.js",
+    "./lib/*": "./lib/*.js",
+    "./server": "./server/index.js"
+  },
   "dependencies": {
     "@secret-agent/commons": "1.3.0-alpha.3",
     "@secret-agent/core-interfaces": "1.3.0-alpha.3",
@@ -18,7 +27,6 @@
     "core-js-bundle": "^3.7.0",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.7",
-    "source-map-support": "^0.5.19",
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.38",
     "uuid": "^8.1.0",

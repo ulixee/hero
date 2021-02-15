@@ -1,8 +1,8 @@
 import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
 import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
 import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
-import os from 'os';
-import Path from 'path';
+import * as os from 'os';
+import * as Path from 'path';
 import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 

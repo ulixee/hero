@@ -1,8 +1,10 @@
 import MitmSocket from '@secret-agent/mitm-socket';
-import http2, { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 'http2';
+import * as http2 from 'http2';
+import { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 'http2';
 import Log from '@secret-agent/commons/Logger';
-import https, { RequestOptions } from 'https';
-import http from 'http';
+import * as https from 'https';
+import { RequestOptions } from 'https';
+import * as http from 'http';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import Queue from '@secret-agent/commons/Queue';

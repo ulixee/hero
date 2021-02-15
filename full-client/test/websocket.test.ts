@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
 import MitmServer from '@secret-agent/mitm/lib/MitmProxy';
 import { createPromise } from '@secret-agent/commons/utils';
-import WebSocket from 'ws';
+import * as WebSocket from 'ws';
 import HttpUpgradeHandler from '@secret-agent/mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@secret-agent/client/lib/WebsocketResource';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';

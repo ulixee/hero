@@ -31,6 +31,9 @@ module.exports = {
     'prettier',
     'prettier/@typescript-eslint',
     'plugin:monorepo-cop/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
   ],
   plugins: ['monorepo-cop'],
   parserOptions: {
@@ -40,6 +43,11 @@ module.exports = {
   settings: {
     'import/core-modules': ['electron'],
     'import/external-module-folders': workspacesWithModules,
+    'import/resolver': {
+      typescript: {
+        project: ['tsconfig.json', 'replay/tsconfig.json', 'replay/frontend/tsconfig.json'],
+      },
+    },
   },
   env: {
     node: true,
@@ -123,6 +131,7 @@ module.exports = {
     '**/test/assets/**',
     'build',
     'build-dist',
+    'examples/*.js',
     '**/build/**',
     '**/dist/**',
     '**/*.md',

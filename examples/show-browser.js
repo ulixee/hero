@@ -1,5 +1,4 @@
-// NOTE: if running this example in production, import agent from 'secret-agent'
-import { Agent } from 'secret-agent';
+const { Agent } = require('secret-agent');
 
 process.env.SHOW_BROWSER = 'true';
 

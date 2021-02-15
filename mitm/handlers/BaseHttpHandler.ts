@@ -1,6 +1,6 @@
 import Log from '@secret-agent/commons/Logger';
-import http from 'http';
-import http2 from 'http2';
+import * as http from 'http';
+import * as http2 from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import BlockHandler from './BlockHandler';
 import HeadersHandler from './HeadersHandler';

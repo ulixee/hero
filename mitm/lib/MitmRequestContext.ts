@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import http from 'http';
+import * as http from 'http';
 import * as http2 from 'http2';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';

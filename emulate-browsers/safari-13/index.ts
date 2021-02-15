@@ -26,11 +26,11 @@ import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import Log from '@secret-agent/commons/Logger';
-import pkg from './package.json';
-import headerProfiles from './data/headers.json';
-import userAgentOptions from './data/user-agent-options.json';
-import config from './config.json';
-import windowFramingBase from './data/window-framing.json';
+import * as pkg from './package.json';
+import * as headerProfiles from './data/headers.json';
+import * as userAgentOptions from './data/user-agent-options.json';
+import * as config from './config.json';
+import * as windowFramingBase from './data/window-framing.json';
 
 const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');

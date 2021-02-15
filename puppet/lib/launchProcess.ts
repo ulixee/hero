@@ -18,7 +18,7 @@ import * as childProcess from 'child_process';
 import { StdioOptions } from 'child_process';
 import { Readable, Writable } from 'stream';
 import * as readline from 'readline';
-import Path from 'path';
+import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
 import { PipeTransport } from './PipeTransport';

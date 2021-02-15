@@ -1,7 +1,7 @@
 import * as os from 'os';
-import ProgressBar from 'progress';
+import * as ProgressBar from 'progress';
 import { BrowserFetcher } from './BrowserFetcher';
-import { getInstallDirectory } from "./browserPaths";
+import { getInstallDirectory } from './browserPaths';
 
 export default class EngineInstaller {
   constructor(readonly engine: { browser: string; revision: string }) {}

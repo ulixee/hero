@@ -15,7 +15,7 @@ import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
-import pkg from './package.json';
+import * as pkg from './package.json';
 
 const config = require('./config.json');
 const headerProfiles = require('./data/headers.json');

@@ -1,5 +1,5 @@
 import install from '@secret-agent/emulate-browsers-base/install';
-import config from './config.json';
+import * as config from './config.json';
 
 install({
   browser: config.browserEngine.name,

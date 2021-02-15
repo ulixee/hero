@@ -1,9 +1,11 @@
-import net, { Socket } from 'net';
-import http, { IncomingMessage } from 'http';
-import http2 from 'http2';
+import * as net from 'net';
+import { Socket } from 'net';
+import * as http from 'http';
+import { IncomingMessage } from 'http';
+import * as http2 from 'http2';
 import Log from '@secret-agent/commons/Logger';
-import Os from 'os';
-import Path from 'path';
+import * as Os from 'os';
+import * as Path from 'path';
 import { createPromise } from '@secret-agent/commons/utils';
 import CertificateAuthority from './CertificateAuthority';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
