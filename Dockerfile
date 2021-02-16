@@ -1,4 +1,4 @@
-FROM node:12-slim
+FROM node:14-slim
 
 ENV CHROME_URL http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_80.0.3987.122-1_amd64.deb
 ENV GO_URL https://golang.org/dl/go1.14.2.linux-amd64.tar.gz
