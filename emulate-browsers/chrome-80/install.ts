@@ -4,4 +4,5 @@ import * as config from './config.json';
 install({
   browser: config.browserEngine.name,
   version: config.browserEngine.version,
+  executablePathEnvVar: config.browserEngine.executablePathEnvVar,
 });

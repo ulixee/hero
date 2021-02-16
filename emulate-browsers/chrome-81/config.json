@@ -4,7 +4,8 @@
     "id": "chrome-81-0",
     "name": "chrome",
     "version": "81.0.4044.138",
-    "features": ["headless"]
+    "features": ["headless"],
+    "executablePathEnvVar": "CHROME_81_BIN"
   },
   "marketshare": 0.4
 }

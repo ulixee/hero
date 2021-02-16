@@ -1,4 +1,11 @@
 {
-  "browserEngine": ["chrome-80-0", "headless"],
+  "browserId": "safari-13-0",
+  "browserEngine": {
+    "id": "chrome-83-0",
+    "name": "chrome",
+    "version": "83.0.4103.61",
+    "features": ["headless"],
+    "executablePathEnvVar": "CHROME_83_BIN"
+  },
   "marketshare": 5.9
 }

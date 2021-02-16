@@ -36,9 +36,9 @@ const engineObj = {
 @BrowserEmulatorClassDecorator
 export default class Chrome81 {
   public static id = pkg.name;
-  public static roundRobinPercent: number = (config as any).marketshare;
+  public static roundRobinPercent: number = config.marketshare;
 
-  public static engine = getEngine(engineObj, process.env.CHROME_81_BIN);
+  public static engine = getEngine(engineObj, config.browserEngine.executablePathEnvVar);
 
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 

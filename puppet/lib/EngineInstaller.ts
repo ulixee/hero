@@ -1,16 +1,17 @@
 import * as os from 'os';
 import * as ProgressBar from 'progress';
+import { IBrowserEngineConfig } from '@secret-agent/core-interfaces/IBrowserEngine';
 import { EngineFetcher } from './EngineFetcher';
 
 export default class EngineInstaller {
-  constructor(readonly engine: { browser: string; version: string }) {}
+  constructor(readonly engine: IBrowserEngineConfig) {}
 
   public async install() {
     if (this.shouldSkipDownload()) return;
 
-    const { version, browser } = this.engine;
+    const { version, browser, executablePathEnvVar } = this.engine;
     const browserTitle = browser[0].toUpperCase() + browser.slice(1);
-    const engineFetcher = new EngineFetcher(browser as any, version);
+    const engineFetcher = new EngineFetcher(browser as any, version, executablePathEnvVar);
 
     // Do nothing if the revision is already downloaded.
     if (engineFetcher.isInstalled) {

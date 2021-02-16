@@ -17,13 +17,13 @@ const { log } = Log(module);
 
 function getEngine(
   engine: { browser: string; version: string },
-  executablePathOverride?: string,
+  executablePathEnvVar?: string,
 ): IBrowserEngine {
-  const engineFetcher = new EngineFetcher(engine.browser, engine.version).toJSON();
-
-  if (executablePathOverride) {
-    engineFetcher.executablePath = executablePathOverride;
-  }
+  const engineFetcher = new EngineFetcher(
+    engine.browser,
+    engine.version,
+    executablePathEnvVar,
+  ).toJSON();
 
   log.stats('Browser.getEngine', {
     sessionId: null,

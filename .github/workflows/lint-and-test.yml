@@ -128,7 +128,7 @@ jobs:
           done
 
       - name: Run tests
-        run: yarn jest --testTimeout=60000
+        run: yarn jest --testTimeout=60000 --runInBand
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false

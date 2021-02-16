@@ -6,7 +6,7 @@ import { createGunzip } from 'zlib';
 import * as Tar from 'tar';
 import downloadFile from '@secret-agent/commons/downloadFile';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import { execSync } from 'child_process';
+import * as LinuxUtils from './LinuxUtils';
 
 export class EngineFetcher {
   private static linuxInstallerDirector = '/tmp/secret-agent/browser-installers';
@@ -41,7 +41,8 @@ export class EngineFetcher {
   public readonly platform: 'linux' | 'mac' | 'win32' | 'win64';
   public readonly version: string;
   public readonly browserVersionDir: string;
-  public executablePath: string;
+  public readonly executablePathEnvVar: string;
+  public readonly executablePath: string;
 
   public get isInstalled(): boolean {
     return Fs.existsSync(this.executablePath);
@@ -64,9 +65,15 @@ export class EngineFetcher {
     return [];
   }
 
-  constructor(browser: 'chrome' | string, version: string, downloadsBaseUrl?: string) {
+  constructor(
+    browser: 'chrome' | string,
+    version: string,
+    executablePathEnvVar: string,
+    downloadsBaseUrl?: string,
+  ) {
     this.browserName = browser as any;
     this.version = version;
+    this.executablePathEnvVar = executablePathEnvVar;
     this.platform = EngineFetcher.getPlatform();
 
     assert(this.platform, 'This operating system is not supported');
@@ -84,7 +91,8 @@ export class EngineFetcher {
     const relativePath =
       EngineFetcher.relativeBrowserExecutablePathsByOs[this.browserName][this.platform];
 
-    this.executablePath = Path.join(this.browserVersionDir, relativePath);
+    this.executablePath =
+      process.env[executablePathEnvVar] ?? Path.join(this.browserVersionDir, relativePath);
   }
 
   public async download(
@@ -132,26 +140,36 @@ export class EngineFetcher {
   ): Promise<{ installCommand: string }> {
     if (this.isInstalled) return;
 
+    const isDebianLinux = await LinuxUtils.isDebianFlavor();
     const downloadsDir = EngineFetcher.linuxInstallerDirector;
 
     if (!Fs.existsSync(downloadsDir)) {
       Fs.mkdirSync(downloadsDir, { recursive: true });
     }
 
-    const downloadedInstaller = `${downloadsDir}/${this.browserName}_${this.version}.deb`;
-
-    await downloadFile(this.url, downloadedInstaller, progressCallback);
+    if (isDebianLinux) {
+      const downloadedInstaller = `${downloadsDir}/${this.browserName}_${this.version}.deb`;
+      await downloadFile(this.url, downloadedInstaller, progressCallback);
+    }
 
     return {
-      installCommand: this.getPendingInstallCommand(),
+      installCommand: await this.getPendingInstallCommand(),
     };
   }
 
-  public getPendingInstallCommand(): string {
+  public async getPendingInstallCommand(): Promise<string> {
     if (this.platform === 'linux') {
+      if (!(await LinuxUtils.isDebianFlavor())) {
+        return `SecretAgent does not yet automatically install browsers on this flavor of linux.
+
+You can install ${this.browserName}@${this.version} to "${this.executablePath}".
+
+Or set the executablePath of your installation to the environment variable "${this.executablePathEnvVar}" (eg, ${this.executablePathEnvVar}=[path])`;
+      }
+
       const downloadedInstaller = `${EngineFetcher.linuxInstallerDirector}/${this.browserName}_${this.version}.deb`;
       if (Fs.existsSync(downloadedInstaller)) {
-        return `sudo chown _apt "${downloadedInstaller}" && sudo apt -y install ${downloadedInstaller} && rm ${downloadedInstaller}`;
+        return `sudo chown _apt ${downloadedInstaller} && sudo apt -y install ${downloadedInstaller} && rm ${downloadedInstaller}`;
       }
     }
   }
@@ -161,6 +179,7 @@ export class EngineFetcher {
       browser: this.browserName,
       version: this.version,
       executablePath: this.executablePath,
+      executablePathEnvVar: this.executablePathEnvVar,
       isInstalled: this.isInstalled,
       extraLaunchArgs: this.launchArgs,
     };

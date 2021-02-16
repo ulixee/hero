@@ -84,7 +84,7 @@ export default class Puppet {
     const executablePath = this.engine.executablePath;
 
     if (!existsSync(executablePath)) {
-      throw this.getLaunchError(executablePath);
+      throw await this.noExecutableAtPathError(executablePath);
     }
 
     try {
@@ -104,34 +104,43 @@ export default class Puppet {
     }
   }
 
-  private getLaunchError(executablePath: string): Error {
-    const engineFetcher = new EngineFetcher(this.engine.browser, this.engine.version);
-    if (engineFetcher.platform === 'linux') {
-      const installCommand = engineFetcher.getPendingInstallCommand();
+  private async noExecutableAtPathError(executablePath: string): Promise<Error> {
+    const engineFetcher = new EngineFetcher(
+      this.engine.browser,
+      this.engine.version,
+      this.engine.executablePathEnvVar,
+    );
+
+    let remedyMessage = `No executable exists at "${executablePath}"`;
+
+    // If we tried using stock downloaded browser, suggest further installation directions
+    if (executablePath === engineFetcher.executablePath) {
+      const installCommand = await engineFetcher.getPendingInstallCommand();
       if (installCommand) {
-        return new Error(`SecretAgent can't use ${this.engine.browser}@${this.engine.version} until you run the following apt installer:
+        remedyMessage = `Please run the following command:
 -------------- APT INSTALL NEEDED ---------------
 -------------------------------------------------
 
 ${installCommand}
 
 -------------------------------------------------
-`);
+`;
+      } else {
+        const majorBrowserVersion = this.engine.version.split('.').shift();
+        remedyMessage = `Please re-install the browser engine:
+-------------- NPM INSTALL ----------------------
+-------------------------------------------------
+
+ npm install @secret-agent/emulate-chrome-${majorBrowserVersion}
+
+-------------------------------------------------
+`;
       }
     }
 
-    const errorMessageLines = [
-      `Failed to launch ${this.engine.browser}@${this.engine.version} because executable doesn't exist at "${executablePath}"`,
-    ];
+    return new Error(`Failed to launch ${this.engine.browser} ${this.engine.version}:
 
-    // If we tried using stock downloaded browser, suggest re-installing SecretAgent.
-    if (executablePath === engineFetcher.executablePath) {
-      const majorBrowserVersion = this.engine.version.split('.').shift();
-      errorMessageLines.push(
-        `Try re-installing SecretAgent with "npm install secret-agent" or re-install any custom BrowserEmulators (eg, @secret-agent/emulate-chrome-${majorBrowserVersion}).`,
-      );
-    }
-    return new Error(errorMessageLines.join('\n'));
+${remedyMessage}`);
   }
 }
 

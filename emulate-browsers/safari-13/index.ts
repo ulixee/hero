@@ -39,12 +39,17 @@ const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
 const cookieCallbackName = 'SecretAgentSetCookie';
 const { log } = Log(module);
 
+const engineObj = {
+  browser: config.browserEngine.name,
+  version: config.browserEngine.version,
+};
+
 @BrowserEmulatorClassDecorator
 export default class Safari13 {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
-  public static engine = getEngine(pkg.engine, process.env.CHROME_83_BIN);
+  public static engine = getEngine(engineObj, config.browserEngine.executablePathEnvVar);
 
   public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
