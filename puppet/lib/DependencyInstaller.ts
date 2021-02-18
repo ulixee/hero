@@ -17,9 +17,12 @@ export default class DependencyInstaller {
         aptScriptPath,
         `
 if [ ! -f "${installPath}/.validated" ]; then
-  sudo chown _apt ${installPath}/install-dependencies.deb;
-  sudo apt install -y ${installPath}/install-dependencies.deb;
+  chown _apt ${installPath}/install-dependencies.deb;
+  apt-get update;
+  apt install -y ${installPath}/install-dependencies.deb;
+  apt-get -y autoremove;
   touch ${installPath}/.validated;
+  chmod 777 ${installPath}/.validated;
 fi
 `,
       );
@@ -53,6 +56,7 @@ fi
 
 if [ "$(whoami)" != "root" ]; then
   read -p "This script helps install Chrome dependencies using APT installers. You'll be prompted for sudo access, so please look at the contents. (enter to continue)";
+  su root;
 fi
 
 `,

@@ -42,17 +42,26 @@ WORKDIR /app/secret-agent
 
 COPY ./build-dist /app/secret-agent/
 
+RUN cat /etc/*-release
+
 # Add user so we don't need --no-sandbox.
 # same layer as yarn install to keep re-chowned files from using up several hundred MBs more space
+
+# NOTE: this installs the monorepo, but you could also install secret-agent directly + and desired browsers
+# we will automatically install dependencies
 RUN cd /app/secret-agent && yarn \
+    && $(npx puppet-install-deps) \
     && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
     && mkdir -p /home/sagent/Downloads \
+    && mkdir -p /home/sagent/.cache \
     && chown -R sagent:sagent /home/sagent \
     && chown -R sagent:sagent /app/secret-agent \
-    && chown -R sagent:sagent /app/secret-agent/node_modules
-
-
-RUN sudo $(npx puppet-install-deps)
+    && mv ~/.cache/secret-agent /home/sagent/.cache/ \
+    && chmod 777 /tmp \
+    && chmod -R 777 /home/sagent/.cache/secret-agent
 
 # Add below to run as unprivileged user.
-## USER sagent
+USER sagent
+
+CMD node core/start;
+# To run this docker, please see /tools/docker/docker-run.sh

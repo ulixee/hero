@@ -105,11 +105,7 @@ export default class Puppet {
   }
 
   private noExecutableAtPathError(executablePath: string): Error {
-    const engineFetcher = new EngineFetcher(
-      this.engine.browser,
-      this.engine.version,
-      this.engine.executablePathEnvVar,
-    );
+    const engineFetcher = new EngineFetcher(this.engine.browser, this.engine.version);
 
     let remedyMessage = `No executable exists at "${executablePath}"`;
 

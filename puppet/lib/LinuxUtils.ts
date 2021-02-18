@@ -7,7 +7,7 @@ export async function isDebianFlavor(): Promise<boolean> {
   const valuesByKey = await getLinuxOsRelease();
   if (!valuesByKey) return false;
   return (
-    valuesByKey.get('id_like').includes('debian') || (await existsAsync(`/etc/debian_version`))
+    valuesByKey.get('id_like')?.includes('debian') || (await existsAsync(`/etc/debian_version`))
   );
 }
 

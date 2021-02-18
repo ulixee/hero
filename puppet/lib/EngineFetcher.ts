@@ -65,7 +65,7 @@ export class EngineFetcher {
   constructor(
     browser: 'chrome' | string,
     version: string,
-    executablePathEnvVar: string,
+    executablePathEnvVar?: string,
     downloadsBaseUrl?: string,
   ) {
     this.browserName = browser as any;
@@ -84,8 +84,8 @@ export class EngineFetcher {
     const relativePath =
       EngineFetcher.relativeBrowserExecutablePathsByOs[this.browserName][this.platform];
 
-    this.executablePath =
-      process.env[executablePathEnvVar] ?? Path.join(this.browsersDir, this.version, relativePath);
+    const envVar = executablePathEnvVar ? process.env[executablePathEnvVar] : undefined;
+    this.executablePath = envVar ?? Path.join(this.browsersDir, this.version, relativePath);
   }
 
   public async download(
