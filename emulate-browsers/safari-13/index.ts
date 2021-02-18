@@ -40,8 +40,8 @@ const cookieCallbackName = 'SecretAgentSetCookie';
 const { log } = Log(module);
 
 const engineObj = {
-  browser: config.browserEngine.name,
-  version: config.browserEngine.version,
+  name: config.browserEngine.name,
+  fullVersion: config.browserEngine.fullVersion,
 };
 
 @BrowserEmulatorClassDecorator

@@ -16,12 +16,12 @@ import * as DnsOverTlsProviders from './lib/DnsOverTlsProviders';
 const { log } = Log(module);
 
 function getEngine(
-  engine: { browser: string; version: string },
+  engine: { name: string; fullVersion: string },
   executablePathEnvVar?: string,
 ): IBrowserEngine {
   const engineFetcher = new EngineFetcher(
-    engine.browser,
-    engine.version,
+    engine.name,
+    engine.fullVersion,
     executablePathEnvVar,
   ).toJSON();
 

@@ -38,8 +38,8 @@ export async function validateHostRequirements(engine: IBrowserEngine): Promise<
     return;
   }
 
-  const { browser, version } = engine;
-  const engineName = `${browser[0].toUpperCase()}${browser.slice(1)} ${version}`;
+  const { name, fullVersion } = engine;
+  const engineName = `${name[0].toUpperCase()}${name.slice(1)} ${fullVersion}`;
 
   let resolutionMessage: string;
   if (isWindows64) {
