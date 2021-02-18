@@ -32,16 +32,18 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install Dependencies
-        run: yarn install --immutable
+        run: yarn install --immutable --network-timeout 1000000
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          SA_SKIP_DOWNLOAD: 1
 
       - name: Run "build" step
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn tsc
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          SA_SKIP_DOWNLOAD: 1
 
       - name: Run  Lint
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
@@ -111,7 +113,7 @@ jobs:
         run: cp -r mitm-socket/dist build/mitm-socket
 
       - name: Build modules
-        run: yarn
+        run: yarn --network-timeout 1000000
         working-directory: ./build
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
@@ -119,13 +121,8 @@ jobs:
 
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          set -x
-          for deb in /tmp/secret-agent/browser-installers/*.deb; do
-            sudo chown _apt "$deb"
-            echo "sudo apt -y install $deb"
-            sudo apt -y install "$deb"
-          done
+        working-directory: ./build
+        run: sudo $(npx puppet-install-deps)
 
       - name: Run tests
         run: yarn jest --testTimeout=60000 --runInBand

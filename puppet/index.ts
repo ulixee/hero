@@ -46,7 +46,7 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.engine.browser === 'chrome' || this.engine.browser === 'chromium') {
+    if (this.engine.browser === 'chrome') {
       launcher = PuppetChrome;
     }
 
@@ -91,20 +91,20 @@ export default class Puppet {
       const { pipeBrowserIo, proxyPort, showBrowser } = args;
       const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
 
+      // exists, but can't launch, try to launch
+      await validateHostRequirements(this.engine);
+
       if (this.engine.extraLaunchArgs?.length) {
         launchArgs.push(...this.engine.extraLaunchArgs);
       }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
       return launcher.createPuppet(launchedProcess, this.engine);
     } catch (err) {
-      // exists, but can't launch, try to launch
-      await validateHostRequirements(this.engine.executablePath);
-
       throw launcher.translateLaunchError(err);
     }
   }
 
-  private async noExecutableAtPathError(executablePath: string): Promise<Error> {
+  private noExecutableAtPathError(executablePath: string): Error {
     const engineFetcher = new EngineFetcher(
       this.engine.browser,
       this.engine.version,
@@ -113,29 +113,18 @@ export default class Puppet {
 
     let remedyMessage = `No executable exists at "${executablePath}"`;
 
-    // If we tried using stock downloaded browser, suggest further installation directions
+    // If this is the default install path, suggest further installation directions
     if (executablePath === engineFetcher.executablePath) {
-      const installCommand = await engineFetcher.getPendingInstallCommand();
-      if (installCommand) {
-        remedyMessage = `Please run the following command:
--------------- APT INSTALL NEEDED ---------------
+      const majorBrowserVersion = this.engine.version.split('.').shift();
+      remedyMessage = `Please re-install the browser engine:
 -------------------------------------------------
-
-${installCommand}
-
--------------------------------------------------
-`;
-      } else {
-        const majorBrowserVersion = this.engine.version.split('.').shift();
-        remedyMessage = `Please re-install the browser engine:
 -------------- NPM INSTALL ----------------------
 -------------------------------------------------
 
- npm install @secret-agent/emulate-chrome-${majorBrowserVersion}
+ npm install @secret-agent/emulate-${this.engine.browser}-${majorBrowserVersion}
 
 -------------------------------------------------
 `;
-      }
     }
 
     return new Error(`Failed to launch ${this.engine.browser} ${this.engine.version}:

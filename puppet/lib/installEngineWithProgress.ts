@@ -1,0 +1,87 @@
+import * as ProgressBar from 'progress';
+import { IBrowserEngineConfig } from '@secret-agent/core-interfaces/IBrowserEngine';
+import { EngineFetcher } from './EngineFetcher';
+import { validateHostRequirements } from './validateHostDependencies';
+
+export default async function installEngineWithProgress(engine: IBrowserEngineConfig) {
+  if (shouldSkipDownload()) return;
+
+  const { version, browser, executablePathEnvVar } = engine;
+  const browserTitle = browser[0].toUpperCase() + browser.slice(1);
+  const engineFetcher = new EngineFetcher(browser as any, version, executablePathEnvVar);
+
+  // Do nothing if the revision is already downloaded.
+  if (engineFetcher.isInstalled) {
+    npmlog(`${browserTitle} ${version} is already installed; skipping download.`);
+    return;
+  }
+
+  try {
+    let progressBar: ProgressBar = null;
+    let lastDownloadedBytes = 0;
+    npmlog(`Downloading ${browserTitle} ${version} from ${engineFetcher.url}.`);
+    await engineFetcher.download((downloadedBytes, totalBytes) => {
+      if (!progressBar) {
+        const mb = totalBytes / 1024 / 1024;
+        const mbString = `${Math.round(mb * 10) / 10} Mb`;
+
+        progressBar = new ProgressBar(
+          `Downloading ${browserTitle} ${version} - ${mbString} [:bar] :percent :etas `,
+          {
+            complete: '=',
+            incomplete: ' ',
+            width: 20,
+            total: totalBytes,
+          },
+        );
+      }
+      const delta = downloadedBytes - lastDownloadedBytes;
+      lastDownloadedBytes = downloadedBytes;
+      progressBar.tick(delta);
+    });
+
+    await validateHostRequirements(engineFetcher.toJSON());
+
+    npmlog(`${browserTitle} (${version}) downloaded to ${engineFetcher.browsersDir}`);
+  } catch (error) {
+    console.error(
+      `ERROR: Failed to set up ${browserTitle} ${version}! Set "SA_SKIP_DOWNLOAD" env variable to skip download.`,
+    );
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+function shouldSkipDownload() {
+  for (const envVar of [
+    'SA_SKIP_CHROME_DOWNLOAD',
+    'SA_SKIP_CHROMIUM_DOWNLOAD',
+    'SA_SKIP_DOWNLOAD',
+  ]) {
+    if (getEnv(envVar)) {
+      npmlog(`**INFO** Skipping browser download. "${envVar}" environment variable was found.`);
+      return true;
+    }
+    if (getEnv(`NPM_CONFIG_${envVar}`)) {
+      npmlog(`**INFO** Skipping browser download. "${envVar}" was set in npm config.`);
+      return true;
+    }
+    if (getEnv(`NPM_PACKAGE_CONFIG_${envVar}`)) {
+      npmlog(`**INFO** Skipping browser download. "${envVar}" was set in project config.`);
+      return true;
+    }
+  }
+  return false;
+}
+
+function getEnv(key: string): string {
+  return process.env[key] ?? process.env[key.toUpperCase()] ?? process.env[key.toUpperCase()];
+}
+
+function npmlog(toBeLogged) {
+  const logLevel = process.env.npm_config_loglevel;
+  const logLevelDisplay = ['silent', 'error', 'warn'].indexOf(logLevel) > -1;
+
+  // eslint-disable-next-line no-console
+  if (!logLevelDisplay) console.log(toBeLogged);
+}

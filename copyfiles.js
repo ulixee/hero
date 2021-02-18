@@ -30,6 +30,7 @@ for (const workspace of workspaces) {
     `${workspace}/*.mjs`,
     `${workspace}/**/.gitignore`,
     `${workspace}/**/.npmignore`,
+    `${workspace}/**/*.sh`,
   );
 }
 

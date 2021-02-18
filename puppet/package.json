@@ -2,6 +2,9 @@
   "name": "@secret-agent/puppet",
   "version": "1.3.1-alpha.0",
   "description": "Puppet driver",
+  "bin": {
+    "puppet-install-deps": "./bin/installDeps.js"
+  },
   "dependencies": {
     "@secret-agent/commons": "1.3.1-alpha.0",
     "@secret-agent/core-interfaces": "1.3.1-alpha.0",

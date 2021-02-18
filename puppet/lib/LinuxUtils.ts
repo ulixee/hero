@@ -40,6 +40,7 @@ export async function getLinuxOsRelease(): Promise<Map<string, string>> {
     if (!name) continue;
     osReleaseValuesByKey.set(name.toLowerCase(), value);
   }
+  return osReleaseValuesByKey;
 }
 
 async function existsAsync(path: string): Promise<boolean> {

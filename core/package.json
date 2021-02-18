@@ -9,6 +9,7 @@
     },
     "./start": "./start.js",
     "./lib/*": "./lib/*.js",
+    "./lib/CoreProcess": "./lib/CoreProcess.js",
     "./server": "./server/index.js"
   },
   "dependencies": {
