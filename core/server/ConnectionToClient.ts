@@ -11,6 +11,8 @@ import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
 import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
+import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -65,15 +67,28 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       if ((this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError) {
         return;
       }
+      const isChildProcess = !!process.send;
+      if (isChildProcess === false) {
+        log.error('ConnectionToClient.HandleRequestError', {
+          error,
+          sessionId: session?.id,
+        });
+      }
       isError = true;
-      data =
-        error instanceof Error
-          ? {
-              message: error.message,
-              stack: error.stack,
-              ...error,
-            }
-          : new Error(`Unknown error occurred ${error}`);
+      if (error instanceof PuppetLaunchError || error instanceof DependenciesMissingError) {
+        data = {
+          message: 'CoreServer needs further setup to launch the browserEmulator. See server logs.',
+        };
+      } else if (error instanceof Error) {
+        data = {
+          message: error.message,
+          stack: error.stack,
+          ...error,
+        };
+      } else {
+        const tempError = new Error(`Unknown error occurred ${error}`);
+        data = { message: tempError.message, stack: tempError.stack };
+      }
     }
 
     const commandId = session?.sessionState?.lastCommand?.id;

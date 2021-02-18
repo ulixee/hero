@@ -40,7 +40,8 @@ export default async function installEngineWithProgress(engine: IBrowserEngineCo
       progressBar.tick(delta);
     });
 
-    await validateHostRequirements(engineFetcher.toJSON());
+    // don't blow up during install process if host requirements can't be met
+    await validateHostRequirements(engineFetcher.toJSON()).catch(err => npmlog(err.toString()));
 
     npmlog(`${browserTitle} (${version}) downloaded to ${engineFetcher.browsersDir}`);
   } catch (error) {

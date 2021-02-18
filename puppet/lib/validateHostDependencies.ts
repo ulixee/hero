@@ -20,11 +20,9 @@ import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import Log from '@secret-agent/commons/Logger';
 import { isDebianFlavor } from './LinuxUtils';
 import DependencyInstaller from './DependencyInstaller';
-
-const { log } = Log(module);
+import { DependenciesMissingError } from './DependenciesMissingError';
 
 export async function validateHostRequirements(engine: IBrowserEngine): Promise<void> {
   const isWindows64 = os.platform() === 'win32' && os.arch() === 'x64';
@@ -48,7 +46,7 @@ export async function validateHostRequirements(engine: IBrowserEngine): Promise<
     resolutionMessage = getWindowsResolutionMessage(missingDeps);
   } else if (isDebian) {
     await DependencyInstaller.appendAptInstallNeeded(engine);
-    resolutionMessage = `You can resolve this by running the apt installer at:
+    resolutionMessage = `You can resolve this by running the apt dependency installer at:
 -------------------------------------------------
 
 ${DependencyInstaller.aptScriptPath}
@@ -62,9 +60,7 @@ missing: ${[...missingDeps].join(', ')}
       '\n    ',
     )}`;
   }
-  log.warn(
-    `Some of the dependencies needed to run ${engineName} are not on your system!\n\n${resolutionMessage}`,
-  );
+  throw new DependenciesMissingError(resolutionMessage, engineName, [...missingDeps]);
 }
 
 function getWindowsResolutionMessage(missingDeps: Set<string>): string {
@@ -122,21 +118,17 @@ async function findAllMissingDependencies(directoryPath: string): Promise<Set<st
         return await spawnMissingDepsCheck(filePath);
       }
 
-      const canAccess = await fileExists(filePath, FsConstants.X_OK);
-      if (canAccess) {
+      try {
+        await Fs.access(filePath, FsConstants.X_OK);
         return await spawnMissingDepsCheck(filePath);
+      } catch (error) {
+        // just break through and return if we can't access
       }
       return [];
     }),
   );
 
-  return new Set<string>(...[].concat(...missingDeps));
-}
-
-function fileExists(filePath: string, mode?: number): Promise<boolean> {
-  return Fs.access(filePath, mode)
-    .then(() => true)
-    .catch(() => false);
+  return new Set<string>([].concat(...missingDeps));
 }
 
 async function spawnMissingDepsCheck(filePath: string): Promise<string[]> {
@@ -168,7 +160,7 @@ async function spawnMissingDepsCheck(filePath: string): Promise<string[]> {
   }
 
   return stdout
-    .split(/\r?\n/)
+    .split(/\r?\n/g)
     .filter(line => line.trim().endsWith('not found') && line.includes('=>'))
     .map(line => line.split('=>')[0].trim());
 }

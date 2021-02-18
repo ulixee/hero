@@ -9,6 +9,7 @@ import { existsSync } from 'fs';
 import launchProcess from './lib/launchProcess';
 import { validateHostRequirements } from './lib/validateHostDependencies';
 import { EngineFetcher } from './lib/EngineFetcher';
+import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
 
@@ -100,7 +101,12 @@ export default class Puppet {
       const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
       return launcher.createPuppet(launchedProcess, this.engine);
     } catch (err) {
-      throw launcher.translateLaunchError(err);
+      const launchError = launcher.translateLaunchError(err);
+      throw new PuppetLaunchError(
+        launchError.message,
+        launchError.stack,
+        launchError.isSandboxError,
+      );
     }
   }
 

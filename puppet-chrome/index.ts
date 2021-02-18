@@ -4,6 +4,7 @@ import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
 import * as os from 'os';
 import * as Path from 'path';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import { IPuppetLaunchError } from '@secret-agent/puppet-interfaces/IPuppetLaunchError';
 import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 
@@ -51,29 +52,35 @@ const PuppetLauncher: IPuppetLauncher = {
       const connection = new Connection(transport);
       return await Browser.create(connection, engine, close);
     } catch (error) {
-      close();
+      await close();
       throw error;
     }
   },
-  translateLaunchError(error: Error): Error {
+  translateLaunchError(rawError: Error): IPuppetLaunchError {
     // These error messages are taken from Chromium source code as of July, 2020:
     // https://github.com/chromium/chromium/blob/70565f67e79f79e17663ad1337dc6e63ee207ce9/content/browser/zygote_host/zygote_host_impl_linux.cc
+    const error = {
+      message: rawError.message,
+      stack: rawError.stack,
+      name: 'PuppetLaunchError',
+      isSandboxError: false,
+    };
     if (
-      !error.message.includes('crbug.com/357670') &&
-      !error.message.includes('No usable sandbox!') &&
-      !error.message.includes('crbug.com/638180')
+      error.message.includes('crbug.com/357670') ||
+      error.message.includes('No usable sandbox!') ||
+      error.message.includes('crbug.com/638180')
     ) {
-      return error;
+      error.stack += [
+        `\nChromium sandboxing failed!`,
+        `================================`,
+        `To workaround sandboxing issues, do either of the following:`,
+        `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/secret-agent/tree/master/tools/docker)`,
+        `  - (alternative): Launch Chromium without sandbox using 'NO_CHROME_SANDBOX=false' environmental variable`,
+        `================================`,
+        ``,
+      ].join('\n');
+      error.isSandboxError = true;
     }
-    error.stack += [
-      `\nChromium sandboxing failed!`,
-      `================================`,
-      `To workaround sandboxing issues, do either of the following:`,
-      `  - (preferred): Configure environment to support sandboxing (eg: in Docker, use custom seccomp profile + non-root user + --ipc=host)`,
-      `  - (alternative): Launch Chromium without sandbox using 'NO_CHROME_SANDBOX=false' environmental variable`,
-      `================================`,
-      ``,
-    ].join('\n');
     return error;
   },
 };
