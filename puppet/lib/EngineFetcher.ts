@@ -39,7 +39,6 @@ export class EngineFetcher {
   public readonly browserName: 'chrome' | 'safari' | 'firefox';
   public readonly osPlatformName: 'linux' | 'mac' | 'win32' | 'win64';
   public readonly fullVersion: string;
-  public readonly browserVersionDir: string;
   public readonly executablePathEnvVar: string;
   public readonly executablePath: string;
 
