@@ -43,7 +43,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     function getContexts(puppetPage: IPuppetPage) {
-      if (browserEngine.browser === 'chromium' || browserEngine.browser === 'chrome') {
+      if (browserEngine.name === 'chrome') {
         const rawPage = puppetPage as Page;
         // @ts-ignore
         return rawPage.framesManager.activeContexts.size;

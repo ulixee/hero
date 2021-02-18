@@ -29,8 +29,8 @@ const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
 const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 
 const engineObj = {
-  browser: config.browserEngine.name,
-  version: config.browserEngine.version,
+  name: config.browserEngine.name,
+  fullVersion: config.browserEngine.fullVersion,
 };
 
 @BrowserEmulatorClassDecorator

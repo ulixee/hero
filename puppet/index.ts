@@ -47,7 +47,7 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.engine.browser === 'chrome') {
+    if (this.engine.name === 'chrome') {
       launcher = PuppetChrome;
     }
 
@@ -111,25 +111,25 @@ export default class Puppet {
   }
 
   private noExecutableAtPathError(executablePath: string): Error {
-    const engineFetcher = new EngineFetcher(this.engine.browser, this.engine.version);
+    const engineFetcher = new EngineFetcher(this.engine.name, this.engine.fullVersion);
 
     let remedyMessage = `No executable exists at "${executablePath}"`;
 
     // If this is the default install path, suggest further installation directions
     if (executablePath === engineFetcher.executablePath) {
-      const majorBrowserVersion = this.engine.version.split('.').shift();
+      const majorBrowserVersion = this.engine.fullVersion.split('.').shift();
       remedyMessage = `Please re-install the browser engine:
 -------------------------------------------------
 -------------- NPM INSTALL ----------------------
 -------------------------------------------------
 
- npm install @secret-agent/emulate-${this.engine.browser}-${majorBrowserVersion}
+ npm install @secret-agent/emulate-${this.engine.name}-${majorBrowserVersion}
 
 -------------------------------------------------
 `;
     }
 
-    return new Error(`Failed to launch ${this.engine.browser} ${this.engine.version}:
+    return new Error(`Failed to launch ${this.engine.name} ${this.engine.fullVersion}:
 
 ${remedyMessage}`);
   }

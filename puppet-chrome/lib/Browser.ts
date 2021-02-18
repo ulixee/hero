@@ -127,10 +127,8 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     const browser = new Browser(connection, closeCallback);
 
     let needsTargetDiscovery = false;
-    if (engine.browser === 'chromium') {
-      needsTargetDiscovery = Number(engine.version) <= Number('737027');
-    } else if (engine.browser === 'chrome') {
-      const versionParts = engine.version.split('.').map(Number);
+    if (engine.name === 'chrome') {
+      const versionParts = engine.fullVersion.split('.').map(Number);
       needsTargetDiscovery = versionParts[0] < 83;
     }
 

@@ -28,7 +28,7 @@ export class EngineFetcher {
   };
 
   public get cacheDir(): string {
-    return EngineFetcher.cacheDirectoryByPlatform[this.platform];
+    return EngineFetcher.cacheDirectoryByPlatform[this.osPlatformName];
   }
 
   public get browsersDir(): string {
@@ -37,8 +37,8 @@ export class EngineFetcher {
 
   public readonly downloadBaseUrl: string;
   public readonly browserName: 'chrome' | 'safari' | 'firefox';
-  public readonly platform: 'linux' | 'mac' | 'win32' | 'win64';
-  public readonly version: string;
+  public readonly osPlatformName: 'linux' | 'mac' | 'win32' | 'win64';
+  public readonly fullVersion: string;
   public readonly executablePathEnvVar: string;
   public readonly executablePath: string;
 
@@ -47,45 +47,46 @@ export class EngineFetcher {
   }
 
   public get url(): string {
-    const { downloadBaseUrl, version, platform } = this;
+    const { downloadBaseUrl, fullVersion, osPlatformName } = this;
 
     let baseUrl = downloadBaseUrl;
     if (!baseUrl.endsWith('/')) baseUrl += '/';
 
-    return `${baseUrl}${version}/${this.browserName}_${version}_${platform}.tar.gz`;
+    return `${baseUrl}${fullVersion}/${this.browserName}_${fullVersion}_${osPlatformName}.tar.gz`;
   }
 
   public get launchArgs(): string[] {
     if (this.isWindows() && this.browserName === 'chrome') {
-      return [`--chrome-version=${this.version}`];
+      return [`--chrome-version=${this.fullVersion}`];
     }
     return [];
   }
 
   constructor(
-    browser: 'chrome' | string,
-    version: string,
+    browserName: 'chrome' | string,
+    fullVersion: string,
     executablePathEnvVar?: string,
+    osPlatformName?: EngineFetcher['osPlatformName'],
     downloadsBaseUrl?: string,
   ) {
-    this.browserName = browser as any;
-    this.version = version;
+    this.browserName = browserName as any;
+    this.fullVersion = fullVersion;
     this.executablePathEnvVar = executablePathEnvVar;
-    this.platform = EngineFetcher.getPlatform();
+    this.osPlatformName = osPlatformName ?? EngineFetcher.getOsPlatformName();
 
-    assert(this.platform, 'This operating system is not supported');
-    assert(browser === 'chrome', 'This browser is not supported');
+    assert(this.osPlatformName, 'This operating system is not supported');
+    assert(browserName === 'chrome', 'This browser is not supported');
 
-    if (browser === 'chrome') {
+    if (browserName === 'chrome') {
       this.downloadBaseUrl =
         downloadsBaseUrl ?? 'https://github.com/ulixee/chrome-versions/releases/download/';
     }
 
     const relativePath =
-      EngineFetcher.relativeBrowserExecutablePathsByOs[this.browserName][this.platform];
+      EngineFetcher.relativeBrowserExecutablePathsByOs[this.browserName][this.osPlatformName];
 
     const envVar = executablePathEnvVar ? process.env[executablePathEnvVar] : undefined;
-    this.executablePath = envVar ?? Path.join(this.browsersDir, this.version, relativePath);
+    this.executablePath = envVar ?? Path.join(this.browsersDir, this.fullVersion, relativePath);
   }
 
   public async download(
@@ -101,8 +102,8 @@ export class EngineFetcher {
       await downloadFile(this.url, downloadArchive, progressCallback);
       let cwd = this.browsersDir;
       // mac needs to be extracted directly into version directory
-      if (this.platform === 'mac') {
-        cwd = Path.join(cwd, this.version);
+      if (this.osPlatformName === 'mac') {
+        cwd = Path.join(cwd, this.fullVersion);
       }
       if (!existsSync(cwd)) Fs.mkdirSync(cwd, { recursive: true });
 
@@ -126,8 +127,8 @@ export class EngineFetcher {
 
   public toJSON(): IBrowserEngine & { isInstalled: boolean } {
     return {
-      browser: this.browserName,
-      version: this.version,
+      name: this.browserName,
+      fullVersion: this.fullVersion,
       executablePath: this.executablePath,
       executablePathEnvVar: this.executablePathEnvVar,
       isInstalled: this.isInstalled,
@@ -136,13 +137,13 @@ export class EngineFetcher {
   }
 
   private isWindows(): boolean {
-    return this.platform === 'win32' || this.platform === 'win64';
+    return this.osPlatformName === 'win32' || this.osPlatformName === 'win64';
   }
 
-  private static getPlatform(): EngineFetcher['platform'] {
-    const platform = Os.platform();
-    if (platform === 'darwin') return 'mac';
-    if (platform === 'linux') return 'linux';
-    if (platform === 'win32') return Os.arch() === 'x64' ? 'win64' : 'win32';
+  private static getOsPlatformName(): EngineFetcher['osPlatformName'] {
+    const osPlatformName = Os.platform();
+    if (osPlatformName === 'darwin') return 'mac';
+    if (osPlatformName === 'linux') return 'linux';
+    if (osPlatformName === 'win32') return Os.arch() === 'x64' ? 'win64' : 'win32';
   }
 }

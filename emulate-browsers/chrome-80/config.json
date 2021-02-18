@@ -3,7 +3,7 @@
   "browserEngine": {
     "id": "chrome-80-0",
     "name": "chrome",
-    "version": "80.0.3987.162",
+    "fullVersion": "80.0.3987.162",
     "features": ["headless"],
     "executablePathEnvVar": "CHROME_80_BIN"
   },

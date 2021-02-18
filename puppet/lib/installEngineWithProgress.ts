@@ -6,27 +6,27 @@ import { validateHostRequirements } from './validateHostDependencies';
 export default async function installEngineWithProgress(engine: IBrowserEngineConfig) {
   if (shouldSkipDownload()) return;
 
-  const { version, browser, executablePathEnvVar } = engine;
-  const browserTitle = browser[0].toUpperCase() + browser.slice(1);
-  const engineFetcher = new EngineFetcher(browser as any, version, executablePathEnvVar);
+  const { fullVersion, name, executablePathEnvVar } = engine;
+  const browserTitle = name[0].toUpperCase() + name.slice(1);
+  const engineFetcher = new EngineFetcher(name as any, fullVersion, executablePathEnvVar);
 
   // Do nothing if the revision is already downloaded.
   if (engineFetcher.isInstalled) {
-    npmlog(`${browserTitle} ${version} is already installed; skipping download.`);
+    npmlog(`${browserTitle} ${fullVersion} is already installed; skipping download.`);
     return;
   }
 
   try {
     let progressBar: ProgressBar = null;
     let lastDownloadedBytes = 0;
-    npmlog(`Downloading ${browserTitle} ${version} from ${engineFetcher.url}.`);
+    npmlog(`Downloading ${browserTitle} ${fullVersion} from ${engineFetcher.url}.`);
     await engineFetcher.download((downloadedBytes, totalBytes) => {
       if (!progressBar) {
         const mb = totalBytes / 1024 / 1024;
         const mbString = `${Math.round(mb * 10) / 10} Mb`;
 
         progressBar = new ProgressBar(
-          `Downloading ${browserTitle} ${version} - ${mbString} [:bar] :percent :etas `,
+          `Downloading ${browserTitle} ${fullVersion} - ${mbString} [:bar] :percent :etas `,
           {
             complete: '=',
             incomplete: ' ',
@@ -43,10 +43,10 @@ export default async function installEngineWithProgress(engine: IBrowserEngineCo
     // don't blow up during install process if host requirements can't be met
     await validateHostRequirements(engineFetcher.toJSON()).catch(err => npmlog(err.toString()));
 
-    npmlog(`${browserTitle} (${version}) downloaded to ${engineFetcher.browsersDir}`);
+    npmlog(`${browserTitle} (${fullVersion}) downloaded to ${engineFetcher.browsersDir}`);
   } catch (error) {
     console.error(
-      `ERROR: Failed to set up ${browserTitle} ${version}! Set "SA_SKIP_DOWNLOAD" env variable to skip download.`,
+      `ERROR: Failed to set up ${browserTitle} ${fullVersion}! Set "SA_SKIP_DOWNLOAD" env variable to skip download.`,
     );
     console.error(error);
     process.exit(1);
