@@ -14,6 +14,7 @@ import CoreSession from '../lib/CoreSession';
 import { IAgentCreateOptions } from '../index';
 import Agent from '../lib/Agent';
 import CoreSessions from '../lib/CoreSessions';
+import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
 const { log } = Log(module);
 
@@ -49,6 +50,7 @@ export default abstract class ConnectionToCore {
     } else {
       this.hostOrError = Promise.resolve(new Error('No host provided'));
     }
+    this.disconnect = this.disconnect.bind(this);
   }
 
   protected abstract internalSendRequest(payload: ICoreRequestPayload): Promise<void>;
@@ -81,18 +83,25 @@ export default abstract class ConnectionToCore {
   public async disconnect(fatalError?: Error): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
-    const logid = log.stats('ConnectionToCore.Disconnecting');
+    const logid = log.stats('ConnectionToCore.Disconnecting', {
+      host: this.hostOrError,
+      sessionId: null,
+    });
 
-    this.cancelPendingRequests();
+    await this.cancelPendingRequests();
     if (this.connectPromise) {
-      await this.internalSendRequestAndWait({
-        command: 'disconnect',
-        args: [fatalError],
-      });
+      await this.internalSendRequestAndWait(
+        {
+          command: 'disconnect',
+          args: [fatalError],
+        },
+        2e3,
+      );
     }
     await this.destroyConnection();
-    log.stats('RemoteConnectionToCore.Disconnected', {
+    log.stats('ConnectionToCore.Disconnected', {
       parentLogId: logid,
+      host: this.hostOrError,
       sessionId: null,
     });
   }
@@ -155,21 +164,32 @@ export default abstract class ConnectionToCore {
 
   protected async internalSendRequestAndWait(
     payload: Omit<ICoreRequestPayload, 'messageId'>,
+    timeoutMs?: number,
   ): Promise<ICoreResponsePayload> {
-    const { promise, id } = this.createPendingResult();
+    const { promise, id, resolve } = this.createPendingResult();
+
+    let timeout: NodeJS.Timeout;
+    if (timeoutMs) timeout = setTimeout(() => resolve(null), timeoutMs).unref();
     try {
       await this.internalSendRequest({
         messageId: id,
         ...payload,
       });
     } catch (error) {
+      clearTimeout(timeout);
       if (error instanceof CanceledPromiseError) {
         this.pendingRequestsById.delete(id);
         return;
       }
       throw error;
     }
-    return promise;
+
+    // now run to completion with timeout
+    try {
+      return await promise;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   protected onEvent(payload: ICoreEventPayload): void {
@@ -183,22 +203,21 @@ export default abstract class ConnectionToCore {
     if (!pending) return;
     this.pendingRequestsById.delete(id);
 
-    if (message.isError) {
-      const error = new Error(message.data?.message);
-      Object.assign(error, message.data);
-      this.rejectPendingRequest(pending, error);
+    if (message.data instanceof Error) {
+      this.rejectPendingRequest(pending, message.data);
     } else {
       pending.resolve({ data: message.data, commandId: message.commandId });
     }
   }
 
-  protected cancelPendingRequests(): void {
+  protected async cancelPendingRequests(): Promise<void> {
     this.commandQueue.clearPending();
-    this.coreSessions.close();
+    const host = String(await this.hostOrError);
+    this.coreSessions.close(new DisconnectedFromCoreError(host));
     const pending = [...this.pendingRequestsById.values()];
     this.pendingRequestsById.clear();
     for (const entry of pending) {
-      this.rejectPendingRequest(entry, new CanceledPromiseError('Disconnecting from Core'));
+      this.rejectPendingRequest(entry, new DisconnectedFromCoreError(host));
     }
   }
 

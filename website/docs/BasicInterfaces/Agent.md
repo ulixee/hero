@@ -72,6 +72,12 @@ Returns a reference to the currently active tab.
 
 #### **Type**: [`Tab`](/docs/basic-interfaces/tab)
 
+### agent.coreHost {#core-host}
+
+The connectionToCore host address to which this Agent has connected. This is useful in scenarios where a Handler is round-robining connections between multiple hosts.
+
+#### **Type**: `Promise<string>`
+
 ### agent.document <div class="specs"><i>W3C</i></div> {#document}
 
 Returns a reference to the document that the active tab contains.

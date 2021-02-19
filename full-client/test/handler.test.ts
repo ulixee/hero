@@ -1,6 +1,10 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core, { Session } from '@secret-agent/core/index';
+import CoreProcess from '@secret-agent/core/lib/CoreProcess';
+import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
+import { RemoteConnectionToCore } from '@secret-agent/client/index';
+import { createPromise } from '@secret-agent/commons/utils';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -76,7 +80,7 @@ describe('Full client Handler', () => {
 
     await agent1.close();
 
-    await expect(isAgent3Available(1e3)).resolves.toBe(true);
+    await expect(isAgent3Available(5e3)).resolves.toBe(true);
   });
 });
 
@@ -139,5 +143,111 @@ describe('waitForAllDispatches', () => {
     });
 
     await expect(handler.waitForAllDispatches()).rejects.toThrow('invalid url "any url 2"');
+  });
+});
+
+describe('connectionToCore', () => {
+  it('handles disconnects from killed core server', async () => {
+    const coreHost = await CoreProcess.spawn({});
+    Helpers.onClose(() => CoreProcess.kill());
+    const connection = new RemoteConnectionToCore({
+      maxConcurrency: 2,
+      host: coreHost,
+    });
+    await connection.connect();
+
+    const handler = new Handler(connection);
+    Helpers.needsClosing.push(handler);
+
+    const waitForGoto = createPromise();
+    let dispatchError: Error = null;
+    handler.dispatchAgent(async agent => {
+      try {
+        await agent.goto(koaServer.baseUrl);
+        waitForGoto.resolve();
+        await agent.waitForPaintingStable();
+        await agent.waitForMillis(10e3);
+      } catch (error) {
+        dispatchError = error;
+        throw error;
+      }
+    });
+    await waitForGoto.promise;
+    await CoreProcess.kill('SIGINT');
+    await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
+    expect(dispatchError).toBeTruthy();
+    expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
+    expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
+  });
+
+  it('handles core server ending websocket (econnreset)', async () => {
+    const coreHost = await Core.server.address;
+    // @ts-ignore
+    const sockets = new Set(Core.server.sockets);
+
+    const connection = new RemoteConnectionToCore({
+      maxConcurrency: 2,
+      host: coreHost,
+    });
+    await connection.connect();
+    // @ts-ignore
+    const newSockets = [...Core.server.sockets];
+
+    const socket = newSockets.find(x => !sockets.has(x));
+
+    const handler = new Handler(connection);
+    Helpers.needsClosing.push(handler);
+
+    const waitForGoto = createPromise();
+    let dispatchError: Error = null;
+    handler.dispatchAgent(async agent => {
+      try {
+        await agent.goto(koaServer.baseUrl);
+        waitForGoto.resolve();
+        await agent.waitForPaintingStable();
+        await agent.waitForMillis(10e3);
+      } catch (error) {
+        dispatchError = error;
+        throw error;
+      }
+    });
+
+    await waitForGoto.promise;
+    socket.destroy();
+    await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
+    expect(dispatchError).toBeTruthy();
+    expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
+    expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
+  });
+
+  it('can add and remove connections', async () => {
+    const coreHost = await Core.server.address;
+
+    const connection = new RemoteConnectionToCore({
+      maxConcurrency: 2,
+      host: coreHost,
+    });
+    await connection.connect();
+
+    const handler = new Handler(connection);
+    Helpers.needsClosing.push(handler);
+
+    expect(await handler.coreHosts).toHaveLength(1);
+
+    const spawnedCoreHost = await CoreProcess.spawn({});
+    Helpers.onClose(() => CoreProcess.kill());
+    await expect(handler.addConnectionToCore({ host: spawnedCoreHost })).resolves.toBeUndefined();
+
+    expect(await handler.coreHosts).toHaveLength(2);
+
+    const disconnectSpy = jest.spyOn(connection, 'disconnect');
+
+    await handler.removeConnectionToCore(String(await connection.hostOrError));
+
+    expect(disconnectSpy).toHaveBeenCalledTimes(1);
+
+    expect(await handler.coreHosts).toHaveLength(1);
+
+    await handler.close();
   });
 });

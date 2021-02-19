@@ -11,6 +11,17 @@ const { log } = Log(module);
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
+  public get coreHosts(): Promise<string[]> {
+    return Promise.all(this.connections.map(x => x.hostOrError)).then(x => {
+      const hosts: string[] = [];
+      for (const host of x) {
+        if (host instanceof Error) continue;
+        hosts.push(host);
+      }
+      return hosts;
+    });
+  }
+
   private readonly connections: ConnectionToCore[] = [];
   private readonly dispatches: Promise<Error | void>[] = [];
 
@@ -26,6 +37,25 @@ export default class Handler {
 
     ShutdownHandler.register(() => this.close());
     this.registerUnhandledExceptionHandlers();
+  }
+
+  public async addConnectionToCore(
+    options: IConnectionToCoreOptions | ConnectionToCore,
+  ): Promise<void> {
+    const connection = ConnectionFactory.createConnection(options);
+    const error = await connection.connect();
+    if (error) throw error;
+    this.connections.push(connection);
+  }
+
+  public async removeConnectionToCore(host: string): Promise<void> {
+    const wsHost = host.startsWith('ws') ? host : `ws://${host}`;
+    for (const connection of this.connections) {
+      const coreHost = await connection.hostOrError;
+      if (typeof coreHost === 'string' && coreHost === wsHost) {
+        await connection.disconnect();
+      }
+    }
   }
 
   public dispatchAgent<T>(

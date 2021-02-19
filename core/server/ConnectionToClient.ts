@@ -13,6 +13,7 @@ import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
 import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
+import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -33,20 +34,34 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIds = new Set<string>();
 
+  private clientExposedMethods = new Set<keyof this & string>([
+    'createSession',
+    'connect',
+    'disconnect',
+    'configure',
+    'waitForNewTab',
+    'logUnhandledError',
+    'addEventListener',
+    'removeEventListener',
+    'getTabs',
+    'getAgentMeta',
+    'closeSession',
+    'exportUserProfile',
+  ]);
+
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
     const { messageId, command, meta } = payload;
 
+    const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
+
     // json converts args to null which breaks undefined argument handlers
     const args = payload.args.map(x => (x === null ? undefined : x));
 
-    const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
-
     let data: any;
-    let isError = false;
     try {
-      if (command in this) {
+      if (this.clientExposedMethods.has(command as any)) {
         if (meta) {
           data = await this[command](meta, ...args);
         } else {
@@ -55,40 +70,27 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       } else {
         // if not on this function, assume we're sending on to tab
         const tab = Session.getTab(meta);
-        if (typeof tab[command] === 'function') {
-          data = await tab[command](...args);
-        } else {
-          isError = true;
+        if (!tab) {
+          data = new CanceledPromiseError('Requested tab is not a part of session or closed.');
+        } else if (typeof tab[command] !== 'function') {
           data = new Error(`Command not available on tab (${command} - ${typeof tab[command]})`);
+        } else {
+          data = await tab[command](...args);
         }
       }
     } catch (error) {
       // if we're closing, don't emit errors
-      if ((this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError) {
-        return;
-      }
+      const shouldSkipLogging =
+        (this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError;
       const isChildProcess = !!process.send;
-      if (isChildProcess === false) {
+
+      if (isChildProcess === false && shouldSkipLogging === false) {
         log.error('ConnectionToClient.HandleRequestError', {
           error,
-          sessionId: session?.id,
+          sessionId: session?.id ?? meta?.sessionId,
         });
       }
-      isError = true;
-      if (error instanceof PuppetLaunchError || error instanceof DependenciesMissingError) {
-        data = {
-          message: 'CoreServer needs further setup to launch the browserEmulator. See server logs.',
-        };
-      } else if (error instanceof Error) {
-        data = {
-          message: error.message,
-          stack: error.stack,
-          ...error,
-        };
-      } else {
-        const tempError = new Error(`Unknown error occurred ${error}`);
-        data = { message: tempError.message, stack: tempError.stack };
-      }
+      data = this.serializeError(error);
     }
 
     const commandId = session?.sessionState?.lastCommand?.id;
@@ -97,7 +99,6 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       responseId: messageId,
       commandId,
       data,
-      isError,
     };
     this.emit('message', response);
   }
@@ -144,7 +145,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     log.stats('ConnectionToClient.Disconnected', { sessionId: null, parentLogId: logId });
   }
 
-  public isActive() {
+  public isActive(): boolean {
     return this.sessionIds.size > 0 || this.isPersistent;
   }
 
@@ -172,9 +173,9 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     };
   }
 
-  public async exportUserProfile(meta: ISessionMeta) {
+  public exportUserProfile(meta: ISessionMeta): Promise<IUserProfile> {
     const session = Session.get(meta.sessionId);
-    return await UserProfile.export(session);
+    return UserProfile.export(session);
   }
 
   public async createSession(options: ICreateSessionOptions = {}): Promise<ISessionMeta> {
@@ -238,5 +239,16 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       sessionsDataLocation: session.baseDir,
       tabId: tab.id,
     };
+  }
+
+  private serializeError(error: Error): object {
+    if (error instanceof PuppetLaunchError || error instanceof DependenciesMissingError) {
+      return new Error(
+        'CoreServer needs further setup to launch the browserEmulator. See server logs.',
+      );
+    }
+    if (error instanceof Error) return error;
+
+    return new Error(`Unknown error occurred ${error}`);
   }
 }
