@@ -7,7 +7,9 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
 import launchProcess from './lib/launchProcess';
-import { getExecutablePath } from './lib/browserPaths';
+import { validateHostRequirements } from './lib/validateHostDependencies';
+import { EngineFetcher } from './lib/EngineFetcher';
+import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
 
@@ -45,7 +47,7 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.engine.browser === 'chrome' || this.engine.browser === 'chromium') {
+    if (this.engine.name === 'chrome') {
       launcher = PuppetChrome;
     }
 
@@ -83,27 +85,53 @@ export default class Puppet {
     const executablePath = this.engine.executablePath;
 
     if (!existsSync(executablePath)) {
-      const errorMessageLines = [
-        `Failed to launch ${this.engine.browser}@${this.engine.revision} because executable doesn't exist at ${executablePath}`,
-      ];
-
-      const packagedPath = getExecutablePath(this.engine.browser, this.engine.revision);
-      // If we tried using stock downloaded browser, suggest re-installing SecretAgent.
-      if (executablePath === packagedPath)
-        errorMessageLines.push(
-          `Try re-installing SecretAgent with "npm install secret-agent" or re-install any custom BrowserEmulators.`,
-        );
-      throw new Error(errorMessageLines.join('\n'));
+      throw await this.noExecutableAtPathError(executablePath);
     }
 
     try {
       const { pipeBrowserIo, proxyPort, showBrowser } = args;
       const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
+
+      // exists, but can't launch, try to launch
+      await validateHostRequirements(this.engine);
+
+      if (this.engine.extraLaunchArgs?.length) {
+        launchArgs.push(...this.engine.extraLaunchArgs);
+      }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
-      return launcher.createPuppet(launchedProcess, this.engine.revision);
+      return launcher.createPuppet(launchedProcess, this.engine);
     } catch (err) {
-      throw launcher.translateLaunchError(err);
+      const launchError = launcher.translateLaunchError(err);
+      throw new PuppetLaunchError(
+        launchError.message,
+        launchError.stack,
+        launchError.isSandboxError,
+      );
     }
+  }
+
+  private noExecutableAtPathError(executablePath: string): Error {
+    const engineFetcher = new EngineFetcher(this.engine.name, this.engine.fullVersion);
+
+    let remedyMessage = `No executable exists at "${executablePath}"`;
+
+    // If this is the default install path, suggest further installation directions
+    if (executablePath === engineFetcher.executablePath) {
+      const majorBrowserVersion = this.engine.fullVersion.split('.').shift();
+      remedyMessage = `Please re-install the browser engine:
+-------------------------------------------------
+-------------- NPM INSTALL ----------------------
+-------------------------------------------------
+
+ npm install @secret-agent/emulate-${this.engine.name}-${majorBrowserVersion}
+
+-------------------------------------------------
+`;
+    }
+
+    return new Error(`Failed to launch ${this.engine.name} ${this.engine.fullVersion}:
+
+${remedyMessage}`);
   }
 }
 

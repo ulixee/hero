@@ -1,15 +1,6 @@
 FROM node:14-slim
 
-ENV CHROME_URL http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_80.0.3987.122-1_amd64.deb
 ENV GO_URL https://golang.org/dl/go1.14.2.linux-amd64.tar.gz
-
-RUN apt-get update \
-    && apt-get install -y git wget pkg-config apt-utils --no-install-recommends \
-    && wget -O chrome-stable.deb "${CHROME_URL}" -q --progress=bar  \
-    && apt install -y ./chrome-stable.deb \
-    && rm chrome-stable.deb \
-    && apt-get clean \
-    && apt-get autoremove -y
 
 # fonts
 RUN echo "deb http://httpredir.debian.org/debian buster main contrib non-free" > /etc/apt/sources.list \
@@ -51,17 +42,26 @@ WORKDIR /app/secret-agent
 
 COPY ./build-dist /app/secret-agent/
 
-ENV SA_SKIP_CHROMIUM_DOWNLOAD=1
-ENV CHROME_BIN=/usr/bin/google-chrome-stable
+RUN cat /etc/*-release
 
 # Add user so we don't need --no-sandbox.
 # same layer as yarn install to keep re-chowned files from using up several hundred MBs more space
+
+# NOTE: this installs the monorepo, but you could also install secret-agent directly + and desired browsers
+# we will automatically install dependencies
 RUN cd /app/secret-agent && yarn \
+    && $(npx puppet-install-deps) \
     && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
     && mkdir -p /home/sagent/Downloads \
+    && mkdir -p /home/sagent/.cache \
     && chown -R sagent:sagent /home/sagent \
     && chown -R sagent:sagent /app/secret-agent \
-    && chown -R sagent:sagent /app/secret-agent/node_modules
+    && mv ~/.cache/secret-agent /home/sagent/.cache/ \
+    && chmod 777 /tmp \
+    && chmod -R 777 /home/sagent/.cache/secret-agent
 
 # Add below to run as unprivileged user.
-## USER sagent
+USER sagent
+
+CMD node core/start;
+# To run this docker, please see /tools/docker/docker-run.sh

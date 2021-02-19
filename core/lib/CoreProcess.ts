@@ -56,8 +56,7 @@ export default class CoreProcess {
         key.startsWith('NODE_') ||
         key.startsWith('MITM_') ||
         key.startsWith('SA_') ||
-        key.includes('CHROME_') ||
-        key.includes('CHROMIUM_');
+        key.includes('CHROME_');
 
       if (isWhitelisted) {
         processEnv[key] = value;

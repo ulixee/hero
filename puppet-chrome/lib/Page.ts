@@ -241,7 +241,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       format,
       quality,
       clip,
-    });
+      captureBeyondViewport: true, // added in chrome 87
+    } as Protocol.Page.CaptureScreenshotRequest);
 
     return Buffer.from(result.data, 'base64');
   }

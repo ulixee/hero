@@ -326,7 +326,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     })('${server.crossProcessBaseUrl}/grid.html')`);
         await page.frames[1].evaluate(`document.cookie = 'username=John Doe'`);
         await new Promise(resolve => setTimeout(resolve, 2e3));
-        const allowsThirdParty = false; // options.CHROMIUM || options.FIREFOX;
+        const allowsThirdParty = false; // options.CHROME || options.FIREFOX;
         const cookies = await context.getCookies(
           new URL(`${server.crossProcessBaseUrl}/grid.html}`),
         );

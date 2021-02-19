@@ -1,5 +1,12 @@
 export default interface IBrowserEngine {
-  browser: string;
-  revision: string;
+  name: string;
+  fullVersion: string;
   executablePath: string;
+  executablePathEnvVar: string;
+  extraLaunchArgs?: string[];
 }
+
+export type IBrowserEngineConfig = Pick<
+  IBrowserEngine,
+  'name' | 'fullVersion' | 'executablePathEnvVar'
+>;

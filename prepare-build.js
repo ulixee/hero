@@ -8,7 +8,6 @@ function processPackageJson(packagePath) {
   if (fs.existsSync(`${packagePath}/package.build.json`)) {
     overridesJson = JSON.parse(fs.readFileSync(`${packagePath}/package.build.json`, 'utf8'));
     console.log('Has package.json overrides', packagePath, overridesJson);
-    fs.unlinkSync(`${packagePath}/package.build.json`);
   }
 
   if (!overridesJson) return;

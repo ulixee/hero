@@ -13,6 +13,7 @@ const copyArgs = [
   'examples/*.js',
   'examples/*.mjs',
   'mitm-socket/lib/*.*',
+  '.*ignore',
 ];
 if (isBuild) {
   copyArgs.push(
@@ -28,8 +29,8 @@ for (const workspace of workspaces) {
   copyArgs.push(
     `${workspace}/*.cjs`,
     `${workspace}/*.mjs`,
-    `${workspace}/**/.gitignore`,
-    `${workspace}/**/.npmignore`,
+    `${workspace}/**/.*ignore`,
+    `${workspace}/**/*.sh`,
   );
 }
 

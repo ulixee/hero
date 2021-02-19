@@ -17,8 +17,8 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 13
-
+          node-version: 14
+          
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -27,21 +27,23 @@ jobs:
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-2${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-2
+            ${{ runner.os }}-yarn
 
       - name: Install Dependencies
-        run: yarn install --immutable
+        run: yarn install --immutable --network-timeout 1000000
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          SA_SKIP_DOWNLOAD: 1
 
       - name: Run "build" step
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn tsc
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          SA_SKIP_DOWNLOAD: 1
 
       - name: Run  Lint
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
@@ -75,10 +77,12 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
       - uses: actions/setup-go@v2
         with:
           go-version: 1.14
-      - name: Download a single artifact
+
+      - name: Download built typescript files
         uses: actions/download-artifact@v2
         with:
           name: js-build
@@ -109,14 +113,19 @@ jobs:
         run: cp -r mitm-socket/dist build/mitm-socket
 
       - name: Build modules
-        run: yarn
+        run: yarn --network-timeout 1000000
         working-directory: ./build
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
 
+      - name: Linux - Apt Install Chrome(s)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        working-directory: ./build
+        run: sudo $(npx puppet-install-deps)
+
       - name: Run tests
-        run: yarn jest --testTimeout=60000 --runInBand --detectOpenHandles
+        run: yarn jest --testTimeout=60000 --runInBand
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false
@@ -125,6 +134,6 @@ jobs:
       - name: Coverage
         run: npm -g install codecov && codecov
         working-directory: ./build
-        if: ${{ matrix.node-version == '13' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.node-version == '14' && matrix.os == 'ubuntu-latest' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

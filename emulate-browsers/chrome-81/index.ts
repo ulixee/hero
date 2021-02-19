@@ -3,7 +3,7 @@ import {
   BrowserEmulatorClassDecorator,
   DnsOverTlsProviders,
   DomOverridesBuilder,
-  getEngineExecutablePath,
+  getEngine,
   getTcpSettingsForOs,
   modifyHeaders,
   parseNavigatorPlugins,
@@ -29,19 +29,16 @@ const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
 const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
 
 const engineObj = {
-  browser: config.browserEngine.name,
-  revision: config.browserEngine.revision,
+  name: config.browserEngine.name,
+  fullVersion: config.browserEngine.fullVersion,
 };
 
 @BrowserEmulatorClassDecorator
 export default class Chrome81 {
   public static id = pkg.name;
-  public static roundRobinPercent: number = (config as any).marketshare;
+  public static roundRobinPercent: number = config.marketshare;
 
-  public static engine = {
-    ...engineObj,
-    executablePath: process.env.CHROMIUM_81_BIN ?? getEngineExecutablePath(engineObj),
-  };
+  public static engine = getEngine(engineObj, config.browserEngine.executablePathEnvVar);
 
   public static dnsOverTlsConnectOptions = DnsOverTlsProviders.Cloudflare;
 

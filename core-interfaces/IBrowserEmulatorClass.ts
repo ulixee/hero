@@ -1,10 +1,11 @@
 import IBrowserEmulator from './IBrowserEmulator';
 import IUserAgentOption from './IUserAgentOption';
+import IBrowserEngine from './IBrowserEngine';
 
 export default interface IBrowserEmulatorClass {
   id: string;
   roundRobinPercent: number;
-  engine: { browser: string; executablePath: string; revision: string };
+  engine: IBrowserEngine;
   new (): IBrowserEmulator;
   userAgentOptions?: IUserAgentOption[];
 }

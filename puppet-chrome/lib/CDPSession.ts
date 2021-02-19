@@ -115,7 +115,7 @@ export class CDPSession extends EventEmitter {
       error.stack += `\n${'------DEVTOOLS'.padEnd(
         50,
         '-',
-      )}\n${`------DEVTOOLS-SESSION-ID =${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
+      )}\n${`------CDP_SESSION_ID=${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
       resolvable.reject(error);
     }
     this.pendingMessages.clear();

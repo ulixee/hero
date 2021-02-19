@@ -42,7 +42,6 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     it('should click the document', async () => {
-      // Occasionally times out on options.FIREFOX on Windows: https://github.com/microsoft/playwright/pull/1911/checks?check_run_id=607149016
       await page.evaluate(`(() => {
         window.clickPromise = new Promise(resolve => {
           document.addEventListener('click', event => {

@@ -52,9 +52,9 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     const options = {
-      CHROMIUM: browserEngine.browser === 'chromium',
-      WEBKIT: browserEngine.browser === 'webkit',
-      FIREFOX: browserEngine.browser === 'firefox',
+      CHROME: browserEngine.name === 'chrome',
+      WEBKIT: browserEngine.name === 'webkit',
+      FIREFOX: browserEngine.name === 'firefox',
     };
 
     const isWindows = process.platform === 'win32';
@@ -103,9 +103,9 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         let error = null;
         await page.goto(server.emptyPage).catch(e => (error = e));
         expect(error).not.toBe(null);
-        if (browserEngine.browser === 'chromium')
+        if (browserEngine.name === 'chrome')
           expect(error.message).toContain('net::ERR_ABORTED');
-        else if (browserEngine.browser === 'webkit')
+        else if (browserEngine.name === 'webkit')
           expect(error.message).toContain('Aborted: 204 No Content');
         else expect(error.message).toContain('NS_BINDING_ABORTED');
       });
@@ -130,7 +130,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       it('should fail when navigating to bad url', async () => {
         let error = null;
         await page.goto('asdfasdf').catch(e => (error = e));
-        if (options.CHROMIUM || options.WEBKIT)
+        if (options.CHROME || options.WEBKIT)
           expect(error.message).toContain('Cannot navigate to invalid URL');
         else expect(error.message).toContain('Invalid url');
       });
@@ -138,7 +138,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       it('should fail when main resources failed to load', async () => {
         let error = null;
         await page.goto('http://localhost:44123/non-existing-url').catch(e => (error = e));
-        if (options.CHROMIUM) expect(error.message).toContain('net::ERR_CONNECTION_REFUSED');
+        if (options.CHROME) expect(error.message).toContain('net::ERR_CONNECTION_REFUSED');
         else if (options.WEBKIT && isWindows)
           expect(error.message).toContain(`Couldn't connect to server`);
         else if (options.WEBKIT) expect(error.message).toContain('Could not connect');
@@ -153,7 +153,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         });
         const error = await page.goto(`${server.baseUrl}/empty.html`).catch(e => e);
         await anotherPromise;
-        if (options.CHROMIUM) expect(error.message).toContain('net::ERR_ABORTED');
+        if (options.CHROME) expect(error.message).toContain('net::ERR_ABORTED');
         else if (options.WEBKIT) expect(error.message).toContain('cancelled');
         else expect(error.message).toContain('NS_BINDING_ABORTED');
       });
