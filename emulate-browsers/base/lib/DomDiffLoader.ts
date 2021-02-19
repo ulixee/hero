@@ -1,6 +1,6 @@
 import * as Fs from 'fs';
 import getLocalOperatingSystemMeta from './getLocalOperatingSystemMeta';
-import { convertVersionsToTree, getClosestNumberMatch } from './VersionUtils';
+import { findClosestVersionMatch } from './VersionUtils';
 
 const localOsMeta = getLocalOperatingSystemMeta();
 
@@ -24,8 +24,6 @@ export default class DomDiffLoader {
 }
 
 function extractFilename(filenames: string[]) {
-  const localOsName = localOsMeta.name;
-  const localOsVersion = localOsMeta.version;
   const filenameMap = {};
   for (const filename of filenames) {
     const matches = filename.match(/^dom-diffs-when-runtime-([a-z-]+)(-([0-9-]+))?.json$/);
@@ -36,44 +34,19 @@ function extractFilename(filenames: string[]) {
     filenameMap[osName][osVersion || 'ALL'] = filename;
   }
 
-  if (!filenameMap[localOsName]) {
-    throw new Error(`Your OS (${localOsName}) is not supported by this emulator.`);
+  if (!filenameMap[localOsMeta.name]) {
+    throw new Error(`Your OS (${localOsMeta.name}) is not supported by this emulator.`);
   }
 
   const versionMatch = findClosestVersionMatch(
-    localOsVersion,
-    Object.keys(filenameMap[localOsName]),
+    localOsMeta.version,
+    Object.keys(filenameMap[localOsMeta.name]),
   );
 
   if (!versionMatch) {
-    throw new Error(`Emulator could not find a version match for ${localOsName} ${localOsVersion}`);
+    throw new Error(`Emulator could not find a version match for ${localOsMeta.name} ${localOsMeta.version}`);
   }
 
-  return filenameMap[localOsName][versionMatch];
+  return filenameMap[localOsMeta.name][versionMatch];
 }
 
-function findClosestVersionMatch(versionToMatch: string, versions: string[]) {
-  if (versions.length === 1 && versions[0] === 'ALL') return 'ALL';
-
-  // there is no guarantee we have an exact match, so let's get the closest
-  const versionTree = convertVersionsToTree(versions);
-  const [major, minor] = versionToMatch.split('-').map(x => Number(x));
-
-  const majors = Object.keys(versionTree).map(x => Number(x));
-  const majorMatch = getClosestNumberMatch(major, majors);
-  let versionMatch = `${majorMatch}`;
-
-  if (minor) {
-    const minors = Object.keys(versionTree[majorMatch]).map(x => Number(x));
-    const minorMatch = getClosestNumberMatch(minor, minors);
-    versionMatch += `-${minorMatch}`;
-  } else if (!versions.includes(versionMatch)) {
-    const minors = Object.keys(versionTree[majorMatch]).map(x => Number(x));
-    if (minors.length) {
-      const minorMatch = major > majorMatch ? Math.max(...minors) : Math.min(...minors);
-      versionMatch += `-${minorMatch}`;
-    }
-  }
-
-  return versions.includes(versionMatch) ? versionMatch : null;
-}

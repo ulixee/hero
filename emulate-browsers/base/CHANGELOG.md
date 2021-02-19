@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.1-alpha.0...v1.3.1-alpha.1) (2021-02-19)
+
+
+### Bug Fixes
+
+* os version should fallback to major if no minor exists ([374cf76](https://github.com/ulixee/secret-agent/commit/374cf7601060350df985f2ff41bde56c6cd8b824))
+
+
+
+
+
 # [1.3.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.3...v1.3.0-alpha.4) (2021-02-15)
 
 
