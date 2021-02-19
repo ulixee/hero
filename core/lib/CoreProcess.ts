@@ -53,7 +53,7 @@ export default class CoreProcess {
       const isWhitelisted =
         key === 'DEBUG' ||
         key === 'SHOW_BROWSER' ||
-        key === 'NODE_ENV' ||
+        key.startsWith('NODE_') ||
         key.startsWith('MITM_') ||
         key.startsWith('SA_') ||
         key.includes('CHROME_') ||
