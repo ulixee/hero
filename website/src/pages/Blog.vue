@@ -61,6 +61,9 @@ export default {
     margin-bottom: 10px;
     padding-bottom: 10px;
   }
+  article {
+    margin-bottom: 45px;
+  }
   .read-link {
   }
 }

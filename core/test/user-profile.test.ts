@@ -363,6 +363,7 @@ localStorage.setItem('cross', '1');
 
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
       await tab.waitForLoad('PaintingStable');
+      await tab.puppetPage.frames[1].waitForLoad();
       profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
