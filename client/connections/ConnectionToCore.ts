@@ -8,6 +8,8 @@ import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionO
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -18,19 +20,24 @@ import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
 const { log } = Log(module);
 
-export default abstract class ConnectionToCore {
+export default abstract class ConnectionToCore extends TypedEventEmitter<{
+  disconnected: void;
+  connected: void;
+}> {
   public readonly commandQueue: CoreCommandQueue;
   public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
 
   private connectPromise: Promise<Error | null>;
   private isClosing = false;
+  private resolvedHost: string;
 
   private coreSessions: CoreSessions;
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();
   private lastId = 0;
 
   constructor(options?: IConnectionToCoreOptions) {
+    super();
     this.options = options ?? { isPersistent: true };
     this.commandQueue = new CoreCommandQueue(null, this);
     this.coreSessions = new CoreSessions(
@@ -45,6 +52,10 @@ export default abstract class ConnectionToCore {
             return `ws://${x}`;
           }
           return x;
+        })
+        .then(x => {
+          this.resolvedHost = x;
+          return this.resolvedHost;
         })
         .catch(err => err);
     } else {
@@ -104,6 +115,7 @@ export default abstract class ConnectionToCore {
       host: this.hostOrError,
       sessionId: null,
     });
+    this.emit('disconnected');
   }
 
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +216,11 @@ export default abstract class ConnectionToCore {
     this.pendingRequestsById.delete(id);
 
     if (message.data instanceof Error) {
-      this.rejectPendingRequest(pending, message.data);
+      let error = message.data;
+      if (this.isClosing || error.name === SessionClosedOrMissingError.name) {
+        error = new DisconnectedFromCoreError(this.resolvedHost);
+      }
+      this.rejectPendingRequest(pending, error);
     } else {
       pending.resolve({ data: message.data, commandId: message.commandId });
     }
@@ -249,6 +265,7 @@ export default abstract class ConnectionToCore {
       this.options.maxConcurrency = maxConcurrency;
     }
     this.options.browserEmulatorIds ??= browserEmulatorIds ?? [];
+    this.emit('connected');
   }
 }
 

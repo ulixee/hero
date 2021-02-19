@@ -33,6 +33,7 @@ export default class Handler {
     for (const options of connectionOptions) {
       const connection = ConnectionFactory.createConnection(options);
       this.connections.push(connection);
+      connection.on('disconnected', this.onDisconnected.bind(this, connection));
     }
 
     ShutdownHandler.register(() => this.close());
@@ -110,6 +111,7 @@ export default class Handler {
 
   public async waitForAllDispatches(): Promise<void> {
     const dispatches = [...this.dispatches];
+    // clear out dispatches everytime you check it
     this.dispatches.length = 0;
     await Promise.all(
       dispatches.map(async dispatch => {
@@ -138,5 +140,10 @@ export default class Handler {
     }
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.logUnhandledError(error)));
+  }
+
+  private onDisconnected(connection: ConnectionToCore): void {
+    const idx = this.connections.indexOf(connection);
+    if (idx >= 0) this.connections.splice(idx, 1);
   }
 }

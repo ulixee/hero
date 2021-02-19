@@ -7,5 +7,6 @@ export class DependenciesMissingError extends Error {
     super(
       `Some of the dependencies needed to run ${engineName} are not on your system!\n\n${resolutionMessage}`,
     );
+    this.name = 'DependenciesMissingError';
   }
 }

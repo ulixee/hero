@@ -188,6 +188,7 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/ordered-imports': 'off',
+    '@typescript-eslint/return-await': 'off',
     '@typescript-eslint/no-shadow': [
       'error',
       { ignoreTypeValueShadow: true, ignoreFunctionTypeParameterNameValueShadow: true },

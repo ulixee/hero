@@ -14,6 +14,7 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
 import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -71,7 +72,9 @@ export default class ConnectionToClient extends TypedEventEmitter<{
         // if not on this function, assume we're sending on to tab
         const tab = Session.getTab(meta);
         if (!tab) {
-          data = new CanceledPromiseError('Requested tab is not a part of session or closed.');
+          data = new SessionClosedOrMissingError(
+            `The requested command (${command}) references a tab that is no longer part of session or has been closed.`,
+          );
         } else if (typeof tab[command] !== 'function') {
           data = new Error(`Command not available on tab (${command} - ${typeof tab[command]})`);
         } else {
