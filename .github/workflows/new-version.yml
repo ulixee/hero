@@ -16,7 +16,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 13
 
       - name: Yarn install
         run: yarn install --network-timeout 1000000

@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 13
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -65,7 +65,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: [12, 14]
+        node-version: [13, 14]
 
     runs-on: ${{ matrix.os }}
 
@@ -125,6 +125,6 @@ jobs:
       - name: Coverage
         run: npm -g install codecov && codecov
         working-directory: ./build
-        if: ${{ matrix.node-version == '12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.node-version == '13' && matrix.os == 'ubuntu-latest' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
