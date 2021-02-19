@@ -93,6 +93,7 @@ describe('UserProfile cookie tests', () => {
 
       await tab.goto(`${koaServer.baseUrl}/cross-cookie`);
       await tab.waitForLoad('PaintingStable');
+      await tab.puppetPage.frames[1].waitForLoad();
 
       profile = await connection.exportUserProfile(meta);
       expect(profile.cookies).toHaveLength(3);

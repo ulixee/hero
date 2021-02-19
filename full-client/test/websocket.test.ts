@@ -57,9 +57,12 @@ describe('Websocket tests', () => {
     ws.onmessage = msg => {
       ws.send('Echo ' + msg.data);
     };
-    setTimeout(() => {
+    let hasRun = false;
+    document.addEventListener('mousemove', () => {
+      if (hasRun) return;
+      hasRun = true;
       ws.send('Final message');
-    }, 1e3);
+    })
   </script>
 </html>`;
     });
@@ -86,6 +89,7 @@ describe('Websocket tests', () => {
         broadcast.resolve();
       }
     });
+    await agent.interact({ move: [10, 10] });
     await broadcast.promise;
     expect(messagesCtr).toBe(41);
 
