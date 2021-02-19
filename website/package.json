@@ -14,6 +14,7 @@
   "dependencies": {
     "@gridsome/remark-prismjs": "^0.3.0",
     "@gridsome/vue-remark": "^0.2.1",
+    "@microflash/gridsome-plugin-feed": "^1.2.1",
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
     "awaited-dom": "^1.1.10",
