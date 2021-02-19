@@ -78,5 +78,27 @@ module.exports = {
         },
       },
     },
+    {
+      use: '@microflash/gridsome-plugin-feed',
+      options: {
+        contentTypes: ['Post'],
+        feedOptions: {
+          title: 'SecretAgent Blog',
+          description: 'A blog about scraping, features and experiences developing SecretAgent',
+        },
+        rss: {
+          enabled: true,
+          output: '/feed.xml',
+        },
+        atom: {
+          enabled: true,
+          output: '/feed.atom',
+        },
+        json: {
+          enabled: true,
+          output: '/feed.json',
+        },
+      },
+    },
   ],
 };

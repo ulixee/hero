@@ -1,6 +1,6 @@
 ---
 title: 'Scaling SecretAgent Scrapes with Handlers'
-path: /handling-scale
+path: /blog/handling-scale
 date: 2020-12-29
 summary: "We needed a simpler approach to scaling out to multiple machines running SecretAgent and 1000s of waiting actions. So we added a new concept called Handlers."
 ---
