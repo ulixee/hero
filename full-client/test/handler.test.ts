@@ -3,8 +3,9 @@ import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core, { Session } from '@secret-agent/core/index';
 import CoreProcess from '@secret-agent/core/lib/CoreProcess';
 import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
-import { RemoteConnectionToCore } from '@secret-agent/client/index';
+import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
 import { createPromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -218,6 +219,35 @@ describe('connectionToCore', () => {
     expect(dispatchError).toBeTruthy();
     expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
     expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
+  });
+
+  it('can close without waiting for dispatches', async () => {
+    const spawnedCoreHost = await CoreProcess.spawn({});
+    Helpers.onClose(() => CoreProcess.kill());
+    const coreHost = await Core.server.address;
+
+    const handler = new Handler({ host: coreHost }, { host: spawnedCoreHost });
+    Helpers.needsClosing.push(handler);
+
+    const waits: Promise<any>[] = [];
+    const waitForAgent = async (agent: Agent, waitForGoto: IResolvablePromise<any>) => {
+      await agent.goto(koaServer.baseUrl);
+      waitForGoto.resolve();
+      await agent.waitForPaintingStable();
+      await agent.waitForMillis(10e3);
+    };
+    for (let i = 0; i < 10; i += 1) {
+      const waitForGoto = createPromise();
+      waits.push(waitForGoto.promise);
+      handler.dispatchAgent(waitForAgent, waitForGoto);
+    }
+
+    await Promise.all(waits);
+
+    // kill off one of the cores
+    await CoreProcess.kill('SIGINT');
+    // should still be able to close
+    await expect(handler.close()).resolves.toBeUndefined();
   });
 
   it('can add and remove connections', async () => {
