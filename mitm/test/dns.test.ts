@@ -115,3 +115,30 @@ test('should lookup in the local machine if not found in DoT', async () => {
   expect(lookupSpy).toHaveBeenCalledTimes(1);
   expect(systemLookupSpy).toHaveBeenCalledTimes(1);
 });
+
+test('should properly expose errors if nothing is found', async () => {
+  const lookupSpy = jest.spyOn(nodeDns, 'lookup').mockClear();
+  const dotLookup = jest
+    .spyOn<any, any>(dns, 'lookupDnsEntry')
+    .mockClear()
+    .mockImplementationOnce(() => {
+      throw new Error('Not found');
+    });
+  const systemLookupSpy = jest.spyOn<any, any>(dns, 'systemLookup').mockClear();
+
+  let unhandledErrorCalled = false;
+  const handler = () => {
+    unhandledErrorCalled = true;
+  };
+  process.once('unhandledRejection', handler);
+
+  await expect(dns.lookupIp('not-real-123423423443433434343-fake-domain.com')).rejects.toThrowError(
+    'Not found',
+  );
+  await new Promise(resolve => setTimeout(resolve, 100));
+  expect(unhandledErrorCalled).toBe(false);
+  expect(dotLookup).toHaveBeenCalledTimes(1);
+  expect(lookupSpy).toHaveBeenCalledTimes(1);
+  expect(systemLookupSpy).toHaveBeenCalledTimes(1);
+  process.off('unhandledRejection', handler);
+});

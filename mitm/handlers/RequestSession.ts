@@ -222,7 +222,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       try {
         return await this.dns.lookupIp(host);
       } catch (error) {
-        log.error('DnsLookup.Error', {
+        log.info('DnsLookup.Error', {
           sessionId: this.sessionId,
           error,
         });
