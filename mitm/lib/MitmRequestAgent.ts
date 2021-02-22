@@ -1,13 +1,14 @@
 import MitmSocket from '@secret-agent/mitm-socket';
 import * as http2 from 'http2';
 import { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 'http2';
-import Log from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import * as https from 'https';
 import { RequestOptions } from 'https';
 import * as http from 'http';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import Queue from '@secret-agent/commons/Queue';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
@@ -332,7 +333,7 @@ export default class MitmRequestAgent {
   private async handleHttp2ProxyToClientPush(
     pushContext: IMitmRequestContext,
     onResponseHeaders: Promise<void>,
-    error: Error,
+    createPushStreamError: Error,
     proxyToClientPushStream: ServerHttp2Stream,
   ): Promise<void> {
     pushContext.setState(ResourceState.ProxyToClientPushResponse);
@@ -341,10 +342,10 @@ export default class MitmRequestAgent {
     const session = this.session;
     const sessionId = session.sessionId;
 
-    if (error) {
+    if (createPushStreamError) {
       log.warn('Http2.ClientToProxy.PushStreamError', {
         sessionId,
-        error,
+        error: createPushStreamError,
       });
       return;
     }
@@ -370,34 +371,63 @@ export default class MitmRequestAgent {
     }
     cache.onHttp2PushStream();
 
-    if (cache.shouldServeCachedData) {
-      if (!proxyToClientPushStream.destroyed) {
-        proxyToClientPushStream.write(cache.cacheData);
-      }
-      if (!serverToProxyPushStream.destroyed) {
-        serverToProxyPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
-      }
-    } else {
-      proxyToClientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
-      proxyToClientPushStream.on('wantTrailers', (): void => {
-        pushContext.responseTrailers = trailers;
-        proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
-      });
+    try {
+      if (cache.shouldServeCachedData) {
+        if (!proxyToClientPushStream.destroyed) {
+          proxyToClientPushStream.write(cache.cacheData, err => {
+            if (err)
+              this.onHttp2PushError(pushContext, 'Http2PushProxyToClient.CacheWriteError', err);
+          });
+        }
+        if (!serverToProxyPushStream.destroyed) {
+          serverToProxyPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
+        }
+      } else {
+        proxyToClientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
+        proxyToClientPushStream.on('wantTrailers', (): void => {
+          pushContext.responseTrailers = trailers;
+          proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
+        });
 
-      pushContext.setState(ResourceState.ServerToProxyPushResponse);
-      for await (const chunk of serverToProxyPushStream) {
-        if (proxyToClientPushStream.destroyed || serverToProxyPushStream.destroyed) return;
-        cache.onResponseData(chunk);
-        proxyToClientPushStream.write(chunk);
+        pushContext.setState(ResourceState.ServerToProxyPushResponse);
+        for await (const chunk of serverToProxyPushStream) {
+          if (proxyToClientPushStream.destroyed || serverToProxyPushStream.destroyed) return;
+          cache.onResponseData(chunk);
+          proxyToClientPushStream.write(chunk, err => {
+            if (err) this.onHttp2PushError(pushContext, 'Http2PushProxyToClient.WriteError', err);
+          });
+        }
+        if (!serverToProxyPushStream.destroyed) serverToProxyPushStream.end();
       }
-      if (!serverToProxyPushStream.destroyed) serverToProxyPushStream.end();
+
+      if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.end();
+      cache.onResponseEnd();
+
+      await HeadersHandler.waitForBrowserRequest(pushContext);
+      this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
+    } catch (writeError) {
+      this.onHttp2PushError(pushContext, 'Http2PushProxyToClient.UnhandledError', writeError);
+      if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.destroy();
     }
+  }
 
-    if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.end();
-    cache.onResponseEnd();
+  private onHttp2PushError(pushContext: IMitmRequestContext, kind: string, error: Error): void {
+    const isCanceled = error instanceof CanceledPromiseError;
+    const { requestSession } = pushContext;
 
-    await HeadersHandler.waitForBrowserRequest(pushContext);
-    this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
+    pushContext.setState(ResourceState.Error);
+    requestSession.emit('http-error', {
+      request: MitmRequestContext.toEmittedResource(pushContext),
+      error,
+    });
+
+    if (!isCanceled && !requestSession.isClosing && !error[hasBeenLoggedSymbol]) {
+      log.info(`MitmHttpRequest.${kind}`, {
+        sessionId: requestSession.sessionId,
+        request: `H2PUSH: ${pushContext.url.href}`,
+        error,
+      });
+    }
   }
 
   private getHttp2Session(origin: string): IHttp2Session | undefined {
