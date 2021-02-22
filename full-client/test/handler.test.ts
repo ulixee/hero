@@ -147,6 +147,47 @@ describe('waitForAllDispatches', () => {
   });
 });
 
+describe('waitForAllDispatchesSettled', () => {
+  it('should return all successful and error dispatches', async () => {
+    const handler = new Handler({
+      maxConcurrency: 2,
+      host: await Core.server.address,
+    });
+    Helpers.onClose(() => handler.close(), true);
+
+    let failedAgentSessionId: string;
+    handler.dispatchAgent(
+      async agent => {
+        failedAgentSessionId = await agent.sessionId;
+        const tab = Session.getTab({
+          sessionId: failedAgentSessionId,
+          tabId: await agent.activeTab.tabId,
+        });
+        jest.spyOn(tab, 'goto').mockImplementation(async url => {
+          throw new Error(`invalid url "${url}"`);
+        });
+
+        await agent.goto('any url 2');
+      },
+      { test: 1 },
+    );
+
+    handler.dispatchAgent(
+      async agent => {
+        await agent.goto(koaServer.baseUrl);
+      },
+      { test: 2 },
+    );
+
+    const dispatchResult = await handler.waitForAllDispatchesSettled();
+    expect(Object.keys(dispatchResult)).toHaveLength(2);
+    expect(dispatchResult[failedAgentSessionId]).toBeTruthy();
+    expect(dispatchResult[failedAgentSessionId].error).toBeTruthy();
+    expect(dispatchResult[failedAgentSessionId].error.message).toMatch('invalid url');
+    expect(dispatchResult[failedAgentSessionId].args).toStrictEqual({ test: 1 });
+  });
+});
+
 describe('connectionToCore', () => {
   it('handles disconnects from killed core server', async () => {
     const coreHost = await CoreProcess.spawn({});
@@ -165,9 +206,9 @@ describe('connectionToCore', () => {
     handler.dispatchAgent(async agent => {
       try {
         await agent.goto(koaServer.baseUrl);
+        const promise = agent.waitForMillis(10e3);
         waitForGoto.resolve();
-        await agent.waitForPaintingStable();
-        await agent.waitForMillis(10e3);
+        await promise;
       } catch (error) {
         dispatchError = error;
         throw error;
@@ -204,9 +245,9 @@ describe('connectionToCore', () => {
     handler.dispatchAgent(async agent => {
       try {
         await agent.goto(koaServer.baseUrl);
+        const promise = agent.waitForMillis(10e3);
         waitForGoto.resolve();
-        await agent.waitForPaintingStable();
-        await agent.waitForMillis(10e3);
+        await promise;
       } catch (error) {
         dispatchError = error;
         throw error;
@@ -232,9 +273,11 @@ describe('connectionToCore', () => {
     const waits: Promise<any>[] = [];
     const waitForAgent = async (agent: Agent, waitForGoto: IResolvablePromise<any>) => {
       await agent.goto(koaServer.baseUrl);
+
+      // don't wait
+      const promise = agent.waitForMillis(10e3);
       waitForGoto.resolve();
-      await agent.waitForPaintingStable();
-      await agent.waitForMillis(10e3);
+      await promise;
     };
     for (let i = 0; i < 10; i += 1) {
       const waitForGoto = createPromise();
