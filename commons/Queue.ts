@@ -28,12 +28,12 @@ export default class Queue {
     return promise.promise;
   }
 
-  public stop(): void {
+  public stop(error?: Error): void {
     while (this.queue.length) {
       const next = this.queue.shift();
       if (!next) continue;
 
-      this.reject(next, new CanceledPromiseError('Canceling Queue Item'));
+      this.reject(next, error ?? new CanceledPromiseError('Canceling Queue Item'));
     }
   }
 

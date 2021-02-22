@@ -11,6 +11,17 @@ const { log } = Log(module);
 
 export default class Handler {
   public defaultAgentOptions: IAgentCreateOptions = {};
+  public get coreHosts(): Promise<string[]> {
+    return Promise.all(this.connections.map(x => x.hostOrError)).then(x => {
+      const hosts: string[] = [];
+      for (const host of x) {
+        if (host instanceof Error) continue;
+        hosts.push(host);
+      }
+      return hosts;
+    });
+  }
+
   private readonly connections: ConnectionToCore[] = [];
   private readonly dispatches: Promise<Error | void>[] = [];
 
@@ -22,10 +33,30 @@ export default class Handler {
     for (const options of connectionOptions) {
       const connection = ConnectionFactory.createConnection(options);
       this.connections.push(connection);
+      connection.on('disconnected', this.onDisconnected.bind(this, connection));
     }
 
     ShutdownHandler.register(() => this.close());
     this.registerUnhandledExceptionHandlers();
+  }
+
+  public async addConnectionToCore(
+    options: IConnectionToCoreOptions | ConnectionToCore,
+  ): Promise<void> {
+    const connection = ConnectionFactory.createConnection(options);
+    const error = await connection.connect();
+    if (error) throw error;
+    this.connections.push(connection);
+  }
+
+  public async removeConnectionToCore(host: string): Promise<void> {
+    const wsHost = host.startsWith('ws') ? host : `ws://${host}`;
+    for (const connection of this.connections) {
+      const coreHost = await connection.hostOrError;
+      if (typeof coreHost === 'string' && coreHost === wsHost) {
+        await connection.disconnect();
+      }
+    }
   }
 
   public dispatchAgent<T>(
@@ -80,6 +111,7 @@ export default class Handler {
 
   public async waitForAllDispatches(): Promise<void> {
     const dispatches = [...this.dispatches];
+    // clear out dispatches everytime you check it
     this.dispatches.length = 0;
     await Promise.all(
       dispatches.map(async dispatch => {
@@ -108,5 +140,10 @@ export default class Handler {
     }
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.logUnhandledError(error)));
+  }
+
+  private onDisconnected(connection: ConnectionToCore): void {
+    const idx = this.connections.indexOf(connection);
+    if (idx >= 0) this.connections.splice(idx, 1);
   }
 }

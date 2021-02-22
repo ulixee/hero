@@ -36,6 +36,7 @@ import IAgentDefaults from '../interfaces/IAgentDefaults';
 import CoreSession from './CoreSession';
 import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 import ConnectionFactory from '../connections/ConnectionFactory';
+import ConnectionToCore from '../connections/ConnectionToCore';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -56,6 +57,7 @@ const propertyKeys: (keyof Agent)[] = [
   'sessionId',
   'meta',
   'tabs',
+  'coreHost',
   'activeTab',
   'sessionName',
   'url',
@@ -134,6 +136,10 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   public get url(): Promise<string> {
     return this.activeTab.url;
+  }
+
+  public get coreHost(): Promise<string> {
+    return getState(this).connection.host;
   }
 
   public get Request(): typeof Request {
@@ -321,6 +327,14 @@ class SessionConnection {
     this._activeTab = value;
   }
 
+  public get host(): Promise<string> {
+    return this._connection?.hostOrError.then(x => {
+      if (x instanceof Error) throw x;
+      return x;
+    });
+  }
+
+  private _connection: ConnectionToCore;
   private _coreSession: Promise<CoreSession | Error>;
   private _activeTab: Tab;
   private _tabs: Tab[] = [];
@@ -378,6 +392,7 @@ class SessionConnection {
     const connection = ConnectionFactory.createConnection(
       connectionToCore ?? { isPersistent: false },
     );
+    this._connection = connection;
 
     this._coreSession = connection.createSession(options).catch(err => err);
 

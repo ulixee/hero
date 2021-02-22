@@ -95,9 +95,8 @@ export default class CoreServer {
         return connection.handleRequest(payload);
       });
 
-      ws.on('close', () => {
-        return connection.disconnect();
-      });
+      ws.once('close', () => connection.disconnect());
+      ws.once('error', error => connection.disconnect(error));
 
       connection.on('message', async payload => {
         const json = TypeSerializer.stringify(payload);

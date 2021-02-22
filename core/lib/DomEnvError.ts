@@ -5,6 +5,7 @@ export default class DomEnvError extends Error {
   constructor(message: string, pathState: { step: IPathStep; index: number }) {
     super(message);
     this.pathState = pathState;
+    this.name = 'DomEnvError';
   }
 
   public toJSON(): object {

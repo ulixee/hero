@@ -13,11 +13,10 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
   constructor(options: IConnectionToCoreOptions) {
     if (!options.host) throw new Error('A remote connection to core needs a host parameter!');
     super(options);
-    this.disconnect = this.disconnect.bind(this);
   }
 
   public async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
-    if (!this.webSocketOrError) return;
+    if (!this.webSocketOrError) throw new CanceledPromiseError('No websocket connection');
     const message = TypeSerializer.stringify(payload);
 
     const webSocket = await this.getWebsocket();
@@ -39,6 +38,7 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
     if (webSocket?.readyState === WebSocket.OPEN) {
       try {
         webSocket.off('close', this.disconnect);
+        webSocket.off('error', this.disconnect);
         webSocket.terminate();
       } catch (_) {
         // ignore errors terminating
@@ -56,6 +56,7 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
       try {
         const webSocket = await this.getWebsocket();
         webSocket.once('close', this.disconnect);
+        webSocket.once('error', this.disconnect);
         webSocket.on('message', message => {
           const payload = TypeSerializer.parse(message.toString());
           this.onMessage(payload);
@@ -84,9 +85,11 @@ function connectToWebsocketHost(host: string): IResolvablePromise<WebSocket | Er
     if (error instanceof Error) resolvable.resolve(error);
     else resolvable.resolve(new Error(`Error connecting to Websocket host -> ${error}`));
   }
+  webSocket.once('close', onError);
   webSocket.once('error', onError);
   webSocket.once('open', () => {
     webSocket.off('error', onError);
+    webSocket.off('close', onError);
     resolvable.resolve(webSocket);
   });
   return resolvable;

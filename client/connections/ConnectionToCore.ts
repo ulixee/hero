@@ -8,28 +8,36 @@ import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionO
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import { IAgentCreateOptions } from '../index';
 import Agent from '../lib/Agent';
 import CoreSessions from '../lib/CoreSessions';
+import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
 const { log } = Log(module);
 
-export default abstract class ConnectionToCore {
+export default abstract class ConnectionToCore extends TypedEventEmitter<{
+  disconnected: void;
+  connected: void;
+}> {
   public readonly commandQueue: CoreCommandQueue;
   public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
 
   private connectPromise: Promise<Error | null>;
   private isClosing = false;
+  private resolvedHost: string;
 
   private coreSessions: CoreSessions;
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();
   private lastId = 0;
 
   constructor(options?: IConnectionToCoreOptions) {
+    super();
     this.options = options ?? { isPersistent: true };
     this.commandQueue = new CoreCommandQueue(null, this);
     this.coreSessions = new CoreSessions(
@@ -45,10 +53,15 @@ export default abstract class ConnectionToCore {
           }
           return x;
         })
+        .then(x => {
+          this.resolvedHost = x;
+          return this.resolvedHost;
+        })
         .catch(err => err);
     } else {
       this.hostOrError = Promise.resolve(new Error('No host provided'));
     }
+    this.disconnect = this.disconnect.bind(this);
   }
 
   protected abstract internalSendRequest(payload: ICoreRequestPayload): Promise<void>;
@@ -81,20 +94,28 @@ export default abstract class ConnectionToCore {
   public async disconnect(fatalError?: Error): Promise<void> {
     if (this.isClosing) return;
     this.isClosing = true;
-    const logid = log.stats('ConnectionToCore.Disconnecting');
-
-    this.cancelPendingRequests();
-    if (this.connectPromise) {
-      await this.internalSendRequestAndWait({
-        command: 'disconnect',
-        args: [fatalError],
-      });
-    }
-    await this.destroyConnection();
-    log.stats('RemoteConnectionToCore.Disconnected', {
-      parentLogId: logid,
+    const logid = log.stats('ConnectionToCore.Disconnecting', {
+      host: this.hostOrError,
       sessionId: null,
     });
+
+    await this.cancelPendingRequests();
+    if (this.connectPromise) {
+      await this.internalSendRequestAndWait(
+        {
+          command: 'disconnect',
+          args: [fatalError],
+        },
+        2e3,
+      );
+    }
+    await this.destroyConnection();
+    log.stats('ConnectionToCore.Disconnected', {
+      parentLogId: logid,
+      host: this.hostOrError,
+      sessionId: null,
+    });
+    this.emit('disconnected');
   }
 
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,21 +176,32 @@ export default abstract class ConnectionToCore {
 
   protected async internalSendRequestAndWait(
     payload: Omit<ICoreRequestPayload, 'messageId'>,
+    timeoutMs?: number,
   ): Promise<ICoreResponsePayload> {
-    const { promise, id } = this.createPendingResult();
+    const { promise, id, resolve } = this.createPendingResult();
+
+    let timeout: NodeJS.Timeout;
+    if (timeoutMs) timeout = setTimeout(() => resolve(null), timeoutMs).unref();
     try {
       await this.internalSendRequest({
         messageId: id,
         ...payload,
       });
     } catch (error) {
+      clearTimeout(timeout);
       if (error instanceof CanceledPromiseError) {
         this.pendingRequestsById.delete(id);
         return;
       }
       throw error;
     }
-    return promise;
+
+    // now run to completion with timeout
+    try {
+      return await promise;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   protected onEvent(payload: ICoreEventPayload): void {
@@ -183,22 +215,25 @@ export default abstract class ConnectionToCore {
     if (!pending) return;
     this.pendingRequestsById.delete(id);
 
-    if (message.isError) {
-      const error = new Error(message.data?.message);
-      Object.assign(error, message.data);
+    if (message.data instanceof Error) {
+      let error = message.data;
+      if (this.isClosing || error.name === SessionClosedOrMissingError.name) {
+        error = new DisconnectedFromCoreError(this.resolvedHost);
+      }
       this.rejectPendingRequest(pending, error);
     } else {
       pending.resolve({ data: message.data, commandId: message.commandId });
     }
   }
 
-  protected cancelPendingRequests(): void {
+  protected async cancelPendingRequests(): Promise<void> {
     this.commandQueue.clearPending();
-    this.coreSessions.close();
+    const host = String(await this.hostOrError);
+    this.coreSessions.close(new DisconnectedFromCoreError(host));
     const pending = [...this.pendingRequestsById.values()];
     this.pendingRequestsById.clear();
     for (const entry of pending) {
-      this.rejectPendingRequest(entry, new CanceledPromiseError('Disconnecting from Core'));
+      this.rejectPendingRequest(entry, new DisconnectedFromCoreError(host));
     }
   }
 
@@ -230,6 +265,7 @@ export default abstract class ConnectionToCore {
       this.options.maxConcurrency = maxConcurrency;
     }
     this.options.browserEmulatorIds ??= browserEmulatorIds ?? [];
+    this.emit('connected');
   }
 }
 

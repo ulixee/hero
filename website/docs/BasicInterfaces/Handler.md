@@ -79,6 +79,12 @@ const { Handler } = require('secret-agent');
 
 ## Properties
 
+### handler.coreHosts {#core-hosts}
+
+Readonly property returning the resolved list of coreHosts.
+
+#### **Returns**: `Promise<string[]>`
+
 ### handler.defaultAgentOptions {#default-agent-properties}
 
 Sets default properties to apply to any new Agent created. Accepts any of the configurations that can be provided to [`createAgent()`](#create-agent).
@@ -90,6 +96,31 @@ See the [Configuration](/docs/overview/configuration) page for more details on `
 #### **Type**: [`Tab`](/docs/basic-interfaces/tab)
 
 ## Methods
+
+### handler.addConnectionToCore*(options | connectionToCore)* {#add-connection}
+
+Adds a connection to the handler. This method will call connect on the underlying connection.
+
+Connection arguments are the same as the constructor arguments for a single connection.
+
+#### **Arguments**:
+
+Can be either:
+
+- options `object`. A set of settings that controls the creation of a [`connection`](/docs/advanced/connection-to-core#options) to a `SecretAgent Core`. (see [`constructor`](#constructor))
+- connectionToCore [`ConnectionToCore`](/docs/advanced/connection-to-core#options). A pre-initialized connection to a `SecretAgent Core`.
+
+#### **Returns**: `Promise<void>`
+
+### handler.closeConnectionToCore*(coreHost)* {#close-connection}
+
+Closes and disconnects a connection from core. Agents "in-process" will throw `DisconnectedFromCoreError` on active commands.
+
+#### **Arguments**:
+
+- coreHost `string`. The coreHost connection.
+
+#### **Returns**: `Promise<void>`
 
 ### handler.close*()* {#close}
 
@@ -131,9 +162,9 @@ const { Handler } = require('secret-agent');
   const agent2 = await handler.createAgent();
 
   setTimeout(() => agent2.close(), 100);
-  
+
   // will be available in 100 ms when agent2 closes
-  const agent3 = await handler.createAgent(); 
+  const agent3 = await handler.createAgent();
 })();
 ```
 
@@ -142,6 +173,8 @@ const { Handler } = require('secret-agent');
 This method allows you queue up functions that should be called as soon as a connection can allocate a new Agent. All configurations available to `createAgent` are available here.
 
 NOTE: you do not need to call close on an Agent when using this method. It will automatically be called when your callback returns.
+
+On Disconnecting: if a Core is shut-down or the handler closes a coreConnection while work is still in-progress, the agent commands will throw a `DisconnectedFromCoreError`.
 
 #### **Arguments**:
 

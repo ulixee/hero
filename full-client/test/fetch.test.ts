@@ -58,7 +58,7 @@ describe('Fetch tests', () => {
   it('should be able to create a request object', async () => {
     let header1: string;
     koaServer.get('/request', ctx => {
-      header1 = ctx.headers.header1;
+      header1 = ctx.headers.header1 as string;
 
       ctx.body = { got: 'request' };
     });
