@@ -94,6 +94,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
         });
       }
       data = this.serializeError(error);
+      data.isDisconnecting = this.isClosing || session?.isClosing;
     }
 
     const commandId = session?.sessionState?.lastCommand?.id;

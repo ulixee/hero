@@ -103,11 +103,13 @@ export default class CoreServer {
         try {
           await wsSend(ws, json);
         } catch (error) {
-          log.error('Error sending message', {
-            error,
-            payload,
-            sessionId: null,
-          });
+          if (connection.isClosing === false) {
+            log.error('Error sending message', {
+              error,
+              payload,
+              sessionId: null,
+            });
+          }
           if (isOpen(ws)) {
             ws.close(CLOSE_UNEXPECTED_ERROR, JSON.stringify({ message: error.message }));
           }

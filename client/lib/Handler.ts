@@ -71,7 +71,7 @@ export default class Handler {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
-    const connection = pickRandom(this.connections);
+    const connection = this.getConnection();
 
     const dispatched: PendingDispatch = { args, resolution: null };
     dispatched.resolution = connection
@@ -95,7 +95,7 @@ export default class Handler {
     };
     const promise = createPromise<Agent>();
 
-    const connection = pickRandom(this.connections);
+    const connection = this.getConnection();
 
     connection
       .useAgent(options, agent => {
@@ -151,6 +151,13 @@ export default class Handler {
   public async close(error?: Error): Promise<void> {
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.disconnect(error)));
+  }
+
+  private getConnection(): ConnectionToCore {
+    // prefer a connection that can create a session right now
+    let connections = this.connections.filter(x => x.canCreateSessionNow());
+    if (!connections.length) connections = this.connections.filter(x => !x.isDisconnecting);
+    return pickRandom(connections);
   }
 
   private registerUnhandledExceptionHandlers(): void {

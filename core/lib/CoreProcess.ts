@@ -25,6 +25,8 @@ export default class CoreProcess {
       });
       // now that it's set, if Core shuts down, clear out the host promise
       this.child.once('exit', () => {
+        this.child.removeAllListeners('message');
+        this.child.removeAllListeners('error');
         this.coreHostPromise = null;
         this.child = null;
       });
@@ -34,11 +36,9 @@ export default class CoreProcess {
 
   public static kill(signal?: NodeJS.Signals) {
     const child = this.child;
-    this.child = null;
-
-    if (child && !child.killed) {
-      const closed = new Promise<void>(resolve => child.once('exit', resolve));
-      child.kill(signal);
+    if (child) {
+      const closed = new Promise<void>(resolve => child.once('exit', () => setImmediate(resolve)));
+      if (!child.killed) child.kill(signal);
       return closed;
     }
   }

@@ -1,6 +1,8 @@
 import { createPromise } from '@secret-agent/commons/utils';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
+import Resolvable from '@secret-agent/commons/Resolvable';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);
@@ -10,6 +12,8 @@ export default class CoreCommandQueue {
   public items: IItem[] = [];
   public lastCommandId = 0;
   private isProcessing = false;
+
+  private abortPromise = new Resolvable<CanceledPromiseError>();
 
   private readonly sessionMarker: string = '';
 
@@ -48,8 +52,9 @@ export default class CoreCommandQueue {
     return promise;
   }
 
-  public clearPending(): void {
+  public clearPending(cancelError: CanceledPromiseError): void {
     this.items.length = 0;
+    this.abortPromise.resolve(cancelError);
   }
 
   // PRIVATE
@@ -61,11 +66,16 @@ export default class CoreCommandQueue {
       while (this.items.length) {
         const item: IItem = this.items.shift();
         try {
-          const response = await this.connection.sendRequest({
-            meta: item.meta,
-            command: item.command,
-            args: item.args,
-          });
+          const response = await Promise.race([
+            this.connection.sendRequest({
+              meta: item.meta,
+              command: item.command,
+              args: item.args,
+            }),
+            this.abortPromise.promise,
+          ]);
+          if (response instanceof CanceledPromiseError) throw response;
+
           let data = null;
           if (response) {
             this.lastCommandId = response.commandId;
@@ -78,7 +88,6 @@ export default class CoreCommandQueue {
           }`;
           item.reject(error);
         }
-        // force next loop so promises don't simulate synchronous-ity when local core
         await new Promise(setImmediate);
       }
     } finally {
