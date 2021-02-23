@@ -260,6 +260,7 @@ describe('connectionToCore', () => {
     await waitForGoto.promise;
     socket.destroy();
     await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
+    await new Promise(setImmediate);
     expect(dispatchError).toBeTruthy();
     expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
     expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);

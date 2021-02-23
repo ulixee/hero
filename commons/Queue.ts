@@ -68,7 +68,8 @@ export default class Queue {
     this.activeCount += 1;
     try {
       const res = await Promise.race([next.cb(), this.abortPromise.promise]);
-      if (res instanceof CanceledPromiseError) throw res;
+      if (this.abortPromise.isResolved) throw await this.abortPromise.promise;
+
       next.promise.resolve(res);
     } catch (error) {
       this.reject(next, error);
