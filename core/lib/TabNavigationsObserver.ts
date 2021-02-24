@@ -118,7 +118,7 @@ export default class TabNavigationsObserver {
   public cancelWaiting(cancelMessage: string): void {
     clearTimeout(this.waitingForLoadTimeout);
     for (const promise of [this.waitingForResource, this.waitingForPromise]) {
-      if (!promise || !promise.isResolved) continue;
+      if (!promise || promise.isResolved) continue;
 
       const canceled = new CanceledPromiseError(cancelMessage);
       canceled.stack += `\n${'------LOCATION'.padEnd(50, '-')}\n${promise.stack}`;
@@ -221,7 +221,7 @@ export default class TabNavigationsObserver {
     if (this.waitingForPromise) this.cancelWaiting('New location trigger created');
 
     this.waitingForStatus = status;
-    this.waitingForPromise = createPromise<void>(timeoutMs ?? 30e3);
+    this.waitingForPromise = createPromise<void>(timeoutMs ?? 60e3);
     return this.waitingForPromise.promise;
   }
 

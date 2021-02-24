@@ -227,7 +227,9 @@ export default class SessionState {
     if (!navigations) return;
 
     const isNavigationToCurrentUrl =
-      resource.url === navigations.currentUrl && resourceEvent.request.method !== 'OPTIONS';
+      (resource.url === navigations.currentUrl ||
+        resource.request.url === navigations.currentUrl) &&
+      resourceEvent.request.method !== 'OPTIONS';
 
     if (
       isNavigationToCurrentUrl ||
@@ -250,7 +252,10 @@ export default class SessionState {
     if (isResponse) {
       const navigations = this.navigationsByTabId[tabId];
       const isNavigationToCurrentUrl =
-        resource.url === navigations.currentUrl && resourceEvent.request.method !== 'OPTIONS';
+        (resource.url === navigations.currentUrl ||
+          resource.request.url === navigations.currentUrl) &&
+        resourceEvent.request.method !== 'OPTIONS';
+
       if (
         isNavigationToCurrentUrl ||
         resourceResponseEvent.browserRequestId === navigations.top?.browserRequestId
