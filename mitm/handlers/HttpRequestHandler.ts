@@ -36,6 +36,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
         'error',
         this.onError.bind(this, 'ClientToProxy.Http2StreamError'),
       );
+      clientToProxyRequest.stream.on('streamClosed', code =>
+        this.onError('ClientToProxy.Http2StreamError', new Error(`Stream Closed ${code}`)),
+      );
       const http2Session = clientToProxyRequest.stream.session;
       if (!http2Session.listenerCount('error')) {
         http2Session.on('error', this.onError.bind(this, 'ClientToProxy.Http2SessionError'));
@@ -111,8 +114,11 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     }
     await CookieHandler.readServerResponseCookies(context);
 
-    await this.writeResponse();
-
+    try {
+      await this.writeResponse();
+    } catch (err) {
+      return this.onError('ServerToProxyToClient.ReadWriteResponseError', err);
+    }
     context.setState(ResourceState.End);
 
     process.nextTick(agent => agent.freeSocket(context), context.requestSession.requestAgent);
@@ -143,6 +149,11 @@ export default class HttpRequestHandler extends BaseHttpHandler {
         request: `${method}: ${url}`,
         error,
       });
+    }
+
+    if (proxyToClientResponse instanceof Http2ServerResponse) {
+      if (proxyToClientResponse.stream && !proxyToClientResponse.stream.destroyed)
+        proxyToClientResponse.stream.destroy();
     }
 
     try {

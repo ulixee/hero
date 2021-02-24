@@ -71,8 +71,12 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     proxyToServerMitmSocket.on('close', () => {
       this.context.setState(ResourceState.End);
       // don't try to write again
-      clientSocket.destroy();
-      serverSocket.destroy();
+      try {
+        clientSocket.destroy();
+        serverSocket.destroy();
+      } catch (err) {
+        // no-operation
+      }
     });
 
     // copy response message (have to write to raw socket)
@@ -89,7 +93,11 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
 
     if (!serverSocket.readable || !serverSocket.writable) {
       this.context.setState(ResourceState.PrematurelyClosed);
-      return serverSocket.destroy();
+      try {
+        return serverSocket.destroy();
+      } catch (error) {
+        // don't log if error
+      }
     }
     serverSocket.on('error', this.onError.bind(this, 'ServerToProxy.UpgradeSocketError'));
 

@@ -143,7 +143,16 @@ export default class SessionDb {
   }
 
   public flush() {
-    if (this.batchInsert) this.batchInsert.immediate();
+    if (this.batchInsert) {
+      try {
+        this.batchInsert.immediate();
+      } catch (error) {
+        if (String(error).match(/attempt to write a readonly database/)) {
+          clearInterval(this.saveInterval);
+        }
+        throw error;
+      }
+    }
   }
 
   public unsubscribeToChanges() {

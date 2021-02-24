@@ -63,6 +63,16 @@ export default abstract class BaseHttpHandler {
         'error',
         this.onError.bind(this, 'ProxyToServer.RequestError'),
       );
+      const stream = <http2.Http2Stream>this.context.proxyToServerRequest;
+      stream.on('streamClosed', code =>
+        this.onError(
+          'ProxyToH2Server.StreamClosedError',
+          new Error(`Stream closed with code ${code}`),
+        ),
+      );
+      if (stream.session && stream.session.listenerCount('error') === 0) {
+        stream.session?.on('error', this.onError.bind(this, 'ProxyToServer.SessionError'));
+      }
 
       return this.context.proxyToServerRequest;
     } catch (err) {

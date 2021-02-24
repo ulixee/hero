@@ -53,7 +53,7 @@ test('should be able to handle an http->http2 request', async () => {
   expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
 
   const res = await Helpers.httpGet(server.baseUrl, proxyHost, proxyCredentials);
-  expect(res.includes('h2 secure as anything!')).toBeTruthy();
+  expect(res).toBe('h2 secure as anything!');
   expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(1);
   await session.close();
 });
@@ -79,6 +79,25 @@ test('should be able to handle an http2->http2 request', async () => {
   const call = mocks.MitmRequestContext.create.mock.calls[0];
   expect(call[0].isUpgrade).toBe(false);
   expect(call[0].clientToProxyRequest).toBeInstanceOf(http2.Http2ServerRequest);
+});
+
+test('should handle server closing connection', async () => {
+  const server = await Helpers.runHttp2Server((req, res1) => {
+    res1.end('h2 closing soon!');
+    res1.stream.close(2);
+  });
+
+  const session = new RequestSession('h2-close', 'any agent', null);
+  Helpers.needsClosing.push(session);
+  const proxyCredentials = session.getProxyCredentials();
+
+  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+
+  const h2stream = client.request({
+    ':path': '/',
+  });
+  const buffer = await Helpers.readableToBuffer(h2stream);
+  expect(buffer.toString()).toBe('h2 closing soon!');
 });
 
 it('should send http1 response headers through proxy', async () => {

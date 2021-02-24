@@ -86,7 +86,7 @@ export default class MitmProxy {
     this.db.close();
     while (this.serverConnects.length) {
       const connect = this.serverConnects.shift();
-      connect.destroy();
+      destroyConnection(connect);
     }
     delete this.secureContexts;
 
@@ -223,9 +223,9 @@ export default class MitmProxy {
       }
     });
 
-    proxyConnection.on('end', () => socket.destroy());
-    proxyConnection.on('close', () => socket.destroy());
-    socket.on('close', () => proxyConnection.destroy());
+    proxyConnection.on('end', () => destroyConnection(socket));
+    proxyConnection.on('close', () => destroyConnection(socket));
+    socket.on('close', () => destroyConnection(proxyConnection));
     socket.on('end', this.removeSocketConnect.bind(this, socket));
 
     await connectedPromise;
@@ -315,6 +315,14 @@ export default class MitmProxy {
   private static isTlsByte(buffer: Buffer): boolean {
     // check for clienthello byte
     return buffer[0] === 0x16;
+  }
+}
+
+function destroyConnection(socket: net.Socket): void {
+  try {
+    socket.destroy();
+  } catch (e) {
+    // nothing to do
   }
 }
 
