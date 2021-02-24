@@ -6,6 +6,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from './ConnectionToCore';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
+import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
 export default class RemoteConnectionToCore extends ConnectionToCore {
   private webSocketOrError: IResolvablePromise<WebSocket | Error>;
@@ -15,7 +16,7 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
     super(options);
   }
 
-  public async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
+  protected async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     if (!this.webSocketOrError) throw new CanceledPromiseError('No websocket connection');
     const message = TypeSerializer.stringify(payload);
 
@@ -27,8 +28,13 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
 
     return new Promise((resolve, reject) =>
       webSocket.send(message, err => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {
+          const { code } = err as any;
+          if (code === 'EPIPE' && super.isDisconnecting) {
+            return reject(new DisconnectedFromCoreError(this.resolvedHost));
+          }
+          reject(err);
+        } else resolve();
       }),
     );
   }
@@ -37,8 +43,8 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
     const webSocket = await this.getWebsocket(false);
     if (webSocket?.readyState === WebSocket.OPEN) {
       try {
-        webSocket.off('close', this.disconnect);
-        webSocket.off('error', this.disconnect);
+        webSocket.off('close', this.internalDisconnect);
+        webSocket.off('error', this.internalDisconnect);
         webSocket.terminate();
       } catch (_) {
         // ignore errors terminating
@@ -55,8 +61,8 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
       this.webSocketOrError = connectToWebsocketHost(hostOrError);
       try {
         const webSocket = await this.getWebsocket();
-        webSocket.once('close', this.disconnect);
-        webSocket.once('error', this.disconnect);
+        webSocket.once('close', this.internalDisconnect);
+        webSocket.once('error', this.internalDisconnect);
         webSocket.on('message', message => {
           const payload = TypeSerializer.parse(message.toString());
           this.onMessage(payload);

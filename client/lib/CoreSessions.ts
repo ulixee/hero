@@ -16,8 +16,12 @@ export default class CoreSessions {
     this.sessionTimeoutMillis = sessionTimeoutMillis;
   }
 
-  public async waitForAvailable(callbackFn: () => Promise<any>): Promise<void> {
-    await this.queue.run(async () => await callbackFn(), this.sessionTimeoutMillis);
+  public waitForAvailable(callbackFn: () => Promise<any>): Promise<void> {
+    return this.queue.run(callbackFn, this.sessionTimeoutMillis);
+  }
+
+  public hasAvailability(): boolean {
+    return this.queue.canRunMoreConcurrently();
   }
 
   public get(sessionId: string): CoreSession | null {

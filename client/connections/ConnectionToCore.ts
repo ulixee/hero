@@ -1,7 +1,7 @@
 import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
-import { createPromise } from '@secret-agent/commons/utils';
+import { bindFunctions, createPromise } from '@secret-agent/commons/utils';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import Log from '@secret-agent/commons/Logger';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
@@ -10,6 +10,7 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -27,11 +28,23 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   public readonly commandQueue: CoreCommandQueue;
   public readonly hostOrError: Promise<string | Error>;
   public options: IConnectionToCoreOptions;
+  public isDisconnecting = false;
 
-  private connectPromise: Promise<Error | null>;
-  private isClosing = false;
-  private resolvedHost: string;
+  protected resolvedHost: string;
 
+  private connectPromise: IResolvablePromise<Error | null>;
+  private get connectOptions(): ICoreConfigureOptions & { isPersistent: boolean } {
+    return {
+      coreServerPort: this.options.coreServerPort,
+      browserEmulatorIds: this.options.browserEmulatorIds,
+      localProxyPortStart: this.options.localProxyPortStart,
+      sessionsDir: this.options.sessionsDir,
+      isPersistent: this.options.isPersistent,
+    };
+  }
+
+  private connectRequestId: string;
+  private disconnectRequestId: string;
   private coreSessions: CoreSessions;
   private readonly pendingRequestsById = new Map<string, IResolvablePromiseWithId>();
   private lastId = 0;
@@ -61,61 +74,68 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     } else {
       this.hostOrError = Promise.resolve(new Error('No host provided'));
     }
-    this.disconnect = this.disconnect.bind(this);
+    bindFunctions(this);
   }
 
   protected abstract internalSendRequest(payload: ICoreRequestPayload): Promise<void>;
   protected abstract createConnection(): Promise<Error | null>;
   protected abstract destroyConnection(): Promise<any>;
 
-  public connect(): Promise<Error | null> {
-    this.connectPromise ??= this.createConnection()
-      .then(err => {
-        if (err) throw err;
-        return this.internalSendRequestAndWait({
-          command: 'connect',
-          args: [
-            <ICoreConfigureOptions & { isPersistent: boolean }>{
-              coreServerPort: this.options.coreServerPort,
-              browserEmulatorIds: this.options.browserEmulatorIds,
-              localProxyPortStart: this.options.localProxyPortStart,
-              sessionsDir: this.options.sessionsDir,
-              isPersistent: this.options.isPersistent,
-            },
-          ],
-        });
-      })
-      .then(result => this.onConnected(result.data))
-      .catch(err => err);
+  public async connect(): Promise<Error | null> {
+    if (!this.connectPromise) {
+      this.connectPromise = new Resolvable();
+      try {
+        const connectError = await this.createConnection();
+        if (connectError) throw connectError;
+        if (this.isDisconnecting) throw new DisconnectedFromCoreError(this.resolvedHost);
+        // can be resolved if canceled by a disconnect
+        if (this.connectPromise.isResolved) return;
 
-    return this.connectPromise;
+        const connectResult = await this.internalSendRequestAndWait({
+          command: 'connect',
+          args: [this.connectOptions],
+        });
+        if (connectResult?.data) {
+          const { maxConcurrency, browserEmulatorIds } = connectResult.data;
+          if (
+            maxConcurrency &&
+            (!this.options.maxConcurrency || maxConcurrency < this.options.maxConcurrency)
+          ) {
+            log.info('Overriding max concurrency with Core value', {
+              maxConcurrency,
+              sessionId: null,
+            });
+            this.coreSessions.concurrency = maxConcurrency;
+            this.options.maxConcurrency = maxConcurrency;
+          }
+          this.options.browserEmulatorIds ??= browserEmulatorIds ?? [];
+        }
+        this.emit('connected');
+      } catch (err) {
+        this.connectPromise.resolve(err);
+      } finally {
+        if (!this.connectPromise.isResolved) this.connectPromise.resolve();
+      }
+    }
+
+    return this.connectPromise.promise;
   }
 
   public async disconnect(fatalError?: Error): Promise<void> {
-    if (this.isClosing) return;
-    this.isClosing = true;
-    const logid = log.stats('ConnectionToCore.Disconnecting', {
-      host: this.hostOrError,
-      sessionId: null,
+    // user triggered disconnect sends a disconnect to Core
+    await this.internalDisconnect(fatalError, async () => {
+      try {
+        await this.internalSendRequestAndWait(
+          {
+            command: 'disconnect',
+            args: [fatalError],
+          },
+          2e3,
+        );
+      } catch (error) {
+        // don't do anything
+      }
     });
-
-    await this.cancelPendingRequests();
-    if (this.connectPromise) {
-      await this.internalSendRequestAndWait(
-        {
-          command: 'disconnect',
-          args: [fatalError],
-        },
-        2e3,
-      );
-    }
-    await this.destroyConnection();
-    log.stats('ConnectionToCore.Disconnected', {
-      parentLogId: logid,
-      host: this.hostOrError,
-      sessionId: null,
-    });
-    this.emit('disconnected');
   }
 
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,18 +161,24 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
 
-  public async useAgent(
+  public useAgent(
     options: IAgentCreateOptions,
     callbackFn: (agent: Agent) => Promise<any>,
   ): Promise<void> {
-    await this.connect();
-    await this.coreSessions.waitForAvailable(() => {
+    // just kick off
+    this.connect().catch(() => null);
+    return this.coreSessions.waitForAvailable(() => {
       const agent = new Agent({
         ...options,
         connectionToCore: this,
       });
+
       return callbackFn(agent);
     });
+  }
+
+  public canCreateSessionNow(): boolean {
+    return this.isDisconnecting === false && this.coreSessions.hasAvailability();
   }
 
   public async createSession(options: ICreateSessionOptions): Promise<CoreSession> {
@@ -174,11 +200,45 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     await this.commandQueue.run('logUnhandledError', error);
   }
 
+  protected async internalDisconnect(
+    fatalError?: Error,
+    beforeClose?: () => Promise<any>,
+  ): Promise<void> {
+    if (this.isDisconnecting) return;
+    this.isDisconnecting = true;
+    const logid = log.stats('ConnectionToCore.Disconnecting', {
+      host: this.hostOrError,
+      sessionId: null,
+    });
+
+    this.cancelPendingRequests();
+
+    if (this.connectPromise) {
+      if (!this.connectPromise.isResolved) {
+        this.connectPromise.resolve(new DisconnectedFromCoreError(this.resolvedHost));
+      } else if (beforeClose) {
+        await beforeClose();
+      }
+    }
+    await this.destroyConnection();
+    log.stats('ConnectionToCore.Disconnected', {
+      parentLogId: logid,
+      host: this.hostOrError,
+      sessionId: null,
+    });
+
+    this.emit('disconnected');
+  }
+
   protected async internalSendRequestAndWait(
     payload: Omit<ICoreRequestPayload, 'messageId'>,
     timeoutMs?: number,
   ): Promise<ICoreResponsePayload> {
     const { promise, id, resolve } = this.createPendingResult();
+    const { command } = payload;
+
+    if (command === 'connect') this.connectRequestId = id;
+    if (command === 'disconnect') this.disconnectRequestId = id;
 
     let timeout: NodeJS.Timeout;
     if (timeoutMs) timeout = setTimeout(() => resolve(null), timeoutMs).unref();
@@ -214,25 +274,34 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     const pending = this.pendingRequestsById.get(id);
     if (!pending) return;
     this.pendingRequestsById.delete(id);
+    const isInternalRequest = this.connectRequestId === id || this.disconnectRequestId === id;
 
     if (message.data instanceof Error) {
-      let error = message.data;
-      if (this.isClosing || error.name === SessionClosedOrMissingError.name) {
-        error = new DisconnectedFromCoreError(this.resolvedHost);
+      let responseError = message.data;
+      const isDisconnected =
+        this.isDisconnecting ||
+        responseError.name === SessionClosedOrMissingError.name ||
+        (responseError as any).isDisconnecting === true;
+
+      if (!isInternalRequest && isDisconnected) {
+        responseError = new DisconnectedFromCoreError(this.resolvedHost);
       }
-      this.rejectPendingRequest(pending, error);
+      this.rejectPendingRequest(pending, responseError);
     } else {
       pending.resolve({ data: message.data, commandId: message.commandId });
     }
   }
 
-  protected async cancelPendingRequests(): Promise<void> {
-    this.commandQueue.clearPending();
-    const host = String(await this.hostOrError);
+  protected cancelPendingRequests(): void {
+    const host = String(this.resolvedHost);
     this.coreSessions.close(new DisconnectedFromCoreError(host));
-    const pending = [...this.pendingRequestsById.values()];
-    this.pendingRequestsById.clear();
-    for (const entry of pending) {
+    this.commandQueue.clearPending(new DisconnectedFromCoreError(host));
+    for (const entry of this.pendingRequestsById.values()) {
+      const id = entry.id;
+      if (this.connectRequestId === id || this.disconnectRequestId === id) {
+        continue;
+      }
+      this.pendingRequestsById.delete(id);
       this.rejectPendingRequest(entry, new DisconnectedFromCoreError(host));
     }
   }
@@ -249,23 +318,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   private rejectPendingRequest(pending: IResolvablePromiseWithId, error: Error): void {
     error.stack += `\n${'------CONNECTION'.padEnd(50, '-')}\n${pending.stack}`;
     pending.reject(error);
-  }
-
-  private onConnected(
-    connectionParams: { maxConcurrency?: number; browserEmulatorIds?: string[] } = {},
-  ): void {
-    this.isClosing = false;
-    const { maxConcurrency, browserEmulatorIds } = connectionParams;
-    if (!this.options.maxConcurrency || maxConcurrency < this.options.maxConcurrency) {
-      log.info('Overriding max concurrency with Core value', {
-        maxConcurrency,
-        sessionId: null,
-      });
-      this.coreSessions.concurrency = maxConcurrency;
-      this.options.maxConcurrency = maxConcurrency;
-    }
-    this.options.browserEmulatorIds ??= browserEmulatorIds ?? [];
-    this.emit('connected');
   }
 }
 

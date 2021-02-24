@@ -120,7 +120,12 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       }
     }
 
-    await resource.isRequestedInBrowser.promise;
+    const stack = resource.isRequestedInBrowser.stack;
+    const result = await resource.isRequestedInBrowser.promise;
+    if (result instanceof Error) {
+      result.stack += `\n${'------PENDING-CHROME_RESOURCE'.padEnd(50, '-')}\n${stack}`;
+      throw result;
+    }
 
     const idx = this.resourcesRequestedByBrowser.indexOf(resource);
     if (idx >= 0) this.resourcesRequestedByBrowser.splice(idx, 1);
@@ -185,7 +190,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       );
     if (match) {
       match.resourceType = event.resource.resourceType;
-      match.isRequestedInBrowser.reject(event.loadError);
+      match.isRequestedInBrowser.resolve(event.loadError);
     } else {
       log.warn('BrowserViewOfResourceLoad::Failed', {
         sessionId: this.sessionId,
@@ -222,7 +227,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       try {
         return await this.dns.lookupIp(host);
       } catch (error) {
-        log.error('DnsLookup.Error', {
+        log.info('DnsLookup.Error', {
           sessionId: this.sessionId,
           error,
         });
@@ -240,7 +245,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     const logid = this.logger.stats('MitmRequestSession.Closing');
     this.isClosing = true;
     for (const pending of this.resourcesRequestedByBrowser) {
-      pending.isRequestedInBrowser.reject(
+      pending.isRequestedInBrowser.resolve(
         new CanceledPromiseError('Canceling: Mitm Request Session Closing'),
       );
     }
@@ -449,7 +454,7 @@ interface IResourcePendingBrowserLoad {
   method: string;
   origin: string;
   referer: string;
-  isRequestedInBrowser: IResolvablePromise<IResourcePendingBrowserLoad>;
+  isRequestedInBrowser: IResolvablePromise<IResourcePendingBrowserLoad | Error>;
   tabId?: string;
   browserRequestId?: string;
   resourceType?: ResourceType;

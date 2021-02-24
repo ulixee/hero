@@ -54,9 +54,9 @@ export class Dns {
   }
 
   private async systemLookup(host: string): Promise<IDnsEntry> {
+    const dnsEntry = createPromise<IDnsEntry>();
+    Dns.dnsEntries.set(host, dnsEntry);
     try {
-      const dnsEntry = createPromise<IDnsEntry>();
-      Dns.dnsEntries.set(host, dnsEntry);
       const lookupAddresses = await dns.lookup(host.split(':').shift(), {
         all: true,
         family: 4,
@@ -68,22 +68,20 @@ export class Dns {
         })),
       };
       dnsEntry.resolve(entry);
-      return entry;
     } catch (error) {
-      Dns.dnsEntries.get(host)?.reject(error);
+      dnsEntry.reject(error);
       Dns.dnsEntries.delete(host);
-      throw error;
     }
+    return dnsEntry.promise;
   }
 
   private async lookupDnsEntry(host: string): Promise<IDnsEntry> {
     const existing = Dns.dnsEntries.get(host);
     if (existing && !existing.isResolved) return existing.promise;
 
+    const dnsEntry = createPromise<IDnsEntry>();
+    Dns.dnsEntries.set(host, dnsEntry);
     try {
-      const dnsEntry = createPromise<IDnsEntry>();
-      Dns.dnsEntries.set(host, dnsEntry);
-
       if (!this.socket) {
         this.socket = new DnsOverTlsSocket(
           this.dnsServer,
@@ -103,12 +101,11 @@ export class Dns {
           })),
       };
       dnsEntry.resolve(entry);
-      return entry;
     } catch (error) {
-      Dns.dnsEntries.get(host)?.reject(error);
+      dnsEntry.reject(error);
       Dns.dnsEntries.delete(host);
-      throw error;
     }
+    return dnsEntry.promise;
   }
 
   private nextIp(dnsEntry: IDnsEntry): string {

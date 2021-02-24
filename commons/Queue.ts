@@ -1,14 +1,16 @@
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from './utils';
 import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
+import Resolvable from './Resolvable';
 
-type Callback<T> = (value?: any) => Promise<T>;
+type AsyncCallback<T> = (value?: any) => Promise<T>;
 
 export default class Queue {
   public concurrency = 1;
   public idletimeMillis = 500;
   public idlePromise = createPromise();
 
+  private readonly abortPromise = new Resolvable<CanceledPromiseError>();
   private idleTimout: NodeJS.Timeout;
   private activeCount = 0;
 
@@ -16,7 +18,7 @@ export default class Queue {
 
   constructor(readonly stacktraceMarker = 'QUEUE') {}
 
-  public run<T>(cb: Callback<T>, timeoutMillis?: number): Promise<T> {
+  public run<T>(cb: AsyncCallback<T>, timeoutMillis?: number): Promise<T> {
     const promise = createPromise<T>(timeoutMillis);
 
     this.queue.push({
@@ -24,23 +26,30 @@ export default class Queue {
       cb,
       startStack: new Error('').stack.split('\n').slice(1).join('\n'),
     });
-    setImmediate(() => this.next());
+
+    this.next().catch(() => null);
     return promise.promise;
   }
 
-  public stop(error?: Error): void {
+  public stop(error?: CanceledPromiseError): void {
+    const canceledError = error ?? new CanceledPromiseError('Canceling Queue Item');
+    this.abortPromise.resolve(canceledError);
     while (this.queue.length) {
       const next = this.queue.shift();
       if (!next) continue;
 
-      this.reject(next, error ?? new CanceledPromiseError('Canceling Queue Item'));
+      this.reject(next, canceledError);
     }
+  }
+
+  public canRunMoreConcurrently(): boolean {
+    return this.activeCount < this.concurrency;
   }
 
   private async next(): Promise<void> {
     clearTimeout(this.idleTimout);
 
-    if (this.activeCount >= this.concurrency) return;
+    if (!this.canRunMoreConcurrently()) return;
 
     const next = this.queue.shift();
     if (!next) {
@@ -58,7 +67,9 @@ export default class Queue {
 
     this.activeCount += 1;
     try {
-      const res = await next.cb();
+      const res = await Promise.race([next.cb(), this.abortPromise.promise]);
+      if (this.abortPromise.isResolved) throw await this.abortPromise.promise;
+
       next.promise.resolve(res);
     } catch (error) {
       this.reject(next, error);
@@ -79,6 +90,6 @@ export default class Queue {
 
 interface IQueueEntry {
   promise: IResolvablePromise;
-  cb: Callback<any>;
+  cb: AsyncCallback<any>;
   startStack: string;
 }

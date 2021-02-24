@@ -7,7 +7,7 @@ export default class Timer {
 
   private readonly time = process.hrtime();
   private timeoutMessage = 'Timeout waiting';
-  private readonly expirePromise = new Resolvable();
+  private readonly expirePromise = new Resolvable<void>();
 
   constructor(readonly timeoutMillis: number, readonly registry?: IRegistry[]) {
     // NOTE: A zero value will NOT timeout. This is to give users an ability to not timeout certain requests
@@ -52,16 +52,21 @@ export default class Timer {
 
   public waitForPromise<Z>(promise: Promise<Z>, message: string): Promise<Z> {
     this.timeoutMessage = message;
-    return Promise.race([promise, this.expirePromise]) as Promise<Z>;
+    return Promise.race([
+      promise,
+      this.expirePromise.then(() => {
+        throw new TimeoutError(this.timeoutMessage);
+      }),
+    ]) as Promise<Z>;
   }
 
   public waitForTimeout(): Promise<void> {
     // wait for promise to expire
-    return this.expirePromise.promise.catch(() => {});
+    return this.expirePromise.promise;
   }
 
   private expire(): void {
-    this.expirePromise.reject(new TimeoutError(this.timeoutMessage));
+    this.expirePromise.resolve();
     this.clear();
   }
 

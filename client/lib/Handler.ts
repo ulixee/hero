@@ -7,6 +7,9 @@ import Agent from './Agent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
 
+type SettledDispatchesBySessionId = { [sessionId: string]: { args: any; error?: Error } };
+type PendingDispatch = { resolution: Promise<Error | void>; sessionId?: string; args: any };
+
 const { log } = Log(module);
 
 export default class Handler {
@@ -23,7 +26,7 @@ export default class Handler {
   }
 
   private readonly connections: ConnectionToCore[] = [];
-  private readonly dispatches: Promise<Error | void>[] = [];
+  private readonly dispatches: PendingDispatch[] = [];
 
   constructor(...connectionOptions: (IConnectionToCoreOptions | ConnectionToCore)[]) {
     if (!connectionOptions.length) {
@@ -68,19 +71,21 @@ export default class Handler {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
-    const connection = pickRandom(this.connections);
+    const connection = this.getConnection();
 
-    // NOTE: keep await to ensure dispatch stays in stack trace
-    const promise = connection
+    const dispatched: PendingDispatch = { args, resolution: null };
+    dispatched.resolution = connection
       .useAgent(options, async agent => {
         try {
-          return await runFn(agent, args);
+          dispatched.sessionId = await agent.sessionId;
+          await runFn(agent, args);
         } finally {
           await agent.close();
         }
       })
       .catch((err: Error) => err);
-    this.dispatches.push(promise);
+
+    this.dispatches.push(dispatched);
   }
 
   public async createAgent(createAgentOptions: IAgentCreateOptions = {}): Promise<Agent> {
@@ -90,7 +95,7 @@ export default class Handler {
     };
     const promise = createPromise<Agent>();
 
-    const connection = pickRandom(this.connections);
+    const connection = this.getConnection();
 
     connection
       .useAgent(options, agent => {
@@ -115,7 +120,7 @@ export default class Handler {
     this.dispatches.length = 0;
     await Promise.all(
       dispatches.map(async dispatch => {
-        const err = await dispatch;
+        const err = await dispatch.resolution;
         if (err) throw err;
       }),
     );
@@ -123,9 +128,36 @@ export default class Handler {
     if (this.dispatches.length) return this.waitForAllDispatches();
   }
 
+  public async waitForAllDispatchesSettled(): Promise<SettledDispatchesBySessionId> {
+    const result: SettledDispatchesBySessionId = {};
+
+    do {
+      const dispatches = [...this.dispatches];
+      // clear out dispatches everytime you check it
+      this.dispatches.length = 0;
+
+      await Promise.all(dispatches.map(x => x.resolution));
+      for (const { sessionId, resolution, args } of dispatches) {
+        const error = <Error>await resolution;
+        result[sessionId] = { args, error };
+      }
+
+      await new Promise(setImmediate);
+    } while (this.dispatches.length);
+
+    return result;
+  }
+
   public async close(error?: Error): Promise<void> {
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.disconnect(error)));
+  }
+
+  private getConnection(): ConnectionToCore {
+    // prefer a connection that can create a session right now
+    let connections = this.connections.filter(x => x.canCreateSessionNow());
+    if (!connections.length) connections = this.connections.filter(x => !x.isDisconnecting);
+    return pickRandom(connections);
   }
 
   private registerUnhandledExceptionHandlers(): void {

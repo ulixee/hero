@@ -147,10 +147,51 @@ describe('waitForAllDispatches', () => {
   });
 });
 
+describe('waitForAllDispatchesSettled', () => {
+  it('should return all successful and error dispatches', async () => {
+    const handler = new Handler({
+      maxConcurrency: 2,
+      host: await Core.server.address,
+    });
+    Helpers.onClose(() => handler.close(), true);
+
+    let failedAgentSessionId: string;
+    handler.dispatchAgent(
+      async agent => {
+        failedAgentSessionId = await agent.sessionId;
+        const tab = Session.getTab({
+          sessionId: failedAgentSessionId,
+          tabId: await agent.activeTab.tabId,
+        });
+        jest.spyOn(tab, 'goto').mockImplementation(async url => {
+          throw new Error(`invalid url "${url}"`);
+        });
+
+        await agent.goto('any url 2');
+      },
+      { test: 1 },
+    );
+
+    handler.dispatchAgent(
+      async agent => {
+        await agent.goto(koaServer.baseUrl);
+      },
+      { test: 2 },
+    );
+
+    const dispatchResult = await handler.waitForAllDispatchesSettled();
+    expect(Object.keys(dispatchResult)).toHaveLength(2);
+    expect(dispatchResult[failedAgentSessionId]).toBeTruthy();
+    expect(dispatchResult[failedAgentSessionId].error).toBeTruthy();
+    expect(dispatchResult[failedAgentSessionId].error.message).toMatch('invalid url');
+    expect(dispatchResult[failedAgentSessionId].args).toStrictEqual({ test: 1 });
+  });
+});
+
 describe('connectionToCore', () => {
   it('handles disconnects from killed core server', async () => {
     const coreHost = await CoreProcess.spawn({});
-    Helpers.onClose(() => CoreProcess.kill());
+    Helpers.onClose(() => CoreProcess.kill('SIGINT'));
     const connection = new RemoteConnectionToCore({
       maxConcurrency: 2,
       host: coreHost,
@@ -161,24 +202,27 @@ describe('connectionToCore', () => {
     Helpers.needsClosing.push(handler);
 
     const waitForGoto = createPromise();
-    let dispatchError: Error = null;
+    const dispatchErrorPromise = createPromise<Error>();
     handler.dispatchAgent(async agent => {
       try {
         await agent.goto(koaServer.baseUrl);
+        const promise = agent.waitForMillis(10e3);
+        await new Promise(resolve => setTimeout(resolve, 50));
         waitForGoto.resolve();
-        await agent.waitForPaintingStable();
-        await agent.waitForMillis(10e3);
+        await promise;
       } catch (error) {
-        dispatchError = error;
+        dispatchErrorPromise.resolve(error);
         throw error;
       }
     });
     await waitForGoto.promise;
     await CoreProcess.kill('SIGINT');
-    await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
-    expect(dispatchError).toBeTruthy();
+    await new Promise(setImmediate);
+    await expect(dispatchErrorPromise).resolves.toBeTruthy();
+    const dispatchError = await dispatchErrorPromise;
     expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
     expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
+    await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
   });
 
   it('handles core server ending websocket (econnreset)', async () => {
@@ -204,9 +248,9 @@ describe('connectionToCore', () => {
     handler.dispatchAgent(async agent => {
       try {
         await agent.goto(koaServer.baseUrl);
+        const promise = agent.waitForMillis(10e3);
         waitForGoto.resolve();
-        await agent.waitForPaintingStable();
-        await agent.waitForMillis(10e3);
+        await promise;
       } catch (error) {
         dispatchError = error;
         throw error;
@@ -216,6 +260,7 @@ describe('connectionToCore', () => {
     await waitForGoto.promise;
     socket.destroy();
     await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
+    await new Promise(setImmediate);
     expect(dispatchError).toBeTruthy();
     expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
     expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
@@ -223,26 +268,40 @@ describe('connectionToCore', () => {
 
   it('can close without waiting for dispatches', async () => {
     const spawnedCoreHost = await CoreProcess.spawn({});
-    Helpers.onClose(() => CoreProcess.kill());
+    Helpers.onClose(() => CoreProcess.kill('SIGINT'));
     const coreHost = await Core.server.address;
 
-    const handler = new Handler({ host: coreHost }, { host: spawnedCoreHost });
+    const localConn = new RemoteConnectionToCore({ host: coreHost, maxConcurrency: 2 });
+    const spawnedConn = new RemoteConnectionToCore({ host: spawnedCoreHost, maxConcurrency: 2 });
+    await localConn.connect();
+    await spawnedConn.connect();
+    const handler = new Handler(localConn, spawnedConn);
     Helpers.needsClosing.push(handler);
+
+    let spawnedConnections = 0;
+    let localConnections = 0;
 
     const waits: Promise<any>[] = [];
     const waitForAgent = async (agent: Agent, waitForGoto: IResolvablePromise<any>) => {
       await agent.goto(koaServer.baseUrl);
+      const host = await agent.coreHost;
+      if (host === spawnedCoreHost) spawnedConnections += 1;
+      else localConnections += 1;
+
+      // don't wait
+      const promise = agent.waitForMillis(10e3);
       waitForGoto.resolve();
-      await agent.waitForPaintingStable();
-      await agent.waitForMillis(10e3);
+      await expect(promise).rejects.toThrowError('Disconnected');
     };
-    for (let i = 0; i < 10; i += 1) {
+    for (let i = 0; i < 4; i += 1) {
       const waitForGoto = createPromise();
       waits.push(waitForGoto.promise);
       handler.dispatchAgent(waitForAgent, waitForGoto);
     }
 
     await Promise.all(waits);
+    expect(spawnedConnections).toBe(2);
+    expect(localConnections).toBe(2);
 
     // kill off one of the cores
     await CoreProcess.kill('SIGINT');
@@ -265,7 +324,7 @@ describe('connectionToCore', () => {
     expect(await handler.coreHosts).toHaveLength(1);
 
     const spawnedCoreHost = await CoreProcess.spawn({});
-    Helpers.onClose(() => CoreProcess.kill());
+    Helpers.onClose(() => CoreProcess.kill('SIGINT'));
     await expect(handler.addConnectionToCore({ host: spawnedCoreHost })).resolves.toBeUndefined();
 
     expect(await handler.coreHosts).toHaveLength(2);

@@ -213,6 +213,17 @@ const { Handler } = require('secret-agent');
 
 ### handler.waitForAllDispatches*()* {#wait-for-all-dispatches}
 
-Waits for all agents which have been created using `dispatchAgent` to complete. If any errors are thrown by Agents, they will be thrown upon awaiting this method.
+Waits for all agents which have been created using `dispatchAgent` to complete. If any errors are thrown by Agents, the first exception will be thrown upon awaiting this method.
 
 #### **Returns**: `Promise`
+
+### handler.waitForAllDispatchesSettled*()* {#wait-for-all-dispatches-settled}
+
+Waits for all agents which have been created using `dispatchAgent` to complete or throw an error. This method will always wait for all dispatches to finish, regardless of errors thrown. This is different from `waitForAllDispatches`, which will throw on any dispatch errors.
+
+#### **Returns**: `Promise<DispatchResults>`
+
+- DispatchResults { [sessionId: string]: { args?: any, error?: Error } }
+  - sessionId `string key`. The session id assigned to the dispatched Agent.
+  - args `any`. Any arguments passed to the dispatched Agent.
+  - error `Error?`. An error if one has been thrown during dispatch.
