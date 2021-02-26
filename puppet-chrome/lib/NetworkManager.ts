@@ -306,7 +306,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         this.requestsById.delete(id);
         this.emit('resource-loaded', { resource, frameId });
       }
-    }, 500);
+    }, 500).unref();
   }
 
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////

@@ -68,7 +68,7 @@ describe('basic Navigation tests', () => {
 <a href="/etagPage">Etag Page</a>
 </body></html>`;
     });
-    koaServer.get('/img', async ctx => {
+    koaServer.get('/img.jpeg', async ctx => {
       ctx.set('ETag', `W/\\"d02-48a7cf4b62c41\\"`);
       ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
       ctx.body = await getLogo();
@@ -82,8 +82,40 @@ describe('basic Navigation tests', () => {
       expect(hrefAttribute.value).toBe(`${koaServer.baseUrl}/etagPage`);
     }
 
+    // need to give the last image a second to show that it loaded from cache
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     const resources = tab.sessionState.getResources(tab.id);
     expect(resources).toHaveLength(20);
+  });
+
+  it('can goto a page multiple times', async () => {
+    const startingUrl = `${koaServer.baseUrl}/etag2`;
+    koaServer.get('/img2.jpeg', async ctx => {
+      ctx.body = await getLogo();
+    });
+    koaServer.get('/etag2', ctx => {
+      ctx.body = `<html><body>
+<img src="/img2.jpeg"/>
+<a href="/etagPage">Etag Page</a>
+<script>
+ for (let i = 0; i< 100; i+=1) {
+    const elements = document.querySelectorAll('a');
+    const newElement = document.createElement('div');
+    newElement.textContent = 'hi';
+    elements[0].append(newElement)
+ }
+</script>
+</body></html>`;
+    });
+    const { tab } = await createSession();
+
+    for (let i = 0; i < 15; i += 1) {
+      await tab.goto(startingUrl);
+      await tab.waitForLoad('PaintingStable');
+      const hrefAttribute = await tab.execJsPath(['document', ['querySelector', 'a'], 'href']);
+      expect(hrefAttribute.value).toBe(`${koaServer.baseUrl}/etagPage`);
+    }
   });
 
   it('handles page reloading itself', async () => {
@@ -343,7 +375,8 @@ setTimeout(function() {
       ctx.redirect('/popup-redirect2');
     });
     koaServer.get('/popup-redirect2', ctx => {
-      ctx.redirect('/popup-redirect3');
+      ctx.status = 301;
+      ctx.set('Location', '/popup-redirect3');
     });
     koaServer.get('/popup-redirect3', ctx => {
       ctx.body = '<body><h1>Long journey!</h1></body>';
@@ -379,6 +412,7 @@ setTimeout(() => {
     await popupTab.waitForLocation(LocationTrigger.change);
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
+    tab.sessionState.db.flush();
     expect(await popupTab.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
 
     const history = popupTab.navigations.history;
@@ -399,6 +433,20 @@ setTimeout(() => {
     expect(history[1].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
     expect(history[2].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
     expect(history[3].stateChanges.has('ContentPaint')).toBe(true);
+  });
+
+  it('should return the last redirected url as the "resource" when a goto redirects', async () => {
+    const startingUrl = `${koaServer.baseUrl}/goto-redirect`;
+    koaServer.get('/goto-redirect', ctx => {
+      ctx.redirect('/after-redirect');
+    });
+    koaServer.get('/after-redirect', ctx => {
+      ctx.body = '<html lang="en"><body><h1>Hi</h1></body></html>';
+    });
+    const { tab } = await createSession();
+    const resource = await tab.goto(startingUrl);
+    expect(resource.request.url).toBe(`${koaServer.baseUrl}/after-redirect`);
+    expect(resource.isRedirect).toBe(false);
   });
 });
 

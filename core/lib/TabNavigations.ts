@@ -95,7 +95,10 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
   ): void {
     if (url === 'about:blank') return;
     // if this is a redirect, capture in top
-    if (redirectedFromUrl && this.top?.requestedUrl === redirectedFromUrl) {
+    if (
+      redirectedFromUrl &&
+      (this.top?.requestedUrl === redirectedFromUrl || this.top?.finalUrl === redirectedFromUrl)
+    ) {
       this.changeNavigationState(this.top, LocationStatus.HttpRedirected, url);
     }
     // if we already have this status at top level, this is a new nav

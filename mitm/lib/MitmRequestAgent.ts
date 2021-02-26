@@ -1,6 +1,11 @@
 import MitmSocket from '@secret-agent/mitm-socket';
 import * as http2 from 'http2';
-import { ClientHttp2Session, ClientHttp2Stream, ServerHttp2Stream } from 'http2';
+import {
+  ClientHttp2Session,
+  ClientHttp2Stream,
+  Http2ServerRequest,
+  ServerHttp2Stream,
+} from 'http2';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import * as https from 'https';
 import { RequestOptions } from 'https';
@@ -96,9 +101,13 @@ export default class MitmRequestAgent {
 
   public close(): void {
     for (const session of this.http2Sessions) {
-      session.mitmSocket.close();
-      session.client.destroy();
-      session.client.unref();
+      try {
+        session.mitmSocket.close();
+        session.client.destroy();
+        session.client.unref();
+      } catch (err) {
+        // don't need to log closing sessions
+      }
     }
     this.http2Sessions.length = 0;
     for (const socket of this.sockets) {
@@ -442,12 +451,30 @@ export default class MitmRequestAgent {
     const existing = this.getHttp2Session(origin);
     if (existing) return existing.client;
 
+    const session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
+
     ctx.setState(ResourceState.CreateH2Session);
     const proxyToServerH2Client = http2.connect(origin, {
       createConnection: () => mitmSocket.socket,
     });
 
     proxyToServerH2Client.on('stream', this.onHttp2ServerToProxyPush.bind(this, ctx));
+    proxyToServerH2Client.on('error', error => {
+      log.warn('Http2Client.error', {
+        sessionId: this.session.sessionId,
+        origin,
+        error,
+      });
+      if (session && !session.destroyed) session.destroy(error);
+    });
+
+    proxyToServerH2Client.on('close', () => {
+      log.info('Http2Client.close', {
+        sessionId: this.session.sessionId,
+        origin,
+      });
+      if (session && !session.destroyed) session.destroy();
+    });
 
     proxyToServerH2Client.on('remoteSettings', settings => {
       log.stats('Http2Client.remoteSettings', {

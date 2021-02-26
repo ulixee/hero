@@ -662,14 +662,17 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     ) {
       this.navigations.onHttpResponded(
         event.resource.browserRequestId,
-        event.resource.url?.href,
+        event.resource.responseUrl ?? event.resource.url?.href,
         event.frameId ?? this.mainFrameId,
       );
     }
 
-    const resources = this.sessionState.getBrowserRequestResources(event.resource.browserRequestId);
+    const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
+      event.resource.browserRequestId,
+    );
 
-    if (!resources?.length) {
+    // if we get a cached response, it might never hit mitm, so record now
+    if (event.resource.browserServedFromCache && !resourcesWithBrowserRequestId?.length) {
       const ctx = MitmRequestContext.createFromLoadedResource(event.resource);
       this.sessionState.captureResource(this.id, MitmRequestContext.toEmittedResource(ctx), true);
     }
