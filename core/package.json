@@ -8,9 +8,6 @@
       "require": "./index.cjs"
     },
     "./start": "./start.js",
-    "./lib/*": "./lib/*.js",
-    "./dbs/*": "./dbs/*.js",
-    "./lib/CoreProcess": "./lib/CoreProcess.js",
     "./server": "./server/index.js"
   },
   "dependencies": {

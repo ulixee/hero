@@ -1,8 +1,7 @@
 import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import { GlobalPool } from '@secret-agent/core';
-import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
+import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
 // @ts-ignore

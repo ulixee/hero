@@ -1,7 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
-import { GlobalPool } from '@secret-agent/core';
+import { GlobalPool, Viewports } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Viewports from '@secret-agent/core/lib/Viewports';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;

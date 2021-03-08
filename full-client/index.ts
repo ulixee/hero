@@ -4,7 +4,7 @@ import agent, {
   IConnectionToCoreOptions,
   RemoteConnectionToCore,
 } from '@secret-agent/client';
-import CoreProcess from '@secret-agent/core/lib/CoreProcess';
+import { CoreProcess } from '@secret-agent/core';
 import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
 
 export * from '@secret-agent/client';
