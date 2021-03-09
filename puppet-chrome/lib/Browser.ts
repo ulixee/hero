@@ -107,7 +107,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
 
   private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent) {
     const { targetInfo } = event;
-    if (targetInfo.type === 'page') {
+    if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.browserContextsById.get(targetInfo.browserContextId);
       await context.attachToTarget(targetInfo.targetId);
     }

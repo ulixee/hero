@@ -124,6 +124,7 @@ export class BrowserContext
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
     if (!opener && !this.createdTargetIds.has(targetInfo.targetId)) opener = this.pages[0];
+
     const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
     this.pages.push(page);
     // eslint-disable-next-line promise/catch-or-return

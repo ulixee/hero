@@ -316,11 +316,12 @@ export default class Session extends TypedEventEmitter<{
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ) {
-    const startUrl = page.mainFrame.url;
     const tab = Tab.create(this, page, parentTab, openParams);
     this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
     this.registerTab(tab, page);
     await tab.isReady;
+    await page.mainFrame.waitForLoader();
+    const startUrl = page.mainFrame.url;
     parentTab.emit('child-tab-created', tab);
     // make sure we match browser requests that weren't associated with a tab to the new tab
     if (this.pendingNavigationMitmResponses.length) {
