@@ -151,7 +151,7 @@ function replayDomEvent(event: IFrontendDomChangeEvent) {
 
 const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
 function isPreservedElement(event: IFrontendDomChangeEvent) {
-  const { action, nodeId, nodeType, tagName } = event;
+  const { action, nodeId, nodeType } = event;
 
   if (nodeType === document.DOCUMENT_NODE) {
     idMap.set(nodeId, document);
@@ -163,7 +163,12 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
     return true;
   }
 
-  if (!preserveElements.has(event.tagName)) return false;
+  let tagName = event.tagName;
+  if (!tagName) {
+    const existing = idMap.get(nodeId);
+    if (existing) tagName = (existing as Element).tagName;
+  }
+  if (!preserveElements.has(tagName)) return false;
 
   const elem = document.querySelector(tagName);
   if (!elem) {
