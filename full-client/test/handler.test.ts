@@ -1,7 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Core, { Session } from '@secret-agent/core/index';
-import CoreProcess from '@secret-agent/core/lib/CoreProcess';
+import Core, { Session, CoreProcess } from '@secret-agent/core/index';
 import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
 import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
 import { createPromise } from '@secret-agent/commons/utils';

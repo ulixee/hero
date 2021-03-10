@@ -1,6 +1,6 @@
-import { Helpers } from "@secret-agent/testing";
-import GlobalPool from "@secret-agent/core/lib/GlobalPool";
-import MitmProxy from "../lib/MitmProxy";
+import { Helpers } from '@secret-agent/testing';
+import { GlobalPool } from '@secret-agent/core';
+import MitmProxy from '../lib/MitmProxy';
 
 afterAll(Helpers.afterAll);
 

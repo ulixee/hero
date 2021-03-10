@@ -4,14 +4,27 @@ import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
+import CoreProcess from './lib/CoreProcess';
+import BrowserEmulators from './lib/BrowserEmulators';
+import HumanEmulators from './lib/HumanEmulators';
 import Session from './lib/Session';
+import Viewports from './lib/Viewports';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 
-export { GlobalPool, Tab, Session, LocationTrigger };
+export {
+  GlobalPool,
+  Tab,
+  Session,
+  LocationTrigger,
+  CoreProcess,
+  BrowserEmulators,
+  HumanEmulators,
+  Viewports,
+};
 
 export default class Core {
   public static server = new CoreServer();
