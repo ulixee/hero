@@ -165,7 +165,7 @@ Closes the current instance and any open tabs.
 
 #### **Returns**: `Promise`
 
-### agent.closeTab*(tab)* {#focus-tab}
+### agent.closeTab*(tab)* {#close-tab}
 
 Close a single Tab. The first opened Tab will become the focused tab.
 
@@ -214,7 +214,7 @@ Executes a series of mouse and keyboard interactions.
 
 Refer to the [Interactions page](/docs/basic-interfaces/interactions) for details on how to construct an interaction.
 
-### agent.scrollTo*(mousePosition)* {#click}
+### agent.scrollTo*(mousePosition)* {#scroll-to}
 
 Executes a scroll interaction. This is a shortcut for `agent.interact({ scroll: mousePosition })`. See the [Interactions page](/docs/basic-interfaces/interactions) for more details.
 

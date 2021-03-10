@@ -1,12 +1,12 @@
 # Introduction
 
-> SecretAgent is a free and open source headless browser that's written in NodeJs, built on top of Chromium and [nearly impossible for websites to detect](https://github.com/ulixee/double-agent/).
+> SecretAgent is a free and open source headless browser that's written in NodeJs, built on top of Chrome and [nearly impossible for websites to detect](https://github.com/ulixee/double-agent/).
 
 ## Why SecretAgent?
 
 - **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
-- **Powered by Chromium** - The powerful Chromium engine sits under the hood, allowing for lightning fast rendering.
+- **Powered by Chrome** - The powerful Chrome engine sits under the hood, allowing for lightning fast rendering.
 - **Emulates any modern browser** - Browser emulators make it easy to disguise your script as practically any browser.
 - **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 
@@ -14,7 +14,7 @@
 
 We started by challenging ourselves to create the ultimate scraper detection tool, which we coined [DoubleAgent](https://github.com/ulixee/double-agent/). Along the way we discovered 76,697 checks that any website can implement to [block practically all known scrapers](https://stateofscraping.org). Then we designed SecretAgent to bypass detection by emulating real users.
 
-SecretAgent uses Chromium as its core rendering engine under the hood, with DevTools Protocol as its glue layer.
+SecretAgent uses Chrome as its core rendering engine under the hood, with DevTools Protocol as its glue layer.
 
 Instead of creating another complex puppeteer-like API that requires use of nested callbacks and running code in remote contexts, we designed the AwaitedDOM. AwaitedDOM is a W3C compliant DOM written for NodeJS that allows you to write scraper scripts as if you were inside the webpage.
 
@@ -32,7 +32,7 @@ or
 yarn add secret-agent
 ```
 
-When you install SecretAgent, it also downloads a recent version of Chromium and an app call [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions.
+When you install SecretAgent, it also downloads a recent version of Chrome and an app call [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions.
 
 More details about installation can be found on the [troubleshooting](/docs/help/troubleshooting) page.
 

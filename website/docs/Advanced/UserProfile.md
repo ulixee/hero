@@ -47,5 +47,5 @@ An object with a key for each "security origin" of a page, and value all the ass
   - indexedDB `IndexedDB[]`. An array of the `indexedDB` databases for a given domain with records stored as [typeson](https://github.com/dfahlander/typeson).
   
 #### **Type**: `object { [origin: string]: DomStorage }`
-  - key `string`. The "security origin" of a page or iFrame as defined by Chromium.
+  - key `string`. The "security origin" of a page or iFrame as defined by Chrome.
   - value [DomStorage](#dom-storage). The `DomStorage` entry for the given origin.

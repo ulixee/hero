@@ -2,7 +2,7 @@
 
 > ConnectionToCore is a built-in mechanism to stream commands to local and remote instances of SecretAgent using the same simple interface.
 
-When you install SecretAgent, it comes ready to run locally with a Chromium engine and client all in your local codebase. However, as you begin to scale the number of concurrent scrapes, you will end up needing to manage a fleet of "engines" running on a number of computers.
+When you install SecretAgent, it comes ready to run locally with a Chrome engine and client all in your local codebase. However, as you begin to scale the number of concurrent scrapes, you will end up needing to manage a fleet of "engines" running on a number of computers.
 
 ```javascript
 const { Agent: BaseAgent } = require('@secret-agent/client');
