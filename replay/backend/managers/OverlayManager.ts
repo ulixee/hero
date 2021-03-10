@@ -37,11 +37,11 @@ export default class OverlayManager {
   }
 
   public destroy = () => {
-    this.browserViews.forEach(x => x.destroy());
+    this.browserViews.length = 0;
   };
 
   public sendToAll = (channel: string, ...args: any[]) => {
-    this.browserViews.forEach(x => !x.isDestroyed() && x.webContents.send(channel, ...args));
+    this.browserViews.forEach(x => x?.webContents.send(channel, ...args));
   };
 
   public getByName(name: string) {

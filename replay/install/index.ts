@@ -27,8 +27,11 @@ if (isBinaryInstalled()) {
     win32: 'win',
   };
 
+  let archAddon = '';
+  if (platform === 'darwin' && os.arch() === 'arm64') archAddon = '-arm64';
+
   const response = await download(
-    `https://github.com/ulixee/secret-agent/releases/download/v${version}/replay-${version}-${platformNames[platform]}.tar.gz`,
+    `https://github.com/ulixee/secret-agent/releases/download/v${version}/replay-${version}-${platformNames[platform]}${archAddon}.tar.gz`,
   );
   const length = parseInt(response.headers['content-length'], 10);
 

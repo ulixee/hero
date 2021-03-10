@@ -14,7 +14,6 @@ export default class AppView extends ViewBackend {
   }
 
   public async load(location: IWindowLocation = InternalLocations.Dashboard) {
-    if (this.browserView.isDestroyed()) return;
     this.attach();
     this.location = InternalLocations[location];
 

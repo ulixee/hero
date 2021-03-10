@@ -4,7 +4,7 @@ SecretAgent is a web browser that's built for scraping.
 
 - [x] **Built for scraping** - it's the first modern headless browsers designed specifically for scraping instead of just automated testing.
 - [x] **Designed for web developers** - We've recreated a fully compliant DOM directly in NodeJS allowing you bypass the headaches of previous scraper tools.
-- [x] **Powered by Chromium** - The powerful Chromium engine sits under the hood, allowing for lightning fast rendering.
+- [x] **Powered by Chrome** - The powerful Chrome engine sits under the hood, allowing for lightning fast rendering.
 - [x] **Emulates any modern browser** - BrowserEmulators make it easy to disguise your script as practically any browser.
 - [x] **Avoids detection along the entire stack** - Don't be blocked because of TLS fingerprints in your networking stack.
 

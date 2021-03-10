@@ -104,7 +104,6 @@ export default class BaseOverlay {
   }
 
   public destroy() {
-    this.browserView.destroy();
     this.browserView = null;
   }
 

@@ -49,6 +49,7 @@ function getDistDir() {
   switch (platform) {
     case 'mas':
     case 'darwin':
+      if (os.arch() === 'arm64') return 'mac-arm64';
       return 'mac';
     default:
       return '';
