@@ -332,9 +332,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
-      if (!resource.publishing?.published && resource.url?.href) {
-        this.doEmitResourceRequested(requestId);
-      }
       resource.responseHeaders = response.headers;
       resource.status = response.status;
       resource.statusMessage = response.statusText;
@@ -346,7 +343,15 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       if (response.fromServiceWorker) resource.browserServedFromCache = 'service-worker';
       if (response.fromPrefetchCache) resource.browserServedFromCache = 'prefetch';
 
-      if (response.requestHeaders) resource.requestHeaders = response.requestHeaders;
+      if (response.requestHeaders) this.mergeRequestHeaders(resource, response.requestHeaders);
+      if (!resource.url) {
+        resource.url = new URL(response.url);
+        resource.frameId = frameId;
+        resource.browserRequestId = requestId;
+      }
+      if (!resource.publishing?.published && resource.url?.href) {
+        this.doEmitResourceRequested(requestId);
+      }
     }
 
     const isNavigation = requestId === loaderId && type === 'Document';

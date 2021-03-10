@@ -63,4 +63,17 @@ describe('basic resource tests', () => {
     }
     await agent.close();
   });
+
+  it('cancels a pending resource on agent close', async () => {
+    const exampleUrl = `${koaServer.baseUrl}/test`;
+    const agent = await handler.createAgent();
+
+    await agent.goto(exampleUrl);
+
+    const waitForResource = agent.waitForResource({ type: 'Fetch' });
+    // eslint-disable-next-line jest/valid-expect
+    const waitError = expect(waitForResource).rejects.toThrowError('disconnected');
+    await agent.close();
+    await waitError;
+  });
 });

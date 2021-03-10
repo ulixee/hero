@@ -37,6 +37,7 @@ import CoreSession from './CoreSession';
 import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -148,12 +149,17 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   // METHODS
 
-  public close(): Promise<void> {
+  public async close(): Promise<void> {
     const { isClosing, connection } = getState(this);
     if (isClosing) return;
     setState(this, { isClosing: true });
 
-    return connection.close();
+    try {
+      return await connection.close();
+    } catch (error) {
+      if (error instanceof DisconnectedFromCoreError) return;
+      throw error;
+    }
   }
 
   public async closeTab(tab: Tab): Promise<void> {

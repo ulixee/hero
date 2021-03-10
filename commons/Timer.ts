@@ -50,14 +50,12 @@ export default class Timer {
     return time[0] * 1000 + time[1] / 1000000;
   }
 
-  public waitForPromise<Z>(promise: Promise<Z>, message: string): Promise<Z> {
+  public async waitForPromise<Z>(promise: Promise<Z>, message: string): Promise<Z> {
     this.timeoutMessage = message;
-    return Promise.race([
-      promise,
-      this.expirePromise.then(() => {
-        throw new TimeoutError(this.timeoutMessage);
-      }),
-    ]) as Promise<Z>;
+    const timeout = new TimeoutError(this.timeoutMessage);
+    const result = await Promise.race([promise, this.expirePromise.then(() => timeout)]);
+    if (result instanceof TimeoutError) throw timeout;
+    return result;
   }
 
   public waitForTimeout(): Promise<void> {

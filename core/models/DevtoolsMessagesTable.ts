@@ -80,7 +80,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
       // clean out post data (we have these in resources table)
       if ((key === 'headers' || key === 'postData') && params.request) {
-        return 'OMITTED';
+        return 'SA_REMOVED_FOR_DB';
       }
       return value;
     }

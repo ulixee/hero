@@ -428,6 +428,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     // last command is the one running right now
     const startCommandId = options?.sinceCommandId ?? this.lastCommandId - 1;
     let newTab: Tab;
+    const startTime = new Date();
     if (startCommandId >= 0) {
       for (const tab of this.session.tabs) {
         if (tab.parentTabId === this.id && tab.createdAtCommandId >= startCommandId) {
@@ -437,6 +438,15 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       }
     }
     if (!newTab) newTab = await this.waitOn('child-tab-created', undefined, options?.timeoutMs);
+
+    // wait for a real url to be requested
+    if (newTab.url === 'about:blank' || !newTab.url) {
+      let timeoutMs = options?.timeoutMs ?? 10e3;
+      const millis = new Date().getTime() - startTime.getTime();
+      timeoutMs -= millis;
+      await newTab.navigations.waitOn('navigation-requested', null, timeoutMs).catch(() => null);
+    }
+
     await newTab.navigationsObserver.waitForNavigationResourceId();
     return newTab;
   }
