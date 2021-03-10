@@ -63,12 +63,13 @@ export default class Session extends TypedEventEmitter<{
 
   public readonly humanEmulatorId: string;
   public readonly browserEmulatorId: string;
-
   public get isClosing() {
     return this._isClosing;
   }
 
   private _isClosing = false;
+
+  private tabIdCounter = 0;
 
   constructor(readonly options: ICreateTabOptions) {
     super();
@@ -129,7 +130,7 @@ export default class Session extends TypedEventEmitter<{
     );
   }
 
-  public getTab(id: string): Tab {
+  public getTab(id: number): Tab {
     return this.tabs.find(x => x.id === id);
   }
 
@@ -183,6 +184,10 @@ export default class Session extends TypedEventEmitter<{
     requestSession.on('resource-state', this.onResourceStates.bind(this));
     requestSession.on('socket-close', this.onSocketClose.bind(this));
     requestSession.on('socket-connect', this.onSocketConnect.bind(this));
+  }
+
+  public nextTabId(): number {
+    return (this.tabIdCounter += 1);
   }
 
   public async createTab() {

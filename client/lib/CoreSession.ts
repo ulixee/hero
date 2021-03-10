@@ -10,7 +10,7 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreSession implements IJsPathEventTarget {
-  public tabsById = new Map<string, CoreTab>();
+  public tabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
   public sessionsDataLocation: string;

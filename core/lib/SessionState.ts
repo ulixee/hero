@@ -39,7 +39,7 @@ export default class SessionState {
   public readonly sessionId: string;
 
   public viewport: IViewport;
-  public readonly navigationsByTabId: { [tabId: string]: TabNavigations } = {};
+  public readonly navigationsByTabId: { [tabId: number]: TabNavigations } = {};
   public readonly db: SessionDb;
 
   private readonly sessionName: string;
@@ -121,7 +121,7 @@ export default class SessionState {
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public registerTab(tabId: string): void {
+  public registerTab(tabId: number): void {
     this.navigationsByTabId[tabId] = new TabNavigations(this.db);
   }
 
@@ -213,7 +213,7 @@ export default class SessionState {
   }
 
   public captureResourceFailed(
-    tabId: string,
+    tabId: number,
     resourceFailedEvent: IRequestSessionResponseEvent,
     error: Error,
   ): void {
@@ -239,7 +239,7 @@ export default class SessionState {
   }
 
   public captureResourceError(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent,
     error: Error,
   ): void {
@@ -253,7 +253,7 @@ export default class SessionState {
   }
 
   public resolveNavigation(
-    tabId: string,
+    tabId: number,
     browserRequestId: string,
     resource: IResourceMeta,
     error?: Error,
@@ -272,7 +272,7 @@ export default class SessionState {
   }
 
   public captureResource(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
     isResponse: boolean,
   ): IResourceMeta {
@@ -295,7 +295,7 @@ export default class SessionState {
   }
 
   public resourceEventToMeta(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
   ): IResourceMeta {
     const {
@@ -339,7 +339,7 @@ export default class SessionState {
     return resource;
   }
 
-  public getResources(tabId: string): IResourceMeta[] {
+  public getResources(tabId: number): IResourceMeta[] {
     return this.resources.filter(x => x.tabId === tabId);
   }
 
@@ -354,7 +354,7 @@ export default class SessionState {
   ///////   FRAMES ///////
 
   public captureFrameCreated(
-    tabId: string,
+    tabId: number,
     createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
     domNodeId: number,
   ): void {
@@ -373,7 +373,7 @@ export default class SessionState {
   }
 
   public captureSubFrameNavigated(
-    tabId: string,
+    tabId: number,
     frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & {
       navigationReason?: string;
     },
@@ -389,13 +389,13 @@ export default class SessionState {
     // TODO: capture frame navigations
   }
 
-  public captureError(tabId: string, frameId: string, source: string, error: Error): void {
+  public captureError(tabId: number, frameId: string, source: string, error: Error): void {
     this.logger.info('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
   public captureLog(
-    tabId: string,
+    tabId: number,
     frameId: string,
     consoleType: string,
     message: string,
@@ -482,7 +482,7 @@ export default class SessionState {
   }
 
   public onPageEvents(
-    tabId: string,
+    tabId: number,
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
@@ -556,10 +556,10 @@ export default class SessionState {
   }
 
   public captureTab(
-    tabId: string,
+    tabId: number,
     pageId: string,
     devtoolsSessionId: string,
-    openerTabId?: string,
+    openerTabId?: number,
   ): void {
     this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
   }

@@ -25,7 +25,7 @@ export default class ReplayTabState extends EventEmitter {
   public readonly focusEvents: IFocusRecord[] = [];
   public readonly paintEvents: IPaintEvent[] = [];
 
-  public tabId: string;
+  public tabId: number;
   public startOrigin: string;
   public urlOrigin: string;
   public viewportWidth: number;

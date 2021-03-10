@@ -17,9 +17,9 @@ export default class ConnectionToReplay {
   private readonly sessionClosedPromise = createPromise();
 
   private session: ISessionRecord;
-  private tabs = new Map<
-    string,
-    { tabId: string; createdTime: string; startOrigin: string; width: number; height: number }
+  private tabsById = new Map<
+    number,
+    { tabId: number; createdTime: string; startOrigin: string; width: number; height: number }
   >();
 
   private readonly frameIdToNodePath = new Map<string, string>();
@@ -91,10 +91,10 @@ export default class ConnectionToReplay {
 
     db.tabs.subscribe(tabs => {
       for (const tab of tabs) {
-        if (!this.tabs.has(tab.tabId)) {
+        if (!this.tabsById.has(tab.tabId)) {
           this.addTabId(tab.tabId, tab.createdTime);
         }
-        const sessionTab = this.tabs.get(tab.tabId);
+        const sessionTab = this.tabsById.get(tab.tabId);
         sessionTab.height = tab.viewportHeight;
         sessionTab.width = tab.viewportWidth;
       }
@@ -121,14 +121,14 @@ export default class ConnectionToReplay {
         const isMainFrame = this.mainFrames.has(change.frameId);
         if (isMainFrame && change.action === 'newDocument') {
           this.addTabId(change.tabId, change.timestamp);
-          const tab = this.tabs.get(change.tabId);
+          const tab = this.tabsById.get(change.tabId);
           if (!tab.startOrigin) {
             tab.startOrigin = change.textContent;
           }
           if (!tabReadyPromise.isResolved) {
             this.send('session', {
               ...this.session,
-              tabs: [...this.tabs.values()],
+              tabs: [...this.tabsById.values()],
               dataLocation: this.sessionLookup.dataLocation,
               relatedScriptInstances: this.sessionLookup.relatedScriptInstances,
               relatedSessions: this.sessionLookup.relatedSessions,
@@ -229,9 +229,9 @@ export default class ConnectionToReplay {
     }
   }
 
-  private addTabId(tabId: string, timestamp: string): void {
-    if (!this.tabs.has(tabId)) {
-      this.tabs.set(tabId, {
+  private addTabId(tabId: number, timestamp: string): void {
+    if (!this.tabsById.has(tabId)) {
+      this.tabsById.set(tabId, {
         tabId,
         createdTime: timestamp,
         startOrigin: null,

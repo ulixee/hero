@@ -1,6 +1,6 @@
 export interface IDomChangeEvent {
   nodeId: number;
-  tabId: string;
+  tabId: number;
   eventIndex: number;
   action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
   timestamp: string;
@@ -17,7 +17,4 @@ export interface IDomChangeEvent {
   properties?: { [key: string]: string | boolean | number | string[] };
 }
 
-export type IFrontendDomChangeEvent = Omit<
-  IDomChangeEvent,
-  'tabId' | 'commandId'
->;
+export type IFrontendDomChangeEvent = Omit<IDomChangeEvent, 'tabId' | 'commandId'>;

@@ -12,7 +12,7 @@ import RequestSession from '../handlers/RequestSession';
 const { log } = Log(module);
 
 export default class BrowserRequestMatcher {
-  public requestIdToTabId = new Map<string, string>();
+  public requestIdToTabId = new Map<string, number>();
 
   protected readonly logger: IBoundLog;
 
@@ -83,7 +83,7 @@ export default class BrowserRequestMatcher {
 
   public onBrowserRequestedResourceExtraDetails(
     httpResourceLoad: IHttpResourceLoadDetails,
-    tabId?: string,
+    tabId?: number,
   ): void {
     const match = this.requestedResources.find(
       x => x.browserRequestId === httpResourceLoad.browserRequestId,
@@ -102,7 +102,7 @@ export default class BrowserRequestMatcher {
 
   public onBrowserRequestedResource(
     httpResourceLoad: IHttpResourceLoadDetails,
-    tabId?: string,
+    tabId?: number,
   ): IRequestedResource {
     const { method } = httpResourceLoad;
 
@@ -134,7 +134,7 @@ export default class BrowserRequestMatcher {
 
   public onBrowserRequestFailed(event: {
     resource: IHttpResourceLoadDetails;
-    tabId: string;
+    tabId: number;
     loadError: Error;
   }): number {
     this.requestIdToTabId.set(event.resource.browserRequestId, event.tabId);
@@ -166,7 +166,7 @@ export default class BrowserRequestMatcher {
   private updatePendingResource(
     httpResourceLoad: IHttpResourceLoadDetails,
     pendingResource: IRequestedResource,
-    tabId: string,
+    tabId: number,
   ): void {
     if (tabId) {
       pendingResource.tabId = tabId;
@@ -240,7 +240,7 @@ interface IRequestedResource {
   headers: IResourceHeaders;
   requestTime: Date;
   browserRequestedPromise: IResolvablePromise<void>;
-  tabId?: string;
+  tabId?: number;
   mitmResourceId?: number;
   browserRequestId?: string;
   resourceType?: ResourceType;

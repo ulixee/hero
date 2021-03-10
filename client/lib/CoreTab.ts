@@ -22,7 +22,7 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreTab implements IJsPathEventTarget {
-  public tabId: string;
+  public tabId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;

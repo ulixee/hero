@@ -80,7 +80,7 @@ export default class HeaderPage extends Vue {
   $refs: any;
   tabRef: HTMLElement;
   isFullscreen = false;
-  activeTabId = '';
+  activeTabId = 0;
 
   currentUrl = 'Loading';
 

@@ -44,7 +44,7 @@ Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing 
 
 An identifier for the tab.
 
-#### **Type**: `Promise<string>`
+#### **Type**: `Promise<number>`
 
 ### tab.url {#url}
 

@@ -1,5 +1,5 @@
 export default interface ISessionMeta {
-  tabId?: string;
+  tabId?: number;
   sessionId: string;
   sessionsDataLocation?: string;
 }

@@ -1,6 +1,6 @@
 export default interface ICommandMeta {
   id: number;
-  tabId: string;
+  tabId: number;
   frameId: string;
   name: string;
   args?: string;

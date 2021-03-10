@@ -55,7 +55,7 @@ export default class DomEnv {
   private tab: { isClosing: boolean };
   private logger: IBoundLog;
 
-  constructor(tab: { sessionId: string; isClosing: boolean; id: string }, puppetPage: IPuppetPage) {
+  constructor(tab: { sessionId: string; isClosing: boolean; id: number }, puppetPage: IPuppetPage) {
     this.puppetPage = puppetPage;
     this.tab = tab;
     this.logger = log.createChild(module, {

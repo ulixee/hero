@@ -67,7 +67,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     });
   }
 
-  public get tabId(): Promise<string> {
+  public get tabId(): Promise<number> {
     return getCoreTab(this).then(x => x.tabId);
   }
 

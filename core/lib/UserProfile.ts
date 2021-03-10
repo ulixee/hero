@@ -58,7 +58,7 @@ export default class UserProfile {
 
       if (hasStorage) {
         // install scripts so we can restore storage
-        const domEnv = new DomEnv({ sessionId, isClosing: false, id: 'UserProfileInstall' }, page);
+        const domEnv = new DomEnv({ sessionId, isClosing: false, id: -1 }, page);
         await domEnv.install();
 
         for (const origin of origins) {

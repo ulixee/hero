@@ -5,7 +5,7 @@ import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const sessionMeta = {
-  tabId: 'tab-id',
+  tabId: 1,
   sessionId: 'session-id',
   sessionsDataLocation: '',
 };

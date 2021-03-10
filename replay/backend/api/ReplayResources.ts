@@ -137,7 +137,7 @@ function getDecodeStream(firstByte: number, encoding: string) {
 
 interface IReplayResource {
   data: Buffer;
-  tabId: string;
+  tabId: number;
   doctype?: string;
   headers: Map<string, string>;
   type: string;

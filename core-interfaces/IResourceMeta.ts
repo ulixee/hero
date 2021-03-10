@@ -4,7 +4,7 @@ import ResourceType from './ResourceType';
 
 export default interface IResourceMeta {
   id: number;
-  tabId: string;
+  tabId: number;
   url: string;
   request: IResourceRequest;
   response?: IResourceResponse;

@@ -19,13 +19,13 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       ['properties', 'TEXT'],
       ['namespaceUri', 'TEXT'],
       ['commandId', 'INTEGER'],
-      ['tabId', 'TEXT'],
+      ['tabId', 'INTEGER'],
       ['timestamp', 'TEXT'],
     ]);
     this.defaultSortOrder = 'timestamp ASC';
   }
 
-  public insert(tabId: string, frameId: string, change: IDomChangeEvent) {
+  public insert(tabId: number, frameId: string, change: IDomChangeEvent) {
     const [commandId, action, nodeData, timestamp, eventIndex] = change;
     const record = [
       frameId,
@@ -99,7 +99,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
 
 export interface IDomChangeRecord {
   commandId: number;
-  tabId: string;
+  tabId: number;
   frameId: string;
   nodeId: number;
   timestamp: string;

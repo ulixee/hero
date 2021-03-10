@@ -43,8 +43,8 @@ import DomRecorder from './DomRecorder';
 const { log } = Log(module);
 
 export default class Tab extends TypedEventEmitter<ITabEventParams> {
-  public readonly id: string;
-  public readonly parentTabId?: string;
+  public readonly id: number;
+  public readonly parentTabId?: number;
   public readonly session: Session;
   public readonly navigationsObserver: TabNavigationObserver;
   public readonly domRecorder: DomRecorder;
@@ -87,12 +87,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
-    parentTabId?: string,
+    parentTabId?: number,
     windowOpenParams?: { url: string; windowName: string },
   ) {
     super();
     this.setEventsToLog(['child-tab-created', 'close']);
-    this.id = uuidv1();
+    this.id = session.nextTabId();
     this.logger = log.createChild(module, {
       tabId: this.id,
       sessionId: session.id,

@@ -357,7 +357,7 @@ describe('basic MitM tests', () => {
         requestLowerHeaders: {},
         documentUrl: `${httpServer.url}page1`,
       } as IHttpResourceLoadDetails,
-      '1',
+      1,
     );
     const onresponse = jest.fn();
     const onError = jest.fn();
