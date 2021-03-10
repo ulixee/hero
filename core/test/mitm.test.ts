@@ -4,6 +4,7 @@ import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import { createPromise } from '@secret-agent/commons/utils';
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import GlobalPool from '../lib/GlobalPool';
 import Core, { Session } from '../index';
 
@@ -130,6 +131,53 @@ myWorker.postMessage('send');
   await tab.goto(`${koa.baseUrl}/testWorker`);
   await tab.waitForLoad('PaintingStable');
   await expect(serviceXhr).resolves.toBe('FromWorker');
+  expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
+});
+
+test('should proxy requests from shared workers', async () => {
+  const xhrResolvable = new Resolvable<string>();
+  const server = await Helpers.runHttpsServer(async (req, res) => {
+    if (req.url === '/shared-worker.js') {
+      res.setHeader('content-type', 'application/javascript');
+      res.end(`
+onconnect = async message => {
+  const port = message.ports[0]
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', '${server.baseUrl}/sharedWorkerXhr');
+  xhr.send('FromSharedWorker');
+  port.postMessage('done')
+}`);
+    } else if (req.url === '/testSharedWorker') {
+      res.setHeader('content-type', 'text/html');
+      res.end(`<html lang="en">
+<script>
+try {
+
+const sharedWorker = new SharedWorker('./shared-worker.js');
+sharedWorker.port.start()
+sharedWorker.port.addEventListener('message', message => {
+    sharedWorker.port.close();
+});
+} catch(error ){
+    console.log('couldnt start shared worker', error)
+}
+</script>
+<h1>This is a visible page</h1>
+</html>
+    `);
+    } else if (req.url === '/sharedWorkerXhr') {
+      res.setHeader('content-type', 'text');
+      res.end('ok');
+      const requestBody = await Helpers.readableToBuffer(req);
+      xhrResolvable.resolve(requestBody.toString());
+    }
+  });
+  const session = await GlobalPool.createSession({});
+  Helpers.needsClosing.push(session);
+  const tab = await session.createTab();
+  await tab.goto(`${server.baseUrl}/testSharedWorker`);
+  await tab.waitForLoad('PaintingStable');
+  await expect(xhrResolvable.promise).resolves.toBe('FromSharedWorker');
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(3);
 });
 

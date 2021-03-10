@@ -24,6 +24,8 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import SessionState from './SessionState';
 import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
@@ -67,7 +69,6 @@ export default class Session extends TypedEventEmitter<{
   }
 
   private _isClosing = false;
-  private pendingNavigationMitmResponses: IRequestSessionResponseEvent[] = [];
 
   constructor(readonly options: ICreateTabOptions) {
     super();
@@ -172,6 +173,10 @@ export default class Session extends TypedEventEmitter<{
     }
 
     const requestSession = this.mitmRequestSession;
+    requestSession.networkInterceptorDelegate.http ??= {};
+    requestSession.networkInterceptorDelegate.http.beforeSendingResponseFn = this.beforeSendingMitmHttpResponse.bind(
+      this,
+    );
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
     requestSession.on('http-error', this.onMitmError.bind(this));
@@ -204,8 +209,6 @@ export default class Session extends TypedEventEmitter<{
       sessionId: this.id,
     });
 
-    this.pendingNavigationMitmResponses.forEach(x => this.onMitmResponse(x));
-
     await this.mitmRequestSession.close();
     await Promise.all(Object.values(this.tabs).map(x => x.close()));
     try {
@@ -226,6 +229,40 @@ export default class Session extends TypedEventEmitter<{
     this.emit('awaited-event', payload);
   }
 
+  private async beforeSendingMitmHttpResponse(resource: IHttpResourceLoadDetails): Promise<void> {
+    // wait for share and service worker "envs" to load before returning response
+    const secFetchDest = resource.requestLowerHeaders['sec-fetch-dest'] as string;
+    // NOTE: not waiting for "workers" because the worker isn't attached until the response comes in
+    if (!secFetchDest || !['sharedworker', 'serviceworker'].includes(secFetchDest)) {
+      return;
+    }
+
+    const workerType = secFetchDest.replace('worker', '_worker');
+
+    function match(worker: IPuppetWorker): boolean {
+      if (worker.hasLoadedResponse) return false;
+      return workerType === worker.type && worker.url === resource.url.href;
+    }
+    let worker: IPuppetWorker;
+    try {
+      for (const value of this.browserContext.workersById.values()) {
+        if (match(value)) worker = value;
+      }
+      if (!worker) {
+        ({ worker } = await this.browserContext.waitOn(
+          'worker',
+          event => match(event.worker),
+          5e3,
+        ));
+      }
+      await worker.isReady;
+      worker.hasLoadedResponse = true;
+    } catch (error) {
+      if (error instanceof CanceledPromiseError) return;
+      throw error;
+    }
+  }
+
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
     this.sessionState.captureDevtoolsMessage(event);
   }
@@ -236,13 +273,13 @@ export default class Session extends TypedEventEmitter<{
   }
 
   private onMitmResponse(event: IRequestSessionResponseEvent) {
-    const tabId = this.mitmRequestSession.browserRequestIdToTabId.get(event.browserRequestId);
-    let tab = this.tabs.find(x => x.id === tabId);
-    if (!tab && event.browserRequestId === 'fallback-navigation') {
-      tab = this.tabs.find(x => x.url === event.request.url || x.url === event.redirectedToUrl);
-      if (!tab) {
-        return this.pendingNavigationMitmResponses.push(event);
-      }
+    const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
+      event.browserRequestId,
+    );
+    const tab = this.tabs.find(x => x.id === tabId);
+    if (!tab && !tabId) {
+      this.logger.warn(`Mitm Response received without matching tab`, { event });
+      return;
     }
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
@@ -250,7 +287,7 @@ export default class Session extends TypedEventEmitter<{
   }
 
   private onMitmError(event: IRequestSessionHttpErrorEvent) {
-    const tabId = this.mitmRequestSession.browserRequestIdToTabId.get(
+    const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
       event.request.browserRequestId,
     );
 
@@ -274,24 +311,11 @@ export default class Session extends TypedEventEmitter<{
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ) {
-    const startUrl = page.mainFrame.url;
     const tab = Tab.create(this, page, parentTab, openParams);
     this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
     this.registerTab(tab, page);
     await tab.isReady;
     parentTab.emit('child-tab-created', tab);
-    // make sure we match browser requests that weren't associated with a tab to the new tab
-    if (this.pendingNavigationMitmResponses.length) {
-      const replayPending = [...this.pendingNavigationMitmResponses];
-      this.pendingNavigationMitmResponses.length = 0;
-      while (replayPending.length) {
-        const next = replayPending.pop();
-        if (next.redirectedToUrl === startUrl || next.request.url === startUrl) {
-          const resource = this.sessionState.captureResource(tab.id, next, true);
-          tab.emit('resource', resource);
-        }
-      }
-    }
     return tab;
   }
 

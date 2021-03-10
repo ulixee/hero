@@ -294,8 +294,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
 
   protected cancelPendingRequests(): void {
     const host = String(this.resolvedHost);
-    this.coreSessions.close(new DisconnectedFromCoreError(host));
-    this.commandQueue.clearPending(new DisconnectedFromCoreError(host));
+    this.coreSessions.stop(new DisconnectedFromCoreError(host));
+    this.commandQueue.stop(new DisconnectedFromCoreError(host));
     for (const entry of this.pendingRequestsById.values()) {
       const id = entry.id;
       if (this.connectRequestId === id || this.disconnectRequestId === id) {

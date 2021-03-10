@@ -84,25 +84,44 @@ export default class Resource {
     const timer = new Timer(options?.timeoutMs ?? 30e3);
 
     const resourceFilter = { url: filter.url, type: filter.type };
-    const resourceOptions = {
-      ...(options ?? {}),
+    const resourceOptions: IWaitForResourceOptions = {
+      sinceCommandId: options?.sinceCommandId,
       timeoutMs: 2e3,
       throwIfTimeout: false,
-    } as IWaitForResourceOptions;
+    };
 
     let isComplete = false;
     const done = (): boolean => (isComplete = true);
 
     do {
-      let foundResources: IResourceMeta[] = [];
-
       try {
         const waitForResourcePromise = coreTab.waitForResource(resourceFilter, resourceOptions);
-        foundResources = await timer.waitForPromise(
+        const foundResources = await timer.waitForPromise(
           waitForResourcePromise,
           'Timeout waiting for Resource(s)',
         );
         resourceOptions.sinceCommandId = coreTab.commandQueue.lastCommandId;
+
+        for (const resourceMeta of foundResources) {
+          if (idsSeen.has(resourceMeta.id)) continue;
+          idsSeen.add(resourceMeta.id);
+
+          const resource = createResource(resourceMeta, Promise.resolve(coreTab));
+
+          let shouldInclude = true;
+
+          if (filter.filterFn) {
+            // resources can trigger commandQueue functions, so time them out
+            shouldInclude = await timer.waitForPromise(
+              Promise.resolve(filter.filterFn(resource, done)),
+              'Timeout waiting for waitResource.filterFn',
+            );
+          }
+
+          if (shouldInclude) resources.push(resource);
+
+          if (isComplete) break;
+        }
       } catch (err) {
         if (err instanceof TimeoutError) {
           if (options?.throwIfTimeout === false) {
@@ -110,22 +129,6 @@ export default class Resource {
           }
         }
         throw err;
-      }
-
-      for (const resourceMeta of foundResources) {
-        if (idsSeen.has(resourceMeta.id)) continue;
-        idsSeen.add(resourceMeta.id);
-
-        const resource = createResource(resourceMeta, Promise.resolve(coreTab));
-
-        if (filter.filterFn) {
-          const shouldIncludeResource = await filter.filterFn(resource, done);
-          if (shouldIncludeResource) resources.push(resource);
-        } else {
-          resources.push(resource);
-        }
-
-        if (isComplete) break;
       }
 
       // if no filter callback provided, break after 1 found

@@ -1,6 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
 import { GlobalPool, Viewports } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import * as Fs from 'fs';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -463,6 +465,60 @@ self.addEventListener('message', async event => {
     for (const prop of propsToGet) {
       const windowValue = (await agent.getJsValue(`navigator.${prop}`)).value;
       expect(params[prop]).toStrictEqual(windowValue);
+    }
+  });
+
+  it('should be able to load the creep-js phantom worker tests', async () => {
+    let jsonResult = new Resolvable<string>();
+    const httpsServer = await Helpers.runHttpsServer(async (req, res) => {
+      res.setHeader('access-control-allow-origin', '*');
+      if (req.url.match('/creepjs/tests/workers.html')) {
+        res.end(`<!DOCTYPE html>
+      <html lang="en">
+      <body>
+      <div id="fingerprint-data"></div>
+          <script src="workers.js"></script>
+      </body>
+      </html>`);
+      } else if (req.url.includes('worker-result')) {
+        const result = await Helpers.readableToBuffer(req);
+        jsonResult.resolve(result.toString());
+        res.end('');
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        const body = Fs.readFileSync(`${__dirname}/html/worker.js`);
+        res.setHeader('etag', 'W/"602f25aa-573c"');
+        res.setHeader('content-type', 'application/javascript; charset=utf-8');
+        res.end(body);
+      }
+    });
+
+    jsonResult = new Resolvable<string>();
+
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${httpsServer.baseUrl}/creepjs/tests/workers.html`);
+
+    const result = JSON.parse(await jsonResult.promise);
+    expect(result).toBeTruthy();
+
+    const { windowScope, dedicatedWorker, sharedWorker, serviceWorker } = result;
+    expect(windowScope.userAgent).toBe(dedicatedWorker.userAgent);
+    expect(windowScope.userAgent).toBe(serviceWorker.userAgent);
+    expect(windowScope.userAgent).toBe(sharedWorker.userAgent);
+    await agent.close();
+  });
+
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('should load creepjs', async () => {
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+    await agent.goto('https://abrahamjuliot.github.io/creepjs/tests/workers.html');
+    await agent.waitForPaintingStable();
+    const cols = await agent.document.querySelectorAll('.col-six');
+    for (const col of cols) {
+      const background = await col.getAttribute('style');
+      expect(background.trim()).toBe('background: none');
     }
   });
 });

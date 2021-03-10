@@ -25,6 +25,7 @@ export default interface INetworkInterceptorDelegate {
       statusCode: number,
     ) => Promise<void>;
     onOriginHasFirstPartyInteraction?: (documentUrl: string) => void;
+    beforeSendingResponseFn?: (resource: IHttpResourceLoadDetails) => Promise<any>;
   };
 }
 

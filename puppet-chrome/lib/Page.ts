@@ -37,6 +37,7 @@ import Frame from './Frame';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
+import TargetInfo = Protocol.Target.TargetInfo;
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -132,6 +133,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       'websocket-frame',
       'websocket-handshake',
       'resource-will-be-requested',
+      'resource-was-requested',
       'resource-loaded',
       'resource-failed',
     ] as const) {
@@ -247,6 +249,29 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return Buffer.from(result.data, 'base64');
   }
 
+  onWorkerAttached(cdpSession: CDPSession, targetInfo: TargetInfo): Promise<Error | void> {
+    const targetId = targetInfo.targetId;
+
+    this.browserContext.beforeWorkerAttached(cdpSession, targetId, this.targetId);
+    const worker = new Worker(
+      this.browserContext,
+      this.networkManager,
+      cdpSession,
+      this.workerInitializeFn,
+      this.logger,
+      targetInfo,
+    );
+    if (worker.type !== 'shared_worker') this.workersById.set(targetId, worker);
+    this.browserContext.onWorkerAttached(worker);
+
+    worker.on('console', this.emit.bind(this, 'console'));
+    worker.on('page-error', this.emit.bind(this, 'page-error'));
+    worker.on('close', () => this.workersById.delete(targetId));
+
+    this.emit('worker', { worker });
+    return worker.isReady;
+  }
+
   async close(): Promise<void> {
     if (this.cdpSession.isConnected() && !this.isClosed) {
       // trigger beforeUnload
@@ -297,17 +322,25 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   private async initialize(): Promise<void> {
-    await Promise.all([
-      this.updateEmulationSettings(),
-      this.networkManager.initialize(),
-      this.framesManager.initialize(),
-      this.cdpSession.send('Target.setAutoAttach', {
-        autoAttach: true,
-        waitForDebuggerOnStart: true,
-        flatten: true,
-      }),
-      this.cdpSession.send('Emulation.setFocusEmulationEnabled', { enabled: true }),
+    const errors = await Promise.all([
+      this.updateEmulationSettings().catch(err => err),
+      this.networkManager.initialize().catch(err => err),
+      this.framesManager.initialize().catch(err => err),
+      this.cdpSession
+        .send('Target.setAutoAttach', {
+          autoAttach: true,
+          waitForDebuggerOnStart: true,
+          flatten: true,
+        })
+        .catch(err => err),
+      this.cdpSession
+        .send('Emulation.setFocusEmulationEnabled', { enabled: true })
+        .catch(err => err),
     ]);
+
+    for (const error of errors) {
+      if (error && error instanceof Error) throw error;
+    }
 
     if (this.opener && this.opener.popupInitializeFn) {
       this.logger.stats('Popup triggered', {
@@ -335,27 +368,12 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const { sessionId, targetInfo, waitingForDebugger } = event;
 
     const cdpSession = this.cdpSession.connection.getSession(sessionId);
-
-    if (targetInfo.type === 'service_worker' || targetInfo.type === 'worker') {
-      const targetId = targetInfo.targetId;
-
-      this.browserContext.onWorkerAttached(cdpSession, targetId, this.targetId);
-      const worker = new Worker(
-        this.browserContext,
-        this.networkManager,
-        cdpSession,
-        this.workerInitializeFn,
-        this.logger,
-        targetInfo,
-      );
-      this.workersById.set(targetId, worker);
-
-      worker.on('console', this.emit.bind(this, 'console'));
-      worker.on('page-error', this.emit.bind(this, 'page-error'));
-      worker.on('close', () => this.workersById.delete(targetId));
-
-      this.emit('worker', { worker });
-      return worker.isReady;
+    if (
+      targetInfo.type === 'service_worker' ||
+      targetInfo.type === 'shared_worker' ||
+      targetInfo.type === 'worker'
+    ) {
+      return this.onWorkerAttached(cdpSession, targetInfo);
     }
 
     if (waitingForDebugger) {

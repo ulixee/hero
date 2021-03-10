@@ -9,6 +9,7 @@ import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
+import CacheHandler from '../handlers/CacheHandler';
 
 const mocks = {
   httpRequestHandler: {
@@ -18,12 +19,12 @@ const mocks = {
     create: jest.spyOn(MitmRequestContext, 'create'),
   },
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
+    determineResourceType: jest.spyOn(HeadersHandler, 'determineResourceType'),
   },
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
+  mocks.HeadersHandler.determineResourceType.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;
@@ -222,6 +223,8 @@ test('should handle h2 client going to h1 request', async () => {
 
 test('should handle cache headers for h2', async () => {
   const etags: string[] = [];
+  CacheHandler.isEnabled = true;
+  Helpers.onClose(() => (CacheHandler.isEnabled = false));
   const server = await Helpers.runHttp2Server((req, res1) => {
     if (req.headers[':path'] === '/cached') {
       etags.push(req.headers['if-none-match'] as string);

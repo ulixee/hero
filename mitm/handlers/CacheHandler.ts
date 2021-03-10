@@ -3,6 +3,7 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
 
 export default class CacheHandler {
+  public static isEnabled = Boolean(JSON.parse(process.env.SA_ENABLE_MITM_CACHE ?? 'false'));
   public didProposeCachedResource = false;
   public shouldServeCachedData = false;
   private readonly data: Buffer[] = [];
@@ -21,6 +22,7 @@ export default class CacheHandler {
   public onRequest(): void {
     const ctx = this.ctx;
     ctx.setState(ResourceState.CheckCacheOnRequest);
+    if (!CacheHandler.isEnabled) return;
 
     // only cache get (don't do preflight, post, etc)
     if (ctx.method === 'GET' && !ctx.requestLowerHeaders['if-none-match']) {
@@ -36,6 +38,7 @@ export default class CacheHandler {
 
   public onHttp2PushStream(): void {
     this.ctx.setState(ResourceState.CheckCacheOnRequest);
+    if (!CacheHandler.isEnabled) return;
     if (this.ctx.method === 'GET') {
       const cached = this.responseCache?.get(this.ctx.url.href);
       if (cached) {
@@ -56,6 +59,7 @@ export default class CacheHandler {
   }
 
   public onResponseHeaders(): void {
+    if (!CacheHandler.isEnabled) return;
     if (this.didProposeCachedResource && this.ctx.status === 304) {
       this.useCached();
       this.ctx.status = 200;
@@ -65,6 +69,7 @@ export default class CacheHandler {
   public onResponseEnd(): void {
     const ctx = this.ctx;
     ctx.setState(ResourceState.CheckCacheOnResponseEnd);
+    if (!CacheHandler.isEnabled) return;
     if (
       ctx.method === 'GET' &&
       !this.didProposeCachedResource &&

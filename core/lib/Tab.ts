@@ -428,6 +428,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     // last command is the one running right now
     const startCommandId = options?.sinceCommandId ?? this.lastCommandId - 1;
     let newTab: Tab;
+    const startTime = new Date();
     if (startCommandId >= 0) {
       for (const tab of this.session.tabs) {
         if (tab.parentTabId === this.id && tab.createdAtCommandId >= startCommandId) {
@@ -437,6 +438,15 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       }
     }
     if (!newTab) newTab = await this.waitOn('child-tab-created', undefined, options?.timeoutMs);
+
+    // wait for a real url to be requested
+    if (newTab.url === 'about:blank' || !newTab.url) {
+      let timeoutMs = options?.timeoutMs ?? 10e3;
+      const millis = new Date().getTime() - startTime.getTime();
+      timeoutMs -= millis;
+      await newTab.navigations.waitOn('navigation-requested', null, timeoutMs).catch(() => null);
+    }
+
     await newTab.navigationsObserver.waitForNavigationResourceId();
     return newTab;
   }
@@ -602,6 +612,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
+    page.on('resource-was-requested', this.onResourceWasRequested.bind(this), true);
     page.on('resource-loaded', this.onResourceLoaded.bind(this), true);
     page.on('resource-failed', this.onResourceFailed.bind(this), true);
     page.on('navigation-response', this.onNavigationResourceResponse.bind(this), true);
@@ -621,8 +632,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private onResourceWillBeRequested(event: IPuppetPageEvents['resource-will-be-requested']): void {
     const { session, lastCommandId } = this;
-    const { resource, isDocumentNavigation, frameId, redirectedFromUrl, url } = event;
+    const { resource, isDocumentNavigation, frameId, redirectedFromUrl } = event;
     const { browserRequestId } = resource;
+    const url = resource.url.href;
 
     if (isDocumentNavigation && !this.navigations.top) {
       this.navigations.onNavigationRequested(
@@ -633,14 +645,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         browserRequestId,
       );
     }
+    resource.hasUserGesture ||= this.navigations.didGotoUrl(url);
 
-    session.mitmRequestSession.browserRequestedResource({
-      ...resource,
-      ...event,
-      url,
-      tabId: this.id,
-      isUserNavigation: event.resource.hasUserGesture || this.navigations.didGotoUrl(url),
-    });
+    session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(resource, this.id);
 
     // only track main frame for now
     if (isDocumentNavigation && frameId === this.mainFrameId) {
@@ -654,7 +661,19 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     }
   }
 
+  private onResourceWasRequested(event: IPuppetPageEvents['resource-was-requested']): void {
+    this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
+      event.resource,
+      this.id,
+    );
+  }
+
   private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
+    this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
+      event.resource,
+      this.id,
+    );
+
     if (
       !!event.resource.browserServedFromCache &&
       event.resource.url?.href === this.navigations?.top?.requestedUrl &&
@@ -694,21 +713,27 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       );
     }
 
-    this.session.mitmRequestSession.browserRequestFailed({
+    let resourceId = this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestFailed({
       resource,
       tabId: this.id,
       loadError,
     });
 
-    const resources = this.sessionState.getBrowserRequestResources(event.resource.browserRequestId);
-    if (resources?.length) {
-      // this function will resolve any pending resourceId for a navigation
-      this.sessionState.captureResourceError(
-        this.id,
-        MitmRequestContext.toEmittedResource({ id: resources[0].resourceId, ...resource } as any),
-        loadError,
+    if (!resourceId) {
+      const resources = this.sessionState.getBrowserRequestResources(
+        event.resource.browserRequestId,
       );
+      if (resources?.length) {
+        resourceId = resources[resources.length - 1].resourceId;
+      }
     }
+
+    // this function will resolve any pending resourceId for a navigation
+    this.sessionState.captureResourceFailed(
+      this.id,
+      MitmRequestContext.toEmittedResource({ id: resourceId, ...resource } as any),
+      loadError,
+    );
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {

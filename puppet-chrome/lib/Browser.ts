@@ -57,21 +57,19 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return !this.connection.isClosed;
   }
 
-  protected async listen(needsTargetDiscovery = false) {
+  protected async listen() {
     await this.cdpSession.send('Target.setAutoAttach', {
       autoAttach: true,
-      waitForDebuggerOnStart: needsTargetDiscovery,
+      waitForDebuggerOnStart: true,
       flatten: true,
     });
 
-    if (needsTargetDiscovery) {
-      // NOTE: only needed for < Chrome 83 to detect popups!!
-      await this.cdpSession.send('Target.setDiscoverTargets', {
-        discover: true,
-      });
-      this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
-      this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
-    }
+    await this.cdpSession.send('Target.setDiscoverTargets', {
+      discover: true,
+    });
+    this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
+    this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
+
     return this;
   }
 
@@ -86,22 +84,36 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       const cdpSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
       context?.onPageAttached(cdpSession, targetInfo);
+      return;
     }
 
-    if (event.waitingForDebugger) {
-      log.error('Browser.attachedToTarget.waitingForDebugger', {
-        event,
-        sessionId: null,
-      });
-      throw new Error('Attached to target waiting for debugger!');
+    if (targetInfo.type === 'shared_worker') {
+      const cdpSession = this.connection.getSession(sessionId);
+      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      context?.onSharedWorkerAttached(cdpSession, targetInfo).catch(() => null);
+    }
+
+    if (event.waitingForDebugger && targetInfo.type === 'other') {
+      const cdpSession = this.connection.getSession(sessionId);
+      if (!cdpSession) return;
+      // Ideally, detaching should resume any target, but there is a bug in the backend.
+      cdpSession
+        .send('Runtime.runIfWaitingForDebugger')
+        .catch(() => null)
+        .then(() => this.cdpSession.send('Target.detachFromTarget', { sessionId }))
+        .catch(() => null);
     }
   }
 
   private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent) {
     const { targetInfo } = event;
-    if (targetInfo.type === 'page') {
+    if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.browserContextsById.get(targetInfo.browserContextId);
       await context.attachToTarget(targetInfo.targetId);
+    }
+    if (targetInfo.type === 'shared_worker') {
+      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      await context.attachToWorker(targetInfo);
     }
   }
 
@@ -126,12 +138,14 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   ): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
 
-    let needsTargetDiscovery = false;
-    if (engine.name === 'chrome') {
-      const versionParts = engine.fullVersion.split('.').map(Number);
-      needsTargetDiscovery = versionParts[0] < 83;
-    }
+    const version = await browser.cdpSession.send('Browser.getVersion');
+    log.info('Browser.create', {
+      ...version,
+      executablePath: engine.executablePath,
+      desiredFullVersion: engine.fullVersion,
+      sessionId: null,
+    });
 
-    return await browser.listen(needsTargetDiscovery);
+    return await browser.listen();
   }
 }

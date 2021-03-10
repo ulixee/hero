@@ -33,7 +33,7 @@ export default class CoreCommandQueue {
     });
   }
 
-  public clearPending(cancelError: CanceledPromiseError): void {
+  public stop(cancelError: CanceledPromiseError): void {
     this.internalQueue.stop(cancelError);
   }
 

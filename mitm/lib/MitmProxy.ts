@@ -268,6 +268,11 @@ export default class MitmProxy {
         sessionId: null,
         hostname,
       });
+    } else if (errorCodes.includes('ECONNABORTED')) {
+      log.info(`Got ECONNABORTED on Proxy Connect, ignoring.`, {
+        sessionId: null,
+        hostname,
+      });
     } else if (errorCodes.includes('ERR_STREAM_UNSHIFT_AFTER_END_EVENT')) {
       log.info(`Got ERR_STREAM_UNSHIFT_AFTER_END_EVENT on Proxy Connect, ignoring.`, {
         sessionId: null,

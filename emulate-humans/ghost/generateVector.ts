@@ -1,5 +1,5 @@
-import * as Bezier from 'bezier-js';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
+import Bezier from './Bezier';
 
 const sub = (a: IPoint, b: IPoint): IPoint => ({ x: a.x - b.x, y: a.y - b.y });
 const div = (a: IPoint, b: number): IPoint => ({ x: a.x / b, y: a.y / b });
@@ -36,7 +36,7 @@ function path(start: IPoint, end: IPoint, targetWidth = 100, spreadOverride?: nu
   const steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
 
   return curve
-    .getLUT(steps)
+    .getLookupTable(steps)
     .map(vector => ({
       x: vector.x,
       y: vector.y,
@@ -44,7 +44,7 @@ function path(start: IPoint, end: IPoint, targetWidth = 100, spreadOverride?: nu
     .filter(({ x, y }) => !Number.isNaN(x) && !Number.isNaN(y));
 }
 
-function bezierCurve(start: IPoint, finish: IPoint, overrideSpread?: number) {
+function bezierCurve(start: IPoint, finish: IPoint, overrideSpread?: number): Bezier {
   // could be played around with
   const min = 2;
   const max = 200;
@@ -61,13 +61,13 @@ function randomVectorOnLine(a: IPoint, b: IPoint) {
   return add(a, mult(vec, multiplier));
 }
 
-function randomNormalLine(a: IPoint, b: IPoint, range: number) {
+function randomNormalLine(a: IPoint, b: IPoint, range: number): IPoint[] {
   const randMid = randomVectorOnLine(a, b);
   const normalV = setMagnitude(perpendicular(direction(a, randMid)), range);
   return [randMid, normalV];
 }
 
-function generateBezierAnchors(a: IPoint, b: IPoint, spread: number) {
+function generateBezierAnchors(a: IPoint, b: IPoint, spread: number): IPoint[] {
   const side = Math.round(Math.random()) === 1 ? 1 : -1;
   const calc = (): IPoint => {
     const [randMid, normalV] = randomNormalLine(a, b, spread);

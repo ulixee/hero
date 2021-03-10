@@ -15,6 +15,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -38,6 +39,8 @@ export class BrowserContext
       });
     }
   }
+
+  public workersById = new Map<string, IPuppetWorker>();
 
   private _emulation: IBrowserEmulationSettings;
 
@@ -103,6 +106,13 @@ export class BrowserContext
     }
   }
 
+  async attachToWorker(targetInfo: TargetInfo) {
+    await this.cdpRootSessionSend('Target.attachToTarget', {
+      targetId: targetInfo.targetId,
+      flatten: true,
+    });
+  }
+
   onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
     if (this.getPageWithId(targetInfo.targetId)) return;
 
@@ -114,6 +124,7 @@ export class BrowserContext
     let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
     // make the first page the active page
     if (!opener && !this.createdTargetIds.has(targetInfo.targetId)) opener = this.pages[0];
+
     const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
     this.pages.push(page);
     // eslint-disable-next-line promise/catch-or-return
@@ -129,12 +140,23 @@ export class BrowserContext
     }
   }
 
-  onWorkerAttached(cdpSession: CDPSession, workerTargetId: string, pageTargetId: string) {
+  async onSharedWorkerAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
+    const page = this.pages.find(x => !x.isClosed) ?? this.pages[0];
+    await page.onWorkerAttached(cdpSession, targetInfo);
+  }
+
+  beforeWorkerAttached(cdpSession: CDPSession, workerTargetId: string, pageTargetId: string) {
     this.subscribeToDevtoolsMessages(cdpSession, {
       sessionType: 'worker' as const,
       pageTargetId,
       workerTargetId,
     });
+  }
+
+  onWorkerAttached(worker: IPuppetWorker) {
+    this.workersById.set(worker.id, worker);
+    worker.on('close', () => this.workersById.delete(worker.id));
+    this.emit('worker', { worker });
   }
 
   async close(): Promise<void> {
@@ -169,7 +191,7 @@ export class BrowserContext
       .filter(c => {
         if (!url) return true;
 
-        if (url.hostname !== c.domain) return false;
+        if (url.hostname !== c.domain && !url.hostname.includes(c.domain)) return false;
         if (!url.pathname.startsWith(c.path)) return false;
         if (c.secure === true && url.protocol !== 'https:') return false;
         return true;

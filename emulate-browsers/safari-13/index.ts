@@ -309,7 +309,10 @@ export default class Safari13 {
   }
 
   private async getCookieHeader(resource: IHttpResourceLoadDetails) {
-    const { url, documentUrl: sourceDocumentUrl } = resource;
+    const { url, documentUrl } = resource;
+
+    let sourceDocumentUrl = documentUrl;
+    if (!sourceDocumentUrl && resource.isUserNavigation) sourceDocumentUrl = url.href;
 
     let sameSiteContext = getSameSiteContext(resource);
     if (resource.isFromRedirect) {

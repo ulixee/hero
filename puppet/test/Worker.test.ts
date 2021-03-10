@@ -141,14 +141,17 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         page.goto(`${server.baseUrl}/worker/worker.html`),
       ]);
       const url = `${server.baseUrl}/one-style.css`;
-      const requestPromise = page.waitOn('resource-will-be-requested', x => x.url === url);
+      const requestPromise = page.waitOn(
+        'resource-will-be-requested',
+        x => x.resource.url.href === url,
+      );
       await workerEvent.worker.evaluate(`(async () => {
           await fetch("${url}")
             .then(response => response.text())
             .then(console.log);
         })();`);
       const request = await requestPromise;
-      expect(request.url).toBe(url);
+      expect(request.resource.url.href).toBe(url);
     });
 
     it('should report network activity on worker creation', async () => {
@@ -156,7 +159,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       await page.goto(server.emptyPage);
       const url = `${server.baseUrl}/one-style.css`;
       const requestPromise = page.waitOn('resource-will-be-requested', x =>
-        x.url.includes('one-style.css'),
+        x.resource.url.href.includes('one-style.css'),
       );
 
       await page.evaluate(`(() => {
@@ -172,7 +175,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
           );
         })();`);
       const request = await requestPromise;
-      expect(request.url).toBe(url);
+      expect(request.resource.url.href).toBe(url);
     });
   },
 );

@@ -28,7 +28,7 @@ export default class CoreSessions {
     return this.sessionsById.get(sessionId);
   }
 
-  public close(closeError: Error): boolean {
+  public stop(closeError: Error): boolean {
     const hasSessions = this.sessionsById.size > 0;
     this.queue.stop(closeError);
     this.sessionsById.clear();

@@ -212,6 +212,32 @@ export default class SessionState {
     this.db.resourceStates.insert(id, state);
   }
 
+  public captureResourceFailed(
+    tabId: string,
+    resourceFailedEvent: IRequestSessionResponseEvent,
+    error: Error,
+  ): void {
+    let resourceId = resourceFailedEvent.id;
+    if (!resourceId) {
+      const resources = this.getBrowserRequestResources(resourceFailedEvent.browserRequestId);
+      resourceId = resources?.length ? resources[0].resourceId : null;
+    }
+    const convertedMeta = this.resourceEventToMeta(tabId, resourceFailedEvent);
+    let resourceMeta = this.getResourceMeta(resourceId);
+    if (!resourceMeta) {
+      resourceMeta = convertedMeta;
+      this.resources.push(resourceMeta);
+    }
+    if (convertedMeta.response) {
+      resourceMeta.response ??= convertedMeta.response;
+      for (const [key, value] of Object.entries(convertedMeta.response)) {
+        if (value) resourceMeta.response[key] = value;
+      }
+    }
+    this.db.resources.insert(tabId, resourceMeta, null, resourceFailedEvent, error);
+    this.resolveNavigation(tabId, resourceFailedEvent.browserRequestId, resourceMeta, error);
+  }
+
   public captureResourceError(
     tabId: string,
     resourceEvent: IRequestSessionResponseEvent,
@@ -223,18 +249,24 @@ export default class SessionState {
     if (!this.resources.some(x => x.id === resourceEvent.id)) {
       this.resources.push(resource);
     }
+    this.resolveNavigation(tabId, resourceEvent.browserRequestId, resource, error);
+  }
+
+  public resolveNavigation(
+    tabId: string,
+    browserRequestId: string,
+    resource: IResourceMeta,
+    error?: Error,
+  ) {
     const navigations = this.navigationsByTabId[tabId];
     if (!navigations) return;
 
     const isNavigationToCurrentUrl =
       (resource.url === navigations.currentUrl ||
         resource.request.url === navigations.currentUrl) &&
-      resourceEvent.request.method !== 'OPTIONS';
+      resource.request.method !== 'OPTIONS';
 
-    if (
-      isNavigationToCurrentUrl ||
-      resourceEvent.browserRequestId === navigations.top?.browserRequestId
-    ) {
+    if (isNavigationToCurrentUrl || browserRequestId === navigations.top?.browserRequestId) {
       navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
     }
   }
@@ -250,18 +282,7 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
 
     if (isResponse) {
-      const navigations = this.navigationsByTabId[tabId];
-      const isNavigationToCurrentUrl =
-        (resource.url === navigations.currentUrl ||
-          resource.request.url === navigations.currentUrl) &&
-        resourceEvent.request.method !== 'OPTIONS';
-
-      if (
-        isNavigationToCurrentUrl ||
-        resourceResponseEvent.browserRequestId === navigations.top?.browserRequestId
-      ) {
-        navigations.onResourceLoaded(resource.id, resource.response?.statusCode);
-      }
+      this.resolveNavigation(tabId, resourceResponseEvent.browserRequestId, resource);
       this.resources.push(resource);
     }
     return resource;

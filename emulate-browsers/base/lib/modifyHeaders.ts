@@ -16,17 +16,28 @@ export default function modifyHeaders(
 
   const { headers, lowerHeaders } = resource;
   if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
+    const newHeaders: IResourceHeaders = {};
     let hasKeepAlive = false;
     for (const [header, value] of Object.entries(headers)) {
-      if (header.match(/user-agent/i) && value !== userAgentString) {
-        headers[header] = value;
+      let key = header;
+      if (resource.isServerHttp2 === false) {
+        key = key
+          .split('-')
+          .map(x => `${x[0].toUpperCase()}${x.slice(1)}`)
+          .join('-');
       }
       if (header.match(/connection/i)) hasKeepAlive = true;
+
+      if (header.match(/user-agent/i) && value !== userAgentString) {
+        newHeaders[key] = userAgentString;
+      } else {
+        newHeaders[key] = value;
+      }
     }
     if (!defaultOrder && !hasKeepAlive && !resource.isServerHttp2) {
-      headers.Connection = 'keep-alive';
+      newHeaders.Connection = 'keep-alive';
     }
-    return headers;
+    return newHeaders;
   }
 
   const headerList: [string, string | string[]][] = [];

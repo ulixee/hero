@@ -123,7 +123,7 @@ export default class TabNavigations extends TypedEventEmitter<TabNavigationEvent
     if (url === 'about:blank') return;
 
     const top = this.top;
-    if (top.frameId !== frameId) {
+    if (!top || top.frameId !== frameId) {
       this.logger.warn('onHttpResponded: Mismatched frame responded', { url, frameId, top });
       return;
     }
