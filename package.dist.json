@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "lerna": "^3.4.3",
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.19"
   },
   "engines": {
     "node": ">=13.2.0"

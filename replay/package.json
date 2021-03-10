@@ -21,7 +21,13 @@
     "appId": "dev.secretagent.replay",
     "productName": "SecretAgentReplay",
     "mac": {
-      "target": "dir",
+      "target": {
+        "target": "dir",
+        "arch": [
+          "arm64",
+          "x64"
+        ]
+      },
       "artifactName": "replay-${version}-${os}${ext}"
     },
     "win": {
@@ -62,13 +68,13 @@
     "@babel/runtime-corejs3": "^7.11.2",
     "compare-versions": "^3.6.0",
     "core-js": "^3.6.5",
-    "electron-log": "^4.2.1",
-    "moment": "^2.24.0",
+    "electron-log": "^4.3.2",
+    "moment": "^2.24.1",
     "progress": "^2.0.3",
     "proper-lockfile": "^4.1.1",
     "source-map-support": "^0.5.19",
     "tar": "^6.0.5",
-    "uuid": "^8.3.1",
+    "uuid": "^8.3.2",
     "ws": "^7.4.2"
   },
   "devDependencies": {
@@ -76,11 +82,12 @@
     "@types/node": "^13.13.34",
     "@types/proper-lockfile": "^4.1.1",
     "@types/tar": "^4.0.4",
+    "@types/fs-extra": "9.0.7",
     "concurrently": "^5.2.0",
     "core-js": "^3.6.5",
     "cross-env": "^7.0.3",
-    "electron": "10.3.2",
-    "electron-builder": "^22.9.1",
+    "electron": "12.0.0",
+    "electron-builder": "^22.10.5",
     "electron-icon-builder": "^1.0.2",
     "shx": "^0.3.3",
     "tscpaths": "^0.0.9",

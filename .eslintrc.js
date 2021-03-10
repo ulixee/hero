@@ -29,7 +29,6 @@ module.exports = {
     'plugin:jest/recommended',
     'plugin:promise/recommended',
     'prettier',
-    'prettier/@typescript-eslint',
     'plugin:monorepo-cop/recommended',
     'plugin:import/errors',
     'plugin:import/warnings',
@@ -177,6 +176,7 @@ module.exports = {
     'consistent-return': ['off', { treatUndefinedAsUnspecified: true }],
     'spaced-comment': ['error', 'always', { markers: ['/////'] }],
     'require-await': 'error',
+    'arrow-body-style': 'off',
     'jest/no-conditional-expect': 'off',
     '@typescript-eslint/no-implied-eval': 'off', // false positives for setTimeout with bind fn
     '@typescript-eslint/no-explicit-any': 'off',

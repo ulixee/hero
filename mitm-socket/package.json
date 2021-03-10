@@ -11,7 +11,7 @@
   "dependencies": {
     "@secret-agent/commons": "1.3.1-alpha.0",
     "@secret-agent/core-interfaces": "1.3.1-alpha.0",
-    "uuid": "^3.4.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@secret-agent/testing": "1.3.1-alpha.0",

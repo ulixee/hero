@@ -16,6 +16,13 @@ if [ -d "./mac" ]; then
   cd ..
 fi
 
+if [ -d "./mac-arm64" ]; then
+  cd "mac-arm64"
+  echo "Packing mac-arm64"
+  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac-arm64.tar.gz" SecretAgentReplay.app
+  cd ..
+fi
+
 if [ -d "./linux-unpacked" ]; then
   echo "Packing linux"
   mv linux-unpacked "replay-${PACKAGE_VERSION}-linux"
