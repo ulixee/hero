@@ -17,6 +17,7 @@ import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEv
 export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IPuppetWorker {
   public readonly browserContext: BrowserContext;
   public isReady: Promise<Error | null>;
+  public hasLoadedResponse = false;
 
   protected readonly logger: IBoundLog;
 

@@ -19,11 +19,14 @@ export interface IPuppetNetworkEvents {
   };
   'resource-will-be-requested': {
     resource: IHttpResourceLoadDetails;
-    url: string;
     redirectedFromUrl: string;
     isDocumentNavigation: boolean;
-    origin: string;
-    referer: string;
+    frameId: string;
+  };
+  'resource-was-requested': {
+    resource: IHttpResourceLoadDetails;
+    redirectedFromUrl: string;
+    isDocumentNavigation: boolean;
     frameId: string;
   };
   'resource-loaded': {

@@ -78,8 +78,8 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
         return `${value.substr(0, 250)}... truncated ${params.payload.length - 250} chars`;
       }
 
-      // clean out post data and headers (we have these in resources table)
-      if ((key === 'headers' || key === 'postData') && params.request) {
+      // clean out post data (we have these in resources table)
+      if (key === 'postData' && params.request) {
         return undefined;
       }
       return value;

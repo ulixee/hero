@@ -273,13 +273,13 @@ export default class MitmRequestAgent {
     return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
 
-  private onHttp2ServerToProxyPush(
+  private async onHttp2ServerToProxyPush(
     parentContext: IMitmRequestContext,
     serverPushStream: http2.ClientHttp2Stream,
     headers: http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader,
     flags: number,
     rawHeaders: string[],
-  ): void {
+  ): Promise<void> {
     const session = this.session;
     const sessionId = session.sessionId;
     log.info('Http2Client.pushReceived', { sessionId, headers, flags });
@@ -296,6 +296,7 @@ export default class MitmRequestAgent {
     this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
 
     if (BlockHandler.shouldBlockRequest(pushContext)) {
+      await pushContext.browserHasRequested;
       this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
       pushContext.setState(ResourceState.Blocked);
       return serverPushStream.close(http2.constants.NGHTTP2_CANCEL);
@@ -412,7 +413,8 @@ export default class MitmRequestAgent {
       if (!proxyToClientPushStream.destroyed) proxyToClientPushStream.end();
       cache.onResponseEnd();
 
-      await HeadersHandler.waitForBrowserRequest(pushContext);
+      await HeadersHandler.determineResourceType(pushContext);
+      await pushContext.browserHasRequested;
       this.session.emit('response', MitmRequestContext.toEmittedResource(pushContext));
     } catch (writeError) {
       this.onHttp2PushError(pushContext, 'Http2PushProxyToClient.UnhandledError', writeError);

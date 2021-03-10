@@ -18,12 +18,12 @@ const mocks = {
     create: jest.spyOn(MitmRequestContext, 'create'),
   },
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
+    determineResourceType: jest.spyOn(HeadersHandler, 'determineResourceType'),
   },
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
+  mocks.HeadersHandler.determineResourceType.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;

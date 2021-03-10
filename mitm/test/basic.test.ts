@@ -2,10 +2,12 @@ import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
 import { Helpers } from '@secret-agent/testing';
 import * as HttpProxyAgent from 'http-proxy-agent';
+import { URL } from 'url';
 import { AddressInfo } from 'net';
 import * as WebSocket from 'ws';
 import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
@@ -18,12 +20,12 @@ const mocks = {
     onRequest: jest.spyOn<any, any>(HttpRequestHandler.prototype, 'onRequest'),
   },
   HeadersHandler: {
-    waitForResource: jest.spyOn(HeadersHandler, 'waitForBrowserRequest'),
+    determineResourceType: jest.spyOn(HeadersHandler, 'determineResourceType'),
   },
 };
 
 beforeAll(() => {
-  mocks.HeadersHandler.waitForResource.mockImplementation(async () => {
+  mocks.HeadersHandler.determineResourceType.mockImplementation(async () => {
     return {
       resourceType: 'Document',
     } as any;
@@ -336,7 +338,7 @@ describe('basic MitM tests', () => {
   });
 
   it('should intercept requests', async () => {
-    mocks.HeadersHandler.waitForResource.mockRestore();
+    mocks.HeadersHandler.determineResourceType.mockRestore();
     const httpServer = await Helpers.runHttpServer();
     const mitmServer = await MitmServer.start();
     Helpers.needsClosing.push(mitmServer);
@@ -344,18 +346,19 @@ describe('basic MitM tests', () => {
 
     const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', null);
     session.networkInterceptorDelegate.http.requestHeaders = jest.fn();
-    session.browserRequestedResource({
-      tabId: '1',
-      browserRequestId: '25.123',
-      url: `${httpServer.url}page1`,
-      method: 'GET',
-      resourceType: 'Document',
-      hasUserGesture: true,
-      isUserNavigation: true,
-      origin: undefined,
-      referer: undefined,
-      documentUrl: `${httpServer.url}page1`,
-    });
+    session.browserRequestMatcher.onBrowserRequestedResource(
+      {
+        browserRequestId: '25.123',
+        url: new URL(`${httpServer.url}page1`),
+        method: 'GET',
+        resourceType: 'Document',
+        hasUserGesture: true,
+        isUserNavigation: true,
+        requestLowerHeaders: {},
+        documentUrl: `${httpServer.url}page1`,
+      } as IHttpResourceLoadDetails,
+      '1',
+    );
     const onresponse = jest.fn();
     const onError = jest.fn();
     session.on('response', onresponse);
@@ -378,7 +381,7 @@ describe('basic MitM tests', () => {
     expect(response.remoteAddress).toContain(httpServer.port);
     expect(wasCached).toBe(false);
     expect(onError).not.toHaveBeenCalled();
-    mocks.HeadersHandler.waitForResource.mockImplementation(async () => ({} as any));
+    mocks.HeadersHandler.determineResourceType.mockImplementation(async () => ({} as any));
 
     await httpServer.close();
     await mitmServer.close();

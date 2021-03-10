@@ -215,6 +215,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
+    await context.requestSession.willSendResponse(context);
+
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
       if (data && !this.isClientConnectionDestroyed()) {
@@ -242,6 +244,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     proxyToClientResponse.end();
 
     context.cacheHandler.onResponseEnd();
+
+    // wait for browser request id before resolving
+    await context.browserHasRequested;
     context.requestSession.emit('response', MitmRequestContext.toEmittedResource(context));
   }
 

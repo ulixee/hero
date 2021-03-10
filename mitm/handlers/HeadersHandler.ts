@@ -1,52 +1,42 @@
 // @ts-ignore
 import * as nodeCommon from '_http_common';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
 import * as http2 from 'http2';
 import OriginType from '@secret-agent/core-interfaces/OriginType';
+import ResourceType from '@secret-agent/core-interfaces/ResourceType';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
 
-const { log } = Log(module);
 export default class HeadersHandler {
-  public static async waitForBrowserRequest(ctx: IMitmRequestContext): Promise<void> {
-    ctx.setState(ResourceState.WaitForBrowserRequest);
+  public static async determineResourceType(ctx: IMitmRequestContext): Promise<void> {
+    ctx.setState(ResourceState.DetermineResourceType);
     const session = ctx.requestSession;
 
-    const { method, requestHeaders } = ctx;
+    const { method, requestHeaders, requestLowerHeaders } = ctx;
+
+    const fetchDest = requestLowerHeaders['sec-fetch-dest'] as string;
+    const fetchSite = requestLowerHeaders['sec-fetch-site'] as string;
+    const fetchMode = requestLowerHeaders['sec-fetch-mode'] as string;
+    const hasUserActivity = requestLowerHeaders['sec-fetch-user'] as string;
+    const isDocumentNavigation = fetchMode === 'navigate' && fetchDest === 'document';
+
+    // fill in known details
+    if (fetchSite) ctx.originType = fetchSite as OriginType;
+
+    if (fetchDest) ctx.resourceType = this.secFetchDestToResourceType(fetchDest as string);
+    if (method === 'OPTIONS') ctx.resourceType = 'Preflight';
+
+    if (hasUserActivity === '?1') ctx.hasUserGesture = true;
+    if (fetchMode) ctx.isUserNavigation = isDocumentNavigation && ctx.hasUserGesture;
+
+    session.browserRequestMatcher.onMitmRequestedResource(ctx);
 
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
-    } else {
-      const resource = await session.waitForBrowserResourceRequest(ctx);
-
-      if (!resource.resourceType) {
-        log.error('HeadersHandler.ErrorGettingResourceType', {
-          sessionId: ctx.requestSession.sessionId,
-          resource,
-          url: ctx.url,
-        });
-        throw Error('No resource type found for resource');
-      }
-      ctx.browserRequestId = resource.browserRequestId;
-      ctx.resourceType = resource.resourceType;
-      if (method === 'OPTIONS') {
-        ctx.resourceType = 'Preflight';
-      }
-      ctx.originType = resource.originType as OriginType;
-      ctx.hasUserGesture = resource.hasUserGesture;
-      ctx.isUserNavigation = resource.isUserNavigation;
-      ctx.documentUrl = resource.documentUrl;
-      if (session.networkInterceptorDelegate?.http.onOriginHasFirstPartyInteraction) {
-        const hasUserActivity = !!ctx.requestLowerHeaders['sec-fetch-user'];
-        if (hasUserActivity) {
-          await session.networkInterceptorDelegate.http.onOriginHasFirstPartyInteraction(
-            resource.documentUrl,
-          );
-        }
-      }
+    } else if (!ctx.resourceType) {
+      await ctx.browserHasRequested;
     }
   }
 
@@ -171,6 +161,45 @@ export default class HeadersHandler {
       if (/^proxy-/i.test(header) || /^mitm-/i.test(header)) {
         delete headers[header];
       }
+    }
+  }
+
+  private static secFetchDestToResourceType(secFetchDest: string): ResourceType {
+    switch (secFetchDest) {
+      case 'document':
+      case 'nested-document': // guess
+        return 'Document';
+      case 'style':
+      case 'xslt': // not sure where this one goes
+        return 'Stylesheet';
+      case 'script':
+        return 'Script';
+      case 'empty':
+        return 'Fetch';
+      case 'font':
+        return 'Font';
+      case 'image':
+        return 'Image';
+      case 'video':
+      case 'audio':
+      case 'paintworklet': // guess
+      case 'audioworklet': // guess
+        return 'Media';
+      case 'manifest':
+        return 'Manifest';
+      case 'embed': // guess
+      case 'object': // guess
+        return 'Other';
+      case 'report': // guess
+        return 'CSP Violation Report';
+      case 'worker':
+      case 'serviceworker':
+      case 'sharedworker':
+        return 'Other';
+      case 'track': // guess
+        return 'Text Track';
+      default:
+        return null;
     }
   }
 }

@@ -1,7 +1,7 @@
 enum ResourceState {
   ClientToProxyRequest = 'ClientToProxyRequest',
   BlockHandler = 'BlockHandler',
-  WaitForBrowserRequest = 'WaitForBrowserRequest',
+  DetermineResourceType = 'DetermineResourceType',
   SetCookieHeader = 'SetCookieHeader',
   ReadResponseCookies = 'ReadResponseCookies',
   CheckCacheOnRequest = 'CheckCacheOnRequest',

@@ -46,13 +46,14 @@ export default abstract class BaseHttpHandler {
           sessionId: session.sessionId,
           url: context.url.href,
         });
-        await HeadersHandler.waitForBrowserRequest(context);
+        await HeadersHandler.determineResourceType(context);
+        await context.browserHasRequested;
         session.emit('response', MitmRequestContext.toEmittedResource(this.context));
         // already wrote reply
         return;
       }
 
-      await HeadersHandler.waitForBrowserRequest(context);
+      await HeadersHandler.determineResourceType(context);
       await CookieHandler.setProxyToServerCookies(context);
 
       // do one more check on the session before doing a connect
