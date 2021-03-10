@@ -1,1 +1,1 @@
-require('source-map-support').install({ uncaughtShimInstalled: false });
+require('source-map-support').install({ handleUncaughtExceptions: false });

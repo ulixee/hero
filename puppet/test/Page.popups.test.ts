@@ -129,7 +129,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
             await newPage.click('a');
             popup = await popupNavigate;
 
-            await popup.waitOn('load', null, 5e3, true);
+            await popup.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'load', 5e3, true);
             expect(popup.mainFrame.url).toBe(server.emptyPage);
           } finally {
             await popup?.close();

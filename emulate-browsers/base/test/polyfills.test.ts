@@ -120,7 +120,10 @@ test('it should be able to add polyfills', async () => {
     }).script,
     false,
   );
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
 
   const json = await page.mainFrame.evaluate(
     `new (${DomExtractor.toString()})('window').run(window, 'window', ['windowKeys','chromey','ObjectTest'])`,
@@ -154,7 +157,10 @@ test('it should be able to remove properties', async () => {
     }).script,
     false,
   );
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
 
   expect(await page.mainFrame.evaluate(`!!window.Atomics`, false)).not.toBeTruthy();
   expect(await page.mainFrame.evaluate(`!!Array.from`, false)).not.toBeTruthy();
@@ -180,7 +186,10 @@ test('it should be able to change properties', async () => {
     }).script,
     false,
   );
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
 
   const protocolToString = await page.mainFrame.evaluate(
     `window.Navigator.prototype.registerProtocolHandler.toString()`,
@@ -223,7 +232,10 @@ test('it should be able to change property order', async () => {
     false,
   );
   await new Promise(setImmediate);
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
 
   const keyOrder = (await page.mainFrame.evaluate(
     `Object.keys(window.Navigator.prototype)`,
@@ -267,7 +279,10 @@ test('it should be able to change window property order', async () => {
     }).script,
     false,
   );
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
   const windowKeysAfter = (await page.mainFrame.evaluate(`Object.keys(window)`, false)) as string[];
 
   const prop1Index = windowKeysAfter.indexOf(windowKeys[10]);

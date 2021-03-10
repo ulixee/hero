@@ -1,5 +1,10 @@
 import { createPromise } from '@secret-agent/commons/utils';
-import { ILifecycleEvents, IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
+import {
+  ILifecycleEvents,
+  IPuppetFrame,
+  IPuppetFrameEvents,
+  IPuppetFrameInternalEvents,
+} from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
@@ -13,7 +18,9 @@ import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
 
-export default class Frame extends TypedEventEmitter<IFrameEvents> implements IPuppetFrame {
+export default class Frame
+  extends TypedEventEmitter<IPuppetFrameEvents & IPuppetFrameInternalEvents>
+  implements IPuppetFrame {
   public get id(): string {
     return this.internalFrame.id;
   }
@@ -49,17 +56,16 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     return this.loaderLifecycles.get(this.activeLoaderId);
   }
 
+  public readonly isAttached: () => boolean;
   public loaderLifecycles = new Map<string, ILifecycleEvents>();
 
   protected readonly logger: IBoundLog;
-
   private isolatedWorldElementObjectId?: string;
   private readonly parentFrame: Frame | null;
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
   private activeLoaderId: string;
   private readonly activeContexts: Set<number>;
   private readonly cdpSession: CDPSession;
-  private readonly isAttached: () => boolean;
 
   private get activeLoader(): IResolvablePromise<Error | null> {
     return this.loaderIdResolvers.get(this.activeLoaderId);
@@ -83,6 +89,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.logger = logger.createChild(module);
     this.parentFrame = parentFrame;
     this.isAttached = isAttached;
+    this.storeEventsWithoutListeners = true;
     this.onLoaded(internalFrame);
   }
 
@@ -145,7 +152,7 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
     this.navigationReason = reason;
     this.disposition = disposition;
 
-    this.emit('frame-requested-navigation', { url, reason });
+    this.emit('frame-requested-navigation', { frame: this, url, reason });
   }
 
   public onLoaded(internalFrame: PageFrame): void {
@@ -175,18 +182,19 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       loader.resolve();
     }
 
-    this.emit('frame-navigated');
+    this.emit('frame-navigated', { frame: this });
   }
 
   public onNavigatedWithinDocument(url: string): void {
+    if (this.url === url && this.activeLoader?.isResolved) return;
     this.url = url;
 
     // clear out any active one
     this.activeLoaderId = null;
     this.setLoader('inpage');
     this.loaderIdResolvers.get('inpage').resolve();
-    this.emit('frame-navigated', { navigatedInDocument: true });
     this.onStoppedLoading();
+    this.emit('frame-navigated', { frame: this, navigatedInDocument: true });
   }
 
   /////// LIFECYCLE ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,20 +236,21 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
         loaderId,
         frameId: this.id,
       });
+
+      if (!this.loaderIdResolvers.has(loaderId)) {
+        this.setLoader(loaderId);
+      }
       this.loaderIdResolvers.get(loaderId)?.resolve();
     }
 
-    let lifecycle = this.lifecycleEvents;
-    if (loaderId) {
-      lifecycle = this.loaderLifecycles.get(loaderId) ?? this.lifecycleEvents;
-    }
+    const lifecycle = this.loaderLifecycles.get(loaderId);
 
     if (lifecycle) {
       lifecycle[name] = new Date();
     }
 
     if (!this.isDefaultPage()) {
-      this.emit('frame-lifecycle', { name });
+      this.emit('frame-lifecycle', { frame: this, name });
     }
   }
 
@@ -424,12 +433,4 @@ export default class Frame extends TypedEventEmitter<IFrameEvents> implements IP
       this.url = this.internalFrame.url + (this.internalFrame.urlFragment ?? '');
     }
   }
-}
-
-interface IFrameEvents {
-  'default-context-created': { executionContextId: number };
-  'isolated-context-created': { executionContextId: number };
-  'frame-lifecycle': { name: string };
-  'frame-navigated': { navigatedInDocument?: boolean };
-  'frame-requested-navigation': { url: string; reason: NavigationReason };
 }

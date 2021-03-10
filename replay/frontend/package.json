@@ -16,7 +16,6 @@
     "@vue/cli-service": "~4.5.11",
     "animejs": "^3.2.0",
     "core-js": "^3.9.1",
-    "source-map-support": "^0.5.19",
     "uuid": "^8.3.2",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",

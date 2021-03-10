@@ -32,7 +32,7 @@ describe('basic SecretAgent tests', () => {
   it('creates and closes an agent', async () => {
     const outgoing = jest.fn(
       async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-        if (command === 'createSession') {
+        if (command === 'Session.create') {
           return {
             data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
           };
@@ -58,9 +58,9 @@ describe('basic SecretAgent tests', () => {
 
     const outgoingCommands = outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
-      'connect',
-      'createSession',
-      'closeSession',
+      'Core.connect',
+      'Session.create',
+      'Session.close',
     ]);
   });
 });

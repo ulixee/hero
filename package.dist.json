@@ -6,8 +6,7 @@
     "postinstall": "yarn workspace @secret-agent/mitm-socket postinstall"
   },
   "devDependencies": {
-    "lerna": "^3.4.3",
-    "source-map-support": "^0.5.19"
+    "lerna": "^3.4.3"
   },
   "engines": {
     "node": ">=13.2.0"

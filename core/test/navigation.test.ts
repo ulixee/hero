@@ -7,7 +7,7 @@ import * as Fs from 'fs';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
-import TabNavigationsObserver from '../lib/TabNavigationsObserver';
+import FrameNavigationsObserver from '../lib/FrameNavigationsObserver';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -358,7 +358,7 @@ setTimeout(function() {
       },
     ]);
 
-    const spy = jest.spyOn<any, any>(TabNavigationsObserver.prototype, 'onNavigation');
+    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'onNavigation');
 
     // clear data before this run
     const popupTab = await tab.waitForNewTab();

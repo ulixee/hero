@@ -289,6 +289,7 @@ export default class Session extends TypedEventEmitter<{
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
     tab?.emit('resource', resource);
+    tab?.checkForResolvedNavigation(event.browserRequestId, resource);
   }
 
   private onMitmError(event: IRequestSessionHttpErrorEvent) {
@@ -296,7 +297,11 @@ export default class Session extends TypedEventEmitter<{
       event.request.browserRequestId,
     );
 
-    this.sessionState.captureResourceError(tabId, event.request, event.error);
+    const resource = this.sessionState.captureResourceError(tabId, event.request, event.error);
+    if (event.request?.resourceType === 'Document') {
+      const tab = this.tabs.find(x => x.id === tabId);
+      tab?.checkForResolvedNavigation(event.request.browserRequestId, resource, event.error);
+    }
   }
 
   private onResourceStates(event: IResourceStateChangeEvent) {
@@ -319,7 +324,9 @@ export default class Session extends TypedEventEmitter<{
     const tab = Tab.create(this, page, parentTab, openParams);
     this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
     this.registerTab(tab, page);
+
     await tab.isReady;
+
     parentTab.emit('child-tab-created', tab);
     return tab;
   }

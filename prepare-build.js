@@ -4,7 +4,7 @@ const buildDir = `${__dirname}/build`;
 
 function processPackageJson(packagePath) {
   const packageJson = JSON.parse(fs.readFileSync(`${packagePath}/package.json`, 'utf8'));
-  let overridesJson = {};
+  let overridesJson = null;
   if (fs.existsSync(`${packagePath}/package.build.json`)) {
     overridesJson = JSON.parse(fs.readFileSync(`${packagePath}/package.build.json`, 'utf8'));
     console.log('Has package.json overrides', packagePath, overridesJson);
@@ -29,11 +29,11 @@ function processDir(path) {
   for (const dirname of fs.readdirSync(path)) {
     if (dirname === 'node_modules' || dirname.startsWith('.')) continue;
     const fullpath = `${path}/${dirname}`;
-    if (fs.existsSync(`${fullpath}/package.json`)) {
-      processPackageJson(fullpath);
-    }
-    if (fs.lstatSync(fullpath).isDirectory()) {
+    const stat = fs.lstatSync(fullpath);
+    if (stat.isDirectory()) {
       processDir(fullpath);
+    } else if (stat.isFile() && dirname === 'package.json') {
+      processPackageJson(path);
     }
   }
 }

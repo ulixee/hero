@@ -119,12 +119,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       'worker',
     ]);
 
-    this.framesManager.on('frame-lifecycle', ({ frame, name }) => {
-      if (name === 'load' && frame.id === this.mainFrame?.id) {
-        this.emit('load');
-      }
-    });
-
     for (const event of ['frame-created', 'frame-navigated', 'frame-lifecycle'] as const) {
       this.framesManager.on(event, this.emit.bind(this, event));
     }
@@ -314,10 +308,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
-    const frameId = this.mainFrame.id;
     await Promise.all([
       this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id }),
-      this.framesManager.waitOn('frame-navigated', x => x.frame.id === frameId),
+      this.mainFrame.waitOn('frame-navigated'),
     ]);
   }
 

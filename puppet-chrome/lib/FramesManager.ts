@@ -75,6 +75,16 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
         const framesResponse = await this.cdpSession.send('Page.getFrameTree');
         this.recurseFrameTree(framesResponse.frameTree);
         resolve();
+        if (this.main.securityOrigin && !this.main.lifecycleEvents?.load) {
+          const readyStateResult = await this.cdpSession.send('Runtime.evaluate', {
+            expression: 'document.readyState',
+          });
+          const readyState = readyStateResult.result?.value;
+          let loadName: string;
+          if (readyState === 'interactive') loadName = 'DOMContentLoaded';
+          else if (readyState === 'complete') loadName = 'load';
+          if (loadName) setImmediate(() => this.main.onLifecycleEvent(loadName));
+        }
       } catch (error) {
         if (error instanceof CanceledPromiseError) {
           return;
@@ -279,10 +289,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
     for (const eventName of proxiedEvents) {
       const listener = eventUtils.addEventListener(frame, eventName, event =>
-        this.emit(eventName, {
-          frame,
-          ...event,
-        }),
+        this.emit(eventName, event),
       );
       this.registeredEvents.push(listener);
     }

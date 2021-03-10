@@ -240,7 +240,7 @@ describe('basic Dom Replay tests', () => {
     await newTabMirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await Promise.all([
       newTabMirrorPage.navigate(`${koaServer.baseUrl}/empty`),
-      newTabMirrorPage.waitOn('load'),
+      newTabMirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
     ]);
 
     await newTabMirrorPage.mainFrame.evaluate(

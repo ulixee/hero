@@ -130,6 +130,19 @@ jobs:
         env:
           SA_SHOW_REPLAY: false
           NODE_ENV: test
+          SA_SESSIONS_DIR: .sessions
+
+      - name: 'Tar files'
+        if: ${{ failure() }}
+        run: tar -cvf test-dbs.tar ./build/.sessions
+
+      - name: Upload Databases
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-dbs-${{matrix.os}}-${{ matrix.node-version }}
+          path: test-dbs.tar
+          retention-days: 1
 
       - name: Coverage
         run: npm -g install codecov && codecov

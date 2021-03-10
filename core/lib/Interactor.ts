@@ -7,7 +7,6 @@ import {
   InteractionCommand,
 } from '@secret-agent/core-interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import {
   getKeyboardKey,
   IKeyboardKey,
@@ -24,6 +23,10 @@ import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import Tab from './Tab';
+import FrameEnvironment from './FrameEnvironment';
+import { JsPath } from './JsPath';
+import MouseupListener from './MouseupListener';
+import MouseoverListener from './MouseoverListener';
 
 const { log } = Log(module);
 
@@ -39,7 +42,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get scrollOffset() {
-    return this.tab.domEnv.getWindowOffset().then(offset => {
+    return new JsPath(this.frameEnvironment, null).getWindowOffset().then(offset => {
       return {
         x: offset.pageXOffset,
         y: offset.pageYOffset,
@@ -48,12 +51,16 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get viewport() {
-    return this.tab.session.viewport;
+    return this.frameEnvironment.session.viewport;
   }
 
   public logger: IBoundLog;
 
-  private readonly tab: Tab;
+  private readonly frameEnvironment: FrameEnvironment;
+
+  private get tab(): Tab {
+    return this.frameEnvironment.tab;
+  }
 
   private get mouse() {
     return this.tab.puppetPage.mouse;
@@ -67,9 +74,12 @@ export default class Interactor implements IInteractionsHelper {
     return this.tab.session.humanEmulator;
   }
 
-  constructor(tab: Tab) {
-    this.tab = tab;
-    this.logger = log.createChild(module, { sessionId: tab.session.id });
+  constructor(frameEnvironment: FrameEnvironment) {
+    this.frameEnvironment = frameEnvironment;
+    this.logger = log.createChild(module, {
+      sessionId: frameEnvironment.session.id,
+      frameId: frameEnvironment.id,
+    });
   }
 
   public async initialize() {
@@ -94,7 +104,8 @@ export default class Interactor implements IInteractionsHelper {
     if (isMousePositionCoordinate(mousePosition)) {
       return { x: mousePosition[0] as number, y: mousePosition[1] as number, width: 1, height: 1 };
     }
-    const rect = await this.tab.domEnv.getJsPathClientRect(mousePosition as IJsPath);
+    const jsPath = new JsPath(this.frameEnvironment, mousePosition);
+    const rect = await jsPath.getClientRect();
     const attachedState = (rect as any).attachedState as IAttachedState;
 
     return {
@@ -112,9 +123,10 @@ export default class Interactor implements IInteractionsHelper {
     timeoutMs: number,
   ): Promise<{ onTriggered: Promise<IMouseUpResult> }> {
     assert(nodeId, 'nodeId should not be null');
-    await this.tab.domEnv.registerMouseupListener(nodeId);
+    const mouseListener = new MouseupListener(this.frameEnvironment, nodeId);
+    await mouseListener.register();
     return {
-      onTriggered: this.tab.domEnv.waitForMouseup(nodeId, timeoutMs),
+      onTriggered: mouseListener.waitForMouseEvent(timeoutMs),
     };
   }
 
@@ -123,10 +135,11 @@ export default class Interactor implements IInteractionsHelper {
     timeoutMs: number,
   ): Promise<{ onTriggered: Promise<boolean> }> {
     assert(nodeId, 'nodeId should not be null');
-    await this.tab.domEnv.registerMouseoverListener(nodeId);
+    const mouseListener = new MouseoverListener(this.frameEnvironment, nodeId);
+    await mouseListener.register();
 
     return {
-      onTriggered: this.tab.domEnv.waitForMouseover(nodeId, timeoutMs),
+      onTriggered: mouseListener.waitForMouseEvent(timeoutMs),
     };
   }
 
@@ -146,14 +159,14 @@ export default class Interactor implements IInteractionsHelper {
         break;
       }
       case InteractionCommand.scroll: {
-        const windowBounds = await this.tab.domEnv.getWindowOffset();
+        const windowBounds = await new JsPath(this.frameEnvironment, null).getWindowOffset();
         const scroll = await this.getScrollOffset(interaction.mousePosition, windowBounds);
 
         if (scroll) {
           const { deltaY, deltaX } = scroll;
           await this.mouse.wheel(scroll);
           // need to check for offset since wheel event doesn't wait for scroll
-          await this.tab.domEnv.waitForScrollOffset(
+          await new JsPath(this.frameEnvironment, null).waitForScrollOffset(
             Math.max(0, deltaX + windowBounds.pageXOffset),
             Math.max(0, deltaY + windowBounds.pageYOffset),
           );
@@ -181,7 +194,7 @@ export default class Interactor implements IInteractionsHelper {
         let nodeId: number;
         let domCoordinates: IPoint;
 
-        const isPagePaintStable = this.tab.navigationsObserver.isPaintStable();
+        const isPagePaintStable = this.frameEnvironment.navigationsObserver.isPaintStable();
         // try 2x to hover over the expected target
         for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
           const position = await this.getPositionXY(interaction.mousePosition);
@@ -190,7 +203,10 @@ export default class Interactor implements IInteractionsHelper {
           domCoordinates = { x, y };
 
           if (simulateOptionClick) {
-            await this.tab.domEnv.simulateOptionClick(interaction.mousePosition as IJsPath);
+            await new JsPath(
+              this.frameEnvironment,
+              interaction.mousePosition,
+            ).simulateOptionClick();
             return;
           }
 
@@ -295,11 +311,11 @@ export default class Interactor implements IInteractionsHelper {
       }
 
       case InteractionCommand.waitForNode: {
-        await this.tab.waitForDom(interaction.delayNode);
+        await this.frameEnvironment.waitForDom(interaction.delayNode);
         break;
       }
       case InteractionCommand.waitForElementVisible: {
-        await this.tab.waitForDom(interaction.delayElement, { waitForVisible: true });
+        await this.frameEnvironment.waitForDom(interaction.delayElement, { waitForVisible: true });
         break;
       }
       case InteractionCommand.waitForMillis: {
@@ -334,7 +350,7 @@ export default class Interactor implements IInteractionsHelper {
       const [x, y] = mousePosition as number[];
       return { x: round(x), y: round(y) };
     }
-    const rect = await this.tab.domEnv.getJsPathClientRect(mousePosition as IJsPath);
+    const rect = await new JsPath(this.frameEnvironment, mousePosition).getClientRect();
     const attachedState = (rect as any).attachedState as IAttachedState;
     if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {
       return { x: 0, y: 0, simulateOptionClick: rect.tag === 'option', nodeId: attachedState?.id };

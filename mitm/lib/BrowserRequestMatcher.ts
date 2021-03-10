@@ -147,7 +147,7 @@ export default class BrowserRequestMatcher {
       match.tabId = event.tabId;
       match.browserRequestedPromise.resolve();
       const id = match.mitmResourceId;
-      if (id) this.clearRequest(id);
+      if (id) setTimeout(() => this.clearRequest(id), 500).unref();
       return id;
     }
     this.logger.warn('BrowserViewOfResourceLoad::Failed', {

@@ -70,14 +70,14 @@ function processPackageJson(packagePath) {
 }
 
 function processDir(path) {
-  for (const dirname of fs.readdirSync(path)) {
-    if (dirname === 'node_modules' || dirname.startsWith('.')) continue;
-    const fullpath = `${path}/${dirname}`;
-    if (fs.existsSync(`${fullpath}/package.json`)) {
-      processPackageJson(fullpath);
-    }
+  for (const fileOrDir of fs.readdirSync(path)) {
+    if (fileOrDir === 'node_modules' || fileOrDir.startsWith('.')) continue;
+
+    const fullpath = `${path}/${fileOrDir}`;
     if (fs.lstatSync(fullpath).isDirectory()) {
       processDir(fullpath);
+    } else if (fileOrDir === 'package.json') {
+      processPackageJson(path);
     }
   }
 }

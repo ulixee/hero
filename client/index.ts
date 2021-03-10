@@ -10,6 +10,8 @@ import IAgentCreateOptions from './interfaces/IAgentCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import Handler from './lib/Handler';
 import Agent from './lib/Agent';
+import type FrameEnvironment from './lib/FrameEnvironment';
+import type Tab from './lib/Tab';
 import RemoteConnectionToCore from './connections/RemoteConnectionToCore';
 import ConnectionToCore from './connections/ConnectionToCore';
 import ConnectionFactory from './connections/ConnectionFactory';
@@ -30,6 +32,8 @@ export {
   IAgentCreateOptions,
   IConnectionToCoreOptions,
   Node,
+  FrameEnvironment,
+  Tab,
   XPathResult,
   LocationStatus,
   LocationTrigger,

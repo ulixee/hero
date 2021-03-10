@@ -4,23 +4,33 @@ A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying d
 
 ## Constructor
 
-A default tab is provided in each Agent instance. Navigate by using the [secretAgent.goto](/docs/basic-interfaces/secret-agent#goto) method.
+A default tab is provided in each Agent instance. Navigate by using the [agent.goto](/docs/basic-interfaces/agent#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [secretAgent.tabs](/docs/basic-interfaces/secret-agent#tabs) method, or waiting with [secretAgent.waitForNewTab()](/docs/basic-interfaces/secret-agent#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [agent.tabs](/docs/basic-interfaces/agent#tabs) method, or waiting with [agent.waitForNewTab()](/docs/basic-interfaces/agent#wait-for-new-tab).
 
 ## Properties
 
 ### tab.cookieStorage {#cookie-storage}
 
-Returns a [CookieStorage](/docs/advanced/cookie-storage) instance to get/set/delete Tab cookies.
+Returns a [CookieStorage](/docs/advanced/cookie-storage) instance to get/set/delete cookies in the [mainFrameEnvironment](#main-frame-environment) of this tab.
+
+Alias for [tab.mainFrameEnvironment.cookieStorage](/docs/basic-interfaces/frame-environment#cookie-storage).
 
 #### **Type**: [`CookieStorage`](/docs/advanced/cookie-storage)
 
 ### tab.document <div class="specs"><i>W3C</i></div> {#document}
 
-Returns a reference to the document of the tab.
+Returns a reference to the document of the [mainFrameEnvironment](#main-frame-environment) of this tab.
+
+Alias for [tab.mainFrameEnvironment.document](/docs/basic-interfaces/frame-environment#document).
 
 #### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+
+### tab.frameEnvironments {#frame-environments}
+
+Returns a list of [Frames](/docs/basic-interfaces/frame-environment) loaded for this tab.
+
+#### **Type**: [`Promise<Frame[]>`](/docs/basic-interfaces/frame-environment).
 
 ### tab.lastCommandId {#lastCommandId}
 
@@ -30,13 +40,23 @@ An execution point that refers to a command run on this Agent instance (`waitFor
 
 ### tab.localStorage <div class="specs"><i>W3C</i></div> {#local-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the tab.
+Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing localStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
+
+Alias for [tab.mainFrameEnvironment.localStorage](/docs/basic-interfaces/frame-environment#local-storage).
 
 #### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
+### tab.mainFrameEnvironment {#main-frame-environment}
+
+Returns the [`FrameEnvironment`](/docs/basic-interfaces/frame-environment) representing the primary content of the loaded tab.
+
+#### **Type**: [`FrameEnvironment`](/docs/basic-interfaces/frame-environment).
+
 ### tab.sessionStorage <div class="specs"><i>W3C</i></div> {#session-storage}
 
-Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the tab.
+Returns a reference to the [Storage](/docs/awaited-dom/storage) object managing sessionStorage for the [mainFrameEnvironment](#main-frame-environment) of this tab.
+
+Alias for [tab.mainFrameEnvironment.sessionStorage](/docs/basic-interfaces/frame-environment#session-storage).
 
 #### **Type**: [`Storage`](/docs/awaited-dom/storage)
 
@@ -54,18 +74,9 @@ The url of the active tab.
 
 ### tab.Request <div class="specs"><i>W3C</i></div> {#request-type}
 
-Returns a constructor for a [Request](/docs/awaited-dom/request) object that can be sent to [tab.fetch(request)](#fetch).
+Returns a constructor for a [Request](/docs/awaited-dom/request) object in the [mainFrameEnvironment](#main-frame-environment).
 
-```js
-const { Request, fetch } = agent;
-const url = 'https://dataliberationfoundation.org';
-const request = new Request(url, {
-  headers: {
-    'X-From': 'https://secretagent.dev',
-  },
-});
-const response = await fetch(request);
-```
+Alias for [tab.mainFrameEnvironment.Request](/docs/basic-interfaces/frame-environment#request-type)
 
 #### **Type**: [`Request`](/docs/awaited-dom/request)
 
@@ -79,7 +90,10 @@ Closes the current tab only (will close the whole Agent instance if there are no
 
 ### tab.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
-Perform a native "fetch" request in the current tab context.
+Perform a native "fetch" request in the [mainFrameEnvironment](#main-frame-environment) context.
+
+NOTE: You can work around Cross Origin Request (CORS) issues or change your request "origin" by running fetch
+from each [FrameEnvironment](/docs/basic-interfaces/frame-environment#fetch).
 
 #### **Arguments**:
 
@@ -87,6 +101,8 @@ Perform a native "fetch" request in the current tab context.
 - requestInit `IRequestInit?` Optional request initialization parameters. Follows w3c specification.
   - Inbound Body currently supports: `string`, `ArrayBuffer`, `null`.
   - Not supported: `Blob`, `FormData`, `ReadableStream`, `URLSearchParams`
+
+Alias for [tab.mainFrameEnvironment.fetch](/docs/basic-interfaces/frame-environment#fetch)
 
 #### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
 
@@ -110,6 +126,12 @@ const response = await agent.fetch(url, {
 });
 ```
 
+### tab.getFrameEnvironment*(frameElement)* {#get-frame-environment}
+
+Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to interface with the full environment of the given DOM element without cross-domain restrictions.
+
+Alias for [FrameEnvironment.getFrameEnvironment](/docs/basic-interfaces/frame-environment#get-frame-environment)
+
 ### tab.focus*()* {#focus}
 
 Make this tab the `activeTab` within a browser, which directs many SecretAgent methods to this tab.
@@ -118,7 +140,9 @@ Make this tab the `activeTab` within a browser, which directs many SecretAgent m
 
 ### tab.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
 
-Perform a native `Window.getComputedStyle` request in the current tab context - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
+Perform a native `Window.getComputedStyle` request in the current main [FrameEnvironment](/docs/basic-interfaces/frame-environment) - it returns an object containing the values of all CSS properties of an element, after applying active stylesheets and resolving any basic computation those values may contain. Individual CSS property values are accessed through APIs provided by the object, or by indexing with CSS property names.
+
+Alias for [tab.mainFrameEnvironment.getComputedStyle](/docs/basic-interfaces/frame-environment#computed-style).
 
 #### **Arguments**:
 
@@ -137,7 +161,12 @@ const opacity = await style.getProperty('opacity');
 
 ### tab.getJsValue*(path)* {#get-js-value}
 
-Extract any publicly accessible javascript value from the webpage context.
+Extract any publicly accessible javascript value from the current main [FrameEnvironment](/docs/basic-interfaces/frame-environment) context.
+
+NOTE: This type of operation could potentially be snooped on by the hosting website as it must run in the main Javascript environment
+in order to access variables.
+
+Alias for [tab.mainFrameEnvironment.getJsValue](/docs/basic-interfaces/frame-environment#get-js-value).
 
 #### **Arguments**:
 
@@ -183,12 +212,14 @@ Executes a navigation request for the document associated with the parent Secret
 
 ### tab.isElementVisible*(element)* {#is-element-visible}
 
-Determines if an element is visible to an end user. This method checks whether an element has:
+Determines if an element from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether an element has:
 
 - layout: width, height, x and y.
 - opacity: non-zero opacity.
 - css visibility: the element does not have a computed style where visibility=hidden.
 - no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
+
+Alias for [tab.mainFrameEnvironment.isElementVisible](/docs/basic-interfaces/frame-environment#is-element-visible).
 
 #### **Arguments**:
 
@@ -208,20 +239,22 @@ Reload the currently loaded url.
 
 ### tab.takeScreenshot*(options?)* {#take-screenshot}
 
-Takes a screenshot of the current contents rendered in the browser. 
+Takes a screenshot of the current contents rendered in the browser.
 
 #### **Arguments**:
 
 - options `object` Optional
   - format `jpeg | png`. Image format type to create. Default `jpeg`.
   - jpegQuality `number`. Optional compression quality from 1 to 100 for jpeg images (100 is highest quality).
-  - rectangle `IRect`. Optionally clip the screenshot to the given rectangle (eg, x, y, width, height). Includes a pixel scale. 
+  - rectangle `IRect`. Optionally clip the screenshot to the given rectangle (eg, x, y, width, height). Includes a pixel scale.
 
 #### **Returns**: `Promise<Buffer>` Buffer with image bytes in base64.
 
 ### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
 
-Wait for the page to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
+Wait for the [mainFrameEnvironment](#main-frame-environment) to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
+
+Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/basic-interfaces/frame-environment#wait-for-painting-stable).
 
 #### **Arguments**:
 
@@ -233,7 +266,9 @@ Wait for the page to be loaded such that a user can see the main content above t
 
 ### tab.waitForElement*(element)* {#wait-for-element}
 
-Wait until a specific element is present in the dom.
+Wait until a specific element is present in the dom of the [mainFrameEnvironment](#main-frame-environment).
+
+Alias for [tab.mainFrameEnvironment.waitForElement](/docs/basic-interfaces/frame-environment#wait-for-element).
 
 #### **Arguments**:
 
@@ -257,7 +292,9 @@ await activeTab.waitForElement(elem, {
 
 ### tab.waitForLoad*(status, options)* {#wait-for-load}
 
-Wait for the load status to occur on a page.
+Wait for the load status of the [mainFrameEnvironment](#main-frame-environment).
+
+Alias for [tab.mainFrameEnvironment.waitForLoad](/docs/basic-interfaces/frame-environment#wait-for-load).
 
 #### **Arguments**:
 
@@ -284,6 +321,8 @@ The following are possible statuses and their meanings:
 ### tab.waitForLocation*(trigger, options)* {#wait-for-location}
 
 Waits for a navigational change to document.location either because of a `reload` event or changes to the URL.
+
+Alias for [tab.mainFrameEnvironment.waitForLocation](/docs/basic-interfaces/frame-environment#wait-for-location).
 
 #### **Arguments**:
 

@@ -23,11 +23,7 @@
     "@secret-agent/puppet-interfaces": "1.4.0-alpha.1",
     "awaited-dom": "^1.1.10",
     "better-sqlite3": "^7.1.2",
-    "core-js-bundle": "^3.7.0",
     "moment": "^2.24.1",
-    "regenerator-runtime": "^0.13.7",
-    "typeson": "^5.18.2",
-    "typeson-registry": "^1.0.0-alpha.38",
     "uuid": "^8.3.2",
     "ws": "^7.4.2"
   },

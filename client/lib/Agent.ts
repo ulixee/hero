@@ -38,6 +38,7 @@ import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
+import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -58,6 +59,8 @@ const propertyKeys: (keyof Agent)[] = [
   'sessionId',
   'meta',
   'tabs',
+  'frameEnvironments',
+  'mainFrameEnvironment',
   'coreHost',
   'activeTab',
   'sessionName',
@@ -105,8 +108,16 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.document;
   }
 
+  public get frameEnvironments(): Promise<FrameEnvironment[]> {
+    return this.activeTab.frameEnvironments;
+  }
+
   public get lastCommandId(): Promise<number> {
     return this.activeTab.lastCommandId;
+  }
+
+  public get mainFrameEnvironment(): FrameEnvironment {
+    return this.activeTab.mainFrameEnvironment;
   }
 
   public get sessionId(): Promise<string> {
@@ -207,24 +218,30 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   // INTERACT METHODS
 
   public async click(mousePosition: IMousePosition): Promise<void> {
-    const coreTab = await getCoreTab(this.activeTab);
-    await Interactor.run(coreTab, [{ click: mousePosition }]);
+    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    await Interactor.run(coreFrame, [{ click: mousePosition }]);
+  }
+
+  public async getFrameEnvironment(
+    frameElement: IElementIsolate,
+  ): Promise<FrameEnvironment | null> {
+    return await this.activeTab.getFrameEnvironment(frameElement);
   }
 
   public async interact(...interactions: IInteractions): Promise<void> {
-    const coreTab = await getCoreTab(this.activeTab);
-    await Interactor.run(coreTab, interactions);
+    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePosition): Promise<void> {
-    const coreTab = await getCoreTab(this.activeTab);
-    await Interactor.run(coreTab, [{ [Command.scroll]: mousePosition }]);
+    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
   public async type(...typeInteractions: ITypeInteraction[]): Promise<void> {
-    const coreTab = await getCoreTab(this.activeTab);
+    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     await Interactor.run(
-      coreTab,
+      coreFrame,
       typeInteractions.map(t => ({ type: t })),
     );
   }

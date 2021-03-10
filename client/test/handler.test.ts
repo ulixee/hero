@@ -26,7 +26,7 @@ describe('Handler', () => {
   it('allows you to run concurrent dispatched tasks', async () => {
     let counter = 0;
     outgoing.mockImplementation(({ command }) => {
-      if (command === 'createSession') {
+      if (command === 'Session.create') {
         return {
           data: {
             tabId: 'tab-id',
@@ -35,12 +35,12 @@ describe('Handler', () => {
           },
         };
       }
-      if (command === 'addEventListener') {
+      if (command === 'Session.addEventListener') {
         return {
           data: { listenerId: 1 },
         };
       }
-      if (command === 'close') {
+      if (command === 'Session.close') {
         return {
           data: {},
         };
@@ -72,7 +72,7 @@ describe('Handler', () => {
     };
     for (let i = 0; i < 100; i += 1) {
       handler.dispatchAgent(runFn, i);
-      expectedCalls.push('createSession', 'closeSession');
+      expectedCalls.push('Session.create', 'Session.close');
     }
 
     await handler.waitForAllDispatches();
@@ -84,7 +84,7 @@ describe('Handler', () => {
 
     const outgoingCommands = outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command).sort()).toMatchObject(
-      ['connect', ...expectedCalls, 'disconnect'].sort(),
+      ['Core.connect', ...expectedCalls, 'Core.disconnect'].sort(),
     );
   });
 
@@ -92,7 +92,7 @@ describe('Handler', () => {
     let counter = 0;
     let listenerId = 0;
     outgoing.mockImplementation(({ command }) => {
-      if (command === 'createSession') {
+      if (command === 'Session.create') {
         return {
           data: {
             tabId: 'tab-id',
@@ -101,7 +101,7 @@ describe('Handler', () => {
           },
         };
       }
-      if (command === 'addEventListener') {
+      if (command === 'Session.addEventListener') {
         return {
           data: { listenerId: (listenerId += 1).toString() },
         };

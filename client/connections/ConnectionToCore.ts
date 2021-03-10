@@ -92,7 +92,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
         if (this.connectPromise.isResolved) return;
 
         const connectResult = await this.internalSendRequestAndWait({
-          command: 'connect',
+          command: 'Core.connect',
           args: [this.connectOptions],
         });
         if (connectResult?.data) {
@@ -127,7 +127,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       try {
         await this.internalSendRequestAndWait(
           {
-            command: 'disconnect',
+            command: 'Core.disconnect',
             args: [fatalError],
           },
           2e3,
@@ -182,7 +182,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
 
   public async createSession(options: ICreateSessionOptions): Promise<CoreSession> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('createSession', options);
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
     const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
     this.coreSessions.track(session);
     return session;
@@ -197,7 +197,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
 
   public async logUnhandledError(error: Error): Promise<void> {
-    await this.commandQueue.run('logUnhandledError', error);
+    await this.commandQueue.run('Core.logUnhandledError', error);
   }
 
   protected async internalDisconnect(
@@ -237,8 +237,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     const { promise, id, resolve } = this.createPendingResult();
     const { command } = payload;
 
-    if (command === 'connect') this.connectRequestId = id;
-    if (command === 'disconnect') this.disconnectRequestId = id;
+    if (command === 'Core.connect') this.connectRequestId = id;
+    if (command === 'Core.disconnect') this.disconnectRequestId = id;
 
     let timeout: NodeJS.Timeout;
     if (timeoutMs) timeout = setTimeout(() => resolve(null), timeoutMs).unref();

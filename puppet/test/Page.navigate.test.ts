@@ -103,8 +103,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         let error = null;
         await page.goto(server.emptyPage).catch(e => (error = e));
         expect(error).not.toBe(null);
-        if (browserEngine.name === 'chrome')
-          expect(error.message).toContain('net::ERR_ABORTED');
+        if (browserEngine.name === 'chrome') expect(error.message).toContain('net::ERR_ABORTED');
         else if (browserEngine.name === 'webkit')
           expect(error.message).toContain('Aborted: 204 No Content');
         else expect(error.message).toContain('NS_BINDING_ABORTED');
@@ -190,7 +189,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         let warning = null;
         const warningHandler = w => (warning = w);
         process.on('warning', warningHandler);
-        const promises = [...Array(20)].map(() => page.waitOn('frame-navigated'));
+        const promises = [...Array(20)].map(() => page.mainFrame.waitOn('frame-navigated'));
         await page.goto(server.emptyPage);
         await Promise.all(promises);
         process.off('warning', warningHandler);

@@ -26,6 +26,7 @@ import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtra
 type ResourceRequest = IHttpResourceLoadDetails & {
   frameId?: string;
   redirectedFromUrl?: string;
+  hasRequestWillBeSent: boolean;
   publishing?: {
     timeout?: NodeJS.Timeout;
     published?: boolean;
@@ -178,6 +179,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       requestTime: new Date(),
       clientAlpn: null,
       hasUserGesture: false,
+      hasRequestWillBeSent: false,
       documentUrl: networkRequest.request.headers.Referer,
       frameId: networkRequest.frameId,
     };
@@ -227,6 +229,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       isClientHttp2: false,
       requestTime: new Date(networkRequest.wallTime * 1e3),
       clientAlpn: null,
+      hasRequestWillBeSent: true,
       browserRequestId: networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.type),
       method: networkRequest.request.method,
@@ -260,7 +263,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   ): void {
     const requestId = networkRequest.requestId;
     let resource = this.requestsById.get(requestId);
-    const hasNetworkRequest = !!resource?.url;
+    const hasNetworkRequest = resource?.hasRequestWillBeSent === true;
     if (!resource) {
       resource = {} as any;
       this.requestsById.set(requestId, resource);
@@ -269,7 +272,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.mergeRequestHeaders(resource, networkRequest.headers);
 
     if (hasNetworkRequest) {
-      clearTimeout(resource.publishing?.timeout);
       this.doEmitResourceRequested(resource.browserRequestId);
     }
   }
@@ -295,12 +297,17 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     if (!resource.publishing) resource.publishing = {};
     // if we're already waiting, go ahead and publish now
-    if (resource.publishing?.timeout && !resource.publishing?.published) {
+    if (resource.publishing.timeout && !resource.publishing.published) {
       this.doEmitResourceRequested(browserRequestId);
       return;
     }
+
     // give it a small period to add extra info. no network id means it's running outside the normal "requestWillBeSent" flow
-    setTimeout(this.doEmitResourceRequested.bind(this), 200, browserRequestId).unref();
+    resource.publishing.timeout = setTimeout(
+      this.doEmitResourceRequested.bind(this),
+      200,
+      browserRequestId,
+    ).unref();
   }
 
   private doEmitResourceRequested(browserRequestId: string): boolean {
@@ -309,7 +316,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (!resource.url) return false;
 
     clearTimeout(resource.publishing?.timeout);
-    resource.publishing ??= {};
+    if (!resource.publishing) resource.publishing = {};
     resource.publishing.timeout = undefined;
 
     const event = <IPuppetNetworkEvents['resource-will-be-requested']>{
@@ -373,7 +380,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const resource = this.requestsById.get(requestId);
     if (resource) {
       resource.browserServedFromCache = 'memory';
-      setTimeout(() => this.emitLoaded(requestId), 500);
+      setTimeout(() => this.emitLoaded(requestId), 500).unref();
     }
   }
 
@@ -400,12 +407,12 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.emitLoaded(requestId);
   }
 
-  private emitLoaded(id: string, frameId?: string): void {
+  private emitLoaded(id: string): void {
     const resource = this.requestsById.get(id);
     if (resource) {
       if (!resource.publishing?.published) this.emitResourceRequested(id);
       this.requestsById.delete(id);
-      this.emit('resource-loaded', { resource, frameId });
+      this.emit('resource-loaded', { resource, frameId: resource.frameId });
     }
   }
 

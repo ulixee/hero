@@ -247,6 +247,7 @@ function sort() {
     expect(domFrames).toHaveLength(3);
 
     await tab.puppetPage.frames[3].waitForLoad();
+    await tab.domRecorder.flush();
     await state.db.flush();
     const frames = state.db.frames.all();
     expect(frames).toHaveLength(4);

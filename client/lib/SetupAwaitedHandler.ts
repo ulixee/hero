@@ -5,7 +5,7 @@ import IAttachedState from 'awaited-dom/base/IAttachedState';
 import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import CoreSession from './CoreTab';
+import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = {
@@ -25,10 +25,10 @@ export async function getProperty<T, TClass>(
   const state = self.getState(instance);
   await awaitRemoteInitializer(state);
   const awaitedPath = state.awaitedPath as AwaitedPath;
-  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-  const tab = await coreTab;
+  const { coreFrame } = state.awaitedOptions as IAwaitedOptions;
+  const awaitedCoreFrame = await coreFrame;
   const finalPath = awaitedPath.addProperty(name).toJSON();
-  const result = await execJsPath<TClass, T>(self, tab, instance, finalPath);
+  const result = await execJsPath<TClass, T>(self, awaitedCoreFrame, instance, finalPath);
 
   return cleanResult(self, instance, result);
 }
@@ -52,10 +52,10 @@ export async function runMethod<T, TClass>(
   await awaitRemoteInitializer(instance);
   const state = self.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
-  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-  const tab = await coreTab;
+  const { coreFrame } = state.awaitedOptions as IAwaitedOptions;
+  const awaitedCoreFrame = await coreFrame;
   const finalPath = awaitedPath.addMethod(name, ...args).toJSON();
-  const result = await execJsPath<TClass, T>(self, tab, instance, finalPath);
+  const result = await execJsPath<TClass, T>(self, awaitedCoreFrame, instance, finalPath);
   return cleanResult(self, instance, result);
 }
 
@@ -67,10 +67,10 @@ export async function loadState<TClass>(
   await awaitRemoteInitializer(instance);
   const state = self.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
-  const { coreTab } = state.awaitedOptions as IAwaitedOptions;
-  const tab = await coreTab;
+  const { coreFrame } = state.awaitedOptions as IAwaitedOptions;
+  const awaitedCoreFrame = await coreFrame;
   const finalPath = awaitedPath.addMethod(getAttachedStateFnName, properties).toJSON();
-  const result = await execJsPath<TClass, null>(self, tab, instance, finalPath);
+  const result = await execJsPath<TClass, null>(self, awaitedCoreFrame, instance, finalPath);
 
   return result?.attachedState as IAttachedState;
 }
@@ -93,7 +93,7 @@ export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
 
 function execJsPath<TClass, T>(
   self: AwaitedHandler<TClass>,
-  coreTab: CoreSession,
+  coreFrame: CoreFrameEnvironment,
   instance: TClass,
   path: IJsPath,
 ): Promise<IExecJsPathResult<T>> {
@@ -112,7 +112,7 @@ function execJsPath<TClass, T>(
       }
     }
   }
-  return coreTab.execJsPath<T>(path);
+  return coreFrame.execJsPath<T>(path);
 }
 
 function cleanResult<T, TClass>(

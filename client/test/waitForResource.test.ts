@@ -11,12 +11,12 @@ const outgoing = jest.fn(
     const { command } = payload;
     const response = payloadHandler(payload);
     if (response) return response;
-    if (command === 'createSession') {
+    if (command === 'Session.create') {
       return {
         data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
       };
     }
-    if (command === 'addEventListener') {
+    if (command === 'Session.addEventListener') {
       return {
         data: { listenerId: 1 },
       };
@@ -45,7 +45,7 @@ afterAll(Helpers.afterAll);
 describe('waitForResource', () => {
   it('should break after finding one resource', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         return { data: [{ id: 1, url: '/test.js' } as IResourceMeta] };
       }
     };
@@ -62,7 +62,7 @@ describe('waitForResource', () => {
   it('should try more than once to get files', async () => {
     let attempts = 0;
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         attempts += 1;
         if (attempts === 3) {
           return { data: [{ id: 1, url: '/test2.js' } as IResourceMeta] };
@@ -84,7 +84,7 @@ describe('waitForResource', () => {
 
   it('should return multiple files if many match on one round trip', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         return {
           data: [
             { id: 1, url: '/test3.js', type: 'Xhr' } as IResourceMeta,
@@ -106,7 +106,7 @@ describe('waitForResource', () => {
 
   it('should match multiple files by url', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         return {
           data: [
             { id: 1, url: '/test3.js' } as IResourceMeta,
@@ -128,7 +128,7 @@ describe('waitForResource', () => {
 
   it('should allow a user to specify a match function', async () => {
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         return {
           data: [
             { id: 1, url: '/test1.js' } as IResourceMeta,
@@ -161,7 +161,7 @@ describe('waitForResource', () => {
   it('should run multiple batches when a match function is provided', async () => {
     let counter = 0;
     payloadHandler = ({ command }: ICoreRequestPayload): ICoreResponsePayload => {
-      if (command === 'waitForResource') {
+      if (command === 'Tab.waitForResource') {
         counter += 1;
         if (counter === 1) {
           return {

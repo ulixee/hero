@@ -101,7 +101,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
 
         await Promise.all([
           page.evaluate(`window.location.hash = 'dynamic';`),
-          page.waitOn('frame-navigated', event => {
+          page.mainFrame.waitOn('frame-navigated', event => {
             return event.navigatedInDocument;
           }),
         ]);
@@ -293,7 +293,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         const navigationPromise = page.goto(`${server.baseUrl}/frames/one-frame.html`);
         await page.waitOn('frame-created');
         const frame = page.frames[1];
-        const loaded = page.waitOn('load');
+        const loaded = page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'load');
         await new Promise<void>(resolve => {
           page.on('frame-navigated', f => {
             if (f.frame.id === frame.id) resolve();
@@ -301,7 +301,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         });
         await frame.evaluate(`window.stop()`);
         await expect(navigationPromise).resolves.toBe(undefined);
-        await expect(loaded).resolves.toBe(undefined);
+        await expect(loaded).resolves.toBeTruthy();
       });
     });
   },
