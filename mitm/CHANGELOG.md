@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.3.1-alpha.1...v1.4.0-alpha.0) (2021-03-11)
+
+
+### Bug Fixes
+
+* **core:** exports not working <= node 14.12 ([d793601](https://github.com/ulixee/secret-agent/commit/d793601a052c243a541cf0331c79d00bc1332d1e))
+* **core:** try to fix tab test ([2f74a1e](https://github.com/ulixee/secret-agent/commit/2f74a1e48f2aa04d05c9826ac654de88686af597))
+* **ghost:** fix oom in bezierjs ([1d4ab06](https://github.com/ulixee/secret-agent/commit/1d4ab06c572f1d9aff7b8edd00ba9603c7da1f45))
+* **mitm:** don’t let dns errors go unhandled ([c8d8ac0](https://github.com/ulixee/secret-agent/commit/c8d8ac08e9cf1923f14e47318857bccdab85504e))
+* **mitm:** don’t wait for browser resources ([4c70bd5](https://github.com/ulixee/secret-agent/commit/4c70bd5ae89bf38cda80049d522e0b25f842240d)), closes [#176](https://github.com/ulixee/secret-agent/issues/176)
+* **mitm:** enable cache handler for test ([79e069b](https://github.com/ulixee/secret-agent/commit/79e069b71798fd5fa53fe1927db8729a75a7e61a))
+* **mitm:** handle http2 push canceled errors ([f1fbe4d](https://github.com/ulixee/secret-agent/commit/f1fbe4de5277c603af894b30a917157b39873b90))
+* **mitm:** try/catch around mitm throw areas ([e58b7a2](https://github.com/ulixee/secret-agent/commit/e58b7a2ba67ab6c5a435b83fa2b69b3ecc8f3465))
+
+
+
+
+
 # [1.3.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.3...v1.3.0-alpha.4) (2021-02-15)
 
 

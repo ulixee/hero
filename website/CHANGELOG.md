@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.3.1-alpha.1...v1.4.0-alpha.0) (2021-03-11)
+
+
+### Bug Fixes
+
+* **docs:** reference Chrome vs Chromium ([94226b2](https://github.com/ulixee/secret-agent/commit/94226b20aff716f150a8d1134052ddef7b188378))
+
+
+### Features
+
+* **client:** coreHost & disconnecting errors ([aed9fc3](https://github.com/ulixee/secret-agent/commit/aed9fc3f49996a661ab6b70e5446c9442649802a)), closes [#165](https://github.com/ulixee/secret-agent/issues/165)
+* **client:** waitForAllDispatchesSettled ([cf3e6b5](https://github.com/ulixee/secret-agent/commit/cf3e6b540fd312e771f72ff27a08bf3ee9f6212a))
+* **replay:** update for mac silicon + deps ([30ffec7](https://github.com/ulixee/secret-agent/commit/30ffec74fc06485b56344f17374a082d2055c1f1))
+* **website:** blog post about chrome + atom ([b6dc12b](https://github.com/ulixee/secret-agent/commit/b6dc12b4eb008100d30c58699468b877ce1e86ff))
+
+
+
+
+
 # [1.3.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.3...v1.3.0-alpha.4) (2021-02-15)
 
 

@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.3.1-alpha.1...v1.4.0-alpha.0) (2021-03-11)
+
+
+### Bug Fixes
+
+* **client:** fix close handling ([f413ea8](https://github.com/ulixee/secret-agent/commit/f413ea8c66b0e07512a7b6fbd0d9857bebad1d7c))
+* **client:** resource timeout + blank new tab ([4fdd378](https://github.com/ulixee/secret-agent/commit/4fdd3789edf9c2a7290b4deb660aa2d7194ec9c8))
+* **client:** translate errors when session n/a ([6c15793](https://github.com/ulixee/secret-agent/commit/6c15793f67cadfcf7d62e270848fbef895e397af))
+* **core:** exports not working <= node 14.12 ([d793601](https://github.com/ulixee/secret-agent/commit/d793601a052c243a541cf0331c79d00bc1332d1e))
+* **core:** handle canceled navigation redirect ([348c058](https://github.com/ulixee/secret-agent/commit/348c05863519ad6daaf8386c35a2b021883bd386))
+* **core:** try to fix tab test ([2f74a1e](https://github.com/ulixee/secret-agent/commit/2f74a1e48f2aa04d05c9826ac654de88686af597))
+* **docs:** reference Chrome vs Chromium ([94226b2](https://github.com/ulixee/secret-agent/commit/94226b20aff716f150a8d1134052ddef7b188378))
+* **ghost:** fix oom in bezierjs ([1d4ab06](https://github.com/ulixee/secret-agent/commit/1d4ab06c572f1d9aff7b8edd00ba9603c7da1f45))
+* **mitm:** don’t let dns errors go unhandled ([c8d8ac0](https://github.com/ulixee/secret-agent/commit/c8d8ac08e9cf1923f14e47318857bccdab85504e))
+* **mitm:** don’t wait for browser resources ([4c70bd5](https://github.com/ulixee/secret-agent/commit/4c70bd5ae89bf38cda80049d522e0b25f842240d)), closes [#176](https://github.com/ulixee/secret-agent/issues/176)
+* **mitm:** enable cache handler for test ([79e069b](https://github.com/ulixee/secret-agent/commit/79e069b71798fd5fa53fe1927db8729a75a7e61a))
+* **mitm:** handle http2 push canceled errors ([f1fbe4d](https://github.com/ulixee/secret-agent/commit/f1fbe4de5277c603af894b30a917157b39873b90))
+* **mitm:** try/catch around mitm throw areas ([e58b7a2](https://github.com/ulixee/secret-agent/commit/e58b7a2ba67ab6c5a435b83fa2b69b3ecc8f3465))
+* **replay:** don’t remove preserved tags ([fe023d5](https://github.com/ulixee/secret-agent/commit/fe023d5707fb9b1c7e1bed987bbde4ba0dd6511d))
+* failing test ([a6ae58d](https://github.com/ulixee/secret-agent/commit/a6ae58dc02940fce6a9184d0d5adc1b2ee29bd45))
+* failing test ([9064518](https://github.com/ulixee/secret-agent/commit/906451802f31f362c7e82bf2b094a03bfcf74420))
+* lerna config ([77a1810](https://github.com/ulixee/secret-agent/commit/77a18100ba1e29576323b35e1e947bf83d96b5e5))
+* removed unnecessary browserVersionDir in EngineFetcher ([9daa98a](https://github.com/ulixee/secret-agent/commit/9daa98a42234b27898e2e2c2bada3815a5826ba6))
+* renamed some vars, removed chromium blocks, and modified BrowserFetcher ([60955b2](https://github.com/ulixee/secret-agent/commit/60955b259c15c887e20ae423ed8683caed80751d))
+* test reliability ([76aea40](https://github.com/ulixee/secret-agent/commit/76aea4051f71f489a62c15385a337b17a19afaf2))
+* **puppet:** extract linux chrome ([55f8ef5](https://github.com/ulixee/secret-agent/commit/55f8ef57ba410685697f5dc73f923026c8b0c4a6))
+* **puppet:** no chrome launch errors to client ([1e636a6](https://github.com/ulixee/secret-agent/commit/1e636a6625c47c67ee8a4e7d5be05ce99b513a5f))
+
+
+### Features
+
+* **client:** coreHost & disconnecting errors ([aed9fc3](https://github.com/ulixee/secret-agent/commit/aed9fc3f49996a661ab6b70e5446c9442649802a)), closes [#165](https://github.com/ulixee/secret-agent/issues/165)
+* **client:** waitForAllDispatchesSettled ([cf3e6b5](https://github.com/ulixee/secret-agent/commit/cf3e6b540fd312e771f72ff27a08bf3ee9f6212a))
+* **puppet:** switch to chrome ([d064e53](https://github.com/ulixee/secret-agent/commit/d064e53ace2107ac95348cf721c3cc35afe07efc))
+* **puppet:** unsupported linux install message ([fe6e634](https://github.com/ulixee/secret-agent/commit/fe6e63472a813c6275433b8dfb00e094c49c8a6a))
+* **puppet:** update docker to for new installs ([19351b5](https://github.com/ulixee/secret-agent/commit/19351b556718161c885b5dfb12f7fa80af8daf46))
+* **replay:** update for mac silicon + deps ([30ffec7](https://github.com/ulixee/secret-agent/commit/30ffec74fc06485b56344f17374a082d2055c1f1))
+* **website:** blog post about chrome + atom ([b6dc12b](https://github.com/ulixee/secret-agent/commit/b6dc12b4eb008100d30c58699468b877ce1e86ff))
+* **website:** blog post about chrome + atom ([5f0cafa](https://github.com/ulixee/secret-agent/commit/5f0cafa633f50aa0757dc3627ec6b06c27fd8f99))
+
+
+
+
+
 ## [1.3.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.3.1-alpha.0...v1.3.1-alpha.1) (2021-02-19)
 
 
