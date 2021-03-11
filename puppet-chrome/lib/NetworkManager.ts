@@ -190,6 +190,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         resource.requestLowerHeaders = existing.requestLowerHeaders ?? {};
         resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
       }
+
+      if (existing.resourceType) resource.resourceType = existing.resourceType;
       resource.redirectedFromUrl = existing.redirectedFromUrl;
     }
     this.mergeRequestHeaders(resource, networkRequest.request.headers);

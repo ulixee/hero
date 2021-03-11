@@ -1,10 +1,10 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.4.0-alpha.0",
+  "version": "1.4.0-alpha.1",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.0-alpha.0",
+    "@secret-agent/core-interfaces": "1.4.0-alpha.1",
     "https-proxy-agent": "^5.0.0",
     "source-map-support": "^0.5.19",
     "typeson": "^5.18.2",

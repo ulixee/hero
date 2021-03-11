@@ -1,17 +1,17 @@
 {
   "name": "@secret-agent/emulate-browsers-base",
-  "version": "1.4.0-alpha.0",
+  "version": "1.4.0-alpha.1",
   "description": "SecretAgent client that runs remotely",
   "scripts": {},
   "dependencies": {
-    "@secret-agent/commons": "1.4.0-alpha.0",
-    "@secret-agent/core-interfaces": "1.4.0-alpha.0",
-    "@secret-agent/puppet": "1.4.0-alpha.0"
+    "@secret-agent/commons": "1.4.0-alpha.1",
+    "@secret-agent/core-interfaces": "1.4.0-alpha.1",
+    "@secret-agent/puppet": "1.4.0-alpha.1"
   },
   "devDependencies": {
-    "@secret-agent/core": "1.4.0-alpha.0",
-    "@secret-agent/emulate-chrome-80": "1.4.0-alpha.0",
-    "@secret-agent/puppet-interfaces": "1.4.0-alpha.0",
-    "@secret-agent/testing": "1.4.0-alpha.0"
+    "@secret-agent/core": "1.4.0-alpha.1",
+    "@secret-agent/emulate-chrome-80": "1.4.0-alpha.1",
+    "@secret-agent/puppet-interfaces": "1.4.0-alpha.1",
+    "@secret-agent/testing": "1.4.0-alpha.1"
   }
 }
