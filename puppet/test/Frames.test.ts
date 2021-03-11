@@ -28,7 +28,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
     });
 
     afterEach(async () => {
-      await page.close();
+      await page.close().catch(() => null);
       server.reset();
     });
 
@@ -38,7 +38,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
 
     afterAll(async () => {
       await server.stop();
-      await context.close();
+      await context.close().catch(() => null);
       await puppet.close();
     });
 

@@ -125,7 +125,7 @@ jobs:
         run: sudo $(npx puppet-install-deps)
 
       - name: Run tests
-        run: yarn jest --testTimeout=60000 --runInBand
+        run: yarn jest --testTimeout=60000 --maxWorkers=2
         working-directory: ./build
         env:
           SA_SHOW_REPLAY: false
