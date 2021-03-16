@@ -5,7 +5,7 @@ import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy as MitmServer } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
-import Puppet from '@secret-agent/puppet';
+import Puppet, { ILaunchArgs } from '@secret-agent/puppet';
 import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import DefaultBrowser from '@secret-agent/emulate-chrome-83';
@@ -28,6 +28,7 @@ export default class GlobalPool {
     return this.activeSessionCount < GlobalPool.maxConcurrentAgentsCount;
   }
 
+  private static defaultLaunchArgs: ILaunchArgs;
   private static _activeSessionCount = 0;
   private static puppets: Puppet[] = [];
   private static mitmServer: MitmServer;
@@ -103,11 +104,27 @@ export default class GlobalPool {
       return existing;
     }
 
+    if (!this.defaultLaunchArgs) {
+      this.defaultLaunchArgs = {
+        showBrowser: Boolean(JSON.parse(process.env.SA_SHOW_BROWSER ?? 'false')),
+        disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
+        noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
+        disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
+      };
+    }
+
+    // if showing all browsers, make sure to set on the engine
+    if (!engine.isHeaded && this.defaultLaunchArgs.showBrowser) {
+      engine.isHeaded = true;
+    }
+
     const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
     const browserOrError = await puppet.start({
+      ...this.defaultLaunchArgs,
       proxyPort: this.mitmServer.port,
+      showBrowser: engine.isHeaded,
     });
     if (browserOrError instanceof Error) throw browserOrError;
     return puppet;

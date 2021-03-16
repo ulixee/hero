@@ -11,7 +11,13 @@ import { Connection } from './lib/Connection';
 let counter = 0;
 
 const PuppetLauncher: IPuppetLauncher = {
-  getLaunchArgs(options: { proxyPort?: number; showBrowser?: boolean }) {
+  getLaunchArgs(options: {
+    proxyPort?: number;
+    showBrowser?: boolean;
+    disableGpu?: boolean;
+    disableDevtools?: boolean;
+    disableSandbox?: boolean;
+  }) {
     const chromeArguments = [...defaultArgs];
     if (!options.showBrowser) {
       chromeArguments.push(
@@ -25,15 +31,20 @@ const PuppetLauncher: IPuppetLauncher = {
         `--user-data-dir=${Path.join(os.tmpdir(), 'chromium-headed-data', String((counter += 1)))}`,
       ); // required to allow multiple browsers to be headed
 
-      const shouldDisableDevtools = Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false'));
-      if (!shouldDisableDevtools) chromeArguments.push('--auto-open-devtools-for-tabs');
+      if (!options.disableDevtools) chromeArguments.push('--auto-open-devtools-for-tabs');
     }
 
     if (options.proxyPort !== undefined) {
       chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
     }
 
-    if (Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')) === true) {
+    if (options.disableGpu === true) {
+      chromeArguments.push('--disable-gpu', '--disable-software-rasterizer');
+      const idx = chromeArguments.indexOf('--use-gl=any');
+      if (idx >= 0) chromeArguments.splice(idx, 1);
+    }
+
+    if (options.disableSandbox === true) {
       chromeArguments.push('--no-sandbox');
     } else if (os.platform() === 'linux') {
       const runningAsRoot = process.geteuid && process.geteuid() === 0;
@@ -100,18 +111,18 @@ const defaultArgs = [
   '--disable-default-apps', // Disable installation of default apps on first run
   '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
   '--disable-extensions', // Disable all chrome extensions.
-  '--disable-features=TranslateUI,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+  '--disable-features=PaintHolding,TranslateUI,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
   '--disable-hang-monitor',
   '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
   '--disable-prompt-on-repost', // Reloading a page that came from a POST normally prompts the user.
   '--disable-renderer-backgrounding', // This disables non-foreground tabs from getting a lower process priority This doesn't (on its own) affect timers or painting behavior. karma-chrome-launcher#123
   '--disable-sync', // Disable syncing to a Google account
-  '--disable-gpu',
   '--enable-logging',
+
   '--force-color-profile=srgb', // Force all monitors to be treated as though they have the specified color profile.
-  '--use-gl=swiftshader-webgl',
-  '--use-gl=swiftshader', // Select which implementation of GL the GPU process should use. Options are: desktop: whatever desktop OpenGL the user has installed (Linux and Mac default). egl: whatever EGL / GLES2 the user has installed (Windows default - actually ANGLE). swiftshader: The SwiftShader software renderer.
-  '--use-gl=osmesa',
+  '--use-gl=any', // Select which implementation of GL the GPU process should use. Options are: desktop: whatever desktop OpenGL the user has installed (Linux and Mac default). egl: whatever EGL / GLES2 the user has installed (Windows default - actually ANGLE). swiftshader: The SwiftShader software renderer.
+  '--disable-partial-raster', // https://crbug.com/919955
+  '--disable-skia-runtime-opts', // Do not use runtime-detected high-end CPU optimizations in Skia.
 
   '--incognito',
 
