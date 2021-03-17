@@ -13,7 +13,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['devtoolsRequestId', 'TEXT'],
-        ['tabId', 'TEXT'],
+        ['tabId', 'INTEGER'],
         ['type', 'TEXT'],
         ['receivedAtCommandId', 'INTEGER'],
         ['seenAtCommandId', 'INTEGER'],
@@ -50,7 +50,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public insert(
-    tabId: string,
+    tabId: number,
     meta: IResourceMeta,
     body: Buffer,
     extras: {
@@ -148,7 +148,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
 export interface IResourcesRecord {
   id: number;
   devtoolsRequestId: number;
-  tabId: string;
+  tabId: number;
   type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;

@@ -10,7 +10,7 @@ import * as Path from 'path';
 import { IncomingMessage } from 'http';
 import { getInstallDirectory, isBinaryInstalled, recordVersion, version } from './Utils';
 
-if (process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD) {
+if (Boolean(JSON.parse(process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD ?? 'false')) === true) {
   process.exit(0);
 }
 

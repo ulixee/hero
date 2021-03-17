@@ -26,18 +26,21 @@ import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtra
 type ResourceRequest = IHttpResourceLoadDetails & {
   frameId?: string;
   redirectedFromUrl?: string;
-  publishing?: {
-    timeout?: NodeJS.Timeout;
-    published?: boolean;
-    details?: boolean;
-  };
 };
+
+interface IResourcePublishing {
+  hasRequestWillBeSentEvent: boolean;
+  emitTimeout?: NodeJS.Timeout;
+  isPublished?: boolean;
+  isDetailsEmitted?: boolean;
+}
 
 export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   protected readonly logger: IBoundLog;
   private readonly cdpSession: CDPSession;
   private readonly attemptedAuthentications = new Set<string>();
   private readonly requestsById = new Map<string, ResourceRequest>();
+  private readonly requestPublishingById = new Map<string, IResourcePublishing>();
 
   private readonly navigationRequestIds = new Set<string>();
   private emulation?: IBrowserEmulationSettings;
@@ -236,17 +239,25 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       frameId: networkRequest.frameId,
     };
 
+    const publishing = this.getPublishingForRequestId(resource.browserRequestId, true);
+    publishing.hasRequestWillBeSentEvent = true;
+
     const existing = this.requestsById.get(resource.browserRequestId);
 
-    const shouldReplace = redirectedFromUrl && existing.url !== resource.url;
+    const isNewRedirect = redirectedFromUrl && existing && existing.url !== resource.url;
 
     // NOTE: same requestId will be used in devtools for redirected resources
-    if (existing && !shouldReplace) {
-      // preserve headers and frameId from a fetch or networkWillRequestExtraInfo
-      resource.requestHeaders = existing.requestHeaders ?? {};
-      resource.requestLowerHeaders = existing.requestLowerHeaders ?? {};
-      resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
-      resource.publishing = existing.publishing;
+    if (existing) {
+      if (isNewRedirect) {
+        publishing.isPublished = false;
+        clearTimeout(publishing.emitTimeout);
+        publishing.emitTimeout = undefined;
+      } else {
+        // preserve headers and frameId from a fetch or networkWillRequestExtraInfo
+        resource.requestHeaders = existing.requestHeaders ?? {};
+        resource.requestLowerHeaders = existing.requestLowerHeaders ?? {};
+        resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
+      }
     }
 
     this.requestsById.set(resource.browserRequestId, resource);
@@ -260,7 +271,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   ): void {
     const requestId = networkRequest.requestId;
     let resource = this.requestsById.get(requestId);
-    const hasNetworkRequest = !!resource?.url;
     if (!resource) {
       resource = {} as any;
       this.requestsById.set(requestId, resource);
@@ -268,8 +278,9 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     this.mergeRequestHeaders(resource, networkRequest.headers);
 
+    const hasNetworkRequest =
+      this.requestPublishingById.get(requestId)?.hasRequestWillBeSentEvent === true;
     if (hasNetworkRequest) {
-      clearTimeout(resource.publishing?.timeout);
       this.doEmitResourceRequested(resource.browserRequestId);
     }
   }
@@ -293,14 +304,19 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const resource = this.requestsById.get(browserRequestId);
     if (!resource) return;
 
-    if (!resource.publishing) resource.publishing = {};
+    const publishing = this.getPublishingForRequestId(browserRequestId, true);
     // if we're already waiting, go ahead and publish now
-    if (resource.publishing?.timeout && !resource.publishing?.published) {
+    if (publishing.emitTimeout && !publishing.isPublished) {
       this.doEmitResourceRequested(browserRequestId);
       return;
     }
+
     // give it a small period to add extra info. no network id means it's running outside the normal "requestWillBeSent" flow
-    setTimeout(this.doEmitResourceRequested.bind(this), 200, browserRequestId).unref();
+    publishing.emitTimeout = setTimeout(
+      this.doEmitResourceRequested.bind(this),
+      200,
+      browserRequestId,
+    ).unref();
   }
 
   private doEmitResourceRequested(browserRequestId: string): boolean {
@@ -308,9 +324,9 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (!resource) return false;
     if (!resource.url) return false;
 
-    clearTimeout(resource.publishing?.timeout);
-    resource.publishing ??= {};
-    resource.publishing.timeout = undefined;
+    const publishing = this.getPublishingForRequestId(browserRequestId, true);
+    clearTimeout(publishing.emitTimeout);
+    publishing.emitTimeout = undefined;
 
     const event = <IPuppetNetworkEvents['resource-will-be-requested']>{
       resource,
@@ -320,11 +336,11 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     };
 
     // NOTE: same requestId will be used in devtools for redirected resources
-    if (!resource.publishing.published) {
-      resource.publishing.published = true;
+    if (!publishing.isPublished) {
+      publishing.isPublished = true;
       this.emit('resource-will-be-requested', event);
-    } else if (!resource.publishing.details) {
-      resource.publishing.details = true;
+    } else if (!publishing.isDetailsEmitted) {
+      publishing.isDetailsEmitted = true;
       this.emit('resource-was-requested', event);
     }
   }
@@ -351,7 +367,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         resource.frameId = frameId;
         resource.browserRequestId = requestId;
       }
-      if (!resource.publishing?.published && resource.url?.href) {
+      if (!this.requestPublishingById.get(requestId)?.isPublished && resource.url?.href) {
         this.doEmitResourceRequested(requestId);
       }
     }
@@ -373,7 +389,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const resource = this.requestsById.get(requestId);
     if (resource) {
       resource.browserServedFromCache = 'memory';
-      setTimeout(() => this.emitLoaded(requestId), 500);
+      setTimeout(() => this.emitLoaded(requestId), 500).unref();
     }
   }
 
@@ -382,7 +398,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
-      if (!resource.publishing?.published) {
+      if (!this.requestPublishingById.get(requestId)?.isPublished) {
         this.doEmitResourceRequested(requestId);
       }
       if (canceled) resource.browserCanceled = true;
@@ -392,6 +408,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         resource,
       });
       this.requestsById.delete(requestId);
+      this.requestPublishingById.delete(requestId);
     }
   }
 
@@ -400,15 +417,24 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.emitLoaded(requestId);
   }
 
-  private emitLoaded(id: string, frameId?: string): void {
+  private emitLoaded(id: string): void {
     const resource = this.requestsById.get(id);
     if (resource) {
-      if (!resource.publishing?.published) this.emitResourceRequested(id);
+      if (!this.requestPublishingById.get(id)?.isPublished) this.emitResourceRequested(id);
       this.requestsById.delete(id);
-      this.emit('resource-loaded', { resource, frameId });
+      this.requestPublishingById.delete(id);
+      this.emit('resource-loaded', { resource, frameId: resource.frameId });
     }
   }
 
+  private getPublishingForRequestId(id: string, createIfNull = false): IResourcePublishing {
+    const publishing = this.requestPublishingById.get(id);
+    if (publishing) return publishing;
+    if (createIfNull) {
+      this.requestPublishingById.set(id, { hasRequestWillBeSentEvent: false });
+      return this.requestPublishingById.get(id);
+    }
+  }
   /////// WEBSOCKET EVENT HANDLERS /////////////////////////////////////////////////////////////////
 
   private onWebsocketHandshake(handshake: WebSocketWillSendHandshakeRequestEvent): void {

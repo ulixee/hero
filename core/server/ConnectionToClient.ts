@@ -35,19 +35,19 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIds = new Set<string>();
 
-  private clientExposedMethods = new Set<keyof this & string>([
-    'createSession',
-    'connect',
-    'disconnect',
-    'configure',
-    'waitForNewTab',
-    'logUnhandledError',
-    'addEventListener',
-    'removeEventListener',
-    'getTabs',
-    'getAgentMeta',
-    'closeSession',
-    'exportUserProfile',
+  private clientExposedMethods = new Map<string, keyof this & string>([
+    ['Core.connect', 'connect'],
+    ['Core.disconnect', 'disconnect'],
+    ['Core.logUnhandledError', 'logUnhandledError'],
+    ['Session.create', 'createSession'],
+    ['Session.close', 'closeSession'],
+    ['Session.configure', 'configure'],
+    ['Session.getAgentMeta', 'getAgentMeta'],
+    ['Session.exportUserProfile', 'exportUserProfile'],
+    ['Session.getTabs', 'getTabs'],
+    ['Session.waitForNewTab', 'waitForNewTab'],
+    ['Session.addEventListener', 'addEventListener'],
+    ['Session.removeEventListener', 'removeEventListener'],
   ]);
 
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
@@ -62,25 +62,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
     let data: any;
     try {
-      if (this.clientExposedMethods.has(command as any)) {
-        if (meta) {
-          data = await this[command](meta, ...args);
-        } else {
-          data = await this[command](...args);
-        }
-      } else {
-        // if not on this function, assume we're sending on to tab
-        const tab = Session.getTab(meta);
-        if (!tab) {
-          data = new SessionClosedOrMissingError(
-            `The requested command (${command}) references a tab that is no longer part of session or has been closed.`,
-          );
-        } else if (typeof tab[command] !== 'function') {
-          data = new Error(`Command not available on tab (${command} - ${typeof tab[command]})`);
-        } else {
-          data = await tab[command](...args);
-        }
-      }
+      data = await this.executeCommand(command, args, meta);
     } catch (error) {
       // if we're closing, don't emit errors
       const shouldSkipLogging =
@@ -227,6 +209,67 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     session.awaitedEventListener.remove(id);
   }
 
+  /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
+
+  private async executeCommand(command: string, args: any[], meta: ISessionMeta): Promise<any> {
+    const target = command.split('.').shift();
+    if (target === 'Core' || target === 'Session') {
+      if (!this.clientExposedMethods.has(command)) {
+        return new Error(`Command not allowed (${command})`);
+      }
+
+      const method = this.clientExposedMethods.get(command) as string;
+      if (target === 'Core' || command === 'Session.create') {
+        return await this[method](...args);
+      }
+
+      const session = Session.get(meta.sessionId);
+      if (!session) {
+        return new SessionClosedOrMissingError(
+          `The requested command (${command}) references a session that is closed or invalid.`,
+        );
+      }
+      return await this[method](meta, ...args);
+    }
+
+    // if not on this function, assume we're sending on to tab
+    const tab = Session.getTab(meta);
+    if (!tab) {
+      return new SessionClosedOrMissingError(
+        `The requested command (${command}) references a tab that is no longer part of session or has been closed.`,
+      );
+    }
+
+    const method = command.split('.').pop();
+
+    /////// Tab Functions
+    if (target === 'Tab') {
+      if (!tab.isAllowedCommand(method)) {
+        return new Error(`Command not allowed (${command})`);
+      }
+
+      return await tab[method](...args);
+    }
+
+    /////// Frame Functions
+    if (target === 'FrameEnvironment') {
+      const frameEnvironment =
+        tab.frameEnvironmentsById.get(meta.frameId) ?? tab.mainFrameEnvironment;
+
+      if (!frameEnvironment || (meta.frameId && !tab.frameEnvironmentsById.has(meta.frameId))) {
+        return new Error(
+          `The requested frame environment for this command (${command}) is not longer available`,
+        );
+      }
+
+      if (!frameEnvironment.isAllowedCommand(method)) {
+        return new Error(`Command not allowed (${command})`);
+      }
+
+      return await frameEnvironment[method](...args);
+    }
+  }
+
   private checkForAutoShutdown(): void {
     if (this.isActive()) return;
     clearTimeout(this.autoShutdownTimer);
@@ -240,6 +283,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     const session = tab.session;
     return {
       sessionId: session.id,
+      frameId: tab.mainFrameId,
       sessionsDataLocation: session.baseDir,
       tabId: tab.id,
     };

@@ -55,7 +55,7 @@ export default class ReplayView extends ViewBackend {
     this.playbarView.play();
   }
 
-  public async loadTab(id?: string) {
+  public async loadTab(id?: number) {
     this.isTabLoaded = false;
     await this.clearTabState();
     this.attach();

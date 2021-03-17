@@ -167,11 +167,11 @@ export default class Window {
     this.sendToRenderer('replay:page-url', url);
   }
 
-  public setActiveTabId(id: string) {
+  public setActiveTabId(id: number) {
     this.sendToRenderer('replay:active-tab', id);
   }
 
-  public async loadReplayTab(id: string) {
+  public async loadReplayTab(id: number) {
     await this.replayView.loadTab(id);
     await this.fixBounds();
   }

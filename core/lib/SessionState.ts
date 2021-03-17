@@ -9,7 +9,6 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import INavigation from '@secret-agent/core-interfaces/INavigation';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
@@ -20,8 +19,6 @@ import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
 import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
 import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/core-interfaces/IDomChangeEvent';
-import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
-import TabNavigations from './TabNavigations';
 import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -39,7 +36,6 @@ export default class SessionState {
   public readonly sessionId: string;
 
   public viewport: IViewport;
-  public readonly navigationsByTabId: { [tabId: string]: TabNavigations } = {};
   public readonly db: SessionDb;
 
   private readonly sessionName: string;
@@ -60,6 +56,9 @@ export default class SessionState {
 
   private lastErrorTime?: Date;
   private closeDate?: Date;
+  private lastNavigationTime?: Date;
+  private hasLoadedAnyPage = false;
+
   private isClosing = false;
 
   private websocketMessageIdCounter = 0;
@@ -121,29 +120,13 @@ export default class SessionState {
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
   }
 
-  public registerTab(tabId: string): void {
-    this.navigationsByTabId[tabId] = new TabNavigations(this.db);
+  public recordCommandStart(commandMeta: ICommandMeta) {
+    this.commands.push(commandMeta);
+    this.db.commands.insert(commandMeta);
   }
 
-  public async runCommand<T>(commandFn: () => Promise<T>, commandMeta: ICommandMeta): Promise<T> {
-    this.commands.push(commandMeta);
-
-    let result: T;
-    try {
-      commandMeta.startDate = new Date().toISOString();
-      this.db.commands.insert(commandMeta);
-
-      result = await commandFn();
-      return result;
-    } catch (err) {
-      result = err;
-      throw err;
-    } finally {
-      commandMeta.endDate = new Date().toISOString();
-      commandMeta.result = result;
-      // NOTE: second insert on purpose -- it will do an update
-      this.db.commands.insert(commandMeta);
-    }
+  public recordCommandFinished(commandMeta: ICommandMeta) {
+    this.db.commands.insert(commandMeta);
   }
 
   public onWebsocketMessages(
@@ -213,10 +196,10 @@ export default class SessionState {
   }
 
   public captureResourceFailed(
-    tabId: string,
+    tabId: number,
     resourceFailedEvent: IRequestSessionResponseEvent,
     error: Error,
-  ): void {
+  ): IResourceMeta {
     let resourceId = resourceFailedEvent.id;
     if (!resourceId) {
       const resources = this.getBrowserRequestResources(resourceFailedEvent.browserRequestId);
@@ -235,44 +218,25 @@ export default class SessionState {
       }
     }
     this.db.resources.insert(tabId, resourceMeta, null, resourceFailedEvent, error);
-    this.resolveNavigation(tabId, resourceFailedEvent.browserRequestId, resourceMeta, error);
+    return resourceMeta;
   }
 
   public captureResourceError(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent,
     error: Error,
-  ): void {
+  ): IResourceMeta {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
-    if (!this.resources.some(x => x.id === resourceEvent.id)) {
+    if (!this.getResourceMeta(resource.id)) {
       this.resources.push(resource);
     }
-    this.resolveNavigation(tabId, resourceEvent.browserRequestId, resource, error);
-  }
-
-  public resolveNavigation(
-    tabId: string,
-    browserRequestId: string,
-    resource: IResourceMeta,
-    error?: Error,
-  ) {
-    const navigations = this.navigationsByTabId[tabId];
-    if (!navigations) return;
-
-    const isNavigationToCurrentUrl =
-      (resource.url === navigations.currentUrl ||
-        resource.request.url === navigations.currentUrl) &&
-      resource.request.method !== 'OPTIONS';
-
-    if (isNavigationToCurrentUrl || browserRequestId === navigations.top?.browserRequestId) {
-      navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
-    }
+    return resource;
   }
 
   public captureResource(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
     isResponse: boolean,
   ): IResourceMeta {
@@ -282,7 +246,6 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
 
     if (isResponse) {
-      this.resolveNavigation(tabId, resourceResponseEvent.browserRequestId, resource);
       this.resources.push(resource);
     }
     return resource;
@@ -295,7 +258,7 @@ export default class SessionState {
   }
 
   public resourceEventToMeta(
-    tabId: string,
+    tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
   ): IResourceMeta {
     const {
@@ -339,7 +302,7 @@ export default class SessionState {
     return resource;
   }
 
-  public getResources(tabId: string): IResourceMeta[] {
+  public getResources(tabId: number): IResourceMeta[] {
     return this.resources.filter(x => x.tabId === tabId);
   }
 
@@ -354,7 +317,7 @@ export default class SessionState {
   ///////   FRAMES ///////
 
   public captureFrameCreated(
-    tabId: string,
+    tabId: number,
     createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
     domNodeId: number,
   ): void {
@@ -372,30 +335,25 @@ export default class SessionState {
     this.db.frames.insert(frame);
   }
 
-  public captureSubFrameNavigated(
-    tabId: string,
-    frame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'> & {
-      navigationReason?: string;
-    },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    navigatedInDocument: boolean,
+  public updateFrameSecurityOrigin(
+    tabId: number,
+    frame: Pick<IFrameRecord, 'id' | 'name' | 'securityOrigin'>,
   ): void {
     const existing = this.frames[frame.id];
     if (existing) {
       existing.name = frame.name;
       existing.securityOrigin = frame.securityOrigin;
-      this.db.frames.insert(existing);
+      existing.url = this.db.frames.insert(existing);
     }
-    // TODO: capture frame navigations
   }
 
-  public captureError(tabId: string, frameId: string, source: string, error: Error): void {
+  public captureError(tabId: number, frameId: string, source: string, error: Error): void {
     this.logger.info('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
   public captureLog(
-    tabId: string,
+    tabId: number,
     frameId: string,
     consoleType: string,
     message: string,
@@ -429,6 +387,17 @@ export default class SessionState {
     SessionState.registry.delete(this.sessionId);
   }
 
+  public recordNavigation(navigation: INavigation) {
+    this.db.frameNavigations.insert(navigation);
+    if (navigation.stateChanges.has('Load') || navigation.stateChanges.has('ContentPaint')) {
+      this.hasLoadedAnyPage = true;
+    }
+    for (const date of navigation.stateChanges.values()) {
+      if (date > this.lastNavigationTime) this.lastNavigationTime = date;
+    }
+    if (navigation.initiatedTime) this.lastNavigationTime = navigation.initiatedTime;
+  }
+
   public checkForResponsive(): {
     hasRecentErrors: boolean;
     lastActivityDate: Date;
@@ -436,18 +405,34 @@ export default class SessionState {
     closeDate: Date | null;
   } {
     let lastSuccessDate = this.createDate;
-    for (const navigation of Object.values(this.navigationsByTabId)) {
-      const loadTime = navigation.top?.stateChanges?.get('Load');
-      const lastPageTime = loadTime ?? navigation.top?.initiatedTime;
-      if (lastPageTime && lastPageTime > lastSuccessDate) {
-        lastSuccessDate = lastPageTime;
+
+    if (!this.lastNavigationTime) {
+      const lastNavigation = this.db.frameNavigations.last();
+      if (lastNavigation && lastNavigation.initiatedTime) {
+        this.lastNavigationTime = new Date(
+          lastNavigation.loadTime ??
+            lastNavigation.contentPaintedTime ??
+            lastNavigation.initiatedTime,
+        );
+        this.hasLoadedAnyPage = !!lastNavigation.initiatedTime || !!lastNavigation.loadTime;
       }
-      for (const command of this.commands) {
-        if (!command.endDate) continue;
-        const endDate = new Date(command.endDate);
-        if (loadTime && endDate > lastSuccessDate && !command.resultType?.includes('Error')) {
-          lastSuccessDate = endDate;
-        }
+    }
+
+    if (this.lastNavigationTime && this.lastNavigationTime > lastSuccessDate) {
+      lastSuccessDate = this.lastNavigationTime;
+    }
+
+    for (let i = this.commands.length - 1; i >= 0; i -= 1) {
+      const command = this.commands[i];
+      if (!command.endDate) continue;
+      const endDate = new Date(command.endDate);
+      if (
+        this.hasLoadedAnyPage &&
+        endDate > lastSuccessDate &&
+        !command.resultType?.includes('Error')
+      ) {
+        lastSuccessDate = endDate;
+        break;
       }
     }
 
@@ -481,55 +466,15 @@ export default class SessionState {
     );
   }
 
-  public onPageEvents(
-    tabId: string,
+  public captureDomEvents(
+    tabId: number,
+    startCommandId: number,
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
-    loadEvents: ILoadEvent[],
-  ): void {
-    this.logger.stats('State.onPageEvents', {
-      tabId,
-      frameId,
-      dom: domChanges.length,
-      mouse: mouseEvents.length,
-      focusEvents: focusEvents.length,
-      scrollEvents: scrollEvents.length,
-      loadEvents,
-    });
-
-    let startCommandId = domChanges.reduce((max, change) => {
-      if (max > change[0]) return max;
-      return change[0];
-    }, -1);
-
-    const navigations = this.navigationsByTabId[tabId];
-    // find last page load
-    for (let i = navigations.history.length - 1; i >= 0; i -= 1) {
-      const page = navigations.history[i];
-      if (page.stateChanges.has(LocationStatus.HttpResponded)) {
-        startCommandId = page.startCommandId;
-        break;
-      }
-    }
-
-    for (const loadEvent of loadEvents) {
-      const [, event, url, timestamp] = loadEvent;
-
-      let incomingStatus;
-      if (event === 'LargestContentfulPaint') {
-        incomingStatus = 'ContentPaint';
-      } else if (event === 'DOMContentLoaded') {
-        incomingStatus = LocationStatus.DomContentLoaded;
-      } else if (event === 'load') {
-        incomingStatus = 'Load';
-      }
-
-      navigations.onLoadStateChanged(incomingStatus, url, frameId, new Date(timestamp));
-    }
-
+  ) {
     for (const domChange of domChanges) {
       if (domChange[0] === -1) domChange[0] = startCommandId;
       this.db.domChanges.insert(tabId, frameId, domChange);
@@ -556,10 +501,10 @@ export default class SessionState {
   }
 
   public captureTab(
-    tabId: string,
+    tabId: number,
     pageId: string,
     devtoolsSessionId: string,
-    openerTabId?: string,
+    openerTabId?: number,
   ): void {
     this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
   }

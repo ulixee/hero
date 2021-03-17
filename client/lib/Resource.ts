@@ -5,7 +5,7 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import Timer from '@secret-agent/commons/Timer';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
-import CoreSession from './CoreTab';
+import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
@@ -18,7 +18,7 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreTab: Promise<CoreSession>;
+  coreTab: Promise<CoreTab>;
 }
 
 const propertyKeys: (keyof Resource)[] = [
@@ -141,10 +141,7 @@ export default class Resource {
   }
 }
 
-export function createResource(
-  resourceMeta: IResourceMeta,
-  coreTab: Promise<CoreSession>,
-): Resource {
+export function createResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>): Resource {
   if (resourceMeta.type === 'Websocket') {
     return createWebsocketResource(resourceMeta, coreTab);
   }

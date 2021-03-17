@@ -5,8 +5,8 @@ import IViewport from '@secret-agent/core-interfaces/IViewport';
 export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Tabs', [
-      ['tabId', 'TEXT'],
-      ['openerTabId', 'TEXT'],
+      ['tabId', 'INTEGER'],
+      ['openerTabId', 'INTEGER'],
       ['pageTargetId', 'TEXT'],
       ['sessionId', 'TEXT'],
       ['viewportWidth', 'INTEGER'],
@@ -18,11 +18,11 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
   }
 
   public insert(
-    tabId: string,
+    tabId: number,
     pageId: string,
     devtoolsSessionId: string,
     viewPort: IViewport,
-    openerTabId?: string,
+    openerTabId?: number,
   ) {
     return this.queuePendingInsert([
       tabId,
@@ -39,8 +39,8 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
 }
 
 export interface ITabsRecord {
-  tabId: string;
-  openerTabId?: string;
+  tabId: number;
+  openerTabId?: number;
   pageTargetId: string;
   sessionId: string;
   viewportWidth: number;

@@ -5,7 +5,7 @@ import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const sessionMeta = {
-  tabId: 'tab-id',
+  tabId: 1,
   sessionId: 'session-id',
   sessionsDataLocation: '',
 };
@@ -15,9 +15,9 @@ let spy: jest.SpyInstance;
 beforeEach(() => {
   class TestConnection extends ConnectionToCore {
     async internalSendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
-      if (command === 'createSession') {
+      if (command === 'Session.create') {
         this.onMessage({ data: sessionMeta, responseId: messageId });
-      } else if (command === 'addEventListener') {
+      } else if (command === 'Session.addEventListener') {
         this.onMessage({ data: { listenerId: 'listener-id' }, responseId: messageId });
       } else {
         this.onMessage({ data: {}, responseId: messageId });
@@ -50,11 +50,11 @@ describe('events', () => {
 
     const outgoingCommands = spy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
-      'connect',
-      'createSession',
-      'addEventListener', // automatic close tracker
-      'addEventListener', // user added close listener
-      'closeSession',
+      'Core.connect',
+      'Session.create',
+      'Session.addEventListener', // automatic close tracker
+      'Session.addEventListener', // user added close listener
+      'Session.close',
     ]);
     expect(isClosed).toBe(true);
   });

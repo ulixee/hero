@@ -87,7 +87,7 @@ export default class ReplayApi {
     ReplayApi.websockets.delete(this.websocket);
   }
 
-  public getTab(tabId: string): ReplayTabState {
+  public getTab(tabId: number): ReplayTabState {
     return this.tabs.find(x => x.tabId === tabId);
   }
 

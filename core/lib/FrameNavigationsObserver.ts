@@ -16,21 +16,21 @@ import type IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePr
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import * as moment from 'moment';
 import type { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import type TabNavigations from './TabNavigations';
+import type FrameNavigations from './FrameNavigations';
 
-export default class TabNavigationsObserver {
-  private readonly navigations: TabNavigations;
+export default class FrameNavigationsObserver {
+  private readonly navigations: FrameNavigations;
 
   // this is the default "starting" point for a wait-for location change if a previous command id is not specified
   private defaultWaitForLocationCommandId = 0;
 
   private waitingForLoadTimeout: NodeJS.Timeout;
-  private waitingForResource: IResolvablePromise<number>;
-  private waitingForPromise: IResolvablePromise<void>;
-  private waitingForStatus: ILocationStatus;
+  private resourceIdResolvable: IResolvablePromise<number>;
+  private statusTriggerResolvable: IResolvablePromise<void>;
+  private statusTrigger: ILocationStatus;
   private logger: IBoundLog;
 
-  constructor(navigations: TabNavigations) {
+  constructor(navigations: FrameNavigations) {
     this.navigations = navigations;
     this.logger = navigations.logger.createChild(module);
     navigations.on('navigation-requested', this.onNavigation.bind(this));
@@ -69,7 +69,7 @@ export default class TabNavigationsObserver {
         ? history.startCommandId >= sinceCommandId
         : history.startCommandId > sinceCommandId;
       if (isMatch) {
-        const previousState = TabNavigationsObserver.getTriggerForNavigationReason(
+        const previousState = FrameNavigationsObserver.getTriggerForNavigationReason(
           history.navigationReason,
         );
         if (previousState === status) {
@@ -107,8 +107,8 @@ export default class TabNavigationsObserver {
   public async waitForNavigationResourceId(): Promise<number> {
     const top = this.navigations.top;
 
-    this.waitingForResource = top?.resourceId;
-    const resourceId = await this.waitingForResource?.promise;
+    this.resourceIdResolvable = top?.resourceId;
+    const resourceId = await this.resourceIdResolvable?.promise;
     if (top?.navigationError) {
       throw top.navigationError;
     }
@@ -117,7 +117,7 @@ export default class TabNavigationsObserver {
 
   public cancelWaiting(cancelMessage: string): void {
     clearTimeout(this.waitingForLoadTimeout);
-    for (const promise of [this.waitingForResource, this.waitingForPromise]) {
+    for (const promise of [this.resourceIdResolvable, this.statusTriggerResolvable]) {
       if (!promise || promise.isResolved) continue;
 
       const canceled = new CanceledPromiseError(cancelMessage);
@@ -151,17 +151,18 @@ export default class TabNavigationsObserver {
   private onNavigation(lifecycle: INavigation): void {
     // don't trigger change for the first url on a new tab
     if (lifecycle.navigationReason === 'newTab') return;
-    const trigger = TabNavigationsObserver.getTriggerForNavigationReason(
+    const trigger = FrameNavigationsObserver.getTriggerForNavigationReason(
       lifecycle.navigationReason,
     );
-    if (trigger === this.waitingForStatus) this.resolvePendingStatus(trigger);
+    if (trigger === this.statusTrigger) this.resolvePendingStatus(trigger);
   }
 
   private onLoadStatusChange(): void {
-    const loadTrigger = PipelineStatus[this.waitingForStatus];
-    if (!this.waitingForPromise || this.waitingForPromise.isResolved || !loadTrigger) return;
+    const loadTrigger = PipelineStatus[this.statusTrigger];
+    if (!this.statusTriggerResolvable || this.statusTriggerResolvable.isResolved || !loadTrigger)
+      return;
 
-    if (this.waitingForStatus === LocationStatus.PaintingStable) {
+    if (this.statusTrigger === LocationStatus.PaintingStable) {
       this.waitForPageLoaded();
       return;
     }
@@ -205,24 +206,24 @@ export default class TabNavigationsObserver {
   }
 
   private resolvePendingStatus(resolvedWithStatus: string): void {
-    this.logger.info(`Resolving pending "${this.waitingForStatus}" with trigger`, {
+    this.logger.info(`Resolving pending "${this.statusTrigger}" with trigger`, {
       resolvedWithStatus,
-      waitingForStatus: this.waitingForStatus,
+      waitingForStatus: this.statusTrigger,
       url: this.navigations.currentUrl,
     });
     clearTimeout(this.waitingForLoadTimeout);
-    if (this.waitingForPromise && !this.waitingForPromise?.isResolved) {
-      this.waitingForPromise.resolve();
-      this.waitingForPromise = null;
+    if (this.statusTriggerResolvable && !this.statusTriggerResolvable?.isResolved) {
+      this.statusTriggerResolvable.resolve();
+      this.statusTriggerResolvable = null;
     }
   }
 
   private createStatusTriggeredPromise(status: ILocationStatus, timeoutMs: number): Promise<void> {
-    if (this.waitingForPromise) this.cancelWaiting('New location trigger created');
+    if (this.statusTriggerResolvable) this.cancelWaiting('New location trigger created');
 
-    this.waitingForStatus = status;
-    this.waitingForPromise = createPromise<void>(timeoutMs ?? 60e3);
-    return this.waitingForPromise.promise;
+    this.statusTrigger = status;
+    this.statusTriggerResolvable = createPromise<void>(timeoutMs ?? 60e3);
+    return this.statusTriggerResolvable.promise;
   }
 
   private static getTriggerForNavigationReason(reason: NavigationReason): LocationTrigger {

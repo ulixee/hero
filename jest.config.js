@@ -8,7 +8,7 @@ module.exports = {
   verbose: false,
   testMatch: ['**/test/*.test.js'],
   testEnvironment: 'node',
-  collectCoverage: true,
+  collectCoverage: false,
   transform: {},
   collectCoverageFrom: workspaces.map(x => `${x}/**/*.js`),
   coverageReporters: ['text-summary', 'json'],

@@ -5,7 +5,7 @@ import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
 export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'MouseEvents', [
-      ['tabId', 'TEXT'],
+      ['tabId', 'INTEGER'],
       ['event', 'INTEGER'],
       ['commandId', 'INTEGER'],
       ['pageX', 'INTEGER'],
@@ -19,7 +19,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(tabId: string, mouseEvent: IMouseEvent) {
+  public insert(tabId: number, mouseEvent: IMouseEvent) {
     const [
       commandId,
       event,
@@ -50,7 +50,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
 }
 
 export interface IMouseEventRecord {
-  tabId: string;
+  tabId: number;
   event: MouseEventType;
   commandId: number;
   pageX: number;

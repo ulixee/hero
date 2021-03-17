@@ -1,7 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
 import { XPathResult } from '@secret-agent/core-interfaces/AwaitedDom';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { Handler } from '../index';
+import { FrameEnvironment } from '@secret-agent/client';
+import { Handler, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
 let handler: Handler;
@@ -291,6 +292,84 @@ describe('basic Document tests', () => {
     const lis = await shadowRoot.querySelectorAll('li').length;
     expect(lis).toBe(3);
   });
+
+  it('allows selectors in iframes', async () => {
+    koaServer.get('/iframePage', ctx => {
+      ctx.body = `
+        <body>
+        <h1>Iframe Page</h1>
+<iframe src="/subFrame"></iframe>
+        </body>
+      `;
+    });
+    koaServer.get('/subFrame', ctx => {
+      ctx.body = `
+        <body>
+        <h1>Subframe Page</h1>
+<div>This is content inside the frame</div>
+        </body>
+      `;
+    });
+
+    const agent = await openBrowser(`/iframePage`);
+
+    const outerH1 = await agent.document.querySelector('h1').textContent;
+    expect(outerH1).toBe('Iframe Page');
+
+    let innerFrame: FrameEnvironment;
+    for (const frame of await agent.activeTab.frameEnvironments) {
+      await frame.waitForLoad(LocationStatus.DomContentLoaded);
+      const url = await frame.url;
+      if (url.endsWith('/subFrame')) {
+        innerFrame = frame;
+        break;
+      }
+    }
+
+    const innerH1 = await innerFrame.document.querySelector('h1').textContent;
+    expect(innerH1).toBe('Subframe Page');
+
+    await agent.close();
+  });
+
+  it('can find the Frame object for an iframe', async () => {
+    koaServer.get('/iframePage2', ctx => {
+      ctx.body = `
+        <body>
+        <h1>Iframe Page</h1>
+<iframe src="/subFrame1" name="frame1"></iframe>
+<iframe src="/subFrame2" id="frame2"></iframe>
+        </body>
+      `;
+    });
+    koaServer.get('/subFrame1', ctx => {
+      ctx.body = `<body><h1>Subframe Page 1</h1></body>`;
+    });
+    koaServer.get('/subFrame2', ctx => {
+      ctx.body = `<body><h1>Subframe Page 2</h1>
+<iframe src="/subFrame1" id="nested"></iframe>
+</body>`;
+    });
+
+    const agent = await openBrowser(`/iframePage2`);
+
+    const frameElement2 = agent.document.querySelector('#frame2');
+    await agent.waitForElement(frameElement2);
+    const frame2Env = await agent.activeTab.getFrameEnvironment(frameElement2);
+
+    expect(frame2Env).toBeTruthy();
+    await expect(frame2Env.document.querySelector('h1').textContent).resolves.toBe(
+      'Subframe Page 2',
+    );
+
+    const nestedFrameElement = frame2Env.document.querySelector('iframe');
+    const nestedFrameEnv = await frame2Env.getFrameEnvironment(nestedFrameElement);
+    expect(nestedFrameEnv).toBeTruthy();
+
+    await expect(nestedFrameEnv.document.body.innerHTML).resolves.toBe('<h1>Subframe Page 1</h1>');
+
+    await agent.close();
+  }, 130e3);
 });
 
 async function openBrowser(path: string) {

@@ -1,5 +1,6 @@
 import * as Typeson from 'typeson';
 import * as TypesonRegistry from 'typeson-registry/dist/presets/builtin';
+import * as Fs from 'fs';
 import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 
 const buffer = {
@@ -42,7 +43,18 @@ const errorHandler = {
 
 const TSON = new Typeson().register(TypesonRegistry).register(buffer).register(errorHandler);
 
+const domScript = `${Fs.readFileSync(require.resolve('typeson/dist/typeson.min.js'), 'utf8')};
+${Fs.readFileSync(require.resolve('typeson-registry/dist/presets/builtin.js'), 'utf8').replace(
+  /\/\/# sourceMappingURL=.+\.map/g,
+  '',
+)};
+
+const TSON = new Typeson().register(Typeson.presets.builtin);
+`;
+
 export default class TypeSerializer {
+  static domScript = domScript;
+
   static stringify(object: any): string {
     return TSON.stringify(object);
   }

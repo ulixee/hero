@@ -4,7 +4,7 @@ import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { assert } from '@secret-agent/commons/utils';
 import Session from './Session';
-import DomEnv from './DomEnv';
+import InjectedScripts from './InjectedScripts';
 
 const { log } = Log(module);
 
@@ -58,8 +58,7 @@ export default class UserProfile {
 
       if (hasStorage) {
         // install scripts so we can restore storage
-        const domEnv = new DomEnv({ sessionId, isClosing: false, id: 'UserProfileInstall' }, page);
-        await domEnv.install();
+        await InjectedScripts.install(page);
 
         for (const origin of origins) {
           const originStorage = storage[origin];
@@ -89,7 +88,7 @@ export default class UserProfile {
       // reinstall session storage for the
       for (const [origin, storage] of Object.entries(userProfile?.storage ?? {})) {
         if (!storage.sessionStorage.length) continue;
-        const load = page.waitOn('load');
+        const load = page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load');
         await page.navigate(origin);
         await load;
         await page.mainFrame.evaluate(

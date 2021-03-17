@@ -4,7 +4,7 @@ import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import CoreSession from './CoreTab';
+import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import AwaitedEventTarget from './AwaitedEventTarget';
@@ -15,7 +15,7 @@ interface IState {
   resource: IResourceMeta;
   request: ResourceRequest;
   response: ResourceResponse;
-  coreTab: Promise<CoreSession>;
+  coreTab: Promise<CoreTab>;
   awaitedPath: AwaitedPath;
 }
 
@@ -74,7 +74,7 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
 
 export function createWebsocketResource(
   resourceMeta: IResourceMeta,
-  coreTab: Promise<CoreSession>,
+  coreTab: Promise<CoreTab>,
 ): WebsocketResource {
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);

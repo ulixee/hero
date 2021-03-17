@@ -4,7 +4,7 @@ import SqliteTable from '@secret-agent/commons/SqliteTable';
 export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'PageLogs', [
-      ['tabId', 'TEXT'],
+      ['tabId', 'INTEGER'],
       ['frameId', 'TEXT'],
       ['type', 'TEXT'],
       ['message', 'TEXT'],
@@ -14,7 +14,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
   }
 
   public insert(
-    tabId: string,
+    tabId: number,
     frameId: string,
     type: string,
     message: string,
@@ -26,7 +26,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
 }
 
 export interface IPageLogRecord {
-  tabId: string;
+  tabId: number;
   frameId: string;
   type: string;
   message: string;

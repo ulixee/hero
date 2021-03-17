@@ -17,7 +17,7 @@ export default interface ISaSession {
 }
 
 export interface ISessionTab {
-  tabId: string;
+  tabId: number;
   createdTime: string;
   startOrigin?: string;
   width: number;

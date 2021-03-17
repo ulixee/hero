@@ -236,7 +236,7 @@ export default class Application {
       return this.loadSessionReplay(replayMeta, true);
     });
 
-    ipcMain.on('navigate-to-session-tab', (e, tab: { id: string }) => {
+    ipcMain.on('navigate-to-session-tab', (e, tab: { id: number }) => {
       Window.current?.loadReplayTab(tab.id);
     });
 

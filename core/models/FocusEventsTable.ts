@@ -5,7 +5,7 @@ import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
 export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'FocusEvents', [
-      ['tabId', 'TEXT'],
+      ['tabId', 'INTEGER'],
       ['event', 'INTEGER'],
       ['commandId', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
@@ -14,7 +14,7 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
     ]);
   }
 
-  public insert(tabId: string, focusEvent: IFocusEvent) {
+  public insert(tabId: number, focusEvent: IFocusEvent) {
     const [commandId, type, targetNodeId, relatedTargetNodeId, timestamp] = focusEvent;
     const record = [
       tabId,
@@ -29,7 +29,7 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
 }
 
 export interface IFocusRecord {
-  tabId: string;
+  tabId: number;
   event: FocusEventType;
   commandId: number;
   targetNodeId?: number;

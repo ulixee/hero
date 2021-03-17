@@ -80,11 +80,25 @@ The connectionToCore host address to which this Agent has connected. This is use
 
 ### agent.document <div class="specs"><i>W3C</i></div> {#document}
 
-Returns a reference to the document that the active tab contains.
+Returns a reference to the main Document for the active tab.
 
 #### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 Alias for [activeTab.document](/docs/basic-interfaces/tab#document)
+
+### agent.mainFrameEnvironment {#main-frame-environment}
+
+Returns a reference to the document of the [mainFrameEnvironment](#main-frame-environment) of the active tab.
+
+Alias for [tab.mainFrameEnvironment.document](/docs/basic-interfaces/frame-environment#document).
+
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
+
+### agent.frameEnvironments {#frame-environments}
+
+Returns a list of [FrameEnvironments](/docs/basic-interfaces/frame-environment) loaded for the active tab.
+
+#### **Type**: [`Promise<Frame[]>`](/docs/basic-interfaces/frame-environment).
 
 ### agent.lastCommandId {#lastCommandId}
 
@@ -277,6 +291,10 @@ Agent instances have aliases to all top-level Tab methods. They will be routed t
 ### agent.fetch*(requestInput, requestInit)* <div class="specs"><i>W3C</i></div> {#fetch}
 
 Alias for [Tab.fetch()](/docs/basic-interfaces/tab#fetch)
+
+### agent.getFrameEnvironment*(frameElement)* {#get-frame-environment}
+
+Alias for [Tab.getFrameEnvironment()](/docs/basic-interfaces/tab#get-frame-environment)
 
 ### agent.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#get-computed-style}
 

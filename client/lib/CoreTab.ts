@@ -1,39 +1,39 @@
-import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import { ILocationStatus, ILocationTrigger } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
-import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from 'awaited-dom/base/IAttachedState';
-import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@secret-agent/core-interfaces/IScreenshotOptions';
+import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import { createResource } from './Resource';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 export default class CoreTab implements IJsPathEventTarget {
-  public tabId: string;
+  public tabId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
+  public get mainFrameEnvironment(): CoreFrameEnvironment {
+    return this.frameEnvironmentsById.get(this.mainFrameId);
+  }
 
+  protected frameEnvironmentsById = new Map<string, CoreFrameEnvironment>();
   protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly connection: ConnectionToCore;
+  private readonly mainFrameId: string;
 
   constructor(meta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
-    const { tabId, sessionId, sessionName } = meta;
+    const { tabId, sessionId, frameId, sessionName } = meta;
     this.tabId = tabId;
     this.sessionId = sessionId;
+    this.mainFrameId = frameId;
     this.meta = {
       sessionId,
       tabId,
@@ -42,6 +42,7 @@ export default class CoreTab implements IJsPathEventTarget {
     this.connection = connection;
     this.commandQueue = new CoreCommandQueue(meta, connection);
     this.eventHeap = new CoreEventHeap(this.meta, connection);
+    this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));
 
     if (!this.eventHeap.hasEventInterceptors('resource')) {
       this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
@@ -50,114 +51,78 @@ export default class CoreTab implements IJsPathEventTarget {
     }
   }
 
-  public getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
-    return this.commandQueue.run('getResourceProperty', id, propertyPath);
+  public async getCoreFrameEnvironments(): Promise<CoreFrameEnvironment[]> {
+    const frameMetas = await this.commandQueue.run<IFrameMeta[]>('Tab.getFrameEnvironments');
+    for (const frameMeta of frameMetas) {
+      this.getCoreFrameForMeta(frameMeta);
+    }
+    return [...this.frameEnvironmentsById.values()];
+  }
+
+  public getCoreFrameForMeta(frameMeta: IFrameMeta): CoreFrameEnvironment {
+    if (!this.frameEnvironmentsById.has(frameMeta.id)) {
+      const meta = { ...this.meta };
+      meta.frameId = frameMeta.id;
+      this.frameEnvironmentsById.set(
+        frameMeta.id,
+        new CoreFrameEnvironment(meta, this.commandQueue),
+      );
+    }
+    return this.frameEnvironmentsById.get(frameMeta.id);
+  }
+
+  public async getResourceProperty<T = any>(id: number, propertyPath: string): Promise<T> {
+    return await this.commandQueue.run('Tab.getResourceProperty', id, propertyPath);
   }
 
   public async configure(options: IConfigureSessionOptions): Promise<void> {
-    await this.commandQueue.run('configure', options);
-  }
-
-  public async execJsPath<T = any>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
-    return await this.commandQueue.run('execJsPath', jsPath);
-  }
-
-  public async getJsValue<T>(expression: string): Promise<{ value: T; type: string }> {
-    return await this.commandQueue.run('getJsValue', expression);
-  }
-
-  public async fetch(request: string | number, init?: IRequestInit): Promise<IAttachedState> {
-    return await this.commandQueue.run('fetch', request, init);
-  }
-
-  public async createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
-    return await this.commandQueue.run('createRequest', input, init);
-  }
-
-  public async getUrl(): Promise<string> {
-    return await this.commandQueue.run('getLocationHref');
+    await this.commandQueue.run('Tab.configure', options);
   }
 
   public async goto(href: string, timeoutMs?: number): Promise<IResourceMeta> {
-    return await this.commandQueue.run('goto', href, timeoutMs);
+    return await this.commandQueue.run('Tab.goto', href, timeoutMs);
   }
 
   public async goBack(timeoutMs?: number): Promise<string> {
-    return await this.commandQueue.run('goBack', timeoutMs);
+    return await this.commandQueue.run('Tab.goBack', timeoutMs);
   }
 
   public async goForward(timeoutMs?: number): Promise<string> {
-    return await this.commandQueue.run('goForward', timeoutMs);
+    return await this.commandQueue.run('Tab.goForward', timeoutMs);
   }
 
   public async reload(timeoutMs?: number): Promise<void> {
-    return await this.commandQueue.run('reload', timeoutMs);
-  }
-
-  public async interact(interactionGroups: IInteractionGroups): Promise<void> {
-    await this.commandQueue.run('interact', ...interactionGroups);
+    return await this.commandQueue.run('Tab.reload', timeoutMs);
   }
 
   public async exportUserProfile(): Promise<IUserProfile> {
-    return await this.commandQueue.run('exportUserProfile');
-  }
-
-  public async getCookies(): Promise<ICookie[]> {
-    return await this.commandQueue.run('getCookies');
-  }
-
-  public async setCookie(
-    name: string,
-    value: string,
-    options?: ISetCookieOptions,
-  ): Promise<boolean> {
-    return await this.commandQueue.run('setCookie', name, value, options);
-  }
-
-  public async removeCookie(name: string): Promise<boolean> {
-    return await this.commandQueue.run('removeCookie', name);
+    return await this.commandQueue.run('Session.exportUserProfile');
   }
 
   public async takeScreenshot(options: IScreenshotOptions): Promise<Buffer> {
-    return await this.commandQueue.run('takeScreenshot', options);
-  }
-
-  public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
-    return await this.commandQueue.run('isElementVisible', jsPath);
+    return await this.commandQueue.run('Tab.takeScreenshot', options);
   }
 
   public async waitForResource(
     filter: Pick<IWaitForResourceFilter, 'url' | 'type'>,
     opts: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
-    return await this.commandQueue.run('waitForResource', filter, opts);
-  }
-
-  public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {
-    await this.commandQueue.run('waitForElement', jsPath, opts);
-  }
-
-  public async waitForLoad(status: ILocationStatus, opts: IWaitForOptions): Promise<void> {
-    await this.commandQueue.run('waitForLoad', status, opts);
-  }
-
-  public async waitForLocation(trigger: ILocationTrigger, opts: IWaitForOptions): Promise<void> {
-    await this.commandQueue.run('waitForLocation', trigger, opts);
+    return await this.commandQueue.run('Tab.waitForResource', filter, opts);
   }
 
   public async waitForMillis(millis: number): Promise<void> {
-    await this.commandQueue.run('waitForMillis', millis);
+    await this.commandQueue.run('Tab.waitForMillis', millis);
   }
 
   public async waitForNewTab(opts: IWaitForOptions): Promise<CoreTab> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('waitForNewTab', opts);
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.waitForNewTab', opts);
     const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
     return new CoreTab({ ...this.meta, tabId: sessionMeta.tabId }, this.connection);
   }
 
   public async focusTab(): Promise<void> {
-    await this.commandQueue.run('focus');
+    await this.commandQueue.run('Tab.focus');
   }
 
   public async addEventListener(
@@ -178,7 +143,7 @@ export default class CoreTab implements IJsPathEventTarget {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run('close');
+    await this.commandQueue.run('Tab.close');
     const session = this.connection.getSession(this.sessionId);
     session?.removeTab(this);
   }

@@ -141,7 +141,10 @@ test('should override Errors properly on https pages', async () => {
   page.on('console', console.log);
   await page.addNewDocumentScript(getOverrideScript('Error.captureStackTrace').script, false);
   await page.addNewDocumentScript(getOverrideScript('Error.constructor').script, false);
-  await Promise.all([page.navigate(httpServer.url), page.waitOn('load')]);
+  await Promise.all([
+    page.navigate(httpServer.url),
+    page.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+  ]);
 
   const errorToString = await page.evaluate(`Error.toString()`);
   expect(errorToString).toBe('function Error() { [native code] }');

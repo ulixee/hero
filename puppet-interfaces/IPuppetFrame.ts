@@ -1,6 +1,7 @@
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
+import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
 
-export interface IPuppetFrame {
+export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   id: string;
   parentId?: string;
   name?: string;
@@ -9,6 +10,7 @@ export interface IPuppetFrame {
   disposition?: string;
   securityOrigin: string;
   isLoaded: boolean;
+  isAttached(): boolean;
   waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
@@ -28,4 +30,9 @@ export interface IPuppetFrameEvents {
   'frame-lifecycle': { frame: IPuppetFrame; name: string };
   'frame-navigated': { frame: IPuppetFrame; navigatedInDocument?: boolean };
   'frame-requested-navigation': { frame: IPuppetFrame; url: string; reason: NavigationReason };
+}
+
+export interface IPuppetFrameInternalEvents {
+  'default-context-created': { executionContextId: number };
+  'isolated-context-created': { executionContextId: number };
 }

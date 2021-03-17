@@ -12,6 +12,7 @@ export default class CoreCommandQueue {
   constructor(
     private readonly meta: (ISessionMeta & { sessionName: string }) | null,
     private readonly connection: ConnectionToCore,
+    sharedQueue?: Queue,
   ) {
     if (meta) {
       const markers = [
@@ -22,7 +23,8 @@ export default class CoreCommandQueue {
       ].join('\n');
       this.sessionMarker = `\n\n${markers}`;
     }
-    this.internalQueue = new Queue('CORE COMMANDS');
+
+    this.internalQueue = sharedQueue ?? new Queue('CORE COMMANDS');
     this.internalQueue.concurrency = 1;
   }
 
@@ -35,6 +37,10 @@ export default class CoreCommandQueue {
 
   public stop(cancelError: CanceledPromiseError): void {
     this.internalQueue.stop(cancelError);
+  }
+
+  public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
+    return new CoreCommandQueue(meta, this.connection, this.internalQueue);
   }
 
   private async runRequest<T>(command: string, args: any[]): Promise<T> {

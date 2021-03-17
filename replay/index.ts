@@ -48,13 +48,14 @@ try {
 let hasLocalReplay = false;
 try {
   require.resolve('./app');
-  hasLocalReplay = !process.env.SA_USE_REPLAY_BINARY;
+  hasLocalReplay = Boolean(JSON.parse(process.env.SA_USE_REPLAY_BINARY ?? 'false')) === false;
 } catch (err) {
   // not installed locally
 }
 
+const showDebugLogs = Boolean(JSON.parse(process.env.SA_REPLAY_DEBUG ?? 'false'));
+
 export async function replay(launchArgs: IReplayScriptRegistration): Promise<any> {
-  const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const {
     replayApiUrl,
     sessionsDataLocation,
@@ -99,7 +100,7 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
       console.log("Couldn't register this script with the Replay app.", scriptMeta);
     }
   } catch (err) {
-    if (showLogs) {
+    if (showDebugLogs) {
       console.log('Error launching Replay', scriptMeta, err);
     }
   } finally {
@@ -152,10 +153,9 @@ function launchReplay(
   args: string[],
   needsShell = false,
 ): ChildProcess.ChildProcess {
-  const showLogs = !!process.env.SA_REPLAY_DEBUG;
   const child = ChildProcess.spawn(appPath, args, {
     detached: true,
-    stdio: ['ignore', showLogs ? 'inherit' : 'ignore', showLogs ? 'inherit' : 'ignore'],
+    stdio: ['ignore', showDebugLogs ? 'inherit' : 'ignore', showDebugLogs ? 'inherit' : 'ignore'],
     shell: needsShell,
     windowsHide: false,
   });

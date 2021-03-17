@@ -10,7 +10,7 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreSession implements IJsPathEventTarget {
-  public tabsById = new Map<string, CoreTab>();
+  public tabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
   public sessionsDataLocation: string;
@@ -59,15 +59,15 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public getAgentMeta(): Promise<IAgentMeta> {
-    return this.commandQueue.run('getAgentMeta');
+    return this.commandQueue.run('Session.getAgentMeta');
   }
 
   public async configure(options?: Partial<IConfigureSessionOptions>): Promise<void> {
-    await this.commandQueue.run('configure', options);
+    await this.commandQueue.run('Session.configure', options);
   }
 
   public async getTabs(): Promise<CoreTab[]> {
-    const tabSessionMetas = await this.commandQueue.run<ISessionMeta[]>('getTabs');
+    const tabSessionMetas = await this.commandQueue.run<ISessionMeta[]>('Session.getTabs');
     for (const tabMeta of tabSessionMetas) {
       this.addTab(tabMeta);
     }
@@ -88,7 +88,7 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run('closeSession');
+    await this.commandQueue.run('Session.close');
     process.nextTick(() => this.connection.closeSession(this));
     loggerSessionIdNames.delete(this.sessionId);
   }

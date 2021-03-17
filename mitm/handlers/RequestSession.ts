@@ -181,7 +181,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public registerWebsocketHeaders(
-    tabId: string,
+    tabId: number,
     message: {
       browserRequestId: string;
       headers: IResourceHeaders;

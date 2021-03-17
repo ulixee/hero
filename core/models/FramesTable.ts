@@ -8,7 +8,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       'Frames',
       [
         ['id', 'TEXT', 'NOT NULL PRIMARY KEY'],
-        ['tabId', 'TEXT'],
+        ['tabId', 'INTEGER'],
         ['domNodeId', 'INTEGER'],
         ['name', 'TEXT'],
         ['securityOrigin', 'TEXT'],
@@ -36,7 +36,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
 
 export interface IFrameRecord {
   id: string;
-  tabId: string;
+  tabId: number;
   domNodeId?: number;
   startCommandId: number;
   name?: string;

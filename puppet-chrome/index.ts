@@ -24,14 +24,16 @@ const PuppetLauncher: IPuppetLauncher = {
       chromeArguments.push(
         `--user-data-dir=${Path.join(os.tmpdir(), 'chromium-headed-data', String((counter += 1)))}`,
       ); // required to allow multiple browsers to be headed
-      chromeArguments.push('--auto-open-devtools-for-tabs');
+
+      const shouldDisableDevtools = Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false'));
+      if (!shouldDisableDevtools) chromeArguments.push('--auto-open-devtools-for-tabs');
     }
 
     if (options.proxyPort !== undefined) {
       chromeArguments.push(`--proxy-server=localhost:${options.proxyPort}`);
     }
 
-    if (process.env.NO_CHROME_SANDBOX) {
+    if (Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')) === true) {
       chromeArguments.push('--no-sandbox');
     } else if (os.platform() === 'linux') {
       const runningAsRoot = process.geteuid && process.geteuid() === 0;
@@ -75,7 +77,7 @@ const PuppetLauncher: IPuppetLauncher = {
         `================================`,
         `To workaround sandboxing issues, do either of the following:`,
         `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/secret-agent/tree/master/tools/docker)`,
-        `  - (alternative): Launch Chromium without sandbox using 'NO_CHROME_SANDBOX=false' environmental variable`,
+        `  - (alternative): Launch Chromium without sandbox using 'SA_NO_CHROME_SANDBOX=false' environmental variable`,
         `================================`,
         ``,
       ].join('\n');

@@ -16,7 +16,7 @@ const releasesAssetsUrl = `https://github.com/ulixee/secret-agent/releases/downl
 
 // tslint:disable:no-console
 
-const forceBuild = process.env.SA_REBUILD_MITM_SOCKET || false;
+const forceBuild = Boolean(JSON.parse(process.env.SA_REBUILD_MITM_SOCKET || 'false'));
 
 (async function install() {
   let programName = 'connect';

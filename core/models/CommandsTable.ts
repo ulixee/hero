@@ -10,7 +10,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       'Commands',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
-        ['tabId', 'TEXT'],
+        ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
         ['name', 'TEXT'],
         ['args', 'TEXT'],

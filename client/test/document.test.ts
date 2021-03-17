@@ -18,17 +18,17 @@ describe('document tests', () => {
       async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
         const { command, args } = payload;
         await new Promise(resolve => setTimeout(resolve, 5));
-        if (command === 'createSession') {
+        if (command === 'Session.create') {
           return {
             data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
           };
         }
-        if (command === 'addEventListener') {
+        if (command === 'Session.addEventListener') {
           return {
             data: { listenerId: '1' },
           };
         }
-        if (command === 'execJsPath') {
+        if (command === 'FrameEnvironment.execJsPath') {
           const [jsPath] = args;
           const lastPath = jsPath[jsPath.length - 1];
           if (lastPath && lastPath[0] === getAttachedStateFnName) {
@@ -75,13 +75,13 @@ describe('document tests', () => {
 
     const outgoingCommands = outgoing.mock.calls;
     expect(outgoingCommands.map(x => x[0].command)).toMatchObject([
-      'connect',
-      'createSession',
-      'addEventListener',
-      'execJsPath',
-      'execJsPath',
-      'closeSession',
-      'disconnect',
+      'Core.connect',
+      'Session.create',
+      'Session.addEventListener',
+      'FrameEnvironment.execJsPath',
+      'FrameEnvironment.execJsPath',
+      'Session.close',
+      'Core.disconnect',
     ]);
     expect(outgoingCommands[3][0].args).toMatchObject([
       [...jsPath, [getAttachedStateFnName, undefined]],
