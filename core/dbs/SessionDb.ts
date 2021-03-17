@@ -108,6 +108,10 @@ export default class SessionDb {
           try {
             table.flush();
           } catch (error) {
+            if (String(error).match('attempt to write a readonly database')) {
+              clearInterval(this.saveInterval);
+              this.db = null;
+            }
             log.error('SessionDb.flushError', {
               sessionId: this.sessionId,
               error,
