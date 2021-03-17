@@ -37,6 +37,7 @@ export default class Bezier {
   }
 
   getLookupTable(steps = 100): IPoint[] {
+    if (Number.isNaN(steps)) steps = 100;
     // We want a range from 0 to 1 inclusive, so
     // we decrement and then use <= rather than <:
     steps -= 1;

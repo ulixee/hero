@@ -1,11 +1,6 @@
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import Bezier from './Bezier';
 
-const sub = (a: IPoint, b: IPoint): IPoint => ({ x: a.x - b.x, y: a.y - b.y });
-const div = (a: IPoint, b: number): IPoint => ({ x: a.x / b, y: a.y / b });
-const mult = (a: IPoint, b: number): IPoint => ({ x: a.x * b, y: a.y * b });
-const add = (a: IPoint, b: IPoint): IPoint => ({ x: a.x + b.x, y: a.y + b.y });
-
 export default function generateVector(
   startPoint: IPoint,
   destinationPoint: IPoint,
@@ -28,12 +23,23 @@ export default function generateVector(
   });
 }
 
-function path(start: IPoint, end: IPoint, targetWidth = 100, spreadOverride?: number): IPoint[] {
+function path(start: IPoint, finish: IPoint, targetWidth = 100, spreadOverride?: number): IPoint[] {
   const minSteps = 25;
-  const curve = bezierCurve(start, end, spreadOverride);
+
+  if (!targetWidth || Number.isNaN(targetWidth)) targetWidth = 1;
+
+  let spread = spreadOverride;
+  if (!spread) {
+    const vec = direction(start, finish);
+    spread = Math.min(magnitude(vec), 200);
+  }
+  const anchors = generateBezierAnchors(start, finish, spread);
+
+  const curve = new Bezier(start, ...anchors, finish);
   const length = curve.length() * 0.8;
   const baseTime = Math.random() * minSteps;
-  const steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
+  let steps = Math.ceil((Math.log2(fitts(length, targetWidth) + 1) + baseTime) * 3);
+  if (Number.isNaN(steps)) steps = 25;
 
   return curve
     .getLookupTable(steps)
@@ -44,16 +50,10 @@ function path(start: IPoint, end: IPoint, targetWidth = 100, spreadOverride?: nu
     .filter(({ x, y }) => !Number.isNaN(x) && !Number.isNaN(y));
 }
 
-function bezierCurve(start: IPoint, finish: IPoint, overrideSpread?: number): Bezier {
-  // could be played around with
-  const min = 2;
-  const max = 200;
-  const vec = direction(start, finish);
-  const length = magnitude(vec);
-  const spread = Math.min(length, Math.max(min, max));
-  const anchors = generateBezierAnchors(start, finish, overrideSpread ?? spread);
-  return new Bezier(start, ...anchors, finish);
-}
+const sub = (a: IPoint, b: IPoint): IPoint => ({ x: a.x - b.x, y: a.y - b.y });
+const div = (a: IPoint, b: number): IPoint => ({ x: a.x / b, y: a.y / b });
+const mult = (a: IPoint, b: number): IPoint => ({ x: a.x * b, y: a.y * b });
+const add = (a: IPoint, b: IPoint): IPoint => ({ x: a.x + b.x, y: a.y + b.y });
 
 function randomVectorOnLine(a: IPoint, b: IPoint) {
   const vec = direction(a, b);
