@@ -214,11 +214,9 @@ test('should handle h2 client going to h1 request', async () => {
   });
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('Gtg');
-  expect(responseHeaders).toEqual({
-    ':status': 200,
-    'cache-control': 'public',
-    date: expect.any(String),
-  });
+  expect(responseHeaders[':status']).toBe(200);
+  expect(responseHeaders['cache-control']).toBe('public');
+  expect(responseHeaders.date).toBeTruthy();
 });
 
 test('should handle cache headers for h2', async () => {
