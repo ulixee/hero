@@ -96,6 +96,11 @@ export class BrowserContext
     if (page) page.didClose();
   }
 
+  targetKilled(targetId: string, errorCode: number) {
+    const page = this.getPageWithId(targetId);
+    if (page) page.onTargetKilled(errorCode);
+  }
+
   async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
     if (!this.getPageWithId(targetId)) {
@@ -268,8 +273,12 @@ export class BrowserContext
     const receive = addTypedEventListener(cdpSession.messageEvents, 'receive', event => {
       if (shouldFilter) {
         // see if this was initiated by this browser context
-        const { id } = event as any;
+        const { id, targetInfo } = event as any;
         if (id && !this.browserContextInitiatedMessageIds.has(id)) return;
+
+        // see if this has a browser context target
+        const target = targetInfo as TargetInfo;
+        if (target && target.browserContextId && target.browserContextId !== this.id) return;
       }
       this.emit('devtools-message', {
         direction: 'receive',

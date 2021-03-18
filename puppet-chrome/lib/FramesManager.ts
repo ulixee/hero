@@ -95,11 +95,11 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     return this.isReady;
   }
 
-  public close() {
+  public close(error?: Error) {
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('FramesManager closed');
     for (const frame of this.framesById.values()) {
-      frame.cancelPendingEvents('FramesManager closed');
+      frame.close(error);
     }
   }
 

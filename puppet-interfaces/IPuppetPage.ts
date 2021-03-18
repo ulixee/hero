@@ -48,7 +48,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
 export interface IPuppetPageEvents extends IPuppetFrameEvents, IPuppetNetworkEvents {
   close: undefined;
   worker: { worker: IPuppetWorker };
-  crashed: { error: Error };
+  crashed: { error: Error; fatal?: boolean };
   console: { frameId: string; type: string; message: string; location: string };
   'page-error': { frameId: string; error: Error };
 }

@@ -280,9 +280,17 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.closePromise.promise;
   }
 
-  didClose(): void {
+  onTargetKilled(errorCode: number): void {
+    this.emit('crashed', {
+      error: new Error(`Page crashed - killed by Chrome with code ${errorCode}`),
+      fatal: true,
+    });
+    this.didClose();
+  }
+
+  didClose(closeError?: Error): void {
     this.isClosed = true;
-    this.framesManager.close();
+    this.framesManager.close(closeError);
     this.networkManager.close();
     eventUtils.removeEventListeners(this.registeredEvents);
     this.cancelPendingEvents('Page closed', ['close']);
