@@ -51,10 +51,10 @@ export default class DomRecorder {
   }
 
   public async setCommandIdForPage(commandId: number) {
-    const command = `window.commandId = ${commandId}`;
+    const command = `window.commandId=${commandId}`;
     await Promise.all(
       this.puppetPage.frames.map(x =>
-        x.evaluate(command, true).catch(() => {
+        x.evaluate(command, true, false).catch(() => {
           // can fail when frames aren't ready. don't worry about it
         }),
       ),

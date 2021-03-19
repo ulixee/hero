@@ -75,6 +75,7 @@ export default class Session extends TypedEventEmitter<{
     super();
     this.id = uuidv1();
     Session.byId[this.id] = this;
+    this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
     this.browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
     const BrowserEmulator = BrowserEmulators.getClass(this.browserEmulatorId);

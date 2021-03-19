@@ -1,4 +1,5 @@
 import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
+import { registerSerializableErrorType } from './TypeSerializer';
 
 export default class SessionClosedOrMissingError extends CanceledPromiseError {
   constructor(message: string) {
@@ -6,3 +7,5 @@ export default class SessionClosedOrMissingError extends CanceledPromiseError {
     this.name = 'SessionClosedOrMissingError';
   }
 }
+
+registerSerializableErrorType(SessionClosedOrMissingError);

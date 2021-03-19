@@ -96,6 +96,7 @@ export default class Frame
   public async evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
+    shouldAwaitExpression = true,
   ): Promise<T> {
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     const result = await this.cdpSession.send(
@@ -104,7 +105,7 @@ export default class Frame
         expression,
         contextId,
         returnByValue: true,
-        awaitPromise: true,
+        awaitPromise: shouldAwaitExpression,
       },
       this,
     );

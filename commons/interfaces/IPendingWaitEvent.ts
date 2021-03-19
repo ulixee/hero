@@ -1,4 +1,5 @@
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { registerSerializableErrorType } from '../TypeSerializer';
 
 export class CanceledPromiseError extends Error {
   constructor(message: string) {
@@ -13,3 +14,5 @@ export default interface IPendingWaitEvent {
   resolvable: IResolvablePromise;
   error: CanceledPromiseError;
 }
+
+registerSerializableErrorType(CanceledPromiseError);
