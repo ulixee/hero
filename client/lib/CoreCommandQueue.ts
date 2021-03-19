@@ -29,6 +29,9 @@ export default class CoreCommandQueue {
   }
 
   public run<T>(command: string, ...args: any[]): Promise<T> {
+    if (this.connection.isDisconnecting) {
+      return Promise.resolve(null);
+    }
     return this.internalQueue.run<T>(this.runRequest.bind(this, command, args)).catch(error => {
       error.stack += `${this.sessionMarker}`;
       throw error;

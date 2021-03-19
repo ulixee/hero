@@ -224,6 +224,42 @@ describe('connectionToCore', () => {
     await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
   });
 
+  it('handles disconnects from client', async () => {
+    const coreHost = await CoreProcess.spawn({});
+    Helpers.onClose(() => CoreProcess.kill('SIGINT'));
+    const connection = new RemoteConnectionToCore({
+      maxConcurrency: 2,
+      host: coreHost,
+    });
+    await connection.connect();
+
+    const handler = new Handler(connection);
+    Helpers.needsClosing.push(handler);
+
+    const waitForGoto = createPromise();
+    const dispatchErrorPromise = createPromise<Error>();
+    handler.dispatchAgent(async agent => {
+      try {
+        await agent.goto(koaServer.baseUrl);
+        const promise = agent.waitForMillis(10e3);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        waitForGoto.resolve();
+        await promise;
+      } catch (error) {
+        dispatchErrorPromise.resolve(error);
+        throw error;
+      }
+    });
+    await waitForGoto.promise;
+    await connection.disconnect();
+    await new Promise(setImmediate);
+    await expect(dispatchErrorPromise).resolves.toBeTruthy();
+    const dispatchError = await dispatchErrorPromise;
+    expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
+    expect((dispatchError as DisconnectedFromCoreError).coreHost).toBe(coreHost);
+    await expect(handler.waitForAllDispatches()).rejects.toThrowError(DisconnectedFromCoreError);
+  });
+
   it('handles core server ending websocket (econnreset)', async () => {
     const coreHost = await Core.server.address;
     // @ts-ignore

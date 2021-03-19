@@ -1,11 +1,13 @@
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
-import Log from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import Agent from './Agent';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
+import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 type SettledDispatchesBySessionId = { [sessionId: string]: { args: any; error?: Error } };
 type PendingDispatch = { resolution: Promise<Error | void>; sessionId?: string; args: any };
@@ -118,10 +120,15 @@ export default class Handler {
     const dispatches = [...this.dispatches];
     // clear out dispatches everytime you check it
     this.dispatches.length = 0;
+    const startStack = new Error('').stack.split(/\r?\n/).slice(1).join('\n');
     await Promise.all(
       dispatches.map(async dispatch => {
         const err = await dispatch.resolution;
-        if (err) throw err;
+        if (err) {
+          const marker = `------WAIT FOR ALL DISPATCHES`.padEnd(50, '-');
+          err.stack += `\n${marker}\n${startStack}`;
+          throw err;
+        }
       }),
     );
     // keep going if there are new things queued
@@ -166,12 +173,25 @@ export default class Handler {
   }
 
   private async logUnhandledError(error: Error): Promise<void> {
+    if (error instanceof DisconnectedFromCoreError) return;
+    if (!error || error[hasBeenLoggedSymbol]) return;
     // if error and there are remote connections, log error here
-    if (error && this.connections.some(x => !!x.options.host)) {
-      log.error('UnhandledRejection', { error, sessionId: null });
+    if (this.connections.some(x => !!x.options.host)) {
+      log.error('UnhandledRejection (Client)', { error, sessionId: null });
     }
     // eslint-disable-next-line promise/no-promise-in-callback
-    await Promise.all(this.connections.map(x => x.logUnhandledError(error)));
+    await Promise.all(
+      this.connections.map(x => {
+        return x.logUnhandledError(error).catch(logError => {
+          if (logError instanceof CanceledPromiseError) return;
+          log.error('UnhandledRejection.CouldNotSendToCore', {
+            error: logError,
+            connectionHost: x.hostOrError,
+            sessionId: null,
+          });
+        });
+      }),
+    );
   }
 
   private onDisconnected(connection: ConnectionToCore): void {

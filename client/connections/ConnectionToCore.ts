@@ -182,10 +182,15 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
 
   public async createSession(options: ICreateSessionOptions): Promise<CoreSession> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
-    const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
-    this.coreSessions.track(session);
-    return session;
+    try {
+      const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
+      const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
+      this.coreSessions.track(session);
+      return session;
+    } catch (error) {
+      if (error instanceof DisconnectedFromCoreError && this.isDisconnecting) return null;
+      throw error;
+    }
   }
 
   public getSession(sessionId: string): CoreSession {
@@ -294,8 +299,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
 
   protected cancelPendingRequests(): void {
     const host = String(this.resolvedHost);
-    this.coreSessions.stop(new DisconnectedFromCoreError(host));
-    this.commandQueue.stop(new DisconnectedFromCoreError(host));
     for (const entry of this.pendingRequestsById.values()) {
       const id = entry.id;
       if (this.connectRequestId === id || this.disconnectRequestId === id) {
@@ -304,6 +307,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       this.pendingRequestsById.delete(id);
       this.rejectPendingRequest(entry, new DisconnectedFromCoreError(host));
     }
+    this.coreSessions.stop(new DisconnectedFromCoreError(host));
+    this.commandQueue.stop(new DisconnectedFromCoreError(host));
   }
 
   private createPendingResult(): IResolvablePromiseWithId {
