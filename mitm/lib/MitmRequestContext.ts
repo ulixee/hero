@@ -228,6 +228,12 @@ export default class MitmRequestContext {
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = parseRawHeaders(response.rawHeaders);
     ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, ctx.responseOriginalHeaders);
+
+    const redirectUrl = HeadersHandler.checkForRedirectResponseLocation(ctx);
+    if (redirectUrl) {
+      ctx.redirectedToUrl = redirectUrl.href;
+      ctx.responseUrl = ctx.redirectedToUrl;
+    }
   }
 
   public static readHttp2Response(
@@ -243,5 +249,11 @@ export default class MitmRequestContext {
     ctx.serverToProxyResponse = response;
     ctx.responseOriginalHeaders = headers;
     ctx.responseHeaders = HeadersHandler.cleanResponseHeaders(ctx, headers);
+
+    const redirectUrl = HeadersHandler.checkForRedirectResponseLocation(ctx);
+    if (redirectUrl) {
+      ctx.redirectedToUrl = redirectUrl.href;
+      ctx.responseUrl = ctx.redirectedToUrl;
+    }
   }
 }

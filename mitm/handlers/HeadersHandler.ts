@@ -5,9 +5,12 @@ import * as http from 'http';
 import * as http2 from 'http2';
 import OriginType from '@secret-agent/core-interfaces/OriginType';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import { URL } from 'url';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
+
+const redirectCodes = new Set([300, 301, 302, 303, 305, 307, 308]);
 
 export default class HeadersHandler {
   public static async determineResourceType(ctx: IMitmRequestContext): Promise<void> {
@@ -105,6 +108,15 @@ export default class HeadersHandler {
     }
 
     return headers;
+  }
+
+  public static checkForRedirectResponseLocation(context: IMitmRequestContext): URL {
+    if (redirectCodes.has(context.status)) {
+      const redirectLocation = context.responseHeaders.location || context.responseHeaders.Location;
+      if (redirectLocation) {
+        return new URL(redirectLocation as string, context.url);
+      }
+    }
   }
 
   public static sendRequestTrailers(ctx: IMitmRequestContext): void {
