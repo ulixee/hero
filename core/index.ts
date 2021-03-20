@@ -124,6 +124,7 @@ export default class Core {
   }
 
   public static logUnhandledError(clientError: Error, fatalError = false): void {
+    if (!clientError || clientError[hasBeenLoggedSymbol]) return;
     if (fatalError) {
       log.error('UnhandledError(fatal)', { clientError, sessionId: null });
     } else if (!clientError[hasBeenLoggedSymbol]) {

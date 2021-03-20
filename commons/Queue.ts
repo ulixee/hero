@@ -2,6 +2,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import { createPromise } from './utils';
 import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 import Resolvable from './Resolvable';
+import getPrototypeOf = Reflect.getPrototypeOf;
 
 type AsyncCallback<T> = (value?: any) => Promise<T>;
 
@@ -24,7 +25,7 @@ export default class Queue {
     this.queue.push({
       promise,
       cb,
-      startStack: new Error('').stack.split('\n').slice(1).join('\n'),
+      startStack: new Error('').stack.split(/\r?\n/).slice(1).join('\n'),
     });
 
     this.next().catch(() => null);
@@ -68,7 +69,9 @@ export default class Queue {
     this.activeCount += 1;
     try {
       const res = await Promise.race([next.cb(), this.abortPromise.promise]);
-      if (this.abortPromise.isResolved) throw await this.abortPromise.promise;
+      if (this.abortPromise.isResolved) {
+        return this.reject(next, await this.abortPromise.promise);
+      }
 
       next.promise.resolve(res);
     } catch (error) {
@@ -77,13 +80,16 @@ export default class Queue {
       this.activeCount -= 1;
     }
 
-    setImmediate(() => this.next());
+    setImmediate(() => this.next().catch(() => null));
   }
 
-  private reject(entry: IQueueEntry, error: Error): void {
-    const marker = `------${this.stacktraceMarker}`.padEnd(50, '-');
+  private reject(entry: IQueueEntry, sourceError: Error): void {
+    const error = <Error>Object.create(getPrototypeOf(sourceError));
+    error.message = sourceError.message;
+    Object.assign(error, sourceError);
 
-    error.stack = `${error.stack}\n${marker}\n${entry.startStack}`;
+    const marker = `------${this.stacktraceMarker}`.padEnd(50, '-');
+    error.stack = `${sourceError.stack}\n${marker}\n${entry.startStack}`;
     entry.promise.reject(error);
   }
 }
