@@ -1,7 +1,6 @@
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 
 export function parseRawHeaders(rawHeaders: string[]): IResourceHeaders {
-  if (!rawHeaders.length) return;
   const headers = {};
   for (let i = 0; i < rawHeaders.length; i += 2) {
     const key = rawHeaders[i];

@@ -1,6 +1,7 @@
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
 import * as http2 from 'http2';
+import { ClientHttp2Stream } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import BlockHandler from './BlockHandler';
 import HeadersHandler from './HeadersHandler';
@@ -59,25 +60,37 @@ export default abstract class BaseHttpHandler {
       // do one more check on the session before doing a connect
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 
-      this.context.proxyToServerRequest = await session.requestAgent.request(context);
-      this.context.proxyToServerRequest.on(
-        'error',
-        this.onError.bind(this, 'ProxyToServer.RequestError'),
-      );
-      const stream = <http2.Http2Stream>this.context.proxyToServerRequest;
-      stream.on('streamClosed', code =>
-        this.onError(
-          'ProxyToH2Server.StreamClosedError',
-          new Error(`Stream closed with code ${code}`),
-        ),
-      );
-      if (stream.session && stream.session.listenerCount('error') === 0) {
-        stream.session?.on('error', this.onError.bind(this, 'ProxyToServer.SessionError'));
+      const request = await session.requestAgent.request(context);
+      this.context.proxyToServerRequest = request;
+      request.on('error', this.onError.bind(this, 'ProxyToServer.RequestError'));
+
+      if (this.context.isServerHttp2) {
+        const h2Request = request as ClientHttp2Stream;
+        this.bindHttp2ErrorListeners('ProxyToH2Server', h2Request, h2Request.session);
       }
 
       return this.context.proxyToServerRequest;
     } catch (err) {
       this.onError('ProxyToServer.RequestHandlerError', err);
+    }
+  }
+
+  protected bindHttp2ErrorListeners(
+    source: string,
+    stream: http2.Http2Stream,
+    session: http2.Http2Session,
+  ): void {
+    if (!stream.listenerCount('error')) {
+      stream.on('error', this.onError.bind(this, `${source}.Http2StreamError`));
+    }
+
+    stream.on('streamClosed', code => {
+      if (!code) return;
+      this.onError(`${source}.Http2StreamError`, new Error(`Stream Closed ${code}`));
+    });
+
+    if (session && !session.listenerCount('error')) {
+      session.on('error', this.onError.bind(this, `${source}.Http2SessionError`));
     }
   }
 }

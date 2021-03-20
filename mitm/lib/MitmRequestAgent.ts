@@ -334,10 +334,17 @@ export default class MitmRequestAgent {
 
     const clientToProxyRequest = parentContext.clientToProxyRequest as http2.Http2ServerRequest;
     pushContext.setState(ResourceState.ProxyToClientPush);
-    clientToProxyRequest.stream.pushStream(
-      pushContext.requestHeaders,
-      this.handleHttp2ProxyToClientPush.bind(this, pushContext, onResponseHeaders),
-    );
+    try {
+      clientToProxyRequest.stream.pushStream(
+        pushContext.requestHeaders,
+        this.handleHttp2ProxyToClientPush.bind(this, pushContext, onResponseHeaders),
+      );
+    } catch (error) {
+      log.warn('Http2.ClientToProxy.CreatePushStreamError', {
+        sessionId,
+        error,
+      });
+    }
   }
 
   private async handleHttp2ProxyToClientPush(

@@ -2,7 +2,6 @@ import * as http from 'http';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
-import { URL } from 'url';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
@@ -14,7 +13,6 @@ import HttpResponseCache from '../lib/HttpResponseCache';
 import ResourceState from '../interfaces/ResourceState';
 
 const { log } = Log(module);
-const redirectCodes = new Set([300, 301, 302, 303, 305, 307, 308]);
 
 export default class HttpRequestHandler extends BaseHttpHandler {
   protected static responseCache = new HttpResponseCache();
@@ -29,32 +27,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     this.context.setState(ResourceState.ClientToProxyRequest);
 
     // register error listeners first
-    const { clientToProxyRequest, proxyToClientResponse } = request;
-    clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
-    if (clientToProxyRequest instanceof Http2ServerRequest) {
-      clientToProxyRequest.stream.on(
-        'error',
-        this.onError.bind(this, 'ClientToProxy.Http2StreamError'),
-      );
-      clientToProxyRequest.stream.on('streamClosed', code =>
-        this.onError('ClientToProxy.Http2StreamError', new Error(`Stream Closed ${code}`)),
-      );
-      const http2Session = clientToProxyRequest.stream.session;
-      if (!http2Session.listenerCount('error')) {
-        http2Session.on('error', this.onError.bind(this, 'ClientToProxy.Http2SessionError'));
-      }
-    }
-    if (proxyToClientResponse instanceof Http2ServerResponse) {
-      proxyToClientResponse.stream.on(
-        'error',
-        this.onError.bind(this, 'ProxyToClient.Http2StreamError'),
-      );
-      const http2Session = proxyToClientResponse.stream.session;
-      if (!http2Session.listenerCount('error')) {
-        http2Session.on('error', this.onError.bind(this, 'ProxyToClient.Http2SessionError'));
-      }
-    }
-    proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
+    this.bindErrorListeners();
   }
 
   public async onRequest(): Promise<void> {
@@ -83,6 +56,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     rawHeaders?: string[],
   ): Promise<void> {
     const context = this.context;
+
     context.setState(ResourceState.ServerToProxyOnResponse);
 
     if (response instanceof http.IncomingMessage) {
@@ -95,8 +69,11 @@ export default class HttpRequestHandler extends BaseHttpHandler {
         rawHeaders,
       );
     }
-    const { serverToProxyResponse } = context;
-    serverToProxyResponse.on('error', this.onError.bind(this, 'ServerToProxy.ResponseError'));
+    // wait for MitmRequestContext to read this
+    context.serverToProxyResponse.on(
+      'error',
+      this.onError.bind(this, 'ServerToProxy.ResponseError'),
+    );
 
     try {
       context.cacheHandler.onResponseHeaders();
@@ -104,15 +81,23 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return this.onError('ServerToProxy.ResponseHeadersHandlerError', err);
     }
 
-    if (redirectCodes.has(context.status)) {
-      const redirectLocation = context.responseHeaders.location || context.responseHeaders.Location;
-      if (redirectLocation) {
-        const redirectUrl = new URL(redirectLocation as string, context.url);
-        context.redirectedToUrl = redirectUrl.href;
-        context.responseUrl = context.redirectedToUrl;
-      }
-    }
     await CookieHandler.readServerResponseCookies(context);
+
+    /////// WRITE CLIENT RESPONSE //////////////////
+
+    if (!context.proxyToClientResponse) {
+      log.warn('Error.NoProxyToClientResponse', {
+        sessionId: context.requestSession.sessionId,
+      });
+      context.setState(ResourceState.PrematurelyClosed);
+      return;
+    }
+
+    try {
+      this.writeResponseHead();
+    } catch (err) {
+      return this.onError('ServerToProxyToClient.WriteResponseHeadError', err);
+    }
 
     try {
       await this.writeResponse();
@@ -164,6 +149,22 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     }
   }
 
+  private bindErrorListeners(): void {
+    const { clientToProxyRequest, proxyToClientResponse } = this.context;
+    clientToProxyRequest.on('error', this.onError.bind(this, 'ClientToProxy.RequestError'));
+    proxyToClientResponse.on('error', this.onError.bind(this, 'ProxyToClient.ResponseError'));
+
+    if (clientToProxyRequest instanceof Http2ServerRequest) {
+      const stream = clientToProxyRequest.stream;
+      this.bindHttp2ErrorListeners('ClientToProxy', stream, stream.session);
+    }
+
+    if (proxyToClientResponse instanceof Http2ServerResponse) {
+      const stream = proxyToClientResponse.stream;
+      this.bindHttp2ErrorListeners('ProxyToClient', stream, stream.session);
+    }
+  }
+
   private async writeRequest(): Promise<void> {
     this.context.setState(ResourceState.WriteProxyToServerRequestBody);
     const { proxyToServerRequest, clientToProxyRequest } = this.context;
@@ -185,17 +186,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     this.context.requestPostData = Buffer.concat(data);
   }
 
-  private async writeResponse(): Promise<void> {
+  private writeResponseHead(): void {
     const context = this.context;
-    if (!context.proxyToClientResponse) {
-      log.warn('Error.NoProxyToClientResponse', {
-        sessionId: context.requestSession.sessionId,
-      });
-      context.setState(ResourceState.PrematurelyClosed);
-      return;
-    }
-
-    const { serverToProxyResponse, proxyToClientResponse } = this.context;
+    const { serverToProxyResponse, proxyToClientResponse } = context;
 
     proxyToClientResponse.statusCode = context.status;
     // write individually so we properly write header-lists
@@ -207,11 +200,12 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       context.responseTrailers = headers;
     });
 
-    try {
-      proxyToClientResponse.writeHead(proxyToClientResponse.statusCode);
-    } catch (err) {
-      return this.onError('ServerToProxy.WriteResponseHeadError', err);
-    }
+    proxyToClientResponse.writeHead(proxyToClientResponse.statusCode);
+  }
+
+  private async writeResponse(): Promise<void> {
+    const context = this.context;
+    const { serverToProxyResponse, proxyToClientResponse } = context;
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
@@ -219,20 +213,11 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
-      if (data && !this.isClientConnectionDestroyed()) {
-        proxyToClientResponse.write(data, error => {
-          if (error && !this.isClientConnectionDestroyed())
-            this.onError('ServerToProxy.WriteResponseError', error);
-        });
-      }
+      this.safeWriteToClient(data);
     }
 
     if (context.cacheHandler.shouldServeCachedData) {
-      if (!this.isClientConnectionDestroyed())
-        proxyToClientResponse.write(context.cacheHandler.cacheData, error => {
-          if (error && !this.isClientConnectionDestroyed())
-            this.onError('ServerToProxy.WriteCachedResponseError', error);
-        });
+      this.safeWriteToClient(context.cacheHandler.cacheData);
     }
 
     if (serverToProxyResponse instanceof http.IncomingMessage) {
@@ -248,6 +233,15 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     // wait for browser request id before resolving
     await context.browserHasRequested;
     context.requestSession.emit('response', MitmRequestContext.toEmittedResource(context));
+  }
+
+  private safeWriteToClient(data: Buffer): void {
+    if (!data || this.isClientConnectionDestroyed()) return;
+
+    this.context.proxyToClientResponse.write(data, error => {
+      if (error && !this.isClientConnectionDestroyed())
+        this.onError('ServerToProxy.WriteResponseError', error);
+    });
   }
 
   private isClientConnectionDestroyed(): boolean {
@@ -269,5 +263,3 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     await handler.onRequest();
   }
 }
-
-export { redirectCodes };

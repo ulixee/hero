@@ -87,7 +87,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     const socket = net.connect(this.socketPath);
     this.socket = socket;
     socket.on('error', error => {
-      this.logger.error('SocketConnectDriver.SocketError', {
+      this.logger.warn('SocketConnectDriver.SocketError', {
         sessionId: this.sessionId,
         error,
         socketPath: this.socketPath,
