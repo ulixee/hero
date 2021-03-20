@@ -701,10 +701,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.frameEnvironmentsById.set(frame.id, frame);
   }
 
-  /////// LOGGGING EVENTS //////////////////////////////////////////////////////////////////////////
+  /////// LOGGING EVENTS ///////////////////////////////////////////////////////////////////////////
 
   private onPageError(event: IPuppetPageEvents['page-error']): void {
     const { error, frameId } = event;
+    this.logger.info('Window.pageError', { error, frameId });
     this.sessionState.captureError(this.id, frameId, `events.page-error`, error);
   }
 
@@ -715,6 +716,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   private onTargetCrashed(event: IPuppetPageEvents['crashed']): void {
     const error = event.error;
+
+    const errorLevel = event.fatal ? 'error' : 'info';
+    this.logger[errorLevel]('BrowserEngine.Tab.crashed', { error });
+
     this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
   }
 

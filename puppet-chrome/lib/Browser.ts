@@ -32,6 +32,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     this.connection.on('disconnected', this.emit.bind(this, 'disconnected'));
     this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
     this.cdpSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
+    this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
+    this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
+    this.cdpSession.on('Target.targetCrashed', this.onTargetCrashed.bind(this));
   }
 
   public async newContext(
@@ -67,8 +70,6 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     await this.cdpSession.send('Target.setDiscoverTargets', {
       discover: true,
     });
-    this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
-    this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
 
     return this;
   }
@@ -93,6 +94,11 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       context?.onSharedWorkerAttached(cdpSession, targetInfo).catch(() => null);
     }
 
+    if (event.waitingForDebugger && targetInfo.type === 'service_worker') {
+      const cdpSession = this.connection.getSession(sessionId);
+      if (!cdpSession) return;
+      cdpSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
+    }
     if (event.waitingForDebugger && targetInfo.type === 'other') {
       const cdpSession = this.connection.getSession(sessionId);
       if (!cdpSession) return;
@@ -121,6 +127,15 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     const { targetId } = event;
     for (const context of this.browserContextsById.values()) {
       context.targetDestroyed(targetId);
+    }
+  }
+
+  private onTargetCrashed(event: Protocol.Target.TargetCrashedEvent) {
+    const { targetId, errorCode, status } = event;
+    if (status === 'killed') {
+      for (const context of this.browserContextsById.values()) {
+        context.targetKilled(targetId, errorCode);
+      }
     }
   }
 

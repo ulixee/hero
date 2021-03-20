@@ -74,6 +74,7 @@ export default class Frame
   private defaultContextIds = new Set<number>();
   private isolatedContextIds = new Set<number>();
   private internalFrame: PageFrame;
+  private closedWithError: Error;
 
   constructor(
     internalFrame: PageFrame,
@@ -93,10 +94,18 @@ export default class Frame
     this.onLoaded(internalFrame);
   }
 
+  public close(error: Error) {
+    this.cancelPendingEvents('Frame closed');
+    error ??= new CanceledPromiseError('Frame closed');
+    this.activeLoader.resolve(error);
+    this.closedWithError = error;
+  }
+
   public async evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
   ): Promise<T> {
+    if (this.closedWithError) throw this.closedWithError;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     const result = await this.cdpSession.send(
       'Runtime.evaluate',
@@ -118,6 +127,7 @@ export default class Frame
   }
 
   public async evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T> {
+    if (this.closedWithError) throw this.closedWithError;
     const objectId = await this.getParentElementId();
     if (!objectId) return;
     try {

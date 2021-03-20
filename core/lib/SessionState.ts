@@ -348,7 +348,6 @@ export default class SessionState {
   }
 
   public captureError(tabId: number, frameId: string, source: string, error: Error): void {
-    this.logger.info('Window.error', { source, error });
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
