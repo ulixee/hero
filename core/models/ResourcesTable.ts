@@ -176,7 +176,7 @@ export interface IResourcesRecord {
   requestOriginalHeaders: string;
   httpError: string;
 
-  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'unspecified';
+  browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'memory';
   browserLoadFailure?: string;
   browserBlockedReason?: string;
   browserCanceled?: boolean;

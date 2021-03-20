@@ -166,7 +166,7 @@ export default class MitmRequestContext {
 
     const response = {
       url: ctx.responseUrl,
-      statusCode: ctx.originalStatus,
+      statusCode: ctx.originalStatus ?? ctx.status,
       statusMessage: ctx.statusMessage,
       headers: ctx.responseHeaders,
       trailers: ctx.responseTrailers,
