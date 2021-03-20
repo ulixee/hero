@@ -31,13 +31,8 @@ export default function launchProcess(
   executablePath: string,
   processArguments: string[],
   env: NodeJS.ProcessEnv,
-  pipeIo = true,
 ): Promise<ILaunchedProcess> {
   const stdio: StdioOptions = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
-  if (!pipeIo) {
-    stdio[1] = 'ignore';
-    stdio[2] = 'ignore';
-  }
 
   log.info(`Puppet.LaunchProcess`, { sessionId: null, executablePath, processArguments });
   const launchedProcess = childProcess.spawn(executablePath, processArguments, {
@@ -63,17 +58,16 @@ export default function launchProcess(
   let exe = executablePath.split(Path.sep).pop().toLowerCase();
   exe = exe[0].toUpperCase() + exe.slice(1);
 
-  if (pipeIo) {
-    const stdout = readline.createInterface({ input: launchedProcess.stdout });
-    stdout.on('line', line => {
-      log.stats(`${exe}.stdout`, { message: line, sessionId: null });
-    });
+  const stdout = readline.createInterface({ input: launchedProcess.stdout });
+  stdout.on('line', line => {
+    log.stats(`${exe}.stdout`, { message: line, sessionId: null });
+  });
 
-    const stderr = readline.createInterface({ input: launchedProcess.stderr });
-    stderr.on('line', line => {
-      log.warn(`${exe}.stderr`, { message: line, sessionId: null });
-    });
-  }
+  const stderr = readline.createInterface({ input: launchedProcess.stderr });
+  stderr.on('line', line => {
+    log.warn(`${exe}.stderr`, { message: line, sessionId: null });
+  });
+
   let processKilled = false;
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;

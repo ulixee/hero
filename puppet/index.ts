@@ -38,7 +38,6 @@ export default class Puppet {
   public start(
     args: ILaunchArgs = {
       showBrowser: false,
-      pipeBrowserIo: false,
     },
   ): Promise<IPuppetBrowser | Error> {
     if (this.browserOrError) {
@@ -89,7 +88,7 @@ export default class Puppet {
     }
 
     try {
-      const { pipeBrowserIo, proxyPort, showBrowser } = args;
+      const { proxyPort, showBrowser } = args;
       const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
 
       // exists, but can't launch, try to launch
@@ -98,7 +97,7 @@ export default class Puppet {
       if (this.engine.extraLaunchArgs?.length) {
         launchArgs.push(...this.engine.extraLaunchArgs);
       }
-      const launchedProcess = await launchProcess(executablePath, launchArgs, {}, pipeBrowserIo);
+      const launchedProcess = await launchProcess(executablePath, launchArgs, {});
       return launcher.createPuppet(launchedProcess, this.engine);
     } catch (err) {
       const launchError = launcher.translateLaunchError(err);
@@ -138,5 +137,4 @@ ${remedyMessage}`);
 interface ILaunchArgs {
   proxyPort?: number;
   showBrowser?: boolean;
-  pipeBrowserIo?: boolean;
 }
