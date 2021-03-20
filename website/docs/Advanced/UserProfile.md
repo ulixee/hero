@@ -11,7 +11,7 @@ UserProfiles enable you to capture the full browser state of a user after perfor
 
 This "state" is not instantiated, but retrieved from an Agent instance: [agent.exportUserProfile()](/docs/basic-interfaces/agent#export-profile).
 
-State is stored for all domains (origins) that are loaded into a window at the time of export. The exported state is JSON with additional type information for IndexedDB ([typeson](https://github.com/dfahlander/typeson).
+State is stored for all domains (origins) that are loaded into a window at the time of export. The exported state is JSON with additional type information for IndexedDB complex objects.
 
 When you restore a UserProfile, SecretAgent will restore the Cookies, Dom Storage and IndexedDB records for all domains that are included in the state.
 

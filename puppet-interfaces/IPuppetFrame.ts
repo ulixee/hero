@@ -14,7 +14,11 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
-  evaluate<T>(expression: string, isolateFromWebPageEnvironment?: boolean): Promise<T>;
+  evaluate<T>(
+    expression: string,
+    isolateFromWebPageEnvironment?: boolean,
+    shouldAwaitExpression?: boolean,
+  ): Promise<T>;
   evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
   toJSON(): object;
 }

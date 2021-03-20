@@ -104,6 +104,7 @@ export default class Frame
   public async evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
+    shouldAwaitExpression = true,
   ): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
@@ -113,7 +114,7 @@ export default class Frame
         expression,
         contextId,
         returnByValue: true,
-        awaitPromise: true,
+        awaitPromise: shouldAwaitExpression,
       },
       this,
     );

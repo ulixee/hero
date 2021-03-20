@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
 
 const pageScripts = {
   domStorage: fs.readFileSync(require.resolve(`../injected-scripts/domStorage.js`), 'utf8'),
@@ -11,7 +11,9 @@ const pageScripts = {
 
 const injectedScript = `(function installInjectedScripts() {
 const exports = {}; // workaround for ts adding an exports variable
-${TypeSerializer.domScript};
+${stringifiedTypeSerializerClass};
+
+const TSON = TypeSerializer;
 
 ${pageScripts.jsPath};
 ${pageScripts.Fetcher};

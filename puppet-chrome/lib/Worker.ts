@@ -90,7 +90,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     const contextId = await this.executionContextId.promise;
     const result = await this.cdpSession.send('Runtime.evaluate', {
       expression,
-      awaitPromise: true,
+      awaitPromise: !isInitializationScript,
       contextId,
       returnByValue: true,
     });

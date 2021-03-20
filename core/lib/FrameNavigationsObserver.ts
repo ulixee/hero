@@ -95,7 +95,7 @@ export default class FrameNavigationsObserver {
 
     const promise = this.createStatusTriggeredPromise(status, options.timeoutMs);
 
-    this.onLoadStatusChange();
+    if (this.navigations.top) this.onLoadStatusChange();
     return promise;
   }
 
