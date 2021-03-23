@@ -50,32 +50,43 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 	}
 
 	copyUntilTimeout := func(dst io.Writer, src net.Conn, notifyChan chan error, counter *uint32) {
-		var err error
+		var readErr error
+		var writeErr error
 		var n int
-		var data []byte = make([]byte, 1024)
+		var data []byte = make([]byte, 4096)
 
 		for {
 			if atomic.LoadUint32(counter) > 0 {
 				return
 			}
 
-			n, err = src.Read(data)
+			n, readErr = src.Read(data)
 
-			if err != nil {
-				notifyChan <- err
+			if n > 0 {
+				_, writeErr = dst.Write(data[:n])
+				if writeErr != nil {
+				    notifyChan <- writeErr
+				}
+			}
+
+			if readErr != nil {
+				notifyChan <- readErr
 				if atomic.LoadUint32(counter) > 0 {
 				    return
 				}
-				if err == io.EOF {
+
+				if readErr == io.EOF {
+				    if n == 0 {
+                        atomic.AddUint32(&piper.completeCounter, 1)
+                        if piper.debug {
+                            fmt.Println("DomainSocket -> 0 Byte EOF")
+                        }
+                        return
+                    }
                     time.Sleep(1 * time.Second)
                 }
 			} else if n == 0 {
 				time.Sleep(200 * time.Millisecond)
-			} else {
-				_, err = dst.Write(data[:n])
-				if err != nil {
-				    notifyChan <- err
-				}
 			}
 		}
 	}
@@ -103,14 +114,6 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 					atomic.AddUint32(&piper.completeCounter, 1)
 					if piper.debug {
 						log.Printf("DomainSocket -> EOF")
-					}
-					return
-				}
-
-				if neterr, ok = err.(net.Error); ok && neterr.Timeout() {
-					atomic.AddUint32(&piper.completeCounter, 1)
-					if piper.debug {
-						log.Printf("DomainSocket -> Read Timeout")
 					}
 					return
 				}

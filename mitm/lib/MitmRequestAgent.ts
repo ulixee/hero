@@ -83,14 +83,16 @@ export default class MitmRequestAgent {
     if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
-
-    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
+    const connectionHeader = ctx.responseHeaders?.Connection ?? ctx.responseHeaders?.connection;
+    const isCloseRequested = connectionHeader === 'close';
 
     const socket = ctx.proxyToServerMitmSocket;
-    if (!socket.isReusable()) {
+
+    if (!socket.isReusable() || isCloseRequested) {
       return socket.close();
     }
 
+    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
     const pending = pool.pending.shift();
     if (pending) {
       pending.resolve(socket);
@@ -122,8 +124,10 @@ export default class MitmRequestAgent {
   ): Promise<MitmSocket> {
     const session = this.session;
     const tlsProfileId = session.networkInterceptorDelegate.tls?.emulatorProfileId;
-    const isKeepAlive = ((options.headers.connection ??
-      options.headers.Connection) as string)?.match(/keep-alive/i);
+    const isKeepAlive =
+      ((options.headers.connection ?? options.headers.Connection) as string)?.match(
+        /keep-alive/i,
+      ) ?? true;
 
     ctx.setState(ResourceState.LookupDns);
     const ipIfNeeded = await session.lookupDns(options.host);

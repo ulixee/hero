@@ -35,6 +35,7 @@ func main() {
 	domainSocketPiper := &DomainSocketPiper{
 		Path:  socketPath,
 		debug: connectArgs.Debug,
+		keepAlive: connectArgs.KeepAlive,
 	}
 
 	if debug {
@@ -89,4 +90,5 @@ type ConnectArgs struct {
 	TcpTtl             int
 	TcpWindowSize      int
 	Debug              bool
+	KeepAlive          bool
 }
