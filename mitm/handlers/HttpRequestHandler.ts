@@ -106,7 +106,7 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     }
     context.setState(ResourceState.End);
 
-    process.nextTick(agent => agent.freeSocket(context), context.requestSession.requestAgent);
+    context.requestSession.requestAgent.freeSocket(context);
   }
 
   protected onError(kind: string, error: Error): void {
@@ -123,10 +123,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     });
 
     let status = 504;
-    let message = String(error);
     if (isCanceled) {
       status = 444;
-      message = undefined;
     }
     if (!isCanceled && !requestSession.isClosing && !error[hasBeenLoggedSymbol]) {
       log.info(`MitmHttpRequest.${kind}`, {
@@ -136,14 +134,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       });
     }
 
-    if (proxyToClientResponse instanceof Http2ServerResponse) {
-      if (proxyToClientResponse.stream && !proxyToClientResponse.stream.destroyed)
-        proxyToClientResponse.stream.destroy();
-    }
-
     try {
       if (!proxyToClientResponse.headersSent) proxyToClientResponse.writeHead(status);
-      if (!proxyToClientResponse.finished) proxyToClientResponse.end(message);
+      if (!proxyToClientResponse.finished) proxyToClientResponse.end();
     } catch (e) {
       // drown errors
     }

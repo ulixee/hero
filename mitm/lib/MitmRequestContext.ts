@@ -52,14 +52,24 @@ export default class MitmRequestContext {
     const expectedProtocol = `${protocol}${isSSL ? 's' : ''}:`;
 
     let url: URL;
-    if (clientToProxyRequest.url.match(/[http|ws]s?:\/\//)) {
+    if (
+      clientToProxyRequest.url.startsWith('http://') ||
+      clientToProxyRequest.url.startsWith('https://') ||
+      clientToProxyRequest.url.startsWith('ws://') ||
+      clientToProxyRequest.url.startsWith('wss://')
+    ) {
       url = new URL(clientToProxyRequest.url);
     } else {
       let providedHost = (clientToProxyRequest.headers.host ??
         clientToProxyRequest.headers[':authority'] ??
         '') as string;
       if (providedHost.endsWith('/')) providedHost = providedHost.slice(0, -1);
-      if (providedHost.startsWith('http') || providedHost.startsWith('ws')) {
+      if (
+        providedHost.startsWith('http://') ||
+        providedHost.startsWith('https://') ||
+        providedHost.startsWith('ws://') ||
+        providedHost.startsWith('wss://')
+      ) {
         providedHost = providedHost.split('://').slice(1).join('://');
       }
       // build urls in two steps because URL constructor will bomb on valid WHATWG urls with path

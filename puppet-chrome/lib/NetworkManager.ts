@@ -398,12 +398,13 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
-      if (!this.requestPublishingById.get(requestId)?.isPublished) {
-        this.doEmitResourceRequested(requestId);
-      }
       if (canceled) resource.browserCanceled = true;
       if (blockedReason) resource.browserBlockedReason = blockedReason;
       if (errorText) resource.browserLoadFailure = errorText;
+
+      if (!this.requestPublishingById.get(requestId)?.isPublished) {
+        this.doEmitResourceRequested(requestId);
+      }
       this.emit('resource-failed', {
         resource,
       });

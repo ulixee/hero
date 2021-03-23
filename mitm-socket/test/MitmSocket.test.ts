@@ -4,6 +4,8 @@ import * as http2 from 'http2';
 import * as stream from 'stream';
 import * as WebSocket from 'ws';
 import { getTlsConnection, httpGetWithSocket } from '@secret-agent/testing/helpers';
+import * as https from 'https';
+import { IncomingMessage } from 'http';
 import MitmSocket from '../index';
 
 afterAll(Helpers.afterAll);
@@ -85,6 +87,44 @@ test('should be able to hit gstatic using a Chrome Emulator', async () => {
   });
   const httpResponse = await readResponse(request);
   expect(httpResponse).toBeTruthy();
+});
+
+test('should be able to hit a server that disconnects', async () => {
+  const server = await Helpers.runHttpsServer(async (req, res) => {
+    res.socket.end(
+      `HTTP/1.1 301 Moved Permanently\r\nContent-Length: 0\r\nConnection: close\r\nLocation: https://www.location2.com\r\n\r\n`,
+    );
+  });
+
+  const tlsConnection = new MitmSocket('disconnect', {
+    host: `localhost`,
+    port: String(server.port),
+    servername: 'localhost',
+    clientHelloId: 'Chrome72',
+    keepAlive: true,
+  });
+  Helpers.onClose(async () => tlsConnection.close());
+
+  await tlsConnection.connect();
+  expect(tlsConnection.alpn).toBe('http/1.1');
+  const request = https.request({
+    method: 'GET',
+    path: '/',
+    host: 'localhost',
+    port: server.port,
+    createConnection() {
+      return tlsConnection.socket;
+    },
+  });
+
+  const responsePromise = new Promise<IncomingMessage>(resolve => request.on('response', resolve));
+  request.end();
+  const response = await responsePromise;
+  expect(response.headers).toEqual({
+    'content-length': '0',
+    connection: 'close',
+    location: 'https://www.location2.com',
+  });
 });
 
 // only test this manually

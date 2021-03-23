@@ -597,7 +597,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(resource, this.id);
 
-    if (isDocumentNavigation) {
+    if (isDocumentNavigation && !event.resource.browserCanceled) {
       navigations.onHttpRequested(url, lastCommandId, redirectedFromUrl, browserRequestId);
     }
   }
