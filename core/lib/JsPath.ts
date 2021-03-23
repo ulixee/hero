@@ -10,7 +10,7 @@ export class JsPath {
   private readonly frameEnvironment: FrameEnvironment;
   private readonly jsPath: IJsPath;
 
-  constructor(frameEnvironment: FrameEnvironment, jsPath: IJsPath) {
+  constructor(frameEnvironment: FrameEnvironment, jsPath?: IJsPath) {
     this.frameEnvironment = frameEnvironment;
     this.jsPath = jsPath;
   }

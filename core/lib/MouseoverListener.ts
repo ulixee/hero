@@ -17,16 +17,11 @@ export default class MouseoverListener {
     );
   }
 
-  public async waitForMouseEvent(timeoutMillis: number): Promise<boolean> {
-    const result = await this.frameEnvironment.runIsolatedFn<boolean>(
-      'window.SecretAgent.MouseEvents.waitFor',
+  public async didTriggerMouseEvent(): Promise<boolean> {
+    return await this.frameEnvironment.runIsolatedFn<boolean>(
+      'window.SecretAgent.MouseEvents.didTrigger',
       'mouseover',
       this.nodeId,
-      timeoutMillis,
     );
-    if ((result as any) === 'timeout') {
-      return false;
-    }
-    return result;
   }
 }

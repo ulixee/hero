@@ -18,19 +18,11 @@ export default class MouseupListener {
     );
   }
 
-  public async waitForMouseEvent(timeoutMillis: number): Promise<IMouseUpResult> {
-    const result = await this.frameEnvironment.runIsolatedFn<IMouseUpResult>(
-      'window.SecretAgent.MouseEvents.waitFor',
+  public async didTriggerMouseEvent(): Promise<IMouseUpResult> {
+    return await this.frameEnvironment.runIsolatedFn<IMouseUpResult>(
+      'window.SecretAgent.MouseEvents.didTrigger',
       'mouseup',
       this.nodeId,
-      timeoutMillis,
     );
-
-    if ((result as any) === 'timeout') {
-      return {
-        didClickLocation: false,
-      } as IMouseUpResult;
-    }
-    return result;
   }
 }

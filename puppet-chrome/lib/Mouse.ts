@@ -74,15 +74,6 @@ export default class Mouse {
     });
   }
 
-  async click(options: IMouseOptions & { delay?: number } = {}): Promise<void> {
-    const { delay = null } = options;
-    await this.down(options);
-    if (delay !== null) {
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-    await this.up(options);
-  }
-
   async down(options: IMouseOptions = {}): Promise<void> {
     const { button = 'left', clickCount = 1 } = options;
     this.button = button;

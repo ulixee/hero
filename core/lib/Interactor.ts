@@ -22,6 +22,9 @@ import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/puppet-interfaces/IPuppetInput';
+import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
+import IViewport from '@secret-agent/core-interfaces/IViewport';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
@@ -37,12 +40,12 @@ const commandsNeedingScroll = [
 ];
 
 export default class Interactor implements IInteractionsHelper {
-  public get mousePosition() {
+  public get mousePosition(): IPoint {
     return { ...this.mouse.position };
   }
 
-  public get scrollOffset() {
-    return new JsPath(this.frameEnvironment, null).getWindowOffset().then(offset => {
+  public get scrollOffset(): Promise<IPoint> {
+    return new JsPath(this.frameEnvironment).getWindowOffset().then(offset => {
       return {
         x: offset.pageXOffset,
         y: offset.pageYOffset,
@@ -50,7 +53,7 @@ export default class Interactor implements IInteractionsHelper {
     });
   }
 
-  public get viewport() {
+  public get viewport(): IViewport {
     return this.frameEnvironment.session.viewport;
   }
 
@@ -62,15 +65,15 @@ export default class Interactor implements IInteractionsHelper {
     return this.frameEnvironment.tab;
   }
 
-  private get mouse() {
+  private get mouse(): IPuppetMouse {
     return this.tab.puppetPage.mouse;
   }
 
-  private get keyboard() {
+  private get keyboard(): IPuppetKeyboard {
     return this.tab.puppetPage.keyboard;
   }
 
-  private get humanEmulator() {
+  private get humanEmulator(): IHumanEmulator {
     return this.tab.session.humanEmulator;
   }
 
@@ -82,7 +85,7 @@ export default class Interactor implements IInteractionsHelper {
     });
   }
 
-  public async initialize() {
+  public async initialize(): Promise<void> {
     if (this.humanEmulator.getStartingMousePoint) {
       this.mouse.position = await this.humanEmulator.getStartingMousePoint(this);
     }
@@ -118,28 +121,26 @@ export default class Interactor implements IInteractionsHelper {
     };
   }
 
-  public async startMouseupListener(
+  public async createMouseupTrigger(
     nodeId: number,
-    timeoutMs: number,
-  ): Promise<{ onTriggered: Promise<IMouseUpResult> }> {
+  ): Promise<{ didTrigger: () => Promise<IMouseUpResult> }> {
     assert(nodeId, 'nodeId should not be null');
     const mouseListener = new MouseupListener(this.frameEnvironment, nodeId);
     await mouseListener.register();
     return {
-      onTriggered: mouseListener.waitForMouseEvent(timeoutMs),
+      didTrigger: () => mouseListener.didTriggerMouseEvent(),
     };
   }
 
-  public async startMouseoverListener(
+  public async createMouseoverTrigger(
     nodeId: number,
-    timeoutMs: number,
-  ): Promise<{ onTriggered: Promise<boolean> }> {
+  ): Promise<{ didTrigger: () => Promise<boolean> }> {
     assert(nodeId, 'nodeId should not be null');
     const mouseListener = new MouseoverListener(this.frameEnvironment, nodeId);
     await mouseListener.register();
 
     return {
-      onTriggered: mouseListener.waitForMouseEvent(timeoutMs),
+      didTrigger: () => mouseListener.didTriggerMouseEvent(),
     };
   }
 
@@ -159,14 +160,14 @@ export default class Interactor implements IInteractionsHelper {
         break;
       }
       case InteractionCommand.scroll: {
-        const windowBounds = await new JsPath(this.frameEnvironment, null).getWindowOffset();
+        const windowBounds = await new JsPath(this.frameEnvironment).getWindowOffset();
         const scroll = await this.getScrollOffset(interaction.mousePosition, windowBounds);
 
         if (scroll) {
           const { deltaY, deltaX } = scroll;
           await this.mouse.wheel(scroll);
           // need to check for offset since wheel event doesn't wait for scroll
-          await new JsPath(this.frameEnvironment, null).waitForScrollOffset(
+          await new JsPath(this.frameEnvironment).waitForScrollOffset(
             Math.max(0, deltaX + windowBounds.pageXOffset),
             Math.max(0, deltaY + windowBounds.pageYOffset),
           );
@@ -176,76 +177,38 @@ export default class Interactor implements IInteractionsHelper {
 
       case InteractionCommand.click:
       case InteractionCommand.doubleclick: {
-        const button = interaction.mouseButton || 'left';
-        const clickCount = interaction.command === InteractionCommand.doubleclick ? 2 : 1;
-        const isCoordinates = isMousePositionCoordinate(interaction.mousePosition);
+        const { delayMillis, mouseButton, command, mousePosition } = interaction;
+        const button = mouseButton || 'left';
+        const clickCount = command === InteractionCommand.doubleclick ? 2 : 1;
+        const isCoordinates = isMousePositionCoordinate(mousePosition);
 
         if (isCoordinates) {
-          const [x, y] = interaction.mousePosition as number[];
+          const [x, y] = mousePosition as number[];
+          const clickOptions = { button, clickCount };
           await this.mouse.move(x, y);
-          await this.mouse.click({
-            button,
-            clickCount,
-            delay: interaction.delayMillis,
-          });
+          await this.mouse.down(clickOptions);
+          if (delayMillis) await waitFor(delayMillis, resolvable);
+
+          await this.mouse.up(clickOptions);
           return;
         }
 
-        let nodeId: number;
-        let domCoordinates: IPoint;
-
         const isPagePaintStable = this.frameEnvironment.navigationsObserver.isPaintStable();
-        // try 2x to hover over the expected target
-        for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
-          const position = await this.getPositionXY(interaction.mousePosition);
-          const { x, y, simulateOptionClick } = position;
-          nodeId = position.nodeId;
-          domCoordinates = { x, y };
+        const result = await this.moveMouseOverTarget(interaction, resolvable);
 
-          if (simulateOptionClick) {
-            await new JsPath(
-              this.frameEnvironment,
-              interaction.mousePosition,
-            ).simulateOptionClick();
-            return;
-          }
-
-          const waitForTarget = await this.startMouseoverListener(nodeId, 500);
-          // give mouse-over a tick to register
-          await new Promise(setImmediate);
-          await this.mouse.move(x, y);
-
-          const isOverTarget = await waitForTarget.onTriggered;
-          if (isOverTarget === true) break;
-
-          this.logger.info(
-            'Interaction.click - move did not hover over expected "Interaction.mousePosition" element.',
-            {
-              mousePosition: interaction.mousePosition,
-              expectedNodeId: nodeId,
-              domCoordinates,
-              retryNumber,
-            },
-          );
-
-          // give the page time to sort out
-          await new Promise(resolve => setTimeout(resolve, 500));
-          // make sure element is on screen
-          await this.playInteraction(resolvable, {
-            command: 'scroll',
-            mousePosition: interaction.mousePosition,
-          });
+        if (result.simulateOptionClick) {
+          await new JsPath(this.frameEnvironment, mousePosition).simulateOptionClick();
+          return;
         }
 
-        const mouseupListener = await this.startMouseupListener(nodeId, 5e3);
-        // give mouse-up a tick to register
-        await new Promise(setImmediate);
-        await this.mouse.click({
-          button,
-          clickCount,
-          delay: interaction.delayMillis,
-        });
-        const mouseupTriggered = await mouseupListener.onTriggered;
+        const { nodeId, domCoordinates } = result;
+
+        await this.mouse.down({ button, clickCount });
+        if (delayMillis) await waitFor(delayMillis, resolvable);
+
+        const mouseupTrigger = await this.createMouseupTrigger(nodeId);
+        await this.mouse.up({ button, clickCount });
+        const mouseupTriggered = await mouseupTrigger.didTrigger();
         if (!mouseupTriggered.didClickLocation) {
           const suggestWaitingMessage = isPagePaintStable.isStable
             ? '\n\nYou might have more predictable results by waiting for the page to stabilize before triggering this click -- agent.waitForPaintingStable()'
@@ -282,7 +245,7 @@ export default class Interactor implements IInteractionsHelper {
           const delay = interaction.keyboardDelayBetween;
           const keyupDelay = interaction.keyboardKeyupDelay;
           if (counter > 0 && delay) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await waitFor(delay, resolvable);
           }
 
           if ('keyCode' in keyboardCommand) {
@@ -302,7 +265,7 @@ export default class Interactor implements IInteractionsHelper {
               } else {
                 await this.keyboard.sendCharacter(char);
               }
-              if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+              if (delay) await waitFor(delay, resolvable);
             }
           }
           counter += 1;
@@ -319,13 +282,16 @@ export default class Interactor implements IInteractionsHelper {
         break;
       }
       case InteractionCommand.waitForMillis: {
-        await new Promise(resolve => setTimeout(resolve, interaction.delayMillis));
+        await waitFor(interaction.delayMillis, resolvable);
         break;
       }
     }
   }
 
-  private async getScrollOffset(targetPosition: IMousePosition, windowBounds: IWindowOffset) {
+  private async getScrollOffset(
+    targetPosition: IMousePosition,
+    windowBounds: IWindowOffset,
+  ): Promise<{ deltaX: number; deltaY: number }> {
     assert(targetPosition, 'targetPosition should not be null');
 
     if (isMousePositionCoordinate(targetPosition)) {
@@ -344,7 +310,9 @@ export default class Interactor implements IInteractionsHelper {
     return { deltaX, deltaY };
   }
 
-  private async getPositionXY(mousePosition: IMousePosition) {
+  private async getPositionXY(
+    mousePosition: IMousePosition,
+  ): Promise<IPoint & { nodeId?: number; simulateOptionClick?: boolean }> {
     assert(mousePosition, 'mousePosition should not be null');
     if (isMousePositionCoordinate(mousePosition)) {
       const [x, y] = mousePosition as number[];
@@ -366,7 +334,53 @@ export default class Interactor implements IInteractionsHelper {
     return { x, y, nodeId: attachedState?.id };
   }
 
-  private static injectScrollToPositions(interactions: IInteractionGroups) {
+  private async moveMouseOverTarget(
+    interaction: IInteractionStep,
+    resolvable: IResolvablePromise,
+  ): Promise<{ nodeId: number; domCoordinates: IPoint; simulateOptionClick?: boolean }> {
+    const { mousePosition } = interaction;
+    // try 2x to hover over the expected target
+    for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
+      const { x, y, simulateOptionClick, nodeId } = await this.getPositionXY(mousePosition);
+
+      if (simulateOptionClick) {
+        return { simulateOptionClick: true, nodeId, domCoordinates: null };
+      }
+
+      // wait for mouse to be over target
+      const waitForTarget = await this.createMouseoverTrigger(nodeId);
+      await this.mouse.move(x, y);
+
+      const isOverTarget = await waitForTarget.didTrigger();
+      if (isOverTarget === true) {
+        return { nodeId, domCoordinates: { x, y } };
+      }
+
+      this.logger.info(
+        'Interaction.click - moving over target before click did not hover over expected "Interaction.mousePosition" element.',
+        {
+          mousePosition,
+          expectedNodeId: nodeId,
+          domCoordinates: { x, y },
+          retryNumber,
+        },
+      );
+
+      // give the page time to sort out
+      await waitFor(500, resolvable);
+      // make sure element is on screen
+      await this.playInteraction(resolvable, {
+        command: 'scroll',
+        mousePosition,
+      });
+    }
+
+    throw new Error(
+      'Interaction.click - could not move mouse over target provided by "Interaction.mousePosition".',
+    );
+  }
+
+  private static injectScrollToPositions(interactions: IInteractionGroups): IInteractionGroups {
     const finalInteractions: IInteractionGroups = [];
     for (const group of interactions) {
       const groupCommands: IInteractionGroup = [];
@@ -388,7 +402,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 }
 
-export function isMousePositionCoordinate(value: IMousePosition) {
+export function isMousePositionCoordinate(value: IMousePosition): boolean {
   return (
     Array.isArray(value) &&
     value.length === 2 &&
@@ -397,7 +411,11 @@ export function isMousePositionCoordinate(value: IMousePosition) {
   );
 }
 
-export function deltaToFullyVisible(coordinate: number, length: number, boundaryLength: number) {
+export function deltaToFullyVisible(
+  coordinate: number,
+  length: number,
+  boundaryLength: number,
+): number {
   if (coordinate >= 0) {
     if (length > boundaryLength) {
       length = boundaryLength / 2;
@@ -416,6 +434,15 @@ export function deltaToFullyVisible(coordinate: number, length: number, boundary
   return 0;
 }
 
-function round(num: number) {
+async function waitFor(millis: number, resolvable: IResolvablePromise): Promise<void> {
+  if (millis === undefined || millis === null) return;
+
+  await Promise.race([
+    resolvable.promise,
+    new Promise(resolve => setTimeout(resolve, millis).unref()),
+  ]);
+}
+
+function round(num: number): number {
   return Math.round(10 * num) / 10;
 }

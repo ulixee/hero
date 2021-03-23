@@ -9,14 +9,8 @@ export default interface IInteractionsHelper {
   lookupBoundingRect(
     mousePosition: IMousePosition,
   ): Promise<IRect & { elementTag?: string; nodeId?: number }>;
-  startMouseupListener(
-    nodeId: number,
-    timeoutMs: number,
-  ): Promise<{ onTriggered: Promise<IMouseUpResult> }>;
-  startMouseoverListener(
-    nodeId: number,
-    timeoutMs: number,
-  ): Promise<{ onTriggered: Promise<boolean> }>;
+  createMouseupTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<IMouseUpResult> }>;
+  createMouseoverTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<boolean> }>;
   mousePosition: IPoint;
   scrollOffset: Promise<IPoint>;
   viewport: IViewport;

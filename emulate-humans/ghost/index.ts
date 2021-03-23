@@ -155,10 +155,10 @@ export default class HumanEmulatorGhost {
 
     const jsPath = interactionStep.mousePosition;
 
-    let clickConfirm: Promise<IMouseUpResult> = null;
+    let clickConfirm: () => Promise<IMouseUpResult> = null;
     if (targetRect.nodeId && targetRect.elementTag !== 'option') {
-      const listener = await helper.startMouseupListener(targetRect.nodeId, 5e3);
-      clickConfirm = listener.onTriggered;
+      const listener = await helper.createMouseupTrigger(targetRect.nodeId);
+      clickConfirm = listener.didTrigger;
     }
 
     if (targetRect.elementTag !== 'option') {
@@ -169,7 +169,7 @@ export default class HumanEmulatorGhost {
     await run(interactionStep);
 
     if (clickConfirm !== null) {
-      const mouseUpResult = await clickConfirm;
+      const mouseUpResult = await clickConfirm();
 
       if (mouseUpResult.didClickLocation === false) {
         helper.logger.error(

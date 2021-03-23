@@ -80,16 +80,9 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         expect(await page.evaluate(`navigator.userAgent`)).toBe('popupcity');
         expect(await page.evaluate(`navigator.platform`)).toBe('Windows95');
         expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en-GB']);
-        const coordinates: any = await page.evaluate(`(()=>{
-    const rect = document.querySelector('a').getBoundingClientRect();
-    return {
-      x: rect.x,
-      y: rect.y
-    };
-})();`);
+
         const popupPromise = page.waitForPopup();
-        await page.mouse.move(coordinates.x, coordinates.y);
-        await page.mouse.click();
+        await page.click('a');
         const popup = await popupPromise;
         needsClosing.push(popup);
         expect(await popup.evaluate(`navigator.userAgent`)).toBe('popupcity');

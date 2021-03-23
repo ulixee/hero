@@ -130,7 +130,7 @@ export default class FrameNavigationsObserver {
     const top = this.navigations.top;
     if (!top) return { isStable: false };
 
-    // need to wait for both load + painting stable, or wait 3 seconds after either
+    // need to wait for both load + painting stable, or wait 3 seconds after painting stable
     const loadDate = top.stateChanges.get('Load');
     const contentPaintedDate = top.stateChanges.get('ContentPaint');
     if (!!loadDate && !!contentPaintedDate) return { isStable: true };
@@ -141,7 +141,8 @@ export default class FrameNavigationsObserver {
     // if not stable yet, don't count as resolved
     if (!contentPaintedDate) return { isStable: false };
 
-    const timeUntilReadyMs = moment().diff(loadDate, 'milliseconds');
+    // have contentPaintedDate date, but no load
+    const timeUntilReadyMs = moment().diff(contentPaintedDate, 'milliseconds');
     return {
       isStable: timeUntilReadyMs >= 3e3,
       timeUntilReadyMs: Math.min(3e3, 3e3 - timeUntilReadyMs),

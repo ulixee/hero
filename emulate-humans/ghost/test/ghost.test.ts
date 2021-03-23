@@ -99,14 +99,14 @@ describe('move', () => {
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
         logger: log,
-        startMouseupListener() {
+        createMouseupTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+            didTrigger: () => Promise.resolve({ didClickLocation: true } as any),
           });
         },
-        startMouseoverListener() {
+        createMouseoverTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve(true),
+            didTrigger: () => Promise.resolve(true),
           });
         },
       },
@@ -146,14 +146,14 @@ describe('scroll', () => {
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
         logger: log,
-        startMouseupListener() {
+        createMouseupTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+            didTrigger: () => Promise.resolve({ didClickLocation: true } as any),
           });
         },
-        startMouseoverListener() {
+        createMouseoverTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve(true),
+            didTrigger: () => Promise.resolve(true),
           });
         },
       },
@@ -191,14 +191,14 @@ describe('scroll', () => {
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
         logger: log,
-        startMouseupListener() {
+        createMouseupTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+            didTrigger: () => Promise.resolve({ didClickLocation: true } as any),
           });
         },
-        startMouseoverListener() {
+        createMouseoverTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve(true),
+            didTrigger: () => Promise.resolve(true),
           });
         },
       },
@@ -236,14 +236,14 @@ describe('scroll', () => {
         },
         scrollOffset: Promise.resolve({ x: 0, y: 0 }),
         logger: log,
-        startMouseupListener() {
+        createMouseupTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve({ didClickLocation: true } as any),
+            didTrigger: () => Promise.resolve({ didClickLocation: true } as any),
           });
         },
-        startMouseoverListener() {
+        createMouseoverTrigger() {
           return Promise.resolve({
-            onTriggered: Promise.resolve(true),
+            didTrigger: () => Promise.resolve(true),
           });
         },
       },
