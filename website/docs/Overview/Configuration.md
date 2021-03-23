@@ -38,7 +38,7 @@ Configures the port Replay uses to serve Session data.
 
 Configurable via [`Core.start()`](#core-start) or the first [`ConnectionToCore`](/docs/advanced/connection-to-core#configuration).
 
-### Sessions Dir <div class="specs"><i>Connection</i><i>Core</i></div>
+### Sessions Dir <div class="specs"><i>Connection</i><i>Core</i></div> {#sessions-dir}
 
 Configures the storage location for files created by Core.
 
