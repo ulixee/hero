@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.1...v1.4.1-alpha.0) (2021-03-23)
+
+
+### Bug Fixes
+
+* **client:** properly handle unhandled disconnect ([e3afedd](https://github.com/ulixee/secret-agent/commit/e3afedd90f0c614dab8ed5a02ba40de013e24b1d))
+* **core:** stop writing to db if it goes readonly ([9fc9e2f](https://github.com/ulixee/secret-agent/commit/9fc9e2f67ea5a5dd495fbfcb6946698c279c118c))
+* **core:** type serializer, fix null headers issue ([e4d832b](https://github.com/ulixee/secret-agent/commit/e4d832b62278c67c59edb7bb6d0b2097a6b8669b))
+* **emulator:** polyfill setAppBadge/clearAppBadge ([5cfa400](https://github.com/ulixee/secret-agent/commit/5cfa40082de419458656370622552c668b0a071f))
+* **mitm:** cached resources to use cached status ([26079b5](https://github.com/ulixee/secret-agent/commit/26079b5ee040efc7abbc57a422bb356f9b41a39e))
+* **mitm:** fix url error ([d53ae18](https://github.com/ulixee/secret-agent/commit/d53ae18a905fce3fea45a1e19edd9498ed4c54bd))
+* **puppet:** handle crashed windows ([290e923](https://github.com/ulixee/secret-agent/commit/290e923544008c3cd84b568c2d8a7c2f0de38437))
+
+
+### Features
+
+* **client:** expose frames ([44a6b12](https://github.com/ulixee/secret-agent/commit/44a6b129fef6f541cffc24e8913fd76defcf3aef))
+
+
+
+
+
 # [1.4.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.0...v1.4.0-alpha.1) (2021-03-11)
 
 **Note:** Version bump only for package @secret-agent/core
