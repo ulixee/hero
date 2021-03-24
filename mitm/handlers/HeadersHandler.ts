@@ -179,6 +179,7 @@ export default class HeadersHandler {
   private static secFetchDestToResourceType(secFetchDest: string): ResourceType {
     switch (secFetchDest) {
       case 'document':
+      case 'iframe':
       case 'nested-document': // guess
         return 'Document';
       case 'style':

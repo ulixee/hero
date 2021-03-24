@@ -19,6 +19,14 @@ export default class AwaitedEventListener {
     session.on('closing', () => this.triggerListenersWithType('close'));
   }
 
+  public close() {
+    for (const entry of this.listenersById.values()) {
+      if (entry.type !== 'close') {
+        this.remove(entry.id);
+      }
+    }
+  }
+
   public listen(
     sessionMeta: ISessionMeta,
     jsPath: IJsPath | null,
@@ -59,11 +67,13 @@ export default class AwaitedEventListener {
 
     const { type, meta, listenFn, jsPath } = listener;
     const tab = Session.getTab(meta);
-    if (type === 'resource') {
-      tab.off('resource', listenFn);
-    }
-    if (isWebsocketListener(listener)) {
-      tab.sessionState.stopWebsocketMessages(jsPath[1] as string, listenFn);
+    if (tab) {
+      if (type === 'resource') {
+        tab.off('resource', listenFn);
+      }
+      if (isWebsocketListener(listener)) {
+        tab.sessionState.stopWebsocketMessages(jsPath[1] as string, listenFn);
+      }
     }
 
     for (const entry of this.listenersById.values()) {
