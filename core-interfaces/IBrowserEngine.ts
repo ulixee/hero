@@ -4,6 +4,7 @@ export default interface IBrowserEngine {
   executablePath: string;
   executablePathEnvVar: string;
   extraLaunchArgs?: string[];
+  isHeaded?: boolean;
 }
 
 export type IBrowserEngineConfig = Pick<

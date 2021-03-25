@@ -96,7 +96,6 @@ const defaultArgs = [
   '--disable-breakpad', // Disable crashdump collection (reporting is already disabled in Chromium)
   '--disable-client-side-phishing-detection', //  Disables client-side phishing detection.
   '--disable-domain-reliability', // Disables Domain Reliability Monitoring, which tracks whether the browser has difficulty contacting Google-owned sites and uploads reports to Google.
-  '--disable-component-update', // Don't update the browser 'components' listed at chrome://components/
   '--disable-component-extensions-with-background-pages', // Disable some built-in extensions that aren't affected by --disable-extensions
   '--disable-default-apps', // Disable installation of default apps on first run
   '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
@@ -115,6 +114,8 @@ const defaultArgs = [
   '--use-gl=osmesa',
 
   '--incognito',
+
+  '--use-fake-device-for-media-stream',
 
   '--no-default-browser-check', //  Disable the default browser check, do not prompt to set it as such
   '--metrics-recording-only', // Disable reporting to UMA, but allows for collection

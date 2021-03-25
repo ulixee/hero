@@ -67,6 +67,35 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
+test('widevine detection', async () => {
+  const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
+  await agent.goto(koaServer.baseUrl);
+
+  const accessKey = await agent
+    .getJsValue(
+      `navigator.requestMediaKeySystemAccess('com.widevine.alpha', [{
+      initDataTypes: ['cenc'],
+      audioCapabilities: [
+        {
+          contentType: 'audio/mp4;codecs="mp4a.40.2"',
+        },
+      ],
+      videoCapabilities: [
+        {
+          contentType: 'video/mp4;codecs="avc1.42E01E"',
+        },
+      ],
+    },
+  ]).then(x => {
+    if (x.keySystem !== 'com.widevine.alpha') throw new Error('Wrong keysystem ' + x.keySystem);
+    return x.createMediaKeys();
+  })`,
+    )
+    .catch(err => err);
+  expect(accessKey.type).toBe('MediaKeys');
+});
+
 test('should pass FpScanner', async () => {
   const analyzePromise = new Promise(resolve => {
     koaServer.post('/analyze', async ctx => {
@@ -81,6 +110,7 @@ test('should pass FpScanner', async () => {
   });
 
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}/collect`);
 
   const data = await analyzePromise;
@@ -97,6 +127,7 @@ test('should pass FpScanner', async () => {
 
 test('should not be denied for notifications but prompt for permissions', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}`);
   const activeTab = await agent.activeTab;
   const tabId = await activeTab.tabId;
@@ -120,6 +151,7 @@ test('should not be denied for notifications but prompt for permissions', async 
 
 test('should not leave markers on permissions.query.toString', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   const tabId = await agent.activeTab.tabId;
   await agent.goto(`${koaServer.baseUrl}`);
   const sessionId = await agent.sessionId;
@@ -146,6 +178,7 @@ test('should not leave markers on permissions.query.toString', async () => {
 
 test('should not recurse the toString function', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}`);
   const tabId = await agent.activeTab.tabId;
   const sessionId = await agent.sessionId;
@@ -166,6 +199,7 @@ test('should not recurse the toString function', async () => {
 
 test('should properly maintain stack traces in toString', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   await agent.goto(`${koaServer.baseUrl}`);
   const tabId = await agent.activeTab.tabId;
   const sessionId = await agent.sessionId;
@@ -201,6 +235,7 @@ test('should properly maintain stack traces in toString', async () => {
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   const tabId = await agent.activeTab.tabId;
   await agent.goto(koaServer.baseUrl);
   const sessionId = await agent.sessionId;
@@ -224,6 +259,7 @@ document.querySelector = (function (orig) {
 
 test('should not leave stack trace markers when calling in page functions', async () => {
   const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
   koaServer.get('/marker', ctx => {
     ctx.body = `
 <body>

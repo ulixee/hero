@@ -25,6 +25,10 @@ function getEngine(
     executablePathEnvVar,
   ).toJSON();
 
+  engineFetcher.isHeaded = Boolean(
+    JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
+  );
+
   log.stats('Browser.getEngine', {
     sessionId: null,
     engineFetcher,

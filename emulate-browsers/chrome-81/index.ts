@@ -130,6 +130,7 @@ export default class Chrome81 {
     domOverrides.add('navigator', {
       userAgentString: this.userAgentString,
       platform: this.osPlatform,
+      headless: Chrome81.engine.isHeaded !== true,
     });
 
     domOverrides.add('MediaDevices.prototype.enumerateDevices', {

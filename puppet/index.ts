@@ -35,11 +35,7 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public start(
-    args: ILaunchArgs = {
-      showBrowser: false,
-    },
-  ): Promise<IPuppetBrowser | Error> {
+  public start(args: ILaunchArgs = {}): Promise<IPuppetBrowser | Error> {
     if (this.browserOrError) {
       return this.browserOrError;
     }
@@ -88,8 +84,11 @@ export default class Puppet {
     }
 
     try {
-      const { proxyPort, showBrowser } = args;
-      const launchArgs = launcher.getLaunchArgs({ showBrowser, proxyPort });
+      const { proxyPort } = args;
+      const launchArgs = launcher.getLaunchArgs({
+        showBrowser: !!this.engine.isHeaded,
+        proxyPort,
+      });
 
       // exists, but can't launch, try to launch
       await validateHostRequirements(this.engine);
@@ -136,5 +135,4 @@ ${remedyMessage}`);
 
 interface ILaunchArgs {
   proxyPort?: number;
-  showBrowser?: boolean;
 }
