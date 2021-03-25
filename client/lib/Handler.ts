@@ -9,12 +9,20 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
-type SettledDispatchesBySessionId = { [sessionId: string]: { args: any; error?: Error } };
-type PendingDispatch = { resolution: Promise<Error | void>; sessionId?: string; args: any };
+type SettledDispatchesBySessionId = {
+  [sessionId: string]: { args: any; error?: Error; retries: number };
+};
+type PendingDispatch = {
+  resolution: Promise<Error | void>;
+  sessionId?: string;
+  args: any;
+  retries: number;
+};
 
 const { log } = Log(module);
 
 export default class Handler {
+  public disconnectedDispatchRetries = 3;
   public defaultAgentOptions: IAgentCreateOptions = {};
   public get coreHosts(): Promise<string[]> {
     return Promise.all(this.connections.map(x => x.hostOrError)).then(x => {
@@ -29,6 +37,8 @@ export default class Handler {
 
   private readonly connections: ConnectionToCore[] = [];
   private readonly dispatches: PendingDispatch[] = [];
+
+  private isClosing = false;
 
   constructor(...connectionOptions: (IConnectionToCoreOptions | ConnectionToCore)[]) {
     if (!connectionOptions.length) {
@@ -68,14 +78,25 @@ export default class Handler {
     runFn: (agent: Agent, args?: T) => Promise<void>,
     args?: T,
     createAgentOptions?: IAgentCreateOptions,
+    pendingDispatch?: PendingDispatch,
   ): void {
     const options = {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
-    const connection = this.getConnection();
 
-    const dispatched: PendingDispatch = { args, resolution: null };
+    const dispatched: PendingDispatch = pendingDispatch ?? { args, resolution: null, retries: 0 };
+
+    // if no available connection, return
+    const connection = this.getConnection();
+    if (!connection) {
+      dispatched.resolution = Promise.resolve(
+        new Error("There aren't any connections available to dispatch this agent"),
+      );
+      this.dispatches.push(dispatched);
+      return;
+    }
+
     dispatched.resolution = connection
       .useAgent(options, async agent => {
         try {
@@ -85,7 +106,16 @@ export default class Handler {
           await agent.close();
         }
       })
-      .catch((err: Error) => err);
+      .catch(err => {
+        const canRetry =
+          !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
+        if (canRetry && !this.isClosing && this.connections.length) {
+          dispatched.retries += 1;
+          return this.dispatchAgent(runFn, args, createAgentOptions, dispatched);
+        }
+
+        return err;
+      });
 
     this.dispatches.push(dispatched);
   }
@@ -144,9 +174,9 @@ export default class Handler {
       this.dispatches.length = 0;
 
       await Promise.all(dispatches.map(x => x.resolution));
-      for (const { sessionId, resolution, args } of dispatches) {
+      for (const { sessionId, resolution, args, retries } of dispatches) {
         const error = <Error>await resolution;
-        result[sessionId] = { args, error };
+        result[sessionId] = { args, error, retries };
       }
 
       await new Promise(setImmediate);
@@ -156,15 +186,21 @@ export default class Handler {
   }
 
   public async close(error?: Error): Promise<void> {
+    if (this.isClosing) return;
+    this.isClosing = true;
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.disconnect(error)));
   }
 
-  private getConnection(): ConnectionToCore {
+  private getAvailableConnections(): ConnectionToCore[] {
     // prefer a connection that can create a session right now
     let connections = this.connections.filter(x => x.canCreateSessionNow());
     if (!connections.length) connections = this.connections.filter(x => !x.isDisconnecting);
-    return pickRandom(connections);
+    return connections;
+  }
+
+  private getConnection(): ConnectionToCore {
+    return pickRandom(this.getAvailableConnections());
   }
 
   private registerUnhandledExceptionHandlers(): void {

@@ -34,6 +34,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   private autoShutdownTimer: NodeJS.Timer;
   private readonly sessionIds = new Set<string>();
+  private hasActiveCommand = false;
 
   private clientExposedMethods = new Map<string, keyof this & string>([
     ['Core.connect', 'connect'],
@@ -62,6 +63,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
     let data: any;
     try {
+      this.hasActiveCommand = true;
       data = await this.executeCommand(command, args, meta);
     } catch (error) {
       // if we're closing, don't emit errors
@@ -77,6 +79,8 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       }
       data = this.serializeError(error);
       data.isDisconnecting = this.isClosing || session?.isClosing;
+    } finally {
+      this.hasActiveCommand = false;
     }
 
     const commandId = session?.sessionState?.lastCommand?.id;
@@ -132,7 +136,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   }
 
   public isActive(): boolean {
-    return this.sessionIds.size > 0 || this.isPersistent;
+    return this.sessionIds.size > 0 || this.isPersistent || this.hasActiveCommand;
   }
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
