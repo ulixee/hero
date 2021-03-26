@@ -136,7 +136,7 @@ export default class CommandFormatter {
 }
 
 export function formatJsPath(path: any) {
-  const jsPath = path
+  const jsPath = (path ?? [])
     .map((x, i) => {
       if (i === 0 && typeof x === 'number') {
         return '<previouslySelectedNode>';

@@ -6,4 +6,5 @@ export default interface IElementRect {
   height: number;
   width: number;
   tag: string;
+  isVisible?: boolean;
 }

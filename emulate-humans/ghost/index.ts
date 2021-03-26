@@ -62,7 +62,7 @@ export default class HumanEmulatorGhost {
         }
 
         if (step.command === InteractionCommand.move) {
-          await this.move(step, run, helper);
+          await this.moveMouse(step, run, helper);
           continue;
         }
 
@@ -70,7 +70,7 @@ export default class HumanEmulatorGhost {
           step.command === InteractionCommand.click ||
           step.command === InteractionCommand.doubleclick
         ) {
-          await this.moveAndClick(step, run, helper);
+          await this.moveMouseAndClick(step, run, helper);
           continue;
         }
 
@@ -116,19 +116,27 @@ export default class HumanEmulatorGhost {
     }
   }
 
-  protected async moveAndClick(
+  protected async moveMouseAndClick(
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
+    attachedNodeId?: number,
     retries = 0,
   ): Promise<void> {
+    const originalMousePosition = [...interactionStep.mousePosition];
     interactionStep.delayMillis = Math.floor(Math.random() * 100);
-    const targetRect = await helper.lookupBoundingRect(interactionStep.mousePosition);
+
+    const targetRect = await helper.lookupBoundingRect(
+      attachedNodeId ? [attachedNodeId] : interactionStep.mousePosition,
+    );
+
     const targetPoint = getRandomRectPoint(targetRect, HumanEmulatorGhost.boxPaddingPercent);
 
-    await this.moveToPoint(targetPoint, targetRect.width, run, helper);
+    const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, run, helper);
 
-    const finalRect = await helper.lookupBoundingRect(interactionStep.mousePosition);
+    const finalRect = didMoveMouse
+      ? await helper.lookupBoundingRect([targetRect.nodeId])
+      : targetRect;
 
     const isFinalRectVisible = this.isRectVisible(finalRect, helper);
     // make sure target is still visible
@@ -137,23 +145,26 @@ export default class HumanEmulatorGhost {
       if (retries < 2) {
         const isScroll = !isFinalRectVisible;
         helper.logger.info(
-          `Click mousePosition not visible after mouse moves. Moving${
+          `Click mousePosition not in viewport after mouse moves. Moving${
             isScroll ? ' and scrolling' : ''
           } to a new point.`,
           {
             interactionStep,
+            targetNodeId: targetRect.nodeId,
             retries,
           },
         );
-        if (isScroll) await this.scroll(interactionStep, run, helper);
-        return this.moveAndClick(interactionStep, run, helper, retries + 1);
+        if (isScroll) {
+          const scrollToStep = interactionStep;
+          if (targetRect.nodeId) scrollToStep.mousePosition = [targetRect.nodeId];
+          await this.scroll(scrollToStep, run, helper);
+        }
+        return this.moveMouseAndClick(interactionStep, run, helper, targetRect.nodeId, retries + 1);
       }
       throw new Error(
         'Element or mousePosition remains out of viewport after 2 attempts to move it into view',
       );
     }
-
-    const jsPath = interactionStep.mousePosition;
 
     let clickConfirm: () => Promise<IMouseUpResult> = null;
     if (targetRect.nodeId && targetRect.elementTag !== 'option') {
@@ -172,10 +183,15 @@ export default class HumanEmulatorGhost {
       const mouseUpResult = await clickConfirm();
 
       if (mouseUpResult.didClickLocation === false) {
+        let extras = '';
+        if (finalRect.isNodeVisible === false && finalRect.nodeId) {
+          extras =
+            '\n\nNOTE: The target node is not visible in the dom. Possibly needs a refined selector.';
+        }
         helper.logger.error(
-          'Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.',
+          `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
           {
-            mousePosition: jsPath,
+            mousePosition: originalMousePosition,
             jsPathNodeId: finalRect.nodeId,
             clickedNodeId: mouseUpResult.targetNodeId,
             expectedDomCoordinates: finalRect,
@@ -186,13 +202,13 @@ export default class HumanEmulatorGhost {
           },
         );
         throw new Error(
-          'Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.',
+          `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
         );
       }
     }
   }
 
-  protected async move(
+  protected async moveMouse(
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
@@ -200,15 +216,15 @@ export default class HumanEmulatorGhost {
     const rect = await helper.lookupBoundingRect(interactionStep.mousePosition);
     const targetPoint = getRandomRectPoint(rect, HumanEmulatorGhost.boxPaddingPercent);
 
-    await this.moveToPoint(targetPoint, rect.width, run, helper);
+    await this.moveMouseToPoint(targetPoint, rect.width, run, helper);
   }
 
-  protected async moveToPoint(
+  protected async moveMouseToPoint(
     targetPoint: IPoint,
     targetWidth: number,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const mousePosition = helper.mousePosition;
     const vector = generateVector(mousePosition, targetPoint, targetWidth, {
       threshold: HumanEmulatorGhost.overshootThreshold,
@@ -216,12 +232,15 @@ export default class HumanEmulatorGhost {
       spread: HumanEmulatorGhost.overshootSpread,
     });
 
+    if (!vector.length) return false;
+
     for (const { x, y } of vector) {
       await run({
         mousePosition: [x, y],
         command: InteractionCommand.move,
       });
     }
+    return true;
   }
 
   protected async jitterMouse(
