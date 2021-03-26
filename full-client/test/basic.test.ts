@@ -51,12 +51,10 @@ describe('basic Full Client tests', () => {
     await agent.activeTab.on('resource', event => resources.push(event));
     await agent.goto(`${koaServer.baseUrl}/block`);
     await agent.waitForPaintingStable();
-    expect(resources).toHaveLength(3);
-    for (const resource of resources) {
-      const status = await resource.response.statusCode;
-      if (resource.type === 'Document') expect(status).toBe(200);
-      else expect(status).toBe(404);
-    }
+    await new Promise(setImmediate);
+    expect(resources).toHaveLength(1);
+    expect(await resources[0].response.statusCode).toBe(200);
+    expect(resources[0].type).toBe('Document');
   });
 
   it('should get unreachable proxy errors in the client', async () => {

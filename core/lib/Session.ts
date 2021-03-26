@@ -215,6 +215,7 @@ export default class Session extends TypedEventEmitter<{
       sessionId: this.id,
     });
 
+    this.awaitedEventListener.close();
     await this.mitmRequestSession.close();
     await Promise.all(Object.values(this.tabs).map(x => x.close()));
     try {
@@ -289,7 +290,9 @@ export default class Session extends TypedEventEmitter<{
     }
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
-    tab?.emit('resource', resource);
+    if (!event.didBlockResource) {
+      tab?.emit('resource', resource);
+    }
     tab?.checkForResolvedNavigation(event.browserRequestId, resource);
   }
 

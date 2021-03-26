@@ -41,20 +41,21 @@ export default abstract class BaseHttpHandler {
 
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);
 
+      // need to determine resource type before blocking
+      await HeadersHandler.determineResourceType(context);
+
       if (BlockHandler.shouldBlockRequest(context)) {
         context.setState(ResourceState.Blocked);
         log.info(`Http.RequestBlocked`, {
           sessionId: session.sessionId,
           url: context.url.href,
         });
-        await HeadersHandler.determineResourceType(context);
         await context.browserHasRequested;
         session.emit('response', MitmRequestContext.toEmittedResource(this.context));
         // already wrote reply
         return;
       }
 
-      await HeadersHandler.determineResourceType(context);
       await CookieHandler.setProxyToServerCookies(context);
 
       // do one more check on the session before doing a connect
