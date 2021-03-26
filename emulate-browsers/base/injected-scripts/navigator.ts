@@ -38,3 +38,22 @@ if ('clearAppBadge' in self.navigator) {
     return Promise.resolve(undefined);
   });
 }
+
+if (args.headless === true && 'requestMediaKeySystemAccess' in self.navigator) {
+  proxyFunction(self.navigator, 'requestMediaKeySystemAccess', (target, thisArg, argArray) => {
+    if (argArray.length < 2) {
+      return ProxyOverride.callOriginal;
+    }
+    const [keySystem, configs] = argArray;
+    if (keySystem !== 'com.widevine.alpha' || [...configs].length < 1) {
+      return ProxyOverride.callOriginal;
+    }
+    return target
+      .call(thisArg, 'org.w3.clearkey', configs)
+      .then(x => {
+        proxyGetter(x, 'keySystem', () => keySystem);
+        return x;
+      })
+      .catch(err => cleanErrorStack(err));
+  });
+}

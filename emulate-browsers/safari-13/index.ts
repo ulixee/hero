@@ -178,6 +178,7 @@ export default class Safari13 {
     domOverrides.add('navigator', {
       userAgentString: this.userAgentString,
       platform: this.osPlatform,
+      headless: Safari13.engine.isHeaded !== true,
     });
 
     domOverrides.add('MediaDevices.prototype.enumerateDevices', {

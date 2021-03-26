@@ -151,13 +151,13 @@ export default class Core {
   });
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  process.on('uncaughtExceptionMonitor', async (error: Error) => {
-    await Core.logUnhandledError(error, true);
+process.on('uncaughtExceptionMonitor', async (error: Error) => {
+  await Core.logUnhandledError(error, true);
+  if (process.env.NODE_ENV !== 'test') {
     await Core.shutdown();
-  });
+  }
+});
 
-  process.on('unhandledRejection', async (error: Error) => {
-    await Core.logUnhandledError(error, false);
-  });
-}
+process.on('unhandledRejection', async (error: Error) => {
+  await Core.logUnhandledError(error, false);
+});
