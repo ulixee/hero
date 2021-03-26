@@ -1,6 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Core, { Session, CoreProcess } from '@secret-agent/core/index';
+import Core, { CoreProcess, Session } from '@secret-agent/core/index';
 import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
 import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
 import { createPromise } from '@secret-agent/commons/utils';
@@ -12,6 +12,7 @@ beforeAll(async () => {
   await Core.start();
   koaServer = await Helpers.runKoaServer(true);
 });
+afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
 
 describe('Full client Handler', () => {
@@ -68,6 +69,8 @@ describe('Full client Handler', () => {
     await expect(agent2.sessionId).resolves.toBeTruthy();
     const agent3 = handler.createAgent();
 
+    Helpers.needsClosing.push(agent2);
+
     async function isAgent3Available(millis = 100): Promise<boolean> {
       const result = await Promise.race([
         agent3,
@@ -81,6 +84,7 @@ describe('Full client Handler', () => {
     await agent1.close();
 
     await expect(isAgent3Available(5e3)).resolves.toBe(true);
+    await (await agent3).close();
   });
 });
 
@@ -373,5 +377,64 @@ describe('connectionToCore', () => {
     expect(await handler.coreHosts).toHaveLength(1);
 
     await handler.close();
+  });
+
+  it('can re-queue dispatched agents that never started', async () => {
+    const coreHost = await CoreProcess.spawn({});
+    Helpers.onClose(() => CoreProcess.kill('SIGINT'));
+    const connection1 = new RemoteConnectionToCore({
+      maxConcurrency: 1,
+      host: coreHost,
+    });
+    await connection1.connect();
+
+    const handler = new Handler(connection1);
+    Helpers.needsClosing.push(handler);
+
+    const waitForGoto = createPromise();
+    const dispatchErrorPromise = createPromise<Error>();
+    handler.dispatchAgent(async agent => {
+      try {
+        await agent.goto(koaServer.baseUrl);
+        // create a command we can disconnect from (don't await yet)
+        const promise = agent.waitForMillis(5e3);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        waitForGoto.resolve();
+        await promise;
+      } catch (error) {
+        dispatchErrorPromise.resolve(error);
+        throw error;
+      }
+    });
+
+    let counter = 0;
+    const incr = async agent => {
+      await agent.goto(koaServer.baseUrl);
+      counter += 1;
+    };
+    handler.dispatchAgent(incr);
+    handler.dispatchAgent(incr);
+
+    // first 2 will be queued against the first connection
+    const coreHost2 = await Core.server.address;
+    await handler.addConnectionToCore({ maxConcurrency: 2, host: coreHost2 });
+    handler.dispatchAgent(incr);
+    handler.dispatchAgent(incr);
+    await waitForGoto.promise;
+
+    // disconnect the first connection. the first two handlers should get re-queued
+    await connection1.disconnect();
+    await new Promise(setImmediate);
+
+    // should have an error thrown if it actually the process. this one should NOT get re-queued
+    await expect(dispatchErrorPromise).resolves.toBeTruthy();
+    const dispatchError = await dispatchErrorPromise;
+    expect(dispatchError).toBeInstanceOf(DisconnectedFromCoreError);
+
+    const allDispatches = await handler.waitForAllDispatchesSettled();
+
+    expect(counter).toBe(4);
+    expect(Object.keys(allDispatches)).toHaveLength(5);
+    expect(Object.values(allDispatches).filter(x => !!x.error)).toHaveLength(1);
   });
 });
