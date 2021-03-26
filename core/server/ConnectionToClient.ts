@@ -275,7 +275,6 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   }
 
   private checkForAutoShutdown(): void {
-    if (this.isActive()) return;
     clearTimeout(this.autoShutdownTimer);
     this.autoShutdownTimer = setTimeout(() => {
       if (this.isActive()) return;
