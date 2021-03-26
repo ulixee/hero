@@ -46,19 +46,21 @@ export default class BrowserRequestMatcher {
     const hasUserActivity =
       !!mitmResource.requestLowerHeaders['sec-fetch-user'] || mitmResource.hasUserGesture;
 
-    // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
-    const isSharedWorker = mitmResource.requestLowerHeaders['sec-fetch-dest'] === 'sharedworker';
+    const resolveTimeout = setTimeout(
+      () =>
+        this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', {
+          request: browserRequest,
+        }),
+      5e3,
+    ).unref();
 
-    let resolveTimeout: NodeJS.Timeout;
-    if (!isSharedWorker) {
-      resolveTimeout = setTimeout(
-        () =>
-          this.logger.warn('BrowserRequestMatcher.ResourceNotResolved', {
-            request: browserRequest,
-          }),
-        5e3,
-      ).unref();
+    const fetchDest = mitmResource.requestLowerHeaders['sec-fetch-dest'] as string;
+
+    // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
+    if (fetchDest === 'sharedworker' || fetchDest === 'serviceworker') {
+      browserRequest.browserRequestedPromise.resolve(null);
     }
+
     mitmResource.browserHasRequested = browserRequest.browserRequestedPromise.promise
       .then(async () => {
         clearTimeout(resolveTimeout);
