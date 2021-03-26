@@ -41,7 +41,8 @@ export async function click(page: IPuppetPage, selector: string) {
     };
 })();`);
   await page.mouse.move(coordinates.x, coordinates.y);
-  await page.mouse.click();
+  await page.mouse.down();
+  await page.mouse.up();
 }
 
 export async function attachFrame(page: IPuppetPage, frameId: string, url: string) {

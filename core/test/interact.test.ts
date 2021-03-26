@@ -4,7 +4,6 @@ import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
-import Interactor from '../lib/Interactor';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;
@@ -169,7 +168,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       koaServer.get('/move-on-load', ctx => {
         ctx.body = `
         <body>
-            <div style="height: 1000px"></div>
+            <div style="height: 1800px"></div>
             <div>
               <img src="/img.png" />
               <img src="/img.png?test=1" />
@@ -187,22 +186,22 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       `;
       });
 
-      const lookupSpy = jest.spyOn(Interactor.prototype, 'lookupBoundingRect');
-      lookupSpy.mockImplementationOnce(async () => {
-        return {
-          x: 0,
-          y: 6,
-          height: 50,
-          width: 100,
-          elementTag: 'button',
-          nodeId: 1,
-        };
-      });
-
       const meta = await connection.createSession({ humanEmulatorId });
       const session = Session.get(meta.sessionId);
       Helpers.needsClosing.push(session);
+
       const tab = Session.getTab(meta);
+      // @ts-ignore
+      const interactor = tab.mainFrameEnvironment.interactor;
+      // @ts-ignore
+      const originalFn = interactor.getPositionXY.bind(interactor);
+      const mouseMoveSpy = jest.spyOn<any, any>(interactor, 'getPositionXY');
+      mouseMoveSpy.mockImplementationOnce(async mousePosition => {
+        const data = await originalFn(mousePosition);
+        data.y -= 500;
+        return data;
+      });
+
       await tab.goto(`${koaServer.baseUrl}/move-on-load`);
       await tab.interact([
         {
@@ -210,9 +209,10 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
           mousePosition: ['window', 'document', ['querySelector', '#button-1']],
         },
       ]);
+      expect(mouseMoveSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
       const lastClicked = await tab.getJsValue('lastClicked');
       expect(lastClicked.value).toBe('clickedit');
-    }, 60e3);
+    });
 
     it('should cancel pending interactions after a page clears', async () => {
       koaServer.get('/redirect-on-move', ctx => {

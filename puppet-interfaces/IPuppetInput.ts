@@ -12,7 +12,6 @@ export interface IPuppetKeyboard {
 export interface IPuppetMouse {
   position: IPoint;
   move(x: number, y: number): Promise<void>;
-  click(options?: IMouseOptions & { delay?: number }): Promise<void>;
   up(options?: IMouseOptions): Promise<void>;
   down(options?: IMouseOptions): Promise<void>;
   wheel(options: { deltaX?: number; deltaY?: number }): Promise<void>;

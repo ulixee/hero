@@ -57,7 +57,8 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         });
       })()`);
       await page.mouse.move(50, 60);
-      await page.mouse.click();
+      await page.mouse.down();
+      await page.mouse.up();
       const event: any = await page.evaluate(`window.clickPromise`);
       expect(event.type).toBe('click');
       expect(event.detail).toBe(1);
@@ -84,7 +85,9 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         });
       })()`);
       await page.mouse.move(50, 60);
-      await page.mouse.click({ clickCount: 2 });
+      const opts = { clickCount: 2 };
+      await page.mouse.down(opts);
+      await page.mouse.up(opts);
       const event: any = await page.evaluate(`window.dblclickPromise`);
       expect(event.type).toBe('dblclick');
       expect(event.detail).toBe(2);
