@@ -30,6 +30,7 @@ import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
 import MouseupListener from './MouseupListener';
 import MouseoverListener from './MouseoverListener';
+import { formatJsPath } from './CommandFormatter';
 
 const { log } = Log(module);
 
@@ -103,13 +104,25 @@ export default class Interactor implements IInteractionsHelper {
 
   public async lookupBoundingRect(
     mousePosition: IMousePosition,
-  ): Promise<IRect & { elementTag?: string; nodeId?: number }> {
+  ): Promise<IRect & { elementTag?: string; nodeId?: number; isNodeVisible?: boolean }> {
     if (isMousePositionCoordinate(mousePosition)) {
-      return { x: mousePosition[0] as number, y: mousePosition[1] as number, width: 1, height: 1 };
+      return {
+        x: mousePosition[0] as number,
+        y: mousePosition[1] as number,
+        width: 1,
+        height: 1,
+      };
     }
     const jsPath = new JsPath(this.frameEnvironment, mousePosition);
     const rect = await jsPath.getClientRect();
     const attachedState = (rect as any).attachedState as IAttachedState;
+
+    if (!attachedState)
+      throw new Error(
+        `The provided interaction->mousePosition did not match any nodes (${formatJsPath(
+          mousePosition,
+        )})`,
+      );
 
     return {
       x: rect.left,
@@ -118,6 +131,7 @@ export default class Interactor implements IInteractionsHelper {
       width: rect.width,
       elementTag: rect.tag,
       nodeId: attachedState.id,
+      isNodeVisible: rect.isVisible,
     };
   }
 
@@ -193,20 +207,31 @@ export default class Interactor implements IInteractionsHelper {
           return;
         }
 
+        let attachedNodeId: number;
+        if (isMousePositionAttachedId(mousePosition)) {
+          attachedNodeId = mousePosition[0] as number;
+        } else {
+          const attachedState = await new JsPath(
+            this.frameEnvironment,
+            mousePosition,
+          ).getAttachedState();
+          attachedNodeId = attachedState.attachedState.id;
+        }
+
         const isPagePaintStable = this.frameEnvironment.navigationsObserver.isPaintStable();
-        const result = await this.moveMouseOverTarget(interaction, resolvable);
+        const result = await this.moveMouseOverTarget(attachedNodeId, interaction, resolvable);
 
         if (result.simulateOptionClick) {
-          await new JsPath(this.frameEnvironment, mousePosition).simulateOptionClick();
+          await new JsPath(this.frameEnvironment, [attachedNodeId]).simulateOptionClick();
           return;
         }
 
-        const { nodeId, domCoordinates } = result;
+        const { domCoordinates } = result;
 
         await this.mouse.down({ button, clickCount });
         if (delayMillis) await waitFor(delayMillis, resolvable);
 
-        const mouseupTrigger = await this.createMouseupTrigger(nodeId);
+        const mouseupTrigger = await this.createMouseupTrigger(attachedNodeId);
         await this.mouse.up({ button, clickCount });
         const mouseupTriggered = await mouseupTrigger.didTrigger();
         if (!mouseupTriggered.didClickLocation) {
@@ -217,7 +242,7 @@ export default class Interactor implements IInteractionsHelper {
             `Interaction.click did not trigger mouseup on the requested node.${suggestWaitingMessage}`,
             {
               interaction,
-              jsPathNodeId: nodeId,
+              jsPathNodeId: attachedNodeId,
               clickedNodeId: mouseupTriggered.targetNodeId,
               domCoordinates,
             },
@@ -335,32 +360,32 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   private async moveMouseOverTarget(
+    attachedNodeId: number,
     interaction: IInteractionStep,
     resolvable: IResolvablePromise,
-  ): Promise<{ nodeId: number; domCoordinates: IPoint; simulateOptionClick?: boolean }> {
-    const { mousePosition } = interaction;
+  ): Promise<{ domCoordinates: IPoint; simulateOptionClick?: boolean }> {
     // try 2x to hover over the expected target
     for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
-      const { x, y, simulateOptionClick, nodeId } = await this.getPositionXY(mousePosition);
+      const { x, y, simulateOptionClick } = await this.getPositionXY([attachedNodeId]);
 
       if (simulateOptionClick) {
-        return { simulateOptionClick: true, nodeId, domCoordinates: null };
+        return { simulateOptionClick: true, domCoordinates: null };
       }
 
       // wait for mouse to be over target
-      const waitForTarget = await this.createMouseoverTrigger(nodeId);
+      const waitForTarget = await this.createMouseoverTrigger(attachedNodeId);
       await this.mouse.move(x, y);
 
       const isOverTarget = await waitForTarget.didTrigger();
       if (isOverTarget === true) {
-        return { nodeId, domCoordinates: { x, y } };
+        return { domCoordinates: { x, y } };
       }
 
       this.logger.info(
         'Interaction.click - moving over target before click did not hover over expected "Interaction.mousePosition" element.',
         {
-          mousePosition,
-          expectedNodeId: nodeId,
+          mousePosition: interaction.mousePosition,
+          expectedNodeId: attachedNodeId,
           domCoordinates: { x, y },
           retryNumber,
         },
@@ -371,7 +396,7 @@ export default class Interactor implements IInteractionsHelper {
       // make sure element is on screen
       await this.playInteraction(resolvable, {
         command: 'scroll',
-        mousePosition,
+        mousePosition: [attachedNodeId],
       });
     }
 
@@ -400,6 +425,10 @@ export default class Interactor implements IInteractionsHelper {
     }
     return finalInteractions;
   }
+}
+
+function isMousePositionAttachedId(mousePosition: IMousePosition): boolean {
+  return mousePosition.length === 1 && typeof mousePosition[0] === 'number';
 }
 
 export function isMousePositionCoordinate(value: IMousePosition): boolean {
