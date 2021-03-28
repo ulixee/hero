@@ -283,10 +283,10 @@ export default class Session extends TypedEventEmitter<{
     const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
       event.browserRequestId,
     );
-    const tab = this.tabs.find(x => x.id === tabId);
+    let tab = this.tabs.find(x => x.id === tabId);
     if (!tab && !tabId) {
-      this.logger.warn(`Mitm Response received without matching tab`, { event });
-      return;
+      // if we can't place it, just use the first active tab
+      tab = this.tabs.find(x => !x.isClosing) ?? this.tabs[0];
     }
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
