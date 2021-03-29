@@ -84,11 +84,7 @@ export default class Puppet {
     }
 
     try {
-      const { proxyPort } = args;
-      const launchArgs = launcher.getLaunchArgs({
-        showBrowser: !!this.engine.isHeaded,
-        proxyPort,
-      });
+      const launchArgs = launcher.getLaunchArgs(args);
 
       // exists, but can't launch, try to launch
       await validateHostRequirements(this.engine);
@@ -133,6 +129,10 @@ ${remedyMessage}`);
   }
 }
 
-interface ILaunchArgs {
+export interface ILaunchArgs {
   proxyPort?: number;
+  showBrowser?: boolean;
+  disableDevtools?: boolean;
+  disableGpu?: boolean;
+  noChromeSandbox?: boolean;
 }
