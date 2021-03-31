@@ -39,6 +39,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['usedArtificialCache', 'INTEGER'],
         ['didUserScriptBlockResource', 'INTEGER'],
         ['requestOriginalHeaders', 'TEXT'],
+        ['responseOriginalHeaders', 'TEXT'],
         ['httpError', 'TEXT'],
         ['browserServedFromCache', 'TEXT'],
         ['browserLoadFailure', 'TEXT'],
@@ -57,6 +58,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       socketId: number;
       redirectedToUrl?: string;
       originalHeaders: IResourceHeaders;
+      responseOriginalHeaders?: IResourceHeaders;
       clientAlpn: string;
       dnsResolvedIp?: string;
       wasCached?: boolean;
@@ -114,6 +116,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       extras.wasCached ? 1 : 0,
       extras.didBlockResource ? 1 : 0,
       JSON.stringify(extras.originalHeaders ?? {}),
+      JSON.stringify(extras.responseOriginalHeaders ?? {}),
       errorString,
       meta.response?.browserServedFromCache,
       meta.response?.browserLoadFailure,
@@ -174,6 +177,7 @@ export interface IResourcesRecord {
   didUserScriptBlockResource: boolean;
   isHttp2Push: boolean;
   requestOriginalHeaders: string;
+  responseOriginalHeaders: string;
   httpError: string;
 
   browserServedFromCache?: 'service-worker' | 'disk' | 'prefetch' | 'memory';

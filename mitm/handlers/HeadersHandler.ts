@@ -84,7 +84,7 @@ export default class HeadersHandler {
         continue;
       }
       // if going h2->h1->h2, strip http1 headers before responding to client
-      if (ctx.isServerHttp2 === false && ctx.isClientHttp2) {
+      if (ctx.isClientHttp2) {
         if (stripHttp1HeadersForH2.includes(canonizedKey.toLowerCase())) {
           continue;
         }

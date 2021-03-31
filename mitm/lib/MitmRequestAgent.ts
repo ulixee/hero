@@ -56,7 +56,8 @@ export default class MitmRequestAgent {
       port: url.port || (ctx.isSSL ? 443 : 80),
       headers: ctx.requestHeaders,
       rejectUnauthorized: allowUnverifiedCertificates === false,
-    };
+      insecureHTTPParser: true, // if we don't include this setting, invalid characters in http requests will blow up responses
+    } as any;
 
     await this.assignSocket(ctx, requestSettings);
 
