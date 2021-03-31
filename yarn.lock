@@ -2788,7 +2788,7 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/better-sqlite3@^5.4.0", "@types/better-sqlite3@^5.4.1":
+"@types/better-sqlite3@^5.4.1":
   version "5.4.1"
   resolved "https://registry.yarnpkg.com/@types/better-sqlite3/-/better-sqlite3-5.4.1.tgz#d45600bc19f8f41397263d037ca9b0d05df85e58"
   integrity sha512-8hje3Rhsg/9veTkALfCwiWn7VMrP1QDwHhBSgerttYPABEvrHsMQnU9dlqoM6QX3x4uw3Y06dDVz8uDQo1J4Ng==
@@ -4639,14 +4639,14 @@ before-after-hook@^2.0.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.0.tgz#09c40d92e936c64777aa385c4e9b904f8147eaf0"
   integrity sha512-jH6rKQIfroBbhEXVmI7XmXe3ix5S/PgJqpzdDPnR8JGLHWNYLsYZ6tK5iWOF/Ra3oqEX0NobXGlzbiylIzVphQ==
 
-better-sqlite3@^7.1.2:
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.1.2.tgz#95565757a834093f1ecae0d4457f60820ed5dd2a"
-  integrity sha512-8FWYnJ6Bx94MBX03J5Ka7sTRlvXXMEm4FW2Op7nM8ErQZeyALYLmSlbMBnfr4cMpS0tj0aYZv0a+26G2YJuIjg==
+better-sqlite3@^7.1.4:
+  version "7.1.4"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-7.1.4.tgz#19ba6aa10b92f81410944f498d9f63b000f0b9c1"
+  integrity sha512-9BvUSm8/xSyxZbnWpcRAwEZsfTK0196qi4592N5WoVMM3dAH9g0E3/colX0dxhGVSLcVfkiBUoCEBkFz8uvySw==
   dependencies:
     bindings "^1.5.0"
-    prebuild-install "^5.3.3"
-    tar "^6.0.5"
+    prebuild-install "^6.0.1"
+    tar "^6.1.0"
 
 bfj@^6.1.1:
   version "6.1.2"
@@ -5515,7 +5515,7 @@ chokidar@^3.3.0, chokidar@^3.4.1:
   optionalDependencies:
     fsevents "~2.3.1"
 
-chownr@^1.1.1, chownr@^1.1.2, chownr@^1.1.3:
+chownr@^1.1.1, chownr@^1.1.2:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.4.tgz#6fc9d7b42d32a583596337666e7d08084da2cc6b"
   integrity sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==
@@ -12889,7 +12889,7 @@ minizlib@^1.2.1:
   dependencies:
     minipass "^2.9.0"
 
-minizlib@^2.1.0, minizlib@^2.1.1:
+minizlib@^2.1.1:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/minizlib/-/minizlib-2.1.2.tgz#e90d3466ba209b932451508a11ce3d3632145931"
   integrity sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==
@@ -13071,7 +13071,7 @@ mz@^2.4.0, mz@^2.5.0:
     object-assign "^4.0.1"
     thenify-all "^1.0.0"
 
-nan@^2.12.1, nan@^2.13.2, nan@^2.14.0:
+nan@^2.12.1, nan@^2.13.2:
   version "2.14.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.2.tgz#f5376400695168f4cc694ac9393d0c9585eeea19"
   integrity sha512-M2ufzIiINKCuDfBSAUr1vWQ+vuVcA9kqx8JJUsbQi6yf1uGRyb7HfpdfUr5qLXf3B/t8dPvcjhKMmlfnP47EzQ==
@@ -14820,10 +14820,31 @@ postcss@^7.0.0, postcss@^7.0.1, postcss@^7.0.14, postcss@^7.0.27, postcss@^7.0.3
     source-map "^0.6.1"
     supports-color "^6.1.0"
 
-prebuild-install@^5.3.3, prebuild-install@^5.3.4:
+prebuild-install@^5.3.4:
   version "5.3.6"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.3.6.tgz#7c225568d864c71d89d07f8796042733a3f54291"
   integrity sha512-s8Aai8++QQGi4sSbs/M1Qku62PFK49Jm1CbgXklGz4nmHveDq0wzJkg7Na5QbnO1uNH8K7iqx2EQ/mV0MZEmOg==
+  dependencies:
+    detect-libc "^1.0.3"
+    expand-template "^2.0.3"
+    github-from-package "0.0.0"
+    minimist "^1.2.3"
+    mkdirp-classic "^0.5.3"
+    napi-build-utils "^1.0.1"
+    node-abi "^2.7.0"
+    noop-logger "^0.1.1"
+    npmlog "^4.0.1"
+    pump "^3.0.0"
+    rc "^1.2.7"
+    simple-get "^3.0.3"
+    tar-fs "^2.0.0"
+    tunnel-agent "^0.6.0"
+    which-pm-runs "^1.0.0"
+
+prebuild-install@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-6.0.1.tgz#5902172f7a40eb67305b96c2a695db32636ee26d"
+  integrity sha512-7GOJrLuow8yeiyv75rmvZyeMGzl8mdEX5gY69d6a6bHWmiPevwqFw+tQavhK0EYMaSg3/KD24cWqeQv1EWsqDQ==
   dependencies:
     detect-libc "^1.0.3"
     expand-template "^2.0.3"
@@ -16411,22 +16432,7 @@ shallow-clone@^3.0.0:
   dependencies:
     kind-of "^6.0.2"
 
-sharp@^0.23.2:
-  version "0.23.4"
-  resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.23.4.tgz#ca36067cb6ff7067fa6c77b01651cb9a890f8eb3"
-  integrity sha512-fJMagt6cT0UDy9XCsgyLi0eiwWWhQRxbwGmqQT6sY8Av4s0SVsT/deg8fobBQCTDU5iXRgz0rAeXoE2LBZ8g+Q==
-  dependencies:
-    color "^3.1.2"
-    detect-libc "^1.0.3"
-    nan "^2.14.0"
-    npmlog "^4.1.2"
-    prebuild-install "^5.3.3"
-    semver "^6.3.0"
-    simple-get "^3.1.0"
-    tar "^5.0.5"
-    tunnel-agent "^0.6.0"
-
-sharp@^0.25.2:
+sharp@^0.25.2, sharp@^0.25.4:
   version "0.25.4"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.25.4.tgz#1a8e542144a07ab7e9316ab89de80182b827c363"
   integrity sha512-umSzJJ1oBwIOfwFFt/fJ7JgCva9FvrEU2cbbm7u/3hSDZhXvkME8WE5qpaJqLIe2Har5msF5UG4CzYlEg5o3BQ==
@@ -16511,7 +16517,7 @@ simple-concat@^1.0.0:
   resolved "https://registry.yarnpkg.com/simple-concat/-/simple-concat-1.0.1.tgz#f46976082ba35c2263f1c8ab5edfe26c41c9552f"
   integrity sha512-cSFtAPtRhljv69IK0hTVZQ+OfE9nePi/rtJmw5UjHeVyVroEqJXP1sFztKUy1qU+xvz3u/sfYJLa947b7nAN2Q==
 
-simple-get@^3.0.3, simple-get@^3.1.0:
+simple-get@^3.0.3:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/simple-get/-/simple-get-3.1.0.tgz#b45be062435e50d159540b576202ceec40b9c6b3"
   integrity sha512-bCR6cP+aTdScaQCnQKbPKtJOKDp/hj9EDLJo3Nw4y1QksqaovlW/bnptB6/c1e+qmNIDHRK+oXFDdEqBT8WzUA==
@@ -17462,19 +17468,7 @@ tar@^4.4.10, tar@^4.4.12, tar@^4.4.8:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tar@^5.0.5:
-  version "5.0.5"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-5.0.5.tgz#03fcdb7105bc8ea3ce6c86642b9c942495b04f93"
-  integrity sha512-MNIgJddrV2TkuwChwcSNds/5E9VijOiw7kAc1y5hTNJoLDSuIyid2QtLYiCYNnICebpuvjhPQZsXwUL0O3l7OQ==
-  dependencies:
-    chownr "^1.1.3"
-    fs-minipass "^2.0.0"
-    minipass "^3.0.0"
-    minizlib "^2.1.0"
-    mkdirp "^0.5.0"
-    yallist "^4.0.0"
-
-tar@^6.0.2, tar@^6.0.5:
+tar@^6.0.2, tar@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.0.tgz#d1724e9bcc04b977b18d5c573b333a2207229a83"
   integrity sha512-DUCttfhsnLCjwoDoFcI+B2iJgYa93vBnDUATYEeRx6sntCTdN01VnqsIuTlALXla/LWooNg0yEGeB+Y8WdFxGA==

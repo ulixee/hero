@@ -73,7 +73,7 @@
     "progress": "^2.0.3",
     "proper-lockfile": "^4.1.1",
     "source-map-support": "^0.5.19",
-    "tar": "^6.0.5",
+    "tar": "^6.1.0",
     "uuid": "^8.3.2",
     "ws": "^7.4.2"
   },

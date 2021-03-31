@@ -2,9 +2,9 @@ import Puppet from '@secret-agent/puppet';
 import Chrome83 from '@secret-agent/emulate-chrome-83';
 import TypeSerializer, { stringifiedTypeSerializerClass } from '../TypeSerializer';
 import { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
-import Log from '../Logger';
+import logger from '../Logger';
 
-const { log } = Log(module);
+const { log } = logger(module);
 
 let testObject: any;
 beforeAll(() => {

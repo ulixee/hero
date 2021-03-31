@@ -70,8 +70,9 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       const shouldSkipLogging =
         (this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError;
       const isChildProcess = !!process.send;
+      const isLaunchError = this.isLaunchError(error);
 
-      if (isChildProcess === false && shouldSkipLogging === false) {
+      if ((isChildProcess === false && shouldSkipLogging === false) || isLaunchError) {
         log.error('ConnectionToClient.HandleRequestError', {
           error,
           sessionId: session?.id ?? meta?.sessionId,
@@ -127,7 +128,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     const closeAll: Promise<any>[] = [];
     for (const id of this.sessionIds) {
       const promise = Session.get(id)?.close();
-      if (promise) closeAll.push(promise);
+      if (promise) closeAll.push(promise.catch(err => err));
     }
     await Promise.all(closeAll);
     this.isPersistent = false;
@@ -292,8 +293,12 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     };
   }
 
+  private isLaunchError(error: Error): boolean {
+    return error instanceof PuppetLaunchError || error instanceof DependenciesMissingError;
+  }
+
   private serializeError(error: Error): object {
-    if (error instanceof PuppetLaunchError || error instanceof DependenciesMissingError) {
+    if (this.isLaunchError(error)) {
       return new Error(
         'CoreServer needs further setup to launch the browserEmulator. See server logs.',
       );

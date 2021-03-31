@@ -7,8 +7,7 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
-    "./start": "./start.js",
-    "./server": "./server/index.js"
+    "./start": "./start.js"
   },
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.0",
@@ -22,7 +21,7 @@
     "@secret-agent/puppet": "1.4.1-alpha.0",
     "@secret-agent/puppet-interfaces": "1.4.1-alpha.0",
     "awaited-dom": "^1.1.10",
-    "better-sqlite3": "^7.1.2",
+    "better-sqlite3": "^7.1.4",
     "moment": "^2.24.1",
     "uuid": "^8.3.2",
     "ws": "^7.4.2"
@@ -33,7 +32,7 @@
     "@secret-agent/emulate-safari-13": "1.4.1-alpha.0",
     "@secret-agent/puppet-chrome": "1.4.1-alpha.0",
     "@secret-agent/testing": "1.4.1-alpha.0",
-    "@types/better-sqlite3": "^5.4.0",
+    "@types/better-sqlite3": "^5.4.1",
     "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1",
     "vue": "^2.6.12"

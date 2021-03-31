@@ -154,7 +154,7 @@ class LogEvents {
   }
 }
 
-export { LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
+export { Log, LogEvents, loggerSessionIdNames, hasBeenLoggedSymbol };
 
 export function injectLogger(builder: (module: NodeModule) => ILogBuilder): void {
   logCreator = builder;

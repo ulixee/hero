@@ -3,7 +3,6 @@ import { getProxyAgent, runHttpsServer } from '@secret-agent/testing/helpers';
 import * as WebSocket from 'ws';
 import * as HttpProxyAgent from 'http-proxy-agent';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
-import * as net from 'net';
 import { URL } from 'url';
 import * as https from 'https';
 import MitmServer from '../lib/MitmProxy';
@@ -117,7 +116,7 @@ test('should create new connections as needed when no keepalive', async () => {
 
 test('should be able to handle a reused socket that closes on server', async () => {
   const server = await Helpers.runHttpsServer(async (req, res) => {
-    res.setHeader('Connection', 'keep-alive');
+    res.writeHead(200, { Connection: 'keep-alive' });
 
     res.end('Looks good');
   });

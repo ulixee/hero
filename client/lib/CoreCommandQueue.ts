@@ -32,10 +32,25 @@ export default class CoreCommandQueue {
     if (this.connection.isDisconnecting) {
       return Promise.resolve(null);
     }
-    return this.internalQueue.run<T>(this.runRequest.bind(this, command, args)).catch(error => {
-      error.stack += `${this.sessionMarker}`;
-      throw error;
-    });
+    return this.internalQueue
+      .run<T>(async () => {
+        const response = await this.connection.sendRequest({
+          meta: this.meta,
+          command,
+          args,
+        });
+
+        let data: T = null;
+        if (response) {
+          this.lastCommandId = response.commandId;
+          data = response.data;
+        }
+        return data;
+      })
+      .catch(error => {
+        error.stack += `${this.sessionMarker}`;
+        throw error;
+      });
   }
 
   public stop(cancelError: CanceledPromiseError): void {
@@ -44,20 +59,5 @@ export default class CoreCommandQueue {
 
   public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
     return new CoreCommandQueue(meta, this.connection, this.internalQueue);
-  }
-
-  private async runRequest<T>(command: string, args: any[]): Promise<T> {
-    const response = await this.connection.sendRequest({
-      meta: this.meta,
-      command,
-      args,
-    });
-
-    let data: T = null;
-    if (response) {
-      this.lastCommandId = response.commandId;
-      data = response.data;
-    }
-    return data;
   }
 }

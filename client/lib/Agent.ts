@@ -75,7 +75,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   constructor(options: IAgentCreateOptions = {}) {
     super(() => {
       return {
-        target: getState(this).connection.coreSession,
+        target: getState(this).connection.getCoreSessionOrReject(),
       };
     });
     initializeConstantsAndProperties(this, [], propertyKeys);
@@ -121,7 +121,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public get sessionId(): Promise<string> {
-    const { coreSession } = getState(this).connection;
+    const coreSession = getState(this).connection.getCoreSessionOrReject();
     return coreSession.then(x => x.sessionId);
   }
 
@@ -130,7 +130,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public get meta(): Promise<IAgentMeta> {
-    const { coreSession } = getState(this).connection;
+    const coreSession = getState(this).connection.getCoreSessionOrReject();
     return coreSession.then(x => x.getAgentMeta());
   }
 
@@ -198,7 +198,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
         );
       }
     } else {
-      const session = await connection.coreSession;
+      const session = await connection.getCoreSessionOrReject();
       await session.configure(options);
     }
   }
@@ -314,21 +314,20 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public then<TResult1 = Agent, TResult2 = never>(
+  public async then<TResult1 = Agent, TResult2 = never>(
     onfulfilled?:
       | ((value: Omit<Agent, 'then'>) => PromiseLike<TResult1> | TResult1)
       | undefined
       | null,
     onrejected?: ((reason: any) => PromiseLike<TResult2> | TResult2) | undefined | null,
   ): Promise<TResult1 | TResult2> {
-    const session = getState(this).connection.coreSession;
-    return session
-      .then(() => {
-        this.then = null;
-        return this;
-      })
-      .then(onfulfilled, onrejected)
-      .catch(onrejected);
+    try {
+      this.then = null;
+      await getState(this).connection.getCoreSessionOrReject();
+      return onfulfilled(this);
+    } catch (err) {
+      return onrejected(err);
+    }
   }
 }
 
@@ -336,13 +335,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 class SessionConnection {
   public hasConnected = false;
 
-  public get coreSession(): Promise<CoreSession> {
-    if (this._coreSession) return this.getCoreSessionOrReject();
-    return this.connectSession();
-  }
-
   public get activeTab(): Tab {
-    this.connectSession();
+    this.getCoreSessionOrReject().catch(() => null);
     return this._activeTab;
   }
 
@@ -380,7 +374,7 @@ class SessionConnection {
 
   public async close(): Promise<void> {
     if (!this.hasConnected) return;
-    const sessionOrError = await this.getCoreSessionOrReject();
+    const sessionOrError = await this._coreSession;
     if (sessionOrError instanceof CoreSession) {
       await sessionOrError.close();
     }
@@ -398,16 +392,11 @@ class SessionConnection {
     this._tabs.push(tab);
   }
 
-  private async getCoreSessionOrReject(): Promise<CoreSession> {
-    if (!this._coreSession) return undefined;
-    const sessionOrError = await this._coreSession;
-    if (sessionOrError instanceof CoreSession) return sessionOrError;
-    throw sessionOrError;
-  }
-
-  private connectSession(): Promise<CoreSession> {
+  public async getCoreSessionOrReject(): Promise<CoreSession> {
     if (this.hasConnected) {
-      return this.getCoreSessionOrReject();
+      const coreSession = await this._coreSession;
+      if (coreSession instanceof CoreSession) return coreSession;
+      throw coreSession;
     }
     this.hasConnected = true;
     const { showReplay, connectionToCore, ...options } = getState(this.agent).options;
@@ -417,23 +406,26 @@ class SessionConnection {
     );
     this._connection = connection;
 
-    this._coreSession = connection.createSession(options).catch(err => err);
+    this._coreSession = connection.createSession(options);
 
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
       this._coreSession = this._coreSession.then(async x => {
-        if (x instanceof Error) return x;
-        await scriptInstance.launchReplay(x);
+        if (x instanceof CoreSession) await scriptInstance.launchReplay(x);
         return x;
       });
     }
 
-    const session = this.getCoreSessionOrReject();
+    const session = this._coreSession.then(value => {
+      if (value instanceof CoreSession) return value;
+      throw value;
+    });
 
-    const coreTab = session.then(x => x.firstTab);
+    const coreTab = session.then(x => x.firstTab).catch(err => err);
     this._activeTab = createTab(this.agent, coreTab);
     this._tabs = [this._activeTab];
-    return session;
+
+    return await session;
   }
 }
