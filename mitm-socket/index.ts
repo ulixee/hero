@@ -33,14 +33,15 @@ export default class MitmSocket extends TypedEventEmitter<{
   public dialTime: Date;
   public connectTime: Date;
   public closeTime: Date;
+
+  public isConnected = false;
   public isReused = false;
+  public isClosing = false;
 
   public get pid(): number | undefined {
     return this.child?.pid;
   }
 
-  private isClosing = false;
-  private isConnected = false;
   private child: ChildProcess;
   private connectError?: string;
   private readonly callStack: string;
@@ -223,7 +224,9 @@ export default class MitmSocket extends TypedEventEmitter<{
           host: this.connectOpts?.host,
           clientHello: this.connectOpts?.clientHelloId,
         });
-      } else if (message) {
+      } else if (message.startsWith('[DomainSocketPiper.Closed]')) {
+        this.close();
+      } else {
         this.logger.info('SocketHandler.onData', {
           message,
           host: this.connectOpts?.host,

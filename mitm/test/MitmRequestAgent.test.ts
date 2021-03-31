@@ -5,6 +5,7 @@ import * as HttpProxyAgent from 'http-proxy-agent';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import { URL } from 'url';
 import * as https from 'https';
+import * as net from 'net';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
@@ -115,10 +116,13 @@ test('should create new connections as needed when no keepalive', async () => {
 });
 
 test('should be able to handle a reused socket that closes on server', async () => {
+  let serverSocket: net.Socket;
+  const sockets = new Set<net.Socket>();
   const server = await Helpers.runHttpsServer(async (req, res) => {
     res.writeHead(200, { Connection: 'keep-alive' });
-
     res.end('Looks good');
+    serverSocket = res.socket;
+    sockets.add(res.socket);
   });
   const mitmServer = await startMitmServer();
 
@@ -144,8 +148,15 @@ test('should be able to handle a reused socket that closes on server', async () 
     expect(response).toBe('Looks good');
   }
 
-  // node seems to default reset the connection at 5 seconds
-  await new Promise(resolve => setTimeout(resolve, 5e3));
+  // @ts-ignore
+  const originalFn = session.requestAgent.http1Request.bind(session.requestAgent);
+
+  const httpRequestSpy = jest.spyOn<any, any>(session.requestAgent, 'http1Request');
+  httpRequestSpy.mockImplementationOnce(async (ctx, settings) => {
+    serverSocket.destroy();
+    await new Promise(setImmediate);
+    return await originalFn(ctx, settings);
+  });
 
   {
     const request = https.request({
@@ -173,6 +184,10 @@ test('should be able to handle a reused socket that closes on server', async () 
     }
     expect(body.join('')).toBe('Looks good');
   }
+
+  expect(sockets.size).toBe(2);
+  expect(httpRequestSpy).toHaveBeenCalledTimes(2);
+  httpRequestSpy.mockClear();
 });
 
 test('it should not put upgrade connections in a pool', async () => {

@@ -301,7 +301,12 @@ export default class MitmRequestAgent {
     request.once('response', x => {
       response = x;
     });
-    const rebroadcast = (event: string, handler: (result: any) => void): http.ClientRequest => {
+
+    // we have to rebroadcast because this function is async, so the handlers can register late
+    const rebroadcastMissedEvent = (
+      event: string,
+      handler: (result: any) => void,
+    ): http.ClientRequest => {
       if (event === 'response' && response) {
         handler(response);
         response = null;
@@ -314,11 +319,11 @@ export default class MitmRequestAgent {
     const originalOnce = request.once.bind(request);
     request.on = function onOverride(event, handler): http.ClientRequest {
       originalOn(event, handler);
-      return rebroadcast(event, handler);
+      return rebroadcastMissedEvent(event, handler);
     };
     request.once = function onOverride(event, handler): http.ClientRequest {
       originalOnce(event, handler);
-      return rebroadcast(event, handler);
+      return rebroadcastMissedEvent(event, handler);
     };
 
     // if re-using, we need to make sure the connection can still be written to by probing it
@@ -326,7 +331,7 @@ export default class MitmRequestAgent {
       if (!request.headersSent) request.flushHeaders();
       // give this 100 ms to flush (go is on a wait timer right now)
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (didHaveFlushErrors) {
+      if (didHaveFlushErrors || ctx.proxyToServerMitmSocket.isClosing) {
         await this.assignSocket(ctx, requestSettings);
         return this.http1Request(ctx, requestSettings);
       }

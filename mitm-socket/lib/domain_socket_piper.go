@@ -78,9 +78,9 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 				if readErr == io.EOF {
 				    if n == 0 {
                         atomic.AddUint32(&piper.completeCounter, 1)
-                        if piper.debug {
-                            fmt.Println("DomainSocket -> 0 Byte EOF")
-                        }
+
+                        fmt.Println("[DomainSocketPiper.Closed] -> 0 Byte EOF")
+
                         return
                     }
 				    time.Sleep(200 * time.Millisecond)
