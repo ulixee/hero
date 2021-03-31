@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.0...v1.4.1-alpha.1) (2021-03-31)
+
+
+### Bug Fixes
+
+* **core:** fix failing interact test ([d0993e6](https://github.com/ulixee/secret-agent/commit/d0993e6539cdb10d502e8eec396414e04f6ad03c))
+
+
+### Features
+
+* **interact:** peg nodeid for interactions ([8a4db76](https://github.com/ulixee/secret-agent/commit/8a4db764b11cd9b0fae0acde44ee7887d7c9f2ef))
+
+
+
+
+
 ## [1.4.1-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.1...v1.4.1-alpha.0) (2021-03-23)
 
 

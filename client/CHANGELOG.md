@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.0...v1.4.1-alpha.1) (2021-03-31)
+
+
+### Bug Fixes
+
+* **client:** adjust return error pattern to throw ([884e87d](https://github.com/ulixee/secret-agent/commit/884e87db16a5706dc50416e3df0defa67f0606e2))
+* **client:** fix logging dependency error ([22900c4](https://github.com/ulixee/secret-agent/commit/22900c49da47e8ce0d910c255d9b535527ce040d))
+
+
+### Features
+
+* **handler:** re-q unstarted agents on disconnect ([b0ece5b](https://github.com/ulixee/secret-agent/commit/b0ece5bdaa203352932dd524b1eddc082df6fb31))
+
+
+
+
+
 ## [1.4.1-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.1...v1.4.1-alpha.0) (2021-03-23)
 
 

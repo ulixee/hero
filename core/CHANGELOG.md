@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.0...v1.4.1-alpha.1) (2021-03-31)
+
+
+### Bug Fixes
+
+* **client:** fix logging dependency error ([22900c4](https://github.com/ulixee/secret-agent/commit/22900c49da47e8ce0d910c255d9b535527ce040d))
+* **core:** block resources not working ([5488b34](https://github.com/ulixee/secret-agent/commit/5488b34230e85209c428469b9ed2356077443120))
+* **core:** fix failing interact test ([d0993e6](https://github.com/ulixee/secret-agent/commit/d0993e6539cdb10d502e8eec396414e04f6ad03c))
+* **core:** hang closing ([233ff06](https://github.com/ulixee/secret-agent/commit/233ff0678de8abd181e989ce849b21c0d9cbff6a))
+* **emulate:** mask widevine checks ([65e8655](https://github.com/ulixee/secret-agent/commit/65e8655e5d906ba538f9ebc84f21f7d6a5356f47))
+* **mitm:** invalid header char bugs ([2d794d9](https://github.com/ulixee/secret-agent/commit/2d794d928c74d36b1e8530e8350fe1aa8a51d656))
+* **mitm:** store resources if tab not found ([60c76d0](https://github.com/ulixee/secret-agent/commit/60c76d0bbca07cf1d1338d2ba1593f9725beae6f))
+* **puppet:** enable gpu by default ([9a06165](https://github.com/ulixee/secret-agent/commit/9a061657eaf844a385e17953cb7436181fadad6a))
+
+
+### Features
+
+* **handler:** re-q unstarted agents on disconnect ([b0ece5b](https://github.com/ulixee/secret-agent/commit/b0ece5bdaa203352932dd524b1eddc082df6fb31))
+* **interact:** peg nodeid for interactions ([8a4db76](https://github.com/ulixee/secret-agent/commit/8a4db764b11cd9b0fae0acde44ee7887d7c9f2ef))
+
+
+
+
+
 ## [1.4.1-alpha.0](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.1...v1.4.1-alpha.0) (2021-03-23)
 
 

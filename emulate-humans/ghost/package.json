@@ -1,12 +1,12 @@
 {
   "name": "@secret-agent/emulate-humans-ghost",
-  "version": "1.4.1-alpha.0",
+  "version": "1.4.1-alpha.1",
   "description": "HumanEmulator based on Xetera/ghost-cursor for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.0"
+    "@secret-agent/core-interfaces": "1.4.1-alpha.1"
   },
   "devDependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.0"
+    "@secret-agent/commons": "1.4.1-alpha.1"
   }
 }

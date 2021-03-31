@@ -1,22 +1,22 @@
 {
   "name": "@secret-agent/puppet",
-  "version": "1.4.1-alpha.0",
+  "version": "1.4.1-alpha.1",
   "description": "Puppet driver",
   "bin": {
     "puppet-install-deps": "./bin/installDeps.js"
   },
   "dependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.0",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.0",
-    "@secret-agent/puppet-chrome": "1.4.1-alpha.0",
-    "@secret-agent/puppet-interfaces": "1.4.1-alpha.0",
+    "@secret-agent/commons": "1.4.1-alpha.1",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.1",
+    "@secret-agent/puppet-chrome": "1.4.1-alpha.1",
+    "@secret-agent/puppet-interfaces": "1.4.1-alpha.1",
     "progress": "^2.0.3",
     "tar": "^6.1.0"
   },
   "devDependencies": {
-    "@secret-agent/emulate-chrome-80": "1.4.1-alpha.0",
-    "@secret-agent/emulate-chrome-83": "1.4.1-alpha.0",
-    "@secret-agent/testing": "1.4.1-alpha.0",
+    "@secret-agent/emulate-chrome-80": "1.4.1-alpha.1",
+    "@secret-agent/emulate-chrome-83": "1.4.1-alpha.1",
+    "@secret-agent/testing": "1.4.1-alpha.1",
     "ws": "^7.3.1"
   }
 }
