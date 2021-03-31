@@ -406,7 +406,7 @@ class SessionConnection {
     );
     this._connection = connection;
 
-    this._coreSession = connection.createSession(options);
+    this._coreSession = connection.createSession(options).catch(err => err);
 
     const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
 
