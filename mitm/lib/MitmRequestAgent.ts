@@ -58,22 +58,16 @@ export default class MitmRequestAgent {
       rejectUnauthorized: allowUnverifiedCertificates === false,
     };
 
-    ctx.setState(ResourceState.GetSocket);
-    let mitmSocket = await this.getAvailableSocket(ctx, requestSettings);
-    if (!mitmSocket) {
-      mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
-    }
-    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
+    await this.assignSocket(ctx, requestSettings);
+
     ctx.cacheHandler.onRequest();
     await HeadersHandler.modifyHeaders(ctx);
 
     requestSettings.headers = ctx.requestHeaders;
-    requestSettings.createConnection = () => mitmSocket.socket;
-    requestSettings.agent = null;
 
     if (ctx.isServerHttp2) {
       HeadersHandler.prepareRequestHeadersForHttp2(ctx);
-      return this.http2Request(ctx, mitmSocket);
+      return this.http2Request(ctx);
     }
 
     return this.http1Request(ctx, requestSettings);
@@ -84,13 +78,15 @@ export default class MitmRequestAgent {
       return;
     }
     const connectionHeader = ctx.responseHeaders?.Connection ?? ctx.responseHeaders?.connection;
-    const isCloseRequested = connectionHeader === 'close';
+    const isCloseRequested = connectionHeader !== 'keep-alive';
 
     const socket = ctx.proxyToServerMitmSocket;
 
     if (!socket.isReusable() || isCloseRequested) {
       return socket.close();
     }
+
+    socket.isReused = true;
 
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
     const pending = pool.pending.shift();
@@ -118,6 +114,8 @@ export default class MitmRequestAgent {
     this.sockets.clear();
   }
 
+  /////// ////////// Socket Connection Management ///////////////////////////////////////////////////
+
   private async createSocketConnection(
     ctx: IMitmRequestContext,
     options: RequestOptions,
@@ -132,6 +130,7 @@ export default class MitmRequestAgent {
     ctx.setState(ResourceState.LookupDns);
     const ipIfNeeded = await session.lookupDns(options.host);
     ctx.dnsResolvedIp = ipIfNeeded || 'Not Found';
+
     const mitmSocket = new MitmSocket(session.sessionId, {
       host: ipIfNeeded || options.host,
       port: String(options.port),
@@ -162,7 +161,18 @@ export default class MitmRequestAgent {
     return mitmSocket;
   }
 
-  /////// ////////// Socket Connection Management ///////////////////////////////////////////////////
+  private async assignSocket(
+    ctx: IMitmRequestContext,
+    requestSettings: RequestOptions,
+  ): Promise<MitmSocket> {
+    ctx.setState(ResourceState.GetSocket);
+    let mitmSocket = await this.getAvailableSocket(ctx, requestSettings);
+    if (!mitmSocket) {
+      mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
+    }
+    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
+    return mitmSocket;
+  }
 
   private waitForFreeSocket(origin: string): Promise<MitmSocket> {
     const socketPool = this.getSocketPoolByOrigin(origin);
@@ -257,22 +267,76 @@ export default class MitmRequestAgent {
     });
   }
 
-  private http1Request(
+  private async http1Request(
     ctx: IMitmRequestContext,
     requestSettings: http.RequestOptions,
-  ): http.ClientRequest {
+  ): Promise<http.ClientRequest> {
     const httpModule = ctx.isSSL ? https : http;
     ctx.setState(ResourceState.CreateProxyToServerRequest);
-    return httpModule.request(requestSettings);
+
+    let didHaveFlushErrors = false;
+
+    const request = httpModule.request({
+      ...requestSettings,
+      createConnection: () => ctx.proxyToServerMitmSocket.socket,
+      agent: null,
+    });
+
+    function initError(error): void {
+      if (error.code === 'ECONNRESET') {
+        didHaveFlushErrors = true;
+        return;
+      }
+      log.info(`MitmHttpRequest.Http1SendRequestError`, {
+        sessionId: ctx.requestSession.sessionId,
+        request: requestSettings,
+        error,
+      });
+    }
+
+    request.once('error', initError);
+
+    let response: http.IncomingMessage;
+    request.once('response', x => {
+      response = x;
+    });
+    const rebroadcast = (event: string, handler: (result: any) => void): http.ClientRequest => {
+      if (event === 'response' && response) {
+        handler(response);
+        response = null;
+      }
+      // hand off to another fn
+      if (event === 'error') request.off('error', initError);
+      return request;
+    };
+    const originalOn = request.on.bind(request);
+    const originalOnce = request.once.bind(request);
+    request.on = function onOverride(event, handler): http.ClientRequest {
+      originalOn(event, handler);
+      return rebroadcast(event, handler);
+    };
+    request.once = function onOverride(event, handler): http.ClientRequest {
+      originalOnce(event, handler);
+      return rebroadcast(event, handler);
+    };
+
+    // if re-using, we need to make sure the connection can still be written to by probing it
+    if (ctx.proxyToServerMitmSocket.isReused) {
+      if (!request.headersSent) request.flushHeaders();
+      // give this 100 ms to flush (go is on a wait timer right now)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (didHaveFlushErrors) {
+        await this.assignSocket(ctx, requestSettings);
+        return this.http1Request(ctx, requestSettings);
+      }
+    }
+    return request;
   }
 
   /////// ////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
-  private http2Request(
-    ctx: IMitmRequestContext,
-    connectResult: MitmSocket,
-  ): http2.ClientHttp2Stream {
-    const client = this.createHttp2Session(ctx, connectResult);
+  private http2Request(ctx: IMitmRequestContext): http2.ClientHttp2Stream {
+    const client = this.createHttp2Session(ctx);
     ctx.setState(ResourceState.CreateProxyToServerRequest);
     return client.request(ctx.requestHeaders, { waitForTrailers: true });
   }
@@ -459,7 +523,7 @@ export default class MitmRequestAgent {
     });
   }
 
-  private createHttp2Session(ctx: IMitmRequestContext, mitmSocket: MitmSocket): ClientHttp2Session {
+  private createHttp2Session(ctx: IMitmRequestContext): ClientHttp2Session {
     const origin = ctx.url.origin;
     const existing = this.getHttp2Session(origin);
     if (existing) return existing.client;
@@ -468,7 +532,7 @@ export default class MitmRequestAgent {
 
     ctx.setState(ResourceState.CreateH2Session);
     const proxyToServerH2Client = http2.connect(origin, {
-      createConnection: () => mitmSocket.socket,
+      createConnection: () => ctx.proxyToServerMitmSocket.socket,
     });
 
     proxyToServerH2Client.on('stream', this.onHttp2ServerToProxyPush.bind(this, ctx));
@@ -543,7 +607,7 @@ export default class MitmRequestAgent {
     this.http2Sessions.push({
       origin,
       client: proxyToServerH2Client,
-      mitmSocket,
+      mitmSocket: ctx.proxyToServerMitmSocket,
     });
 
     return proxyToServerH2Client;

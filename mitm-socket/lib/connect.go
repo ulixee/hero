@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,8 +34,8 @@ func main() {
 	debug := connectArgs.Debug
 
 	domainSocketPiper := &DomainSocketPiper{
-		Path:  socketPath,
-		debug: connectArgs.Debug,
+		Path:      socketPath,
+		debug:     connectArgs.Debug,
 		keepAlive: connectArgs.KeepAlive,
 	}
 
@@ -46,6 +47,11 @@ func main() {
 
 	addr := fmt.Sprintf("%s:%s", connectArgs.Host, connectArgs.Port)
 	dialConn, err := Dial(addr, connectArgs)
+
+	tcpConn := dialConn.(*net.TCPConn)
+	if connectArgs.KeepAlive {
+		tcpConn.SetKeepAlive(true)
+	}
 
 	if err != nil {
 		log.Fatalf("Dial (proxy/remote) Error: %+v\n", err)

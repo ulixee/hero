@@ -1,7 +1,11 @@
 import { Helpers } from '@secret-agent/testing';
-import { runHttpsServer } from '@secret-agent/testing/helpers';
+import { getProxyAgent, runHttpsServer } from '@secret-agent/testing/helpers';
 import * as WebSocket from 'ws';
 import * as HttpProxyAgent from 'http-proxy-agent';
+import { IncomingHttpHeaders, IncomingMessage } from 'http';
+import * as net from 'net';
+import { URL } from 'url';
+import * as https from 'https';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
@@ -21,6 +25,10 @@ beforeAll(() => {
   });
 });
 
+beforeEach(() => {
+  process.env.MITM_ALLOW_INSECURE = 'false';
+});
+
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
@@ -29,6 +37,7 @@ test('should create up to a max number of secure connections per origin', async 
   MitmRequestAgent.defaultMaxConnectionsPerOrigin = 2;
   const server = await runHttpsServer((req, res) => {
     remotePorts.push(req.connection.remotePort);
+    res.socket.setKeepAlive(true);
     res.end('I am here');
   });
   const mitmServer = await startMitmServer();
@@ -57,7 +66,6 @@ test('should create up to a max number of secure connections per origin', async 
     promises.push(p);
   }
   await Promise.all(promises);
-  process.env.MITM_ALLOW_INSECURE = 'false';
 
   expect(connectionsByOrigin[server.baseUrl].all.size).toBe(2);
   await session.close();
@@ -98,7 +106,6 @@ test('should create new connections as needed when no keepalive', async () => {
     promises.push(p);
   }
   await Promise.all(promises);
-  process.env.MITM_ALLOW_INSECURE = 'false';
 
   // they all close after use, so should be gone now
   expect(connectionsByOrigin[server.baseUrl].all.size).toBe(0);
@@ -106,6 +113,67 @@ test('should create new connections as needed when no keepalive', async () => {
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(4);
+});
+
+test('should be able to handle a reused socket that closes on server', async () => {
+  const server = await Helpers.runHttpsServer(async (req, res) => {
+    res.setHeader('Connection', 'keep-alive');
+
+    res.end('Looks good');
+  });
+  const mitmServer = await startMitmServer();
+
+  const session = createMitmSession();
+  const proxyCredentials = session.getProxyCredentials();
+  process.env.MITM_ALLOW_INSECURE = 'true';
+
+  {
+    let headers: IncomingHttpHeaders;
+    const response = await Helpers.httpRequest(
+      server.baseUrl,
+      'GET',
+      `http://localhost:${mitmServer.port}`,
+      proxyCredentials,
+      {
+        connection: 'keep-alive',
+      },
+      res => {
+        headers = res.headers;
+      },
+    );
+    expect(headers.connection).toBe('keep-alive');
+    expect(response).toBe('Looks good');
+  }
+
+  // node seems to default reset the connection at 5 seconds
+  await new Promise(resolve => setTimeout(resolve, 5e3));
+
+  {
+    const request = https.request({
+      host: 'localhost',
+      port: server.port,
+      method: 'GET',
+      path: '/',
+      headers: {
+        connection: 'keep-alive',
+      },
+      rejectUnauthorized: false,
+      agent: getProxyAgent(
+        new URL(server.baseUrl),
+        `http://localhost:${mitmServer.port}`,
+        proxyCredentials,
+      ),
+    });
+    const responseP = new Promise<IncomingMessage>(resolve => request.on('response', resolve));
+    request.end();
+    const response = await responseP;
+    expect(response.headers.connection).toBe('keep-alive');
+    const body = [];
+    for await (const chunk of response) {
+      body.push(chunk.toString());
+    }
+    expect(body.join('')).toBe('Looks good');
+  }
 });
 
 test('it should not put upgrade connections in a pool', async () => {

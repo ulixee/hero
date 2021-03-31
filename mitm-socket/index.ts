@@ -33,6 +33,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public dialTime: Date;
   public connectTime: Date;
   public closeTime: Date;
+  public isReused = false;
 
   public get pid(): number | undefined {
     return this.child?.pid;

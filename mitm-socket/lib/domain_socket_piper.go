@@ -49,7 +49,7 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 		}
 	}
 
-	copyUntilTimeout := func(dst io.Writer, src net.Conn, notifyChan chan error, counter *uint32) {
+	copy := func(dst io.Writer, src net.Conn, notifyChan chan error, counter *uint32) {
 		var readErr error
 		var writeErr error
 		var n int
@@ -83,7 +83,7 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
                         }
                         return
                     }
-                    time.Sleep(1 * time.Second)
+				    time.Sleep(200 * time.Millisecond)
                 }
 			} else if n == 0 {
 				time.Sleep(200 * time.Millisecond)
@@ -92,8 +92,8 @@ func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
 	}
 
 	// Pipe data
-	go copyUntilTimeout(remoteConn, piper.client, localNotify, &piper.completeCounter)
-	go copyUntilTimeout(piper.client, remoteConn, remoteNotify, &piper.completeCounter)
+	go copy(remoteConn, piper.client, localNotify, &piper.completeCounter)
+	go copy(piper.client, remoteConn, remoteNotify, &piper.completeCounter)
 
 	// Read until one of these errors occur
 	var err error
