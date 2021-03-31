@@ -53,7 +53,7 @@
     "build:backend": "tsc -b tsconfig.json && yarn build:backend-paths && shx cp package.json ../build/replay && shx cp -r *.png ../build/replay",
     "build:icons": "electron-icon-builder -f --input=./icon@2x.png --output=../build/replay/build",
     "build:dist": "yarn build:frontend && yarn build:backend",
-    "build:dist-local": "yarn build:dist && shx cp pack-local.sh ../build/replay/ && cd ../build/replay && yarn electron-builder && ./pack-local.sh && shx cp -r dist ../../build-dist/replay",
+    "build:dist-local": "yarn build:dist && shx cp pack-local.sh ../build/replay/ && cd ../build/replay && electron-builder && ./pack-local.sh && shx cp -r dist ../../build-dist/replay",
     "build": "yarn build:dist",
     "build:pack": "yarn build:icons && shx cp pack.sh pack-local.sh ../build/replay/ && cd ../build/replay && electron-builder -mwl && ./pack.sh",
     "clean": "shx rm -rf ../build/replay/static && shx rm -rf ../build/replay/dist && tsc -b --clean tsconfig.json && tsc -b --clean frontend/tsconfig.json",

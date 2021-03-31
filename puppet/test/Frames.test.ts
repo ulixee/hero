@@ -7,7 +7,7 @@ import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
-import { createTestPage, ITestPage } from './TestPage';
+import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
 import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
@@ -25,6 +25,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       puppet = new Puppet(browserEngine);
       await puppet.start();
       context = await puppet.newContext(defaultEmulation, log);
+      capturePuppetContextLogs(context, `${browserEngine.fullVersion}-Frames-test`);
     });
 
     afterEach(async () => {
@@ -227,6 +228,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         page.on('frame-navigated', frame => navigatedFrames.push(frame));
         await page.goto(`${server.baseUrl}/frames/frameset.html`);
         expect(page.frames.length).toBe(5);
+        for (const frame of page.frames) await frame.waitForLoader();
         expect(navigatedFrames.length).toBe(5);
 
         navigatedFrames = [];

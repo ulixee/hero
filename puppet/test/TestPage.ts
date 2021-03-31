@@ -2,6 +2,8 @@ import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import { IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { keyDefinitions } from '@secret-agent/puppet-chrome/interfaces/USKeyboardLayout';
+import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
+import * as Fs from 'fs';
 
 export interface ITestPage extends IPuppetPage {
   click(selector: string): Promise<void>;
@@ -11,6 +13,16 @@ export interface ITestPage extends IPuppetPage {
   goto(url: string, waitOnLifecycle?: string): Promise<void>;
   setContent(content: string): Promise<void>;
   waitForPopup(): Promise<IPuppetPage>;
+}
+
+export function capturePuppetContextLogs(context: IPuppetContext, id: string): void {
+  const outDir = process.env.SA_SESSIONS_DIR;
+
+  if (!Fs.existsSync(outDir)) Fs.mkdirSync(outDir, { recursive: true });
+
+  context.on('devtools-message', x => {
+    Fs.appendFileSync(`${outDir}/${id}.txt`, `${JSON.stringify(x)}\n`);
+  });
 }
 
 export function createTestPage(page: IPuppetPage) {

@@ -5,7 +5,7 @@ import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
-import { createTestPage, ITestPage } from './TestPage';
+import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
 import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
@@ -22,6 +22,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
       puppet = new Puppet(browserEngine);
       await puppet.start();
       context = await puppet.newContext(defaultEmulation, log);
+      capturePuppetContextLogs(context, `${browserEngine.fullVersion}-load-test`);
       server.setRoute('/link.html', async (req, res) => {
         res.setHeader('Content-Type', 'text/html');
         res.end(`
