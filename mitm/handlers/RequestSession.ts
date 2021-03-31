@@ -262,6 +262,7 @@ export interface IRequestSessionResponseEvent extends IRequestSessionRequestEven
   wasCached: boolean;
   dnsResolvedIp?: string;
   resourceType: ResourceType;
+  responseOriginalHeaders?: IResourceHeaders;
   body: Buffer;
   redirectedToUrl?: string;
   executionMillis: number;

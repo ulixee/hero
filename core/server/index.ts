@@ -91,7 +91,7 @@ export default class CoreServer {
     if (request.url === '/') {
       const connection = Core.addConnection();
       ws.on('message', message => {
-        const payload = TypeSerializer.parse(message.toString());
+        const payload = TypeSerializer.parse(message.toString(), 'CLIENT');
         return connection.handleRequest(payload);
       });
 

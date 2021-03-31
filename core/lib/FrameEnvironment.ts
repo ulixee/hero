@@ -403,7 +403,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       return this.runFn(fnName, serializedFn, retries - 1);
     }
 
-    const result = unparsedResult ? TypeSerializer.parse(unparsedResult as string) : unparsedResult;
+    const result = unparsedResult
+      ? TypeSerializer.parse(unparsedResult as string, 'BROWSER')
+      : unparsedResult;
     if (result?.error) {
       this.logger.error(fnName, { result });
       throw new InjectedScriptError(result.error, result.pathState);

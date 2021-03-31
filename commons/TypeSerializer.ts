@@ -2,7 +2,7 @@ export default class TypeSerializer {
   public static errorTypes = new Map<string, { new (message?: string): Error }>();
   private static isNodejs = typeof process !== 'undefined' && process.release.name === 'node';
 
-  public static parse(stringified: string): any {
+  public static parse(stringified: string, stackMarker = 'SERIALIZER'): any {
     return JSON.parse(stringified, (key, entry) => {
       if (!entry || !entry.type) return entry;
 
@@ -41,10 +41,13 @@ export default class TypeSerializer {
           }
         }
 
+        const startStack = new Error('').stack.split(/\r?\n/).slice(1).join('\n');
         const e = new Constructor(message);
         e.name = name;
-        if (stack) e.stack = stack;
         Object.assign(e, data);
+        if (stack) {
+          e.stack = `${stack}\n${`------${stackMarker}`.padEnd(50, '-')}\n${startStack}`;
+        }
         return e;
       }
 

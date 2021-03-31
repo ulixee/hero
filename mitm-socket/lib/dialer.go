@@ -32,5 +32,11 @@ func Dial(addr string, connectArgs ConnectArgs) (net.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	tcpConn, ok := dialConn.(*net.TCPConn)
+	if ok && connectArgs.KeepAlive {
+		tcpConn.SetKeepAlive(true)
+	}
+
 	return dialConn, nil
 }

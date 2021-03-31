@@ -80,7 +80,7 @@ export default class GlobalPool {
     const closePromises: Promise<any>[] = [];
     while (this.puppets.length) {
       const puppetBrowser = this.puppets.shift();
-      closePromises.push(puppetBrowser.close());
+      closePromises.push(puppetBrowser.close().catch(err => err));
     }
     if (this.mitmServer) {
       closePromises.push(this.mitmServer.close());

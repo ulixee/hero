@@ -1,7 +1,14 @@
 import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
+import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
+import DependencyInstaller from '@secret-agent/puppet/lib/DependencyInstaller';
+import * as ValidateHostDeps from '@secret-agent/puppet/lib/validateHostDependencies';
+import { Log } from '@secret-agent/commons/Logger';
 import CoreServer from '../server';
+
+const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
+const logError = jest.spyOn(Log.prototype, 'error');
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
 let coreServer: CoreServer;
@@ -72,5 +79,42 @@ describe('basic connection tests', () => {
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
     await customAgent.close();
+  });
+
+  it('should throw an error informing how to install dependencies', async () => {
+    logError.mockClear();
+    validate.mockClear();
+    validate.mockImplementationOnce(() => {
+      throw new DependenciesMissingError(
+        `You can resolve this by running the apt dependency installer at:${DependencyInstaller.aptScriptPath}`,
+        'Chrome',
+        ['libnacl'],
+      );
+    });
+
+    logError.mockImplementationOnce(() => null /* no op*/);
+
+    const agent1 = new Agent({
+      browserEmulatorId: 'chrome-80',
+      connectionToCore: {
+        host: await coreServer.address,
+      },
+    });
+
+    try {
+      await agent1;
+    } catch (err) {
+      // eslint-disable-next-line jest/no-try-expect
+      expect(String(err)).toMatch(
+        'CoreServer needs further setup to launch the browserEmulator. See server logs',
+      );
+    }
+
+    expect(logError).toHaveBeenCalledTimes(1);
+    const error = String((logError.mock.calls[0][1] as any).error);
+    expect(error).toMatch('PuppetLaunchError');
+    expect(error).toMatch('You can resolve this by running');
+    expect(validate).toHaveBeenCalledTimes(1);
+    await agent1.close();
   });
 });

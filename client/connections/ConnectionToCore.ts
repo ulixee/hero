@@ -307,8 +307,8 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       this.pendingRequestsById.delete(id);
       this.rejectPendingRequest(entry, new DisconnectedFromCoreError(host));
     }
-    this.coreSessions.stop(new DisconnectedFromCoreError(host));
     this.commandQueue.stop(new DisconnectedFromCoreError(host));
+    this.coreSessions.stop(new DisconnectedFromCoreError(host));
   }
 
   private createPendingResult(): IResolvablePromiseWithId {

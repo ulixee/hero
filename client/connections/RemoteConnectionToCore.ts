@@ -64,7 +64,7 @@ export default class RemoteConnectionToCore extends ConnectionToCore {
         webSocket.once('close', this.internalDisconnect);
         webSocket.once('error', this.internalDisconnect);
         webSocket.on('message', message => {
-          const payload = TypeSerializer.parse(message.toString());
+          const payload = TypeSerializer.parse(message.toString(), 'REMOTE CORE');
           this.onMessage(payload);
         });
       } catch (error) {

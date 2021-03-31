@@ -88,9 +88,12 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   public async close(): Promise<void> {
-    await this.commandQueue.run('Session.close');
-    process.nextTick(() => this.connection.closeSession(this));
-    loggerSessionIdNames.delete(this.sessionId);
+    try {
+      await this.commandQueue.run('Session.close');
+    } finally {
+      process.nextTick(() => this.connection.closeSession(this));
+      loggerSessionIdNames.delete(this.sessionId);
+    }
   }
 
   public async addEventListener(

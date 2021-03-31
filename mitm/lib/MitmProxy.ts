@@ -57,7 +57,7 @@ export default class MitmProxy {
 
     this.db = new NetworkDb(options.sslCaDir);
     this.ca = new CertificateAuthority(this.db);
-    this.httpServer = http.createServer();
+    this.httpServer = http.createServer({ insecureHTTPParser: true });
     this.httpServer.on('connect', this.onHttpConnect.bind(this));
     this.httpServer.on('clientError', this.onClientError.bind(this, false));
     this.httpServer.on('request', this.onHttpRequest.bind(this, false));

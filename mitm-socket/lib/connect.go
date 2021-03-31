@@ -33,8 +33,8 @@ func main() {
 	debug := connectArgs.Debug
 
 	domainSocketPiper := &DomainSocketPiper{
-		Path:  socketPath,
-		debug: connectArgs.Debug,
+		Path:      socketPath,
+		debug:     connectArgs.Debug,
 		keepAlive: connectArgs.KeepAlive,
 	}
 

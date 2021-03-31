@@ -189,7 +189,7 @@ export default class Handler {
     if (this.isClosing) return;
     this.isClosing = true;
     // eslint-disable-next-line promise/no-promise-in-callback
-    await Promise.all(this.connections.map(x => x.disconnect(error)));
+    await Promise.all(this.connections.map(x => x.disconnect(error).catch(() => null)));
   }
 
   private getAvailableConnections(): ConnectionToCore[] {
@@ -204,6 +204,8 @@ export default class Handler {
   }
 
   private registerUnhandledExceptionHandlers(): void {
+    if (process.env.NODE_ENV === 'test') return;
+
     process.on('uncaughtExceptionMonitor', this.close.bind(this));
     process.on('unhandledRejection', this.logUnhandledError.bind(this));
   }

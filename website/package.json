@@ -41,7 +41,7 @@
     "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
     "pug": "^3.0.2",
     "sass-loader": "^8.0.0",
-    "sharp": "^0.23.2",
+    "sharp": "^0.25.4",
     "ts-loader": "^6.2.1",
     "typescript": "~4.1.2",
     "vue-svg-loader": "^0.12.0",
