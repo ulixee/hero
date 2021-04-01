@@ -25,7 +25,7 @@ export default class BrowserRequestMatcher {
     requestSession.on('response', event => this.clearRequest(event.id));
   }
 
-  public onMitmRequestedResource(mitmResource: IMitmRequestContext): void {
+  public onMitmRequestedResource(mitmResource: IMitmRequestContext): IRequestedResource {
     let browserRequest = this.findMatchingRequest(mitmResource, 'noMitmResourceId');
 
     // if no request from browser (and unmatched), queue a new one
@@ -65,6 +65,7 @@ export default class BrowserRequestMatcher {
       .then(async () => {
         clearTimeout(resolveTimeout);
         // copy values to mitm resource
+        if (!browserRequest?.browserRequestId) return;
         mitmResource.resourceType = browserRequest.resourceType;
         mitmResource.browserRequestId = browserRequest.browserRequestId;
         mitmResource.hasUserGesture = browserRequest.hasUserGesture;
@@ -81,6 +82,8 @@ export default class BrowserRequestMatcher {
       })
       // drown errors - we don't want to log cancels
       .catch(() => clearTimeout(resolveTimeout));
+
+    return browserRequest;
   }
 
   public onBrowserRequestedResourceExtraDetails(
@@ -195,6 +198,13 @@ export default class BrowserRequestMatcher {
     let matches = this.requestedResources.filter(x => {
       return x.url === url && x.method === method;
     });
+
+    if (resourceToMatch.browserRequestId) {
+      matches = matches.filter(x => {
+        if (x.browserRequestId) return x.browserRequestId === resourceToMatch.browserRequestId;
+        return true;
+      });
+    }
 
     if (filter === 'noMitmResourceId') {
       matches = matches.filter(x => {

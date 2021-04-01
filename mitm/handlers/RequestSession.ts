@@ -173,10 +173,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public getWebsocketUpgradeRequestId(headers: IResourceHeaders): Promise<string> {
     const key = this.getWebsocketHeadersKey(headers);
-    if (!this.websocketBrowserResourceIds[key]) {
-      this.websocketBrowserResourceIds[key] = createPromise<string>(30e3);
-    }
 
+    this.websocketBrowserResourceIds[key] ??= createPromise<string>(30e3);
     return this.websocketBrowserResourceIds[key].promise;
   }
 
@@ -189,9 +187,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   ): void {
     this.browserRequestMatcher.requestIdToTabId.set(message.browserRequestId, tabId);
     const key = this.getWebsocketHeadersKey(message.headers);
-    if (!this.websocketBrowserResourceIds[key]) {
-      this.websocketBrowserResourceIds[key] = createPromise<string>();
-    }
+
+    this.websocketBrowserResourceIds[key] ??= createPromise<string>();
     this.websocketBrowserResourceIds[key].resolve(message.browserRequestId);
   }
 

@@ -140,6 +140,7 @@ export default class MitmRequestAgent {
       rejectUnauthorized: options.rejectUnauthorized,
       clientHelloId: tlsProfileId,
       keepAlive: !!isKeepAlive,
+      disableAlpn: ctx.isUpgrade,
     });
     mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
     mitmSocket.on('connect', () => session.emit('socket-connect', { socket: mitmSocket }));
@@ -301,13 +302,16 @@ export default class MitmRequestAgent {
     request.once('response', x => {
       response = x;
     });
+    request.once('upgrade', x => {
+      response = x;
+    });
 
     // we have to rebroadcast because this function is async, so the handlers can register late
     const rebroadcastMissedEvent = (
       event: string,
       handler: (result: any) => void,
     ): http.ClientRequest => {
-      if (event === 'response' && response) {
+      if ((event === 'response' || event === 'upgrade') && response) {
         handler(response);
         response = null;
       }
