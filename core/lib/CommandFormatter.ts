@@ -1,5 +1,5 @@
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { IInteractionGroup, IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
+import { IInteractionGroup } from '@secret-agent/core-interfaces/IInteractions';
 import { getKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
 import ICommandWithResult from '../interfaces/ICommandWithResult';

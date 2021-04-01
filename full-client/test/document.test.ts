@@ -185,6 +185,13 @@ describe('basic Document tests', () => {
     expect(await heading2.textContent).toBe('Also me');
   });
 
+  it("returns null for elements that don't exist", async () => {
+    const agent = await openBrowser(`/`);
+    const { document } = agent;
+    const element = await document.querySelector('#this-element-aint-there');
+    expect(element).toBe(null);
+  });
+
   it('can determine if an element is visible', async () => {
     koaServer.get('/isVisible', ctx => {
       ctx.body = `

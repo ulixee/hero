@@ -20,7 +20,7 @@
     "@secret-agent/mitm": "1.4.1-alpha.1",
     "@secret-agent/puppet": "1.4.1-alpha.1",
     "@secret-agent/puppet-interfaces": "1.4.1-alpha.1",
-    "awaited-dom": "^1.1.10",
+    "awaited-dom": "^1.1.11",
     "better-sqlite3": "^7.1.4",
     "moment": "^2.24.1",
     "uuid": "^8.3.2",
