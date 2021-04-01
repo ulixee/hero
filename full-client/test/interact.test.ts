@@ -2,7 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { Handler } from '../index';
+import { Handler, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
 let handler: Handler;
@@ -146,6 +146,27 @@ describe('basic Interact tests', () => {
     );
 
     expect(await textarea.value).toBe('T');
+    await agent.close();
+  });
+
+  it('should be able to click on the same element twice', async () => {
+    koaServer.get('/twice', ctx => {
+      ctx.body = `
+        <body>
+          <div id="spot">Twice spot</div>
+        </body>
+      `;
+    });
+    const agent = await handler.createAgent({
+      humanEmulatorId: 'basic',
+    });
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${koaServer.baseUrl}/twice`);
+    await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+    const logo = agent.document.querySelector('#spot');
+    await expect(agent.interact({ click: logo })).resolves.toBeUndefined();
+    await agent.waitForMillis(100);
+    await expect(agent.interact({ click: logo })).resolves.toBeUndefined();
     await agent.close();
   });
 });

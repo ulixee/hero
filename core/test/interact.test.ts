@@ -194,9 +194,9 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       // @ts-ignore
       const interactor = tab.mainFrameEnvironment.interactor;
       // @ts-ignore
-      const originalFn = interactor.getPositionXY.bind(interactor);
-      const mouseMoveSpy = jest.spyOn<any, any>(interactor, 'getPositionXY');
-      mouseMoveSpy.mockImplementationOnce(async mousePosition => {
+      const originalFn = interactor.lookupBoundingRect.bind(interactor);
+      const lookupSpy = jest.spyOn(interactor, 'lookupBoundingRect');
+      lookupSpy.mockImplementationOnce(async mousePosition => {
         const data = await originalFn(mousePosition);
         data.y -= 500;
         return data;
@@ -209,7 +209,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
           mousePosition: ['window', 'document', ['querySelector', '#button-1']],
         },
       ]);
-      expect(mouseMoveSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
+      expect(lookupSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
       const lastClicked = await tab.getJsValue('lastClicked');
       expect(lastClicked.value).toBe('clickedit');
     });
