@@ -25,6 +25,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/puppet-interfaces/IPuppetInput';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
+import IElementRect from '@secret-agent/core-interfaces/IElementRect';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
@@ -104,6 +105,7 @@ export default class Interactor implements IInteractionsHelper {
 
   public async lookupBoundingRect(
     mousePosition: IMousePosition,
+    throwIfNotPresent = false,
   ): Promise<IRect & { elementTag?: string; nodeId?: number; isNodeVisible?: boolean }> {
     if (isMousePositionCoordinate(mousePosition)) {
       return {
@@ -117,7 +119,7 @@ export default class Interactor implements IInteractionsHelper {
     const rect = await jsPath.getClientRect();
     const attachedState = (rect as any).attachedState as IAttachedState;
 
-    if (!attachedState)
+    if (!attachedState && throwIfNotPresent)
       throw new Error(
         `The provided interaction->mousePosition did not match any nodes (${formatJsPath(
           mousePosition,
@@ -130,7 +132,7 @@ export default class Interactor implements IInteractionsHelper {
       height: rect.height,
       width: rect.width,
       elementTag: rect.tag,
-      nodeId: attachedState.id,
+      nodeId: attachedState?.id,
       isNodeVisible: rect.isVisible,
     };
   }
@@ -337,7 +339,7 @@ export default class Interactor implements IInteractionsHelper {
 
   private async getPositionXY(
     mousePosition: IMousePosition,
-  ): Promise<IPoint & { nodeId?: number; simulateOptionClick?: boolean }> {
+  ): Promise<IPoint & { nodeId?: number }> {
     assert(mousePosition, 'mousePosition should not be null');
     if (isMousePositionCoordinate(mousePosition)) {
       const [x, y] = mousePosition as number[];
@@ -345,10 +347,15 @@ export default class Interactor implements IInteractionsHelper {
     }
     const rect = await new JsPath(this.frameEnvironment, mousePosition).getClientRect();
     const attachedState = (rect as any).attachedState as IAttachedState;
-    if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {
-      return { x: 0, y: 0, simulateOptionClick: rect.tag === 'option', nodeId: attachedState?.id };
-    }
 
+    const point = this.createPointInRect(rect);
+    return { ...point, nodeId: attachedState?.id };
+  }
+
+  private createPointInRect(rect: IElementRect): IPoint {
+    if (rect.bottom === 0 && rect.height === 0 && rect.width === 0 && rect.right === 0) {
+      return { x: 0, y: 0 };
+    }
     // Default is to find exact middle. An emulator should replace an entry with a coordinate to avoid this functionality
     let x = round(rect.left + rect.width / 2);
     let y = round(rect.top + rect.height / 2);
@@ -356,7 +363,7 @@ export default class Interactor implements IInteractionsHelper {
     if (x > this.viewport.width) x = this.viewport.width - 1;
     if (y > this.viewport.height) y = this.viewport.height - 1;
 
-    return { x, y, nodeId: attachedState?.id };
+    return { x, y };
   }
 
   private async moveMouseOverTarget(
@@ -366,19 +373,32 @@ export default class Interactor implements IInteractionsHelper {
   ): Promise<{ domCoordinates: IPoint; simulateOptionClick?: boolean }> {
     // try 2x to hover over the expected target
     for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
-      const { x, y, simulateOptionClick } = await this.getPositionXY([attachedNodeId]);
+      const rect = await this.lookupBoundingRect([attachedNodeId], false);
 
-      if (simulateOptionClick) {
+      if (rect.elementTag === 'option') {
         return { simulateOptionClick: true, domCoordinates: null };
       }
 
+      const targetPoint = this.createPointInRect({
+        left: rect.x,
+        top: rect.y,
+        bottom: rect.y + rect.height,
+        right: rect.x + rect.width,
+        tag: rect.elementTag,
+        ...rect,
+      });
+
+      const needsMouseoverTest = !isPointInRect(this.mouse.position, rect);
+
       // wait for mouse to be over target
-      const waitForTarget = await this.createMouseoverTrigger(attachedNodeId);
-      await this.mouse.move(x, y);
+      const waitForTarget = needsMouseoverTest
+        ? await this.createMouseoverTrigger(attachedNodeId)
+        : { didTrigger: () => Promise.resolve(true) };
+      await this.mouse.move(targetPoint.x, targetPoint.y);
 
       const isOverTarget = await waitForTarget.didTrigger();
       if (isOverTarget === true) {
-        return { domCoordinates: { x, y } };
+        return { domCoordinates: targetPoint };
       }
 
       this.logger.info(
@@ -386,7 +406,7 @@ export default class Interactor implements IInteractionsHelper {
         {
           mousePosition: interaction.mousePosition,
           expectedNodeId: attachedNodeId,
-          domCoordinates: { x, y },
+          domCoordinates: targetPoint,
           retryNumber,
         },
       );
@@ -429,6 +449,13 @@ export default class Interactor implements IInteractionsHelper {
 
 function isMousePositionAttachedId(mousePosition: IMousePosition): boolean {
   return mousePosition.length === 1 && typeof mousePosition[0] === 'number';
+}
+
+export function isPointInRect(point: IPoint, rect: IRect): boolean {
+  if (point.x < rect.x || point.x > rect.x + rect.width) return false;
+  if (point.y < rect.y || point.y > rect.y + rect.height) return false;
+
+  return true;
 }
 
 export function isMousePositionCoordinate(value: IMousePosition): boolean {

@@ -127,6 +127,21 @@ export default class CommandFormatter {
       }
     }
 
+    if (!command.resultNodeIds && command.name === 'execJsPath') {
+      const [jsPath] = JSON.parse(command.args);
+      if (typeof jsPath[0] === 'number') command.resultNodeIds = [jsPath[0]];
+    }
+
+    if (!command.resultNodeIds && command.name === 'interact') {
+      const args = JSON.parse(command.args);
+      const mouseInteraction = args.find((x: IInteractionGroup) => {
+        return x.length && x[0].mousePosition && x[0].mousePosition.length === 1;
+      });
+      if (mouseInteraction) {
+        command.resultNodeIds = mouseInteraction.mousePosition;
+      }
+    }
+
     // we have shell objects occasionally coming back. hide from ui
     if (meta.args?.includes(getAttachedStateFnName)) {
       command.result = undefined;
