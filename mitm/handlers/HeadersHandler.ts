@@ -34,10 +34,11 @@ export default class HeadersHandler {
     if (hasUserActivity === '?1') ctx.hasUserGesture = true;
     if (fetchMode) ctx.isUserNavigation = isDocumentNavigation && ctx.hasUserGesture;
 
-    session.browserRequestMatcher.onMitmRequestedResource(ctx);
+    const requestedResource = session.browserRequestMatcher.onMitmRequestedResource(ctx);
 
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
+      requestedResource.browserRequestedPromise.resolve(null);
     } else if (!ctx.resourceType) {
       await ctx.browserHasRequested;
     }

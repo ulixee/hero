@@ -91,4 +91,5 @@ type ConnectArgs struct {
 	TcpWindowSize      int
 	Debug              bool
 	KeepAlive          bool
+	DisableAlpn        bool
 }

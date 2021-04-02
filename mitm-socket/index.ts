@@ -226,7 +226,7 @@ export default class MitmSocket extends TypedEventEmitter<{
         });
       } else if (message.startsWith('[DomainSocketPiper.Closed]')) {
         this.close();
-      } else {
+      } else if (message) {
         this.logger.info('SocketHandler.onData', {
           message,
           host: this.connectOpts?.host,
@@ -274,6 +274,7 @@ export interface IGoTlsSocketConnectOpts {
   tcpWindowSize?: number;
   debug?: boolean;
   keepAlive?: boolean;
+  disableAlpn?: boolean;
 }
 
 class Socks5ProxyConnectError extends Error {}

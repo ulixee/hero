@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net"
+	"strconv"
+	"strings"
 
 	tls "github.com/ulixee/utls"
 )
@@ -17,24 +19,44 @@ func EmulateTls(dialConn net.Conn, addr string, connectArgs ConnectArgs) *tls.UC
 	var err error
 
 	// Upgrade connection with correct TLS signature
-	var helloID tls.ClientHelloID = tls.HelloChrome_72
+	var spec tls.ClientHelloSpec
 	if connectArgs.ClientHelloId == "Safari13" {
-		helloID = tls.HelloCustom
+		spec = GetSafari13Spec()
+	} else if strings.HasPrefix(connectArgs.ClientHelloId, "Chrome") {
+		chromeVersionBit := strings.Split(connectArgs.ClientHelloId, "Chrome")[1]
+		chromeVersion, _ := strconv.ParseInt(chromeVersionBit, 10, 0)
+		// lowest supported is chrome 72, otherwise channel id extensions crop up
+		if chromeVersion < 83 {
+			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_72)
+		} else {
+			spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_83)
+		}
+	} else {
+	    // default to chrome83
+		spec, _ = tls.UtlsIdToSpec(tls.HelloChrome_83)
 	}
-	if connectArgs.ClientHelloId == "Chrome83" {
-        helloID = tls.HelloChrome_83
-    }
+
 	tlsConfig := tls.Config{
 		ServerName:         connectArgs.Servername,
 		InsecureSkipVerify: !connectArgs.RejectUnauthorized,
 	}
 
-	tlsConn := tls.UClient(dialConn, &tlsConfig, helloID)
-	if connectArgs.ClientHelloId == "Safari13" {
-		err := tlsConn.ApplyPreset(&ClientHelloSafari13)
-		if err != nil {
-			log.Fatalf("Error building client hello. %#v", err)
+	tlsConn := tls.UClient(dialConn, &tlsConfig, tls.HelloCustom)
+
+	if connectArgs.DisableAlpn {
+		tmp := spec.Extensions[:0]
+		for _, ext := range spec.Extensions {
+			if _, ok := ext.(*tls.ALPNExtension); !ok {
+				tmp = append(tmp, ext)
+			}
 		}
+		spec.Extensions = tmp
+	}
+	log.Printf("Spec", spec)
+
+	err = tlsConn.ApplyPreset(&spec)
+	if err != nil {
+		log.Fatalf("Error building client hello. %#v", err)
 	}
 
 	err = tlsConn.Handshake()
@@ -43,4 +65,8 @@ func EmulateTls(dialConn net.Conn, addr string, connectArgs ConnectArgs) *tls.UC
 	}
 
 	return tlsConn
+}
+
+func removeIndex(s []string, index int) []string {
+	return append(s[:index], s[index+1:]...)
 }
