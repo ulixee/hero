@@ -61,8 +61,8 @@ test('should not break iframe functions', async () => {
     const body = document.querySelector('body');
     const iframe = document.createElement('iframe');
     iframe.srcdoc = 'foobar';
-    iframe.contentWindow.mySuperFunction = () => returnValue;
     body.appendChild(iframe);
+    iframe.contentWindow.mySuperFunction = () => returnValue;
   })("${testFuncReturnValue}")`);
 
   const realReturn = await page.evaluate(
