@@ -130,7 +130,7 @@ export default class FrameNavigationsObserver {
     const top = this.navigations.top;
     if (!top) return { isStable: false };
 
-    // need to wait for both load + painting stable, or wait 3 seconds after painting stable
+    // need to wait for both load + painting stable, or wait 3 seconds after either one
     const loadDate = top.stateChanges.get('Load');
     const contentPaintedDate = top.stateChanges.get('ContentPaint');
     if (!!loadDate && !!contentPaintedDate) return { isStable: true };
@@ -138,11 +138,8 @@ export default class FrameNavigationsObserver {
     // NOTE: LargestContentfulPaint, which currently drives PaintingStable will NOT trigger if the page
     // doesn't have any "contentful" items that are eligible (image, headers, divs, paragraphs that fill the page)
 
-    // if not stable yet, don't count as resolved
-    if (!contentPaintedDate) return { isStable: false };
-
     // have contentPaintedDate date, but no load
-    const timeUntilReadyMs = moment().diff(contentPaintedDate, 'milliseconds');
+    const timeUntilReadyMs = moment().diff(contentPaintedDate ?? loadDate, 'milliseconds');
     return {
       isStable: timeUntilReadyMs >= 3e3,
       timeUntilReadyMs: Math.min(3e3, 3e3 - timeUntilReadyMs),
