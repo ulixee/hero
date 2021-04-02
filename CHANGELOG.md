@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
+
+
+### Bug Fixes
+
+* **human:** fix re-hovering over current location ([7eb202a](https://github.com/ulixee/secret-agent/commit/7eb202ab19c43af8642a395351db6debdf0eb83d)), closes [#209](https://github.com/ulixee/secret-agent/issues/209)
+* **mitm:** websockets use http1 in chrome ([0643003](https://github.com/ulixee/secret-agent/commit/0643003d5878913b9439cc013cc2e6533711d423))
+
+
+### Features
+
+* **core:** return null for non-existent elements ([871c2fa](https://github.com/ulixee/secret-agent/commit/871c2fa22d761e37836b3ecb1d765c6a5fc7cdee))
+* **emulate:** wait 3 seconds after load ([1dd0fd5](https://github.com/ulixee/secret-agent/commit/1dd0fd5b6d151339b8c19ea95db43eef60998b00))
+* **replay:** show nodes running execJsPath ([bb1a270](https://github.com/ulixee/secret-agent/commit/bb1a270aa44e5965443fdfa7640cdedb70ff005a))
+
+
+
+
+
 ## [1.4.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.0...v1.4.1-alpha.1) (2021-03-31)
 
 

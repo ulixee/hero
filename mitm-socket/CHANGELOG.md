@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
+
+
+### Bug Fixes
+
+* **mitm:** websockets use http1 in chrome ([0643003](https://github.com/ulixee/secret-agent/commit/0643003d5878913b9439cc013cc2e6533711d423))
+
+
+
+
+
 ## [1.4.1-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.0...v1.4.1-alpha.1) (2021-03-31)
 
 
