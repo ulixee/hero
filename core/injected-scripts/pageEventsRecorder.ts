@@ -90,10 +90,9 @@ class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [
     // preload with a document
     [
-      -1,
       'newDocument',
       { id: -1, textContent: window.self.location.href },
-      new Date().toISOString(),
+      new Date().getTime(),
       idx(),
     ],
   ];
@@ -104,7 +103,6 @@ class PageEventsRecorder {
   private loadEvents: ILoadEvent[] = [];
   private location = window.self.location.href;
 
-  private commandId = -1;
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
   private stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
 
@@ -138,22 +136,6 @@ class PageEventsRecorder {
     });
   }
 
-  public hasCommandId() {
-    return this.commandId !== -1;
-  }
-
-  public setCommandId(id: number) {
-    const isUnset = this.commandId === -1;
-    this.commandId = id;
-
-    if (isUnset) {
-      for (const change of this.domChanges) {
-        if (change[0] === -1) change[0] = this.commandId;
-      }
-    }
-    this.uploadChanges();
-  }
-
   public extractChanges(): PageRecorderResultSet {
     const changes = this.convertMutationsToChanges(this.observer.takeRecords());
     this.domChanges.push(...changes);
@@ -165,8 +147,8 @@ class PageEventsRecorder {
     const relatedNodeId = focusEvent.relatedTarget
       ? nodeTracker.getId(focusEvent.relatedTarget as Node)
       : undefined;
-    const time = new Date().toISOString();
-    const event = [this.commandId, eventType, nodeId, relatedNodeId, time] as IFocusEvent;
+    const time = new Date().getTime();
+    const event = [eventType, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
     this.getPropertyChanges(time, this.domChanges);
   }
@@ -177,7 +159,6 @@ class PageEventsRecorder {
       ? nodeTracker.getId(mouseEvent.relatedTarget as Node)
       : undefined;
     const event = [
-      this.commandId,
       eventType,
       mouseEvent.pageX,
       mouseEvent.pageY,
@@ -187,27 +168,22 @@ class PageEventsRecorder {
       mouseEvent.buttons,
       nodeId,
       relatedNodeId,
-      new Date().toISOString(),
+      new Date().getTime(),
     ] as IMouseEvent;
     this.mouseEvents.push(event);
   }
 
   public trackScroll(scrollX: number, scrollY: number) {
-    this.scrollEvents.push([this.commandId, scrollX, scrollY, new Date().toISOString()]);
+    this.scrollEvents.push([scrollX, scrollY, new Date().getTime()]);
   }
 
   public onLoadEvent(name: string) {
-    this.loadEvents.push([
-      this.commandId,
-      name,
-      window.self.location.href,
-      new Date().toISOString(),
-    ]);
+    this.loadEvents.push([name, window.self.location.href, new Date().getTime()]);
     this.uploadChanges();
   }
 
   public checkForAllPropertyChanges() {
-    this.getPropertyChanges(new Date().toISOString(), this.domChanges);
+    this.getPropertyChanges(new Date().getTime(), this.domChanges);
   }
 
   public get pageResultset(): PageRecorderResultSet {
@@ -240,33 +216,25 @@ class PageEventsRecorder {
     }
   }
 
-  private getLocationChange(changeTime: string, changes: IDomChangeEvent[]) {
-    const timestamp = changeTime || new Date().toISOString();
+  private getLocationChange(changeUnixTime: number, changes: IDomChangeEvent[]) {
+    const timestamp = changeUnixTime || new Date().getTime();
     const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
-      changes.push([
-        this.commandId,
-        'location',
-        { id: -1, textContent: currentLocation },
-        timestamp,
-        idx(),
-      ]);
+      changes.push(['location', { id: -1, textContent: currentLocation }, timestamp, idx()]);
     }
   }
 
-  private getPropertyChanges(changeTime: string, changes: IDomChangeEvent[]) {
-    const timestamp = changeTime;
+  private getPropertyChanges(changeUnixTime: number, changes: IDomChangeEvent[]) {
     for (const [input, propertyMap] of this.propertyTrackingElements) {
       for (const [propertyName, value] of propertyMap) {
         const newPropValue = input[propertyName];
         if (newPropValue !== value) {
           const nodeId = nodeTracker.getId(input);
           changes.push([
-            this.commandId,
             'property',
             { id: nodeId, properties: { [propertyName]: newPropValue } },
-            timestamp,
+            changeUnixTime,
             idx(),
           ]);
           propertyMap.set(propertyName, newPropValue);
@@ -293,8 +261,8 @@ class PageEventsRecorder {
     }
   }
 
-  private checkForStylesheetChanges(changeTime: string, changes: IDomChangeEvent[]) {
-    const timestamp = changeTime || new Date().toISOString();
+  private checkForStylesheetChanges(changeUnixTime: number, changes: IDomChangeEvent[]) {
+    const timestamp = changeUnixTime || new Date().getTime();
     for (const [style, current] of this.stylesheets) {
       if (!style.sheet || !style.isConnected) continue;
       const sheet = style.sheet as CSSStyleSheet;
@@ -302,7 +270,6 @@ class PageEventsRecorder {
       if (newPropValue.toString() !== current.toString()) {
         const nodeId = nodeTracker.getId(style);
         changes.push([
-          this.commandId,
           'property',
           { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
           timestamp,
@@ -320,8 +287,7 @@ class PageEventsRecorder {
 
   private convertMutationsToChanges(mutations: MutationRecord[]) {
     const changes: IDomChangeEvent[] = [];
-    const currentCommandId = this.commandId;
-    const stamp = new Date().toISOString();
+    const stamp = new Date().getTime();
 
     this.getLocationChange(stamp, changes);
     this.getPropertyChanges(stamp, changes);
@@ -332,7 +298,7 @@ class PageEventsRecorder {
     for (const mutation of mutations) {
       const { type, target } = mutation;
       if (!nodeTracker.has(target)) {
-        this.serializeHierarchy(target, changes, currentCommandId, stamp, addedNodeMap);
+        this.serializeHierarchy(target, changes, stamp, addedNodeMap);
       }
 
       if (type === 'childList') {
@@ -346,7 +312,7 @@ class PageEventsRecorder {
           serial.previousSiblingId = nodeTracker.getId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push([currentCommandId, 'removed', serial, stamp, idx()]);
+          changes.push(['removed', serial, stamp, idx()]);
           isFirstRemoved = false;
         }
 
@@ -372,14 +338,14 @@ class PageEventsRecorder {
             }
           }
           addedNodeMap.set(node, serial);
-          changes.push([currentCommandId, 'added', serial, stamp, idx()]);
+          changes.push(['added', serial, stamp, idx()]);
         }
       }
 
       if (type === 'attributes') {
         // don't store
         if (!nodeTracker.has(target)) {
-          this.serializeHierarchy(target, changes, currentCommandId, stamp, addedNodeMap);
+          this.serializeHierarchy(target, changes, stamp, addedNodeMap);
         }
         const serial = addedNodeMap.get(target) || this.serializeNode(target);
         if (!serial.attributes) serial.attributes = {};
@@ -395,14 +361,14 @@ class PageEventsRecorder {
         const changeType = 'attribute';
         // flatten changes
         if (!addedNodeMap.has(target)) {
-          changes.push([currentCommandId, changeType as any, serial, stamp, idx()]);
+          changes.push([changeType as any, serial, stamp, idx()]);
         }
       }
 
       if (type === 'characterData') {
         const textChange = this.serializeNode(target);
         textChange.textContent = target.textContent;
-        changes.push([currentCommandId, 'text', textChange, stamp, idx()]);
+        changes.push(['text', textChange, stamp, idx()]);
       }
     }
 
@@ -411,7 +377,7 @@ class PageEventsRecorder {
       // individually so we need to extract child nodes into flat hierarchy
       const children = this.serializeChildren(node, addedNodeMap);
       for (const childData of children) {
-        changes.push([currentCommandId, 'added', childData, stamp, idx()]);
+        changes.push(['added', childData, stamp, idx()]);
       }
     }
 
@@ -423,8 +389,7 @@ class PageEventsRecorder {
   private serializeHierarchy(
     node: Node,
     changes: IDomChangeEvent[],
-    currentCommandId: number,
-    stamp: string,
+    changeTime: number,
     addedNodeMap: Map<Node, INodeData>,
   ) {
     if (nodeTracker.has(node)) return this.serializeNode(node);
@@ -435,8 +400,7 @@ class PageEventsRecorder {
       const parentSerial = this.serializeHierarchy(
         node.parentNode,
         changes,
-        currentCommandId,
-        stamp,
+        changeTime,
         addedNodeMap,
       );
 
@@ -447,13 +411,12 @@ class PageEventsRecorder {
       const previous = this.serializeHierarchy(
         node.previousSibling,
         changes,
-        currentCommandId,
-        stamp,
+        changeTime,
         addedNodeMap,
       );
       serial.previousSiblingId = previous.id;
     }
-    changes.push([currentCommandId, 'added', serial, stamp, idx()]);
+    changes.push(['added', serial, changeTime, idx()]);
     addedNodeMap.set(node, serial);
     return serial;
   }
@@ -559,20 +522,6 @@ const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
 const propertiesToCheck = ['value', 'selected', 'checked'];
 
 const recorder = new PageEventsRecorder();
-
-// @ts-ignore
-if (window.commandId) {
-  // @ts-ignore
-  recorder.setCommandId(window.commandId);
-  // @ts-ignore
-  delete window.commandId;
-}
-
-Object.defineProperty(window, 'commandId', {
-  set(value: number) {
-    return recorder.setCommandId(value);
-  },
-});
 
 function flushPageRecorder() {
   const changes = recorder.extractChanges();

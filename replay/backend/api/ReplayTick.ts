@@ -30,7 +30,7 @@ export default class ReplayTick {
     readonly eventType: IEventType,
     public eventTypeIdx: number,
     readonly commandId: number,
-    readonly timestamp: string,
+    readonly timestamp: number,
     readonly label?: string,
   ) {
     this.eventDate = new Date(timestamp);

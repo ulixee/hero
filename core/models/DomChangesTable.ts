@@ -20,13 +20,13 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       ['namespaceUri', 'TEXT'],
       ['commandId', 'INTEGER'],
       ['tabId', 'INTEGER'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
     ]);
     this.defaultSortOrder = 'timestamp ASC';
   }
 
-  public insert(tabId: number, frameId: string, change: IDomChangeEvent) {
-    const [commandId, action, nodeData, timestamp, eventIndex] = change;
+  public insert(tabId: number, frameId: string, commandId: number, change: IDomChangeEvent) {
+    const [action, nodeData, timestamp, eventIndex] = change;
     const record = [
       frameId,
       eventIndex,
@@ -55,36 +55,6 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
 
     return query.all(frameId, sinceCommandId ?? -2);
   }
-
-  public static toDomChangeEvent(record: IDomChangeRecord): IDomChangeEvent {
-    return [
-      record.commandId,
-      record.action as any,
-      {
-        ...record,
-        id: record.nodeId,
-        attributes: record.attributes ? JSON.parse(record.attributes) : undefined,
-        attributeNamespaces: record.attributeNamespaces
-          ? JSON.parse(record.attributeNamespaces)
-          : undefined,
-        properties: record.properties ? JSON.parse(record.properties) : undefined,
-      },
-      record.timestamp,
-      record.eventIndex,
-    ];
-  }
-
-  public static toRecord(event: IDomChangeEvent): Omit<IDomChangeRecord, 'frameId' | 'tabId'> {
-    const [commandId, action, nodeData, timestamp, eventIndex] = event;
-    return {
-      commandId,
-      action,
-      nodeId: nodeData.id,
-      ...nodeData,
-      timestamp,
-      eventIndex,
-    } as any;
-  }
 }
 
 export interface IDomChangeRecord {
@@ -92,7 +62,7 @@ export interface IDomChangeRecord {
   tabId: number;
   frameId: string;
   nodeId: number;
-  timestamp: string;
+  timestamp: number;
   eventIndex: number;
   action: string;
   nodeType: number;

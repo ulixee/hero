@@ -171,7 +171,7 @@ export default class MitmRequestContext {
       headers: ctx.requestHeaders,
       method: ctx.method,
       postData: ctx.requestPostData,
-      timestamp: ctx.requestTime.toISOString(),
+      timestamp: ctx.requestTime.getTime(),
     } as IResourceRequest;
 
     const response = {
@@ -180,7 +180,7 @@ export default class MitmRequestContext {
       statusMessage: ctx.statusMessage,
       headers: ctx.responseHeaders,
       trailers: ctx.responseTrailers,
-      timestamp: ctx.responseTime?.toISOString(),
+      timestamp: ctx.responseTime?.getTime(),
       browserServedFromCache: ctx.browserServedFromCache,
       browserLoadFailure: ctx.browserLoadFailure,
       remoteAddress: ctx.remoteAddress,

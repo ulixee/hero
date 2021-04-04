@@ -24,7 +24,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       ['params', 'TEXT'],
       ['error', 'TEXT'],
       ['result', 'TEXT'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
     ]);
   }
 
@@ -97,7 +97,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       params ? JSON.stringify(params, paramsStringifyFilter) : undefined,
       event.error ? JSON.stringify(event.error) : undefined,
       event.result ? JSON.stringify(event.result) : undefined,
-      event.timestamp.toISOString(),
+      event.timestamp.getTime(),
     ];
     this.queuePendingInsert(record);
   }
@@ -122,5 +122,5 @@ export interface IDevtoolsMessageRecord {
   params?: string;
   error?: string;
   result?: string;
-  timestamp: string;
+  timestamp: number;
 }

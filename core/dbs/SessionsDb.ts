@@ -46,7 +46,7 @@ export default class SessionsDb {
     const otherSessions = this.sessions.findByScriptEntrypoint(session.scriptEntrypoint);
     const relatedScriptInstances: {
       id: string;
-      startDate: string;
+      startDate: number;
       defaultSessionId: string;
     }[] = [];
     const relatedSessions: { id: string; name: string }[] = [];
@@ -56,7 +56,7 @@ export default class SessionsDb {
       if (!scriptDates.has(key)) {
         relatedScriptInstances.push({
           id: otherSession.scriptInstanceId,
-          startDate: otherSession.scriptStartDate,
+          startDate: new Date(otherSession.scriptStartDate).getTime(),
           defaultSessionId: otherSession.id,
         });
       }

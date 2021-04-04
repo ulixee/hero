@@ -4,8 +4,8 @@ export default interface ICommandMeta {
   frameId: string;
   name: string;
   args?: string;
-  startDate: string;
-  endDate?: string;
+  startDate: number;
+  endDate?: number;
   result?: any;
   resultType?: string;
 }

@@ -7,19 +7,17 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
     super(db, 'FocusEvents', [
       ['tabId', 'INTEGER'],
       ['event', 'INTEGER'],
-      ['commandId', 'INTEGER'],
       ['targetNodeId', 'INTEGER'],
       ['relatedTargetNodeId', 'INTEGER'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
     ]);
   }
 
-  public insert(tabId: number, focusEvent: IFocusEvent) {
-    const [commandId, type, targetNodeId, relatedTargetNodeId, timestamp] = focusEvent;
+  public insert(tabId: number, commandId: number, focusEvent: IFocusEvent) {
+    const [type, targetNodeId, relatedTargetNodeId, timestamp] = focusEvent;
     const record = [
       tabId,
       type === 'in' ? FocusEventType.IN : FocusEventType.OUT,
-      commandId,
       targetNodeId,
       relatedTargetNodeId,
       timestamp,
@@ -31,10 +29,9 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
 export interface IFocusRecord {
   tabId: number;
   event: FocusEventType;
-  commandId: number;
   targetNodeId?: number;
   relatedTargetNodeId?: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 export enum FocusEventType {

@@ -8,7 +8,7 @@ const { log } = Log(module);
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
   public readonly entrypoint: string = process.argv[1];
-  public readonly startDate: string = new Date().toISOString();
+  public readonly startDate = new Date().getTime();
   private sessionNameCountByName: { [name: string]: number } = {};
 
   public get meta(): IScriptInstanceMeta {

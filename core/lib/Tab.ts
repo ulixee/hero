@@ -19,11 +19,7 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import {
-  ILocationTrigger,
-  IPipelineStatus,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
+import { ILocationTrigger, IPipelineStatus } from '@secret-agent/core-interfaces/Location';
 import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
 import { INodeData } from '@secret-agent/core-interfaces/IDomChangeEvent';
 import FrameNavigations from './FrameNavigations';
@@ -511,14 +507,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       // overrides happen in main frame
       await page.addNewDocumentScript(newDocumentScript.script, false);
     }
-    if (this.parentTabId) {
-      // the page is paused waiting for debugger, so it won't resume until "install" is complete
-      InjectedScripts.setCommandIdForPage(this.puppetPage, this.lastCommandId).catch(error => {
-        this.logger.warn('Tab.child.setCommandId.error', {
-          error,
-        });
-      });
-    }
+
     await this.mainFrameEnvironment.isReady;
     if (this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
@@ -585,28 +574,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       loadEvents,
     });
 
-    let startCommandId = domChanges.reduce((max, change) => {
-      if (max > change[0]) return max;
-      return change[0];
-    }, -1);
-
     const frame = this.frameEnvironmentsById.get(frameId);
-
-    const navigationHistory = frame.navigations.history;
-    // find last page load
-    for (let i = navigationHistory.length - 1; i >= 0; i -= 1) {
-      const nav = navigationHistory[i];
-      if (nav.stateChanges.has(LocationStatus.HttpResponded)) {
-        startCommandId = nav.startCommandId;
-        break;
-      }
-    }
 
     frame.onDomRecorderLoadEvents(loadEvents);
 
     this.sessionState.captureDomEvents(
       this.id,
-      startCommandId,
       frameId,
       domChanges,
       mouseEvents,

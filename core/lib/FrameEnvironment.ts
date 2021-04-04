@@ -352,7 +352,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public onDomRecorderLoadEvents(loadEvents: ILoadEvent[]): void {
     for (const loadEvent of loadEvents) {
-      const [, event, url, timestamp] = loadEvent;
+      const [event, url, timestamp] = loadEvent;
 
       const incomingStatus = {
         LargestContentfulPaint: 'ContentPaint',

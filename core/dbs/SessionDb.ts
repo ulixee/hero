@@ -199,7 +199,7 @@ export interface ISessionLookup {
   dataLocation: string;
   sessionState: SessionState;
   relatedSessions: { id: string; name: string }[];
-  relatedScriptInstances: { id: string; startDate: string; defaultSessionId: string }[];
+  relatedScriptInstances: { id: string; startDate: number; defaultSessionId: string }[];
 }
 
 export interface ISessionLookupArgs {

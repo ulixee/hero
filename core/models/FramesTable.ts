@@ -14,7 +14,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
         ['securityOrigin', 'TEXT'],
         ['startCommandId', 'INTEGER'],
         ['parentId', 'TEXT'],
-        ['createdTime', 'TEXT'],
+        ['createdTimestamp', 'INTEGER'],
       ],
       true,
     );
@@ -29,7 +29,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       frame.securityOrigin,
       frame.startCommandId,
       frame.parentId,
-      frame.createdTime,
+      frame.createdTimestamp,
     ]);
   }
 }
@@ -42,5 +42,5 @@ export interface IFrameRecord {
   name?: string;
   securityOrigin?: string;
   parentId?: string; // if null, top level frame
-  createdTime: string;
+  createdTimestamp: number;
 }

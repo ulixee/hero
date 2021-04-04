@@ -52,7 +52,6 @@ func EmulateTls(dialConn net.Conn, addr string, connectArgs ConnectArgs) *tls.UC
 		}
 		spec.Extensions = tmp
 	}
-	log.Printf("Spec", spec)
 
 	err = tlsConn.ApplyPreset(&spec)
 	if err != nil {

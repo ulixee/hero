@@ -13,9 +13,9 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
         ['localAddress', 'TEXT'],
         ['remoteAddress', 'TEXT'],
         ['pid', 'INTEGER'],
-        ['dialTime', 'TEXT'],
-        ['connectTime', 'TEXT'],
-        ['closeTime', 'TEXT'],
+        ['dialTime', 'INTEGER'],
+        ['connectTime', 'INTEGER'],
+        ['closeTime', 'INTEGER'],
       ],
       true,
     );
@@ -46,9 +46,9 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
       localAddress,
       remoteAddress,
       pid,
-      dialTime?.toISOString(),
-      connectTime?.toISOString(),
-      closeTime?.toISOString(),
+      dialTime?.getTime(),
+      connectTime?.getTime(),
+      closeTime?.getTime(),
     ]);
   }
 }
@@ -60,7 +60,7 @@ export interface ISocketRecord {
   pid: number;
   alpn: string;
   serverName: string;
-  dialTime: string;
-  connectTime: string;
-  closeTime: string;
+  dialTime: number;
+  connectTime: number;
+  closeTime: number;
 }

@@ -94,7 +94,7 @@ export default class SessionState {
       sessionsTable.insert(
         sessionId,
         sessionName,
-        this.createDate.toISOString(),
+        this.createDate.getTime(),
         scriptInstanceMeta.id,
         scriptInstanceMeta.entrypoint,
         scriptInstanceMeta.startDate,
@@ -329,7 +329,7 @@ export default class SessionState {
       name: createdFrame.name,
       securityOrigin: createdFrame.securityOrigin,
       startCommandId: this.lastCommand?.id,
-      createdTime: new Date().toISOString(),
+      createdTimestamp: new Date().getTime(),
     } as IFrameRecord;
     this.frames[createdFrame.id] = frame;
     this.db.frames.insert(frame);
@@ -457,32 +457,45 @@ export default class SessionState {
 
   public captureDomEvents(
     tabId: number,
-    startCommandId: number,
     frameId: string,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
   ) {
+    let lastCommand = this.lastCommand;
     for (const domChange of domChanges) {
-      if (domChange[0] === -1) domChange[0] = startCommandId;
-      this.db.domChanges.insert(tabId, frameId, domChange);
+      lastCommand = this.getCommandForTimestamp(lastCommand, domChange[2]);
+      this.db.domChanges.insert(tabId, frameId, lastCommand.id, domChange);
     }
 
     for (const mouseEvent of mouseEvents) {
-      if (mouseEvent[0] === -1) mouseEvent[0] = startCommandId;
-      this.db.mouseEvents.insert(tabId, mouseEvent);
+      lastCommand = this.getCommandForTimestamp(lastCommand, mouseEvent[8]);
+      this.db.mouseEvents.insert(tabId, lastCommand.id, mouseEvent);
     }
 
     for (const focusEvent of focusEvents) {
-      if (focusEvent[0] === -1) focusEvent[0] = startCommandId;
-      this.db.focusEvents.insert(tabId, focusEvent);
+      lastCommand = this.getCommandForTimestamp(lastCommand, focusEvent[3]);
+      this.db.focusEvents.insert(tabId, lastCommand.id, focusEvent);
     }
 
     for (const scrollEvent of scrollEvents) {
-      if (scrollEvent[0] === -1) scrollEvent[0] = startCommandId;
-      this.db.scrollEvents.insert(tabId, scrollEvent);
+      lastCommand = this.getCommandForTimestamp(lastCommand, scrollEvent[2]);
+      this.db.scrollEvents.insert(tabId, lastCommand.id, scrollEvent);
     }
+  }
+
+  public getCommandForTimestamp(lastCommand: ICommandMeta, timestamp: number): ICommandMeta {
+    let command = lastCommand;
+    if (command.startDate <= timestamp && command.endDate > timestamp) {
+      return command;
+    }
+
+    for (let i = this.commands.length - 1; i >= 0; i -= 1) {
+      command = this.commands[i];
+      if (command.startDate <= timestamp) break;
+    }
+    return command;
   }
 
   public captureDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {

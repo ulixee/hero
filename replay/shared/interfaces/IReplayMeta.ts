@@ -3,7 +3,7 @@ export default interface IReplayMeta {
   dataLocation: string;
   sessionName?: string;
   sessionId?: string;
-  scriptStartDate?: string;
+  scriptStartDate?: number;
   scriptInstanceId?: string;
   scriptEntrypoint?: string;
 }

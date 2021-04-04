@@ -1,6 +1,6 @@
-import { CommandId, ISOTimestamp } from './GenericTypes';
+import { UnixTimestamp } from './GenericTypes';
 
 type EventName = string;
 type Url = string;
 
-export type ILoadEvent = [CommandId, EventName, Url, ISOTimestamp];
+export type ILoadEvent = [EventName, Url, UnixTimestamp];

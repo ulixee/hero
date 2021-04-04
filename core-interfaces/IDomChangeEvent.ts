@@ -1,13 +1,12 @@
 // tslint:disable-next-line
-import type { CommandId, ISOTimestamp } from './GenericTypes';
+import type { UnixTimestamp } from './GenericTypes';
 
 type Idx = number;
 
 export type IDomChangeEvent = [
-  CommandId,
   'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
   INodeData,
-  ISOTimestamp,
+  UnixTimestamp,
   Idx,
 ];
 

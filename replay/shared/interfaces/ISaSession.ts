@@ -8,17 +8,17 @@ export default interface ISaSession {
   deviceScaleFactor: number;
   startOrigin: string;
   startDate: Date;
-  scriptStartDate: string;
+  scriptStartDate: number;
   closeDate?: Date;
   scriptEntrypoint: string;
   scriptInstanceId: string;
-  relatedScriptInstances: { id: string; startDate: string; defaultSessionId }[];
+  relatedScriptInstances: { id: string; startDate: number; defaultSessionId }[];
   relatedSessions: { id: string; name: string }[];
 }
 
 export interface ISessionTab {
   tabId: number;
-  createdTime: string;
+  createdTime: number;
   startOrigin?: string;
   width: number;
   height: number;
@@ -33,7 +33,7 @@ export interface IMouseEvent {
   buttons: number;
   targetNodeId: number;
   event: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 export interface IFrontendMouseEvent
@@ -47,12 +47,12 @@ export interface IFocusRecord {
   commandId: number;
   targetNodeId?: number;
   relatedTargetNodeId?: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 export interface IScrollRecord {
   scrollX: number;
   scrollY: number;
   commandId: number;
-  timestamp: string;
+  timestamp: number;
 }
