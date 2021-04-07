@@ -77,7 +77,8 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         expect(page.frames.length).toBe(2);
         expect(getContexts(page)).toBe(4);
         await page.goto(server.emptyPage);
-        expect(getContexts(page)).toBe(2);
+        // isolated context might or might not be loaded
+        expect(getContexts(page)).toBeLessThanOrEqual(2);
       });
 
       it('should dispose context on cross-origin navigation', async () => {
@@ -85,7 +86,8 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         expect(page.frames.length).toBe(2);
         expect(getContexts(page)).toBe(4);
         await page.goto(`${server.crossProcessBaseUrl}/empty.html`);
-        expect(getContexts(page)).toBe(2);
+        // isolated context might or might not be loaded
+        expect(getContexts(page)).toBeLessThanOrEqual(2);
       });
 
       it('should execute after cross-site navigation', async () => {

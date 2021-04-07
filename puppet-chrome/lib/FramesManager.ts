@@ -5,6 +5,7 @@ import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredE
 import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import { CDPSession } from './CDPSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -71,6 +72,10 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
           this.cdpSession.send('Page.enable'),
           this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
           this.cdpSession.send('Runtime.enable'),
+          this.cdpSession.send('Page.addScriptToEvaluateOnNewDocument', {
+            source: `//# sourceURL=${injectedSourceUrl}`,
+            worldName: ISOLATED_WORLD,
+          }),
         ]);
         const framesResponse = await this.cdpSession.send('Page.getFrameTree');
         this.recurseFrameTree(framesResponse.frameTree);
