@@ -16,23 +16,23 @@
  */
 import * as childProcess from 'child_process';
 import { StdioOptions } from 'child_process';
-import { Readable, Writable } from 'stream';
 import * as readline from 'readline';
 import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
-import { PipeTransport } from './PipeTransport';
+import Resolvable from '@secret-agent/commons/Resolvable';
+import { WebSocketTransport } from './WebSocketTransport';
 
 const { log } = Log(module);
 
 const logProcessExit = process.env.NODE_ENV !== 'test';
 
-export default function launchProcess(
+export default async function launchProcess(
   executablePath: string,
   processArguments: string[],
   env: NodeJS.ProcessEnv,
 ): Promise<ILaunchedProcess> {
-  const stdio: StdioOptions = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
+  const stdio: StdioOptions = ['ignore', 'pipe', 'pipe'];
 
   log.info(`Puppet.LaunchProcess`, { sessionId: null, executablePath, processArguments });
   const launchedProcess = childProcess.spawn(executablePath, processArguments, {
@@ -60,11 +60,16 @@ export default function launchProcess(
 
   const stdout = readline.createInterface({ input: launchedProcess.stdout });
   stdout.on('line', line => {
-    log.stats(`${exe}.stdout`, { message: line, sessionId: null });
+    if (line) log.stats(`${exe}.stdout`, { message: line, sessionId: null });
   });
 
+  const websocketEndpointResolvable = new Resolvable<string>();
   const stderr = readline.createInterface({ input: launchedProcess.stderr });
   stderr.on('line', line => {
+    if (!line) return;
+    const match = line.match(/DevTools listening on (.*)/);
+    if (match) websocketEndpointResolvable.resolve(match[1].trim());
+
     log.warn(`${exe}.stderr`, { message: line, sessionId: null });
   });
 
@@ -76,10 +81,9 @@ export default function launchProcess(
     }
   });
 
-  const transport = new PipeTransport(
-    launchedProcess.stdio[3] as Writable,
-    launchedProcess.stdio[4] as Readable,
-  );
+  const wsEndpoint = await websocketEndpointResolvable.promise;
+  const transport = new WebSocketTransport(wsEndpoint);
+  await transport.waitForOpen;
 
   return Promise.resolve(<ILaunchedProcess>{
     transport,
@@ -89,6 +93,11 @@ export default function launchProcess(
   function close(): Promise<void> {
     if (launchedProcess.killed || processKilled) return;
 
+    try {
+      transport.close();
+    } catch (error) {
+      // drown
+    }
     try {
       const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
       if (process.platform === 'win32') {
