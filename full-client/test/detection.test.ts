@@ -90,10 +90,12 @@ test('widevine detection', async () => {
   ]).then(x => {
     if (x.keySystem !== 'com.widevine.alpha') throw new Error('Wrong keysystem ' + x.keySystem);
     return x.createMediaKeys();
+  }).then(x => {
+    return x.constructor.name
   })`,
     )
     .catch(err => err);
-  expect(accessKey.type).toBe('MediaKeys');
+  expect(accessKey).toBe('MediaKeys');
 });
 
 test('should pass FpScanner', async () => {
@@ -252,8 +254,8 @@ document.querySelector = (function (orig) {
 
   // for live variables, we shouldn't see markers of utils.js
   const query = await tab.getJsValue('document.querySelector("h1")');
-  expect(query.value).toBe(
-    'Error: QuerySelector Override Detection\n    at HTMLDocument.querySelector (<anonymous>:4:17)',
+  expect(query).toBe(
+    'Error: QuerySelector Override Detection\n    at HTMLDocument.querySelector (<anonymous>:4:17)\n    at <anonymous>:1:10',
   );
 });
 
@@ -287,11 +289,13 @@ test('should not leave stack trace markers when calling in page functions', asyn
   const tab = Session.getTab({ tabId, sessionId });
 
   const pageFunction = await tab.getJsValue('errorCheck()');
-  expect(pageFunction.value).toBe(`Error: This is from inside\n    at errorCheck (${url}:6:17)`);
+  expect(pageFunction).toBe(
+    `Error: This is from inside\n    at errorCheck (${url}:6:17)\n    at <anonymous>:1:1`,
+  );
 
   // for something created
   const queryAllTest = await tab.getJsValue('document.querySelectorAll("h1")');
-  expect(queryAllTest.value).toBe(
-    `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:11:19)`,
+  expect(queryAllTest).toBe(
+    `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:11:19)\n    at <anonymous>:1:10`,
   );
 });

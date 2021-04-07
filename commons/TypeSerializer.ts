@@ -1,9 +1,9 @@
 const Types = {
-  Number: 'number',
-  String: 'string',
-  Boolean: 'boolean',
-  Object: 'object',
-  BigInt: 'bigint',
+  number: 'number',
+  string: 'string',
+  boolean: 'boolean',
+  object: 'object',
+  bigint: 'bigint',
   NaN: 'NaN',
   Infinity: 'Infinity',
   NegativeInfinity: '-Infinity',
@@ -22,12 +22,12 @@ export default class TypeSerializer {
 
   public static parse(stringified: string, stackMarker = 'SERIALIZER'): any {
     return JSON.parse(stringified, (key, entry) => {
-      if (!entry || !entry.type) return entry;
+      if (!entry || !entry.__type) return entry;
 
-      const { value, type } = entry;
+      const { value, __type: type } = entry;
 
-      if (type === Types.Number || type === Types.String || type === Types.Boolean) return value;
-      if (type === Types.BigInt) return BigInt(value);
+      if (type === Types.number || type === Types.string || type === Types.boolean) return value;
+      if (type === Types.bigint) return BigInt(value);
       if (type === Types.NaN) return Number.NaN;
       if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
       if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
@@ -77,7 +77,7 @@ export default class TypeSerializer {
 
   public static stringify(object: any): string {
     return JSON.stringify(object, (key, value) => {
-      if (value && typeof value === Types.Object && !Array.isArray(value)) {
+      if (value && typeof value === Types.object && !Array.isArray(value)) {
         const resultObject = {};
         for (const [k, v] of Object.entries(value)) {
           resultObject[k] = this.convertKeyValue(k, v);
@@ -92,54 +92,54 @@ export default class TypeSerializer {
     if (value === null || value === undefined) return value;
 
     if (Number.isNaN(value)) {
-      return { type: Types.NaN };
+      return { __type: Types.NaN };
     }
 
     if (value === Number.POSITIVE_INFINITY) {
-      return { type: Types.Infinity };
+      return { __type: Types.Infinity };
     }
 
     if (value === Number.NEGATIVE_INFINITY) {
-      return { type: Types.NegativeInfinity };
+      return { __type: Types.NegativeInfinity };
     }
 
     const type = typeof value;
-    if (type === Types.Boolean || type === Types.String || type === Types.Number) return value;
-    if (type === Types.BigInt) {
-      return { type: Types.BigInt, value: value.toString() };
+    if (type === Types.boolean || type === Types.string || type === Types.number) return value;
+    if (type === Types.bigint) {
+      return { __type: Types.bigint, value: value.toString() };
     }
 
     if (value instanceof Date) {
-      return { type: Types.DateIso, value: value.toISOString() };
+      return { __type: Types.DateIso, value: value.toISOString() };
     }
 
     if (value instanceof RegExp) {
-      return { type: Types.RegExp, value: [value.source, value.flags] };
+      return { __type: Types.RegExp, value: [value.source, value.flags] };
     }
 
     if (value instanceof Error) {
       const { name, message, stack, ...data } = value;
-      return { type: Types.Error, value: { name, message, stack, ...data } };
+      return { __type: Types.Error, value: { name, message, stack, ...data } };
     }
 
     if (value instanceof Map) {
-      return { type: Types.Map, value: [...value.entries()] };
+      return { __type: Types.Map, value: [...value.entries()] };
     }
 
     if (value instanceof Set) {
-      return { type: Types.Set, value: [...value] };
+      return { __type: Types.Set, value: [...value] };
     }
 
     if (this.isNodejs) {
       if (value instanceof Buffer || Buffer.isBuffer(value)) {
-        return { type: Types.Buffer64, value: value.toString('base64') };
+        return { __type: Types.Buffer64, value: value.toString('base64') };
       }
     } else {
       if (ArrayBuffer.isView(value)) {
         // @ts-ignore
         const binary = new TextDecoder('utf8').decode(value.buffer);
         return {
-          type: Types.ArrayBuffer64,
+          __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
           args: {
             arrayType: value[Symbol.toStringTag],
@@ -152,7 +152,7 @@ export default class TypeSerializer {
         // @ts-ignore
         const binary = new TextDecoder('utf8').decode(value);
         return {
-          type: Types.ArrayBuffer64,
+          __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
         };
       }

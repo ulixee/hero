@@ -53,11 +53,11 @@ describe('Multi-tab scenarios', () => {
     const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(meta.userAgentString);
+    expect(navigatorAgent).toBe(meta.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
-    expect(csi.value.startE).toBeTruthy();
+    expect(csi.startE).toBeTruthy();
 
     await agent.closeTab(newTab);
     const newTabList = await agent.tabs;
@@ -161,11 +161,11 @@ describe('Multi-tab scenarios', () => {
     const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(meta.userAgentString);
+    expect(navigatorAgent).toBe(meta.userAgentString);
 
     // make sure polyfills ran
     const csi = await agent.getJsValue<any>('chrome.csi()');
-    expect(csi.value.startE).toBeTruthy();
+    expect(csi.startE).toBeTruthy();
 
     await agent.closeTab(newTab);
   });
@@ -209,7 +209,7 @@ document.querySelector('a').addEventListener('click', event => {
     const meta = await agent.meta;
     // make sure user agent is wired up
     const navigatorAgent = await agent.getJsValue('navigator.userAgent');
-    expect(navigatorAgent.value).toBe(meta.userAgentString);
+    expect(navigatorAgent).toBe(meta.userAgentString);
 
     await agent.closeTab(newTab);
   });

@@ -171,27 +171,8 @@ export default class FrameEnvironment {
     }
   }
 
-  public async getJsValue<T>(expression: string): Promise<{ value: T; type: string }> {
-    const unparsedResult = await this.puppetFrame.evaluate<string>(
-      `(async function execNonIsolatedExpression() {
-  const value = await ${expression};
-
-  let type = typeof value;
-  if (value && value.constructor) {
-    type = value.constructor.name;
-  }
-
-  return JSON.stringify({
-    value,
-    type,
-  });
-
-})();
-//# sourceURL=${injectedSourceUrl}
-`,
-      false,
-    );
-    return JSON.parse(unparsedResult);
+  public async getJsValue<T>(expression: string): Promise<T> {
+    return await this.puppetFrame.evaluate<T>(expression, false);
   }
 
   public meta(): IFrameMeta {

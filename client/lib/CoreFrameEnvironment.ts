@@ -44,7 +44,7 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.execJsPath', jsPath);
   }
 
-  public async getJsValue<T>(expression: string): Promise<{ value: T; type: string }> {
+  public async getJsValue<T>(expression: string): Promise<T> {
     return await this.commandQueue.run('FrameEnvironment.getJsValue', expression);
   }
 
