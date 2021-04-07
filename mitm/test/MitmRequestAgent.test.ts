@@ -42,7 +42,7 @@ test('should create up to a max number of secure connections per origin', async 
   });
   const mitmServer = await startMitmServer();
 
-  const session = createMitmSession();
+  const session = createMitmSession(mitmServer);
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -82,7 +82,7 @@ test('should create new connections as needed when no keepalive', async () => {
   });
   const mitmServer = await startMitmServer();
 
-  const session = createMitmSession();
+  const session = createMitmSession(mitmServer);
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -126,7 +126,7 @@ test('should be able to handle a reused socket that closes on server', async () 
   });
   const mitmServer = await startMitmServer();
 
-  const session = createMitmSession();
+  const session = createMitmSession(mitmServer);
   const proxyCredentials = session.getProxyCredentials();
   process.env.MITM_ALLOW_INSECURE = 'true';
 
@@ -195,7 +195,7 @@ test('it should not put upgrade connections in a pool', async () => {
   const mitmServer = await startMitmServer();
   const wsServer = new WebSocket.Server({ noServer: true });
 
-  const session = createMitmSession();
+  const session = createMitmSession(mitmServer);
 
   httpServer.server.on('upgrade', (request, socket, head) => {
     wsServer.handleUpgrade(request, socket, head, async (ws: WebSocket) => {
@@ -227,7 +227,7 @@ test('it should reuse http2 connections', async () => {
 
   const mitmServer = await startMitmServer();
   const mitmUrl = `http://localhost:${mitmServer.port}`;
-  const session = createMitmSession();
+  const session = createMitmSession(mitmServer);
 
   // @ts-ignore
   const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
@@ -256,7 +256,9 @@ async function startMitmServer() {
 }
 
 let counter = 1;
-function createMitmSession() {
+function createMitmSession(mitmServer: MitmServer) {
   counter += 1;
-  return new RequestSession(`${counter}`, 'any agent', null);
+  const session = new RequestSession(`${counter}`, 'any agent', null);
+  mitmServer.registerSession(session, false);
+  return session;
 }

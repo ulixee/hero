@@ -12,10 +12,10 @@ import {
   TypedEventEmitter,
 } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
+import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { CDPSession } from './CDPSession';
@@ -33,7 +33,7 @@ export class BrowserContext
 
   public set emulation(value: IBrowserEmulationSettings) {
     this._emulation = value;
-    for (const page of this.pages) {
+    for (const page of this.pagesById.values()) {
       page.updateEmulationSettings().catch(err => {
         this.logger.error('ERROR setting emulation settings', err);
       });
@@ -41,11 +41,11 @@ export class BrowserContext
   }
 
   public workersById = new Map<string, IPuppetWorker>();
+  public pagesById = new Map<string, Page>();
 
   private _emulation: IBrowserEmulationSettings;
 
   private readonly createdTargetIds = new Set<string>();
-  private readonly pages: Page[] = [];
   private readonly browser: Browser;
   private readonly id: string;
   private isClosing = false;
@@ -85,25 +85,25 @@ export class BrowserContext
     await this.attachToTarget(targetId);
 
     // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
-    const page = this.getPageWithId(targetId);
+    const page = this.pagesById.get(targetId);
     await page.isReady;
     if (page.isClosed) throw new Error('Page has been closed.');
     return page;
   }
 
   targetDestroyed(targetId: string) {
-    const page = this.getPageWithId(targetId);
+    const page = this.pagesById.get(targetId);
     if (page) page.didClose();
   }
 
   targetKilled(targetId: string, errorCode: number) {
-    const page = this.getPageWithId(targetId);
+    const page = this.pagesById.get(targetId);
     if (page) page.onTargetKilled(errorCode);
   }
 
   async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
-    if (!this.getPageWithId(targetId)) {
+    if (!this.pagesById.has(targetId)) {
       await this.cdpRootSessionSend('Target.attachToTarget', {
         targetId,
         flatten: true,
@@ -119,34 +119,36 @@ export class BrowserContext
   }
 
   onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
-    if (this.getPageWithId(targetInfo.targetId)) return;
+    if (this.pagesById.has(targetInfo.targetId)) return;
 
     this.subscribeToDevtoolsMessages(cdpSession, {
       sessionType: 'page',
       pageTargetId: targetInfo.targetId,
     });
 
-    let opener = targetInfo.openerId ? this.getPageWithId(targetInfo.openerId) || null : null;
+    let opener = targetInfo.openerId ? this.pagesById.get(targetInfo.openerId) || null : null;
     // make the first page the active page
-    if (!opener && !this.createdTargetIds.has(targetInfo.targetId)) opener = this.pages[0];
+    if (!opener && !this.createdTargetIds.has(targetInfo.targetId))
+      opener = this.pagesById.values().next().value;
 
     const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
-    this.pages.push(page);
+    this.pagesById.set(page.targetId, page);
     // eslint-disable-next-line promise/catch-or-return
     page.isReady.then(() => this.emit('page', { page }));
+    return page;
   }
 
   onPageDetached(targetId: string) {
-    const page = this.getPageWithId(targetId);
+    const page = this.pagesById.get(targetId);
     if (page) {
-      const idx = this.pages.indexOf(page);
-      if (idx >= 0) this.pages.splice(idx, 1);
+      this.pagesById.delete(targetId);
       page.didClose();
     }
   }
 
   async onSharedWorkerAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
-    const page = this.pages.find(x => !x.isClosed) ?? this.pages[0];
+    const page: Page =
+      [...this.pagesById.values()].find(x => !x.isClosed) ?? this.pagesById.values().next().value;
     await page.onWorkerAttached(cdpSession, targetInfo);
   }
 
@@ -168,7 +170,7 @@ export class BrowserContext
     if (this.isClosing) return;
     this.isClosing = true;
 
-    await Promise.all(this.pages.map(x => x.close()));
+    await Promise.all([...this.pagesById.values()].map(x => x.close()));
     await this.cdpRootSessionSend('Target.disposeBrowserContext', {
       browserContextId: this.id,
     }).catch(err => {
@@ -303,9 +305,5 @@ export class BrowserContext
       });
     });
     this.eventListeners.push(receive, send);
-  }
-
-  private getPageWithId(targetId: string) {
-    return this.pages.find(x => x.targetId === targetId);
   }
 }

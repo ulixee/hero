@@ -96,11 +96,13 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
           maxTotalBufferSize: 0,
         })
         .catch(err => err),
-      this.cdpSession
-        .send('Fetch.enable', {
-          handleAuthRequests: true,
-        })
-        .catch(err => err),
+      this.emulation.proxyPassword
+        ? this.cdpSession
+            .send('Fetch.enable', {
+              handleAuthRequests: true,
+            })
+            .catch(err => err)
+        : Promise.resolve(),
     ]);
     for (const error of errors) {
       if (error && error instanceof Error) throw error;

@@ -193,6 +193,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     if (this.isClosing) return;
     this.isClosing = true;
     const parentLogId = this.logger.stats('Tab.Closing');
+    const errors: Error[] = [];
 
     try {
       if (this.navigations.top && this.puppetPage.mainFrame.isLoaded) {
@@ -200,6 +201,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }
     } catch (error) {
       // don't re-handle
+      errors.push(error);
     }
 
     try {
@@ -209,16 +211,22 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         frame.close();
       }
       this.cancelPendingEvents(cancelMessage);
-
-      await this.puppetPage.close();
-
-      this.emit('close');
-      this.logger.stats('Tab.Closed', { parentLogId });
     } catch (error) {
       if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
-        this.logger.error('Tab.ClosingError', { error, parentLogId });
+        errors.push(error);
       }
     }
+
+    try {
+      // run this one individually
+      await this.puppetPage.close();
+    } catch (error) {
+      if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
+        errors.push(error);
+      }
+    }
+    this.emit('close');
+    this.logger.stats('Tab.Closed', { parentLogId, errors });
   }
 
   public async setOrigin(origin: string): Promise<void> {

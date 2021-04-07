@@ -135,7 +135,7 @@ const defaultArgs = [
 
   // '--enable-automation', BAB - disable because adds infobar, stops auto-reload on network errors (using other flags)
   '--enable-auto-reload', // Enable auto-reload of error pages.
-  '--remote-debugging-pipe', // more secure than using protocol over a websocket
+  '--remote-debugging-port=0',
 
   '--password-store=basic', // Avoid potential instability of using Gnome Keyring or KDE wallet.
   '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs

@@ -85,7 +85,7 @@ export default class GlobalPool {
       closePromises.push(puppetBrowser.close().catch(err => err));
     }
     if (this.mitmServer) {
-      closePromises.push(this.mitmServer.close());
+      this.mitmServer.close();
       this.mitmServer = null;
     }
     SessionsDb.shutdown();
@@ -153,6 +153,8 @@ export default class GlobalPool {
 
       puppet =
         this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
+
+      await session.registerWithProxy(this.mitmServer, await puppet.supportsBrowserContextProxy);
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

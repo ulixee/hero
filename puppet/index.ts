@@ -6,6 +6,7 @@ import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
 import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import launchProcess from './lib/launchProcess';
 import { validateHostRequirements } from './lib/validateHostDependencies';
 import { EngineFetcher } from './lib/EngineFetcher';
@@ -18,6 +19,11 @@ export default class Puppet {
   public readonly id: number;
   public readonly engine: IBrowserEngine;
   public isShuttingDown: boolean;
+  public get supportsBrowserContextProxy(): Promise<boolean> {
+    return this.browserFeaturesPromise.promise;
+  }
+
+  private browserFeaturesPromise = new Resolvable<boolean>();
   private browserOrError: Promise<IPuppetBrowser | Error>;
 
   public get isReady(): Promise<IPuppetBrowser> {
@@ -93,7 +99,13 @@ export default class Puppet {
         launchArgs.push(...this.engine.extraLaunchArgs);
       }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {});
-      return launcher.createPuppet(launchedProcess, this.engine);
+
+      const browser = await launcher.createPuppet(launchedProcess, this.engine);
+
+      const features = await browser.getFeatures();
+
+      this.browserFeaturesPromise.resolve(features?.supportsPerBrowserContextProxy);
+      return browser;
     } catch (err) {
       const launchError = launcher.translateLaunchError(err);
       throw new PuppetLaunchError(

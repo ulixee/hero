@@ -26,6 +26,8 @@ const defaultStorageDirectory =
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
  */
 export default class MitmProxy {
+  private static sharedDb: NetworkDb;
+
   public get port(): number {
     return this.httpPort;
   }
@@ -37,6 +39,12 @@ export default class MitmProxy {
   public get http2Port(): number | undefined {
     return (this.http2Server.address() as net.AddressInfo)?.port;
   }
+
+  // used if this is a one-off proxy
+  private defaultSessionId?: string;
+  private sessionById: { [sessionId: string]: RequestSession } = {};
+  private sessionIdByPort: { [port: number]: string } = {};
+  private portsBySessionId: { [sessionId: number]: Set<number> } = {};
 
   private readonly options: IMitmProxyOptions;
   private readonly httpServer: http.Server;
@@ -50,13 +58,17 @@ export default class MitmProxy {
   } = {};
 
   private ca: CertificateAuthority;
-  private readonly db: NetworkDb;
+  private readonly isDbOwner: boolean = false;
 
   constructor(options: IMitmProxyOptions) {
     this.options = options;
 
-    this.db = new NetworkDb(options.sslCaDir);
-    this.ca = new CertificateAuthority(this.db);
+    if (!MitmProxy.sharedDb) {
+      MitmProxy.sharedDb = new NetworkDb(options.sslCaDir);
+      this.isDbOwner = true;
+    }
+
+    this.ca = new CertificateAuthority(MitmProxy.sharedDb);
     this.httpServer = http.createServer({ insecureHTTPParser: true });
     this.httpServer.on('connect', this.onHttpConnect.bind(this));
     this.httpServer.on('clientError', this.onClientError.bind(this, false));
@@ -80,23 +92,77 @@ export default class MitmProxy {
     return this;
   }
 
-  public async close(): Promise<this> {
+  public close(): void {
     if (this.isClosing) return;
     this.isClosing = true;
-    this.db.close();
+
+    const startLogId = log.info('MitmProxy.Closing', {
+      sessionId: this.defaultSessionId,
+    });
+    const errors: Error[] = [];
+    try {
+      if (this.isDbOwner) {
+        MitmProxy.sharedDb.close();
+        MitmProxy.sharedDb = null;
+      }
+    } catch (err) {
+      errors.push(err);
+    }
+
+    for (const session of Object.values(this.sessionById)) {
+      try {
+        session.close();
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+
     while (this.serverConnects.length) {
       const connect = this.serverConnects.shift();
       destroyConnection(connect);
     }
+
     delete this.secureContexts;
+    try {
+      this.http2Server.close();
+    } catch (err) {
+      errors.push(err);
+    }
+    try {
+      this.httpServer.close();
+    } catch (err) {
+      errors.push(err);
+    }
 
-    await Promise.all([
-      closeServer(this.httpServer),
-      closeServer(this.http2Server),
-      RequestSession.close(),
-    ]);
+    log.stats('MitmProxy.Closed', {
+      sessionId: this.defaultSessionId,
+      parentLogId: startLogId,
+      closeErrors: errors,
+    });
+  }
 
-    return this;
+  /////// RequestSessions //////////////////////////////////////////////////////////////////////////////////////////////
+
+  public registerSession(session: RequestSession, isDefault: boolean): void {
+    const { sessionId } = session;
+    this.sessionById[sessionId] = session;
+    if (isDefault) {
+      this.defaultSessionId = sessionId;
+    } else {
+      // if not default, need to clear out entries
+      session.once('close', () => {
+        setTimeout(() => this.removeSessionTracking(sessionId), 1e3).unref();
+      });
+    }
+  }
+
+  public removeSessionTracking(sessionId: string): void {
+    const ports = this.portsBySessionId[sessionId] || [];
+    for (const port of ports) {
+      delete this.sessionIdByPort[port];
+    }
+    delete this.portsBySessionId[sessionId];
+    delete this.sessionById[sessionId];
   }
 
   private async onHttpRequest(
@@ -104,7 +170,7 @@ export default class MitmProxy {
     clientToProxyRequest: http2.Http2ServerRequest,
     proxyToClientResponse: http2.Http2ServerResponse,
   ): Promise<void> {
-    const sessionId = RequestSession.readSessionId(
+    const sessionId = this.readSessionId(
       clientToProxyRequest.headers,
       clientToProxyRequest.socket.remotePort,
     );
@@ -112,7 +178,7 @@ export default class MitmProxy {
       return RequestSession.sendNeedsAuth(proxyToClientResponse.socket);
     }
 
-    const requestSession = RequestSession.sessionById[sessionId];
+    const requestSession = this.sessionById[sessionId];
     if (requestSession?.isClosing) return;
 
     if (!requestSession) {
@@ -146,14 +212,14 @@ export default class MitmProxy {
   ): Promise<void> {
     // socket resumes in HttpUpgradeHandler.upgradeResponseHandler
     socket.pause();
-    const sessionId = RequestSession.readSessionId(
+    const sessionId = this.readSessionId(
       clientToProxyRequest.headers,
       clientToProxyRequest.socket.remotePort,
     );
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
     }
-    const requestSession = RequestSession.sessionById[sessionId];
+    const requestSession = this.sessionById[sessionId];
     if (requestSession?.isClosing) return;
 
     if (!requestSession) {
@@ -180,7 +246,7 @@ export default class MitmProxy {
     socket: net.Socket,
     head: Buffer,
   ): Promise<void> {
-    const sessionId = RequestSession.readSessionId(request.headers, request.socket.remotePort);
+    const sessionId = this.readSessionId(request.headers, request.socket.remotePort);
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
     }
@@ -229,7 +295,7 @@ export default class MitmProxy {
     socket.on('end', this.removeSocketConnect.bind(this, socket));
 
     await connectedPromise;
-    RequestSession.registerProxySession(proxyConnection, sessionId);
+    this.registerProxySession(proxyConnection, sessionId);
 
     // create a tunnel back to the same proxy
     socket.pipe(proxyConnection).pipe(socket);
@@ -242,7 +308,7 @@ export default class MitmProxy {
   private onGenericHttpError(isHttp2: boolean, error: Error): void {
     const logLevel = this.isClosing ? 'stats' : 'error';
     log[logLevel](`Mitm.Http${isHttp2 ? '2' : ''}ServerError`, {
-      sessionId: null,
+      sessionId: this.defaultSessionId,
       error,
     });
   }
@@ -253,7 +319,7 @@ export default class MitmProxy {
     }
     const kind = isHttp2 ? 'Http2.SessionError' : 'Http2.ClientError';
     log.error(`Mitm.${kind}`, {
-      sessionId: null,
+      sessionId: this.defaultSessionId,
       error,
       socketAddress: socket.address(),
     });
@@ -265,30 +331,30 @@ export default class MitmProxy {
     const errorCodes = [(error as any).errno, (error as any).code];
     if (errorCodes.includes('ECONNRESET')) {
       log.info(`Got ECONNRESET on Proxy Connect, ignoring.`, {
-        sessionId: null,
+        sessionId: this.defaultSessionId,
         hostname,
       });
     } else if (errorCodes.includes('ECONNABORTED')) {
       log.info(`Got ECONNABORTED on Proxy Connect, ignoring.`, {
-        sessionId: null,
+        sessionId: this.defaultSessionId,
         hostname,
       });
     } else if (errorCodes.includes('ERR_STREAM_UNSHIFT_AFTER_END_EVENT')) {
       log.info(`Got ERR_STREAM_UNSHIFT_AFTER_END_EVENT on Proxy Connect, ignoring.`, {
-        sessionId: null,
+        sessionId: this.defaultSessionId,
         hostname,
         errorKind,
       });
     } else if (errorCodes.includes('EPIPE')) {
       log.info(`Got EPIPE on Proxy Connect, ignoring.`, {
-        sessionId: null,
+        sessionId: this.defaultSessionId,
         hostname,
         errorKind,
       });
     } else {
       const logLevel = this.isClosing ? 'stats' : 'error';
       log[logLevel]('MitmConnectError', {
-        sessionId: null,
+        sessionId: this.defaultSessionId,
         errorKind,
         error,
         errorCodes,
@@ -306,6 +372,30 @@ export default class MitmProxy {
   private async addSecureContext(hostname: string): Promise<void> {
     const credentials = await this.ca.getCertificateKeys(hostname);
     this.http2Server.addContext(hostname, credentials);
+  }
+
+  /////// SESSION ID MGMT //////////////////////////////////////////////////////////////////////////////////////////////
+
+  private readSessionId(
+    requestHeaders: { [key: string]: string | string[] | undefined },
+    remotePort: number,
+  ): string {
+    if (this.defaultSessionId) return this.defaultSessionId;
+
+    const authHeader = requestHeaders['proxy-authorization'] as string;
+    if (!authHeader) {
+      return this.sessionIdByPort[remotePort];
+    }
+
+    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+    return sessionId;
+  }
+
+  private registerProxySession(loopbackProxySocket: net.Socket, sessionId: string): void {
+    // local port is the side that originates from our http server
+    this.portsBySessionId[sessionId] = this.portsBySessionId[sessionId] || new Set();
+    this.portsBySessionId[sessionId].add(loopbackProxySocket.localPort);
+    this.sessionIdByPort[loopbackProxySocket.localPort] = sessionId;
   }
 
   public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
@@ -345,11 +435,5 @@ function startServer(
     } catch (err) {
       reject(err);
     }
-  });
-}
-
-function closeServer(server: http.Server | http2.Http2SecureServer): Promise<void> {
-  return new Promise<void>(resolve => {
-    server.close(() => resolve());
   });
 }

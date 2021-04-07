@@ -48,7 +48,7 @@ test('should be able to handle an http->http2 request', async () => {
   Helpers.onClose(() => mitmServer.close());
   const proxyHost = `http://localhost:${mitmServer.port}`;
 
-  const session = new RequestSession('h2', 'any agent', null);
+  const session = createSession(mitmServer, 'h2');
 
   const proxyCredentials = session.getProxyCredentials();
   expect(mocks.httpRequestHandler.onRequest).toBeCalledTimes(0);
@@ -64,11 +64,7 @@ test('should be able to handle an http2->http2 request', async () => {
     return res1.end('h2 secure as anything!');
   });
 
-  const session = new RequestSession('h2-to-h2', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
-
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('h2-to-h2', server.baseUrl);
 
   const h2stream = client.request({
     ':path': '/',
@@ -88,11 +84,7 @@ test('should handle server closing connection', async () => {
     res1.stream.close(2);
   });
 
-  const session = new RequestSession('h2-close', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
-
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('h2-close', server.baseUrl);
 
   const h2stream = client.request({
     ':path': '/',
@@ -106,11 +98,8 @@ it('should send http1 response headers through proxy', async () => {
     res1.setHeader('x-test', ['1', '2']);
     res1.end('headers done');
   });
-  const session = new RequestSession('h1-to-h2-response', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
 
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('h1-to-h2-response', server.baseUrl);
 
   const h2stream = client.request({
     ':path': '/',
@@ -151,11 +140,7 @@ test('should support push streams', async () => {
     res1.end('H2 response');
   });
 
-  const session = new RequestSession('push-streams', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
-
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('push-streams', server.baseUrl);
   const pushRequestHeaders: {
     [path: string]: { requestHeaders: IResourceHeaders; responseHeaders?: IResourceHeaders };
   } = {};
@@ -193,10 +178,7 @@ test('should handle h2 client going to h1 request', async () => {
     }
   });
 
-  const session = new RequestSession('h2-to-h1', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('h2-to-h1', server.baseUrl);
 
   client.on('error', err => {
     expect(err).not.toBeTruthy();
@@ -236,7 +218,7 @@ test('should handle cache headers for h2', async () => {
   Helpers.onClose(() => mitmServer.close());
   const proxyHost = `http://localhost:${mitmServer.port}`;
 
-  const session = new RequestSession('h2-cache-headers', 'any agent', null);
+  const session = createSession(mitmServer, 'h2-cache-headers');
   Helpers.needsClosing.push(session);
 
   const proxyCredentials = session.getProxyCredentials();
@@ -266,11 +248,7 @@ test('should send trailers', async () => {
     return res1.end('Trailin...');
   });
 
-  const session = new RequestSession('trailers', 'any agent', null);
-  Helpers.needsClosing.push(session);
-  const proxyCredentials = session.getProxyCredentials();
-
-  const client = await createH2Connection(session.sessionId, server.baseUrl, proxyCredentials);
+  const client = await createH2Connection('trailers', server.baseUrl);
 
   const h2stream = client.request({ ':path': '/' });
   const trailers = await new Promise(resolve => h2stream.once('trailers', resolve));
@@ -279,10 +257,13 @@ test('should send trailers', async () => {
   expect(trailers['mr-trailer']).toBe('1');
 });
 
-async function createH2Connection(sessionId: string, url: string, proxyCredentials: string) {
+async function createH2Connection(sessionId: string, url: string) {
   const hostUrl = new URL(url);
   const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
+
+  const session = createSession(mitmServer, sessionId);
+  const proxyCredentials = session.getProxyCredentials();
   const proxyHost = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
 
   const tlsConnection = new MitmSocket(sessionId, {
@@ -301,4 +282,13 @@ async function createH2Connection(sessionId: string, url: string, proxyCredentia
   });
   Helpers.onClose(async () => client.close());
   return client;
+}
+
+let sessionCounter = 0;
+function createSession(mitmProxy: MitmServer, sessionId = '') {
+  const session = new RequestSession(`${sessionId}${(sessionCounter += 1)}`, 'any agent', null);
+  mitmProxy.registerSession(session, false);
+  Helpers.needsClosing.push(session);
+
+  return session;
 }
