@@ -54,7 +54,7 @@ export default class DomRecorder {
     const command = `window.commandId=${commandId}`;
     await Promise.all(
       this.puppetPage.frames.map(x =>
-        x.evaluate(command, true, false).catch(() => {
+        x.evaluate(command, true, { shouldAwaitExpression: false }).catch(() => {
           // can fail when frames aren't ready. don't worry about it
         }),
       ),

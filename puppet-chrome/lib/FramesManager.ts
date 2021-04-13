@@ -129,7 +129,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     // sometimes we get a new anchor link that already has an initiated frame. If that's the case, newDocumentScripts won't trigger.
     // NOTE: we DON'T want this to trigger for internal pages (':', 'about:blank')
     if (this.main.url?.startsWith('http')) {
-      await this.main.evaluate(script, installInIsolatedScope);
+      await this.main.evaluate(script, installInIsolatedScope, { retriesWaitingForLoad: 1 });
     }
   }
 
