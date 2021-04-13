@@ -39,19 +39,41 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       const proxyToServerRequest = await this.createProxyToServerRequest();
       if (!proxyToServerRequest) return;
 
-      proxyToServerRequest.on('response', this.onResponse.bind(this));
+      const responsePromise = new Promise<
+        [
+          response: IMitmRequestContext['serverToProxyResponse'],
+          flags?: number,
+          rawHeaders?: string[],
+        ]
+      >(resolve =>
+        proxyToServerRequest.on('response', (r, flags, headers) => resolve([r, flags, headers])),
+      );
 
       clientToProxyRequest.resume();
 
-      // now write request
-      await this.writeRequest();
+      const socketClosedPromise = this.context.proxyToServerMitmSocket.closedPromise.promise;
+
+      // now write request - make sure socket doesn't exit before writing
+      const didWriteRequest = await Promise.race([this.writeRequest(), socketClosedPromise]);
+
+      if (didWriteRequest instanceof Date) {
+        throw new Error('Socket closed before request written');
+      }
+
+      // wait for response and make sure socket doesn't exit before writing
+      const response = await Promise.race([responsePromise, socketClosedPromise]);
+
+      if (response instanceof Date) {
+        throw new Error('Socket closed before response received');
+      }
+      await this.onResponse(...response);
     } catch (err) {
       this.onError('ClientToProxy.HandlerError', err);
     }
   }
 
   protected async onResponse(
-    response: http.IncomingMessage | (http2.IncomingHttpHeaders & http2.IncomingHttpStatusHeader),
+    response: IMitmRequestContext['serverToProxyResponse'],
     flags?: number,
     rawHeaders?: string[],
   ): Promise<void> {
@@ -135,8 +157,12 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     }
 
     try {
-      if (!proxyToClientResponse.headersSent) proxyToClientResponse.writeHead(status);
-      if (!proxyToClientResponse.finished) proxyToClientResponse.end();
+      if (!proxyToClientResponse.headersSent) {
+        proxyToClientResponse.writeHead(status);
+        proxyToClientResponse.end(error.stack);
+      } else if (!proxyToClientResponse.finished) {
+        proxyToClientResponse.end();
+      }
     } catch (e) {
       // drown errors
     }

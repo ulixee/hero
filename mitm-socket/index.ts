@@ -7,6 +7,7 @@ import { v1 as uuid } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import { createPromise } from '@secret-agent/commons/utils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import Resolvable from '@secret-agent/commons/Resolvable';
 
 const { log } = Log(module);
 
@@ -37,6 +38,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public isConnected = false;
   public isReused = false;
   public isClosing = false;
+  public closedPromise = new Resolvable<Date>();
 
   public get pid(): number | undefined {
     return this.child?.pid;
@@ -83,6 +85,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     this.emit('close');
     this.cleanupSocket();
     this.closeChild();
+    this.closedPromise.resolve(this.closeTime);
   }
 
   public onListening(): void {
