@@ -389,19 +389,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.runFn<T>(fnName, callFn);
   }
 
-  protected async runFn<T>(fnName: string, callFn: string, retries = 10): Promise<T> {
-    const serializedFn = `'SecretAgent' in window ? ${callFn} : '${SA_NOT_INSTALLED}';`;
+  protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
     const unparsedResult = await this.puppetFrame.evaluate(serializedFn, true);
-
-    if (unparsedResult === SA_NOT_INSTALLED) {
-      if (retries === 0 || this.isClosing) throw new Error('Injected scripts not installed.');
-      this.logger.warn('Injected scripts not installed yet. Retrying', {
-        fnName,
-        puppetFrame: this.puppetFrame,
-      });
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return this.runFn(fnName, serializedFn, retries - 1);
-    }
 
     const result = unparsedResult
       ? TypeSerializer.parse(unparsedResult as string, 'BROWSER')

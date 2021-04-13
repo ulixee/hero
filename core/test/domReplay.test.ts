@@ -6,7 +6,6 @@ import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ConnectionToClient from '../server/ConnectionToClient';
-import DomChangesTable from '../models/DomChangesTable';
 
 const { log } = Log(module);
 
@@ -94,7 +93,7 @@ describe('basic Dom Replay tests', () => {
     const session = tab.session;
 
     const mirrorChrome = new Puppet(session.browserEngine);
-    mirrorChrome.start();
+    await mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
     const context = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
@@ -111,15 +110,12 @@ describe('basic Dom Replay tests', () => {
 
     const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
 
-    const state = tab.sessionState;
-
     {
-      await tab.domRecorder.flush();
-      const pages = tab.navigations;
-      const pageChanges = await state.getMainFrameDomChanges(pages.history);
-      const [changes] = Object.values(pageChanges);
-      const records = changes.map(DomChangesTable.toRecord);
-      await mirrorPage.mainFrame.evaluate(`window.replayEvents(${JSON.stringify(records)})`, false);
+      const pageChanges = await tab.getMainFrameDomChanges();
+      await mirrorPage.mainFrame.evaluate(
+        `window.replayEvents(${JSON.stringify(pageChanges)})`,
+        false,
+      );
     }
 
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
@@ -136,13 +132,10 @@ describe('basic Dom Replay tests', () => {
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      await tab.domRecorder.flush();
-      const pages = tab.navigations;
-      const pageChangesByFrame = await state.getMainFrameDomChanges(pages.history, lastCommandId);
+      const pageChangesByFrame = await tab.getMainFrameDomChanges(lastCommandId);
       lastCommandId = tab.lastCommandId;
-      const [changes] = Object.values(pageChangesByFrame);
       await mirrorPage.mainFrame.evaluate(
-        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+        `window.replayEvents(${JSON.stringify(pageChangesByFrame)})`,
         false,
       );
       // replay happens on animation tick now
@@ -204,16 +197,9 @@ describe('basic Dom Replay tests', () => {
     const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
 
     {
-      await tab.domRecorder.flush();
-      const pages = tab.navigations;
-      const state = tab.sessionState;
-      const pageChanges = await state.getMainFrameDomChanges(pages.history);
-      const [changes] = Object.values(pageChanges);
+      const changes = await tab.getMainFrameDomChanges();
       expect(changes).toHaveLength(21);
-      await mirrorPage.mainFrame.evaluate(
-        `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
-        false,
-      );
+      await mirrorPage.mainFrame.evaluate(`window.replayEvents(${JSON.stringify(changes)})`, false);
       // replay happens on animation tick now
       await new Promise(setImmediate);
     }
@@ -230,11 +216,8 @@ describe('basic Dom Replay tests', () => {
     const newTab = await tab.waitForNewTab();
     await newTab.waitForLoad('PaintingStable');
     const newTabHtml = await newTab.puppetPage.mainFrame.evaluate(getContentScript, false);
-    await newTab.domRecorder.flush();
-    const pages = newTab.navigations;
-    const pageChanges = await newTab.sessionState.getMainFrameDomChanges(pages.history);
-    const [changes] = Object.values(pageChanges);
-    expect(changes.length).toBeGreaterThan(10);
+    const pageChanges = await newTab.getMainFrameDomChanges();
+    expect(pageChanges.length).toBeGreaterThan(10);
 
     const newTabMirrorPage = await mirrorContext.newPage();
     await newTabMirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
@@ -244,7 +227,7 @@ describe('basic Dom Replay tests', () => {
     ]);
 
     await newTabMirrorPage.mainFrame.evaluate(
-      `window.replayEvents(${JSON.stringify(changes.map(DomChangesTable.toRecord))})`,
+      `window.replayEvents(${JSON.stringify(pageChanges)})`,
       false,
     );
     // replay happens on animation tick now

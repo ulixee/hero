@@ -455,16 +455,6 @@ export default class SessionState {
     };
   }
 
-  public getMainFrameDomChanges(
-    frameLifecycles: INavigation[],
-    sinceCommandId?: number,
-  ): { [frameId: string]: IDomChangeEvent[] } {
-    return this.db.getDomChanges(
-      frameLifecycles.map(x => x.frameId),
-      sinceCommandId,
-    );
-  }
-
   public captureDomEvents(
     tabId: number,
     startCommandId: number,

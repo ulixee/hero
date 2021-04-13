@@ -5,7 +5,6 @@ import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions'
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
-import DomChangesTable from '../models/DomChangesTable';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
@@ -40,27 +39,20 @@ function addMe() {
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigations;
-    const state = tab.sessionState;
-
-    await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
+    const changesAfterLoad = await tab.getMainFrameDomChanges();
 
     const commandId = tab.lastCommandId;
-    const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(12);
-    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test1`);
+    expect(changesAfterLoad).toHaveLength(12);
+    expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test1`);
 
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForElement(['document', ['querySelector', 'a#link2']]);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history, commandId);
-    const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(2);
-    expect(changes[key][0][1]).toBe('added');
-    expect(changes[key][0][2].tagName).toBe('A');
+    const changes = await tab.getMainFrameDomChanges(commandId);
+    expect(changes).toHaveLength(2);
+    expect(changes[0].action).toBe('added');
+    expect(changes[0].tagName).toBe('A');
   });
 
   it('detects removed nodes', async () => {
@@ -81,14 +73,9 @@ function removeMe() {
     await tab.goto(`${koaServer.baseUrl}/test2`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigations;
-    const state = tab.sessionState;
-
-    await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
-    const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(12);
-    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test2`);
+    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    expect(changesAfterLoad).toHaveLength(12);
+    expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test2`);
     const loadCommand = tab.lastCommandId;
 
     await tab.waitForElement(['document', ['querySelector', 'a']]);
@@ -96,11 +83,9 @@ function removeMe() {
 
     await tab.waitForMillis(100);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
-    const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(2);
-    expect(changes[key][0][1]).toBe('removed');
+    const changes = await tab.getMainFrameDomChanges(loadCommand);
+    expect(changes).toHaveLength(2);
+    expect(changes[0].action).toBe('removed');
 
     await tab.close();
   });
@@ -133,15 +118,9 @@ function sort() {
     await tab.goto(`${koaServer.baseUrl}/test3`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigations;
-
-    const state = tab.sessionState;
-
-    await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
-    const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(30);
-    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test3`);
+    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    expect(changesAfterLoad).toHaveLength(30);
+    expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test3`);
     const loadCommand = tab.lastCommandId;
 
     await tab.waitForElement(['document', ['querySelector', 'a']]);
@@ -149,21 +128,19 @@ function sort() {
 
     await tab.waitForMillis(100);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
-    const [key] = Object.keys(changes);
+    const changes = await tab.getMainFrameDomChanges(loadCommand);
     // 1 remove and 1 add for each
-    expect(changes[key]).toHaveLength(9);
-    expect(changes[key].filter(x => x[1] === 'removed')).toHaveLength(4);
+    expect(changes).toHaveLength(9);
+    expect(changes.filter(x => x.action === 'removed')).toHaveLength(4);
 
-    const elem3 = changesAfterLoad[frameId].find(x => x[2].attributes?.id === 'id-3');
-    const elem1 = changesAfterLoad[frameId].find(x => x[2].attributes?.id === 'id-1');
+    const elem3 = changesAfterLoad.find(x => x.attributes?.id === 'id-3');
+    const elem1 = changesAfterLoad.find(x => x.attributes?.id === 'id-1');
 
-    const [lastChange, locationChange] = changes[key].slice(-2);
-    expect(locationChange[1]).toBe('location');
-    expect(lastChange[1]).toBe('added');
-    expect(lastChange[2].id).toBe(elem1[2].id);
-    expect(lastChange[2].previousSiblingId).toBe(elem3[2].id);
+    const [lastChange, locationChange] = changes.slice(-2);
+    expect(locationChange.action).toBe('location');
+    expect(lastChange.action).toBe('added');
+    expect(lastChange.id).toBe(elem1.id);
+    expect(lastChange.previousSiblingId).toBe(elem3.id);
 
     await tab.close();
   });
@@ -185,15 +162,9 @@ function sort() {
     await tab.goto(`${koaServer.baseUrl}/test4`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const state = tab.sessionState;
-
-    const pages = tab.navigations;
-
-    await tab.domRecorder.flush();
-    const changesAfterLoad = await state.getMainFrameDomChanges(pages.history);
-    const [frameId] = Object.keys(changesAfterLoad);
-    expect(changesAfterLoad[frameId]).toHaveLength(15);
-    expect(changesAfterLoad[frameId][0][2].textContent).toBe(`${koaServer.baseUrl}/test4`);
+    const changesAfterLoad = await tab.getMainFrameDomChanges();
+    expect(changesAfterLoad).toHaveLength(15);
+    expect(changesAfterLoad[0].textContent).toBe(`${koaServer.baseUrl}/test4`);
     const loadCommand = tab.lastCommandId;
 
     await tab.waitForElement(['document', ['querySelector', 'a']]);
@@ -201,12 +172,10 @@ function sort() {
 
     await tab.waitForMillis(100);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history, loadCommand);
-    const [key] = Object.keys(changes);
-    expect(changes[key]).toHaveLength(2);
-    expect(changes[key][0][1]).toBe('attribute');
-    expect(changes[key][0][2].attributes['new-attr']).toBe('1');
+    const changes = await tab.getMainFrameDomChanges(loadCommand);
+    expect(changes).toHaveLength(2);
+    expect(changes[0].action).toBe('attribute');
+    expect(changes[0].attributes['new-attr']).toBe('1');
 
     await tab.close();
   });
@@ -240,14 +209,13 @@ function sort() {
     await tab.puppetPage.frames[2].waitForLoad();
     // await tab.puppetPage.frames[3].waitOn('frame-lifecycle', f => f.name === 'load');
 
-    await tab.domRecorder.flush();
     await state.db.flush();
     const domChanges = state.db.domChanges.all();
     const domFrames = domChanges.filter(x => x.tagName === 'IFRAME');
     expect(domFrames).toHaveLength(3);
 
     await tab.puppetPage.frames[3].waitForLoad();
-    await tab.domRecorder.flush();
+
     await state.db.flush();
     const frames = state.db.frames.all();
     expect(frames).toHaveLength(4);
@@ -288,25 +256,19 @@ function clickIt() {
     await tab.goto(`${koaServer.baseUrl}/cssom`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const state = tab.sessionState;
-
-    const pages = tab.navigations;
-
     await tab.waitForElement(['document', ['querySelector', 'a']]);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history);
-    const [key] = Object.keys(changes);
+    const changes = await tab.getMainFrameDomChanges();
 
-    const propChange = changes[key].find(
-      x => x[1] === 'property' && !!x[2].properties['sheet.cssRules'],
+    const propChange = changes.find(
+      x => x.action === 'property' && !!x.properties['sheet.cssRules'],
     );
     expect(propChange).toBeTruthy();
 
-    expect(propChange[2].properties['sheet.cssRules']).toStrictEqual(['body { color: red; }']);
+    expect(propChange.properties['sheet.cssRules']).toStrictEqual(['body { color: red; }']);
     await tab.close();
   });
 
@@ -342,28 +304,20 @@ customElements.define('image-list', class extends HTMLElement {
     await tab.goto(`${koaServer.baseUrl}/test5`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const state = tab.sessionState;
-
-    const pages = tab.navigations;
-
     await tab.waitForElement(['document', ['querySelector', 'a']]);
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
 
     await tab.waitForMillis(100);
 
-    await tab.domRecorder.flush();
-    const changes = await state.getMainFrameDomChanges(pages.history);
-    const [key] = Object.keys(changes);
-    expect(changes[key].find(x => x[1] === 'added' && x[2].nodeType === 40)).toBeTruthy();
+    const changes = await tab.getMainFrameDomChanges();
+    expect(changes.find(x => x.action === 'added' && x.nodeType === 40)).toBeTruthy();
 
-    const shadowRoot = changes[key].find(x => x[1] === 'added' && x[2].nodeType === 40)[2];
-    expect(changes[key].find(x => x[2].id === shadowRoot.parentNodeId)[2].tagName).toBe(
-      'IMAGE-LIST',
-    );
-    const shadowImg = changes[key].find(x => x[2].parentNodeId === shadowRoot.id);
+    const shadowRoot = changes.find(x => x.action === 'added' && x.nodeType === 40);
+    expect(changes.find(x => x.id === shadowRoot.parentNodeId).tagName).toBe('IMAGE-LIST');
+    const shadowImg = changes.find(x => x.parentNodeId === shadowRoot.id);
 
-    expect(shadowImg[2].tagName).toBe('IMG');
-    expect(shadowImg[2].attributes.alt).toBe(' new image is closed ');
+    expect(shadowImg.tagName).toBe('IMG');
+    expect(shadowImg.attributes.alt).toBe(' new image is closed ');
     await tab.close();
   });
 });
@@ -410,8 +364,7 @@ describe('basic Mouse Event tests', () => {
       { command: 'click', mousePosition: ['document', ['querySelector', 'BUTTON']] },
     ]);
 
-    await tab.domRecorder.flush();
-    await state.db.flush();
+    await tab.getMainFrameDomChanges();
     const mouseMoves = state.db.mouseEvents.all();
 
     expect(mouseMoves.filter(x => x.event === MouseEventType.MOVE)).toHaveLength(1);
@@ -423,10 +376,8 @@ describe('basic Mouse Event tests', () => {
     const mouseDownEvents = mouseMoves.filter(x => x.event === MouseEventType.DOWN);
     expect(mouseDownEvents).toHaveLength(1);
 
-    const pages = tab.navigations;
-    const changes = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changes);
-    const linkNode = domChanges.find(x => x[2].tagName === 'BUTTON')[2];
+    const domChanges = await tab.getMainFrameDomChanges();
+    const linkNode = domChanges.find(x => x.tagName === 'BUTTON');
 
     expect(mouseDownEvents[0].targetNodeId).toBe(linkNode.id);
 
@@ -483,18 +434,17 @@ describe('basic Form element tests', () => {
     expect(textValue2.value).toBe('test');
 
     await state.db.flush();
-    await tab.domRecorder.flush();
 
-    const pages = tab.navigations;
-    const changesAfterType = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changesAfterType);
+    const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(domChanges.filter(x => x[1] === 'property')).toHaveLength('Hello world!'.length + 1);
+    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(
+      'Hello world!'.length + 1,
+    );
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
-    const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
+    const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
     await tab.close();
@@ -544,19 +494,18 @@ describe('basic Form element tests', () => {
     const textValue2 = await tab.execJsPath(['document', ['querySelector', 'textarea'], 'value']);
     expect(textValue2.value).toBe('test');
 
-    await tab.domRecorder.flush();
     await state.db.flush();
 
-    const pages = tab.navigations;
-    const changesAfterType = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changesAfterType);
+    const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(domChanges.filter(x => x[1] === 'property')).toHaveLength('Hello world!'.length + 1);
+    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(
+      'Hello world!'.length + 1,
+    );
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
-    const inputNode = domChanges.find(x => x[2].tagName === 'TEXTAREA')[2];
+    const inputNode = changesAfterType.find(x => x.tagName === 'TEXTAREA');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
     await tab.close();
@@ -601,19 +550,16 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(2);
 
-    await tab.domRecorder.flush();
     await state.db.flush();
 
-    const pages = tab.navigations;
-    const changesAfterType = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changesAfterType);
+    const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(domChanges.filter(x => x[1] === 'property')).toHaveLength(2);
+    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(2);
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
-    const inputNode = domChanges.find(x => x[2].tagName === 'INPUT')[2];
+    const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
 
     await tab.close();
@@ -658,24 +604,20 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
 
-    await tab.domRecorder.flush();
-
     await state.db.flush();
 
-    const pages = tab.navigations;
-    const changesAfterType = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changesAfterType);
+    const changesAfterType = await tab.getMainFrameDomChanges();
 
     // 2 changes per radio change
-    expect(domChanges.filter(x => x[1] === 'property')).toHaveLength(4);
+    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(4);
     expect(
-      domChanges.filter(x => x[1] === 'property' && x[2].properties.checked === true),
+      changesAfterType.filter(x => x.action === 'property' && x.properties.checked === true),
     ).toHaveLength(2);
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
-    const inputNode = domChanges.find(x => x[2].attributes?.id === 'radio2')[2];
-    expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+    const inputNode = changesAfterType.find(x => x.attributes?.id === 'radio2');
+    expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
     await tab.close();
   });
 
@@ -723,25 +665,25 @@ describe('basic Form element tests', () => {
     const values = await tab.execJsPath(['document', ['querySelectorAll', ':checked']]);
     expect(Object.keys(values.value)).toHaveLength(1);
 
-    await tab.domRecorder.flush();
-
     await state.db.flush();
 
-    const pages = tab.navigations;
-    const changesAfterType = await state.getMainFrameDomChanges(pages.history);
-    const [domChanges] = Object.values(changesAfterType);
+    const changesAfterType = await tab.getMainFrameDomChanges();
 
     const focusRecords = state.db.focusEvents.all();
 
     expect(focusRecords).toHaveLength(3);
-    const select = domChanges.find(x => x[2].tagName === 'SELECT')[2];
-    const opt2 = domChanges.find(x => x[2].attributes?.id === 'opt2')[2];
+    const select = changesAfterType.find(x => x.tagName === 'SELECT');
+    const opt2 = changesAfterType.find(x => x.attributes?.id === 'opt2');
     expect(focusRecords[0].targetNodeId).toBe(select.id);
 
     // 2 sets of: 1 change for each option, 1 for select
-    expect(domChanges.filter(x => x[1] === 'property')).toHaveLength(6);
-    expect(domChanges.filter(x => x[1] === 'property' && x[2].id === select.id)).toHaveLength(2);
-    expect(domChanges.filter(x => x[1] === 'property' && x[2].id === opt2.id)).toHaveLength(2);
+    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(6);
+    expect(
+      changesAfterType.filter(x => x.action === 'property' && x.nodeId === select.id),
+    ).toHaveLength(2);
+    expect(
+      changesAfterType.filter(x => x.action === 'property' && x.nodeId === opt2.id),
+    ).toHaveLength(2);
     await tab.close();
   });
 });
@@ -782,11 +724,7 @@ function addMe2() {
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad('DomContentLoaded');
 
-    const pages = tab.navigations;
-
     await tab.interact([{ command: 'click', mousePosition: ['document', ['querySelector', 'a']] }]);
-
-    await tab.domRecorder.flush();
 
     const tab2 = await tab.waitForNewTab();
     await tab2.waitForLoad('PaintingStable');
@@ -794,22 +732,17 @@ function addMe2() {
       { command: 'click', mousePosition: ['document', ['querySelector', 'a']] },
     ]);
 
-    await tab2.domRecorder.flush();
+    const tab1Changes = await tab.getMainFrameDomChanges();
+    const tab2Changes = await tab2.getMainFrameDomChanges();
 
-    const pages2 = tab2.navigations;
-
-    const tab1Changes = await tab.sessionState.getMainFrameDomChanges(pages.history);
-    const tab2Changes = await tab2.sessionState.getMainFrameDomChanges(pages2.history);
-
-    const [frameId] = Object.keys(tab1Changes);
-    const frame1DomRecords = tab1Changes[frameId].map(DomChangesTable.toRecord).map(x => ({
+    const frame1DomRecords = tab1Changes.map(x => ({
       action: x.action,
       textContent: x.textContent,
       tagName: x.tagName,
       attributes: x.attributes,
     }));
-    const [frameId2] = Object.keys(tab2Changes);
-    const frame2DomRecords = tab2Changes[frameId2].map(DomChangesTable.toRecord).map(x => ({
+
+    const frame2DomRecords = tab2Changes.map(x => ({
       action: x.action,
       textContent: x.textContent,
       tagName: x.tagName,

@@ -48,24 +48,12 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     this.queuePendingInsert(record);
   }
 
-  public getFrameChanges(frameIds: string[], sinceCommandId?: number) {
-    const frameParams = frameIds.map(() => '?').join(', ');
+  public getFrameChanges(frameId: string, sinceCommandId?: number): IDomChangeRecord[] {
     const query = this.db.prepare(
-      `select * from ${this.tableName} where frameId in (${frameParams}) and commandId > ?`,
+      `select * from ${this.tableName} where frameId =? and commandId > ?`,
     );
 
-    const records: { [frameId: string]: IDomChangeEvent[] } = {};
-    for (const frameId of frameIds) {
-      records[frameId] = [];
-    }
-
-    for (const record of query.iterate(
-      ...frameIds,
-      sinceCommandId ?? -2,
-    ) as IterableIterator<IDomChangeRecord>) {
-      records[record.frameId].push(DomChangesTable.toDomChangeEvent(record));
-    }
-    return records;
+    return query.all(frameId, sinceCommandId ?? -2);
   }
 
   public static toDomChangeEvent(record: IDomChangeRecord): IDomChangeEvent {
@@ -86,14 +74,16 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     ];
   }
 
-  public static toRecord(event: IDomChangeEvent) {
+  public static toRecord(event: IDomChangeEvent): Omit<IDomChangeRecord, 'frameId' | 'tabId'> {
+    const [commandId, action, nodeData, timestamp, eventIndex] = event;
     return {
-      commandId: event[0],
-      action: event[1],
-      ...event[2],
-      nodeId: event[2].id,
-      timestamp: event[3],
-    };
+      commandId,
+      action,
+      nodeId: nodeData.id,
+      ...nodeData,
+      timestamp,
+      eventIndex,
+    } as any;
   }
 }
 

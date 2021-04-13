@@ -123,12 +123,6 @@ export default class SessionDb {
     }
   }
 
-  public getDomChanges(frameIds: string[], sinceCommandId: number) {
-    this.flush();
-
-    return this.domChanges.getFrameChanges(frameIds, sinceCommandId);
-  }
-
   public getResourceData(resourceId: number) {
     if (this.resources.hasPending()) {
       this.flush();
