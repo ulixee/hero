@@ -9,7 +9,10 @@ import {
   LocationTrigger,
   PipelineStatus,
 } from '@secret-agent/core-interfaces/Location';
-import INavigation, { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
+import INavigation, {
+  LoadStatus,
+  NavigationReason,
+} from '@secret-agent/core-interfaces/INavigation';
 import type ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import type IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import type IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
@@ -93,9 +96,25 @@ export default class FrameNavigationsObserver {
       throw new Error('Not implemented');
     }
 
+    const top = this.navigations.top;
+    if (top) {
+      if (status === LocationStatus.DomContentLoaded) {
+        if (
+          top.stateChanges.has(LoadStatus.DomContentLoaded) ||
+          top.stateChanges.has(LoadStatus.ContentPaint) ||
+          top.stateChanges.has(LoadStatus.Load)
+        ) {
+          return;
+        }
+      } else if (status === LocationStatus.PaintingStable) {
+        if (this.getPaintStableStatus().isStable) {
+          return;
+        }
+      }
+    }
     const promise = this.createStatusTriggeredPromise(status, options.timeoutMs);
 
-    if (this.navigations.top) this.onLoadStatusChange();
+    if (top) this.onLoadStatusChange();
     return promise;
   }
 
@@ -126,13 +145,13 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  public isPaintStable(): { isStable: boolean; timeUntilReadyMs?: number } {
+  public getPaintStableStatus(): { isStable: boolean; timeUntilReadyMs?: number } {
     const top = this.navigations.top;
     if (!top) return { isStable: false };
 
     // need to wait for both load + painting stable, or wait 3 seconds after either one
-    const loadDate = top.stateChanges.get('Load');
-    const contentPaintedDate = top.stateChanges.get('ContentPaint');
+    const loadDate = top.stateChanges.get(LoadStatus.Load);
+    const contentPaintedDate = top.stateChanges.get(LoadStatus.ContentPaint);
     if (!!loadDate && !!contentPaintedDate) return { isStable: true };
 
     // NOTE: LargestContentfulPaint, which currently drives PaintingStable will NOT trigger if the page
@@ -172,12 +191,12 @@ export default class FrameNavigationsObserver {
       let recordedStatus = PipelineStatus[state as IPipelineStatus];
 
       // use painting stable "order of pipeline" if the passed in state is load
-      if (state === 'Load') {
+      if (state === LoadStatus.Load) {
         recordedStatus = PipelineStatus.PaintingStable;
       }
 
       if (recordedStatus >= loadTrigger) {
-        this.resolvePendingStatus(state as IPipelineStatus);
+        this.resolvePendingStatus(state);
         return;
       }
     }
@@ -186,13 +205,13 @@ export default class FrameNavigationsObserver {
   private waitForPageLoaded(): void {
     clearTimeout(this.waitingForLoadTimeout);
 
-    const { isStable, timeUntilReadyMs } = this.isPaintStable();
+    const { isStable, timeUntilReadyMs } = this.getPaintStableStatus();
 
     if (isStable) this.resolvePendingStatus('PaintingStable + Load');
 
     if (!isStable && timeUntilReadyMs) {
-      const loadDate = this.navigations.top.stateChanges.get('Load');
-      const contentPaintDate = this.navigations.top.stateChanges.get('ContentPaint');
+      const loadDate = this.navigations.top.stateChanges.get(LoadStatus.Load);
+      const contentPaintDate = this.navigations.top.stateChanges.get(LoadStatus.ContentPaint);
       this.waitingForLoadTimeout = setTimeout(
         () =>
           this.resolvePendingStatus(
@@ -204,13 +223,13 @@ export default class FrameNavigationsObserver {
   }
 
   private resolvePendingStatus(resolvedWithStatus: string): void {
-    this.logger.info(`Resolving pending "${this.statusTrigger}" with trigger`, {
-      resolvedWithStatus,
-      waitingForStatus: this.statusTrigger,
-      url: this.navigations.currentUrl,
-    });
-    clearTimeout(this.waitingForLoadTimeout);
     if (this.statusTriggerResolvable && !this.statusTriggerResolvable?.isResolved) {
+      this.logger.info(`Resolving pending "${this.statusTrigger}" with trigger`, {
+        resolvedWithStatus,
+        waitingForStatus: this.statusTrigger,
+        url: this.navigations.currentUrl,
+      });
+      clearTimeout(this.waitingForLoadTimeout);
       this.statusTriggerResolvable.resolve();
       this.statusTriggerResolvable = null;
     }

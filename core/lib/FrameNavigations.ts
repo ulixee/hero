@@ -1,4 +1,5 @@
 import INavigation, {
+  LoadStatus,
   NavigationReason,
   NavigationState,
 } from '@secret-agent/core-interfaces/INavigation';
@@ -86,8 +87,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
         }
         nextTop.resourceId.resolve(currentTop.resourceId.promise);
       } else {
-        nextTop.stateChanges.set('Load', nextTop.initiatedTime);
-        nextTop.stateChanges.set('ContentPaint', nextTop.initiatedTime);
+        nextTop.stateChanges.set(LoadStatus.Load, nextTop.initiatedTime);
+        nextTop.stateChanges.set(LoadStatus.ContentPaint, nextTop.initiatedTime);
         nextTop.resourceId.resolve(-1);
       }
       nextTop.finalUrl = url;
@@ -205,5 +206,9 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 }
 
 function isLoadState(status: NavigationState): boolean {
-  return status === 'ContentPaint' || status === 'Load' || status === 'DomContentLoaded';
+  return (
+    status === LoadStatus.ContentPaint ||
+    status === LoadStatus.Load ||
+    status === LoadStatus.DomContentLoaded
+  );
 }

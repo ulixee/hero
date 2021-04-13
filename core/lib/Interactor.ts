@@ -220,7 +220,7 @@ export default class Interactor implements IInteractionsHelper {
           attachedNodeId = attachedState.attachedState.id;
         }
 
-        const isPagePaintStable = this.frameEnvironment.navigationsObserver.isPaintStable();
+        const paintStableStatus = this.frameEnvironment.navigationsObserver.getPaintStableStatus();
         const result = await this.moveMouseOverTarget(attachedNodeId, interaction, resolvable);
 
         if (result.simulateOptionClick) {
@@ -237,7 +237,7 @@ export default class Interactor implements IInteractionsHelper {
         await this.mouse.up({ button, clickCount });
         const mouseupTriggered = await mouseupTrigger.didTrigger();
         if (!mouseupTriggered.didClickLocation) {
-          const suggestWaitingMessage = isPagePaintStable.isStable
+          const suggestWaitingMessage = paintStableStatus.isStable
             ? '\n\nYou might have more predictable results by waiting for the page to stabilize before triggering this click -- agent.waitForPaintingStable()'
             : '';
           this.logger.error(

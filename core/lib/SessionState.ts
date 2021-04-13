@@ -10,7 +10,7 @@ import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
-import INavigation from '@secret-agent/core-interfaces/INavigation';
+import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
 import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
@@ -388,7 +388,10 @@ export default class SessionState {
 
   public recordNavigation(navigation: INavigation) {
     this.db.frameNavigations.insert(navigation);
-    if (navigation.stateChanges.has('Load') || navigation.stateChanges.has('ContentPaint')) {
+    if (
+      navigation.stateChanges.has(LoadStatus.Load) ||
+      navigation.stateChanges.has(LoadStatus.ContentPaint)
+    ) {
       this.hasLoadedAnyPage = true;
     }
     for (const date of navigation.stateChanges.values()) {

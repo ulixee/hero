@@ -25,7 +25,7 @@ export default class Queue {
     this.queue.push({
       promise,
       cb,
-      startStack: new Error('').stack.split(/\r?\n/).slice(1).join('\n'),
+      startStack: new Error('').stack.slice(8), // "Error: \n" is 8 chars
     });
 
     this.next().catch(() => null);

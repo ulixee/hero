@@ -107,7 +107,6 @@ const filteredEventMethods = new Set([
   'Network.dataReceived', // Not useful to SA since we use Mitm
   'Page.domContentEventFired', // duplicated by Page.lifecycleEvent
   'Page.loadEventFired', // duplicated by Page.lifecycleEvent
-  // 'Network.requestWillBeSentExtraInfo', // handled by mitm
 ]);
 
 export interface IDevtoolsMessageRecord {

@@ -7,6 +7,22 @@ import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
 import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
 import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
 
+enum DomActionType {
+  newDocument = 0,
+  location = 1,
+  added = 2,
+  removed = 3,
+  text = 4,
+  attribute = 5,
+  property = 6,
+}
+
+const MutationRecordType = {
+  attributes: 'attributes',
+  childList: 'childList',
+  characterData: 'characterData',
+};
+
 // exporting a type is ok. Don't export variables or will blow up the page
 export type PageRecorderResultSet = [
   IDomChangeEvent[],
@@ -58,8 +74,10 @@ class NodeTracker implements INodeTracker {
       return this.nodeIds.get(node);
     }
     const id = this.nextId;
-    // @ts-ignore
-    node.saTrackerNodeId = id;
+    Object.defineProperty(node, 'saTrackerNodeId', {
+      enumerable: false,
+      value: id,
+    });
     this.nextId += 1;
     this.nodeIds.set(node, id);
     return id;
@@ -90,7 +108,7 @@ class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [
     // preload with a document
     [
-      'newDocument',
+      DomActionType.newDocument,
       { id: -1, textContent: window.self.location.href },
       new Date().getTime(),
       idx(),
@@ -142,13 +160,13 @@ class PageEventsRecorder {
     return this.pageResultset;
   }
 
-  public trackFocus(eventType: 'in' | 'out', focusEvent: FocusEvent) {
+  public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
     const nodeId = focusEvent.target ? nodeTracker.getId(focusEvent.target as Node) : undefined;
     const relatedNodeId = focusEvent.relatedTarget
       ? nodeTracker.getId(focusEvent.relatedTarget as Node)
       : undefined;
     const time = new Date().getTime();
-    const event = [eventType, nodeId, relatedNodeId, time] as IFocusEvent;
+    const event = [eventType as any, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
     this.getPropertyChanges(time, this.domChanges);
   }
@@ -221,7 +239,12 @@ class PageEventsRecorder {
     const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
-      changes.push(['location', { id: -1, textContent: currentLocation }, timestamp, idx()]);
+      changes.push([
+        DomActionType.location,
+        { id: -1, textContent: currentLocation },
+        timestamp,
+        idx(),
+      ]);
     }
   }
 
@@ -232,7 +255,7 @@ class PageEventsRecorder {
         if (newPropValue !== value) {
           const nodeId = nodeTracker.getId(input);
           changes.push([
-            'property',
+            DomActionType.property,
             { id: nodeId, properties: { [propertyName]: newPropValue } },
             changeUnixTime,
             idx(),
@@ -270,7 +293,7 @@ class PageEventsRecorder {
       if (newPropValue.toString() !== current.toString()) {
         const nodeId = nodeTracker.getId(style);
         changes.push([
-          'property',
+          DomActionType.property,
           { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
           timestamp,
           idx(),
@@ -301,7 +324,7 @@ class PageEventsRecorder {
         this.serializeHierarchy(target, changes, stamp, addedNodeMap);
       }
 
-      if (type === 'childList') {
+      if (type === MutationRecordType.childList) {
         let isFirstRemoved = true;
         for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
           const node = mutation.removedNodes[i];
@@ -312,7 +335,7 @@ class PageEventsRecorder {
           serial.previousSiblingId = nodeTracker.getId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
-          changes.push(['removed', serial, stamp, idx()]);
+          changes.push([DomActionType.removed, serial, stamp, idx()]);
           isFirstRemoved = false;
         }
 
@@ -338,11 +361,11 @@ class PageEventsRecorder {
             }
           }
           addedNodeMap.set(node, serial);
-          changes.push(['added', serial, stamp, idx()]);
+          changes.push([DomActionType.added, serial, stamp, idx()]);
         }
       }
 
-      if (type === 'attributes') {
+      if (type === MutationRecordType.attributes) {
         // don't store
         if (!nodeTracker.has(target)) {
           this.serializeHierarchy(target, changes, stamp, addedNodeMap);
@@ -358,17 +381,16 @@ class PageEventsRecorder {
           serial.attributeNamespaces[mutation.attributeName] = mutation.attributeNamespace;
         }
 
-        const changeType = 'attribute';
         // flatten changes
         if (!addedNodeMap.has(target)) {
-          changes.push([changeType as any, serial, stamp, idx()]);
+          changes.push([DomActionType.attribute, serial, stamp, idx()]);
         }
       }
 
-      if (type === 'characterData') {
+      if (type === MutationRecordType.characterData) {
         const textChange = this.serializeNode(target);
         textChange.textContent = target.textContent;
-        changes.push(['text', textChange, stamp, idx()]);
+        changes.push([DomActionType.text, textChange, stamp, idx()]);
       }
     }
 
@@ -377,7 +399,7 @@ class PageEventsRecorder {
       // individually so we need to extract child nodes into flat hierarchy
       const children = this.serializeChildren(node, addedNodeMap);
       for (const childData of children) {
-        changes.push(['added', childData, stamp, idx()]);
+        changes.push([DomActionType.added, childData, stamp, idx()]);
       }
     }
 
@@ -416,7 +438,7 @@ class PageEventsRecorder {
       );
       serial.previousSiblingId = previous.id;
     }
-    changes.push(['added', serial, changeTime, idx()]);
+    changes.push([DomActionType.added, serial, changeTime, idx()]);
     addedNodeMap.set(node, serial);
     return serial;
   }
@@ -592,12 +614,12 @@ document.addEventListener('mouseleave', e => recorder.trackMouse(MouseEventType.
   passive: true,
 });
 
-document.addEventListener('focusin', e => recorder.trackFocus('in', e), {
+document.addEventListener('focusin', e => recorder.trackFocus(FocusType.IN, e), {
   capture: true,
   passive: true,
 });
 
-document.addEventListener('focusout', e => recorder.trackFocus('out', e), {
+document.addEventListener('focusout', e => recorder.trackFocus(FocusType.OUT, e), {
   capture: true,
   passive: true,
 });
@@ -614,4 +636,9 @@ enum MouseEventType {
   UP = 2,
   OVER = 3,
   OUT = 4,
+}
+
+enum FocusType {
+  IN = 0,
+  OUT = 1,
 }

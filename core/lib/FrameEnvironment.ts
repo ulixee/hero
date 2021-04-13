@@ -1,9 +1,5 @@
 import Log from '@secret-agent/commons/Logger';
-import {
-  ILocationTrigger,
-  IPipelineStatus,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
+import { ILocationTrigger, IPipelineStatus } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
@@ -354,11 +350,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     for (const loadEvent of loadEvents) {
       const [event, url, timestamp] = loadEvent;
 
-      const incomingStatus = {
-        LargestContentfulPaint: 'ContentPaint',
-        DOMContentLoaded: LocationStatus.DomContentLoaded,
-        load: 'Load',
-      }[event];
+      const incomingStatus = pageStateToLoadStatus[event];
 
       this.navigations.onLoadStateChanged(incomingStatus, url, new Date(timestamp));
     }
@@ -433,10 +425,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {
     const lowerEventName = event.name.toLowerCase();
-    let status: 'Load' | LocationStatus.DomContentLoaded;
+    let status: LoadStatus.Load | LoadStatus.DomContentLoaded;
 
-    if (lowerEventName === 'load') status = 'Load';
-    else if (lowerEventName === 'domcontentloaded') status = LocationStatus.DomContentLoaded;
+    if (lowerEventName === 'load') status = LoadStatus.Load;
+    else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
       this.navigations.onLoadStateChanged(status, event.frame.url);
@@ -463,3 +455,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     this.navigations.updateNavigationReason(url, reason);
   }
 }
+
+const pageStateToLoadStatus = {
+  LargestContentfulPaint: LoadStatus.ContentPaint,
+  DOMContentLoaded: LoadStatus.DomContentLoaded,
+  load: LoadStatus.Load,
+};

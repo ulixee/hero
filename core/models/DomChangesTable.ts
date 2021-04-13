@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
-import { IDomChangeEvent } from '@secret-agent/core-interfaces/IDomChangeEvent';
+import { DomActionType, IDomChangeEvent } from '@secret-agent/core-interfaces/IDomChangeEvent';
 
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
@@ -30,7 +30,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     const record = [
       frameId,
       eventIndex,
-      action,
+      DomActionType[action],
       nodeData.id,
       nodeData.nodeType,
       nodeData.tagName,

@@ -14,11 +14,13 @@ export default class Resolvable<T = any> implements IResolvablePromise<T>, Promi
 
   constructor(timeoutMillis?: number, timeoutMessage?: string) {
     // get parent stack
-    const error = new TimeoutError(timeoutMessage);
-    this.stack = error.stack.split(/\r?\n/).slice(2).join('\n');
+    this.stack = new Error('').stack.slice(8);
 
     if (timeoutMillis !== undefined && timeoutMillis !== null) {
-      this.timeout = setTimeout(this.reject.bind(this, error), timeoutMillis).unref();
+      this.timeout = setTimeout(
+        this.rejectWithTimeout.bind(this, timeoutMessage),
+        timeoutMillis,
+      ).unref();
     }
     this.promise = new Promise<T>((resolve, reject) => {
       this.resolveFn = resolve;
@@ -69,5 +71,11 @@ export default class Resolvable<T = any> implements IResolvablePromise<T>, Promi
 
   public finally(onfinally?: () => void): Promise<T> {
     return this.promise.finally(onfinally);
+  }
+
+  private rejectWithTimeout(message: string): void {
+    const error = new TimeoutError(message);
+    error.stack = `TimeoutError: ${message}\n${this.stack}`;
+    this.reject(error);
   }
 }

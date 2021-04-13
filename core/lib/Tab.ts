@@ -463,7 +463,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       .getFrameChanges(this.mainFrameId)
       .filter(x => {
         if (sinceCommandId) {
-          return x.commandId >= sinceCommandId;
+          return x.commandId > sinceCommandId;
         }
         return true;
       })

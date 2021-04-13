@@ -1,6 +1,6 @@
 import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import INavigation from '@secret-agent/core-interfaces/INavigation';
+import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
@@ -43,12 +43,12 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.finalUrl,
       navigation.navigationReason,
       navigation.initiatedTime.getTime(),
-      navigation.stateChanges.get(LocationStatus.HttpRequested)?.getTime(),
-      navigation.stateChanges.get(LocationStatus.HttpResponded)?.getTime(),
-      navigation.stateChanges.get(LocationStatus.HttpRedirected)?.getTime(),
-      navigation.stateChanges.get(LocationStatus.DomContentLoaded)?.getTime(),
-      navigation.stateChanges.get('Load')?.getTime(),
-      navigation.stateChanges.get('ContentPaint')?.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpRequested)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpResponded)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpRedirected)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.DomContentLoaded)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.Load)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.ContentPaint)?.getTime(),
     ];
     this.queuePendingInsert(record);
   }
