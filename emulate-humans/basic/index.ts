@@ -1,9 +1,10 @@
 import { IInteractionGroups, IInteractionStep } from '@secret-agent/core-interfaces/IInteractions';
 import { HumanEmulatorClassDecorator } from '@secret-agent/core-interfaces/IHumanEmulatorClass';
+import * as pkg from './package.json';
 
 @HumanEmulatorClassDecorator
 export default class HumanEmulatorBasic {
-  public static id = 'basic';
+  public static id = pkg.name;
 
   public async playInteractions(
     interactionGroups: IInteractionGroups,

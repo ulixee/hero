@@ -17,7 +17,9 @@ import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserE
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
+import IHumanEmulatorClass from '@secret-agent/core-interfaces/IHumanEmulatorClass';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
+import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
@@ -77,11 +79,10 @@ export default class Session extends TypedEventEmitter<{
     Session.byId[this.id] = this;
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
-    this.browserEmulatorId = BrowserEmulators.getId(options.browserEmulatorId);
-    const BrowserEmulator = BrowserEmulators.getClass(this.browserEmulatorId);
-    this.browserEngine = BrowserEmulator.engine;
-    this.browserEmulator = new BrowserEmulator();
+    this.browserEmulator = BrowserEmulators.createInstance(options.browserEmulatorId);
     this.browserEmulator.sessionId = this.id;
+    this.browserEmulatorId = (this.browserEmulator.constructor as IBrowserEmulatorClass).id;
+    this.browserEngine = (this.browserEmulator.constructor as IBrowserEmulatorClass).engine;
     if (options.userProfile) {
       this.userProfile = options.userProfile;
       this.browserEmulator.userProfile = options.userProfile;
@@ -108,8 +109,8 @@ export default class Session extends TypedEventEmitter<{
       );
     }
 
-    this.humanEmulatorId = options.humanEmulatorId || HumanEmulators.getRandomId();
-    this.humanEmulator = HumanEmulators.create(this.humanEmulatorId);
+    this.humanEmulator = HumanEmulators.createInstance(options.humanEmulatorId);
+    this.humanEmulatorId = (this.humanEmulator.constructor as IHumanEmulatorClass).id;
 
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(

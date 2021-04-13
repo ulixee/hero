@@ -1,5 +1,4 @@
 {
-  "browserId": "safari-13-0",
   "browserEngine": {
     "id": "chrome-83-0",
     "name": "chrome",
@@ -7,5 +6,9 @@
     "features": ["headless"],
     "executablePathEnvVar": "CHROME_83_BIN"
   },
-  "marketshare": 5.9
+  "marketshare": 5.9,
+  "browserMatcher": {
+    "name": "safari",
+    "versionRange": [13]
+  }
 }

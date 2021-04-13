@@ -112,6 +112,7 @@ const defaultArgs = [
   '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
   '--disable-extensions', // Disable all chrome extensions.
   '--disable-features=PaintHolding,TranslateUI,site-per-process,OutOfBlinkCors', // site-per-process = Disables OOPIF, OutOfBlinkCors = Disables feature in chrome80/81 for out of process cors
+  '--disable-blink-features=AutomationControlled',
   '--disable-hang-monitor',
   '--disable-ipc-flooding-protection', // Some javascript functions can be used to flood the browser process with IPC. By default, protection is on to limit the number of IPC sent to 10 per second per frame.
   '--disable-prompt-on-repost', // Reloading a page that came from a POST normally prompts the user.

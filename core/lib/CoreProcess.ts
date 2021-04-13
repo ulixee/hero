@@ -52,7 +52,7 @@ export default class CoreProcess {
     for (const [key, value] of Object.entries(process.env)) {
       const isWhitelisted =
         key === 'DEBUG' ||
-        key === 'SHOW_BROWSER' ||
+        key === 'SA_SHOW_BROWSER' ||
         key.startsWith('NODE_') ||
         key.startsWith('MITM_') ||
         key.startsWith('SA_') ||

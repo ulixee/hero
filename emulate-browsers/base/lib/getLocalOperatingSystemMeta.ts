@@ -60,7 +60,7 @@ function extractMacOsVersion(release: string) {
   }
 
   const versionString = darwinToMacOsVersionMap[versionMatch];
-  return macOsVersionAliasMap[versionString] || versionString;
+  return convertMacOsVersionString(versionString);
 }
 
 const platformToOsName = {
@@ -75,3 +75,12 @@ const platformToOsName = {
 
 const darwinVersionTree = convertVersionsToTree(Object.keys(darwinToMacOsVersionMap));
 const windowsVersionTree = convertVersionsToTree(Object.keys(windowsToWindowsVersionMap));
+
+function  convertMacOsVersionString(versionString: string) {
+  let newVersionString = macOsVersionAliasMap[versionString];
+  if (!newVersionString) {
+    const [majorVersion] = versionString.split('.');
+    newVersionString = macOsVersionAliasMap[`${majorVersion}.*`];
+  }
+  return newVersionString || versionString;
+}

@@ -8,7 +8,6 @@ import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionO
 import Puppet, { ILaunchArgs } from '@secret-agent/puppet';
 import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import DefaultBrowser from '@secret-agent/emulate-chrome-83';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
@@ -17,7 +16,7 @@ const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 
 export default class GlobalPool {
-  public static defaultBrowserEmulatorId = DefaultBrowser.id;
+  public static defaultBrowserEmulatorId = BrowserEmulators.defaultId;
   public static maxConcurrentAgentsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
@@ -46,8 +45,11 @@ export default class GlobalPool {
     await this.startMitm();
 
     for (const emulatorId of browserEmulatorIds) {
-      const browserEmulator = BrowserEmulators.getClass(emulatorId);
-      const puppet = await this.addPuppet(browserEmulator.engine);
+      const BrowserEmulator = BrowserEmulators.getClassById(emulatorId);
+      if (!BrowserEmulator) {
+        throw new Error(`BrowserEmulator was not found: ${emulatorId}`);
+      }
+      const puppet = await this.addPuppet(BrowserEmulator.engine);
       await puppet.isReady;
     }
 

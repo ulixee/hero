@@ -13,12 +13,13 @@ import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import type IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import generateVector from './generateVector';
+import * as pkg from './package.json';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
 @HumanEmulatorClassDecorator
 export default class HumanEmulatorGhost {
-  public static id = 'ghost';
+  public static id = pkg.name;
 
   public static overshootSpread = 2;
   public static overshootRadius = 5;

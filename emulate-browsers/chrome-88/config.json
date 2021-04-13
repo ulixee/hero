@@ -1,0 +1,14 @@
+{
+  "browserEngine": {
+    "id": "chrome-88-0",
+    "name": "chrome",
+    "fullVersion": "88.0.4324.150",
+    "features": ["headless"],
+    "executablePathEnvVar": "CHROME_88_BIN"
+  },
+  "marketshare": 45.3,
+  "browserMatcher": {
+    "name": "chrome",
+    "versionRange": [88]
+  }
+}

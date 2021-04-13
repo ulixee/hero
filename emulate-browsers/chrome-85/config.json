@@ -1,0 +1,14 @@
+{
+  "browserEngine": {
+    "id": "chrome-85-0",
+    "name": "chrome",
+    "fullVersion": "85.0.4183.102",
+    "features": ["headless"],
+    "executablePathEnvVar": "CHROME_85_BIN"
+  },
+  "marketshare": 0.7,
+  "browserMatcher": {
+    "name": "chrome",
+    "versionRange": [85]
+  }
+}

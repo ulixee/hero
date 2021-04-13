@@ -1,7 +1,7 @@
 {
   "name": "@secret-agent/emulate-chrome-81",
   "version": "1.4.1-alpha.2",
-  "description": "BrowserEmulator for Chrome version 81.0",
+  "description": "BrowserEmulator for Chrome version 81",
   "main": "index.js",
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.2",

@@ -1,7 +1,7 @@
 {
   "name": "@secret-agent/emulate-chrome-80",
   "version": "1.4.1-alpha.2",
-  "description": "BrowserEmulator for Google Chrome version 80",
+  "description": "BrowserEmulator for Chrome version 80",
   "main": "index.js",
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.2",

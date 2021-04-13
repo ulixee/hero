@@ -15,7 +15,7 @@ let puppet: Puppet;
 let httpServer: ITestHttpServer<http.Server>;
 let context: IPuppetContext;
 beforeAll(async () => {
-  const engine = BrowserEmulators.getClass(GlobalPool.defaultBrowserEmulatorId).engine;
+  const engine = BrowserEmulators.getClassById(GlobalPool.defaultBrowserEmulatorId).engine;
   puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();
@@ -102,8 +102,8 @@ test('it should be able to add polyfills', async () => {
     _$value: 'I am chrome',
   };
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.additions', {
-      additions: [
+    getOverrideScript('polyfill.add', {
+      itemsToAdd: [
         {
           path: 'window',
           propertyName: 'chromey',
@@ -152,8 +152,8 @@ test('it should be able to remove properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.removals', {
-      removals: ['window.Atomics', 'window.Array.from'],
+    getOverrideScript('polyfill.remove', {
+      itemsToRemove: [{ path: 'window', propertyName: 'Atomics' }, { path: 'window.Array', propertyName: 'from' }],
     }).script,
     false,
   );
@@ -170,8 +170,8 @@ test('it should be able to change properties', async () => {
   const page = await createPage();
 
   await page.addNewDocumentScript(
-    getOverrideScript('polyfill.changes', {
-      changes: [
+    getOverrideScript('polyfill.modify', {
+      itemsToModify: [
         {
           path: 'window.Navigator.prototype.registerProtocolHandler.name',
           propertyName: '_$value',
@@ -214,7 +214,7 @@ test('it should be able to change property order', async () => {
 
   await page.addNewDocumentScript(
     getOverrideScript('polyfill.reorder', {
-      order: [
+      itemsToReorder: [
         {
           path: 'window.Navigator.prototype',
           propertyName: startNavigatorKeys[10],
@@ -253,7 +253,7 @@ test('it should be able to change window property order', async () => {
   const page = await createPage();
   const windowKeys = await page.mainFrame.evaluate(`Object.keys(window)`, false);
 
-  const order = [
+  const itemsToReorder = [
     {
       path: 'window',
       propertyName: windowKeys[10],
@@ -275,7 +275,7 @@ test('it should be able to change window property order', async () => {
   ];
   await page.addNewDocumentScript(
     getOverrideScript('polyfill.reorder', {
-      order,
+      itemsToReorder,
     }).script,
     false,
   );

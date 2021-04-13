@@ -19,13 +19,13 @@ import {
 } from 'tough-cookie';
 import { randomBytes } from 'crypto';
 import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
-import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import Log from '@secret-agent/commons/Logger';
+import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import * as pkg from './package.json';
 import * as headerProfiles from './data/headers.json';
 import * as userAgentOptions from './data/user-agent-options.json';
@@ -107,10 +107,8 @@ export default class Safari13 {
     [site: string]: IResolvablePromise;
   } = {};
 
-  constructor() {
-    const userAgentOption = pickRandom(
-      (this.constructor as any).userAgentOptions as IUserAgentOption[],
-    );
+  constructor(matchMeta?: IUserAgentMatchMeta) {
+    const userAgentOption = selectUserAgentOption(matchMeta);
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
     this.osPlatform = windowNavigator.navigator.platform._$value;
     this.userAgentString = userAgentOption.string;
@@ -170,8 +168,6 @@ export default class Safari13 {
     const domOverrides = this.domOverrides;
     domOverrides.add('Error.captureStackTrace');
     domOverrides.add('Error.constructor');
-
-    domOverrides.add('navigator.webdriver');
 
     const deviceMemory = Math.ceil(Math.random() * 4) * 2;
     domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
@@ -407,8 +403,17 @@ export default class Safari13 {
     );
   }
 
-  public static get userAgentOptions() {
-    return userAgentOptions;
+  public static isMatch(meta: IUserAgentMatchMeta) {
+    if (!config.browserMatcher) return false;
+    const matchName = (config.browserMatcher.name || '').toLowerCase();
+    const matchVersionRange = config.browserMatcher.versionRange || [];
+    const betaBrowser = meta.browser;
+    if (betaBrowser.name !== matchName) return false;
+
+    const minMajorVersion = Math.min(...matchVersionRange);
+    const maxMajorVersion = Math.max(...matchVersionRange);
+
+    return betaBrowser.version.major >= minMajorVersion && betaBrowser.version.major <= maxMajorVersion;
   }
 }
 
@@ -421,4 +426,14 @@ function getSameSiteContext(resource: IHttpResourceLoadDetails): SameSiteContext
     return 'lax';
   }
   return 'none';
+}
+
+function selectUserAgentOption(meta: IUserAgentMatchMeta) {
+  if (!meta) return pickRandom(userAgentOptions as any[]);
+  const filteredOptions = userAgentOptions.filter(userAgentOption => {
+    if (userAgentOption.browserId !== meta.browser.id) return false;
+    if (userAgentOption.operatingSystemId !== meta.operatingSystem.id) return false;
+    return true;
+  });
+  return pickRandom(filteredOptions);
 }

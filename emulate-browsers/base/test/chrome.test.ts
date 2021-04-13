@@ -13,7 +13,7 @@ const { chrome, prevProperty } = windowChrome as any;
 
 let puppet: Puppet;
 beforeAll(async () => {
-  const engine = BrowserEmulators.getClass(GlobalPool.defaultBrowserEmulatorId).engine;
+  const engine = BrowserEmulators.getClassById(GlobalPool.defaultBrowserEmulatorId).engine;
   puppet = new Puppet(engine);
   Helpers.onClose(() => puppet.close(), true);
   puppet.start();

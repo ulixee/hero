@@ -1,5 +1,4 @@
 {
-  "browserId": "chrome-80-0",
   "browserEngine": {
     "id": "chrome-80-0",
     "name": "chrome",
@@ -7,5 +6,9 @@
     "features": ["headless"],
     "executablePathEnvVar": "CHROME_80_BIN"
   },
-  "marketshare": 0.4
+  "marketshare": 0.2,
+  "browserMatcher": {
+    "name": "chrome",
+    "versionRange": [80]
+  }
 }

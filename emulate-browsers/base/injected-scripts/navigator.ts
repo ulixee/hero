@@ -14,7 +14,9 @@ if (args.platform && self.navigator?.platform !== args.platform) {
 if ('setAppBadge' in self.navigator) {
   proxyFunction(self.navigator, 'setAppBadge', (target, thisArg, argArray) => {
     let error: TypeError;
-    if (argArray.length) {
+    if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {
+      error = new TypeError("Failed to execute 'setAppBadge' on 'Navigator': Illegal invocation");
+    } else if (argArray.length) {
       const arg = argArray[0];
       if (typeof arg === 'number') {
         if (arg < 0 || arg > Number.MAX_SAFE_INTEGER) {
@@ -35,6 +37,11 @@ if ('setAppBadge' in self.navigator) {
 
 if ('clearAppBadge' in self.navigator) {
   proxyFunction(self.navigator, 'clearAppBadge', (target, thisArg, argArray) => {
+    let error: TypeError;
+    if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {
+      error = new TypeError("Failed to execute 'clearAppBadge' on 'Navigator': Illegal invocation");
+    }
+    if (error) return Promise.reject(cleanErrorStack(error));
     return Promise.resolve(undefined);
   });
 }
