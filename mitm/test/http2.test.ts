@@ -3,6 +3,7 @@ import * as http2 from 'http2';
 import { URL } from 'url';
 import MitmSocket from '@secret-agent/mitm-socket';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
@@ -265,18 +266,21 @@ async function createH2Connection(sessionId: string, url: string) {
   const session = createSession(mitmServer, sessionId);
   const proxyCredentials = session.getProxyCredentials();
   const proxyHost = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
+  const mitmSocketSession = new MitmSocketSession(sessionId, {
+    clientHelloId: 'Chrome72',
+    rejectUnauthorized: false,
+  });
+  Helpers.needsClosing.push(mitmSocketSession);
 
   const tlsConnection = new MitmSocket(sessionId, {
     host: 'localhost',
     port: hostUrl.port,
     servername: 'localhost',
-    clientHelloId: 'Chrome72',
     isSsl: url.startsWith('https'),
     proxyUrl: proxyHost,
-    rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   const client = http2.connect(url, {
     createConnection: () => tlsConnection.socket,
   });

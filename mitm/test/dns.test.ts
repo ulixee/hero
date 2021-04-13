@@ -1,5 +1,6 @@
 import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import { LookupAddress, promises as nodeDns } from 'dns';
+import { Helpers } from '@secret-agent/testing';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
 import RequestSession from '../handlers/RequestSession';
@@ -20,9 +21,13 @@ const Quad9 = {
 };
 
 let dns: Dns;
+let requestSession: RequestSession;
 beforeAll(() => {
-  dns = new Dns({
-    networkInterceptorDelegate: {
+  requestSession = new RequestSession(
+    'dns.test',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
+    null,
+    {
       tls: {
         emulatorProfileId: 'Chrome83',
       },
@@ -30,17 +35,20 @@ beforeAll(() => {
         dnsOverTlsConnection: Quad9,
       },
     } as INetworkInterceptorDelegate,
-  } as RequestSession);
+  );
+  Helpers.onClose(() => requestSession.close(), true);
+  dns = new Dns(requestSession);
 });
 
 afterAll(() => {
   dns.close();
+  return Helpers.afterAll();
 });
 
 describe('DnsOverTlsSocket', () => {
   let cloudflareDnsSocket: DnsOverTlsSocket;
   beforeAll(() => {
-    cloudflareDnsSocket = new DnsOverTlsSocket(CloudFlare);
+    cloudflareDnsSocket = new DnsOverTlsSocket(CloudFlare, requestSession);
   });
   afterAll(() => {
     cloudflareDnsSocket.close();
@@ -68,7 +76,7 @@ describe('DnsOverTlsSocket', () => {
   test('should be able to lookup with google', async () => {
     let socket: DnsOverTlsSocket;
     try {
-      socket = new DnsOverTlsSocket(Google);
+      socket = new DnsOverTlsSocket(Google, requestSession);
       const response = await socket.lookupARecords('ulixee.org');
       expect(response.answers).toHaveLength(2);
     } finally {

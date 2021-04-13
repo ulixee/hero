@@ -7,9 +7,19 @@ import { getTlsConnection, httpGetWithSocket } from '@secret-agent/testing/helpe
 import * as https from 'https';
 import { IncomingMessage } from 'http';
 import MitmSocket from '../index';
+import MitmSocketSession from '../lib/MitmSocketSession';
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
+
+let mitmSocketSession: MitmSocketSession;
+beforeAll(() => {
+  mitmSocketSession = new MitmSocketSession('mitmSocket.test', {
+    clientHelloId: 'Chrome72',
+    rejectUnauthorized: false,
+  });
+  Helpers.onClose(() => mitmSocketSession.close(), true);
+});
 
 test('should be able to send a tls connection', async () => {
   const htmlString = 'Secure as anything!';
@@ -18,7 +28,7 @@ test('should be able to send a tls connection', async () => {
   });
 
   const tlsConnection = getTlsConnection(server.port);
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
 });
@@ -29,7 +39,7 @@ test('should handle http2 requests', async () => {
   });
   const tlsConnection = getTlsConnection(httpServer.port);
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   expect(tlsConnection.alpn).toBe('h2');
 
   const client = http2.connect('https://secretagent.dev', {
@@ -40,18 +50,23 @@ test('should handle http2 requests', async () => {
   const request = client.request({ ':path': '/' });
   const httpResponse = await readResponse(request);
   expect(httpResponse).toBe('I am h2');
+  client.destroy();
 });
 
 test('should be able to hit google using a Chrome Emulator', async () => {
+  const socketSession = new MitmSocketSession('mitmSocket.test', {
+    clientHelloId: 'Chrome79',
+    rejectUnauthorized: false,
+  });
+  Helpers.needsClosing.push(socketSession);
   const tlsConnection = new MitmSocket('1', {
     host: 'google.com',
     port: '443',
-    clientHelloId: 'Chrome79',
     servername: 'google.com',
   });
   Helpers.onClose(async () => tlsConnection.close());
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(socketSession);
   expect(tlsConnection.alpn).toBe('h2');
 
   const client = http2.connect('https://www.google.com', {
@@ -70,11 +85,10 @@ test('should be able to hit gstatic using a Chrome Emulator', async () => {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
-    clientHelloId: 'Chrome72',
   });
   Helpers.onClose(async () => tlsConnection.close());
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   expect(tlsConnection.alpn).toBe('h2');
 
   const client = http2.connect('https://www.gstatic.com', {
@@ -100,12 +114,11 @@ test('should be able to hit a server that disconnects', async () => {
     host: `localhost`,
     port: String(server.port),
     servername: 'localhost',
-    clientHelloId: 'Chrome72',
     keepAlive: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   expect(tlsConnection.alpn).toBe('http/1.1');
   const request = https.request({
     method: 'GET',
@@ -130,15 +143,19 @@ test('should be able to hit a server that disconnects', async () => {
 // only test this manually
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip('should be able to get scripts from unpkg using Chrome emulator', async () => {
+  const socketSession = new MitmSocketSession('mitmSocket.test', {
+    clientHelloId: 'Chrome79',
+    rejectUnauthorized: false,
+  });
+  Helpers.needsClosing.push(socketSession);
   const tlsConnection = new MitmSocket('3', {
     host: 'unpkg.com',
     port: '443',
-    clientHelloId: 'Chrome79',
     servername: 'unpkg.com',
   });
   Helpers.onClose(async () => tlsConnection.close());
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(socketSession);
   expect(tlsConnection.alpn).toBe('h2');
 
   const client = http2.connect('https://unpkg.com', {
@@ -180,7 +197,7 @@ test('should handle websockets', async () => {
 
   const tlsConnection = getTlsConnection(server.port);
   tlsConnection.connectOpts.keepAlive = true;
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   const wsClient = new WebSocket(`wss://localhost:${server.port}`, {
     rejectUnauthorized: false,
@@ -209,7 +226,7 @@ test('should handle upstream disconnects', async () => {
   });
 
   const tlsConnection = getTlsConnection(server.port);
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   await expect(
     httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket),

@@ -28,7 +28,7 @@ import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { MitmProxy as MitmServer, MitmProxy } from '@secret-agent/mitm/index';
+import { MitmProxy } from '@secret-agent/mitm/index';
 import SessionState from './SessionState';
 import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
@@ -158,12 +158,13 @@ export default class Session extends TypedEventEmitter<{
     }
   }
 
-  public async registerWithProxy(
-    mitmProxy: MitmServer,
+  public async registerWithMitm(
+    sharedMitmProxy: MitmProxy,
     doesPuppetSupportBrowserContextProxy: boolean,
   ): Promise<void> {
+    let mitmProxy = sharedMitmProxy;
     if (doesPuppetSupportBrowserContextProxy) {
-      this.isolatedMitmProxy = await MitmServer.start();
+      this.isolatedMitmProxy = await MitmProxy.start();
       mitmProxy = this.isolatedMitmProxy;
     }
 

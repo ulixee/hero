@@ -3,15 +3,15 @@ import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   private readonly getQuery: Statement;
+  private pemByHost = new Map<string, ICertificateRecord>();
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
-      'Certificates',
+      'Certificates2',
       [
         ['host', 'TEXT', 'NOT NULL PRIMARY KEY'],
         ['pem', 'TEXT'],
-        ['beginDate', 'TEXT'],
-        ['expireDate', 'TEXT'],
+        ['expireDate', 'INTEGER'],
       ],
       true,
     );
@@ -19,15 +19,26 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   }
 
   public insert(record: ICertificateRecord): void {
-    const { host, pem, beginDate, expireDate } = record;
-    this.queuePendingInsert([host, pem, beginDate.toISOString(), expireDate.toISOString()]);
+    const { host, pem, expireDate } = record;
+    this.pemByHost.set(host, record);
+    this.queuePendingInsert([host, pem, expireDate.getTime()]);
   }
 
   public get(host: string): ICertificateRecord {
+    if (this.pemByHost.has(host)) return this.pemByHost.get(host);
+
     const record = this.getQuery.get(host) as ICertificateRecord;
-    if (!record) return record;
-    record.beginDate = new Date(record.beginDate);
+    if (!record) {
+      return null;
+    }
+    const millisUntilExpire = (record.expireDate as any) - new Date().getTime();
+    if (millisUntilExpire < 60 * 60e3) {
+      console.log('expired cert');
+      return null;
+    }
+
     record.expireDate = new Date(record.expireDate);
+    this.pemByHost.set(host, record);
     return record;
   }
 }
@@ -35,6 +46,5 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
 export interface ICertificateRecord {
   host: string;
   pem: string;
-  beginDate: Date;
   expireDate: Date;
 }

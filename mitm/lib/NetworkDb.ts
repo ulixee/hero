@@ -3,13 +3,11 @@ import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 import Log from '@secret-agent/commons/Logger';
 import CertificatesTable from '../models/CertificatesTable';
-import PkiTable from '../models/PkiTable';
 
 const { log } = Log(module);
 
 export default class NetworkDb {
   public readonly certificates: CertificatesTable;
-  public readonly pki: PkiTable;
   private db: SqliteDatabase;
   private readonly batchInsert: Transaction;
   private readonly saveInterval: NodeJS.Timeout;
@@ -18,10 +16,9 @@ export default class NetworkDb {
   constructor(baseDir: string) {
     this.db = new Database(`${baseDir}/network.db`);
     this.certificates = new CertificatesTable(this.db);
-    this.pki = new PkiTable(this.db);
     this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
 
-    this.tables = [this.certificates, this.pki];
+    this.tables = [this.certificates];
 
     this.batchInsert = this.db.transaction(() => {
       for (const table of this.tables) {

@@ -14,6 +14,7 @@ import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise
 import { createPromise } from '@secret-agent/commons/utils';
 import Queue from '@secret-agent/commons/Queue';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
@@ -30,6 +31,7 @@ const allowUnverifiedCertificates = Boolean(JSON.parse(process.env.MITM_ALLOW_IN
 
 export default class MitmRequestAgent {
   public static defaultMaxConnectionsPerOrigin = 6;
+  public readonly socketSession: MitmSocketSession;
   private readonly session: RequestSession;
   private readonly maxConnectionsPerOrigin: number;
 
@@ -39,6 +41,12 @@ export default class MitmRequestAgent {
 
   constructor(session: RequestSession) {
     this.session = session;
+    this.socketSession = new MitmSocketSession(session.sessionId, {
+      rejectUnauthorized: allowUnverifiedCertificates === false,
+      clientHelloId: session.networkInterceptorDelegate.tls?.emulatorProfileId,
+      tcpTtl: session.networkInterceptorDelegate.tcp?.ttl,
+      tcpWindowSize: session.networkInterceptorDelegate.tcp?.windowSize,
+    });
     this.maxConnectionsPerOrigin =
       session.networkInterceptorDelegate?.connections?.socketsPerOrigin ??
       MitmRequestAgent.defaultMaxConnectionsPerOrigin;
@@ -108,6 +116,11 @@ export default class MitmRequestAgent {
         // don't need to log closing sessions
       }
     }
+    try {
+      this.socketSession.close();
+    } catch (err) {
+      // don't need to log closing sessions
+    }
     this.http2Sessions.length = 0;
     for (const socket of this.sockets) {
       socket.close();
@@ -122,7 +135,6 @@ export default class MitmRequestAgent {
     options: RequestOptions,
   ): Promise<MitmSocket> {
     const session = this.session;
-    const tlsProfileId = session.networkInterceptorDelegate.tls?.emulatorProfileId;
     const isKeepAlive =
       ((options.headers.connection ?? options.headers.Connection) as string)?.match(
         /keep-alive/i,
@@ -137,16 +149,11 @@ export default class MitmRequestAgent {
       port: String(options.port),
       isSsl: ctx.isSSL,
       servername: options.servername || options.host,
-      rejectUnauthorized: options.rejectUnauthorized,
-      clientHelloId: tlsProfileId,
       keepAlive: !!isKeepAlive,
       disableAlpn: ctx.isUpgrade,
     });
     mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
     mitmSocket.on('connect', () => session.emit('socket-connect', { socket: mitmSocket }));
-
-    const tcpVars = session.networkInterceptorDelegate.tcp;
-    if (tcpVars) mitmSocket.setTcpSettings(tcpVars);
 
     if (session.upstreamProxyUrl) {
       ctx.setState(ResourceState.GetUpstreamProxyUrl);
@@ -154,7 +161,7 @@ export default class MitmRequestAgent {
     }
 
     ctx.setState(ResourceState.SocketConnect);
-    await mitmSocket.connect(10e3);
+    await mitmSocket.connect(this.socketSession, 10e3);
 
     if (ctx.isUpgrade) {
       mitmSocket.socket.setNoDelay(true);

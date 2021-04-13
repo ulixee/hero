@@ -1,14 +1,14 @@
-// +build windows
+// +build !windows
 
 package main
 
 import (
-	winio "github.com/Microsoft/go-winio"
+	"net"
 )
 
 func ListenOnDomain(path string) (net.Listener, error) {
-	// Create server on Windows Named Pipe
-	ln, err := winio.ListenPipe(path, nil)
+	/// Create server on Unix socket path
+	ln, err := net.Listen("unix", path)
 	if err != nil {
 		return nil, err
 	}
@@ -16,7 +16,7 @@ func ListenOnDomain(path string) (net.Listener, error) {
 }
 
 func DialOnDomain(path string) (net.Conn, error) {
-	conn, err := winio.DialPipe(path)
+	conn, err := net.Dial("unix", path)
 	if err != nil {
 		return nil, err
 	}

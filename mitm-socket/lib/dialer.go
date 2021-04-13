@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func Dial(addr string, connectArgs ConnectArgs) (net.Conn, error) {
+func Dial(addr string, connectArgs ConnectArgs, sessionArgs SessionArgs) (net.Conn, error) {
 	var dialTimeout = time.Duration(15) * time.Second
 
 	/// Dial the server
 	dialer := net.Dialer{
-		Control: ConfigureSocket(connectArgs.TcpTtl, connectArgs.TcpWindowSize),
+		Control: ConfigureSocket(sessionArgs.TcpTtl, sessionArgs.TcpWindowSize),
 		Timeout: dialTimeout,
 	}
 
@@ -25,7 +25,7 @@ func Dial(addr string, connectArgs ConnectArgs) (net.Conn, error) {
 			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl)
 		}
 
-		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !connectArgs.RejectUnauthorized)
+		return DialAddrViaHttpProxy(dialer, addr, proxyUrl, !sessionArgs.RejectUnauthorized)
 	}
 
 	dialConn, err := dialer.Dial("tcp", addr)

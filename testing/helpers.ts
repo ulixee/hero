@@ -316,9 +316,9 @@ export function httpGetWithSocket(
 ): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     let isResolved = false;
-    socket.once('close', err => {
+    socket.once('close', () => {
       if (isResolved) return;
-      reject(err);
+      reject(new Error('Socket closed before resolve'));
     });
     socket.once('error', err => {
       if (isResolved) return;
@@ -346,17 +346,11 @@ export function httpGetWithSocket(
 
 let sessionId = 0;
 
-export function getTlsConnection(
-  serverPort: number,
-  host = 'localhost',
-  clientHello = 'Chrome83',
-): MitmSocket {
+export function getTlsConnection(serverPort: number, host = 'localhost'): MitmSocket {
   const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
     host,
     port: String(serverPort),
-    clientHelloId: clientHello,
     servername: host,
-    rejectUnauthorized: false,
   });
   Helpers.onClose(() => tlsConnection.close());
   return tlsConnection;
@@ -439,11 +433,11 @@ function destroyServerFn(
 
   return () =>
     new Promise(resolve => {
-      server.close(() => {
-        setTimeout(resolve, 10);
-      });
       for (const conn of connections) {
         conn.destroy();
       }
+      server.close(() => {
+        setTimeout(resolve, 10);
+      });
     });
 }

@@ -44,7 +44,7 @@ const forceBuild = Boolean(JSON.parse(process.env.SA_REBUILD_MITM_SOCKET || 'fal
     const goVersionNeeded = getGoVersionNeeded();
     console.log(
       `The architecture file you need for the Secret Agent connect library is not available (${filepath}).\n\n
-You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/lib directory`,
+You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/lib directory\n\n`,
     );
     process.exit(1);
   }

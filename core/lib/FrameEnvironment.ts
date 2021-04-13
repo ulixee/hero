@@ -18,7 +18,7 @@ import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
 import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';

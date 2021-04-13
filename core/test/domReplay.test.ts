@@ -106,19 +106,23 @@ describe('basic Dom Replay tests', () => {
       mirrorPage.on('console', console.log);
     }
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
-    await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
-
+    await Promise.all([
+      mirrorPage.navigate(`${koaServer.baseUrl}/empty`),
+      mirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    ]);
     const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
 
-    {
-      const pageChanges = await tab.getMainFrameDomChanges();
-      await mirrorPage.mainFrame.evaluate(
-        `window.replayEvents(${JSON.stringify(pageChanges)})`,
-        false,
-      );
-    }
+    const mainPageChanges = await tab.getMainFrameDomChanges();
+    await mirrorPage.mainFrame.evaluate(
+      `window.replayEvents(${JSON.stringify(mainPageChanges)})`,
+      false,
+    );
 
     const mirrorHtml = await mirrorPage.mainFrame.evaluate(getContentScript, false);
+    if (mirrorHtml !== sourceHtml) {
+      // eslint-disable-next-line no-console
+      console.log('Mirror Page mismatch', mainPageChanges);
+    }
     expect(mirrorHtml).toBe(sourceHtml);
 
     let lastCommandId = tab.lastCommandId;
@@ -192,8 +196,10 @@ describe('basic Dom Replay tests', () => {
     const mirrorContext = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
     const mirrorPage = await mirrorContext.newPage();
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
-    await mirrorPage.navigate(`${koaServer.baseUrl}/empty`);
-
+    await Promise.all([
+      mirrorPage.navigate(`${koaServer.baseUrl}/empty`),
+      mirrorPage.mainFrame.waitOn('frame-lifecycle', event => event.name === 'load'),
+    ]);
     const sourceHtml = await tab.puppetPage.mainFrame.evaluate(getContentScript, false);
 
     {

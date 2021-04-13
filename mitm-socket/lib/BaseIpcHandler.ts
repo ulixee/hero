@@ -1,0 +1,212 @@
+import { ChildProcess, spawn } from 'child_process';
+import * as os from 'os';
+import Log from '@secret-agent/commons/Logger';
+import * as net from 'net';
+import { existsSync, unlinkSync } from 'fs';
+import Resolvable from '@secret-agent/commons/Resolvable';
+import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import * as Path from 'path';
+import { v1 as uuidv1 } from 'uuid';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { bindFunctions } from '@secret-agent/commons/utils';
+
+const ext = os.platform() === 'win32' ? '.exe' : '';
+const libPath = `${__dirname}/../dist/connect${ext}`;
+
+const { log } = Log(module);
+
+export default abstract class BaseIpcHandler {
+  public isClosing: boolean;
+  public get waitForConnected(): Promise<void> {
+    this.hasWaitListeners = true;
+    return this.waitForConnect.promise;
+  }
+
+  public get pid(): number | undefined {
+    return this.child?.pid;
+  }
+
+  protected abstract logger: IBoundLog;
+  protected options: IGoIpcOpts;
+
+  private hasWaitListeners = false;
+  private waitForConnect = new Resolvable<void>();
+  private readonly child: ChildProcess;
+  private readonly ipcServer = new net.Server();
+  private ipcSocket: net.Socket;
+  private isExited = false;
+
+  private pendingMessage = '';
+
+  private readonly handlerName: string;
+
+  constructor(options: Partial<IGoIpcOpts>) {
+    this.options = this.getDefaultOptions(options);
+
+    const mode = this.options.mode;
+    this.handlerName = `${mode[0].toUpperCase() + mode.slice(1)}IpcHandler`;
+    this.cleanupSocketHandle();
+
+    bindFunctions(this);
+
+    this.ipcServer.listen(this.options.ipcSocketPath);
+    this.ipcServer.once('connection', this.onIpcConnection.bind(this));
+
+    this.child = spawn(libPath, [JSON.stringify(options)], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
+      cwd: Path.resolve(__dirname, '..', 'dist'),
+    });
+
+    this.bindChildListeners();
+  }
+
+  public close(): void {
+    const parentLogId = this.logger.info(`${this.handlerName}.closing`);
+    if (this.isClosing) return;
+    this.isClosing = true;
+
+    if (!this.child.killed) {
+      if (os.platform() === 'win32') {
+        try {
+          // fix for node 13 throwing errors on closed sockets
+          this.child.stdin.on('error', () => {
+            // catch
+          });
+          // NOTE: windows writes to stdin
+          this.child.send('disconnect');
+        } catch (err) {
+          // don't log epipes
+        }
+      } else {
+        this.child.kill('SIGINT');
+      }
+      this.child.unref();
+    }
+
+    try {
+      this.onExit();
+    } catch (err) {
+      // don't log cleanup issue
+    }
+    if (!this.waitForConnect.isResolved && this.hasWaitListeners) {
+      this.waitForConnect.reject(new CanceledPromiseError('Canceling ipc connect'));
+    }
+    this.logger.stats(`${this.handlerName}.closed`, {
+      parentLogId,
+    });
+  }
+
+  protected abstract onMessage(message: string): void;
+  protected abstract beforeExit(): void;
+
+  protected async sendIpcMessage(message: any): Promise<void> {
+    await this.waitForConnect.promise;
+    await new Promise<void>((resolve, reject) => {
+      this.ipcSocket.write(`${JSON.stringify(message)}\n`, err => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  private onIpcConnection(socket: net.Socket): void {
+    this.ipcSocket = socket;
+    this.ipcSocket.on('data', this.onIpcData.bind(this));
+    this.ipcSocket.on('error', err => {
+      if (!this.isClosing) this.logger.error(`${this.handlerName}.error`, err);
+    });
+
+    this.waitForConnect.resolve();
+  }
+
+  private cleanupSocketHandle(): void {
+    if (existsSync(this.options.ipcSocketPath)) unlinkSync(this.options.ipcSocketPath);
+  }
+
+  private onExit(): void {
+    if (this.isExited) return;
+    this.isExited = true;
+    this.beforeExit();
+
+    this.ipcServer.unref().close(() => {
+      this.cleanupSocketHandle();
+    });
+    if (this.ipcSocket) {
+      this.ipcSocket.unref().end();
+    }
+  }
+
+  private onError(error: Error): void {
+    if (this.isClosing) return;
+    this.logger.error(`${this.handlerName}.onError`, {
+      error,
+    });
+  }
+
+  private onIpcData(buffer: Buffer): void {
+    if (this.isClosing) return;
+    let end = buffer.indexOf('\n');
+    if (end === -1) {
+      this.pendingMessage += buffer.toString();
+      return;
+    }
+    const message = this.pendingMessage + buffer.toString(undefined, 0, end);
+    this.onMessage(message);
+
+    let start = end + 1;
+    end = buffer.indexOf('\n', start);
+    while (end !== -1) {
+      this.onMessage(buffer.toString(undefined, start, end));
+      start = end + 1;
+      end = buffer.indexOf('\n', start);
+    }
+    this.pendingMessage = buffer.toString(undefined, start);
+  }
+
+  private onChildProcessMessage(message: string): void {
+    if (this.isClosing) return;
+    this.logger.info(`${this.handlerName}.stdout: ${message}`);
+  }
+
+  private onChildProcessStderr(message: string): void {
+    if (this.isClosing) return;
+    this.logger.info(`${this.handlerName}.stderr: ${message}`);
+  }
+
+  private bindChildListeners(): void {
+    const child = this.child;
+    child.on('exit', this.onExit);
+    child.on('error', this.onError);
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', this.onChildProcessMessage);
+    child.stderr.on('data', this.onChildProcessStderr);
+  }
+
+  private getDefaultOptions(options: Partial<IGoIpcOpts>): IGoIpcOpts {
+    options.debug ??= log.level === 'stats';
+    const mode = options.mode || 'proxy';
+    options.mode = mode;
+
+    const id = `${mode}-${uuidv1()}`;
+    if (options.ipcSocketPath === undefined) {
+      if (os.platform() === 'win32') {
+        options.ipcSocketPath = `\\\\.\\pipe\\sa-ipc-${id}`;
+      } else {
+        options.ipcSocketPath = `${os.tmpdir()}/sa-ipc-${id}.sock`;
+      }
+    }
+    return options as IGoIpcOpts;
+  }
+}
+
+export interface IGoIpcOpts {
+  mode?: 'certs' | 'proxy';
+  ipcSocketPath?: string;
+  clientHelloId?: string;
+  tcpTtl?: number;
+  tcpWindowSize?: number;
+  rejectUnauthorized?: boolean;
+  debug?: boolean;
+}

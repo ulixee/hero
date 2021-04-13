@@ -15,9 +15,13 @@ export default class Queue {
   private idleTimout: NodeJS.Timeout;
   private activeCount = 0;
 
+  private stopDequeuing = false;
+
   private queue: IQueueEntry[] = [];
 
-  constructor(readonly stacktraceMarker = 'QUEUE') {}
+  constructor(readonly stacktraceMarker = 'QUEUE', concurrency?: number) {
+    if (concurrency) this.concurrency = concurrency;
+  }
 
   public run<T>(cb: AsyncCallback<T>, timeoutMillis?: number): Promise<T> {
     const promise = createPromise<T>(timeoutMillis);
@@ -30,6 +34,10 @@ export default class Queue {
 
     this.next().catch(() => null);
     return promise.promise;
+  }
+
+  public willStop(): void {
+    this.stopDequeuing = true;
   }
 
   public stop(error?: CanceledPromiseError): void {
@@ -50,7 +58,7 @@ export default class Queue {
   private async next(): Promise<void> {
     clearTimeout(this.idleTimout);
 
-    if (!this.canRunMoreConcurrently()) return;
+    if (!this.canRunMoreConcurrently() || this.stopDequeuing === true) return;
 
     const next = this.queue.shift();
     if (!next) {

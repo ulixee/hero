@@ -3,11 +3,12 @@ import * as Path from 'path';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
-import { MitmProxy as MitmServer } from '@secret-agent/mitm';
+import { MitmProxy } from '@secret-agent/mitm';
 import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
 import Puppet, { ILaunchArgs } from '@secret-agent/puppet';
 import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import BrowserEmulators from './BrowserEmulators';
@@ -30,7 +31,7 @@ export default class GlobalPool {
   private static defaultLaunchArgs: ILaunchArgs;
   private static _activeSessionCount = 0;
   private static puppets: Puppet[] = [];
-  private static mitmServer: MitmServer;
+  private static mitmServer: MitmProxy;
   private static waitingForAvailability: {
     options: ICreateSessionOptions;
     promise: IResolvablePromise<Session>;
@@ -76,7 +77,7 @@ export default class GlobalPool {
     const logId = log.stats('GlobalPool.Closing');
 
     for (const { promise } of this.waitingForAvailability) {
-      promise.reject(new Error('Shutting down'));
+      promise.reject(new CanceledPromiseError('Puppet pool shutting down'));
     }
     this.waitingForAvailability.length = 0;
     const closePromises: Promise<any>[] = [];
@@ -84,6 +85,7 @@ export default class GlobalPool {
       const puppetBrowser = this.puppets.shift();
       closePromises.push(puppetBrowser.close().catch(err => err));
     }
+    MitmProxy.close();
     if (this.mitmServer) {
       this.mitmServer.close();
       this.mitmServer = null;
@@ -139,7 +141,7 @@ export default class GlobalPool {
 
   private static async startMitm() {
     if (this.mitmServer) return;
-    this.mitmServer = await MitmServer.start(this.localProxyPortStart, this.sessionsDir);
+    this.mitmServer = await MitmProxy.start(this.localProxyPortStart, this.sessionsDir);
   }
 
   private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
@@ -154,7 +156,7 @@ export default class GlobalPool {
       puppet =
         this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
 
-      await session.registerWithProxy(this.mitmServer, await puppet.supportsBrowserContextProxy);
+      await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
 
       const browserContext = await puppet.newContext(
         session.getBrowserEmulation(),

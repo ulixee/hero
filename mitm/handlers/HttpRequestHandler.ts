@@ -39,14 +39,13 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       const proxyToServerRequest = await this.createProxyToServerRequest();
       if (!proxyToServerRequest) return;
 
-      const responsePromise = new Promise<
-        [
-          response: IMitmRequestContext['serverToProxyResponse'],
-          flags?: number,
-          rawHeaders?: string[],
-        ]
-      >(resolve =>
-        proxyToServerRequest.on('response', (r, flags, headers) => resolve([r, flags, headers])),
+      type HttpServerResponse = [
+        response: IMitmRequestContext['serverToProxyResponse'],
+        flags?: number,
+        rawHeaders?: string[],
+      ];
+      const responsePromise = new Promise<HttpServerResponse>(resolve =>
+        proxyToServerRequest.once('response', (r, flags, headers) => resolve([r, flags, headers])),
       );
 
       clientToProxyRequest.resume();

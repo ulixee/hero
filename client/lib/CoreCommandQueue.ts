@@ -53,6 +53,10 @@ export default class CoreCommandQueue {
       });
   }
 
+  public willStop(): void {
+    this.internalQueue.willStop();
+  }
+
   public stop(cancelError: CanceledPromiseError): void {
     this.internalQueue.stop(cancelError);
   }

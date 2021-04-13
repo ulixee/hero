@@ -11,11 +11,21 @@ import * as socks5 from 'simple-socks';
 import { createPromise } from '@secret-agent/commons/utils';
 import * as http2 from 'http2';
 import MitmSocket from '../index';
+import MitmSocketSession from '../lib/MitmSocketSession';
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 let sessionId = 0;
+
+let mitmSocketSession: MitmSocketSession;
+beforeAll(() => {
+  mitmSocketSession = new MitmSocketSession('proxy.test', {
+    clientHelloId: 'Chrome83',
+    rejectUnauthorized: false,
+  });
+  Helpers.onClose(() => mitmSocketSession.close(), true);
+});
 
 test('should be able to send a request through a proxy', async () => {
   const htmlString = 'Proxy proxy echo echo';
@@ -28,13 +38,11 @@ test('should be able to send a request through a proxy', async () => {
   const tlsConnection = new MitmSocket(`${(sessionId += 1)}`, {
     host: 'localhost',
     port: String(server.port),
-    clientHelloId: 'Chrome83',
     servername: 'localhost',
     proxyUrl: `http://localhost:${proxyPort}`,
-    rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
@@ -65,7 +73,7 @@ test('should be able to send a request through a secure proxy with auth', async 
   const tlsConnection = getTlsConnection(server.port);
   tlsConnection.setProxyUrl(`https://${password}@localhost:${proxyServer.port}`);
 
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
   expect(connect).toHaveBeenCalledTimes(1);
@@ -85,13 +93,11 @@ test('should be able to use a socks5 proxy', async () => {
   const tlsConnection = new MitmSocket(`${(sessionId += 1)}`, {
     host: 'localhost',
     port: String(server.port),
-    clientHelloId: 'Chrome83',
     servername: 'localhost',
     proxyUrl: `socks5://localhost:${proxyPort}`,
-    rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   const httpResponse = await httpGetWithSocket(`${server.baseUrl}/any`, {}, tlsConnection.socket);
   expect(httpResponse).toBe(htmlString);
@@ -125,13 +131,11 @@ test('should be able to use a socks5 proxy with auth', async () => {
   const tlsConnection = new MitmSocket(`${(sessionId += 1)}`, {
     host: 'localhost',
     port: String(server.port),
-    clientHelloId: 'Chrome83',
     servername: 'localhost',
     proxyUrl: `socks5://foo:bar@localhost:${proxyPort}`,
-    rejectUnauthorized: false,
   });
   Helpers.onClose(async () => tlsConnection.close());
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   const client = http2.connect(server.baseUrl, {
     createConnection: () => tlsConnection.socket,
@@ -163,7 +167,7 @@ test('should handle websockets over proxies', async () => {
   const tlsConnection = getTlsConnection(serverPort);
   tlsConnection.connectOpts.keepAlive = true;
   tlsConnection.setProxyUrl(`http://localhost:${proxyPort}`);
-  await tlsConnection.connect();
+  await tlsConnection.connect(mitmSocketSession);
 
   const wsClient = new WebSocket(`wss://localhost:${serverPort}`, {
     rejectUnauthorized: false,

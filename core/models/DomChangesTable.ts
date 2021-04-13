@@ -53,7 +53,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       `select * from ${this.tableName} where frameId =? and commandId > ?`,
     );
 
-    return query.all(frameId, sinceCommandId ?? -2);
+    return query.all(frameId, sinceCommandId ?? 0);
   }
 }
 

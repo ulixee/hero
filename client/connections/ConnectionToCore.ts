@@ -11,6 +11,7 @@ import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureO
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import ICoreConnectionEventPayload from '@secret-agent/core-interfaces/ICoreConnectionEventPayload';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
@@ -138,6 +139,10 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     });
   }
 
+  public willDisconnect(): void {
+    this.coreSessions.willStop();
+    this.commandQueue.willStop();
+  }
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
 
   public async sendRequest(
@@ -149,14 +154,18 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     return this.internalSendRequestAndWait(payload);
   }
 
-  public onMessage(payload: ICoreResponsePayload | ICoreEventPayload): void {
-    if ((payload as ICoreResponsePayload).responseId) {
+  public onMessage(
+    payload: ICoreResponsePayload | ICoreEventPayload | ICoreConnectionEventPayload,
+  ): void {
+    if ((payload as ICoreConnectionEventPayload).disconnecting) {
+      this.willDisconnect();
+    } else if ((payload as ICoreResponsePayload).responseId) {
       payload = payload as ICoreResponsePayload;
       this.onResponse(payload.responseId, payload);
     } else if ((payload as ICoreEventPayload).listenerId) {
       this.onEvent(payload as ICoreEventPayload);
     } else {
-      throw new Error(`message could not be processed: ${payload}`);
+      throw new Error(`message could not be processed: ${JSON.stringify(payload)}`);
     }
   }
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////

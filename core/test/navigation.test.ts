@@ -365,8 +365,7 @@ setTimeout(function() {
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     // should not have triggered a navigation change
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][0]).toContain('PaintingStable');
+    expect(spy).toHaveBeenCalledTimes(0);
   });
 
   it('handles a new tab that redirects', async () => {
