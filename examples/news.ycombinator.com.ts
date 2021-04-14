@@ -1,6 +1,6 @@
 import agent from 'secret-agent';
 
-// process.env.SHOW_BROWSER = 'true';
+// process.env.SA_SHOW_BROWSER = 'true';
 
 async function run() {
   await agent.configure({ browserEmulatorId: 'chrome-80' });

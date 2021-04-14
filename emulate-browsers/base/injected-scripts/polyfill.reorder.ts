@@ -1,4 +1,4 @@
-for (const { propertyName, prevProperty, throughProperty, path } of args.order || []) {
+for (const { propertyName, prevProperty, throughProperty, path } of args.itemsToReorder || []) {
   try {
     if (!path.includes('.prototype')) {
       reorderOnWindow(path, propertyName, prevProperty, throughProperty);

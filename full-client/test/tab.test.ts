@@ -97,6 +97,8 @@ describe('Multi-tab scenarios', () => {
     await agent.waitForPaintingStable();
     expect(await agent.tabs).toHaveLength(1);
     expect(await agent.url).toBe(`${koaServer.baseUrl}/page1`);
+
+    const startCommandId = await agent.lastCommandId;
     await agent.click(agent.document.querySelector('a'));
 
     const tab1 = agent.activeTab;
@@ -110,6 +112,7 @@ describe('Multi-tab scenarios', () => {
       `${koaServer.baseUrl}/logo.png`,
       `${koaServer.baseUrl}/logo.png?page=page1`,
     ]);
+    await agent.waitForNewTab({ sinceCommandId: startCommandId });
 
     const tabs = await agent.tabs;
     expect(tabs).toHaveLength(2);

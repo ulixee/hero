@@ -1,6 +1,6 @@
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
-import ICommandMeta from '../../core-interfaces/ICommandMeta';
+import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import Tab from './Tab';
 
 const { log } = Log(module);

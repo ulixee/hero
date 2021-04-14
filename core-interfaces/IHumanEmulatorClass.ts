@@ -2,7 +2,7 @@ import IHumanEmulator from './IHumanEmulator';
 
 export default interface IHumanEmulatorClass {
   id: string;
-  new (): IHumanEmulator;
+  new(): IHumanEmulator;
 }
 
 // decorator for human emulator classes. hacky way to check the class implements statics we need

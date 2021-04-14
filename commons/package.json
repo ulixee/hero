@@ -9,7 +9,7 @@
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@secret-agent/emulate-chrome-83": "1.4.1-alpha.2",
+    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.2",
     "@secret-agent/puppet": "1.4.1-alpha.2",
     "@types/better-sqlite3": "^5.4.1"
   }

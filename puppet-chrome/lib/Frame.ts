@@ -18,6 +18,8 @@ import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
 
+const ContextNotFoundCode = -32000;
+
 export default class Frame
   extends TypedEventEmitter<IPuppetFrameEvents & IPuppetFrameInternalEvents>
   implements IPuppetFrame {
@@ -104,27 +106,43 @@ export default class Frame
   public async evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
-    shouldAwaitExpression = true,
+    options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
   ): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
-    const result = await this.cdpSession.send(
-      'Runtime.evaluate',
-      {
-        expression,
-        contextId,
-        returnByValue: true,
-        awaitPromise: shouldAwaitExpression,
-      },
-      this,
-    );
-    if (result.exceptionDetails) {
-      throw ConsoleMessage.exceptionToError(result.exceptionDetails);
-    }
+    try {
+      const result: Protocol.Runtime.EvaluateResponse = await this.cdpSession.send(
+        'Runtime.evaluate',
+        {
+          expression,
+          contextId,
+          returnByValue: true,
+          awaitPromise: options?.shouldAwaitExpression ?? true,
+        },
+        this,
+      );
 
-    const remote = result.result;
-    if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
-    return remote.value as T;
+      if (result.exceptionDetails) {
+        throw ConsoleMessage.exceptionToError(result.exceptionDetails);
+      }
+
+      const remote = result.result;
+      if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
+      return remote.value as T;
+    } catch (err) {
+      const retries = options?.retriesWaitingForLoad ?? 0;
+      const isNotFoundError =
+        err.code === ContextNotFoundCode ||
+        (err as ProtocolError).remoteError?.code === ContextNotFoundCode;
+      if (isNotFoundError && retries > 0) {
+        // Cannot find context with specified id (ie, could be reloading or unloading)
+        return this.evaluate(expression, isolateFromWebPageEnvironment, {
+          shouldAwaitExpression: options?.shouldAwaitExpression,
+          retriesWaitingForLoad: retries - 1,
+        });
+      }
+      throw err;
+    }
   }
 
   public async evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T> {
@@ -393,7 +411,7 @@ export default class Frame
       }
       if (error instanceof ProtocolError) {
         // 32000 code means frame doesn't exist, see if we just missed timing
-        if (error.remoteError?.code === -32000) {
+        if (error.remoteError?.code === ContextNotFoundCode) {
           if (!this.isAttached()) return;
         }
       }

@@ -1,0 +1,53 @@
+{
+  "add": [],
+  "remove": [
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "webdriver"
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "webdriver"
+    },
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.document",
+      "propertyName": "$cdc_asdjflasutopfhvcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [
+    {
+      "path": "window.Notification.permission",
+      "propertyName": "_$value",
+      "property": "default"
+    }
+  ],
+  "reorder": []
+}

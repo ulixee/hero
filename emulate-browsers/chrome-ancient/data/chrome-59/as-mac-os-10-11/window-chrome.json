@@ -1,0 +1,540 @@
+{
+  "chrome": {
+    "_$protos": ["Object.prototype"],
+    "loadTimes": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "requestTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391633.546
+        },
+        "startLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391633.546
+        },
+        "commitLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391633.807
+        },
+        "finishDocumentLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "finishLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "firstPaintTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "firstPaintAfterLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "navigationType": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "Other"
+        },
+        "wasFetchedViaSpdy": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "wasNpnNegotiated": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": true
+        },
+        "npnNegotiatedProtocol": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "wasAlternateProtocolAvailable": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "connectionInfo": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{requestTime: 1612391633.546,startLoadTime: 1612391633.546,commitLoadTime: 1612391633.807,finishDocumentLoadTime: 0,finishLoadTime: 0,firstPaintTime: 0,firstPaintAfterLoadTime: 0,navigationType: Other,wasFetchedViaSpdy: false,wasNpnNegotiated: true,npnNegotiatedProtocol: http/1.1,wasAlternateProtocolAvailable: false,connectionInfo: http/1.1}",
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "csi": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "startE": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391633546
+        },
+        "onloadT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "pageT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1602.099
+        },
+        "tran": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 15
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{startE: 1612391633546,onloadT: 0,pageT: 1602.312,tran: 15}",
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "app": {
+      "_$protos": ["Object.prototype"],
+      "getIsInstalled": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetIsInstalled"
+        },
+        "arguments": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "caller": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "_$type": "function",
+        "_$function": "function GetIsInstalled() { [native code] }",
+        "_$invocation": false,
+        "_$flags": "cew",
+        "_$value": "function GetIsInstalled() { [native code] }"
+      },
+      "getDetails": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetDetails"
+        },
+        "arguments": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "caller": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "_$type": "function",
+        "_$function": "function GetDetails() { [native code] }",
+        "_$invocation": null,
+        "_$flags": "cew",
+        "_$value": "function GetDetails() { [native code] }"
+      },
+      "runningState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetRunningState"
+        },
+        "arguments": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "caller": {
+          "_$type": "object",
+          "_$flags": "",
+          "_$value": null
+        },
+        "_$type": "function",
+        "_$function": "function GetRunningState() { [native code] }",
+        "_$invocation": "cannot_run",
+        "_$flags": "cew",
+        "_$value": "function GetRunningState() { [native code] }"
+      },
+      "isInstalled": {
+        "_$type": "boolean",
+        "_$flags": "ce",
+        "_$value": false,
+        "_$get": "function GetIsInstalled() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      },
+      "installState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getInstallState"
+        },
+        "prototype": {
+          "_$protos": ["Object.prototype"],
+          "_$type": "object",
+          "_$flags": "w"
+        },
+        "new()": {
+          "_$protos": ["getInstallState.prototype", "Object.prototype"],
+          "_$type": "constructor"
+        },
+        "_$type": "function",
+        "_$function": "function getInstallState(callback) {\n  var callbackId = nextCallbackId++;\n  callbacks[callbackId] = callback;\n  appNatives.GetInstallState(callbackId);\n}",
+        "_$flags": "cew",
+        "_$value": "function getInstallState(callback) {\n  var callbackId = nextCallbackId++;\n  callbacks[callbackId] = callback;\n  appNatives.GetInstallState(callbackId);\n}"
+      },
+      "_$type": "object",
+      "_$flags": "cew"
+    },
+    "webstore": {
+      "_$protos": ["Object.prototype"],
+      "install": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 3
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "install"
+        },
+        "prototype": {
+          "_$protos": ["Object.prototype"],
+          "_$type": "object",
+          "_$flags": "w"
+        },
+        "new()": {
+          "_$type": "constructor",
+          "_$constructorException": "Chrome Web Store installations can only be initated by a user gesture."
+        },
+        "_$type": "function",
+        "_$function": "function (url, onSuccess, onFailure) {\n    installer.install(url, onSuccess, onFailure);\n  }",
+        "_$invocation": "Chrome Web Store installations can only be initated by a user gesture.",
+        "_$flags": "cew",
+        "_$value": "function (url, onSuccess, onFailure) {\n    installer.install(url, onSuccess, onFailure);\n  }"
+      },
+      "onInstallStageChanged": {
+        "_$protos": ["Event.prototype", "Object.prototype"],
+        "addListener": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "removeListener": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "hasListener": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "hasListeners": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "dispatchToListener": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "dispatch": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "addRules": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "removeRules": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "getRules": {
+          "length": {
+            "_$type": "number",
+            "_$flags": "c",
+            "_$value": 0
+          },
+          "name": {
+            "_$type": "string",
+            "_$flags": "c",
+            "_$value": ""
+          },
+          "prototype": {
+            "_$protos": ["Object.prototype"],
+            "_$type": "object",
+            "_$flags": "w"
+          },
+          "new()": {
+            "_$type": "constructor",
+            "_$constructorException": "Error: impl is not an instance of EventImpl"
+          },
+          "_$type": "function",
+          "_$value": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }",
+          "_$function": "function () {\n        var impl = getPrivateImpl(this);\n        return $Function.apply(impl[func], impl, arguments);\n      }"
+        },
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "onDownloadProgress": {
+        "_$protos": ["Event.prototype", "Object.prototype"],
+        "_$type": "object",
+        "_$flags": "cew"
+      },
+      "_$type": "object",
+      "_$flags": "cew"
+    },
+    "_$type": "object",
+    "_$flags": "ew"
+  },
+  "prevProperty": "XMLDocument"
+}

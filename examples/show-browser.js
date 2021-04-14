@@ -1,6 +1,6 @@
 const { Agent } = require('secret-agent');
 
-process.env.SHOW_BROWSER = 'true';
+process.env.SA_SHOW_BROWSER = 'true';
 
 (async () => {
   const url = `https://dataliberationfoundation.org/`;

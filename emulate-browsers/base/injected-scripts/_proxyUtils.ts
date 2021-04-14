@@ -227,7 +227,6 @@ function addDescriptorAfterProperty(
   const descriptors = Object.getOwnPropertyDescriptors(owner);
   // if already exists, don't add again
   if (descriptors[propertyName]) {
-    console.log(`Not re-adding descriptor for ${propertyName}`);
     return;
   }
 

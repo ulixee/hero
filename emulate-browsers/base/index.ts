@@ -7,7 +7,7 @@ import { EngineFetcher } from '@secret-agent/puppet/lib/EngineFetcher';
 import Log from '@secret-agent/commons/Logger';
 import modifyHeaders from './lib/modifyHeaders';
 import DataLoader from './lib/DataLoader';
-import DomDiffLoader from './lib/DomDiffLoader';
+import DomPolyfillLoader from './lib/DomPolyfillLoader';
 import getTcpSettingsForOs from './lib/getTcpSettingsForOs';
 import parseNavigatorPlugins from './lib/parseNavigatorPlugins';
 import DomOverridesBuilder from './lib/DomOverridesBuilder';
@@ -45,7 +45,7 @@ export {
   DomOverridesBuilder,
   modifyHeaders,
   DataLoader,
-  DomDiffLoader,
+  DomPolyfillLoader,
   getTcpSettingsForOs,
   getEngine,
   parseNavigatorPlugins,

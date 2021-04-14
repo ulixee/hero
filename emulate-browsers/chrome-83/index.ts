@@ -1,16 +1,16 @@
-import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
+  DataLoader,
   DnsOverTlsProviders,
+  DomPolyfillLoader,
   DomOverridesBuilder,
   getEngine,
   getTcpSettingsForOs,
   modifyHeaders,
   parseNavigatorPlugins,
-  DataLoader,
-  DomDiffLoader,
 } from '@secret-agent/emulate-browsers-base';
-import IUserAgentOption from '@secret-agent/core-interfaces/IUserAgentOption';
+import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
@@ -26,7 +26,7 @@ const windowFramingData = new DataLoader(`${__dirname}/data`, 'window-framing');
 const windowChromeData = new DataLoader(`${__dirname}/data`, 'window-chrome');
 const windowNavigatorData = new DataLoader(`${__dirname}/data`, 'window-navigator');
 const codecsData = new DataLoader(`${__dirname}/data`, 'codecs');
-const domDiffsData = new DomDiffLoader(`${__dirname}/data`);
+const domPolyfillData = new DomPolyfillLoader(`${__dirname}/data`);
 
 const engineObj = {
   name: config.browserEngine.name,
@@ -67,14 +67,12 @@ export default class Chrome83 {
   private _locale = 'en-US,en';
   private hasCustomLocale = false;
 
-  constructor() {
-    const userAgentOption = pickRandom(
-      (this.constructor as any).userAgentOptions as IUserAgentOption[],
-    );
+  constructor(matchMeta?: IUserAgentMatchMeta) {
+    const userAgentOption = selectUserAgentOption(matchMeta);
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
     this.osPlatform = windowNavigator.navigator.platform._$value;
     this.userAgentString = userAgentOption.string;
-    this.canPolyfill = !!domDiffsData.get(userAgentOption.operatingSystemId);
+    this.canPolyfill = !!domPolyfillData.get(userAgentOption.operatingSystemId);
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
     this.networkInterceptorDelegate = {
@@ -123,8 +121,6 @@ export default class Chrome83 {
     domOverrides.add('Error.captureStackTrace');
     domOverrides.add('Error.constructor');
 
-    domOverrides.add('navigator.webdriver');
-
     const deviceMemory = Math.ceil(Math.random() * 4) * 2;
     domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
     domOverrides.add('navigator', {
@@ -152,25 +148,25 @@ export default class Chrome83 {
       },
     });
 
-    const polyfills = domDiffsData.get(operatingSystemId);
-    if (polyfills?.removals?.length) {
-      domOverrides.add('polyfill.removals', {
-        removals: polyfills.removals,
+    const domPolyfill = domPolyfillData.get(operatingSystemId);
+    if (domPolyfill?.add?.length) {
+      domOverrides.add('polyfill.add', {
+        itemsToAdd: domPolyfill.add,
       });
     }
-    if (polyfills?.additions?.length) {
-      domOverrides.add('polyfill.additions', {
-        additions: polyfills.additions,
+    if (domPolyfill?.remove?.length) {
+      domOverrides.add('polyfill.remove', {
+        itemsToRemove: domPolyfill.remove,
       });
     }
-    if (polyfills?.changes?.length) {
-      domOverrides.add('polyfill.changes', {
-        changes: polyfills.changes,
+    if (domPolyfill?.modify?.length) {
+      domOverrides.add('polyfill.modify', {
+        itemsToModify: domPolyfill.modify,
       });
     }
-    if (polyfills?.order?.length) {
+    if (domPolyfill?.reorder?.length) {
       domOverrides.add('polyfill.reorder', {
-        order: polyfills.order,
+        itemsToReorder: domPolyfill.reorder,
       });
     }
 
@@ -212,7 +208,27 @@ export default class Chrome83 {
     }
   }
 
-  public static get userAgentOptions() {
-    return userAgentOptions;
+  public static isMatch(meta: IUserAgentMatchMeta) {
+    if (!config.browserMatcher) return false;
+    const matchName = (config.browserMatcher.name || '').toLowerCase();
+    const matchVersionRange = config.browserMatcher.versionRange || [];
+    const metaBrowser = meta.browser;
+    if (metaBrowser.name !== matchName) return false;
+    if (!matchVersionRange.length) return true;
+
+    const minMajorVersion = Math.min(...matchVersionRange);
+    const maxMajorVersion = Math.max(...matchVersionRange);
+
+    return metaBrowser.version.major >= minMajorVersion && metaBrowser.version.major <= maxMajorVersion;
   }
+}
+
+function selectUserAgentOption(meta: IUserAgentMatchMeta) {
+  if (!meta) return pickRandom(userAgentOptions as any[]);
+  const filteredOptions = userAgentOptions.filter(userAgentOption => {
+    if (userAgentOption.browserId !== meta.browser.id) return false;
+    if (userAgentOption.operatingSystemId !== meta.operatingSystem.id) return false;
+    return true;
+  });
+  return pickRandom(filteredOptions);
 }

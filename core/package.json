@@ -7,22 +7,28 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
-    "./start": "./start.js"
+    "./start": "./start.js",
+    "./lib/*": "./lib/*.js",
+    "./lib/CoreProcess": "./lib/CoreProcess.js",
+    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
+    "./server": "./server/index.js"
   },
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.2",
     "@secret-agent/core-interfaces": "1.4.1-alpha.2",
     "@secret-agent/emulate-browsers-base": "1.4.1-alpha.2",
-    "@secret-agent/emulate-chrome-83": "1.4.1-alpha.2",
+    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.2",
     "@secret-agent/emulate-humans-basic": "1.4.1-alpha.2",
     "@secret-agent/emulate-humans-ghost": "1.4.1-alpha.2",
     "@secret-agent/emulate-humans-skipper": "1.4.1-alpha.2",
     "@secret-agent/mitm": "1.4.1-alpha.2",
     "@secret-agent/puppet": "1.4.1-alpha.2",
     "@secret-agent/puppet-interfaces": "1.4.1-alpha.2",
+    "@types/ua-parser-js": "^0.7.35",
     "awaited-dom": "^1.1.11",
     "better-sqlite3": "^7.1.4",
     "moment": "^2.24.1",
+    "ua-parser-js": "^0.7.22",
     "uuid": "^8.3.2",
     "ws": "^7.4.2"
   },

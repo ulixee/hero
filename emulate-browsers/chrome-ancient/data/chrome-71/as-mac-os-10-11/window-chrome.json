@@ -1,0 +1,253 @@
+{
+  "chrome": {
+    "_$protos": ["Object.prototype"],
+    "loadTimes": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "requestTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391658.594
+        },
+        "startLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391658.594
+        },
+        "commitLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391658.821
+        },
+        "finishDocumentLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391662.325
+        },
+        "finishLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391662.326
+        },
+        "firstPaintTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391662.295
+        },
+        "firstPaintAfterLoadTime": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 0
+        },
+        "navigationType": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "Other"
+        },
+        "wasFetchedViaSpdy": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "wasNpnNegotiated": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": true
+        },
+        "npnNegotiatedProtocol": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "wasAlternateProtocolAvailable": {
+          "_$type": "boolean",
+          "_$flags": "cew",
+          "_$value": false
+        },
+        "connectionInfo": {
+          "_$type": "string",
+          "_$flags": "cew",
+          "_$value": "http/1.1"
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{requestTime: 1612391658.594,startLoadTime: 1612391658.594,commitLoadTime: 1612391658.821,finishDocumentLoadTime: 1612391662.325,finishLoadTime: 1612391662.326,firstPaintTime: 1612391662.295,firstPaintAfterLoadTime: 0,navigationType: Other,wasFetchedViaSpdy: false,wasNpnNegotiated: true,npnNegotiatedProtocol: http/1.1,wasAlternateProtocolAvailable: false,connectionInfo: http/1.1}",
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "csi": {
+      "length": {
+        "_$type": "number",
+        "_$flags": "c",
+        "_$value": 0
+      },
+      "name": {
+        "_$type": "string",
+        "_$flags": "c",
+        "_$value": ""
+      },
+      "arguments": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "caller": {
+        "_$type": "object",
+        "_$flags": "",
+        "_$value": null
+      },
+      "prototype": {
+        "_$protos": ["Object.prototype"],
+        "_$type": "object",
+        "_$flags": "w"
+      },
+      "new()": {
+        "_$protos": ["Object.prototype"],
+        "startE": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391658594
+        },
+        "onloadT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 1612391662325
+        },
+        "pageT": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 4387.32
+        },
+        "tran": {
+          "_$type": "number",
+          "_$flags": "cew",
+          "_$value": 15
+        },
+        "_$type": "constructor"
+      },
+      "_$type": "function",
+      "_$function": "function () { [native code] }",
+      "_$invocation": "{startE: 1612391658594,onloadT: 1612391662325,pageT: 4387.547,tran: 15}",
+      "_$flags": "cew",
+      "_$value": "function () { [native code] }"
+    },
+    "app": {
+      "_$protos": ["Object.prototype"],
+      "getIsInstalled": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetIsInstalled"
+        },
+        "_$type": "function",
+        "_$function": "function GetIsInstalled() { [native code] }",
+        "_$invocation": false,
+        "_$flags": "cew",
+        "_$value": "function GetIsInstalled() { [native code] }"
+      },
+      "getDetails": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetDetails"
+        },
+        "_$type": "function",
+        "_$function": "function GetDetails() { [native code] }",
+        "_$invocation": null,
+        "_$flags": "cew",
+        "_$value": "function GetDetails() { [native code] }"
+      },
+      "runningState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 0
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "GetRunningState"
+        },
+        "_$type": "function",
+        "_$function": "function GetRunningState() { [native code] }",
+        "_$invocation": "cannot_run",
+        "_$flags": "cew",
+        "_$value": "function GetRunningState() { [native code] }"
+      },
+      "isInstalled": {
+        "_$type": "boolean",
+        "_$flags": "ce",
+        "_$value": false,
+        "_$get": "function() { return isInstalled(); }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      },
+      "installState": {
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getInstallState"
+        },
+        "prototype": {
+          "_$protos": ["Object.prototype"],
+          "_$type": "object",
+          "_$flags": "w"
+        },
+        "new()": {
+          "_$protos": ["getInstallState.prototype", "Object.prototype"],
+          "_$type": "constructor"
+        },
+        "_$type": "function",
+        "_$function": "function getInstallState(callback) {\n  var callbackId = nextCallbackId++;\n  callbacks[callbackId] = callback;\n  appNatives.GetInstallState(callbackId);\n}",
+        "_$flags": "cew",
+        "_$value": "function getInstallState(callback) {\n  var callbackId = nextCallbackId++;\n  callbacks[callbackId] = callback;\n  appNatives.GetInstallState(callbackId);\n}"
+      },
+      "_$type": "object",
+      "_$flags": "cew"
+    },
+    "_$type": "object",
+    "_$flags": "ew"
+  },
+  "prevProperty": "globalThis"
+}

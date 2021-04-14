@@ -9,7 +9,8 @@ export default class HumanEmulators {
     this.emulatorsById[HumanEmulatorClass.id] = HumanEmulatorClass;
   }
 
-  public static create(id: string) {
+  public static createInstance(id: string) {
+    id = id || this.getRandomId();
     let EmulatorClass = this.emulatorsById[id];
     if (!EmulatorClass) {
       const fromShortId = `@secret-agent/emulate-humans-${id}`;

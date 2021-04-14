@@ -1,6 +1,6 @@
-import Chrome80 from '@secret-agent/emulate-chrome-80';
 import Log from '@secret-agent/commons/Logger';
-import Chrome83 from '@secret-agent/emulate-chrome-83/index';
+import Chrome80 from '@secret-agent/emulate-chrome-80';
+import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { TestServer } from './server';
@@ -10,7 +10,7 @@ import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
-describe.each([[Chrome80.engine], [Chrome83.engine]])(
+describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
   'Load test for %s@%s',
   (browserEngine: IBrowserEngine) => {
     let server: TestServer;

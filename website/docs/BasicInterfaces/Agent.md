@@ -54,7 +54,7 @@ const { Agent } = require('secret-agent');
 - options `object` Accepts any of the following:
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
-  - browserEmulatorId `string` defaults to `chrome-83`. Emulates a specific browser engine version.
+  - browserEmulatorId `string` defaults to `chrome-latest`. Emulates a specific browser engine version.
   - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
