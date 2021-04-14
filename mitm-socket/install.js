@@ -44,7 +44,7 @@ const forceBuild = Boolean(JSON.parse(process.env.SA_REBUILD_MITM_SOCKET || 'fal
     const goVersionNeeded = getGoVersionNeeded();
     console.log(
       `The architecture file you need for the Secret Agent connect library is not available (${filepath}).\n\n
-You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/lib directory\n\n`,
+You can install golang ${goVersionNeeded} (https://golang.org/) and run "go build" from the mitm-socket/go directory\n\n`,
     );
     process.exit(1);
   }
@@ -77,7 +77,7 @@ function tryBuild(programName) {
 
   if (isGoInstalled) {
     if (compile()) {
-      fs.renameSync(`${__dirname}/lib/${programName}`, `${outDir}/${programName}`);
+      fs.renameSync(`${__dirname}/go/${programName}`, `${outDir}/${programName}`);
       return true;
     }
   }
@@ -165,7 +165,7 @@ async function getSourceChecksum(filename) {
 
 function compile() {
   try {
-    execSync('go build', { cwd: `${__dirname}/lib` });
+    execSync('go build', { cwd: `${__dirname}/go` });
     return true;
   } catch (err) {
     console.log(
@@ -177,7 +177,7 @@ function compile() {
 }
 
 function getGoVersionNeeded() {
-  const goMod = fs.readFileSync(`${__dirname}/lib/go.mod`, 'utf8');
+  const goMod = fs.readFileSync(`${__dirname}/go/go.mod`, 'utf8');
   const goMatch = goMod.match(/go ([\d.]+)/);
   return goMatch[1];
 }

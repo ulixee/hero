@@ -1,7 +1,7 @@
 builds:
   - id: 'connect'
     binary: connect
-    dir: ./lib
+    dir: ./go
     goos:
       - linux
       - windows
