@@ -1,5 +1,5 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
-import Chrome83 from '@secret-agent/emulate-chrome-83';
+import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
@@ -12,7 +12,7 @@ import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
-describe.each([[Chrome80.engine], [Chrome83.engine]])(
+describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
   'Frames for %s@%s',
   (browserEngine: IBrowserEngine) => {
     let server: TestServer;

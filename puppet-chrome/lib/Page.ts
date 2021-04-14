@@ -323,7 +323,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   }
 
   private async initialize(): Promise<void> {
-    const errors = await Promise.all([
+    const promises = [
       this.updateEmulationSettings().catch(err => err),
       this.networkManager.initialize().catch(err => err),
       this.framesManager.initialize().catch(err => err),
@@ -337,9 +337,13 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.cdpSession
         .send('Emulation.setFocusEmulationEnabled', { enabled: true })
         .catch(err => err),
-    ]);
+    ];
 
-    for (const error of errors) {
+    // TODO: need to queue up new page scripts before running debugger, but we need to have emulators "publish" them to do that
+
+    promises.push(this.cdpSession.send('Runtime.runIfWaitingForDebugger').catch(err => err));
+
+    for (const error of await Promise.all(promises)) {
       if (error && error instanceof Error) throw error;
     }
 
@@ -361,8 +365,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         windowOpenParams: this.opener.windowOpenParams,
       });
     }
-
-    await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
   }
 
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent): Promise<any> {

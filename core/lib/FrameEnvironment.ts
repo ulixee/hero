@@ -22,6 +22,7 @@ import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
 import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -31,7 +32,6 @@ import CommandRecorder from './CommandRecorder';
 import FrameNavigations from './FrameNavigations';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
-import injectedSourceUrl from '../../core-interfaces/injectedSourceUrl';
 import { JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 

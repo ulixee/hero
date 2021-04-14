@@ -2,8 +2,8 @@ import { UAParser } from 'ua-parser-js';
 import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import { pickRandom } from '@secret-agent/commons/utils';
+import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import GlobalPool from './GlobalPool';
-import IUserAgentMatchMeta from "../../core-interfaces/IUserAgentMatchMeta";
 
 export default class BrowserEmulators {
   public static defaultId = ChromeLatest.id;
@@ -75,11 +75,16 @@ export default class BrowserEmulators {
     }
   }
 
-  private static extractUserAgentMatchMetaFromUa(uaBrowser: UAParser.IBrowser, uaOs: UAParser.IOS): IUserAgentMatchMeta {
-    const [browserVersionMajor, browserVersionMinor] = uaBrowser.version.split('.').map(x => Number(x));
+  private static extractUserAgentMatchMetaFromUa(
+    uaBrowser: UAParser.IBrowser,
+    uaOs: UAParser.IOS,
+  ): IUserAgentMatchMeta {
+    const [browserVersionMajor, browserVersionMinor] = uaBrowser.version
+      .split('.')
+      .map(x => Number(x));
     const [osVersionMajor, osVersionMinor] = uaOs.version.split('.').map(x => Number(x));
     const browserName = (uaBrowser.name || '').toLowerCase();
-    const browserId = `${browserName}-${browserVersionMajor}-${browserVersionMinor}`
+    const browserId = `${browserName}-${browserVersionMajor}-${browserVersionMinor}`;
     const osName = (uaOs.name || '').toLowerCase();
 
     let osId = [osName.replace(' ', '-'), osVersionMajor, osVersionMinor].filter(x => x).join('-');
@@ -89,13 +94,13 @@ export default class BrowserEmulators {
       browser: {
         id: browserId,
         name: browserName,
-        version: { major: browserVersionMajor, minor: browserVersionMinor }
+        version: { major: browserVersionMajor, minor: browserVersionMinor },
       },
       operatingSystem: {
         id: osId,
         name: osName,
-        version: { major: osVersionMajor, minor: osVersionMinor }
-      }
+        version: { major: osVersionMajor, minor: osVersionMinor },
+      },
     };
   }
 

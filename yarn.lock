@@ -18087,12 +18087,7 @@ typography@^0.16.19:
     object-assign "^4.1.0"
     typography-normalize "^0.16.19"
 
-ua-parser-js@^0.7.18:
-  version "0.7.24"
-  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.24.tgz#8d3ecea46ed4f1f1d63ec25f17d8568105dc027c"
-  integrity sha512-yo+miGzQx5gakzVK3QFfN0/L9uVhosXBBO7qmnk7c2iw1IhL212wfA3zbnI54B0obGwC/5NWub/iT9sReMx+Fw==
-
-ua-parser-js@^0.7.22:
+ua-parser-js@^0.7.18, ua-parser-js@^0.7.22:
   version "0.7.24"
   resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.24.tgz#8d3ecea46ed4f1f1d63ec25f17d8568105dc027c"
   integrity sha512-yo+miGzQx5gakzVK3QFfN0/L9uVhosXBBO7qmnk7c2iw1IhL212wfA3zbnI54B0obGwC/5NWub/iT9sReMx+Fw==
@@ -18824,7 +18819,14 @@ w3c-hr-time@^1.0.2:
   dependencies:
     browser-process-hrtime "^1.0.0"
 
-w3c-xmlserializer@^2.0.0, "w3c-xmlserializer@https://github.com/ulixee/w3c-xmlserializer.git":
+w3c-xmlserializer@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/w3c-xmlserializer/-/w3c-xmlserializer-2.0.0.tgz#3e7104a05b75146cc60f564380b7f683acf1020a"
+  integrity sha512-4tzD0mF8iSiMiNs30BiLO3EpfGLZUT2MSX/G+o7ZywDzliWQ3OPtTZ0PTC3B3ca1UAf4cJMHB+2Bf56EriJuRA==
+  dependencies:
+    xml-name-validator "^3.0.0"
+
+"w3c-xmlserializer@https://github.com/ulixee/w3c-xmlserializer.git":
   version "2.0.0"
   resolved "https://github.com/ulixee/w3c-xmlserializer.git#74efc6b7211319a6a14a2c12d86028ca60f4f559"
   dependencies:

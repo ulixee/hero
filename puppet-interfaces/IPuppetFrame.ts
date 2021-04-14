@@ -17,7 +17,7 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
-    shouldAwaitExpression?: boolean,
+    options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
   ): Promise<T>;
   evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
   toJSON(): object;

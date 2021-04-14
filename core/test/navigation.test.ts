@@ -358,14 +358,15 @@ setTimeout(function() {
       },
     ]);
 
-    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'onNavigation');
+    const spy = jest.spyOn<any, any>(FrameNavigationsObserver.prototype, 'resolvePendingStatus');
 
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     // should not have triggered a navigation change
-    expect(spy).not.toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toContain('PaintingStable');
   });
 
   it('handles a new tab that redirects', async () => {
@@ -408,8 +409,7 @@ setTimeout(() => {
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
 
-    await popupTab.waitForLoad(LocationStatus.DomContentLoaded);
-    await popupTab.waitForLocation(LocationTrigger.change);
+    await new Promise(resolve => setTimeout(resolve, 200));
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     tab.sessionState.db.flush();
@@ -429,7 +429,7 @@ setTimeout(() => {
       `${koaServer.baseUrl}/popup-redirect3`,
       `${koaServer.baseUrl}/popup-redirect3`,
     ]);
-    expect(history[0].stateChanges.has('ContentPaint')).toBe(true);
+
     expect(history[1].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
     expect(history[2].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
     expect(history[3].stateChanges.has('ContentPaint')).toBe(true);

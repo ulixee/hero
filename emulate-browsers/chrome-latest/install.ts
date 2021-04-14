@@ -1,1 +1,1 @@
-import '@secret-agent/emulate-chrome-83/install';
+import '@secret-agent/emulate-chrome-88/install';

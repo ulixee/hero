@@ -1,17 +1,17 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
-import Chrome83 from '@secret-agent/emulate-chrome-83';
+import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
-import { createTestPage, ITestPage } from './TestPage';
+import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
 import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
-describe.each([[Chrome80.engine], [Chrome83.engine]])(
+describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
   'Page.popups for %s@%s',
   (browserEngine: IBrowserEngine) => {
     let server: TestServer;
@@ -33,6 +33,7 @@ describe.each([[Chrome80.engine], [Chrome83.engine]])(
         },
         log,
       );
+      capturePuppetContextLogs(context, `${browserEngine.fullVersion}-Page.popups-test`);
       context.on('page', event => {
         needsClosing.push(event.page);
       });
