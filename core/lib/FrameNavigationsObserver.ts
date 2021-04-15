@@ -119,7 +119,6 @@ export default class FrameNavigationsObserver {
   }
 
   public waitForReady(): Promise<void> {
-    if (!this.navigations.top) return Promise.resolve();
     return this.waitForLoad(LocationStatus.DomContentLoaded);
   }
 

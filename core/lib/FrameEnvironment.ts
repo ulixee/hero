@@ -209,7 +209,9 @@ export default class FrameEnvironment {
 
   public async getLocationHref(): Promise<string> {
     await this.navigationsObserver.waitForReady();
-    return this.puppetFrame.evaluate('location.href', false);
+    return this.puppetFrame.evaluate('location.href', false, {
+      retriesWaitingForLoad: 1,
+    });
   }
 
   public async getCookies(): Promise<ICookie[]> {
@@ -224,9 +226,7 @@ export default class FrameEnvironment {
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    await this.navigationsObserver.waitForReady();
-    const url = this.puppetFrame.url;
-    if (url === 'about:blank') {
+    if (!this.navigations.top && this.puppetFrame.url === 'about:blank') {
       throw new Error(`Chrome won't allow you to set cookies on a blank tab.
 
 SecretAgent supports two options to set cookies:
@@ -234,6 +234,9 @@ a) Goto a url first and then set cookies on the activeTab
 b) Use the UserProfile feature to set cookies for 1 or more domains before they're loaded (https://secretagent.dev/docs/advanced/user-profile)
       `);
     }
+
+    await this.navigationsObserver.waitForReady();
+    const url = this.navigations.currentUrl;
     await this.session.browserContext.addCookies([
       {
         name,

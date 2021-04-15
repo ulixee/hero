@@ -390,9 +390,10 @@ setTimeout(function() {
       ctx.body = `<body>
 <h1>Loaded</h1>
 <script type="text/javascript">
-setTimeout(() => {
+const perfObserver = new PerformanceObserver(() => {
   window.location.href = '/popup-redirect';
-}, 200);
+});
+perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 </script>
       </body>`;
     });
@@ -401,7 +402,6 @@ setTimeout(() => {
     });
 
     await tab.goto(`${koaServer.baseUrl}/popup-start`);
-
     await tab.waitForLoad(LocationStatus.PaintingStable);
     await tab.interact([
       {
@@ -412,8 +412,6 @@ setTimeout(() => {
 
     // clear data before this run
     const popupTab = await tab.waitForNewTab();
-
-    await new Promise(resolve => setTimeout(resolve, 200));
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
     // if we're on serious delay, need to wait for change
     if ((await popupTab.getLocationHref()) === `${koaServer.baseUrl}/popup`) {
