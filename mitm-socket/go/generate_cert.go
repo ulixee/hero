@@ -244,7 +244,7 @@ func (c *CertConfig) CreateCert(hostname string) ([]byte, int64, error) {
 
 	// Increment the serial number
 	serial := atomic.AddInt64(&currentSerialNumber, 1)
-    expireDate := time.Now().AddDate(0, 1, 0)
+	expireDate := time.Now().AddDate(0, 1, 0)
 
 	tmpl := &x509.Certificate{
 		SerialNumber: big.NewInt(serial),

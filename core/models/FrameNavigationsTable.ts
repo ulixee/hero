@@ -1,4 +1,3 @@
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import SqliteTable from '@secret-agent/commons/SqliteTable';

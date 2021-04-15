@@ -1,6 +1,5 @@
 import * as http from 'http';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
-import * as http2 from 'http2';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -126,8 +125,6 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return this.onError('ServerToProxyToClient.ReadWriteResponseError', err);
     }
     context.setState(ResourceState.End);
-
-    context.requestSession.requestAgent.freeSocket(context);
   }
 
   protected onError(kind: string, error: Error): void {
@@ -244,8 +241,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
     if (context.responseTrailers) {
       proxyToClientResponse.addTrailers(context.responseTrailers);
     }
-    proxyToClientResponse.end();
+    await new Promise<void>(resolve => proxyToClientResponse.end(resolve));
 
+    context.requestSession.requestAgent.freeSocket(context);
     context.cacheHandler.onResponseEnd();
 
     // wait for browser request id before resolving

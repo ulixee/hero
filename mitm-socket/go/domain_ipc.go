@@ -52,10 +52,3 @@ func SendErrorToIpc(id int, step string, err error) {
 		log.Fatalf("[id=%d] WriteMessage Error: %+v\n", id, writeError)
 	}
 }
-
-type ErrorIpcMessage struct {
-	Id        int    `id`
-	Status    string `status`
-	Error     string `error`
-	ErrorStep string `errorStep`
-}

@@ -326,7 +326,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       await getState(this).connection.getCoreSessionOrReject();
       return onfulfilled(this);
     } catch (err) {
-      return onrejected(err);
+      if (onrejected) return onrejected(err);
+      throw err;
     }
   }
 

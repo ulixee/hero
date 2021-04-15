@@ -15,7 +15,7 @@ import (
 )
 
 func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, allowInsecure bool) (net.Conn, error) {
-  	isSecure, proxyHost, err := getCleanHost(proxyUrl)
+	isSecure, proxyHost, err := getCleanHost(proxyUrl)
 
 	fmt.Printf("Dialing proxy connect %s to %s\n", proxyHost, addr)
 	connectReq := &http.Request{
@@ -25,7 +25,7 @@ func DialAddrViaHttpProxy(dialer net.Dialer, addr string, proxyUrl *url.URL, all
 		Header: make(http.Header),
 	}
 
-    if proxyUrl.User != nil {
+	if proxyUrl.User != nil {
 		proxyAuth := proxyUrl.User.String()
 		connectReq.Header.Set("Proxy-Authorization", fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(proxyAuth))))
 	}

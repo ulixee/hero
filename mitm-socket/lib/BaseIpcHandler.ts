@@ -62,37 +62,35 @@ export default abstract class BaseIpcHandler {
   }
 
   public close(): void {
-    const parentLogId = this.logger.info(`${this.handlerName}.closing`);
+    const parentLogId = this.logger.info(`${this.handlerName}.Closing`);
     if (this.isClosing) return;
     this.isClosing = true;
 
-    if (!this.child.killed) {
-      if (os.platform() === 'win32') {
-        try {
-          // fix for node 13 throwing errors on closed sockets
-          this.child.stdin.on('error', () => {
-            // catch
-          });
-          // NOTE: windows writes to stdin
-          this.child.send('disconnect');
-        } catch (err) {
-          // don't log epipes
-        }
-      } else {
-        this.child.kill('SIGINT');
-      }
-      this.child.unref();
+    try {
+      // fix for node 13 throwing errors on closed sockets
+      this.child.stdin.on('error', () => {
+        // catch
+      });
+      // NOTE: windows writes to stdin
+      // MUST SEND SIGNALS BEFORE DISABLING PIPE!!
+      this.child.send('disconnect');
+    } catch (err) {
+      // don't log epipes
     }
+
+    this.child.kill('SIGINT');
+    this.child.unref();
 
     try {
       this.onExit();
     } catch (err) {
       // don't log cleanup issue
     }
+
     if (!this.waitForConnect.isResolved && this.hasWaitListeners) {
       this.waitForConnect.reject(new CanceledPromiseError('Canceling ipc connect'));
     }
-    this.logger.stats(`${this.handlerName}.closed`, {
+    this.logger.stats(`${this.handlerName}.Closed`, {
       parentLogId,
     });
   }

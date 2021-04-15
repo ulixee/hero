@@ -1,4 +1,4 @@
-import MitmSocket from '@secret-agent/mitm-socket';
+import MitmSocket, { IGoTlsSocketConnectOpts } from '@secret-agent/mitm-socket';
 import * as http2 from 'http2';
 import {
   ClientHttp2Session,
@@ -10,9 +10,6 @@ import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import * as https from 'https';
 import { RequestOptions } from 'https';
 import * as http from 'http';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
-import Queue from '@secret-agent/commons/Queue';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -21,6 +18,7 @@ import RequestSession from '../handlers/RequestSession';
 import BlockHandler from '../handlers/BlockHandler';
 import HeadersHandler from '../handlers/HeadersHandler';
 import ResourceState from '../interfaces/ResourceState';
+import SocketPool from './SocketPool';
 
 const { log } = Log(module);
 
@@ -35,9 +33,7 @@ export default class MitmRequestAgent {
   private readonly session: RequestSession;
   private readonly maxConnectionsPerOrigin: number;
 
-  private readonly http2Sessions: IHttp2Session[] = [];
-  private readonly sockets = new Set<MitmSocket>();
-  private readonly socketPoolByOrigin: { [origin: string]: ISocketPool } = {};
+  private readonly socketPoolByOrigin = new Map<string, SocketPool>();
 
   constructor(session: RequestSession) {
     this.session = session;
@@ -86,9 +82,14 @@ export default class MitmRequestAgent {
     if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
-    const connectionHeader = ctx.responseHeaders?.Connection ?? ctx.responseHeaders?.connection;
-    const isCloseRequested = connectionHeader !== 'keep-alive';
+    const headers = ctx.responseOriginalHeaders;
+    let isCloseRequested = false;
 
+    if (headers) {
+      if (headers.Connection === 'close' || headers.connection === 'close') {
+        isCloseRequested = true;
+      }
+    }
     const socket = ctx.proxyToServerMitmSocket;
 
     if (!socket.isReusable() || isCloseRequested) {
@@ -98,61 +99,61 @@ export default class MitmRequestAgent {
     socket.isReused = true;
 
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
-    const pending = pool.pending.shift();
-    if (pending) {
-      pending.resolve(socket);
-    } else {
-      pool.free.push(socket);
-    }
+    pool?.freeSocket(ctx.proxyToServerMitmSocket);
   }
 
   public close(): void {
-    for (const session of this.http2Sessions) {
-      try {
-        session.mitmSocket.close();
-        session.client.destroy();
-        session.client.unref();
-      } catch (err) {
-        // don't need to log closing sessions
-      }
-    }
     try {
       this.socketSession.close();
     } catch (err) {
       // don't need to log closing sessions
     }
-    this.http2Sessions.length = 0;
-    for (const socket of this.sockets) {
-      socket.close();
+    for (const pool of this.socketPoolByOrigin.values()) {
+      pool.close();
     }
-    this.sockets.clear();
   }
 
-  /////// ////////// Socket Connection Management ///////////////////////////////////////////////////
-
-  private async createSocketConnection(
+  private async assignSocket(
     ctx: IMitmRequestContext,
     options: RequestOptions,
   ): Promise<MitmSocket> {
+    ctx.setState(ResourceState.GetSocket);
+    const pool = this.getSocketPoolByOrigin(ctx.url.origin);
+    let isKeepAlive = true;
+    if (((options.headers.connection ?? options.headers.Connection) as string)?.match(/close/i)) {
+      isKeepAlive = false;
+    }
+    const mitmSocket = await pool.getSocket(
+      { isWebsocket: ctx.isUpgrade },
+      this.createSocketConnection.bind(this, ctx, options, isKeepAlive),
+    );
+    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
+    return mitmSocket;
+  }
+
+  private async createSocketConnection(
+    ctx: IMitmRequestContext,
+    options: IGoTlsSocketConnectOpts,
+    keepAlive: boolean,
+  ): Promise<MitmSocket> {
     const session = this.session;
-    const isKeepAlive =
-      ((options.headers.connection ?? options.headers.Connection) as string)?.match(
-        /keep-alive/i,
-      ) ?? true;
 
     ctx.setState(ResourceState.LookupDns);
     const ipIfNeeded = await session.lookupDns(options.host);
     ctx.dnsResolvedIp = ipIfNeeded || 'Not Found';
 
-    const mitmSocket = new MitmSocket(session.sessionId, {
-      host: ipIfNeeded || options.host,
-      port: String(options.port),
-      isSsl: ctx.isSSL,
-      servername: options.servername || options.host,
-      keepAlive: !!isKeepAlive,
-      disableAlpn: ctx.isUpgrade,
-    });
-    mitmSocket.on('close', this.onSocketClosed.bind(this, mitmSocket, ctx, options));
+    const mitmSocket = new MitmSocket(
+      session.sessionId,
+      {
+        host: ipIfNeeded || options.host,
+        port: String(options.port),
+        isSsl: ctx.isSSL,
+        servername: options.servername || options.host,
+        keepAlive,
+        isWebsocket: ctx.isUpgrade,
+      },
+      ctx.isUpgrade,
+    );
     mitmSocket.on('connect', () => session.emit('socket-connect', { socket: mitmSocket }));
 
     if (session.upstreamProxyUrl) {
@@ -170,110 +171,15 @@ export default class MitmRequestAgent {
     return mitmSocket;
   }
 
-  private async assignSocket(
-    ctx: IMitmRequestContext,
-    requestSettings: RequestOptions,
-  ): Promise<MitmSocket> {
-    ctx.setState(ResourceState.GetSocket);
-    let mitmSocket = await this.getAvailableSocket(ctx, requestSettings);
-    if (!mitmSocket) {
-      mitmSocket = await this.waitForFreeSocket(ctx.url.origin);
-    }
-    MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
-    return mitmSocket;
-  }
-
-  private waitForFreeSocket(origin: string): Promise<MitmSocket> {
-    const socketPool = this.getSocketPoolByOrigin(origin);
-    const pending = createPromise<MitmSocket>();
-    socketPool.pending.push(pending);
-    return pending.promise;
-  }
-
-  private getSocketPoolByOrigin(origin: string): ISocketPool {
-    if (!this.socketPoolByOrigin[origin]) {
-      this.socketPoolByOrigin[origin] = {
-        alpn: null,
-        queue: new Queue('SOCKET TO ORIGIN'),
-        pending: [],
-        all: new Set<MitmSocket>(),
-        free: [],
-      };
+  private getSocketPoolByOrigin(origin: string): SocketPool {
+    if (!this.socketPoolByOrigin.has(origin)) {
+      this.socketPoolByOrigin.set(
+        origin,
+        new SocketPool(origin, this.maxConnectionsPerOrigin, this.session),
+      );
     }
 
-    return this.socketPoolByOrigin[origin];
-  }
-
-  private async onSocketClosed(
-    socketConnect: MitmSocket,
-    ctx: IMitmRequestContext,
-    options: RequestOptions,
-  ): Promise<void> {
-    const origin = ctx.url.origin;
-    this.sockets.delete(socketConnect);
-
-    log.stats('Socket closed', {
-      sessionId: this.session.sessionId,
-      origin,
-    });
-    ctx.requestSession.emit('socket-close', { socket: socketConnect });
-    const pool = this.getSocketPoolByOrigin(origin);
-
-    pool.all.delete(socketConnect);
-
-    const freeIdx = pool.free.indexOf(socketConnect);
-    if (freeIdx >= 0) pool.free.splice(freeIdx, 1);
-
-    if (this.session.isClosing || ctx.isUpgrade) return;
-
-    // if nothing pending, return
-    if (!pool.pending.length) return;
-
-    // safe to create one since we are short
-    const socket = await this.getAvailableSocket(ctx, options);
-    if (!socket) return;
-
-    const pending = pool.pending.shift();
-
-    if (pending) {
-      pending.resolve(socket);
-    } else {
-      pool.free.push(socket);
-    }
-  }
-
-  private getAvailableSocket(
-    ctx: IMitmRequestContext,
-    options: RequestOptions,
-  ): Promise<MitmSocket> {
-    const origin = ctx.url.origin;
-    const isUpgrade = ctx.isUpgrade;
-
-    const pool = this.getSocketPoolByOrigin(origin);
-    return pool.queue.run(async () => {
-      const http2Session = this.getHttp2Session(origin);
-      if (http2Session && !isUpgrade) {
-        return Promise.resolve(http2Session.mitmSocket);
-      }
-
-      if (pool.free.length) return pool.free.shift();
-
-      if (pool.all.size >= this.maxConnectionsPerOrigin) {
-        return null;
-      }
-
-      const mitmSocket = await this.createSocketConnection(ctx, options);
-      pool.alpn = mitmSocket.alpn;
-
-      this.sockets.add(mitmSocket);
-
-      // don't put connections that can't be reused into the pool
-      if (!mitmSocket.isHttp2() && !isUpgrade) {
-        pool.all.add(mitmSocket);
-      }
-
-      return mitmSocket;
-    });
+    return this.socketPoolByOrigin.get(origin);
   }
 
   private async http1Request(
@@ -285,6 +191,7 @@ export default class MitmRequestAgent {
 
     let didHaveFlushErrors = false;
 
+    ctx.proxyToServerMitmSocket.receivedEOF = false;
     const request = httpModule.request({
       ...requestSettings,
       createConnection: () => ctx.proxyToServerMitmSocket.socket,
@@ -342,7 +249,13 @@ export default class MitmRequestAgent {
       if (!request.headersSent) request.flushHeaders();
       // give this 100 ms to flush (go is on a wait timer right now)
       await new Promise(resolve => setTimeout(resolve, 100));
-      if (didHaveFlushErrors || ctx.proxyToServerMitmSocket.isClosing) {
+      if (
+        didHaveFlushErrors ||
+        ctx.proxyToServerMitmSocket.isClosing ||
+        ctx.proxyToServerMitmSocket.receivedEOF
+      ) {
+        const socket = ctx.proxyToServerMitmSocket;
+        socket.close();
         await this.assignSocket(ctx, requestSettings);
         return this.http1Request(ctx, requestSettings);
       }
@@ -533,16 +446,11 @@ export default class MitmRequestAgent {
     }
   }
 
-  private getHttp2Session(origin: string): IHttp2Session | undefined {
-    return this.http2Sessions.find(x => {
-      if (x.origin === origin) return true;
-      return x.client.originSet?.includes(origin);
-    });
-  }
-
   private createHttp2Session(ctx: IMitmRequestContext): ClientHttp2Session {
     const origin = ctx.url.origin;
-    const existing = this.getHttp2Session(origin);
+    const originSocketPool = this.getSocketPoolByOrigin(origin);
+
+    const existing = originSocketPool.getHttp2Session();
     if (existing) return existing.client;
 
     const session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
@@ -593,7 +501,6 @@ export default class MitmRequestAgent {
         origin,
         args,
       });
-      this.closeHttp2Session(proxyToServerH2Client);
     });
 
     proxyToServerH2Client.on('altsvc', (alt, altOrigin) => {
@@ -611,6 +518,12 @@ export default class MitmRequestAgent {
         origin,
         origins,
       });
+      for (const svcOrigin of origins) {
+        this.getSocketPoolByOrigin(svcOrigin).registerHttp2Session(
+          proxyToServerH2Client,
+          ctx.proxyToServerMitmSocket,
+        );
+      }
     });
 
     proxyToServerH2Client.on('close', () => {
@@ -618,38 +531,10 @@ export default class MitmRequestAgent {
         sessionId: this.session.sessionId,
         origin,
       });
-      this.closeHttp2Session(proxyToServerH2Client);
     });
 
-    this.http2Sessions.push({
-      origin,
-      client: proxyToServerH2Client,
-      mitmSocket: ctx.proxyToServerMitmSocket,
-    });
+    originSocketPool.registerHttp2Session(proxyToServerH2Client, ctx.proxyToServerMitmSocket);
 
     return proxyToServerH2Client;
   }
-
-  private closeHttp2Session(client: ClientHttp2Session): void {
-    const index = this.http2Sessions.findIndex(x => x.client === client);
-    if (index < 0) return;
-
-    const [session] = this.http2Sessions.splice(index, 1);
-    client.close();
-    session.mitmSocket.close();
-  }
-}
-
-interface ISocketPool {
-  alpn: string;
-  queue: Queue;
-  all: Set<MitmSocket>;
-  free: MitmSocket[]; // array for fifo
-  pending: IResolvablePromise<MitmSocket>[];
-}
-
-interface IHttp2Session {
-  origin: string;
-  client: ClientHttp2Session;
-  mitmSocket: MitmSocket;
 }

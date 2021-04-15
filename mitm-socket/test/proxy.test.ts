@@ -164,7 +164,7 @@ test('should handle websockets over proxies', async () => {
     ws.send('ola');
   });
 
-  const tlsConnection = getTlsConnection(serverPort);
+  const tlsConnection = getTlsConnection(serverPort, undefined, true);
   tlsConnection.connectOpts.keepAlive = true;
   tlsConnection.setProxyUrl(`http://localhost:${proxyPort}`);
   await tlsConnection.connect(mitmSocketSession);

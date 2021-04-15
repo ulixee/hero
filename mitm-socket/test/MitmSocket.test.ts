@@ -195,7 +195,7 @@ test('should handle websockets', async () => {
     }
   });
 
-  const tlsConnection = getTlsConnection(server.port);
+  const tlsConnection = getTlsConnection(server.port, undefined, true);
   tlsConnection.connectOpts.keepAlive = true;
   await tlsConnection.connect(mitmSocketSession);
 

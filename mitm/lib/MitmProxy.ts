@@ -403,7 +403,7 @@ export default class MitmProxy {
   public static close(): void {
     if (this.certificateGenerator) {
       try {
-        // this.certificateGenerator.close();
+        this.certificateGenerator.close();
       } catch (err) {
         // closing, so don't rebroadcast
       }

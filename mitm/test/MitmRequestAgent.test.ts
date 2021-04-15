@@ -67,7 +67,8 @@ test('should create up to a max number of secure connections per origin', async 
   }
   await Promise.all(promises);
 
-  expect(connectionsByOrigin[server.baseUrl].all.size).toBe(2);
+  // @ts-ignore
+  expect(connectionsByOrigin.get(server.baseUrl).pool.size).toBe(2);
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(2);
@@ -108,7 +109,8 @@ test('should create new connections as needed when no keepalive', async () => {
   await Promise.all(promises);
 
   // they all close after use, so should be gone now
-  expect(connectionsByOrigin[server.baseUrl].all.size).toBe(0);
+  // @ts-ignore
+  expect(connectionsByOrigin.get(server.baseUrl).pool.size).toBe(0);
 
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
@@ -116,6 +118,7 @@ test('should create new connections as needed when no keepalive', async () => {
 });
 
 test('should be able to handle a reused socket that closes on server', async () => {
+  MitmRequestAgent.defaultMaxConnectionsPerOrigin = 1;
   let serverSocket: net.Socket;
   const sockets = new Set<net.Socket>();
   const server = await Helpers.runHttpsServer(async (req, res) => {
@@ -215,11 +218,13 @@ test('it should not put upgrade connections in a pool', async () => {
   await new Promise(resolve => wsClient.on('open', resolve));
 
   // @ts-ignore
-  const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
-  expect(connectionsByOrigin[`ws://localhost:${httpServer.port}`].all.size).toBe(0);
+  const pool = session.requestAgent.socketPoolByOrigin.get(`ws://localhost:${httpServer.port}`);
+  // @ts-ignore
+  expect(pool.pool.size).toBe(0);
 });
 
 test('it should reuse http2 connections', async () => {
+  MitmRequestAgent.defaultMaxConnectionsPerOrigin = 4;
   const httpServer = await Helpers.runHttp2Server((request, response) => {
     response.end(request.url);
   });
@@ -230,7 +235,7 @@ test('it should reuse http2 connections', async () => {
   const session = createMitmSession(mitmServer);
 
   // @ts-ignore
-  const connectionsByOrigin = session.requestAgent.socketPoolByOrigin;
+  const pool = session.requestAgent.socketPoolByOrigin;
 
   const proxyCredentials = session.getProxyCredentials();
 
@@ -244,9 +249,10 @@ test('it should reuse http2 connections', async () => {
 
   process.env.MITM_ALLOW_INSECURE = 'false';
   // not reusable, so should not be here
-  expect(connectionsByOrigin[baseUrl].all.size).toBe(0);
   // @ts-ignore
-  expect(session.requestAgent.http2Sessions).toHaveLength(1);
+  expect(pool.get(baseUrl).pool.size).toBe(0);
+  // @ts-ignore
+  expect(pool.get(baseUrl).http2Sessions).toHaveLength(1);
 });
 
 async function startMitmServer() {

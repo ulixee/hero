@@ -37,12 +37,18 @@ export default class MitmSocket extends TypedEventEmitter<{
   public isClosing = false;
   public closedPromise = new Resolvable<Date>();
   public connectError?: string;
+  public receivedEOF = false;
 
   private server = new net.Server().unref();
   private connectPromise: Resolvable<void>;
+  private socketReadyPromise = new Resolvable<void>();
   private readonly callStack: string;
 
-  constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
+  constructor(
+    readonly sessionId: string,
+    readonly connectOpts: IGoTlsSocketConnectOpts,
+    readonly isWebsocket: boolean = false,
+  ) {
     super();
     const id = uuid();
     this.callStack = new Error().stack.replace('Error:', '').trim();
@@ -76,6 +82,8 @@ export default class MitmSocket extends TypedEventEmitter<{
 
   public close(): void {
     if (this.isClosing) return;
+
+    const parentLogId = this.logger.info(`MitmSocket.Closing`);
     this.isClosing = true;
     this.closeTime = new Date();
     if (!this.connectPromise?.isResolved) {
@@ -89,6 +97,9 @@ export default class MitmSocket extends TypedEventEmitter<{
     this.emit('close');
     this.cleanupSocket();
     this.closedPromise.resolve(this.closeTime);
+    this.logger.stats(`MitmSocket.Closed`, {
+      parentLogId,
+    });
   }
 
   public onConnected(socket: net.Socket): void {
@@ -109,6 +120,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     });
     socket.on('end', this.onSocketClose.bind(this, 'end'));
     socket.on('close', this.onSocketClose.bind(this, 'close'));
+    this.socketReadyPromise.resolve();
   }
 
   public async connect(session: MitmSocketSession, connectTimeoutMillis = 30e3): Promise<void> {
@@ -123,9 +135,9 @@ export default class MitmSocket extends TypedEventEmitter<{
       }`,
     );
 
-    await session.requestSocket(this).catch(this.connectPromise.reject);
+    await session.requestSocket(this);
 
-    await this.connectPromise.promise;
+    await Promise.all([this.connectPromise.promise, this.socketReadyPromise.promise]);
   }
 
   public onMessage(message: any): void {
@@ -133,7 +145,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     if (status === 'connected') {
       this.connectTime = new Date();
       this.isConnected = true;
-      this.alpn = message.alpn;
+      if (message.alpn) this.alpn = message.alpn;
       this.remoteAddress = message.remoteAddress;
       this.localAddress = message.localAddress;
       this.emit('connect');
@@ -144,6 +156,8 @@ export default class MitmSocket extends TypedEventEmitter<{
       this.connectPromise.resolve();
     } else if (status === 'error') {
       this.onError(message.error);
+    } else if (status === 'eof') {
+      this.receivedEOF = true;
     } else if (status === 'closing') {
       this.close();
     }
@@ -214,7 +228,7 @@ export interface IGoTlsSocketConnectOpts {
   proxyUrl?: string;
   proxyAuth?: string;
   keepAlive?: boolean;
-  disableAlpn?: boolean;
+  isWebsocket?: boolean;
 }
 
 class Socks5ProxyConnectError extends Error {}

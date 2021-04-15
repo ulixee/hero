@@ -7,8 +7,6 @@ import IConnectionTransport, {
 } from '@secret-agent/puppet-interfaces/IConnectionTransport';
 import * as WebSocket from 'ws';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import * as http from 'http';
-import { URL } from 'url';
 
 const { log } = Log(module);
 

@@ -346,12 +346,20 @@ export function httpGetWithSocket(
 
 let sessionId = 0;
 
-export function getTlsConnection(serverPort: number, host = 'localhost'): MitmSocket {
-  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
-    host,
-    port: String(serverPort),
-    servername: host,
-  });
+export function getTlsConnection(
+  serverPort: number,
+  host = 'localhost',
+  isWebsocket = false,
+): MitmSocket {
+  const tlsConnection = new MitmSocket(
+    `session${(sessionId += 1)}`,
+    {
+      host,
+      port: String(serverPort),
+      servername: host,
+    },
+    isWebsocket,
+  );
   Helpers.onClose(() => tlsConnection.close());
   return tlsConnection;
 }

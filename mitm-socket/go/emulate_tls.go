@@ -42,7 +42,7 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 
 	tlsConn := tls.UClient(dialConn, &tlsConfig, tls.HelloCustom)
 
-	if connectArgs.DisableAlpn {
+	if connectArgs.IsWebsocket {
 		tmp := spec.Extensions[:0]
 		for _, ext := range spec.Extensions {
 			if _, ok := ext.(*tls.ALPNExtension); !ok {

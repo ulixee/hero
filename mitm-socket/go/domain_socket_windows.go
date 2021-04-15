@@ -3,6 +3,7 @@
 package main
 
 import (
+    "net"
 	winio "github.com/Microsoft/go-winio"
 )
 
@@ -16,7 +17,7 @@ func ListenOnDomain(path string) (net.Listener, error) {
 }
 
 func DialOnDomain(path string) (net.Conn, error) {
-	conn, err := winio.DialPipe(path)
+	conn, err := winio.DialPipe(path, nil)
 	if err != nil {
 		return nil, err
 	}

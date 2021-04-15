@@ -34,8 +34,12 @@ func Dial(addr string, connectArgs ConnectArgs, sessionArgs SessionArgs) (net.Co
 	}
 
 	tcpConn, ok := dialConn.(*net.TCPConn)
-	if ok && connectArgs.KeepAlive {
-		tcpConn.SetKeepAlive(true)
+	if ok {
+	    if connectArgs.KeepAlive {
+		    tcpConn.SetKeepAlive(true)
+		}
+        tcpConn.SetNoDelay(connectArgs.IsWebsocket)
+        tcpConn.SetLinger(0)
 	}
 
 	return dialConn, nil

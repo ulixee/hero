@@ -1,86 +1,142 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
-	"os"
+	"sync"
 	"time"
 )
 
 type DomainSocketPiper struct {
-	Id          int
-	client      net.Conn
-	doneChannel chan bool
-	debug       bool
+	id       int
+	client   net.Conn
+	isClosed bool
+	wg       sync.WaitGroup
+	signals  *Signals
+	debug    bool
 }
 
-func (piper *DomainSocketPiper) Pipe(remoteConn net.Conn, sigc chan os.Signal) {
-	piper.doneChannel = make(chan bool)
+func (piper *DomainSocketPiper) Pipe(remote net.Conn) {
+	client := piper.client
 
-	copy := func(dst io.Writer, src net.Conn, doneChannel chan bool) {
-		defer func() {
-			doneChannel <- true
-		}()
+	piper.wg.Add(2)
+	clientHasDataChan := make(chan bool, 1)
+	// Pipe data
+	go piper.copy(client, remote, clientHasDataChan, true)
+	go piper.copy(remote, client, clientHasDataChan, false)
 
-		var readErr error
-		var writeErr error
-		var n int
-		var data []byte = make([]byte, 32*1024)
+	piper.wg.Wait()
+	SendToIpc(piper.id, "closing", nil)
+}
 
-		for {
-			n, readErr = src.Read(data)
+func (piper *DomainSocketPiper) copy(dst net.Conn, src net.Conn, clientHasData chan bool, isReadingFromRemote bool) {
+	var totalBytes int64
+	var n int
+	var w int
+	var neterr net.Error
+	var ok bool
+	var writeErr error
+	var readErr error
+	var direction string
+	var waitForData bool
 
-			if n > 0 {
-				_, writeErr = dst.Write(data[:n])
-				if writeErr != nil {
-					SendErrorToIpc(piper.Id, "writeData", writeErr)
-					return
-				}
-			}
-
-			if readErr == nil && n > 0 {
-			    continue;
-            }
-
-            if readErr == io.EOF {
-                if n == 0 {
-                    return
-                }
-            } else {
-                SendErrorToIpc(piper.Id, "readData", readErr)
-                return
-            }
-
-
-
-			select {
-			case <-doneChannel:
-				return
-			case <-sigc:
-				return
-
-			default:
-				time.Sleep(50 * time.Millisecond)
-			}
+	if piper.debug {
+		if isReadingFromRemote {
+			direction = "from remote"
+		} else {
+			direction = "from client"
 		}
 	}
 
-	// Pipe data
-	go copy(remoteConn, piper.client, piper.doneChannel)
-	go copy(piper.client, remoteConn, piper.doneChannel)
-	<-piper.doneChannel
-	SendToIpc(piper.Id, "closing", nil)
+	data := make([]byte, 5*1096)
+
+	defer piper.wg.Done()
+
+	for {
+		if isReadingFromRemote == true && waitForData {
+			select {
+			case <-clientHasData:
+				waitForData = false
+			case <-time.After(50 * time.Millisecond):
+				if piper.signals.IsClosed || piper.isClosed {
+					return
+				}
+			}
+			if waitForData {
+				continue
+			}
+		}
+		src.SetReadDeadline(time.Now().Add(2 * time.Second)) // Set the deadline
+		n, readErr = src.Read(data)
+
+		if n > 0 {
+			if isReadingFromRemote == false && len(clientHasData) == 0 {
+				clientHasData <- true
+			}
+			w, writeErr = dst.Write(data[0:n])
+			if w < 0 || n < w {
+				w = 0
+				if writeErr == nil {
+					writeErr = errors.New("invalid write result")
+				}
+			}
+			totalBytes += int64(w)
+
+			if writeErr == nil && n != w {
+				writeErr = io.ErrShortWrite
+			}
+			if writeErr != nil {
+				SendErrorToIpc(piper.id, "writeErr", writeErr)
+				piper.isClosed = true
+				return
+			}
+		}
+
+		if piper.debug {
+			fmt.Printf("[id=%d] Read %d bytes %s. Total: %d\n", piper.id, n, direction, totalBytes)
+		}
+
+		if n == 0 && readErr == io.EOF {
+			if isReadingFromRemote {
+				if totalBytes == 0 {
+					piper.isClosed = true
+					return
+				}
+
+				SendToIpc(piper.id, "eof", nil)
+				if len(clientHasData) > 0 {
+					// drain
+					<-clientHasData
+				}
+				waitForData = true
+			} else {
+				piper.isClosed = true
+				return
+			}
+		}
+
+		if readErr != nil && readErr != io.EOF {
+			neterr, ok = readErr.(net.Error)
+			// if not a timeout, stop and return
+			if !ok || !neterr.Timeout() {
+				SendErrorToIpc(piper.id, "readErr", readErr)
+				piper.isClosed = true
+				return
+			}
+		}
+
+		if piper.signals.IsClosed || piper.isClosed {
+			return
+		}
+
+		if n == 0 || readErr != nil {
+			time.Sleep(50 * time.Millisecond)
+		}
+	}
 }
 
 func (piper *DomainSocketPiper) Close() {
-	if piper.debug {
-		fmt.Printf("[id=%d] Done\n", piper.Id)
-	}
-	piper.doneChannel <- true
-
-	if piper.client != nil {
-		piper.client.Close()
-		piper.client = nil
-	}
+	piper.isClosed = true
 }

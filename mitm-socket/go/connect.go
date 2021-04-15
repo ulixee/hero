@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
+	"net"
 	"time"
 
 	utls "github.com/ulixee/utls"
@@ -19,6 +18,8 @@ func main() {
 	var sessionArgs = SessionArgs{}
 	var certConfig *CertConfig
 	json.Unmarshal([]byte(os.Args[1]), &sessionArgs)
+
+	signals := RegisterSignals()
 
 	if sessionArgs.Debug {
 		fmt.Printf("SessionArgs %#v\n", sessionArgs)
@@ -41,45 +42,27 @@ func main() {
 		})
 	}
 
-	// also make a signals channel
-	sigc := make(chan os.Signal, 1)
-	signal.Notify(sigc, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		_, err := fmt.Scanf("disconnect")
-		if err != nil {
-			panic(err)
-		}
-		sigc <- syscall.SIGINT
-	}()
-
 	var msg []byte
 	reader := bufio.NewReader(conn)
 
 	for {
-		select {
-		case <-sigc:
-			if sessionArgs.Debug {
-				fmt.Printf("Got sigc, exiting")
-			}
+		if signals.IsClosed {
 			return
+		}
+		conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond)) // Set the deadline
 
-		default:
-			conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond)) // Set the deadline
+		msg, err = reader.ReadBytes('\n')
+		if err != nil {
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		var connectArgs = ConnectArgs{}
+		json.Unmarshal(msg, &connectArgs)
 
-			msg, err = reader.ReadBytes('\n')
-			if err != nil {
-				time.Sleep(50 * time.Millisecond)
-				continue
-			}
-			var connectArgs = ConnectArgs{}
-			json.Unmarshal(msg, &connectArgs)
-
-			if sessionArgs.Mode == CertsMode {
-				go generateCert(certConfig, connectArgs.Id, connectArgs.Host)
-			} else {
-				go handleSocket(connectArgs, sessionArgs, sigc)
-			}
+		if sessionArgs.Mode == CertsMode {
+			go generateCert(certConfig, connectArgs.Id, connectArgs.Host)
+		} else {
+			go handleSocket(connectArgs, sessionArgs, signals)
 		}
 	}
 }
@@ -93,12 +76,12 @@ func generateCert(config *CertConfig, id int, hostname string) {
 	}
 
 	SendToIpc(id, "certs", map[string]interface{}{
-		"cert": string(cert),
+		"cert":       string(cert),
 		"expireDate": expireDate,
 	})
 }
 
-func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, sigc chan os.Signal) {
+func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, signals *Signals) {
 	var uTlsConn *utls.UConn
 	var protocol string
 
@@ -108,6 +91,7 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, sigc chan os
 	}
 
 	domainConn, connErr := DialOnDomain(connectArgs.SocketPath)
+	defer domainConn.Close()
 
 	if connErr != nil {
 		SendErrorToIpc(id, "ipcConnect", connErr)
@@ -115,9 +99,10 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, sigc chan os
 	}
 
 	domainSocketPiper := &DomainSocketPiper{
-		client:    domainConn,
-		Id:        connectArgs.Id,
-		debug:     sessionArgs.Debug,
+		client:  domainConn,
+		id:      connectArgs.Id,
+		debug:   sessionArgs.Debug,
+		signals: signals,
 	}
 	defer domainSocketPiper.Close()
 
@@ -138,6 +123,10 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, sigc chan os
 			return
 		}
 		protocol = uTlsConn.ConnectionState().NegotiatedProtocol
+	    tcpConn, ok := dialConn.(*net.TCPConn)
+		if protocol == "h2" && ok {
+		    tcpConn.SetNoDelay(true)
+		}
 	}
 
 	SendToIpc(id, "connected", map[string]interface{}{
@@ -147,9 +136,9 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, sigc chan os
 	})
 
 	if uTlsConn != nil {
-		domainSocketPiper.Pipe(uTlsConn, sigc)
+		domainSocketPiper.Pipe(uTlsConn)
 	} else {
-		domainSocketPiper.Pipe(dialConn, sigc)
+		domainSocketPiper.Pipe(dialConn)
 	}
 }
 
@@ -162,7 +151,7 @@ type ConnectArgs struct {
 	Servername  string
 	ProxyUrl    string
 	KeepAlive   bool
-	DisableAlpn bool
+	IsWebsocket bool
 }
 
 type SessionArgs struct {

@@ -2,7 +2,6 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import Tab from './Tab';
-import InjectedScripts from './InjectedScripts';
 
 const { log } = Log(module);
 type AsyncFunc = (...args: any[]) => Promise<any>;

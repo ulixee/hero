@@ -272,13 +272,17 @@ async function createH2Connection(sessionId: string, url: string) {
   });
   Helpers.needsClosing.push(mitmSocketSession);
 
-  const tlsConnection = new MitmSocket(sessionId, {
-    host: 'localhost',
-    port: hostUrl.port,
-    servername: 'localhost',
-    isSsl: url.startsWith('https'),
-    proxyUrl: proxyHost,
-  });
+  const tlsConnection = new MitmSocket(
+    sessionId,
+    {
+      host: 'localhost',
+      port: hostUrl.port,
+      servername: 'localhost',
+      isSsl: url.startsWith('https'),
+      proxyUrl: proxyHost,
+    },
+    false,
+  );
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect(mitmSocketSession);
   const client = http2.connect(url, {

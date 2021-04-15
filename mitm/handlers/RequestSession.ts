@@ -17,7 +17,6 @@ import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
 import ResourceState from '../interfaces/ResourceState';
 import BrowserRequestMatcher from '../lib/BrowserRequestMatcher';
-import MitmProxy from '../lib/MitmProxy';
 
 const { log } = Log(module);
 

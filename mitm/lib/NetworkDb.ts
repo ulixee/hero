@@ -45,6 +45,7 @@ export default class NetworkDb {
   }
 
   public flush(): void {
+    if (!this.db || this.db.readonly) return;
     this.batchInsert.immediate();
   }
 }

@@ -7,7 +7,7 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
-      'Certificates2',
+      'CertificatesV2',
       [
         ['host', 'TEXT', 'NOT NULL PRIMARY KEY'],
         ['pem', 'TEXT'],
@@ -33,7 +33,6 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
     }
     const millisUntilExpire = (record.expireDate as any) - new Date().getTime();
     if (millisUntilExpire < 60 * 60e3) {
-      console.log('expired cert');
       return null;
     }
 

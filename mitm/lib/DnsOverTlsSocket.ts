@@ -31,13 +31,17 @@ export default class DnsOverTlsSocket {
 
   constructor(dnsServer: ConnectionOptions, requestSession: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
-    this.mitmSocket = new MitmSocket(requestSession?.sessionId, {
-      host: dnsServer.host,
-      port: String(dnsServer.port ?? 853),
-      isSsl: true,
-      servername: dnsServer.servername,
-      keepAlive: true,
-    });
+    this.mitmSocket = new MitmSocket(
+      requestSession?.sessionId,
+      {
+        host: dnsServer.host,
+        port: String(dnsServer.port ?? 853),
+        isSsl: true,
+        servername: dnsServer.servername,
+        keepAlive: true,
+      },
+      false,
+    );
     this.dnsServer = dnsServer;
     this.onClose = onClose;
   }

@@ -1,5 +1,4 @@
 import type IResolvablePromise from './IResolvablePromise';
-import { IPipelineStatus } from './Location';
 
 export default interface INavigation {
   id: number;
