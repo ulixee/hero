@@ -107,7 +107,6 @@ const defaultArgs = [
   '--disable-breakpad', // Disable crashdump collection (reporting is already disabled in Chromium)
   '--disable-client-side-phishing-detection', //  Disables client-side phishing detection.
   '--disable-domain-reliability', // Disables Domain Reliability Monitoring, which tracks whether the browser has difficulty contacting Google-owned sites and uploads reports to Google.
-  '--disable-component-extensions-with-background-pages', // Disable some built-in extensions that aren't affected by --disable-extensions
   '--disable-default-apps', // Disable installation of default apps on first run
   '--disable-dev-shm-usage', // https://github.com/GoogleChrome/puppeteer/issues/1834
   '--disable-extensions', // Disable all chrome extensions.

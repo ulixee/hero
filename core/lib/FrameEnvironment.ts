@@ -207,11 +207,8 @@ export default class FrameEnvironment {
     );
   }
 
-  public async getLocationHref(): Promise<string> {
-    await this.navigationsObserver.waitForReady();
-    return this.puppetFrame.evaluate('location.href', false, {
-      retriesWaitingForLoad: 1,
-    });
+  public getLocationHref(): Promise<string> {
+    return Promise.resolve(this.navigations.currentUrl || this.puppetFrame.url);
   }
 
   public async getCookies(): Promise<ICookie[]> {

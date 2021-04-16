@@ -9,10 +9,7 @@ import {
   LocationTrigger,
   PipelineStatus,
 } from '@secret-agent/core-interfaces/Location';
-import INavigation, {
-  LoadStatus,
-  NavigationReason,
-} from '@secret-agent/core-interfaces/INavigation';
+import { LoadStatus, NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import type ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
 import type IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import type IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
@@ -31,12 +28,12 @@ export default class FrameNavigationsObserver {
   private resourceIdResolvable: IResolvablePromise<number>;
   private statusTriggerResolvable: IResolvablePromise<void>;
   private statusTrigger: ILocationStatus;
+  private statusTriggerStartCommandId: number;
   private logger: IBoundLog;
 
   constructor(navigations: FrameNavigations) {
     this.navigations = navigations;
     this.logger = navigations.logger.createChild(module);
-    navigations.on('navigation-requested', this.onNavigation.bind(this));
     navigations.on('status-change', this.onLoadStatusChange.bind(this));
   }
 
@@ -58,35 +55,16 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  public waitForLocation(
-    status: ILocationTrigger,
-    options: IWaitForOptions = {},
-    inclusiveOfCommandId = true,
-  ): Promise<void> {
+  public waitForLocation(status: ILocationTrigger, options: IWaitForOptions = {}): Promise<void> {
     assert(LocationTrigger[status], `Invalid location status: ${status}`);
 
     // determine if this location trigger has already been satisfied
-    const sinceCommandId = options.sinceCommandId ?? this.defaultWaitForLocationCommandId;
-    for (const history of this.navigations.history) {
-      const isMatch = inclusiveOfCommandId
-        ? history.startCommandId >= sinceCommandId
-        : history.startCommandId > sinceCommandId;
-      if (isMatch) {
-        const previousState = FrameNavigationsObserver.getTriggerForNavigationReason(
-          history.navigationReason,
-        );
-        if (previousState === status) {
-          this.logger.info(`Resolving waitForLocation(${status}) with navigation history`, {
-            history,
-            status,
-            sinceCommandId: options.sinceCommandId,
-          });
-          return Promise.resolve();
-        }
-      }
+    const sinceCommandId = Number(options.sinceCommandId ?? this.defaultWaitForLocationCommandId);
+    if (this.hasLocationTrigger(status, sinceCommandId)) {
+      return Promise.resolve();
     }
     // otherwise set pending
-    return this.createStatusTriggeredPromise(status, options.timeoutMs);
+    return this.createStatusTriggeredPromise(status, options.timeoutMs, sinceCommandId);
   }
 
   public waitForLoad(status: IPipelineStatus, options: IWaitForOptions = {}): Promise<void> {
@@ -164,16 +142,17 @@ export default class FrameNavigationsObserver {
     };
   }
 
-  private onNavigation(lifecycle: INavigation): void {
-    // don't trigger change for the first url on a new tab
-    if (lifecycle.navigationReason === 'newTab') return;
-    const trigger = FrameNavigationsObserver.getTriggerForNavigationReason(
-      lifecycle.navigationReason,
-    );
-    if (trigger === this.statusTrigger) this.resolvePendingStatus(trigger);
-  }
-
   private onLoadStatusChange(): void {
+    if (
+      this.statusTrigger === LocationTrigger.change ||
+      this.statusTrigger === LocationTrigger.reload
+    ) {
+      if (this.hasLocationTrigger(this.statusTrigger, this.statusTriggerStartCommandId)) {
+        this.resolvePendingStatus(this.statusTrigger);
+      }
+      return;
+    }
+
     const loadTrigger = PipelineStatus[this.statusTrigger];
     if (!this.statusTriggerResolvable || this.statusTriggerResolvable.isResolved || !loadTrigger)
       return;
@@ -231,21 +210,65 @@ export default class FrameNavigationsObserver {
       clearTimeout(this.waitingForLoadTimeout);
       this.statusTriggerResolvable.resolve();
       this.statusTriggerResolvable = null;
+      this.statusTrigger = null;
+      this.statusTriggerStartCommandId = null;
     }
   }
 
-  private createStatusTriggeredPromise(status: ILocationStatus, timeoutMs: number): Promise<void> {
+  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number) {
+    let previousLoadedUrl: string;
+    for (const history of this.navigations.history) {
+      const isMatch = history.startCommandId >= sinceCommandId;
+      if (isMatch) {
+        let isLocationChange = false;
+        if (trigger === LocationTrigger.reload) {
+          isLocationChange = FrameNavigationsObserver.isNavigationReload(history.navigationReason);
+        }
+
+        // if there was a previously loaded url, use this change
+        if (
+          trigger === LocationTrigger.change &&
+          previousLoadedUrl &&
+          previousLoadedUrl !== history.finalUrl &&
+          history.stateChanges.has(LoadStatus.DomContentLoaded)
+        ) {
+          isLocationChange = true;
+        }
+
+        if (isLocationChange) {
+          this.logger.info(`Resolving waitForLocation(${trigger}) with navigation history`, {
+            historyEntry: history,
+            status: trigger,
+            sinceCommandId,
+          });
+          return true;
+        }
+      }
+
+      if (
+        history.stateChanges.has(LoadStatus.HttpResponded) &&
+        !history.stateChanges.has(LoadStatus.HttpRedirected)
+      ) {
+        previousLoadedUrl = history.finalUrl;
+      }
+    }
+    return false;
+  }
+
+  private createStatusTriggeredPromise(
+    status: ILocationStatus,
+    timeoutMs: number,
+    sinceCommandId?: number,
+  ): Promise<void> {
     if (this.statusTriggerResolvable) this.cancelWaiting('New location trigger created');
 
     this.statusTrigger = status;
+    this.statusTriggerStartCommandId = sinceCommandId;
     this.statusTriggerResolvable = createPromise<void>(timeoutMs ?? 60e3);
     return this.statusTriggerResolvable.promise;
   }
 
-  private static getTriggerForNavigationReason(reason: NavigationReason): LocationTrigger {
-    if (reason === 'newTab') return null;
-    const isReload =
-      reason === 'httpHeaderRefresh' || reason === 'metaTagRefresh' || reason === 'reload';
-    return isReload ? LocationTrigger.reload : LocationTrigger.change;
+  private static isNavigationReload(reason: NavigationReason): boolean {
+    return reason === 'httpHeaderRefresh' || reason === 'metaTagRefresh' || reason === 'reload';
   }
 }
