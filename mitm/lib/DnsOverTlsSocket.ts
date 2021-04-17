@@ -29,17 +29,19 @@ export default class DnsOverTlsSocket {
 
   private requestSession: RequestSession | undefined;
 
-  constructor(dnsServer: ConnectionOptions, requestSession?: RequestSession, onClose?: () => void) {
+  constructor(dnsServer: ConnectionOptions, requestSession: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
-    this.mitmSocket = new MitmSocket(requestSession?.sessionId, {
-      host: dnsServer.host,
-      port: String(dnsServer.port ?? 853),
-      isSsl: true,
-      servername: dnsServer.servername,
-      rejectUnauthorized: false,
-      clientHelloId: requestSession?.networkInterceptorDelegate?.tls.emulatorProfileId,
-      keepAlive: true,
-    });
+    this.mitmSocket = new MitmSocket(
+      requestSession?.sessionId,
+      {
+        host: dnsServer.host,
+        port: String(dnsServer.port ?? 853),
+        isSsl: true,
+        servername: dnsServer.servername,
+        keepAlive: true,
+      },
+      false,
+    );
     this.dnsServer = dnsServer;
     this.onClose = onClose;
   }
@@ -71,7 +73,7 @@ export default class DnsOverTlsSocket {
         this.mitmSocket.setProxyUrl(upstreamProxy);
       }
     }
-    await this.mitmSocket.connect(10e3);
+    await this.mitmSocket.connect(this.requestSession.requestAgent.socketSession, 10e3);
 
     this.mitmSocket.socket.on('data', this.onData.bind(this));
     this.mitmSocket.on('close', () => {

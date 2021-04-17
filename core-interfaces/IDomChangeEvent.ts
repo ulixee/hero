@@ -1,15 +1,19 @@
 // tslint:disable-next-line
-import type { CommandId, ISOTimestamp } from './GenericTypes';
+import type { UnixTimestamp } from './GenericTypes';
 
 type Idx = number;
 
-export type IDomChangeEvent = [
-  CommandId,
-  'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property',
-  INodeData,
-  ISOTimestamp,
-  Idx,
-];
+export type IDomChangeEvent = [DomActionType, INodeData, UnixTimestamp, Idx];
+
+export enum DomActionType {
+  newDocument = 0,
+  location = 1,
+  added = 2,
+  removed = 3,
+  text = 4,
+  attribute = 5,
+  property = 6,
+}
 
 export interface INodeData {
   id: number;

@@ -16,21 +16,28 @@ export default class SessionsTable extends SqliteTable<ISessionRecord> {
   public insert(
     id: string,
     name: string,
-    startDate: string,
+    startDate: number,
     scriptInstanceId: string,
     scriptEntrypoint: string,
-    scriptStartDate: string,
+    scriptStartDate: number,
   ) {
-    const record = [id, name, startDate, scriptInstanceId, scriptEntrypoint, scriptStartDate];
+    const record = [
+      id,
+      name,
+      new Date(startDate).toISOString(),
+      scriptInstanceId,
+      scriptEntrypoint,
+      new Date(scriptStartDate).toISOString(),
+    ];
     this.insertNow(record);
   }
 
-  public findByName(name: string, scriptInstanceId: string) {
+  public findByName(name: string, scriptInstanceId: string): ISessionRecord {
     const sql = `SELECT * FROM ${this.tableName} WHERE name=? AND scriptInstanceId=? ORDER BY scriptStartDate DESC, startDate DESC LIMIT 1`;
     return this.db.prepare(sql).get([name, scriptInstanceId]) as ISessionRecord;
   }
 
-  public findByScriptEntrypoint(scriptEntrypoint) {
+  public findByScriptEntrypoint(scriptEntrypoint): ISessionRecord[] {
     const sql = `SELECT * FROM ${this.tableName} WHERE scriptEntrypoint=? ORDER BY scriptStartDate DESC, startDate DESC`;
     return this.db.prepare(sql).all([scriptEntrypoint]) as ISessionRecord[];
   }

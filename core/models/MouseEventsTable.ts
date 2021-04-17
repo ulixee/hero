@@ -19,9 +19,8 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(tabId: number, mouseEvent: IMouseEvent) {
+  public insert(tabId: number, commandId: number, mouseEvent: IMouseEvent) {
     const [
-      commandId,
       event,
       pageX,
       pageY,
@@ -30,7 +29,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       buttons,
       targetNodeId,
       relatedTargetNodeId,
-      isoTimestamp,
+      timestamp,
     ] = mouseEvent;
     const record = [
       tabId,
@@ -43,7 +42,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
       buttons,
       targetNodeId,
       relatedTargetNodeId,
-      isoTimestamp,
+      timestamp,
     ];
     this.queuePendingInsert(record);
   }
@@ -60,7 +59,7 @@ export interface IMouseEventRecord {
   buttons: number;
   targetNodeId?: number;
   relatedTargetNodeId?: number;
-  timestamp: string;
+  timestamp: number;
 }
 
 export enum MouseEventType {

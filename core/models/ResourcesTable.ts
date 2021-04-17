@@ -21,7 +21,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['requestUrl', 'TEXT'],
         ['requestHeaders', 'TEXT'],
         ['requestTrailers', 'TEXT'],
-        ['requestTimestamp', 'TEXT'],
+        ['requestTimestamp', 'INTEGER'],
         ['requestPostData', 'TEXT'],
         ['redirectedToUrl', 'TEXT'],
         ['statusCode', 'INTEGER'],
@@ -29,7 +29,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['responseUrl', 'TEXT'],
         ['responseHeaders', 'TEXT'],
         ['responseTrailers', 'TEXT'],
-        ['responseTimestamp', 'TEXT'],
+        ['responseTimestamp', 'INTEGER'],
         ['responseEncoding', 'TEXT'],
         ['responseData', 'BLOB'],
         ['socketId', 'INTEGER'],
@@ -159,7 +159,7 @@ export interface IResourcesRecord {
   requestUrl: string;
   requestHeaders: string;
   requestTrailers?: string;
-  requestTimestamp: string;
+  requestTimestamp: number;
   requestPostData?: string;
   redirectedToUrl?: string;
   statusCode: number;
@@ -167,7 +167,7 @@ export interface IResourcesRecord {
   responseUrl: string;
   responseHeaders: string;
   responseTrailers?: string;
-  responseTimestamp: string;
+  responseTimestamp: number;
   responseEncoding: string;
   responseData?: Buffer;
   socketId: number;

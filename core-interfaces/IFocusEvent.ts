@@ -1,8 +1,12 @@
 // tslint:disable-next-line
-import { CommandId, ISOTimestamp } from './GenericTypes';
+import { UnixTimestamp } from './GenericTypes';
 
 type NodeId = number;
 type RelatedNodeId = NodeId;
-type FocusEventType = 'in' | 'out';
 
-export type IFocusEvent = [CommandId, FocusEventType, NodeId, RelatedNodeId, ISOTimestamp];
+export enum FocusEventType {
+  IN = 0,
+  OUT = 1,
+}
+
+export type IFocusEvent = [FocusEventType, NodeId, RelatedNodeId, UnixTimestamp];

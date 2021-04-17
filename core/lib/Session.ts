@@ -28,6 +28,7 @@ import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
 import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { MitmProxy } from '@secret-agent/mitm/index';
 import SessionState from './SessionState';
 import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
@@ -69,6 +70,7 @@ export default class Session extends TypedEventEmitter<{
     return this._isClosing;
   }
 
+  private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
 
   private tabIdCounter = 0;
@@ -156,13 +158,27 @@ export default class Session extends TypedEventEmitter<{
     }
   }
 
+  public async registerWithMitm(
+    sharedMitmProxy: MitmProxy,
+    doesPuppetSupportBrowserContextProxy: boolean,
+  ): Promise<void> {
+    let mitmProxy = sharedMitmProxy;
+    if (doesPuppetSupportBrowserContextProxy) {
+      this.isolatedMitmProxy = await MitmProxy.start();
+      mitmProxy = this.isolatedMitmProxy;
+    }
+
+    mitmProxy.registerSession(this.mitmRequestSession, !!this.isolatedMitmProxy);
+  }
+
   public getBrowserEmulation() {
     const browserEmulator = this.browserEmulator;
     return {
       locale: browserEmulator.locale,
       userAgent: browserEmulator.userAgentString,
       platform: browserEmulator.osPlatform,
-      proxyPassword: this.id,
+      proxyAddress: this.isolatedMitmProxy ? `localhost:${this.isolatedMitmProxy.port}` : null,
+      proxyPassword: this.isolatedMitmProxy ? null : this.id,
       viewport: this.viewport,
       timezoneId: this.timezoneId,
     } as IBrowserEmulationSettings;
@@ -216,13 +232,19 @@ export default class Session extends TypedEventEmitter<{
       sessionId: this.id,
     });
 
-    this.awaitedEventListener.close();
-    await this.mitmRequestSession.close();
-    await Promise.all(Object.values(this.tabs).map(x => x.close()));
+    try {
+      this.awaitedEventListener.close();
+      await Promise.all(this.tabs.map(x => x.close()));
+      this.mitmRequestSession.close();
+      if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
+    } catch (error) {
+      log.error('Session.CloseMitmError', { error, sessionId: this.id });
+    }
+
     try {
       await this.browserContext?.close();
     } catch (error) {
-      log.error('ErrorClosingSession', { error, sessionId: this.id });
+      log.error('Session.CloseBrowserContextError', { error, sessionId: this.id });
     }
     log.stats('Session.Closed', {
       sessionId: this.id,

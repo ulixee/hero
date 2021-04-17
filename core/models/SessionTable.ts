@@ -16,11 +16,11 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['screenWidth', 'INTEGER'],
         ['screenHeight', 'INTEGER'],
         ['deviceScaleFactor', 'INTEGER'],
-        ['startDate', 'TEXT'],
-        ['closeDate', 'TEXT'],
+        ['startDate', 'INTEGER'],
+        ['closeDate', 'INTEGER'],
         ['scriptInstanceId', 'TEXT'],
         ['scriptEntrypoint', 'TEXT'],
-        ['scriptStartDate', 'TEXT'],
+        ['scriptStartDate', 'INTEGER'],
         ['timezoneId', 'TEXT'],
       ],
       true,
@@ -36,7 +36,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     startDate: Date,
     scriptInstanceId: string,
     scriptEntrypoint: string,
-    scriptStartDate: string,
+    scriptStartDate: number,
     timezoneId: string,
     viewport: IViewport,
   ) {
@@ -49,7 +49,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       viewport.screenWidth,
       viewport.screenHeight,
       viewport.deviceScaleFactor,
-      startDate.toISOString(),
+      startDate.getTime(),
       null,
       scriptInstanceId,
       scriptEntrypoint,
@@ -60,7 +60,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
   }
 
   public close(id: string, closeDate: Date) {
-    const values = [closeDate.toISOString(), id];
+    const values = [closeDate.getTime(), id];
     const fields = ['closeDate'];
     const sql = `UPDATE ${this.tableName} SET ${fields.map(n => `${n}=?`).join(', ')} WHERE id=?`;
     this.db.prepare(sql).run(...values);
@@ -81,10 +81,10 @@ export interface ISessionRecord {
   screenWidth: number;
   screenHeight: number;
   deviceScaleFactor: number;
-  startDate: string;
-  closeDate: string;
+  startDate: number;
+  closeDate: number;
   scriptInstanceId: string;
   scriptEntrypoint: string;
-  scriptStartDate: string;
+  scriptStartDate: number;
   timezoneId: string;
 }

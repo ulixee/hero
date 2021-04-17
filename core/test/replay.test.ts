@@ -43,7 +43,7 @@ describe('basic Replay API tests', () => {
     });
     const commandMap: { [id: string]: ICommandWithResult } = {};
     const paintMap: {
-      [timestamp: string]: IDomChangeRecord[];
+      [timestamp: number]: IDomChangeRecord[];
     } = {};
     const gotCommandsPromise = createPromise();
     api.on('message', async message => {

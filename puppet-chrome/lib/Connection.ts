@@ -24,6 +24,8 @@ import IConnectionTransport, {
 } from '@secret-agent/puppet-interfaces/IConnectionTransport';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import Log from '@secret-agent/commons/Logger';
+import { URL } from 'url';
+import * as http from 'http';
 import { CDPSession } from './CDPSession';
 
 const { log } = Log(module);
@@ -48,6 +50,24 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
 
     this.rootSession = new CDPSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
+  }
+
+  public getProtocol(): Promise<any> {
+    if (!this.transport.url) return Promise.resolve(null);
+
+    const port = new URL(this.transport.url).port;
+
+    return new Promise((resolve, reject) => {
+      const request = http.get(`http://localhost:${port}/json/protocol`, async res => {
+        const body: Buffer[] = [];
+        for await (const chunk of res) {
+          body.push(chunk);
+        }
+        resolve(JSON.parse(Buffer.concat(body).toString()));
+      });
+      request.on('error', reject);
+      request.end();
+    });
   }
 
   public sendMessage(message: object): number {

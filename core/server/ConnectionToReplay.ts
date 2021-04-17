@@ -19,7 +19,7 @@ export default class ConnectionToReplay {
   private session: ISessionRecord;
   private tabsById = new Map<
     number,
-    { tabId: number; createdTime: string; startOrigin: string; width: number; height: number }
+    { tabId: number; createdTime: number; startOrigin: string; width: number; height: number }
   >();
 
   private readonly frameIdToNodePath = new Map<string, string>();
@@ -109,7 +109,7 @@ export default class ConnectionToReplay {
           const parentPath = this.frameIdToNodePath.get(frame.parentId);
           this.frameIdToNodePath.set(frame.id, `${parentPath ?? ''}_${frame.domNodeId}`);
         }
-        this.addTabId(frame.tabId, frame.createdTime);
+        this.addTabId(frame.tabId, frame.createdTimestamp);
       }
     });
 
@@ -229,7 +229,7 @@ export default class ConnectionToReplay {
     }
   }
 
-  private addTabId(tabId: number, timestamp: string): void {
+  private addTabId(tabId: number, timestamp: number): void {
     if (!this.tabsById.has(tabId)) {
       this.tabsById.set(tabId, {
         tabId,

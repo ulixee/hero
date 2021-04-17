@@ -150,7 +150,7 @@ export default class Handler {
     const dispatches = [...this.dispatches];
     // clear out dispatches everytime you check it
     this.dispatches.length = 0;
-    const startStack = new Error('').stack.split(/\r?\n/).slice(1).join('\n');
+    const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
     await Promise.all(
       dispatches.map(async dispatch => {
         const err = await dispatch.resolution;
@@ -200,7 +200,9 @@ export default class Handler {
   }
 
   private getConnection(): ConnectionToCore {
-    return pickRandom(this.getAvailableConnections());
+    const connections = this.getAvailableConnections();
+    if (!connections.length) throw new Error('There are no active Core connections available.');
+    return pickRandom(connections);
   }
 
   private registerUnhandledExceptionHandlers(): void {

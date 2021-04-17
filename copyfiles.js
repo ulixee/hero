@@ -12,7 +12,7 @@ const copyArgs = [
   'emulate-browsers/**/data/**',
   'examples/*.js',
   'examples/*.mjs',
-  'mitm-socket/lib/*.*',
+  'mitm-socket/go/*.*',
   '.*ignore',
 ];
 if (isBuild) {

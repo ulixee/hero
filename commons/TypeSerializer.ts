@@ -1,19 +1,38 @@
+const Types = {
+  number: 'number',
+  string: 'string',
+  boolean: 'boolean',
+  object: 'object',
+  bigint: 'bigint',
+  NaN: 'NaN',
+  Infinity: 'Infinity',
+  NegativeInfinity: '-Infinity',
+  DateIso: 'DateIso',
+  Buffer64: 'Buffer64',
+  ArrayBuffer64: 'ArrayBuffer64',
+  RegExp: 'RegExp',
+  Map: 'Map',
+  Set: 'Set',
+  Error: 'Error',
+};
+
 export default class TypeSerializer {
   public static errorTypes = new Map<string, { new (message?: string): Error }>();
   private static isNodejs = typeof process !== 'undefined' && process.release.name === 'node';
 
   public static parse(stringified: string, stackMarker = 'SERIALIZER'): any {
     return JSON.parse(stringified, (key, entry) => {
-      if (!entry || !entry.type) return entry;
+      if (!entry || !entry.__type) return entry;
 
-      const { value, type } = entry;
+      const { value, __type: type } = entry;
 
-      if (type === 'BigInt') return BigInt(value);
-      if (type === 'NaN') return Number.NaN;
-      if (type === 'Infinity') return Number.POSITIVE_INFINITY;
-      if (type === '-Infinity') return Number.NEGATIVE_INFINITY;
-      if (type === 'DateIso') return new Date(value);
-      if (type === 'Buffer64' || type === 'ArrayBuffer64') {
+      if (type === Types.number || type === Types.string || type === Types.boolean) return value;
+      if (type === Types.bigint) return BigInt(value);
+      if (type === Types.NaN) return Number.NaN;
+      if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
+      if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
+      if (type === Types.DateIso) return new Date(value);
+      if (type === Types.Buffer64 || type === Types.ArrayBuffer64) {
         if (this.isNodejs) {
           return Buffer.from(value, 'base64');
         }
@@ -27,10 +46,10 @@ export default class TypeSerializer {
 
         return new globalThis[arrayType](uint8Array.buffer, byteOffset, byteLength);
       }
-      if (type === 'RegExp') return new RegExp(value[0], value[1]);
-      if (type === 'Map') return new Map(value);
-      if (type === 'Set') return new Set(value);
-      if (type === 'Error') {
+      if (type === Types.RegExp) return new RegExp(value[0], value[1]);
+      if (type === Types.Map) return new Map(value);
+      if (type === Types.Set) return new Set(value);
+      if (type === Types.Error) {
         const { name, message, stack, ...data } = value;
         let Constructor = this.errorTypes && this.errorTypes.get(name);
         if (!Constructor) {
@@ -41,7 +60,8 @@ export default class TypeSerializer {
           }
         }
 
-        const startStack = new Error('').stack.split(/\r?\n/).slice(1).join('\n');
+        const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
+
         const e = new Constructor(message);
         e.name = name;
         Object.assign(e, data);
@@ -57,7 +77,7 @@ export default class TypeSerializer {
 
   public static stringify(object: any): string {
     return JSON.stringify(object, (key, value) => {
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
+      if (value && typeof value === Types.object && !Array.isArray(value)) {
         const resultObject = {};
         for (const [k, v] of Object.entries(value)) {
           resultObject[k] = this.convertKeyValue(k, v);
@@ -69,57 +89,57 @@ export default class TypeSerializer {
   }
 
   private static convertKeyValue(_: string, value: any): any {
+    if (value === null || value === undefined) return value;
+
     if (Number.isNaN(value)) {
-      return { type: 'NaN' };
+      return { __type: Types.NaN };
     }
 
     if (value === Number.POSITIVE_INFINITY) {
-      return { type: 'Infinity' };
+      return { __type: Types.Infinity };
     }
 
     if (value === Number.NEGATIVE_INFINITY) {
-      return { type: '-Infinity' };
+      return { __type: Types.NegativeInfinity };
     }
 
-    if (value === null || value === undefined) return value;
-
     const type = typeof value;
-    if (type === 'boolean' || type === 'string' || type === 'number') return value;
-    if (type === 'bigint') {
-      return { type: 'BigInt', value: value.toString() };
+    if (type === Types.boolean || type === Types.string || type === Types.number) return value;
+    if (type === Types.bigint) {
+      return { __type: Types.bigint, value: value.toString() };
     }
 
     if (value instanceof Date) {
-      return { type: 'DateIso', value: value.toISOString() };
+      return { __type: Types.DateIso, value: value.toISOString() };
     }
 
     if (value instanceof RegExp) {
-      return { type: 'RegExp', value: [value.source, value.flags] };
+      return { __type: Types.RegExp, value: [value.source, value.flags] };
     }
 
     if (value instanceof Error) {
       const { name, message, stack, ...data } = value;
-      return { type: 'Error', value: { name, message, stack, ...data } };
+      return { __type: Types.Error, value: { name, message, stack, ...data } };
     }
 
     if (value instanceof Map) {
-      return { type: 'Map', value: [...value.entries()] };
+      return { __type: Types.Map, value: [...value.entries()] };
     }
 
     if (value instanceof Set) {
-      return { type: 'Set', value: [...value] };
+      return { __type: Types.Set, value: [...value] };
     }
 
     if (this.isNodejs) {
       if (value instanceof Buffer || Buffer.isBuffer(value)) {
-        return { type: 'Buffer64', value: value.toString('base64') };
+        return { __type: Types.Buffer64, value: value.toString('base64') };
       }
     } else {
       if (ArrayBuffer.isView(value)) {
         // @ts-ignore
         const binary = new TextDecoder('utf8').decode(value.buffer);
         return {
-          type: 'ArrayBuffer64',
+          __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
           args: {
             arrayType: value[Symbol.toStringTag],
@@ -132,7 +152,7 @@ export default class TypeSerializer {
         // @ts-ignore
         const binary = new TextDecoder('utf8').decode(value);
         return {
-          type: 'ArrayBuffer64',
+          __type: Types.ArrayBuffer64,
           value: globalThis.btoa(binary),
         };
       }
@@ -148,4 +168,6 @@ export function registerSerializableErrorType(errorConstructor: {
   TypeSerializer.errorTypes.set(errorConstructor.name, errorConstructor);
 }
 
-export const stringifiedTypeSerializerClass = TypeSerializer.toString();
+export const stringifiedTypeSerializerClass = `const Types = ${JSON.stringify(
+  Types,
+)};\n${TypeSerializer.toString()}`;

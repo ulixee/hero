@@ -144,7 +144,7 @@ describe('basic Full Client tests', () => {
       expect(cookie.httpOnly).toBe(true);
       // httponly not in doc
       const documentCookies = await agent.getJsValue('document.cookie');
-      expect(documentCookies.value).toBe('');
+      expect(documentCookies).toBe('');
     }
     {
       const expires = new Date();
@@ -156,14 +156,14 @@ describe('basic Full Client tests', () => {
       expect(cookie.httpOnly).toBe(false);
 
       const documentCookies = await agent.getJsValue('document.cookie');
-      expect(documentCookies.value).toBe('Cookie2=test2');
+      expect(documentCookies).toBe('Cookie2=test2');
     }
     // test deleting
     {
       await cookieStorage.removeItem('Cookie2');
       expect(await cookieStorage.length).toBe(1);
       const documentCookies = await agent.getJsValue('document.cookie');
-      expect(documentCookies.value).toBe('');
+      expect(documentCookies).toBe('');
     }
   });
 
@@ -186,8 +186,7 @@ describe('basic Full Client tests', () => {
     await localStorage.setItem('Test1', 'here');
     expect(await localStorage.length).toBe(1);
 
-    const { value } = await agent.getJsValue('localStorage.getItem("Test1")');
-    expect(value).toBe('here');
+    await expect(agent.getJsValue('localStorage.getItem("Test1")')).resolves.toBe('here');
 
     expect(await localStorage.key(0)).toBe('Test1');
     await localStorage.removeItem('Test1');

@@ -44,8 +44,29 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
     const { browserContextId } = await this.cdpSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
+      proxyBypassList: '<-loopback>',
+      proxyServer: emulation.proxyAddress,
     });
+
     return new BrowserContext(this, browserContextId, emulation, logger);
+  }
+
+  public async getFeatures(): Promise<{
+    supportsPerBrowserContextProxy: boolean;
+    version: { major: string; minor: string };
+  }> {
+    const protocol = await this.connection.getProtocol();
+    const targetProtocol = protocol.domains.find(x => x.domain === 'Target');
+    const createBrowserContext = targetProtocol.commands.find(
+      x => x.name === 'createBrowserContext',
+    );
+    const supportsProxy =
+      createBrowserContext?.parameters?.some(x => x.name === 'proxyServer') ?? false;
+
+    return {
+      supportsPerBrowserContextProxy: supportsProxy,
+      version: protocol.version,
+    };
   }
 
   public async close(): Promise<void> {
@@ -115,11 +136,11 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     const { targetInfo } = event;
     if (targetInfo.type === 'page' && !targetInfo.attached) {
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      await context.attachToTarget(targetInfo.targetId);
+      await context?.attachToTarget(targetInfo.targetId);
     }
     if (targetInfo.type === 'shared_worker') {
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      await context.attachToWorker(targetInfo);
+      await context?.attachToWorker(targetInfo);
     }
   }
 

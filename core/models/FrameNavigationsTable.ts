@@ -1,6 +1,5 @@
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import INavigation from '@secret-agent/core-interfaces/INavigation';
+import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
@@ -17,13 +16,13 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
         ['requestedUrl', 'TEXT'],
         ['finalUrl', 'TEXT'],
         ['navigationReason', 'TEXT'],
-        ['initiatedTime', 'TEXT'],
-        ['httpRequestedTime', 'TEXT'],
-        ['httpRespondedTime', 'TEXT'],
-        ['httpRedirectedTime', 'TEXT'],
-        ['domContentLoadedTime', 'TEXT'],
-        ['loadTime', 'TEXT'],
-        ['contentPaintedTime', 'TEXT'],
+        ['initiatedTime', 'INTEGER'],
+        ['httpRequestedTime', 'INTEGER'],
+        ['httpRespondedTime', 'INTEGER'],
+        ['httpRedirectedTime', 'INTEGER'],
+        ['domContentLoadedTime', 'INTEGER'],
+        ['loadTime', 'INTEGER'],
+        ['contentPaintedTime', 'INTEGER'],
       ],
       true,
     );
@@ -42,13 +41,13 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.requestedUrl,
       navigation.finalUrl,
       navigation.navigationReason,
-      navigation.initiatedTime.toISOString(),
-      navigation.stateChanges.get(LocationStatus.HttpRequested)?.toISOString(),
-      navigation.stateChanges.get(LocationStatus.HttpResponded)?.toISOString(),
-      navigation.stateChanges.get(LocationStatus.HttpRedirected)?.toISOString(),
-      navigation.stateChanges.get(LocationStatus.DomContentLoaded)?.toISOString(),
-      navigation.stateChanges.get('Load')?.toISOString(),
-      navigation.stateChanges.get('ContentPaint')?.toISOString(),
+      navigation.initiatedTime.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpRequested)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpResponded)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.HttpRedirected)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.DomContentLoaded)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.Load)?.getTime(),
+      navigation.stateChanges.get(LoadStatus.ContentPaint)?.getTime(),
     ];
     this.queuePendingInsert(record);
   }
@@ -68,10 +67,10 @@ export interface IFrameNavigationRecord {
   startCommandId: number;
   navigationReason: string;
   initiatedTime: Date;
-  httpRequestedTime: string;
-  httpRespondedTime: string;
-  httpRedirectedTime?: string;
-  domContentLoadedTime?: string;
-  loadTime?: string;
-  contentPaintedTime?: string;
+  httpRequestedTime: number;
+  httpRespondedTime: number;
+  httpRedirectedTime?: number;
+  domContentLoadedTime?: number;
+  loadTime?: number;
+  contentPaintedTime?: number;
 }

@@ -32,7 +32,7 @@ export default class ReplayTabState extends EventEmitter {
   public viewportHeight: number;
   public currentPlaybarOffsetPct = 0;
   public replayTime: ReplayTime;
-  public tabCreatedTime: string;
+  public tabCreatedTime: number;
   public hasAllData = false;
 
   public get isActive() {
@@ -64,7 +64,7 @@ export default class ReplayTabState extends EventEmitter {
     this.viewportWidth = tabMeta.width;
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
-    this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.toISOString(), 'Load'));
+    this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.getTime(), 'Load'));
   }
 
   public getTickState() {
@@ -293,7 +293,7 @@ export default class ReplayTabState extends EventEmitter {
         events.sort((a, b) => {
           if (a.frameIdPath === b.frameIdPath) {
             if (a.timestamp === b.timestamp) return a.eventIndex - b.eventIndex;
-            return a.timestamp.localeCompare(b.timestamp);
+            return a.timestamp - b.timestamp;
           }
           return a.frameIdPath.localeCompare(b.frameIdPath);
         });
@@ -325,7 +325,7 @@ export default class ReplayTabState extends EventEmitter {
       if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
         console.log('Need to resort paint events - received out of order');
 
-        this.paintEvents.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        this.paintEvents.sort((a, b) => a.timestamp - b.timestamp);
 
         for (const t of this.ticks) {
           if (t.eventType !== 'paint') continue;
@@ -447,5 +447,5 @@ export default class ReplayTabState extends EventEmitter {
 
 interface IDomEvent {
   commandId: number;
-  timestamp: string;
+  timestamp: number;
 }

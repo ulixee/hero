@@ -47,8 +47,8 @@ export default class ResourceResponse {
     return getResponseProperty(this, 'url');
   }
 
-  public get timestamp(): Promise<string> {
-    return getResponseProperty(this, 'timestamp');
+  public get timestamp(): Promise<Date> {
+    return getResponseProperty(this, 'timestamp').then(x => (x ? new Date(x as number) : null));
   }
 
   public get remoteAddress(): Promise<string> {

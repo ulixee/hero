@@ -36,18 +36,14 @@ export default class CommandRecorder {
       args: args.length ? JSON.stringify(args) : undefined,
     } as ICommandMeta;
 
-    // TODO: figure out where we end up getting navigations from
     const frame = tab.frameEnvironmentsById.get(this.frameId);
     frame.navigationsObserver.willRunCommand(commandMeta, commandHistory);
 
-    if (fn.name !== 'goto') {
-      await tab.domRecorder.setCommandIdForPage(commandMeta.id);
-    }
     const id = this.logger.info('Command.run', commandMeta);
 
     let result: T;
     try {
-      commandMeta.startDate = new Date().toISOString();
+      commandMeta.startDate = new Date().getTime();
       sessionState.recordCommandStart(commandMeta);
 
       result = await fn.call(this.owner, ...args);
@@ -56,7 +52,7 @@ export default class CommandRecorder {
       result = err;
       throw err;
     } finally {
-      commandMeta.endDate = new Date().toISOString();
+      commandMeta.endDate = new Date().getTime();
       commandMeta.result = result;
       // NOTE: second insert on purpose -- it will do an update
       sessionState.recordCommandFinished(commandMeta);

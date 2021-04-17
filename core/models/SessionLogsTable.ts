@@ -6,7 +6,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'SessionLogs', [
       ['id', 'INTEGER'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
       ['action', 'TEXT'],
       ['level', 'TEXT'],
       ['module', 'TEXT'],
@@ -29,7 +29,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
             return {
               stack: value.stack,
               toString: value.toString(),
-              ...value
+              ...value,
             };
           }
           return value;
@@ -37,7 +37,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
       : null;
     return this.queuePendingInsert([
       log.id,
-      log.timestamp.toISOString(),
+      log.timestamp.getTime(),
       log.action,
       log.level,
       log.module,
@@ -56,7 +56,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
 
 export interface ISessionLogRecord {
   id: number;
-  timestamp: string;
+  timestamp: number;
   action: string;
   level: string;
   module: string;

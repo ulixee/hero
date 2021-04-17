@@ -58,7 +58,7 @@ export default class UserProfile {
 
       if (hasStorage) {
         // install scripts so we can restore storage
-        await InjectedScripts.install(page);
+        await InjectedScripts.installDomStorageRestore(page);
 
         for (const origin of origins) {
           const originStorage = storage[origin];

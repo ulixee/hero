@@ -277,7 +277,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.getComputedStyle(element, pseudoElement);
   }
 
-  public getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
+  public getJsValue<T>(path: string): Promise<T> {
     return this.activeTab.getJsValue<T>(path);
   }
 
@@ -326,7 +326,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       await getState(this).connection.getCoreSessionOrReject();
       return onfulfilled(this);
     } catch (err) {
-      return onrejected(err);
+      if (onrejected) return onrejected(err);
+      throw err;
     }
   }
 

@@ -145,16 +145,16 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       };
 
       let lastClicked = await click('#button-1');
-      expect(lastClicked.value).toBe('click1');
+      expect(lastClicked).toBe('click1');
 
       lastClicked = await click('#button-2');
-      expect(lastClicked.value).toBe('click2');
+      expect(lastClicked).toBe('click2');
 
       lastClicked = await click('#button-3');
-      expect(lastClicked.value).toBe('click3');
+      expect(lastClicked).toBe('click3');
 
       lastClicked = await click('#button-1');
-      expect(lastClicked.value).toBe('click1');
+      expect(lastClicked).toBe('click1');
     }, 60e3);
 
     it('should be able to click elements that move on load', async () => {
@@ -211,7 +211,7 @@ describe.each([['ghost'], ['basic'], ['skipper']])(
       ]);
       expect(lookupSpy.mock.calls.length).toBeGreaterThanOrEqual(2);
       const lastClicked = await tab.getJsValue('lastClicked');
-      expect(lastClicked.value).toBe('clickedit');
+      expect(lastClicked).toBe('clickedit');
     });
 
     it('should cancel pending interactions after a page clears', async () => {

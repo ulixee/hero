@@ -320,7 +320,7 @@ export default class Frame
 
     if (isolatedContext) {
       const context = await this.createIsolatedWorld();
-      // give one second to set up
+      // give one task to set up
       await new Promise(setImmediate);
       return context;
     }
@@ -370,10 +370,6 @@ export default class Frame
     if (loaderId === 'inpage' || !this.loaderIdResolvers.has(loaderId)) {
       this.loaderLifecycles.set(loaderId, {});
       const newResolver = createPromise();
-      if (loaderId !== 'inpage') {
-        const chain = newResolver.promise;
-        newResolver.promise = this.createIsolatedWorld().then(() => chain);
-      }
 
       if (this.activeLoader && !this.activeLoader.isResolved) {
         this.activeLoader.resolve(newResolver.promise);

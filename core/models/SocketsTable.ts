@@ -12,31 +12,29 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
         ['serverName', 'TEXT'],
         ['localAddress', 'TEXT'],
         ['remoteAddress', 'TEXT'],
-        ['pid', 'INTEGER'],
-        ['dialTime', 'TEXT'],
-        ['connectTime', 'TEXT'],
-        ['closeTime', 'TEXT'],
+        ['createTime', 'INTEGER'],
+        ['ipcConnectionTime', 'INTEGER'],
+        ['connectTime', 'INTEGER'],
+        ['errorTime', 'INTEGER'],
+        ['closeTime', 'INTEGER'],
+        ['connectError', 'TEXT'],
       ],
       true,
     );
   }
 
-  public insert(
-    record: Omit<ISocketRecord, 'dialTime' | 'connectTime' | 'closeTime'> & {
-      closeTime: Date;
-      connectTime: Date;
-      dialTime: Date;
-    },
-  ) {
+  public insert(record: ISocketRecord) {
     const {
       id,
       localAddress,
       remoteAddress,
       serverName,
-      pid,
       alpn,
-      dialTime,
+      createTime,
+      ipcConnectionTime,
       connectTime,
+      errorTime,
+      connectError,
       closeTime,
     } = record;
     return this.queuePendingInsert([
@@ -45,10 +43,12 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
       serverName,
       localAddress,
       remoteAddress,
-      pid,
-      dialTime?.toISOString(),
-      connectTime?.toISOString(),
-      closeTime?.toISOString(),
+      createTime?.getTime(),
+      ipcConnectionTime?.getTime(),
+      connectTime?.getTime(),
+      errorTime?.getTime(),
+      closeTime?.getTime(),
+      connectError,
     ]);
   }
 }
@@ -57,10 +57,12 @@ export interface ISocketRecord {
   id: number;
   localAddress: string;
   remoteAddress: string;
-  pid: number;
   alpn: string;
   serverName: string;
-  dialTime: string;
-  connectTime: string;
-  closeTime: string;
+  createTime: Date;
+  ipcConnectionTime: Date;
+  connectTime: Date;
+  errorTime: Date;
+  closeTime: Date;
+  connectError?: string;
 }

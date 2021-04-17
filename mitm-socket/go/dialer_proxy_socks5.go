@@ -1,9 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
-	"errors"
 	"net/url"
 	"strings"
 
@@ -11,7 +11,7 @@ import (
 )
 
 func DialAddrViaSock5Proxy(dialer net.Dialer, addr string, proxyUrl *url.URL) (net.Conn, error) {
-    var socksAuth *proxy.Auth = nil
+	var socksAuth *proxy.Auth = nil
 
 	proxyHost := proxyUrl.Host
 

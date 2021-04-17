@@ -13,7 +13,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
       ['viewportHeight', 'INTEGER'],
       ['browserPositionX', 'INTEGER'],
       ['browserPositionY', 'INTEGER'],
-      ['createdTime', 'TEXT'],
+      ['createdTime', 'INTEGER'],
     ]);
   }
 
@@ -33,7 +33,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
       viewPort.height,
       viewPort.positionX,
       viewPort.positionY,
-      new Date().toISOString(),
+      new Date().getTime(),
     ]);
   }
 }
@@ -47,5 +47,5 @@ export interface ITabsRecord {
   viewportHeight: number;
   browserPositionX: number;
   browserPositionY: number;
-  createdTime: string;
+  createdTime: number;
 }

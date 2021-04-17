@@ -140,7 +140,7 @@ export default class FrameEnvironment {
     ) as CSSStyleDeclaration;
   }
 
-  public async getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
+  public async getJsValue<T>(path: string): Promise<T> {
     const coreFrame = await getCoreFrameEnvironment(this);
     return coreFrame.getJsValue<T>(path);
   }

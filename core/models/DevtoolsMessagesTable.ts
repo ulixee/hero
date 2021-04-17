@@ -24,7 +24,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       ['params', 'TEXT'],
       ['error', 'TEXT'],
       ['result', 'TEXT'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
     ]);
   }
 
@@ -97,7 +97,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       params ? JSON.stringify(params, paramsStringifyFilter) : undefined,
       event.error ? JSON.stringify(event.error) : undefined,
       event.result ? JSON.stringify(event.result) : undefined,
-      event.timestamp.toISOString(),
+      event.timestamp.getTime(),
     ];
     this.queuePendingInsert(record);
   }
@@ -107,7 +107,6 @@ const filteredEventMethods = new Set([
   'Network.dataReceived', // Not useful to SA since we use Mitm
   'Page.domContentEventFired', // duplicated by Page.lifecycleEvent
   'Page.loadEventFired', // duplicated by Page.lifecycleEvent
-  // 'Network.requestWillBeSentExtraInfo', // handled by mitm
 ]);
 
 export interface IDevtoolsMessageRecord {
@@ -122,5 +121,5 @@ export interface IDevtoolsMessageRecord {
   params?: string;
   error?: string;
   result?: string;
-  timestamp: string;
+  timestamp: number;
 }

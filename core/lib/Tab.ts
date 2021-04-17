@@ -19,26 +19,19 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
 import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import {
-  ILocationTrigger,
-  IPipelineStatus,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
+import { ILocationTrigger, IPipelineStatus } from '@secret-agent/core-interfaces/Location';
 import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
-import { IDomChangeEvent } from '@secret-agent/core-interfaces/IDomChangeEvent';
-import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
-import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
-import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
-import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
+import { INodeData } from '@secret-agent/core-interfaces/IDomChangeEvent';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
-import DomRecorder from './DomRecorder';
 import IResourceFilterProperties from '../interfaces/IResourceFilterProperties';
 import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
+import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
+import { IDomChangeRecord } from '../models/DomChangesTable';
 
 const { log } = Log(module);
 
@@ -46,7 +39,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public readonly id: number;
   public readonly parentTabId?: number;
   public readonly session: Session;
-  public readonly domRecorder: DomRecorder;
   public readonly frameEnvironmentsById = new Map<string, FrameEnvironment>();
   public puppetPage: IPuppetPage;
   public isClosing = false;
@@ -112,13 +104,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       const frame = new FrameEnvironment(this, puppetFrame);
       this.frameEnvironmentsById.set(frame.id, frame);
     }
-
-    this.domRecorder = new DomRecorder(
-      session.id,
-      puppetPage,
-      // bind session state to tab id
-      this.onDomRecorderEvents.bind(this),
-    );
 
     if (windowOpenParams) {
       this.navigations.onNavigationRequested('newTab', windowOpenParams.url, this.lastCommandId);
@@ -208,13 +193,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     if (this.isClosing) return;
     this.isClosing = true;
     const parentLogId = this.logger.stats('Tab.Closing');
+    const errors: Error[] = [];
 
     try {
       if (this.navigations.top && this.puppetPage.mainFrame.isLoaded) {
-        await this.domRecorder.flush(true);
+        await this.flushPageEventsRecorder();
       }
     } catch (error) {
       // don't re-handle
+      errors.push(error);
     }
 
     try {
@@ -224,16 +211,22 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         frame.close();
       }
       this.cancelPendingEvents(cancelMessage);
-
-      await this.puppetPage.close();
-
-      this.emit('close');
-      this.logger.stats('Tab.Closed', { parentLogId });
     } catch (error) {
       if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
-        this.logger.error('Tab.ClosingError', { error, parentLogId });
+        errors.push(error);
       }
     }
+
+    try {
+      // run this one individually
+      await this.puppetPage.close();
+    } catch (error) {
+      if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
+        errors.push(error);
+      }
+    }
+    this.emit('close');
+    this.logger.stats('Tab.Closed', { parentLogId, errors });
   }
 
   public async setOrigin(origin: string): Promise<void> {
@@ -466,6 +459,35 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
+  public async getMainFrameDomChanges(
+    sinceCommandId?: number,
+  ): Promise<
+    (Omit<IDomChangeRecord, 'attributes' | 'attributeNamespaces' | 'properties'> & INodeData)[]
+  > {
+    await this.flushPageEventsRecorder();
+    this.sessionState.db.flush();
+
+    return this.sessionState.db.domChanges
+      .getFrameChanges(this.mainFrameId)
+      .filter(x => {
+        if (sinceCommandId) {
+          return x.commandId > sinceCommandId;
+        }
+        return true;
+      })
+      .map(record => {
+        return {
+          ...record,
+          id: record.nodeId,
+          attributes: record.attributes ? JSON.parse(record.attributes) : undefined,
+          attributeNamespaces: record.attributeNamespaces
+            ? JSON.parse(record.attributeNamespaces)
+            : undefined,
+          properties: record.properties ? JSON.parse(record.properties) : undefined,
+        };
+      });
+  }
+
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public toJSON() {
@@ -481,7 +503,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private async install(): Promise<void> {
     const page = this.puppetPage;
 
-    await InjectedScripts.install(page);
+    await InjectedScripts.install(page, this.onPageRecorderEvents.bind(this));
 
     const newDocumentInjectedScripts = await this.session.browserEmulator.newDocumentInjectedScripts();
     for (const newDocumentScript of newDocumentInjectedScripts) {
@@ -492,16 +514,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       }
       // overrides happen in main frame
       await page.addNewDocumentScript(newDocumentScript.script, false);
-    }
-
-    await this.domRecorder.install();
-    if (this.parentTabId) {
-      // the page is paused waiting for debugger, so it won't resume until "install" is complete
-      this.domRecorder.setCommandIdForPage(this.lastCommandId).catch(error => {
-        this.logger.warn('Tab.child.setCommandId.error', {
-          error,
-        });
-      });
     }
 
     await this.mainFrameEnvironment.isReady;
@@ -532,14 +544,34 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     page.on('websocket-frame', this.onWebsocketFrame.bind(this));
   }
 
-  private onDomRecorderEvents(
-    frameId: string,
-    domChanges: IDomChangeEvent[],
-    mouseEvents: IMouseEvent[],
-    focusEvents: IFocusEvent[],
-    scrollEvents: IScrollEvent[],
-    loadEvents: ILoadEvent[],
-  ): void {
+  private async flushPageEventsRecorder(): Promise<void> {
+    await Promise.all(
+      this.puppetPage.frames.map(async frame => {
+        try {
+          // don't wait for env to be available
+          if (!frame.canEvaluate(true)) return;
+
+          const results = await frame.evaluate<PageRecorderResultSet>(
+            `window.flushPageRecorder()`,
+            true,
+          );
+          await this.onPageRecorderEvents(results, frame.id);
+        } catch (error) {
+          // no op if it fails
+        }
+      }),
+    );
+  }
+
+  private onPageRecorderEvents(results: PageRecorderResultSet, frameId: string) {
+    if (!frameId) {
+      log.warn('DomRecorder.bindingCalledBeforeExecutionTracked', {
+        sessionId: this.sessionId,
+        payload: results,
+      });
+      return;
+    }
+    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
     this.logger.stats('Tab.onPageEvents', {
       tabId: this.id,
       frameId,
@@ -550,28 +582,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       loadEvents,
     });
 
-    let startCommandId = domChanges.reduce((max, change) => {
-      if (max > change[0]) return max;
-      return change[0];
-    }, -1);
-
     const frame = this.frameEnvironmentsById.get(frameId);
-
-    const navigationHistory = frame.navigations.history;
-    // find last page load
-    for (let i = navigationHistory.length - 1; i >= 0; i -= 1) {
-      const nav = navigationHistory[i];
-      if (nav.stateChanges.has(LocationStatus.HttpResponded)) {
-        startCommandId = nav.startCommandId;
-        break;
-      }
-    }
 
     frame.onDomRecorderLoadEvents(loadEvents);
 
     this.sessionState.captureDomEvents(
       this.id,
-      startCommandId,
       frameId,
       domChanges,
       mouseEvents,

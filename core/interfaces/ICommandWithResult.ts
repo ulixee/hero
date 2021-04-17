@@ -4,8 +4,8 @@ export default interface ICommandWithResult {
   label: string;
   name: string;
   args?: string;
-  startDate: string;
-  endDate?: string;
+  startDate: number;
+  endDate?: number;
   duration: number;
   isError: boolean;
   result: any;

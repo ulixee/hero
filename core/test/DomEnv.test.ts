@@ -57,11 +57,11 @@ it('should be able to get window variables', async () => {
   await tab.waitForLoad('DomContentLoaded');
 
   const pageClicks = await tab.getJsValue('pageClicks');
-  expect(pageClicks.value).toStrictEqual([1, 2, 3]);
+  expect(pageClicks).toStrictEqual([1, 2, 3]);
 
   await tab.getJsValue(`add('item4')`);
   const pageClicks2 = await tab.getJsValue('pageClicks');
 
-  expect(pageClicks2.value).toStrictEqual([1, 2, 3, 'item4']);
+  expect(pageClicks2).toStrictEqual([1, 2, 3, 'item4']);
   await session.close();
 });

@@ -30,7 +30,7 @@
     "moment": "^2.24.1",
     "ua-parser-js": "^0.7.22",
     "uuid": "^8.3.2",
-    "ws": "^7.4.2"
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "@secret-agent/client": "1.4.1-alpha.2",

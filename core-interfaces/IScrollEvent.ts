@@ -1,6 +1,6 @@
-import { CommandId, ISOTimestamp } from './GenericTypes';
+import { UnixTimestamp } from './GenericTypes';
 
 type ScrollX = number;
 type ScrollY = number;
 
-export type IScrollEvent = [CommandId, ScrollX, ScrollY, ISOTimestamp];
+export type IScrollEvent = [ScrollX, ScrollY, UnixTimestamp];

@@ -27,7 +27,7 @@ describe('basic Emulator tests', () => {
 
     const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
     const timezoneOffset = await agent.getJsValue('new Date(1479579154987).toString()');
-    expect(timezoneOffset.value).toBe(formatted);
+    expect(timezoneOffset).toBe(formatted);
   });
 
   it('should affect accept-language header', async () => {
@@ -50,10 +50,10 @@ describe('basic Emulator tests', () => {
 
     await agent.goto(`${koaServer.baseUrl}`);
     const result = await agent.getJsValue(`navigator.language`);
-    expect(result.value).toBe('fr-CH');
+    expect(result).toBe('fr-CH');
 
     const result2 = await agent.getJsValue(`navigator.languages`);
-    expect(result2.value).toStrictEqual(['fr-CH', 'fr-CA']);
+    expect(result2).toStrictEqual(['fr-CH', 'fr-CA']);
   });
 
   it('should format number', async () => {
@@ -63,7 +63,7 @@ describe('basic Emulator tests', () => {
 
       await agent.goto(`${koaServer.baseUrl}`);
       const result = await agent.getJsValue(`(1000000.5).toLocaleString()`);
-      expect(result.value).toBe('1,000,000.5');
+      expect(result).toBe('1,000,000.5');
     }
     {
       const agent = await handler.createAgent({ locale: 'fr-CH' });
@@ -72,7 +72,7 @@ describe('basic Emulator tests', () => {
       await agent.goto(`${koaServer.baseUrl}`);
 
       const result = await agent.getJsValue(`(1000000.5).toLocaleString()`);
-      expect(result.value).toBe('1 000 000,5');
+      expect(result).toBe('1 000 000,5');
     }
   });
 
@@ -89,7 +89,7 @@ describe('basic Emulator tests', () => {
       const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
 
       const result = await agent.getJsValue(`new Date(1479579154987).toString()`);
-      expect(result.value).toBe(formatted);
+      expect(result).toBe(formatted);
     }
     {
       const agent = await handler.createAgent({
@@ -102,7 +102,7 @@ describe('basic Emulator tests', () => {
 
       const formatted = 'Sat Nov 19 2016 19:12:34 GMT+0100 (Mitteleuropäische Normalzeit)';
       const result = await agent.getJsValue(`new Date(1479579154987).toString()`);
-      expect(result.value).toBe(formatted);
+      expect(result).toBe(formatted);
     }
   });
 });
@@ -125,19 +125,19 @@ describe('setScreensize', () => {
 
     await agent.goto(`${koaServer.baseUrl}`);
     const screenWidth = await agent.getJsValue('screen.width');
-    expect(screenWidth.value).toBe(viewport.screenWidth);
+    expect(screenWidth).toBe(viewport.screenWidth);
     const screenHeight = await agent.getJsValue('screen.height');
-    expect(screenHeight.value).toBe(viewport.screenHeight);
+    expect(screenHeight).toBe(viewport.screenHeight);
 
     const screenX = await agent.getJsValue('screenX');
-    expect(screenX.value).toBe(viewport.positionX);
+    expect(screenX).toBe(viewport.positionX);
     const screenY = await agent.getJsValue('screenY');
-    expect(screenY.value).toBe(viewport.positionY);
+    expect(screenY).toBe(viewport.positionY);
 
     const innerWidth = await agent.getJsValue('innerWidth');
-    expect(innerWidth.value).toBe(viewport.width);
+    expect(innerWidth).toBe(viewport.width);
     const innerHeight = await agent.getJsValue('innerHeight');
-    expect(innerHeight.value).toBe(viewport.height);
+    expect(innerHeight).toBe(viewport.height);
   });
 
   it('should support Media Queries', async () => {
@@ -153,24 +153,19 @@ describe('setScreensize', () => {
     });
     Helpers.needsClosing.push(agent);
 
-    async function getQueryValue(mediaQuery: string) {
-      const result = await agent.getJsValue(mediaQuery);
-      return result.value;
-    }
+    expect(await agent.getJsValue(`matchMedia('(min-device-width: 100px)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(min-device-width: 300px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(max-device-width: 100px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(max-device-width: 300px)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(device-width: 500px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(device-width: 200px)').matches`)).toBe(true);
 
-    expect(await getQueryValue(`matchMedia('(min-device-width: 100px)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(min-device-width: 300px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(max-device-width: 100px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(max-device-width: 300px)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(device-width: 500px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(device-width: 200px)').matches`)).toBe(true);
-
-    expect(await getQueryValue(`matchMedia('(min-device-height: 100px)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(min-device-height: 300px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(max-device-height: 100px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(max-device-height: 300px)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(device-height: 500px)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(min-device-height: 100px)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(min-device-height: 300px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(max-device-height: 100px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(max-device-height: 300px)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(device-height: 500px)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
   });
 });
 
@@ -179,19 +174,14 @@ describe('mouse', () => {
     const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
-    async function getQueryValue(mediaQuery: string) {
-      const result = await agent.getJsValue(mediaQuery);
-      return result.value;
-    }
-
-    expect(await getQueryValue(`matchMedia('(hover: none)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(hover: hover)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(any-hover: none)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(any-hover: hover)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(pointer: coarse)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(pointer: fine)').matches`)).toBe(true);
-    expect(await getQueryValue(`matchMedia('(any-pointer: coarse)').matches`)).toBe(false);
-    expect(await getQueryValue(`matchMedia('(any-pointer: fine)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(hover: none)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(hover: hover)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(any-hover: none)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(any-hover: hover)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(pointer: coarse)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(pointer: fine)').matches`)).toBe(true);
+    expect(await agent.getJsValue(`matchMedia('(any-pointer: coarse)').matches`)).toBe(false);
+    expect(await agent.getJsValue(`matchMedia('(any-pointer: fine)').matches`)).toBe(true);
   });
 });
 
@@ -247,7 +237,7 @@ describe('user agent and platform', () => {
 
     async function getJsValue(jsValue: string) {
       const result = await agent.getJsValue(jsValue);
-      return result.value;
+      return result;
     }
 
     const windowParams: any = {};
@@ -300,7 +290,7 @@ describe('user agent and platform', () => {
     async function getParams() {
       const windowParams: any = {};
       for (const prop of propsToGet) {
-        windowParams[prop] = (await agent.getJsValue(`navigator.${prop}`)).value;
+        windowParams[prop] = await agent.getJsValue(`navigator.${prop}`);
       }
       return windowParams;
     }
@@ -319,7 +309,7 @@ describe('user agent and platform', () => {
       expect(page2WindowParams[key]).toBe(page1WindowParams[key]);
     }
 
-    const page2StartParams = (await agent.getJsValue('startPageVars')).value;
+    const page2StartParams = await agent.getJsValue('startPageVars');
     for (const key of propsToGet) {
       expect(page2StartParams[key]).toBe(page1WindowParams[key]);
     }
@@ -385,7 +375,7 @@ describe('user agent and platform', () => {
     }
 
     for (const prop of propsToGet) {
-      const windowValue = (await agent.getJsValue(`navigator.${prop}`)).value;
+      const windowValue = await agent.getJsValue(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
     }
   });
@@ -463,7 +453,7 @@ self.addEventListener('message', async event => {
     }
 
     for (const prop of propsToGet) {
-      const windowValue = (await agent.getJsValue(`navigator.${prop}`)).value;
+      const windowValue = await agent.getJsValue(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
     }
   });

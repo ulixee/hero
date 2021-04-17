@@ -1,5 +1,4 @@
 import type IResolvablePromise from './IResolvablePromise';
-import { IPipelineStatus } from './Location';
 
 export default interface INavigation {
   id: number;
@@ -15,7 +14,18 @@ export default interface INavigation {
   stateChanges: Map<NavigationState, Date>;
 }
 
-export type NavigationState = Exclude<IPipelineStatus, 'PaintingStable'> | 'Load' | 'ContentPaint';
+export enum LoadStatus {
+  NavigationRequested = 'NavigationRequested',
+  HttpRequested = 'HttpRequested',
+  HttpRedirected = 'HttpRedirected',
+  HttpResponded = 'HttpResponded',
+
+  DomContentLoaded = 'DomContentLoaded',
+  Load = 'Load',
+  ContentPaint = 'ContentPaint',
+}
+
+export type NavigationState = keyof typeof LoadStatus;
 
 export type NavigationReason =
   | DevToolsNavigationReason

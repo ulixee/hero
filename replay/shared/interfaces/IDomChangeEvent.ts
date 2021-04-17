@@ -3,7 +3,7 @@ export interface IDomChangeEvent {
   tabId: number;
   eventIndex: number;
   action: 'newDocument' | 'location' | 'added' | 'removed' | 'text' | 'attribute' | 'property';
-  timestamp: string;
+  timestamp: number;
   frameIdPath?: string;
   commandId: number;
   nodeType?: number;

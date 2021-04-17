@@ -3,7 +3,7 @@ import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 
 export default interface IResourceResponse {
   url: string;
-  timestamp: string;
+  timestamp: number;
   headers: IResourceHeaders;
   trailers?: IResourceHeaders;
   browserServedFromCache?: IHttpResourceLoadDetails['browserServedFromCache'];

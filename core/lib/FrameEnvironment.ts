@@ -1,9 +1,5 @@
 import Log from '@secret-agent/commons/Logger';
-import {
-  ILocationTrigger,
-  IPipelineStatus,
-  LocationStatus,
-} from '@secret-agent/core-interfaces/Location';
+import { ILocationTrigger, IPipelineStatus } from '@secret-agent/core-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@secret-agent/core-interfaces/ICookie';
 import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
@@ -22,7 +18,7 @@ import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
 import { ILoadEvent } from '@secret-agent/core-interfaces/ILoadEvent';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -175,27 +171,8 @@ export default class FrameEnvironment {
     }
   }
 
-  public async getJsValue<T>(expression: string): Promise<{ value: T; type: string }> {
-    const unparsedResult = await this.puppetFrame.evaluate<string>(
-      `(async function execNonIsolatedExpression() {
-  const value = await ${expression};
-
-  let type = typeof value;
-  if (value && value.constructor) {
-    type = value.constructor.name;
-  }
-
-  return JSON.stringify({
-    value,
-    type,
-  });
-
-})();
-//# sourceURL=${injectedSourceUrl}
-`,
-      false,
-    );
-    return JSON.parse(unparsedResult);
+  public async getJsValue<T>(expression: string): Promise<T> {
+    return await this.puppetFrame.evaluate<T>(expression, false);
   }
 
   public meta(): IFrameMeta {
@@ -230,9 +207,8 @@ export default class FrameEnvironment {
     );
   }
 
-  public async getLocationHref(): Promise<string> {
-    await this.navigationsObserver.waitForReady();
-    return this.puppetFrame.evaluate('location.href', false);
+  public getLocationHref(): Promise<string> {
+    return Promise.resolve(this.navigations.currentUrl || this.puppetFrame.url);
   }
 
   public async getCookies(): Promise<ICookie[]> {
@@ -247,9 +223,7 @@ export default class FrameEnvironment {
     value: string,
     options?: ISetCookieOptions,
   ): Promise<boolean> {
-    await this.navigationsObserver.waitForReady();
-    const url = this.puppetFrame.url;
-    if (url === 'about:blank') {
+    if (!this.navigations.top && this.puppetFrame.url === 'about:blank') {
       throw new Error(`Chrome won't allow you to set cookies on a blank tab.
 
 SecretAgent supports two options to set cookies:
@@ -257,6 +231,9 @@ a) Goto a url first and then set cookies on the activeTab
 b) Use the UserProfile feature to set cookies for 1 or more domains before they're loaded (https://secretagent.dev/docs/advanced/user-profile)
       `);
     }
+
+    await this.navigationsObserver.waitForReady();
+    const url = this.navigations.currentUrl;
     await this.session.browserContext.addCookies([
       {
         name,
@@ -352,13 +329,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public onDomRecorderLoadEvents(loadEvents: ILoadEvent[]): void {
     for (const loadEvent of loadEvents) {
-      const [, event, url, timestamp] = loadEvent;
+      const [event, url, timestamp] = loadEvent;
 
-      const incomingStatus = {
-        LargestContentfulPaint: 'ContentPaint',
-        DOMContentLoaded: LocationStatus.DomContentLoaded,
-        load: 'Load',
-      }[event];
+      const incomingStatus = pageStateToLoadStatus[event];
 
       this.navigations.onLoadStateChanged(incomingStatus, url, new Date(timestamp));
     }
@@ -389,19 +362,8 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.runFn<T>(fnName, callFn);
   }
 
-  protected async runFn<T>(fnName: string, callFn: string, retries = 10): Promise<T> {
-    const serializedFn = `'SecretAgent' in window ? ${callFn} : '${SA_NOT_INSTALLED}';`;
+  protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
     const unparsedResult = await this.puppetFrame.evaluate(serializedFn, true);
-
-    if (unparsedResult === SA_NOT_INSTALLED) {
-      if (retries === 0 || this.isClosing) throw new Error('Injected scripts not installed.');
-      this.logger.warn('Injected scripts not installed yet. Retrying', {
-        fnName,
-        puppetFrame: this.puppetFrame,
-      });
-      await new Promise(resolve => setTimeout(resolve, 100));
-      return this.runFn(fnName, serializedFn, retries - 1);
-    }
 
     const result = unparsedResult
       ? TypeSerializer.parse(unparsedResult as string, 'BROWSER')
@@ -444,10 +406,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {
     const lowerEventName = event.name.toLowerCase();
-    let status: 'Load' | LocationStatus.DomContentLoaded;
+    let status: LoadStatus.Load | LoadStatus.DomContentLoaded;
 
-    if (lowerEventName === 'load') status = 'Load';
-    else if (lowerEventName === 'domcontentloaded') status = LocationStatus.DomContentLoaded;
+    if (lowerEventName === 'load') status = LoadStatus.Load;
+    else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
       this.navigations.onLoadStateChanged(status, event.frame.url);
@@ -474,3 +436,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     this.navigations.updateNavigationReason(url, reason);
   }
 }
+
+const pageStateToLoadStatus = {
+  LargestContentfulPaint: LoadStatus.ContentPaint,
+  DOMContentLoaded: LoadStatus.DomContentLoaded,
+  load: LoadStatus.Load,
+};

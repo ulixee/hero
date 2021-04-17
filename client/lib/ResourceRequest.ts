@@ -32,8 +32,8 @@ export default class ResourceRequest {
     return getRequestProperty(this, 'url');
   }
 
-  public get timestamp(): Promise<string> {
-    return getRequestProperty(this, 'timestamp');
+  public get timestamp(): Promise<Date> {
+    return getRequestProperty(this, 'timestamp').then(x => (x ? new Date(x as number) : null));
   }
 
   public get method(): Promise<string> {

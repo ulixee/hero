@@ -8,7 +8,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
       ['frameId', 'TEXT'],
       ['type', 'TEXT'],
       ['message', 'TEXT'],
-      ['timestamp', 'TEXT'],
+      ['timestamp', 'INTEGER'],
       ['location', 'TEXT'],
     ]);
   }
@@ -21,7 +21,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
     date: Date,
     location?: string,
   ) {
-    return this.queuePendingInsert([tabId, frameId, type, message, date.toISOString(), location]);
+    return this.queuePendingInsert([tabId, frameId, type, message, date.getTime(), location]);
   }
 }
 
@@ -30,6 +30,6 @@ export interface IPageLogRecord {
   frameId: string;
   type: string;
   message: string;
-  timestamp: string;
+  timestamp: number;
   location?: string;
 }

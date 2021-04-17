@@ -21,10 +21,6 @@ import BrowserRequestMatcher from '../lib/BrowserRequestMatcher';
 const { log } = Log(module);
 
 export default class RequestSession extends TypedEventEmitter<IRequestSessionEvents> {
-  public static sessionById: { [sessionId: string]: RequestSession } = {};
-  public static sessionIdByPort: { [port: number]: string } = {};
-  public static portsBySessionId: { [sessionId: number]: Set<number> } = {};
-
   public websocketBrowserResourceIds: {
     [headersHash: string]: IResolvablePromise<string>;
   } = {};
@@ -63,7 +59,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
   ) {
     super();
-    RequestSession.sessionById[sessionId] = this;
     this.logger = log.createChild(module, {
       sessionId,
     });
@@ -120,26 +115,24 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public close(): void {
+    if (this.isClosing) return;
     const logid = this.logger.stats('MitmRequestSession.Closing');
     this.isClosing = true;
+    const errors: Error[] = [];
     this.browserRequestMatcher.cancelPending();
-    this.requestAgent.close();
-    this.dns.close();
-    this.logger.stats('MitmRequestSession.Closed', logid);
+    try {
+      this.requestAgent.close();
+    } catch (err) {
+      errors.push(err);
+    }
+    try {
+      this.dns.close();
+    } catch (err) {
+      errors.push(err);
+    }
+    this.logger.stats('MitmRequestSession.Closed', { parentLogId: logid, errors });
 
-    // give it a second for lingering requests to finish
-    setTimeout(
-      sessionId => {
-        const ports = RequestSession.portsBySessionId[sessionId] || [];
-        for (const port of ports) {
-          delete RequestSession.sessionIdByPort[port];
-        }
-        delete RequestSession.portsBySessionId[sessionId];
-        delete RequestSession.sessionById[sessionId];
-      },
-      1e3,
-      this.sessionId,
-    ).unref();
+    setImmediate(() => this.emit('close'));
   }
 
   public shouldBlockRequest(url: string): boolean {
@@ -203,30 +196,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     return [host, websocketKey].join(',');
   }
 
-  public static async close(): Promise<void> {
-    await Promise.all(Object.values(RequestSession.sessionById).map(x => x.close()));
-  }
-
-  public static readSessionId(
-    requestHeaders: { [key: string]: string | string[] | undefined },
-    remotePort: number,
-  ): string {
-    const authHeader = requestHeaders['proxy-authorization'] as string;
-    if (!authHeader) {
-      return RequestSession.sessionIdByPort[remotePort];
-    }
-
-    const [, sessionId] = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    return sessionId;
-  }
-
-  public static registerProxySession(loopbackProxySocket: net.Socket, sessionId: string): void {
-    // local port is the side that originates from our http server
-    this.portsBySessionId[sessionId] = this.portsBySessionId[sessionId] || new Set();
-    this.portsBySessionId[sessionId].add(loopbackProxySocket.localPort);
-    this.sessionIdByPort[loopbackProxySocket.localPort] = sessionId;
-  }
-
   public static sendNeedsAuth(socket: net.Socket): void {
     socket.end(
       'HTTP/1.1 407 Proxy Authentication Required\r\n' +
@@ -236,6 +205,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 }
 
 interface IRequestSessionEvents {
+  close: void;
   response: IRequestSessionResponseEvent;
   request: IRequestSessionRequestEvent;
   'http-error': IRequestSessionHttpErrorEvent;

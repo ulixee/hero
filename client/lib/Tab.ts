@@ -156,7 +156,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return coreTab.reload(timeoutMs);
   }
 
-  public async getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
+  public async getJsValue<T>(path: string): Promise<T> {
     return await this.mainFrameEnvironment.getJsValue(path);
   }
 
