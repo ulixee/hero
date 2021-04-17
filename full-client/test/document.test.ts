@@ -270,6 +270,20 @@ describe('basic Document tests', () => {
     expect(dataUrl).toMatch(/data:image\/png.+/);
   });
 
+  it('can get a dataset attribute', async () => {
+    koaServer.get('/dataset', ctx => {
+      ctx.body = `
+        <body>
+          <div id="main" data-id="1" data-name="name">This is a div</div>
+        </body>
+      `;
+    });
+    const agent = await openBrowser(`/dataset`);
+    const { document } = agent;
+    const dataset = await document.querySelector('#main').dataset;
+    expect(dataset).toEqual({ id: '1', name: 'name' });
+  });
+
   it('allows you to run shadow dom query selectors', async () => {
     koaServer.get('/shadow', ctx => {
       ctx.body = `
