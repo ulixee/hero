@@ -66,7 +66,8 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   private pendingWaitEvents: IPendingWaitEvent[] = [];
 
   private eventsToLog = new Set<string | symbol>();
-  private storedEvents: { eventType: keyof T & (string | symbol); event?: any }[] = [];
+  private storedEventsByType = new Map<keyof T & (string | symbol), any[]>();
+  private reemitterCountByEventType: { [eventType: string]: number } = {};
 
   public cancelPendingEvents(message?: string, excludeEvents?: (keyof T & string)[]): void {
     const events = [...this.pendingWaitEvents];
@@ -90,7 +91,6 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     eventType: K,
     listenerFn?: (this: this, event?: T[K]) => boolean,
     timeoutMillis = 30e3,
-    includeUnhandledEvents = false,
   ): Promise<T[K]> {
     const promise = createPromise<T[K]>(
       timeoutMillis ?? 30e3,
@@ -110,21 +110,16 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       eventType,
     });
 
-    const listener = addTypedEventListener(
-      this,
-      eventType,
-      (result: T[K]) => {
-        // give the listeners a second to register
-        if (!listenerFn || listenerFn.call(this, result)) {
-          this.logger?.stats('waitOn.resolve', {
-            eventType,
-            parentLogId: messageId,
-          });
-          promise.resolve(result);
-        }
-      },
-      includeUnhandledEvents,
-    );
+    const listener = addTypedEventListener(this, eventType, (result: T[K]) => {
+      // give the listeners a second to register
+      if (!listenerFn || listenerFn.call(this, result)) {
+        this.logger?.stats('waitOn.resolve', {
+          eventType,
+          parentLogId: messageId,
+        });
+        promise.resolve(result);
+      }
+    });
 
     return promise.promise.finally(() => {
       removeEventListeners([listener]);
@@ -133,22 +128,35 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     });
   }
 
+  public addEventEmitter<Y, K extends keyof T & keyof Y & (string | symbol)>(
+    emitter: TypedEventEmitter<Y>,
+    eventTypes: K[],
+  ): IRegisteredEventListener[] {
+    const listeners: IRegisteredEventListener[] = [];
+    for (const eventName of eventTypes) {
+      const handler = emitter.emit.bind(emitter, eventName);
+      listeners.push({ handler, eventName, emitter: this });
+      super.on(eventName, handler);
+      this.reemitterCountByEventType[eventName as string] ??= 0;
+      this.reemitterCountByEventType[eventName as string] += 1;
+    }
+    return listeners;
+  }
+
   public on<K extends keyof T & (string | symbol)>(
     eventType: K,
     listenerFn: (this: this, event?: T[K]) => any,
     includeUnhandledEvents = false,
   ): this {
     super.on(eventType, listenerFn);
-    if (includeUnhandledEvents) this.replayMissedEvents(eventType);
-    else this.clearMissedEvents(eventType);
-    return this;
+    return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
   public off<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => any,
   ): this {
-    return super.off(event, listener);
+    return super.off(eventType, listenerFn);
   }
 
   public once<K extends keyof T & (string | symbol)>(
@@ -157,9 +165,7 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     includeUnhandledEvents = false,
   ): this {
     super.once(eventType, listenerFn);
-    if (includeUnhandledEvents) this.replayMissedEvents(eventType);
-    else this.clearMissedEvents(eventType);
-    return this;
+    return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
   public emit<K extends keyof T & (string | symbol)>(
@@ -167,11 +173,11 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
     event?: T[K],
     sendInitiator?: object,
   ): boolean {
-    if (!super.listenerCount(eventType)) {
-      if (this.storeEventsWithoutListeners) {
-        this.storedEvents.push({ eventType, event });
-      }
-      return;
+    const listeners = super.listenerCount(eventType);
+    if (this.storeEventsWithoutListeners && !listeners) {
+      if (!this.storedEventsByType.has(eventType)) this.storedEventsByType.set(eventType, []);
+      this.storedEventsByType.get(eventType).push(event);
+      return false;
     }
     this.logEvent(eventType, event);
 
@@ -179,76 +185,58 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
   }
 
   public addListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => any,
     includeUnhandledEvents = false,
   ): this {
-    super.addListener(event, listener);
-    if (includeUnhandledEvents) this.replayMissedEvents(event);
-    else this.clearMissedEvents(event);
-    return this;
+    return this.on(eventType, listenerFn, includeUnhandledEvents);
   }
 
   public removeListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => any,
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => any,
   ): this {
-    return super.removeListener(event, listener);
+    return super.removeListener(eventType, listenerFn);
   }
 
   public prependListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => void,
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => void,
     includeUnhandledEvents = false,
   ): this {
-    super.prependListener(event, listener);
-    if (includeUnhandledEvents) this.replayMissedEvents(event);
-    else this.clearMissedEvents(event);
-    return this;
+    super.prependListener(eventType, listenerFn);
+    return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
   public prependOnceListener<K extends keyof T & (string | symbol)>(
-    event: K,
-    listener: (this: this, event?: T[K]) => void,
+    eventType: K,
+    listenerFn: (this: this, event?: T[K]) => void,
     includeUnhandledEvents = false,
   ): this {
-    super.prependOnceListener(event, listener);
-    if (includeUnhandledEvents) this.replayMissedEvents(event);
-    else this.clearMissedEvents(event);
-    return this;
+    super.prependOnceListener(eventType, listenerFn);
+    return this.replayOrClearMissedEvents(includeUnhandledEvents, eventType);
   }
 
-  private clearMissedEvents(replayEventType: string | symbol): void {
-    if (!this.storedEvents.length) return;
-
-    const events = [...this.storedEvents];
-    this.storedEvents.length = 0;
-    for (const { event, eventType } of events) {
-      if (eventType !== replayEventType) {
-        this.storedEvents.push({ event, eventType });
-      }
-    }
-  }
-
-  private replayMissedEvents(replayEventType: string | symbol): void {
-    if (!this.storedEvents.length) return;
-
-    const events = [...this.storedEvents];
-    this.storedEvents.length = 0;
-    for (const { event, eventType } of events) {
-      if (eventType === replayEventType) {
+  private replayOrClearMissedEvents<K extends keyof T & (string | symbol)>(
+    shouldReplay: boolean,
+    eventType: K,
+  ): this {
+    const events = this.storedEventsByType.get(eventType);
+    if (!events || !events.length) return this;
+    this.storedEventsByType.delete(eventType);
+    if (shouldReplay) {
+      for (const event of events) {
         this.logEvent(eventType, event);
         super.emit(eventType, event);
-      } else {
-        this.storedEvents.push({ event, eventType });
       }
     }
+    return this;
   }
 
   private logEvent<K extends keyof T & (string | symbol)>(eventType: K, event?: T[K]): void {
     if (this.eventsToLog.has(eventType)) {
       let data: any = event;
-      if (event) {
+      if (eventType) {
         if (typeof event === 'object') {
           if ((event as any).toJSON) {
             data = (event as any).toJSON();

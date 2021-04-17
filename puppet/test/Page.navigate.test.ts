@@ -89,7 +89,10 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           res.statusCode = 204;
           res.end();
         });
-        const wait = page.waitOn('frame-lifecycle', event => event.name === 'DOMContentLoaded');
+        const wait = page.mainFrame.waitOn(
+          'frame-lifecycle',
+          event => event.name === 'DOMContentLoaded',
+        );
         await page.goto(`${server.baseUrl}/frames/one-frame.html`);
         await expect(wait).resolves.toBeTruthy();
       });
@@ -118,7 +121,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
             false,
           );
         })()`);
-        const waitForLoad = page.waitOn(
+        const waitForLoad = page.mainFrame.waitOn(
           'frame-lifecycle',
           event => event.name === 'DOMContentLoaded',
         );

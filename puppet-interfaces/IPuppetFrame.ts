@@ -6,10 +6,12 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   parentId?: string;
   name?: string;
   url: string;
+  activeLoaderId: string;
   navigationReason?: string;
   disposition?: string;
   securityOrigin: string;
   isLoaded: boolean;
+  isDefaultUrl: boolean;
   isAttached(): boolean;
   waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
@@ -29,14 +31,15 @@ export interface ILifecycleEvents {
   init?: Date;
 }
 
-export interface IPuppetFrameEvents {
-  'frame-created': { frame: IPuppetFrame };
-  'frame-lifecycle': { frame: IPuppetFrame; name: string };
-  'frame-navigated': { frame: IPuppetFrame; navigatedInDocument?: boolean };
-  'frame-requested-navigation': { frame: IPuppetFrame; url: string; reason: NavigationReason };
+export interface IPuppetFrameManagerEvents {
+  'frame-created': { frame: IPuppetFrame; loaderId: string };
 }
-
-export interface IPuppetFrameInternalEvents {
-  'default-context-created': { executionContextId: number };
-  'isolated-context-created': { executionContextId: number };
+export interface IPuppetFrameEvents {
+  'frame-lifecycle': { frame: IPuppetFrame; name: string; loaderId: string };
+  'frame-navigated': { frame: IPuppetFrame; navigatedInDocument?: boolean; loaderId?: string };
+  'frame-requested-navigation': {
+    frame: IPuppetFrame;
+    url: string;
+    reason: NavigationReason;
+  };
 }

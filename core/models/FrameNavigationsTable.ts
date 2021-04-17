@@ -16,6 +16,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
         ['requestedUrl', 'TEXT'],
         ['finalUrl', 'TEXT'],
         ['navigationReason', 'TEXT'],
+        ['loaderId', 'TEXT'],
         ['initiatedTime', 'INTEGER'],
         ['httpRequestedTime', 'INTEGER'],
         ['httpRespondedTime', 'INTEGER'],
@@ -41,6 +42,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.requestedUrl,
       navigation.finalUrl,
       navigation.navigationReason,
+      navigation.loaderId,
       navigation.initiatedTime.getTime(),
       navigation.stateChanges.get(LoadStatus.HttpRequested)?.getTime(),
       navigation.stateChanges.get(LoadStatus.HttpResponded)?.getTime(),
@@ -64,6 +66,7 @@ export interface IFrameNavigationRecord {
   frameId: string;
   requestedUrl: string;
   finalUrl?: string;
+  loaderId: string;
   startCommandId: number;
   navigationReason: string;
   initiatedTime: Date;

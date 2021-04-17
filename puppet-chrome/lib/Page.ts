@@ -110,19 +110,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
     this.setEventsToLog([
       'frame-created',
-      'frame-navigated',
-      'frame-lifecycle',
-      'frame-requested-navigation',
       'websocket-frame',
       'websocket-handshake',
       'navigation-response',
       'worker',
     ]);
 
-    for (const event of ['frame-created', 'frame-navigated', 'frame-lifecycle'] as const) {
-      this.framesManager.on(event, this.emit.bind(this, event));
-    }
-    for (const event of [
+    this.framesManager.addEventEmitter(this, ['frame-created']);
+
+    this.networkManager.addEventEmitter(this, [
       'navigation-response',
       'websocket-frame',
       'websocket-handshake',
@@ -130,9 +126,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       'resource-was-requested',
       'resource-loaded',
       'resource-failed',
-    ] as const) {
-      this.networkManager.on(event, this.emit.bind(this, event));
-    }
+    ]);
 
     this.cdpSession.once('disconnected', this.emit.bind(this, 'close'));
 

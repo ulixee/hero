@@ -7,6 +7,7 @@ export interface IPuppetNetworkEvents {
     status: number;
     location?: string;
     url?: string;
+    loaderId: string;
   };
   'websocket-frame': {
     browserRequestId: string;
@@ -22,16 +23,19 @@ export interface IPuppetNetworkEvents {
     redirectedFromUrl: string;
     isDocumentNavigation: boolean;
     frameId: string;
+    loaderId?: string;
   };
   'resource-was-requested': {
     resource: IHttpResourceLoadDetails;
     redirectedFromUrl: string;
     isDocumentNavigation: boolean;
     frameId: string;
+    loaderId?: string;
   };
   'resource-loaded': {
     resource: IHttpResourceLoadDetails;
     frameId?: string;
+    loaderId?: string;
   };
   'resource-failed': {
     resource: IHttpResourceLoadDetails;

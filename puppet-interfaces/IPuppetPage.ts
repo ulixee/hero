@@ -1,7 +1,7 @@
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
 import IRect from '@secret-agent/core-interfaces/IRect';
-import { IPuppetFrame, IPuppetFrameEvents } from './IPuppetFrame';
+import { IPuppetFrame, IPuppetFrameManagerEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
 import { IPuppetWorker } from './IPuppetWorker';
@@ -45,7 +45,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   ): Promise<IRegisteredEventListener>;
 }
 
-export interface IPuppetPageEvents extends IPuppetFrameEvents, IPuppetNetworkEvents {
+export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNetworkEvents {
   close: undefined;
   worker: { worker: IPuppetWorker };
   crashed: { error: Error; fatal?: boolean };

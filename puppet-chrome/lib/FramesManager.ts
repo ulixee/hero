@@ -2,7 +2,7 @@ import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
+import { IPuppetFrameManagerEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
@@ -23,7 +23,7 @@ import Page = Protocol.Page;
 export const DEFAULT_PAGE = 'about:blank';
 export const ISOLATED_WORLD = '__sa_world__';
 
-export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents> {
+export default class FramesManager extends TypedEventEmitter<IPuppetFrameManagerEvents> {
   public framesById = new Map<string, Frame>();
 
   public get mainFrameId() {
@@ -41,7 +41,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   protected readonly logger: IBoundLog;
 
   private attachedFrameIds = new Set<string>();
-  private activeContexts = new Set<number>();
+  private activeContextIds = new Set<number>();
   private readonly registeredEvents: IRegisteredEventListener[] = [];
   private readonly cdpSession: CDPSession;
 
@@ -68,8 +68,12 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
   public initialize() {
     this.isReady = new Promise<void>(async (resolve, reject) => {
       try {
-        await Promise.all([
+        const [framesResponse, , readyStateResult] = await Promise.all([
+          this.cdpSession.send('Page.getFrameTree'),
           this.cdpSession.send('Page.enable'),
+          this.cdpSession.send('Runtime.evaluate', {
+            expression: 'document.readyState',
+          }),
           this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
           this.cdpSession.send('Runtime.enable'),
           this.cdpSession.send('Page.addScriptToEvaluateOnNewDocument', {
@@ -77,13 +81,9 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
             worldName: ISOLATED_WORLD,
           }),
         ]);
-        const framesResponse = await this.cdpSession.send('Page.getFrameTree');
         this.recurseFrameTree(framesResponse.frameTree);
         resolve();
         if (this.main.securityOrigin && !this.main.lifecycleEvents?.load) {
-          const readyStateResult = await this.cdpSession.send('Runtime.evaluate', {
-            expression: 'document.readyState',
-          });
           const readyState = readyStateResult.result?.value;
           let loadName: string;
           if (readyState === 'interactive') loadName = 'DOMContentLoaded';
@@ -176,7 +176,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   private async onExecutionContextDestroyed(event: ExecutionContextDestroyedEvent) {
     await this.isReady;
-    this.activeContexts.delete(event.executionContextId);
+    this.activeContextIds.delete(event.executionContextId);
     for (const frame of this.framesById.values()) {
       frame.removeContextId(event.executionContextId);
     }
@@ -184,7 +184,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
 
   private async onExecutionContextsCleared() {
     await this.isReady;
-    this.activeContexts.clear();
+    this.activeContextIds.clear();
     for (const frame of this.framesById.values()) {
       frame.clearContextIds();
     }
@@ -195,7 +195,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const { context } = event;
     const frameId = context.auxData.frameId as string;
 
-    this.activeContexts.add(context.id);
+    this.activeContextIds.add(context.id);
     const frame = this.framesById.get(frameId);
     if (!frame) {
       this.logger.warn('No frame for active context!', {
@@ -277,27 +277,15 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameEvents>
     const parentFrame = parentId ? this.framesById.get(parentId) : null;
     const frame = new Frame(
       newFrame,
-      this.activeContexts,
+      this.activeContextIds,
       this.cdpSession,
       this.logger,
       () => this.attachedFrameIds.has(id),
       parentFrame,
     );
     this.framesById.set(id, frame);
-    this.emit('frame-created', { frame });
 
-    const proxiedEvents = [
-      'frame-lifecycle',
-      'frame-navigated',
-      'frame-requested-navigation',
-    ] as const;
-
-    for (const eventName of proxiedEvents) {
-      const listener = eventUtils.addEventListener(frame, eventName, event =>
-        this.emit(eventName, event),
-      );
-      this.registeredEvents.push(listener);
-    }
+    this.emit('frame-created', { frame, loaderId: newFrame.loaderId });
 
     return frame;
   }

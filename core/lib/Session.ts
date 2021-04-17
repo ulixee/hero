@@ -348,7 +348,10 @@ export default class Session extends TypedEventEmitter<{
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ) {
-    const tab = Tab.create(this, page, parentTab, openParams);
+    const tab = Tab.create(this, page, parentTab, {
+      ...openParams,
+      loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoaderId,
+    });
     this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
     this.registerTab(tab, page);
 

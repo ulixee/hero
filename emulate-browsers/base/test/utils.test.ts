@@ -95,7 +95,7 @@ test('should override a function and clean error stacks', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const worksOnce = await page.evaluate(

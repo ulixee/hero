@@ -60,7 +60,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           page = createTestPage(await context.newPage());
           await page.goto(server.url('link.html'));
 
-          const navigate = page.waitOn('frame-navigated');
+          const navigate = page.mainFrame.waitOn('frame-navigated');
           await page.click('a');
           await navigate;
           expect(page.mainFrame.url).toBe(`${server.crossProcessBaseUrl}/empty.html`);

@@ -102,7 +102,7 @@ test('it should override plugins in a browser window', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const hasPlugins = await page.mainFrame.evaluate(
