@@ -295,9 +295,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         const frame = page.frames[1];
         const loaded = page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'load');
         await new Promise<void>(resolve => {
-          page.on('frame-navigated', f => {
-            if (f.frame.id === frame.id) resolve();
-          });
+          frame.on('frame-navigated', () => resolve());
         });
         await frame.evaluate(`window.stop()`);
         await expect(navigationPromise).resolves.toBe(undefined);

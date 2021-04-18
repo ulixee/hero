@@ -47,7 +47,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
       if (browserEngine.name === 'chrome') {
         const rawPage = puppetPage as Page;
         // @ts-ignore
-        return rawPage.framesManager.activeContexts.size;
+        return rawPage.framesManager.activeContextIds.size;
       }
       return null;
     }
@@ -176,20 +176,24 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
       it('should send events when frames are manipulated dynamically', async () => {
         await page.goto(server.emptyPage);
 
+        // validate framenavigated events
+        const navigatedFrames = [];
+        page.on('frame-created', ({ frame }) => {
+          frame.on('frame-navigated', () => {
+            navigatedFrames.push({ frame });
+          });
+        });
         await page.attachFrame('frame1', './assets/frame.html');
         expect(page.frames.length).toBe(2);
         expect(page.frames[1].url).toContain('/assets/frame.html');
 
-        // validate framenavigated events
-        const navigatedFrames = [];
-        page.on('frame-navigated', frame => navigatedFrames.push(frame));
         await page.evaluate(`(async () => {
           const frame = document.getElementById('frame1');
           frame.src = './empty.html';
           await new Promise(x => (frame.onload = x));
         })()`);
-        expect(navigatedFrames.length).toBe(1);
-        expect(navigatedFrames[0].frame.url).toBe(server.emptyPage);
+        expect(navigatedFrames.length).toBe(2);
+        expect(navigatedFrames[1].frame.url).toBe(server.emptyPage);
 
         // validate framedetached events
         await page.detachFrame('frame1');
@@ -198,7 +202,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
 
       it('should send "frameNavigated" when navigating on anchor URLs', async () => {
         await page.goto(server.emptyPage);
-        const frameNavigated = page.waitOn('frame-navigated');
+        const frameNavigated = page.mainFrame.waitOn('frame-navigated');
         await page.goto(`${server.emptyPage}#foo`);
         expect(page.mainFrame.url).toBe(`${server.emptyPage}#foo`);
         await expect(frameNavigated).resolves.toBeTruthy();
@@ -213,7 +217,12 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
 
       it('should detach child frames on navigation', async () => {
         let navigatedFrames = [];
-        page.on('frame-navigated', frame => navigatedFrames.push(frame));
+        page.mainFrame.on('frame-navigated', ev => navigatedFrames.push(ev));
+        page.on('frame-created', ({ frame }) => {
+          frame.on('frame-navigated', () => {
+            navigatedFrames.push(frame);
+          });
+        });
         await page.goto(`${server.baseUrl}/frames/nested-frames.html`);
         expect(page.frames.length).toBe(5);
         for (const frame of page.frames) await frame.waitForLoader();
@@ -227,7 +236,12 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
 
       it('should support framesets', async () => {
         let navigatedFrames = [];
-        page.on('frame-navigated', frame => navigatedFrames.push(frame));
+        page.mainFrame.on('frame-navigated', ev => navigatedFrames.push(ev));
+        page.on('frame-created', ({ frame }) => {
+          frame.on('frame-navigated', () => {
+            navigatedFrames.push(frame);
+          });
+        });
         await page.goto(`${server.baseUrl}/frames/frameset.html`);
         expect(page.frames.length).toBe(5);
         for (const frame of page.frames) await frame.waitForLoader();
@@ -319,7 +333,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         await page.setContent(`<a href="${server.emptyPage}">empty.html</a>`);
         await page.mainFrame.waitForLoader();
 
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.click('a');
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -332,7 +346,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
 
         await page.setContent(`<a href="${server.crossProcessBaseUrl}/empty.html">empty.html</a>`);
 
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.click('a');
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -348,7 +362,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
       <input name="foo" value="bar">
       <input type="submit" value="Submit">
     </form>`);
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.click('input[type=submit]');
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -365,7 +379,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
       <input type="submit" value="Submit">
     </form>`);
 
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.click('input[type=submit]');
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -376,7 +390,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           res.end(`<link rel='stylesheet' href='./one-style.css'>`);
         });
 
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.evaluate(`window.location.href = "${server.emptyPage}"`);
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -391,7 +405,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           res.end('done');
         });
 
-        const navigatedEvent = page.waitOn('frame-navigated');
+        const navigatedEvent = page.mainFrame.waitOn('frame-navigated');
         await page.evaluate(`
       window.location.href = "${server.emptyPage}?cancel";
       window.location.href = "${server.emptyPage}?override";
@@ -406,7 +420,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           res.end(`<link rel='stylesheet' href='./one-style.css'>`);
         });
 
-        const navigate = page.waitOn('frame-navigated');
+        const navigate = page.mainFrame.waitOn('frame-navigated');
         await page.evaluate(`window.location.reload()`);
         await expect(navigate).resolves.toBeTruthy();
       });
@@ -422,7 +436,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
     <iframe name=target></iframe>
   `);
         const frame = page.frames.find(x => x.name === 'target');
-        const nav = page.waitOn('frame-navigated');
+        const nav = frame.waitOn('frame-navigated');
         await page.click('a');
         await nav;
         expect(frame.url).toBe(server.emptyPage);

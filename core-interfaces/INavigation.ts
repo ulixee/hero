@@ -5,6 +5,7 @@ export default interface INavigation {
   frameId: string;
   resourceId: IResolvablePromise<number>;
   browserRequestId: string;
+  loaderId: string;
   navigationError?: Error;
   startCommandId: number;
   requestedUrl: string;

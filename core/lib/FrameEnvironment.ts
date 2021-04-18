@@ -333,7 +333,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
       const incomingStatus = pageStateToLoadStatus[event];
 
-      this.navigations.onLoadStateChanged(incomingStatus, url, new Date(timestamp));
+      this.navigations.onLoadStateChanged(incomingStatus, url, null, new Date(timestamp));
     }
   }
 
@@ -412,7 +412,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
-      this.navigations.onLoadStateChanged(status, event.frame.url);
+      this.navigations.onLoadStateChanged(status, event.frame.url, event.loaderId);
     }
   }
 
@@ -421,7 +421,12 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     if (navigatedInDocument) {
       this.logger.info('Page.navigatedWithinDocument', event);
       // set load state back to all loaded
-      this.navigations.onNavigationRequested('inPage', frame.url, this.tab.lastCommandId);
+      this.navigations.onNavigationRequested(
+        'inPage',
+        frame.url,
+        this.tab.lastCommandId,
+        event.loaderId,
+      );
     }
     this.sessionState.updateFrameSecurityOrigin(this.tab.id, frame);
   }

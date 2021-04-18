@@ -3,7 +3,6 @@ import {
   ILifecycleEvents,
   IPuppetFrame,
   IPuppetFrameEvents,
-  IPuppetFrameInternalEvents,
 } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
@@ -12,6 +11,7 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import ProtocolError from './ProtocolError';
 import { CDPSession } from './CDPSession';
 import ConsoleMessage from './ConsoleMessage';
@@ -20,9 +20,7 @@ import PageFrame = Protocol.Page.Frame;
 
 const ContextNotFoundCode = -32000;
 
-export default class Frame
-  extends TypedEventEmitter<IPuppetFrameEvents & IPuppetFrameInternalEvents>
-  implements IPuppetFrame {
+export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> implements IPuppetFrame {
   public get id(): string {
     return this.internalFrame.id;
   }
@@ -37,11 +35,16 @@ export default class Frame
 
   public url: string;
 
+  public get isDefaultUrl(): boolean {
+    return !this.url || this.url === ':' || this.url === DEFAULT_PAGE;
+  }
+
   public get securityOrigin(): string {
-    if (!this.isLoaded || this.url === DEFAULT_PAGE || !this.url || this.url === ':') return '';
-    const origin = this.internalFrame.securityOrigin;
+    if (!this.isLoaded || this.isDefaultUrl) return '';
+    let origin = this.internalFrame.securityOrigin;
     if (!origin || origin === '://') {
-      return new URL(this.url).origin;
+      this.internalFrame.securityOrigin = new URL(this.url).origin;
+      origin = this.internalFrame.securityOrigin;
     }
     return origin;
   }
@@ -60,38 +63,40 @@ export default class Frame
 
   public readonly isAttached: () => boolean;
   public loaderLifecycles = new Map<string, ILifecycleEvents>();
+  public activeLoaderId: string;
 
   protected readonly logger: IBoundLog;
   private isolatedWorldElementObjectId?: string;
   private readonly parentFrame: Frame | null;
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
-  private activeLoaderId: string;
-  private readonly activeContexts: Set<number>;
   private readonly cdpSession: CDPSession;
 
   private get activeLoader(): IResolvablePromise<Error | null> {
     return this.loaderIdResolvers.get(this.activeLoaderId);
   }
 
-  private defaultContextIds = new Set<number>();
-  private isolatedContextIds = new Set<number>();
+  private defaultContextId: number;
+  private isolatedContextId: number;
+  private readonly activeContextIds: Set<number>;
   private internalFrame: PageFrame;
   private closedWithError: Error;
+  private defaultContextCreated: Resolvable<void>;
 
   constructor(
     internalFrame: PageFrame,
-    activeContexts: Set<number>,
+    activeContextIds: Set<number>,
     cdpSession: CDPSession,
     logger: IBoundLog,
     isAttached: () => boolean,
     parentFrame: Frame | null,
   ) {
     super();
-    this.activeContexts = activeContexts;
+    this.activeContextIds = activeContextIds;
     this.cdpSession = cdpSession;
     this.logger = logger.createChild(module);
     this.parentFrame = parentFrame;
     this.isAttached = isAttached;
+    this.setEventsToLog(['frame-requested-navigation', 'frame-navigated', 'frame-lifecycle']);
     this.storeEventsWithoutListeners = true;
     this.onLoaded(internalFrame);
   }
@@ -100,6 +105,7 @@ export default class Frame
     this.cancelPendingEvents('Frame closed');
     error ??= new CanceledPromiseError('Frame closed');
     this.activeLoader.resolve(error);
+    this.defaultContextCreated?.reject(error);
     this.closedWithError = error;
   }
 
@@ -109,6 +115,7 @@ export default class Frame
     options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
   ): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
+    const startOrigin = this.securityOrigin;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     try {
       const result: Protocol.Runtime.EvaluateResponse = await this.cdpSession.send(
@@ -130,7 +137,11 @@ export default class Frame
       if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
       return remote.value as T;
     } catch (err) {
-      const retries = options?.retriesWaitingForLoad ?? 0;
+      let retries = options?.retriesWaitingForLoad ?? 0;
+      // if we had a context id from a blank page, try again
+      if (!startOrigin && this.getActiveContextId(isolateFromWebPageEnvironment) !== contextId) {
+        retries += 1;
+      }
       const isNotFoundError =
         err.code === ContextNotFoundCode ||
         (err as ProtocolError).remoteError?.code === ContextNotFoundCode;
@@ -278,8 +289,8 @@ export default class Frame
       lifecycle[name] = new Date();
     }
 
-    if (!this.isDefaultPage()) {
-      this.emit('frame-lifecycle', { frame: this, name });
+    if (!this.isDefaultUrl) {
+      this.emit('frame-lifecycle', { frame: this, name, loaderId: pageLoaderId });
     }
   }
 
@@ -287,29 +298,37 @@ export default class Frame
 
   public hasContextId(executionContextId: number): boolean {
     return (
-      this.defaultContextIds.has(executionContextId) ||
-      this.isolatedContextIds.has(executionContextId)
+      this.defaultContextId === executionContextId || this.isolatedContextId === executionContextId
     );
   }
 
   public removeContextId(executionContextId: number): void {
-    this.defaultContextIds.delete(executionContextId);
-    this.isolatedContextIds.delete(executionContextId);
+    if (this.defaultContextId === executionContextId) this.defaultContextId = null;
+    if (this.isolatedContextId === executionContextId) this.defaultContextId = null;
   }
 
   public clearContextIds(): void {
-    this.defaultContextIds.clear();
-    this.isolatedContextIds.clear();
+    this.defaultContextId = null;
+    this.defaultContextId = null;
   }
 
   public addContextId(executionContextId: number, isDefault: boolean): void {
     if (isDefault) {
-      this.defaultContextIds.add(executionContextId);
-      this.emit('default-context-created', { executionContextId });
+      this.defaultContextId = executionContextId;
+      this.defaultContextCreated?.resolve();
     } else {
-      this.isolatedContextIds.add(executionContextId);
-      this.emit('isolated-context-created', { executionContextId });
+      this.isolatedContextId = executionContextId;
     }
+  }
+
+  public getActiveContextId(isolatedContext: boolean): number | undefined {
+    let id: number;
+    if (isolatedContext) {
+      id = this.isolatedContextId;
+    } else {
+      id = this.defaultContextId;
+    }
+    if (id && this.activeContextIds.has(id)) return id;
   }
 
   public async waitForActiveContextId(isolatedContext = true): Promise<number> {
@@ -333,18 +352,6 @@ export default class Frame
     return this.getActiveContextId(isolatedFromWebPageEnvironment) !== undefined;
   }
 
-  public getActiveContextId(isolatedContext: boolean): number | undefined {
-    if (isolatedContext) {
-      for (const id of this.isolatedContextIds) {
-        if (this.activeContexts.has(id)) return id;
-      }
-    } else {
-      for (const id of this.defaultContextIds) {
-        if (this.activeContexts.has(id)) return id;
-      }
-    }
-  }
-
   public toJSON() {
     return {
       id: this.id,
@@ -361,7 +368,7 @@ export default class Frame
 
   public async waitForLoad(): Promise<void> {
     if (this.lifecycleEvents.load) return;
-    await this.waitOn('frame-lifecycle', x => x.name === 'load');
+    await this.waitOn('frame-lifecycle', x => x.name === 'load', 30e3);
   }
 
   private setLoader(loaderId: string): void {
@@ -394,8 +401,8 @@ export default class Frame
         this,
       );
       const { executionContextId } = isolatedWorld;
-      if (!this.activeContexts.has(executionContextId)) {
-        this.activeContexts.add(executionContextId);
+      if (!this.activeContextIds.has(executionContextId)) {
+        this.activeContextIds.add(executionContextId);
         this.addContextId(executionContextId, false);
         this.getParentElementId().catch(() => null);
       }
@@ -442,15 +449,12 @@ export default class Frame
   private async waitForDefaultContext(): Promise<void> {
     if (this.getActiveContextId(false)) return;
 
+    this.defaultContextCreated = new Resolvable<void>();
     // don't time out this event, we'll just wait for the page to shut down
-    await this.waitOn('default-context-created', null, null).catch(err => {
+    await this.defaultContextCreated.promise.catch(err => {
       if (err instanceof CanceledPromiseError) return;
       throw err;
     });
-  }
-
-  private isDefaultPage(): boolean {
-    return !this.url || this.url === DEFAULT_PAGE;
   }
 
   private updateUrl(): void {

@@ -35,7 +35,7 @@ test('it should mimic a chrome object', async () => {
   await page.addNewDocumentScript(script, false);
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const structure = JSON.parse(
@@ -66,7 +66,7 @@ test('it should update loadtimes and csi values', async () => {
   );
   await Promise.all([
     page.navigate(httpServer.url),
-    page.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
+    page.mainFrame.waitOn('frame-lifecycle', ev => ev.name === 'DOMContentLoaded'),
   ]);
 
   const loadTimes = JSON.parse(

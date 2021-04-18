@@ -42,7 +42,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   private readonly requestsById = new Map<string, ResourceRequest>();
   private readonly requestPublishingById = new Map<string, IResourcePublishing>();
 
-  private readonly navigationRequestIds = new Set<string>();
+  private readonly navigationRequestIdsToLoaderId = new Map<string, string>();
   private emulation?: IBrowserEmulationSettings;
 
   private parentManager?: NetworkManager;
@@ -219,7 +219,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     const isNavigation =
       networkRequest.requestId === networkRequest.loaderId && networkRequest.type === 'Document';
     if (isNavigation) {
-      this.navigationRequestIds.add(networkRequest.requestId);
+      this.navigationRequestIdsToLoaderId.set(networkRequest.requestId, networkRequest.loaderId);
     }
 
     const resource = <ResourceRequest>{
@@ -332,9 +332,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const event = <IPuppetNetworkEvents['resource-will-be-requested']>{
       resource,
-      isDocumentNavigation: this.navigationRequestIds.has(browserRequestId),
+      isDocumentNavigation: this.navigationRequestIdsToLoaderId.has(browserRequestId),
       frameId: resource.frameId,
       redirectedFromUrl: resource.redirectedFromUrl,
+      loaderId: this.navigationRequestIdsToLoaderId.get(browserRequestId),
     };
 
     // NOTE: same requestId will be used in devtools for redirected resources
@@ -382,6 +383,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         status: response.status,
         location: response.headers.location,
         url: response.url,
+        loaderId: event.loaderId,
       });
     }
   }
@@ -426,7 +428,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       if (!this.requestPublishingById.get(id)?.isPublished) this.emitResourceRequested(id);
       this.requestsById.delete(id);
       this.requestPublishingById.delete(id);
-      this.emit('resource-loaded', { resource, frameId: resource.frameId });
+      const loaderId = this.navigationRequestIdsToLoaderId.get(id);
+      this.emit('resource-loaded', { resource, frameId: resource.frameId, loaderId });
     }
   }
 

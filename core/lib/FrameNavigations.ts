@@ -36,6 +36,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   public logger: IBoundLog;
 
+  private loaderIds = new Set<string>();
+
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
   constructor(readonly frameId: string, readonly sessionState: SessionState) {
@@ -55,12 +57,14 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     reason: NavigationReason,
     url: string,
     commandId: number,
+    loaderId: string,
     browserRequestId?: string,
-  ): void {
+  ): INavigation {
     const nextTop = <INavigation>{
       requestedUrl: url,
       finalUrl: null,
       frameId: this.frameId,
+      loaderId,
       startCommandId: commandId,
       navigationReason: reason,
       initiatedTime: new Date(),
@@ -68,6 +72,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       resourceId: createPromise(),
       browserRequestId,
     };
+    if (loaderId) this.loaderIds.add(loaderId);
 
     if (this.nextNavigationReason?.url === url) {
       nextTop.navigationReason = reason;
@@ -97,6 +102,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
     this.emit('navigation-requested', nextTop);
     this.captureNavigationUpdate(nextTop);
+    return nextTop;
   }
 
   public onHttpRequested(
@@ -104,35 +110,45 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     lastCommandId: number,
     redirectedFromUrl: string,
     browserRequestId: string,
+    loaderId: string,
   ): void {
     if (url === 'about:blank') return;
     // if this is a redirect, capture in top
-    if (this.top) {
-      const top = this.top;
-      if (redirectedFromUrl && redirectedFromUrl === (top.finalUrl ?? top.requestedUrl)) {
-        this.changeNavigationState(LocationStatus.HttpRedirected, url);
-      }
-      // if we already have this status at top level, this is a new nav
-      if (top.stateChanges.has(LocationStatus.HttpRequested) === true) {
-        let reason: NavigationReason;
-        if (redirectedFromUrl) reason = top.navigationReason;
-        else if (url === (top.finalUrl ?? top.requestedUrl)) reason = 'reload';
+    if (!this.top) return;
 
-        this.onNavigationRequested(reason ?? 'userGesture', url, lastCommandId, browserRequestId);
-      }
+    if (redirectedFromUrl) {
+      this.recordRedirect(redirectedFromUrl, url, loaderId);
     }
 
-    // keep outside block for this.top since we might have a new top
-    if (this.top && !this.top.browserRequestId) {
-      this.top.browserRequestId = browserRequestId;
+    // if we already have this status at top level, this is a new nav
+    if (
+      this.top.stateChanges.has(LocationStatus.HttpRequested) === true &&
+      // add new entries for redirects
+      (!this.loaderIds.has(loaderId) || redirectedFromUrl)
+    ) {
+      let reason: NavigationReason;
+      if (redirectedFromUrl) reason = this.top.navigationReason;
+      else if (url === (this.top.finalUrl ?? this.top.requestedUrl)) reason = 'reload';
+
+      this.onNavigationRequested(
+        reason ?? 'userGesture',
+        url,
+        lastCommandId,
+        loaderId,
+        browserRequestId,
+      );
     }
-    this.changeNavigationState(LocationStatus.HttpRequested);
+
+    this.changeNavigationState(LocationStatus.HttpRequested, loaderId);
   }
 
-  public onHttpResponded(browserRequestId: string, url: string): void {
+  public onHttpResponded(browserRequestId: string, url: string, loaderId: string): void {
     if (url === 'about:blank') return;
 
-    this.changeNavigationState(LocationStatus.HttpResponded, url);
+    const navigation = this.findMatchingNavigation(loaderId);
+    navigation.finalUrl = url;
+
+    this.recordStatusChange(navigation, LocationStatus.HttpResponded);
   }
 
   public onResourceLoaded(resourceId: number, statusCode: number, error?: Error): void {
@@ -153,51 +169,94 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 
   public onLoadStateChanged(
-    incomingStatus: NavigationState,
+    incomingStatus: LoadStatus.DomContentLoaded | LoadStatus.Load,
     url: string,
+    loaderId: string,
     statusChangeDate?: Date,
   ): void {
     if (url === 'about:blank') return;
-    this.changeNavigationState(incomingStatus, url, statusChangeDate);
+    this.changeNavigationState(incomingStatus, loaderId, statusChangeDate);
   }
 
   public updateNavigationReason(url: string, reason: NavigationReason): void {
     const top = this.top;
-    if (!top) {
-      this.nextNavigationReason = { url, reason };
-      return;
-    }
-    if (top.requestedUrl === url || top.finalUrl === url) {
+    if (
+      top &&
+      top.navigationReason !== 'goto' &&
+      (top.requestedUrl === url || top.finalUrl === url)
+    ) {
       top.navigationReason = reason;
       this.captureNavigationUpdate(top);
+    } else {
+      this.nextNavigationReason = { url, reason };
+    }
+  }
+
+  public assignLoaderId(navigation: INavigation, loaderId: string): void {
+    if (!loaderId) return;
+    this.loaderIds.add(loaderId);
+    navigation.loaderId = loaderId;
+    this.captureNavigationUpdate(navigation);
+  }
+
+  private findMatchingNavigation(loaderId: string): INavigation {
+    const navigation = this.top;
+    if (!navigation) return undefined;
+    if (loaderId && navigation.loaderId && navigation.loaderId !== loaderId) {
+      // find the right loader id
+      for (let i = this.history.length - 1; i >= 0; i -= 1) {
+        const nav = this.history[i];
+        if (nav && nav.loaderId === loaderId) {
+          return nav;
+        }
+      }
+    }
+    return navigation;
+  }
+
+  private recordRedirect(requestedUrl: string, finalUrl: string, loaderId: string): void {
+    // find the right loader id
+    for (let i = this.history.length - 1; i >= 0; i -= 1) {
+      const navigation = this.history[i];
+      if (navigation && navigation.loaderId === loaderId) {
+        if (
+          !navigation.stateChanges.has(LocationStatus.HttpRedirected) &&
+          navigation.requestedUrl === requestedUrl
+        ) {
+          navigation.finalUrl = finalUrl;
+          this.recordStatusChange(navigation, LocationStatus.HttpRedirected);
+        }
+      }
     }
   }
 
   private changeNavigationState(
     newStatus: NavigationState,
-    finalUrl?: string,
+    loaderId?: string,
     statusChangeDate?: Date,
   ): void {
-    const top = this.top;
-    if (!top) return;
-    if (top.stateChanges.has(newStatus)) return;
+    const navigation = this.findMatchingNavigation(loaderId);
+    if (!navigation) return;
+    if (navigation.stateChanges.has(newStatus)) return;
 
-    if (
-      (newStatus === 'HttpResponded' || newStatus === 'HttpRedirected') &&
-      !top.finalUrl &&
-      finalUrl
-    ) {
-      top.finalUrl = finalUrl;
-    }
-    top.stateChanges.set(newStatus, statusChangeDate ?? new Date());
+    this.recordStatusChange(navigation, newStatus, statusChangeDate);
+    if (loaderId) this.loaderIds.add(loaderId);
+  }
+
+  private recordStatusChange(
+    navigation: INavigation,
+    newStatus: NavigationState,
+    statusChangeDate?: Date,
+  ): void {
+    navigation.stateChanges.set(newStatus, statusChangeDate ?? new Date());
 
     this.emit('status-change', {
-      url: top.finalUrl ?? top.requestedUrl,
+      url: navigation.finalUrl ?? navigation.requestedUrl,
       // @ts-ignore - Typescript refuses to recognize this function
-      stateChanges: Object.fromEntries(top.stateChanges),
+      stateChanges: Object.fromEntries(navigation.stateChanges),
       newStatus,
     });
-    this.captureNavigationUpdate(top);
+    this.captureNavigationUpdate(navigation);
   }
 
   private captureNavigationUpdate(navigation: INavigation): void {

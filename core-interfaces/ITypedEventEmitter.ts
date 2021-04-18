@@ -3,7 +3,6 @@ export default interface ITypedEventEmitter<T> {
     eventType: K,
     listenerFn?: (this: this, event?: T[K]) => boolean,
     timeoutMillis?: number,
-    includeUnhandledEvents?: boolean,
   ): Promise<T[K]>;
 
   on<K extends keyof T & (string | symbol)>(

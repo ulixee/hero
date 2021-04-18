@@ -7,7 +7,6 @@ import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { createPromise } from '@secret-agent/commons/utils';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/IPuppetPage';
-import { IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
@@ -86,7 +85,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     session: Session,
     puppetPage: IPuppetPage,
     parentTabId?: number,
-    windowOpenParams?: { url: string; windowName: string },
+    windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
     super();
     this.setEventsToLog(['child-tab-created', 'close']);
@@ -106,7 +105,12 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     if (windowOpenParams) {
-      this.navigations.onNavigationRequested('newTab', windowOpenParams.url, this.lastCommandId);
+      this.navigations.onNavigationRequested(
+        'newTab',
+        windowOpenParams.url,
+        this.lastCommandId,
+        windowOpenParams.loaderId,
+      );
     }
     this.listen();
     this.isReady = this.install();
@@ -326,12 +330,18 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async goto(url: string, timeoutMs = 30e3): Promise<IResourceMeta> {
     const formattedUrl = Url.format(url);
 
-    this.navigations.onNavigationRequested('goto', formattedUrl, this.lastCommandId);
+    const navigation = this.navigations.onNavigationRequested(
+      'goto',
+      formattedUrl,
+      this.lastCommandId,
+      null,
+    );
 
     const timeoutMessage = `Timeout waiting for "tab.goto(${url})"`;
 
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     await timer.waitForPromise(this.puppetPage.navigate(formattedUrl), timeoutMessage);
+    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId);
 
     const resource = await timer.waitForPromise(
       this.navigationsObserver.waitForNavigationResourceId(),
@@ -353,12 +363,19 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async reload(timeoutMs?: number): Promise<IResourceMeta> {
-    this.navigations.onNavigationRequested('reload', this.url, this.lastCommandId);
+    const navigation = this.navigations.onNavigationRequested(
+      'reload',
+      this.url,
+      this.lastCommandId,
+      null,
+    );
 
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     const timeoutMessage = `Timeout waiting for "tab.reload()"`;
 
     await timer.waitForPromise(this.puppetPage.reload(), timeoutMessage);
+    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId);
+
     const resource = await timer.waitForPromise(
       this.navigationsObserver.waitForNavigationResourceId(),
       timeoutMessage,
@@ -607,14 +624,26 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const navigations = this.frameEnvironmentsById.get(frameId)?.navigations ?? this.navigations;
 
     if (isDocumentNavigation && !navigations.top) {
-      navigations.onNavigationRequested('newTab', url, lastCommandId, browserRequestId);
+      navigations.onNavigationRequested(
+        'newTab',
+        url,
+        lastCommandId,
+        browserRequestId,
+        event.loaderId,
+      );
     }
     resource.hasUserGesture ||= navigations.didGotoUrl(url);
 
     session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResource(resource, this.id);
 
     if (isDocumentNavigation && !event.resource.browserCanceled) {
-      navigations.onHttpRequested(url, lastCommandId, redirectedFromUrl, browserRequestId);
+      navigations.onHttpRequested(
+        url,
+        lastCommandId,
+        redirectedFromUrl,
+        browserRequestId,
+        event.loaderId,
+      );
     }
   }
 
@@ -639,6 +668,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       frame.navigations.onHttpResponded(
         event.resource.browserRequestId,
         event.resource.responseUrl ?? event.resource.url?.href,
+        event.loaderId,
       );
     }
 
@@ -702,7 +732,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
     const frame = this.frameEnvironmentsById.get(event.frameId) ?? this.mainFrameEnvironment;
 
-    frame.navigations.onHttpResponded(event.browserRequestId, event.url);
+    frame.navigations.onHttpResponded(event.browserRequestId, event.url, event.loaderId);
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
   }
 
@@ -711,7 +741,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.emit('websocket-message', wsResource);
   }
 
-  private onFrameCreated(event: IPuppetFrameEvents['frame-created']): void {
+  private onFrameCreated(event: IPuppetPageEvents['frame-created']): void {
     if (this.frameEnvironmentsById.has(event.frame.id)) return;
     const frame = new FrameEnvironment(this, event.frame);
     this.frameEnvironmentsById.set(frame.id, frame);
@@ -745,7 +775,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     session: Session,
     puppetPage: IPuppetPage,
     parentTab?: Tab,
-    openParams?: { url: string; windowName: string },
+    openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
     const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
     tab.logger.info('Tab.created', {
