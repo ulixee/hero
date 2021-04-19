@@ -177,6 +177,30 @@ test('should emulate contentWindow features', async () => {
   expect(results.topIsNotSame).toBe(true);
 });
 
+test('should handle a removed frame', async () => {
+  const meta = await coreServerConnection.createSession();
+  const tab = Session.getTab(meta);
+  Helpers.needsClosing.push(tab.session);
+  await tab.goto(koaServer.baseUrl);
+  await tab.waitForLoad('PaintingStable');
+  const results = await tab.puppetPage.evaluate<boolean>(`(() => {
+    try {
+      const numberOfIframes = window.length;
+      const div = document.createElement('div');
+      div.setAttribute('style', 'display:none');
+      document.body.appendChild(div);
+      div.innerHTML = '<div style="height: 100vh;width: 100vw;position: absolute;left:-10000px;visibility: hidden;"><iframe></iframe></div>';
+      const iframeWindow = window[numberOfIframes];
+      div.parentNode.removeChild(div);
+      return iframeWindow.navigator.platform;
+    } catch (error) {
+      console.error(error);
+    }
+  })()`);
+  await tab.puppetPage.close();
+  expect(results).toBe(tab.session.browserEmulator.osPlatform);
+});
+
 // only run this test manually
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip('should not break recaptcha popup', async () => {

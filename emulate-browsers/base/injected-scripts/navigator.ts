@@ -7,9 +7,9 @@ if (args.userAgentString && self.navigator?.userAgent !== args.userAgentString) 
     true,
   );
 }
-if (args.platform && self.navigator?.platform !== args.platform) {
-  proxyGetter(self.navigator, 'platform', () => args.platform, true);
-}
+
+// always override
+proxyGetter(self.navigator, 'platform', () => args.platform, true);
 
 if ('setAppBadge' in self.navigator) {
   proxyFunction(self.navigator, 'setAppBadge', (target, thisArg, argArray) => {
