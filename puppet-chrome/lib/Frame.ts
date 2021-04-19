@@ -163,7 +163,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     try {
       const result = await this.cdpSession.send('Runtime.callFunctionOn', {
         functionDeclaration: `function executeRemoteFn() {
-        return this.${expression};
+        return ${expression};
       }`,
         returnByValue: true,
         objectId,
@@ -436,6 +436,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
         nodeId: owner.nodeId,
       });
       this.isolatedWorldElementObjectId = resolved.object.objectId;
+      this.cdpSession.disposeRemoteObject(resolved.object);
       return this.isolatedWorldElementObjectId;
     } catch (error) {
       // ignore errors looking this up

@@ -190,11 +190,11 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.framesManager.waitForFrame(navigationResponse, url, true);
   }
 
-  goBack(): Promise<void> {
+  goBack(): Promise<string> {
     return this.navigateToHistory(-1);
   }
 
-  goForward(): Promise<void> {
+  goForward(): Promise<string> {
     return this.navigateToHistory(+1);
   }
 
@@ -306,7 +306,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     ]);
   }
 
-  private async navigateToHistory(delta: number): Promise<void> {
+  private async navigateToHistory(delta: number): Promise<string> {
     const history = await this.cdpSession.send('Page.getNavigationHistory');
     const entry = history.entries[history.currentIndex + delta];
     if (!entry) return null;
@@ -314,6 +314,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       this.cdpSession.send('Page.navigateToHistoryEntry', { entryId: entry.id }),
       this.mainFrame.waitOn('frame-navigated'),
     ]);
+    return entry.url;
   }
 
   private async initialize(): Promise<void> {

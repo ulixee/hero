@@ -229,8 +229,7 @@ export default class FrameNavigationsObserver {
         if (
           trigger === LocationTrigger.change &&
           previousLoadedUrl &&
-          previousLoadedUrl !== history.finalUrl &&
-          history.stateChanges.has(LoadStatus.DomContentLoaded)
+          previousLoadedUrl !== history.finalUrl
         ) {
           isLocationChange = true;
         }

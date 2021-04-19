@@ -106,7 +106,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     if (windowOpenParams) {
       this.navigations.onNavigationRequested(
-        'newTab',
+        'newFrame',
         windowOpenParams.url,
         this.lastCommandId,
         windowOpenParams.loaderId,
@@ -351,13 +351,28 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async goBack(timeoutMs?: number): Promise<string> {
-    await this.puppetPage.goBack();
+    const navigation = this.navigations.onNavigationRequested(
+      'goBack',
+      null,
+      this.lastCommandId,
+      null,
+    );
+    const backUrl = await this.puppetPage.goBack();
+    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId, backUrl);
+
     await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
     return this.url;
   }
 
   public async goForward(timeoutMs?: number): Promise<string> {
-    await this.puppetPage.goForward();
+    const navigation = this.navigations.onNavigationRequested(
+      'goForward',
+      null,
+      this.lastCommandId,
+      null,
+    );
+    const url = await this.puppetPage.goForward();
+    this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId, url);
     await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
     return this.url;
   }
@@ -625,7 +640,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     if (isDocumentNavigation && !navigations.top) {
       navigations.onNavigationRequested(
-        'newTab',
+        'newFrame',
         url,
         lastCommandId,
         browserRequestId,
