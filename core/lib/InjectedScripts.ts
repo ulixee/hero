@@ -27,7 +27,7 @@ ${pageScripts.MouseEvents};
    ${pageScripts.domObserver}
 })('${pageEventsCallbackName}');
 
-window.SecretAgent = {
+window.SA = {
   JsPath,
   MouseEvents,
   Fetcher,
@@ -39,8 +39,8 @@ ${pageScripts.domStorage}
 const installedSymbol = Symbol('InjectedScripts.Installed');
 
 export default class InjectedScripts {
-  public static JsPath = `window.SecretAgent.JsPath`;
-  public static Fetcher = `window.SecretAgent.Fetcher`;
+  public static JsPath = `SA.JsPath`;
+  public static Fetcher = `SA.Fetcher`;
 
   public static async install(
     puppetPage: IPuppetPage,

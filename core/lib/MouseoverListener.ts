@@ -11,7 +11,7 @@ export default class MouseoverListener {
 
   public register(): Promise<void> {
     return this.frameEnvironment.runIsolatedFn(
-      'window.SecretAgent.MouseEvents.listenFor',
+      'SA.MouseEvents.listenFor',
       'mouseover',
       this.nodeId,
     );
@@ -19,7 +19,7 @@ export default class MouseoverListener {
 
   public async didTriggerMouseEvent(): Promise<boolean> {
     return await this.frameEnvironment.runIsolatedFn<boolean>(
-      'window.SecretAgent.MouseEvents.didTrigger',
+      'SA.MouseEvents.didTrigger',
       'mouseover',
       this.nodeId,
     );

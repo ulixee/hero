@@ -384,7 +384,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       } else {
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
         this.domNodeId = await this.puppetFrame.evaluateOnIsolatedFrameElement<number>(
-          'saTrackerNodeId',
+          'NodeTracker.assignNodeId(this)',
         );
       }
     } catch (error) {

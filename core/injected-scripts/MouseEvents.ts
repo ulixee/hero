@@ -22,9 +22,11 @@ class MouseEvents {
       });
     } else {
       this.pendingMouseup = new EventResolvable(nodeId, event => {
-        const targetNodeId = event.target ? NodeTracker.getNodeId(event.target as Node) : undefined;
+        const targetNodeId = event.target
+          ? NodeTracker.assignNodeId(event.target as Node)
+          : undefined;
         const relatedTargetNodeId = event.relatedTarget
-          ? NodeTracker.getNodeId(event.relatedTarget as Node)
+          ? NodeTracker.assignNodeId(event.relatedTarget as Node)
           : undefined;
 
         this.pendingMouseup?.resolve({

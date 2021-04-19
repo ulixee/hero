@@ -436,7 +436,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
         nodeId: owner.nodeId,
       });
       this.isolatedWorldElementObjectId = resolved.object.objectId;
-      this.cdpSession.disposeRemoteObject(resolved.object);
+      // don't dispose... will cleanup frame
       return this.isolatedWorldElementObjectId;
     } catch (error) {
       // ignore errors looking this up

@@ -318,7 +318,7 @@ class ObjectAtPath {
   public get overlappingElementId() {
     const overlapping = this.overlappingElement;
     if (!overlapping) return null;
-    return NodeTracker.getNodeId(overlapping);
+    return NodeTracker.assignNodeId(overlapping);
   }
 
   public get isBehindOtherElement() {
@@ -410,7 +410,7 @@ class ObjectAtPath {
   public static createAttachedState(objectAtPath: any, properties?: string[]) {
     if (!objectAtPath) return null;
 
-    const nodeId = NodeTracker.getNodeId(objectAtPath);
+    const nodeId = NodeTracker.assignNodeId(objectAtPath);
     const state = {
       id: nodeId,
       type: objectAtPath.constructor?.name,
@@ -420,7 +420,7 @@ class ObjectAtPath {
       state.iterableIsCustomType = isCustomType(objectAtPath);
       const objectAsIterable = Array.from(objectAtPath);
       if (state.iterableIsCustomType) {
-        state.iterableIds = objectAsIterable.map(x => NodeTracker.getNodeId(x as Node));
+        state.iterableIds = objectAsIterable.map(x => NodeTracker.assignNodeId(x as Node));
       } else {
         state.iterableItems = objectAsIterable;
       }
@@ -506,22 +506,4 @@ function isPromise(obj) {
     (typeof obj === 'object' || typeof obj === 'function') &&
     typeof obj.then === 'function'
   );
-}
-
-// / Node tracker //////
-
-class NodeTracker {
-  private static get instance(): INodeTracker {
-    return (window as any).nodeTracker;
-  }
-
-  public static getNodeWithId(id: number) {
-    return this.instance.getNode(id);
-  }
-
-  public static getNodeId(node: Node) {
-    const id = this.instance.getId(node);
-    if (id) return id;
-    return this.instance.track(node);
-  }
 }
