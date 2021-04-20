@@ -4,7 +4,6 @@ import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
-import CookieHandler from './CookieHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
 import BaseHttpHandler from './BaseHttpHandler';
@@ -101,8 +100,6 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       return this.onError('ServerToProxy.ResponseHeadersHandlerError', err);
     }
 
-    await CookieHandler.readServerResponseCookies(context);
-
     /////// WRITE CLIENT RESPONSE //////////////////
 
     if (!context.proxyToClientResponse) {
@@ -112,6 +109,8 @@ export default class HttpRequestHandler extends BaseHttpHandler {
       context.setState(ResourceState.PrematurelyClosed);
       return;
     }
+
+    await context.requestSession.willSendResponse(context);
 
     try {
       this.writeResponseHead();
@@ -224,7 +223,9 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
-    await context.requestSession.willSendResponse(context);
+    if (context.requestSession.willWriteResponseBody) {
+      await context.requestSession.willWriteResponseBody(context);
+    }
 
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);

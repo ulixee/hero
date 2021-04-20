@@ -13,7 +13,7 @@ export class Dns {
   private readonly dnsServer: ConnectionOptions;
 
   constructor(readonly requestSession?: RequestSession) {
-    this.dnsServer = requestSession?.networkInterceptorDelegate?.dns?.dnsOverTlsConnection;
+    this.dnsServer = requestSession?.networkEmulation?.dns?.dnsOverTlsConnection;
   }
 
   public async lookupIp(host: string, retries = 3): Promise<string> {

@@ -31,7 +31,7 @@ describe('basic Emulator tests', () => {
   });
 
   it('should affect accept-language header', async () => {
-    const agent = await handler.createAgent({ locale: 'en-US,en;q=0.9' });
+    const agent = await handler.createAgent({ locale: 'en-GB,en' });
     Helpers.needsClosing.push(agent);
 
     let acceptLanguage = '';
@@ -41,7 +41,7 @@ describe('basic Emulator tests', () => {
     });
 
     await agent.goto(`${koaServer.baseUrl}/headers`);
-    expect(acceptLanguage).toBe('en-US,en;q=0.9');
+    expect(acceptLanguage).toBe('en-GB,en;q=0.9');
   });
 
   it('should affect navigator.language', async () => {

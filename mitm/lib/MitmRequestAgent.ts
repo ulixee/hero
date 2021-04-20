@@ -37,15 +37,15 @@ export default class MitmRequestAgent {
 
   constructor(session: RequestSession) {
     this.session = session;
+    const socketSettings = session.networkEmulation?.socketSettings;
     this.socketSession = new MitmSocketSession(session.sessionId, {
       rejectUnauthorized: allowUnverifiedCertificates === false,
-      clientHelloId: session.networkInterceptorDelegate.tls?.emulatorProfileId,
-      tcpTtl: session.networkInterceptorDelegate.tcp?.ttl,
-      tcpWindowSize: session.networkInterceptorDelegate.tcp?.windowSize,
+      clientHelloId: socketSettings?.tlsClientHelloId,
+      tcpTtl: socketSettings?.tcpTtl,
+      tcpWindowSize: socketSettings?.tcpWindowSize,
     });
     this.maxConnectionsPerOrigin =
-      session.networkInterceptorDelegate?.connections?.socketsPerOrigin ??
-      MitmRequestAgent.defaultMaxConnectionsPerOrigin;
+      socketSettings?.socketsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
   public async request(
@@ -66,15 +66,29 @@ export default class MitmRequestAgent {
     await this.assignSocket(ctx, requestSettings);
 
     ctx.cacheHandler.onRequest();
-    await HeadersHandler.modifyHeaders(ctx);
 
-    requestSettings.headers = ctx.requestHeaders;
+    ctx.setState(ResourceState.BeforeSendRequest);
+
+    const emulation = ctx.requestSession.networkEmulation;
 
     if (ctx.isServerHttp2) {
+      // NOTE: must come after connect to know if http2
+      if (emulation.beforeHttpRequest) {
+        await emulation.beforeHttpRequest(ctx);
+      }
       HeadersHandler.prepareRequestHeadersForHttp2(ctx);
       return this.http2Request(ctx);
     }
 
+    if (!ctx.requestHeaders.host && !ctx.requestHeaders.Host) {
+      ctx.requestHeaders.Host = ctx.url.host;
+    }
+    if (emulation.beforeHttpRequest) {
+      await emulation.beforeHttpRequest(ctx);
+    }
+    HeadersHandler.cleanHttp1RequestHeaders(ctx);
+
+    requestSettings.headers = ctx.requestHeaders;
     return this.http1Request(ctx, requestSettings);
   }
 

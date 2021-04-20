@@ -1,6 +1,5 @@
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
@@ -8,6 +7,7 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import Resolvable from '@secret-agent/commons/Resolvable';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
+import HeadersHandler from '../handlers/HeadersHandler';
 
 const { log } = Log(module);
 
@@ -33,7 +33,7 @@ export default class BrowserRequestMatcher {
       browserRequest = {
         url: mitmResource.url.href,
         method: mitmResource.method,
-        headers: mitmResource.requestLowerHeaders,
+        ...getHeaderDetails(mitmResource),
         isHttp2Push: mitmResource.isHttp2Push,
         mitmResourceId: mitmResource.id,
         requestTime: mitmResource.requestTime,
@@ -43,8 +43,6 @@ export default class BrowserRequestMatcher {
     }
 
     browserRequest.mitmResourceId = mitmResource.id;
-    const hasUserActivity =
-      !!mitmResource.requestLowerHeaders['sec-fetch-user'] || mitmResource.hasUserGesture;
 
     const resolveTimeout = setTimeout(
       () =>
@@ -54,7 +52,7 @@ export default class BrowserRequestMatcher {
       5e3,
     ).unref();
 
-    const fetchDest = mitmResource.requestLowerHeaders['sec-fetch-dest'] as string;
+    const fetchDest = HeadersHandler.getRequestHeader(mitmResource, 'sec-fetch-dest');
 
     // NOTE: shared workers do not auto-register with chrome as of chrome 83, so we won't get a matching browserRequest
     if (fetchDest === 'sharedworker' || fetchDest === 'serviceworker') {
@@ -62,7 +60,7 @@ export default class BrowserRequestMatcher {
     }
 
     mitmResource.browserHasRequested = browserRequest.browserRequestedPromise.promise
-      .then(async () => {
+      .then(() => {
         clearTimeout(resolveTimeout);
         // copy values to mitm resource
         if (!browserRequest?.browserRequestId) return;
@@ -70,14 +68,6 @@ export default class BrowserRequestMatcher {
         mitmResource.browserRequestId = browserRequest.browserRequestId;
         mitmResource.hasUserGesture = browserRequest.hasUserGesture;
         mitmResource.documentUrl = browserRequest.documentUrl;
-
-        const onFirstPartyInteraction =
-          mitmResource.requestSession.networkInterceptorDelegate?.http
-            .onOriginHasFirstPartyInteraction;
-
-        if (onFirstPartyInteraction && hasUserActivity) {
-          await onFirstPartyInteraction(browserRequest.documentUrl);
-        }
         return null;
       })
       // drown errors - we don't want to log cancels
@@ -94,7 +84,7 @@ export default class BrowserRequestMatcher {
       x => x.browserRequestId === httpResourceLoad.browserRequestId,
     );
     if (!match) return;
-    Object.assign(match.headers, httpResourceLoad.requestLowerHeaders);
+    Object.assign(match, getHeaderDetails(httpResourceLoad));
 
     const mitmResourceNeedsResolve = this.findMatchingRequest(
       httpResourceLoad,
@@ -126,8 +116,8 @@ export default class BrowserRequestMatcher {
         url: httpResourceLoad.url.href,
         method,
         requestTime: httpResourceLoad.requestTime,
-        headers: httpResourceLoad.requestLowerHeaders,
         browserRequestedPromise: new Resolvable(),
+        ...getHeaderDetails(httpResourceLoad),
       } as IRequestedResource;
       this.requestedResources.push(resource);
     }
@@ -207,17 +197,11 @@ export default class BrowserRequestMatcher {
     }
 
     if (filter === 'noMitmResourceId') {
-      matches = matches.filter(x => {
-        return x.mitmResourceId === null || x.mitmResourceId === undefined;
-      });
+      matches = matches.filter(x => !x.mitmResourceId);
     }
     if (filter === 'hasMitmResourceId') {
-      matches = matches.filter(x => {
-        return x.mitmResourceId !== null && x.mitmResourceId !== undefined;
-      });
+      matches = matches.filter(x => !!x.mitmResourceId);
     }
-
-    const headers = resourceToMatch.requestLowerHeaders ?? {};
 
     // if http2 push, we don't know what referer/origin headers the browser will use
     // NOTE: we do this because it aligns the browserRequestId. We don't need header info
@@ -226,30 +210,45 @@ export default class BrowserRequestMatcher {
     if (resourceToMatch.isHttp2Push && matches.length) return matches[0];
 
     if (method === 'OPTIONS') {
-      return matches.find(x => x.headers.origin === headers.origin);
+      const origin = HeadersHandler.getRequestHeader(resourceToMatch, 'origin');
+      return matches.find(x => x.origin === origin);
     }
 
     // if we have sec-fetch-dest headers, make sure they match
-    const secDest = headers['sec-fetch-dest'];
+    const secDest = HeadersHandler.getRequestHeader(resourceToMatch, 'sec-fetch-dest');
     if (secDest) {
-      matches = matches.filter(x => secDest === x.headers['sec-fetch-dest']);
+      matches = matches.filter(x => x.secFetchDest === secDest);
     }
     // if we have sec-fetch-dest headers, make sure they match
-    const secSite = headers['sec-fetch-site'];
+    const secSite = HeadersHandler.getRequestHeader(resourceToMatch, 'sec-fetch-site');
     if (secSite) {
-      matches = matches.filter(x => secSite === x.headers['sec-fetch-site']);
+      matches = matches.filter(x => x.secFetchSite === secSite);
     }
 
     if (matches.length === 1) return matches[0];
     // otherwise, use referer
-    return matches.find(x => x.headers.referer === headers.referer);
+    const referer = HeadersHandler.getRequestHeader(resourceToMatch, 'referer');
+    return matches.find(x => x.referer === referer);
   }
+}
+
+function getHeaderDetails(
+  httpResourceLoad: IHttpResourceLoadDetails,
+): { origin: string; referer: string; secFetchDest: string; secFetchSite: string } {
+  const origin = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'origin');
+  const referer = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'referer');
+  const secFetchDest = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'sec-fetch-dest');
+  const secFetchSite = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'sec-fetch-site');
+  return { origin, referer, secFetchDest, secFetchSite };
 }
 
 interface IRequestedResource {
   url: string;
   method: string;
-  headers: IResourceHeaders;
+  origin: string;
+  secFetchSite: string;
+  secFetchDest: string;
+  referer: string;
   requestTime: Date;
   browserRequestedPromise: IResolvablePromise<void>;
   tabId?: number;

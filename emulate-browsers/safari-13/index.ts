@@ -1,5 +1,4 @@
 import { URL } from 'url';
-import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import {
   BrowserEmulatorClassDecorator,
   DataLoader,
@@ -26,6 +25,7 @@ import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import Log from '@secret-agent/commons/Logger';
 import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
+import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
 import * as pkg from './package.json';
 import * as headerProfiles from './data/headers.json';
 import * as userAgentOptions from './data/user-agent-options.json';
@@ -45,13 +45,11 @@ const engineObj = {
 };
 
 @BrowserEmulatorClassDecorator
-export default class Safari13 {
+export default class Safari13 implements INetworkEmulation {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
   public static engine = getEngine(engineObj, config.browserEngine.executablePathEnvVar);
-
-  public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
 
   public canPolyfill = false;
 
@@ -95,6 +93,10 @@ export default class Safari13 {
   public windowFramingBase: IWindowFraming = windowFramingBase;
   public windowFraming: IWindowFraming;
 
+  public socketSettings: INetworkEmulation['socketSettings'] = {
+    tlsClientHelloId: 'Safari13',
+  };
+
   protected domOverrides = new DomOverridesBuilder();
   private _userProfile: IUserProfile;
 
@@ -115,24 +117,58 @@ export default class Safari13 {
     this.userAgentVersion = userAgentOption.version;
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
-    this.networkInterceptorDelegate = {
-      tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
-      tls: {
-        emulatorProfileId: 'Safari13',
-      },
-      http: {
-        requestHeaders: modifyHeaders.bind(
-          this,
-          userAgentOption.string,
-          headerProfiles,
-          this.hasCustomLocale,
-        ),
-        cookieHeader: this.getCookieHeader.bind(this),
-        onSetCookie: this.setCookie.bind(this),
-        onOriginHasFirstPartyInteraction: this.documentHasUserActivity.bind(this),
-      },
-    };
+    const tcpSettings = getTcpSettingsForOs(userAgentOption.operatingSystemId);
+    if (tcpSettings) {
+      this.socketSettings.tcpTtl = tcpSettings.ttl;
+      this.socketSettings.tcpWindowSize = tcpSettings.windowSize;
+    }
     this.loadDomOverrides(userAgentOption.operatingSystemId);
+  }
+
+  public async beforeHttpRequest(request: IHttpResourceLoadDetails): Promise<any> {
+    // never send cookies to preflight requests
+    if (request.method !== 'OPTIONS') {
+      const cookieHeader = await this.getCookieHeader(request);
+      const existingCookies = Object.entries(request.requestHeaders).find(([key]) =>
+        key.match(/^cookie/i),
+      );
+      const existingCookie = existingCookies ? existingCookies[1] : null;
+      if (existingCookie !== cookieHeader) {
+        const headerKey = existingCookies ? existingCookies[0] : 'Cookie';
+        if (cookieHeader) {
+          request[headerKey] = cookieHeader;
+        } else {
+          delete request.requestHeaders[headerKey];
+        }
+      }
+    }
+
+    const modifiedHeaders = modifyHeaders(
+      this.userAgentString,
+      headerProfiles,
+      this.hasCustomLocale,
+      request,
+      this.sessionId,
+    );
+    if (modifiedHeaders) request.requestHeaders = modifiedHeaders;
+  }
+
+  public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
+    let cookies =
+      resource.responseHeaders['set-cookie'] ?? resource.responseHeaders['Set-Cookie'] ?? [];
+    if (!Array.isArray(cookies)) cookies = [cookies];
+
+    for (const setCookie of cookies) {
+      try {
+        await this.setCookie(setCookie, resource);
+      } catch (error) {
+        log.warn('Could not set cookie', { sessionId: this.sessionId, error });
+      }
+    }
+  }
+
+  public websiteHasFirstPartyInteraction(url: URL) {
+    this.documentHasUserActivity(url);
   }
 
   public async newDocumentInjectedScripts() {
@@ -413,7 +449,9 @@ export default class Safari13 {
     const minMajorVersion = Math.min(...matchVersionRange);
     const maxMajorVersion = Math.max(...matchVersionRange);
 
-    return betaBrowser.version.major >= minMajorVersion && betaBrowser.version.major <= maxMajorVersion;
+    return (
+      betaBrowser.version.major >= minMajorVersion && betaBrowser.version.major <= maxMajorVersion
+    );
   }
 }
 

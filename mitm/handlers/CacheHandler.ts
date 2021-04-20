@@ -1,6 +1,7 @@
 import HttpResponseCache from '../lib/HttpResponseCache';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
+import HeadersHandler from './HeadersHandler';
 
 export default class CacheHandler {
   public static isEnabled = Boolean(JSON.parse(process.env.SA_ENABLE_MITM_CACHE ?? 'false'));
@@ -25,7 +26,7 @@ export default class CacheHandler {
     if (!CacheHandler.isEnabled) return;
 
     // only cache get (don't do preflight, post, etc)
-    if (ctx.method === 'GET' && !ctx.requestLowerHeaders['if-none-match']) {
+    if (ctx.method === 'GET' && !HeadersHandler.getRequestHeader(ctx, 'if-none-match')) {
       const cache = this.responseCache?.get(ctx.url.href);
 
       if (cache?.etag) {

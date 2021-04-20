@@ -36,9 +36,7 @@ test('should send a Host header to secure http1 Chrome requests', async () => {
   });
 
   const url = `${server.baseUrl}/`;
-  const session = await GlobalPool.createSession({
-    browserEmulatorId: 'chrome-83',
-  });
+  const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();
   process.env.MITM_ALLOW_INSECURE = 'true';

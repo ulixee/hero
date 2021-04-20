@@ -1,4 +1,4 @@
-import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
 import { LookupAddress, promises as nodeDns } from 'dns';
 import { Helpers } from '@secret-agent/testing';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
@@ -28,13 +28,13 @@ beforeAll(() => {
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
     null,
     {
-      tls: {
-        emulatorProfileId: 'Chrome83',
+      socketSettings: {
+        tlsClientHelloId: 'Chrome83',
       },
       dns: {
         dnsOverTlsConnection: Quad9,
       },
-    } as INetworkInterceptorDelegate,
+    } as INetworkEmulation,
   );
   Helpers.onClose(() => requestSession.close(), true);
   dns = new Dns(requestSession);

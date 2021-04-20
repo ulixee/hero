@@ -130,7 +130,7 @@ export default class Session extends TypedEventEmitter<{
       this.id,
       this.browserEmulator.userAgentString,
       this.upstreamProxyUrl,
-      this.browserEmulator.networkInterceptorDelegate,
+      this.browserEmulator,
     );
   }
 
@@ -192,10 +192,7 @@ export default class Session extends TypedEventEmitter<{
     }
 
     const requestSession = this.mitmRequestSession;
-    requestSession.networkInterceptorDelegate.http ??= {};
-    requestSession.networkInterceptorDelegate.http.beforeSendingResponseFn = this.beforeSendingMitmHttpResponse.bind(
-      this,
-    );
+    requestSession.willWriteResponseBody = this.beforeSendingMitmHttpResponse.bind(this);
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
     requestSession.on('http-error', this.onMitmError.bind(this));
@@ -261,7 +258,9 @@ export default class Session extends TypedEventEmitter<{
 
   private async beforeSendingMitmHttpResponse(resource: IHttpResourceLoadDetails): Promise<void> {
     // wait for share and service worker "envs" to load before returning response
-    const secFetchDest = resource.requestLowerHeaders['sec-fetch-dest'] as string;
+    const secFetchDest = (resource.requestHeaders['sec-fetch-dest'] ??
+      resource.requestHeaders['Sec-Fetch-Dest']) as string;
+
     // NOTE: not waiting for "workers" because the worker isn't attached until the response comes in
     if (!secFetchDest || !['sharedworker', 'serviceworker'].includes(secFetchDest)) {
       return;
@@ -278,6 +277,7 @@ export default class Session extends TypedEventEmitter<{
       for (const value of this.browserContext.workersById.values()) {
         if (match(value)) worker = value;
       }
+
       if (!worker) {
         ({ worker } = await this.browserContext.waitOn(
           'worker',

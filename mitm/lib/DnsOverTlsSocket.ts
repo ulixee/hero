@@ -67,7 +67,7 @@ export default class DnsOverTlsSocket {
   }
 
   protected async connect(): Promise<void> {
-    if (this.requestSession?.networkInterceptorDelegate?.dns?.useUpstreamProxy) {
+    if (this.requestSession?.networkEmulation?.dns?.useUpstreamProxy) {
       const upstreamProxy = this.requestSession.upstreamProxyUrl;
       if (upstreamProxy) {
         this.mitmSocket.setProxyUrl(upstreamProxy);

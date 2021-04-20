@@ -5,7 +5,6 @@ import { ClientHttp2Stream } from 'http2';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import BlockHandler from './BlockHandler';
 import HeadersHandler from './HeadersHandler';
-import CookieHandler from './CookieHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import HttpResponseCache from '../lib/HttpResponseCache';
 import ResourceState from '../interfaces/ResourceState';
@@ -55,8 +54,6 @@ export default abstract class BaseHttpHandler {
         // already wrote reply
         return;
       }
-
-      await CookieHandler.setProxyToServerCookies(context);
 
       // do one more check on the session before doing a connect
       if (session.isClosing) return context.setState(ResourceState.SessionClosed);

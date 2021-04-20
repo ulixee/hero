@@ -2,7 +2,7 @@ import * as http from 'http';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
+import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
 import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
@@ -12,6 +12,7 @@ import * as net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Log from '@secret-agent/commons/Logger';
 import MitmSocket from '@secret-agent/mitm-socket/index';
+import { URL } from 'url';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import { Dns } from '../lib/Dns';
@@ -47,6 +48,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }[] = [];
 
   public readonly browserRequestMatcher: BrowserRequestMatcher;
+
+  public willWriteResponseBody?: (context: IHttpResourceLoadDetails) => Promise<void>;
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
 
@@ -56,7 +59,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     readonly sessionId: string,
     readonly useragent: string,
     public upstreamProxyUrl?: string,
-    readonly networkInterceptorDelegate: INetworkInterceptorDelegate = { http: {} },
+    readonly networkEmulation: INetworkEmulation = {},
   ) {
     super();
     this.logger = log.createChild(module, {
@@ -91,8 +94,17 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public async willSendResponse(context: IMitmRequestContext): Promise<void> {
-    const callbackFn = this.networkInterceptorDelegate.http?.beforeSendingResponseFn;
-    if (callbackFn) await callbackFn(context);
+    context.setState(ResourceState.EmulationWillSendResponse);
+
+    if (context.resourceType === 'Document' && context.status === 200) {
+      if (this.networkEmulation.websiteHasFirstPartyInteraction) {
+        this.networkEmulation.websiteHasFirstPartyInteraction(context.url);
+      }
+    }
+
+    if (this.networkEmulation.beforeHttpResponse) {
+      await this.networkEmulation.beforeHttpResponse(context);
+    }
   }
 
   public async lookupDns(host: string): Promise<string> {
@@ -157,8 +169,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public recordDocumentUserActivity(documentUrl: string): void {
-    if (this.networkInterceptorDelegate?.http.onOriginHasFirstPartyInteraction) {
-      this.networkInterceptorDelegate.http.onOriginHasFirstPartyInteraction(documentUrl);
+    if (this.networkEmulation.websiteHasFirstPartyInteraction) {
+      this.networkEmulation.websiteHasFirstPartyInteraction(new URL(documentUrl));
     }
   }
 

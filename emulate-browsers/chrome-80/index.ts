@@ -2,19 +2,19 @@ import {
   BrowserEmulatorClassDecorator,
   DataLoader,
   DnsOverTlsProviders,
-  DomPolyfillLoader,
   DomOverridesBuilder,
+  DomPolyfillLoader,
   getEngine,
-  getTcpSettingsForOs,
   modifyHeaders,
   parseNavigatorPlugins,
 } from '@secret-agent/emulate-browsers-base';
-import INetworkInterceptorDelegate from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
 import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import { randomBytes } from 'crypto';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
+import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
 import * as pkg from './package.json';
 
 const config = require('./config.json');
@@ -53,10 +53,18 @@ export default class Chrome80 {
     return this._locale;
   }
 
+  public sessionId: string;
   public readonly userAgentString: string;
   public readonly osPlatform: string;
 
-  public readonly networkInterceptorDelegate: INetworkInterceptorDelegate;
+  public readonly socketSettings: INetworkEmulation['socketSettings'] = {
+    tlsClientHelloId: 'Chrome80',
+  };
+
+  public readonly dns = {
+    dnsOverTlsConnection: Chrome80.dnsOverTlsConnectOptions,
+  };
+
   public userProfile: IUserProfile;
 
   public windowFramingBase: IWindowFraming = windowFramingBase;
@@ -75,24 +83,18 @@ export default class Chrome80 {
     this.canPolyfill = !!domPolyfillData.get(userAgentOption.operatingSystemId);
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
-    this.networkInterceptorDelegate = {
-      tcp: getTcpSettingsForOs(userAgentOption.operatingSystemId),
-      tls: {
-        emulatorProfileId: 'Chrome80',
-      },
-      dns: {
-        dnsOverTlsConnection: Chrome80.dnsOverTlsConnectOptions,
-      },
-      http: {
-        requestHeaders: modifyHeaders.bind(
-          this,
-          userAgentOption.string,
-          headerProfiles,
-          this.hasCustomLocale,
-        ),
-      },
-    };
     this.loadDomOverrides(userAgentOption.operatingSystemId);
+  }
+
+  public async beforeHttpRequest(request: IHttpResourceLoadDetails): Promise<any> {
+    const modifiedHeaders = modifyHeaders(
+      this.userAgentString,
+      headerProfiles,
+      this.hasCustomLocale,
+      request,
+      this.sessionId,
+    );
+    if (modifiedHeaders) request.requestHeaders = modifiedHeaders;
   }
 
   public async newDocumentInjectedScripts() {
@@ -219,7 +221,9 @@ export default class Chrome80 {
     const minMajorVersion = Math.min(...matchVersionRange);
     const maxMajorVersion = Math.max(...matchVersionRange);
 
-    return metaBrowser.version.major >= minMajorVersion && metaBrowser.version.major <= maxMajorVersion;
+    return (
+      metaBrowser.version.major >= minMajorVersion && metaBrowser.version.major <= maxMajorVersion
+    );
   }
 }
 

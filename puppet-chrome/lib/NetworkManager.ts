@@ -192,7 +192,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (existing) {
       if (existing.url === resource.url) {
         resource.requestHeaders = existing.requestHeaders ?? {};
-        resource.requestLowerHeaders = existing.requestLowerHeaders ?? {};
         resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
       }
 
@@ -257,7 +256,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       } else {
         // preserve headers and frameId from a fetch or networkWillRequestExtraInfo
         resource.requestHeaders = existing.requestHeaders ?? {};
-        resource.requestLowerHeaders = existing.requestLowerHeaders ?? {};
         resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
       }
     }
@@ -293,10 +291,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   ): void {
     resource.requestHeaders ??= {};
     resource.requestOriginalHeaders ??= {};
-    resource.requestLowerHeaders ??= {};
     for (const [key, value] of Object.entries(requestHeaders)) {
-      const lowerKey = key.toLowerCase();
-      resource.requestLowerHeaders[lowerKey] = value;
       resource.requestOriginalHeaders[key] = value;
       resource.requestHeaders[key] = value;
     }

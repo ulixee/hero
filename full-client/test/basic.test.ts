@@ -89,7 +89,7 @@ describe('basic Full Client tests', () => {
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
     const agent = await handler.createAgent({
-      locale: 'en-US,en;q=0.9',
+      locale: 'en-US,en',
     });
     Helpers.needsClosing.push(agent);
 
