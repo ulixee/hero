@@ -95,15 +95,23 @@ Perform a native "fetch" request in the current frame environment.
 #### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
 
 ```js
-const url = 'https://dataliberationfoundation.org';
-const response = await agent.fetch(url);
+const origin = 'https://dataliberationfoundation.org/';
+const getUrl = 'https://dataliberationfoundation.org/mission';
+
+await agent.goto(origin);
+const mainFrame = agent.mainFrameEnvironment;
+const response = await mainFrame.fetch(getUrl);
 ```
 
 Http Post example with a body:
 
 ```js
-const url = 'https://dataliberationfoundation.org/nopost';
-const response = await agent.fetch(url, {
+const origin = 'https://dataliberationfoundation.org/';
+const postUrl = 'https://dataliberationfoundation.org/nopost';
+
+await agent.goto(origin);
+const mainFrame = agent.mainFrameEnvironment;
+const response = await mainFrame.fetch(postUrl, {
   method: 'post',
   headers: {
     Authorization: 'Basic ZWx1c3VhcmlvOnlsYWNsYXZl',
@@ -113,6 +121,7 @@ const response = await agent.fetch(url, {
   }),
 });
 ```
+
 
 ### frameEnvironment.getFrameEnvironment*(frameElement)* {#find-frame}
 

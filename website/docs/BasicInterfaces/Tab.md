@@ -93,7 +93,7 @@ Closes the current tab only (will close the whole Agent instance if there are no
 Perform a native "fetch" request in the [mainFrameEnvironment](#main-frame-environment) context.
 
 NOTE: You can work around Cross Origin Request (CORS) issues or change your request "origin" by running fetch
-from each [FrameEnvironment](/docs/basic-interfaces/frame-environment#fetch).
+from a different [FrameEnvironment](/docs/basic-interfaces/frame-environment#fetch).
 
 #### **Arguments**:
 
@@ -107,15 +107,21 @@ Alias for [tab.mainFrameEnvironment.fetch](/docs/basic-interfaces/frame-environm
 #### **Returns**: [`Promise<Response>`](/docs/awaited-dom/response)
 
 ```js
-const url = 'https://dataliberationfoundation.org';
-const response = await agent.fetch(url);
+const origin = 'https://dataliberationfoundation.org/';
+const getUrl = 'https://dataliberationfoundation.org/mission';
+
+await agent.goto(origin);
+const response = await agent.fetch(getUrl);
 ```
 
 Http Post example with a body:
 
 ```js
-const url = 'https://dataliberationfoundation.org/nopost';
-const response = await agent.fetch(url, {
+const origin = 'https://dataliberationfoundation.org/';
+const postUrl = 'https://dataliberationfoundation.org/nopost';
+
+await agent.goto(origin);
+const response = await agent.fetch(postUrl, {
   method: 'post',
   headers: {
     Authorization: 'Basic ZWx1c3VhcmlvOnlsYWNsYXZl',

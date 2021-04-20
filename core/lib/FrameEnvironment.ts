@@ -189,7 +189,13 @@ export default class FrameEnvironment {
     return await new JsPath(this, jsPath).exec(propertiesToExtract);
   }
 
-  public createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+    if (!this.navigations.top && !this.url) {
+      throw new Error(
+        'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
+      );
+    }
+    await this.navigationsObserver.waitForReady();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.createRequest`,
       input,
@@ -198,7 +204,13 @@ export default class FrameEnvironment {
     );
   }
 
-  public fetch(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async fetch(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+    if (!this.navigations.top && !this.url) {
+      throw new Error(
+        'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
+      );
+    }
+    await this.navigationsObserver.waitForReady();
     return this.runIsolatedFn(
       `${InjectedScripts.Fetcher}.fetch`,
       input,
