@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
+
+
+### Bug Fixes
+
+* **client:** explicit mjs exports ([d3e4525](https://github.com/ulixee/secret-agent/commit/d3e4525ee8fb0430c4073791efde9741e01d9f9d))
+* **core:** allow retrieving datasets ([582ed16](https://github.com/ulixee/secret-agent/commit/582ed16fd07c09346afbbcd7f9e3d5e9e375aeb8)), closes [#213](https://github.com/ulixee/secret-agent/issues/213)
+* **core:** convert dates to numbers ([da17efe](https://github.com/ulixee/secret-agent/commit/da17efecaa8301070ed3c98d8d4d423d44d50f74))
+* **core:** fix location change triggers ([360dfa0](https://github.com/ulixee/secret-agent/commit/360dfa0325bb5b87fe299c387d48b4bbcf45cabe))
+* **core:** fix looping for node id lookup ([91ac3bc](https://github.com/ulixee/secret-agent/commit/91ac3bcabe75bc8c4ef58518671727fc22e6a6b6))
+* **core:** handle url not loaded yet for nav in 88 ([ddafb11](https://github.com/ulixee/secret-agent/commit/ddafb114a9ce64fc16f9dc1171a60730d70bd56a))
+* **core:** improve navigation tracking ([2e75570](https://github.com/ulixee/secret-agent/commit/2e755704d182c960d7844a03be9874360dc11ba4))
+* **core:** properly record back/forward nav ([6a1a52a](https://github.com/ulixee/secret-agent/commit/6a1a52a5551c18d87d0c545bb0a3748e49e2cbdd))
+* **emulate:** fix removed iframe platform ([27d2e4f](https://github.com/ulixee/secret-agent/commit/27d2e4f356e1201383ccd2f568cd6696c949b8ae))
+* **http:** timeout sockets that dont connect ([da59e41](https://github.com/ulixee/secret-agent/commit/da59e419756c80ece2b6b34f8365e90c82673fff))
+* **mitm:** fix ipc timeouts ([851be03](https://github.com/ulixee/secret-agent/commit/851be03be65fb0718b8af8230ab76360a7f006ef))
+* **puppet:** dont double-create isolated world ([0df01e2](https://github.com/ulixee/secret-agent/commit/0df01e26184dca1f10aa0a43c8203b12e4eec8af))
+* **puppet:** fix chrome-88 ([f917b52](https://github.com/ulixee/secret-agent/commit/f917b5237fd9010e041b68fa493a77bfd4d8fea0))
+
+
+### Features
+
+* **client:** getJsValue should return value ([84dcd65](https://github.com/ulixee/secret-agent/commit/84dcd650fb6dc358904374e59965a72e7c3b2aa6))
+* **core:** optimize string reuse in high traffic ([3c03c3a](https://github.com/ulixee/secret-agent/commit/3c03c3aa1639a74a38160fb9cfd13882774fc70f))
+* **core:** single script install ([4b80047](https://github.com/ulixee/secret-agent/commit/4b8004721c2146e09d1c6b33433500b79db02522))
+* **core:** throw fetch error if no origin ([0c10980](https://github.com/ulixee/secret-agent/commit/0c10980b9db085cd042444fb1eca9514eb89ba91))
+* **mitm:** move go files to new dir ([23780f9](https://github.com/ulixee/secret-agent/commit/23780f96668e9e0ac2db2a04f7300d33b77fc09e))
+* **mitm:** support mitm per browser context ([f1dea45](https://github.com/ulixee/secret-agent/commit/f1dea4525dbac2faac04e2779a1be7312c100df5))
+* **mitm:** use shared mitm socket ([f80334b](https://github.com/ulixee/secret-agent/commit/f80334b59f03f59dda63040b28146c51cff1825d))
+* **puppet:** convert to websocket ([43af64e](https://github.com/ulixee/secret-agent/commit/43af64e3ee6167bf8ff5c2f0c07977fc7a368ed1))
+* updated chrome 80, 81, 83 + added 84, 85, 86, 87, and 88 ([62f9638](https://github.com/ulixee/secret-agent/commit/62f96389abbe8c095d4eafb229293f8ee247edad))
+
+
+
+
+
 ## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
 
 

@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/emulate-humans-skipper",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "Skip the HumanEmulator for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.2"
+    "@secret-agent/core-interfaces": "1.4.1-alpha.3"
   }
 }

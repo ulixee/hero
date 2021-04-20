@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
+
+
+### Bug Fixes
+
+* **core:** fix location change triggers ([360dfa0](https://github.com/ulixee/secret-agent/commit/360dfa0325bb5b87fe299c387d48b4bbcf45cabe))
+* **core:** fix looping for node id lookup ([91ac3bc](https://github.com/ulixee/secret-agent/commit/91ac3bcabe75bc8c4ef58518671727fc22e6a6b6))
+* **core:** improve navigation tracking ([2e75570](https://github.com/ulixee/secret-agent/commit/2e755704d182c960d7844a03be9874360dc11ba4))
+* **core:** properly record back/forward nav ([6a1a52a](https://github.com/ulixee/secret-agent/commit/6a1a52a5551c18d87d0c545bb0a3748e49e2cbdd))
+* **puppet:** dont double-create isolated world ([0df01e2](https://github.com/ulixee/secret-agent/commit/0df01e26184dca1f10aa0a43c8203b12e4eec8af))
+* **puppet:** fix chrome-88 ([f917b52](https://github.com/ulixee/secret-agent/commit/f917b5237fd9010e041b68fa493a77bfd4d8fea0))
+
+
+### Features
+
+* **mitm:** support mitm per browser context ([f1dea45](https://github.com/ulixee/secret-agent/commit/f1dea4525dbac2faac04e2779a1be7312c100df5))
+* updated chrome 80, 81, 83 + added 84, 85, 86, 87, and 88 ([62f9638](https://github.com/ulixee/secret-agent/commit/62f96389abbe8c095d4eafb229293f8ee247edad))
+
+
+
+
+
 ## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
 
 **Note:** Version bump only for package @secret-agent/puppet-chrome

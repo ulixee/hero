@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
+
+
+### Bug Fixes
+
+* **core:** improve navigation tracking ([2e75570](https://github.com/ulixee/secret-agent/commit/2e755704d182c960d7844a03be9874360dc11ba4))
+* **mitm:** fix ipc timeouts ([851be03](https://github.com/ulixee/secret-agent/commit/851be03be65fb0718b8af8230ab76360a7f006ef))
+* **puppet:** dont double-create isolated world ([0df01e2](https://github.com/ulixee/secret-agent/commit/0df01e26184dca1f10aa0a43c8203b12e4eec8af))
+* **puppet:** fix chrome-88 ([f917b52](https://github.com/ulixee/secret-agent/commit/f917b5237fd9010e041b68fa493a77bfd4d8fea0))
+
+
+### Features
+
+* **mitm:** support mitm per browser context ([f1dea45](https://github.com/ulixee/secret-agent/commit/f1dea4525dbac2faac04e2779a1be7312c100df5))
+* **puppet:** convert to websocket ([43af64e](https://github.com/ulixee/secret-agent/commit/43af64e3ee6167bf8ff5c2f0c07977fc7a368ed1))
+
+
+
+
+
 ## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
 
 **Note:** Version bump only for package @secret-agent/puppet

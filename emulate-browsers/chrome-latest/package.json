@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/emulate-chrome-latest",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "BrowserEmulator for latest version of Chrome",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/emulate-chrome-88": "1.4.1-alpha.2"
+    "@secret-agent/emulate-chrome-88": "1.4.1-alpha.3"
   }
 }

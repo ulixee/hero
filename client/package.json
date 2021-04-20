@@ -1,21 +1,21 @@
 {
   "name": "@secret-agent/client",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "The client interface for SecretAgent",
   "exports": {
     "import": "./index.mjs",
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.2",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.2",
-    "@secret-agent/replay": "1.4.1-alpha.2",
+    "@secret-agent/commons": "1.4.1-alpha.3",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.3",
+    "@secret-agent/replay": "1.4.1-alpha.3",
     "awaited-dom": "^1.1.12",
     "uuid": "^8.3.2",
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@secret-agent/core": "1.4.1-alpha.2",
-    "@secret-agent/testing": "1.4.1-alpha.2"
+    "@secret-agent/core": "1.4.1-alpha.3",
+    "@secret-agent/testing": "1.4.1-alpha.3"
   }
 }

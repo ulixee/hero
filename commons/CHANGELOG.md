@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
+
+
+### Bug Fixes
+
+* **core:** improve navigation tracking ([2e75570](https://github.com/ulixee/secret-agent/commit/2e755704d182c960d7844a03be9874360dc11ba4))
+* **puppet:** fix chrome-88 ([f917b52](https://github.com/ulixee/secret-agent/commit/f917b5237fd9010e041b68fa493a77bfd4d8fea0))
+
+
+### Features
+
+* **client:** getJsValue should return value ([84dcd65](https://github.com/ulixee/secret-agent/commit/84dcd650fb6dc358904374e59965a72e7c3b2aa6))
+* **core:** optimize string reuse in high traffic ([3c03c3a](https://github.com/ulixee/secret-agent/commit/3c03c3aa1639a74a38160fb9cfd13882774fc70f))
+* **mitm:** use shared mitm socket ([f80334b](https://github.com/ulixee/secret-agent/commit/f80334b59f03f59dda63040b28146c51cff1825d))
+
+
+
+
+
 ## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
 
 **Note:** Version bump only for package @secret-agent/commons

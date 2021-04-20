@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
+
+
+### Bug Fixes
+
+* **core:** allow retrieving datasets ([582ed16](https://github.com/ulixee/secret-agent/commit/582ed16fd07c09346afbbcd7f9e3d5e9e375aeb8)), closes [#213](https://github.com/ulixee/secret-agent/issues/213)
+* **core:** convert dates to numbers ([da17efe](https://github.com/ulixee/secret-agent/commit/da17efecaa8301070ed3c98d8d4d423d44d50f74))
+* **core:** improve navigation tracking ([2e75570](https://github.com/ulixee/secret-agent/commit/2e755704d182c960d7844a03be9874360dc11ba4))
+* **core:** properly record back/forward nav ([6a1a52a](https://github.com/ulixee/secret-agent/commit/6a1a52a5551c18d87d0c545bb0a3748e49e2cbdd))
+* **mitm:** fix ipc timeouts ([851be03](https://github.com/ulixee/secret-agent/commit/851be03be65fb0718b8af8230ab76360a7f006ef))
+
+
+### Features
+
+* **core:** optimize string reuse in high traffic ([3c03c3a](https://github.com/ulixee/secret-agent/commit/3c03c3aa1639a74a38160fb9cfd13882774fc70f))
+* **mitm:** use shared mitm socket ([f80334b](https://github.com/ulixee/secret-agent/commit/f80334b59f03f59dda63040b28146c51cff1825d))
+* updated chrome 80, 81, 83 + added 84, 85, 86, 87, and 88 ([62f9638](https://github.com/ulixee/secret-agent/commit/62f96389abbe8c095d4eafb229293f8ee247edad))
+
+
+
+
+
 ## [1.4.1-alpha.2](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.1...v1.4.1-alpha.2) (2021-04-02)
 
 

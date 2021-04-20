@@ -1,11 +1,11 @@
 {
   "name": "@secret-agent/emulate-chrome-83",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "BrowserEmulator for Chrome version 83",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.2",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.2",
-    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.2"
+    "@secret-agent/commons": "1.4.1-alpha.3",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.3",
+    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.3"
   }
 }

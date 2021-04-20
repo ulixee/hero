@@ -1,9 +1,9 @@
 {
   "name": "@secret-agent/core-interfaces",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "Core interfaces used by SecretAgent",
   "dependencies": {
-    "@secret-agent/puppet-interfaces": "1.4.1-alpha.2",
+    "@secret-agent/puppet-interfaces": "1.4.1-alpha.3",
     "awaited-dom": "^1.1.12"
   },
   "devDependencies": {

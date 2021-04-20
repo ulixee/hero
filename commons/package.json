@@ -1,16 +1,16 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.4.1-alpha.2",
+  "version": "1.4.1-alpha.3",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.2",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.3",
     "https-proxy-agent": "^5.0.0",
     "source-map-support": "^0.5.19"
   },
   "devDependencies": {
-    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.2",
-    "@secret-agent/puppet": "1.4.1-alpha.2",
+    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.3",
+    "@secret-agent/puppet": "1.4.1-alpha.3",
     "@types/better-sqlite3": "^5.4.1"
   }
 }
