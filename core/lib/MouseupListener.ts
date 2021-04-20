@@ -11,16 +11,12 @@ export default class MouseupListener {
   }
 
   public register(): Promise<void> {
-    return this.frameEnvironment.runIsolatedFn(
-      'window.SecretAgent.MouseEvents.listenFor',
-      'mouseup',
-      this.nodeId,
-    );
+    return this.frameEnvironment.runIsolatedFn('SA.MouseEvents.listenFor', 'mouseup', this.nodeId);
   }
 
   public async didTriggerMouseEvent(): Promise<IMouseUpResult> {
     return await this.frameEnvironment.runIsolatedFn<IMouseUpResult>(
-      'window.SecretAgent.MouseEvents.didTrigger',
+      'SA.MouseEvents.didTrigger',
       'mouseup',
       this.nodeId,
     );

@@ -74,8 +74,12 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     };
     if (loaderId) this.loaderIds.add(loaderId);
 
-    if (this.nextNavigationReason?.url === url) {
-      nextTop.navigationReason = reason;
+    if (
+      this.nextNavigationReason &&
+      this.nextNavigationReason.url === url &&
+      (!nextTop.navigationReason || nextTop.navigationReason === 'newFrame')
+    ) {
+      nextTop.navigationReason = this.nextNavigationReason.reason;
       this.nextNavigationReason = null;
     }
 
@@ -116,27 +120,27 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     // if this is a redirect, capture in top
     if (!this.top) return;
 
+    let reason: NavigationReason;
     if (redirectedFromUrl) {
-      this.recordRedirect(redirectedFromUrl, url, loaderId);
+      const redirectedNavigation = this.recordRedirect(redirectedFromUrl, url, loaderId);
+      reason = redirectedNavigation?.navigationReason;
     }
 
-    // if we already have this status at top level, this is a new nav
+    const top = this.top;
+
     if (
-      this.top.stateChanges.has(LocationStatus.HttpRequested) === true &&
+      !top.requestedUrl &&
+      (top.navigationReason === 'goBack' || top.navigationReason === 'goForward')
+    ) {
+      top.requestedUrl = url;
+    }
+    // if we already have this status at top level, this is a new nav
+    else if (
+      top.stateChanges.has(LocationStatus.HttpRequested) === true &&
       // add new entries for redirects
       (!this.loaderIds.has(loaderId) || redirectedFromUrl)
     ) {
-      let reason: NavigationReason;
-      if (redirectedFromUrl) reason = this.top.navigationReason;
-      else if (url === (this.top.finalUrl ?? this.top.requestedUrl)) reason = 'reload';
-
-      this.onNavigationRequested(
-        reason ?? 'userGesture',
-        url,
-        lastCommandId,
-        loaderId,
-        browserRequestId,
-      );
+      this.onNavigationRequested(reason, url, lastCommandId, loaderId, browserRequestId);
     }
 
     this.changeNavigationState(LocationStatus.HttpRequested, loaderId);
@@ -182,8 +186,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     const top = this.top;
     if (
       top &&
-      top.navigationReason !== 'goto' &&
-      (top.requestedUrl === url || top.finalUrl === url)
+      top.requestedUrl === url &&
+      (top.navigationReason === null || top.navigationReason === 'newFrame')
     ) {
       top.navigationReason = reason;
       this.captureNavigationUpdate(top);
@@ -192,10 +196,16 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
   }
 
-  public assignLoaderId(navigation: INavigation, loaderId: string): void {
+  public assignLoaderId(navigation: INavigation, loaderId: string, url?: string): void {
     if (!loaderId) return;
     this.loaderIds.add(loaderId);
     navigation.loaderId = loaderId;
+    if (
+      url &&
+      (navigation.navigationReason === 'goBack' || navigation.navigationReason === 'goForward')
+    ) {
+      navigation.requestedUrl = url;
+    }
     this.captureNavigationUpdate(navigation);
   }
 
@@ -214,7 +224,15 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     return navigation;
   }
 
-  private recordRedirect(requestedUrl: string, finalUrl: string, loaderId: string): void {
+  private recordRedirect(requestedUrl: string, finalUrl: string, loaderId: string): INavigation {
+    const top = this.top;
+    if (top.requestedUrl === requestedUrl && !top.finalUrl && !top.loaderId) {
+      top.loaderId = loaderId;
+      top.finalUrl = finalUrl;
+      this.recordStatusChange(top, LocationStatus.HttpRedirected);
+      return top;
+    }
+
     // find the right loader id
     for (let i = this.history.length - 1; i >= 0; i -= 1) {
       const navigation = this.history[i];
@@ -225,6 +243,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
         ) {
           navigation.finalUrl = finalUrl;
           this.recordStatusChange(navigation, LocationStatus.HttpRedirected);
+          return navigation;
         }
       }
     }

@@ -3,7 +3,7 @@
 const frameWindowProxies = new WeakMap();
 
 proxyGetter(HTMLIFrameElement.prototype, 'contentWindow', (target, iframe) => {
-  if (frameWindowProxies.has(iframe)) {
+  if (frameWindowProxies.has(iframe) && iframe.isConnected) {
     return frameWindowProxies.get(iframe);
   }
   return ProxyOverride.callOriginal;

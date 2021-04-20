@@ -1,5 +1,4 @@
 // NOTE: do not use node dependencies
-
 // eslint-disable-next-line max-classes-per-file
 import { IDomChangeEvent, INodeData } from '@secret-agent/core-interfaces/IDomChangeEvent';
 import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
@@ -39,6 +38,7 @@ const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) =>
 delete window[runtimeFunction];
 
 let lastUploadDate: Date;
+let recorder: PageEventsRecorder;
 
 function upload(records: PageRecorderResultSet) {
   try {
@@ -55,54 +55,60 @@ function upload(records: PageRecorderResultSet) {
   return false;
 }
 
-class NodeTracker implements INodeTracker {
-  private nextId = 1;
-  private nodeIds = new Map<Node, number>();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
 
-  public has(node: Node) {
+@NodeTrackerStatics
+class NodeTracker {
+  private static nextId = 1;
+  private static nodesById = new Map<number, Node>();
+  private static nodeIds = new WeakMap<Node, number>();
+
+  public static has(node: Node): boolean {
     return this.nodeIds.has(node);
   }
 
-  public getId(node: Node) {
+  public static getNodeId(node: Node): number {
     if (!node) return undefined;
-    return this.nodeIds.get(node) || undefined;
+    return this.nodeIds.get(node) ?? undefined;
   }
 
-  public track(node: Node) {
+  public static assignNodeId(node: Node): number {
+    const id = this.getNodeId(node);
+    if (id) return id;
+    // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
+    recorder.extractChanges();
+    return this.track(node);
+  }
+
+  public static track(node: Node): number {
     if (!node) return;
     if (this.nodeIds.has(node)) {
       return this.nodeIds.get(node);
     }
     const id = this.nextId;
-    Object.defineProperty(node, 'saTrackerNodeId', {
-      enumerable: false,
-      value: id,
-    });
     this.nextId += 1;
     this.nodeIds.set(node, id);
+    this.nodesById.set(id, node);
     return id;
   }
 
-  public getNode(id: number) {
-    for (const [node, nodeId] of this.nodeIds) {
-      if (id === nodeId) {
-        return node;
-      }
+  public static getNodeWithId(id: number): Node | undefined {
+    if (this.nodesById.has(id)) {
+      return this.nodesById.get(id);
     }
     throw new Error(`Node with id not found -> ${id}`);
   }
 }
 
-const nodeTracker = new NodeTracker();
+// @ts-ignore
+window.NodeTracker = NodeTracker;
 
 let eventCounter = 0;
 
 function idx() {
   return (eventCounter += 1);
 }
-
-// @ts-ignore
-window.nodeTracker = nodeTracker;
 
 class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [
@@ -161,9 +167,9 @@ class PageEventsRecorder {
   }
 
   public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
-    const nodeId = focusEvent.target ? nodeTracker.getId(focusEvent.target as Node) : undefined;
+    const nodeId = focusEvent.target ? NodeTracker.getNodeId(focusEvent.target as Node) : undefined;
     const relatedNodeId = focusEvent.relatedTarget
-      ? nodeTracker.getId(focusEvent.relatedTarget as Node)
+      ? NodeTracker.getNodeId(focusEvent.relatedTarget as Node)
       : undefined;
     const time = new Date().getTime();
     const event = [eventType as any, nodeId, relatedNodeId, time] as IFocusEvent;
@@ -172,9 +178,9 @@ class PageEventsRecorder {
   }
 
   public trackMouse(eventType: MouseEventType, mouseEvent: MouseEvent) {
-    const nodeId = mouseEvent.target ? nodeTracker.getId(mouseEvent.target as Node) : undefined;
+    const nodeId = mouseEvent.target ? NodeTracker.getNodeId(mouseEvent.target as Node) : undefined;
     const relatedNodeId = mouseEvent.relatedTarget
-      ? nodeTracker.getId(mouseEvent.relatedTarget as Node)
+      ? NodeTracker.getNodeId(mouseEvent.relatedTarget as Node)
       : undefined;
     const event = [
       eventType,
@@ -253,7 +259,7 @@ class PageEventsRecorder {
       for (const [propertyName, value] of propertyMap) {
         const newPropValue = input[propertyName];
         if (newPropValue !== value) {
-          const nodeId = nodeTracker.getId(input);
+          const nodeId = NodeTracker.getNodeId(input);
           changes.push([
             DomActionType.property,
             { id: nodeId, properties: { [propertyName]: newPropValue } },
@@ -291,7 +297,7 @@ class PageEventsRecorder {
       const sheet = style.sheet as CSSStyleSheet;
       const newPropValue = [...sheet.cssRules].map(x => x.cssText);
       if (newPropValue.toString() !== current.toString()) {
-        const nodeId = nodeTracker.getId(style);
+        const nodeId = NodeTracker.getNodeId(style);
         changes.push([
           DomActionType.property,
           { id: nodeId, properties: { 'sheet.cssRules': newPropValue } },
@@ -320,7 +326,7 @@ class PageEventsRecorder {
 
     for (const mutation of mutations) {
       const { type, target } = mutation;
-      if (!nodeTracker.has(target)) {
+      if (!NodeTracker.has(target)) {
         this.serializeHierarchy(target, changes, stamp, addedNodeMap);
       }
 
@@ -329,10 +335,10 @@ class PageEventsRecorder {
         for (let i = 0, length = mutation.removedNodes.length; i < length; i += 1) {
           const node = mutation.removedNodes[i];
           removedNodes.add(node);
-          if (!nodeTracker.has(node)) continue;
+          if (!NodeTracker.has(node)) continue;
           const serial = this.serializeNode(node);
-          serial.parentNodeId = nodeTracker.getId(target);
-          serial.previousSiblingId = nodeTracker.getId(
+          serial.parentNodeId = NodeTracker.getNodeId(target);
+          serial.previousSiblingId = NodeTracker.getNodeId(
             isFirstRemoved ? mutation.previousSibling : node.previousSibling,
           );
           changes.push([DomActionType.removed, serial, stamp, idx()]);
@@ -345,8 +351,8 @@ class PageEventsRecorder {
         for (let i = 0, length = mutation.addedNodes.length; i < length; i += 1) {
           const node = mutation.addedNodes[i];
           const serial = this.serializeNode(node);
-          serial.parentNodeId = nodeTracker.getId(target);
-          serial.previousSiblingId = nodeTracker.getId(
+          serial.parentNodeId = NodeTracker.getNodeId(target);
+          serial.previousSiblingId = NodeTracker.getNodeId(
             isFirstAdded ? mutation.previousSibling : node.previousSibling,
           );
           isFirstAdded = false;
@@ -367,7 +373,7 @@ class PageEventsRecorder {
 
       if (type === MutationRecordType.attributes) {
         // don't store
-        if (!nodeTracker.has(target)) {
+        if (!NodeTracker.has(target)) {
           this.serializeHierarchy(target, changes, stamp, addedNodeMap);
         }
         const serial = addedNodeMap.get(target) || this.serializeNode(target);
@@ -414,10 +420,10 @@ class PageEventsRecorder {
     changeTime: number,
     addedNodeMap: Map<Node, INodeData>,
   ) {
-    if (nodeTracker.has(node)) return this.serializeNode(node);
+    if (NodeTracker.has(node)) return this.serializeNode(node);
 
     const serial = this.serializeNode(node);
-    serial.parentNodeId = nodeTracker.getId(node.parentNode);
+    serial.parentNodeId = NodeTracker.getNodeId(node.parentNode);
     if (!serial.parentNodeId && node.parentNode) {
       const parentSerial = this.serializeHierarchy(
         node.parentNode,
@@ -428,7 +434,7 @@ class PageEventsRecorder {
 
       serial.parentNodeId = parentSerial.id;
     }
-    serial.previousSiblingId = nodeTracker.getId(node.previousSibling);
+    serial.previousSiblingId = NodeTracker.getNodeId(node.previousSibling);
     if (!serial.previousSiblingId && node.previousSibling) {
       const previous = this.serializeHierarchy(
         node.previousSibling,
@@ -447,10 +453,10 @@ class PageEventsRecorder {
     const serialized: INodeData[] = [];
 
     for (const child of node.childNodes) {
-      if (!nodeTracker.has(child)) {
+      if (!NodeTracker.has(child)) {
         const serial = this.serializeNode(child);
-        serial.parentNodeId = nodeTracker.getId(child.parentElement ?? child.getRootNode());
-        serial.previousSiblingId = nodeTracker.getId(child.previousSibling);
+        serial.parentNodeId = NodeTracker.getNodeId(child.parentElement ?? child.getRootNode());
+        serial.previousSiblingId = NodeTracker.getNodeId(child.previousSibling);
         addedNodes.set(child, serial);
         serialized.push(serial, ...this.serializeChildren(child, addedNodes));
       }
@@ -461,9 +467,9 @@ class PageEventsRecorder {
         this.trackStylesheet(element as HTMLStyleElement);
       }
       const shadowRoot = element.shadowRoot;
-      if (shadowRoot && !nodeTracker.has(shadowRoot)) {
+      if (shadowRoot && !NodeTracker.has(shadowRoot)) {
         const serial = this.serializeNode(shadowRoot);
-        serial.parentNodeId = nodeTracker.getId(element);
+        serial.parentNodeId = NodeTracker.getNodeId(element);
         serialized.push(serial, ...this.serializeChildren(shadowRoot, addedNodes));
         this.observer.observe(shadowRoot, {
           attributes: true,
@@ -482,14 +488,14 @@ class PageEventsRecorder {
       return undefined;
     }
 
-    const id = nodeTracker.getId(node);
+    const id = NodeTracker.getNodeId(node);
     if (id !== undefined) {
       return { id };
     }
 
     const data: INodeData = {
       nodeType: node.nodeType,
-      id: nodeTracker.track(node),
+      id: NodeTracker.track(node),
     };
 
     if (node instanceof ShadowRoot) {
@@ -543,7 +549,7 @@ class PageEventsRecorder {
 const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
 const propertiesToCheck = ['value', 'selected', 'checked'];
 
-const recorder = new PageEventsRecorder();
+recorder = new PageEventsRecorder();
 
 function flushPageRecorder() {
   const changes = recorder.extractChanges();

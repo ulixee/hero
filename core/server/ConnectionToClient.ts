@@ -15,6 +15,7 @@ import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
 import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
 import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
+import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -67,8 +68,18 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       data = await this.executeCommand(command, args, meta);
     } catch (error) {
       // if we're closing, don't emit errors
-      const shouldSkipLogging =
+      let shouldSkipLogging =
         (this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError;
+
+      // don't log timeouts when explicitly provided timeout (NOTE: doesn't cover goto)
+      if (args && error instanceof TimeoutError) {
+        for (const arg of args) {
+          if (arg && !Number.isNaN(arg.timeoutMs)) {
+            shouldSkipLogging = true;
+          }
+        }
+      }
+
       const isChildProcess = !!process.send;
       const isLaunchError = this.isLaunchError(error);
 

@@ -31,9 +31,11 @@ export type NavigationState = keyof typeof LoadStatus;
 export type NavigationReason =
   | DevToolsNavigationReason
   | 'goto'
+  | 'goBack'
+  | 'goForward'
   | 'userGesture'
   | 'inPage'
-  | 'newTab';
+  | 'newFrame';
 
 type DevToolsNavigationReason =
   | 'formSubmissionGet'

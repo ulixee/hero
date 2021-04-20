@@ -18,8 +18,8 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
 
   isClosed: boolean;
   navigate(url: string, options?: { referrer?: string }): Promise<void>;
-  goBack(): Promise<void>;
-  goForward(): Promise<void>;
+  goBack(): Promise<string>;
+  goForward(): Promise<string>;
   reload(): Promise<void>;
   close(): Promise<void>;
   bringToFront(): Promise<void>;

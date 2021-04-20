@@ -3,16 +3,12 @@ interface ITson {
   parse(object: string): any;
 }
 
-interface INodeTracker {
-  has(node: Node): boolean;
-  getId(node: Node): number | undefined;
-  track(node: Node): number;
-  getNode(id: number): Node | null;
-}
-
 interface IStaticNodeTracker {
   getNodeWithId(id: number): Node;
-  getNodeId(node: Node): number;
+  has(node: Node): boolean;
+  getNodeId(node: Node): number | undefined;
+  assignNodeId(node: Node): number | undefined;
+  track(node: Node): number;
 }
 
 declare let TSON: ITson;
