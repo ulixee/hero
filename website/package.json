@@ -17,7 +17,7 @@
     "@microflash/gridsome-plugin-feed": "^1.2.1",
     "@types/json2md": "^1.5.0",
     "@types/lodash.kebabcase": "^4.1.6",
-    "awaited-dom": "^1.1.12",
+    "awaited-dom": "1.1.12",
     "babel-runtime": "^6.26.0",
     "decamelize": "^4.0.0",
     "docsearch.js": "^2.6.3",
