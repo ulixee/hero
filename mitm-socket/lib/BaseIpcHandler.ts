@@ -5,7 +5,6 @@ import * as net from 'net';
 import { existsSync, unlinkSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import * as Path from 'path';
 import { v1 as uuidv1 } from 'uuid';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@secret-agent/commons/utils';
@@ -55,7 +54,7 @@ export default abstract class BaseIpcHandler {
     this.child = spawn(libPath, [JSON.stringify(options)], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
-      cwd: Path.resolve(__dirname, '..', 'dist'),
+      cwd: options.storageDir,
     });
 
     this.bindChildListeners();
@@ -201,6 +200,7 @@ export default abstract class BaseIpcHandler {
 
 export interface IGoIpcOpts {
   mode?: 'certs' | 'proxy';
+  storageDir?: string;
   ipcSocketPath?: string;
   clientHelloId?: string;
   tcpTtl?: number;

@@ -389,8 +389,9 @@ export default class MitmProxy {
 
   public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
     if (this.certificateGenerator == null) {
-      this.networkDb = new NetworkDb(sslCaDir || defaultStorageDirectory);
-      this.certificateGenerator = new CertificateGenerator();
+      const baseDir = sslCaDir || defaultStorageDirectory;
+      this.networkDb = new NetworkDb(baseDir);
+      this.certificateGenerator = new CertificateGenerator({ storageDir: baseDir });
     }
     const proxy = new MitmProxy({
       port: startingPort,

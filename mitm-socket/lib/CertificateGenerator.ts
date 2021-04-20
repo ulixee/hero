@@ -20,6 +20,7 @@ export default class CertificateGenerator extends BaseIpcHandler {
     options: Partial<{
       debug?: boolean;
       ipcSocketPath?: string;
+      storageDir?: string;
     }> = {},
   ) {
     super({ ...options, mode: 'certs' });
