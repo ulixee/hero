@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/core",
-  "version": "1.4.1-alpha.3",
+  "version": "1.4.1-alpha.4",
   "description": "The core browser API used to run SecretAgent",
   "exports": {
     ".": {
@@ -14,16 +14,16 @@
     "./server": "./server/index.js"
   },
   "dependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.3",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.3",
-    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.3",
-    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.3",
-    "@secret-agent/emulate-humans-basic": "1.4.1-alpha.3",
-    "@secret-agent/emulate-humans-ghost": "1.4.1-alpha.3",
-    "@secret-agent/emulate-humans-skipper": "1.4.1-alpha.3",
-    "@secret-agent/mitm": "1.4.1-alpha.3",
-    "@secret-agent/puppet": "1.4.1-alpha.3",
-    "@secret-agent/puppet-interfaces": "1.4.1-alpha.3",
+    "@secret-agent/commons": "1.4.1-alpha.4",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.4",
+    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.4",
+    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.4",
+    "@secret-agent/emulate-humans-basic": "1.4.1-alpha.4",
+    "@secret-agent/emulate-humans-ghost": "1.4.1-alpha.4",
+    "@secret-agent/emulate-humans-skipper": "1.4.1-alpha.4",
+    "@secret-agent/mitm": "1.4.1-alpha.4",
+    "@secret-agent/puppet": "1.4.1-alpha.4",
+    "@secret-agent/puppet-interfaces": "1.4.1-alpha.4",
     "@types/ua-parser-js": "^0.7.35",
     "awaited-dom": "^1.1.12",
     "better-sqlite3": "^7.1.4",
@@ -33,11 +33,11 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@secret-agent/client": "1.4.1-alpha.3",
-    "@secret-agent/core": "1.4.1-alpha.3",
-    "@secret-agent/emulate-safari-13": "1.4.1-alpha.3",
-    "@secret-agent/puppet-chrome": "1.4.1-alpha.3",
-    "@secret-agent/testing": "1.4.1-alpha.3",
+    "@secret-agent/client": "1.4.1-alpha.4",
+    "@secret-agent/core": "1.4.1-alpha.4",
+    "@secret-agent/emulate-safari-13": "1.4.1-alpha.4",
+    "@secret-agent/puppet-chrome": "1.4.1-alpha.4",
+    "@secret-agent/testing": "1.4.1-alpha.4",
     "@types/better-sqlite3": "^5.4.1",
     "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1",

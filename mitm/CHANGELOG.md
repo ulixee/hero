@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
+
+
+### Bug Fixes
+
+* **mitm:** store certs with network db ([eed99f1](https://github.com/ulixee/secret-agent/commit/eed99f1c36841fc30e55265378a5c47a68ce7185))
+
+
+
+
+
 ## [1.4.1-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.2...v1.4.1-alpha.3) (2021-04-20)
 
 

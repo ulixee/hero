@@ -1,11 +1,11 @@
 {
   "name": "@secret-agent/emulate-chrome-ancient",
-  "version": "1.4.1-alpha.3",
+  "version": "1.4.1-alpha.4",
   "description": "BrowserEmulator for Chrome versions 79 or older",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.3",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.3",
-    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.3"
+    "@secret-agent/commons": "1.4.1-alpha.4",
+    "@secret-agent/core-interfaces": "1.4.1-alpha.4",
+    "@secret-agent/emulate-browsers-base": "1.4.1-alpha.4"
   }
 }
