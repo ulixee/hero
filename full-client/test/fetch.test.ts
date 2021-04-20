@@ -13,11 +13,21 @@ afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('Fetch tests', () => {
+  it('should be able to fetch from top level', async () => {
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+
+    await expect(agent.fetch('https://dataliberationfoundation.org')).rejects.toThrowError(
+      'need to use a "goto"',
+    );
+  });
+
   it('should be able to run a fetch from the browser', async () => {
     koaServer.get('/fetch', ctx => {
       ctx.body = { got: 'it' };
     });
     const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
 
     await agent.goto(`${koaServer.baseUrl}/`);
     await agent.waitForPaintingStable();
