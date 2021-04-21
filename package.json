@@ -80,7 +80,7 @@
     "packages": [
       "client",
       "core",
-      "core-interfaces",
+      "interfaces",
       "emulate-browsers/*",
       "emulate-humans/*",
       "full-client",

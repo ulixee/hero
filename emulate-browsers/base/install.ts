@@ -1,5 +1,5 @@
 import installEngineWithProgress from '@secret-agent/puppet/lib/installEngineWithProgress';
-import { IBrowserEngineConfig } from '@secret-agent/core-interfaces/IBrowserEngine';
+import { IBrowserEngineConfig } from '@secret-agent/interfaces/IBrowserEngine';
 
 export default function install(engine: IBrowserEngineConfig) {
   installEngineWithProgress(engine).catch(error => {

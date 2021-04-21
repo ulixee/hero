@@ -1,4 +1,4 @@
-import IPoint from '@secret-agent/core-interfaces/IPoint';
+import IPoint from '@secret-agent/interfaces/IPoint';
 import Bezier from './Bezier';
 
 export default function generateVector(

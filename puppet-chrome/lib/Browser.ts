@@ -1,12 +1,12 @@
 import { Protocol } from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { assert } from '@secret-agent/commons/utils';
-import IPuppetBrowser from '@secret-agent/core-interfaces/IPuppetBrowser';
+import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
-import IProxyConnectionOptions from '@secret-agent/core-interfaces/IProxyConnectionOptions';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
 import { DevtoolsSession } from './DevtoolsSession';

@@ -1,4 +1,4 @@
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import Resolvable from './Resolvable';
 
 export function assert(value: unknown, message?: string, reject?): void {

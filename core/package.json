@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.4",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.4",
+    "@secret-agent/interfaces": "1.4.1-alpha.4",
     "@secret-agent/emulate-browsers-base": "1.4.1-alpha.4",
     "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.4",
     "@secret-agent/emulate-humans-basic": "1.4.1-alpha.4",
@@ -23,7 +23,6 @@
     "@secret-agent/emulate-humans-skipper": "1.4.1-alpha.4",
     "@secret-agent/mitm": "1.4.1-alpha.4",
     "@secret-agent/puppet": "1.4.1-alpha.4",
-    "@secret-agent/core-interfaces": "1.4.1-alpha.4",
     "@types/ua-parser-js": "^0.7.35",
     "awaited-dom": "1.1.12",
     "better-sqlite3": "^7.1.4",

@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import ILog, { ILogData } from '@secret-agent/core-interfaces/ILog';
+import ILog, { ILogData } from '@secret-agent/interfaces/ILog';
 import { inspect } from 'util';
 
 const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');

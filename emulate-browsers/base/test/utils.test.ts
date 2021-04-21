@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
 // @ts-ignore
 // eslint-disable-next-line import/extensions

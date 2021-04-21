@@ -4,6 +4,6 @@
   "description": "Very basic HumanEmulator for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.4"
+    "@secret-agent/interfaces": "1.4.1-alpha.4"
   }
 }

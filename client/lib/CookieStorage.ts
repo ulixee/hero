@@ -1,7 +1,7 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
+import { ICookie } from '@secret-agent/interfaces/ICookie';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 const { getState, setState } = StateMachine<CookieStorage, IState>();

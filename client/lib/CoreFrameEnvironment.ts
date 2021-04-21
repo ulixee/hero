@@ -1,15 +1,15 @@
-import { IInteractionGroups } from '@secret-agent/core-interfaces/IInteractions';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import { ILocationStatus, ILocationTrigger } from '@secret-agent/core-interfaces/Location';
+import { IInteractionGroups } from '@secret-agent/interfaces/IInteractions';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
+import { ILocationStatus, ILocationTrigger } from '@secret-agent/interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
+import { ICookie } from '@secret-agent/interfaces/ICookie';
+import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
+import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
-import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
-import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
-import IFrameMeta from '@secret-agent/core-interfaces/IFrameMeta';
+import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
+import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {

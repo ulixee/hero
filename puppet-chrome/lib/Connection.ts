@@ -21,8 +21,8 @@ import {
 } from '@secret-agent/commons/eventUtils';
 import IConnectionTransport, {
   IConnectionTransportEvents,
-} from '@secret-agent/core-interfaces/IConnectionTransport';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+} from '@secret-agent/interfaces/IConnectionTransport';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
 import Log from '@secret-agent/commons/Logger';
 import { URL } from 'url';
 import * as http from 'http';

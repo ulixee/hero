@@ -1,7 +1,7 @@
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@secret-agent/commons/Resolvable';

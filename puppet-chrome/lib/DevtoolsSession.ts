@@ -20,12 +20,12 @@ import { Protocol } from 'devtools-protocol';
 import { EventEmitter } from 'events';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import IDevtoolsSession, {
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
-} from '@secret-agent/core-interfaces/IDevtoolsSession';
+} from '@secret-agent/interfaces/IDevtoolsSession';
 import ProtocolError from './ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;

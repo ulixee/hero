@@ -11,17 +11,17 @@ import {
   parseNavigatorPlugins,
   Viewports,
 } from '@secret-agent/emulate-browsers-base';
-import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
+import IUserAgentMatchMeta from '@secret-agent/interfaces/IUserAgentMatchMeta';
 import { randomBytes } from 'crypto';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
-import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
-import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
-import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
-import IDevtoolsSession from '@secret-agent/core-interfaces/IDevtoolsSession';
+import IWindowFraming from '@secret-agent/interfaces/IWindowFraming';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import INetworkEmulation from '@secret-agent/interfaces/INetworkEmulation';
+import IBrowserEmulatorConfiguration from '@secret-agent/interfaces/IBrowserEmulatorConfiguration';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
+import IDevtoolsSession from '@secret-agent/interfaces/IDevtoolsSession';
 import * as Path from 'path';
 import * as os from 'os';
 import * as pkg from './package.json';

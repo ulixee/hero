@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 import Protocol from 'devtools-protocol';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/interfaces/IPuppetPage';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
 import { assert, createPromise } from '@secret-agent/commons/utils';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IRect from '@secret-agent/core-interfaces/IRect';
+import IRect from '@secret-agent/interfaces/IRect';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';

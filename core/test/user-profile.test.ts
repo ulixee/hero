@@ -1,6 +1,6 @@
 import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Safari13 from '@secret-agent/emulate-safari-13';

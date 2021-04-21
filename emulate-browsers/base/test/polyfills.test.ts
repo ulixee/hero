@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { ITestHttpServer } from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import IPuppetContext from '@secret-agent/core-interfaces/IPuppetContext';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';

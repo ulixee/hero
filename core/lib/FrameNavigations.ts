@@ -2,11 +2,11 @@ import INavigation, {
   LoadStatus,
   NavigationReason,
   NavigationState,
-} from '@secret-agent/core-interfaces/INavigation';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+} from '@secret-agent/interfaces/INavigation';
+import { LocationStatus } from '@secret-agent/interfaces/Location';
 import { createPromise } from '@secret-agent/commons/utils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import SessionState from './SessionState';
 

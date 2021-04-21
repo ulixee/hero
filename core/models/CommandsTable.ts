@@ -1,4 +1,4 @@
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
+import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 

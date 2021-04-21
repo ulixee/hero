@@ -4,7 +4,7 @@ import Log from '@secret-agent/commons/Logger';
 import * as net from 'net';
 import { existsSync, unlinkSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { v1 as uuidv1 } from 'uuid';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@secret-agent/commons/utils';

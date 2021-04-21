@@ -3,19 +3,15 @@ import type {
   ILocationStatus,
   ILocationTrigger,
   IPipelineStatus,
-} from '@secret-agent/core-interfaces/Location';
-import {
-  LocationStatus,
-  LocationTrigger,
-  PipelineStatus,
-} from '@secret-agent/core-interfaces/Location';
-import { LoadStatus, NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import type ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import type IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
-import type IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+} from '@secret-agent/interfaces/Location';
+import { LocationStatus, LocationTrigger, PipelineStatus } from '@secret-agent/interfaces/Location';
+import { LoadStatus, NavigationReason } from '@secret-agent/interfaces/INavigation';
+import type ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
+import type IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import type IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import * as moment from 'moment';
-import type { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import type { IBoundLog } from '@secret-agent/interfaces/ILog';
 import type FrameNavigations from './FrameNavigations';
 
 export default class FrameNavigationsObserver {

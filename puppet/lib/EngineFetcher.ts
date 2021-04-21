@@ -5,7 +5,7 @@ import { assert } from '@secret-agent/commons/utils';
 import { createGunzip } from 'zlib';
 import * as Tar from 'tar';
 import downloadFile from '@secret-agent/commons/downloadFile';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
 
 const windowsLocalAppData = process.env.LOCALAPPDATA || Path.join(Os.homedir(), 'AppData', 'Local');

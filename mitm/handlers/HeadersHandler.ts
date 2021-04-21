@@ -1,12 +1,12 @@
 // @ts-ignore
 import * as nodeCommon from '_http_common';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import * as http from 'http';
 import * as http2 from 'http2';
-import OriginType from '@secret-agent/core-interfaces/OriginType';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import OriginType from '@secret-agent/interfaces/OriginType';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
 import { URL } from 'url';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';

@@ -1,7 +1,7 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
+import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
 import CoreTab from './CoreTab';
 
 const { getState, setState } = StateMachine<ResourceRequest, IState>();

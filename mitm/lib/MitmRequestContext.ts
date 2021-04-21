@@ -1,13 +1,13 @@
 import { URL } from 'url';
 import * as http from 'http';
 import * as http2 from 'http2';
-import IResourceRequest from '@secret-agent/core-interfaces/IResourceRequest';
+import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
 import { TLSSocket } from 'tls';
 import MitmSocket from '@secret-agent/mitm-socket';
-import OriginType, { isOriginType } from '@secret-agent/core-interfaces/OriginType';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
-import IResourceResponse from '@secret-agent/core-interfaces/IResourceResponse';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import OriginType, { isOriginType } from '@secret-agent/interfaces/OriginType';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
+import IResourceResponse from '@secret-agent/interfaces/IResourceResponse';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import HttpResponseCache from './HttpResponseCache';
 import HeadersHandler from '../handlers/HeadersHandler';
 import { IRequestSessionResponseEvent } from '../handlers/RequestSession';

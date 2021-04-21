@@ -1,7 +1,7 @@
 import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import * as fs from 'fs';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';

@@ -1,11 +1,11 @@
 import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { IPuppetFrameManagerEvents } from '@secret-agent/core-interfaces/IPuppetFrame';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
+import { IPuppetFrameManagerEvents } from '@secret-agent/interfaces/IPuppetFrame';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;

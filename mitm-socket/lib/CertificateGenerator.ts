@@ -1,6 +1,6 @@
 import Log from '@secret-agent/commons/Logger';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import BaseIpcHandler from './BaseIpcHandler';
 

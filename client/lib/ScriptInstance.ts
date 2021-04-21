@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
+import IScriptInstanceMeta from '@secret-agent/interfaces/IScriptInstanceMeta';
 import Log from '@secret-agent/commons/Logger';
 import CoreSession from './CoreSession';
 

@@ -1,5 +1,5 @@
 import { pickRandom } from '@secret-agent/commons/utils';
-import IHumanEmulatorClass from '@secret-agent/core-interfaces/IHumanEmulatorClass';
+import IHumanEmulatorClass from '@secret-agent/interfaces/IHumanEmulatorClass';
 import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
 
 export default class HumanEmulators {

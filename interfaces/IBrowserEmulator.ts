@@ -1,5 +1,5 @@
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
-import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import INetworkEmulation from './INetworkEmulation';
 import IWindowFraming from './IWindowFraming';
 import IBrowserEmulatorConfiguration from './IBrowserEmulatorConfiguration';

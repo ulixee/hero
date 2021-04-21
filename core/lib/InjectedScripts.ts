@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
 
 const pageScripts = {

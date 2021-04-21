@@ -13,10 +13,10 @@ import {
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/core-interfaces/Location';
-import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
+import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Location';
+import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
+import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';

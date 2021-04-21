@@ -1,4 +1,4 @@
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
 
 const defaultEmulation = {
   canPolyfill: false,

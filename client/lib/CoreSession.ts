@@ -1,8 +1,8 @@
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
+import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
+import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';

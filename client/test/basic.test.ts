@@ -1,6 +1,6 @@
 import Core from '@secret-agent/core/index';
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
 import { Helpers } from '@secret-agent/testing';
 import { Agent, Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';

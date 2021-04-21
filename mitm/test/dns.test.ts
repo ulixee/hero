@@ -1,4 +1,4 @@
-import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
+import INetworkEmulation from '@secret-agent/interfaces/INetworkEmulation';
 import { LookupAddress, promises as nodeDns } from 'dns';
 import { Helpers } from '@secret-agent/testing';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';

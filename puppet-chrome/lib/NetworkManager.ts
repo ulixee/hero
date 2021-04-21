@@ -1,12 +1,12 @@
 import { Protocol } from 'devtools-protocol';
-import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
+import { getResourceTypeForChromeValue } from '@secret-agent/interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetNetworkEvents } from '@secret-agent/core-interfaces/IPuppetNetworkEvents';
+import { IPuppetNetworkEvents } from '@secret-agent/interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { URL } from 'url';
 import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;

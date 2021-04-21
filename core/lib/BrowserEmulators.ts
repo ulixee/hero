@@ -1,9 +1,9 @@
 import { UAParser } from 'ua-parser-js';
-import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
+import IBrowserEmulatorClass from '@secret-agent/interfaces/IBrowserEmulatorClass';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
-import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
+import IUserAgentMatchMeta from '@secret-agent/interfaces/IUserAgentMatchMeta';
+import IBrowserEmulatorConfiguration from '@secret-agent/interfaces/IBrowserEmulatorConfiguration';
 import GlobalPool from './GlobalPool';
 
 export default class BrowserEmulators {

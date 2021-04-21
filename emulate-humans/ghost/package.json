@@ -4,7 +4,7 @@
   "description": "HumanEmulator based on Xetera/ghost-cursor for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.4"
+    "@secret-agent/interfaces": "1.4.1-alpha.4"
   },
   "devDependencies": {
     "@secret-agent/commons": "1.4.1-alpha.4"
