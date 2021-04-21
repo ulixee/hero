@@ -8,6 +8,7 @@ import { existsSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
 import IProxyConnectionOptions from '@secret-agent/core-interfaces/IProxyConnectionOptions';
+import IPuppetLaunchArgs from '@secret-agent/core-interfaces/IPuppetLaunchArgs';
 import launchProcess from './lib/launchProcess';
 import { validateHostRequirements } from './lib/validateHostDependencies';
 import { EngineFetcher } from './lib/EngineFetcher';
@@ -42,7 +43,7 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public start(args: ILaunchArgs = {}): Promise<IPuppetBrowser | Error> {
+  public start(args: IPuppetLaunchArgs = {}): Promise<IPuppetBrowser | Error> {
     if (this.browserOrError) {
       return this.browserOrError;
     }
@@ -86,7 +87,7 @@ export default class Puppet {
 
   private async launchEngine(
     launcher: IPuppetLauncher,
-    args: ILaunchArgs,
+    args: IPuppetLaunchArgs,
   ): Promise<IPuppetBrowser> {
     const executablePath = this.engine.executablePath;
 
@@ -95,14 +96,11 @@ export default class Puppet {
     }
 
     try {
-      const launchArgs = launcher.getLaunchArgs(args);
+      const launchArgs = launcher.getLaunchArgs(args, this.engine);
 
       // exists, but can't launch, try to launch
       await validateHostRequirements(this.engine);
 
-      if (this.engine.extraLaunchArgs?.length) {
-        launchArgs.push(...this.engine.extraLaunchArgs);
-      }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {});
 
       const browser = await launcher.createPuppet(launchedProcess, this.engine);
@@ -144,12 +142,4 @@ export default class Puppet {
 
 ${remedyMessage}`);
   }
-}
-
-export interface ILaunchArgs {
-  proxyPort?: number;
-  showBrowser?: boolean;
-  disableDevtools?: boolean;
-  disableGpu?: boolean;
-  noChromeSandbox?: boolean;
 }

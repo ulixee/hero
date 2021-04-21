@@ -1,10 +1,12 @@
+import IPuppetLaunchArgs from './IPuppetLaunchArgs';
+
 export default interface IBrowserEngine {
   name: string;
   fullVersion: string;
   executablePath: string;
   executablePathEnvVar: string;
-  extraLaunchArgs?: string[];
   isHeaded?: boolean;
+  getLaunchArguments?(puppetOptions: IPuppetLaunchArgs, defaultArguments: string[]): string[];
 }
 
 export type IBrowserEngineConfig = Pick<

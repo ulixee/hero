@@ -19,23 +19,23 @@ const { log } = Log(module);
 function getEngine(
   engine: { name: string; fullVersion: string },
   executablePathEnvVar?: string,
+  getLaunchArguments?: IBrowserEngine['getLaunchArguments'],
 ): IBrowserEngine {
-  const engineFetcher = new EngineFetcher(
-    engine.name,
-    engine.fullVersion,
-    executablePathEnvVar,
-  ).toJSON();
+  const engineFetcher = new EngineFetcher(engine.name, engine.fullVersion, executablePathEnvVar);
 
-  engineFetcher.isHeaded = Boolean(
-    JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
-  );
-
+  const browserEngine = engineFetcher.toJSON();
   log.stats('Browser.getEngine', {
     sessionId: null,
-    engineFetcher,
+    browserEngine,
   });
+  const engineFetcherLaunchArgs = engineFetcher.launchArgs;
+  browserEngine.getLaunchArguments = (puppetOptions, defaultArguments) => {
+    defaultArguments.push(...engineFetcherLaunchArgs);
+    if (getLaunchArguments) return getLaunchArguments(puppetOptions, defaultArguments);
+    return defaultArguments;
+  };
 
-  return engineFetcher;
+  return browserEngine;
 }
 
 export {

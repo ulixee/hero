@@ -132,7 +132,6 @@ export class EngineFetcher {
       executablePath: this.executablePath,
       executablePathEnvVar: this.executablePathEnvVar,
       isInstalled: this.isInstalled,
-      extraLaunchArgs: this.launchArgs,
     };
   }
 
