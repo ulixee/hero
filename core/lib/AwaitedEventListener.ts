@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { assert } from '@secret-agent/commons/utils';
 import IListenerObject from '../interfaces/IListenerObject';
 import Session from './Session';

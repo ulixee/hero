@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
+import IViewport from '@secret-agent/interfaces/IViewport';
 
 export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {

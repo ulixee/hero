@@ -1,4 +1,4 @@
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
 
 export default interface IResourceFilterProperties {
   url?: string | RegExp;

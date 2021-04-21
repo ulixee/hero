@@ -1,5 +1,5 @@
-import { IDomStorageForOrigin, IStorageEntry } from '@secret-agent/core-interfaces/IDomStorage';
-import { IIndexedDB } from '@secret-agent/core-interfaces/IIndexedDB';
+import { IDomStorageForOrigin, IStorageEntry } from '@secret-agent/interfaces/IDomStorage';
+import { IIndexedDB } from '@secret-agent/interfaces/IIndexedDB';
 
 function dumpStorage(storage: Storage) {
   const store: [string, string][] = [];

@@ -1,5 +1,5 @@
 import * as ProgressBar from 'progress';
-import { IBrowserEngineConfig } from '@secret-agent/core-interfaces/IBrowserEngine';
+import { IBrowserEngineConfig } from '@secret-agent/interfaces/IBrowserEngine';
 import { EngineFetcher } from './EngineFetcher';
 import { validateHostRequirements } from './validateHostDependencies';
 

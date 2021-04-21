@@ -1,5 +1,5 @@
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
+import IViewport from '@secret-agent/interfaces/IViewport';
+import IWindowFraming from '@secret-agent/interfaces/IWindowFraming';
 
 const defaultWindowFraming = {
   screenGapLeft: 0,

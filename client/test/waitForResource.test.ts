@@ -1,7 +1,7 @@
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
 import { Helpers } from '@secret-agent/testing/index';
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 

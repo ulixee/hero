@@ -1,4 +1,4 @@
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { bindFunctions } from './utils';
 import TimeoutError from './interfaces/TimeoutError';
 

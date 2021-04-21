@@ -1,4 +1,4 @@
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Queue from '@secret-agent/commons/Queue';
 import ConnectionToCore from '../connections/ConnectionToCore';

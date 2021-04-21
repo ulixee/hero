@@ -1,6 +1,6 @@
 import { assert } from '@secret-agent/commons/utils';
-import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/core-interfaces/IPuppetContext';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
+import { ICookie } from '@secret-agent/interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import {
@@ -8,14 +8,14 @@ import {
   removeEventListeners,
   TypedEventEmitter,
 } from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
-import IProxyConnectionOptions from '@secret-agent/core-interfaces/IProxyConnectionOptions';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';

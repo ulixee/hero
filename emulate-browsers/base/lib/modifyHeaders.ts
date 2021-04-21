@@ -1,7 +1,7 @@
 import Log from '@secret-agent/commons/Logger';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 
 const { log } = Log(module);
 

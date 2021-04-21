@@ -1,4 +1,4 @@
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
 import { Helpers } from '@secret-agent/testing/index';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';

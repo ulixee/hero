@@ -1,5 +1,5 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import Log from '@secret-agent/commons/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 

@@ -1,5 +1,5 @@
 import { ChildProcess, fork } from 'child_process';
-import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
 import Dict = NodeJS.Dict;
 
 const start = require.resolve('../start');

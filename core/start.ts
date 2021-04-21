@@ -1,5 +1,5 @@
 import '@secret-agent/commons/SourceMapSupport';
-import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
 import Log from '@secret-agent/commons/Logger';
 import Core from '.';
 

@@ -7,7 +7,7 @@ import { AddressInfo } from 'net';
 import * as WebSocket from 'ws';
 import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';

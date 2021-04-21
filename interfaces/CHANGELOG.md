@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -74,7 +74,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.4.0-alpha.1](https://github.com/ulixee/secret-agent/compare/v1.4.0-alpha.0...v1.4.0-alpha.1) (2021-03-11)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -118,7 +118,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.3.0-alpha.3](https://github.com/ulixee/secret-agent/compare/v1.3.0-alpha.2...v1.3.0-alpha.3) (2021-02-11)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -184,7 +184,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.2.0-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.2.0-alpha.3...v1.2.0-alpha.4) (2020-12-22)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -316,7 +316,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.14](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2020-10-06)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -324,7 +324,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -347,7 +347,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.10](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2020-08-25)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -379,7 +379,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [1.0.0-alpha.5](https://github.com/ulixee/secret-agent/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2020-07-21)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -425,7 +425,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.1 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces
 
 
 
@@ -433,4 +433,4 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 1.0.0-alpha.0 (2020-06-27)
 
-**Note:** Version bump only for package @secret-agent/core-interfaces
+**Note:** Version bump only for package @secret-agent/interfaces

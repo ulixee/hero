@@ -2,7 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import * as http2 from 'http2';
 import { URL } from 'url';
 import MitmSocket from '@secret-agent/mitm-socket';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';

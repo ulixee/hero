@@ -1,5 +1,5 @@
-import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@secret-agent/core-interfaces/Location';
+import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
+import { LocationTrigger } from '@secret-agent/interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import ConnectionToClient from './server/ConnectionToClient';

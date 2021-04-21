@@ -1,8 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
-import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Location';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import * as Fs from 'fs';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';

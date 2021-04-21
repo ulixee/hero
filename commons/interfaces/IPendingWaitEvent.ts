@@ -1,4 +1,4 @@
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { registerSerializableErrorType } from '../TypeSerializer';
 
 export class CanceledPromiseError extends Error {

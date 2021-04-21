@@ -1,4 +1,4 @@
-import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
+import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
 import FrameEnvironment from './FrameEnvironment';
 
 export default class MouseupListener {

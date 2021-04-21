@@ -1,5 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import HumanEmulatorGhost from '@secret-agent/emulate-humans-ghost';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
 import Core, { Session } from '../index';

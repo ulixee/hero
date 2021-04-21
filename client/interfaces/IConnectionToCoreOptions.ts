@@ -1,4 +1,4 @@
-import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
+import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
 
 export default interface IConnectionToCoreOptions
   extends Omit<ICoreConfigureOptions, 'maxConcurrentAgentsCount'> {

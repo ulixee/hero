@@ -1,5 +1,5 @@
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
+import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';

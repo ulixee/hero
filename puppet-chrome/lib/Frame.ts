@@ -3,14 +3,14 @@ import {
   ILifecycleEvents,
   IPuppetFrame,
   IPuppetFrameEvents,
-} from '@secret-agent/core-interfaces/IPuppetFrame';
+} from '@secret-agent/interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import { NavigationReason } from '@secret-agent/interfaces/INavigation';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import ProtocolError from './ProtocolError';
 import { DevtoolsSession } from './DevtoolsSession';

@@ -2,8 +2,8 @@ import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHan
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import IAttachedState from 'awaited-dom/base/IAttachedState';
-import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
+import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 

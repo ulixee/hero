@@ -1,5 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
-import { KeyboardKeys } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { Handler, LocationStatus } from '../index';

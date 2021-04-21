@@ -1,5 +1,5 @@
-import { IBlockedResourceType } from '@secret-agent/core-interfaces/ITabOptions';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import { IBlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 
 export default interface IAgentDefaults {
   defaultBlockedResourceTypes?: IBlockedResourceType[];

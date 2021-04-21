@@ -1,8 +1,8 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
-import IElementRect from '@secret-agent/core-interfaces/IElementRect';
-import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
+import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
+import IElementRect from '@secret-agent/interfaces/IElementRect';
+import IWindowOffset from '@secret-agent/interfaces/IWindowOffset';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 

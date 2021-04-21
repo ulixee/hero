@@ -1,4 +1,4 @@
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import IConnectionToCoreOptions from './IConnectionToCoreOptions';
 

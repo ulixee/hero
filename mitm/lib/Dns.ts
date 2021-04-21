@@ -1,5 +1,5 @@
 import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { ConnectionOptions } from 'tls';
 import * as moment from 'moment';
 import * as net from 'net';

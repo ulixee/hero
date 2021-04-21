@@ -1,8 +1,8 @@
 import IBrowserEmulatorClass, {
   BrowserEmulatorClassDecorator,
-} from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+} from '@secret-agent/interfaces/IBrowserEmulatorClass';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { EngineFetcher } from '@secret-agent/puppet/lib/EngineFetcher';
 import Log from '@secret-agent/commons/Logger';
 import modifyHeaders from './lib/modifyHeaders';

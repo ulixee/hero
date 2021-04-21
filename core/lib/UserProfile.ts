@@ -1,7 +1,7 @@
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IDomStorage from '@secret-agent/core-interfaces/IDomStorage';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
+import IDomStorage from '@secret-agent/interfaces/IDomStorage';
 import Log from '@secret-agent/commons/Logger';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { assert } from '@secret-agent/commons/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';

@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateTabOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -9,20 +9,20 @@ import RequestSession, {
   ISocketEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
-import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/core-interfaces/IPuppetContext';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
-import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
-import IHumanEmulatorClass from '@secret-agent/core-interfaces/IHumanEmulatorClass';
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
-import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
+import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
+import IHumanEmulatorClass from '@secret-agent/interfaces/IHumanEmulatorClass';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IBrowserEmulatorClass from '@secret-agent/interfaces/IBrowserEmulatorClass';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { MitmProxy } from '@secret-agent/mitm/index';
 import SessionState from './SessionState';
