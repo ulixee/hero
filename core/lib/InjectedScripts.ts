@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
-import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),

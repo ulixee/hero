@@ -5,7 +5,6 @@ import { pickRandom } from '@secret-agent/commons/utils';
 import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
 import GlobalPool from './GlobalPool';
-import Session from './Session';
 
 export default class BrowserEmulators {
   public static defaultId = ChromeLatest.id;

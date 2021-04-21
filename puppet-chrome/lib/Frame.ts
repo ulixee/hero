@@ -61,6 +61,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     return this.loaderLifecycles.get(this.activeLoaderId);
   }
 
+  public waitForNonDefaultLoader;
+
   public readonly isAttached: () => boolean;
   public loaderLifecycles = new Map<string, ILifecycleEvents>();
   public activeLoaderId: string;
@@ -385,6 +387,10 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       this.loaderIdResolvers.set(loaderId, newResolver);
     }
     this.activeLoaderId = loaderId;
+    this.emit('frame-loader-created', {
+      frame: this,
+      loaderId,
+    });
   }
 
   private async createIsolatedWorld(): Promise<number> {

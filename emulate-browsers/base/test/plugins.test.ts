@@ -1,11 +1,9 @@
 import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
+import { BrowserEmulators, GlobalPool } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as navigatorJson from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-navigator.json';
-import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
-import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');

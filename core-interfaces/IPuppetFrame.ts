@@ -42,4 +42,8 @@ export interface IPuppetFrameEvents {
     url: string;
     reason: NavigationReason;
   };
+  'frame-loader-created': {
+    frame: IPuppetFrame;
+    loaderId: string;
+  };
 }

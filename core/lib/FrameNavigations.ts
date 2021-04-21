@@ -74,14 +74,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     };
     if (loaderId) this.loaderIds.add(loaderId);
 
-    if (
-      this.nextNavigationReason &&
-      this.nextNavigationReason.url === url &&
-      (!nextTop.navigationReason || nextTop.navigationReason === 'newFrame')
-    ) {
-      nextTop.navigationReason = this.nextNavigationReason.reason;
-      this.nextNavigationReason = null;
-    }
+    this.checkStoredNavigationReason(nextTop, url);
 
     const currentTop = this.top;
     // if in-page, set the state to match current top
@@ -128,11 +121,17 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
     const top = this.top;
 
-    if (
+    const isHistoryNavigation =
+      top.navigationReason === 'goBack' || top.navigationReason === 'goForward';
+    if (!top.requestedUrl && isHistoryNavigation) {
+      top.requestedUrl = url;
+    } else if (
       !top.requestedUrl &&
-      (top.navigationReason === 'goBack' || top.navigationReason === 'goForward')
+      top.navigationReason === 'newFrame' &&
+      top.loaderId === loaderId
     ) {
       top.requestedUrl = url;
+      this.checkStoredNavigationReason(top, url);
     }
     // if we already have this status at top level, this is a new nav
     else if (
@@ -207,6 +206,17 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       navigation.requestedUrl = url;
     }
     this.captureNavigationUpdate(navigation);
+  }
+
+  private checkStoredNavigationReason(navigation: INavigation, url: string): void {
+    if (
+      this.nextNavigationReason &&
+      this.nextNavigationReason.url === url &&
+      (!navigation.navigationReason || navigation.navigationReason === 'newFrame')
+    ) {
+      navigation.navigationReason = this.nextNavigationReason.reason;
+      this.nextNavigationReason = null;
+    }
   }
 
   private findMatchingNavigation(loaderId: string): INavigation {

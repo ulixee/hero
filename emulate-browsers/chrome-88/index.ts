@@ -378,7 +378,7 @@ export default class Chrome88 implements IBrowserEmulator {
       chromeArguments.push(
         `--user-data-dir=${Path.join(
           os.tmpdir(),
-          this.engine.fullVersion.replace('.', '-'),
+          Chrome88.engine.fullVersion.replace('.', '-'),
           '-data',
           String((sessionDirCounter += 1)),
         )}`,

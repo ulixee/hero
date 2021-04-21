@@ -349,6 +349,11 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         });
         return;
       }
+      if (this.mainFrame.isDefaultUrl) {
+        // if we're on the default page, wait for a loader to be created before telling the page it's ready
+        await this.mainFrame.waitOn('frame-loader-created', null, 2e3).catch(() => null);
+        if (this.isClosed) return;
+      }
       await this.opener.popupInitializeFn(this, this.opener.windowOpenParams);
       this.logger.stats('Popup initialized', {
         targetId: this.targetId,

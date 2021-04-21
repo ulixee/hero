@@ -584,7 +584,7 @@ export default class Safari13 implements IBrowserEmulator {
       chromeArguments.push(
         `--user-data-dir=${Path.join(
           os.tmpdir(),
-          this.engine.fullVersion.replace('.', '-'),
+          Safari13.engine.fullVersion.replace('.', '-'),
           '-data',
           String((sessionDirCounter += 1)),
         )}`,

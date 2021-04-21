@@ -376,7 +376,7 @@ export default class Chrome80 implements IBrowserEmulator {
       chromeArguments.push(
         `--user-data-dir=${Path.join(
           os.tmpdir(),
-          this.engine.fullVersion.replace('.', '-'),
+          Chrome80.engine.fullVersion.replace('.', '-'),
           '-data',
           String((sessionDirCounter += 1)),
         )}`,
