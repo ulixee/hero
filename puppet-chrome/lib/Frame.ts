@@ -3,7 +3,7 @@ import {
   ILifecycleEvents,
   IPuppetFrame,
   IPuppetFrameEvents,
-} from '@secret-agent/puppet-interfaces/IPuppetFrame';
+} from '@secret-agent/core-interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
@@ -13,7 +13,7 @@ import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import ProtocolError from './ProtocolError';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import ConsoleMessage from './ConsoleMessage';
 import { DEFAULT_PAGE, ISOLATED_WORLD } from './FramesManager';
 import PageFrame = Protocol.Page.Frame;
@@ -69,7 +69,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private isolatedWorldElementObjectId?: string;
   private readonly parentFrame: Frame | null;
   private loaderIdResolvers = new Map<string, IResolvablePromise<Error | null>>();
-  private readonly cdpSession: CDPSession;
+  private readonly devtoolsSession: DevtoolsSession;
 
   private get activeLoader(): IResolvablePromise<Error | null> {
     return this.loaderIdResolvers.get(this.activeLoaderId);
@@ -85,14 +85,14 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   constructor(
     internalFrame: PageFrame,
     activeContextIds: Set<number>,
-    cdpSession: CDPSession,
+    devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     isAttached: () => boolean,
     parentFrame: Frame | null,
   ) {
     super();
     this.activeContextIds = activeContextIds;
-    this.cdpSession = cdpSession;
+    this.devtoolsSession = devtoolsSession;
     this.logger = logger.createChild(module);
     this.parentFrame = parentFrame;
     this.isAttached = isAttached;
@@ -118,7 +118,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     const startOrigin = this.securityOrigin;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     try {
-      const result: Protocol.Runtime.EvaluateResponse = await this.cdpSession.send(
+      const result: Protocol.Runtime.EvaluateResponse = await this.devtoolsSession.send(
         'Runtime.evaluate',
         {
           expression,
@@ -134,7 +134,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       }
 
       const remote = result.result;
-      if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
+      if (remote.objectId) this.devtoolsSession.disposeRemoteObject(remote);
       return remote.value as T;
     } catch (err) {
       let retries = options?.retriesWaitingForLoad ?? 0;
@@ -161,7 +161,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     const objectId = await this.getParentElementId();
     if (!objectId) return;
     try {
-      const result = await this.cdpSession.send('Runtime.callFunctionOn', {
+      const result = await this.devtoolsSession.send('Runtime.callFunctionOn', {
         functionDeclaration: `function executeRemoteFn() {
         return ${expression};
       }`,
@@ -173,7 +173,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       }
 
       const remote = result.result;
-      if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
+      if (remote.objectId) this.devtoolsSession.disposeRemoteObject(remote);
       return remote.value as T;
     } catch (err) {
       if (err instanceof CanceledPromiseError) return;
@@ -390,7 +390,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
   private async createIsolatedWorld(): Promise<number> {
     try {
       if (!this.isAttached()) return;
-      const isolatedWorld = await this.cdpSession.send(
+      const isolatedWorld = await this.devtoolsSession.send(
         'Page.createIsolatedWorld',
         {
           frameId: this.id,
@@ -429,8 +429,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     try {
       if (!this.parentFrame || this.isolatedWorldElementObjectId)
         return this.isolatedWorldElementObjectId;
-      const owner = await this.cdpSession.send('DOM.getFrameOwner', { frameId: this.id });
-      const resolved = await this.cdpSession.send('DOM.resolveNode', {
+      const owner = await this.devtoolsSession.send('DOM.getFrameOwner', { frameId: this.id });
+      const resolved = await this.devtoolsSession.send('DOM.resolveNode', {
         backendNodeId: owner.backendNodeId,
         executionContextId: this.parentFrame.getActiveContextId(true),
         nodeId: owner.nodeId,

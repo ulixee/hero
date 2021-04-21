@@ -22,16 +22,20 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
+import IDevtoolsSession, {
+  IDevtoolsEventMessage,
+  IDevtoolsResponseMessage,
+} from '@secret-agent/core-interfaces/IDevtoolsSession';
 import ProtocolError from './ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;
 
 /**
- * The `CDPSession` instances are used to talk raw Chrome Devtools Protocol.
+ * The `DevtoolsSession` instances are used to talk raw Chrome Devtools Protocol.
  *
  * https://chromedevtools.github.io/devtools-protocol/
  */
-export class CDPSession extends EventEmitter {
+export class DevtoolsSession extends EventEmitter implements IDevtoolsSession {
   public connection: Connection;
   public messageEvents = new TypedEventEmitter<IMessageEvents>();
   public get id() {
@@ -81,7 +85,7 @@ export class CDPSession extends EventEmitter {
     return await resolvable.promise;
   }
 
-  onMessage(object: ICDPSendResponseMessage & ICDPEventMessage): void {
+  onMessage(object: IDevtoolsResponseMessage & IDevtoolsEventMessage): void {
     this.messageEvents.emit('receive', { ...object });
     if (!object.id) {
       this.emit(object.method, object.params);
@@ -115,7 +119,7 @@ export class CDPSession extends EventEmitter {
       error.stack += `\n${'------DEVTOOLS'.padEnd(
         50,
         '-',
-      )}\n${`------CDP_SESSION_ID=${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
+      )}\n${`------DEVTOOLS_SESSION_ID=${this.sessionId}`.padEnd(50, '-')}\n${resolvable.stack}`;
       resolvable.reject(error);
     }
     this.pendingMessages.clear();
@@ -128,20 +132,7 @@ export class CDPSession extends EventEmitter {
   }
 }
 
-interface ICDPSendResponseMessage {
-  sessionId: string;
-  id: number;
-  error?: { message: string; data: any };
-  result?: any;
-}
-
-interface ICDPEventMessage {
-  sessionId: string;
-  method: string;
-  params: object;
-}
-
 export interface IMessageEvents {
   send: { sessionId: string | undefined; id: number; method: string; params: any };
-  receive: ICDPSendResponseMessage | ICDPEventMessage;
+  receive: IDevtoolsResponseMessage | IDevtoolsEventMessage;
 }

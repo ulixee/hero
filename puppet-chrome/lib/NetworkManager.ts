@@ -2,14 +2,13 @@ import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/core-interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetNetworkEvents } from '@secret-agent/puppet-interfaces/IPuppetNetworkEvents';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import { IPuppetNetworkEvents } from '@secret-agent/core-interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import { URL } from 'url';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
 import RequestWillBeSentEvent = Protocol.Network.RequestWillBeSentEvent;
@@ -37,22 +36,21 @@ interface IResourcePublishing {
 
 export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   protected readonly logger: IBoundLog;
-  private readonly cdpSession: CDPSession;
+  private readonly devtools: DevtoolsSession;
   private readonly attemptedAuthentications = new Set<string>();
   private readonly requestsById = new Map<string, ResourceRequest>();
   private readonly requestPublishingById = new Map<string, IResourcePublishing>();
 
   private readonly navigationRequestIdsToLoaderId = new Map<string, string>();
-  private emulation?: IBrowserEmulationSettings;
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
 
-  constructor(cdpSession: CDPSession, logger: IBoundLog) {
+  constructor(devtoolsSession: DevtoolsSession, logger: IBoundLog, private proxyPassword?: string) {
     super();
-    this.cdpSession = cdpSession;
+    this.devtools = devtoolsSession;
     this.logger = logger.createChild(module);
-    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+    this.registeredEvents = eventUtils.addEventListeners(this.devtools, [
       ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
       ['Fetch.authRequired', this.onAuthRequired.bind(this)],
 
@@ -78,26 +76,17 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     return super.emit(eventType, event);
   }
 
-  public setUserAgentOverrides(emulation: IBrowserEmulationSettings): Promise<void> {
-    this.emulation = emulation;
-    return this.cdpSession.send('Network.setUserAgentOverride', {
-      userAgent: emulation.userAgent,
-      acceptLanguage: emulation.locale,
-      platform: emulation.platform,
-    });
-  }
-
   public async initialize(): Promise<void> {
     const errors = await Promise.all([
-      this.cdpSession
+      this.devtools
         .send('Network.enable', {
           maxPostDataSize: 0,
           maxResourceBufferSize: 0,
           maxTotalBufferSize: 0,
         })
         .catch(err => err),
-      this.emulation.proxyPassword
-        ? this.cdpSession
+      this.proxyPassword
+        ? this.devtools
             .send('Fetch.enable', {
               handleAuthRequests: true,
             })
@@ -114,15 +103,9 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     this.cancelPendingEvents('NetworkManager closed');
   }
 
-  public async initializeFromParent(parentManager: NetworkManager): Promise<void> {
+  public initializeFromParent(parentManager: NetworkManager): Promise<void> {
     this.parentManager = parentManager;
-    const errors = await Promise.all([
-      this.setUserAgentOverrides(parentManager.emulation).catch(err => err),
-      this.initialize().catch(err => err),
-    ]);
-    for (const error of errors) {
-      if (error && error instanceof Error) throw error;
-    }
+    return this.initialize();
   }
 
   private onAuthRequired(event: Protocol.Fetch.AuthRequiredEvent): void {
@@ -132,14 +115,14 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     if (this.attemptedAuthentications.has(event.requestId)) {
       authChallengeResponse.response = AuthChallengeResponse.CancelAuth;
-    } else if (this.emulation.proxyPassword) {
+    } else if (this.proxyPassword) {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
       authChallengeResponse.username = 'puppet-chrome';
-      authChallengeResponse.password = this.emulation.proxyPassword;
+      authChallengeResponse.password = this.proxyPassword;
     }
-    this.cdpSession
+    this.devtools
       .send('Fetch.continueWithAuth', {
         requestId: event.requestId,
         authChallengeResponse,
@@ -156,7 +139,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   private async onRequestPaused(networkRequest: RequestPausedEvent): Promise<void> {
     try {
-      await this.cdpSession.send('Fetch.continueRequest', {
+      await this.devtools.send('Fetch.continueRequest', {
         requestId: networkRequest.requestId,
       });
     } catch (error) {

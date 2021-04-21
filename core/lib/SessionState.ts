@@ -13,7 +13,7 @@ import IViewport from '@secret-agent/core-interfaces/IViewport';
 import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
 import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
 import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
-import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
+import type { IPuppetContextEvents } from '@secret-agent/core-interfaces/IPuppetContext';
 import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
 import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
 import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
@@ -467,6 +467,7 @@ export default class SessionState {
     scrollEvents: IScrollEvent[],
   ) {
     let lastCommand = this.lastCommand;
+    if (!lastCommand) return; // nothing to store yet
     for (const domChange of domChanges) {
       lastCommand = this.getCommandForTimestamp(lastCommand, domChange[2]);
       this.db.domChanges.insert(tabId, frameId, lastCommand.id, domChange);

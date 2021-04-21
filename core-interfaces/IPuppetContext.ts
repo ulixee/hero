@@ -1,14 +1,12 @@
 import { URL } from 'url';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
-import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
+import { ICookie } from './ICookie';
+import ITypedEventEmitter from './ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
-import IBrowserEmulationSettings from './IBrowserEmulationSettings';
 import { IPuppetWorker } from './IPuppetWorker';
 
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
-  emulation: IBrowserEmulationSettings;
   workersById: Map<string, IPuppetWorker>;
-
+  defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
   newPage(): Promise<IPuppetPage>;
   close(): Promise<void>;
 

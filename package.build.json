@@ -21,7 +21,6 @@
       "emulate-humans/*",
       "full-client",
       "puppet",
-      "puppet-interfaces",
       "puppet-chrome",
       "mitm",
       "mitm-socket",

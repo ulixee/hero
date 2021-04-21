@@ -10,7 +10,6 @@
     "full-client",
     "puppet",
     "puppet-chrome",
-    "puppet-interfaces",
     "mitm",
     "replay",
     "testing",

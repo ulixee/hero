@@ -1,8 +1,8 @@
-import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
+import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
 import INetworkEmulation from './INetworkEmulation';
-import IUserProfile from './IUserProfile';
-import INewDocumentInjectedScript from './INewDocumentInjectedScript';
 import IWindowFraming from './IWindowFraming';
+import IBrowserEmulatorConfiguration from './IBrowserEmulatorConfiguration';
 
 export default interface IBrowserEmulator extends INetworkEmulation {
   readonly userAgentString: string;
@@ -10,12 +10,11 @@ export default interface IBrowserEmulator extends INetworkEmulation {
   readonly canPolyfill: boolean;
   readonly windowFramingBase?: IWindowFraming;
   readonly windowFraming?: IWindowFraming;
-  locale: string;
-  userProfile: IUserProfile;
-  sessionId?: string;
+  configuration: IBrowserEmulatorConfiguration;
+  sessionId: string;
 
-  newDocumentInjectedScripts(): Promise<INewDocumentInjectedScript[]>;
-  newWorkerInjectedScripts(
-    workerType: IPuppetWorker['type'],
-  ): Promise<INewDocumentInjectedScript[]>;
+  configure(options: IBrowserEmulatorConfiguration): Promise<void>;
+
+  onNewPuppetPage(page: IPuppetPage): Promise<any>;
+  onNewPuppetWorker?(worker: IPuppetWorker): Promise<any>;
 }

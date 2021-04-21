@@ -1,4 +1,4 @@
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IBrowserEngine from './IBrowserEngine';
 import ILaunchedProcess from './ILaunchedProcess';
 import IPuppetBrowser from './IPuppetBrowser';
 import { IPuppetLaunchError } from './IPuppetLaunchError';

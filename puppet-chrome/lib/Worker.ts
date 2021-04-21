@@ -2,11 +2,11 @@ import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import Protocol from 'devtools-protocol';
-import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/puppet-interfaces/IPuppetWorker';
+import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/core-interfaces/IPuppetWorker';
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import { BrowserContext } from './BrowserContext';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import ConsoleMessage from './ConsoleMessage';
 import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
@@ -19,9 +19,9 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   public isReady: Promise<Error | null>;
   public hasLoadedResponse = false;
 
-  protected readonly logger: IBoundLog;
+  public readonly devtoolsSession: DevtoolsSession;
 
-  private readonly cdpSession: CDPSession;
+  protected readonly logger: IBoundLog;
   private readonly networkManager: NetworkManager;
   private readonly targetInfo: TargetInfo;
 
@@ -43,55 +43,58 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   constructor(
     browserContext: BrowserContext,
     parentNetworkManager: NetworkManager,
-    cdpSession: CDPSession,
-    workerInitializeFn: (worker: IPuppetWorker) => Promise<void>,
+    devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     targetInfo: TargetInfo,
   ) {
     super();
     this.targetInfo = targetInfo;
-    this.cdpSession = cdpSession;
+    this.devtoolsSession = devtoolsSession;
     this.browserContext = browserContext;
     this.logger = logger.createChild(module, {
       workerTargetId: this.id,
       workerType: this.type,
     });
-    this.networkManager = new NetworkManager(cdpSession, this.logger);
-    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+    this.networkManager = new NetworkManager(
+      devtoolsSession,
+      this.logger,
+      browserContext.proxyPassword,
+    );
+    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
       ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
       ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
       ['Runtime.executionContextCreated', this.onContextCreated.bind(this)],
       ['disconnected', this.emit.bind(this, 'close')],
     ]);
-    this.isReady = this.initialize(parentNetworkManager, workerInitializeFn).catch(err => err);
+    this.isReady = this.initialize(parentNetworkManager).catch(err => err);
   }
 
-  async initialize(
-    pageNetworkManager: NetworkManager,
-    initializeFn: (worker: IPuppetWorker) => Promise<void>,
-  ): Promise<void> {
-    await this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
-      // web workers can use parent network
-      if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
-      throw err;
-    });
-
-    await this.cdpSession.send('Runtime.enable');
-    if (initializeFn) await initializeFn(this);
-
-    await this.cdpSession.send('Runtime.runIfWaitingForDebugger');
+  async initialize(pageNetworkManager: NetworkManager): Promise<void> {
+    const emulator = this.browserContext.emulator;
+    await Promise.all([
+      this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
+        // web workers can use parent network
+        if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
+        throw err;
+      }),
+      this.devtoolsSession.send('Runtime.enable'),
+      emulator?.onNewPuppetWorker
+        ? emulator.onNewPuppetWorker(this).catch(error => {
+            this.logger.error('Emulator.onNewPuppetWorkerError', {
+              error,
+            });
+            throw error;
+          })
+        : null,
+      this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
+    ]);
   }
 
   async evaluate<T>(expression: string, isInitializationScript = false): Promise<T> {
-    if (!isInitializationScript) {
-      const didThrowError = await this.isReady;
-      if (didThrowError) throw didThrowError;
-    }
-    const contextId = await this.executionContextId.promise;
-    const result = await this.cdpSession.send('Runtime.evaluate', {
+    const result = await this.devtoolsSession.send('Runtime.evaluate', {
       expression,
       awaitPromise: !isInitializationScript,
-      contextId,
+      // contextId,
       returnByValue: true,
     });
 
@@ -100,7 +103,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     }
 
     const remote = result.result;
-    if (remote.objectId) this.cdpSession.disposeRemoteObject(remote);
+    if (remote.objectId) this.devtoolsSession.disposeRemoteObject(remote);
     return remote.value as T;
   }
 
@@ -131,7 +134,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   }
 
   private onRuntimeConsole(event: ConsoleAPICalledEvent): void {
-    const message = ConsoleMessage.create(this.cdpSession, event);
+    const message = ConsoleMessage.create(this.devtoolsSession, event);
     const frameId = `${this.type}:${this.url}`; // TBD
 
     this.emit('console', {

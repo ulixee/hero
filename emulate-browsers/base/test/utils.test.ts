@@ -65,17 +65,16 @@ test('should override a function and clean error stacks', async () => {
 
   const context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Plugin Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,
@@ -120,17 +119,16 @@ test('should override Errors properly on https pages', async () => {
 
   const context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Plugin Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,

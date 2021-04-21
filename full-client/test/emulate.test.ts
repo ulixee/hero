@@ -1,8 +1,9 @@
 import { Helpers } from '@secret-agent/testing';
-import { GlobalPool, Viewports } from '@secret-agent/core';
+import { GlobalPool } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import * as Fs from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import Viewports from '@secret-agent/emulate-browsers-base/lib/Viewports';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;

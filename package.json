@@ -87,7 +87,6 @@
       "mitm",
       "mitm-socket",
       "puppet",
-      "puppet-interfaces",
       "puppet-chrome",
       "replay",
       "replay/frontend",

@@ -159,10 +159,11 @@ export default class GlobalPool {
       await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
 
       const browserContext = await puppet.newContext(
-        session.getBrowserEmulation(),
+        session.browserEmulator,
         log.createChild(module, {
           sessionId: session.id,
         }),
+        session.getMitmProxy(),
       );
       await session.initialize(browserContext);
 

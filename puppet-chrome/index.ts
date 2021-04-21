@@ -1,10 +1,10 @@
-import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
-import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
-import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@secret-agent/core-interfaces/IPuppetBrowser';
+import ILaunchedProcess from '@secret-agent/core-interfaces/ILaunchedProcess';
+import IPuppetLauncher from '@secret-agent/core-interfaces/IPuppetLauncher';
 import * as os from 'os';
 import * as Path from 'path';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import { IPuppetLaunchError } from '@secret-agent/puppet-interfaces/IPuppetLaunchError';
+import { IPuppetLaunchError } from '@secret-agent/core-interfaces/IPuppetLaunchError';
 import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 

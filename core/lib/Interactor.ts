@@ -22,7 +22,7 @@ import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
-import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/puppet-interfaces/IPuppetInput';
+import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/core-interfaces/IPuppetInput';
 import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
 import IViewport from '@secret-agent/core-interfaces/IViewport';
 import IElementRect from '@secret-agent/core-interfaces/IElementRect';
@@ -56,7 +56,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get viewport(): IViewport {
-    return this.frameEnvironment.session.viewport;
+    return this.frameEnvironment.session.browserEmulator.configuration.viewport;
   }
 
   public logger: IBoundLog;

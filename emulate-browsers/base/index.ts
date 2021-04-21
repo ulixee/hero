@@ -12,6 +12,7 @@ import getTcpSettingsForOs from './lib/getTcpSettingsForOs';
 import parseNavigatorPlugins from './lib/parseNavigatorPlugins';
 import DomOverridesBuilder from './lib/DomOverridesBuilder';
 import * as DnsOverTlsProviders from './lib/DnsOverTlsProviders';
+import Viewports from './lib/Viewports';
 
 const { log } = Log(module);
 
@@ -47,6 +48,7 @@ export {
   DataLoader,
   DomPolyfillLoader,
   getTcpSettingsForOs,
+  Viewports,
   getEngine,
   parseNavigatorPlugins,
 };

@@ -1,12 +1,13 @@
 import PuppetChrome from '@secret-agent/puppet-chrome';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
-import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
-import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
+import IPuppetLauncher from '@secret-agent/core-interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@secret-agent/core-interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
+import IProxyConnectionOptions from '@secret-agent/core-interfaces/IProxyConnectionOptions';
 import launchProcess from './lib/launchProcess';
 import { validateHostRequirements } from './lib/validateHostDependencies';
 import { EngineFetcher } from './lib/EngineFetcher';
@@ -56,11 +57,15 @@ export default class Puppet {
     return this.browserOrError;
   }
 
-  public async newContext(emulation: IBrowserEmulationSettings, logger: IBoundLog) {
+  public async newContext(
+    emulator: IBrowserEmulator,
+    logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
+  ) {
     const browser = await this.browserOrError;
     if (browser instanceof Error) throw browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(emulation, logger);
+    return browser.newContext(emulator, logger, proxy);
   }
 
   public async close() {

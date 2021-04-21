@@ -9,7 +9,7 @@ import { createPromise } from '@secret-agent/commons/utils';
 import IWaitForElementOptions from '@secret-agent/core-interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IPuppetFrame, IPuppetFrameEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
+import { IPuppetFrame, IPuppetFrameEvents } from '@secret-agent/core-interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@secret-agent/core-interfaces/ISetCookieOptions';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';

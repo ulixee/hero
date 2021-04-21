@@ -418,10 +418,10 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     if ((await popupTab.getLocationHref()) === `${koaServer.baseUrl}/popup`) {
       await popupTab.waitForLocation('change', { sinceCommandId: commandId });
     }
+    await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     tab.sessionState.db.flush();
     expect(await popupTab.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
-    await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     const history = popupTab.navigations.history;
     expect(history).toHaveLength(4);

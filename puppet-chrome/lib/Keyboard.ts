@@ -16,9 +16,9 @@
  */
 import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
 import { assert } from '@secret-agent/commons/utils';
-import { IPuppetKeyboard } from '@secret-agent/puppet-interfaces/IPuppetInput';
+import { IPuppetKeyboard } from '@secret-agent/core-interfaces/IPuppetInput';
 import { IKeyDefinition, keyDefinitions } from '../interfaces/USKeyboardLayout';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 
 type KeyDescription = Required<Pick<IKeyDefinition, 'key' | 'text' | 'code' | 'location'>> & {
   keyCode: number;
@@ -26,11 +26,11 @@ type KeyDescription = Required<Pick<IKeyDefinition, 'key' | 'text' | 'code' | 'l
 
 export class Keyboard implements IPuppetKeyboard {
   public modifiers = 0;
-  private cdpSession: CDPSession;
+  private devtoolsSession: DevtoolsSession;
   private pressedKeys = new Set<string>();
 
-  constructor(cdpSession: CDPSession) {
-    this.cdpSession = cdpSession;
+  constructor(devtoolsSession: DevtoolsSession) {
+    this.devtoolsSession = devtoolsSession;
   }
 
   async down(key: IKeyboardKey): Promise<void> {
@@ -41,7 +41,7 @@ export class Keyboard implements IPuppetKeyboard {
     this.modifiers |= Keyboard.modifierBit(description.key);
 
     const text = description.text;
-    await this.cdpSession.send('Input.dispatchKeyEvent', {
+    await this.devtoolsSession.send('Input.dispatchKeyEvent', {
       type: text ? 'keyDown' : 'rawKeyDown',
       modifiers: this.modifiers,
       windowsVirtualKeyCode: description.keyCode,
@@ -60,7 +60,7 @@ export class Keyboard implements IPuppetKeyboard {
 
     this.modifiers &= ~Keyboard.modifierBit(description.key);
     this.pressedKeys.delete(description.code);
-    await this.cdpSession.send('Input.dispatchKeyEvent', {
+    await this.devtoolsSession.send('Input.dispatchKeyEvent', {
       type: 'keyUp',
       modifiers: this.modifiers,
       key: description.key,
@@ -71,7 +71,7 @@ export class Keyboard implements IPuppetKeyboard {
   }
 
   async sendCharacter(char: string): Promise<void> {
-    await this.cdpSession.send('Input.insertText', { text: char });
+    await this.devtoolsSession.send('Input.insertText', { text: char });
   }
 
   async press(key: IKeyboardKey, keyupDelay?: number): Promise<void> {

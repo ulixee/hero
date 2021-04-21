@@ -6,8 +6,8 @@ import IViewport from './IViewport';
 export default interface ICreateSessionOptions extends ISessionOptions {
   sessionName?: string;
   browserEmulatorId?: string;
-  userProfile?: IUserProfile;
   scriptInstanceMeta?: IScriptInstanceMeta;
+  userProfile?: IUserProfile;
   viewport?: IViewport;
   timezoneId?: string;
   locale?: string;

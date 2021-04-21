@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
+import type { IPuppetContextEvents } from '@secret-agent/core-interfaces/IPuppetContext';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {

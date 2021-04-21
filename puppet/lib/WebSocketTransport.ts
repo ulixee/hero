@@ -4,7 +4,7 @@ import Log from '@secret-agent/commons/Logger';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import IConnectionTransport, {
   IConnectionTransportEvents,
-} from '@secret-agent/puppet-interfaces/IConnectionTransport';
+} from '@secret-agent/core-interfaces/IConnectionTransport';
 import * as WebSocket from 'ws';
 import Resolvable from '@secret-agent/commons/Resolvable';
 

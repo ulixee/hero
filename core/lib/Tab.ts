@@ -6,7 +6,7 @@ import Timer from '@secret-agent/commons/Timer';
 import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
 import { createPromise } from '@secret-agent/commons/utils';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/core-interfaces/IPuppetPage';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
@@ -113,7 +113,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       );
     }
     this.listen();
-    this.isReady = this.install();
+    this.isReady = this.waitForReady();
     this.commandRecorder = new CommandRecorder(this, this, this.mainFrameId, [
       this.focus,
       this.getFrameEnvironments,
@@ -532,22 +532,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     };
   }
 
-  private async install(): Promise<void> {
-    const page = this.puppetPage;
-
-    await InjectedScripts.install(page, this.onPageRecorderEvents.bind(this));
-
-    const newDocumentInjectedScripts = await this.session.browserEmulator.newDocumentInjectedScripts();
-    for (const newDocumentScript of newDocumentInjectedScripts) {
-      if (newDocumentScript.callbackWindowName) {
-        await page.addPageCallback(newDocumentScript.callbackWindowName, payload => {
-          newDocumentScript.callback(JSON.parse(payload));
-        });
-      }
-      // overrides happen in main frame
-      await page.addNewDocumentScript(newDocumentScript.script, false);
-    }
-
+  private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
     if (this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
@@ -561,6 +546,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     page.on('crashed', this.onTargetCrashed.bind(this));
     page.on('console', this.onConsole.bind(this), true);
     page.on('frame-created', this.onFrameCreated.bind(this), true);
+    page.on('page-callback-triggered', this.onPageCallback.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
@@ -595,14 +581,22 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
   }
 
-  private onPageRecorderEvents(results: PageRecorderResultSet, frameId: string) {
-    if (!frameId) {
-      log.warn('DomRecorder.bindingCalledBeforeExecutionTracked', {
-        sessionId: this.sessionId,
-        payload: results,
-      });
-      return;
+  private onPageCallback(event: IPuppetPageEvents['page-callback-triggered']): void {
+    if (event.name === InjectedScripts.PageEventsCallbackName) {
+      const { frameId, payload } = event;
+      if (!frameId || !this.frameEnvironmentsById.has(frameId)) {
+        log.warn('DomRecorder.bindingCalledBeforeExecutionTracked', {
+          sessionId: this.sessionId,
+          payload,
+        });
+        return;
+      }
+
+      this.onPageRecorderEvents(JSON.parse(payload), frameId);
     }
+  }
+
+  private onPageRecorderEvents(results: PageRecorderResultSet, frameId: string) {
     const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
     this.logger.stats('Tab.onPageEvents', {
       tabId: this.id,

@@ -5,8 +5,11 @@ import {
   DomOverridesBuilder,
   DomPolyfillLoader,
   getEngine,
+  getTcpSettingsForOs,
+  IBrowserEmulator,
   modifyHeaders,
   parseNavigatorPlugins,
+  Viewports,
 } from '@secret-agent/emulate-browsers-base';
 import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import { randomBytes } from 'crypto';
@@ -15,6 +18,10 @@ import { pickRandom } from '@secret-agent/commons/utils';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
+import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
+import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
+import IDevtoolsSession from '@secret-agent/core-interfaces/IDevtoolsSession';
 import * as pkg from './package.json';
 
 const config = require('./config.json');
@@ -34,7 +41,7 @@ const engineObj = {
 };
 
 @BrowserEmulatorClassDecorator
-export default class Chrome80 {
+export default class Chrome80 implements IBrowserEmulator {
   public static id = pkg.name;
   public static roundRobinPercent: number = config.marketshare;
 
@@ -44,18 +51,10 @@ export default class Chrome80 {
 
   public canPolyfill: boolean;
 
-  public set locale(value: string) {
-    this._locale = value;
-    this.hasCustomLocale = true;
-  }
-
-  public get locale() {
-    return this._locale;
-  }
-
   public sessionId: string;
   public readonly userAgentString: string;
   public readonly osPlatform: string;
+  public configuration: IBrowserEmulatorConfiguration;
 
   public readonly socketSettings: INetworkEmulation['socketSettings'] = {
     tlsClientHelloId: 'Chrome80',
@@ -72,10 +71,11 @@ export default class Chrome80 {
 
   protected domOverrides = new DomOverridesBuilder();
 
-  private _locale = 'en-US,en';
-  private hasCustomLocale = false;
+  private get hasCustomLocale(): boolean {
+    return this.configuration.locale !== 'en-US,en';
+  }
 
-  constructor(matchMeta?: IUserAgentMatchMeta) {
+  constructor(configuration: IBrowserEmulatorConfiguration, matchMeta?: IUserAgentMatchMeta) {
     const userAgentOption = selectUserAgentOption(matchMeta);
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
     this.osPlatform = windowNavigator.navigator.platform._$value;
@@ -83,7 +83,31 @@ export default class Chrome80 {
     this.canPolyfill = !!domPolyfillData.get(userAgentOption.operatingSystemId);
     this.windowFraming = windowFramingData.get(userAgentOption.operatingSystemId);
 
+    const tcpSettings = getTcpSettingsForOs(userAgentOption.operatingSystemId);
+    if (tcpSettings) {
+      this.socketSettings.tcpTtl = tcpSettings.ttl;
+      this.socketSettings.tcpWindowSize = tcpSettings.windowSize;
+    }
+
+    this.configuration = configuration ?? {};
+    this.configuration.locale ??= 'en-US,en';
+    this.configuration.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.configuration.viewport ??= Viewports.getDefault(
+      this.windowFraming,
+      this.windowFramingBase,
+    );
+
     this.loadDomOverrides(userAgentOption.operatingSystemId);
+  }
+
+  async configure(configuration: IBrowserEmulatorConfiguration) {
+    if (!configuration) return;
+    const { locale, userProfile, viewport, timezoneId } = configuration;
+
+    if (locale) this.configuration.locale = locale;
+    if (viewport) this.configuration.viewport = viewport;
+    if (userProfile) this.configuration.userProfile = userProfile;
+    if (timezoneId) this.configuration.timezoneId = timezoneId;
   }
 
   public async beforeHttpRequest(request: IHttpResourceLoadDetails): Promise<any> {
@@ -97,12 +121,35 @@ export default class Chrome80 {
     if (modifiedHeaders) request.requestHeaders = modifiedHeaders;
   }
 
-  public async newDocumentInjectedScripts() {
-    return this.domOverrides.build();
+  public onNewPuppetPage(page: IPuppetPage): Promise<any> {
+    // Don't await here! we want to queue all these up to run before the debugger resumes
+    const devtools = page.devtoolsSession;
+    const promises = [
+      this.setUserAgent(devtools),
+      this.setTimezone(devtools),
+      this.setLocale(devtools),
+      this.setScreensize(devtools),
+      devtools.send('Emulation.setFocusEmulationEnabled', { enabled: true }).catch(err => err),
+    ];
+    const scripts = this.domOverrides.build();
+
+    for (const script of scripts) {
+      if (script.callbackWindowName) {
+        // eslint-disable-next-line @typescript-eslint/no-loop-func
+        promises.push(
+          page.addPageCallback(script.callbackWindowName, payload => {
+            script.callback(JSON.parse(payload));
+          }),
+        );
+      }
+      // overrides happen in main frame
+      promises.push(page.addNewDocumentScript(script.script, false));
+    }
+    return Promise.all(promises);
   }
 
-  public async newWorkerInjectedScripts() {
-    const result = this.domOverrides.build([
+  public onNewPuppetWorker(worker: IPuppetWorker): Promise<any> {
+    const scripts = this.domOverrides.build([
       'Error.captureStackTrace',
       'Error.constructor',
       'navigator.deviceMemory',
@@ -114,10 +161,65 @@ export default class Chrome80 {
       'HTMLMediaElement.prototype.canPlayType',
       'RTCRtpSender.getCapabilities',
     ]);
-    return result;
+    return Promise.all([
+      this.setUserAgent(worker.devtoolsSession),
+      ...scripts.map(x => worker.evaluate(x.script, true)),
+    ]);
   }
 
-  protected loadDomOverrides(operatingSystemId: string) {
+  protected async setUserAgent(devtools: IDevtoolsSession) {
+    return devtools.send('Network.setUserAgentOverride', {
+      userAgent: this.userAgentString,
+      acceptLanguage: this.configuration.locale,
+      platform: this.osPlatform,
+    });
+  }
+
+  protected async setScreensize(devtools: IDevtoolsSession): Promise<void> {
+    const { viewport } = this.configuration;
+    if (!viewport) return;
+    await devtools.send('Emulation.setDeviceMetricsOverride', {
+      width: viewport.width,
+      height: viewport.height,
+      deviceScaleFactor: viewport.deviceScaleFactor ?? 1,
+      positionX: viewport.positionX,
+      positionY: viewport.positionY,
+      screenWidth: viewport.screenWidth,
+      screenHeight: viewport.screenHeight,
+      mobile: false,
+    });
+  }
+
+  protected async setTimezone(devtools: IDevtoolsSession): Promise<void> {
+    const { timezoneId } = this.configuration;
+    if (!timezoneId) return;
+    try {
+      await devtools.send('Emulation.setTimezoneOverride', { timezoneId });
+    } catch (error) {
+      if (error.message.includes('Timezone override is already in effect')) return;
+      if (error.message.includes('Invalid timezone'))
+        throw new Error(`Invalid timezone ID: ${timezoneId}`);
+      throw error;
+    }
+  }
+
+  protected async setLocale(devtools: IDevtoolsSession): Promise<void> {
+    const { locale } = this.configuration;
+    if (!locale) return;
+    try {
+      await devtools.send('Emulation.setLocaleOverride', { locale });
+    } catch (error) {
+      // not installed in Chrome 80
+      if (error.message.includes("'Emulation.setLocaleOverride' wasn't found")) return;
+      // All pages in the same renderer share locale. All such pages belong to the same
+      // context and if locale is overridden for one of them its value is the same as
+      // we are trying to set so it's not a problem.
+      if (error.message.includes('Another locale override is already in effect')) return;
+      throw error;
+    }
+  }
+
+  protected loadDomOverrides(operatingSystemId: string): void {
     const domOverrides = this.domOverrides;
 
     domOverrides.add('Error.captureStackTrace');
@@ -210,7 +312,7 @@ export default class Chrome80 {
     }
   }
 
-  public static isMatch(meta: IUserAgentMatchMeta) {
+  public static isMatch(meta: IUserAgentMatchMeta): boolean {
     if (!config.browserMatcher) return false;
     const matchName = (config.browserMatcher.name || '').toLowerCase();
     const matchVersionRange = config.browserMatcher.versionRange || [];

@@ -1,6 +1,6 @@
 import cjsImport from './index.js';
 
-const { LocationTrigger, CoreProcess, BrowserEmulators, HumanEmulators, Viewports } = cjsImport;
+const { CoreProcess, BrowserEmulators, HumanEmulators } = cjsImport;
 
-export { LocationTrigger, CoreProcess, BrowserEmulators, HumanEmulators, Viewports };
+export { CoreProcess, BrowserEmulators, HumanEmulators };
 export default cjsImport.default;

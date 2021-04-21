@@ -5,8 +5,10 @@ import {
   DomOverridesBuilder,
   getEngine,
   getTcpSettingsForOs,
+  IBrowserEmulator,
   modifyHeaders,
   parseNavigatorPlugins,
+  Viewports,
 } from '@secret-agent/emulate-browsers-base';
 import {
   canonicalDomain,
@@ -21,11 +23,14 @@ import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
 import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
 import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
 import { createPromise, pickRandom } from '@secret-agent/commons/utils';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
 import IWindowFraming from '@secret-agent/core-interfaces/IWindowFraming';
 import Log from '@secret-agent/commons/Logger';
 import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
 import INetworkEmulation from '@secret-agent/core-interfaces/INetworkEmulation';
+import IBrowserEmulatorConfiguration from '@secret-agent/core-interfaces/IBrowserEmulatorConfiguration';
+import { IPuppetPage } from '@secret-agent/core-interfaces/IPuppetPage';
+import { IPuppetWorker } from '@secret-agent/core-interfaces/IPuppetWorker';
+import IDevtoolsSession from '@secret-agent/core-interfaces/IDevtoolsSession';
 import * as pkg from './package.json';
 import * as headerProfiles from './data/headers.json';
 import * as userAgentOptions from './data/user-agent-options.json';
@@ -45,7 +50,7 @@ const engineObj = {
 };
 
 @BrowserEmulatorClassDecorator
-export default class Safari13 implements INetworkEmulation {
+export default class Safari13 implements IBrowserEmulator {
   public static id = pkg.name;
   public static roundRobinPercent: number = (config as any).marketshare;
 
@@ -55,17 +60,9 @@ export default class Safari13 implements INetworkEmulation {
 
   public sessionId: string;
 
-  public set locale(value: string) {
-    this._locale = value;
-    this.hasCustomLocale = true;
-  }
-
-  public get locale() {
-    return this._locale;
-  }
-
   public readonly userAgentString: string;
   public readonly osPlatform: string;
+  public configuration: IBrowserEmulatorConfiguration;
 
   public cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
@@ -79,17 +76,6 @@ export default class Safari13 implements INetworkEmulation {
     [site: string]: { cookie: Cookie; sourceUrl: string; sameSiteContext: SameSiteContext }[];
   } = {};
 
-  public get userProfile(): IUserProfile {
-    return this._userProfile;
-  }
-
-  public set userProfile(userProfile: IUserProfile) {
-    this._userProfile = userProfile;
-    if (userProfile.cookies) {
-      this.loadProfileCookies();
-    }
-  }
-
   public windowFramingBase: IWindowFraming = windowFramingBase;
   public windowFraming: IWindowFraming;
 
@@ -98,9 +84,6 @@ export default class Safari13 implements INetworkEmulation {
   };
 
   protected domOverrides = new DomOverridesBuilder();
-  private _userProfile: IUserProfile;
-
-  private _locale = 'en-US';
   private hasCustomLocale = false;
 
   private userAgentVersion: { major: string; minor: string; patch?: string };
@@ -109,7 +92,7 @@ export default class Safari13 implements INetworkEmulation {
     [site: string]: IResolvablePromise;
   } = {};
 
-  constructor(matchMeta?: IUserAgentMatchMeta) {
+  constructor(configuration: IBrowserEmulatorConfiguration, matchMeta?: IUserAgentMatchMeta) {
     const userAgentOption = selectUserAgentOption(matchMeta);
     const windowNavigator = windowNavigatorData.get(userAgentOption.operatingSystemId);
     this.osPlatform = windowNavigator.navigator.platform._$value;
@@ -121,6 +104,20 @@ export default class Safari13 implements INetworkEmulation {
     if (tcpSettings) {
       this.socketSettings.tcpTtl = tcpSettings.ttl;
       this.socketSettings.tcpWindowSize = tcpSettings.windowSize;
+    }
+
+    this.configuration = configuration ?? {};
+    this.configuration.locale ??= 'en-US,en';
+    if (configuration.locale !== 'en-US,en') {
+      this.hasCustomLocale = true;
+    }
+    this.configuration.timezoneId ??= Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.configuration.viewport ??= Viewports.getDefault(
+      this.windowFraming,
+      this.windowFramingBase,
+    );
+    if (this.configuration.userProfile?.cookies) {
+      this.loadProfileCookies();
     }
     this.loadDomOverrides(userAgentOption.operatingSystemId);
   }
@@ -171,33 +168,64 @@ export default class Safari13 implements INetworkEmulation {
     this.documentHasUserActivity(url);
   }
 
-  public async newDocumentInjectedScripts() {
-    const result = this.domOverrides.build();
-    Object.assign(result[0], {
-      callback: ({ cookie, origin }) => {
-        try {
-          this.cookieJar.setCookie(cookie, origin);
-        } catch (error) {
-          log.warn('Error setting cookie from page', {
-            error,
-            sessionId: this.sessionId,
-          });
-        }
-      },
-      callbackWindowName: cookieCallbackName,
-    });
-    return result;
+  public async configure(options: IBrowserEmulatorConfiguration): Promise<void> {
+    if (options.userProfile) {
+      this.configuration.userProfile = options.userProfile;
+      this.loadProfileCookies();
+    }
   }
 
-  public async newWorkerInjectedScripts() {
-    const result = this.domOverrides.build([
+  public onNewPuppetPage(page: IPuppetPage): Promise<any> {
+    // Don't await here! we want to queue all these up to run before the debugger resumes
+    const devtools = page.devtoolsSession;
+    const promises = [
+      this.setUserAgent(devtools),
+      this.setTimezone(devtools),
+      this.setLocale(devtools),
+      this.setScreensize(devtools),
+      devtools.send('Emulation.setFocusEmulationEnabled', { enabled: true }).catch(err => err),
+    ];
+    const scripts = this.domOverrides.build();
+
+    scripts[0].callback = async ({ cookie, origin }) => {
+      try {
+        await this.cookieJar.setCookie(cookie, origin);
+      } catch (error) {
+        log.warn('Error setting cookie from page', {
+          error,
+          sessionId: this.sessionId,
+        });
+      }
+    };
+    scripts[0].callbackWindowName = cookieCallbackName;
+
+    for (const script of scripts) {
+      if (script.callbackWindowName) {
+        // eslint-disable-next-line @typescript-eslint/no-loop-func
+        promises.push(
+          page.addPageCallback(script.callbackWindowName, payload => {
+            script.callback(JSON.parse(payload));
+          }),
+        );
+      }
+      // overrides happen in main frame
+      promises.push(page.addNewDocumentScript(script.script, false));
+    }
+    return Promise.all(promises);
+  }
+
+  public onNewPuppetWorker(worker: IPuppetWorker): Promise<any> {
+    const scripts = this.domOverrides.build([
       'Error.captureStackTrace',
       'Error.constructor',
       'navigator.deviceMemory',
       'navigator',
       'WebGLRenderingContext.prototype.getParameter',
     ]);
-    return result;
+    return Promise.all([
+      this.setUserAgent(worker.devtoolsSession),
+      ...scripts.map(x => worker.evaluate(x.script, true)),
+    ]);
   }
 
   protected loadDomOverrides(operatingSystemId: string) {
@@ -264,9 +292,62 @@ export default class Safari13 implements INetworkEmulation {
     });
   }
 
+  protected async setUserAgent(devtools: IDevtoolsSession) {
+    return devtools.send('Network.setUserAgentOverride', {
+      userAgent: this.userAgentString,
+      acceptLanguage: this.configuration.locale,
+      platform: this.osPlatform,
+    });
+  }
+
+  protected async setScreensize(devtools: IDevtoolsSession): Promise<void> {
+    const { viewport } = this.configuration;
+    if (!viewport) return;
+    await devtools.send('Emulation.setDeviceMetricsOverride', {
+      width: viewport.width,
+      height: viewport.height,
+      deviceScaleFactor: viewport.deviceScaleFactor ?? 1,
+      positionX: viewport.positionX,
+      positionY: viewport.positionY,
+      screenWidth: viewport.screenWidth,
+      screenHeight: viewport.screenHeight,
+      mobile: false,
+    });
+  }
+
+  protected async setTimezone(devtools: IDevtoolsSession): Promise<void> {
+    const { timezoneId } = this.configuration;
+    if (!timezoneId) return;
+    try {
+      await devtools.send('Emulation.setTimezoneOverride', { timezoneId });
+    } catch (error) {
+      if (error.message.includes('Timezone override is already in effect')) return;
+      if (error.message.includes('Invalid timezone'))
+        throw new Error(`Invalid timezone ID: ${timezoneId}`);
+      throw error;
+    }
+  }
+
+  protected async setLocale(devtools: IDevtoolsSession): Promise<void> {
+    const { locale } = this.configuration;
+    if (!locale) return;
+    try {
+      await devtools.send('Emulation.setLocaleOverride', { locale });
+    } catch (error) {
+      // not installed in Chrome 80
+      if (error.message.includes("'Emulation.setLocaleOverride' wasn't found")) return;
+      // All pages in the same renderer share locale. All such pages belong to the same
+      // context and if locale is overridden for one of them its value is the same as
+      // we are trying to set so it's not a problem.
+      if (error.message.includes('Another locale override is already in effect')) return;
+      throw error;
+    }
+  }
+
   private loadProfileCookies() {
-    const originUrls = (Object.keys(this.userProfile.storage ?? {}) ?? []).map(x => new URL(x));
-    const cookies = this.userProfile.cookies;
+    const userProfile = this.configuration.userProfile;
+    const originUrls = (Object.keys(userProfile.storage ?? {}) ?? []).map(x => new URL(x));
+    const cookies = userProfile.cookies;
     for (const cookie of cookies) {
       let url = `http${cookie.secure ? 's' : ''}://${cookie.domain}${cookie.path}`;
       const match = originUrls.find(x => {

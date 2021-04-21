@@ -17,7 +17,6 @@ module.exports = {
     '<rootDir>/testing/*',
     '<rootDir>/.*/interfaces/*',
     '<rootDir>/.*/core-interfaces/*.[ts|js]',
-    '<rootDir>/.*/puppet-interfaces/*.[ts|js]',
     '<rootDir>/.*/bin/*.[ts|js]',
     '<rootDir>/.*/start.[ts|js]',
     '<rootDir>/.*/install.[ts|js]',

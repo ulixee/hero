@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 import { IMouseButton } from '@secret-agent/core-interfaces/IInteractions';
-import { IMouseOptions } from '@secret-agent/puppet-interfaces/IPuppetInput';
+import { IMouseOptions } from '@secret-agent/core-interfaces/IPuppetInput';
 import IPoint from '@secret-agent/core-interfaces/IPoint';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import { Keyboard } from './Keyboard';
 
 /**
@@ -50,12 +50,12 @@ import { Keyboard } from './Keyboard';
 export default class Mouse {
   public position: IPoint = { x: 0, y: 0 };
 
-  private cdpSession: CDPSession;
+  private devtoolsSession: DevtoolsSession;
   private keyboard: Keyboard;
   private button: IMouseButton | 'none' = 'none';
 
-  constructor(cdpSession: CDPSession, keyboard: Keyboard) {
-    this.cdpSession = cdpSession;
+  constructor(devtoolsSession: DevtoolsSession, keyboard: Keyboard) {
+    this.devtoolsSession = devtoolsSession;
     this.keyboard = keyboard;
   }
 
@@ -65,7 +65,7 @@ export default class Mouse {
     if (roundedX === this.position.x && roundedY === this.position.y) return;
     this.position.x = roundedX;
     this.position.y = roundedY;
-    await this.cdpSession.send('Input.dispatchMouseEvent', {
+    await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mouseMoved',
       button: this.button,
       x: this.position.x,
@@ -77,7 +77,7 @@ export default class Mouse {
   async down(options: IMouseOptions = {}): Promise<void> {
     const { button = 'left', clickCount = 1 } = options;
     this.button = button;
-    await this.cdpSession.send('Input.dispatchMouseEvent', {
+    await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mousePressed',
       button,
       x: this.position.x,
@@ -90,7 +90,7 @@ export default class Mouse {
   async up(options: IMouseOptions = {}): Promise<void> {
     const { button = 'left', clickCount = 1 } = options;
     this.button = 'none';
-    await this.cdpSession.send('Input.dispatchMouseEvent', {
+    await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mouseReleased',
       button,
       x: this.position.x,
@@ -106,7 +106,7 @@ export default class Mouse {
 
     if (deltaY === 0 && deltaY === 0) return;
 
-    await this.cdpSession.send('Input.dispatchMouseEvent', {
+    await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mouseWheel',
       x: 0,
       y: 0, // don't scroll relative to points... not included in mouse events and just confusing

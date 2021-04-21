@@ -1,6 +1,6 @@
-import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import { IMouseButton } from '@secret-agent/core-interfaces/IInteractions';
-import IPoint from '@secret-agent/core-interfaces/IPoint';
+import { IKeyboardKey } from './IKeyboardLayoutUS';
+import { IMouseButton } from './IInteractions';
+import IPoint from './IPoint';
 
 export interface IPuppetKeyboard {
   up(key: IKeyboardKey): Promise<void>;

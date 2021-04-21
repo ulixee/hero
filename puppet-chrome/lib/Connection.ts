@@ -21,21 +21,21 @@ import {
 } from '@secret-agent/commons/eventUtils';
 import IConnectionTransport, {
   IConnectionTransportEvents,
-} from '@secret-agent/puppet-interfaces/IConnectionTransport';
+} from '@secret-agent/core-interfaces/IConnectionTransport';
 import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
 import Log from '@secret-agent/commons/Logger';
 import { URL } from 'url';
 import * as http from 'http';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 
 const { log } = Log(module);
 
 export class Connection extends TypedEventEmitter<{ disconnected: void }> {
-  public readonly rootSession: CDPSession;
+  public readonly rootSession: DevtoolsSession;
   public isClosed = false;
 
   private lastId = 0;
-  private sessionsById = new Map<string, CDPSession>();
+  private sessionsById = new Map<string, DevtoolsSession>();
 
   private readonly registeredEvents: IRegisteredEventListener[];
 
@@ -48,7 +48,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
       addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
     ];
 
-    this.rootSession = new CDPSession(this, 'browser', '');
+    this.rootSession = new DevtoolsSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
   }
 
@@ -77,7 +77,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
     return id;
   }
 
-  public getSession(sessionId: string): CDPSession | undefined {
+  public getSession(sessionId: string): DevtoolsSession | undefined {
     return this.sessionsById.get(sessionId);
   }
 
@@ -88,23 +88,23 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
 
   private onMessage(message: string): void {
     const object = JSON.parse(message);
-    const cdpSessionId = object.params?.sessionId;
+    const devtoolsSessionId = object.params?.sessionId;
 
     if (object.method === 'Target.attachedToTarget') {
-      const session = new CDPSession(this, object.params.targetInfo.type, cdpSessionId);
-      this.sessionsById.set(cdpSessionId, session);
+      const session = new DevtoolsSession(this, object.params.targetInfo.type, devtoolsSessionId);
+      this.sessionsById.set(devtoolsSessionId, session);
     }
     if (object.method === 'Target.detachedFromTarget') {
-      const session = this.sessionsById.get(cdpSessionId);
+      const session = this.sessionsById.get(devtoolsSessionId);
       if (session) {
         session.onClosed();
-        this.sessionsById.delete(cdpSessionId);
+        this.sessionsById.delete(devtoolsSessionId);
       }
     }
 
-    const cdpSession = this.sessionsById.get(object.sessionId || '');
-    if (cdpSession) {
-      cdpSession.onMessage(object);
+    const devtoolsSession = this.sessionsById.get(object.sessionId || '');
+    if (devtoolsSession) {
+      devtoolsSession.onMessage(object);
     } else {
       log.warn('MessageWithUnknownSession', { sessionId: null, message: object });
     }
