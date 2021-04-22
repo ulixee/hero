@@ -1,0 +1,10 @@
+{
+  "name": "@secret-agent/interfaces",
+  "version": "1.4.1-alpha.4",
+  "description": "Core interfaces used by SecretAgent",
+  "dependencies": {
+    "@secret-agent/interfaces": "1.4.1-alpha.4",
+    "awaited-dom": "1.1.12",
+    "devtools-protocol": "^0.0.799653"
+  }
+}

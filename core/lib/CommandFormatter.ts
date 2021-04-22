@@ -1,7 +1,7 @@
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { IInteractionGroup } from '@secret-agent/core-interfaces/IInteractions';
-import { getKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
+import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
+import { IInteractionGroup } from '@secret-agent/interfaces/IInteractions';
+import { getKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
+import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {

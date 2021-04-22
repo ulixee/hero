@@ -4,7 +4,7 @@
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/core-interfaces": "1.4.1-alpha.4",
+    "@secret-agent/interfaces": "1.4.1-alpha.4",
     "https-proxy-agent": "^5.0.0",
     "source-map-support": "^0.5.19"
   },

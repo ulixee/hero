@@ -1,8 +1,8 @@
 import { Helpers } from '@secret-agent/testing';
-import { LocationStatus, LocationTrigger } from '@secret-agent/core-interfaces/Location';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Location';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import * as Fs from 'fs';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
@@ -418,10 +418,10 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     if ((await popupTab.getLocationHref()) === `${koaServer.baseUrl}/popup`) {
       await popupTab.waitForLocation('change', { sinceCommandId: commandId });
     }
+    await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     tab.sessionState.db.flush();
     expect(await popupTab.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
-    await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     const history = popupTab.navigations.history;
     expect(history).toHaveLength(4);

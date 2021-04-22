@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import * as dnsPacket from 'dns-packet';
 import { ConnectionOptions } from 'tls';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import MitmSocket from '@secret-agent/mitm-socket/index';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
@@ -67,7 +67,7 @@ export default class DnsOverTlsSocket {
   }
 
   protected async connect(): Promise<void> {
-    if (this.requestSession?.networkInterceptorDelegate?.dns?.useUpstreamProxy) {
+    if (this.requestSession?.networkEmulation?.dns?.useUpstreamProxy) {
       const upstreamProxy = this.requestSession.upstreamProxyUrl;
       if (upstreamProxy) {
         this.mitmSocket.setProxyUrl(upstreamProxy);

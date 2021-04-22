@@ -1,8 +1,9 @@
 import { UAParser } from 'ua-parser-js';
-import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
+import IBrowserEmulatorClass from '@secret-agent/interfaces/IBrowserEmulatorClass';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IUserAgentMatchMeta from '@secret-agent/core-interfaces/IUserAgentMatchMeta';
+import IUserAgentMatchMeta from '@secret-agent/interfaces/IUserAgentMatchMeta';
+import IBrowserEmulatorConfiguration from '@secret-agent/interfaces/IBrowserEmulatorConfiguration';
 import GlobalPool from './GlobalPool';
 
 export default class BrowserEmulators {
@@ -33,10 +34,10 @@ export default class BrowserEmulators {
     return BrowserEmulator;
   }
 
-  public static createInstance(tmpId?: string) {
+  public static createInstance(options: IBrowserEmulatorConfiguration, tmpId?: string) {
     const id = this.getId(tmpId);
     let BrowserEmulator = this.getClassById(id);
-    if (BrowserEmulator) return new BrowserEmulator();
+    if (BrowserEmulator) return new BrowserEmulator(options);
 
     const uaParser = new UAParser(id);
     const uaBrowser = uaParser.getBrowser();
@@ -44,7 +45,7 @@ export default class BrowserEmulators {
     if (uaBrowser.name) {
       const matchMeta = this.extractUserAgentMatchMetaFromUa(uaBrowser, uaOs);
       BrowserEmulator = this.requireClassFromMatchMeta(matchMeta);
-      return new BrowserEmulator(matchMeta);
+      return new BrowserEmulator(options, matchMeta);
     }
 
     throw new Error(`BrowserEmulator was not found: ${id}`);

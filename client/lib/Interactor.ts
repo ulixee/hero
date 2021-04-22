@@ -6,11 +6,11 @@ import {
   IMousePosition as ICoreMousePosition,
   InteractionCommand as CoreCommand,
   MouseButton,
-} from '@secret-agent/core-interfaces/IInteractions';
+} from '@secret-agent/interfaces/IInteractions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement, ISuperNode } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { IKeyboardKeyCode } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { IKeyboardKeyCode } from '@secret-agent/interfaces/IKeyboardLayoutUS';
 import IInteractions, {
   Command,
   ICommand,

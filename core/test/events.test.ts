@@ -1,7 +1,7 @@
 import { Helpers } from '@secret-agent/testing';
-import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
+import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { LocationStatus } from '@secret-agent/interfaces/Location';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 

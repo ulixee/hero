@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
+import IViewport from '@secret-agent/interfaces/IViewport';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {

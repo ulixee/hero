@@ -1,7 +1,7 @@
 import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
+import { BrowserEmulators, GlobalPool } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as navigatorJson from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-navigator.json';
 import * as pluginsChrome from './plugins-Chrome.json';
@@ -30,17 +30,16 @@ test('it should override plugins in a browser window', async () => {
 
   const context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Plugin Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,

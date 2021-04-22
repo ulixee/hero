@@ -1,8 +1,10 @@
-import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
+import ITypedEventEmitter from './ITypedEventEmitter';
+import IDevtoolsSession from './IDevtoolsSession';
 
 export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
   id: string;
   url: string;
+  devtoolsSession: IDevtoolsSession;
   type: 'service_worker' | 'shared_worker' | 'worker';
   hasLoadedResponse: boolean;
   isReady: Promise<Error | null>;

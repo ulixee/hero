@@ -1,4 +1,4 @@
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 
 export interface IPuppetNetworkEvents {
   'navigation-response': {

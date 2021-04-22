@@ -2,7 +2,7 @@ import { Helpers } from '@secret-agent/testing';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import { createPromise } from '@secret-agent/commons/utils';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
+import { LocationStatus } from '@secret-agent/interfaces/Location';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import GlobalPool from '../lib/GlobalPool';
@@ -36,9 +36,7 @@ test('should send a Host header to secure http1 Chrome requests', async () => {
   });
 
   const url = `${server.baseUrl}/`;
-  const session = await GlobalPool.createSession({
-    browserEmulatorId: 'chrome-83',
-  });
+  const session = await GlobalPool.createSession({});
   Helpers.needsClosing.push(session);
   const tab = await session.createTab();
   process.env.MITM_ALLOW_INSECURE = 'true';

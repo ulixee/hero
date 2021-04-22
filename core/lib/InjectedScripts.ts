@@ -1,7 +1,6 @@
 import * as fs from 'fs';
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
-import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
@@ -41,23 +40,17 @@ const installedSymbol = Symbol('InjectedScripts.Installed');
 export default class InjectedScripts {
   public static JsPath = `SA.JsPath`;
   public static Fetcher = `SA.Fetcher`;
+  public static PageEventsCallbackName = pageEventsCallbackName;
 
-  public static async install(
-    puppetPage: IPuppetPage,
-    onPageRecordingsPublished: (results: PageRecorderResultSet, frameId: string) => Promise<any>,
-  ): Promise<void> {
+  public static install(puppetPage: IPuppetPage): Promise<any> {
     if (puppetPage[installedSymbol]) return;
     puppetPage[installedSymbol] = true;
 
-    if (onPageRecordingsPublished) {
-      await puppetPage.addPageCallback(pageEventsCallbackName, (payload, frameId) =>
-        onPageRecordingsPublished(JSON.parse(payload), frameId),
-      );
-    }
-
-    await puppetPage.addNewDocumentScript(injectedScript, true);
-    // delete binding from every context also
-    await puppetPage.addNewDocumentScript(`delete window.${pageEventsCallbackName}`, false);
+    return Promise.all([
+      puppetPage.addPageCallback(pageEventsCallbackName),
+      puppetPage.addNewDocumentScript(injectedScript, true),
+      puppetPage.addNewDocumentScript(`delete window.${pageEventsCallbackName}`, false),
+    ]);
   }
 
   public static async installDomStorageRestore(puppetPage: IPuppetPage): Promise<void> {

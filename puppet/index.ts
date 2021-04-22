@@ -1,12 +1,14 @@
 import PuppetChrome from '@secret-agent/puppet-chrome';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
-import IPuppetLauncher from '@secret-agent/puppet-interfaces/IPuppetLauncher';
-import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { existsSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
+import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import launchProcess from './lib/launchProcess';
 import { validateHostRequirements } from './lib/validateHostDependencies';
 import { EngineFetcher } from './lib/EngineFetcher';
@@ -41,7 +43,7 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public start(args: ILaunchArgs = {}): Promise<IPuppetBrowser | Error> {
+  public start(args: IPuppetLaunchArgs = {}): Promise<IPuppetBrowser | Error> {
     if (this.browserOrError) {
       return this.browserOrError;
     }
@@ -56,11 +58,15 @@ export default class Puppet {
     return this.browserOrError;
   }
 
-  public async newContext(emulation: IBrowserEmulationSettings, logger: IBoundLog) {
+  public async newContext(
+    emulator: IBrowserEmulator,
+    logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
+  ) {
     const browser = await this.browserOrError;
     if (browser instanceof Error) throw browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(emulation, logger);
+    return browser.newContext(emulator, logger, proxy);
   }
 
   public async close() {
@@ -81,7 +87,7 @@ export default class Puppet {
 
   private async launchEngine(
     launcher: IPuppetLauncher,
-    args: ILaunchArgs,
+    args: IPuppetLaunchArgs,
   ): Promise<IPuppetBrowser> {
     const executablePath = this.engine.executablePath;
 
@@ -90,14 +96,11 @@ export default class Puppet {
     }
 
     try {
-      const launchArgs = launcher.getLaunchArgs(args);
+      const launchArgs = launcher.getLaunchArgs(args, this.engine);
 
       // exists, but can't launch, try to launch
       await validateHostRequirements(this.engine);
 
-      if (this.engine.extraLaunchArgs?.length) {
-        launchArgs.push(...this.engine.extraLaunchArgs);
-      }
       const launchedProcess = await launchProcess(executablePath, launchArgs, {});
 
       const browser = await launcher.createPuppet(launchedProcess, this.engine);
@@ -139,12 +142,4 @@ export default class Puppet {
 
 ${remedyMessage}`);
   }
-}
-
-export interface ILaunchArgs {
-  proxyPort?: number;
-  showBrowser?: boolean;
-  disableDevtools?: boolean;
-  disableGpu?: boolean;
-  noChromeSandbox?: boolean;
 }

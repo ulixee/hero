@@ -1,9 +1,9 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
-import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
@@ -27,9 +27,12 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
       context = await puppet.newContext(
         {
           ...defaultEmulation,
-          userAgent: 'popupcity',
-          locale: 'en-GB',
-          platform: 'Windows95',
+          userAgentString: 'popupcity',
+          osPlatform: 'Windows95',
+          configuration: {
+            ...defaultEmulation.configuration,
+            locale: 'en-GB',
+          },
         },
         log,
       );

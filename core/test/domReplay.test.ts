@@ -1,7 +1,7 @@
 import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
 import * as fs from 'fs';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
@@ -96,7 +96,7 @@ describe('basic Dom Replay tests', () => {
     await mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const context = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
+    const context = await mirrorChrome.newContext(session.browserEmulator, log);
     const mirrorPage = await context.newPage();
     const debug = false;
     if (debug) {
@@ -193,7 +193,7 @@ describe('basic Dom Replay tests', () => {
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const mirrorContext = await mirrorChrome.newContext(session.getBrowserEmulation(), log);
+    const mirrorContext = await mirrorChrome.newContext(session.browserEmulator, log);
     const mirrorPage = await mirrorContext.newPage();
     await mirrorPage.addNewDocumentScript(`const exports = {};\n${domReplayScript}`, false);
     await Promise.all([

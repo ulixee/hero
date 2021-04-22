@@ -2,8 +2,8 @@ import Chrome80 from '@secret-agent/emulate-chrome-80';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import { URL } from 'url';
 import Log from '@secret-agent/commons/Logger';
-import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';
@@ -99,27 +99,31 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           needsClosing.push(context);
           const page = await context.newPage();
           needsClosing.push(page);
-          expect(await page.evaluate(`navigator.userAgent`)).toBe(defaultEmulation.userAgent);
-          expect(await page.evaluate(`navigator.platform`)).toBe(defaultEmulation.platform);
+          expect(await page.evaluate(`navigator.userAgent`)).toBe(defaultEmulation.userAgentString);
+          expect(await page.evaluate(`navigator.platform`)).toBe(defaultEmulation.osPlatform);
           expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en']);
-          expect(await page.evaluate('screen.height')).toBe(defaultEmulation.viewport.height);
+          expect(await page.evaluate('screen.height')).toBe(
+            defaultEmulation.configuration.viewport.height,
+          );
           await context.close();
         }
         {
           const context = await puppet.newContext(
             {
-              userAgent: 'foobar',
-              platform: 'Windows',
-              locale: 'de',
-              proxyPassword: '',
-              viewport: {
-                screenHeight: 901,
-                screenWidth: 1024,
-                positionY: 1,
-                positionX: 0,
-                height: 900,
-                width: 1024,
+              ...defaultEmulation,
+              configuration: {
+                locale: 'de',
+                viewport: {
+                  screenHeight: 901,
+                  screenWidth: 1024,
+                  positionY: 1,
+                  positionX: 0,
+                  height: 900,
+                  width: 1024,
+                },
               },
+              osPlatform: 'Windows',
+              userAgentString: 'foobar',
             },
             log,
           );
@@ -145,11 +149,16 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
           needsClosing.push(context);
           const page = await context.newPage();
           needsClosing.push(page);
-          expect(await page.evaluate(`navigator.userAgent`)).toContain(defaultEmulation.userAgent);
+          expect(await page.evaluate(`navigator.userAgent`)).toContain(
+            defaultEmulation.userAgentString,
+          );
           await context.close();
         }
         {
-          const context = await puppet.newContext({ userAgent: 'foobar' } as any, log);
+          const context = await puppet.newContext(
+            { ...defaultEmulation, userAgentString: 'foobar' },
+            log,
+          );
           needsClosing.push(context);
           const page = await context.newPage();
           needsClosing.push(page);

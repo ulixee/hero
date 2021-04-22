@@ -1,14 +1,15 @@
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
-import IRect from '@secret-agent/core-interfaces/IRect';
+import IRegisteredEventListener from './IRegisteredEventListener';
+import ITypedEventEmitter from './ITypedEventEmitter';
+import IRect from './IRect';
 import { IPuppetFrame, IPuppetFrameManagerEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
 import { IPuppetWorker } from './IPuppetWorker';
+import IDevtoolsSession from './IDevtoolsSession';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   id: string;
-  devtoolsSessionId: string;
+  devtoolsSession: IDevtoolsSession;
   mouse: IPuppetMouse;
   keyboard: IPuppetKeyboard;
   frames: IPuppetFrame[];
@@ -32,7 +33,6 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
   ) => Promise<void>;
-  workerInitializeFn?: (worker: IPuppetWorker) => Promise<void>;
 
   getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   setJavaScriptEnabled(enabled: boolean): Promise<void>;
@@ -41,7 +41,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   addNewDocumentScript(script: string, isolateFromWebPageEnvironment: boolean): Promise<void>;
   addPageCallback(
     name: string,
-    onCallback: (payload: any, frameId: string) => any,
+    onCallback?: (payload: any, frameId: string) => any,
   ): Promise<IRegisteredEventListener>;
 }
 
@@ -51,4 +51,5 @@ export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNet
   crashed: { error: Error; fatal?: boolean };
   console: { frameId: string; type: string; message: string; location: string };
   'page-error': { frameId: string; error: Error };
+  'page-callback-triggered': { name: string; frameId: string; payload: any };
 }

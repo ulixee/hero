@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { ITestHttpServer } from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
-import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
@@ -22,17 +22,16 @@ beforeAll(async () => {
 
   context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Chrome Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,
@@ -153,7 +152,10 @@ test('it should be able to remove properties', async () => {
 
   await page.addNewDocumentScript(
     getOverrideScript('polyfill.remove', {
-      itemsToRemove: [{ path: 'window', propertyName: 'Atomics' }, { path: 'window.Array', propertyName: 'from' }],
+      itemsToRemove: [
+        { path: 'window', propertyName: 'Atomics' },
+        { path: 'window.Array', propertyName: 'from' },
+      ],
     }).script,
     false,
   );

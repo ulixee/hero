@@ -1,14 +1,15 @@
 import { Protocol } from 'devtools-protocol';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import { assert } from '@secret-agent/commons/utils';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
-import IPuppetBrowser from '@secret-agent/puppet-interfaces/IPuppetBrowser';
+import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 
 interface IBrowserEvents {
   disconnected: void;
@@ -17,7 +18,7 @@ const { log } = Log(module);
 
 export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
   public readonly browserContextsById = new Map<string, BrowserContext>();
-  public readonly cdpSession: CDPSession;
+  public readonly devtoolsSession: DevtoolsSession;
 
   private readonly connection: Connection;
 
@@ -26,29 +27,30 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   constructor(connection: Connection, closeCallback: () => void) {
     super();
     this.connection = connection;
-    this.cdpSession = connection.rootSession;
+    this.devtoolsSession = connection.rootSession;
     this.closeCallback = closeCallback;
 
     this.connection.on('disconnected', this.emit.bind(this, 'disconnected'));
-    this.cdpSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
-    this.cdpSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
-    this.cdpSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
-    this.cdpSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
-    this.cdpSession.on('Target.targetCrashed', this.onTargetCrashed.bind(this));
+    this.devtoolsSession.on('Target.attachedToTarget', this.onAttachedToTarget.bind(this));
+    this.devtoolsSession.on('Target.detachedFromTarget', this.onDetachedFromTarget.bind(this));
+    this.devtoolsSession.on('Target.targetCreated', this.onTargetCreated.bind(this));
+    this.devtoolsSession.on('Target.targetDestroyed', this.onTargetDestroyed.bind(this));
+    this.devtoolsSession.on('Target.targetCrashed', this.onTargetCrashed.bind(this));
   }
 
   public async newContext(
-    emulation: IBrowserEmulationSettings,
+    emulator: IBrowserEmulator,
     logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
   ): Promise<BrowserContext> {
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
-    const { browserContextId } = await this.cdpSession.send('Target.createBrowserContext', {
+    const { browserContextId } = await this.devtoolsSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
       proxyBypassList: '<-loopback>',
-      proxyServer: emulation.proxyAddress,
+      proxyServer: proxy?.address,
     });
 
-    return new BrowserContext(this, browserContextId, emulation, logger);
+    return new BrowserContext(this, emulator, browserContextId, logger, proxy);
   }
 
   public async getFeatures(): Promise<{
@@ -82,13 +84,13 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   }
 
   protected async listen() {
-    await this.cdpSession.send('Target.setAutoAttach', {
+    await this.devtoolsSession.send('Target.setAutoAttach', {
       autoAttach: true,
       waitForDebuggerOnStart: true,
       flatten: true,
     });
 
-    await this.cdpSession.send('Target.setDiscoverTargets', {
+    await this.devtoolsSession.send('Target.setDiscoverTargets', {
       discover: true,
     });
 
@@ -103,31 +105,31 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     }
 
     if (targetInfo.type === 'page') {
-      const cdpSession = this.connection.getSession(sessionId);
+      const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      context?.onPageAttached(cdpSession, targetInfo);
+      context?.onPageAttached(devtoolsSession, targetInfo);
       return;
     }
 
     if (targetInfo.type === 'shared_worker') {
-      const cdpSession = this.connection.getSession(sessionId);
+      const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      context?.onSharedWorkerAttached(cdpSession, targetInfo).catch(() => null);
+      context?.onSharedWorkerAttached(devtoolsSession, targetInfo).catch(() => null);
     }
 
     if (event.waitingForDebugger && targetInfo.type === 'service_worker') {
-      const cdpSession = this.connection.getSession(sessionId);
-      if (!cdpSession) return;
-      cdpSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
+      const devtoolsSession = this.connection.getSession(sessionId);
+      if (!devtoolsSession) return;
+      devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
     }
     if (event.waitingForDebugger && targetInfo.type === 'other') {
-      const cdpSession = this.connection.getSession(sessionId);
-      if (!cdpSession) return;
+      const devtoolsSession = this.connection.getSession(sessionId);
+      if (!devtoolsSession) return;
       // Ideally, detaching should resume any target, but there is a bug in the backend.
-      cdpSession
+      devtoolsSession
         .send('Runtime.runIfWaitingForDebugger')
         .catch(() => null)
-        .then(() => this.cdpSession.send('Target.detachFromTarget', { sessionId }))
+        .then(() => this.devtoolsSession.send('Target.detachFromTarget', { sessionId }))
         .catch(() => null);
     }
   }
@@ -174,7 +176,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   ): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
 
-    const version = await browser.cdpSession.send('Browser.getVersion');
+    const version = await browser.devtoolsSession.send('Browser.getVersion');
     log.info('Browser.create', {
       ...version,
       executablePath: engine.executablePath,

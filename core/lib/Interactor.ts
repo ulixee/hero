@@ -5,27 +5,27 @@ import {
   IMousePosition,
   IMousePositionXY,
   InteractionCommand,
-} from '@secret-agent/core-interfaces/IInteractions';
+} from '@secret-agent/interfaces/IInteractions';
 import { assert } from '@secret-agent/commons/utils';
 import {
   getKeyboardKey,
   IKeyboardKey,
   KeyboardKeys,
-} from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
-import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelper';
-import IRect from '@secret-agent/core-interfaces/IRect';
-import IWindowOffset from '@secret-agent/core-interfaces/IWindowOffset';
+} from '@secret-agent/interfaces/IKeyboardLayoutUS';
+import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
+import IRect from '@secret-agent/interfaces/IRect';
+import IWindowOffset from '@secret-agent/interfaces/IWindowOffset';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import { IAttachedState } from '@secret-agent/core-interfaces/AwaitedDom';
-import IPoint from '@secret-agent/core-interfaces/IPoint';
-import IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
-import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/puppet-interfaces/IPuppetInput';
-import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import IElementRect from '@secret-agent/core-interfaces/IElementRect';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import { IAttachedState } from '@secret-agent/interfaces/AwaitedDom';
+import IPoint from '@secret-agent/interfaces/IPoint';
+import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/interfaces/IPuppetInput';
+import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
+import IViewport from '@secret-agent/interfaces/IViewport';
+import IElementRect from '@secret-agent/interfaces/IElementRect';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
@@ -56,7 +56,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get viewport(): IViewport {
-    return this.frameEnvironment.session.viewport;
+    return this.frameEnvironment.session.browserEmulator.configuration.viewport;
   }
 
   public logger: IBoundLog;

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import ITypedEventEmitter from '@secret-agent/interfaces/ITypedEventEmitter';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { createPromise } from './utils';
 import IPendingWaitEvent, { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 
@@ -106,15 +106,14 @@ export class TypedEventEmitter<T> extends EventEmitter implements ITypedEventEmi
       resolvable: promise,
       error: new CanceledPromiseError(`Event (${String(eventType)}) canceled`),
     });
-    const messageId = this.logger?.stats('waitOn', {
-      eventType,
+    const messageId = this.logger?.stats(`waitOn:${eventType}`, {
+      timeoutMillis,
     });
 
     const listener = addTypedEventListener(this, eventType, (result: T[K]) => {
       // give the listeners a second to register
       if (!listenerFn || listenerFn.call(this, result)) {
-        this.logger?.stats('waitOn.resolve', {
-          eventType,
+        this.logger?.stats(`waitOn.resolve:${eventType}`, {
           parentLogId: messageId,
         });
         promise.resolve(result);

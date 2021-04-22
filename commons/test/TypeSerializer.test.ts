@@ -41,9 +41,11 @@ test('should be able to serialize and deserialize in a browser window', async ()
     await puppet.start();
     const context = await puppet.newContext(
       {
-        userAgent: 'Page tests',
-        proxyPassword: '',
-        viewport: { width: 1920, height: 800 } as any,
+        userAgentString: 'Page tests',
+        configuration: {},
+        async onNewPuppetPage(): Promise<any> {
+          return null;
+        },
       } as any,
       log,
     );

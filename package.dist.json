@@ -15,12 +15,11 @@
     "packages": [
       "client",
       "core",
-      "core-interfaces",
+      "interfaces",
       "emulate-browsers/*",
       "emulate-humans/*",
       "full-client",
       "puppet",
-      "puppet-interfaces",
       "puppet-chrome",
       "mitm",
       "mitm-socket",

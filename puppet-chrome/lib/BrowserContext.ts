@@ -1,9 +1,6 @@
 import { assert } from '@secret-agent/commons/utils';
-import IPuppetContext, {
-  IPuppetContextEvents,
-} from '@secret-agent/puppet-interfaces/IPuppetContext';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
-import { ICookie } from '@secret-agent/core-interfaces/ICookie';
+import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
+import { ICookie } from '@secret-agent/interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import {
@@ -11,14 +8,17 @@ import {
   removeEventListeners,
   TypedEventEmitter,
 } from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Page } from './Page';
 import { Browser } from './Browser';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
@@ -27,56 +27,48 @@ export class BrowserContext
   extends TypedEventEmitter<IPuppetContextEvents>
   implements IPuppetContext {
   public logger: IBoundLog;
-  public get emulation(): IBrowserEmulationSettings {
-    return this._emulation;
-  }
-
-  public set emulation(value: IBrowserEmulationSettings) {
-    this._emulation = value;
-    for (const page of this.pagesById.values()) {
-      page.updateEmulationSettings().catch(err => {
-        this.logger.error('ERROR setting emulation settings', err);
-      });
-    }
-  }
 
   public workersById = new Map<string, IPuppetWorker>();
   public pagesById = new Map<string, Page>();
-
-  private _emulation: IBrowserEmulationSettings;
+  public emulator: IBrowserEmulator;
+  public proxyPassword: string;
 
   private readonly createdTargetIds = new Set<string>();
   private readonly browser: Browser;
   private readonly id: string;
+
   private isClosing = false;
 
-  private cdpSessions = new WeakSet<CDPSession>();
-
+  private devtoolsSessions = new WeakSet<DevtoolsSession>();
   private eventListeners: IRegisteredEventListener[] = [];
   private browserContextInitiatedMessageIds = new Set<number>();
 
   constructor(
     browser: Browser,
+    emulator: IBrowserEmulator,
     contextId: string,
-    emulation: IBrowserEmulationSettings,
     logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
   ) {
     super();
+    this.emulator = emulator;
     this.browser = browser;
     this.id = contextId;
-    this.emulation = emulation;
     this.logger = logger.createChild(module, {
       browserContextId: contextId,
     });
+    this.proxyPassword = proxy?.password;
     this.browser.browserContextsById.set(this.id, this);
 
-    this.subscribeToDevtoolsMessages(this.browser.cdpSession, {
+    this.subscribeToDevtoolsMessages(this.browser.devtoolsSession, {
       sessionType: 'browser',
     });
   }
 
+  public defaultPageInitializationFn: (page: IPuppetPage) => Promise<any> = () => Promise.resolve();
+
   async newPage(): Promise<Page> {
-    const { targetId } = await this.cdpRootSessionSend('Target.createTarget', {
+    const { targetId } = await this.sendWithBrowserDevtoolsSession('Target.createTarget', {
       url: 'about:blank',
       browserContextId: this.id,
     });
@@ -104,7 +96,7 @@ export class BrowserContext
   async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
     if (!this.pagesById.has(targetId)) {
-      await this.cdpRootSessionSend('Target.attachToTarget', {
+      await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
         targetId,
         flatten: true,
       });
@@ -112,16 +104,16 @@ export class BrowserContext
   }
 
   async attachToWorker(targetInfo: TargetInfo) {
-    await this.cdpRootSessionSend('Target.attachToTarget', {
+    await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
       targetId: targetInfo.targetId,
       flatten: true,
     });
   }
 
-  onPageAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
+  onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo) {
     if (this.pagesById.has(targetInfo.targetId)) return;
 
-    this.subscribeToDevtoolsMessages(cdpSession, {
+    this.subscribeToDevtoolsMessages(devtoolsSession, {
       sessionType: 'page',
       pageTargetId: targetInfo.targetId,
     });
@@ -131,7 +123,7 @@ export class BrowserContext
     if (!opener && !this.createdTargetIds.has(targetInfo.targetId))
       opener = this.pagesById.values().next().value;
 
-    const page = new Page(cdpSession, targetInfo.targetId, this, this.logger, opener);
+    const page = new Page(devtoolsSession, targetInfo.targetId, this, this.logger, opener);
     this.pagesById.set(page.targetId, page);
     // eslint-disable-next-line promise/catch-or-return
     page.isReady.then(() => this.emit('page', { page }));
@@ -146,14 +138,18 @@ export class BrowserContext
     }
   }
 
-  async onSharedWorkerAttached(cdpSession: CDPSession, targetInfo: TargetInfo) {
+  async onSharedWorkerAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo) {
     const page: Page =
       [...this.pagesById.values()].find(x => !x.isClosed) ?? this.pagesById.values().next().value;
-    await page.onWorkerAttached(cdpSession, targetInfo);
+    await page.onWorkerAttached(devtoolsSession, targetInfo);
   }
 
-  beforeWorkerAttached(cdpSession: CDPSession, workerTargetId: string, pageTargetId: string) {
-    this.subscribeToDevtoolsMessages(cdpSession, {
+  beforeWorkerAttached(
+    devtoolsSession: DevtoolsSession,
+    workerTargetId: string,
+    pageTargetId: string,
+  ) {
+    this.subscribeToDevtoolsMessages(devtoolsSession, {
       sessionType: 'worker' as const,
       pageTargetId,
       workerTargetId,
@@ -171,7 +167,7 @@ export class BrowserContext
     this.isClosing = true;
 
     await Promise.all([...this.pagesById.values()].map(x => x.close()));
-    await this.cdpRootSessionSend('Target.disposeBrowserContext', {
+    await this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
       browserContextId: this.id,
     }).catch(err => {
       if (err instanceof CanceledPromiseError) return;
@@ -182,7 +178,7 @@ export class BrowserContext
   }
 
   async getCookies(url?: URL): Promise<ICookie[]> {
-    const { cookies } = await this.cdpRootSessionSend('Storage.getCookies', {
+    const { cookies } = await this.sendWithBrowserDevtoolsSession('Storage.getCookies', {
       browserContextId: this.id,
     });
     return cookies
@@ -247,32 +243,32 @@ export class BrowserContext
 
       parsedCookies.push(cookieToSend);
     }
-    await this.cdpRootSessionSend('Storage.setCookies', {
+    await this.sendWithBrowserDevtoolsSession('Storage.setCookies', {
       cookies: parsedCookies,
       browserContextId: this.id,
     });
   }
 
-  private cdpRootSessionSend<T extends keyof ProtocolMapping.Commands>(
+  private sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {
-    return this.browser.cdpSession.send(method, params, this);
+    return this.browser.devtoolsSession.send(method, params, this);
   }
 
   private subscribeToDevtoolsMessages(
-    cdpSession: CDPSession,
+    devtoolsSession: DevtoolsSession,
     details: Pick<
       IPuppetContextEvents['devtools-message'],
       'pageTargetId' | 'sessionType' | 'workerTargetId'
     >,
   ) {
-    if (this.cdpSessions.has(cdpSession)) return;
+    if (this.devtoolsSessions.has(devtoolsSession)) return;
 
-    this.cdpSessions.add(cdpSession);
+    this.devtoolsSessions.add(devtoolsSession);
     const shouldFilter = details.sessionType === 'browser';
 
-    const receive = addTypedEventListener(cdpSession.messageEvents, 'receive', event => {
+    const receive = addTypedEventListener(devtoolsSession.messageEvents, 'receive', event => {
       if (shouldFilter) {
         // see if this was initiated by this browser context
         const { id, targetInfo } = event as any;
@@ -289,21 +285,25 @@ export class BrowserContext
         ...event,
       });
     });
-    const send = addTypedEventListener(cdpSession.messageEvents, 'send', (event, initiator) => {
-      if (shouldFilter) {
-        if (initiator && initiator !== this) return;
-        this.browserContextInitiatedMessageIds.add(event.id);
-      }
-      if (initiator && initiator instanceof Frame) {
-        (event as any).frameId = initiator.id;
-      }
-      this.emit('devtools-message', {
-        direction: 'send',
-        timestamp: new Date(),
-        ...details,
-        ...event,
-      });
-    });
+    const send = addTypedEventListener(
+      devtoolsSession.messageEvents,
+      'send',
+      (event, initiator) => {
+        if (shouldFilter) {
+          if (initiator && initiator !== this) return;
+          this.browserContextInitiatedMessageIds.add(event.id);
+        }
+        if (initiator && initiator instanceof Frame) {
+          (event as any).frameId = initiator.id;
+        }
+        this.emit('devtools-message', {
+          direction: 'send',
+          timestamp: new Date(),
+          ...details,
+          ...event,
+        });
+      },
+    );
     this.eventListeners.push(receive, send);
   }
 }

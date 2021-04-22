@@ -2,7 +2,6 @@ import * as net from 'net';
 import * as http from 'http';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import MitmRequestContext from '../lib/MitmRequestContext';
-import CookieHandler from './CookieHandler';
 import BaseHttpHandler from './BaseHttpHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';
@@ -64,7 +63,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
 
     const clientSocket = this.clientSocket;
 
-    const { proxyToServerMitmSocket } = this.context;
+    const { proxyToServerMitmSocket, requestSession } = this.context;
 
     clientSocket.on('end', () => proxyToServerMitmSocket.close());
     serverSocket.on('end', () => proxyToServerMitmSocket.close());
@@ -84,7 +83,7 @@ export default class HttpUpgradeHandler extends BaseHttpHandler {
     for (let i = 0; i < serverResponse.rawHeaders.length; i += 2) {
       responseMessage += `${serverResponse.rawHeaders[i]}: ${serverResponse.rawHeaders[i + 1]}\r\n`;
     }
-    await CookieHandler.readServerResponseCookies(this.context);
+    await requestSession.willSendResponse(this.context);
 
     this.context.setState(ResourceState.WriteProxyToClientResponseBody);
     clientSocket.write(`${responseMessage}\r\n`, error => {

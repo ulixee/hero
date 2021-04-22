@@ -1,5 +1,5 @@
-import { NavigationReason } from '@secret-agent/core-interfaces/INavigation';
-import ITypedEventEmitter from '@secret-agent/core-interfaces/ITypedEventEmitter';
+import { NavigationReason } from './INavigation';
+import ITypedEventEmitter from './ITypedEventEmitter';
 
 export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   id: string;
@@ -41,5 +41,9 @@ export interface IPuppetFrameEvents {
     frame: IPuppetFrame;
     url: string;
     reason: NavigationReason;
+  };
+  'frame-loader-created': {
+    frame: IPuppetFrame;
+    loaderId: string;
   };
 }

@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import ICreateTabOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateTabOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -9,34 +9,30 @@ import RequestSession, {
   ISocketEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
 import * as Os from 'os';
-import IPuppetContext, {
-  IPuppetContextEvents,
-} from '@secret-agent/puppet-interfaces/IPuppetContext';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
-import IBrowserEmulationSettings from '@secret-agent/puppet-interfaces/IBrowserEmulationSettings';
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import IHumanEmulator from '@secret-agent/core-interfaces/IHumanEmulator';
-import IHumanEmulatorClass from '@secret-agent/core-interfaces/IHumanEmulatorClass';
-import IBrowserEmulator from '@secret-agent/core-interfaces/IBrowserEmulator';
-import IBrowserEmulatorClass from '@secret-agent/core-interfaces/IBrowserEmulatorClass';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
-import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
+import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
+import IHumanEmulatorClass from '@secret-agent/interfaces/IHumanEmulatorClass';
+import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IBrowserEmulatorClass from '@secret-agent/interfaces/IBrowserEmulatorClass';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
-import { IPuppetWorker } from '@secret-agent/puppet-interfaces/IPuppetWorker';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
+import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { MitmProxy } from '@secret-agent/mitm/index';
 import SessionState from './SessionState';
-import Viewports from './Viewports';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import BrowserEmulators from './BrowserEmulators';
 import HumanEmulators from './HumanEmulators';
+import InjectedScripts from './InjectedScripts';
 
 const { log } = Log(module);
 
@@ -59,9 +55,6 @@ export default class Session extends TypedEventEmitter<{
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
 
-  public viewport: IViewport;
-  public timezoneId?: string;
-
   public tabs: Tab[] = [];
 
   public readonly humanEmulatorId: string;
@@ -81,17 +74,14 @@ export default class Session extends TypedEventEmitter<{
     Session.byId[this.id] = this;
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
-    this.browserEmulator = BrowserEmulators.createInstance(options.browserEmulatorId);
+    this.browserEmulator = BrowserEmulators.createInstance(options, options.browserEmulatorId);
     this.browserEmulator.sessionId = this.id;
     this.browserEmulatorId = (this.browserEmulator.constructor as IBrowserEmulatorClass).id;
     this.browserEngine = (this.browserEmulator.constructor as IBrowserEmulatorClass).engine;
     if (options.userProfile) {
       this.userProfile = options.userProfile;
-      this.browserEmulator.userProfile = options.userProfile;
     }
     this.upstreamProxyUrl = options.upstreamProxyUrl;
-
-    if (options.locale) this.browserEmulator.locale = options.locale;
 
     if (!this.browserEmulator.canPolyfill) {
       log.info('BrowserEmulators.PolyfillNotSupported', {
@@ -100,15 +90,6 @@ export default class Session extends TypedEventEmitter<{
         userAgentString: this.browserEmulator.userAgentString,
         runtimeOs: Os.platform(),
       });
-    }
-
-    this.timezoneId = options.timezoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-    this.viewport = options.viewport;
-    if (!this.viewport) {
-      this.viewport = Viewports.getDefault(
-        this.browserEmulator.windowFraming,
-        this.browserEmulator.windowFramingBase,
-      );
     }
 
     this.humanEmulator = HumanEmulators.createInstance(options.humanEmulatorId);
@@ -123,14 +104,14 @@ export default class Session extends TypedEventEmitter<{
       this.browserEmulatorId,
       this.humanEmulatorId,
       this.browserEmulator.canPolyfill,
-      this.viewport,
-      this.timezoneId,
+      this.browserEmulator.configuration.viewport,
+      this.browserEmulator.configuration.timezoneId,
     );
     this.mitmRequestSession = new RequestSession(
       this.id,
       this.browserEmulator.userAgentString,
       this.upstreamProxyUrl,
-      this.browserEmulator.networkInterceptorDelegate,
+      this.browserEmulator,
     );
   }
 
@@ -146,16 +127,18 @@ export default class Session extends TypedEventEmitter<{
     if (options.blockedResourceTypes !== undefined) {
       for (const tab of this.tabs) await tab.setBlockedResourceTypes(options.blockedResourceTypes);
     }
-    if (options.viewport !== undefined) this.viewport = options.viewport;
+
     if (options.userProfile !== undefined) {
       this.userProfile = options.userProfile;
-      this.browserEmulator.userProfile = this.userProfile;
     }
-    if (options.locale) this.browserEmulator.locale = options.locale;
-    if (options.timezoneId) this.timezoneId = options.timezoneId;
-    if (this.browserContext) {
-      this.browserContext.emulation = this.getBrowserEmulation();
-    }
+    await this.browserEmulator.configure(options);
+  }
+
+  public getMitmProxy(): { address: string; password?: string } {
+    return {
+      address: this.isolatedMitmProxy ? `localhost:${this.isolatedMitmProxy.port}` : null,
+      password: this.isolatedMitmProxy ? null : this.id,
+    };
   }
 
   public async registerWithMitm(
@@ -171,19 +154,6 @@ export default class Session extends TypedEventEmitter<{
     mitmProxy.registerSession(this.mitmRequestSession, !!this.isolatedMitmProxy);
   }
 
-  public getBrowserEmulation() {
-    const browserEmulator = this.browserEmulator;
-    return {
-      locale: browserEmulator.locale,
-      userAgent: browserEmulator.userAgentString,
-      platform: browserEmulator.osPlatform,
-      proxyAddress: this.isolatedMitmProxy ? `localhost:${this.isolatedMitmProxy.port}` : null,
-      proxyPassword: this.isolatedMitmProxy ? null : this.id,
-      viewport: this.viewport,
-      timezoneId: this.timezoneId,
-    } as IBrowserEmulationSettings;
-  }
-
   public async initialize(context: IPuppetContext) {
     this.browserContext = context;
     context.on('devtools-message', this.onDevtoolsMessage.bind(this));
@@ -191,11 +161,10 @@ export default class Session extends TypedEventEmitter<{
       await UserProfile.install(this);
     }
 
+    context.defaultPageInitializationFn = InjectedScripts.install;
+
     const requestSession = this.mitmRequestSession;
-    requestSession.networkInterceptorDelegate.http ??= {};
-    requestSession.networkInterceptorDelegate.http.beforeSendingResponseFn = this.beforeSendingMitmHttpResponse.bind(
-      this,
-    );
+    requestSession.willWriteResponseBody = this.beforeSendingMitmHttpResponse.bind(this);
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
     requestSession.on('http-error', this.onMitmError.bind(this));
@@ -217,7 +186,7 @@ export default class Session extends TypedEventEmitter<{
     }
 
     const tab = Tab.create(this, page);
-    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId);
+    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSession.id);
     this.registerTab(tab, page);
     await tab.isReady;
     return tab;
@@ -261,7 +230,9 @@ export default class Session extends TypedEventEmitter<{
 
   private async beforeSendingMitmHttpResponse(resource: IHttpResourceLoadDetails): Promise<void> {
     // wait for share and service worker "envs" to load before returning response
-    const secFetchDest = resource.requestLowerHeaders['sec-fetch-dest'] as string;
+    const secFetchDest = (resource.requestHeaders['sec-fetch-dest'] ??
+      resource.requestHeaders['Sec-Fetch-Dest']) as string;
+
     // NOTE: not waiting for "workers" because the worker isn't attached until the response comes in
     if (!secFetchDest || !['sharedworker', 'serviceworker'].includes(secFetchDest)) {
       return;
@@ -278,6 +249,7 @@ export default class Session extends TypedEventEmitter<{
       for (const value of this.browserContext.workersById.values()) {
         if (match(value)) worker = value;
       }
+
       if (!worker) {
         ({ worker } = await this.browserContext.waitOn(
           'worker',
@@ -352,7 +324,7 @@ export default class Session extends TypedEventEmitter<{
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoaderId,
     });
-    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSessionId, parentTab.id);
+    this.sessionState.captureTab(tab.id, page.id, page.devtoolsSession.id, parentTab.id);
     this.registerTab(tab, page);
 
     await tab.isReady;
@@ -361,21 +333,10 @@ export default class Session extends TypedEventEmitter<{
     return tab;
   }
 
-  private async onNewWorker(_: Tab, worker: IPuppetWorker) {
-    const newWorkerInjectedScripts = await this.browserEmulator.newWorkerInjectedScripts(
-      worker.type,
-    );
-    for (const newDocumentScript of newWorkerInjectedScripts) {
-      // overrides happen in main frame
-      await worker.evaluate(newDocumentScript.script, true);
-    }
-  }
-
   private registerTab(tab: Tab, page: IPuppetPage) {
     this.tabs.push(tab);
     tab.on('close', this.removeTab.bind(this, tab));
     page.popupInitializeFn = this.onNewTab.bind(this, tab);
-    page.workerInitializeFn = this.onNewWorker.bind(this, tab);
     return tab;
   }
 

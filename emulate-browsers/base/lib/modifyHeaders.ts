@@ -1,8 +1,7 @@
-import OriginType from '@secret-agent/core-interfaces/OriginType';
 import Log from '@secret-agent/commons/Logger';
-import { IResourceToModify } from '@secret-agent/core-interfaces/INetworkInterceptorDelegate';
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import { pickRandom } from '@secret-agent/commons/utils';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 
 const { log } = Log(module);
 
@@ -10,11 +9,18 @@ export default function modifyHeaders(
   userAgentString: string,
   headerProfiles: IResourceHeaderDefaults,
   hasCustomLocale: boolean,
-  resource: IResourceToModify,
+  resource: IHttpResourceLoadDetails,
+  sessionId: string,
 ) {
-  const defaultOrder = getOrderAndDefaults(headerProfiles, resource);
+  const defaultOrder = getOrderAndDefaults(headerProfiles, resource, sessionId);
 
-  const { headers, lowerHeaders } = resource;
+  const requestLowerHeaders = {};
+  for (const [key, value] of Object.entries(resource.requestHeaders)) {
+    requestLowerHeaders[key.toLowerCase()] = value;
+  }
+
+  const headers = resource.requestHeaders;
+
   if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
     const newHeaders: IResourceHeaders = {};
     let hasKeepAlive = false;
@@ -26,9 +32,9 @@ export default function modifyHeaders(
           .map(x => `${x[0].toUpperCase()}${x.slice(1)}`)
           .join('-');
       }
-      if (header.match(/connection/i)) hasKeepAlive = true;
+      if (header.match(/^connection/i)) hasKeepAlive = true;
 
-      if (header.match(/user-agent/i) && value !== userAgentString) {
+      if (header.match(/^user-agent/i) && value !== userAgentString) {
         newHeaders[key] = userAgentString;
       } else {
         newHeaders[key] = value;
@@ -43,12 +49,13 @@ export default function modifyHeaders(
   const headerList: [string, string | string[]][] = [];
   for (const headerName of defaultOrder.order) {
     const defaults = defaultOrder.defaults[headerName];
-    let value = lowerHeaders[headerName.toLowerCase()];
+    const lowerName = headerName.toLowerCase();
+    let value = requestLowerHeaders[lowerName];
 
     // if header is an Sec-Fetch header, trust Chrome
-    if (value && headerName.toLowerCase().startsWith('sec-fetch')) {
+    if (value && lowerName.startsWith('sec-fetch')) {
       // keep given value
-    } else if (value && headerName.toLowerCase() === 'accept-language' && hasCustomLocale) {
+    } else if (value && lowerName === 'accept-language' && hasCustomLocale) {
       // keep given value
     } else if (defaults && defaults.length) {
       // trust that it's doing it's thing
@@ -57,7 +64,7 @@ export default function modifyHeaders(
       }
     }
 
-    if (headerName.match(/user-agent/i) && value !== userAgentString) {
+    if (lowerName === 'user-agent' && value !== userAgentString) {
       value = userAgentString;
     }
     if (value) {
@@ -67,6 +74,7 @@ export default function modifyHeaders(
 
   const lowerNames = defaultOrder.order.map(x => x.toLowerCase());
   let index = -1;
+  const fetchMode = requestLowerHeaders['sec-fetch-mode'];
   for (const [header, value] of Object.entries(headers)) {
     index += 1;
     const lowerHeader = header.toLowerCase();
@@ -76,11 +84,9 @@ export default function modifyHeaders(
     const isDefaultHeader =
       defaultHeaders.includes(lowerHeader) ||
       lowerHeader.startsWith('sec-') ||
-      lowerHeader.startsWith('mitm-') ||
       lowerHeader.startsWith('proxy-');
 
-    const shouldIncludeOrigin =
-      lowerHeader === 'origin' && lowerHeaders['sec-fetch-mode'] === 'cors';
+    const shouldIncludeOrigin = lowerHeader === 'origin' && fetchMode === 'cors';
 
     // if default order does not include this header, strip it
     if (isDefaultHeader && lowerHeader !== 'cookie' && !shouldIncludeOrigin) continue;
@@ -98,8 +104,12 @@ export default function modifyHeaders(
   return newHeaders;
 }
 
-function getOrderAndDefaults(headerProfiles: IResourceHeaderDefaults, resource: IResourceToModify) {
-  const { method, originType, headers, resourceType, isSSL, sessionId } = resource;
+function getOrderAndDefaults(
+  headerProfiles: IResourceHeaderDefaults,
+  resource: IHttpResourceLoadDetails,
+  sessionId: string,
+) {
+  const { method, originType, requestHeaders: headers, resourceType, isSSL } = resource;
   let profiles = headerProfiles[resourceType];
   if (!profiles && resourceType === 'Websocket') profiles = headerProfiles['Websocket Upgrade'];
   if (!profiles) return null;
@@ -139,7 +149,7 @@ function getOrderAndDefaults(headerProfiles: IResourceHeaderDefaults, resource: 
 
 interface IResourceHeaderDefaults {
   [resourceType: string]: {
-    originTypes: OriginType[];
+    originTypes: string[];
     method: string;
     secureDomain: boolean;
     order: string[];

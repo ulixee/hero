@@ -1,9 +1,9 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
+import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
 import Timer from '@secret-agent/commons/Timer';
-import IWaitForResourceOptions from '@secret-agent/core-interfaces/IWaitForResourceOptions';
+import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOptions';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';

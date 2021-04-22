@@ -19,7 +19,7 @@ import { constants as FsConstants, promises as Fs } from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { spawn } from 'child_process';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { isDebianFlavor } from './LinuxUtils';
 import DependencyInstaller from './DependencyInstaller';
 import { DependenciesMissingError } from './DependenciesMissingError';

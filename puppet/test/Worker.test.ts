@@ -1,8 +1,8 @@
 import Chrome80 from '@secret-agent/emulate-chrome-80';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
-import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import { createTestPage, ITestPage } from './TestPage';
 import Puppet from '../index';

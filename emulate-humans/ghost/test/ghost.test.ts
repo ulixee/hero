@@ -1,5 +1,5 @@
-import { IInteractionStep, InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
+import { IInteractionStep, InteractionCommand } from '@secret-agent/interfaces/IInteractions';
+import IViewport from '@secret-agent/interfaces/IViewport';
 import Log from '@secret-agent/commons/Logger';
 import HumanEmulatorGhost, { isVisible } from '../index';
 

@@ -2,7 +2,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import { GlobalPool, BrowserEmulators } from '@secret-agent/core';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
@@ -65,17 +65,16 @@ test('should override a function and clean error stacks', async () => {
 
   const context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Plugin Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,
@@ -120,17 +119,16 @@ test('should override Errors properly on https pages', async () => {
 
   const context = await puppet.newContext(
     {
-      proxyPassword: '',
-      platform: 'win32',
-      locale: 'en',
-      userAgent: 'Plugin Test',
-      viewport: {
-        screenHeight: 900,
-        screenWidth: 1024,
-        positionY: 0,
-        positionX: 0,
-        height: 900,
-        width: 1024,
+      canPolyfill: false,
+      configuration: { locale: 'en' },
+      sessionId: '',
+      configure(): Promise<void> {
+        return null;
+      },
+      osPlatform: 'win32',
+      userAgentString: 'Plugin Test',
+      async onNewPuppetPage() {
+        return null;
       },
     },
     log,

@@ -1,5 +1,5 @@
 import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { ConnectionOptions } from 'tls';
 import * as moment from 'moment';
 import * as net from 'net';
@@ -13,7 +13,7 @@ export class Dns {
   private readonly dnsServer: ConnectionOptions;
 
   constructor(readonly requestSession?: RequestSession) {
-    this.dnsServer = requestSession?.networkInterceptorDelegate?.dns?.dnsOverTlsConnection;
+    this.dnsServer = requestSession?.networkEmulation?.dns?.dnsOverTlsConnection;
   }
 
   public async lookupIp(host: string, retries = 3): Promise<string> {

@@ -1,7 +1,7 @@
 import Core, { Session } from '@secret-agent/core';
 import { Helpers } from '@secret-agent/testing';
-import { LocationStatus } from '@secret-agent/core-interfaces/Location';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { LocationStatus } from '@secret-agent/interfaces/Location';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';

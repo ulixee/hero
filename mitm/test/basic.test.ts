@@ -7,7 +7,7 @@ import { AddressInfo } from 'net';
 import * as WebSocket from 'ws';
 import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
-import IHttpResourceLoadDetails from '@secret-agent/core-interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
@@ -340,7 +340,7 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    session.networkInterceptorDelegate.http.requestHeaders = jest.fn();
+    session.networkEmulation.beforeHttpRequest = jest.fn();
     session.browserRequestMatcher.onBrowserRequestedResource(
       {
         browserRequestId: '25.123',
@@ -349,7 +349,7 @@ describe('basic MitM tests', () => {
         resourceType: 'Document',
         hasUserGesture: true,
         isUserNavigation: true,
-        requestLowerHeaders: {},
+        requestHeaders: {},
         documentUrl: `${httpServer.url}page1`,
       } as IHttpResourceLoadDetails,
       1,
@@ -363,7 +363,7 @@ describe('basic MitM tests', () => {
 
     await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
 
-    expect(session.networkInterceptorDelegate.http.requestHeaders).toHaveBeenCalledTimes(1);
+    expect(session.networkEmulation.beforeHttpRequest).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 
     const [responseEvent] = onresponse.mock.calls[0];

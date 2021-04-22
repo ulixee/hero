@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { Protocol } from 'devtools-protocol';
-import { CDPSession } from './CDPSession';
+import { DevtoolsSession } from './DevtoolsSession';
 import ExceptionDetails = Protocol.Runtime.ExceptionDetails;
 import StackTrace = Protocol.Runtime.StackTrace;
 import ObjectPreview = Protocol.Runtime.ObjectPreview;
@@ -24,12 +24,12 @@ import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 export default class ConsoleMessage {
   constructor(readonly message: string, readonly location: string, readonly type: string) {}
 
-  static create(cdpSession: CDPSession, event: ConsoleAPICalledEvent) {
+  static create(devtoolsSession: DevtoolsSession, event: ConsoleAPICalledEvent) {
     const { args, stackTrace, type, context } = event;
 
     const message = args
       .map(arg => {
-        cdpSession.disposeRemoteObject(arg);
+        devtoolsSession.disposeRemoteObject(arg);
 
         return stringifyRemoteObject(arg);
       })

@@ -1,9 +1,9 @@
 import { Helpers } from '@secret-agent/testing';
 import Core, { Session } from '@secret-agent/core';
-import { InteractionCommand } from '@secret-agent/core-interfaces/IInteractions';
+import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import CoreServerConnection from '@secret-agent/core/server/ConnectionToClient';
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 
 let koaServer: ITestKoaServer;
 let coreServerConnection: CoreServerConnection;

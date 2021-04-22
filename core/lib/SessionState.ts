@@ -4,21 +4,21 @@ import {
   IRequestSessionResponseEvent,
   ISocketEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
-import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import ICommandMeta from '@secret-agent/core-interfaces/ICommandMeta';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IWebsocketMessage from '@secret-agent/interfaces/IWebsocketMessage';
+import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
+import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import INavigation, { LoadStatus } from '@secret-agent/core-interfaces/INavigation';
-import IScriptInstanceMeta from '@secret-agent/core-interfaces/IScriptInstanceMeta';
-import IWebsocketResourceMessage from '@secret-agent/core-interfaces/IWebsocketResourceMessage';
-import type { IPuppetContextEvents } from '@secret-agent/puppet-interfaces/IPuppetContext';
+import IViewport from '@secret-agent/interfaces/IViewport';
+import INavigation, { LoadStatus } from '@secret-agent/interfaces/INavigation';
+import IScriptInstanceMeta from '@secret-agent/interfaces/IScriptInstanceMeta';
+import IWebsocketResourceMessage from '@secret-agent/interfaces/IWebsocketResourceMessage';
+import type { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
 import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
-import { IScrollEvent } from '@secret-agent/core-interfaces/IScrollEvent';
-import { IFocusEvent } from '@secret-agent/core-interfaces/IFocusEvent';
-import { IMouseEvent } from '@secret-agent/core-interfaces/IMouseEvent';
-import { IDomChangeEvent } from '@secret-agent/core-interfaces/IDomChangeEvent';
+import { IScrollEvent } from '@secret-agent/interfaces/IScrollEvent';
+import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
+import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
+import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -467,6 +467,7 @@ export default class SessionState {
     scrollEvents: IScrollEvent[],
   ) {
     let lastCommand = this.lastCommand;
+    if (!lastCommand) return; // nothing to store yet
     for (const domChange of domChanges) {
       lastCommand = this.getCommandForTimestamp(lastCommand, domChange[2]);
       this.db.domChanges.insert(tabId, frameId, lastCommand.id, domChange);

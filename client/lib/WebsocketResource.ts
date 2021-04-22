@@ -1,9 +1,9 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IWebsocketMessage from '@secret-agent/core-interfaces/IWebsocketMessage';
-import IResourceMeta from '@secret-agent/core-interfaces/IResourceMeta';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import IWebsocketMessage from '@secret-agent/interfaces/IWebsocketMessage';
+import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';

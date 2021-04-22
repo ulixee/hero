@@ -1,6 +1,6 @@
 import { promises as Fs } from 'fs';
 
-import IBrowserEngine from '@secret-agent/core-interfaces/IBrowserEngine';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import * as path from 'path';
 import { EngineFetcher } from './EngineFetcher';
 

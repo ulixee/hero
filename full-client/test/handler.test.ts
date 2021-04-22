@@ -4,7 +4,7 @@ import Core, { CoreProcess, Session } from '@secret-agent/core/index';
 import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
 import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
 import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/core-interfaces/IResolvablePromise';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;

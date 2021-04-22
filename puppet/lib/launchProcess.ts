@@ -19,7 +19,7 @@ import { StdioOptions } from 'child_process';
 import * as readline from 'readline';
 import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
-import ILaunchedProcess from '@secret-agent/puppet-interfaces/ILaunchedProcess';
+import ILaunchedProcess from '@secret-agent/interfaces/ILaunchedProcess';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import { WebSocketTransport } from './WebSocketTransport';
 

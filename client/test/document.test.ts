@@ -2,11 +2,11 @@
 import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
-import IExecJsPathResult from '@secret-agent/core-interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/core-interfaces/getAttachedStateFnName';
+import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
 import { Helpers } from '@secret-agent/testing';
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 

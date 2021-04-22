@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http';
 import Logger from '@secret-agent/commons/Logger';
 import { createPromise } from '@secret-agent/commons/utils';
-import ResourceType from '@secret-agent/core-interfaces/ResourceType';
+import ResourceType from '@secret-agent/interfaces/ResourceType';
 import SessionDb, { ISessionLookup, ISessionLookupArgs } from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';
 import { ISessionRecord } from '../models/SessionTable';

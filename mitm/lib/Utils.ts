@@ -1,4 +1,4 @@
-import IResourceHeaders from '@secret-agent/core-interfaces/IResourceHeaders';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 
 export function parseRawHeaders(rawHeaders: string[]): IResourceHeaders {
   const headers = {};

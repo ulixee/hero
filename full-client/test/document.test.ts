@@ -1,5 +1,5 @@
 import { Helpers } from '@secret-agent/testing';
-import { XPathResult } from '@secret-agent/core-interfaces/AwaitedDom';
+import { XPathResult } from '@secret-agent/interfaces/AwaitedDom';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { FrameEnvironment } from '@secret-agent/client';
 import { Handler, LocationStatus } from '../index';

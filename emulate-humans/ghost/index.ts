@@ -5,13 +5,13 @@ import {
   IMousePosition,
   IMousePositionXY,
   InteractionCommand,
-} from '@secret-agent/core-interfaces/IInteractions';
-import { HumanEmulatorClassDecorator } from '@secret-agent/core-interfaces/IHumanEmulatorClass';
-import IRect from '@secret-agent/core-interfaces/IRect';
-import IInteractionsHelper from '@secret-agent/core-interfaces/IInteractionsHelper';
-import IPoint from '@secret-agent/core-interfaces/IPoint';
-import IViewport from '@secret-agent/core-interfaces/IViewport';
-import type IMouseUpResult from '@secret-agent/core-interfaces/IMouseUpResult';
+} from '@secret-agent/interfaces/IInteractions';
+import { HumanEmulatorClassDecorator } from '@secret-agent/interfaces/IHumanEmulatorClass';
+import IRect from '@secret-agent/interfaces/IRect';
+import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
+import IPoint from '@secret-agent/interfaces/IPoint';
+import IViewport from '@secret-agent/interfaces/IViewport';
+import type IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
 

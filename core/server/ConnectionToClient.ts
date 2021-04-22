@@ -1,19 +1,19 @@
-import IConfigureSessionOptions from '@secret-agent/core-interfaces/IConfigureSessionOptions';
-import ISessionMeta from '@secret-agent/core-interfaces/ISessionMeta';
+import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
+import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ICreateSessionOptions from '@secret-agent/core-interfaces/ICreateSessionOptions';
+import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ICoreRequestPayload from '@secret-agent/core-interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/core-interfaces/ICoreResponsePayload';
-import ICoreConfigureOptions from '@secret-agent/core-interfaces/ICoreConfigureOptions';
-import ICoreEventPayload from '@secret-agent/core-interfaces/ICoreEventPayload';
-import IWaitForOptions from '@secret-agent/core-interfaces/IWaitForOptions';
-import IAgentMeta from '@secret-agent/core-interfaces/IAgentMeta';
+import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
+import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
+import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
+import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
 import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
-import IUserProfile from '@secret-agent/core-interfaces/IUserProfile';
+import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
 import Session from '../lib/Session';
@@ -160,18 +160,20 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
     const session = Session.get(meta.sessionId);
+    const { browserEmulator } = session;
+    const { configuration, userAgentString, osPlatform } = browserEmulator;
     return <IAgentMeta>{
       sessionId: session.id,
       sessionName: session.options.sessionName,
       browserEmulatorId: session.browserEmulatorId,
       humanEmulatorId: session.humanEmulatorId,
-      viewport: session.viewport,
-      locale: session.browserEmulator.locale,
-      timezoneId: session.timezoneId,
+      viewport: configuration.viewport,
+      locale: configuration.locale,
+      timezoneId: configuration.timezoneId,
       blockedResourceTypes: session.options.blockedResourceTypes,
       upstreamProxyUrl: session.upstreamProxyUrl,
-      userAgentString: session.browserEmulator.userAgentString,
-      osPlatform: session.browserEmulator.osPlatform,
+      userAgentString,
+      osPlatform,
     };
   }
 

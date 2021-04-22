@@ -1,12 +1,12 @@
 import Protocol from 'devtools-protocol';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IRegisteredEventListener from '@secret-agent/core-interfaces/IRegisteredEventListener';
-import { IPuppetFrameManagerEvents } from '@secret-agent/puppet-interfaces/IPuppetFrame';
-import { IBoundLog } from '@secret-agent/core-interfaces/ILog';
+import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
+import { IPuppetFrameManagerEvents } from '@secret-agent/interfaces/IPuppetFrame';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import injectedSourceUrl from '@secret-agent/core-interfaces/injectedSourceUrl';
-import { CDPSession } from './CDPSession';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
 import FrameTree = Protocol.Page.FrameTree;
@@ -43,15 +43,15 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
   private attachedFrameIds = new Set<string>();
   private activeContextIds = new Set<number>();
   private readonly registeredEvents: IRegisteredEventListener[] = [];
-  private readonly cdpSession: CDPSession;
+  private readonly devtoolsSession: DevtoolsSession;
 
   private isReady: Promise<void>;
 
-  constructor(cdpSession: CDPSession, logger: IBoundLog) {
+  constructor(devtoolsSession: DevtoolsSession, logger: IBoundLog) {
     super();
-    this.cdpSession = cdpSession;
+    this.devtoolsSession = devtoolsSession;
     this.logger = logger.createChild(module);
-    this.registeredEvents = eventUtils.addEventListeners(this.cdpSession, [
+    this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
       ['Page.frameNavigated', this.onFrameNavigated.bind(this)],
       ['Page.navigatedWithinDocument', this.onFrameNavigatedWithinDocument.bind(this)],
       ['Page.frameRequestedNavigation', this.onFrameRequestedNavigation.bind(this)],
@@ -69,14 +69,14 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     this.isReady = new Promise<void>(async (resolve, reject) => {
       try {
         const [framesResponse, , readyStateResult] = await Promise.all([
-          this.cdpSession.send('Page.getFrameTree'),
-          this.cdpSession.send('Page.enable'),
-          this.cdpSession.send('Runtime.evaluate', {
+          this.devtoolsSession.send('Page.getFrameTree'),
+          this.devtoolsSession.send('Page.enable'),
+          this.devtoolsSession.send('Runtime.evaluate', {
             expression: 'document.readyState',
           }),
-          this.cdpSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
-          this.cdpSession.send('Runtime.enable'),
-          this.cdpSession.send('Page.addScriptToEvaluateOnNewDocument', {
+          this.devtoolsSession.send('Page.setLifecycleEventsEnabled', { enabled: true }),
+          this.devtoolsSession.send('Runtime.enable'),
+          this.devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
             source: `//# sourceURL=${injectedSourceUrl}`,
             worldName: ISOLATED_WORLD,
           }),
@@ -113,20 +113,24 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     onCallback: (payload: any, frameId: string) => any,
   ): Promise<IRegisteredEventListener> {
     // add binding to every new context automatically
-    await this.cdpSession.send('Runtime.addBinding', {
+    await this.devtoolsSession.send('Runtime.addBinding', {
       name,
     });
-    return eventUtils.addEventListener(this.cdpSession, 'Runtime.bindingCalled', async event => {
-      if (event.name === name) {
-        await this.isReady;
-        const frameId = this.getFrameIdForExecutionContext(event.executionContextId);
-        onCallback(event.payload, frameId);
-      }
-    });
+    return eventUtils.addEventListener(
+      this.devtoolsSession,
+      'Runtime.bindingCalled',
+      async event => {
+        if (event.name === name) {
+          await this.isReady;
+          const frameId = this.getFrameIdForExecutionContext(event.executionContextId);
+          onCallback(event.payload, frameId);
+        }
+      },
+    );
   }
 
   public async addNewDocumentScript(script: string, installInIsolatedScope = true) {
-    await this.cdpSession.send('Page.addScriptToEvaluateOnNewDocument', {
+    await this.devtoolsSession.send('Page.addScriptToEvaluateOnNewDocument', {
       source: script,
       worldName: installInIsolatedScope ? ISOLATED_WORLD : undefined,
     });
@@ -278,7 +282,7 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
     const frame = new Frame(
       newFrame,
       this.activeContextIds,
-      this.cdpSession,
+      this.devtoolsSession,
       this.logger,
       () => this.attachedFrameIds.has(id),
       parentFrame,

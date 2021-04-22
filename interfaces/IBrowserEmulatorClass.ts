@@ -1,12 +1,13 @@
 import IBrowserEmulator from './IBrowserEmulator';
 import IBrowserEngine from './IBrowserEngine';
 import IUserAgentMatchMeta from './IUserAgentMatchMeta';
+import IBrowserEmulatorConfiguration from './IBrowserEmulatorConfiguration';
 
 export default interface IBrowserEmulatorClass {
   id: string;
   roundRobinPercent: number;
   engine: IBrowserEngine;
-  new (matchMeta?: IUserAgentMatchMeta): IBrowserEmulator;
+  new (options: IBrowserEmulatorConfiguration, matchMeta?: IUserAgentMatchMeta): IBrowserEmulator;
   isMatch: (matchMeta: IUserAgentMatchMeta) => boolean;
 }
 

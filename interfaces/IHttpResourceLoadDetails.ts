@@ -25,7 +25,6 @@ export default interface IHttpResourceLoadDetails {
   method: string;
   requestTime: Date;
   requestOriginalHeaders: IResourceHeaders;
-  requestLowerHeaders: IResourceHeaders;
   requestHeaders: IResourceHeaders;
   requestTrailers?: IResourceHeaders;
   requestPostData?: Buffer;

@@ -1,8 +1,8 @@
-import { IPuppetPage } from '@secret-agent/puppet-interfaces/IPuppetPage';
-import { IPuppetFrame } from '@secret-agent/puppet-interfaces/IPuppetFrame';
-import { IKeyboardKey } from '@secret-agent/core-interfaces/IKeyboardLayoutUS';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { IPuppetFrame } from '@secret-agent/interfaces/IPuppetFrame';
+import { IKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
 import { keyDefinitions } from '@secret-agent/puppet-chrome/interfaces/USKeyboardLayout';
-import IPuppetContext from '@secret-agent/puppet-interfaces/IPuppetContext';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import * as Fs from 'fs';
 
 export interface ITestPage extends IPuppetPage {
