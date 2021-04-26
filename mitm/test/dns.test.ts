@@ -140,9 +140,13 @@ test('should properly expose errors if nothing is found', async () => {
   };
   process.once('unhandledRejection', handler);
 
-  await expect(dns.lookupIp('not-real-123423423443433434343-fake-domain.com')).rejects.toThrowError(
-    'Not found',
-  );
+  try {
+    await dns.lookupIp('not-real-123423423443433434343-fake-domain.com');
+  } catch (error) {
+    // eslint-disable-next-line jest/no-try-expect
+    expect(error).toMatch('Not found');
+  }
+
   await new Promise(resolve => setTimeout(resolve, 100));
   expect(unhandledErrorCalled).toBe(false);
   expect(dotLookup).toHaveBeenCalledTimes(1);

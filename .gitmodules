@@ -1,0 +1,3 @@
+[submodule "emulate-browsers/chrome-88"]
+	path = emulate-browsers/chrome-88
+	url = git@github.com:ulixee/emulate-chrome-88.git

@@ -2684,6 +2684,31 @@
   dependencies:
     "@octokit/openapi-types" "^5.3.2"
 
+"@secret-agent/core-interfaces@1.4.1-alpha.4":
+  version "1.4.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/@secret-agent/core-interfaces/-/core-interfaces-1.4.1-alpha.4.tgz#912792be401298b747981a75786c86d7622af393"
+  integrity sha512-cge9C5NhLEVU5b8aBniPBGwwTjtqSDOVS+vi+GeNmQlsfcC97s9bMxXymBWi/WU/5rAY7Tn4UfsoJLvQfqIwgg==
+  dependencies:
+    "@secret-agent/puppet-interfaces" "1.4.1-alpha.4"
+    awaited-dom "^1.1.12"
+
+"@secret-agent/emulate-safari-13@1.4.1-alpha.4":
+  version "1.4.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/@secret-agent/emulate-safari-13/-/emulate-safari-13-1.4.1-alpha.4.tgz#1a23f7c6d8a7d1bce0d7035813250ca5a07bf3c4"
+  integrity sha512-qYt/5YNTuBba5CsOhasb2L7telEY92t80x82dwe+rfppHzgHfLZvSQdVnH88AjLqxb+FetFxB5sP2Bm3zLxt1w==
+  dependencies:
+    "@secret-agent/commons" "1.4.1-alpha.4"
+    "@secret-agent/core-interfaces" "1.4.1-alpha.4"
+    "@secret-agent/emulate-browsers-base" "1.4.1-alpha.4"
+    tough-cookie "^4.0.0"
+
+"@secret-agent/puppet-interfaces@1.4.1-alpha.4":
+  version "1.4.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/@secret-agent/puppet-interfaces/-/puppet-interfaces-1.4.1-alpha.4.tgz#1f03c66feeb7504d40487fdab8a979853fc6e526"
+  integrity sha512-YoeWNESSPKmoRwdzlDmoKB2Z4rsNYhaflAgtLFTv2iax3T4udt7XKvEONJAdZgHG9pDKyKWdSQ7jtLHkL9EtCA==
+  dependencies:
+    "@secret-agent/core-interfaces" "1.4.1-alpha.4"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -3168,11 +3193,6 @@
   dependencies:
     "@types/minipass" "*"
     "@types/node" "*"
-
-"@types/tough-cookie@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-4.0.0.tgz#fef1904e4668b6e5ecee60c52cc6a078ffa6697d"
-  integrity sha512-I99sngh224D0M7XgW1s120zxCt3VYQ3IQsuw3P3jbq5GG4yc79+ZjyKznyOGIQrflfylLgcfekeZW/vk0yng6A==
 
 "@types/typography@^0.16.3":
   version "0.16.3"
@@ -4372,7 +4392,7 @@ async@0.9.x:
   resolved "https://registry.yarnpkg.com/async/-/async-0.9.2.tgz#aea74d5e61c1f899613bf64bda66d4c78f2fd17d"
   integrity sha1-rqdNXmHB+JlhO/ZL2mbUx48v0X0=
 
-async@^2.5.0, async@^2.6.1, async@^2.6.2:
+async@^2.6.1, async@^2.6.2:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.3.tgz#d72625e2344a3656e3a3ad4fa749fa83299d82ff"
   integrity sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==
@@ -4426,7 +4446,7 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@1.1.12:
+awaited-dom@1.1.12, awaited-dom@^1.1.12:
   version "1.1.12"
   resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.12.tgz#92ec9fa9916a689d299b9e3ad66a26271b2e9cd3"
   integrity sha512-N8CjUxxxqCOPQtcuRtedDw5Rt3G4E2ZjIqitQfgJ5DQ5PQ8QW/Kauu2B0UF2ZMXE4fzJbm2k5SU+XdO2WiCOGA==
@@ -16713,14 +16733,6 @@ source-list-map@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/source-list-map/-/source-list-map-2.0.1.tgz#3993bd873bfc48479cca9ea3a547835c7c154b34"
   integrity sha512-qnQ7gVMxGNxsiL4lEuJwe/To8UnK7fAnmbGEEH8RpLouuKbeEm0lhbQVFIrNSuB+G7tVrAlVsZgETT5nljf+Iw==
-
-source-map-loader@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/source-map-loader/-/source-map-loader-0.2.4.tgz#c18b0dc6e23bf66f6792437557c569a11e072271"
-  integrity sha512-OU6UJUty+i2JDpTItnizPrlpOIBLmQbWMuBg9q5bVtnHACqw1tn9nNwqJLbv0/00JjnJb/Ee5g5WS5vrRv7zIQ==
-  dependencies:
-    async "^2.5.0"
-    loader-utils "^1.1.0"
 
 source-map-resolve@^0.5.0:
   version "0.5.3"
