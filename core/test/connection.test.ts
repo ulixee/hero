@@ -95,7 +95,7 @@ describe('basic connection tests', () => {
     logError.mockImplementationOnce(() => null /* no op*/);
 
     const agent1 = new Agent({
-      browserEmulatorId: 'chrome-80',
+      browserEmulatorId: 'chrome-latest',
       connectionToCore: {
         host: await coreServer.address,
       },

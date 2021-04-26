@@ -3,7 +3,6 @@ import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Safari13 from '@secret-agent/emulate-safari-13';
 import Core from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
@@ -131,49 +130,6 @@ describe('UserProfile cookie tests', () => {
       expect(dlfCookies).toBe('cross1=1; cross2=2');
       expect(sameCookies).toBe('mainsite');
       await tab.close();
-    }
-  });
-
-  it('restores cookies for safari', async () => {
-    let profile: IUserProfile;
-    {
-      const meta = await connection.createSession({
-        browserEmulatorId: Safari13.id,
-      });
-      const core = Session.getTab(meta);
-      koaServer.get('/safari-cookie', ctx => {
-        ctx.cookies.set('safari', 'cookie');
-        ctx.body = `<body><h1>safari page</h1>
-<script type="text/javascript">
-document.cookie = 'secondcookie=1'
-</script>
-
-</body>`;
-      });
-
-      await core.goto(`${koaServer.baseUrl}/safari-cookie`);
-      await core.waitForLoad('PaintingStable');
-      profile = await connection.exportUserProfile(meta);
-      expect(profile.cookies).toHaveLength(2);
-      await core.close();
-    }
-    {
-      const meta = await connection.createSession({
-        userProfile: profile,
-        browserEmulatorId: Safari13.id,
-      });
-      const core = Session.getTab(meta);
-
-      let cookie = '';
-      koaServer.get('/safari-cookie2', ctx => {
-        cookie = ctx.cookies.get('safari');
-        ctx.body = `<body><h1>safari cookies page 2</h1></body>`;
-      });
-      await core.goto(`${koaServer.baseUrl}/safari-cookie2`);
-      await core.waitForLoad('PaintingStable');
-
-      expect(cookie).toBe('cookie');
-      await core.close();
     }
   });
 });

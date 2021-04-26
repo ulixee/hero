@@ -1,16 +1,18 @@
-import * as Helpers from '@secret-agent/testing/helpers';
+import * as Fs from 'fs';
 import { inspect } from 'util';
+import * as Helpers from '@secret-agent/testing/helpers';
 import Puppet from '@secret-agent/puppet';
 import { BrowserEmulators, GlobalPool } from '@secret-agent/core';
 import Log from '@secret-agent/commons/Logger';
-import * as navigatorJson from '@secret-agent/emulate-chrome-80/data/as-mac-os-10-14/window-navigator.json';
+import { chromeLatestDataDir } from '@secret-agent/emulate-chrome-latest';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');
 
 const { log } = Log(module);
 
-const { navigator } = navigatorJson;
+const navigatorJsonPath = `${chromeLatestDataDir}/as-mac-os-10-14/window-navigator.json`
+const { navigator } = JSON.parse(Fs.readFileSync(navigatorJsonPath, 'utf8')) as any;
 
 let puppet: Puppet;
 beforeAll(async () => {

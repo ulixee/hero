@@ -255,7 +255,7 @@ describe('user agent and platform', () => {
   });
 
   it('should maintain user agent and platform across navigations', async () => {
-    const agent = await handler.createAgent({ browserEmulatorId: 'chrome-80' });
+    const agent = await handler.createAgent({ browserEmulatorId: 'chrome-latest' });
     Helpers.needsClosing.push(agent);
 
     const agentMeta = await agent.meta;

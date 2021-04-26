@@ -92,7 +92,8 @@
       "replay/frontend",
       "testing",
       "commons",
-      "website"
+      "website",
+      "../browser-emulators/*"
     ]
   },
   "lint-staged": {
