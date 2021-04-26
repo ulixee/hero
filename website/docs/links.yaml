@@ -10,7 +10,7 @@
     - Agent
     - Handler
     - Tab
-    - Frame
+    - FrameEnvironment
     - Interactions
     - AwaitedDOM
     #- DetachedDOM
