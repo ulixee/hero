@@ -1,5 +1,4 @@
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
-import { Page } from '@secret-agent/puppet-chrome/lib/Page';
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
