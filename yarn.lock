@@ -2684,31 +2684,6 @@
   dependencies:
     "@octokit/openapi-types" "^5.3.2"
 
-"@secret-agent/core-interfaces@1.4.1-alpha.4":
-  version "1.4.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/@secret-agent/core-interfaces/-/core-interfaces-1.4.1-alpha.4.tgz#912792be401298b747981a75786c86d7622af393"
-  integrity sha512-cge9C5NhLEVU5b8aBniPBGwwTjtqSDOVS+vi+GeNmQlsfcC97s9bMxXymBWi/WU/5rAY7Tn4UfsoJLvQfqIwgg==
-  dependencies:
-    "@secret-agent/puppet-interfaces" "1.4.1-alpha.4"
-    awaited-dom "^1.1.12"
-
-"@secret-agent/emulate-safari-13@1.4.1-alpha.4":
-  version "1.4.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/@secret-agent/emulate-safari-13/-/emulate-safari-13-1.4.1-alpha.4.tgz#1a23f7c6d8a7d1bce0d7035813250ca5a07bf3c4"
-  integrity sha512-qYt/5YNTuBba5CsOhasb2L7telEY92t80x82dwe+rfppHzgHfLZvSQdVnH88AjLqxb+FetFxB5sP2Bm3zLxt1w==
-  dependencies:
-    "@secret-agent/commons" "1.4.1-alpha.4"
-    "@secret-agent/core-interfaces" "1.4.1-alpha.4"
-    "@secret-agent/emulate-browsers-base" "1.4.1-alpha.4"
-    tough-cookie "^4.0.0"
-
-"@secret-agent/puppet-interfaces@1.4.1-alpha.4":
-  version "1.4.1-alpha.4"
-  resolved "https://registry.yarnpkg.com/@secret-agent/puppet-interfaces/-/puppet-interfaces-1.4.1-alpha.4.tgz#1f03c66feeb7504d40487fdab8a979853fc6e526"
-  integrity sha512-YoeWNESSPKmoRwdzlDmoKB2Z4rsNYhaflAgtLFTv2iax3T4udt7XKvEONJAdZgHG9pDKyKWdSQ7jtLHkL9EtCA==
-  dependencies:
-    "@secret-agent/core-interfaces" "1.4.1-alpha.4"
-
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -4446,7 +4421,7 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@1.1.12, awaited-dom@^1.1.12:
+awaited-dom@1.1.12:
   version "1.1.12"
   resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.12.tgz#92ec9fa9916a689d299b9e3ad66a26271b2e9cd3"
   integrity sha512-N8CjUxxxqCOPQtcuRtedDw5Rt3G4E2ZjIqitQfgJ5DQ5PQ8QW/Kauu2B0UF2ZMXE4fzJbm2k5SU+XdO2WiCOGA==
