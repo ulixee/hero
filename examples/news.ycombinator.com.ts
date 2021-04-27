@@ -3,7 +3,7 @@ import agent from 'secret-agent';
 // process.env.SA_SHOW_BROWSER = 'true';
 
 async function run() {
-  await agent.configure({ browserEmulatorId: 'chrome-80' });
+  await agent.configure({ browserEmulatorId: 'chrome-latest' });
   await agent.goto('https://news.ycombinator.com/');
   await agent.waitForPaintingStable();
 

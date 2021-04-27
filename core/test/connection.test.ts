@@ -5,6 +5,8 @@ import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesM
 import DependencyInstaller from '@secret-agent/puppet/lib/DependencyInstaller';
 import * as ValidateHostDeps from '@secret-agent/puppet/lib/validateHostDependencies';
 import { Log } from '@secret-agent/commons/Logger';
+import ChromeLatest from '@secret-agent/emulate-chrome-latest';
+import BrowserEmulators from "@secret-agent/core/lib/BrowserEmulators";
 import CoreServer from '../server';
 
 const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
@@ -82,6 +84,12 @@ describe('basic connection tests', () => {
   });
 
   it('should throw an error informing how to install dependencies', async () => {
+    class ChromeTest extends ChromeLatest {
+      public static id = 'emulate-test';
+      public static engine = { ...ChromeLatest.engine };
+    }
+    BrowserEmulators.load(ChromeTest);
+
     logError.mockClear();
     validate.mockClear();
     validate.mockImplementationOnce(() => {
@@ -95,7 +103,7 @@ describe('basic connection tests', () => {
     logError.mockImplementationOnce(() => null /* no op*/);
 
     const agent1 = new Agent({
-      browserEmulatorId: 'chrome-80',
+      browserEmulatorId: 'emulate-test',
       connectionToCore: {
         host: await coreServer.address,
       },
@@ -109,7 +117,6 @@ describe('basic connection tests', () => {
         'CoreServer needs further setup to launch the browserEmulator. See server logs',
       );
     }
-
     expect(logError).toHaveBeenCalledTimes(1);
     const error = String((logError.mock.calls[0][1] as any).error);
     expect(error).toMatch('PuppetLaunchError');

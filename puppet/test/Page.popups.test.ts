@@ -1,9 +1,7 @@
-import Chrome80 from '@secret-agent/emulate-chrome-80';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
@@ -11,9 +9,7 @@ import defaultEmulation from './_defaultEmulation';
 
 const { log } = Log(module);
 
-describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
-  'Page.popups for %s@%s',
-  (browserEngine: IBrowserEngine) => {
+describe('Page.popups', () => {
     let server: TestServer;
     let page: ITestPage;
     let puppet: Puppet;
@@ -22,7 +18,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
 
     beforeAll(async () => {
       server = await TestServer.create(0);
-      puppet = new Puppet(browserEngine);
+      puppet = new Puppet(ChromeLatest.engine);
       await puppet.start();
       context = await puppet.newContext(
         {
@@ -36,7 +32,7 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         },
         log,
       );
-      capturePuppetContextLogs(context, `${browserEngine.fullVersion}-Page.popups-test`);
+      capturePuppetContextLogs(context, `${ChromeLatest.engine.fullVersion}-Page.popups-test`);
       context.on('page', event => {
         needsClosing.push(event.page);
       });
@@ -91,19 +87,9 @@ describe.each([[Chrome80.engine], [ChromeLatest.engine]])(
         needsClosing.push(popup);
         expect(await popup.evaluate(`navigator.userAgent`)).toBe('popupcity');
         expect(await popup.evaluate(`navigator.platform`)).toBe('Windows95');
-
-        // broken on windows for Chrome 80 (we have to polyfill)
-        const isLanguagesBroken = browserEngine === Chrome80.engine;
-        if (!isLanguagesBroken) {
-          expect(await popup.evaluate(`navigator.languages`)).toStrictEqual(['en-GB']);
-        }
       });
 
       it('calling window.open and window.close', async () => {
-        // chrome 80 bombs on disconnect
-        if (browserEngine === Chrome80.engine) {
-          return;
-        }
         await page.goto(server.emptyPage);
         await expect(
           page.evaluate(`(() => {

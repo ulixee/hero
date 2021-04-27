@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@secret-agent/core": "1.4.1-alpha.4",
-    "@secret-agent/emulate-chrome-80": "1.4.1-alpha.4",
+    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.4",
     "@secret-agent/testing": "1.4.1-alpha.4"
   }
 }
