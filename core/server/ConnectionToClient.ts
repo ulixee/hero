@@ -12,7 +12,6 @@ import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
-import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
@@ -324,7 +323,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   }
 
   private isLaunchError(error: Error): boolean {
-    return error instanceof PuppetLaunchError || error instanceof DependenciesMissingError;
+    return error instanceof PuppetLaunchError || error.name === 'DependenciesMissingError';
   }
 
   private serializeError(error: Error): object {

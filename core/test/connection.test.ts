@@ -1,12 +1,12 @@
 import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
-import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
-import DependencyInstaller from '@secret-agent/puppet/lib/DependencyInstaller';
-import * as ValidateHostDeps from '@secret-agent/puppet/lib/validateHostDependencies';
 import { Log } from '@secret-agent/commons/Logger';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
+import { DependenciesMissingError } from '@secret-agent/emulate-browsers-installer/lib/DependenciesMissingError';
+import DependencyInstaller from '@secret-agent/emulate-browsers-installer/lib/DependencyInstaller';
+import * as ValidateHostDeps from '@secret-agent/emulate-browsers-installer/lib/validateHostDependencies';
 import CoreServer from '../server';
 
 const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');

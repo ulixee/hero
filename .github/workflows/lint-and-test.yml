@@ -131,7 +131,7 @@ jobs:
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         working-directory: ./build
-        run: sudo $(npx puppet-install-deps)
+        run: sudo $(npx install-browser-deps)
 
       - name: Run tests
         run: yarn jest --testTimeout=60000 --maxWorkers=2

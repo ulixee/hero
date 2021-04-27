@@ -1,9 +1,16 @@
 import * as ProgressBar from 'progress';
 import { IBrowserEngineConfig } from '@secret-agent/interfaces/IBrowserEngine';
-import { EngineFetcher } from './EngineFetcher';
-import { validateHostRequirements } from './validateHostDependencies';
+import { EngineFetcher } from './lib/EngineFetcher';
+import { validateHostRequirements } from './lib/validateHostDependencies';
 
-export default async function installEngineWithProgress(engine: IBrowserEngineConfig) {
+export default function install(engine: IBrowserEngineConfig) {
+  installEngineWithProgress(engine).catch(error => {
+    console.log('ERROR installing engine', error);
+    process.exit(1);
+  });
+}
+
+async function installEngineWithProgress(engine: IBrowserEngineConfig): Promise<void> {
   if (shouldSkipDownload()) return;
 
   const { fullVersion, name, executablePathEnvVar } = engine;

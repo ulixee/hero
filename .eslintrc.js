@@ -114,6 +114,7 @@ module.exports = {
     {
       files: [
         '**/install*',
+        '**/installer/index*',
         '**/*Install*',
         '**/prepare-*.js',
         '**/scripts/*.ts',

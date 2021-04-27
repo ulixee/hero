@@ -4,14 +4,11 @@ import Log from '@secret-agent/commons/Logger';
 import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import { existsSync } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import launchProcess from './lib/launchProcess';
-import { validateHostRequirements } from './lib/validateHostDependencies';
-import { EngineFetcher } from './lib/EngineFetcher';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
@@ -89,19 +86,12 @@ export default class Puppet {
     launcher: IPuppetLauncher,
     args: IPuppetLaunchArgs,
   ): Promise<IPuppetBrowser> {
-    const executablePath = this.engine.executablePath;
-
-    if (!existsSync(executablePath)) {
-      throw await this.noExecutableAtPathError(executablePath);
-    }
-
     try {
       const launchArgs = launcher.getLaunchArgs(args, this.engine);
 
-      // exists, but can't launch, try to launch
-      await validateHostRequirements(this.engine);
+      if (this.engine.verifyLaunchable) await this.engine.verifyLaunchable();
 
-      const launchedProcess = await launchProcess(executablePath, launchArgs, {});
+      const launchedProcess = await launchProcess(this.engine.executablePath, launchArgs, {});
 
       const browser = await launcher.createPuppet(launchedProcess, this.engine);
 
@@ -117,29 +107,5 @@ export default class Puppet {
         launchError.isSandboxError,
       );
     }
-  }
-
-  private noExecutableAtPathError(executablePath: string): Error {
-    const engineFetcher = new EngineFetcher(this.engine.name, this.engine.fullVersion);
-
-    let remedyMessage = `No executable exists at "${executablePath}"`;
-
-    // If this is the default install path, suggest further installation directions
-    if (executablePath === engineFetcher.executablePath) {
-      const majorBrowserVersion = this.engine.fullVersion.split('.').shift();
-      remedyMessage = `Please re-install the browser engine:
--------------------------------------------------
--------------- NPM INSTALL ----------------------
--------------------------------------------------
-
- npm install @secret-agent/emulate-${this.engine.name}-${majorBrowserVersion}
-
--------------------------------------------------
-`;
-    }
-
-    return new Error(`Failed to launch ${this.engine.name} ${this.engine.fullVersion}:
-
-${remedyMessage}`);
   }
 }

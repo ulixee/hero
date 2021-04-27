@@ -6,11 +6,13 @@
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.4",
     "@secret-agent/interfaces": "1.4.1-alpha.4",
-    "@secret-agent/puppet": "1.4.1-alpha.4"
+    "progress": "^2.0.3",
+    "tar": "^6.1.0"
   },
   "devDependencies": {
     "@secret-agent/core": "1.4.1-alpha.4",
     "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.4",
-    "@secret-agent/testing": "1.4.1-alpha.4"
+    "@secret-agent/testing": "1.4.1-alpha.4",
+    "@secret-agent/puppet": "1.4.1-alpha.4"
   }
 }
