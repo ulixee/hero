@@ -185,13 +185,6 @@ export default class FrameEnvironment {
     const coreFrame = await getCoreFrameEnvironment(this);
     await coreFrame.waitForLocation(trigger, options);
   }
-
-  public toJSON(): any {
-    // return empty so we can
-    return {
-      type: 'FrameEnvironment',
-    };
-  }
 }
 
 export function getFrameState(object: any): IState {

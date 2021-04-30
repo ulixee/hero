@@ -23,6 +23,7 @@ import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import IDevtoolsSession, {
+  DevtoolsEvents,
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
 } from '@secret-agent/interfaces/IDevtoolsSession';
@@ -35,7 +36,7 @@ import RemoteObject = Protocol.Runtime.RemoteObject;
  *
  * https://chromedevtools.github.io/devtools-protocol/
  */
-export class DevtoolsSession extends EventEmitter implements IDevtoolsSession {
+export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implements IDevtoolsSession {
   public connection: Connection;
   public messageEvents = new TypedEventEmitter<IMessageEvents>();
   public get id() {
@@ -88,7 +89,7 @@ export class DevtoolsSession extends EventEmitter implements IDevtoolsSession {
   onMessage(object: IDevtoolsResponseMessage & IDevtoolsEventMessage): void {
     this.messageEvents.emit('receive', { ...object });
     if (!object.id) {
-      this.emit(object.method, object.params);
+      this.emit(object.method as any, object.params);
       return;
     }
 

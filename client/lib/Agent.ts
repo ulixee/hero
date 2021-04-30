@@ -336,13 +336,6 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       throw err;
     }
   }
-
-  public toJSON(): any {
-    // return empty so we can
-    return {
-      type: 'Agent',
-    };
-  }
 }
 
 // This class will lazily connect to core on first access of the tab properties

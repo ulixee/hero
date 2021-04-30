@@ -9,4 +9,4 @@ type FilterOutFlags<Base, Condition> = {
 type OnlyProperties<Base> = FilterOutFlags<Base, (...args: any[]) => any>[keyof Base];
 type AllowedNames<Base, Condition> = FilterFlags<Base, Condition>[keyof Base];
 
-export { FilterFlags, AllowedNames, OnlyProperties };
+export { FilterOutFlags, FilterFlags, AllowedNames, OnlyProperties };

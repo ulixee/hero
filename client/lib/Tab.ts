@@ -221,13 +221,6 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     connection.closeTab(this);
     return coreTab.then(x => x.close());
   }
-
-  public toJSON(): any {
-    // return empty so we can
-    return {
-      type: 'Tab',
-    };
-  }
 }
 
 async function getOrCreateFrameEnvironment(

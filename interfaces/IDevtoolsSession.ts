@@ -1,10 +1,28 @@
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
+import ITypedEventEmitter from './ITypedEventEmitter';
+import { FilterFlags, FilterOutFlags } from './AllowedNames';
 
-export default interface IDevtoolsSession {
+export declare type DevtoolsEvents = {
+  [Key in keyof ProtocolMapping.Events]: ProtocolMapping.Events[Key][0];
+} & { disconnected: void };
+
+type DevtoolsCommandParams = {
+  [Key in keyof ProtocolMapping.Commands]: ProtocolMapping.Commands[Key]['paramsType'][0];
+};
+type OptionalParamsCommands = keyof FilterFlags<DevtoolsCommandParams, void | never>;
+type RequiredParamsCommands = keyof FilterOutFlags<DevtoolsCommandParams, void | never>;
+
+export default interface IDevtoolsSession
+  extends Omit<ITypedEventEmitter<DevtoolsEvents>, 'waitOn'> {
   id: string;
-  send<T extends keyof ProtocolMapping.Commands>(
+  send<T extends RequiredParamsCommands>(
     method: T,
-    params: ProtocolMapping.Commands[T]['paramsType'][0],
+    params: DevtoolsCommandParams[T],
+    sendInitiator?: object,
+  ): Promise<ProtocolMapping.Commands[T]['returnType']>;
+  send<T extends OptionalParamsCommands>(
+    method: T,
+    params?: DevtoolsCommandParams[T],
     sendInitiator?: object,
   ): Promise<ProtocolMapping.Commands[T]['returnType']>;
 
