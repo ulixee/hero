@@ -40,14 +40,12 @@ export default class ConsoleMessage {
   }
 
   static exceptionToError(exceptionDetails: ExceptionDetails) {
-    let message = exceptionDetails.text;
+    const error = new Error(exceptionDetails.text);
     if (exceptionDetails.exception) {
-      message = stringifyRemoteObject(exceptionDetails.exception);
+      error.stack = stringifyRemoteObject(exceptionDetails.exception);
     } else if (exceptionDetails.stackTrace) {
-      message += this.printStackTrace(exceptionDetails.stackTrace);
+      error.stack = this.printStackTrace(exceptionDetails.stackTrace);
     }
-    const error = new Error(message);
-    error.stack = message;
     return error;
   }
 

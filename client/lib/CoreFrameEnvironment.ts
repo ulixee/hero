@@ -6,10 +6,11 @@ import { ICookie } from '@secret-agent/interfaces/ICookie';
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from 'awaited-dom/base/IAttachedState';
+import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {
@@ -48,11 +49,11 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.getJsValue', expression);
   }
 
-  public async fetch(request: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async fetch(request: string | number, init?: IRequestInit): Promise<INodePointer> {
     return await this.commandQueue.run('FrameEnvironment.fetch', request, init);
   }
 
-  public async createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
     return await this.commandQueue.run('FrameEnvironment.createRequest', input, init);
   }
 
@@ -80,8 +81,8 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.removeCookie', name);
   }
 
-  public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
-    return await this.commandQueue.run('FrameEnvironment.isElementVisible', jsPath);
+  public async getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
+    return await this.commandQueue.run('FrameEnvironment.getComputedVisibility', jsPath);
   }
 
   public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {

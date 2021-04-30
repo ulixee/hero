@@ -79,7 +79,7 @@ export function createWebsocketResource(
   const resource = new WebsocketResource();
   const request = createResourceRequest(coreTab, resourceMeta.id);
   const response = createResourceResponse(coreTab, resourceMeta.id);
-  const awaitedPath = new AwaitedPath('resources', String(resourceMeta.id));
+  const awaitedPath = new AwaitedPath(null, 'resources', String(resourceMeta.id));
   setState(resource, { coreTab, resource: resourceMeta, request, response, awaitedPath });
   return resource;
 }

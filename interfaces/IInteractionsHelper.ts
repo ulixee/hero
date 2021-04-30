@@ -4,12 +4,25 @@ import IRect from './IRect';
 import IPoint from './IPoint';
 import IViewport from './IViewport';
 import { IBoundLog } from './ILog';
+import { INodeVisibility } from './INodeVisibility';
 
 export default interface IInteractionsHelper {
   lookupBoundingRect(
     mousePosition: IMousePosition,
-  ): Promise<IRect & { elementTag?: string; nodeId?: number; isNodeVisible?: boolean }>;
-  createMouseupTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<IMouseUpResult> }>;
+    throwIfNotPresent?: boolean,
+    includeNodeVisibility?: boolean,
+  ): Promise<
+    IRect & {
+      elementTag?: string;
+      nodeId?: number;
+      nodeVisibility?: INodeVisibility;
+    }
+  >;
+  createMouseupTrigger(
+    nodeId: number,
+  ): Promise<{
+    didTrigger: (mousePosition: IMousePosition, throwOnFail?: boolean) => Promise<IMouseUpResult>;
+  }>;
   createMouseoverTrigger(nodeId: number): Promise<{ didTrigger: () => Promise<boolean> }>;
   mousePosition: IPoint;
   scrollOffset: Promise<IPoint>;

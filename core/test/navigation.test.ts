@@ -35,12 +35,9 @@ describe('basic Navigation tests', () => {
     const { tab } = await createSession();
     await tab.goto(koaServer.baseUrl);
 
-    const elem = await tab.execJsPath(
-      ['document', ['querySelector', 'a']],
-      ['nodeName', 'baseURI'],
-    );
+    const elem = await tab.execJsPath(['document', ['querySelector', 'a'], 'nodeName']);
     const hrefAttribute = await tab.execJsPath(['document', ['querySelector', 'a'], 'href']);
-    expect(elem.value).toMatchObject({ nodeName: 'A' });
+    expect(elem.value).toBe('A');
     expect(hrefAttribute.value).toBe('https://www.iana.org/domains/example');
   });
 
@@ -524,18 +521,20 @@ describe('PaintingStable tests', () => {
     });
 
     await tab.goto(`${koaServer.baseUrl}/grid/index.html`);
-    const trs = await tab.execJsPath<{ length: number }>(
-      ['document', ['querySelectorAll', '.record']],
-      ['length'],
-    );
+    const trs = await tab.execJsPath<number>([
+      'document',
+      ['querySelectorAll', '.record'],
+      'length',
+    ]);
 
-    expect(trs.value.length).toBe(0);
+    expect(trs.value).toBe(0);
     await tab.waitForLoad(LocationStatus.PaintingStable);
-    const trs2 = await tab.execJsPath<{ length: number }>(
-      ['document', ['querySelectorAll', '.record']],
-      ['length'],
-    );
-    expect(trs2.value.length).toBe(200 * 4);
+    const trs2 = await tab.execJsPath<number>([
+      'document',
+      ['querySelectorAll', '.record'],
+      'length',
+    ]);
+    expect(trs2.value).toBe(200 * 4);
   });
 });
 

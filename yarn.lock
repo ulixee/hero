@@ -4421,10 +4421,10 @@ autoprefixer@^9.4.7, autoprefixer@^9.8.6:
     postcss "^7.0.32"
     postcss-value-parser "^4.1.0"
 
-awaited-dom@1.1.12:
-  version "1.1.12"
-  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.1.12.tgz#92ec9fa9916a689d299b9e3ad66a26271b2e9cd3"
-  integrity sha512-N8CjUxxxqCOPQtcuRtedDw5Rt3G4E2ZjIqitQfgJ5DQ5PQ8QW/Kauu2B0UF2ZMXE4fzJbm2k5SU+XdO2WiCOGA==
+awaited-dom@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/awaited-dom/-/awaited-dom-1.2.1.tgz#1d8a5127d9df7e6988b5781db89a0eb53c785b58"
+  integrity sha512-b9kKF8pyHWK3JMODk+/bN1psPSAD0z9DxN2VlKGUc1RFCGotulxLYcoLLRFezgYR5Ph6fz1GdX4YuJRhvtOPyw==
 
 aws-sign2@~0.7.0:
   version "0.7.0"

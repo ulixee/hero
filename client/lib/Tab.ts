@@ -11,9 +11,10 @@ import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOp
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -160,8 +161,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return await this.mainFrameEnvironment.getJsValue(path);
   }
 
+  // @deprecated 2021-04-30: Replaced with getComputedVisibility
   public async isElementVisible(element: IElementIsolate): Promise<boolean> {
-    return await this.mainFrameEnvironment.isElementVisible(element);
+    return await this.getComputedVisibility(element as any).then(x => x.isVisible);
+  }
+
+  public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
+    return await this.mainFrameEnvironment.getComputedVisibility(node);
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

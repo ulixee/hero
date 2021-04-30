@@ -57,7 +57,7 @@ export default class DomOverridesBuilder {
 
     if (name.startsWith('polyfill.')) {
       wrapper = `// if main frame and HTML element not loaded yet, give it a sec
-  if (window.self === window.top && !document.documentElement) {
+  if (!document.documentElement) {
     new MutationObserver((list, observer) => {
       observer.disconnect();
       ${wrapper}

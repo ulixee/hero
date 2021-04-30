@@ -9,7 +9,7 @@ class MouseEvents {
   public static listenFor(mouseEvent: 'mouseup' | 'mouseover', nodeId: number) {
     this.clearEvent(mouseEvent);
 
-    const node = NodeTracker.getNodeWithId(nodeId);
+    const node = NodeTracker.getWatchedNodeWithId(nodeId);
     if (!node) throw new Error('Node not found');
 
     if (mouseEvent === 'mouseover') {
@@ -22,20 +22,30 @@ class MouseEvents {
       });
     } else {
       this.pendingMouseup = new EventResolvable(nodeId, event => {
-        const targetNodeId = event.target
-          ? NodeTracker.assignNodeId(event.target as Node)
-          : undefined;
+        const targetNodeId = event.target ? NodeTracker.watchNode(event.target as Node) : undefined;
         const relatedTargetNodeId = event.relatedTarget
-          ? NodeTracker.assignNodeId(event.relatedTarget as Node)
+          ? NodeTracker.watchNode(event.relatedTarget as Node)
           : undefined;
 
-        this.pendingMouseup?.resolve({
+        const result: IMouseUpResult = {
           pageX: event.pageX - window.pageXOffset,
           pageY: event.pageY - window.pageYOffset,
           targetNodeId,
           relatedTargetNodeId,
           didClickLocation: node.contains(event.target as Node) || node === event.target,
-        });
+        };
+
+        if (!result.didClickLocation) {
+          // @ts-ignore
+          result.targetNodePreview = generateNodePreview(event.target);
+          // @ts-ignore
+          result.expectedNodePreview = generateNodePreview(node);
+          const expectedNode = new ObjectAtPath();
+          expectedNode.objectAtPath = node;
+          result.expectedNodeVisibility = expectedNode.getComputedVisibility();
+        }
+
+        this.pendingMouseup?.resolve(result);
       });
 
       window.addEventListener('mouseup', this.pendingMouseup.onEventFn, {
@@ -51,11 +61,7 @@ class MouseEvents {
         throw new Error(`${mouseEvent.toUpperCase()} listener not found`);
       }
 
-      return TSON.stringify(pendingEvent.trigger);
-    } catch (error) {
-      return TSON.stringify({
-        error: String(error),
-      });
+      return pendingEvent.trigger;
     } finally {
       this.clearEvent(mouseEvent);
     }
@@ -68,7 +74,7 @@ class MouseEvents {
 
   private static clearPendingMouseover() {
     if (this.pendingMouseover) {
-      const node = NodeTracker.getNodeWithId(this.pendingMouseover.nodeId);
+      const node = NodeTracker.getWatchedNodeWithId(this.pendingMouseover.nodeId);
       node?.removeEventListener('mouseover', this.pendingMouseover.onEventFn);
       this.pendingMouseover = null;
     }

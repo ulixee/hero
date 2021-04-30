@@ -30,7 +30,7 @@ it('can operate when unsafe eval not on', async () => {
   await tab.goto(inputUrl);
   const input = await tab.execJsPath(['document', ['querySelector', 'input'], 'value']);
   expect(input.value).toBe('');
-  const x = await tab.execJsPath([['document.querySelector', 'body'], 'scrollTop']);
+  const x = await tab.execJsPath(['document', ['querySelector', 'body'], 'scrollTop']);
   expect(x.value).toBe(0);
   await session.close();
 });

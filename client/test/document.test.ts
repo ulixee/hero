@@ -3,7 +3,7 @@ import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
+import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
 import { Helpers } from '@secret-agent/testing';
 import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
@@ -31,11 +31,11 @@ describe('document tests', () => {
         if (command === 'FrameEnvironment.execJsPath') {
           const [jsPath] = args;
           const lastPath = jsPath[jsPath.length - 1];
-          if (lastPath && lastPath[0] === getAttachedStateFnName) {
+          if (lastPath && lastPath[0] === getNodePointerFnName) {
             return {
               data: {
                 value: null,
-                attachedState: { id: 1 },
+                nodePointer: { id: 1 },
               } as IExecJsPathResult,
             };
           }
@@ -83,9 +83,7 @@ describe('document tests', () => {
       'Session.close',
       'Core.disconnect',
     ]);
-    expect(outgoingCommands[3][0].args).toMatchObject([
-      [...jsPath, [getAttachedStateFnName, undefined]],
-    ]);
+    expect(outgoingCommands[3][0].args).toMatchObject([[...jsPath, [getNodePointerFnName]]]);
     expect(outgoingCommands[4][0].args).toMatchObject([[1, 'tagName']]);
   });
 });

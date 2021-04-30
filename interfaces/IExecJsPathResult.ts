@@ -1,6 +1,9 @@
-import IAttachedState from 'awaited-dom/base/IAttachedState';
+import INodePointer from 'awaited-dom/base/INodePointer';
+import { IJsPathError } from './IJsPathError';
 
 export default interface IExecJsPathResult<T = any> {
   value: T;
-  attachedState?: IAttachedState;
+  isValueSerialized?: boolean;
+  pathError?: IJsPathError;
+  nodePointer?: INodePointer;
 }

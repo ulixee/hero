@@ -28,6 +28,7 @@ module.exports = {
   ],
   globalTeardown: './jest.teardown.js',
   globalSetup: './jest.setup.js',
+  setupFilesAfterEnv: ['./jest.setupPerTest.js'],
   testTimeout: 10e3,
   reporters: ['default', 'jest-summary-reporter'],
   roots: workspaces.map(x => `${x}/`),

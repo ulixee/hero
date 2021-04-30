@@ -216,22 +216,36 @@ Executes a navigation request for the document associated with the parent Secret
 
 #### **Returns**: [`Promise<Resource>`](/docs/advanced/resource) The loaded resource representing this page.
 
-### tab.isElementVisible*(element)* {#is-element-visible}
+### tab.getComputedVisibility*(node)* {#get-computed-visibility}
 
-Determines if an element from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether an element has:
+Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether a node (or containing element) has:
 
 - layout: width, height, x and y.
 - opacity: non-zero opacity.
 - css visibility: the element does not have a computed style where visibility=hidden.
 - no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
+- on the visible screen (not beyond the horizontal or vertical viewport)
 
-Alias for [tab.mainFrameEnvironment.isElementVisible](/docs/basic-interfaces/frame-environment#is-element-visible).
+Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interfaces/frame-environment#get-computed-visibility).
 
 #### **Arguments**:
 
-- element [`SuperElement`](/docs/awaited-dom/super-element). The element to determine visibility.
+- node [`SuperNode`](/docs/awaited-dom/super-node). The node to determine visibility.
 
-#### **Returns**: `Promise<boolean>` Whether the element is visible to an end user.
+#### **Returns**: `Promise<INodeVisibility>` Boolean values indicating if the node (or closest element) is visible to an end user.
+
+- INodeVisibility `object`
+  - isVisible `boolean`. Is the node ultimately visible.
+  - isFound `boolean`. Was the node found in the DOM.
+  - isOnscreenVertical `boolean`. The node is on-screen vertically.
+  - isOnscreenHorizontal `boolean`. The node is on-screen horizontally.
+  - hasContainingElement `boolean`. The node is an Element or has a containing Element providing layout. 
+  - isConnected `boolean`. The node is connected to the DOM.
+  - hasCssOpacity `boolean`. The display `opacity` property is not "0".
+  - hasCssDisplay `boolean`. The display `display` property is not "none".
+  - hasCssVisibility `boolean`. The visibility `style` property is not "hidden".
+  - hasDimensions `boolean`. The node has width and height.
+  - isUnobstructedByOtherElements `boolean`. The node is not hidden or obscured > 50% by another element.
 
 ### tab.reload*(timeoutMs?)* {#reload}
 
@@ -281,7 +295,7 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/basic-interfaces/frame
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visibility).
 
 #### **Returns**: `Promise`
 

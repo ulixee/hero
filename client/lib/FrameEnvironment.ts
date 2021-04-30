@@ -17,7 +17,8 @@ import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Locat
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
@@ -89,19 +90,19 @@ export default class FrameEnvironment {
   }
 
   public get document(): SuperDocument {
-    const awaitedPath = new AwaitedPath('document');
+    const awaitedPath = new AwaitedPath(null, 'document');
     const awaitedOptions = { ...getState(this) };
     return createSuperDocument<IAwaitedOptions>(awaitedPath, awaitedOptions) as SuperDocument;
   }
 
   public get localStorage(): Storage {
-    const awaitedPath = new AwaitedPath('localStorage');
+    const awaitedPath = new AwaitedPath(null, 'localStorage');
     const awaitedOptions = { ...getState(this) };
     return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
   }
 
   public get sessionStorage(): Storage {
-    const awaitedPath = new AwaitedPath('sessionStorage');
+    const awaitedPath = new AwaitedPath(null, 'sessionStorage');
     const awaitedOptions = { ...getState(this) };
     return createStorage<IAwaitedOptions>(awaitedPath, awaitedOptions) as Storage;
   }
@@ -115,9 +116,9 @@ export default class FrameEnvironment {
   public async fetch(request: Request | string, init?: IRequestInit): Promise<Response> {
     const requestInput = await getRequestIdOrUrl(request);
     const coreFrame = await getCoreFrameEnvironment(this);
-    const attachedState = await coreFrame.fetch(requestInput, init);
+    const nodePointer = await coreFrame.fetch(requestInput, init);
 
-    const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
+    const awaitedPath = new AwaitedPath(null).withNodeId(null, nodePointer.id);
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
@@ -128,7 +129,7 @@ export default class FrameEnvironment {
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
     const { awaitedPath: elementAwaitedPath } = awaitedPathState.getState(element);
-    const awaitedPath = new AwaitedPath('window', [
+    const awaitedPath = new AwaitedPath(null, 'window', [
       'getComputedStyle',
       getAwaitedPathAsMethodArg(elementAwaitedPath),
       pseudoElement,
@@ -140,15 +141,21 @@ export default class FrameEnvironment {
     ) as CSSStyleDeclaration;
   }
 
+  public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
+    if (!node) return { isVisible: false, nodeExists: false };
+    const { awaitedPath } = awaitedPathState.getState(node);
+    const coreFrame = await getCoreFrameEnvironment(this);
+    return coreFrame.getComputedVisibility(awaitedPath.toJSON());
+  }
+
+  // @deprecated 2021-04-30: Replaced with getComputedVisibility
+  public async isElementVisible(element: IElementIsolate): Promise<boolean> {
+    return await this.getComputedVisibility(element as any).then(x => x.isVisible);
+  }
+
   public async getJsValue<T>(path: string): Promise<T> {
     const coreFrame = await getCoreFrameEnvironment(this);
     return coreFrame.getJsValue<T>(path);
-  }
-
-  public async isElementVisible(element: IElementIsolate): Promise<boolean> {
-    const { awaitedPath } = awaitedPathState.getState(element);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    return coreFrame.isElementVisible(awaitedPath.toJSON());
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
@@ -165,6 +172,7 @@ export default class FrameEnvironment {
     element: ISuperElement,
     options?: IWaitForElementOptions,
   ): Promise<void> {
+    if (!element) throw new Error('Element being waited for is null');
     const { awaitedPath } = awaitedPathState.getState(element);
     const coreFrame = await getCoreFrameEnvironment(this);
     await coreFrame.waitForElement(awaitedPath.toJSON(), options);

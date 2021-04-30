@@ -316,9 +316,9 @@ Alias for [Tab.goForward](/docs/basic-interfaces/tab#forward)
 
 Alias for [Tab.goto](/docs/basic-interfaces/tab#goto)
 
-### agent.isElementVisible*(element)*
+### agent.getComputedVisibility*(element)*
 
-Alias for [Tab.isElementVisible](/docs/basic-interfaces/tab#is-element-visible)
+Alias for [Tab.getComputedVisibility](/docs/basic-interfaces/tab#get-computed-visibility)
 
 ### agent.reload*(timeoutMs?)*
 
