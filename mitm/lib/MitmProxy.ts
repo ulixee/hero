@@ -233,6 +233,7 @@ export default class MitmProxy {
     socket: net.Socket,
     head: Buffer,
   ): Promise<void> {
+    if (this.isClosing) return;
     const sessionId = this.readSessionId(request.headers, request.socket.remotePort);
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
@@ -422,6 +423,8 @@ export default class MitmProxy {
 
   private static async getCertificate(host: string): Promise<{ cert: string; key: string }> {
     const { networkDb, certificateGenerator } = this;
+
+    if (!certificateGenerator) return null;
 
     await certificateGenerator.waitForConnected;
     const key = await certificateGenerator.getPrivateKey();
