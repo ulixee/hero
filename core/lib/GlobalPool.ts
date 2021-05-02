@@ -126,7 +126,7 @@ export default class GlobalPool {
     const browserOrError = await puppet.start({
       ...this.defaultLaunchArgs,
       proxyPort: this.mitmServer.port,
-      showBrowser: engine.isHeaded,
+      showBrowser: engine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
     });
     if (browserOrError instanceof Error) throw browserOrError;
     return puppet;
