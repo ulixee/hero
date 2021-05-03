@@ -126,12 +126,15 @@ export default class Interactor implements IInteractionsHelper {
         height: 1,
       };
     }
+    if (mousePosition === null) {
+      throw new Error('Null mouse position provided to agent.interact');
+    }
     const jsPath = new JsPath(this.frameEnvironment, mousePosition);
     const rectResult = await jsPath.getClientRect(includeNodeVisibility);
     const rect = rectResult.value;
     const nodePointer = rectResult.nodePointer as INodePointer;
 
-    if (!nodePointer && throwIfNotPresent)
+    if (!nodePointer?.id && throwIfNotPresent)
       throw new Error(
         `The provided interaction->mousePosition did not match any nodes (${formatJsPath(
           mousePosition,
@@ -214,6 +217,11 @@ export default class Interactor implements IInteractionsHelper {
       case InteractionCommand.click:
       case InteractionCommand.doubleclick: {
         const { delayMillis, mouseButton, command, mousePosition } = interaction;
+        if (!mousePosition) {
+          throw new Error(
+            `Null element provided to interact.click. Please double-check your selector`,
+          );
+        }
         const button = mouseButton || 'left';
         const clickCount = command === InteractionCommand.doubleclick ? 2 : 1;
         const isCoordinates = isMousePositionCoordinate(mousePosition);

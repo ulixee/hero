@@ -129,6 +129,7 @@ export default class HumanEmulatorGhost {
 
     const targetRect = await helper.lookupBoundingRect(
       nodeId ? [nodeId] : interactionStep.mousePosition,
+      true,
     );
 
     const targetPoint = getRandomRectPoint(targetRect, HumanEmulatorGhost.boxPaddingPercent);
@@ -136,7 +137,7 @@ export default class HumanEmulatorGhost {
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, run, helper);
 
     const finalRect = didMoveMouse
-      ? await helper.lookupBoundingRect([targetRect.nodeId], true)
+      ? await helper.lookupBoundingRect([targetRect.nodeId], true, true)
       : targetRect;
 
     const isFinalRectVisible = this.isRectVisible(finalRect, helper);
