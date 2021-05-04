@@ -1,7 +1,8 @@
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import { IInteractionGroup } from '@secret-agent/interfaces/IInteractions';
 import { getKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import getAttachedStateFnName from '@secret-agent/interfaces/getAttachedStateFnName';
+import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {
@@ -80,8 +81,26 @@ export default class CommandFormatter {
       result: undefined,
     };
 
-    if (meta.resultType && meta.result) {
+    if (meta.result && meta.name === 'takeScreenshot') {
       const result = JSON.parse(meta.result);
+      const imageType = command.label.includes('jpeg') ? 'jpeg' : 'png';
+      const base64 = result.__type === 'Buffer64' ? result.value : result.data;
+      command.result = `data:image/${imageType}; base64,${base64}`;
+      command.resultType = 'image';
+    } else if (meta.result && meta.resultType?.toLowerCase().includes('error')) {
+      const result = TypeSerializer.parse(meta.result);
+
+      command.isError = true;
+      command.result = result.message;
+      if (result.pathState) {
+        const { step, index } = result.pathState;
+        command.failedJsPathStepIndex = index;
+        command.failedJsPathStep = Array.isArray(step)
+          ? `${step[0]}(${step.slice(1).map(x => JSON.stringify(x))})`
+          : step;
+      }
+    } else if (meta.resultType && meta.result) {
+      const result = TypeSerializer.parse(meta.result);
       command.result = result;
       if (meta.resultType === 'Object') {
         const resultType = typeof result.value;
@@ -94,35 +113,15 @@ export default class CommandFormatter {
           command.result = result.value;
         }
 
-        if (result.attachedState) {
-          command.resultNodeIds = [result.attachedState.id];
-          command.resultNodeType = result.attachedState.type;
-          if (result.attachedState.iterableItems) {
-            command.result = result.attachedState.iterableItems;
+        if (result.nodePointer) {
+          command.resultNodeIds = [result.nodePointer.id];
+          command.resultNodeType = result.nodePointer.type;
+          if (result.nodePointer.iterableItems) {
+            command.result = result.nodePointer.iterableItems;
           }
-          if (result.attachedState.iterableIds) {
-            command.resultNodeIds = result.attachedState.iterableIds;
+          if (result.nodePointer.iterableIsState) {
+            command.resultNodeIds = result.nodePointer.iterableItems.map(x => x.id);
           }
-        }
-      }
-
-      if (result?.type === 'Buffer' && meta.name === 'takeScreenshot') {
-        const imageType = command.label.includes('jpeg') ? 'jpeg' : 'png';
-        command.result = `data:image/${imageType}; base64,${Buffer.from(result.data).toString(
-          'base64',
-        )}`;
-        command.resultType = 'image';
-      }
-
-      if (meta.resultType.toLowerCase().includes('error')) {
-        command.isError = true;
-        command.result = result.message;
-        if (result.pathState) {
-          const { step, index } = result.pathState;
-          command.failedJsPathStepIndex = index;
-          command.failedJsPathStep = Array.isArray(step)
-            ? `${step[0]}(${step.slice(1).map(x => JSON.stringify(x))})`
-            : step;
         }
       }
     }
@@ -143,7 +142,7 @@ export default class CommandFormatter {
     }
 
     // we have shell objects occasionally coming back. hide from ui
-    if (meta.args?.includes(getAttachedStateFnName)) {
+    if (meta.args?.includes(getNodePointerFnName)) {
       command.result = undefined;
     }
     return command;
@@ -157,7 +156,7 @@ export function formatJsPath(path: any) {
         return '<previouslySelectedNode>';
       }
       if (Array.isArray(x)) {
-        if (x[0] === getAttachedStateFnName) return;
+        if (x[0] === getNodePointerFnName) return;
         return `${x[0]}(${x.slice(1).map(y => JSON.stringify(y))})`;
       }
       return x;

@@ -5,6 +5,7 @@ import Protocol from 'devtools-protocol';
 import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/interfaces/IPuppetWorker';
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { BrowserContext } from './BrowserContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
@@ -80,6 +81,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       this.devtoolsSession.send('Runtime.enable'),
       emulator?.onNewPuppetWorker
         ? emulator.onNewPuppetWorker(this).catch(error => {
+            if (error instanceof CanceledPromiseError) return;
             this.logger.error('Emulator.onNewPuppetWorkerError', {
               error,
             });

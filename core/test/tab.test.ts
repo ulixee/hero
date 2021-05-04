@@ -50,7 +50,7 @@ describe('basic Tab tests', () => {
 
     await expect(
       tab.waitForElement(['document', ['querySelector', 'a#notthere']], { timeoutMs: 500 }),
-    ).rejects.toThrowError(/Timeout waiting for element .* to be visible/);
+    ).rejects.toThrowError(/Timeout waiting for element to be visible/);
   });
 
   it('will wait for an element to be visible', async () => {

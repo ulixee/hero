@@ -1,6 +1,7 @@
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
+import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 
 export default class CommandsTable extends SqliteTable<ICommandMeta> {
   private readonly getQuery: Statement;
@@ -26,17 +27,6 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
   }
 
   public insert(commandMeta: ICommandMeta) {
-    let stringifiedError: string;
-    if (commandMeta.result instanceof Error) {
-      stringifiedError = JSON.stringify({
-        ...commandMeta.result,
-        name: commandMeta.result.name,
-        message: commandMeta.result.message,
-        stack: commandMeta.result.stack,
-      });
-    } else {
-      stringifiedError = JSON.stringify(commandMeta.result);
-    }
     this.queuePendingInsert([
       commandMeta.id,
       commandMeta.tabId,
@@ -45,7 +35,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       commandMeta.args,
       commandMeta.startDate,
       commandMeta.endDate,
-      stringifiedError,
+      TypeSerializer.stringify(commandMeta.result),
       commandMeta.result?.constructor
         ? commandMeta.result.constructor.name
         : typeof commandMeta.result,

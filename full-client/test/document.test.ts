@@ -109,7 +109,7 @@ describe('basic Document tests', () => {
     }
   });
 
-  it('can re-await an element to refresh the underlying attached nodeids', async () => {
+  it('can re-await an element to refresh the underlying nodePointer ids', async () => {
     koaServer.get('/refresh-element', ctx => {
       ctx.body = `
         <body>
@@ -216,18 +216,55 @@ describe('basic Document tests', () => {
     });
     const agent = await openBrowser(`/isVisible`);
     const { document } = agent;
-    await expect(agent.isElementVisible(document.querySelector('#elem-1'))).resolves.toBe(true);
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-1')),
+    ).resolves.toMatchObject({
+      isVisible: true,
+    });
     // visibility
-    await expect(agent.isElementVisible(document.querySelector('#elem-2'))).resolves.toBe(false);
-    await expect(agent.isElementVisible(document.querySelector('#elem-3'))).resolves.toBe(true);
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-2')),
+    ).resolves.toMatchObject({
+      isVisible: false,
+      hasCssVisibility: false,
+    });
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-3')),
+    ).resolves.toMatchObject({
+      isVisible: true,
+    });
     // layout
-    await expect(agent.isElementVisible(document.querySelector('#elem-4'))).resolves.toBe(false);
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-4')),
+    ).resolves.toMatchObject({
+      isVisible: false,
+      hasDimensions: false,
+    });
     // opacity
-    await expect(agent.isElementVisible(document.querySelector('#elem-5'))).resolves.toBe(false);
-    await expect(agent.isElementVisible(document.querySelector('#elem-6'))).resolves.toBe(true);
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-5')),
+    ).resolves.toMatchObject({
+      isVisible: false,
+      hasCssOpacity: false,
+    });
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-6')),
+    ).resolves.toMatchObject({
+      isVisible: true,
+    });
     // overlay
-    await expect(agent.isElementVisible(document.querySelector('#elem-7'))).resolves.toBe(true);
-    await expect(agent.isElementVisible(document.querySelector('#elem-8'))).resolves.toBe(false);
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-7')),
+    ).resolves.toMatchObject({
+      isVisible: true,
+      isUnobstructedByOtherElements: true,
+    });
+    await expect(
+      agent.getComputedVisibility(document.querySelector('#elem-8')),
+    ).resolves.toMatchObject({
+      isVisible: false,
+      isUnobstructedByOtherElements: false,
+    });
   });
 
   it('can get computed styles', async () => {

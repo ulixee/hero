@@ -21,74 +21,70 @@ export default class TypeSerializer {
   private static isNodejs = typeof process !== 'undefined' && process.release.name === 'node';
 
   public static parse(stringified: string, stackMarker = 'SERIALIZER'): any {
-    return JSON.parse(stringified, (key, entry) => {
-      if (!entry || !entry.__type) return entry;
+    return JSON.parse(stringified, this.reviver.bind(this, stackMarker));
+  }
 
-      const { value, __type: type } = entry;
+  public static revive(object: any, objectKey?: string): any {
+    if (!object) return object;
+    const marker = 'SERIALIZER';
+    const revived = this.reviver(marker, objectKey, object);
 
-      if (type === Types.number || type === Types.string || type === Types.boolean) return value;
-      if (type === Types.bigint) return BigInt(value);
-      if (type === Types.NaN) return Number.NaN;
-      if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
-      if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
-      if (type === Types.DateIso) return new Date(value);
-      if (type === Types.Buffer64 || type === Types.ArrayBuffer64) {
-        if (this.isNodejs) {
-          return Buffer.from(value, 'base64');
-        }
-
-        const decoded = globalThis.atob(value);
-        // @ts-ignore
-        const uint8Array = new TextEncoder().encode(decoded);
-        if (!entry.args) return uint8Array;
-
-        const { arrayType, byteOffset, byteLength } = entry.args;
-
-        return new globalThis[arrayType](uint8Array.buffer, byteOffset, byteLength);
+    if (revived !== object) {
+      if (revived instanceof Map) {
+        return new Map([...revived].map(([key, value]) => this.reviver(marker, key, value)));
       }
-      if (type === Types.RegExp) return new RegExp(value[0], value[1]);
-      if (type === Types.Map) return new Map(value);
-      if (type === Types.Set) return new Set(value);
-      if (type === Types.Error) {
-        const { name, message, stack, ...data } = value;
-        let Constructor = this.errorTypes && this.errorTypes.get(name);
-        if (!Constructor) {
-          if (this.isNodejs) {
-            Constructor = global[name] || Error;
-          } else {
-            Constructor = globalThis[name] || Error;
-          }
-        }
-
-        const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
-
-        const e = new Constructor(message);
-        e.name = name;
-        Object.assign(e, data);
-        if (stack) {
-          e.stack = `${stack}\n${`------${stackMarker}`.padEnd(50, '-')}\n${startStack}`;
-        }
-        return e;
+      if (revived instanceof Set) {
+        return new Set([...revived].map(value => this.reviver(marker, '', value)));
       }
+      return revived;
+    }
 
-      return entry;
-    });
+    if (object && typeof object === Types.object) {
+      if (Array.isArray(object)) {
+        object = object.map(x => this.revive(x));
+      }
+      const response = {};
+      for (const [key, value] of Object.entries(object)) {
+        response[key] = this.revive(value, key);
+      }
+      object = response;
+    }
+    return object;
   }
 
   public static stringify(object: any): string {
     return JSON.stringify(object, (key, value) => {
+      const replaced = this.replacer(key, value);
+      if (replaced !== value) return replaced;
       if (value && typeof value === Types.object && !Array.isArray(value)) {
         const resultObject = {};
         for (const [k, v] of Object.entries(value)) {
-          resultObject[k] = this.convertKeyValue(k, v);
+          resultObject[k] = this.replacer(k, v);
         }
         return resultObject;
       }
-      return this.convertKeyValue(key, value);
+      return value;
     });
   }
 
-  private static convertKeyValue(_: string, value: any): any {
+  public static replace(object: any): object {
+    if (!object) return object;
+    const replaced = this.replacer(null, object);
+    if (replaced !== object || (typeof replaced === 'object' && '__type' in replaced)) {
+      return replaced;
+    }
+    if (object && typeof object === Types.object) {
+      if (Array.isArray(object)) return object.map(x => this.replace(x));
+      const response = {};
+      for (const [key, value] of Object.entries(object)) {
+        response[key] = this.replace(value);
+      }
+      return response;
+    }
+    return object;
+  }
+
+  private static replacer(_: string, value: any): any {
     if (value === null || value === undefined) return value;
 
     if (Number.isNaN(value)) {
@@ -135,6 +131,21 @@ export default class TypeSerializer {
         return { __type: Types.Buffer64, value: value.toString('base64') };
       }
     } else {
+      // @ts-ignore
+      if (value instanceof DOMRect) {
+        return value.toJSON();
+      }
+      // @ts-ignore
+      if (value instanceof CSSStyleDeclaration) {
+        const isNumber = new RegExp(/^\d+$/);
+        const result = {};
+        for (const key of Object.keys(value)) {
+          if (isNumber.test(key)) continue;
+          result[key] = value[key];
+        }
+        return result;
+      }
+
       if (ArrayBuffer.isView(value)) {
         // @ts-ignore
         const binary = new TextDecoder('utf8').decode(value.buffer);
@@ -158,7 +169,64 @@ export default class TypeSerializer {
       }
     }
 
+    if ('toJSON' in value) {
+      return value.toJSON();
+    }
+
     return value;
+  }
+
+  private static reviver(stackMarker: string, key: string, entry: any): any {
+    if (!entry || !entry.__type) return entry;
+
+    const { value, __type: type } = entry;
+
+    if (type === Types.number || type === Types.string || type === Types.boolean) return value;
+    if (type === Types.bigint) return BigInt(value);
+    if (type === Types.NaN) return Number.NaN;
+    if (type === Types.Infinity) return Number.POSITIVE_INFINITY;
+    if (type === Types.NegativeInfinity) return Number.NEGATIVE_INFINITY;
+    if (type === Types.DateIso) return new Date(value);
+    if (type === Types.Buffer64 || type === Types.ArrayBuffer64) {
+      if (this.isNodejs) {
+        return Buffer.from(value, 'base64');
+      }
+
+      const decoded = globalThis.atob(value);
+      // @ts-ignore
+      const uint8Array = new TextEncoder().encode(decoded);
+      if (!entry.args) return uint8Array;
+
+      const { arrayType, byteOffset, byteLength } = entry.args;
+
+      return new globalThis[arrayType](uint8Array.buffer, byteOffset, byteLength);
+    }
+    if (type === Types.RegExp) return new RegExp(value[0], value[1]);
+    if (type === Types.Map) return new Map(value);
+    if (type === Types.Set) return new Set(value);
+    if (type === Types.Error) {
+      const { name, message, stack, ...data } = value;
+      let Constructor = this.errorTypes && this.errorTypes.get(name);
+      if (!Constructor) {
+        if (this.isNodejs) {
+          Constructor = global[name] || Error;
+        } else {
+          Constructor = globalThis[name] || Error;
+        }
+      }
+
+      const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
+
+      const e = new Constructor(message);
+      e.name = name;
+      Object.assign(e, data);
+      if (stack) {
+        e.stack = `${stack}\n${`------${stackMarker}`.padEnd(50, '-')}\n${startStack}`;
+      }
+      return e;
+    }
+
+    return entry;
   }
 }
 

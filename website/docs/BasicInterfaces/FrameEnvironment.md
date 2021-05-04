@@ -122,10 +122,9 @@ const response = await mainFrame.fetch(postUrl, {
 });
 ```
 
-
 ### frameEnvironment.getFrameEnvironment*(frameElement)* {#find-frame}
 
-Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element. 
+Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
 
 #### **Arguments**:
 
@@ -141,7 +140,6 @@ const iframeElement = document.querySelector('iframe.interactive');
 const iframe = await agent.findFrame(iframeElement);
 
 const h4 = await iframe.document.querySelector('h4').textContent; // should be something like HTML demo: <iframe>
-
 ```
 
 ### frameEnvironment.getComputedStyle*(element, pseudoElement)* <div class="specs"><i>W3C</i></div> {#computed-style}
@@ -162,6 +160,37 @@ const selector = document.querySelector('h1');
 const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
 ```
+
+### frameEnvironment.getComputedVisibility*(element)* {#get-computed-visibility}
+
+Determines if a node from the [mainFrameEnvironment](#main-frame-environment) is visible to an end user. This method checks whether a node (or containing element) has:
+
+- layout: width, height, x and y.
+- opacity: non-zero opacity.
+- css visibility: the element does not have a computed style where visibility=hidden.
+- no overlay: no other element which overlays more than one fourth of this element and has at least 1 pixel over the center of the element.
+- on the visible screen (not beyond the horizontal or vertical viewport)
+
+Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interfaces/frame-environment#get-computed-visibility).
+
+#### **Arguments**:
+
+- node [`SuperNode`](/docs/awaited-dom/super-node). The node to compute visibility.
+
+#### **Returns**: `Promise<INodeVisibility>` Boolean values indicating if the node (or closest element) is visible to an end user.
+
+- INodeVisibility `object`
+  - isVisible `boolean`. Is the node ultimately visible (convenience sum of other properties).
+  - isFound `boolean`. Was the node found in the DOM.
+  - isOnscreenVertical `boolean`. The node is on-screen vertically.
+  - isOnscreenHorizontal `boolean`. The node is on-screen horizontally.
+  - hasContainingElement `boolean`. The node is an element or has a containing Element providing layout.
+  - isConnected `boolean`. The node is connected to the DOM.
+  - hasCssOpacity `boolean`. The display `opacity` property is not "0".
+  - hasCssDisplay `boolean`. The display `display` property is not "none".
+  - hasCssVisibility `boolean`. The visibility `style` property is not "hidden".
+  - hasDimensions `boolean`. The node has width and height.
+  - isUnobstructedByOtherElements `boolean`. The node is not hidden or obscured > 50% by another element.
 
 ### frameEnvironment.getJsValue*(path)* {#get-js-value}
 
@@ -216,7 +245,7 @@ Wait until a specific element is present in the dom.
 - element [`SuperElement`](/docs/awaited-dom/super-element)
 - options `object` Accepts any of the following:
   - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - waitForVisible `boolean`. Wait until this element is visible to a user (see [isElementVisible](#is-element-visible).
+  - waitForVisible `boolean`. Wait until this element is visible to a user (see [getComputedVisibility](#get-computed-visility).
 
 #### **Returns**: `Promise`
 

@@ -121,14 +121,15 @@ export default class HumanEmulatorGhost {
     interactionStep: IInteractionStep,
     run: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-    attachedNodeId?: number,
+    nodeId?: number,
     retries = 0,
   ): Promise<void> {
     const originalMousePosition = [...interactionStep.mousePosition];
     interactionStep.delayMillis = Math.floor(Math.random() * 100);
 
     const targetRect = await helper.lookupBoundingRect(
-      attachedNodeId ? [attachedNodeId] : interactionStep.mousePosition,
+      nodeId ? [nodeId] : interactionStep.mousePosition,
+      true,
     );
 
     const targetPoint = getRandomRectPoint(targetRect, HumanEmulatorGhost.boxPaddingPercent);
@@ -136,7 +137,7 @@ export default class HumanEmulatorGhost {
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, run, helper);
 
     const finalRect = didMoveMouse
-      ? await helper.lookupBoundingRect([targetRect.nodeId])
+      ? await helper.lookupBoundingRect([targetRect.nodeId], true, true)
       : targetRect;
 
     const isFinalRectVisible = this.isRectVisible(finalRect, helper);
@@ -151,7 +152,8 @@ export default class HumanEmulatorGhost {
           } to a new point.`,
           {
             interactionStep,
-            targetNodeId: targetRect.nodeId,
+            nodeId: targetRect.nodeId,
+            nodeVisibility: finalRect.nodeVisibility,
             retries,
           },
         );
@@ -167,7 +169,10 @@ export default class HumanEmulatorGhost {
       );
     }
 
-    let clickConfirm: () => Promise<IMouseUpResult> = null;
+    let clickConfirm: (
+      mousePosition: IMousePosition,
+      throwOnFail: boolean,
+    ) => Promise<IMouseUpResult> = null;
     if (targetRect.nodeId && targetRect.elementTag !== 'option') {
       const listener = await helper.createMouseupTrigger(targetRect.nodeId);
       clickConfirm = listener.didTrigger;
@@ -181,31 +186,7 @@ export default class HumanEmulatorGhost {
     await run(interactionStep);
 
     if (clickConfirm !== null) {
-      const mouseUpResult = await clickConfirm();
-
-      if (mouseUpResult.didClickLocation === false) {
-        let extras = '';
-        if (finalRect.isNodeVisible === false && finalRect.nodeId) {
-          extras =
-            '\n\nNOTE: The target node is not visible in the dom. Possibly needs a refined selector.';
-        }
-        helper.logger.error(
-          `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
-          {
-            mousePosition: originalMousePosition,
-            jsPathNodeId: finalRect.nodeId,
-            clickedNodeId: mouseUpResult.targetNodeId,
-            expectedDomCoordinates: finalRect,
-            clickedDomCoordinates: {
-              x: mouseUpResult.pageX,
-              y: mouseUpResult.pageY,
-            },
-          },
-        );
-        throw new Error(
-          `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,
-        );
-      }
+      await clickConfirm(originalMousePosition, true);
     }
   }
 

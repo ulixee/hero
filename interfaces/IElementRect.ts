@@ -1,10 +1,10 @@
+import { INodeVisibility } from './INodeVisibility';
+
 export default interface IElementRect {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
+  y: number;
+  x: number;
   height: number;
   width: number;
   tag: string;
-  isVisible?: boolean;
+  nodeVisibility?: INodeVisibility;
 }

@@ -94,7 +94,7 @@ describe('Worker test', () => {
      })()`,
     );
     const { error } = await errorPromise;
-    expect(error.message).toContain('this is my error');
+    expect(error.stack).toContain('this is my error');
   });
 
   it('should clear upon navigation', async () => {

@@ -111,7 +111,11 @@ export default abstract class BaseIpcHandler {
     this.ipcSocket = socket;
     this.ipcSocket.on('data', this.onIpcData.bind(this));
     this.ipcSocket.on('error', err => {
-      if (!this.isClosing) this.logger.error(`${this.handlerName}.error`, err);
+      // wait a sec to see if we're shutting down
+      setImmediate(error => {
+        if (!this.isClosing && !this.isExited)
+          this.logger.error(`${this.handlerName}.error`, { error });
+      }, err);
     });
 
     this.waitForConnect.resolve();

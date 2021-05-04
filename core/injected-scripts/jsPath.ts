@@ -1,57 +1,15 @@
 // eslint-disable-next-line max-classes-per-file
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import type IAttachedState from 'awaited-dom/base/IAttachedState';
+import type INodePointer from 'awaited-dom/base/INodePointer';
 import IElementRect from '@secret-agent/interfaces/IElementRect';
+import { IJsPathError } from '@secret-agent/interfaces/IJsPathError';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
-// / COPIED FROM NODERDOM! DO NOT EDIT HERE
-type IJsPath = IPathStep[];
-type IPathStep = IPropertyName | IMethod | IAttachedId;
-type IPropertyName = string;
-type IMethod = [IMethodName, ...IMethodArgs];
-type IMethodName = string;
-type IMethodArgs = any[];
-type IAttachedId = number;
-
-const stateLookup = '__getSecretAgentNodeState__';
+const stateLookup = '__get_pointer__';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class JsPath {
-  public static async scrollIntoView(jsPath: IJsPath) {
-    const element = new ObjectAtPath(jsPath).lookup().closestElement;
-    if (!element) return;
-
-    const visibleRatio = await new Promise<number>(resolve => {
-      const observer = new IntersectionObserver(entries => {
-        resolve(entries[0].intersectionRatio);
-        observer.disconnect();
-      });
-      observer.observe(element);
-    });
-
-    if (visibleRatio !== 1.0) {
-      element.scrollIntoView({
-        block: 'nearest',
-        behavior: 'auto',
-      });
-      // wait until in-view
-      return new Promise<void>(resolve => {
-        let observer: IntersectionObserver;
-        const timeout = setTimeout(() => {
-          resolve();
-          if (observer) observer.disconnect();
-        }, 1e3);
-        observer = new IntersectionObserver(entries => {
-          if (entries[0].intersectionRatio >= 1) {
-            clearTimeout(timeout);
-            resolve();
-            observer.disconnect();
-          }
-        });
-        observer.observe(element);
-      });
-    }
-  }
-
   public static async waitForScrollOffset(coordinates: [number, number], timeoutMillis: number) {
     let left = Math.max(coordinates[0], 0);
     const scrollWidth = document.body.scrollWidth || document.documentElement.scrollWidth;
@@ -84,15 +42,15 @@ class JsPath {
   }
 
   public static getWindowOffset() {
-    return TSON.stringify({
+    return {
       innerHeight: window.innerHeight || document.documentElement.clientHeight,
       innerWidth: window.innerWidth || document.documentElement.clientWidth,
       pageYOffset: window.pageYOffset || document.documentElement.scrollTop,
       pageXOffset: window.pageXOffset || document.documentElement.scrollLeft,
-    });
+    };
   }
 
-  public static simulateOptionClick(jsPath: IJsPath) {
+  public static simulateOptionClick(jsPath: IJsPath): IExecJsPathResult<boolean> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
       const currentObject = objectAtPath.lookup().objectAtPath;
@@ -119,56 +77,69 @@ class JsPath {
         didClick = true;
       }
 
-      // @ts-ignore
-      return TSON.stringify(didClick);
+      return { value: didClick };
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
   }
 
-  public static getClientRect(jsPath: IJsPath) {
+  public static getClientRect(
+    jsPath: IJsPath,
+    includeVisibilityStatus = false,
+  ): IExecJsPathResult<IElementRect> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
       const box = objectAtPath.lookup().boundingClientRect;
+      box.nodeVisibility = includeVisibilityStatus
+        ? objectAtPath.getComputedVisibility()
+        : undefined;
 
-      // @ts-ignore
-      return TSON.stringify({
-        ...box,
-        isVisible: objectAtPath.isVisible,
-        attachedState: objectAtPath.extractAttachedState(),
-        overlappingElementId: objectAtPath.overlappingElementId,
-      });
+      return {
+        value: box,
+        nodePointer: objectAtPath.extractNodePointer(),
+      };
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
   }
 
-  public static async exec(jsPath: IJsPath, propertiesToExtract?: string[]) {
+  public static async getNodeId(jsPath: IJsPath): Promise<IExecJsPathResult<number>> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
-      const object = objectAtPath.lookup().objectAtPath;
+      const object = await objectAtPath.lookup().objectAtPath;
 
-      const returnObject: IExecJsPathResult = {
-        value: null,
+      return {
+        value: NodeTracker.watchNode(object),
       };
-      if (propertiesToExtract?.length && typeof object === 'object' && !Array.isArray(object)) {
-        returnObject.value = {};
-        for (const prop of propertiesToExtract) {
-          returnObject.value[prop] = object[prop];
-        }
-      } else {
-        returnObject.value = object;
-        if (isPromise(object)) {
-          returnObject.value = await object;
-        }
+    } catch (error) {
+      return objectAtPath.toReturnError(error);
+    }
+  }
+
+  public static async exec(
+    jsPath: IJsPath,
+    stateMap?: { [nodeId: string]: object },
+    properties?: string[],
+  ): Promise<IExecJsPathResult<any>> {
+    const objectAtPath = new ObjectAtPath(jsPath);
+    try {
+      const result = <IExecJsPathResult<any>>{
+        value: await objectAtPath.lookup().objectAtPath,
+      };
+
+      if ((objectAtPath.hasStateLoadRequest || !!stateMap) && !isPrimitive(result.value)) {
+        result.nodePointer = objectAtPath.extractNodePointer(stateMap, properties);
       }
 
-      if (objectAtPath.hasStateLoadRequest && !isPrimitive(object)) {
-        returnObject.attachedState = objectAtPath.extractAttachedState();
+      if (result.nodePointer?.iterableIsState || result.value instanceof Node) {
+        result.value = undefined;
       }
-
-      // @ts-ignore
-      return TSON.stringify(returnObject);
+      // serialize special types
+      else if (result.value && !isPrimitive(result.value) && !isPojo(result.value)) {
+        result.isValueSerialized = true;
+        result.value = TSON.replace(result.value);
+      }
+      return result;
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
@@ -178,20 +149,30 @@ class JsPath {
     jsPath: IJsPath,
     waitForVisible: boolean,
     timeoutMillis: number,
-  ) {
+  ): Promise<IExecJsPathResult<INodeVisibility>> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
-      const returnObject = await new Promise<IExecJsPathResult<boolean>>(async resolve => {
+      return await new Promise<IExecJsPathResult<INodeVisibility>>(async resolve => {
         const end = new Date();
         end.setTime(end.getTime() + timeoutMillis);
 
         while (new Date() < end) {
           try {
             if (!objectAtPath.objectAtPath) objectAtPath.lookup();
-            if (objectAtPath.objectAtPath && (!waitForVisible || objectAtPath.isVisible)) {
+
+            let isElementValid = !!objectAtPath.objectAtPath;
+            let visibility: INodeVisibility = {
+              nodeExists: isElementValid,
+            };
+            if (isElementValid && waitForVisible) {
+              visibility = objectAtPath.getComputedVisibility();
+              isElementValid = visibility.isVisible;
+            }
+
+            if (isElementValid) {
               return resolve({
-                attachedState: objectAtPath.extractAttachedState(),
-                value: true,
+                nodePointer: objectAtPath.extractNodePointer(),
+                value: visibility,
               });
             }
           } catch (err) {
@@ -199,35 +180,28 @@ class JsPath {
           }
           // eslint-disable-next-line promise/param-names
           await new Promise(resolve1 => setTimeout(resolve1, 20));
+          await new Promise(requestAnimationFrame);
         }
 
         resolve(<IExecJsPathResult>{
-          attachedState: objectAtPath.extractAttachedState(),
-          overlappingElementId: objectAtPath.overlappingElementId,
-          ...objectAtPath.visibilityParts,
-          value: false,
+          nodePointer: objectAtPath.extractNodePointer(),
+          value: objectAtPath.getComputedVisibility(),
         });
       });
-      // @ts-ignore
-      return TSON.stringify(returnObject);
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
   }
 
-  public static isVisible(jsPath: IJsPath) {
+  public static getComputedVisibility(jsPath: IJsPath): IExecJsPathResult<INodeVisibility> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
       objectAtPath.lookup();
 
-      const returnObject = <IExecJsPathResult>{
-        attachedState: objectAtPath.extractAttachedState(),
-        overlappingElementId: objectAtPath.overlappingElementId,
-        value: objectAtPath.isVisible,
+      return <IExecJsPathResult<INodeVisibility>>{
+        nodePointer: objectAtPath.extractNodePointer(),
+        value: objectAtPath.getComputedVisibility(),
       };
-
-      // @ts-ignore
-      return TSON.stringify(returnObject);
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
@@ -239,9 +213,10 @@ class JsPath {
 class ObjectAtPath {
   public objectAtPath: Node | any;
   public hasStateLoadRequest: boolean;
+
+  private _obstructedByElement: Element;
   private lookupStep: IPathStep;
   private lookupStepIndex = 0;
-  private readonly stateProperties: string[] = [];
 
   public get closestElement(): Element {
     if (!this.objectAtPath) return;
@@ -254,75 +229,40 @@ class ObjectAtPath {
   public get boundingClientRect() {
     const element = this.closestElement;
     if (!element) {
-      return { top: 0, bottom: 0, right: 0, left: 0, width: 0, height: 0, tag: 'node' };
+      return { x: 0, y: 0, width: 0, height: 0, tag: 'node' };
     }
 
     const rect = element.getBoundingClientRect();
 
     return {
-      top: rect.top,
-      right: rect.right,
-      bottom: rect.bottom,
-      left: rect.left,
+      y: rect.y,
+      x: rect.x,
       height: rect.height,
       width: rect.width,
       tag: element.tagName?.toLowerCase(),
     } as IElementRect;
   }
 
-  public get isVisible() {
-    const element = this.closestElement;
-    if (element) {
-      const { isHiddenStyle, onScreen, hasDimensions, isBehindOtherElement } = this.visibilityParts;
-
-      const isOnScreen = onScreen.vertical && onScreen.horizontal;
-      const isVisible = !isHiddenStyle && !isBehindOtherElement && hasDimensions && isOnScreen;
-
-      return isVisible;
-    }
-    return false;
-  }
-
-  public get visibilityParts() {
-    const element = this.closestElement;
-    const visibility: any = {
-      hasElement: !!element,
-    };
-    if (element) {
-      const style = getComputedStyle(element);
-      visibility.isHiddenStyle =
-        style?.visibility === 'hidden' || style?.display === 'none' || style?.opacity === '0';
-
-      visibility.isBehindOtherElement = this.isBehindOtherElement;
-
-      const rect = this.boundingClientRect;
-      visibility.hasDimensions = rect.width && rect.height;
-      visibility.onScreen = {
-        vertical: rect.top + rect.height > 0 && rect.top < window.innerHeight,
-        horizontal: rect.left + rect.width > 0 && rect.left < window.innerWidth,
-      };
-    }
-    return visibility;
-  }
-
-  public get overlappingElement() {
+  public get obstructedByElement() {
+    if (this._obstructedByElement) return this._obstructedByElement;
     const element = this.closestElement;
     if (!element) return null;
-    const { top, right, left, bottom } = element.getBoundingClientRect();
-    const centerX = Math.floor(100 * left + (right - left) / 2) / 100;
-    const centerY = Math.floor(100 * top + (bottom - top) / 2) / 100;
+    const { x, y, width, height } = element.getBoundingClientRect();
+    const centerX = Math.floor(100 * x + width / 2) / 100;
+    const centerY = Math.floor(100 * y + height / 2) / 100;
 
-    return document.elementFromPoint(centerX, centerY);
+    this._obstructedByElement = document.elementFromPoint(centerX, centerY);
+    return this._obstructedByElement;
   }
 
-  public get overlappingElementId() {
-    const overlapping = this.overlappingElement;
-    if (!overlapping) return null;
-    return NodeTracker.assignNodeId(overlapping);
+  public get obstructedByElementId() {
+    const element = this.obstructedByElement;
+    if (!element) return null;
+    return NodeTracker.watchNode(element);
   }
 
-  public get isBehindOtherElement() {
-    const overlapping = this.overlappingElement;
+  public get isObstructedByAnotherElement() {
+    const overlapping = this.obstructedByElement;
     if (!overlapping) return false;
 
     // adjust coordinates to get more accurate results
@@ -350,13 +290,53 @@ class ObjectAtPath {
   constructor(readonly jsPath: IJsPath) {
     if (!jsPath?.length) return;
 
-    if (jsPath[jsPath.length - 1][0] === stateLookup) {
+    // @ts-ignore - start listening for events since we've just looked up something on this frane
+    window.listenForInteractionEvents();
+
+    if (Array.isArray(jsPath[jsPath.length - 1]) && jsPath[jsPath.length - 1][0] === stateLookup) {
       this.hasStateLoadRequest = true;
-      const lookupCommand = jsPath.pop();
-      if (Array.isArray(lookupCommand) && lookupCommand.length > 1) {
-        this.stateProperties = lookupCommand[1];
-      }
+      jsPath.pop();
     }
+  }
+
+  public getComputedVisibility(): INodeVisibility {
+    const visibility: INodeVisibility = {
+      // put here first for display
+      isVisible: true,
+      nodeExists: !!this.objectAtPath,
+    };
+    if (!visibility.nodeExists) {
+      visibility.isVisible = false;
+      return visibility;
+    }
+
+    visibility.isConnected = this.objectAtPath?.isConnected === true;
+    const element = this.closestElement;
+    visibility.hasContainingElement = !!element;
+
+    if (!visibility.hasContainingElement) {
+      visibility.isVisible = false;
+      return visibility;
+    }
+
+    const style = getComputedStyle(element);
+
+    visibility.hasCssVisibility = style?.visibility !== 'hidden';
+    visibility.hasCssDisplay = style?.display !== 'none';
+    visibility.hasCssOpacity = style?.opacity !== '0';
+    visibility.isUnobstructedByOtherElements = !this.isObstructedByAnotherElement;
+    if (visibility.isUnobstructedByOtherElements === false) {
+      visibility.obstructedByElementId = this.obstructedByElementId;
+    }
+
+    const rect = this.boundingClientRect;
+    visibility.boundingClientRect = rect;
+    visibility.hasDimensions = !(rect.width === 0 && rect.height === 0);
+    visibility.isOnscreenVertical = rect.y + rect.height > 0 && rect.y < window.innerHeight;
+    visibility.isOnscreenHorizontal = rect.x + rect.width > 0 && rect.x < window.innerWidth;
+
+    visibility.isVisible = Object.values(visibility).every(x => x !== false);
+    return visibility;
   }
 
   public lookup() {
@@ -375,11 +355,13 @@ class ObjectAtPath {
           const sub = new ObjectAtPath(innerPath).lookup();
           return sub.objectAtPath;
         });
-        currentObject = runMethod(currentObject, methodName, this.lookupStepIndex, finalArgs);
+        const methodProperty = propertyName(methodName);
+        currentObject = currentObject[methodProperty](...finalArgs);
       } else if (typeof step === 'number') {
-        currentObject = NodeTracker.getNodeWithId(step);
+        currentObject = NodeTracker.getWatchedNodeWithId(step);
       } else if (typeof step === 'string') {
-        currentObject = getProperty(currentObject, step, this.lookupStepIndex);
+        const prop = propertyName(step);
+        currentObject = currentObject[prop];
       } else {
         throw new Error('unknown JsPathStep');
       }
@@ -390,48 +372,146 @@ class ObjectAtPath {
     return this;
   }
 
-  public toReturnError(error: Error) {
-    // @ts-ignore
-    return TSON.stringify({
+  public toReturnError(error: Error): IExecJsPathResult {
+    const pathError = <IJsPathError>{
       error: String(error),
-      object: String(this.objectAtPath),
       pathState: {
         step: this.lookupStep,
         index: this.lookupStepIndex,
-        path: this.jsPath,
       },
-    });
+    };
+    return {
+      value: null,
+      pathError,
+    };
   }
 
-  public extractAttachedState() {
-    return ObjectAtPath.createAttachedState(this.objectAtPath, this.stateProperties);
+  public extractNodePointer(
+    stateMap?: { [nodeId: string]: object },
+    properties?: string[],
+  ): INodePointer {
+    return ObjectAtPath.createNodePointer(this.objectAtPath, stateMap, properties);
   }
 
-  public static createAttachedState(objectAtPath: any, properties?: string[]) {
+  public static createNodePointer(
+    objectAtPath: any,
+    stateMap?: { [nodeId: string]: object },
+    properties?: string[],
+  ): INodePointer {
     if (!objectAtPath) return null;
 
-    const nodeId = NodeTracker.assignNodeId(objectAtPath);
+    const nodeId = NodeTracker.watchNode(objectAtPath);
     const state = {
       id: nodeId,
       type: objectAtPath.constructor?.name,
-    } as IAttachedState;
+      preview: generateNodePreview(objectAtPath),
+    } as INodePointer;
+
+    if (properties?.length) {
+      stateMap[nodeId] ??= {};
+      for (const prop of properties) {
+        if (prop === '::getComputedStyle') {
+          try {
+            stateMap[nodeId][prop] = window.getComputedStyle(objectAtPath);
+          } catch (err) {
+            stateMap[nodeId][prop] = String(err);
+          }
+        } else if (prop === '::getComputedVisibility') {
+          const lookup = new ObjectAtPath([]);
+          lookup.objectAtPath = objectAtPath;
+          stateMap[nodeId][prop] = lookup.getComputedVisibility();
+        } else {
+          stateMap[nodeId][prop] = objectAtPath[prop];
+        }
+      }
+      stateMap[nodeId] = TSON.replace(stateMap[nodeId]);
+    }
 
     if (isIterableOrArray(objectAtPath)) {
-      state.iterableIsCustomType = isCustomType(objectAtPath);
-      const objectAsIterable = Array.from(objectAtPath);
-      if (state.iterableIsCustomType) {
-        state.iterableIds = objectAsIterable.map(x => NodeTracker.assignNodeId(x as Node));
-      } else {
-        state.iterableItems = objectAsIterable;
+      state.iterableItems = Array.from(objectAtPath);
+
+      if (state.iterableItems.length && isCustomType(state.iterableItems[0])) {
+        state.iterableIsState = true;
+        state.iterableItems = state.iterableItems.map(x =>
+          this.createNodePointer(x, stateMap, properties),
+        );
       }
     }
 
-    for (const prop of properties ?? []) {
-      state.properties[prop] = objectAtPath[prop];
-    }
     return state;
   }
 }
+
+function generateNodePreview(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return `#text=${node.nodeValue || ''}`;
+
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    let name = `${node.constructor.name || typeof node}`;
+    if ('length' in node) {
+      name += `(${(node as any).length})`;
+    }
+    return name;
+  }
+  const tag = node.nodeName.toLowerCase();
+  const element = node as Element;
+
+  let attrText = '';
+  for (const attr of element.attributes) {
+    const { name, value } = attr;
+    if (name === 'style') continue;
+    attrText += ` ${name}`;
+    if (value) {
+      let valueText = value;
+      if (valueText.length > 50) {
+        valueText = `${value.substr(0, 49)}\u2026`;
+      }
+      attrText += `="${valueText}"`;
+    }
+  }
+  if (emptyElementTags.has(tag)) return `<${tag}${attrText}/>`;
+
+  const children = element.childNodes;
+  let elementHasTextChildren = false;
+  if (children.length <= 5) {
+    elementHasTextChildren = true;
+    for (const child of children) {
+      if (child.nodeType !== Node.TEXT_NODE) {
+        elementHasTextChildren = false;
+        break;
+      }
+    }
+  }
+  let textContent = '';
+  if (elementHasTextChildren) {
+    textContent = element.textContent ?? '';
+    if (textContent.length > 50) {
+      textContent = `${textContent.substring(0, 49)}\u2026`;
+    }
+  } else if (children.length) {
+    textContent = '\u2026';
+  }
+  return `<${tag}${attrText}>${textContent}</${tag}>`;
+}
+
+const emptyElementTags = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'command',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'keygen',
+  'link',
+  'menuitem',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
 
 // / JS Path Helpers //////
 function isPrimitive(arg) {
@@ -440,7 +520,7 @@ function isPrimitive(arg) {
 }
 
 function isCustomType(object) {
-  if (
+  return !(
     object instanceof Date ||
     object instanceof ArrayBuffer ||
     object instanceof RegExp ||
@@ -450,60 +530,26 @@ function isCustomType(object) {
     object instanceof Number ||
     object instanceof Boolean ||
     isPrimitive(object)
-  ) {
+  );
+}
+
+function isPojo(obj) {
+  if (obj === null || typeof obj !== 'object') {
     return false;
   }
-  if (isIterableOrArray(object)) {
-    const array = Array.from(object);
-    if (array.length) return isCustomType(array[0]);
-  }
-  return true;
+  return Object.getPrototypeOf(obj) === Object.prototype;
 }
 
-function getPropertyAtPath<T>(path: string): T {
-  const parts = path.split(/Symbol\(([\w.]+)\)|(?:^|\.)(\w+)|\[(\d+)]/).filter(Boolean);
-  let obj: any = window;
-  while (parts.length) {
-    const next = parts.shift();
-    if (next === 'window') continue;
-    if (next.startsWith('Symbol.')) {
-      obj = obj[Symbol.for(next)];
-    } else {
-      const parent = obj;
-      obj = obj[next];
-      if (typeof obj === 'function') obj = obj.bind(parent);
-    }
-    if (!obj) {
-      throw new Error(`Property not found -> ${path}`);
-    }
+function propertyName(name: string): string | symbol {
+  if (name.startsWith('Symbol.for')) {
+    const symbolName = name.match(/Symbol\(([\w.]+)\)/)[1];
+    return Symbol.for(symbolName);
   }
-  return obj;
-}
-
-function getProperty(object, name, index): unknown {
-  if (index === 0 && !object[name]) {
-    return getPropertyAtPath(name);
-  }
-  return object[name] as unknown;
-}
-
-function runMethod(object, name, index, args): unknown {
-  if (index === 0 && !object[name]) {
-    return getPropertyAtPath<Function>(name)(...args);
-  }
-  return ((object[name] as unknown) as Function).apply(object, args);
+  return name;
 }
 
 function isIterableOrArray(object) {
   // don't iterate on strings
   if (!object || typeof object === 'string' || object instanceof String) return false;
   return !!object[Symbol.iterator] || Array.isArray(object);
-}
-
-function isPromise(obj) {
-  return (
-    !!obj &&
-    (typeof obj === 'object' || typeof obj === 'function') &&
-    typeof obj.then === 'function'
-  );
 }

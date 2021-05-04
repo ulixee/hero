@@ -21,6 +21,7 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { INodeData } from '@secret-agent/interfaces/IDomChangeEvent';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -292,19 +293,16 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.mainFrameEnvironment.getJsValue(path);
   }
 
-  public execJsPath<T>(
-    jsPath: IJsPath,
-    propertiesToExtract?: string[],
-  ): Promise<IExecJsPathResult<T>> {
-    return this.mainFrameEnvironment.execJsPath<T>(jsPath, propertiesToExtract);
+  public execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
+    return this.mainFrameEnvironment.execJsPath<T>(jsPath);
   }
 
   public getLocationHref(): Promise<string> {
     return this.mainFrameEnvironment.getLocationHref();
   }
 
-  public isElementVisible(jsPath: IJsPath): Promise<boolean> {
-    return this.mainFrameEnvironment.isElementVisible(jsPath);
+  public getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
+    return this.mainFrameEnvironment.getComputedVisibility(jsPath);
   }
 
   public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {

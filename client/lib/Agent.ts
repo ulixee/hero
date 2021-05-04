@@ -15,10 +15,11 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger } from '@secret-agent/interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -277,12 +278,17 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return this.activeTab.getComputedStyle(element, pseudoElement);
   }
 
+  public getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
+    return this.activeTab.getComputedVisibility(node);
+  }
+
   public getJsValue<T>(path: string): Promise<T> {
     return this.activeTab.getJsValue<T>(path);
   }
 
-  public isElementVisible(element: IElementIsolate): Promise<boolean> {
-    return this.activeTab.isElementVisible(element);
+  // @deprecated 2021-04-30: Replaced with getComputedVisibility
+  public async isElementVisible(element: IElementIsolate): Promise<boolean> {
+    return await this.getComputedVisibility(element as any).then(x => x.isVisible);
   }
 
   public takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
@@ -329,13 +335,6 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       if (onrejected) return onrejected(err);
       throw err;
     }
-  }
-
-  public toJSON(): any {
-    // return empty so we can
-    return {
-      type: 'Agent',
-    };
   }
 }
 

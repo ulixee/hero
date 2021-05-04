@@ -85,7 +85,6 @@ function proxyConstructor<T, K extends keyof T>(
 ) {
   const descriptor = Object.getOwnPropertyDescriptor(owner, key);
   const toString = descriptor.value.toString();
-
   descriptor.value = new Proxy(descriptor.value, {
     construct() {
       try {
@@ -96,6 +95,7 @@ function proxyConstructor<T, K extends keyof T>(
       } catch (err) {
         throw cleanErrorStack(err);
       }
+      return ReflectCached.construct(...arguments);
     },
   });
   overriddenFns.set(descriptor.value, toString);

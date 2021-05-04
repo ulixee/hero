@@ -2,12 +2,12 @@ import FetchRequest from 'awaited-dom/impl/official-klasses/Request';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInfo, IRequestInit } from 'awaited-dom/base/interfaces/official';
-import IAttachedState from 'awaited-dom/base/IAttachedState';
+import INodePointer from 'awaited-dom/base/INodePointer';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 interface IState {
   awaitedPath: AwaitedPath;
-  attachedState: IAttachedState;
+  nodePointer: INodePointer;
   remoteInitializerPromise: Promise<void>;
   coreFrame: Promise<CoreFrameEnvironment>;
 }
@@ -37,10 +37,10 @@ async function createRemoteInitializer(
 ): Promise<void> {
   const requestInput = await getRequestIdOrUrl(input);
   const coreFrame = await coreFramePromise;
-  const attachedState = await coreFrame.createRequest(requestInput, init);
-  const awaitedPath = new AwaitedPath().withAttachedId(attachedState.id);
+  const nodePointer = await coreFrame.createRequest(requestInput, init);
+  const awaitedPath = new AwaitedPath(null).withNodeId(null, nodePointer.id);
   setState(instance, {
-    attachedState,
+    nodePointer,
     awaitedPath,
   });
 }

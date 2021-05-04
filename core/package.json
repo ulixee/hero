@@ -24,7 +24,7 @@
     "@secret-agent/mitm": "1.4.1-alpha.4",
     "@secret-agent/puppet": "1.4.1-alpha.4",
     "@types/ua-parser-js": "^0.7.35",
-    "awaited-dom": "1.1.12",
+    "awaited-dom": "1.2.1",
     "better-sqlite3": "^7.1.4",
     "moment": "^2.24.1",
     "ua-parser-js": "^0.7.22",

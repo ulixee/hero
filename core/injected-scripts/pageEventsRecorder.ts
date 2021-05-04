@@ -60,42 +60,45 @@ function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
 
 @NodeTrackerStatics
 class NodeTracker {
+  public static nodeIdSymbol = Symbol.for('saNodeId');
   private static nextId = 1;
-  private static nodesById = new Map<number, Node>();
-  private static nodeIds = new WeakMap<Node, number>();
+  private static watchedNodesById = new Map<number, Node>();
 
   public static has(node: Node): boolean {
-    return this.nodeIds.has(node);
+    return !!node[this.nodeIdSymbol];
   }
 
   public static getNodeId(node: Node): number {
     if (!node) return undefined;
-    return this.nodeIds.get(node) ?? undefined;
+    return node[this.nodeIdSymbol] ?? undefined;
   }
 
-  public static assignNodeId(node: Node): number {
-    const id = this.getNodeId(node);
-    if (id) return id;
-    // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
-    recorder.extractChanges();
-    return this.track(node);
+  public static watchNode(node: Node): number {
+    let id = this.getNodeId(node);
+    if (!id) {
+      // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
+      recorder.extractChanges();
+      id = this.track(node);
+    }
+
+    this.watchedNodesById.set(id, node);
+    return id;
   }
 
   public static track(node: Node): number {
     if (!node) return;
-    if (this.nodeIds.has(node)) {
-      return this.nodeIds.get(node);
+    if (node[this.nodeIdSymbol]) {
+      return node[this.nodeIdSymbol];
     }
     const id = this.nextId;
     this.nextId += 1;
-    this.nodeIds.set(node, id);
-    this.nodesById.set(id, node);
+    node[this.nodeIdSymbol] = id;
     return id;
   }
 
-  public static getNodeWithId(id: number): Node | undefined {
-    if (this.nodesById.has(id)) {
-      return this.nodesById.get(id);
+  public static getWatchedNodeWithId(id: number): Node | undefined {
+    if (this.watchedNodesById.has(id)) {
+      return this.watchedNodesById.get(id);
     }
     throw new Error(`Node with id not found -> ${id}`);
   }
@@ -126,6 +129,8 @@ class PageEventsRecorder {
   private scrollEvents: IScrollEvent[] = [];
   private loadEvents: ILoadEvent[] = [];
   private location = window.self.location.href;
+
+  private isListeningForInteractionEvents = false;
 
   private propertyTrackingElements = new Map<Node, Map<string, string | boolean>>();
   private stylesheets = new Map<HTMLStyleElement | HTMLLinkElement, string[]>();
@@ -167,10 +172,8 @@ class PageEventsRecorder {
   }
 
   public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
-    const nodeId = focusEvent.target ? NodeTracker.getNodeId(focusEvent.target as Node) : undefined;
-    const relatedNodeId = focusEvent.relatedTarget
-      ? NodeTracker.getNodeId(focusEvent.relatedTarget as Node)
-      : undefined;
+    const nodeId = NodeTracker.getNodeId(focusEvent.target as Node);
+    const relatedNodeId = NodeTracker.getNodeId(focusEvent.relatedTarget as Node);
     const time = new Date().getTime();
     const event = [eventType as any, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
@@ -178,10 +181,8 @@ class PageEventsRecorder {
   }
 
   public trackMouse(eventType: MouseEventType, mouseEvent: MouseEvent) {
-    const nodeId = mouseEvent.target ? NodeTracker.getNodeId(mouseEvent.target as Node) : undefined;
-    const relatedNodeId = mouseEvent.relatedTarget
-      ? NodeTracker.getNodeId(mouseEvent.relatedTarget as Node)
-      : undefined;
+    const nodeId = NodeTracker.getNodeId(mouseEvent.target as Node);
+    const relatedNodeId = NodeTracker.getNodeId(mouseEvent.relatedTarget as Node);
     const event = [
       eventType,
       mouseEvent.pageX,
@@ -238,6 +239,57 @@ class PageEventsRecorder {
     if (upload(this.pageResultset)) {
       this.resetLists();
     }
+  }
+
+  public listenToInteractionEvents() {
+    if (this.isListeningForInteractionEvents) return;
+    this.isListeningForInteractionEvents = true;
+    for (const event of ['input', 'keydown', 'change']) {
+      document.addEventListener(event, this.checkForAllPropertyChanges.bind(this), {
+        capture: true,
+        passive: true,
+      });
+    }
+
+    document.addEventListener('mousemove', e => this.trackMouse(MouseEventType.MOVE, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('mousedown', e => this.trackMouse(MouseEventType.DOWN, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('mouseup', e => this.trackMouse(MouseEventType.UP, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('mouseover', e => this.trackMouse(MouseEventType.OVER, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('mouseleave', e => this.trackMouse(MouseEventType.OUT, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('focusin', e => this.trackFocus(FocusType.IN, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('focusout', e => this.trackFocus(FocusType.OUT, e), {
+      capture: true,
+      passive: true,
+    });
+
+    document.addEventListener('scroll', () => this.trackScroll(window.scrollX, window.scrollY), {
+      capture: true,
+      passive: true,
+    });
   }
 
   private getLocationChange(changeUnixTime: number, changes: IDomChangeEvent[]) {
@@ -559,11 +611,13 @@ function flushPageRecorder() {
 }
 // @ts-ignore
 window.flushPageRecorder = flushPageRecorder;
+// @ts-ignore
+window.listenForInteractionEvents = () => recorder.listenToInteractionEvents();
 
 const interval = setInterval(() => {
   if (!lastUploadDate || new Date().getTime() - lastUploadDate.getTime() > 1e3) {
     // if we haven't uploaded in 1 second, make sure nothing is pending
-    recorder.uploadChanges();
+    requestAnimationFrame(() => recorder.uploadChanges());
   }
 }, 500);
 
@@ -572,68 +626,14 @@ window.addEventListener('beforeunload', () => {
   recorder.disconnect();
 });
 
-window.addEventListener('DOMContentLoaded', () => recorder.onLoadEvent('DOMContentLoaded'));
-window.addEventListener('load', () => recorder.onLoadEvent('load'));
-
 const perfObserver = new PerformanceObserver(() => {
   recorder.onLoadEvent('LargestContentfulPaint');
+  perfObserver.disconnect();
 });
 perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 
-document.addEventListener('input', () => recorder.checkForAllPropertyChanges(), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('keydown', () => recorder.checkForAllPropertyChanges(), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('change', () => recorder.checkForAllPropertyChanges(), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('mousemove', e => recorder.trackMouse(MouseEventType.MOVE, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('mousedown', e => recorder.trackMouse(MouseEventType.DOWN, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('mouseup', e => recorder.trackMouse(MouseEventType.UP, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('mouseover', e => recorder.trackMouse(MouseEventType.OVER, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('mouseleave', e => recorder.trackMouse(MouseEventType.OUT, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('focusin', e => recorder.trackFocus(FocusType.IN, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('focusout', e => recorder.trackFocus(FocusType.OUT, e), {
-  capture: true,
-  passive: true,
-});
-
-document.addEventListener('scroll', () => recorder.trackScroll(window.scrollX, window.scrollY), {
-  capture: true,
-  passive: true,
-});
+window.addEventListener('DOMContentLoaded', () => recorder.onLoadEvent('DOMContentLoaded'));
+window.addEventListener('load', () => recorder.onLoadEvent('load'));
 
 // need duplicate since this is a variable - not just a type
 enum MouseEventType {

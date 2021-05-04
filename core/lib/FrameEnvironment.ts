@@ -13,12 +13,12 @@ import { IPuppetFrame, IPuppetFrameEvents } from '@secret-agent/interfaces/IPupp
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import IAttachedState from 'awaited-dom/base/IAttachedState';
+import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { ILoadEvent } from '@secret-agent/interfaces/ILoadEvent';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
+import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -111,7 +111,7 @@ export default class FrameEnvironment {
       this.getJsValue,
       this.getLocationHref,
       this.interact,
-      this.isElementVisible,
+      this.getComputedVisibility,
       this.removeCookie,
       this.setCookie,
       this.waitForElement,
@@ -179,17 +179,14 @@ export default class FrameEnvironment {
     return this.toJSON();
   }
 
-  public async execJsPath<T>(
-    jsPath: IJsPath,
-    propertiesToExtract?: string[],
-  ): Promise<IExecJsPathResult<T>> {
+  public async execJsPath<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
     // if nothing loaded yet, return immediately
     if (!this.navigations.top) return null;
     await this.navigationsObserver.waitForReady();
-    return await new JsPath(this, jsPath).exec(propertiesToExtract);
+    return await new JsPath(this, jsPath).exec();
   }
 
-  public async createRequest(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
     if (!this.navigations.top && !this.url) {
       throw new Error(
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
@@ -204,7 +201,7 @@ export default class FrameEnvironment {
     );
   }
 
-  public async fetch(input: string | number, init?: IRequestInit): Promise<IAttachedState> {
+  public async fetch(input: string | number, init?: IRequestInit): Promise<INodePointer> {
     if (!this.navigations.top && !this.url) {
       throw new Error(
         'You need to use a "goto" before attempting to fetch. The in-browser fetch needs an origin to function properly.',
@@ -269,16 +266,17 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return true;
   }
 
-  public async isElementVisible(jsPath: IJsPath): Promise<boolean> {
-    const isVisible = await new JsPath(this, jsPath).isVisible();
+  public async getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
+    const isVisible = await new JsPath(this, jsPath).getComputedVisibility();
     return isVisible.value;
   }
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
-    const jsPathResult = await new JsPath(this, jsPath).getAttachedState();
-    if (!jsPathResult.attachedState) return null;
+    const nodeIdResult = await new JsPath(this, jsPath).getNodeId();
+    if (!nodeIdResult.value) return null;
 
-    const domId = jsPathResult.attachedState.id;
+    const domId = nodeIdResult.value;
+
     for (const frame of this.childFrameEnvironments) {
       if (!frame.isAttached) continue;
 
@@ -307,7 +305,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     const waitForVisible = options?.waitForVisible ?? false;
     const timeoutMs = options?.timeoutMs ?? 30e3;
     const timeoutPerTry = timeoutMs < 1e3 ? timeoutMs : 1e3;
-    const timeoutMessage = `Timeout waiting for element ${jsPath} to be visible`;
+    const timeoutMessage = `Timeout waiting for element to be visible`;
 
     const timer = new Timer(timeoutMs, this.waitTimeouts);
     await timer.waitForPromise(
@@ -316,19 +314,20 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     );
 
     try {
-      let isFound = false;
-      do {
-        const promise = new JsPath(this, jsPath)
-          .waitForElement(waitForVisible, timeoutPerTry)
-          .catch(() => null);
+      while (!timer.isResolved()) {
+        try {
+          const promise = new JsPath(this, jsPath).waitForElement(waitForVisible, timeoutPerTry);
 
-        const jsonValue = await timer.waitForPromise(promise, timeoutMessage);
-        isFound = (jsonValue as any)?.value ?? false;
-        if (isFound) return true;
+          const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
+          let isValid = isNodeVisible.value?.isVisible;
+          if (!waitForVisible) isValid = isNodeVisible.value?.nodeExists;
+          if (isValid) return true;
+        } catch (err) {
+          // don't log during loop
+        }
 
-        if (timer.isResolved()) return false;
         timer.throwIfExpired(timeoutMessage);
-      } while (!isFound);
+      }
     } finally {
       timer.clear();
     }
@@ -375,14 +374,11 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
-    const unparsedResult = await this.puppetFrame.evaluate(serializedFn, true);
+    const result = await this.puppetFrame.evaluate<T>(serializedFn, true);
 
-    const result = unparsedResult
-      ? TypeSerializer.parse(unparsedResult as string, 'BROWSER')
-      : unparsedResult;
-    if (result?.error) {
+    if ((result as any)?.error) {
       this.logger.error(fnName, { result });
-      throw new InjectedScriptError(result.error, result.pathState);
+      throw new InjectedScriptError((result as any).error as string);
     } else {
       return result as T;
     }
@@ -396,7 +392,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       } else {
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
         this.domNodeId = await this.puppetFrame.evaluateOnIsolatedFrameElement<number>(
-          'NodeTracker.assignNodeId(this)',
+          'NodeTracker.watchNode(this)',
         );
       }
     } catch (error) {
