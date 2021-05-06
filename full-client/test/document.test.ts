@@ -185,6 +185,35 @@ describe('basic Document tests', () => {
     expect(await heading2.textContent).toBe('Also me');
   });
 
+  it('can wait for xpath elements', async () => {
+    koaServer.get('/xpath-wait', ctx => {
+      ctx.body = `
+        <body>
+          <h2 style="display: none">Here I am not</h2>
+          <h2>Also me</h2>
+          <script>
+          setTimeout(() => {
+              const h2 = document.querySelector('h2');
+              h2.style.display = '';
+              h2.textContent = 'Here I am'
+          }, 500)
+</script>
+        </body>
+      `;
+    });
+    const agent = await openBrowser(`/xpath-wait`);
+
+    const headings = agent.document.evaluate(
+      '/html/body//h2',
+      agent.document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    );
+    await agent.waitForElement(headings.singleNodeValue, { waitForVisible: true });
+    await expect(headings.singleNodeValue.textContent).resolves.toBe('Here I am');
+  });
+
   it("returns null for elements that don't exist", async () => {
     const agent = await openBrowser(`/`);
     const { document } = agent;

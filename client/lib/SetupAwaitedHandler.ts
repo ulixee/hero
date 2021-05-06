@@ -4,6 +4,7 @@ import Constructable from 'awaited-dom/base/Constructable';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import StateMachine from 'awaited-dom/base/StateMachine';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
@@ -98,20 +99,20 @@ export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
   return `$$jsPath=${JSON.stringify(awaitedPath.toJSON())}`;
 }
 
-function execJsPath<TClass, T>(
-  self: AwaitedHandler<TClass>,
-  coreFrame: CoreFrameEnvironment,
-  instance: TClass,
-  path: IJsPath,
-): Promise<IExecJsPathResult<T>> {
+const { getState: getAwaitedPathState } = StateMachine<any, { awaitedPath?: AwaitedPath }>();
+
+export function convertJsPathArgs(path: IJsPath): void {
   for (const part of path) {
     // if part is method call, see if any params need to be remotely initialized first
-    if (Array.isArray(part)) {
-      for (let i = 0; i < part.length; i += 1) {
-        const param = part[i];
-        if (!param) continue;
-        if (typeof param === 'object') {
-          const awaitedPath = self.getState(param)?.awaitedPath;
+    if (!Array.isArray(part)) continue;
+
+    for (let i = 0; i < part.length; i += 1) {
+      const param = part[i];
+      if (typeof param === 'object') {
+        if (Array.isArray(param)) {
+          convertJsPathArgs(param);
+        } else {
+          const awaitedPath = getAwaitedPathState(param)?.awaitedPath;
           if (awaitedPath) {
             part[i] = getAwaitedPathAsMethodArg(awaitedPath);
           }
@@ -119,6 +120,15 @@ function execJsPath<TClass, T>(
       }
     }
   }
+}
+
+function execJsPath<TClass, T>(
+  self: AwaitedHandler<TClass>,
+  coreFrame: CoreFrameEnvironment,
+  instance: TClass,
+  path: IJsPath,
+): Promise<IExecJsPathResult<T>> {
+  convertJsPathArgs(path);
   return coreFrame.execJsPath<T>(path);
 }
 
