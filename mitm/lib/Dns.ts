@@ -54,7 +54,7 @@ export class Dns {
   }
 
   private async systemLookup(host: string): Promise<IDnsEntry> {
-    const dnsEntry = createPromise<IDnsEntry>();
+    const dnsEntry = createPromise<IDnsEntry>(10e3);
     Dns.dnsEntries.set(host, dnsEntry);
     try {
       const lookupAddresses = await dns.lookup(host.split(':').shift(), {
@@ -79,7 +79,7 @@ export class Dns {
     const existing = Dns.dnsEntries.get(host);
     if (existing && !existing.isResolved) return existing.promise;
 
-    const dnsEntry = createPromise<IDnsEntry>();
+    const dnsEntry = createPromise<IDnsEntry>(10e3);
     Dns.dnsEntries.set(host, dnsEntry);
     try {
       if (!this.socket) {

@@ -83,6 +83,18 @@ describe('DnsOverTlsSocket', () => {
       socket.close();
     }
   });
+
+  // this test has to wait for the upstream to disconnect, so skip by default
+  test.skip('should be able to lookup a record after a miss', async () => {
+    const item1 = await cloudflareDnsSocket.lookupARecords('double-agent.collect');
+    expect(item1).toBeTruthy();
+    await new Promise(resolve => setTimeout(resolve, 15e3));
+    const response = await Promise.all([
+      cloudflareDnsSocket.lookupARecords('sub.double-agent.collect'),
+      cloudflareDnsSocket.lookupARecords(' double-agent-external.collect'),
+    ]);
+    expect(response).toHaveLength(2);
+  }, 20e3);
 });
 
 test('should cache and round robin results', async () => {
