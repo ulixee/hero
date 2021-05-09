@@ -5,7 +5,7 @@ import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
@@ -39,7 +39,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   }
 
   public async newContext(
-    emulator: IBrowserEmulator,
+    plugins: IPlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ): Promise<BrowserContext> {
@@ -55,7 +55,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       ...proxySettings,
     });
 
-    return new BrowserContext(this, emulator, browserContextId, logger, proxy);
+    return new BrowserContext(this, plugins, browserContextId, logger, proxy);
   }
 
   public async getFeatures(): Promise<{
@@ -176,7 +176,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
 
   public static async create(
     connection: Connection,
-    engine: IBrowserEngine,
+    browserEngine: IBrowserEngine,
     closeCallback: () => void,
   ): Promise<Browser> {
     const browser = new Browser(connection, closeCallback);
@@ -184,8 +184,8 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     const version = await browser.devtoolsSession.send('Browser.getVersion');
     log.info('Browser.create', {
       ...version,
-      executablePath: engine.executablePath,
-      desiredFullVersion: engine.fullVersion,
+      executablePath: browserEngine.executablePath,
+      desiredFullVersion: browserEngine.fullVersion,
       sessionId: null,
     });
 

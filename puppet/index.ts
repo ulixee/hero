@@ -5,7 +5,7 @@ import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import launchProcess from './lib/launchProcess';
@@ -16,7 +16,7 @@ const { log } = Log(module);
 let puppBrowserCounter = 1;
 export default class Puppet {
   public readonly id: number;
-  public readonly engine: IBrowserEngine;
+  public readonly browserEngine: IBrowserEngine;
   public isShuttingDown: boolean;
   public get supportsBrowserContextProxy(): Promise<boolean> {
     return this.browserFeaturesPromise.promise;
@@ -32,8 +32,8 @@ export default class Puppet {
     });
   }
 
-  constructor(engine: IBrowserEngine) {
-    this.engine = engine;
+  constructor(browserEngine: IBrowserEngine) {
+    this.browserEngine = browserEngine;
     this.isShuttingDown = false;
     this.id = puppBrowserCounter;
     this.browserOrError = null;
@@ -47,7 +47,7 @@ export default class Puppet {
     this.isShuttingDown = false;
 
     let launcher: IPuppetLauncher;
-    if (this.engine.name === 'chrome') {
+    if (this.browserEngine.name === 'chrome') {
       launcher = PuppetChrome;
     }
 
@@ -56,14 +56,14 @@ export default class Puppet {
   }
 
   public async newContext(
-    emulator: IBrowserEmulator,
+    plugins: IPlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ) {
     const browser = await this.browserOrError;
     if (browser instanceof Error) throw browser;
     if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(emulator, logger, proxy);
+    return browser.newContext(plugins, logger, proxy);
   }
 
   public async close() {
@@ -87,13 +87,13 @@ export default class Puppet {
     args: IPuppetLaunchArgs,
   ): Promise<IPuppetBrowser> {
     try {
-      const launchArgs = launcher.getLaunchArgs(args, this.engine);
+      const launchArgs = launcher.getLaunchArgs(args, this.browserEngine);
 
-      if (this.engine.verifyLaunchable) await this.engine.verifyLaunchable();
+      if (this.browserEngine.verifyLaunchable) await this.browserEngine.verifyLaunchable();
 
-      const launchedProcess = await launchProcess(this.engine.executablePath, launchArgs, {});
+      const launchedProcess = await launchProcess(this.browserEngine.executablePath, launchArgs, {});
 
-      const browser = await launcher.createPuppet(launchedProcess, this.engine);
+      const browser = await launcher.createPuppet(launchedProcess, this.browserEngine);
 
       const features = await browser.getFeatures();
 

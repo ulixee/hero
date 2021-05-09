@@ -21,6 +21,7 @@ import {
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import ITab from "@secret-agent/interfaces/ITab";
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
@@ -43,7 +44,7 @@ const { getState, setState } = StateMachine<Tab, IState>();
 const agentState = StateMachine<Agent, IAgentState>();
 
 export interface IState {
-  secretAgent: Agent;
+  agent: Agent;
   coreTab: Promise<CoreTab>;
   mainFrameEnvironment: FrameEnvironment;
   frameEnvironments: FrameEnvironment[];
@@ -67,22 +68,30 @@ const propertyKeys: (keyof Tab)[] = [
   'Request',
 ];
 
-export default class Tab extends AwaitedEventTarget<IEventType> {
-  constructor(secretAgent: Agent, coreTab: Promise<CoreTab>) {
+export default class Tab extends AwaitedEventTarget<IEventType> implements ITab {
+  constructor(agent: Agent, coreTab: Promise<CoreTab>) {
     super(() => {
       return { target: coreTab };
     });
     const mainFrameEnvironment = new FrameEnvironment(
-      secretAgent,
+      agent,
       this,
       coreTab.then(x => x.mainFrameEnvironment),
     );
     setState(this, {
-      secretAgent,
+      agent,
       coreTab,
       mainFrameEnvironment,
       frameEnvironments: [mainFrameEnvironment],
     });
+
+    async function sendToTab(pluginId: string, ...args: any[]): Promise<any> {
+      return (await coreTab).commandQueue.run('Tab.runPluginCommand', pluginId, args);
+    }
+
+    for (const plugin of agentState.getState(agent).plugins) {
+      plugin.onTab(agent, this, sendToTab);
+    }
   }
 
   public get tabId(): Promise<number> {
@@ -228,14 +237,14 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public focus(): Promise<void> {
-    const { secretAgent, coreTab } = getState(this);
-    agentState.getState(secretAgent).connection.activeTab = this;
+    const { agent, coreTab } = getState(this);
+    agentState.getState(agent).connection.activeTab = this;
     return coreTab.then(x => x.focusTab());
   }
 
   public close(): Promise<void> {
-    const { secretAgent, coreTab } = getState(this);
-    const { connection } = agentState.getState(secretAgent);
+    const { agent, coreTab } = getState(this);
+    const { connection } = agentState.getState(agent);
     connection.closeTab(this);
     return coreTab.then(x => x.close());
   }
@@ -263,7 +272,7 @@ async function getOrCreateFrameEnvironment(
     const frameId = await frameEnvironment.frameId;
     if (frameId === coreFrame.frameId) return frameEnvironment;
   }
-  const frameEnvironment = new FrameEnvironment(state.secretAgent, tab, Promise.resolve(coreFrame));
+  const frameEnvironment = new FrameEnvironment(state.agent, tab, Promise.resolve(coreFrame));
   frameEnvironments.push(frameEnvironment);
   return frameEnvironment;
 }
@@ -296,6 +305,6 @@ export function getCoreTab(tab: Tab): Promise<CoreTab> {
 
 // CREATE
 
-export function createTab(secretAgent: Agent, coreTab: Promise<CoreTab>): Tab {
-  return new Tab(secretAgent, coreTab);
+export function createTab(agent: Agent, coreTab: Promise<CoreTab>): Tab {
+  return new Tab(agent, coreTab);
 }

@@ -75,7 +75,6 @@ export default class SessionState {
     scriptInstanceMeta: IScriptInstanceMeta,
     browserEmulatorId: string,
     humanEmulatorId: string,
-    hasBrowserEmulatorPolyfills: boolean,
     viewport: IViewport,
     timezoneId: string,
   ) {
@@ -110,7 +109,6 @@ export default class SessionState {
       sessionName,
       browserEmulatorId,
       humanEmulatorId,
-      hasBrowserEmulatorPolyfills,
       this.createDate,
       scriptInstanceMeta?.id,
       scriptInstanceMeta?.entrypoint,

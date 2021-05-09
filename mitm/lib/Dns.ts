@@ -1,23 +1,23 @@
-import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { ConnectionOptions } from 'tls';
 import * as moment from 'moment';
 import * as net from 'net';
 import { promises as dns } from 'dns';
+import { createPromise } from '@secret-agent/commons/utils';
+import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import IDnsSettings from '@secret-agent/interfaces/IDnsSettings';
 import DnsOverTlsSocket from './DnsOverTlsSocket';
 import RequestSession from '../handlers/RequestSession';
 
 export class Dns {
   public static dnsEntries = new Map<string, IResolvablePromise<IDnsEntry>>();
   public socket: DnsOverTlsSocket;
-  private readonly dnsServer: ConnectionOptions;
+  private readonly dnsSettings: IDnsSettings = {};
 
   constructor(readonly requestSession?: RequestSession) {
-    this.dnsServer = requestSession?.networkEmulation?.dns?.dnsOverTlsConnection;
+    requestSession?.plugins?.onDnsConfiguration(this.dnsSettings);
   }
 
   public async lookupIp(host: string, retries = 3): Promise<string> {
-    if (!this.dnsServer || host === 'localhost' || net.isIP(host)) return host;
+    if (!this.dnsSettings.dnsOverTlsConnection || host === 'localhost' || net.isIP(host)) return host;
 
     try {
       // get cached (or in process resolver)
@@ -84,7 +84,7 @@ export class Dns {
     try {
       if (!this.socket) {
         this.socket = new DnsOverTlsSocket(
-          this.dnsServer,
+          this.dnsSettings,
           this.requestSession,
           () => (this.socket = null),
         );

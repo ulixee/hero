@@ -1,7 +1,7 @@
 import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
 import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
@@ -20,7 +20,6 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import BrowserEmulators from '../lib/BrowserEmulators';
 
 const { log } = Log(module);
 
@@ -107,13 +106,12 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public async connect(
     options: ICoreConfigureOptions & { isPersistent?: boolean } = {},
-  ): Promise<{ maxConcurrency: number; browserEmulatorIds: string[] }> {
+  ): Promise<{ maxConcurrency: number }> {
     this.isPersistent = options.isPersistent ?? true;
     this.isClosing = false;
     await Core.start(options, false);
     return {
       maxConcurrency: GlobalPool.maxConcurrentAgentsCount,
-      browserEmulatorIds: BrowserEmulators.emulatorIds,
     };
   }
 
@@ -176,20 +174,20 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
     const session = Session.get(meta.sessionId);
-    const { browserEmulator } = session;
-    const { configuration, userAgentString, osPlatform } = browserEmulator;
+    const { plugins, viewport, locale, timezoneId } = session;
+    const { userAgentString, operatingSystemPlatform } = plugins.browserEmulator;
     return <IAgentMeta>{
       sessionId: session.id,
       sessionName: session.options.sessionName,
-      browserEmulatorId: session.browserEmulatorId,
-      humanEmulatorId: session.humanEmulatorId,
-      viewport: configuration.viewport,
-      locale: configuration.locale,
-      timezoneId: configuration.timezoneId,
+      browserEmulatorId: plugins.browserEmulator.id,
+      humanEmulatorId: plugins.humanEmulator.id,
       blockedResourceTypes: session.options.blockedResourceTypes,
       upstreamProxyUrl: session.upstreamProxyUrl,
+      viewport,
+      locale,
+      timezoneId,
       userAgentString,
-      osPlatform,
+      operatingSystemPlatform,
     };
   }
 
@@ -198,7 +196,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     return session.exportUserProfile();
   }
 
-  public async createSession(options: ICreateSessionOptions = {}): Promise<ISessionMeta> {
+  public async createSession(options: ISessionCreateOptions = {}): Promise<ISessionMeta> {
     if (this.isClosing) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
     const session = await GlobalPool.createSession(options);

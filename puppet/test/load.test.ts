@@ -1,12 +1,15 @@
 import Log from '@secret-agent/commons/Logger';
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Core from '@secret-agent/core';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
-import defaultEmulation from './_defaultEmulation';
+import CustomBrowserEmulator from './_CustomBrowserEmulator';
 
 const { log } = Log(module);
+const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('Load test', () => {
   let server: TestServer;
@@ -14,11 +17,14 @@ describe('Load test', () => {
   let context: IPuppetContext;
 
   beforeAll(async () => {
+    Core.use(CustomBrowserEmulator);
+    const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
+    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
     server = await TestServer.create(0);
-    puppet = new Puppet(ChromeLatest.engine);
+    puppet = new Puppet(browserEngine);
     await puppet.start();
-    context = await puppet.newContext(defaultEmulation, log);
-    capturePuppetContextLogs(context, `${ChromeLatest.engine.fullVersion}-load-test`);
+    context = await puppet.newContext(plugins, log);
+    capturePuppetContextLogs(context, `${browserEngine.fullVersion}-load-test`);
     server.setRoute('/link.html', async (req, res) => {
       res.setHeader('Content-Type', 'text/html');
       res.end(`

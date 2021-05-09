@@ -1,14 +1,27 @@
+import Core from '@secret-agent/core';
+import CoreServer from '@secret-agent/core/server';
 import { Helpers } from '@secret-agent/testing';
 import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
 import { Handler, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
 let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler();
-  Helpers.onClose(() => handler.close(), true);
+  const coreServer = new CoreServer();
+  await coreServer.listen({ port: 0 });
+  Core.use(
+    class BasicHumanEmulator extends HumanEmulatorBase {
+      static id = 'basic';
+    },
+  );
+  handler = new Handler({ host: await coreServer.address });
+  Helpers.onClose(() => {
+    handler.close();
+    coreServer.close();
+  }, true);
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
@@ -186,9 +199,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const agent = await handler.createAgent({
-      humanEmulatorId: 'basic',
-    });
+    const agent = await handler.createAgent({ humanEmulatorId: 'basic' });
     Helpers.needsClosing.push(agent);
     await agent.goto(`${koaServer.baseUrl}/empty-click`);
     await agent.activeTab.waitForLoad(LocationStatus.PaintingStable);

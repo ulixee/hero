@@ -91,7 +91,7 @@ describe('basic Dom Replay tests', () => {
     await mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const context = await mirrorChrome.newContext(session.browserEmulator, log.createChild(module));
+    const context = await mirrorChrome.newContext(session.plugins, log.createChild(module));
     // context.on('devtools-message', console.log);
     const mirrorPage = await context.newPage();
     const debug = false;
@@ -182,10 +182,7 @@ describe('basic Dom Replay tests', () => {
     mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
-    const mirrorContext = await mirrorChrome.newContext(
-      session.browserEmulator,
-      log.createChild(module),
-    );
+    const mirrorContext = await mirrorChrome.newContext(session.plugins, log.createChild(module));
     const mirrorPage = await mirrorContext.newPage();
 
     await Promise.all([

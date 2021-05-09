@@ -1,13 +1,17 @@
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import Core from '@secret-agent/core';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
-import defaultEmulation from './_defaultEmulation';
+import CustomBrowserEmulator from './_CustomBrowserEmulator';
 
 const { log } = Log(module);
+const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('Frames', () => {
   let server: TestServer;
@@ -16,11 +20,14 @@ describe('Frames', () => {
   let context: IPuppetContext;
 
   beforeAll(async () => {
+    Core.use(CustomBrowserEmulator);
+    const { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
+    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
     server = await TestServer.create(0);
-    puppet = new Puppet(ChromeLatest.engine);
+    puppet = new Puppet(browserEngine);
     await puppet.start();
-    context = await puppet.newContext(defaultEmulation, log);
-    capturePuppetContextLogs(context, `${ChromeLatest.engine.fullVersion}-Frames-test`);
+    context = await puppet.newContext(plugins, log);
+    capturePuppetContextLogs(context, `${browserEngine.fullVersion}-Frames-test`);
   });
 
   afterEach(async () => {
@@ -39,7 +46,8 @@ describe('Frames', () => {
   });
 
   function getContexts(puppetPage: IPuppetPage) {
-    if (ChromeLatest.engine.name === 'chrome') {
+    const { browserEngine } = BrowserEmulator.selectBrowserMeta();
+    if (browserEngine.name === 'chrome') {
       const rawPage = puppetPage;
       // @ts-ignore
       return rawPage.framesManager.activeContextIds.size;
@@ -292,10 +300,7 @@ describe('Frames', () => {
       // should have remove frame
       expect(page.frames.filter(x => x.id === frame1.id)).toHaveLength(0);
       const frame2Promise = page.waitOn('frame-created');
-      await Promise.all([
-        frame2Promise,
-        page.evaluate('document.body.appendChild(window.frame)'),
-      ]);
+      await Promise.all([frame2Promise, page.evaluate('document.body.appendChild(window.frame)')]);
       expect((await frame2Promise).frame.id).not.toBe(frame1.id);
     });
 

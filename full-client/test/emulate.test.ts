@@ -1,9 +1,9 @@
+import * as Fs from 'fs';
 import { Helpers } from '@secret-agent/testing';
 import { GlobalPool } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import * as Fs from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import Viewports from '@secret-agent/emulate-browsers-base/lib/Viewports';
+import Viewports from '@secret-agent/default-browser-emulator/lib/Viewports';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -23,6 +23,7 @@ describe('basic Emulator tests', () => {
       timezoneId: 'America/Los_Angeles',
     });
     Helpers.needsClosing.push(agent);
+    await new Promise(resolve => setTimeout(resolve, 1e3));
 
     await agent.goto(`${koaServer.baseUrl}`);
 
@@ -247,7 +248,7 @@ describe('user agent and platform', () => {
     }
 
     expect(agentMeta.userAgentString).toBe(windowParams.userAgent);
-    expect(agentMeta.osPlatform).toBe(windowParams.platform);
+    expect(agentMeta.operatingSystemPlatform).toBe(windowParams.platform);
 
     for (const prop of propsToGet) {
       expect(frameParams[prop]).toStrictEqual(windowParams[prop]);
@@ -255,7 +256,7 @@ describe('user agent and platform', () => {
   });
 
   it('should maintain user agent and platform across navigations', async () => {
-    const agent = await handler.createAgent({ browserEmulatorId: 'chrome-latest' });
+    const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);
 
     const agentMeta = await agent.meta;
@@ -301,7 +302,7 @@ describe('user agent and platform', () => {
     const page1WindowParams = await getParams();
 
     expect(agentMeta.userAgentString).toBe(page1WindowParams.userAgent);
-    expect(agentMeta.osPlatform).toBe(page1WindowParams.platform);
+    expect(agentMeta.operatingSystemPlatform).toBe(page1WindowParams.platform);
 
     await agent.click(agent.document.querySelector('a'));
 

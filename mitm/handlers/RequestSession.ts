@@ -2,7 +2,6 @@ import * as http from 'http';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import ResourceType from '@secret-agent/interfaces/ResourceType';
-import INetworkEmulation from '@secret-agent/interfaces/INetworkEmulation';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
@@ -12,6 +11,8 @@ import * as net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Log from '@secret-agent/commons/Logger';
 import MitmSocket from '@secret-agent/mitm-socket/index';
+import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import { URL } from 'url';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -57,9 +58,8 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   constructor(
     readonly sessionId: string,
-    readonly useragent: string,
+    readonly plugins: IPlugins,
     public upstreamProxyUrl?: string,
-    readonly networkEmulation: INetworkEmulation = {},
   ) {
     super();
     this.logger = log.createChild(module, {
@@ -97,14 +97,10 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
     context.setState(ResourceState.EmulationWillSendResponse);
 
     if (context.resourceType === 'Document' && context.status === 200) {
-      if (this.networkEmulation.websiteHasFirstPartyInteraction) {
-        this.networkEmulation.websiteHasFirstPartyInteraction(context.url);
-      }
+      this.plugins.websiteHasFirstPartyInteraction(context.url);
     }
 
-    if (this.networkEmulation.beforeHttpResponse) {
-      await this.networkEmulation.beforeHttpResponse(context);
-    }
+    await this.plugins.beforeHttpResponse(context);
   }
 
   public async lookupDns(host: string): Promise<string> {
@@ -169,9 +165,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public recordDocumentUserActivity(documentUrl: string): void {
-    if (this.networkEmulation.websiteHasFirstPartyInteraction) {
-      this.networkEmulation.websiteHasFirstPartyInteraction(new URL(documentUrl));
-    }
+    this.plugins.websiteHasFirstPartyInteraction(new URL(documentUrl));
   }
 
   /////// Websockets ///////////////////////////////////////////////////////////

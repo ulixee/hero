@@ -1,12 +1,15 @@
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Core from '@secret-agent/core';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';
-import defaultEmulation from './_defaultEmulation';
+import CustomBrowserEmulator from './_CustomBrowserEmulator';
 
 const { log } = Log(module);
+const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('Page.navigate', () => {
   let server: TestServer;
@@ -15,13 +18,16 @@ describe('Page.navigate', () => {
   let puppet: Puppet;
   let context: IPuppetContext;
   const needsClosing = [];
+  const { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
 
   beforeAll(async () => {
+    Core.use(CustomBrowserEmulator);
     server = await TestServer.create(0);
     httpsServer = await TestServer.createHTTPS(0);
-    puppet = new Puppet(ChromeLatest.engine);
+    puppet = new Puppet(browserEngine);
     await puppet.start();
-    context = await puppet.newContext(defaultEmulation, log);
+    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+    context = await puppet.newContext(plugins, log);
     context.on('page', event => {
       needsClosing.push(event.page);
     });
@@ -48,9 +54,9 @@ describe('Page.navigate', () => {
   });
 
   const options = {
-    CHROME: ChromeLatest.engine.name === 'chrome',
-    WEBKIT: ChromeLatest.engine.name === 'webkit',
-    FIREFOX: ChromeLatest.engine.name === 'firefox',
+    CHROME: browserEngine.name === 'chrome',
+    WEBKIT: browserEngine.name === 'webkit',
+    FIREFOX: browserEngine.name === 'firefox',
   };
 
   const isWindows = process.platform === 'win32';
@@ -102,8 +108,8 @@ describe('Page.navigate', () => {
       let error = null;
       await page.goto(server.emptyPage).catch(e => (error = e));
       expect(error).not.toBe(null);
-      if (ChromeLatest.engine.name === 'chrome') expect(error.message).toContain('net::ERR_ABORTED');
-      else if (ChromeLatest.engine.name === 'webkit')
+      if (browserEngine.name === 'chrome') expect(error.message).toContain('net::ERR_ABORTED');
+      else if (browserEngine.name === 'webkit')
         expect(error.message).toContain('Aborted: 204 No Content');
       else expect(error.message).toContain('NS_BINDING_ABORTED');
     });

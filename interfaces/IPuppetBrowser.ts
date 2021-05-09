@@ -1,7 +1,7 @@
 import { IBoundLog } from './ILog';
-import IBrowserEmulator from './IBrowserEmulator';
 import IPuppetContext from './IPuppetContext';
 import IProxyConnectionOptions from './IProxyConnectionOptions';
+import IPlugins from './IPlugins';
 
 export default interface IPuppetBrowser {
   getFeatures(): Promise<{
@@ -9,7 +9,7 @@ export default interface IPuppetBrowser {
     version: { major: string; minor: string };
   }>;
   newContext(
-    emulator: IBrowserEmulator,
+    plugins: IPlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ): Promise<IPuppetContext>;

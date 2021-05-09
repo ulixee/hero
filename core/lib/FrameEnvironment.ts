@@ -145,6 +145,7 @@ export default class FrameEnvironment {
   }
 
   public close(): void {
+    console.log(new Error('FrameEnvironment.close'));
     if (this.isClosing) return;
     this.isClosing = true;
     const parentLogId = this.logger.stats('FrameEnvironment.Closing');

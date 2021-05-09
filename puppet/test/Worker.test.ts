@@ -1,12 +1,15 @@
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import Log from '@secret-agent/commons/Logger';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Core from '@secret-agent/core';
 import { TestServer } from './server';
 import { createTestPage, ITestPage } from './TestPage';
 import Puppet from '../index';
-import defaultEmulation from './_defaultEmulation';
+import CustomBrowserEmulator from './_CustomBrowserEmulator';
 
 const { log } = Log(module);
+const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('Worker test', () => {
   let server: TestServer;
@@ -16,11 +19,14 @@ describe('Worker test', () => {
   let context: IPuppetContext;
 
   beforeAll(async () => {
+    Core.use(CustomBrowserEmulator);
+    const { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
     server = await TestServer.create(0);
     httpsServer = await TestServer.createHTTPS(0);
-    puppet = new Puppet(ChromeLatest.engine);
+    puppet = new Puppet(browserEngine);
     await puppet.start();
-    context = await puppet.newContext(defaultEmulation, log);
+    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+    context = await puppet.newContext(plugins, log);
   });
 
   afterEach(async () => {

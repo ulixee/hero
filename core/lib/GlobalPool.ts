@@ -4,7 +4,7 @@ import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy } from '@secret-agent/mitm';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import Puppet from '@secret-agent/puppet';
 import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
@@ -12,14 +12,12 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
-import BrowserEmulators from './BrowserEmulators';
 
 const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 const disableMitm = Boolean(JSON.parse(process.env.SA_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
-  public static defaultBrowserEmulatorId = BrowserEmulators.defaultId;
   public static maxConcurrentAgentsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
@@ -36,31 +34,19 @@ export default class GlobalPool {
   private static mitmServer: MitmProxy;
   private static mitmStartPromise: Promise<MitmProxy>;
   private static waitingForAvailability: {
-    options: ICreateSessionOptions;
+    options: ISessionCreateOptions;
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start(browserEmulatorIds?: string[]) {
-    browserEmulatorIds = browserEmulatorIds ?? [];
+  public static async start() {
     log.info('StartingGlobalPool', {
       sessionId: null,
-      browserEmulatorIds,
     });
     await this.startMitm();
-
-    for (const emulatorId of browserEmulatorIds) {
-      const BrowserEmulator = BrowserEmulators.getClassById(emulatorId);
-      if (!BrowserEmulator) {
-        throw new Error(`BrowserEmulator was not found: ${emulatorId}`);
-      }
-      const puppet = await this.addPuppet(BrowserEmulator.engine);
-      await puppet.isReady;
-    }
-
     this.resolveWaitingConnection();
   }
 
-  public static createSession(options: ICreateSessionOptions) {
+  public static createSession(options: ISessionCreateOptions) {
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
@@ -104,8 +90,8 @@ export default class GlobalPool {
       });
   }
 
-  private static async addPuppet(engine: IBrowserEngine): Promise<Puppet> {
-    const existing = this.getPuppet(engine);
+  private static async addPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+    const existing = this.getPuppet(browserEngine);
     if (existing) {
       if (existing instanceof Error) throw existing;
       return existing;
@@ -123,21 +109,21 @@ export default class GlobalPool {
       };
     }
 
-    const puppet = new Puppet(engine);
+    const puppet = new Puppet(browserEngine);
     this.puppets.push(puppet);
 
     const browserOrError = await puppet.start({
       ...this.defaultLaunchArgs,
       proxyPort: this.mitmServer?.port,
-      showBrowser: engine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
+      showBrowser: browserEngine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
     });
     if (browserOrError instanceof Error) throw browserOrError;
     return puppet;
   }
 
-  private static getPuppet(engine?: IBrowserEngine) {
-    if (!engine) return this.puppets[0];
-    return this.puppets.find(x => x.engine === engine);
+  private static getPuppet(browserEngine?: IBrowserEngine) {
+    if (!browserEngine) return this.puppets[0];
+    return this.puppets.find(x => x.browserEngine === browserEngine);
   }
 
   private static async startMitm() {
@@ -149,7 +135,7 @@ export default class GlobalPool {
     }
   }
 
-  private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
+  private static async createSessionNow(options: ISessionCreateOptions): Promise<Session> {
     await this.startMitm();
 
     this._activeSessionCount += 1;
@@ -165,7 +151,7 @@ export default class GlobalPool {
       }
 
       const browserContext = await puppet.newContext(
-        session.browserEmulator,
+        session.plugins,
         log.createChild(module, {
           sessionId: session.id,
         }),

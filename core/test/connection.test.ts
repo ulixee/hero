@@ -2,11 +2,11 @@ import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
 import { Log } from '@secret-agent/commons/Logger';
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
-import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
-import { DependenciesMissingError } from '@secret-agent/emulate-browsers-installer/lib/DependenciesMissingError';
-import DependencyInstaller from '@secret-agent/emulate-browsers-installer/lib/DependencyInstaller';
-import * as ValidateHostDeps from '@secret-agent/emulate-browsers-installer/lib/validateHostDependencies';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Core from '../index';
+import { DependenciesMissingError } from '@secret-agent/plugin-utils/lib/DependenciesMissingError';
+import DependencyInstaller from '@secret-agent/plugin-utils/lib/DependencyInstaller';
+import * as ValidateHostDeps from '@secret-agent/plugin-utils/lib/validateHostDependencies';
 import CoreServer from '../server';
 
 const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
@@ -84,11 +84,17 @@ describe('basic connection tests', () => {
   });
 
   it('should throw an error informing how to install dependencies', async () => {
-    class ChromeTest extends ChromeLatest {
+    class CustomEmulator extends BrowserEmulator {
       public static id = 'emulate-test';
-      public static engine = { ...ChromeLatest.engine };
+      public static selectBrowserMeta(userAgentSelector: string) {
+        const { browserEngine } = BrowserEmulator.selectBrowserMeta();
+        // @ts-ignore
+        const { name, npmPackageName, fullVersion, executablePathEnvVar } = browserEngine;
+        // public static browserEngine = new BrowserEngine(npmPackageName, { name, fullVersion, executablePathEnvVar, id: '', features: [] });
+        return super.selectBrowserMeta();
+      }
     }
-    BrowserEmulators.load(ChromeTest as any);
+    Core.use(CustomEmulator as any);
 
     logError.mockClear();
     validate.mockClear();

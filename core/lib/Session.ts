@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import ICreateTabOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ICreateTabOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -8,14 +8,9 @@ import RequestSession, {
   IResourceStateChangeEvent,
   ISocketEvent,
 } from '@secret-agent/mitm/handlers/RequestSession';
-import * as Os from 'os';
 import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
-import IHumanEmulatorClass from '@secret-agent/interfaces/IHumanEmulatorClass';
-import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
-import IBrowserEmulatorClass from '@secret-agent/interfaces/IBrowserEmulatorClass';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
@@ -24,18 +19,19 @@ import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { IBoundLog } from "@secret-agent/interfaces/ILog";
 import { MitmProxy } from '@secret-agent/mitm/index';
+import IViewport from "@secret-agent/interfaces/IViewport";
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
-import BrowserEmulators from './BrowserEmulators';
-import HumanEmulators from './HumanEmulators';
 import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
+import Plugins from "./Plugins";
 
 const { log } = Log(module);
 
@@ -50,8 +46,12 @@ export default class Session extends TypedEventEmitter<{
   public readonly id: string;
   public readonly baseDir: string;
   public browserEngine: IBrowserEngine;
-  public browserEmulator: IBrowserEmulator;
-  public humanEmulator: IHumanEmulator;
+  public plugins: Plugins;
+
+  public viewport: IViewport;
+  public timezoneId: string;
+  public locale: string;
+
   public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
   public sessionState: SessionState;
@@ -60,8 +60,6 @@ export default class Session extends TypedEventEmitter<{
 
   public tabsById = new Map<number, Tab>();
 
-  public readonly humanEmulatorId: string;
-  public readonly browserEmulatorId: string;
   public get isClosing() {
     return this._isClosing;
   }
@@ -73,6 +71,8 @@ export default class Session extends TypedEventEmitter<{
       event: IRequestSessionHttpErrorEvent;
     }[]
   >();
+
+  protected readonly logger: IBoundLog;
 
   private hasLoadedUserProfile = false;
   private commandRecorder: CommandRecorder;
@@ -88,26 +88,28 @@ export default class Session extends TypedEventEmitter<{
     Session.byId[this.id] = this;
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
-    this.browserEmulator = BrowserEmulators.createInstance(options, options.browserEmulatorId);
-    this.browserEmulator.sessionId = this.id;
-    this.browserEmulatorId = (this.browserEmulator.constructor as IBrowserEmulatorClass).id;
-    this.browserEngine = (this.browserEmulator.constructor as IBrowserEmulatorClass).engine;
+
+    const { userAgent: userAgentSelector, browserEmulatorId, humanEmulatorId } = options;
+    this.plugins = new Plugins({ userAgentSelector, browserEmulatorId, humanEmulatorId }, this.logger);
+
+    this.browserEngine = this.plugins.browserEngine;
+
     if (options.userProfile) {
       this.userProfile = options.userProfile;
     }
     this.upstreamProxyUrl = options.upstreamProxyUrl;
 
-    if (!this.browserEmulator.canPolyfill) {
-      log.info('BrowserEmulators.PolyfillNotSupported', {
-        sessionId: this.id,
-        browserEmulatorId: this.browserEmulatorId,
-        userAgentString: this.browserEmulator.userAgentString,
-        runtimeOs: Os.platform(),
-      });
-    }
-
-    this.humanEmulator = HumanEmulators.createInstance(options.humanEmulatorId);
-    this.humanEmulatorId = (this.humanEmulator.constructor as IHumanEmulatorClass).id;
+    this.plugins.configure(options);
+    this.timezoneId = options.timezoneId || '';
+    this.viewport = options.viewport || {
+      positionX: 0,
+      positionY: 0,
+      screenWidth: 1440,
+      screenHeight: 900,
+      width: 1440,
+      height: 900,
+      deviceScaleFactor: 1,
+    } as IViewport;
 
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
@@ -115,17 +117,15 @@ export default class Session extends TypedEventEmitter<{
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-      this.browserEmulatorId,
-      this.humanEmulatorId,
-      this.browserEmulator.canPolyfill,
-      this.browserEmulator.configuration.viewport,
-      this.browserEmulator.configuration.timezoneId,
+      this.plugins.browserEmulator.id,
+      this.plugins.humanEmulator.id,
+      this.viewport,
+      this.timezoneId,
     );
     this.mitmRequestSession = new RequestSession(
       this.id,
-      this.browserEmulator.userAgentString,
+      this.plugins,
       this.upstreamProxyUrl,
-      this.browserEmulator,
     );
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
@@ -152,7 +152,7 @@ export default class Session extends TypedEventEmitter<{
     if (options.userProfile !== undefined) {
       this.userProfile = options.userProfile;
     }
-    await this.browserEmulator.configure(options);
+    this.plugins.configure(options);
   }
 
   public async detachTab(

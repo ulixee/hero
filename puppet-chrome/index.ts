@@ -9,7 +9,7 @@ import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 
 const PuppetLauncher: IPuppetLauncher = {
-  getLaunchArgs(options: IPuppetLaunchArgs, engine: IBrowserEngine) {
+  getLaunchArgs(options: IPuppetLaunchArgs, browserEngine: IBrowserEngine) {
     const chromeArguments = [];
     if (options.proxyPort !== undefined) {
       chromeArguments.push(
@@ -39,22 +39,22 @@ const PuppetLauncher: IPuppetLauncher = {
       }
     }
 
-    engine.isHeaded = options.showBrowser === true;
-    if (!engine.isHeaded) {
+    browserEngine.isHeaded = options.showBrowser === true;
+    if (!browserEngine.isHeaded) {
       chromeArguments.push('--headless');
     }
 
-    if (engine.getLaunchArguments) {
-      return engine.getLaunchArguments(options, chromeArguments);
+    if (browserEngine.getLaunchArguments) {
+      return browserEngine.getLaunchArguments(options, chromeArguments);
     }
 
     return chromeArguments;
   },
-  async createPuppet(process: ILaunchedProcess, engine: IBrowserEngine): Promise<IPuppetBrowser> {
+  async createPuppet(process: ILaunchedProcess, browserEngine: IBrowserEngine): Promise<IPuppetBrowser> {
     const { transport, close } = process;
     try {
       const connection = new Connection(transport);
-      return await Browser.create(connection, engine, close);
+      return await Browser.create(connection, browserEngine, close);
     } catch (error) {
       await close();
       throw error;

@@ -5,7 +5,7 @@ import { IPuppetLaunchError } from './IPuppetLaunchError';
 import IPuppetLaunchArgs from './IPuppetLaunchArgs';
 
 export default interface IPuppetLauncher {
-  getLaunchArgs(options: IPuppetLaunchArgs, engine: IBrowserEngine): string[];
-  createPuppet(process: ILaunchedProcess, engine: IBrowserEngine): Promise<IPuppetBrowser>;
+  getLaunchArgs(options: IPuppetLaunchArgs, browserEngine: IBrowserEngine): string[];
+  createPuppet(process: ILaunchedProcess, browserEngine: IBrowserEngine): Promise<IPuppetBrowser>;
   translateLaunchError(error: Error): IPuppetLaunchError;
 }

@@ -3,5 +3,4 @@ export default interface ICoreConfigureOptions {
   localProxyPortStart?: number;
   coreServerPort?: number;
   sessionsDir?: string;
-  browserEmulatorIds?: string[];
 }

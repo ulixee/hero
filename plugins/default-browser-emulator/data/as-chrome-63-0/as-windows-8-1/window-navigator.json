@@ -1,0 +1,677 @@
+{
+  "navigator": {
+    "_$protos": [
+      "Navigator.prototype",
+      "Object.prototype"
+    ],
+    "vendorSub": {
+      "_$type": "string",
+      "_$value": ""
+    },
+    "productSub": {
+      "_$type": "string",
+      "_$value": "20030107"
+    },
+    "vendor": {
+      "_$type": "string",
+      "_$value": "Google Inc."
+    },
+    "maxTouchPoints": {
+      "_$type": "number",
+      "_$value": 0
+    },
+    "hardwareConcurrency": {
+      "_$type": "number",
+      "_$value": 2
+    },
+    "cookieEnabled": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "appCodeName": {
+      "_$type": "string",
+      "_$value": "Mozilla"
+    },
+    "appName": {
+      "_$type": "string",
+      "_$value": "Netscape"
+    },
+    "appVersion": {
+      "_$type": "string",
+      "_$value": "5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
+    },
+    "platform": {
+      "_$type": "string",
+      "_$value": "Win32"
+    },
+    "product": {
+      "_$type": "string",
+      "_$value": "Gecko"
+    },
+    "userAgent": {
+      "_$type": "string",
+      "_$value": "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36"
+    },
+    "language": {
+      "_$type": "string",
+      "_$value": "en-US"
+    },
+    "languages": {
+      "0": {
+        "_$type": "string",
+        "_$flags": "e",
+        "_$value": "en-US"
+      },
+      "1": {
+        "_$type": "string",
+        "_$flags": "e",
+        "_$value": "en"
+      },
+      "_$protos": [
+        "Array.prototype",
+        "Object.prototype"
+      ],
+      "_$isFrozen": true,
+      "_$isSealed": true,
+      "length": {
+        "_$type": "number",
+        "_$flags": "",
+        "_$value": 2
+      },
+      "_$type": "array"
+    },
+    "onLine": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "doNotTrack": {
+      "_$type": "object",
+      "_$value": null
+    },
+    "geolocation": {
+      "_$protos": [
+        "Geolocation.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "mediaDevices": {
+      "_$protos": [
+        "MediaDevices.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "ondevicechange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "connection": {
+      "_$protos": [
+        "NetworkInformation.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "downlink": {
+        "_$type": "number",
+        "_$value": 10
+      },
+      "effectiveType": {
+        "_$type": "string",
+        "_$value": "4g"
+      },
+      "onchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "rtt": {
+        "_$type": "number",
+        "_$value": 50
+      },
+      "_$type": "object"
+    },
+    "plugins": {
+      "0": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-google-chrome-pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/x-google-chrome-pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-google-chrome-pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Chrome PDF Plugin"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-pdf-viewer"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 1
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "1": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/pdf": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Chrome PDF Viewer"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "mhjfbmdgcfjbbpaeojofohoefgiehjai"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 1
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "2": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-nacl"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Native Client Executable"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-pnacl"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Native Client Executable"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/x-nacl": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-nacl"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Native Client Executable"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "application/x-pnacl": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-pnacl"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Native Client Executable"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Native Client"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "internal-nacl-plugin"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 2
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "3": {
+        "0": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-ppapi-widevine-cdm"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Widevine Content Decryption Module"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": [
+          "Plugin.prototype",
+          "Object.prototype"
+        ],
+        "application/x-ppapi-widevine-cdm": {
+          "_$protos": [
+            "MimeType.prototype",
+            "Object.prototype"
+          ],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/x-ppapi-widevine-cdm"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": ""
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Widevine Content Decryption Module"
+          },
+          "_$type": "object",
+          "_$flags": "c",
+          "_$value": "{}"
+        },
+        "name": {
+          "_$type": "string",
+          "_$value": "Widevine Content Decryption Module"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": "widevinecdmadapter.dll"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Enables Widevine licenses for playback of HTML audio/video content. (version: 1.4.8.1029)"
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 1
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "_$protos": [
+        "PluginArray.prototype",
+        "Object.prototype"
+      ],
+      "Chrome PDF Plugin": "REF: window.navigator.plugins.0",
+      "Chrome PDF Viewer": "REF: window.navigator.plugins.1",
+      "Native Client": "REF: window.navigator.plugins.2",
+      "Widevine Content Decryption Module": "REF: window.navigator.plugins.3",
+      "length": {
+        "_$type": "number",
+        "_$value": 4
+      },
+      "_$type": "object"
+    },
+    "mimeTypes": {
+      "0": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "1": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/x-google-chrome-pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "2": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/x-nacl"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Native Client Executable"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "3": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/x-pnacl"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Native Client Executable"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "4": {
+        "_$protos": [
+          "MimeType.prototype",
+          "Object.prototype"
+        ],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/x-ppapi-widevine-cdm"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Widevine Content Decryption Module"
+        },
+        "_$type": "object",
+        "_$flags": "ce"
+      },
+      "_$protos": [
+        "MimeTypeArray.prototype",
+        "Object.prototype"
+      ],
+      "application/pdf": "REF: window.navigator.mimeTypes.0",
+      "application/x-google-chrome-pdf": "REF: window.navigator.mimeTypes.1",
+      "application/x-nacl": "REF: window.navigator.mimeTypes.2",
+      "application/x-pnacl": "REF: window.navigator.mimeTypes.3",
+      "application/x-ppapi-widevine-cdm": "REF: window.navigator.mimeTypes.4",
+      "length": {
+        "_$type": "number",
+        "_$value": 5
+      },
+      "_$type": "object"
+    },
+    "webkitTemporaryStorage": {
+      "_$protos": [
+        "DeprecatedStorageQuota.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "webkitPersistentStorage": {
+      "_$protos": [
+        "DeprecatedStorageQuota.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "serviceWorker": {
+      "_$protos": [
+        "ServiceWorkerContainer.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "controller": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ready": {
+        "_$value": "Promise",
+        "_$type": "object"
+      },
+      "oncontrollerchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "onmessage": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "budget": {
+      "_$protos": [
+        "BudgetService.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "permissions": {
+      "_$protos": [
+        "Permissions.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "presentation": {
+      "_$protos": [
+        "Presentation.prototype",
+        "Object.prototype"
+      ],
+      "defaultRequest": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "receiver": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "deviceMemory": {
+      "_$type": "number",
+      "_$value": 4
+    },
+    "credentials": {
+      "_$protos": [
+        "CredentialsContainer.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "storage": {
+      "_$protos": [
+        "StorageManager.prototype",
+        "Object.prototype"
+      ],
+      "_$type": "object"
+    },
+    "usb": {
+      "_$protos": [
+        "USB.prototype",
+        "EventTarget.prototype",
+        "Object.prototype"
+      ],
+      "onconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ondisconnect": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "_$type": "object",
+    "_$flags": "ce",
+    "_$get": "function () { [native code] }",
+    "_$getToStringToString": "function toString() { [native code] }"
+  }
+}

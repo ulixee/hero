@@ -4,6 +4,10 @@ import { URL } from 'url';
 import MitmSocket from '@secret-agent/mitm-socket';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
@@ -11,6 +15,10 @@ import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import { parseRawHeaders } from '../lib/Utils';
 import CacheHandler from '../handlers/CacheHandler';
+
+const { log } = Log(module);
+const browserEmulatorId = BrowserEmulator.id;
+const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
 const mocks = {
   httpRequestHandler: {
@@ -230,7 +238,7 @@ async function createH2Connection(sessionIdPrefix: string, url: string) {
   const proxyCredentials = session.getProxyCredentials();
   const proxyHost = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
   const mitmSocketSession = new MitmSocketSession(sessionId, {
-    clientHelloId: 'Chrome72',
+    clientHelloId: 'chrome-72',
     rejectUnauthorized: false,
   });
   Helpers.needsClosing.push(mitmSocketSession);
@@ -254,7 +262,11 @@ async function createH2Connection(sessionIdPrefix: string, url: string) {
 
 let sessionCounter = 0;
 function createSession(mitmProxy: MitmServer, sessionId = '') {
-  const session = new RequestSession(`${sessionId}${(sessionCounter += 1)}`, 'any agent', null);
+  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const session = new RequestSession(
+    `${sessionId}${(sessionCounter += 1)}`,
+    plugins,
+  );
   mitmProxy.registerSession(session, false);
   Helpers.needsClosing.push(session);
 

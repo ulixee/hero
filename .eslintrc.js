@@ -65,13 +65,13 @@ module.exports = {
       },
     },
     {
-      files: 'emulate-browsers/base/test/*.ts',
+      files: 'plugin-utils/test/*.ts',
       rules: {
         'no-console': 'off',
       },
     },
     {
-      files: 'emulate-browsers/**/*.ts',
+      files: 'plugins/default-browser-emulator/**/*.ts',
       rules: {
         'require-await': 'off', // Turn off while waiting
       },

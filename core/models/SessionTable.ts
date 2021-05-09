@@ -12,7 +12,6 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['name', 'TEXT'],
         ['browserEmulatorId', 'TEXT'],
         ['humanEmulatorId', 'TEXT'],
-        ['hasBrowserEmulatorPolyfills', 'INTEGER'],
         ['screenWidth', 'INTEGER'],
         ['screenHeight', 'INTEGER'],
         ['deviceScaleFactor', 'INTEGER'],
@@ -32,7 +31,6 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     name: string,
     browserEmulatorId: string,
     humanEmulatorId: string,
-    hasBrowserEmulatorPolyfills: boolean,
     startDate: Date,
     scriptInstanceId: string,
     scriptEntrypoint: string,
@@ -45,7 +43,6 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       name,
       browserEmulatorId,
       humanEmulatorId,
-      hasBrowserEmulatorPolyfills ? 1 : 0,
       viewport.screenWidth,
       viewport.screenHeight,
       viewport.deviceScaleFactor,
@@ -77,7 +74,6 @@ export interface ISessionRecord {
   name: string;
   browserEmulatorId: string;
   humanEmulatorId: string;
-  hasBrowserEmulatorPolyfills: boolean;
   screenWidth: number;
   screenHeight: number;
   deviceScaleFactor: number;

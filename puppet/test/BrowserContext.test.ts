@@ -1,13 +1,17 @@
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
 import { URL } from 'url';
 import Log from '@secret-agent/commons/Logger';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Core from '@secret-agent/core';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';
-import defaultEmulation from './_defaultEmulation';
+import CustomBrowserEmulator from './_CustomBrowserEmulator';
 
 const { log } = Log(module);
+const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('BrowserContext', () => {
   let server: TestServer;
@@ -15,8 +19,9 @@ describe('BrowserContext', () => {
   const needsClosing = [];
 
   beforeAll(async () => {
+    Core.use(CustomBrowserEmulator);
     server = await TestServer.create(0);
-    puppet = new Puppet(ChromeLatest.engine);
+    puppet = new Puppet(BrowserEmulator.selectBrowserMeta().browserEngine);
     await puppet.start();
   });
 
@@ -33,7 +38,8 @@ describe('BrowserContext', () => {
 
   describe('basic', () => {
     it('should create new context', async () => {
-      const context = await puppet.newContext(defaultEmulation, log);
+      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       expect(context).toBeTruthy();
       await context.close();
@@ -41,9 +47,12 @@ describe('BrowserContext', () => {
 
     it('should isolate localStorage and cookies', async () => {
       // Create two incognito contexts.
-      const context1 = await puppet.newContext(defaultEmulation, log);
+      const plugins1 = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const context1 = await puppet.newContext(plugins1, log);
       needsClosing.push(context1);
-      const context2 = await puppet.newContext(defaultEmulation, log);
+
+      const plugins2 = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const context2 = await puppet.newContext(plugins2, log);
       needsClosing.push(context2);
 
       // Create a page in first incognito context.
@@ -51,18 +60,18 @@ describe('BrowserContext', () => {
       needsClosing.push(page1);
       await page1.navigate(server.emptyPage);
       await page1.evaluate(`
-    localStorage.setItem('name', 'page1');
-    document.cookie = 'name=page1';
-  `);
+        localStorage.setItem('name', 'page1');
+        document.cookie = 'name=page1';
+      `);
 
       // Create a page in second incognito context.
       const page2 = await context2.newPage();
       needsClosing.push(page2);
       await page2.navigate(server.emptyPage);
       await page2.evaluate(`
-    localStorage.setItem('name', 'page2');
-    document.cookie = 'name=page2';
-  `);
+        localStorage.setItem('name', 'page2');
+        document.cookie = 'name=page2';
+      `);
 
       // Make sure pages don't share localstorage or cookies.
       expect(await page1.evaluate(`localStorage.getItem('name')`)).toBe('page1');
@@ -75,13 +84,15 @@ describe('BrowserContext', () => {
     });
 
     it('close() should work for empty context', async () => {
-      const context = await puppet.newContext(defaultEmulation, log);
+      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       await expect(context.close()).resolves.toBe(undefined);
     });
 
     it('close() should be callable twice', async () => {
-      const context = await puppet.newContext(defaultEmulation, log);
+      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       await Promise.all([context.close(), context.close()]);
       await expect(context.close()).resolves.toBe(undefined);
@@ -91,38 +102,37 @@ describe('BrowserContext', () => {
   describe('emulator', () => {
     it('should set for all pages', async () => {
       {
-        const context = await puppet.newContext(defaultEmulation, log);
+        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const { browserEmulator } = plugins;
+        const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
-        expect(await page.evaluate(`navigator.userAgent`)).toBe(defaultEmulation.userAgentString);
-        expect(await page.evaluate(`navigator.platform`)).toBe(defaultEmulation.osPlatform);
-        expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en']);
-        expect(await page.evaluate('screen.height')).toBe(
-          defaultEmulation.configuration.viewport.height,
+        expect(await page.evaluate(`navigator.userAgent`)).toBe(browserEmulator.userAgentString);
+        expect(await page.evaluate(`navigator.platform`)).toBe(
+          browserEmulator.operatingSystemPlatform,
         );
+        expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en']);
+        expect(await page.evaluate('screen.height')).toBe(browserEmulator.viewport.height);
         await context.close();
       }
       {
-        const context = await puppet.newContext(
-          {
-            ...defaultEmulation,
-            configuration: {
-              locale: 'de',
-              viewport: {
-                screenHeight: 901,
-                screenWidth: 1024,
-                positionY: 1,
-                positionX: 0,
-                height: 900,
-                width: 1024,
-              },
-            },
-            osPlatform: 'Windows',
-            userAgentString: 'foobar',
+        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        plugins.browserEmulator.operatingSystemPlatform = 'Windows';
+        plugins.browserEmulator.userAgentString = 'foobar';
+        plugins.configure({
+          locale: 'de',
+          viewport: {
+            screenHeight: 901,
+            screenWidth: 1024,
+            positionY: 1,
+            positionX: 0,
+            height: 900,
+            width: 1024,
           },
-          log,
-        );
+        });
+
+        const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -141,20 +151,20 @@ describe('BrowserContext', () => {
 
     it('should work for subframes', async () => {
       {
-        const context = await puppet.newContext(defaultEmulation, log);
+        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
         expect(await page.evaluate(`navigator.userAgent`)).toContain(
-          defaultEmulation.userAgentString,
+          plugins.browserEmulator.userAgentString,
         );
         await context.close();
       }
       {
-        const context = await puppet.newContext(
-          { ...defaultEmulation, userAgentString: 'foobar' },
-          log,
-        );
+        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        plugins.browserEmulator.userAgentString = 'foobar';
+        const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
         const page = await context.newPage();
         needsClosing.push(page);
@@ -178,7 +188,8 @@ describe('BrowserContext', () => {
     let context: IPuppetContext;
     let page: ITestPage;
     beforeEach(async () => {
-      context = await puppet.newContext(defaultEmulation, log);
+      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      context = await puppet.newContext(plugins, log);
       page = createTestPage(await context.newPage());
     });
     afterEach(async () => {
@@ -332,9 +343,7 @@ describe('BrowserContext', () => {
       await page.frames[1].evaluate(`document.cookie = 'username=John Doe'`);
       await new Promise(resolve => setTimeout(resolve, 2e3));
       const allowsThirdParty = false; // options.CHROME || options.FIREFOX;
-      const cookies = await context.getCookies(
-        new URL(`${server.crossProcessBaseUrl}/grid.html}`),
-      );
+      const cookies = await context.getCookies(new URL(`${server.crossProcessBaseUrl}/grid.html}`));
       if (allowsThirdParty) {
         expect(cookies).toEqual([
           {

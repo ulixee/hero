@@ -9,7 +9,8 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@secret-agent/emulate-chrome-latest": "1.4.1-alpha.4",
-    "@secret-agent/testing": "1.4.1-alpha.4"
+    "@secret-agent/default-browser-emulator": "1.4.1-alpha.4",
+    "@secret-agent/testing": "1.4.1-alpha.4",
+    "@secret-agent/core": "1.4.1-alpha.4"
   }
 }

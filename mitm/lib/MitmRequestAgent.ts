@@ -6,6 +6,8 @@ import * as https from 'https';
 import * as http from 'http';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
+import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
+import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
@@ -32,15 +34,20 @@ export default class MitmRequestAgent {
 
   constructor(session: RequestSession) {
     this.session = session;
-    const socketSettings = session.networkEmulation?.socketSettings;
+
+    const tcpSettings: ITcpSettings = {};
+    const tlsSettings: ITlsSettings = {};
+    session.plugins.onTcpConfiguration(tcpSettings);
+    session.plugins.onTlsConfiguration(tlsSettings);
+
     this.socketSession = new MitmSocketSession(session.sessionId, {
       rejectUnauthorized: allowUnverifiedCertificates === false,
-      clientHelloId: socketSettings?.tlsClientHelloId,
-      tcpTtl: socketSettings?.tcpTtl,
-      tcpWindowSize: socketSettings?.tcpWindowSize,
+      clientHelloId: tlsSettings?.tlsClientHelloId,
+      tcpTtl: tcpSettings?.tcpTtl,
+      tcpWindowSize: tcpSettings?.tcpWindowSize,
     });
     this.maxConnectionsPerOrigin =
-      socketSettings?.socketsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
+      tlsSettings?.socketsPerOrigin ?? MitmRequestAgent.defaultMaxConnectionsPerOrigin;
   }
 
   public async request(
@@ -65,13 +72,9 @@ export default class MitmRequestAgent {
 
     ctx.setState(ResourceState.BeforeSendRequest);
 
-    const emulation = ctx.requestSession.networkEmulation;
-
     if (ctx.isServerHttp2) {
       // NOTE: must come after connect to know if http2
-      if (emulation.beforeHttpRequest) {
-        await emulation.beforeHttpRequest(ctx);
-      }
+      await ctx.requestSession.plugins.beforeHttpRequest(ctx);
       HeadersHandler.prepareRequestHeadersForHttp2(ctx);
       return this.http2Request(ctx);
     }
@@ -80,9 +83,7 @@ export default class MitmRequestAgent {
       ctx.requestHeaders.Host = ctx.url.host;
     }
     HeadersHandler.cleanProxyHeaders(ctx);
-    if (emulation.beforeHttpRequest) {
-      await emulation.beforeHttpRequest(ctx);
-    }
+    await ctx.requestSession.plugins.beforeHttpRequest(ctx);
 
     requestSettings.headers = ctx.requestHeaders;
     return this.http1Request(ctx, requestSettings);
