@@ -26,7 +26,8 @@ export default function modifyHeaders(
     let hasKeepAlive = false;
     for (const [header, value] of Object.entries(headers)) {
       let key = header;
-      if (resource.isServerHttp2 === false) {
+      // don't capitalize sec-ch-ua headers!
+      if (resource.isServerHttp2 === false && !header.match(/^sec-ch-ua/i)) {
         key = key
           .split('-')
           .map(x => `${x[0].toUpperCase()}${x.slice(1)}`)

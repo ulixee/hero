@@ -68,7 +68,7 @@ export default class ResourceResponse {
   }
 
   public text(): Promise<string> {
-    return this.data.then(x => x.toString());
+    return this.data.then(x => x?.toString());
   }
 
   public json(): Promise<any> {

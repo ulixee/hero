@@ -39,7 +39,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public connectError?: string;
   public receivedEOF = false;
 
-  private server = new net.Server().unref();
+  private server: net.Server;
   private connectPromise: Resolvable<void>;
   private socketReadyPromise = new Resolvable<void>();
   private readonly callStack: string;
@@ -53,17 +53,22 @@ export default class MitmSocket extends TypedEventEmitter<{
     const id = uuid();
     this.callStack = new Error().stack.replace('Error:', '').trim();
     this.serverName = connectOpts.servername;
+    this.logger = log.createChild(module, { sessionId });
+    this.connectOpts.isSsl ??= true;
+
     this.socketPath =
       os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
-    this.logger = log.createChild(module, { sessionId });
-    if (connectOpts.isSsl === undefined) connectOpts.isSsl = true;
+    if (existsSync(this.socketPath)) unlinkSync(this.socketPath);
+
+    // start listening
+    this.server = new net.Server().unref();
     this.server.on('connection', this.onConnected.bind(this));
     this.server.on('error', error => {
       if (this.isClosing) return;
       this.logger.warn('IpcSocketServerError', { error });
     });
-    if (existsSync(this.socketPath)) unlinkSync(this.socketPath);
     this.server.listen(this.socketPath);
+
     this.createTime = new Date();
   }
 
