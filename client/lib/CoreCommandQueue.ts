@@ -2,6 +2,7 @@ import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Queue from '@secret-agent/commons/Queue';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import { convertJsPathArgs } from './SetupAwaitedHandler';
 
 export default class CoreCommandQueue {
   public lastCommandId = 0;
@@ -31,6 +32,11 @@ export default class CoreCommandQueue {
   public run<T>(command: string, ...args: any[]): Promise<T> {
     if (this.connection.isDisconnecting) {
       return Promise.resolve(null);
+    }
+    for (const arg of args) {
+      if (Array.isArray(arg)) {
+        convertJsPathArgs(arg);
+      }
     }
     return this.internalQueue
       .run<T>(async () => {

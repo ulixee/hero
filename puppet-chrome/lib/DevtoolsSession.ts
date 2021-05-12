@@ -17,7 +17,6 @@
 
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
-import { EventEmitter } from 'events';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
