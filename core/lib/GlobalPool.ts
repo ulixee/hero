@@ -16,6 +16,7 @@ import BrowserEmulators from './BrowserEmulators';
 
 const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
+const disableMitm = Boolean(JSON.parse(process.env.SA_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
   public static defaultBrowserEmulatorId = BrowserEmulators.defaultId;
@@ -117,6 +118,7 @@ export default class GlobalPool {
         disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
         noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
         disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
+        enableMitm: !disableMitm,
       };
     }
 
@@ -125,7 +127,7 @@ export default class GlobalPool {
 
     const browserOrError = await puppet.start({
       ...this.defaultLaunchArgs,
-      proxyPort: this.mitmServer.port,
+      proxyPort: this.mitmServer?.port,
       showBrowser: engine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
     });
     if (browserOrError instanceof Error) throw browserOrError;
@@ -138,7 +140,7 @@ export default class GlobalPool {
   }
 
   private static async startMitm() {
-    if (this.mitmServer) return;
+    if (this.mitmServer || disableMitm === true) return;
     this.mitmServer = await MitmProxy.start(this.localProxyPortStart, this.sessionsDir);
   }
 
@@ -154,7 +156,9 @@ export default class GlobalPool {
       puppet =
         this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
 
-      await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
+      if (disableMitm !== true) {
+        await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
+      }
 
       const browserContext = await puppet.newContext(
         session.browserEmulator,

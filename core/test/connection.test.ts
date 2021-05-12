@@ -6,7 +6,7 @@ import DependencyInstaller from '@secret-agent/puppet/lib/DependencyInstaller';
 import * as ValidateHostDeps from '@secret-agent/puppet/lib/validateHostDependencies';
 import { Log } from '@secret-agent/commons/Logger';
 import ChromeLatest from '@secret-agent/emulate-chrome-latest';
-import BrowserEmulators from "@secret-agent/core/lib/BrowserEmulators";
+import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
 import CoreServer from '../server';
 
 const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
@@ -88,7 +88,7 @@ describe('basic connection tests', () => {
       public static id = 'emulate-test';
       public static engine = { ...ChromeLatest.engine };
     }
-    BrowserEmulators.load(ChromeTest);
+    BrowserEmulators.load(ChromeTest as any);
 
     logError.mockClear();
     validate.mockClear();

@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import * as Path from 'path';
 import { Server as WebSocketServer } from 'ws';
 import { AddressInfo, Socket } from 'net';
-import { gzip } from 'zlib';
+import { createGzip } from 'zlib';
 import Log from '@secret-agent/commons/Logger';
 
 const { log } = Log(module);
@@ -174,6 +174,7 @@ export class TestServer {
       this.requestSubscribers.get(pathName)[fulfillSymbol].call(null, request);
       this.requestSubscribers.delete(pathName);
     }
+    response.cork();
     const handler = this.routes.get(pathName);
     if (handler) {
       handler.call(null, request, response);
@@ -203,26 +204,26 @@ export class TestServer {
     if (this.csp.has(pathName))
       response.setHeader('Content-Security-Policy', this.csp.get(pathName));
 
-    fs.readFile(filePath, (err, data) => {
-      if (err) {
-        response.statusCode = 404;
-        response.end(`File not found: ${filePath}`);
-        return;
-      }
-      const extension = filePath.substring(filePath.lastIndexOf('.') + 1);
-      const mimeType = extensionToMime[extension] || 'application/octet-stream';
-      const isTextEncoding = /^text\/|^application\/(javascript|json)/.test(mimeType);
-      const contentType = isTextEncoding ? `${mimeType}; charset=utf-8` : mimeType;
-      response.setHeader('Content-Type', contentType);
-      if (this.gzipRoutes.has(pathName)) {
-        response.setHeader('Content-Encoding', 'gzip');
-        gzip(data, (_, result) => {
-          response.end(result);
-        });
-      } else {
-        response.end(data);
-      }
-    });
+    if (!fs.existsSync(filePath)) {
+      response.statusCode = 404;
+      response.end(`File not found: ${filePath}`);
+      return;
+    }
+
+    const extension = filePath.substring(filePath.lastIndexOf('.') + 1);
+    const mimeType = extensionToMime[extension] || 'application/octet-stream';
+    const isTextEncoding = /^text\/|^application\/(javascript|json)/.test(mimeType);
+    const contentType = isTextEncoding ? `${mimeType}; charset=utf-8` : mimeType;
+    response.setHeader('Content-Type', contentType);
+
+    if (this.gzipRoutes.has(pathName)) response.setHeader('Content-Encoding', 'gzip');
+
+    const stream = fs.createReadStream(filePath, { autoClose: true });
+    if (this.gzipRoutes.has(pathName)) {
+      stream.pipe(createGzip()).pipe(response);
+    } else {
+      stream.pipe(response);
+    }
   }
 
   private onWebSocketConnection(ws) {

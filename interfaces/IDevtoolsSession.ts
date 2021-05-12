@@ -34,10 +34,12 @@ export interface IDevtoolsResponseMessage {
   id: number;
   error?: { message: string; data: any };
   result?: any;
+  timestamp: Date;
 }
 
 export interface IDevtoolsEventMessage {
   sessionId: string;
   method: string;
   params: object;
+  timestamp: Date;
 }

@@ -56,11 +56,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       workerTargetId: this.id,
       workerType: this.type,
     });
-    this.networkManager = new NetworkManager(
-      devtoolsSession,
-      this.logger,
-      browserContext.proxyPassword,
-    );
+    this.networkManager = new NetworkManager(devtoolsSession, this.logger, browserContext.proxy);
     this.registeredEvents = eventUtils.addEventListeners(this.devtoolsSession, [
       ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
       ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],

@@ -2,10 +2,15 @@ import { AddressInfo, ListenOptions, Socket } from 'net';
 import * as WebSocket from 'ws';
 import Log from '@secret-agent/commons/Logger';
 import * as http from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 import { createPromise } from '@secret-agent/commons/utils';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-import Core from '../index';
+
+import Core, { GlobalPool } from '../index';
 import ConnectionToReplay from './ConnectionToReplay';
+import InjectedScripts from '../lib/InjectedScripts';
+import * as pkg from '../package.json';
+import SessionDb from '../dbs/SessionDb';
 
 const { log } = Log(module);
 const CLOSE_UNEXPECTED_ERROR = 1011;
@@ -28,13 +33,23 @@ export default class CoreServer {
   private readonly httpServer: http.Server;
   private readonly pendingReplaysByWebSocket = new WeakMap<WebSocket, Promise<void>>();
 
+  private readonly routes: [
+    RegExp | string,
+    (req: http.IncomingMessage, res: http.ServerResponse, params: string[]) => void,
+  ][];
+
   constructor(addressHost = 'localhost') {
     this.httpServer = new http.Server();
     this.httpServer.on('error', this.onHttpError.bind(this));
+    this.httpServer.on('request', this.onRequest.bind(this));
     this.httpServer.on('connection', this.httpConnection.bind(this));
     this.addressHost = addressHost;
     this.wsServer = new WebSocket.Server({ server: this.httpServer });
     this.wsServer.on('connection', this.handleConnection.bind(this));
+    this.routes = [
+      ['/replay/domReplayer.js', this.handleReplayerScriptRequest.bind(this)],
+      [/\/replay\/([\d\w-]+)\/resource\/(\d+)/, this.handleResourceRequest.bind(this)],
+    ];
   }
 
   public listen(options: ListenOptions): Promise<AddressInfo> {
@@ -80,6 +95,21 @@ export default class CoreServer {
         sessionId: null,
       });
     }
+  }
+
+  private onRequest(req: IncomingMessage, res: ServerResponse): void {
+    for (const [route, handlerFn] of this.routes) {
+      if (route instanceof RegExp && route.test(req.url)) {
+        const args = route.exec(req.url);
+        handlerFn(req, res, args?.length ? args.slice(1) : []);
+        return;
+      }
+      if (req.url === route) {
+        return handlerFn(req, res, []);
+      }
+    }
+    res.writeHead(404);
+    res.end('Route not found');
   }
 
   private httpConnection(socket: Socket): void {
@@ -135,6 +165,44 @@ export default class CoreServer {
       error,
       sessionId: null,
     });
+  }
+
+  private handleReplayerScriptRequest(_: IncomingMessage, res: ServerResponse): void {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Filename', `domReplayer-${pkg.version}.js`);
+    res.end(InjectedScripts.getReplayScript());
+  }
+
+  private async handleResourceRequest(
+    _: IncomingMessage,
+    res: ServerResponse,
+    [sessionId, resourceId],
+  ): Promise<void> {
+    const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
+    const endDate = new Date().getTime() + 5e3;
+    do {
+      const resource = db.resources.getResponse(Number(resourceId));
+      if (resource) {
+        const headers = JSON.parse(resource.responseHeaders ?? '{}');
+        const responseHeaders: any = {
+          connection: 'keep-alive',
+          'content-encoding': resource.responseEncoding,
+          'x-replay-agent': `Secret Agent Replay v${pkg.version}`,
+          'x-original-headers': headers,
+        };
+        const location = headers.location ?? headers.Location;
+        if (location) responseHeaders.location = location;
+        const contentType = headers['content-type'] || headers['Content-Type'];
+        if (contentType) responseHeaders['content-type'] = contentType;
+
+        res.writeHead(resource.statusCode, '', responseHeaders);
+        res.end(resource.responseData);
+        return;
+      }
+      await new Promise(setImmediate);
+    } while (endDate > new Date().getTime());
+
+    res.writeHead(404).end('Not found');
   }
 }
 

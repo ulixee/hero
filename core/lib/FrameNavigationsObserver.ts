@@ -84,6 +84,8 @@ export default class FrameNavigationsObserver {
         if (this.getPaintStableStatus().isStable) {
           return;
         }
+      } else if (top.stateChanges.has(status as LoadStatus)) {
+        return;
       }
     }
     const promise = this.createStatusTriggeredPromise(status, options.timeoutMs);
@@ -125,7 +127,9 @@ export default class FrameNavigationsObserver {
     // need to wait for both load + painting stable, or wait 3 seconds after either one
     const loadDate = top.stateChanges.get(LoadStatus.Load);
     const contentPaintedDate = top.stateChanges.get(LoadStatus.ContentPaint);
-    if (!!loadDate && !!contentPaintedDate) return { isStable: true };
+
+    if (contentPaintedDate) return { isStable: true };
+    if (!loadDate && !contentPaintedDate) return { isStable: false };
 
     // NOTE: LargestContentfulPaint, which currently drives PaintingStable will NOT trigger if the page
     // doesn't have any "contentful" items that are eligible (image, headers, divs, paragraphs that fill the page)
@@ -162,14 +166,11 @@ export default class FrameNavigationsObserver {
     for (const state of this.navigations.top.stateChanges.keys()) {
       // don't resolve states for redirected
       if (state === LocationStatus.HttpRedirected) continue;
-      let recordedStatus = PipelineStatus[state as IPipelineStatus];
-
-      // use painting stable "order of pipeline" if the passed in state is load
+      let pipelineStatus = PipelineStatus[state as IPipelineStatus];
       if (state === LoadStatus.Load) {
-        recordedStatus = PipelineStatus.PaintingStable;
+        pipelineStatus = PipelineStatus.AllContentLoaded;
       }
-
-      if (recordedStatus >= loadTrigger) {
+      if (pipelineStatus >= loadTrigger) {
         this.resolvePendingStatus(state);
         return;
       }

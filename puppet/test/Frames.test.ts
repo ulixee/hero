@@ -453,7 +453,9 @@ describe('Frames', () => {
       await page.type('admin');
       await page.click('input[type=submit]');
 
-      await expect(page.navigate(server.emptyPage)).resolves.toBe(undefined);
+      await expect(page.navigate(server.emptyPage)).resolves.toEqual({
+        loaderId: expect.any(String),
+      });
     });
   });
 });

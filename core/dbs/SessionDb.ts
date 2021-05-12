@@ -123,14 +123,6 @@ export default class SessionDb {
     }
   }
 
-  public getResourceData(resourceId: number) {
-    if (this.resources.hasPending()) {
-      this.flush();
-    }
-
-    return this.resources.getResourceBodyById(resourceId);
-  }
-
   public close() {
     clearInterval(this.saveInterval);
     if (this.db) {

@@ -1,5 +1,8 @@
 import { assert } from '@secret-agent/commons/utils';
-import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
+import IPuppetContext, {
+  IPuppetContextEvents,
+  IPuppetPageOptions,
+} from '@secret-agent/interfaces/IPuppetContext';
 import { ICookie } from '@secret-agent/interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
@@ -16,6 +19,7 @@ import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
 import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
+import Resolvable from '@secret-agent/commons/Resolvable';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';
@@ -31,9 +35,11 @@ export class BrowserContext
   public workersById = new Map<string, IPuppetWorker>();
   public pagesById = new Map<string, Page>();
   public emulator: IBrowserEmulator;
-  public proxyPassword: string;
+  public proxy: IProxyConnectionOptions;
 
+  private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
+  private creatingTargetPromises: Promise<void>[] = [];
   private readonly browser: Browser;
   private readonly id: string;
 
@@ -57,7 +63,7 @@ export class BrowserContext
     this.logger = logger.createChild(module, {
       browserContextId: contextId,
     });
-    this.proxyPassword = proxy?.password;
+    this.proxy = proxy;
     this.browser.browserContextsById.set(this.id, this);
 
     this.subscribeToDevtoolsMessages(this.browser.devtoolsSession, {
@@ -67,50 +73,49 @@ export class BrowserContext
 
   public defaultPageInitializationFn: (page: IPuppetPage) => Promise<any> = () => Promise.resolve();
 
-  async newPage(): Promise<Page> {
+  async newPage(options?: IPuppetPageOptions): Promise<Page> {
+    const resolvable = new Resolvable<void>();
+    this.creatingTargetPromises.push(resolvable.promise);
+
     const { targetId } = await this.sendWithBrowserDevtoolsSession('Target.createTarget', {
       url: 'about:blank',
       browserContextId: this.id,
+      background: options ? true : undefined,
     });
     this.createdTargetIds.add(targetId);
+    this.pageOptionsByTargetId.set(targetId, options);
 
     await this.attachToTarget(targetId);
 
+    resolvable.resolve();
+    const idx = this.creatingTargetPromises.indexOf(resolvable.promise);
+    if (idx >= 0) this.creatingTargetPromises.splice(idx, 1);
+
     // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
-    const page = this.pagesById.get(targetId);
-    await page.isReady;
-    if (page.isClosed) throw new Error('Page has been closed.');
-    return page;
-  }
-
-  targetDestroyed(targetId: string) {
-    const page = this.pagesById.get(targetId);
-    if (page) page.didClose();
-  }
-
-  targetKilled(targetId: string, errorCode: number) {
-    const page = this.pagesById.get(targetId);
-    if (page) page.onTargetKilled(errorCode);
-  }
-
-  async attachToTarget(targetId: string) {
-    // chrome 80 still needs you to manually attach
-    if (!this.pagesById.has(targetId)) {
-      await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
-        targetId,
-        flatten: true,
-      });
+    while (!this.isClosing) {
+      const page = this.pagesById.get(targetId);
+      if (!page) {
+        await new Promise(setImmediate);
+        continue;
+      }
+      await page.isReady;
+      if (page.isClosed) throw new Error('Page has been closed.');
+      return page;
     }
   }
 
-  async attachToWorker(targetInfo: TargetInfo) {
-    await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
-      targetId: targetInfo.targetId,
-      flatten: true,
-    });
+  initializePage(page: Page): Promise<any> {
+    if (this.pageOptionsByTargetId.get(page.targetId)?.runPageScripts === false) return;
+
+    const promises = [this.defaultPageInitializationFn(page).catch(err => err)];
+    if (this.emulator?.onNewPuppetPage) {
+      promises.push(this.emulator.onNewPuppetPage(page).catch(err => err));
+    }
+    return Promise.all(promises);
   }
 
-  onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo) {
+  async onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): Promise<Page> {
+    await Promise.all(this.creatingTargetPromises);
     if (this.pagesById.has(targetInfo.targetId)) return;
 
     this.subscribeToDevtoolsMessages(devtoolsSession, {
@@ -118,15 +123,28 @@ export class BrowserContext
       pageTargetId: targetInfo.targetId,
     });
 
-    let opener = targetInfo.openerId ? this.pagesById.get(targetInfo.openerId) || null : null;
-    // make the first page the active page
-    if (!opener && !this.createdTargetIds.has(targetInfo.targetId))
-      opener = this.pagesById.values().next().value;
+    const pageOptions = this.pageOptionsByTargetId.get(targetInfo.targetId);
 
-    const page = new Page(devtoolsSession, targetInfo.targetId, this, this.logger, opener);
+    let opener = targetInfo.openerId ? this.pagesById.get(targetInfo.openerId) || null : null;
+    if (pageOptions?.triggerPopupOnPageId) {
+      opener = this.pagesById.get(pageOptions.triggerPopupOnPageId);
+    }
+    // make the first page the active page
+    if (!opener && !this.createdTargetIds.has(targetInfo.targetId)) {
+      opener = this.pagesById.values().next().value;
+    }
+
+    const page = new Page(
+      devtoolsSession,
+      targetInfo.targetId,
+      this,
+      this.logger,
+      opener,
+      pageOptions,
+    );
     this.pagesById.set(page.targetId, page);
-    // eslint-disable-next-line promise/catch-or-return
-    page.isReady.then(() => this.emit('page', { page }));
+    await page.isReady;
+    this.emit('page', { page });
     return page;
   }
 
@@ -160,6 +178,33 @@ export class BrowserContext
     this.workersById.set(worker.id, worker);
     worker.on('close', () => this.workersById.delete(worker.id));
     this.emit('worker', { worker });
+  }
+
+  targetDestroyed(targetId: string) {
+    const page = this.pagesById.get(targetId);
+    if (page) page.didClose();
+  }
+
+  targetKilled(targetId: string, errorCode: number) {
+    const page = this.pagesById.get(targetId);
+    if (page) page.onTargetKilled(errorCode);
+  }
+
+  async attachToTarget(targetId: string) {
+    // chrome 80 still needs you to manually attach
+    if (!this.pagesById.has(targetId)) {
+      await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
+        targetId,
+        flatten: true,
+      });
+    }
+  }
+
+  async attachToWorker(targetInfo: TargetInfo) {
+    await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
+      targetId: targetInfo.targetId,
+      flatten: true,
+    });
   }
 
   async close(): Promise<void> {
@@ -280,7 +325,6 @@ export class BrowserContext
       }
       this.emit('devtools-message', {
         direction: 'receive',
-        timestamp: new Date(),
         ...details,
         ...event,
       });
@@ -298,7 +342,6 @@ export class BrowserContext
         }
         this.emit('devtools-message', {
           direction: 'send',
-          timestamp: new Date(),
           ...details,
           ...event,
         });

@@ -272,6 +272,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
+    await this.navigationsObserver.waitForReady();
     const nodeIdResult = await new JsPath(this, jsPath).getNodeId();
     if (!nodeIdResult.value) return null;
 
@@ -280,7 +281,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     for (const frame of this.childFrameEnvironments) {
       if (!frame.isAttached) continue;
 
-      await this.isReady;
+      await frame.isReady;
       if (frame.domNodeId === domId) {
         return frame.toJSON();
       }

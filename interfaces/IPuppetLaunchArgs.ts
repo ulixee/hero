@@ -4,4 +4,5 @@ export default interface IPuppetLaunchArgs {
   disableDevtools?: boolean;
   disableGpu?: boolean;
   noChromeSandbox?: boolean;
+  enableMitm?: boolean;
 }

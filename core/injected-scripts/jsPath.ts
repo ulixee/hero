@@ -137,7 +137,7 @@ class JsPath {
       // serialize special types
       else if (result.value && !isPrimitive(result.value) && !isPojo(result.value)) {
         result.isValueSerialized = true;
-        result.value = TSON.replace(result.value);
+        result.value = TypeSerializer.replace(result.value);
       }
       return result;
     } catch (error) {
@@ -424,7 +424,7 @@ class ObjectAtPath {
           stateMap[nodeId][prop] = objectAtPath[prop];
         }
       }
-      stateMap[nodeId] = TSON.replace(stateMap[nodeId]);
+      stateMap[nodeId] = TypeSerializer.replace(stateMap[nodeId]);
     }
 
     if (isIterableOrArray(objectAtPath)) {

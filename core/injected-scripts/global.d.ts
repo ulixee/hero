@@ -1,4 +1,4 @@
-interface ITson {
+interface ITypeSerializer {
   stringify(object: any): string;
   parse(object: string): any;
   replace(object: any): any;
@@ -12,5 +12,5 @@ interface IStaticNodeTracker {
   track(node: Node): number;
 }
 
-declare let TSON: ITson;
+declare let TypeSerializer: ITypeSerializer;
 declare let NodeTracker: IStaticNodeTracker;

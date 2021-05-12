@@ -114,15 +114,7 @@ function idx() {
 }
 
 class PageEventsRecorder {
-  private domChanges: IDomChangeEvent[] = [
-    // preload with a document
-    [
-      DomActionType.newDocument,
-      { id: -1, textContent: window.self.location.href },
-      new Date().getTime(),
-      idx(),
-    ],
-  ];
+  private domChanges: IDomChangeEvent[] = [];
 
   private mouseEvents: IMouseEvent[] = [];
   private focusEvents: IFocusEvent[] = [];
@@ -139,7 +131,27 @@ class PageEventsRecorder {
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
-    if (window.location?.href === 'about:blank') return;
+    if (window.self.location.href === 'about:blank') return;
+    // preload with a document
+    this.domChanges.push([
+      DomActionType.newDocument,
+      {
+        id: -1,
+        textContent: window.self.location.href,
+      },
+      new Date().getTime(),
+      idx(),
+    ]);
+
+    if (document && document.doctype) {
+      this.domChanges.push([
+        DomActionType.added,
+        this.serializeNode(document.doctype),
+        new Date().getTime(),
+        idx(),
+      ]);
+    }
+
     if (document && document.childNodes.length) {
       const mutations: MutationRecord[] = [
         {
@@ -561,6 +573,10 @@ class PageEventsRecorder {
         data.textContent = node.textContent;
         break;
 
+      case Node.DOCUMENT_TYPE_NODE:
+        data.textContent = new XMLSerializer().serializeToString(node);
+        break;
+
       case Node.ELEMENT_NODE:
         const element = node as Element;
         data.tagName = element.tagName;
@@ -621,18 +637,23 @@ const interval = setInterval(() => {
   }
 }, 500);
 
-window.addEventListener('beforeunload', () => {
-  clearInterval(interval);
-  recorder.disconnect();
+if (window.self.location?.href !== 'about:blank') {
+  window.addEventListener('beforeunload', () => {
+    clearInterval(interval);
+    recorder.disconnect();
+  });
+  const perfObserver = new PerformanceObserver(() => {
+    recorder.onLoadEvent('LargestContentfulPaint');
+    perfObserver.disconnect();
+  });
+  perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // force domContentLoaded to come first
+  recorder.onLoadEvent('DOMContentLoaded');
 });
 
-const perfObserver = new PerformanceObserver(() => {
-  recorder.onLoadEvent('LargestContentfulPaint');
-  perfObserver.disconnect();
-});
-perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-
-window.addEventListener('DOMContentLoaded', () => recorder.onLoadEvent('DOMContentLoaded'));
 window.addEventListener('load', () => recorder.onLoadEvent('load'));
 
 // need duplicate since this is a variable - not just a type

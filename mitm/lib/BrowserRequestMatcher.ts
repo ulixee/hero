@@ -1,10 +1,10 @@
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import ResourceType from '@secret-agent/interfaces/ResourceType';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import { IPuppetResourceRequest } from '@secret-agent/interfaces/IPuppetNetworkEvents';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
@@ -77,7 +77,7 @@ export default class BrowserRequestMatcher {
   }
 
   public onBrowserRequestedResourceExtraDetails(
-    httpResourceLoad: IHttpResourceLoadDetails,
+    httpResourceLoad: IPuppetResourceRequest,
     tabId?: number,
   ): void {
     const match = this.requestedResources.find(
@@ -96,7 +96,7 @@ export default class BrowserRequestMatcher {
   }
 
   public onBrowserRequestedResource(
-    httpResourceLoad: IHttpResourceLoadDetails,
+    httpResourceLoad: IPuppetResourceRequest,
     tabId?: number,
   ): IRequestedResource {
     const { method } = httpResourceLoad;
@@ -128,7 +128,7 @@ export default class BrowserRequestMatcher {
   }
 
   public onBrowserRequestFailed(event: {
-    resource: IHttpResourceLoadDetails;
+    resource: IPuppetResourceRequest;
     tabId: number;
     loadError: Error;
   }): number {
@@ -159,7 +159,7 @@ export default class BrowserRequestMatcher {
   }
 
   private updatePendingResource(
-    httpResourceLoad: IHttpResourceLoadDetails,
+    httpResourceLoad: IPuppetResourceRequest,
     pendingResource: IRequestedResource,
     tabId: number,
   ): void {
@@ -180,7 +180,7 @@ export default class BrowserRequestMatcher {
   }
 
   private findMatchingRequest(
-    resourceToMatch: IHttpResourceLoadDetails,
+    resourceToMatch: IPuppetResourceRequest,
     filter?: 'noMitmResourceId' | 'hasMitmResourceId',
   ): IRequestedResource | null {
     const { method } = resourceToMatch;
@@ -233,7 +233,7 @@ export default class BrowserRequestMatcher {
 }
 
 function getHeaderDetails(
-  httpResourceLoad: IHttpResourceLoadDetails,
+  httpResourceLoad: IPuppetResourceRequest,
 ): { origin: string; referer: string; secFetchDest: string; secFetchSite: string } {
   const origin = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'origin');
   const referer = HeadersHandler.getRequestHeader<string>(httpResourceLoad, 'referer');

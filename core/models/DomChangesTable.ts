@@ -2,12 +2,19 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 import { DomActionType, IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 
+export declare type IFrontendDomChangeEvent = Omit<
+  IDomChangeRecord,
+  'frameId' | 'tabId' | 'commandId' | 'timestamp'
+> & {
+  frameIdPath?: string;
+};
+
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
       ['frameId', 'TEXT'],
       ['eventIndex', 'INTEGER'],
-      ['action', 'TEXT'],
+      ['action', 'INTEGER'],
       ['nodeId', 'INTEGER'],
       ['nodeType', 'INTEGER'],
       ['tagName', 'TEXT'],
@@ -30,7 +37,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     const record = [
       frameId,
       eventIndex,
-      DomActionType[action],
+      action,
       nodeData.id,
       nodeData.nodeType,
       nodeData.tagName,
@@ -53,7 +60,40 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
       `select * from ${this.tableName} where frameId =? and commandId > ?`,
     );
 
-    return query.all(frameId, sinceCommandId ?? 0);
+    return query.all(frameId, sinceCommandId ?? 0).map(DomChangesTable.inflateRecord);
+  }
+
+  public static inflateRecord(record: IDomChangeRecord): IDomChangeRecord {
+    for (const [key, value] of Object.entries(record)) {
+      if (value === null) record[key] = undefined;
+    }
+    record.attributes = record.attributes ? JSON.parse(record.attributes as any) : undefined;
+    record.attributeNamespaces = record.attributeNamespaces
+      ? JSON.parse(record.attributeNamespaces as any)
+      : undefined;
+    record.properties = record.properties ? JSON.parse(record.properties as any) : undefined;
+    return record;
+  }
+
+  public static toFrontendRecord(
+    record: IDomChangeRecord,
+    frameIdToNodePath: Map<string, string>,
+  ): IFrontendDomChangeEvent {
+    return {
+      action: record.action,
+      eventIndex: record.eventIndex,
+      nodeId: record.nodeId,
+      parentNodeId: record.parentNodeId,
+      previousSiblingId: record.previousSiblingId,
+      properties: record.properties,
+      nodeType: record.nodeType,
+      tagName: record.tagName,
+      attributeNamespaces: record.attributeNamespaces,
+      attributes: record.attributes,
+      frameIdPath: frameIdToNodePath.get(record.frameId),
+      textContent: record.textContent,
+      namespaceUri: record.namespaceUri,
+    };
   }
 }
 
@@ -64,14 +104,14 @@ export interface IDomChangeRecord {
   nodeId: number;
   timestamp: number;
   eventIndex: number;
-  action: string;
+  action: DomActionType;
   nodeType: number;
   tagName: string;
   namespaceUri: string;
   textContent: string;
   previousSiblingId: number;
   parentNodeId: number;
-  attributes: string;
-  attributeNamespaces: string;
-  properties: string;
+  attributes: Record<string, string> | undefined;
+  attributeNamespaces: Record<string, string> | undefined;
+  properties: Record<string, any> | undefined;
 }

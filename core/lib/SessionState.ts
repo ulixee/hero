@@ -302,12 +302,24 @@ export default class SessionState {
     return resource;
   }
 
+  public getResourceLookupMap(tabId: number): { [method_url: string]: IResourceMeta[] } {
+    const result: { [method_url: string]: IResourceMeta[] } = {};
+    for (const resource of this.resources) {
+      if (resource.tabId === tabId) {
+        const key = `${resource.request.method}_${resource.request.url}`;
+        result[key] ??= [];
+        result[key].push(resource);
+      }
+    }
+    return result;
+  }
+
   public getResources(tabId: number): IResourceMeta[] {
     return this.resources.filter(x => x.tabId === tabId);
   }
 
-  public getResourceData(id: number): Promise<Buffer> {
-    return this.db.getResourceData(id);
+  public getResourceData(id: number, decompress: boolean): Promise<Buffer> {
+    return this.db.resources.getResourceBodyById(id, decompress);
   }
 
   public getResourceMeta(id: number): IResourceMeta {

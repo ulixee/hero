@@ -2,12 +2,16 @@ import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@secret-agent/interfaces/ResourceType';
 import * as eventUtils from '@secret-agent/commons/eventUtils';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { IPuppetNetworkEvents } from '@secret-agent/interfaces/IPuppetNetworkEvents';
+import {
+  IPuppetNetworkEvents,
+  IPuppetResourceRequest,
+} from '@secret-agent/interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { URL } from 'url';
+import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
+import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -22,11 +26,6 @@ import LoadingFailedEvent = Protocol.Network.LoadingFailedEvent;
 import RequestServedFromCacheEvent = Protocol.Network.RequestServedFromCacheEvent;
 import RequestWillBeSentExtraInfoEvent = Protocol.Network.RequestWillBeSentExtraInfoEvent;
 
-type ResourceRequest = IHttpResourceLoadDetails & {
-  frameId?: string;
-  redirectedFromUrl?: string;
-};
-
 interface IResourcePublishing {
   hasRequestWillBeSentEvent: boolean;
   emitTimeout?: NodeJS.Timeout;
@@ -34,22 +33,35 @@ interface IResourcePublishing {
   isDetailsEmitted?: boolean;
 }
 
+const mbBytes = 1028 * 1028;
+
 export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   protected readonly logger: IBoundLog;
   private readonly devtools: DevtoolsSession;
   private readonly attemptedAuthentications = new Set<string>();
-  private readonly requestsById = new Map<string, ResourceRequest>();
+  private readonly redirectsById = new Map<string, IPuppetResourceRequest[]>();
+  private readonly requestsById = new Map<string, IPuppetResourceRequest>();
   private readonly requestPublishingById = new Map<string, IResourcePublishing>();
 
   private readonly navigationRequestIdsToLoaderId = new Map<string, string>();
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
+  private readonly mockNetworkRequests: IPuppetPageOptions['mockNetworkRequests'];
+  private readonly proxyConnectionOptions: IProxyConnectionOptions;
+  private isChromeRetainingResources = false;
 
-  constructor(devtoolsSession: DevtoolsSession, logger: IBoundLog, private proxyPassword?: string) {
+  constructor(
+    devtoolsSession: DevtoolsSession,
+    logger: IBoundLog,
+    proxyConnectionOptions?: IProxyConnectionOptions,
+    mockNetworkRequests?: IPuppetPageOptions['mockNetworkRequests'],
+  ) {
     super();
+    this.mockNetworkRequests = mockNetworkRequests;
     this.devtools = devtoolsSession;
     this.logger = logger.createChild(module);
+    this.proxyConnectionOptions = proxyConnectionOptions;
     this.registeredEvents = eventUtils.addEventListeners(this.devtools, [
       ['Fetch.requestPaused', this.onRequestPaused.bind(this)],
       ['Fetch.authRequired', this.onAuthRequired.bind(this)],
@@ -77,15 +89,26 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   public async initialize(): Promise<void> {
+    if (this.mockNetworkRequests) {
+      return this.devtools
+        .send('Fetch.enable', {
+          handleAuthRequests: true,
+        })
+        .catch(err => err);
+    }
+
+    const maxResourceBufferSize = this.proxyConnectionOptions?.address ? mbBytes : 5 * mbBytes; // 5mb max
+    if (maxResourceBufferSize > 0) this.isChromeRetainingResources = true;
+
     const errors = await Promise.all([
       this.devtools
         .send('Network.enable', {
           maxPostDataSize: 0,
-          maxResourceBufferSize: 0,
-          maxTotalBufferSize: 0,
+          maxResourceBufferSize,
+          maxTotalBufferSize: maxResourceBufferSize * 5,
         })
         .catch(err => err),
-      this.proxyPassword
+      this.proxyConnectionOptions?.password
         ? this.devtools
             .send('Fetch.enable', {
               handleAuthRequests: true,
@@ -115,12 +138,12 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     if (this.attemptedAuthentications.has(event.requestId)) {
       authChallengeResponse.response = AuthChallengeResponse.CancelAuth;
-    } else if (this.proxyPassword) {
+    } else if (this.proxyConnectionOptions?.password) {
       this.attemptedAuthentications.add(event.requestId);
 
       authChallengeResponse.response = AuthChallengeResponse.ProvideCredentials;
       authChallengeResponse.username = 'puppet-chrome';
-      authChallengeResponse.password = this.proxyPassword;
+      authChallengeResponse.password = this.proxyConnectionOptions.password;
     }
     this.devtools
       .send('Fetch.continueWithAuth', {
@@ -139,6 +162,13 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   private async onRequestPaused(networkRequest: RequestPausedEvent): Promise<void> {
     try {
+      if (this.mockNetworkRequests) {
+        const response = await this.mockNetworkRequests(networkRequest);
+        if (response) {
+          return await this.devtools.send('Fetch.fulfillRequest', response);
+        }
+      }
+
       await this.devtools.send('Fetch.continueRequest', {
         requestId: networkRequest.requestId,
       });
@@ -152,7 +182,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     }
 
     // networkId corresponds to onNetworkRequestWillBeSent
-    const resource = <ResourceRequest>{
+    const resource = <IPuppetResourceRequest>{
       browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
       resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
       url: new URL(networkRequest.request.url),
@@ -175,7 +205,6 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (existing) {
       if (existing.url === resource.url) {
         resource.requestHeaders = existing.requestHeaders ?? {};
-        resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
       }
 
       if (existing.resourceType) resource.resourceType = existing.resourceType;
@@ -204,7 +233,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       this.navigationRequestIdsToLoaderId.set(networkRequest.requestId, networkRequest.loaderId);
     }
 
-    const resource = <ResourceRequest>{
+    const resource = <IPuppetResourceRequest>{
       url: new URL(networkRequest.request.url),
       isSSL: networkRequest.request.url.startsWith('https'),
       isFromRedirect: !!redirectedFromUrl,
@@ -233,13 +262,18 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     // NOTE: same requestId will be used in devtools for redirected resources
     if (existing) {
       if (isNewRedirect) {
+        const existingRedirects = this.redirectsById.get(resource.browserRequestId) ?? [];
+        existing.redirectedToUrl = networkRequest.request.url;
+        existing.responseHeaders = networkRequest.redirectResponse.headers;
+        existing.status = networkRequest.redirectResponse.status;
+        existing.statusMessage = networkRequest.redirectResponse.statusText;
+        this.redirectsById.set(resource.browserRequestId, [...existingRedirects, existing]);
         publishing.isPublished = false;
         clearTimeout(publishing.emitTimeout);
         publishing.emitTimeout = undefined;
       } else {
         // preserve headers and frameId from a fetch or networkWillRequestExtraInfo
         resource.requestHeaders = existing.requestHeaders ?? {};
-        resource.requestOriginalHeaders = existing.requestOriginalHeaders ?? {};
       }
     }
 
@@ -269,13 +303,18 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
   }
 
   private mergeRequestHeaders(
-    resource: IHttpResourceLoadDetails,
+    resource: IPuppetResourceRequest,
     requestHeaders: RequestWillBeSentEvent['request']['headers'],
   ): void {
     resource.requestHeaders ??= {};
-    resource.requestOriginalHeaders ??= {};
     for (const [key, value] of Object.entries(requestHeaders)) {
-      resource.requestOriginalHeaders[key] = value;
+      const titleKey = `${key
+        .split('-')
+        .map(x => x[0].toUpperCase() + x.slice(1))
+        .join('-')}`;
+      if (resource.requestHeaders[titleKey] && titleKey !== key) {
+        delete resource.requestHeaders[titleKey];
+      }
       resource.requestHeaders[key] = value;
     }
   }
@@ -390,6 +429,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       this.emit('resource-failed', {
         resource,
       });
+      this.redirectsById.delete(requestId);
       this.requestsById.delete(requestId);
       this.requestPublishingById.delete(requestId);
     }
@@ -407,7 +447,35 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       this.requestsById.delete(id);
       this.requestPublishingById.delete(id);
       const loaderId = this.navigationRequestIdsToLoaderId.get(id);
-      this.emit('resource-loaded', { resource, frameId: resource.frameId, loaderId });
+      if (this.redirectsById.has(id)) {
+        for (const redirect of this.redirectsById.get(id)) {
+          this.emit('resource-loaded', {
+            resource: redirect,
+            frameId: redirect.frameId,
+            loaderId,
+            // eslint-disable-next-line require-await
+            body: async () => Buffer.from(''),
+          });
+        }
+        this.redirectsById.delete(id);
+      }
+      const body = this.downloadRequestBody.bind(this, id);
+      this.emit('resource-loaded', { resource, frameId: resource.frameId, loaderId, body });
+    }
+  }
+
+  private async downloadRequestBody(requestId: string): Promise<Buffer> {
+    if (this.isChromeRetainingResources === false || !this.devtools.isConnected()) {
+      return null;
+    }
+
+    try {
+      const body = await this.devtools.send('Network.getResponseBody', {
+        requestId,
+      });
+      return Buffer.from(body.body, body.base64Encoded ? 'base64' : undefined);
+    } catch (e) {
+      return null;
     }
   }
 

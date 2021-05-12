@@ -482,7 +482,7 @@ describe('PaintingStable tests', () => {
 
     await tab.goto(`${koaServer.baseUrl}/stable-paint1`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
-    completeLongScript();
+    if (completeLongScript) completeLongScript();
     expect(tab.navigations.top.stateChanges.has('Load')).toBe(false);
     expect(tab.navigations.top.stateChanges.has('ContentPaint')).toBe(true);
   });

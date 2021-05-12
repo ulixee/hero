@@ -87,7 +87,9 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   }
 
   private onMessage(message: string): void {
+    const timestamp = new Date();
     const object = JSON.parse(message);
+    object.timestamp = timestamp;
     const devtoolsSessionId = object.params?.sessionId;
 
     if (object.method === 'Target.attachedToTarget') {

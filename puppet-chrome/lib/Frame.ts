@@ -229,6 +229,8 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   public onNavigatedWithinDocument(url: string): void {
     if (this.url === url && this.activeLoader?.isResolved) return;
+    // we're using params on about:blank, so make sure to strip for url
+    if (url.startsWith(DEFAULT_PAGE)) url = DEFAULT_PAGE;
     this.url = url;
 
     // clear out any active one

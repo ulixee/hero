@@ -77,7 +77,7 @@ async function readStoreData(store: IDBObjectStore) {
       if (cursor) {
         const key = store.keyPath === null ? cursor.key : undefined;
         const value = cursor.value;
-        data.push(TSON.stringify({ key, value }));
+        data.push(TypeSerializer.stringify({ key, value }));
         cursor.continue();
       } else {
         resolve();
@@ -134,7 +134,7 @@ async function restoreData(db: IDBDatabase, restoreDB: IIndexedDB) {
       .transaction(objectStoreToRestore.name, 'readwrite')
       .objectStore(objectStoreToRestore.name);
     for (const record of data) {
-      const { key, value } = TSON.parse(record);
+      const { key, value } = TypeSerializer.parse(record);
       insertStore.add(value, key);
     }
     await new Promise((resolve, reject) => {
