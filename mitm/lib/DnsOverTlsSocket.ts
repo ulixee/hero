@@ -5,6 +5,7 @@ import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import MitmSocket from '@secret-agent/mitm-socket/index';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { addTypedEventListener, removeEventListeners } from '@secret-agent/commons/eventUtils';
 import RequestSession from '../handlers/RequestSession';
 
 export default class DnsOverTlsSocket {
@@ -16,11 +17,14 @@ export default class DnsOverTlsSocket {
     return this.mitmSocket.isReusable() && !this.isClosing;
   }
 
-  private dnsServer: ConnectionOptions;
-  private readonly mitmSocket: MitmSocket;
+  private readonly dnsServer: ConnectionOptions;
+  private mitmSocket: MitmSocket;
   private isConnected: Promise<void>;
 
-  private pending = new Map<number, IResolvablePromise<IDnsResponse>>();
+  private pending = new Map<
+    number,
+    { host: string; resolvable: IResolvablePromise<IDnsResponse> }
+  >();
 
   private buffer: Buffer = null;
   private isClosing = false;
@@ -31,42 +35,39 @@ export default class DnsOverTlsSocket {
 
   constructor(dnsServer: ConnectionOptions, requestSession: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
+    this.dnsServer = dnsServer;
+    this.onClose = onClose;
+  }
+
+  public async lookupARecords(host: string): Promise<IDnsResponse> {
+    if (!this.isConnected) {
+      this.isConnected = this.connect();
+    }
+    await this.isConnected;
+    return this.getDnsResponse(host);
+  }
+
+  public close(): void {
+    if (this.isClosing) return;
+    this.isClosing = true;
+    this.mitmSocket?.close();
+    if (this.onClose) this.onClose();
+  }
+
+  protected async connect(): Promise<void> {
+    const dnsServer = this.dnsServer;
     this.mitmSocket = new MitmSocket(
-      requestSession?.sessionId,
+      this.requestSession?.sessionId,
       {
         host: dnsServer.host,
         port: String(dnsServer.port ?? 853),
         isSsl: true,
         servername: dnsServer.servername,
         keepAlive: true,
+        debug: true,
       },
       false,
     );
-    this.dnsServer = dnsServer;
-    this.onClose = onClose;
-  }
-
-  public async lookupARecords(host: string): Promise<IDnsResponse> {
-    const resolvable = createPromise<IDnsResponse>();
-    if (!this.isConnected) this.isConnected = this.connect();
-    await this.isConnected;
-    const id = this.query({
-      name: host,
-      class: 'IN',
-      type: 'A',
-    });
-    this.pending.set(id, resolvable);
-    return resolvable.promise;
-  }
-
-  public close(): void {
-    if (this.isClosing) return;
-    this.isClosing = true;
-    this.mitmSocket.close();
-    if (this.onClose) this.onClose();
-  }
-
-  protected async connect(): Promise<void> {
     if (this.requestSession?.networkEmulation?.dns?.useUpstreamProxy) {
       const upstreamProxy = this.requestSession.upstreamProxyUrl;
       if (upstreamProxy) {
@@ -76,15 +77,38 @@ export default class DnsOverTlsSocket {
     await this.mitmSocket.connect(this.requestSession.requestAgent.socketSession, 10e3);
 
     this.mitmSocket.socket.on('data', this.onData.bind(this));
-    this.mitmSocket.on('close', () => {
+
+    const registration = addTypedEventListener(this.mitmSocket, 'close', () => {
       this.isClosing = true;
       if (this.onClose) this.onClose();
     });
+    this.mitmSocket.on('eof', async () => {
+      removeEventListeners([registration]);
+      this.mitmSocket.close();
+      await this.connect();
+      // re-run pending queries
+      for (const [id, entry] of this.pending) {
+        this.pending.delete(id);
+        const newHost = this.getDnsResponse(entry.host);
+        entry.resolvable.resolve(newHost);
+      }
+    });
+  }
+
+  private getDnsResponse(host: string): Promise<IDnsResponse> {
+    const id = this.query({
+      name: host,
+      class: 'IN',
+      type: 'A',
+    });
+    const resolvable = createPromise<IDnsResponse>(5e3);
+    this.pending.set(id, { host, resolvable });
+    return resolvable.promise;
   }
 
   private disconnect(): void {
     for (const [, entry] of this.pending) {
-      entry.reject(new CanceledPromiseError('Disconnecting Dns Socket'));
+      entry.resolvable.reject(new CanceledPromiseError('Disconnecting Dns Socket'));
     }
     this.close();
   }
@@ -119,7 +143,7 @@ export default class DnsOverTlsSocket {
       // append prefixed byte length
       const next = this.buffer.slice(0, messageLength + 2);
       const decoded = dnsPacket.streamDecode(next) as IDnsResponse;
-      this.pending.get(decoded.id)?.resolve(decoded);
+      this.pending.get(decoded.id)?.resolvable?.resolve(decoded);
       this.pending.delete(decoded.id);
       this.buffer = this.buffer.slice(messageLength + 2);
     }

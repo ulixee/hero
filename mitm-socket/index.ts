@@ -15,6 +15,7 @@ let idCounter = 0;
 export default class MitmSocket extends TypedEventEmitter<{
   connect: void;
   dial: void;
+  eof: void;
   close: void;
 }> {
   public readonly socketPath: string;
@@ -163,6 +164,7 @@ export default class MitmSocket extends TypedEventEmitter<{
       this.onError(message.error);
     } else if (status === 'eof') {
       this.receivedEOF = true;
+      this.emit('eof');
     } else if (status === 'closing') {
       this.close();
     }
