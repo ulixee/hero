@@ -42,7 +42,7 @@ export default class SessionState {
   private readonly scriptInstanceMeta: IScriptInstanceMeta;
   private readonly createDate = new Date();
   private readonly frames: { [frameId: number]: IFrameRecord } = {};
-  private readonly resources: IResourceMeta[] = [];
+  private readonly resourcesById = new Map<number, IResourceMeta>();
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
   private websocketListeners: {
     [resourceId: string]: ((msg: IWebsocketResourceMessage) => any)[];
@@ -209,7 +209,7 @@ export default class SessionState {
     let resourceMeta = this.getResourceMeta(resourceId);
     if (!resourceMeta) {
       resourceMeta = convertedMeta;
-      this.resources.push(resourceMeta);
+      this.resourcesById.set(resourceMeta.id, resourceMeta);
     }
     if (convertedMeta.response) {
       resourceMeta.response ??= convertedMeta.response;
@@ -229,8 +229,28 @@ export default class SessionState {
     const resource = this.resourceEventToMeta(tabId, resourceEvent);
     this.db.resources.insert(tabId, resource, null, resourceEvent, error);
 
-    if (!this.getResourceMeta(resource.id)) {
-      this.resources.push(resource);
+    if (!this.resourcesById.has(resource.id)) {
+      this.resourcesById.set(resource.id, resource);
+    }
+    return resource;
+  }
+
+  public captureResourceRequestId(
+    resourceId: number,
+    browserRequestId: string,
+    tabId: number,
+  ): IResourceMeta {
+    const resource = this.resourcesById.get(resourceId);
+    if (resource) {
+      resource.tabId = tabId;
+
+      // NOTE: browserRequestId can be shared amongst redirects
+      this.browserRequestIdToResources[browserRequestId] ??= [];
+      this.browserRequestIdToResources[browserRequestId].push({
+        resourceId,
+        url: resource.url,
+      });
+      this.db.resources.updateResource(resourceId, { browserRequestId, tabId });
     }
     return resource;
   }
@@ -246,7 +266,7 @@ export default class SessionState {
     this.db.resources.insert(tabId, resource, resourceResponseEvent.body, resourceEvent);
 
     if (isResponse) {
-      this.resources.push(resource);
+      this.resourcesById.set(resource.id, resource);
     }
     return resource;
   }
@@ -271,9 +291,7 @@ export default class SessionState {
 
     if (browserRequestId) {
       // NOTE: browserRequestId can be shared amongst redirects
-      if (!this.browserRequestIdToResources[browserRequestId]) {
-        this.browserRequestIdToResources[browserRequestId] = [];
-      }
+      this.browserRequestIdToResources[browserRequestId] ??= [];
       this.browserRequestIdToResources[browserRequestId].push({
         resourceId: resourceEvent.id,
         url: request.url,
@@ -304,7 +322,7 @@ export default class SessionState {
 
   public getResourceLookupMap(tabId: number): { [method_url: string]: IResourceMeta[] } {
     const result: { [method_url: string]: IResourceMeta[] } = {};
-    for (const resource of this.resources) {
+    for (const resource of this.resourcesById.values()) {
       if (resource.tabId === tabId) {
         const key = `${resource.request.method}_${resource.request.url}`;
         result[key] ??= [];
@@ -315,7 +333,11 @@ export default class SessionState {
   }
 
   public getResources(tabId: number): IResourceMeta[] {
-    return this.resources.filter(x => x.tabId === tabId);
+    const resources: IResourceMeta[] = [];
+    for (const resource of this.resourcesById.values()) {
+      if (resource.tabId === tabId) resources.push(resource);
+    }
+    return resources;
   }
 
   public getResourceData(id: number, decompress: boolean): Promise<Buffer> {
@@ -323,7 +345,7 @@ export default class SessionState {
   }
 
   public getResourceMeta(id: number): IResourceMeta {
-    return this.resources.find(x => x.id === id);
+    return this.resourcesById.get(id);
   }
 
   ///////   FRAMES ///////

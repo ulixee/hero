@@ -85,7 +85,9 @@ export default class DnsOverTlsSocket {
     this.mitmSocket.on('eof', async () => {
       removeEventListeners([registration]);
       this.mitmSocket.close();
-      await this.connect();
+      this.isConnected = this.connect();
+
+      await this.isConnected;
       // re-run pending queries
       for (const [id, entry] of this.pending) {
         this.pending.delete(id);
