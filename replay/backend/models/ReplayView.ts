@@ -7,7 +7,7 @@ import PlaybarView from '~backend/models/PlaybarView';
 import Application from '~backend/Application';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IRectangle from '~shared/interfaces/IRectangle';
-import { IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import { DomActionType, IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
@@ -43,9 +43,15 @@ export default class ReplayView extends ViewBackend {
   }
 
   public async load(replayApi: ReplayApi) {
+    const isFirstLoad = !this.replayApi;
     this.clearReplayApi();
 
     this.replayApi = replayApi;
+
+    const session = this.webContents.session;
+    const scriptUrl = await replayApi.getReplayScript();
+    session.setPreloads([scriptUrl]);
+    if (isFirstLoad) this.detach(false);
     this.replayApi.onNewTab = this.onNewTab.bind(this);
     await replayApi.isReady;
     await this.loadTab();
@@ -207,8 +213,7 @@ export default class ReplayView extends ViewBackend {
 
     if (domChanges?.length) {
       const [{ action, frameIdPath }] = domChanges;
-      const hasNewUrlToLoad =
-        (action === 'newDocument' || (action as any) === 'load') && frameIdPath === 'main';
+      const hasNewUrlToLoad = action === DomActionType.newDocument && frameIdPath === 'main';
       if (hasNewUrlToLoad) {
         const nav = domChanges.shift();
         await Promise.race([
@@ -268,6 +273,7 @@ export default class ReplayView extends ViewBackend {
 
   private clearReplayApi() {
     if (this.replayApi) {
+      this.webContents.session.setPreloads([]);
       this.replayApi.onNewTab = null;
       this.replayApi.close();
       this.replayApi = null;
@@ -284,12 +290,12 @@ export default class ReplayView extends ViewBackend {
 
   private interceptHttpRequests() {
     const session = this.webContents.session;
-    session.protocol.interceptStreamProtocol('http', async (request, callback) => {
+    session.protocol.interceptBufferProtocol('http', async (request, callback) => {
       console.log('intercepting http buffer', request.url);
       const result = await this.replayApi.getResource(request.url);
       callback(result);
     });
-    session.protocol.interceptStreamProtocol('https', async (request, callback) => {
+    session.protocol.interceptBufferProtocol('https', async (request, callback) => {
       console.log('intercepting https buffer', request.url);
       const result = await this.replayApi.getResource(request.url);
       callback(result);

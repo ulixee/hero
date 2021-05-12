@@ -9,6 +9,7 @@ export enum LocationStatus {
 
   DomContentLoaded = 'DomContentLoaded',
   PaintingStable = 'PaintingStable',
+  AllContentLoaded = 'AllContentLoaded',
 }
 
 export enum LocationTrigger {
@@ -23,6 +24,7 @@ export enum PipelineStatus {
   HttpResponded = 3,
   DomContentLoaded = 4,
   PaintingStable = 5,
+  AllContentLoaded = 6,
 }
 
 export type ILocationStatus = keyof typeof LocationStatus;

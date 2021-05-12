@@ -101,7 +101,7 @@ export default async function launchProcess(
     try {
       const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
       if (process.platform === 'win32') {
-        childProcess.execSync(`taskkill /pid ${launchedProcess.pid} /T /F`);
+        childProcess.execSync(`taskkill /pid ${launchedProcess.pid} /T /F 2> nul`);
       } else {
         launchedProcess.kill('SIGKILL');
       }

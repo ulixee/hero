@@ -43,11 +43,16 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ): Promise<BrowserContext> {
+    const proxySettings = proxy?.address
+      ? {
+          proxyBypassList: '<-loopback>',
+          proxyServer: proxy.address,
+        }
+      : {};
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
     const { browserContextId } = await this.devtoolsSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
-      proxyBypassList: '<-loopback>',
-      proxyServer: proxy?.address,
+      ...proxySettings,
     });
 
     return new BrowserContext(this, emulator, browserContextId, logger, proxy);
@@ -107,7 +112,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     if (targetInfo.type === 'page') {
       const devtoolsSession = this.connection.getSession(sessionId);
       const context = this.browserContextsById.get(targetInfo.browserContextId);
-      context?.onPageAttached(devtoolsSession, targetInfo);
+      context?.onPageAttached(devtoolsSession, targetInfo).catch(() => null);
       return;
     }
 

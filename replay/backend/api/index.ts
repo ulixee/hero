@@ -1,9 +1,12 @@
 import * as WebSocket from 'ws';
 import { ChildProcess, spawn } from 'child_process';
 import * as Path from 'path';
+import * as Http from 'http';
+import * as Fs from 'fs';
+import { app, ProtocolResponse } from 'electron';
 import ISaSession from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
-import ReplayResources, { IReplayHttpResource } from '~backend/api/ReplayResources';
+import ReplayResources from '~backend/api/ReplayResources';
 import getResolvable from '~shared/utils/promise';
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ReplayTime from '~backend/api/ReplayTime';
@@ -13,11 +16,12 @@ export default class ReplayApi {
   public static serverStartPath: string;
   public static nodePath: string;
   private static websockets = new Set<WebSocket>();
-  private static localApiHost: string;
+  private static replayScriptCacheByHost = new Map<string, string>();
+  private static localApiHost: URL;
 
   public readonly saSession: ISaSession;
   public tabs: ReplayTabState[] = [];
-  public apiHost: string;
+  public apiHost: URL;
   public lastActivityDate: Date;
   public lastCommandName: string;
   public showUnresponsiveMessage = true;
@@ -38,9 +42,9 @@ export default class ReplayApi {
 
   private readonly websocket: WebSocket;
 
-  private resources: ReplayResources = new ReplayResources();
+  private resources = new ReplayResources();
 
-  constructor(apiHost: string, replay: IReplayMeta) {
+  constructor(apiHost: URL, replay: IReplayMeta) {
     this.apiHost = apiHost;
     this.saSession = {
       ...replay,
@@ -76,8 +80,64 @@ export default class ReplayApi {
     this.websocket.on('message', this.onMessage.bind(this));
   }
 
-  public getResource(url: string): Promise<IReplayHttpResource> {
-    return this.resources.get(url);
+  public async getReplayScript(): Promise<string> {
+    // only load from memory so we have latest version
+    const cached = ReplayApi.replayScriptCacheByHost.get(this.apiHost.href);
+    if (cached) return cached;
+
+    const scriptsDir = `${app.getPath('userData')}/scripts`;
+    if (!Fs.existsSync(scriptsDir)) {
+      Fs.mkdirSync(scriptsDir, { recursive: true });
+    }
+    const scriptUrl = `http://${this.apiHost.host}/replay/domReplayer.js`;
+
+    console.log('Fetching %s', scriptUrl);
+
+    await new Promise<void>((resolve, reject) => {
+      const req = Http.get(scriptUrl, async res => {
+        res.on('error', reject);
+        const data: Buffer[] = [];
+        for await (const chunk of res) {
+          data.push(chunk);
+        }
+        const result = Buffer.concat(data).toString();
+
+        // cheap sanitization check to avoid accessing electron here
+        if (
+          result.includes('import(') ||
+          result.match(/^\s*import/g) ||
+          result.includes(' require.') ||
+          result.includes(' require(')
+        ) {
+          throw new Error(
+            `Disallowed nodejs module (require or import) access requested by domReplayer.js script at "${scriptUrl}"`,
+          );
+        }
+
+        const scriptPath = `${scriptsDir}/${res.headers.filename}`;
+        await Fs.promises.writeFile(scriptPath, result);
+        ReplayApi.replayScriptCacheByHost.set(this.apiHost.href, scriptPath);
+
+        resolve();
+      });
+      req.on('error', reject);
+      req.end();
+    });
+    return ReplayApi.replayScriptCacheByHost.get(this.apiHost.href);
+  }
+
+  public async getResource(url: string): Promise<ProtocolResponse> {
+    const resource = await this.resources.get(url);
+    if (resource.redirectedToUrl) {
+      return <ProtocolResponse>{
+        statusCode: resource.statusCode,
+        headers: { location: resource.redirectedToUrl },
+      };
+    }
+
+    const localHost = ReplayApi.localApiHost;
+    const apiHost = `http://${localHost.host}/replay/${this.saSession.id}`;
+    return this.resources.getContent(resource.id, apiHost);
   }
 
   public close(): void {
@@ -113,13 +173,10 @@ export default class ReplayApi {
 
     // don't load api data until the session is ready
     await this.isReady;
-    this.onApiFeed(event, data);
-  }
 
-  private onApiFeed(eventName: string, data: any) {
-    console.log('Replay Api Feed', eventName);
     const tabsWithChanges = new Set<ReplayTabState>();
-    if (eventName === 'script-state') {
+
+    if (event === 'script-state') {
       console.log('ScriptState', data);
       const closeDate = data.closeDate ? new Date(data.closeDate) : null;
       this.replayTime.update(closeDate);
@@ -127,13 +184,17 @@ export default class ReplayApi {
       this.lastCommandName = data.lastCommandName;
       for (const tab of this.tabs) tabsWithChanges.add(tab);
     } else {
-      for (const event of data) {
-        let tab = this.getTab(event.tabId);
+      if (!this.replayTime.close) {
+        this.replayTime.update();
+      }
+
+      for (const record of data) {
+        let tab = this.getTab(record.tabId);
         if (!tab) {
           console.log('New Tab created in replay');
           const tabMeta = {
-            tabId: event.tabId,
-            createdTime: event.timestamp ?? event.startDate,
+            tabId: record.tabId,
+            createdTime: record.timestamp ?? record.startDate,
             width: this.tabs[0].viewportWidth,
             height: this.tabs[0].viewportHeight,
           };
@@ -144,16 +205,11 @@ export default class ReplayApi {
         }
         tabsWithChanges.add(tab);
 
-        if (eventName === 'resources') this.resources.onResource(event);
-        else if (eventName === 'dom-changes') tab.loadDomChange(event);
-        else if (eventName === 'commands') {
-          if (!this.replayTime.close) this.replayTime.update();
-          tab.loadCommand(event);
-        } else if (eventName === 'mouse-events') tab.loadPageEvent('mouse', event);
-        else if (eventName === 'focus-events') tab.loadPageEvent('focus', event);
-        else if (eventName === 'scroll-events') tab.loadPageEvent('scroll', event);
+        if (event === 'resources') this.resources.onResource(record);
+        else tab.onApiFeed(event, record);
       }
     }
+
     for (const tab of tabsWithChanges) tab.sortTicks();
   }
 
@@ -189,12 +245,12 @@ export default class ReplayApi {
   }
 
   public static async connect(replay: IReplayMeta) {
-    if (!replay.replayApiUrl && !this.serverProcess) {
-      await ReplayApi.startServer();
-    }
+    await ReplayApi.startServer();
 
-    console.log('Connecting to Replay API', replay.replayApiUrl || this.localApiHost);
-    const api = new ReplayApi(replay.replayApiUrl || this.localApiHost, replay);
+    const replayApiUrl = replay.replayApiUrl ? new URL(replay.replayApiUrl) : this.localApiHost;
+
+    console.log('Connecting to Replay API', replay.replayApiUrl);
+    const api = new ReplayApi(replayApiUrl, replay);
     try {
       await api.isReady;
     } catch (err) {
@@ -212,7 +268,7 @@ export default class ReplayApi {
   }
 
   private static async startServer() {
-    if (this.localApiHost) return;
+    if (this.localApiHost || this.serverProcess) return;
 
     const args = [];
     if (!this.serverStartPath) {
@@ -255,7 +311,7 @@ export default class ReplayApi {
       });
     });
 
-    this.localApiHost = `${await promise}/replay`;
+    this.localApiHost = new URL(`${await promise}/replay`);
     return child;
   }
 }

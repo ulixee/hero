@@ -20,7 +20,6 @@ import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { INodeData } from '@secret-agent/interfaces/IDomChangeEvent';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
@@ -31,7 +30,7 @@ import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
-import { IDomChangeRecord } from '../models/DomChangesTable';
+import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 
 const { log } = Log(module);
 
@@ -265,7 +264,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     if (propertyPath === 'data' || propertyPath === 'response.data') {
-      return ((await this.sessionState.getResourceData(finalResourceId)) as unknown) as Promise<T>;
+      return (await this.sessionState.getResourceData(finalResourceId, true)) as any;
     }
 
     const resource = this.sessionState.getResourceMeta(finalResourceId);
@@ -489,33 +488,34 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
-  public async getMainFrameDomChanges(
-    sinceCommandId?: number,
-  ): Promise<
-    (Omit<IDomChangeRecord, 'attributes' | 'attributeNamespaces' | 'properties'> & INodeData)[]
-  > {
-    await this.flushPageEventsRecorder();
+  public async flushPageEventsRecorder(): Promise<void> {
+    await Promise.all(
+      this.puppetPage.frames.map(async frame => {
+        try {
+          // don't wait for env to be available
+          if (!frame.canEvaluate(true)) return;
+
+          const results = await frame.evaluate<PageRecorderResultSet>(
+            `window.flushPageRecorder()`,
+            true,
+          );
+          await this.onPageRecorderEvents(results, frame.id);
+        } catch (error) {
+          // no op if it fails
+        }
+      }),
+    );
     this.sessionState.db.flush();
+  }
+
+  public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {
+    await this.flushPageEventsRecorder();
+
+    const frameDomNodePaths = this.sessionState.db.frames.frameDomNodePathsById;
 
     return this.sessionState.db.domChanges
-      .getFrameChanges(this.mainFrameId)
-      .filter(x => {
-        if (sinceCommandId) {
-          return x.commandId > sinceCommandId;
-        }
-        return true;
-      })
-      .map(record => {
-        return {
-          ...record,
-          id: record.nodeId,
-          attributes: record.attributes ? JSON.parse(record.attributes) : undefined,
-          attributeNamespaces: record.attributeNamespaces
-            ? JSON.parse(record.attributeNamespaces)
-            : undefined,
-          properties: record.properties ? JSON.parse(record.properties) : undefined,
-        };
-      });
+      .getFrameChanges(this.mainFrameId, sinceCommandId)
+      .map(x => DomChangesTable.toFrontendRecord(x, frameDomNodePaths));
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -558,25 +558,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.session.mitmRequestSession?.registerWebsocketHeaders(this.id, ev);
     });
     page.on('websocket-frame', this.onWebsocketFrame.bind(this));
-  }
-
-  private async flushPageEventsRecorder(): Promise<void> {
-    await Promise.all(
-      this.puppetPage.frames.map(async frame => {
-        try {
-          // don't wait for env to be available
-          if (!frame.canEvaluate(true)) return;
-
-          const results = await frame.evaluate<PageRecorderResultSet>(
-            `window.flushPageRecorder()`,
-            true,
-          );
-          await this.onPageRecorderEvents(results, frame.id);
-        } catch (error) {
-          // no op if it fails
-        }
-      }),
-    );
   }
 
   private onPageCallback(event: IPuppetPageEvents['page-callback-triggered']): void {
@@ -661,7 +642,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
   }
 
-  private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
+  private async onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): Promise<void> {
     this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
       event.resource,
       this.id,
@@ -684,13 +665,17 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
 
     // if we get a cached response, it might never hit mitm, so record now
-    if (event.resource.browserServedFromCache && !resourcesWithBrowserRequestId?.length) {
-      const ctx = MitmRequestContext.createFromLoadedResource(event.resource);
-      const resource = this.sessionState.captureResource(
-        this.id,
-        MitmRequestContext.toEmittedResource(ctx),
-        true,
-      );
+    if (!resourcesWithBrowserRequestId?.length) {
+      const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
+      const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
+      if (!event.resource.browserServedFromCache) {
+        resourceDetails.body = await event.body();
+        if (resourceDetails.body) {
+          delete resourceDetails.response.headers['content-encoding'];
+          delete resourceDetails.response.headers['Content-Encoding'];
+        }
+      }
+      const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
       this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
     }
   }

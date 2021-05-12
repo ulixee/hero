@@ -7,26 +7,16 @@ process.env.MITM_ALLOW_INSECURE = 'true';
 
 test('loads http2 resources', async () => {
   const server = await Helpers.runHttp2Server((req, res) => {
-    res.stream.respond(
-      {
-        ':status': 200,
-        'content-type': 'text/html',
-      },
-      { waitForTrailers: true },
-    );
-    res.stream.pushStream({ ':path': '/img.png' }, (err, pushStream) => {
-      pushStream.respond(
-        {
-          ':status': 200,
-          'content-type': 'application/json',
-        },
-        { waitForTrailers: true },
-      );
-      pushStream.end(Helpers.getLogo());
-      pushStream.on('wantTrailers', () => pushStream.close());
+    res.stream.respond({
+      ':status': 200,
+      'content-type': 'text/html',
     });
-    res.on('wantTrailers', () => () => {
-      res.stream.close();
+    res.stream.pushStream({ ':path': '/img.png' }, (err, pushStream) => {
+      pushStream.respond({
+        ':status': 200,
+        'content-type': 'image/png',
+      });
+      pushStream.end(Helpers.getLogo());
     });
     res.end(`<html><body><img src="/img.png"/></body></html>`);
   });
@@ -39,5 +29,6 @@ test('loads http2 resources', async () => {
   await tab.waitForLoad('DomContentLoaded');
 
   const resources = await tab.waitForResource({ url: /.*\/img.png/ });
+  expect(resources).toHaveLength(1);
   expect(resources[0].type).toBe('Image');
 });

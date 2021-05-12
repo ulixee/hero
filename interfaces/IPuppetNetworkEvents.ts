@@ -1,5 +1,13 @@
 import IHttpResourceLoadDetails from './IHttpResourceLoadDetails';
 
+export declare type IPuppetResourceRequest = Omit<
+  IHttpResourceLoadDetails,
+  'requestTrailers' | 'responseTrailers' | 'requestOriginalHeaders' | 'responseOriginalHeaders'
+> & {
+  frameId?: string;
+  redirectedFromUrl?: string;
+};
+
 export interface IPuppetNetworkEvents {
   'navigation-response': {
     browserRequestId: string;
@@ -19,25 +27,26 @@ export interface IPuppetNetworkEvents {
     headers: { [key: string]: string };
   };
   'resource-will-be-requested': {
-    resource: IHttpResourceLoadDetails;
+    resource: IPuppetResourceRequest;
     redirectedFromUrl: string;
     isDocumentNavigation: boolean;
     frameId: string;
     loaderId?: string;
   };
   'resource-was-requested': {
-    resource: IHttpResourceLoadDetails;
+    resource: IPuppetResourceRequest;
     redirectedFromUrl: string;
     isDocumentNavigation: boolean;
     frameId: string;
     loaderId?: string;
   };
   'resource-loaded': {
-    resource: IHttpResourceLoadDetails;
+    resource: IPuppetResourceRequest;
     frameId?: string;
     loaderId?: string;
+    body(): Promise<Buffer | null>;
   };
   'resource-failed': {
-    resource: IHttpResourceLoadDetails;
+    resource: IPuppetResourceRequest;
   };
 }

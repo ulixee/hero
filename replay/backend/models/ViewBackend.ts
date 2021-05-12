@@ -4,7 +4,7 @@ import generateContextMenu from '../menus/generateContextMenu';
 import Rectangle = Electron.Rectangle;
 
 export default abstract class ViewBackend {
-  public get browserView() {
+  public get browserView(): BrowserView {
     if (!this._browserView) {
       this._browserView = new BrowserView({
         webPreferences: {

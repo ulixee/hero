@@ -3,6 +3,7 @@ import { Helpers } from '@secret-agent/testing';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
 import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
 import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 
@@ -51,7 +52,7 @@ function addMe() {
 
     const changes = await tab.getMainFrameDomChanges(commandId);
     expect(changes).toHaveLength(2);
-    expect(changes[0].action).toBe('added');
+    expect(changes[0].action).toBe(DomActionType.added);
     expect(changes[0].tagName).toBe('A');
   });
 
@@ -85,7 +86,7 @@ function removeMe() {
 
     const changes = await tab.getMainFrameDomChanges(loadCommand);
     expect(changes).toHaveLength(2);
-    expect(changes[0].action).toBe('removed');
+    expect(changes[0].action).toBe(DomActionType.removed);
 
     await tab.close();
   });
@@ -131,16 +132,16 @@ function sort() {
     const changes = await tab.getMainFrameDomChanges(loadCommand);
     // 1 remove and 1 add for each
     expect(changes).toHaveLength(9);
-    expect(changes.filter(x => x.action === 'removed')).toHaveLength(4);
+    expect(changes.filter(x => x.action === DomActionType.removed)).toHaveLength(4);
 
     const elem3 = changesAfterLoad.find(x => x.attributes?.id === 'id-3');
     const elem1 = changesAfterLoad.find(x => x.attributes?.id === 'id-1');
 
     const [lastChange, locationChange] = changes.slice(-2);
-    expect(locationChange.action).toBe('location');
-    expect(lastChange.action).toBe('added');
-    expect(lastChange.id).toBe(elem1.id);
-    expect(lastChange.previousSiblingId).toBe(elem3.id);
+    expect(locationChange.action).toBe(DomActionType.location);
+    expect(lastChange.action).toBe(DomActionType.added);
+    expect(lastChange.nodeId).toBe(elem1.nodeId);
+    expect(lastChange.previousSiblingId).toBe(elem3.nodeId);
 
     await tab.close();
   });
@@ -174,7 +175,7 @@ function sort() {
 
     const changes = await tab.getMainFrameDomChanges(loadCommand);
     expect(changes).toHaveLength(2);
-    expect(changes[0].action).toBe('attribute');
+    expect(changes[0].action).toBe(DomActionType.attribute);
     expect(changes[0].attributes['new-attr']).toBe('1');
 
     await tab.close();
@@ -201,7 +202,7 @@ function sort() {
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/iframe`);
-    await tab.waitForLoad('PaintingStable');
+    await tab.waitForLoad(LocationStatus.AllContentLoaded);
     const state = tab.sessionState;
 
     expect(tab.puppetPage.frames).toHaveLength(4);
@@ -264,7 +265,7 @@ function clickIt() {
     const changes = await tab.getMainFrameDomChanges();
 
     const propChange = changes.find(
-      x => x.action === 'property' && !!x.properties['sheet.cssRules'],
+      x => x.action === DomActionType.property && !!x.properties['sheet.cssRules'],
     );
     expect(propChange).toBeTruthy();
 
@@ -310,11 +311,11 @@ customElements.define('image-list', class extends HTMLElement {
     await tab.waitForMillis(100);
 
     const changes = await tab.getMainFrameDomChanges();
-    expect(changes.find(x => x.action === 'added' && x.nodeType === 40)).toBeTruthy();
+    expect(changes.find(x => x.action === DomActionType.added && x.nodeType === 40)).toBeTruthy();
 
-    const shadowRoot = changes.find(x => x.action === 'added' && x.nodeType === 40);
-    expect(changes.find(x => x.id === shadowRoot.parentNodeId).tagName).toBe('IMAGE-LIST');
-    const shadowImg = changes.find(x => x.parentNodeId === shadowRoot.id);
+    const shadowRoot = changes.find(x => x.action === DomActionType.added && x.nodeType === 40);
+    expect(changes.find(x => x.nodeId === shadowRoot.parentNodeId).tagName).toBe('IMAGE-LIST');
+    const shadowImg = changes.find(x => x.parentNodeId === shadowRoot.nodeId);
 
     expect(shadowImg.tagName).toBe('IMG');
     expect(shadowImg.attributes.alt).toBe(' new image is closed ');
@@ -379,7 +380,7 @@ describe('basic Mouse Event tests', () => {
     const domChanges = await tab.getMainFrameDomChanges();
     const linkNode = domChanges.find(x => x.tagName === 'BUTTON');
 
-    expect(mouseDownEvents[0].targetNodeId).toBe(linkNode.id);
+    expect(mouseDownEvents[0].targetNodeId).toBe(linkNode.nodeId);
 
     const scrollRecords = state.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
@@ -438,14 +439,14 @@ describe('basic Form element tests', () => {
     const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(
+    expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(
       'Hello world!'.length + 1,
     );
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
-    expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+    expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
     await tab.close();
   });
@@ -499,14 +500,14 @@ describe('basic Form element tests', () => {
     const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(
+    expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(
       'Hello world!'.length + 1,
     );
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'TEXTAREA');
-    expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+    expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
     await tab.close();
   });
@@ -555,12 +556,12 @@ describe('basic Form element tests', () => {
     const changesAfterType = await tab.getMainFrameDomChanges();
 
     // should have a change for each keypress + one for test
-    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(2);
+    expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(2);
 
     const focusRecords = state.db.focusEvents.all();
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
-    expect(focusRecords[0].targetNodeId).toBe(inputNode.id);
+    expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
     await tab.close();
   });
@@ -609,9 +610,11 @@ describe('basic Form element tests', () => {
     const changesAfterType = await tab.getMainFrameDomChanges();
 
     // 2 changes per radio change
-    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(4);
+    expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(4);
     expect(
-      changesAfterType.filter(x => x.action === 'property' && x.properties.checked === true),
+      changesAfterType.filter(
+        x => x.action === DomActionType.property && x.properties.checked === true,
+      ),
     ).toHaveLength(2);
 
     const focusRecords = state.db.focusEvents.all();
@@ -674,15 +677,17 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const select = changesAfterType.find(x => x.tagName === 'SELECT');
     const opt2 = changesAfterType.find(x => x.attributes?.id === 'opt2');
-    expect(focusRecords[0].targetNodeId).toBe(select.id);
+    expect(focusRecords[0].targetNodeId).toBe(select.nodeId);
 
     // 2 sets of: 1 change for each option, 1 for select
-    expect(changesAfterType.filter(x => x.action === 'property')).toHaveLength(6);
+    expect(changesAfterType.filter(x => x.action === DomActionType.property)).toHaveLength(6);
     expect(
-      changesAfterType.filter(x => x.action === 'property' && x.nodeId === select.id),
+      changesAfterType.filter(
+        x => x.action === DomActionType.property && x.nodeId === select.nodeId,
+      ),
     ).toHaveLength(2);
     expect(
-      changesAfterType.filter(x => x.action === 'property' && x.nodeId === opt2.id),
+      changesAfterType.filter(x => x.action === DomActionType.property && x.nodeId === opt2.nodeId),
     ).toHaveLength(2);
     await tab.close();
   });
@@ -750,31 +755,31 @@ function addMe2() {
     }));
 
     expect(frame1DomRecords[0]).toStrictEqual({
-      action: 'newDocument',
-      tagName: null,
+      action: DomActionType.newDocument,
+      tagName: undefined,
       attributes: undefined,
       textContent: `${koaServer.baseUrl}/page1`,
     });
     expect(frame1DomRecords.filter(x => x.tagName)).toHaveLength(6);
     expect(frame1DomRecords[frame1DomRecords.length - 1]).toStrictEqual({
-      action: 'added',
+      action: DomActionType.added,
       tagName: 'A',
       attributes: { id: 'link2', href: '/test2' },
-      textContent: null,
+      textContent: undefined,
     });
 
     expect(frame2DomRecords[0]).toStrictEqual({
-      action: 'newDocument',
-      tagName: null,
+      action: DomActionType.newDocument,
+      tagName: undefined,
       attributes: undefined,
       textContent: `${koaServer.baseUrl}/page2`,
     });
     expect(frame2DomRecords.filter(x => x.tagName)).toHaveLength(6);
     expect(frame2DomRecords[frame2DomRecords.length - 2]).toStrictEqual({
-      action: 'added',
+      action: DomActionType.added,
       tagName: 'DIV',
       attributes: { id: 'divPage2' },
-      textContent: null,
+      textContent: undefined,
     });
     await tab.close();
   });

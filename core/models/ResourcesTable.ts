@@ -125,26 +125,34 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     ]);
   }
 
-  public async getResourceBodyById(resourceId: number) {
+  public getResponse(
+    resourceId: number,
+  ): Pick<
+    IResourcesRecord,
+    'responseEncoding' | 'responseHeaders' | 'statusCode' | 'responseData'
+  > {
+    const record = this.db
+      .prepare(
+        `select responseEncoding, responseHeaders, statusCode, responseData from ${this.tableName} where id=? limit 1`,
+      )
+      .get(resourceId);
+    if (!record) return null;
+    return record;
+  }
+
+  public async getResourceBodyById(resourceId: number, decompress = true): Promise<Buffer> {
+    if (this.hasPending(x => x[0] === resourceId)) {
+      this.flush();
+    }
+
     const record = this.db
       .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
       .get(resourceId);
     if (!record) return null;
 
     const { responseData, responseEncoding } = record;
+    if (!decompress) return responseData;
     return await decodeBuffer(responseData, responseEncoding);
-  }
-
-  public async getResourceByUrl(url: string, decodeBody = true) {
-    const sql = `select type, responseData, responseEncoding, statusCode, responseHeaders from ${this.tableName} where requestUrl=? limit 1`;
-    const record = this.db.prepare(sql).get(url);
-    if (!record) return null;
-
-    const data = decodeBody
-      ? await decodeBuffer(record.responseData, record.responseEncoding)
-      : record.responseData;
-    const headers = JSON.parse(record.responseHeaders);
-    return { data, type: record.type as ResourceType, headers, statusCode: record.statusCode };
   }
 }
 

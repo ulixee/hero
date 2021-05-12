@@ -70,11 +70,13 @@ export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implement
       method,
       params,
     };
+    const timestamp = new Date();
     const id = this.connection.sendMessage(message);
     this.messageEvents.emit(
       'send',
       {
         id,
+        timestamp,
         ...message,
       },
       sendInitiator,
@@ -133,6 +135,6 @@ export class DevtoolsSession extends TypedEventEmitter<DevtoolsEvents> implement
 }
 
 export interface IMessageEvents {
-  send: { sessionId: string | undefined; id: number; method: string; params: any };
+  send: { sessionId: string | undefined; id: number; method: string; params: any; timestamp: Date };
   receive: IDevtoolsResponseMessage | IDevtoolsEventMessage;
 }

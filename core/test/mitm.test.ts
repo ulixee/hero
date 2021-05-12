@@ -314,7 +314,7 @@ This is the main body
 </html>`;
   });
   await tab.goto(`${koa.baseUrl}/iframe-test`);
-  await tab.waitForLoad(LocationStatus.PaintingStable);
+  await tab.waitForLoad(LocationStatus.AllContentLoaded);
   expect(mocks.MitmRequestContext.create).toHaveBeenCalledTimes(4);
   const urls = mocks.MitmRequestContext.create.mock.results.map(x => x.value.url.href);
   expect(urls).toEqual([

@@ -9,7 +9,11 @@ import {
 } from '~shared/interfaces/ISaSession';
 import ReplayTick, { IEventType } from '~backend/api/ReplayTick';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
-import { IDomChangeEvent, IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
+import {
+  DomActionType,
+  IDomChangeEvent,
+  IFrontendDomChangeEvent,
+} from '~shared/interfaces/IDomChangeEvent';
 import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
 import getResolvable from '~shared/utils/promise';
@@ -54,6 +58,13 @@ export default class ReplayTabState extends EventEmitter {
   private paintEventsLoadedIdx = -1;
   private broadcastTimer: NodeJS.Timer;
   private lastBroadcast?: Date;
+  private eventRouter = {
+    'dom-changes': this.loadDomChange.bind(this),
+    'mouse-events': this.loadPageEvent.bind(this, 'mouse'),
+    'focus-events': this.loadPageEvent.bind(this, 'focus'),
+    'scroll-events': this.loadPageEvent.bind(this, 'scroll'),
+    commands: this.loadCommand.bind(this),
+  };
 
   constructor(tabMeta: ISessionTab, replayTime: ReplayTime) {
     super();
@@ -65,6 +76,11 @@ export default class ReplayTabState extends EventEmitter {
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
     this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.getTime(), 'Load'));
+  }
+
+  public onApiFeed(eventName: string, event: any) {
+    const method = this.eventRouter[eventName];
+    if (method) method(event);
   }
 
   public getTickState() {
@@ -133,10 +149,10 @@ export default class ReplayTabState extends EventEmitter {
     }
 
     const changeEvents: IFrontendDomChangeEvent[] = [];
-    if (newTick.eventType === 'init') {
+    if (newTick.eventType === 'init' || (newTick.paintEventIdx === -1 && isBackwards)) {
       startIndex = -1;
       changeEvents.push({
-        action: 'newDocument',
+        action: DomActionType.newDocument,
         textContent: this.startOrigin,
         commandId: newTick.commandId,
       } as any);
@@ -149,7 +165,7 @@ export default class ReplayTabState extends EventEmitter {
         }
         if (
           paints.changeEvents[0].frameIdPath === 'main' &&
-          paints.changeEvents[0].action === 'newDocument'
+          paints.changeEvents[0].action === DomActionType.newDocument
         ) {
           changeEvents.length = 0;
         }
@@ -251,7 +267,7 @@ export default class ReplayTabState extends EventEmitter {
     if (!event.frameIdPath) return;
 
     const isMainFrame = event.frameIdPath === 'main';
-    if (isMainFrame && event.action === 'newDocument' && !this.startOrigin) {
+    if (isMainFrame && event.action === DomActionType.newDocument && !this.startOrigin) {
       this.startOrigin = event.textContent;
       console.log('Got start origin for new tab', this.startOrigin);
       this.isReady.resolve();
@@ -268,26 +284,9 @@ export default class ReplayTabState extends EventEmitter {
       paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
     }
 
-    const frontendEvent: IFrontendDomChangeEvent = {
-      nodeId: event.nodeId,
-      eventIndex: event.eventIndex,
-      action: event.action,
-      frameIdPath: event.frameIdPath,
-      nodeType: event.nodeType,
-      textContent: event.textContent,
-      tagName: event.tagName,
-      namespaceUri: event.namespaceUri,
-      previousSiblingId: event.previousSiblingId,
-      parentNodeId: event.parentNodeId,
-      attributes: event.attributes,
-      attributeNamespaces: event.attributeNamespaces,
-      properties: event.properties,
-      timestamp: event.timestamp,
-    };
-
     if (paintEvent) {
       const events = paintEvent.changeEvents;
-      events.push(frontendEvent);
+      events.push(event);
 
       if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
         events.sort((a, b) => {
@@ -302,7 +301,7 @@ export default class ReplayTabState extends EventEmitter {
       }
     } else {
       paintEvent = {
-        changeEvents: [frontendEvent],
+        changeEvents: [event],
         timestamp,
         commandId,
       };
@@ -312,7 +311,7 @@ export default class ReplayTabState extends EventEmitter {
 
       const tick = new ReplayTick(this, 'paint', index, commandId, timestamp);
       this.ticks.push(tick);
-      if (isMainFrame && action === 'newDocument') {
+      if (isMainFrame && action === DomActionType.newDocument) {
         tick.isNewDocumentTick = true;
         tick.documentOrigin = textContent;
         this.pages.push({
@@ -343,6 +342,9 @@ export default class ReplayTabState extends EventEmitter {
     for (const tick of this.ticks) {
       tick.updateDuration(this.replayTime);
     }
+
+    // The ticks can get out of order when they sync from browser -> db -> replay, so need to be resorted
+
     this.ticks.sort((a, b) => {
       return a.playbarOffsetPercent - b.playbarOffsetPercent;
     });
@@ -350,7 +352,7 @@ export default class ReplayTabState extends EventEmitter {
     let prev: ReplayTick;
     for (const tick of this.ticks) {
       if (prev && prev.playbarOffsetPercent >= tick.playbarOffsetPercent) {
-        tick.playbarOffsetPercent += 0.01;
+        tick.playbarOffsetPercent = prev.playbarOffsetPercent + 0.01;
       }
       prev = tick;
     }
@@ -415,7 +417,7 @@ export default class ReplayTabState extends EventEmitter {
       tick.documentOrigin = documentOrigin;
       tick.highlightNodeIds = lastSelectedNodeIds;
 
-      if (tick.eventType === 'init') {
+      if (tick.eventType === 'init' || lastPaintEventIdx === null) {
         tick.documentLoadPaintIndex = -1;
         tick.documentOrigin = this.startOrigin;
         tick.paintEventIdx = -1;

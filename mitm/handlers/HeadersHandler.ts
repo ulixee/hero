@@ -61,7 +61,7 @@ export default class HeadersHandler {
   }
 
   public static getRequestHeader<T = string | string[]>(
-    ctx: IHttpResourceLoadDetails,
+    ctx: Pick<IHttpResourceLoadDetails, 'requestHeaders'>,
     name: string,
   ): T {
     const lowerName = name.toLowerCase();
@@ -139,7 +139,8 @@ export default class HeadersHandler {
     } else {
       const stream = ctx.proxyToServerRequest;
       stream.on('wantTrailers', () => {
-        stream.sendTrailers(trailers ?? {});
+        if (!trailers) stream.close();
+        else stream.sendTrailers(trailers ?? {});
       });
     }
   }

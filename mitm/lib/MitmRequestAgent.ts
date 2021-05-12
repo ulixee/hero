@@ -419,7 +419,8 @@ export default class MitmRequestAgent {
         proxyToClientPushStream.respond(pushContext.responseHeaders, { waitForTrailers: true });
         proxyToClientPushStream.on('wantTrailers', (): void => {
           pushContext.responseTrailers = trailers;
-          proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
+          if (trailers) proxyToClientPushStream.sendTrailers(pushContext.responseTrailers ?? {});
+          else proxyToClientPushStream.close();
         });
 
         pushContext.setState(ResourceState.ServerToProxyPushResponse);

@@ -23,6 +23,7 @@ import { assert, createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IRect from '@secret-agent/interfaces/IRect';
+import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -83,6 +84,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     browserContext: BrowserContext,
     logger: IBoundLog,
     opener: Page | null,
+    options: IPuppetPageOptions | null,
   ) {
     super();
 
@@ -99,7 +101,8 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     this.networkManager = new NetworkManager(
       devtoolsSession,
       this.logger,
-      browserContext.proxyPassword,
+      this.browserContext.proxy,
+      options?.mockNetworkRequests,
     );
     this.framesManager = new FramesManager(devtoolsSession, this.logger);
     this.opener = opener;
@@ -161,7 +164,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     });
   }
 
-  public async getIndexedDbDatabaseNames(): Promise<
+  async getIndexedDbDatabaseNames(): Promise<
     { frameId: string; origin: string; databases: string[] }[]
   > {
     const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
@@ -184,14 +187,15 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return this.mainFrame.evaluate<T>(expression, false);
   }
 
-  async navigate(url: string, options: { referrer?: string } = {}): Promise<void> {
+  async navigate(url: string, options: { referrer?: string } = {}): Promise<{ loaderId: string }> {
     const navigationResponse = await this.devtoolsSession.send('Page.navigate', {
       url,
       referrer: options.referrer,
       frameId: this.mainFrame.id,
     });
     if (navigationResponse.errorText) throw new Error(navigationResponse.errorText);
-    return this.framesManager.waitForFrame(navigationResponse, url, true);
+    await this.framesManager.waitForFrame(navigationResponse, url, true);
+    return { loaderId: navigationResponse.loaderId };
   }
 
   goBack(): Promise<string> {
@@ -326,10 +330,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
           flatten: true,
         })
         .catch(err => err),
-      this.browserContext.defaultPageInitializationFn(this).catch(err => err),
-      this.browserContext.emulator?.onNewPuppetPage
-        ? this.browserContext.emulator.onNewPuppetPage(this).catch(err => err)
-        : null,
+      this.browserContext.initializePage(this),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(err => err),
     ];
 

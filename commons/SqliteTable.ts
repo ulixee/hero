@@ -26,8 +26,12 @@ export default abstract class SqliteTable<T> {
     }
   }
 
-  public hasPending(): boolean {
-    return !!this.pendingInserts.length;
+  public hasPending(cb?: (record: IRecord) => boolean): boolean {
+    if (!this.pendingInserts.length) return false;
+    if (cb) {
+      return this.pendingInserts.some(cb);
+    }
+    return true;
   }
 
   public subscribe(callbackFn: (records: T[]) => void): void {
@@ -104,7 +108,7 @@ export default abstract class SqliteTable<T> {
   private insertToObject(record: IRecord): T {
     const result: any = {};
     for (let i = 0; i < record.length; i += 1) {
-      result[this.columns[i][0]] = record[i];
+      if (record[i] !== null) result[this.columns[i][0]] = record[i];
     }
     return result as T;
   }

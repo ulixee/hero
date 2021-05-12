@@ -7,7 +7,7 @@ import MitmSocket from '@secret-agent/mitm-socket';
 import OriginType, { isOriginType } from '@secret-agent/interfaces/OriginType';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import IResourceResponse from '@secret-agent/interfaces/IResourceResponse';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import { IPuppetResourceRequest } from '@secret-agent/interfaces/IPuppetNetworkEvents';
 import HttpResponseCache from './HttpResponseCache';
 import HeadersHandler from '../handlers/HeadersHandler';
 import { IRequestSessionResponseEvent } from '../handlers/RequestSession';
@@ -19,12 +19,13 @@ import ResourceState from '../interfaces/ResourceState';
 export default class MitmRequestContext {
   private static contextIdCounter = 0;
 
-  public static createFromLoadedResource(
-    resourceLoadDetails: IHttpResourceLoadDetails,
+  public static createFromPuppetResourceRequest(
+    resourceLoadDetails: IPuppetResourceRequest,
   ): IMitmRequestContext {
     return {
       id: (this.contextIdCounter += 1),
       ...resourceLoadDetails,
+      requestOriginalHeaders: { ...resourceLoadDetails.requestHeaders },
       didBlockResource: !!resourceLoadDetails.browserBlockedReason,
       cacheHandler: null,
       clientToProxyRequest: null,

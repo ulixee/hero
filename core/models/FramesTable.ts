@@ -2,6 +2,8 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class FramesTable extends SqliteTable<IFrameRecord> {
+  public frameDomNodePathsById = new Map<string, string>();
+
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
@@ -21,6 +23,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
   }
 
   public insert(frame: IFrameRecord) {
+    this.recordDomNodePath(frame);
     return this.queuePendingInsert([
       frame.id,
       frame.tabId,
@@ -31,6 +34,24 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       frame.parentId,
       frame.createdTimestamp,
     ]);
+  }
+
+  public all(): IFrameRecord[] {
+    const all = super.all();
+    for (const frame of all) {
+      this.recordDomNodePath(frame);
+    }
+    return all;
+  }
+
+  private recordDomNodePath(frame: IFrameRecord) {
+    if (!frame.parentId) {
+      this.frameDomNodePathsById.set(frame.id, 'main');
+    }
+    if (frame.domNodeId) {
+      const parentPath = this.frameDomNodePathsById.get(frame.parentId);
+      this.frameDomNodePathsById.set(frame.id, `${parentPath ?? ''}_${frame.domNodeId}`);
+    }
   }
 }
 

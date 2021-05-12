@@ -1,7 +1,8 @@
 import { IncomingMessage } from 'http';
 import Logger from '@secret-agent/commons/Logger';
 import { createPromise } from '@secret-agent/commons/utils';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
+import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
+import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 import SessionDb, { ISessionLookup, ISessionLookupArgs } from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';
 import { ISessionRecord } from '../models/SessionTable';
@@ -22,7 +23,6 @@ export default class ConnectionToReplay {
     { tabId: number; createdTime: number; startOrigin: string; width: number; height: number }
   >();
 
-  private readonly frameIdToNodePath = new Map<string, string>();
   private readonly mainFrames = new Set<string>();
 
   private lastScriptState: IScriptState;
@@ -104,10 +104,6 @@ export default class ConnectionToReplay {
       for (const frame of frames) {
         if (!frame.parentId) {
           this.mainFrames.add(frame.id);
-          this.frameIdToNodePath.set(frame.id, 'main');
-        } else {
-          const parentPath = this.frameIdToNodePath.get(frame.parentId);
-          this.frameIdToNodePath.set(frame.id, `${parentPath ?? ''}_${frame.domNodeId}`);
         }
         this.addTabId(frame.tabId, frame.createdTimestamp);
       }
@@ -118,8 +114,9 @@ export default class ConnectionToReplay {
 
     db.domChanges.subscribe(changes => {
       for (const change of changes) {
+        DomChangesTable.inflateRecord(change);
         const isMainFrame = this.mainFrames.has(change.frameId);
-        if (isMainFrame && change.action === 'newDocument') {
+        if (isMainFrame && change.action === DomActionType.newDocument) {
           this.addTabId(change.tabId, change.timestamp);
           const tab = this.tabsById.get(change.tabId);
           if (!tab.startOrigin) {
@@ -136,14 +133,12 @@ export default class ConnectionToReplay {
             tabReadyPromise.resolve();
           }
         }
-        (change as any).frameIdPath = this.frameIdToNodePath.get(change.frameId);
-        if (change.attributes) change.attributes = JSON.parse(change.attributes);
-        if (change.attributeNamespaces) {
-          change.attributeNamespaces = JSON.parse(change.attributeNamespaces);
-        }
-        if (change.properties) change.properties = JSON.parse(change.properties);
+        (change as IFrontendDomChangeEvent).frameIdPath = db.frames.frameDomNodePathsById.get(
+          change.frameId,
+        );
+        change.frameId = undefined;
       }
-      if (changes.length) this.send('dom-changes', changes);
+      this.send('dom-changes', changes);
     });
 
     db.commands.subscribe(commands => {
@@ -167,35 +162,21 @@ export default class ConnectionToReplay {
       this.send('focus-events', events);
     });
 
-    const resourceWhitelist: ResourceType[] = [
-      'Ico',
-      'Image',
-      'Media',
-      'Font',
-      'Stylesheet',
-      'Other',
-      'Document',
-    ];
     db.resources.subscribe(resources => {
       const resourcesToSend = [];
+
       for (const resource of resources) {
-        if (!resourceWhitelist.includes(resource.type)) {
-          continue;
-        }
+        if (resource.requestMethod !== 'GET' || !resource.responseHeaders) continue;
         resourcesToSend.push({
           url: resource.requestUrl,
+          id: resource.id,
+          statusCode: resource.statusCode,
           tabId: resource.tabId,
           type: resource.type,
-          data: resource.responseData,
-          encoding: resource.responseEncoding,
-          statusCode: resource.statusCode,
-          headers: resource.responseHeaders ? JSON.parse(resource.responseHeaders) : {},
+          redirectedToUrl: resource.redirectedToUrl,
         });
       }
-      while (resourcesToSend.length) {
-        const toSend = resourcesToSend.splice(0, 50);
-        this.send('resources', toSend);
-      }
+      this.send('resources', resourcesToSend);
     });
 
     db.frameNavigations.subscribe(() => this.checkState());
@@ -247,7 +228,7 @@ export default class ConnectionToReplay {
     }
 
     const json = JSON.stringify({ event, data }, (_, value) => {
-      if (value !== undefined) return value;
+      if (value !== undefined && value !== null) return value;
     });
 
     const sendPromise = this.sendMessage(json).catch(err => err);
