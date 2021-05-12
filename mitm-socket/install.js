@@ -103,7 +103,7 @@ function buildFilename() {
   let platform = String(os.platform());
   let arch = os.arch();
   if (arch === 'x64') arch = 'x86_64';
-  if (arch === 'ia32') arch = '386';
+  if (arch === 'ia32') arch = 'i386';
 
   if (platform === 'win32') {
     platform = 'win';

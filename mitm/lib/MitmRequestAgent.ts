@@ -34,6 +34,7 @@ export default class MitmRequestAgent {
   private readonly maxConnectionsPerOrigin: number;
 
   private readonly socketPoolByOrigin = new Map<string, SocketPool>();
+  private readonly socketPoolByResolvedHost = new Map<string, SocketPool>();
 
   constructor(session: RequestSession) {
     this.session = session;
@@ -125,6 +126,7 @@ export default class MitmRequestAgent {
     for (const pool of this.socketPoolByOrigin.values()) {
       pool.close();
     }
+    this.socketPoolByResolvedHost.clear();
   }
 
   private async assignSocket(
@@ -282,7 +284,9 @@ export default class MitmRequestAgent {
   private http2Request(ctx: IMitmRequestContext): http2.ClientHttp2Stream {
     const client = this.createHttp2Session(ctx);
     ctx.setState(ResourceState.CreateProxyToServerRequest);
-    return client.request(ctx.requestHeaders, { waitForTrailers: true });
+    const weight = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.state?.weight;
+
+    return client.request(ctx.requestHeaders, { waitForTrailers: true, weight });
   }
 
   private async onHttp2ServerToProxyPush(
@@ -462,7 +466,18 @@ export default class MitmRequestAgent {
 
   private createHttp2Session(ctx: IMitmRequestContext): ClientHttp2Session {
     const origin = ctx.url.origin;
-    const originSocketPool = this.getSocketPoolByOrigin(origin);
+    let originSocketPool: SocketPool;
+    let resolvedHost: string;
+    if (ctx.dnsResolvedIp) {
+      const port = ctx.url.port || (ctx.isSSL ? 443 : 80);
+      resolvedHost = `${ctx.dnsResolvedIp}:${port}`;
+      originSocketPool = this.socketPoolByResolvedHost.get(resolvedHost);
+    }
+    originSocketPool ??= this.getSocketPoolByOrigin(origin);
+
+    if (resolvedHost && !this.socketPoolByResolvedHost.has(resolvedHost)) {
+      this.socketPoolByResolvedHost.set(resolvedHost, originSocketPool);
+    }
 
     const existing = originSocketPool.getHttp2Session();
     if (existing) return existing.client;
@@ -470,9 +485,16 @@ export default class MitmRequestAgent {
     const session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
 
     ctx.setState(ResourceState.CreateH2Session);
+    const clientSettings = session?.remoteSettings;
     const proxyToServerH2Client = http2.connect(origin, {
+      settings: clientSettings,
       createConnection: () => ctx.proxyToServerMitmSocket.socket,
     });
+    if (session) {
+      session.on('ping', bytes => {
+        proxyToServerH2Client.ping(bytes, () => null);
+      });
+    }
 
     proxyToServerH2Client.on('stream', this.onHttp2ServerToProxyPush.bind(this, ctx));
     proxyToServerH2Client.on('error', error => {
