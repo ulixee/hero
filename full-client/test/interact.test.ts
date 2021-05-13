@@ -169,4 +169,36 @@ describe('basic Interact tests', () => {
     await expect(agent.interact({ click: logo })).resolves.toBeUndefined();
     await agent.close();
   });
+
+  it('can accept empty commands', async () => {
+    koaServer.get('/empty-click', ctx => {
+      ctx.body = `
+        <body>
+           <div style="margin-top: 200px">
+             <a href="#none" onclick="clickit()">Empty clicker</a>
+           </div>
+          <script>
+            let lastClicked = '';
+            function clickit() {
+              lastClicked = 'clickedit';
+            }
+          </script>
+        </body>
+      `;
+    });
+    const agent = await handler.createAgent({
+      humanEmulatorId: 'basic',
+    });
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${koaServer.baseUrl}/empty-click`);
+    await agent.activeTab.waitForLoad(LocationStatus.PaintingStable);
+    await agent.interact(
+      {
+        [Command.move]: agent.document.querySelector('a'),
+      },
+      'click',
+    );
+
+    expect(await agent.activeTab.getJsValue('lastClicked')).toBe('clickedit');
+  });
 });

@@ -50,6 +50,15 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     );
   }
 
+  public updateResource(id: number, data: { tabId: number; browserRequestId: string }): void {
+    if (this.hasPending(x => x[0] === id)) {
+      this.flush();
+    }
+    this.db
+      .prepare(`update ${this.tableName} set tabId=?, devtoolsRequestId=? where id=?`)
+      .run(data.tabId, data.browserRequestId, id);
+  }
+
   public insert(
     tabId: number,
     meta: IResourceMeta,

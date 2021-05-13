@@ -1,9 +1,15 @@
 import { Helpers } from '@secret-agent/testing';
 import Core, { Session } from '@secret-agent/core';
+import Resolvable from '@secret-agent/commons/Resolvable';
+import ConnectionToClient from '../server/ConnectionToClient';
 
+let connection: ConnectionToClient;
+beforeAll(() => {
+  connection = Core.addConnection();
+  Helpers.onClose(() => connection.disconnect(), true);
+});
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
-process.env.MITM_ALLOW_INSECURE = 'true';
 
 test('loads http2 resources', async () => {
   const server = await Helpers.runHttp2Server((req, res) => {
@@ -21,14 +27,46 @@ test('loads http2 resources', async () => {
     res.end(`<html><body><img src="/img.png"/></body></html>`);
   });
 
-  const connection = Core.addConnection();
-  Helpers.onClose(() => connection.disconnect());
   const meta = await connection.createSession();
   const tab = Session.getTab(meta);
+  const session = Session.get(meta.sessionId);
+  Helpers.needsClosing.push(session);
   await tab.goto(server.url);
   await tab.waitForLoad('DomContentLoaded');
 
   const resources = await tab.waitForResource({ url: /.*\/img.png/ });
   expect(resources).toHaveLength(1);
   expect(resources[0].type).toBe('Image');
+  await session.close();
+});
+
+test('records a single resource for failed mitm requests', async () => {
+  const meta = await connection.createSession();
+  const session = Session.get(meta.sessionId);
+  Helpers.needsClosing.push(session);
+  const tab = Session.getTab(meta);
+
+  const resolvable = new Resolvable<void>();
+  const originalEmit = tab.puppetPage.emit.bind(tab.puppetPage);
+  // @ts-ignore
+  jest.spyOn(tab.puppetPage.networkManager, 'emit').mockImplementation((evt, args) => {
+    // eslint-disable-next-line promise/always-return,promise/catch-or-return
+    resolvable.promise.then(() => {
+      originalEmit(evt, args);
+    });
+    return true;
+  });
+  const goToPromise = tab.goto(`http://localhost:2344/not-there`);
+
+  await expect(goToPromise).rejects.toThrowError();
+  expect(session.mitmErrorsByUrl.get(`http://localhost:2344/not-there`)).toHaveLength(1);
+  expect(session.sessionState.getResources(meta.tabId)).toHaveLength(1);
+  // @ts-ignore
+  expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(0);
+  resolvable.resolve();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  expect(session.sessionState.getResources(meta.tabId)).toHaveLength(1);
+  // @ts-ignore
+  expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(1);
+  await session.close();
 });

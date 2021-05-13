@@ -141,22 +141,38 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     browserRequestId: string,
     resource: IResourceMeta,
     error?: Error,
-  ) {
-    if (resource.request.method !== 'GET') return;
+  ): boolean {
+    const frame = this.findFrameWithUnresolvedNavigation(
+      browserRequestId,
+      resource.request?.method,
+      resource.request?.url,
+      resource.response?.url,
+    );
+    if (frame) {
+      frame.navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
+      return true;
+    }
+    return false;
+  }
+
+  public findFrameWithUnresolvedNavigation(
+    browserRequestId: string,
+    method: string,
+    requestedUrl: string,
+    finalUrl: string,
+  ): FrameEnvironment {
+    if (method !== 'GET') return null;
 
     for (const frame of this.frameEnvironmentsById.values()) {
-      if (!frame.isAttached) continue;
-
       const top = frame.navigations.top;
       if (!top || top.resourceId.isResolved) continue;
 
       if (
-        resource.response?.url === top.finalUrl ||
-        resource.request.url === top.requestedUrl ||
+        finalUrl === top.finalUrl ||
+        requestedUrl === top.requestedUrl ||
         browserRequestId === top.browserRequestId
       ) {
-        frame.navigations.onResourceLoaded(resource.id, resource.response?.statusCode, error);
-        break;
+        return frame;
       }
     }
   }
@@ -664,8 +680,29 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       event.resource.browserRequestId,
     );
 
-    // if we get a cached response, it might never hit mitm, so record now
     if (!resourcesWithBrowserRequestId?.length) {
+      // first check if this is a mitm error
+      const errorsMatchingUrl = this.session.mitmErrorsByUrl.get(event.resource.url.href);
+
+      // if this resource error-ed out,
+      for (let i = 0; i < errorsMatchingUrl?.length ?? 0; i += 1) {
+        const error = errorsMatchingUrl[i];
+        const request = error.event?.request?.request;
+        if (!request) continue;
+        if (
+          request.method === event.resource.method &&
+          Math.abs(request.timestamp - event.resource.requestTime.getTime()) < 500
+        ) {
+          errorsMatchingUrl.splice(i, 1);
+          this.sessionState.captureResourceRequestId(
+            error.resourceId,
+            event.resource.browserRequestId,
+            this.id,
+          );
+          return;
+        }
+      }
+
       const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
       const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
       if (!event.resource.browserServedFromCache) {

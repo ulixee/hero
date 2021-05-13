@@ -63,6 +63,14 @@ export default class Session extends TypedEventEmitter<{
     return this._isClosing;
   }
 
+  public mitmErrorsByUrl = new Map<
+    string,
+    {
+      resourceId: number;
+      event: IRequestSessionHttpErrorEvent;
+    }[]
+  >();
+
   private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
 
@@ -292,14 +300,41 @@ export default class Session extends TypedEventEmitter<{
   }
 
   private onMitmError(event: IRequestSessionHttpErrorEvent) {
-    const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
-      event.request.browserRequestId,
+    const { request } = event;
+    let tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
+      request.browserRequestId,
     );
+    const url = request.request?.url;
+    const isDocument = request?.resourceType === 'Document';
+    if (isDocument && !tabId) {
+      for (const tab of this.tabs) {
+        const isMatch = tab.findFrameWithUnresolvedNavigation(
+          request.browserRequestId,
+          request.request?.method,
+          url,
+          request.response?.url,
+        );
+        if (isMatch) {
+          tabId = tab.id;
+          break;
+        }
+      }
+    }
 
-    const resource = this.sessionState.captureResourceError(tabId, event.request, event.error);
-    if (event.request?.resourceType === 'Document') {
+    // record errors
+    const resource = this.sessionState.captureResourceError(tabId, request, event.error);
+    if (!request.browserRequestId && url) {
+      const existing = this.mitmErrorsByUrl.get(url) ?? [];
+      existing.push({
+        resourceId: resource.id,
+        event,
+      });
+      this.mitmErrorsByUrl.set(url, existing);
+    }
+
+    if (tabId && isDocument) {
       const tab = this.tabs.find(x => x.id === tabId);
-      tab?.checkForResolvedNavigation(event.request.browserRequestId, resource, event.error);
+      tab?.checkForResolvedNavigation(request.browserRequestId, resource, event.error);
     }
   }
 

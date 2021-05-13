@@ -49,7 +49,7 @@ export default class Interactor {
 }
 
 function convertToInteractionGroups(interactions: IInteractions): IInteractionGroups {
-  const lastPosition: IMousePosition = [0, 0];
+  let lastPosition: ICoreMousePosition = [0, 0];
   const interactionGroups: IInteractionGroups = [];
   interactions.forEach(interaction => {
     if (typeof interaction === 'string') {
@@ -58,6 +58,7 @@ function convertToInteractionGroups(interactions: IInteractions): IInteractionGr
       interactionGroups.push([interactionStep]);
     } else {
       const interactionGroup = convertInteractionToInteractionGroup(interaction);
+      lastPosition = interactionGroup[interactionGroup.length - 1].mousePosition;
       interactionGroups.push(interactionGroup);
     }
   });
