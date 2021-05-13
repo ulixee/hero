@@ -20,7 +20,6 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import UserProfile from '../lib/UserProfile';
 import BrowserEmulators from '../lib/BrowserEmulators';
 
 const { log } = Log(module);
@@ -44,6 +43,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     ['Session.create', 'createSession'],
     ['Session.close', 'closeSession'],
     ['Session.configure', 'configure'],
+    ['Session.detachTab', 'detachTab'],
     ['Session.getAgentMeta', 'getAgentMeta'],
     ['Session.exportUserProfile', 'exportUserProfile'],
     ['Session.getTabs', 'getTabs'],
@@ -155,7 +155,16 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public getTabs(meta: ISessionMeta): ISessionMeta[] {
     const session = Session.get(meta.sessionId);
-    return session.tabs.filter(x => !x.isClosing).map(x => this.getSessionMeta(x));
+    return [...session.tabsById.values()]
+      .filter(x => !x.isClosing)
+      .map(x => this.getSessionMeta(x));
+  }
+
+  public async detachTab(meta: ISessionMeta, tabId: number): Promise<ISessionMeta> {
+    const session = Session.get(meta.sessionId);
+    const tab = session.getTab(tabId);
+    const detachedTab = await session.detachTab(tab);
+    return this.getSessionMeta(detachedTab);
   }
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
@@ -179,7 +188,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public exportUserProfile(meta: ISessionMeta): Promise<IUserProfile> {
     const session = Session.get(meta.sessionId);
-    return UserProfile.export(session);
+    return session.exportUserProfile();
   }
 
   public async createSession(options: ICreateSessionOptions = {}): Promise<ISessionMeta> {

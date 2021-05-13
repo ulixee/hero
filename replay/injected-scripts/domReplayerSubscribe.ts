@@ -5,10 +5,8 @@ declare global {
     replayDomChanges(...args: any[]);
     replayInteractions(...args: any[]);
     getIsMainFrame: () => boolean;
-    idMap: Map<number, Node>;
     debugLogs: any[];
     debugToConsole: boolean;
-    getNodeById(id: number): Node;
   }
 }
 

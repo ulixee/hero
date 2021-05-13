@@ -151,7 +151,7 @@ describe('basic Tab tests', () => {
     const session = tab.session;
 
     const newTab = await tab.waitForNewTab();
-    expect(session.tabs.length).toBe(2);
+    expect(session.tabsById.size).toBe(2);
     await newTab.waitForLoad('PaintingStable');
     const header = await newTab.execJsPath([
       'document',

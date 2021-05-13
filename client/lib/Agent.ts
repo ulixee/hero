@@ -40,6 +40,7 @@ import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
+import FrozenTab from './FrozenTab';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -204,6 +205,15 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     }
   }
 
+  public detach(tab: Tab): FrozenTab {
+    const coreTab = getCoreTab(tab);
+    const coreSession = getState(this).connection.getCoreSessionOrReject();
+
+    const detachedTab = coreSession.then(async session => session.detachTab(await coreTab));
+
+    return new FrozenTab(this, detachedTab);
+  }
+
   public async focusTab(tab: Tab): Promise<void> {
     await tab.focus();
   }
@@ -335,6 +345,13 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       if (onrejected) return onrejected(err);
       throw err;
     }
+  }
+
+  public toJSON(): any {
+    // return empty so we can avoid infinite "stringifying" in jest
+    return {
+      type: this.constructor.name,
+    };
   }
 }
 

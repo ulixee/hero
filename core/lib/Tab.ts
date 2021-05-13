@@ -21,6 +21,7 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -30,7 +31,11 @@ import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
-import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
+import DomChangesTable, {
+  IDomChangeRecord,
+  IFrontendDomChangeEvent,
+} from '../models/DomChangesTable';
+import DetachedTabState from './DetachedTabState';
 
 const { log } = Log(module);
 
@@ -42,6 +47,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public puppetPage: IPuppetPage;
   public isClosing = false;
   public isReady: Promise<void>;
+  public isDetached = false;
 
   protected readonly logger: IBoundLog;
 
@@ -84,6 +90,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
+    isDetached: boolean,
     parentTabId?: number,
     windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
@@ -98,6 +105,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.parentTabId = parentTabId;
     this.createdAtCommandId = session.sessionState.lastCommand?.id;
     this.puppetPage = puppetPage;
+    this.isDetached = isDetached;
 
     for (const puppetFrame of puppetPage.frames) {
       const frame = new FrameEnvironment(this, puppetFrame);
@@ -114,7 +122,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
     this.listen();
     this.isReady = this.waitForReady();
-    this.commandRecorder = new CommandRecorder(this, this, this.mainFrameId, [
+    this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
       this.focus,
       this.getFrameEnvironments,
       this.goto,
@@ -316,10 +324,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.mainFrameEnvironment.getLocationHref();
   }
 
-  public getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
-    return this.mainFrameEnvironment.getComputedVisibility(jsPath);
-  }
-
   public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
     return this.mainFrameEnvironment.waitForElement(jsPath, options);
   }
@@ -425,7 +429,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     let newTab: Tab;
     const startTime = new Date();
     if (startCommandId >= 0) {
-      for (const tab of this.session.tabs) {
+      for (const tab of this.session.tabsById.values()) {
         if (tab.parentTabId === this.id && tab.createdAtCommandId >= startCommandId) {
           newTab = tab;
           break;
@@ -505,6 +509,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async flushPageEventsRecorder(): Promise<void> {
+    if (this.isDetached) return;
     await Promise.all(
       this.puppetPage.frames.map(async frame => {
         try {
@@ -525,13 +530,40 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {
-    await this.flushPageEventsRecorder();
-
     const frameDomNodePaths = this.sessionState.db.frames.frameDomNodePathsById;
 
-    return this.sessionState.db.domChanges
-      .getFrameChanges(this.mainFrameId, sinceCommandId)
-      .map(x => DomChangesTable.toFrontendRecord(x, frameDomNodePaths));
+    return (await this.getFrameDomChanges(this.mainFrameId, sinceCommandId)).map(x =>
+      DomChangesTable.toFrontendRecord(x, frameDomNodePaths),
+    );
+  }
+
+  public async getFrameDomChanges(
+    frameId: string,
+    sinceCommandId: number,
+  ): Promise<IDomChangeRecord[]> {
+    await this.flushPageEventsRecorder();
+
+    return this.sessionState.db.domChanges.getFrameChanges(this.mainFrameId, sinceCommandId);
+  }
+
+  public async createDetachedState(): Promise<DetachedTabState> {
+    // need the dom to be loaded on the page
+    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
+    await this.flushPageEventsRecorder();
+    // find last page load
+    const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
+    const domChanges = await this.getFrameDomChanges(
+      this.mainFrameId,
+      lastLoadedNavigation.startCommandId - 1,
+    );
+    const resources = this.sessionState.getResourceLookupMap(this.id);
+    this.logger.info('DetachingTab', {
+      url: lastLoadedNavigation.finalUrl,
+      domChangeIndices: [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex],
+      domChanges: domChanges.length,
+      resources: Object.keys(resources).length,
+    });
+    return new DetachedTabState(this.session, lastLoadedNavigation, domChanges, resources);
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,12 +575,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       sessionId: this.sessionId,
       url: this.url,
       createdAtCommandId: this.createdAtCommandId,
+      isDetached: this.isDetached,
     };
   }
 
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
-    if (this.session.options?.blockedResourceTypes) {
+    if (!this.isDetached && this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
   }
@@ -803,10 +836,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public static create(
     session: Session,
     puppetPage: IPuppetPage,
+    isDetached?: boolean,
     parentTab?: Tab,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
+    const tab = new Tab(session, puppetPage, isDetached, parentTab?.id, openParams);
     tab.logger.info('Tab.created', {
       parentTab: parentTab?.id,
       openParams,

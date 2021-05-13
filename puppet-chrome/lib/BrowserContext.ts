@@ -91,13 +91,21 @@ export class BrowserContext
     const idx = this.creatingTargetPromises.indexOf(resolvable.promise);
     if (idx >= 0) this.creatingTargetPromises.splice(idx, 1);
 
+    let hasTimedOut = false;
+    const timeout = setTimeout(() => {
+      hasTimedOut = true;
+    }, 10e3).unref();
+
     // NOTE: flow here interrupts and expects session to attach and call onPageAttached below
     while (!this.isClosing) {
       const page = this.pagesById.get(targetId);
       if (!page) {
+        if (hasTimedOut) throw new Error('Error creating page. Timed out waiting to attach');
         await new Promise(setImmediate);
+
         continue;
       }
+      clearTimeout(timeout);
       await page.isReady;
       if (page.isClosed) throw new Error('Page has been closed.');
       return page;

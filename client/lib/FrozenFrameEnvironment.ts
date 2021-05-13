@@ -1,6 +1,5 @@
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -13,22 +12,21 @@ import {
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Location';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { getComputedVisibilityFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import {
+  getComputedStyleFnName,
+  getComputedVisibilityFnName,
+} from '@secret-agent/interfaces/jsPathFnNames';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent from './Agent';
-import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import Tab from './Tab';
+import FrozenTab from './FrozenTab';
 
-const { getState, setState } = StateMachine<FrameEnvironment, IState>();
+const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
@@ -36,11 +34,11 @@ const awaitedPathState = StateMachine<
 
 export interface IState {
   secretAgent: Agent;
-  tab: Tab;
+  tab: FrozenTab;
   coreFrame: Promise<CoreFrameEnvironment>;
 }
 
-const propertyKeys: (keyof FrameEnvironment)[] = [
+const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
   'frameId',
   'url',
   'name',
@@ -52,8 +50,8 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
   'Request',
 ];
 
-export default class FrameEnvironment {
-  constructor(secretAgent: Agent, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
+export default class FrozenFrameEnvironment {
+  constructor(secretAgent: Agent, tab: FrozenTab, coreFrame: Promise<CoreFrameEnvironment>) {
     initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
       secretAgent,
@@ -123,23 +121,19 @@ export default class FrameEnvironment {
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
-  public async getFrameEnvironment(element: IElementIsolate): Promise<FrameEnvironment | null> {
-    const { tab } = getState(this);
-    return await tab.getFrameEnvironment(element);
-  }
+  public async getComputedStyle(
+    element: IElementIsolate,
+    pseudoElement?: string,
+  ): Promise<CSSStyleDeclaration & { [style: string]: string }> {
+    const { awaitedPath } = awaitedPathState.getState(element);
+    const coreFrame = await getCoreFrameEnvironment(this);
+    const path = awaitedPath.addMethod(element, getComputedStyleFnName, pseudoElement);
+    const result = await coreFrame.execJsPath<Record<string, string>>(path.toJSON());
 
-  public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    const { awaitedPath: elementAwaitedPath } = awaitedPathState.getState(element);
-    const awaitedPath = new AwaitedPath(null, 'window', [
-      'getComputedStyle',
-      getAwaitedPathAsMethodArg(elementAwaitedPath),
-      pseudoElement,
-    ]);
     const awaitedOptions = { ...getState(this) };
-    return createCSSStyleDeclaration<IAwaitedOptions>(
-      awaitedPath,
-      awaitedOptions,
-    ) as CSSStyleDeclaration;
+    const declaration = createCSSStyleDeclaration<IAwaitedOptions>(awaitedPath, awaitedOptions);
+    Object.assign(declaration, result.value);
+    return declaration;
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
@@ -161,34 +155,6 @@ export default class FrameEnvironment {
     return coreFrame.getJsValue<T>(path);
   }
 
-  public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLoad(LocationStatus.PaintingStable, options);
-  }
-
-  public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLoad(status, options);
-  }
-
-  public async waitForElement(
-    element: ISuperElement,
-    options?: IWaitForElementOptions,
-  ): Promise<void> {
-    if (!element) throw new Error('Element being waited for is null');
-    const { awaitedPath } = awaitedPathState.getState(element);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForElement(awaitedPath.toJSON(), options);
-  }
-
-  public async waitForLocation(
-    trigger: ILocationTrigger,
-    options?: IWaitForOptions,
-  ): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLocation(trigger, options);
-  }
-
   public toJSON(): any {
     // return empty so we can avoid infinite "stringifying" in jest
     return {
@@ -202,16 +168,7 @@ export function getFrameState(object: any): IState {
 }
 
 export function getCoreFrameEnvironment(
-  frameEnvironment: FrameEnvironment,
+  frameEnvironment: FrozenFrameEnvironment,
 ): Promise<CoreFrameEnvironment> {
   return getState(frameEnvironment).coreFrame;
-}
-// CREATE
-
-export function createFrame(
-  secretAgent: Agent,
-  tab: Tab,
-  coreFrame: Promise<CoreFrameEnvironment>,
-): FrameEnvironment {
-  return new FrameEnvironment(secretAgent, tab, coreFrame);
 }

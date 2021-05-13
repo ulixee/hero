@@ -13,7 +13,7 @@ export default class UserProfile {
     const cookies = await session.browserContext.getCookies();
 
     const storage: IDomStorage = {};
-    for (const tab of session.tabs) {
+    for (const tab of session.tabsById.values()) {
       const page = tab.puppetPage;
 
       const dbs = await page.getIndexedDbDatabaseNames();

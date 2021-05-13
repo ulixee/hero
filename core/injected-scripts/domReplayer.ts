@@ -7,7 +7,6 @@ declare global {
     replayDomChanges(...args: any[]);
     replayInteractions(...args: any[]);
     getIsMainFrame?: () => boolean;
-    idMap: Map<number, Node>;
     debugLogs: any[];
     debugToConsole: boolean;
     getNodeById(id: number): Node;
@@ -28,11 +27,9 @@ enum DomActionType {
 const SHADOW_NODE_TYPE = 40;
 
 let frameNodePath: string;
-const idMap = new Map<number, Node>();
 const domChangeList = [];
 
 if (!window.debugLogs) window.debugLogs = [];
-window.idMap = idMap;
 
 function isMainFrame() {
   if ('isMainFrame' in window) return (window as any).isMainFrame;
@@ -151,18 +148,18 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
   const { action, nodeId, nodeType } = event;
 
   if (nodeType === document.DOCUMENT_NODE) {
-    idMap.set(nodeId, document);
+    NodeTracker.restore(nodeId, document);
     return true;
   }
 
   if (nodeType === document.DOCUMENT_TYPE_NODE) {
-    idMap.set(nodeId, document.doctype);
+    NodeTracker.restore(nodeId, document.doctype);
     return true;
   }
 
   let tagName = event.tagName;
   if (!tagName) {
-    const existing = idMap.get(nodeId);
+    const existing = getNode(nodeId);
     if (existing) tagName = (existing as Element).tagName;
   }
   if (!preserveElements.has(tagName)) return false;
@@ -173,7 +170,7 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
     return true;
   }
 
-  idMap.set(nodeId, elem);
+  NodeTracker.restore(nodeId, elem);
   if (action === DomActionType.removed) {
     elem.innerHTML = '';
     for (const attr of elem.attributes) {
@@ -212,7 +209,7 @@ function delegateToSubframe(event: IFrontendDomChangeEvent) {
   const childId = childPath.shift();
   const childFrameNodePath = `${frameNodePath}_${childId}`;
 
-  const node = idMap.get(childId);
+  const node = getNode(childId);
   if (!node) {
     if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
       pendingFrameCreationEvents.set(childFrameNodePath, []);
@@ -282,7 +279,7 @@ function onNewDocument(event: IFrontendDomChangeEvent) {
 
 function getNode(id: number) {
   if (id === null || id === undefined) return null;
-  return idMap.get(id);
+  return NodeTracker.getWatchedNodeWithId(id, false);
 }
 window.getNodeById = getNode;
 
@@ -351,7 +348,7 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
   if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
     // NOTE: we just make all shadows open in replay
     node = parent.attachShadow({ mode: 'open' });
-    idMap.set(data.nodeId, node);
+    NodeTracker.restore(data.nodeId, node);
     return node;
   }
 
@@ -404,7 +401,7 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
 
   if (!node) throw new Error(`Unable to translate node! nodeType = ${data.nodeType}`);
 
-  idMap.set(data.nodeId, node);
+  NodeTracker.restore(data.nodeId, node);
 
   return node;
 }

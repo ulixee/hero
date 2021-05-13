@@ -6,7 +6,7 @@ import { IJsPathError } from '@secret-agent/interfaces/IJsPathError';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
-const stateLookup = '__get_pointer__';
+const pointerFnName = '__getNodePointer__';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class JsPath {
@@ -83,55 +83,21 @@ class JsPath {
     }
   }
 
-  public static getClientRect(
-    jsPath: IJsPath,
-    includeVisibilityStatus = false,
-  ): IExecJsPathResult<IElementRect> {
-    const objectAtPath = new ObjectAtPath(jsPath);
-    try {
-      const box = objectAtPath.lookup().boundingClientRect;
-      box.nodeVisibility = includeVisibilityStatus
-        ? objectAtPath.getComputedVisibility()
-        : undefined;
-
-      return {
-        value: box,
-        nodePointer: objectAtPath.extractNodePointer(),
-      };
-    } catch (error) {
-      return objectAtPath.toReturnError(error);
-    }
-  }
-
-  public static async getNodeId(jsPath: IJsPath): Promise<IExecJsPathResult<number>> {
-    const objectAtPath = new ObjectAtPath(jsPath);
-    try {
-      const object = await objectAtPath.lookup().objectAtPath;
-
-      return {
-        value: NodeTracker.watchNode(object),
-      };
-    } catch (error) {
-      return objectAtPath.toReturnError(error);
-    }
-  }
-
-  public static async exec(
-    jsPath: IJsPath,
-    stateMap?: { [nodeId: string]: object },
-    properties?: string[],
-  ): Promise<IExecJsPathResult<any>> {
+  public static async exec(jsPath: IJsPath): Promise<IExecJsPathResult<any>> {
     const objectAtPath = new ObjectAtPath(jsPath);
     try {
       const result = <IExecJsPathResult<any>>{
         value: await objectAtPath.lookup().objectAtPath,
       };
 
-      if ((objectAtPath.hasStateLoadRequest || !!stateMap) && !isPrimitive(result.value)) {
-        result.nodePointer = objectAtPath.extractNodePointer(stateMap, properties);
+      if (objectAtPath.hasNodePointerLoad && !isPrimitive(result.value)) {
+        result.nodePointer = objectAtPath.extractNodePointer();
       }
 
-      if (result.nodePointer?.iterableIsState || result.value instanceof Node) {
+      if (
+        !objectAtPath.hasCustomMethodLookup &&
+        (result.nodePointer?.iterableIsState || result.value instanceof Node)
+      ) {
         result.value = undefined;
       }
       // serialize special types
@@ -143,6 +109,47 @@ class JsPath {
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
+  }
+
+  public static async execJsPaths(
+    jsPaths: { jsPath: IJsPath; sourceIndex: number }[],
+  ): Promise<{ jsPath: IJsPath; result: IExecJsPathResult<any> }[]> {
+    const resultMapByPathIndex = new Map<number, IExecJsPathResult<any>[]>();
+    const results: { jsPath: IJsPath; result: IExecJsPathResult<any> }[] = [];
+
+    async function runFn(queryIndex: number, jsPath: IJsPath): Promise<void> {
+      // copy into new array so original stays clean
+      const result = await JsPath.exec([...jsPath]);
+      results.push({ jsPath, result });
+
+      if (!resultMapByPathIndex.has(queryIndex)) resultMapByPathIndex.set(queryIndex, []);
+      resultMapByPathIndex.get(queryIndex).push(result);
+    }
+
+    for (let i = 0; i < jsPaths.length; i += 1) {
+      const { jsPath, sourceIndex } = jsPaths[i];
+      if (sourceIndex !== undefined) {
+        const parentResults = resultMapByPathIndex.get(sourceIndex);
+        for (const parentResult of parentResults) {
+          if (parentResult.pathError) continue;
+          if (jsPath[0] === '.') {
+            const nestedJsPath = [parentResult.nodePointer.id, ...jsPath.slice(1)];
+            await runFn(i, nestedJsPath);
+          }
+          if (jsPath[0] === '*.') {
+            if (parentResult.nodePointer.iterableIsState) {
+              for (const iterable of parentResult.nodePointer.iterableItems as INodePointer[]) {
+                const nestedJsPath = [iterable.id, ...jsPath.slice(1)];
+                await runFn(i, nestedJsPath);
+              }
+            }
+          }
+        }
+      } else {
+        await runFn(i, jsPath);
+      }
+    }
+    return results;
   }
 
   public static async waitForElement(
@@ -192,31 +199,19 @@ class JsPath {
       return objectAtPath.toReturnError(error);
     }
   }
-
-  public static getComputedVisibility(jsPath: IJsPath): IExecJsPathResult<INodeVisibility> {
-    const objectAtPath = new ObjectAtPath(jsPath);
-    try {
-      objectAtPath.lookup();
-
-      return <IExecJsPathResult<INodeVisibility>>{
-        nodePointer: objectAtPath.extractNodePointer(),
-        value: objectAtPath.getComputedVisibility(),
-      };
-    } catch (error) {
-      return objectAtPath.toReturnError(error);
-    }
-  }
 }
 
 // / Object At Path Class //////
 
 class ObjectAtPath {
   public objectAtPath: Node | any;
-  public hasStateLoadRequest: boolean;
+  public hasNodePointerLoad: boolean;
+  public hasCustomMethodLookup = false;
 
   private _obstructedByElement: Element;
   private lookupStep: IPathStep;
   private lookupStepIndex = 0;
+  private nodePointer: INodePointer;
 
   public get closestElement(): Element {
     if (!this.objectAtPath) return;
@@ -291,15 +286,21 @@ class ObjectAtPath {
     if (!jsPath?.length) return;
 
     // @ts-ignore - start listening for events since we've just looked up something on this frane
-    window.listenForInteractionEvents();
+    if ('listenForInteractionEvents' in window) window.listenForInteractionEvents();
 
-    if (Array.isArray(jsPath[jsPath.length - 1]) && jsPath[jsPath.length - 1][0] === stateLookup) {
-      this.hasStateLoadRequest = true;
+    if (
+      Array.isArray(jsPath[jsPath.length - 1]) &&
+      jsPath[jsPath.length - 1][0] === pointerFnName
+    ) {
+      this.hasNodePointerLoad = true;
       jsPath.pop();
     }
   }
 
   public getComputedVisibility(): INodeVisibility {
+    this.hasNodePointerLoad = true;
+    this.nodePointer = ObjectAtPath.createNodePointer(this.objectAtPath);
+
     const visibility: INodeVisibility = {
       // put here first for display
       isVisible: true,
@@ -340,7 +341,7 @@ class ObjectAtPath {
   }
 
   public lookup() {
-    let currentObject: any = window;
+    this.objectAtPath = window;
     if (this.jsPath[0] === 'window') this.jsPath.shift();
     this.lookupStepIndex = 0;
     for (const step of this.jsPath) {
@@ -355,20 +356,25 @@ class ObjectAtPath {
           const sub = new ObjectAtPath(innerPath).lookup();
           return sub.objectAtPath;
         });
-        const methodProperty = propertyName(methodName);
-        currentObject = currentObject[methodProperty](...finalArgs);
+        // handlers for getComputedStyle/Visibility/getNodeId/getBoundingRect
+        if (methodName.startsWith('__') && methodName.endsWith('__')) {
+          this.hasCustomMethodLookup = true;
+          this.objectAtPath = this[`${methodName.replace(/__/g, '')}`](...finalArgs);
+        } else {
+          const methodProperty = propertyName(methodName);
+          this.objectAtPath = this.objectAtPath[methodProperty](...finalArgs);
+        }
       } else if (typeof step === 'number') {
-        currentObject = NodeTracker.getWatchedNodeWithId(step);
+        this.objectAtPath = NodeTracker.getWatchedNodeWithId(step);
       } else if (typeof step === 'string') {
         const prop = propertyName(step);
-        currentObject = currentObject[prop];
+        this.objectAtPath = this.objectAtPath[prop];
       } else {
         throw new Error('unknown JsPathStep');
       }
       this.lookupStepIndex += 1;
     }
 
-    this.objectAtPath = currentObject;
     return this;
   }
 
@@ -386,18 +392,28 @@ class ObjectAtPath {
     };
   }
 
-  public extractNodePointer(
-    stateMap?: { [nodeId: string]: object },
-    properties?: string[],
-  ): INodePointer {
-    return ObjectAtPath.createNodePointer(this.objectAtPath, stateMap, properties);
+  public extractNodePointer(): INodePointer {
+    return (this.nodePointer ??= ObjectAtPath.createNodePointer(this.objectAtPath));
   }
 
-  public static createNodePointer(
-    objectAtPath: any,
-    stateMap?: { [nodeId: string]: object },
-    properties?: string[],
-  ): INodePointer {
+  private getClientRect(includeVisibilityStatus = false): IElementRect {
+    this.hasNodePointerLoad = true;
+    this.nodePointer = ObjectAtPath.createNodePointer(this.objectAtPath);
+    const box = this.boundingClientRect;
+    box.nodeVisibility = includeVisibilityStatus ? this.getComputedVisibility() : undefined;
+
+    return box;
+  }
+
+  private getNodeId(): number {
+    return NodeTracker.watchNode(this.objectAtPath);
+  }
+
+  private getComputedStyle(pseudoElement?: string): CSSStyleDeclaration {
+    return window.getComputedStyle(this.objectAtPath, pseudoElement);
+  }
+
+  public static createNodePointer(objectAtPath: any): INodePointer {
     if (!objectAtPath) return null;
 
     const nodeId = NodeTracker.watchNode(objectAtPath);
@@ -407,34 +423,12 @@ class ObjectAtPath {
       preview: generateNodePreview(objectAtPath),
     } as INodePointer;
 
-    if (properties?.length) {
-      stateMap[nodeId] ??= {};
-      for (const prop of properties) {
-        if (prop === '::getComputedStyle') {
-          try {
-            stateMap[nodeId][prop] = window.getComputedStyle(objectAtPath);
-          } catch (err) {
-            stateMap[nodeId][prop] = String(err);
-          }
-        } else if (prop === '::getComputedVisibility') {
-          const lookup = new ObjectAtPath([]);
-          lookup.objectAtPath = objectAtPath;
-          stateMap[nodeId][prop] = lookup.getComputedVisibility();
-        } else {
-          stateMap[nodeId][prop] = objectAtPath[prop];
-        }
-      }
-      stateMap[nodeId] = TypeSerializer.replace(stateMap[nodeId]);
-    }
-
     if (isIterableOrArray(objectAtPath)) {
       state.iterableItems = Array.from(objectAtPath);
 
       if (state.iterableItems.length && isCustomType(state.iterableItems[0])) {
         state.iterableIsState = true;
-        state.iterableItems = state.iterableItems.map(x =>
-          this.createNodePointer(x, stateMap, properties),
-        );
+        state.iterableItems = state.iterableItems.map(x => this.createNodePointer(x));
       }
     }
 

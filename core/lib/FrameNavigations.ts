@@ -208,6 +208,21 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     this.captureNavigationUpdate(navigation);
   }
 
+  public getLastLoadedNavigation(): INavigation {
+    let navigation: INavigation;
+    for (let i = this.history.length - 1; i >= 0; i -= 1) {
+      navigation = this.history[i];
+      if (
+        navigation.stateChanges.has(LoadStatus.DomContentLoaded) &&
+        navigation.navigationReason !== 'inPage' &&
+        !!navigation.finalUrl
+      ) {
+        return navigation;
+      }
+    }
+    return this.top;
+  }
+
   private checkStoredNavigationReason(navigation: INavigation, url: string): void {
     if (
       this.nextNavigationReason &&

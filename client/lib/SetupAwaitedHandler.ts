@@ -3,7 +3,7 @@ import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';

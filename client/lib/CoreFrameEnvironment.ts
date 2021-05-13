@@ -81,10 +81,6 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.removeCookie', name);
   }
 
-  public async getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
-    return await this.commandQueue.run('FrameEnvironment.getComputedVisibility', jsPath);
-  }
-
   public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {
     await this.commandQueue.run('FrameEnvironment.waitForElement', jsPath, opts);
   }

@@ -1,7 +1,7 @@
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import { IInteractionGroup } from '@secret-agent/interfaces/IInteractions';
 import { getKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 

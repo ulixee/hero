@@ -6,7 +6,8 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Tabs', [
       ['tabId', 'INTEGER'],
-      ['openerTabId', 'INTEGER'],
+      ['parentTabId', 'INTEGER'],
+      ['detachedAtCommandId', 'INTEGER'],
       ['pageTargetId', 'TEXT'],
       ['sessionId', 'TEXT'],
       ['viewportWidth', 'INTEGER'],
@@ -22,11 +23,13 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
     pageId: string,
     devtoolsSessionId: string,
     viewPort: IViewport,
-    openerTabId?: number,
+    parentTabId?: number,
+    detachedAtCommandId?: number,
   ) {
     return this.queuePendingInsert([
       tabId,
-      openerTabId,
+      parentTabId,
+      detachedAtCommandId,
       pageId,
       devtoolsSessionId,
       viewPort.width,
@@ -40,7 +43,8 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
 
 export interface ITabsRecord {
   tabId: number;
-  openerTabId?: number;
+  parentTabId: number | null;
+  detachedAtCommandId: number | null;
   pageTargetId: string;
   sessionId: string;
   viewportWidth: number;

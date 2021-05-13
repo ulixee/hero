@@ -544,9 +544,17 @@ export default class SessionState {
     tabId: number,
     pageId: string,
     devtoolsSessionId: string,
-    openerTabId?: number,
+    parentTabId?: number,
+    detachedAtCommandId?: number,
   ): void {
-    this.db.tabs.insert(tabId, pageId, devtoolsSessionId, this.viewport, openerTabId);
+    this.db.tabs.insert(
+      tabId,
+      pageId,
+      devtoolsSessionId,
+      this.viewport,
+      parentTabId,
+      detachedAtCommandId,
+    );
   }
 
   public captureSocketEvent(socketEvent: ISocketEvent): void {

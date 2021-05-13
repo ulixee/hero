@@ -1,0 +1,60 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
+
+@NodeTrackerStatics
+class NodeTracker {
+  public static nodeIdSymbol = Symbol.for('saNodeId');
+  private static nextId = 1;
+  private static watchedNodesById = new Map<number, Node>();
+
+  public static has(node: Node): boolean {
+    return !!node[this.nodeIdSymbol];
+  }
+
+  public static getNodeId(node: Node): number {
+    if (!node) return undefined;
+    return node[this.nodeIdSymbol] ?? undefined;
+  }
+
+  public static watchNode(node: Node): number {
+    let id = this.getNodeId(node);
+    if (!id) {
+      // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
+      if ('extractDomChanges' in window) {
+        // @ts-ignore
+        window.extractDomChanges();
+      }
+      id = this.track(node);
+    }
+
+    this.watchedNodesById.set(id, node);
+    return id;
+  }
+
+  public static track(node: Node): number {
+    if (!node) return;
+    if (node[this.nodeIdSymbol]) {
+      return node[this.nodeIdSymbol];
+    }
+    const id = this.nextId;
+    this.nextId += 1;
+    node[this.nodeIdSymbol] = id;
+    return id;
+  }
+
+  public static getWatchedNodeWithId(id: number, throwIfNotFound = true): Node | undefined {
+    if (this.watchedNodesById.has(id)) {
+      return this.watchedNodesById.get(id);
+    }
+    if (throwIfNotFound) throw new Error(`Node with id not found -> ${id}`);
+  }
+
+  public static restore(id: number, node: Node): void {
+    node[this.nodeIdSymbol] = id;
+    this.watchedNodesById.set(id, node);
+    if (id > this.nextId) this.nextId = id;
+  }
+}
+
+// @ts-ignore
+window.NodeTracker = NodeTracker;

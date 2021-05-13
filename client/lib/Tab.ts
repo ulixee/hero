@@ -25,6 +25,7 @@ import Agent, { IState as IAgentState } from './Agent';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import FrozenTab from './FrozenTab';
 
 const awaitedPathState = StateMachine<
   any,
@@ -220,6 +221,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     const { connection } = agentState.getState(secretAgent);
     connection.closeTab(this);
     return coreTab.then(x => x.close());
+  }
+
+  public toJSON(): any {
+    // return empty so we can avoid infinite "stringifying" in jest
+    return {
+      type: this.constructor.name,
+    };
   }
 }
 

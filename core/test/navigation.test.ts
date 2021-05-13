@@ -190,7 +190,9 @@ describe('basic Navigation tests', () => {
 
     await tab.goForward();
     expect(pages.history).toHaveLength(4);
-    expect(pages.top.stateChanges.has('Load')).toBe(true);
+    expect(pages.top.stateChanges.has('Load') || pages.top.stateChanges.has('ContentPaint')).toBe(
+      true,
+    );
     expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/backAndForth`);
   });
 

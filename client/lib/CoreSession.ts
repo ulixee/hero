@@ -87,6 +87,11 @@ export default class CoreSession implements IJsPathEventTarget {
     this.tabsById.delete(tab.tabId);
   }
 
+  public async detachTab(tab: CoreTab): Promise<CoreTab> {
+    const frozenTabMeta = await this.commandQueue.run<ISessionMeta>('Session.detachTab', tab.tabId);
+    return new CoreTab({ ...frozenTabMeta, sessionName: this.sessionName }, this.connection);
+  }
+
   public async close(): Promise<void> {
     try {
       await this.commandQueue.run('Session.close');
