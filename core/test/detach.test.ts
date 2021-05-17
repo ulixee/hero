@@ -8,7 +8,6 @@ import {
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { inspect } from 'util';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
-import { getCallSite } from '@secret-agent/commons/utils';
 import ConnectionToClient from '../server/ConnectionToClient';
 
 inspect.defaultOptions.colors = true;

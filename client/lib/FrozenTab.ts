@@ -1,4 +1,5 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import * as Util from 'util';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -41,7 +42,6 @@ export default class FrozenTab {
     secretAgent: Agent,
     tabAndJsPathsPromise: Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }>,
   ) {
-    initializeConstantsAndProperties(this, [], propertyKeys);
     const mainFrameEnvironment = new FrozenFrameEnvironment(
       secretAgent,
       this,
@@ -153,6 +153,10 @@ export default class FrozenTab {
     return {
       type: this.constructor.name,
     };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

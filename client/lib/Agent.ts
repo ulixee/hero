@@ -1,7 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
 import { BlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
+import * as Util from 'util';
 import { bindFunctions, getCallSite } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -80,7 +81,6 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
         target: getState(this).connection.getCoreSessionOrReject(),
       };
     });
-    initializeConstantsAndProperties(this, [], propertyKeys);
     bindFunctions(this);
 
     options.blockedResourceTypes =
@@ -358,6 +358,10 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     return {
       type: this.constructor.name,
     };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

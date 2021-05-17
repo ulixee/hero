@@ -20,7 +20,6 @@ import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';

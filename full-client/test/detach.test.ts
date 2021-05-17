@@ -64,28 +64,6 @@ describe('basic Detach tests', () => {
     const detachedTab2 = await frozenTab2.document.querySelectorAll('a').length;
     expect(detachedTab2).toBe(2);
   });
-
-  it.skip('should be able to grab lots of tags', async () => {
-    const agent = await openBrowser('/');
-    await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
-    await agent.waitForPaintingStable();
-    const detached = await agent.detach(agent.activeTab);
-    const { document } = detached;
-    const wrapperElements = await document.querySelectorAll('.RefList');
-    const versions = [];
-    for (const elem of wrapperElements) {
-      const innerText = await elem.querySelector('.RefList-title').innerText;
-      if (innerText === 'Tags') {
-        const aElems = await elem.querySelectorAll('ul.RefList-items li a');
-        for (const aElem of aElems) {
-          const version = await aElem.innerText;
-          versions.push(version);
-        }
-        break;
-      }
-    }
-    expect(versions).toHaveLength(21e3);
-  }, 60e3);
 });
 
 async function openBrowser(path: string) {

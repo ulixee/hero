@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as Fs from 'fs';
 import {
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
@@ -575,7 +574,7 @@ export default class SessionState {
   /////// JsPath Calls
   public async findDetachedJsPathCalls(callsite: string): Promise<IJsPathHistory[]> {
     for (const session of this.previousSessions) {
-      const exists = await Fs.promises
+      const exists = await fs.promises
         .access(`${this.sessionsDirectory}/${session.id}.db`)
         .then(() => true)
         .catch(() => false);

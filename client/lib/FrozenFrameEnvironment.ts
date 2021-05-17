@@ -1,4 +1,5 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
+import * as Util from 'util';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
@@ -59,7 +60,6 @@ export default class FrozenFrameEnvironment {
     coreFrame: Promise<CoreFrameEnvironment>,
     prefetchedJsPaths: Promise<IJsPathResult[]>,
   ) {
-    initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
       secretAgent,
       tab,
@@ -174,6 +174,10 @@ export default class FrozenFrameEnvironment {
     return {
       type: this.constructor.name,
     };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

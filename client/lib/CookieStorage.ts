@@ -1,4 +1,3 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
 import { ICookie } from '@secret-agent/interfaces/ICookie';
@@ -11,10 +10,6 @@ interface IState {
 }
 
 export default class CookieStorage {
-  constructor() {
-    initializeConstantsAndProperties(this, [], []);
-  }
-
   public get length(): Promise<number> {
     return this.getItems().then(x => x.length);
   }

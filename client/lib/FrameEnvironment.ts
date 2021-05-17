@@ -1,4 +1,5 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
+import * as Util from 'util';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
@@ -54,7 +55,6 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
 
 export default class FrameEnvironment {
   constructor(secretAgent: Agent, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
-    initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
       secretAgent,
       tab,
@@ -194,6 +194,10 @@ export default class FrameEnvironment {
     return {
       type: this.constructor.name,
     };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

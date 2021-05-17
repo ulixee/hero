@@ -1,9 +1,10 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import IWebsocketMessage from '@secret-agent/interfaces/IWebsocketMessage';
 import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
 import ResourceType from '@secret-agent/interfaces/ResourceType';
+import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
@@ -36,7 +37,6 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
         jsPath: state.awaitedPath.toJSON(),
       };
     });
-    initializeConstantsAndProperties(this, [], propertyKeys);
   }
 
   public get request(): ResourceRequest {
@@ -69,6 +69,10 @@ export default class WebsocketResource extends AwaitedEventTarget<IEventType> {
 
   public json(): Promise<any> {
     throw new Error(subscribeErrorMessage);
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

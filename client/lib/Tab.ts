@@ -1,4 +1,4 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
@@ -15,6 +15,7 @@ import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isola
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -25,7 +26,6 @@ import Agent, { IState as IAgentState } from './Agent';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
-import FrozenTab from './FrozenTab';
 
 const awaitedPathState = StateMachine<
   any,
@@ -63,7 +63,6 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     super(() => {
       return { target: coreTab };
     });
-    initializeConstantsAndProperties(this, [], propertyKeys);
     const mainFrameEnvironment = new FrameEnvironment(
       secretAgent,
       this,
@@ -228,6 +227,10 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return {
       type: this.constructor.name,
     };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 
