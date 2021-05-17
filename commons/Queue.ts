@@ -88,7 +88,7 @@ export default class Queue {
       this.activeCount -= 1;
     }
 
-    setImmediate(() => this.next().catch(() => null));
+    process.nextTick(() => this.next().catch(() => null));
   }
 
   private reject(entry: IQueueEntry, sourceError: Error): void {

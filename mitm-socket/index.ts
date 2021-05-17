@@ -1,6 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import * as net from 'net';
-import { existsSync, unlink, unlinkSync } from 'fs';
+import { unlink } from 'fs';
 import * as os from 'os';
 import { v1 as uuid } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
@@ -59,7 +59,6 @@ export default class MitmSocket extends TypedEventEmitter<{
 
     this.socketPath =
       os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
-    if (existsSync(this.socketPath)) unlinkSync(this.socketPath);
 
     // start listening
     this.server = new net.Server().unref();
@@ -68,7 +67,10 @@ export default class MitmSocket extends TypedEventEmitter<{
       if (this.isClosing) return;
       this.logger.warn('IpcSocketServerError', { error });
     });
-    this.server.listen(this.socketPath);
+
+    unlink(this.socketPath, () => {
+      this.server.listen(this.socketPath);
+    });
 
     this.createTime = new Date();
   }
