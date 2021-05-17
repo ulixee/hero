@@ -3,6 +3,7 @@ import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSession
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { loggerSessionIdNames } from '@secret-agent/commons/Logger';
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -87,9 +88,18 @@ export default class CoreSession implements IJsPathEventTarget {
     this.tabsById.delete(tab.tabId);
   }
 
-  public async detachTab(tab: CoreTab): Promise<CoreTab> {
-    const frozenTabMeta = await this.commandQueue.run<ISessionMeta>('Session.detachTab', tab.tabId);
-    return new CoreTab({ ...frozenTabMeta, sessionName: this.sessionName }, this.connection);
+  public async detachTab(
+    tab: CoreTab,
+    callSitePath: string,
+  ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
+    const { meta, prefetchedJsPaths } = await this.commandQueue.run<{
+      meta: ISessionMeta;
+      prefetchedJsPaths: IJsPathResult[];
+    }>('Session.detachTab', tab.tabId, callSitePath);
+    return {
+      coreTab: new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection),
+      prefetchedJsPaths,
+    };
   }
 
   public async close(): Promise<void> {

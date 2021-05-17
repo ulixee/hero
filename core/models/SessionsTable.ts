@@ -37,8 +37,10 @@ export default class SessionsTable extends SqliteTable<ISessionRecord> {
     return this.db.prepare(sql).get([name, scriptInstanceId]) as ISessionRecord;
   }
 
-  public findByScriptEntrypoint(scriptEntrypoint): ISessionRecord[] {
-    const sql = `SELECT * FROM ${this.tableName} WHERE scriptEntrypoint=? ORDER BY scriptStartDate DESC, startDate DESC`;
+  public findByScriptEntrypoint(scriptEntrypoint, limit = 50): ISessionRecord[] {
+    const sql = `SELECT * FROM ${
+      this.tableName
+    } WHERE scriptEntrypoint=? ORDER BY scriptStartDate DESC, startDate DESC limit ${limit ?? 50}`;
     return this.db.prepare(sql).all([scriptEntrypoint]) as ISessionRecord[];
   }
 }

@@ -103,7 +103,8 @@ export default class FrameEnvironment {
     this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.interactor = new Interactor(this);
 
-    this.listen();
+    // give tab time to setup
+    process.nextTick(() => this.listen());
     this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
       this.execJsPath,

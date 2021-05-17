@@ -2,7 +2,7 @@
 import { BlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
-import { bindFunctions } from '@secret-agent/commons/utils';
+import { bindFunctions, getCallSite } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@secret-agent/interfaces/IDomStorage';
@@ -206,10 +206,16 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public detach(tab: Tab): FrozenTab {
+    const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
+      .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
+      .join('\n');
+
     const coreTab = getCoreTab(tab);
     const coreSession = getState(this).connection.getCoreSessionOrReject();
 
-    const detachedTab = coreSession.then(async session => session.detachTab(await coreTab));
+    const detachedTab = coreSession.then(async session =>
+      session.detachTab(await coreTab, callSitePath),
+    );
 
     return new FrozenTab(this, detachedTab);
   }

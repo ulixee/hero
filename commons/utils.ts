@@ -1,5 +1,7 @@
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import * as Os from 'os';
 import Resolvable from './Resolvable';
+import CallSite = NodeJS.CallSite;
 
 export function assert(value: unknown, message?: string, reject?): void {
   if (value) return;
@@ -9,6 +11,39 @@ export function assert(value: unknown, message?: string, reject?): void {
   } else {
     throw error;
   }
+}
+
+export function getCallSite(priorToFilename?: string, endFilename?: string): CallSite[] {
+  const err = new Error();
+
+  Error.prepareStackTrace = (_, stack) => stack;
+
+  let stack = (err.stack as unknown) as CallSite[];
+
+  Error.prepareStackTrace = undefined;
+  let startIndex = 1;
+
+  if (priorToFilename) {
+    const idx = stack.findIndex(
+      x => x.getFileName() === priorToFilename || x.getFileName().endsWith(priorToFilename),
+    );
+    if (idx >= 0) startIndex = idx + 1;
+  }
+  stack = stack.slice(startIndex);
+
+  if (endFilename) {
+    const lastIdx = stack.findIndex(
+      x => x.getFileName() === endFilename || x.getFileName().endsWith(endFilename),
+    );
+    if (lastIdx >= 0) stack = stack.slice(0, lastIdx + 1);
+  }
+  return stack;
+}
+
+const homeDirReplace = new RegExp(Os.homedir(), 'g');
+
+export function cleanHomeDir(str: string): string {
+  return str.replace(homeDirReplace, '~');
 }
 
 export function pickRandom<T>(array: T[]): T {

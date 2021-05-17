@@ -3,20 +3,19 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
-import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import CookieStorage from './CookieStorage';
-import Agent, { IState as IAgentState } from './Agent';
+import Agent from './Agent';
 import FrozenFrameEnvironment from './FrozenFrameEnvironment';
 
 const { getState, setState } = StateMachine<FrozenTab, IState>();
-const agentState = StateMachine<Agent, IAgentState>();
 
 export interface IState {
   secretAgent: Agent;
@@ -38,16 +37,20 @@ const propertyKeys: (keyof FrozenTab)[] = [
 ];
 
 export default class FrozenTab {
-  constructor(secretAgent: Agent, coreTab: Promise<CoreTab>) {
+  constructor(
+    secretAgent: Agent,
+    tabAndJsPathsPromise: Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }>,
+  ) {
     initializeConstantsAndProperties(this, [], propertyKeys);
     const mainFrameEnvironment = new FrozenFrameEnvironment(
       secretAgent,
       this,
-      coreTab.then(x => x.mainFrameEnvironment),
+      tabAndJsPathsPromise.then(x => x.coreTab).then(x => x.mainFrameEnvironment),
+      tabAndJsPathsPromise.then(x => x.prefetchedJsPaths),
     );
     setState(this, {
       secretAgent,
-      coreTab,
+      coreTab: tabAndJsPathsPromise.then(x => x.coreTab),
       mainFrameEnvironment,
       frameEnvironments: [mainFrameEnvironment],
     });
@@ -155,10 +158,4 @@ export default class FrozenTab {
 
 export function getCoreTab(tab: FrozenTab): Promise<CoreTab> {
   return getState(tab).coreTab;
-}
-
-// CREATE
-
-export function createFrozenTab(secretAgent: Agent, coreTab: Promise<CoreTab>): FrozenTab {
-  return new FrozenTab(secretAgent, coreTab);
 }

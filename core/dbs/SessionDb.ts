@@ -21,6 +21,7 @@ import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
+import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
 
 const { log } = Log(module);
 
@@ -49,6 +50,7 @@ export default class SessionDb {
   public readonly focusEvents: FocusEventsTable;
   public readonly scrollEvents: ScrollEventsTable;
   public readonly devtoolsMessages: DevtoolsMessagesTable;
+  public readonly detachedJsPathCalls: DetachedJsPathCallsTable;
   public readonly tabs: TabsTable;
   public readonly sessionId: string;
 
@@ -82,6 +84,7 @@ export default class SessionDb {
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
+    this.detachedJsPathCalls = new DetachedJsPathCallsTable(this.db);
 
     this.tables.push(
       this.commands,
@@ -100,6 +103,7 @@ export default class SessionDb {
       this.scrollEvents,
       this.sessionLogs,
       this.devtoolsMessages,
+      this.detachedJsPathCalls,
     );
 
     if (!readonly) {

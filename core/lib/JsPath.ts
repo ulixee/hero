@@ -6,17 +6,14 @@ import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
 
-interface IJsPathHistory {
-  jsPath: IJsPath;
-  sourceIndex?: number;
-}
-
 const { log } = Log(module);
+
 export class JsPath {
   public readonly execHistory: IJsPathHistory[] = [];
 
@@ -70,18 +67,20 @@ export class JsPath {
     );
   }
 
-  public async runJsPaths(
-    jsPaths: IJsPathHistory[],
-  ): Promise<{ jsPath: IJsPath; result: IExecJsPathResult<any> }[]> {
-    const results = await this.frameEnvironment.runIsolatedFn<
-      { jsPath: IJsPath; result: IExecJsPathResult<any> }[]
-    >(`${InjectedScripts.JsPath}.execJsPaths`, jsPaths as any);
+  public async runJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
+    if (!jsPaths?.length) return [];
 
-    for (const { result } of results) {
+    const results = await this.frameEnvironment.runIsolatedFn<IJsPathResult[]>(
+      `${InjectedScripts.JsPath}.execJsPaths`,
+      jsPaths as any,
+    );
+
+    for (const { result, jsPath } of results) {
       if (result?.isValueSerialized === true) {
-        delete result.isValueSerialized;
+        result.isValueSerialized = undefined;
         result.value = TypeSerializer.revive(result.value, 'BROWSER');
       }
+      this.recordExecResult(jsPath, result);
     }
     return results;
   }
@@ -99,7 +98,7 @@ export class JsPath {
     if (result.pathError) {
       throw new InjectedScriptError(result.pathError.error, result.pathError.pathState);
     } else if (result?.isValueSerialized === true) {
-      delete result.isValueSerialized;
+      result.isValueSerialized = undefined;
       result.value = TypeSerializer.revive(result.value, 'BROWSER');
     }
 
@@ -157,4 +156,9 @@ export class JsPath {
       }
     }
   }
+}
+
+export interface IJsPathHistory {
+  jsPath: IJsPath;
+  sourceIndex?: number;
 }

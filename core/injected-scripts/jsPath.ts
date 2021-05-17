@@ -114,7 +114,7 @@ class JsPath {
   public static async execJsPaths(
     jsPaths: { jsPath: IJsPath; sourceIndex: number }[],
   ): Promise<{ jsPath: IJsPath; result: IExecJsPathResult<any> }[]> {
-    const resultMapByPathIndex = new Map<number, IExecJsPathResult<any>[]>();
+    const resultMapByPathIndex: { [index: number]: IExecJsPathResult<any>[] } = {};
     const results: { jsPath: IJsPath; result: IExecJsPathResult<any> }[] = [];
 
     async function runFn(queryIndex: number, jsPath: IJsPath): Promise<void> {
@@ -122,14 +122,13 @@ class JsPath {
       const result = await JsPath.exec([...jsPath]);
       results.push({ jsPath, result });
 
-      if (!resultMapByPathIndex.has(queryIndex)) resultMapByPathIndex.set(queryIndex, []);
-      resultMapByPathIndex.get(queryIndex).push(result);
+      (resultMapByPathIndex[queryIndex] ??= []).push(result);
     }
 
     for (let i = 0; i < jsPaths.length; i += 1) {
       const { jsPath, sourceIndex } = jsPaths[i];
       if (sourceIndex !== undefined) {
-        const parentResults = resultMapByPathIndex.get(sourceIndex);
+        const parentResults = resultMapByPathIndex[sourceIndex];
         for (const parentResult of parentResults) {
           if (parentResult.pathError) continue;
           if (jsPath[0] === '.') {

@@ -16,6 +16,7 @@ import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesM
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -160,11 +161,18 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       .map(x => this.getSessionMeta(x));
   }
 
-  public async detachTab(meta: ISessionMeta, tabId: number): Promise<ISessionMeta> {
+  public async detachTab(
+    meta: ISessionMeta,
+    tabId: number,
+    callsite: string,
+  ): Promise<{ meta: ISessionMeta; prefetchedJsPaths: IJsPathResult[] }> {
     const session = Session.get(meta.sessionId);
     const tab = session.getTab(tabId);
-    const detachedTab = await session.detachTab(tab);
-    return this.getSessionMeta(detachedTab);
+    const { detachedTab, prefetchedJsPaths } = await session.detachTab(tab, callsite);
+    return {
+      meta: this.getSessionMeta(detachedTab),
+      prefetchedJsPaths,
+    };
   }
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {

@@ -10,7 +10,6 @@ import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {

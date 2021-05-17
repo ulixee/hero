@@ -19,6 +19,7 @@ import {
   getComputedStyleFnName,
   getComputedVisibilityFnName,
 } from '@secret-agent/interfaces/jsPathFnNames';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
@@ -36,6 +37,7 @@ export interface IState {
   secretAgent: Agent;
   tab: FrozenTab;
   coreFrame: Promise<CoreFrameEnvironment>;
+  prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
 }
 
 const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
@@ -51,12 +53,24 @@ const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
 ];
 
 export default class FrozenFrameEnvironment {
-  constructor(secretAgent: Agent, tab: FrozenTab, coreFrame: Promise<CoreFrameEnvironment>) {
+  constructor(
+    secretAgent: Agent,
+    tab: FrozenTab,
+    coreFrame: Promise<CoreFrameEnvironment>,
+    prefetchedJsPaths: Promise<IJsPathResult[]>,
+  ) {
     initializeConstantsAndProperties(this, [], propertyKeys);
     setState(this, {
       secretAgent,
       tab,
       coreFrame,
+      prefetchedJsPaths: prefetchedJsPaths.then(x => {
+        const resultMap = new Map<string, IJsPathResult>();
+        for (const result of x) {
+          resultMap.set(JSON.stringify(result.jsPath), result);
+        }
+        return resultMap;
+      }),
     });
   }
 

@@ -691,7 +691,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
   }
 
-  private async onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): Promise<void> {
+  private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
     this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
       event.resource,
       this.id,
@@ -736,18 +736,30 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         }
       }
 
-      const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
-      const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
-      if (!event.resource.browserServedFromCache) {
-        resourceDetails.body = await event.body();
-        if (resourceDetails.body) {
-          delete resourceDetails.response.headers['content-encoding'];
-          delete resourceDetails.response.headers['Content-Encoding'];
-        }
-      }
-      const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
-      this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
+      setImmediate(r => this.checkForResourceCapture(r), event);
     }
+  }
+
+  private async checkForResourceCapture(
+    event: IPuppetPageEvents['resource-loaded'],
+  ): Promise<void> {
+    const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
+      event.resource.browserRequestId,
+    );
+
+    if (resourcesWithBrowserRequestId?.length) return;
+
+    const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
+    const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
+    if (!event.resource.browserServedFromCache) {
+      resourceDetails.body = await event.body();
+      if (resourceDetails.body) {
+        delete resourceDetails.response.headers['content-encoding'];
+        delete resourceDetails.response.headers['Content-Encoding'];
+      }
+    }
+    const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
+    this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
   }
 
   private onResourceFailed(event: IPuppetPageEvents['resource-failed']): void {

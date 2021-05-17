@@ -25,6 +25,7 @@ import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { MitmProxy } from '@secret-agent/mitm/index';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
@@ -153,16 +154,21 @@ export default class Session extends TypedEventEmitter<{
     await this.browserEmulator.configure(options);
   }
 
-  public async detachTab(sourceTab: Tab): Promise<Tab> {
+  public async detachTab(
+    sourceTab: Tab,
+    callsite: string,
+  ): Promise<{ detachedTab: Tab; prefetchedJsPaths: IJsPathResult[] }> {
     const detachedState = await sourceTab.createDetachedState();
 
     const page = await this.browserContext.newPage({
       runPageScripts: false,
       mockNetworkRequests: detachedState.mockNetworkRequests.bind(detachedState),
     });
+    const prefetchPromise = this.sessionState.findDetachedJsPathCalls(callsite);
     await page.setJavaScriptEnabled(false);
     const newTab = Tab.create(this, page, true, sourceTab);
     await detachedState.restoreDomIntoTab(newTab);
+
     this.sessionState.captureTab(
       newTab.id,
       page.id,
@@ -171,10 +177,17 @@ export default class Session extends TypedEventEmitter<{
       detachedState.detachedAtCommandId,
     );
     this.detachedTabsById.set(newTab.id, newTab);
-    const newTabId = newTab.id;
-    newTab.on('close', () => this.detachedTabsById.delete(newTabId));
+    newTab.on('close', () => {
+      this.sessionState.recordDetachedJsPathCalls(
+        newTab.mainFrameEnvironment.jsPath.execHistory,
+        callsite,
+      );
+      this.detachedTabsById.delete(newTab.id);
+    });
+    const jsPaths = await prefetchPromise;
+    const prefetches = await newTab.mainFrameEnvironment.jsPath.runJsPaths(jsPaths);
     await newTab.isReady;
-    return newTab;
+    return { detachedTab: newTab, prefetchedJsPaths: prefetches };
   }
 
   public getMitmProxy(): { address: string; password?: string } {

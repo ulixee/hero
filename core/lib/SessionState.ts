@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as Fs from 'fs';
 import {
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
@@ -22,6 +23,8 @@ import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
+import { IJsPathHistory } from './JsPath';
+import { ISessionRecord } from '../models/SessionsTable';
 
 const { log } = Log(module);
 
@@ -54,6 +57,8 @@ export default class SessionState {
     [browserRequestId: string]: { resourceId: number; url: string }[];
   } = {};
 
+  private readonly previousSessions: ISessionRecord[] = [];
+  private readonly sessionsDirectory: string;
   private lastErrorTime?: Date;
   private closeDate?: Date;
   private lastNavigationTime?: Date;
@@ -88,9 +93,15 @@ export default class SessionState {
     fs.mkdirSync(sessionsDirectory, { recursive: true });
 
     this.db = new SessionDb(sessionsDirectory, sessionId);
-
+    this.sessionsDirectory = sessionsDirectory;
     if (scriptInstanceMeta) {
-      const sessionsTable = SessionsDb.find(sessionsDirectory).sessions;
+      const sessionsDb = SessionsDb.find(sessionsDirectory);
+      this.previousSessions = sessionsDb.sessions.findByScriptEntrypoint(
+        scriptInstanceMeta.entrypoint,
+        2,
+      );
+
+      const sessionsTable = sessionsDb.sessions;
       sessionsTable.insert(
         sessionId,
         sessionName,
@@ -559,5 +570,29 @@ export default class SessionState {
 
   public captureSocketEvent(socketEvent: ISocketEvent): void {
     this.db.sockets.insert(socketEvent.socket);
+  }
+
+  /////// JsPath Calls
+  public async findDetachedJsPathCalls(callsite: string): Promise<IJsPathHistory[]> {
+    for (const session of this.previousSessions) {
+      const exists = await Fs.promises
+        .access(`${this.sessionsDirectory}/${session.id}.db`)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!exists) continue;
+
+      const sessionDb = new SessionDb(this.sessionsDirectory, session.id, { readonly: true });
+      const detachedCalls = sessionDb.detachedJsPathCalls.find(callsite);
+      if (detachedCalls?.execJsPathHistory) {
+        return JSON.parse(detachedCalls.execJsPathHistory);
+      }
+    }
+    return null;
+  }
+
+  public recordDetachedJsPathCalls(calls: IJsPathHistory[], callsite: string): void {
+    if (!calls?.length) return;
+    this.db.detachedJsPathCalls.insert(callsite, calls, new Date());
   }
 }

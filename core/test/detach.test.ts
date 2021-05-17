@@ -8,6 +8,7 @@ import {
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { inspect } from 'util';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
+import { getCallSite } from '@secret-agent/commons/utils';
 import ConnectionToClient from '../server/ConnectionToClient';
 
 inspect.defaultOptions.colors = true;
@@ -65,12 +66,12 @@ describe('basic Detach tests', () => {
 
     const bodyAfterLoad = await tab.puppetPage.evaluate(getContentScript);
 
-    const detached = await session.detachTab(tab);
-    const detachedContent = await detached.puppetPage.evaluate(getContentScript);
+    const { detachedTab } = await session.detachTab(tab, 'callsite2');
+    const detachedContent = await detachedTab.puppetPage.evaluate(getContentScript);
 
     expect(detachedContent).toBe(bodyAfterLoad);
 
-    const inputs = await detached.execJsPath([
+    const inputs = await detachedTab.execJsPath([
       'document',
       ['querySelectorAll', 'input'],
       [getNodePointerFnName],
@@ -102,10 +103,10 @@ describe('basic Detach tests', () => {
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/nested-detach`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
-    const detached = await session.detachTab(tab);
+    const { detachedTab } = await session.detachTab(tab, 'callsite1');
 
-    const execJsPath = jest.spyOn(detached.mainFrameEnvironment.jsPath, 'exec');
-    const qsAllResult = await detached.execJsPath([
+    const execJsPath = jest.spyOn(detachedTab.mainFrameEnvironment.jsPath, 'exec');
+    const qsAllResult = await detachedTab.execJsPath([
       'document',
       ['querySelectorAll', '.menu'],
       [getNodePointerFnName],
@@ -114,41 +115,41 @@ describe('basic Detach tests', () => {
     for (const pointer of qsAllResult.nodePointer.iterableItems as INodePointer[]) {
       counter += 1;
       expect(pointer.type).toBe('HTMLDivElement');
-      const idResult = await detached.execJsPath([pointer.id, 'id']);
+      const idResult = await detachedTab.execJsPath([pointer.id, 'id']);
       expect(idResult.value).toBe(`menu${counter}`);
-      const classNameResult = await detached.execJsPath([pointer.id, 'className']);
+      const classNameResult = await detachedTab.execJsPath([pointer.id, 'className']);
       expect(classNameResult.value).toBe(`menu`);
 
-      const boundingRect = await detached.execJsPath([pointer.id, ['getBoundingClientRect']]);
+      const boundingRect = await detachedTab.execJsPath([pointer.id, ['getBoundingClientRect']]);
       expect(boundingRect.value).toMatchObject({
         x: expect.any(Number),
         y: expect.any(Number),
         width: expect.any(Number),
         height: expect.any(Number),
       });
-      const nestedResult = await detached.execJsPath([
+      const nestedResult = await detachedTab.execJsPath([
         pointer.id,
         ['querySelector', '.nested'],
         [getNodePointerFnName],
       ]);
 
-      await detached.execJsPath([pointer.id, [getComputedVisibilityFnName]]);
+      await detachedTab.execJsPath([pointer.id, [getComputedVisibilityFnName]]);
 
-      const nestedTextResult = await detached.execJsPath([
+      const nestedTextResult = await detachedTab.execJsPath([
         nestedResult.nodePointer.id,
         'textContent',
       ]);
       expect(nestedTextResult.value).toBe(`Nested ${counter}`);
-      const nestedClassnameResult = await detached.execJsPath([
+      const nestedClassnameResult = await detachedTab.execJsPath([
         nestedResult.nodePointer.id,
         'className',
       ]);
       expect(nestedClassnameResult.value).toBe(`nested`);
     }
-    const jsPaths = detached.mainFrameEnvironment.jsPath.execHistory;
+    const jsPaths = detachedTab.mainFrameEnvironment.jsPath.execHistory;
 
     // now should be able to create a second detached tab and replay the paths with same result
-    const secondDetached = await session.detachTab(tab);
+    const { detachedTab: secondDetached } = await session.detachTab(tab, 'callsite3');
     const prefetch = await secondDetached.mainFrameEnvironment.jsPath.runJsPaths(jsPaths);
 
     const manualResults = [];

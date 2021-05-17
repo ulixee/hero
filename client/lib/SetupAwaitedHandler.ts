@@ -19,6 +19,7 @@ export const delegate = {
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = delegate;
+AwaitedHandler.setStorageSymbol(Symbol.for('@secret-agent/InternalAwaitedState'));
 
 async function getProperty<T, TClass>(
   self: AwaitedHandler<TClass>,
@@ -26,12 +27,10 @@ async function getProperty<T, TClass>(
   name: string,
 ): Promise<T> {
   const { awaitedPath, coreFrame } = await getAwaitedState(self, instance);
-
   const finalPath = awaitedPath.addProperty(instance as any, name);
 
   const result = await execJsPath<TClass, T>(self, coreFrame, instance, finalPath.toJSON());
-
-  return cleanResult(self, instance, result);
+  return cleanResult(self, instance, result, new Error().stack);
 }
 
 async function setProperty<T, TClass>(
@@ -54,7 +53,7 @@ async function runMethod<T, TClass>(
   const finalPath = awaitedPath.addMethod(instance as any, name, ...args);
 
   const result = await execJsPath<TClass, T>(self, coreFrame, instance, finalPath.toJSON());
-  return cleanResult(self, instance, result);
+  return cleanResult(self, instance, result, new Error().stack);
 }
 
 async function createNodePointer<TClass>(
@@ -62,9 +61,9 @@ async function createNodePointer<TClass>(
   instance: TClass,
 ): Promise<INodePointer> {
   const { awaitedPath, coreFrame } = await getAwaitedState(self, instance);
-  const finalPath = awaitedPath.addMethod(instance as any, getNodePointerFnName).toJSON();
-  const result = await execJsPath<TClass, null>(self, coreFrame, instance, finalPath);
+  const finalPath = awaitedPath.addMethod(instance as any, getNodePointerFnName);
 
+  const result = await execJsPath<TClass, null>(self, coreFrame, instance, finalPath.toJSON());
   return result?.nodePointer;
 }
 
@@ -122,13 +121,21 @@ export function convertJsPathArgs(path: IJsPath): void {
   }
 }
 
-function execJsPath<TClass, T>(
+async function execJsPath<TClass, T>(
   self: AwaitedHandler<TClass>,
   coreFrame: CoreFrameEnvironment,
   instance: TClass,
   path: IJsPath,
 ): Promise<IExecJsPathResult<T>> {
   convertJsPathArgs(path);
+  const { awaitedOptions } = await self.getState(instance);
+  if (awaitedOptions.prefetchedJsPaths) {
+    const prefetchedJsPaths = await awaitedOptions.prefetchedJsPaths;
+    const prefetched = prefetchedJsPaths.get(JSON.stringify(path));
+    if (prefetched) {
+      return prefetched.result;
+    }
+  }
   return coreFrame.execJsPath<T>(path);
 }
 
@@ -136,6 +143,7 @@ function cleanResult<T, TClass>(
   self: AwaitedHandler<TClass>,
   instance: TClass,
   result: IExecJsPathResult<T>,
+  startStack: string,
 ): T {
   if (!result) return null;
 
@@ -144,7 +152,13 @@ function cleanResult<T, TClass>(
       nodePointer: result.nodePointer,
     });
   }
-
+  if (result?.pathError) {
+    const error = new Error(result.pathError.error);
+    error.name = 'InjectedScriptError';
+    (error as any).pathState = result.pathError.pathState;
+    error.stack = startStack.replace('Error:', '').trim();
+    throw error;
+  }
   return result.value;
 }
 
