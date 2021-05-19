@@ -27,6 +27,7 @@ import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent from './Agent';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
+import * as AwaitedHandler from './SetupAwaitedHandler';
 
 const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
 const awaitedPathState = StateMachine<
@@ -141,24 +142,35 @@ export default class FrozenFrameEnvironment {
     element: IElementIsolate,
     pseudoElement?: string,
   ): Promise<CSSStyleDeclaration & { [style: string]: string }> {
-    const { awaitedPath } = awaitedPathState.getState(element);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    const path = awaitedPath.addMethod(element, getComputedStyleFnName, pseudoElement);
-    const result = await coreFrame.execJsPath<Record<string, string>>(path.toJSON());
-
-    const awaitedOptions = { ...getState(this) };
-    const declaration = createCSSStyleDeclaration<IAwaitedOptions>(awaitedPath, awaitedOptions);
-    Object.assign(declaration, result.value);
+    const { awaitedPath, coreFrame, awaitedOptions } = await AwaitedHandler.getAwaitedState(
+      awaitedPathState,
+      element,
+    );
+    const newPath = awaitedPath.addMethod(element, getComputedStyleFnName, pseudoElement);
+    const result = await AwaitedHandler.execJsPath<Record<string, string>>(
+      coreFrame,
+      awaitedOptions,
+      newPath.toJSON(),
+    );
+    const declaration = createCSSStyleDeclaration<IAwaitedOptions>(newPath, awaitedOptions);
+    const attributes = AwaitedHandler.cleanResult(
+      awaitedPathState,
+      declaration,
+      result,
+      new Error().stack,
+    );
+    Object.assign(declaration, attributes);
     return declaration;
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
     if (!node) return { isVisible: false, nodeExists: false };
-    const { awaitedPath } = awaitedPathState.getState(node);
-    const path = awaitedPath.addMethod(node, getComputedVisibilityFnName);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    const result = await coreFrame.execJsPath<INodeVisibility>(path.toJSON());
-    return result.value;
+    return await AwaitedHandler.delegate.runMethod<INodeVisibility, INodeIsolate>(
+      awaitedPathState,
+      node,
+      getComputedVisibilityFnName,
+      [],
+    );
   }
 
   // @deprecated 2021-04-30: Replaced with getComputedVisibility

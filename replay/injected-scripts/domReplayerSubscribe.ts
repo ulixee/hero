@@ -37,7 +37,7 @@ if (process.isMainFrame) {
       debugLog(
         'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
         rawDomChanges?.length ?? 0,
-        resultNodeIds?.length ?? 0,
+        resultNodeIds ? JSON.stringify(resultNodeIds) : '[]',
         !!mouseEvent,
         !!scrollEvent,
       );

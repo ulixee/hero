@@ -11,7 +11,13 @@ import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOp
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import {
+  IElementIsolate,
+  IHTMLFrameElementIsolate,
+  IHTMLIFrameElementIsolate,
+  IHTMLObjectElementIsolate,
+  INodeIsolate,
+} from 'awaited-dom/base/interfaces/isolate';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
@@ -122,7 +128,9 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
     return await this.mainFrameEnvironment.fetch(request, init);
   }
 
-  public async getFrameEnvironment(element: IElementIsolate): Promise<FrameEnvironment | null> {
+  public async getFrameEnvironment(
+    element: IHTMLFrameElementIsolate | IHTMLIFrameElementIsolate | IHTMLObjectElementIsolate,
+  ): Promise<FrameEnvironment | null> {
     const { awaitedPath, awaitedOptions } = awaitedPathState.getState(element);
     const elementCoreFrame = await awaitedOptions.coreFrame;
     const frameMeta = await elementCoreFrame.getChildFrameEnvironment(awaitedPath.toJSON());
@@ -133,7 +141,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    return this.mainFrameEnvironment.getComputedStyle(element, pseudoElement);
+    return FrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
   public async goto(href: string, timeoutMs?: number): Promise<Resource> {
@@ -167,7 +175,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    return await this.mainFrameEnvironment.getComputedVisibility(node);
+    return await FrameEnvironment.getComputedVisibility(node);
   }
 
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {

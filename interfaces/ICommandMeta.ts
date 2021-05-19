@@ -3,6 +3,7 @@ export default interface ICommandMeta {
   tabId: number;
   frameId: string;
   name: string;
+  wasPrefetched?: boolean;
   args?: string;
   startDate: number;
   endDate?: number;

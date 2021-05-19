@@ -60,6 +60,8 @@ function idx() {
   return (eventCounter += 1);
 }
 
+let isStarted = false;
+
 class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [];
 
@@ -78,7 +80,15 @@ class PageEventsRecorder {
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
-    if (window.self.location.href === 'about:blank') return;
+  }
+
+  public start() {
+    if (isStarted || window.self.location.href === 'about:blank') {
+      return;
+    }
+    isStarted = true;
+
+    const stamp = new Date().getTime();
     // preload with a document
     this.domChanges.push([
       DomActionType.newDocument,
@@ -86,7 +96,7 @@ class PageEventsRecorder {
         id: -1,
         textContent: window.self.location.href,
       },
-      new Date().getTime(),
+      stamp,
       idx(),
     ]);
 
@@ -94,34 +104,21 @@ class PageEventsRecorder {
       this.domChanges.push([
         DomActionType.added,
         this.serializeNode(document.doctype),
-        new Date().getTime(),
+        stamp,
         idx(),
       ]);
     }
-
-    if (document && document.childNodes.length) {
-      const mutations: MutationRecord[] = [
-        {
-          type: 'childList' as any,
-          addedNodes: document.childNodes,
-          removedNodes: [] as any,
-          nextSibling: null,
-          previousSibling: null,
-          oldValue: null,
-          attributeNamespace: null,
-          attributeName: null,
-          target: document,
-        },
-      ];
-
-      this.onMutation(mutations);
-    }
+    const children = this.serializeChildren(document, new Map<Node, INodeData>());
     this.observer.observe(document, {
       attributes: true,
       childList: true,
       subtree: true,
       characterData: true,
     });
+    for (const childData of children) {
+      this.domChanges.push([DomActionType.added, childData, stamp, idx()]);
+    }
+    this.uploadChanges();
   }
 
   public extractChanges(): PageRecorderResultSet {
@@ -169,6 +166,7 @@ class PageEventsRecorder {
   }
 
   public onLoadEvent(name: string) {
+    this.start();
     this.loadEvents.push([name, window.self.location.href, new Date().getTime()]);
     this.uploadChanges();
   }
@@ -587,24 +585,33 @@ const interval = setInterval(() => {
   }
 }, 500);
 
-if (window.self.location?.href !== 'about:blank') {
-  window.addEventListener('beforeunload', () => {
-    clearInterval(interval);
-    recorder.disconnect();
-  });
-  const perfObserver = new PerformanceObserver(() => {
-    recorder.onLoadEvent('LargestContentfulPaint');
-    perfObserver.disconnect();
-  });
-  perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-}
-
 window.addEventListener('DOMContentLoaded', () => {
   // force domContentLoaded to come first
   recorder.onLoadEvent('DOMContentLoaded');
 });
 
 window.addEventListener('load', () => recorder.onLoadEvent('load'));
+
+if (window.self.location?.href !== 'about:blank') {
+  window.addEventListener('beforeunload', () => {
+    clearInterval(interval);
+    recorder.disconnect();
+  });
+
+  const paintObserver = new PerformanceObserver(entryList => {
+    if (entryList.getEntriesByName('first-contentful-paint').length) {
+      recorder.start();
+      paintObserver.disconnect();
+    }
+  });
+  paintObserver.observe({ type: 'paint', buffered: true });
+
+  const contentStableObserver = new PerformanceObserver(() => {
+    recorder.onLoadEvent('LargestContentfulPaint');
+    contentStableObserver.disconnect();
+  });
+  contentStableObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+}
 
 // need duplicate since this is a variable - not just a type
 enum MouseEventType {

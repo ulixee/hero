@@ -53,18 +53,8 @@ export default class TypeSerializer {
   }
 
   public static stringify(object: any): string {
-    return JSON.stringify(object, (key, value) => {
-      const replaced = this.replacer(key, value);
-      if (replaced !== value) return replaced;
-      if (value && typeof value === Types.object && !Array.isArray(value)) {
-        const resultObject = {};
-        for (const [k, v] of Object.entries(value)) {
-          resultObject[k] = this.replacer(k, v);
-        }
-        return resultObject;
-      }
-      return value;
-    });
+    const final = TypeSerializer.replace(object);
+    return JSON.stringify(final);
   }
 
   public static replace(object: any): object {

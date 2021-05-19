@@ -40,7 +40,11 @@ export default class ReplayResources {
     return await this.resourcesByUrl.get(url).promise;
   }
 
-  public async getContent(resourceId: number, baseHost: string): Promise<ProtocolResponse> {
+  public async getContent(
+    resourceId: number,
+    baseHost: string,
+    dataDir: string,
+  ): Promise<ProtocolResponse> {
     const resource = this.resourcesById.get(resourceId);
     if (!resourceWhitelist.has(resource.type)) {
       console.log('skipping resource', resource);
@@ -52,9 +56,9 @@ export default class ReplayResources {
     }
     if (!this.resourceBodyById.has(resourceId)) {
       const { resolve, reject, promise } = getResolvable<ProtocolResponse>();
-
       this.resourceBodyById.set(resourceId, promise);
-      const req = Http.get(`${baseHost}/resource/${resourceId}`, async res => {
+      const reqHeaders = { headers: { 'x-data-location': dataDir } };
+      const req = Http.get(`${baseHost}/resource/${resourceId}`, reqHeaders, async res => {
         res.on('error', reject);
 
         const contentType = res.headers['content-type'];

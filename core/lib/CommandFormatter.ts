@@ -63,10 +63,8 @@ export default class CommandFormatter {
     }
 
     if (command.name === 'detachTab') {
-      return `detachTab({
-  id: ${args[0].id},
-  url: ${args[0].url}
-})`;
+      const { url } = args[0];
+      return `detachTab(${url})`;
     }
 
     if (command.name === 'waitForElement') {
@@ -153,6 +151,10 @@ export default class CommandFormatter {
       command.result.prefetchedJsPaths = undefined;
     }
 
+    if (command.result && command.name.startsWith('go')) {
+      command.result = undefined;
+    }
+
     // we have shell objects occasionally coming back. hide from ui
     if (meta.args?.includes(getNodePointerFnName)) {
       command.result = undefined;
@@ -165,7 +167,7 @@ export function formatJsPath(path: any) {
   const jsPath = (path ?? [])
     .map((x, i) => {
       if (i === 0 && typeof x === 'number') {
-        return '<previouslySelectedNode>';
+        return `getNodeById(${x})`;
       }
       if (Array.isArray(x)) {
         if (x[0] === getNodePointerFnName) return;

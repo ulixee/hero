@@ -31,6 +31,8 @@ export default class CommandOverlay extends Vue {
   private zoomImage = false;
 
   get duration() {
+    if (!this.commandResult?.duration) return 'Pending';
+
     if (this.commandResult?.duration > 1000) {
       return `${Math.floor((this.commandResult.duration * 100) / 1000) / 100}s`;
     }
@@ -64,7 +66,7 @@ export default class CommandOverlay extends Vue {
 @include overlayBaseStyle();
 
 .Page {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 .CommandOverlay {
   @include overlayStyle();

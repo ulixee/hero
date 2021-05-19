@@ -18,14 +18,20 @@ import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Locat
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import {
+  IElementIsolate,
+  IHTMLFrameElementIsolate,
+  IHTMLIFrameElementIsolate,
+  IHTMLObjectElementIsolate,
+  INodeIsolate,
+} from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import { getComputedVisibilityFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent from './Agent';
-import { getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
+import { getAwaitedPathAsMethodArg, delegate as AwaitedHandler } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
 
@@ -123,32 +129,19 @@ export default class FrameEnvironment {
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
-  public async getFrameEnvironment(element: IElementIsolate): Promise<FrameEnvironment | null> {
+  public async getFrameEnvironment(
+    element: IHTMLFrameElementIsolate | IHTMLIFrameElementIsolate | IHTMLObjectElementIsolate,
+  ): Promise<FrameEnvironment | null> {
     const { tab } = getState(this);
     return await tab.getFrameEnvironment(element);
   }
 
   public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    const { awaitedPath: elementAwaitedPath } = awaitedPathState.getState(element);
-    const awaitedPath = new AwaitedPath(null, 'window', [
-      'getComputedStyle',
-      getAwaitedPathAsMethodArg(elementAwaitedPath),
-      pseudoElement,
-    ]);
-    const awaitedOptions = { ...getState(this) };
-    return createCSSStyleDeclaration<IAwaitedOptions>(
-      awaitedPath,
-      awaitedOptions,
-    ) as CSSStyleDeclaration;
+    return FrameEnvironment.getComputedStyle(element, pseudoElement);
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    if (!node) return { isVisible: false, nodeExists: false };
-    const { awaitedPath } = awaitedPathState.getState(node);
-    const path = awaitedPath.addMethod(node, getComputedVisibilityFnName);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    const result = await coreFrame.execJsPath<INodeVisibility>(path.toJSON());
-    return result.value;
+    return await FrameEnvironment.getComputedVisibility(node);
   }
 
   // @deprecated 2021-04-30: Replaced with getComputedVisibility
@@ -198,6 +191,27 @@ export default class FrameEnvironment {
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
+  }
+
+  public static getComputedStyle(
+    element: IElementIsolate,
+    pseudoElement?: string,
+  ): CSSStyleDeclaration {
+    const { awaitedPath: elementAwaitedPath, awaitedOptions } = awaitedPathState.getState(element);
+    const awaitedPath = new AwaitedPath(null, 'window', [
+      'getComputedStyle',
+      getAwaitedPathAsMethodArg(elementAwaitedPath),
+      pseudoElement,
+    ]);
+    return createCSSStyleDeclaration<IAwaitedOptions>(
+      awaitedPath,
+      awaitedOptions,
+    ) as CSSStyleDeclaration;
+  }
+
+  public static async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
+    if (!node) return { isVisible: false, nodeExists: false };
+    return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
   }
 }
 

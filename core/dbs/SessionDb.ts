@@ -31,6 +31,8 @@ interface IDbOptions {
 }
 
 export default class SessionDb {
+  private static byId = new Map<string, SessionDb>();
+
   public get readonly() {
     return this.db?.readonly;
   }
@@ -153,6 +155,19 @@ export default class SessionDb {
     for (const table of this.tables) table.unsubscribe();
   }
 
+  public static getCached(sessionId: string, basePath: string, fileMustExist = false) {
+    if (!this.byId.get(sessionId)?.db?.open) {
+      this.byId.set(
+        sessionId,
+        new SessionDb(basePath, sessionId, {
+          readonly: true,
+          fileMustExist,
+        }),
+      );
+    }
+    return this.byId.get(sessionId);
+  }
+
   public static findWithRelated(scriptArgs: ISessionLookupArgs): ISessionLookup {
     let { dataLocation, sessionId } = scriptArgs;
 
@@ -171,12 +186,7 @@ export default class SessionDb {
 
     const activeSession = SessionState.registry.get(sessionId);
 
-    const sessionDb =
-      activeSession?.db ??
-      new SessionDb(dataLocation, sessionId, {
-        readonly: true,
-        fileMustExist: true,
-      });
+    const sessionDb = activeSession?.db ?? this.getCached(sessionId, dataLocation, true);
 
     const session = sessionDb.session.get();
     const related = sessionsDb.findRelatedSessions(session);

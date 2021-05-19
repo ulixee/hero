@@ -21,9 +21,14 @@ export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPat
   }
 
   public find(callsite: string): IDetachedJsPathCallsRecord {
-    return this.db
-      .prepare(`select * from ${this.tableName} where callsitePath=? limit 1`)
-      .get(callsite);
+    try {
+      return this.db
+        .prepare(`select * from ${this.tableName} where callsitePath=? limit 1`)
+        .get(callsite);
+    } catch (err) {
+      if (String(err).includes('no such table')) return;
+      throw err;
+    }
   }
 }
 

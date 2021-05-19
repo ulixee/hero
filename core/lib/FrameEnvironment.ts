@@ -218,6 +218,7 @@ export default class FrameEnvironment {
       name: 'execJsPath',
       args: TypeSerializer.stringify([entry.jsPath]),
       id: this.sessionState.commands.length + 1,
+      wasPrefetched: true,
       tabId: this.tab.id,
       frameId: this.id,
       result: entry.result,

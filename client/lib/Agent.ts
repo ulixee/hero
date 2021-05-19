@@ -16,7 +16,13 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger } from '@secret-agent/interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import {
+  IElementIsolate,
+  IHTMLFrameElementIsolate,
+  IHTMLIFrameElementIsolate,
+  IHTMLObjectElementIsolate,
+  INodeIsolate,
+} from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
@@ -240,7 +246,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public async getFrameEnvironment(
-    frameElement: IElementIsolate,
+    frameElement: IHTMLFrameElementIsolate | IHTMLIFrameElementIsolate | IHTMLObjectElementIsolate,
   ): Promise<FrameEnvironment | null> {
     return await this.activeTab.getFrameEnvironment(frameElement);
   }

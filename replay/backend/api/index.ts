@@ -137,7 +137,7 @@ export default class ReplayApi {
 
     const localHost = ReplayApi.localApiHost;
     const apiHost = `http://${localHost.host}/replay/${this.saSession.id}`;
-    return this.resources.getContent(resource.id, apiHost);
+    return this.resources.getContent(resource.id, apiHost, this.saSession.dataLocation);
   }
 
   public close(): void {

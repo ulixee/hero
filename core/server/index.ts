@@ -5,7 +5,6 @@ import * as http from 'http';
 import { IncomingMessage, ServerResponse } from 'http';
 import { createPromise } from '@secret-agent/commons/utils';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-
 import Core, { GlobalPool } from '../index';
 import ConnectionToReplay from './ConnectionToReplay';
 import InjectedScripts from '../lib/InjectedScripts';
@@ -182,8 +181,9 @@ export default class CoreServer {
     [sessionId, resourceId],
   ): Promise<void> {
     const dataDir = (req.headers['x-data-location'] as string) ?? GlobalPool.sessionsDir;
-    const db = new SessionDb(dataDir, sessionId, { readonly: true });
     const endDate = new Date().getTime() + 5e3;
+    const db = SessionDb.getCached(sessionId, dataDir);
+
     do {
       const resource = db.resources.getResponse(Number(resourceId));
       req.socket.setKeepAlive(true);
@@ -192,8 +192,6 @@ export default class CoreServer {
         const responseHeaders: any = {
           connection: 'keep-alive',
           'content-encoding': resource.responseEncoding,
-          'x-replay-agent': `Secret Agent Replay v${pkg.version}`,
-          'x-original-headers': resource.responseHeaders,
         };
         const location = headers.location ?? headers.Location;
         if (location) responseHeaders.location = location;
