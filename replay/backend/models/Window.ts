@@ -159,8 +159,8 @@ export default class Window {
     });
   }
 
-  public onNewReplayTab(tab: ISessionTab) {
-    this.sendToRenderer('replay:new-tab', tab);
+  public onReplayTabChange(tab: ISessionTab) {
+    this.sendToRenderer('replay:tab', tab);
   }
 
   public setAddressBarUrl(url: string) {

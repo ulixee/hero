@@ -17,6 +17,8 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
   }
 
   public insert(log: ILogEntry) {
+    // ignore logging these to the db - they're in the Commands table
+    if (log.action === 'Command.run' || log.action === 'Command.done') return;
     if (log.data instanceof Error) {
       log.data = {
         stack: log.data.stack,

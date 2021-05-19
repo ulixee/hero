@@ -44,7 +44,10 @@ export default class CoreServer {
     this.httpServer.on('request', this.onRequest.bind(this));
     this.httpServer.on('connection', this.httpConnection.bind(this));
     this.addressHost = addressHost;
-    this.wsServer = new WebSocket.Server({ server: this.httpServer });
+    this.wsServer = new WebSocket.Server({
+      server: this.httpServer,
+      perMessageDeflate: { threshold: 500, serverNoContextTakeover: false },
+    });
     this.wsServer.on('connection', this.handleWsConnection.bind(this));
     this.routes = [
       ['/replay/domReplayer.js', this.handleReplayerScriptRequest.bind(this)],
@@ -184,7 +187,7 @@ export default class CoreServer {
     do {
       const resource = db.resources.getResponse(Number(resourceId));
       req.socket.setKeepAlive(true);
-      if (resource) {
+      if (resource && resource.statusCode) {
         const headers = JSON.parse(resource.responseHeaders ?? '{}');
         const responseHeaders: any = {
           connection: 'keep-alive',

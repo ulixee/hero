@@ -27,7 +27,7 @@ export default class ReplayView extends ViewBackend {
       nodeIntegrationInSubFrames: true,
       enableRemoteModule: false,
       partition: uuidv1(),
-      contextIsolation: true,
+      contextIsolation: false,
       webSecurity: false,
       javascript: false,
     });
@@ -52,7 +52,7 @@ export default class ReplayView extends ViewBackend {
     const scriptUrl = await replayApi.getReplayScript();
     session.setPreloads([scriptUrl]);
     if (isFirstLoad) this.detach(false);
-    this.replayApi.onNewTab = this.onNewTab.bind(this);
+    this.replayApi.onTabChange = this.onTabChange.bind(this);
     await replayApi.isReady;
     await this.loadTab();
   }
@@ -68,7 +68,7 @@ export default class ReplayView extends ViewBackend {
 
     this.window.setAddressBarUrl('Loading session...');
 
-    this.tabState = id ? this.replayApi.getTab(id) : this.replayApi.getStartTab;
+    this.tabState = id ? this.replayApi.getTab(id) : this.replayApi.startTab;
     this.tabState.on('tick:changes', this.checkResponsive);
     await this.playbarView.load(this.tabState);
 
@@ -223,14 +223,32 @@ export default class ReplayView extends ViewBackend {
       }
     }
 
-    this.webContents.send('dom:apply', ...events);
+    const columns = [
+      'action',
+      'nodeId',
+      'nodeType',
+      'textContent',
+      'tagName',
+      'namespaceUri',
+      'parentNodeId',
+      'previousSiblingId',
+      'attributeNamespaces',
+      'attributes',
+      'properties',
+      'frameIdPath',
+    ];
+    const compressedChanges = domChanges
+      ? domChanges.map(x => columns.map(col => x[col]))
+      : undefined;
+    this.webContents.send('dom:apply', columns, compressedChanges, ...events.slice(1));
     this.window.setAddressBarUrl(this.tabState.urlOrigin);
   }
 
-  private async onNewTab(tab: ReplayTabState) {
+  private async onTabChange(tab: ReplayTabState) {
     await tab.isReady.promise;
-    this.window.onNewReplayTab({
+    this.window.onReplayTabChange({
       tabId: tab.tabId,
+      detachedFromTabId: tab.detachedFromTabId,
       startOrigin: tab.startOrigin,
       createdTime: tab.tabCreatedTime,
       width: tab.viewportWidth,
@@ -274,7 +292,7 @@ export default class ReplayView extends ViewBackend {
   private clearReplayApi() {
     if (this.replayApi) {
       this.webContents.session.setPreloads([]);
-      this.replayApi.onNewTab = null;
+      this.replayApi.onTabChange = null;
       this.replayApi.close();
       this.replayApi = null;
     }
@@ -290,13 +308,13 @@ export default class ReplayView extends ViewBackend {
 
   private interceptHttpRequests() {
     const session = this.webContents.session;
-    session.protocol.interceptBufferProtocol('http', async (request, callback) => {
-      console.log('intercepting http buffer', request.url);
+    session.protocol.interceptStreamProtocol('http', async (request, callback) => {
+      console.log('intercepting http stream', request.url);
       const result = await this.replayApi.getResource(request.url);
       callback(result);
     });
-    session.protocol.interceptBufferProtocol('https', async (request, callback) => {
-      console.log('intercepting https buffer', request.url);
+    session.protocol.interceptStreamProtocol('https', async (request, callback) => {
+      console.log('intercepting https stream', request.url);
       const result = await this.replayApi.getResource(request.url);
       callback(result);
     });

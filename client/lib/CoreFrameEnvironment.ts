@@ -44,6 +44,15 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.execJsPath', jsPath);
   }
 
+  public recordDetachedJsPath(index: number, startTime: Date, endTime: Date): void {
+    this.commandQueue.queueBatchedCommand(
+      'FrameEnvironment.recordDetachedJsPaths',
+      index,
+      startTime.getTime(),
+      endTime.getTime(),
+    );
+  }
+
   public async getJsValue<T>(expression: string): Promise<T> {
     return await this.commandQueue.run('FrameEnvironment.getJsValue', expression);
   }

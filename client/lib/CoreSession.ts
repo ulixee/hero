@@ -12,6 +12,7 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
+  public frozenTabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
   public sessionsDataLocation: string;
@@ -96,14 +97,23 @@ export default class CoreSession implements IJsPathEventTarget {
       meta: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
     }>('Session.detachTab', tab.tabId, callSitePath);
+    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection);
+    this.frozenTabsById.set(meta.tabId, coreTab);
     return {
-      coreTab: new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection),
+      coreTab,
       prefetchedJsPaths,
     };
   }
 
   public async close(): Promise<void> {
     try {
+      await this.commandQueue.flush();
+      for (const tab of this.tabsById.values()) {
+        await tab.flush();
+      }
+      for (const tab of this.frozenTabsById.values()) {
+        await tab.flush();
+      }
       await this.commandQueue.run('Session.close');
     } finally {
       process.nextTick(() => this.connection.closeSession(this));

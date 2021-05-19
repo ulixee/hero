@@ -19,6 +19,8 @@ import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { ILoadEvent } from '@secret-agent/interfaces/ILoadEvent';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -28,7 +30,7 @@ import CommandRecorder from './CommandRecorder';
 import FrameNavigations from './FrameNavigations';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
-import { JsPath } from './JsPath';
+import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 
 const { log } = Log(module);
@@ -65,14 +67,16 @@ export default class FrameEnvironment {
   }
 
   public readonly navigationsObserver: TabNavigationObserver;
+
   public readonly navigations: FrameNavigations;
   public readonly tab: Tab;
   public readonly jsPath: JsPath;
   public puppetFrame: IPuppetFrame;
   public isReady: Promise<Error | void>;
-
   public domNodeId: number;
+
   protected readonly logger: IBoundLog;
+  private prefetchedJsPaths: IJsPathResult[];
   private readonly isDetached: boolean;
   private readonly interactor: Interactor;
   private isClosing = false;
@@ -126,7 +130,12 @@ export default class FrameEnvironment {
   }
 
   public isAllowedCommand(method: string): boolean {
-    return this.commandRecorder.fnNames.has(method) || method === 'close';
+    return (
+      this.commandRecorder.fnNames.has(method) ||
+      method === 'close' ||
+      method === 'recordDetachedJsPath' ||
+      method === 'recordDetachedJsPaths'
+    );
   }
 
   public close(): void {
@@ -189,6 +198,32 @@ export default class FrameEnvironment {
     if (!this.navigations.top) return null;
     await this.navigationsObserver.waitForReady();
     return await this.jsPath.exec(jsPath);
+  }
+
+  public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
+    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths);
+    return this.prefetchedJsPaths;
+  }
+
+  public recordDetachedJsPaths(...commands: [number, number, number][]): void {
+    for (const [index, startDate, endDate] of commands) {
+      this.recordDetachedJsPath(index, startDate, endDate);
+    }
+  }
+
+  public recordDetachedJsPath(index: number, startDate: number, endDate: number): void {
+    const entry = this.prefetchedJsPaths[index];
+    // only need to record start
+    this.sessionState.recordCommandStart({
+      name: 'execJsPath',
+      args: TypeSerializer.stringify([entry.jsPath]),
+      id: this.sessionState.commands.length + 1,
+      tabId: this.tab.id,
+      frameId: this.id,
+      result: entry.result,
+      startDate,
+      endDate,
+    });
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {

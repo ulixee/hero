@@ -66,7 +66,9 @@ export default class FrozenFrameEnvironment {
       coreFrame,
       prefetchedJsPaths: prefetchedJsPaths.then(x => {
         const resultMap = new Map<string, IJsPathResult>();
-        for (const result of x) {
+        for (let i = 0; i < x.length; i += 1) {
+          const result = x[i];
+          result.index = i;
           resultMap.set(JSON.stringify(result.jsPath), result);
         }
         return resultMap;

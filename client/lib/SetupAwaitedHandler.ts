@@ -5,6 +5,7 @@ import INodePointer from 'awaited-dom/base/INodePointer';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
@@ -130,10 +131,15 @@ async function execJsPath<TClass, T>(
   convertJsPathArgs(path);
   const { awaitedOptions } = await self.getState(instance);
   if (awaitedOptions.prefetchedJsPaths) {
-    const prefetchedJsPaths = await awaitedOptions.prefetchedJsPaths;
+    const prefetchedJsPaths = (await awaitedOptions.prefetchedJsPaths) as Map<
+      string,
+      IJsPathResult
+    >;
     const prefetched = prefetchedJsPaths.get(JSON.stringify(path));
     if (prefetched) {
-      return prefetched.result;
+      const result = prefetched.result;
+      coreFrame.recordDetachedJsPath(prefetched.index, new Date(), new Date());
+      return result;
     }
   }
   return coreFrame.execJsPath<T>(path);

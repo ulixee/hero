@@ -20,7 +20,14 @@ export default class ConnectionToReplay {
   private session: ISessionRecord;
   private tabsById = new Map<
     number,
-    { tabId: number; createdTime: number; startOrigin: string; width: number; height: number }
+    {
+      tabId: number;
+      createdTime: number;
+      detachedFromTabId?: number;
+      startOrigin: string;
+      width: number;
+      height: number;
+    }
   >();
 
   private readonly mainFrames = new Set<string>();
@@ -94,10 +101,14 @@ export default class ConnectionToReplay {
         if (!this.tabsById.has(tab.tabId)) {
           this.addTabId(tab.tabId, tab.createdTime);
         }
+        if (tab.detachedAtCommandId) {
+          this.tabsById.get(tab.tabId).detachedFromTabId = tab.parentTabId;
+        }
         const sessionTab = this.tabsById.get(tab.tabId);
         sessionTab.height = tab.viewportHeight;
         sessionTab.width = tab.viewportWidth;
       }
+      this.send('tabs', [...this.tabsById.values()]);
     });
 
     db.frames.subscribe(frames => {
@@ -142,8 +153,10 @@ export default class ConnectionToReplay {
     });
 
     db.commands.subscribe(commands => {
-      for (const command of commands) this.addTabId(command.tabId, command.startDate);
       const commandsWithResults = commands.map(CommandFormatter.parseResult);
+      for (const command of commandsWithResults) {
+        this.addTabId(command.tabId, command.startDate);
+      }
       this.send('commands', commandsWithResults);
       this.checkState();
     });
@@ -211,6 +224,7 @@ export default class ConnectionToReplay {
   }
 
   private addTabId(tabId: number, timestamp: number): void {
+    if (!tabId) return;
     if (!this.tabsById.has(tabId)) {
       this.tabsById.set(tabId, {
         tabId,

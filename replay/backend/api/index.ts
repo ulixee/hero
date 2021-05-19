@@ -4,7 +4,7 @@ import * as Path from 'path';
 import * as Http from 'http';
 import * as Fs from 'fs';
 import { app, ProtocolResponse } from 'electron';
-import ISaSession from '~shared/interfaces/ISaSession';
+import ISaSession, { ISessionTab } from '~shared/interfaces/ISaSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
 import getResolvable from '~shared/utils/promise';
@@ -20,21 +20,21 @@ export default class ReplayApi {
   private static localApiHost: URL;
 
   public readonly saSession: ISaSession;
-  public tabs: ReplayTabState[] = [];
+  public tabsById = new Map<number, ReplayTabState>();
   public apiHost: URL;
   public lastActivityDate: Date;
   public lastCommandName: string;
   public showUnresponsiveMessage = true;
   public hasAllData = false;
 
-  public onNewTab?: (tab: ReplayTabState) => any;
+  public onTabChange?: (tab: ReplayTabState) => any;
 
   public get isReady() {
     return this.isReadyResolvable.promise;
   }
 
-  public get getStartTab(): ReplayTabState {
-    return this.tabs[0];
+  public get startTab(): ReplayTabState {
+    return this.tabsById.values().next().value;
   }
 
   private replayTime: ReplayTime;
@@ -141,14 +141,16 @@ export default class ReplayApi {
   }
 
   public close(): void {
-    if (this.tabs.some(x => x.isActive)) return;
+    for (const value of this.tabsById.values()) {
+      if (value.isActive) return;
+    }
 
     this.websocket.close();
     ReplayApi.websockets.delete(this.websocket);
   }
 
   public getTab(tabId: number): ReplayTabState {
-    return this.tabs.find(x => x.tabId === tabId);
+    return this.tabsById.get(tabId);
   }
 
   private async onMessage(messageData: WebSocket.Data): Promise<void> {
@@ -156,7 +158,7 @@ export default class ReplayApi {
 
     if (event === 'trailer') {
       this.hasAllData = true;
-      for (const tab of this.tabs) tab.hasAllData = true;
+      for (const tab of this.tabsById.values()) tab.hasAllData = true;
       console.log('All data received', data);
       return;
     }
@@ -182,26 +184,19 @@ export default class ReplayApi {
       this.replayTime.update(closeDate);
       this.lastActivityDate = data.lastActivityDate ? new Date(data.lastActivityDate) : null;
       this.lastCommandName = data.lastCommandName;
-      for (const tab of this.tabs) tabsWithChanges.add(tab);
+      for (const tab of this.tabsById.values()) tabsWithChanges.add(tab);
     } else {
       if (!this.replayTime.close) {
         this.replayTime.update();
       }
 
       for (const record of data) {
-        let tab = this.getTab(record.tabId);
+        const tabId = record.tabId;
+        const timestamp: number = record.timestamp ?? record.startDate;
+        let tab = this.getTab(tabId);
         if (!tab) {
           console.log('New Tab created in replay');
-          const tabMeta = {
-            tabId: record.tabId,
-            createdTime: record.timestamp ?? record.startDate,
-            width: this.tabs[0].viewportWidth,
-            height: this.tabs[0].viewportHeight,
-          };
-          tab = new ReplayTabState(tabMeta, this.replayTime);
-          if (this.onNewTab) this.onNewTab(tab);
-
-          this.tabs.push(tab);
+          tab = this.onApiHasNewTab(tabId, timestamp);
         }
         tabsWithChanges.add(tab);
 
@@ -211,6 +206,46 @@ export default class ReplayApi {
     }
 
     for (const tab of tabsWithChanges) tab.sortTicks();
+    // if this is a detached tab command, we should create a new tab here
+    if (event === 'commands') {
+      for (const record of data) {
+        if (record.name !== 'detachTab' || !record.result) continue;
+        console.log('Loading a detached Tab', record);
+        const tab = this.getTab(record.tabId);
+        const detachedTabId = record.result.detachedTab.id;
+        const detachedState = record.result.detachedState;
+        const { timestampRange, indexRange } = detachedState.domChangeRange;
+        const paintEvents = tab.copyPaintEvents(timestampRange, indexRange);
+        const newTab = this.onApiHasNewTab(detachedTabId, record.startDate, record.tabId);
+        newTab.loadDetachedState(
+          record.tabId,
+          paintEvents,
+          record.timestamp,
+          record.id,
+          detachedState.url,
+        );
+      }
+    }
+  }
+
+  private onApiHasNewTab(
+    tabId: number,
+    timestamp: number,
+    detachedFromTabId?: number,
+  ): ReplayTabState {
+    const firstTab = this.startTab;
+    const tabMeta = <ISessionTab>{
+      tabId,
+      detachedFromTabId,
+      createdTime: timestamp,
+      width: firstTab.viewportWidth,
+      height: firstTab.viewportHeight,
+    };
+    const tab = new ReplayTabState(tabMeta, this.replayTime);
+    if (this.onTabChange) this.onTabChange(tab);
+
+    this.tabsById.set(tabId, tab);
+    return tab;
   }
 
   private onSession(data: ISaSession) {
@@ -229,8 +264,9 @@ export default class ReplayApi {
     });
 
     this.replayTime = new ReplayTime(data.startDate, data.closeDate);
-    this.tabs = data.tabs.map(x => new ReplayTabState(x, this.replayTime));
-
+    for (const tab of data.tabs) {
+      this.tabsById.set(tab.tabId, new ReplayTabState(tab, this.replayTime));
+    }
     this.isReadyResolvable.resolve();
   }
 

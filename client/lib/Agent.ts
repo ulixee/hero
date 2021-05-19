@@ -201,7 +201,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       }
     } else {
       const session = await connection.getCoreSessionOrReject();
-      await session.configure(options);
+      await session.configure(getState(this).options);
     }
   }
 

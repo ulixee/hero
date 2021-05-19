@@ -35,6 +35,7 @@ import BrowserEmulators from './BrowserEmulators';
 import HumanEmulators from './HumanEmulators';
 import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
+import DetachedTabState from './DetachedTabState';
 
 const { log } = Log(module);
 
@@ -157,7 +158,11 @@ export default class Session extends TypedEventEmitter<{
   public async detachTab(
     sourceTab: Tab,
     callsite: string,
-  ): Promise<{ detachedTab: Tab; prefetchedJsPaths: IJsPathResult[] }> {
+  ): Promise<{
+    detachedTab: Tab;
+    detachedState: DetachedTabState;
+    prefetchedJsPaths: IJsPathResult[];
+  }> {
     const detachedState = await sourceTab.createDetachedState();
 
     const page = await this.browserContext.newPage({
@@ -185,9 +190,9 @@ export default class Session extends TypedEventEmitter<{
       this.detachedTabsById.delete(newTab.id);
     });
     const jsPaths = await prefetchPromise;
-    const prefetches = await newTab.mainFrameEnvironment.jsPath.runJsPaths(jsPaths);
+    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPaths);
     await newTab.isReady;
-    return { detachedTab: newTab, prefetchedJsPaths: prefetches };
+    return { detachedTab: newTab, detachedState, prefetchedJsPaths: prefetches };
   }
 
   public getMitmProxy(): { address: string; password?: string } {

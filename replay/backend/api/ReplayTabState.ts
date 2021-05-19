@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
-import {
+import ISaSession, {
   IFocusRecord,
   IFrontendMouseEvent,
   IMouseEvent,
@@ -18,18 +18,16 @@ import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
 import getResolvable from '~shared/utils/promise';
 
-let pageCounter = 0;
-
 export default class ReplayTabState extends EventEmitter {
   public ticks: ReplayTick[] = [];
   public readonly commands: ICommandWithResult[] = [];
-  public readonly pages: { id: number; url: string; commandId: number }[] = [];
   public readonly mouseEvents: IMouseEvent[] = [];
   public readonly scrollEvents: IScrollRecord[] = [];
   public readonly focusEvents: IFocusRecord[] = [];
   public readonly paintEvents: IPaintEvent[] = [];
 
   public tabId: number;
+  public detachedFromTabId: number;
   public startOrigin: string;
   public urlOrigin: string;
   public viewportWidth: number;
@@ -73,6 +71,7 @@ export default class ReplayTabState extends EventEmitter {
     this.startOrigin = tabMeta.startOrigin;
     this.viewportHeight = tabMeta.height;
     this.viewportWidth = tabMeta.width;
+    this.detachedFromTabId = tabMeta.detachedFromTabId;
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
     this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.getTime(), 'Load'));
@@ -89,11 +88,6 @@ export default class ReplayTabState extends EventEmitter {
       durationMillis: this.replayTime.millis,
       ticks: this.ticks.filter(x => x.isMajor()).map(x => x.playbarOffsetPercent),
     } as ITickState;
-  }
-
-  public getPageOffset(page: { id: number; url: string }) {
-    const pageToLoad = this.pages.find(x => x.id === page.id);
-    return this.ticks.find(x => x.commandId === pageToLoad.commandId)?.playbarOffsetPercent ?? 0;
   }
 
   public transitionToPreviousTick() {
@@ -187,6 +181,33 @@ export default class ReplayTabState extends EventEmitter {
     return changeEvents;
   }
 
+  public copyPaintEvents(
+    timestampRange: [number, number],
+    eventIndexRange: [number, number],
+  ): IPaintEvent[] {
+    const [startTimestamp, endTimestamp] = timestampRange;
+    const [startIndex, endIndex] = eventIndexRange;
+    const paintEvents: IPaintEvent[] = [];
+    for (const paintEvent of this.paintEvents) {
+      if (paintEvent.timestamp >= startTimestamp && paintEvent.timestamp <= endTimestamp) {
+        paintEvents.push({
+          timestamp: paintEvent.timestamp,
+          commandId: paintEvent.commandId,
+          changeEvents: paintEvent.changeEvents.filter(x => {
+            if (x.timestamp === startTimestamp) {
+              return x.eventIndex >= startIndex;
+            }
+            if (x.timestamp === endTimestamp) {
+              return x.eventIndex <= endIndex;
+            }
+            return true;
+          }),
+        });
+      }
+    }
+    return paintEvents;
+  }
+
   public loadTick(
     newTickIdx: number,
     specificPlaybarOffset?: number,
@@ -260,6 +281,27 @@ export default class ReplayTabState extends EventEmitter {
     this.ticks.push(tick);
   }
 
+  public loadDetachedState(
+    detachedFromTabId: number,
+    paintEvents: IPaintEvent[],
+    timestamp: number,
+    commandId: number,
+    origin: string,
+  ): void {
+    this.detachedFromTabId = detachedFromTabId;
+    const flatEvent = <IPaintEvent>{ changeEvents: [], commandId, timestamp };
+    for (const paintEvent of paintEvents) {
+      flatEvent.changeEvents.push(...paintEvent.changeEvents);
+    }
+    this.paintEvents.push(flatEvent);
+    this.startOrigin = origin;
+    const tick = new ReplayTick(this, 'paint', 0, commandId, timestamp);
+    tick.isNewDocumentTick = true;
+    tick.documentOrigin = origin;
+    this.ticks.push(tick);
+    this.isReady.resolve();
+  }
+
   public loadDomChange(event: IDomChangeEvent) {
     const { commandId, action, textContent, timestamp } = event;
 
@@ -314,11 +356,6 @@ export default class ReplayTabState extends EventEmitter {
       if (isMainFrame && action === DomActionType.newDocument) {
         tick.isNewDocumentTick = true;
         tick.documentOrigin = textContent;
-        this.pages.push({
-          id: (pageCounter += 1),
-          url: textContent,
-          commandId,
-        });
       }
 
       if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {

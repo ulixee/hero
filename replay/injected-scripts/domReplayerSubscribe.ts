@@ -31,15 +31,28 @@ function debugLog(message: string, ...args: any[]) {
 }
 
 if (process.isMainFrame) {
-  ipcRenderer.on('dom:apply', (event, domChanges, resultNodeIds, mouseEvent, scrollEvent) => {
-    debugLog(
-      'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
-      domChanges?.length ?? 0,
-      resultNodeIds?.length ?? 0,
-      !!mouseEvent,
-      !!scrollEvent,
-    );
-    window.replayDomChanges(domChanges);
-    window.replayInteractions(resultNodeIds, mouseEvent, scrollEvent);
-  });
+  ipcRenderer.on(
+    'dom:apply',
+    (event, columns, rawDomChanges, resultNodeIds, mouseEvent, scrollEvent) => {
+      debugLog(
+        'Events: changes=%s, highlighted=%s, hasMouse=%s, hasScroll=%s',
+        rawDomChanges?.length ?? 0,
+        resultNodeIds?.length ?? 0,
+        !!mouseEvent,
+        !!scrollEvent,
+      );
+      if (rawDomChanges?.length) {
+        const domChanges = [];
+        for (const change of rawDomChanges) {
+          const record: any = {};
+          for (let i = 0; i < columns.length; i += 1) {
+            record[columns[i]] = change[i];
+          }
+          domChanges.push(record);
+        }
+        window.replayDomChanges(domChanges);
+      }
+      window.replayInteractions(resultNodeIds, mouseEvent, scrollEvent);
+    },
+  );
 }

@@ -13,6 +13,14 @@ export default class DetachedTabState {
   }
 
   public detachedAtCommandId: number;
+  public get domChangeRange(): { indexRange: [number, number]; timestampRange: [number, number] } {
+    const first = this.domChanges[0];
+    const last = this.domChanges[this.domChanges.length - 1];
+    return {
+      indexRange: [first.eventIndex, last.eventIndex],
+      timestampRange: [first.timestamp, last.timestamp],
+    };
+  }
 
   private readonly initialPageNavigation: INavigation;
   private readonly domChanges: IDomChangeRecord[];
@@ -87,6 +95,15 @@ export default class DetachedTabState {
       responseCode: match.response.statusCode,
     };
   };
+
+  public toJSON(): any {
+    return {
+      domChangeRange: this.domChangeRange,
+      url: this.url,
+      detachedAtCommandId: this.detachedAtCommandId,
+      resources: Object.values(this.resourceLookup).reduce((a, b) => (a += b.length), 0),
+    };
+  }
 
   private getMockHeaders(
     resource: IResourceMeta,

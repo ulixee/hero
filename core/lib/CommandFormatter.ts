@@ -61,6 +61,14 @@ export default class CommandFormatter {
       });
       return interacts.join(';\n');
     }
+
+    if (command.name === 'detachTab') {
+      return `detachTab({
+  id: ${args[0].id},
+  url: ${args[0].url}
+})`;
+    }
+
     if (command.name === 'waitForElement') {
       return `waitForElement( ${formatJsPath(args[0])} )`;
     }
@@ -68,7 +76,7 @@ export default class CommandFormatter {
     return `${command.name}(${args.map(JSON.stringify).join(', ')})`;
   }
 
-  public static parseResult(meta: ICommandMeta) {
+  public static parseResult(meta: ICommandMeta): ICommandWithResult {
     const duration = meta.endDate
       ? new Date(meta.endDate).getTime() - new Date(meta.startDate).getTime()
       : null;
@@ -102,7 +110,7 @@ export default class CommandFormatter {
     } else if (meta.resultType && meta.result) {
       const result = TypeSerializer.parse(meta.result);
       command.result = result;
-      if (meta.resultType === 'Object') {
+      if (meta.resultType === 'Object' && result.value) {
         const resultType = typeof result.value;
         if (
           resultType === 'string' ||
@@ -139,6 +147,10 @@ export default class CommandFormatter {
       if (mouseInteraction) {
         command.resultNodeIds = mouseInteraction.mousePosition;
       }
+    }
+
+    if (command.result && command.name === 'detachTab') {
+      command.result.prefetchedJsPaths = undefined;
     }
 
     // we have shell objects occasionally coming back. hide from ui
