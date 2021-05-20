@@ -84,9 +84,8 @@ export default class DetachedTabState {
       };
     }
 
-    const body = (await this.session.sessionState.getResourceData(match.id, false)).toString(
-      'base64',
-    );
+    const body =
+      (await this.session.sessionState.getResourceData(match.id, false))?.toString('base64') ?? '';
 
     return {
       requestId: request.requestId,

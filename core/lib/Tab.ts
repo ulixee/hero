@@ -548,7 +548,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public async createDetachedState(): Promise<DetachedTabState> {
     // need the dom to be loaded on the page
     await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
-    await this.flushPageEventsRecorder();
     // find last page load
     const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
     const domChanges = await this.getFrameDomChanges(

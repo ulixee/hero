@@ -169,10 +169,11 @@ export default class Session extends TypedEventEmitter<{
       runPageScripts: false,
       mockNetworkRequests: detachedState.mockNetworkRequests.bind(detachedState),
     });
-    const prefetchPromise = this.sessionState.findDetachedJsPathCalls(callsite);
+    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite);
     await page.setJavaScriptEnabled(false);
     const newTab = Tab.create(this, page, true, sourceTab);
     await detachedState.restoreDomIntoTab(newTab);
+    await newTab.isReady;
 
     this.sessionState.captureTab(
       newTab.id,
@@ -187,11 +188,11 @@ export default class Session extends TypedEventEmitter<{
         newTab.mainFrameEnvironment.jsPath.execHistory,
         callsite,
       );
+
       this.detachedTabsById.delete(newTab.id);
     });
-    const jsPaths = await prefetchPromise;
-    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPaths);
-    await newTab.isReady;
+
+    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPathCalls);
     return { detachedTab: newTab, detachedState, prefetchedJsPaths: prefetches };
   }
 

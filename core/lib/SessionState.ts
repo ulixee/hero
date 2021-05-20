@@ -56,7 +56,6 @@ export default class SessionState {
     [browserRequestId: string]: { resourceId: number; url: string }[];
   } = {};
 
-  private readonly previousSessions: ISessionRecord[] = [];
   private readonly sessionsDirectory: string;
   private lastErrorTime?: Date;
   private closeDate?: Date;
@@ -95,11 +94,6 @@ export default class SessionState {
     this.sessionsDirectory = sessionsDirectory;
     if (scriptInstanceMeta) {
       const sessionsDb = SessionsDb.find(sessionsDirectory);
-      this.previousSessions = sessionsDb.sessions.findByScriptEntrypoint(
-        scriptInstanceMeta.entrypoint,
-        2,
-      );
-
       const sessionsTable = sessionsDb.sessions;
       sessionsTable.insert(
         sessionId,
@@ -572,26 +566,28 @@ export default class SessionState {
   }
 
   /////// JsPath Calls
-  public async findDetachedJsPathCalls(callsite: string): Promise<IJsPathHistory[]> {
-    for (const session of this.previousSessions) {
-      const exists = await fs.promises
-        .access(`${this.sessionsDirectory}/${session.id}.db`)
-        .then(() => true)
-        .catch(() => false);
-
-      if (!exists) continue;
-
-      const sessionDb = new SessionDb(this.sessionsDirectory, session.id, { readonly: true });
-      const detachedCalls = sessionDb.detachedJsPathCalls.find(callsite);
-      if (detachedCalls?.execJsPathHistory) {
-        return JSON.parse(detachedCalls.execJsPathHistory);
-      }
+  public findDetachedJsPathCalls(callsite: string, key?: string): IJsPathHistory[] {
+    const sessionsDb = SessionsDb.find(this.sessionsDirectory);
+    const detachedCalls = sessionsDb.detachedJsPathCalls.find(
+      this.scriptInstanceMeta,
+      callsite,
+      key,
+    );
+    if (detachedCalls?.execJsPathHistory) {
+      return JSON.parse(detachedCalls.execJsPathHistory);
     }
     return null;
   }
 
-  public recordDetachedJsPathCalls(calls: IJsPathHistory[], callsite: string): void {
+  public recordDetachedJsPathCalls(calls: IJsPathHistory[], callsite: string, key?: string): void {
     if (!calls?.length) return;
-    this.db.detachedJsPathCalls.insert(callsite, calls, new Date());
+    const sessionsDb = SessionsDb.find(this.sessionsDirectory);
+    sessionsDb.detachedJsPathCalls.insert(
+      this.scriptInstanceMeta,
+      callsite,
+      calls,
+      new Date(),
+      key,
+    );
   }
 }
