@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
-import ISaSession, {
+import {
   IFocusRecord,
   IFrontendMouseEvent,
   IMouseEvent,
@@ -20,11 +20,7 @@ import getResolvable from '~shared/utils/promise';
 
 export default class ReplayTabState extends EventEmitter {
   public ticks: ReplayTick[] = [];
-  public readonly commands: ICommandWithResult[] = [];
-  public readonly mouseEvents: IMouseEvent[] = [];
-  public readonly scrollEvents: IScrollRecord[] = [];
-  public readonly focusEvents: IFocusRecord[] = [];
-  public readonly paintEvents: IPaintEvent[] = [];
+  public readonly commandsById = new Map<number, ICommandWithResult>();
 
   public tabId: number;
   public detachedFromTabId: number;
@@ -50,6 +46,11 @@ export default class ReplayTabState extends EventEmitter {
   }
 
   public isReady = getResolvable<void>();
+
+  private readonly mouseEvents: IMouseEvent[] = [];
+  private readonly scrollEvents: IScrollRecord[] = [];
+  private readonly focusEvents: IFocusRecord[] = [];
+  private readonly paintEvents: IPaintEvent[] = [];
 
   private currentTickIdx = -1;
   // put in placeholder
@@ -251,12 +252,19 @@ export default class ReplayTabState extends EventEmitter {
   }
 
   public loadCommand(command: ICommandWithResult) {
-    const existing = this.commands.find(x => x.id === command.id);
+    if (command.result && typeof command.result === 'string' && command.result.startsWith('"{')) {
+      try {
+        command.result = JSON.parse(command.result);
+      } catch (e) {
+        // didn't parse, just ignore
+      }
+    }
+    const existing = this.commandsById.get(command.id);
     if (existing) {
       Object.assign(existing, command);
     } else {
-      const idx = this.commands.length;
-      this.commands.push(command);
+      const idx = this.commandsById.size;
+      this.commandsById.set(command.id, command);
       const tick = new ReplayTick(
         this,
         'command',
@@ -323,23 +331,32 @@ export default class ReplayTabState extends EventEmitter {
     if (lastPaintEvent?.timestamp === timestamp) {
       paintEvent = lastPaintEvent;
     } else {
-      paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
+      for (let i = this.paintEvents.length - 1; i >= 0; i -= 1) {
+        const paint = this.paintEvents[i];
+        if (!paint) continue;
+        if (paint.timestamp === timestamp) {
+          paintEvent = paint[i];
+          break;
+        }
+      }
     }
 
     if (paintEvent) {
       const events = paintEvent.changeEvents;
       events.push(event);
 
+      // if events are out of order, set the index of paints back to this index
       if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
         events.sort((a, b) => {
           if (a.frameIdPath === b.frameIdPath) {
-            if (a.timestamp === b.timestamp) return a.eventIndex - b.eventIndex;
-            return a.timestamp - b.timestamp;
+            return a.eventIndex - b.eventIndex;
           }
           return a.frameIdPath.localeCompare(b.frameIdPath);
         });
+
         const paintIndex = this.paintEvents.indexOf(paintEvent);
-        if (paintIndex < this.paintEventsLoadedIdx) this.paintEventsLoadedIdx = paintIndex - 1;
+        if (paintIndex !== -1 && paintIndex < this.paintEventsLoadedIdx)
+          this.paintEventsLoadedIdx = paintIndex - 1;
       }
     } else {
       paintEvent = {
@@ -414,7 +431,7 @@ export default class ReplayTabState extends EventEmitter {
       }
       switch (tick.eventType) {
         case 'command':
-          const command = this.commands.find(x => x.id === tick.commandId);
+          const command = this.commandsById.get(tick.commandId);
           if (command.resultNodeIds) {
             lastSelectedNodeIds = command.resultNodeIds;
           }

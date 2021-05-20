@@ -358,13 +358,7 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
       break;
 
     case Node.TEXT_NODE:
-      // noscript tags have funky handling of nested brackets
-      if (parent && parent.tagName === 'NOSCRIPT') {
-        parent.innerHTML = data.textContent;
-        node = parent.childNodes[0];
-      } else {
-        node = document.createTextNode(data.textContent);
-      }
+      node = document.createTextNode(data.textContent);
       break;
 
     case Node.ELEMENT_NODE:

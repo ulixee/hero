@@ -36,7 +36,7 @@ export function getCallSite(priorToFilename?: string, endFilename?: string): Cal
     );
     if (lastIdx >= 0) stack = stack.slice(0, lastIdx + 1);
   }
-  return stack;
+  return stack.filter(x => !!x.getFileName() && !x.getFileName()?.startsWith('internal'));
 }
 
 export function pickRandom<T>(array: T[]): T {

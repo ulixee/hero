@@ -10,7 +10,7 @@
                     img.value(:src="commandResult.result")
                 .result(v-else-if="commandResult.result")
                     span.label result:
-                    span.value(:class="{error:commandResult.isError}") {{commandResult.result}}
+                    span.value(:class="{error:commandResult.isError}") {{formattedResult}}
 
 </template>
 
@@ -21,6 +21,7 @@ import { ipcRenderer } from 'electron';
 import NoCache from '~frontend/lib/NoCache';
 import ICommandWithResult from '~shared/interfaces/ICommandResult';
 import { OverlayStore } from '~frontend/models/OverlayStore';
+import * as JSON5 from 'json5';
 
 @Component
 export default class CommandOverlay extends Vue {
@@ -31,12 +32,22 @@ export default class CommandOverlay extends Vue {
   private zoomImage = false;
 
   get duration() {
-    if (!this.commandResult?.duration) return 'Pending';
+    if (this.commandResult?.duration === undefined || this.commandResult?.duration === null) {
+      return 'Pending';
+    }
 
     if (this.commandResult?.duration > 1000) {
       return `${Math.floor((this.commandResult.duration * 100) / 1000) / 100}s`;
     }
     return `${this.commandResult.duration}ms`;
+  }
+
+  get formattedResult() {
+    if (!this.commandResult?.result) return '-';
+    if (typeof this.commandResult.result === 'object') {
+      return `\n${JSON5.stringify(this.commandResult.result, { space: 2, quote: '' })}`;
+    }
+    return this.commandResult.result;
   }
 
   @NoCache
@@ -105,6 +116,9 @@ export default class CommandOverlay extends Vue {
     }
     .value {
       word-break: break-word;
+      white-space: pre;
+      text-overflow: ellipsis;
+      width: 100%;
       &.error {
         font-style: italic;
         color: #717171;
