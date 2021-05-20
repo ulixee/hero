@@ -24,7 +24,8 @@ export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPat
     execJsPathHistory: IJsPathHistory[],
     timestamp: Date,
     key = 'default',
-  ) {
+  ): void {
+    if (!scriptMeta) return;
     const { entrypoint: scriptEntrypoint } = scriptMeta;
     const record = {
       scriptEntrypoint,
@@ -52,6 +53,8 @@ export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPat
     callsite: string,
     key = 'default',
   ): IDetachedJsPathCallsRecord {
+    if (!scriptMeta) return null;
+
     const cached = this.getCachedRecord(scriptMeta, callsite, key);
     if (cached) return cached;
 
@@ -76,7 +79,8 @@ export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPat
     callsite: string,
     key: string,
   ): IDetachedJsPathCallsRecord {
-    const cacheKey = DetachedJsPathCallsTable.getCacheKey(scriptMeta.entrypoint, callsite, key);
+    const entrypoint = scriptMeta?.entrypoint ?? '';
+    const cacheKey = DetachedJsPathCallsTable.getCacheKey(entrypoint, callsite, key);
     return this.cacheByCallsiteKey[cacheKey];
   }
 

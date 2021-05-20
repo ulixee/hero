@@ -1,6 +1,6 @@
 import { ProtocolResponse } from 'electron';
 import * as Http from 'http';
-import { PassThrough, Readable } from 'stream';
+import { Readable } from 'stream';
 import getResolvable from '~shared/utils/promise';
 import { IReplayResource } from '~shared/interfaces/IReplayResource';
 import decompress from '~shared/utils/decompress';

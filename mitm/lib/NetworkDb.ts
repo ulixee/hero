@@ -23,7 +23,7 @@ export default class NetworkDb {
     this.batchInsert = this.db.transaction(() => {
       for (const table of this.tables) {
         try {
-          table.flush();
+          table.runPendingInserts();
         } catch (error) {
           log.error('NetworkDb.flushError', {
             sessionId: null,

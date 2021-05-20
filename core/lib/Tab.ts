@@ -29,7 +29,6 @@ import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 import DomChangesTable, {
   IDomChangeRecord,
   IFrontendDomChangeEvent,
@@ -221,15 +220,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.isClosing = true;
     const parentLogId = this.logger.stats('Tab.Closing');
     const errors: Error[] = [];
-
-    try {
-      if (this.navigations.top && this.puppetPage.mainFrame.isLoaded) {
-        await this.flushPageEventsRecorder();
-      }
-    } catch (error) {
-      // don't re-handle
-      errors.push(error);
-    }
 
     try {
       const cancelMessage = 'Terminated command because session closing';
@@ -507,27 +497,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
-  public async flushPageEventsRecorder(): Promise<void> {
-    if (this.isDetached) return;
-    await Promise.all(
-      this.puppetPage.frames.map(async frame => {
-        try {
-          // don't wait for env to be available
-          if (!frame.canEvaluate(true)) return;
-
-          const results = await frame.evaluate<PageRecorderResultSet>(
-            `window.flushPageRecorder()`,
-            true,
-          );
-          await this.onPageRecorderEvents(results, frame.id);
-        } catch (error) {
-          // no op if it fails
-        }
-      }),
-    );
-    this.sessionState.db.flush();
-  }
-
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {
     const frameDomNodePaths = this.sessionState.db.frames.frameDomNodePathsById;
 
@@ -540,7 +509,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     frameId: string,
     sinceCommandId: number,
   ): Promise<IDomChangeRecord[]> {
-    await this.flushPageEventsRecorder();
+    await this.mainFrameEnvironment.flushPageEventsRecorder();
+    this.sessionState.db.flush();
 
     return this.sessionState.db.domChanges.getFrameChanges(this.mainFrameId, sinceCommandId);
   }
@@ -557,7 +527,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const resources = this.sessionState.getResourceLookupMap(this.id);
     this.logger.info('DetachingTab', {
       url: lastLoadedNavigation.finalUrl,
-      domChangeIndices: [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex],
+      domChangeIndices:
+        domChanges.length > 0
+          ? [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex]
+          : [],
       domChanges: domChanges.length,
       resources: Object.keys(resources).length,
     });
@@ -618,34 +591,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         return;
       }
 
-      this.onPageRecorderEvents(JSON.parse(payload), frameId);
+      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(JSON.parse(payload));
     }
-  }
-
-  private onPageRecorderEvents(results: PageRecorderResultSet, frameId: string) {
-    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
-    this.logger.stats('Tab.onPageEvents', {
-      tabId: this.id,
-      frameId,
-      dom: domChanges.length,
-      mouse: mouseEvents.length,
-      focusEvents: focusEvents.length,
-      scrollEvents: scrollEvents.length,
-      loadEvents,
-    });
-
-    const frame = this.frameEnvironmentsById.get(frameId);
-
-    frame.onDomRecorderLoadEvents(loadEvents);
-
-    this.sessionState.captureDomEvents(
-      this.id,
-      frameId,
-      domChanges,
-      mouseEvents,
-      focusEvents,
-      scrollEvents,
-    );
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////

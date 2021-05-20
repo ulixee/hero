@@ -31,7 +31,7 @@ import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent from './Agent';
-import { getAwaitedPathAsMethodArg, delegate as AwaitedHandler } from './SetupAwaitedHandler';
+import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
 

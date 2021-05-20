@@ -21,7 +21,6 @@ import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
-import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
 
 const { log } = Log(module);
 
@@ -109,7 +108,7 @@ export default class SessionDb {
       this.batchInsert = this.db.transaction(() => {
         for (const table of this.tables) {
           try {
-            table.flush();
+            table.runPendingInserts();
           } catch (error) {
             if (String(error).match('attempt to write a readonly database')) {
               clearInterval(this.saveInterval);

@@ -16,7 +16,6 @@ import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { ILoadEvent } from '@secret-agent/interfaces/ILoadEvent';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
@@ -32,6 +31,7 @@ import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
 import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
+import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 
 const { log } = Log(module);
 
@@ -376,14 +376,50 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.interactor.initialize();
   }
 
-  public onDomRecorderLoadEvents(loadEvents: ILoadEvent[]): void {
-    for (const loadEvent of loadEvents) {
-      const [event, url, timestamp] = loadEvent;
+  public async flushPageEventsRecorder(): Promise<boolean> {
+    try {
+      // don't wait for env to be available
+      if (!this.puppetFrame.canEvaluate(true)) return false;
 
+      const results = await this.puppetFrame.evaluate<PageRecorderResultSet>(
+        `window.flushPageRecorder()`,
+        true,
+      );
+      return this.onPageRecorderEvents(results);
+    } catch (error) {
+      // no op if it fails
+    }
+    return false;
+  }
+
+  public onPageRecorderEvents(results: PageRecorderResultSet): boolean {
+    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
+    const hasRecords = results.some(x => x.length > 0);
+    if (!hasRecords) return false;
+    this.logger.stats('FrameEnvironment.onPageEvents', {
+      tabId: this.id,
+      dom: domChanges.length,
+      mouse: mouseEvents.length,
+      focusEvents: focusEvents.length,
+      scrollEvents: scrollEvents.length,
+      loadEvents,
+    });
+
+    for (const [event, url, timestamp] of loadEvents) {
       const incomingStatus = pageStateToLoadStatus[event];
 
       this.navigations.onLoadStateChanged(incomingStatus, url, null, new Date(timestamp));
     }
+
+    this.sessionState.captureDomEvents(
+      this.tab.id,
+      this.id,
+      domChanges,
+      mouseEvents,
+      focusEvents,
+      scrollEvents,
+    );
+    return true;
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////

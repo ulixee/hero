@@ -23,7 +23,6 @@ import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
 import { IJsPathHistory } from './JsPath';
-import { ISessionRecord } from '../models/SessionsTable';
 
 const { log } = Log(module);
 

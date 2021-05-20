@@ -99,6 +99,9 @@ class PageEventsRecorder {
       stamp,
       idx(),
     ]);
+    if (document) {
+      this.domChanges.push([DomActionType.added, this.serializeNode(document), stamp, idx()]);
+    }
 
     if (document && document.doctype) {
       this.domChanges.push([
