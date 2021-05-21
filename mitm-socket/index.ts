@@ -97,7 +97,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     if (!this.connectPromise?.isResolved) {
       this.connectPromise?.reject(
         buildConnectError(
-          this.connectError ?? `Socket process exited during connect`,
+          this.connectError ?? `Failed to connect to ${this.serverName}`,
           this.callStack,
         ),
       );
@@ -166,7 +166,10 @@ export default class MitmSocket extends TypedEventEmitter<{
       this.onError(message.error);
     } else if (status === 'eof') {
       this.receivedEOF = true;
-      this.emit('eof');
+      setImmediate(() => {
+        if (this.isClosing) return;
+        this.emit('eof');
+      });
     } else if (status === 'closing') {
       this.close();
     }

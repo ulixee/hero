@@ -198,25 +198,34 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       });
     }
 
-    // networkId corresponds to onNetworkRequestWillBeSent
-    const resource = <IPuppetResourceRequest>{
-      browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
-      resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
-      url: new URL(networkRequest.request.url),
-      method: networkRequest.request.method,
-      isSSL: networkRequest.request.url.startsWith('https'),
-      isFromRedirect: false,
-      isUpgrade: false,
-      isHttp2Push: false,
-      isServerHttp2: false,
-      isClientHttp2: false,
-      requestTime: new Date(),
-      clientAlpn: null,
-      hasUserGesture: false,
-      documentUrl: networkRequest.request.headers.Referer,
-      frameId: networkRequest.frameId,
-    };
-
+    let resource: IPuppetResourceRequest;
+    try {
+      // networkId corresponds to onNetworkRequestWillBeSent
+      resource = <IPuppetResourceRequest>{
+        browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
+        resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
+        url: new URL(networkRequest.request.url),
+        method: networkRequest.request.method,
+        isSSL: networkRequest.request.url.startsWith('https'),
+        isFromRedirect: false,
+        isUpgrade: false,
+        isHttp2Push: false,
+        isServerHttp2: false,
+        isClientHttp2: false,
+        requestTime: new Date(),
+        clientAlpn: null,
+        hasUserGesture: false,
+        documentUrl: networkRequest.request.headers.Referer,
+        frameId: networkRequest.frameId,
+      };
+    } catch (error) {
+      this.logger.warn('NetworkManager.onRequestPausedError', {
+        error,
+        url: networkRequest.request.url,
+        browserRequestId: networkRequest.requestId,
+      });
+      return;
+    }
     const existing = this.requestsById.get(resource.browserRequestId);
 
     if (existing) {
@@ -249,25 +258,34 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (isNavigation) {
       this.navigationRequestIdsToLoaderId.set(networkRequest.requestId, networkRequest.loaderId);
     }
-
-    const resource = <IPuppetResourceRequest>{
-      url: new URL(networkRequest.request.url),
-      isSSL: networkRequest.request.url.startsWith('https'),
-      isFromRedirect: !!redirectedFromUrl,
-      isUpgrade: false,
-      isHttp2Push: false,
-      isServerHttp2: false,
-      isClientHttp2: false,
-      requestTime: new Date(networkRequest.wallTime * 1e3),
-      clientAlpn: null,
-      browserRequestId: networkRequest.requestId,
-      resourceType: getResourceTypeForChromeValue(networkRequest.type),
-      method: networkRequest.request.method,
-      hasUserGesture: networkRequest.hasUserGesture,
-      documentUrl: networkRequest.documentURL,
-      redirectedFromUrl,
-      frameId: networkRequest.frameId,
-    };
+    let resource: IPuppetResourceRequest;
+    try {
+      resource = <IPuppetResourceRequest>{
+        url: new URL(networkRequest.request.url),
+        isSSL: networkRequest.request.url.startsWith('https'),
+        isFromRedirect: !!redirectedFromUrl,
+        isUpgrade: false,
+        isHttp2Push: false,
+        isServerHttp2: false,
+        isClientHttp2: false,
+        requestTime: new Date(networkRequest.wallTime * 1e3),
+        clientAlpn: null,
+        browserRequestId: networkRequest.requestId,
+        resourceType: getResourceTypeForChromeValue(networkRequest.type),
+        method: networkRequest.request.method,
+        hasUserGesture: networkRequest.hasUserGesture,
+        documentUrl: networkRequest.documentURL,
+        redirectedFromUrl,
+        frameId: networkRequest.frameId,
+      };
+    } catch (error) {
+      this.logger.warn('NetworkManager.onNetworkRequestWillBeSentError', {
+        error,
+        url: networkRequest.request.url,
+        browserRequestId: networkRequest.requestId,
+      });
+      return;
+    }
 
     const publishing = this.getPublishingForRequestId(resource.browserRequestId, true);
     publishing.hasRequestWillBeSentEvent = true;
@@ -436,6 +454,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
+      if (!resource.url || !resource.requestTime) {
+        return;
+      }
+
       if (canceled) resource.browserCanceled = true;
       if (blockedReason) resource.browserBlockedReason = blockedReason;
       if (errorText) resource.browserLoadFailure = errorText;
@@ -443,6 +465,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       if (!this.requestPublishingById.get(requestId)?.isPublished) {
         this.doEmitResourceRequested(requestId);
       }
+
       this.emit('resource-failed', {
         resource,
       });

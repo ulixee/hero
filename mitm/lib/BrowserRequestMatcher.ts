@@ -112,6 +112,7 @@ export default class BrowserRequestMatcher {
     }
 
     if (!resource) {
+      if (!httpResourceLoad.url) return;
       resource = {
         url: httpResourceLoad.url.href,
         method,
@@ -184,7 +185,8 @@ export default class BrowserRequestMatcher {
     filter?: 'noMitmResourceId' | 'hasMitmResourceId',
   ): IRequestedResource | null {
     const { method } = resourceToMatch;
-    const url = resourceToMatch.url.href;
+    const url = resourceToMatch.url?.href;
+    if (!url) return;
     let matches = this.requestedResources.filter(x => {
       return x.url === url && x.method === method;
     });

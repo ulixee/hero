@@ -183,12 +183,29 @@ export default class MitmProxy {
       return proxyToClientResponse.end(emptyResponse);
     }
 
-    await HttpRequestHandler.onRequest({
-      isSSL,
-      requestSession,
-      clientToProxyRequest,
-      proxyToClientResponse,
-    });
+    try {
+      await HttpRequestHandler.onRequest({
+        isSSL,
+        requestSession,
+        clientToProxyRequest,
+        proxyToClientResponse,
+      });
+    } catch (error) {
+      // this can only happen during processing of request
+      log.warn('MitmProxy.ErrorProcessingRequest', {
+        sessionId,
+        isSSL,
+        error,
+        host: clientToProxyRequest.headers.host ?? clientToProxyRequest.headers[':authority'],
+        url: clientToProxyRequest.url,
+      });
+      try {
+        proxyToClientResponse.writeHead(400);
+        proxyToClientResponse.end('Bad request');
+      } catch (e) {
+        // don't double throw or log
+      }
+    }
   }
 
   private async onHttpUpgrade(
@@ -219,13 +236,17 @@ export default class MitmProxy {
       return socket.end('HTTP/1.1 504 Proxy Error\r\n\r\n');
     }
 
-    await HttpUpgradeHandler.onUpgrade({
-      isSSL,
-      socket,
-      head,
-      requestSession,
-      clientToProxyRequest,
-    });
+    try {
+      await HttpUpgradeHandler.onUpgrade({
+        isSSL,
+        socket,
+        head,
+        requestSession,
+        clientToProxyRequest,
+      });
+    } catch (error) {
+      this.onClientError(false, error, socket);
+    }
   }
 
   private async onHttpConnect(
@@ -312,7 +333,11 @@ export default class MitmProxy {
       socketAddress: socket.address(),
     });
 
-    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+    try {
+      socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+    } catch (e) {
+      // just drown these
+    }
   }
 
   private onConnectError(hostname: string, errorKind: string, error: Error): void {

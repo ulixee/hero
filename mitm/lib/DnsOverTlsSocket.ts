@@ -6,7 +6,11 @@ import { createPromise } from '@secret-agent/commons/utils';
 import MitmSocket from '@secret-agent/mitm-socket/index';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { addTypedEventListener, removeEventListeners } from '@secret-agent/commons/eventUtils';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
 import RequestSession from '../handlers/RequestSession';
+
+const { log } = Log(module);
 
 export default class DnsOverTlsSocket {
   public get host(): string {
@@ -32,9 +36,11 @@ export default class DnsOverTlsSocket {
   private readonly onClose?: () => void;
 
   private requestSession: RequestSession | undefined;
+  private logger: IBoundLog;
 
   constructor(dnsServer: ConnectionOptions, requestSession: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
+    this.logger = log.createChild({ sessionId: requestSession.sessionId });
     this.dnsServer = dnsServer;
     this.onClose = onClose;
   }
@@ -84,15 +90,21 @@ export default class DnsOverTlsSocket {
     });
     this.mitmSocket.on('eof', async () => {
       removeEventListeners([registration]);
+      if (this.isClosing) return;
       this.mitmSocket.close();
-      this.isConnected = this.connect();
-
-      await this.isConnected;
-      // re-run pending queries
-      for (const [id, entry] of this.pending) {
-        this.pending.delete(id);
-        const newHost = this.getDnsResponse(entry.host);
-        entry.resolvable.resolve(newHost);
+      try {
+        this.isConnected = this.connect();
+        await this.isConnected;
+        // re-run pending queries
+        for (const [id, entry] of this.pending) {
+          this.pending.delete(id);
+          const newHost = this.getDnsResponse(entry.host);
+          entry.resolvable.resolve(newHost);
+        }
+      } catch (error) {
+        this.logger.info('Error re-connecting to dns', {
+          error,
+        });
       }
     });
   }

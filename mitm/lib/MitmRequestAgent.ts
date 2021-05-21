@@ -306,10 +306,20 @@ export default class MitmRequestAgent {
       });
     });
 
-    const pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
-    this.session.trackResourceRedirects(pushContext);
-    pushContext.setState(ResourceState.ServerToProxyPush);
-    this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
+    let pushContext: IMitmRequestContext;
+    try {
+      pushContext = MitmRequestContext.createFromHttp2Push(parentContext, rawHeaders);
+      this.session.trackResourceRedirects(pushContext);
+      pushContext.setState(ResourceState.ServerToProxyPush);
+      this.session.emit('request', MitmRequestContext.toEmittedResource(pushContext));
+    } catch (error) {
+      log.warn('Http2.ClientToProxy.ReadPushPromiseError', {
+        sessionId,
+        rawHeaders,
+        error,
+      });
+      return;
+    }
 
     if (BlockHandler.shouldBlockRequest(pushContext)) {
       await pushContext.browserHasRequested;
