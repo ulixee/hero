@@ -1,7 +1,7 @@
-import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import INavigation from '@secret-agent/interfaces/INavigation';
 import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
 import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
+import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
@@ -58,7 +58,9 @@ export default class DetachedTabState {
     ]);
   }
 
-  public mockNetworkRequests: IPuppetPageOptions['mockNetworkRequests'] = async request => {
+  public mockNetworkRequests: Parameters<
+    IPuppetPage['setNetworkRequestInterceptor']
+  >[0] = async request => {
     const { url, method } = request.request;
     if (request.resourceType === 'Document' && url === this.url) {
       return {

@@ -211,7 +211,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     }
   }
 
-  public detach(tab: Tab): FrozenTab {
+  public detach(tab: Tab, key?: string): FrozenTab {
     const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
       .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
       .join('\n');
@@ -220,7 +220,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
     const coreSession = getState(this).connection.getCoreSessionOrReject();
 
     const detachedTab = coreSession.then(async session =>
-      session.detachTab(await coreTab, callSitePath),
+      session.detachTab(await coreTab, callSitePath, key),
     );
 
     return new FrozenTab(this, detachedTab);

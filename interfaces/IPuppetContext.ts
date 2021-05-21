@@ -1,5 +1,4 @@
 import { URL } from 'url';
-import Protocol from 'devtools-protocol';
 import { ICookie } from './ICookie';
 import ITypedEventEmitter from './ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
@@ -8,6 +7,7 @@ import { IPuppetWorker } from './IPuppetWorker';
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
   workersById: Map<string, IPuppetWorker>;
   defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
+
   newPage(options?: IPuppetPageOptions): Promise<IPuppetPage>;
   close(): Promise<void>;
 
@@ -21,9 +21,6 @@ export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContex
 export interface IPuppetPageOptions {
   runPageScripts: boolean;
   triggerPopupOnPageId?: string;
-  mockNetworkRequests: (
-    request: Protocol.Fetch.RequestPausedEvent,
-  ) => Promise<Protocol.Fetch.FulfillRequestRequest>;
 }
 
 export interface IPuppetContextEvents {

@@ -11,7 +11,6 @@ import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventL
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { URL } from 'url';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
-import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -47,7 +46,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
-  private readonly mockNetworkRequests: IPuppetPageOptions['mockNetworkRequests'];
+  private mockNetworkRequests?: (
+    request: Protocol.Fetch.RequestPausedEvent,
+  ) => Promise<Protocol.Fetch.FulfillRequestRequest>;
+
   private readonly proxyConnectionOptions: IProxyConnectionOptions;
   private isChromeRetainingResources = false;
 
@@ -55,10 +57,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
-    mockNetworkRequests?: IPuppetPageOptions['mockNetworkRequests'],
   ) {
     super();
-    this.mockNetworkRequests = mockNetworkRequests;
     this.devtools = devtoolsSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
@@ -92,7 +92,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (this.mockNetworkRequests) {
       return this.devtools
         .send('Fetch.enable', {
-          handleAuthRequests: true,
+          handleAuthRequests: !!this.proxyConnectionOptions?.password,
         })
         .catch(err => err);
     }
@@ -119,6 +119,23 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     for (const error of errors) {
       if (error && error instanceof Error) throw error;
     }
+  }
+
+  public async setNetworkInterceptor(
+    mockNetworkRequests: NetworkManager['mockNetworkRequests'],
+    disableSessionLogging: boolean,
+  ): Promise<void> {
+    this.mockNetworkRequests = mockNetworkRequests;
+    const promises: Promise<any>[] = [];
+    if (disableSessionLogging) {
+      promises.push(this.devtools.send('Network.disable'));
+    }
+    promises.push(
+      this.devtools.send('Fetch.enable', {
+        handleAuthRequests: !!this.proxyConnectionOptions?.password,
+      }),
+    );
+    await Promise.all(promises);
   }
 
   public close(): void {

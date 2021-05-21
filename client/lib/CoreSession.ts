@@ -92,11 +92,12 @@ export default class CoreSession implements IJsPathEventTarget {
   public async detachTab(
     tab: CoreTab,
     callSitePath: string,
+    key?: string,
   ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
     const { meta, prefetchedJsPaths } = await this.commandQueue.run<{
       meta: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
-    }>('Session.detachTab', tab.tabId, callSitePath);
+    }>('Session.detachTab', tab.tabId, callSitePath, key);
     const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection);
     this.frozenTabsById.set(meta.tabId, coreTab);
     return {

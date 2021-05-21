@@ -20,10 +20,15 @@ import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import {
+  IDevtoolsEventMessage,
+  IDevtoolsResponseMessage,
+} from '@secret-agent/interfaces/IDevtoolsSession';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
+
 import CookieParam = Protocol.Network.CookieParam;
 import TargetInfo = Protocol.Target.TargetInfo;
 
@@ -37,6 +42,7 @@ export class BrowserContext
   public emulator: IBrowserEmulator;
   public proxy: IProxyConnectionOptions;
 
+  private attachedTargetIds = new Set<string>();
   private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
   private creatingTargetPromises: Promise<void>[] = [];
@@ -123,6 +129,7 @@ export class BrowserContext
   }
 
   async onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): Promise<Page> {
+    this.attachedTargetIds.add(targetInfo.targetId);
     await Promise.all(this.creatingTargetPromises);
     if (this.pagesById.has(targetInfo.targetId)) return;
 
@@ -142,14 +149,7 @@ export class BrowserContext
       opener = this.pagesById.values().next().value;
     }
 
-    const page = new Page(
-      devtoolsSession,
-      targetInfo.targetId,
-      this,
-      this.logger,
-      opener,
-      pageOptions,
-    );
+    const page = new Page(devtoolsSession, targetInfo.targetId, this, this.logger, opener);
     this.pagesById.set(page.targetId, page);
     await page.isReady;
     this.emit('page', { page });
@@ -157,6 +157,7 @@ export class BrowserContext
   }
 
   onPageDetached(targetId: string) {
+    this.attachedTargetIds.delete(targetId);
     const page = this.pagesById.get(targetId);
     if (page) {
       this.pagesById.delete(targetId);
@@ -189,6 +190,7 @@ export class BrowserContext
   }
 
   targetDestroyed(targetId: string) {
+    this.attachedTargetIds.delete(targetId);
     const page = this.pagesById.get(targetId);
     if (page) page.didClose();
   }
@@ -200,7 +202,7 @@ export class BrowserContext
 
   async attachToTarget(targetId: string) {
     // chrome 80 still needs you to manually attach
-    if (!this.pagesById.has(targetId)) {
+    if (!this.attachedTargetIds.has(targetId)) {
       await this.sendWithBrowserDevtoolsSession('Target.attachToTarget', {
         targetId,
         flatten: true,
@@ -324,11 +326,11 @@ export class BrowserContext
     const receive = addTypedEventListener(devtoolsSession.messageEvents, 'receive', event => {
       if (shouldFilter) {
         // see if this was initiated by this browser context
-        const { id, targetInfo } = event as any;
+        const { id } = event as IDevtoolsResponseMessage;
         if (id && !this.browserContextInitiatedMessageIds.has(id)) return;
 
         // see if this has a browser context target
-        const target = targetInfo as TargetInfo;
+        const target = (event as IDevtoolsEventMessage).params?.targetInfo as TargetInfo;
         if (target && target.browserContextId && target.browserContextId !== this.id) return;
       }
       this.emit('devtools-message', {

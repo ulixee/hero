@@ -23,7 +23,6 @@ import { assert, createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IRect from '@secret-agent/interfaces/IRect';
-import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';
@@ -84,7 +83,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     browserContext: BrowserContext,
     logger: IBoundLog,
     opener: Page | null,
-    options: IPuppetPageOptions | null,
   ) {
     super();
 
@@ -102,7 +100,6 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       devtoolsSession,
       this.logger,
       this.browserContext.proxy,
-      options?.mockNetworkRequests,
     );
     this.framesManager = new FramesManager(devtoolsSession, this.logger);
     this.opener = opener;
@@ -143,6 +140,14 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       });
       throw error;
     });
+  }
+
+  async setNetworkRequestInterceptor(
+    networkRequestsFn: (
+      request: Protocol.Fetch.RequestPausedEvent,
+    ) => Promise<Protocol.Fetch.FulfillRequestRequest>,
+  ): Promise<void> {
+    return await this.networkManager.setNetworkInterceptor(networkRequestsFn, true);
   }
 
   addNewDocumentScript(script: string, isolatedEnvironment: boolean): Promise<void> {

@@ -158,20 +158,25 @@ export default class Session extends TypedEventEmitter<{
   public async detachTab(
     sourceTab: Tab,
     callsite: string,
+    key?: string,
   ): Promise<{
     detachedTab: Tab;
     detachedState: DetachedTabState;
     prefetchedJsPaths: IJsPathResult[];
   }> {
-    const detachedState = await sourceTab.createDetachedState();
-
-    const page = await this.browserContext.newPage({
-      runPageScripts: false,
-      mockNetworkRequests: detachedState.mockNetworkRequests.bind(detachedState),
-    });
-    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite);
-    await page.setJavaScriptEnabled(false);
+    const [detachedState, page] = await Promise.all([
+      sourceTab.createDetachedState(),
+      this.browserContext.newPage({
+        runPageScripts: false,
+      }),
+    ]);
+    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite, key);
+    await Promise.all([
+      page.setNetworkRequestInterceptor(detachedState.mockNetworkRequests.bind(detachedState)),
+      page.setJavaScriptEnabled(false),
+    ]);
     const newTab = Tab.create(this, page, true, sourceTab);
+
     await detachedState.restoreDomIntoTab(newTab);
     await newTab.isReady;
 
@@ -187,6 +192,7 @@ export default class Session extends TypedEventEmitter<{
       this.sessionState.recordDetachedJsPathCalls(
         newTab.mainFrameEnvironment.jsPath.execHistory,
         callsite,
+        key,
       );
 
       this.detachedTabsById.delete(newTab.id);
