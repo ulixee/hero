@@ -1,5 +1,11 @@
 import agent, { LocationStatus } from 'secret-agent';
 
+/**
+ * The first run of this will result in a script taking 60+ seconds.
+ *
+ * Subsequent runs will "learn" the queries that ran against the frozenTab and run significantly faster.
+ */
+
 async function run() {
   console.time('Detach');
   await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
@@ -7,9 +13,9 @@ async function run() {
   await agent.waitForPaintingStable();
 
   console.timeLog('Detach', 'got sync result');
-  const detached = await agent.detach(agent.activeTab);
+  const frozenTab = await agent.detach(agent.activeTab);
   console.timeLog('Detach', 'detached');
-  const { document } = detached;
+  const { document } = frozenTab;
   console.log(document);
 
   const wrapperElements = await document.querySelectorAll('.RefList');
