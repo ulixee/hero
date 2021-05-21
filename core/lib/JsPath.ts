@@ -15,6 +15,7 @@ import InjectedScriptError from './InjectedScriptError';
 const { log } = Log(module);
 
 export class JsPath {
+  public hasNewExecJsPathHistory = false;
   public readonly execHistory: IJsPathHistory[] = [];
 
   private readonly frameEnvironment: FrameEnvironment;
@@ -80,7 +81,7 @@ export class JsPath {
         result.isValueSerialized = undefined;
         result.value = TypeSerializer.revive(result.value, 'BROWSER');
       }
-      this.recordExecResult(jsPath, result);
+      this.recordExecResult(jsPath, result, false);
     }
     return results;
   }
@@ -108,8 +109,13 @@ export class JsPath {
     return result;
   }
 
-  private recordExecResult(jsPath: IJsPath, result: IExecJsPathResult<any>): void {
+  private recordExecResult(
+    jsPath: IJsPath,
+    result: IExecJsPathResult<any>,
+    isLiveQuery = true,
+  ): void {
     let sourceIndex: number;
+    if (isLiveQuery) this.hasNewExecJsPathHistory = true;
     // if jspath starts with an id, this is a nested query
     if (typeof jsPath[0] === 'number') {
       const id = jsPath[0];

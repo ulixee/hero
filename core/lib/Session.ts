@@ -189,11 +189,13 @@ export default class Session extends TypedEventEmitter<{
     );
     this.detachedTabsById.set(newTab.id, newTab);
     newTab.on('close', () => {
-      this.sessionState.recordDetachedJsPathCalls(
-        newTab.mainFrameEnvironment.jsPath.execHistory,
-        callsite,
-        key,
-      );
+      if (newTab.mainFrameEnvironment.jsPath.hasNewExecJsPathHistory) {
+        this.sessionState.recordDetachedJsPathCalls(
+          newTab.mainFrameEnvironment.jsPath.execHistory,
+          callsite,
+          key,
+        );
+      }
 
       this.detachedTabsById.delete(newTab.id);
     });

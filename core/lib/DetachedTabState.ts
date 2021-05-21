@@ -14,6 +14,9 @@ export default class DetachedTabState {
 
   public detachedAtCommandId: number;
   public get domChangeRange(): { indexRange: [number, number]; timestampRange: [number, number] } {
+    if (!this.domChanges?.length) {
+      return { indexRange: [-1, 1], timestampRange: [-1, 1] };
+    }
     const first = this.domChanges[0];
     const last = this.domChanges[this.domChanges.length - 1];
     return {
