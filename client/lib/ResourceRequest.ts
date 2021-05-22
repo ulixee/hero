@@ -1,7 +1,8 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
+import * as Util from 'util';
 import CoreTab from './CoreTab';
 
 const { getState, setState } = StateMachine<ResourceRequest, IState>();
@@ -20,10 +21,6 @@ const propertyKeys: (keyof ResourceRequest)[] = [
 ];
 
 export default class ResourceRequest {
-  constructor() {
-    initializeConstantsAndProperties(this, [], propertyKeys);
-  }
-
   public get headers(): Promise<IResourceHeaders> {
     return getRequestProperty(this, 'headers');
   }
@@ -42,6 +39,10 @@ export default class ResourceRequest {
 
   public get postData(): Promise<any> {
     return getRequestProperty(this, 'postData');
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

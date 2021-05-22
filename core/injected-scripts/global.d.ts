@@ -13,4 +13,3 @@ interface IStaticNodeTracker {
 }
 
 declare let TypeSerializer: ITypeSerializer;
-declare let NodeTracker: IStaticNodeTracker;

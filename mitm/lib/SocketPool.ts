@@ -70,6 +70,7 @@ export default class SocketPool {
   }
 
   public close(): void {
+    this.queue.willStop();
     for (const pending of this.pending) {
       pending.reject(new CanceledPromiseError('Shutting down socket pool'));
     }
@@ -88,6 +89,7 @@ export default class SocketPool {
     }
     this.all.clear();
     this.pool.clear();
+    this.queue.stop(new CanceledPromiseError('Shutting down socket pool'));
   }
 
   public getHttp2Session(): IHttp2Session | undefined {

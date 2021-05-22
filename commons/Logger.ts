@@ -77,23 +77,8 @@ class Log implements ILog {
         .replace('.js', '')
         .replace('.ts', '')
         .replace('build/', '');
-      const printData: any = {};
-      let error: Error;
-      for (const [key, value] of Object.entries(entry.data)) {
-        if (value === undefined || value === null) continue;
-        if (value instanceof Error) {
-          printData[key] = value.toString();
-          Object.defineProperty(value, hasBeenLoggedSymbol, {
-            enumerable: false,
-            value: true,
-          });
-          error = value;
-        } else if ((value as any).toJSON) {
-          printData[key] = (value as any).toJSON();
-        } else {
-          printData[key] = value;
-        }
-      }
+
+      const { error, printData } = translateToPrintable(entry.data);
 
       if (level === 'warn' || level === 'error') {
         printData.sessionId = sessionId;
@@ -115,6 +100,53 @@ class Log implements ILog {
     LogEvents.broadcast(entry);
     return id;
   }
+}
+
+function translateValueToPrintable(value: any, depth = 0): any {
+  if (value === undefined || value === null) return;
+  if (value instanceof Error) {
+    return value.toString();
+  }
+  if ((value as any).toJSON) {
+    return (value as any).toJSON();
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+
+  if (depth > 2) return value;
+
+  if (typeof value === 'object') {
+    if (Array.isArray(value)) {
+      return value.map(x => translateValueToPrintable(x, depth + 1));
+    }
+    const result: any = {};
+    for (const [key, subValue] of Object.entries(value)) {
+      result[key] = translateValueToPrintable(subValue, depth + 1);
+    }
+    return result;
+  }
+}
+
+function translateToPrintable(
+  data: any,
+  result?: { error?: Error; printData: any },
+): { error?: Error; printData: any } {
+  result ??= { printData: {} };
+  const { printData } = result;
+  for (const [key, value] of Object.entries(data)) {
+    if (value instanceof Error) {
+      Object.defineProperty(value, hasBeenLoggedSymbol, {
+        enumerable: false,
+        value: true,
+      });
+      result.error = value;
+    }
+    const printable = translateValueToPrintable(value);
+    if (!printable) continue;
+    printData[key] = printable;
+  }
+  return result;
 }
 
 const logLevels = ['stats', 'info', 'warn', 'error'];

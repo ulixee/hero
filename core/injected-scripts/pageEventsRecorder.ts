@@ -38,7 +38,6 @@ const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) =>
 delete window[runtimeFunction];
 
 let lastUploadDate: Date;
-let recorder: PageEventsRecorder;
 
 function upload(records: PageRecorderResultSet) {
   try {
@@ -55,63 +54,13 @@ function upload(records: PageRecorderResultSet) {
   return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function NodeTrackerStatics(constructor: IStaticNodeTracker) {}
-
-@NodeTrackerStatics
-class NodeTracker {
-  public static nodeIdSymbol = Symbol.for('saNodeId');
-  private static nextId = 1;
-  private static watchedNodesById = new Map<number, Node>();
-
-  public static has(node: Node): boolean {
-    return !!node[this.nodeIdSymbol];
-  }
-
-  public static getNodeId(node: Node): number {
-    if (!node) return undefined;
-    return node[this.nodeIdSymbol] ?? undefined;
-  }
-
-  public static watchNode(node: Node): number {
-    let id = this.getNodeId(node);
-    if (!id) {
-      // extract so we detect any nodes that haven't been extracted yet. Ie, called from jsPath
-      recorder.extractChanges();
-      id = this.track(node);
-    }
-
-    this.watchedNodesById.set(id, node);
-    return id;
-  }
-
-  public static track(node: Node): number {
-    if (!node) return;
-    if (node[this.nodeIdSymbol]) {
-      return node[this.nodeIdSymbol];
-    }
-    const id = this.nextId;
-    this.nextId += 1;
-    node[this.nodeIdSymbol] = id;
-    return id;
-  }
-
-  public static getWatchedNodeWithId(id: number): Node | undefined {
-    if (this.watchedNodesById.has(id)) {
-      return this.watchedNodesById.get(id);
-    }
-    throw new Error(`Node with id not found -> ${id}`);
-  }
-}
-
-// @ts-ignore
-window.NodeTracker = NodeTracker;
-
 let eventCounter = 0;
 
 function idx() {
   return (eventCounter += 1);
 }
+
+let isStarted = false;
 
 class PageEventsRecorder {
   private domChanges: IDomChangeEvent[] = [];
@@ -131,7 +80,15 @@ class PageEventsRecorder {
 
   constructor() {
     this.observer = new MutationObserver(this.onMutation.bind(this));
-    if (window.self.location.href === 'about:blank') return;
+  }
+
+  public start() {
+    if (isStarted || window.self.location.href === 'about:blank') {
+      return;
+    }
+    isStarted = true;
+
+    const stamp = new Date().getTime();
     // preload with a document
     this.domChanges.push([
       DomActionType.newDocument,
@@ -139,48 +96,45 @@ class PageEventsRecorder {
         id: -1,
         textContent: window.self.location.href,
       },
-      new Date().getTime(),
+      stamp,
       idx(),
     ]);
+    if (document) {
+      this.domChanges.push([DomActionType.added, this.serializeNode(document), stamp, idx()]);
+    }
 
     if (document && document.doctype) {
       this.domChanges.push([
         DomActionType.added,
         this.serializeNode(document.doctype),
-        new Date().getTime(),
+        stamp,
         idx(),
       ]);
     }
-
-    if (document && document.childNodes.length) {
-      const mutations: MutationRecord[] = [
-        {
-          type: 'childList' as any,
-          addedNodes: document.childNodes,
-          removedNodes: [] as any,
-          nextSibling: null,
-          previousSibling: null,
-          oldValue: null,
-          attributeNamespace: null,
-          attributeName: null,
-          target: document,
-        },
-      ];
-
-      this.onMutation(mutations);
-    }
+    const children = this.serializeChildren(document, new Map<Node, INodeData>());
     this.observer.observe(document, {
       attributes: true,
       childList: true,
       subtree: true,
       characterData: true,
     });
+    for (const childData of children) {
+      this.domChanges.push([DomActionType.added, childData, stamp, idx()]);
+    }
+    this.uploadChanges();
   }
 
   public extractChanges(): PageRecorderResultSet {
     const changes = this.convertMutationsToChanges(this.observer.takeRecords());
     this.domChanges.push(...changes);
     return this.pageResultset;
+  }
+
+  public flushAndReturnLists(): PageRecorderResultSet {
+    const changes = recorder.extractChanges();
+
+    recorder.resetLists();
+    return changes;
   }
 
   public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
@@ -215,6 +169,7 @@ class PageEventsRecorder {
   }
 
   public onLoadEvent(name: string) {
+    this.start();
     this.loadEvents.push([name, window.self.location.href, new Date().getTime()]);
     this.uploadChanges();
   }
@@ -617,16 +572,12 @@ class PageEventsRecorder {
 const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
 const propertiesToCheck = ['value', 'selected', 'checked'];
 
-recorder = new PageEventsRecorder();
+const recorder = new PageEventsRecorder();
 
-function flushPageRecorder() {
-  const changes = recorder.extractChanges();
-
-  recorder.resetLists();
-  return changes;
-}
 // @ts-ignore
-window.flushPageRecorder = flushPageRecorder;
+window.extractDomChanges = () => recorder.extractChanges();
+// @ts-ignore
+window.flushPageRecorder = () => recorder.flushAndReturnLists();
 // @ts-ignore
 window.listenForInteractionEvents = () => recorder.listenToInteractionEvents();
 
@@ -637,24 +588,33 @@ const interval = setInterval(() => {
   }
 }, 500);
 
-if (window.self.location?.href !== 'about:blank') {
-  window.addEventListener('beforeunload', () => {
-    clearInterval(interval);
-    recorder.disconnect();
-  });
-  const perfObserver = new PerformanceObserver(() => {
-    recorder.onLoadEvent('LargestContentfulPaint');
-    perfObserver.disconnect();
-  });
-  perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-}
-
 window.addEventListener('DOMContentLoaded', () => {
   // force domContentLoaded to come first
   recorder.onLoadEvent('DOMContentLoaded');
 });
 
 window.addEventListener('load', () => recorder.onLoadEvent('load'));
+
+if (window.self.location?.href !== 'about:blank') {
+  window.addEventListener('beforeunload', () => {
+    clearInterval(interval);
+    recorder.disconnect();
+  });
+
+  const paintObserver = new PerformanceObserver(entryList => {
+    if (entryList.getEntriesByName('first-contentful-paint').length) {
+      recorder.start();
+      paintObserver.disconnect();
+    }
+  });
+  paintObserver.observe({ type: 'paint', buffered: true });
+
+  const contentStableObserver = new PerformanceObserver(() => {
+    recorder.onLoadEvent('LargestContentfulPaint');
+    contentStableObserver.disconnect();
+  });
+  contentStableObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+}
 
 // need duplicate since this is a variable - not just a type
 enum MouseEventType {

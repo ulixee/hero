@@ -206,7 +206,7 @@ function createReplayItems() {
   }
 
   sa-overflow {
-    z-index:10000;
+    z-index: 2147483647;
     display:block;
     width:100%;
     height:8px;
@@ -215,7 +215,7 @@ function createReplayItems() {
   }
 
   sa-highlight {
-    z-index:10000;
+    z-index: 2147483647;
     position:absolute;
     box-shadow: 1px 1px 3px 0 #3498db;
     border-radius:3px;
@@ -228,7 +228,7 @@ function createReplayItems() {
     pointer-events: none;
     position: absolute;
     top: 0;
-    z-index: 10000;
+    z-index: 2147483647;
     left: 0;
     width: 20px;
     height: 20px;

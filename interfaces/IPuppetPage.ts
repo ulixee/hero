@@ -1,3 +1,4 @@
+import Protocol from 'devtools-protocol';
 import IRegisteredEventListener from './IRegisteredEventListener';
 import ITypedEventEmitter from './ITypedEventEmitter';
 import IRect from './IRect';
@@ -33,6 +34,12 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
   ) => Promise<void>;
+
+  setNetworkRequestInterceptor(
+    networkRequestsFn: (
+      request: Protocol.Fetch.RequestPausedEvent,
+    ) => Promise<Protocol.Fetch.FulfillRequestRequest>,
+  ): Promise<void>;
 
   getIndexedDbDatabaseNames(): Promise<{ frameId: string; origin: string; databases: string[] }[]>;
   setJavaScriptEnabled(enabled: boolean): Promise<void>;

@@ -104,7 +104,7 @@ describe('basic Core tests', () => {
     // #4
     const tab4Promise = connection.createSession();
     expect(GlobalPool.activeSessionCount).toBe(3);
-    await tab1.close();
+    await tab1.session.close();
     const tab4Meta = await tab4Promise;
     const tab4 = Session.getTab(tab4Meta);
     Helpers.needsClosing.push(tab4.session);
@@ -112,10 +112,10 @@ describe('basic Core tests', () => {
     // should give straight to this waiting promise
     expect(GlobalPool.activeSessionCount).toBe(3);
     await tab4.goto(httpServer.url);
-    await tab4.close();
+    await tab4.session.close();
     expect(GlobalPool.activeSessionCount).toBe(2);
 
-    await Promise.all([tab1.close(), tab2.close(), tab3.close()]);
+    await Promise.all([tab1.session.close(), tab2.session.close(), tab3.session.close()]);
     expect(GlobalPool.activeSessionCount).toBe(0);
     await httpServer.close();
   }, 15e3);

@@ -166,7 +166,7 @@ export default class MitmRequestContext {
 
   public static toEmittedResource(ctx: IMitmRequestContext): IRequestSessionResponseEvent {
     const request = {
-      url: ctx.url.href,
+      url: ctx.url?.href,
       headers: ctx.requestHeaders,
       method: ctx.method,
       postData: ctx.requestPostData,

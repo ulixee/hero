@@ -1,5 +1,6 @@
 import { ProtocolResponse } from 'electron';
 import * as Http from 'http';
+import { Readable } from 'stream';
 import getResolvable from '~shared/utils/promise';
 import { IReplayResource } from '~shared/interfaces/IReplayResource';
 import decompress from '~shared/utils/decompress';
@@ -39,68 +40,75 @@ export default class ReplayResources {
     return await this.resourcesByUrl.get(url).promise;
   }
 
-  public async getContent(resourceId: number, baseHost: string): Promise<ProtocolResponse> {
-    if (this.resourceBodyById.has(resourceId)) {
-      return this.resourceBodyById.get(resourceId);
-    }
-
+  public async getContent(
+    resourceId: number,
+    baseHost: string,
+    dataDir: string,
+  ): Promise<ProtocolResponse> {
     const resource = this.resourcesById.get(resourceId);
     if (!resourceWhitelist.has(resource.type)) {
       console.log('skipping resource', resource);
+
       return <ProtocolResponse>{
-        data: '',
+        data: Readable.from([]),
         statusCode: 404,
       };
     }
+    if (!this.resourceBodyById.has(resourceId)) {
+      const { resolve, reject, promise } = getResolvable<ProtocolResponse>();
+      this.resourceBodyById.set(resourceId, promise);
+      const reqHeaders = { headers: { 'x-data-location': dataDir } };
+      const req = Http.get(`${baseHost}/resource/${resourceId}`, reqHeaders, async res => {
+        res.on('error', reject);
 
-    const { resolve, reject, promise } = getResolvable<ProtocolResponse>();
-
-    this.resourceBodyById.set(resourceId, promise);
-    const req = Http.get(`${baseHost}/resource/${resourceId}`, async res => {
-      res.on('error', reject);
-
-      const contentType = res.headers['content-type'];
-      const encoding = res.headers['content-encoding'];
-      const headers: any = {
-        'cache-control': 'public, max-age=500',
-        'content-type': contentType,
-        'x-replay-agent': `Secret Agent Replay v${packageJson.version}`,
-      };
-      if (res.headers.location) {
-        headers.location = res.headers.location;
-      }
-
-      const buffer: Buffer[] = [];
-      for await (const chunk of res) {
-        buffer.push(chunk);
-      }
-
-      let body = Buffer.concat(buffer);
-
-      if (encoding) {
-        body = await decompress(body, encoding);
-      }
-
-      if (resource.type === 'Document' && !isAllowedDocumentContentType(contentType)) {
-        const first100 = body.slice(0, 200).toString();
-
-        let doctype = '';
-        const match = first100.match(/^\s*<!DOCTYPE([^>]*?)>/i);
-        if (match) {
-          doctype = `<!DOCTYPE${match[1] ?? ''}>\n`;
+        const contentType = res.headers['content-type'];
+        const encoding = res.headers['content-encoding'];
+        const headers: any = {
+          'Cache-Control': 'public, max-age=604800, immutable',
+          'Content-Type': contentType,
+          'X-Replay-Agent': `Secret Agent Replay v${packageJson.version}`,
+        };
+        if (res.headers.location) {
+          headers.location = res.headers.location;
         }
 
-        body = Buffer.from(`${doctype}<html><head></head><body></body></html>`);
-      }
-      resolve(<ProtocolResponse>{
-        data: body,
-        headers,
-        statusCode: res.statusCode,
+        const buffer: Buffer[] = [];
+        for await (const chunk of res) {
+          buffer.push(chunk);
+        }
+
+        let body = Buffer.concat(buffer);
+
+        if (encoding) {
+          body = await decompress(body, encoding);
+        }
+
+        if (resource.type === 'Document' && !isAllowedDocumentContentType(contentType)) {
+          const first100 = body.slice(0, 200).toString();
+
+          let doctype = '';
+          const match = first100.match(/^\s*<!DOCTYPE([^>]*?)>/i);
+          if (match) {
+            doctype = `<!DOCTYPE${match[1] ?? ''}>\n`;
+          }
+
+          body = Buffer.from(`${doctype}<html><head></head><body></body></html>`);
+        }
+
+        resolve(<ProtocolResponse>{
+          data: body,
+          headers,
+          statusCode: res.statusCode,
+        });
       });
-    });
-    req.on('error', reject);
-    req.end();
-    return await promise;
+      req.on('error', reject);
+      req.end();
+    }
+    const cached = await this.resourceBodyById.get(resourceId);
+    return {
+      ...cached,
+      data: Readable.from(cached.data),
+    };
   }
 
   private initResource(url: string) {

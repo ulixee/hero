@@ -18,6 +18,7 @@
     "core-js": "^3.9.1",
     "uuid": "^8.3.2",
     "vue": "^2.6.12",
+    "json5": "^2.2.0",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.1.2",
     "vue-slider-component": "^3.2.2",

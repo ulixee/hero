@@ -210,6 +210,47 @@ Update existing configuration settings.
 
 See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
 
+### agent.detachTab*(tab\[, key])* {#detach-tab}
+
+Detach the given tab into a "Frozen" state. The `FrozenTab` contains a replica of the DOM and layout at the moment of detachment, and supports all the readonly activities of a normal Tab (eg, querySelectors, getComputedVisibility, getComputedStyle).
+
+`FrozenTabs` have a unique attribute in that any queries you run against them will be "learned" on an initial run, and pre-fetched on subsequent runs. This means you can very quickly iterate through all the data you want on a page after you've loaded it into your desired state.
+
+NOTE: you can detach the same `Tab` multiple times per script. Each instance will contain DOM frozen at the time it was detached.
+
+#### **Arguments**:
+
+- tab `Tab`. An existing tab loaded to the point you wish to `freeze`
+- key `string`. Optional extra identifier to differentiate between runs in a loop. This can be useful if you are looping through a list of links and detaching each Tab but have specific extraction logic for each link. NOTE: if your looping logic is the same, changing this key will decrease performance.
+
+#### **Returns**: `FrozenTab`
+
+```js
+  await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
+  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+
+  const frozenTab = await agent.detach(agent.activeTab);
+  const { document } = frozenTab;
+
+  const versions = [];
+  // 1.  First run will run as normal. 
+  // 2+. Next runs will pre-fetch everything run against the frozenTab
+  // NOTE: Every time your script changes, SecretAgent will re-learn what to pre-fetch.
+  const wrapperElements = await document.querySelectorAll('.RefList');
+  for (const elem of wrapperElements) {
+    const innerText = await elem.querySelector('.RefList-title').innerText;
+    if (innerText === 'Tags') {
+      const aElems = await elem.querySelectorAll('ul.RefList-items li a');
+
+      for (const aElem of aElems) {
+        const version = await aElem.innerText;
+        versions.push(version);
+      }
+    }
+  }
+  await agent.close();
+```
+
 ### agent.exportUserProfile*()* {#export-profile}
 
 Returns a json representation of the underlying browser state for saving. This can later be restored into a new instance using `agent.configure({ userProfile: serialized })`. See the [UserProfile page](/docs/advanced/user-profile) for more details.

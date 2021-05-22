@@ -1,6 +1,8 @@
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
+import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import Session from './Session';
 import Tab from './Tab';
 
 const { log } = Log(module);
@@ -9,14 +11,20 @@ type AsyncFunc = (...args: any[]) => Promise<any>;
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();
   private logger: IBoundLog;
-  constructor(readonly owner: any, readonly tab: Tab, readonly frameId: string, fns: AsyncFunc[]) {
+  constructor(
+    readonly owner: any,
+    readonly session: Session,
+    readonly tabId: number,
+    readonly frameId: string,
+    fns: AsyncFunc[],
+  ) {
     for (const fn of fns) {
       owner[fn.name] = ((...args) => this.runCommandFn(fn, ...args)) as any;
       this.fnNames.add(fn.name);
     }
     this.logger = log.createChild(module, {
-      tabId: tab.id,
-      sessionId: tab.session.id,
+      tabId,
+      sessionId: session.id,
       frameId,
     });
   }
@@ -24,21 +32,29 @@ export default class CommandRecorder {
   private async runCommandFn<T>(fn: AsyncFunc, ...args: any[]): Promise<T> {
     if (!this.fnNames.has(fn.name)) throw new Error(`Unsupported function requested ${fn.name}`);
 
-    const { tab } = this;
-    const sessionState = tab.sessionState;
+    const { session } = this;
+    const sessionState = session.sessionState;
     const commandHistory = sessionState.commands;
+    let tabId = this.tabId;
+    const frameId = this.frameId;
+
+    if (!tabId && args.length && args[0] instanceof Tab) {
+      tabId = args[0].id;
+    }
 
     const commandMeta = {
       id: commandHistory.length + 1,
-      tabId: tab.id,
-      frameId: this.frameId,
+      tabId,
+      frameId,
       name: fn.name,
-      args: args.length ? JSON.stringify(args) : undefined,
+      args: args.length ? TypeSerializer.stringify(args) : undefined,
     } as ICommandMeta;
 
-    const frame = tab.frameEnvironmentsById.get(this.frameId);
-    frame.navigationsObserver.willRunCommand(commandMeta, commandHistory);
-
+    if (frameId) {
+      const tab = session.getTab(tabId);
+      const frame = tab.frameEnvironmentsById.get(frameId);
+      frame.navigationsObserver.willRunCommand(commandMeta, commandHistory);
+    }
     const id = this.logger.info('Command.run', commandMeta);
 
     let result: T;

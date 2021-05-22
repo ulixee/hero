@@ -25,6 +25,7 @@ import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { MitmProxy } from '@secret-agent/mitm/index';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
@@ -33,6 +34,8 @@ import UserProfile from './UserProfile';
 import BrowserEmulators from './BrowserEmulators';
 import HumanEmulators from './HumanEmulators';
 import InjectedScripts from './InjectedScripts';
+import CommandRecorder from './CommandRecorder';
+import DetachedTabState from './DetachedTabState';
 
 const { log } = Log(module);
 
@@ -55,7 +58,7 @@ export default class Session extends TypedEventEmitter<{
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
 
-  public tabs: Tab[] = [];
+  public tabsById = new Map<number, Tab>();
 
   public readonly humanEmulatorId: string;
   public readonly browserEmulatorId: string;
@@ -71,8 +74,11 @@ export default class Session extends TypedEventEmitter<{
     }[]
   >();
 
+  private hasLoadedUserProfile = false;
+  private commandRecorder: CommandRecorder;
   private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
+  private detachedTabsById = new Map<number, Tab>();
 
   private tabIdCounter = 0;
 
@@ -121,10 +127,15 @@ export default class Session extends TypedEventEmitter<{
       this.upstreamProxyUrl,
       this.browserEmulator,
     );
+    this.commandRecorder = new CommandRecorder(this, this, null, null, [
+      this.configure,
+      this.detachTab,
+      this.exportUserProfile,
+    ]);
   }
 
   public getTab(id: number): Tab {
-    return this.tabs.find(x => x.id === id);
+    return this.tabsById.get(id) ?? this.detachedTabsById.get(id);
   }
 
   public async configure(options: IConfigureSessionOptions) {
@@ -133,13 +144,64 @@ export default class Session extends TypedEventEmitter<{
       this.mitmRequestSession.upstreamProxyUrl = options.upstreamProxyUrl;
     }
     if (options.blockedResourceTypes !== undefined) {
-      for (const tab of this.tabs) await tab.setBlockedResourceTypes(options.blockedResourceTypes);
+      for (const tab of this.tabsById.values()) {
+        await tab.setBlockedResourceTypes(options.blockedResourceTypes);
+      }
     }
 
     if (options.userProfile !== undefined) {
       this.userProfile = options.userProfile;
     }
     await this.browserEmulator.configure(options);
+  }
+
+  public async detachTab(
+    sourceTab: Tab,
+    callsite: string,
+    key?: string,
+  ): Promise<{
+    detachedTab: Tab;
+    detachedState: DetachedTabState;
+    prefetchedJsPaths: IJsPathResult[];
+  }> {
+    const [detachedState, page] = await Promise.all([
+      sourceTab.createDetachedState(),
+      this.browserContext.newPage({
+        runPageScripts: false,
+      }),
+    ]);
+    const jsPathCalls = this.sessionState.findDetachedJsPathCalls(callsite, key);
+    await Promise.all([
+      page.setNetworkRequestInterceptor(detachedState.mockNetworkRequests.bind(detachedState)),
+      page.setJavaScriptEnabled(false),
+    ]);
+    const newTab = Tab.create(this, page, true, sourceTab);
+
+    await detachedState.restoreDomIntoTab(newTab);
+    await newTab.isReady;
+
+    this.sessionState.captureTab(
+      newTab.id,
+      page.id,
+      page.devtoolsSession.id,
+      sourceTab.id,
+      detachedState.detachedAtCommandId,
+    );
+    this.detachedTabsById.set(newTab.id, newTab);
+    newTab.on('close', () => {
+      if (newTab.mainFrameEnvironment.jsPath.hasNewExecJsPathHistory) {
+        this.sessionState.recordDetachedJsPathCalls(
+          newTab.mainFrameEnvironment.jsPath.execHistory,
+          callsite,
+          key,
+        );
+      }
+
+      this.detachedTabsById.delete(newTab.id);
+    });
+
+    const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPathCalls);
+    return { detachedTab: newTab, detachedState, prefetchedJsPaths: prefetches };
   }
 
   public getMitmProxy(): { address: string; password?: string } {
@@ -185,12 +247,17 @@ export default class Session extends TypedEventEmitter<{
     return (this.tabIdCounter += 1);
   }
 
+  public exportUserProfile(): Promise<IUserProfile> {
+    return UserProfile.export(this);
+  }
+
   public async createTab() {
     const page = await this.newPage();
 
     // if first tab, install session storage
-    if (!this.tabs.length && this.userProfile?.storage) {
+    if (!this.hasLoadedUserProfile && this.userProfile?.storage) {
       await UserProfile.installSessionStorage(this, page);
+      this.hasLoadedUserProfile = true;
     }
 
     const tab = Tab.create(this, page);
@@ -211,7 +278,14 @@ export default class Session extends TypedEventEmitter<{
 
     try {
       this.awaitedEventListener.close();
-      await Promise.all(this.tabs.map(x => x.close()));
+      const promises: Promise<any>[] = [];
+      for (const tab of this.tabsById.values()) {
+        promises.push(tab.close());
+      }
+      for (const tab of this.detachedTabsById.values()) {
+        promises.push(tab.close());
+      }
+      await Promise.all(promises);
       this.mitmRequestSession.close();
       if (this.isolatedMitmProxy) this.isolatedMitmProxy.close();
     } catch (error) {
@@ -286,10 +360,13 @@ export default class Session extends TypedEventEmitter<{
     const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
       event.browserRequestId,
     );
-    let tab = this.tabs.find(x => x.id === tabId);
+    let tab = this.tabsById.get(tabId);
     if (!tab && !tabId) {
       // if we can't place it, just use the first active tab
-      tab = this.tabs.find(x => !x.isClosing) ?? this.tabs[0];
+      for (const next of this.tabsById.values()) {
+        tab = next;
+        if (!next.isClosing) break;
+      }
     }
 
     const resource = this.sessionState.captureResource(tab?.id ?? tabId, event, true);
@@ -307,7 +384,7 @@ export default class Session extends TypedEventEmitter<{
     const url = request.request?.url;
     const isDocument = request?.resourceType === 'Document';
     if (isDocument && !tabId) {
-      for (const tab of this.tabs) {
+      for (const tab of this.tabsById.values()) {
         const isMatch = tab.findFrameWithUnresolvedNavigation(
           request.browserRequestId,
           request.request?.method,
@@ -333,7 +410,7 @@ export default class Session extends TypedEventEmitter<{
     }
 
     if (tabId && isDocument) {
-      const tab = this.tabs.find(x => x.id === tabId);
+      const tab = this.tabsById.get(tabId);
       tab?.checkForResolvedNavigation(request.browserRequestId, resource, event.error);
     }
   }
@@ -355,7 +432,7 @@ export default class Session extends TypedEventEmitter<{
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
   ) {
-    const tab = Tab.create(this, page, parentTab, {
+    const tab = Tab.create(this, page, false, parentTab, {
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoaderId,
     });
@@ -369,18 +446,11 @@ export default class Session extends TypedEventEmitter<{
   }
 
   private registerTab(tab: Tab, page: IPuppetPage) {
-    this.tabs.push(tab);
-    tab.on('close', this.removeTab.bind(this, tab));
+    const id = tab.id;
+    this.tabsById.set(id, tab);
+    tab.on('close', () => this.tabsById.delete(id));
     page.popupInitializeFn = this.onNewTab.bind(this, tab);
     return tab;
-  }
-
-  private removeTab(tab: Tab) {
-    const tabIdx = this.tabs.indexOf(tab);
-    if (tabIdx >= 0) this.tabs.splice(tabIdx, 1);
-    if (this.tabs.length === 0) {
-      return this.close();
-    }
   }
 
   private async newPage() {
@@ -394,6 +464,8 @@ export default class Session extends TypedEventEmitter<{
 
   public static getTab(meta: ISessionMeta): Tab | undefined {
     if (!meta) return undefined;
-    return this.get(meta.sessionId)?.getTab(meta.tabId);
+    const session = this.get(meta.sessionId);
+    if (!session) return undefined;
+    return session.tabsById.get(meta.tabId) ?? session.detachedTabsById.get(meta.tabId);
   }
 }

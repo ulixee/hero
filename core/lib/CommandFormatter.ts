@@ -1,7 +1,7 @@
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import { IInteractionGroup } from '@secret-agent/interfaces/IInteractions';
 import { getKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
@@ -61,6 +61,12 @@ export default class CommandFormatter {
       });
       return interacts.join(';\n');
     }
+
+    if (command.name === 'detachTab') {
+      const { url } = args[0];
+      return `detachTab(${url})`;
+    }
+
     if (command.name === 'waitForElement') {
       return `waitForElement( ${formatJsPath(args[0])} )`;
     }
@@ -68,7 +74,7 @@ export default class CommandFormatter {
     return `${command.name}(${args.map(JSON.stringify).join(', ')})`;
   }
 
-  public static parseResult(meta: ICommandMeta) {
+  public static parseResult(meta: ICommandMeta): ICommandWithResult {
     const duration = meta.endDate
       ? new Date(meta.endDate).getTime() - new Date(meta.startDate).getTime()
       : null;
@@ -102,7 +108,7 @@ export default class CommandFormatter {
     } else if (meta.resultType && meta.result) {
       const result = TypeSerializer.parse(meta.result);
       command.result = result;
-      if (meta.resultType === 'Object') {
+      if (meta.resultType === 'Object' && result.value) {
         const resultType = typeof result.value;
         if (
           resultType === 'string' ||
@@ -141,6 +147,14 @@ export default class CommandFormatter {
       }
     }
 
+    if (command.result && command.name === 'detachTab') {
+      command.result.prefetchedJsPaths = undefined;
+    }
+
+    if (command.result && command.name.startsWith('go')) {
+      command.result = undefined;
+    }
+
     // we have shell objects occasionally coming back. hide from ui
     if (meta.args?.includes(getNodePointerFnName)) {
       command.result = undefined;
@@ -153,7 +167,7 @@ export function formatJsPath(path: any) {
   const jsPath = (path ?? [])
     .map((x, i) => {
       if (i === 0 && typeof x === 'number') {
-        return '<previouslySelectedNode>';
+        return `getNodeById(${x})`;
       }
       if (Array.isArray(x)) {
         if (x[0] === getNodePointerFnName) return;

@@ -71,6 +71,7 @@ function removeMe() {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/test2`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -88,7 +89,7 @@ function removeMe() {
     expect(changes).toHaveLength(2);
     expect(changes[0].action).toBe(DomActionType.removed);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects reordered nodes', async () => {
@@ -116,6 +117,7 @@ function sort() {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/test3`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -143,7 +145,7 @@ function sort() {
     expect(lastChange.nodeId).toBe(elem1.nodeId);
     expect(lastChange.previousSiblingId).toBe(elem3.nodeId);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects attribute changes', async () => {
@@ -160,6 +162,7 @@ function sort() {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/test4`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -178,7 +181,7 @@ function sort() {
     expect(changes[0].action).toBe(DomActionType.attribute);
     expect(changes[0].attributes['new-attr']).toBe('1');
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('records frame dom ids', async () => {
@@ -201,6 +204,7 @@ function sort() {
 
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/iframe`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
     const state = tab.sessionState;
@@ -234,7 +238,7 @@ function sort() {
     expect(subframe.domNodeId).toBe(domFrames[2].nodeId);
     expect(subframe.parentId).toBe(srcTest.id);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('supports recording CSSOM', async () => {
@@ -254,6 +258,7 @@ function clickIt() {
 
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/cssom`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -270,7 +275,7 @@ function clickIt() {
     expect(propChange).toBeTruthy();
 
     expect(propChange.properties['sheet.cssRules']).toStrictEqual(['body { color: red; }']);
-    await tab.close();
+    await tab.session.close();
   });
 
   it('supports recording closed shadow dom roots', async () => {
@@ -302,6 +307,7 @@ customElements.define('image-list', class extends HTMLElement {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/test5`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -319,7 +325,7 @@ customElements.define('image-list', class extends HTMLElement {
 
     expect(shadowImg.tagName).toBe('IMG');
     expect(shadowImg.attributes.alt).toBe(' new image is closed ');
-    await tab.close();
+    await tab.session.close();
   });
 });
 
@@ -356,6 +362,7 @@ describe('basic Mouse Event tests', () => {
       },
     });
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     const state = tab.sessionState;
 
     await tab.goto(`${koaServer.baseUrl}/mouse1`);
@@ -385,7 +392,7 @@ describe('basic Mouse Event tests', () => {
     const scrollRecords = state.db.scrollEvents.all();
     expect(scrollRecords.length).toBeGreaterThanOrEqual(1);
 
-    await tab.close();
+    await tab.session.close();
   });
 });
 
@@ -448,7 +455,7 @@ describe('basic Form element tests', () => {
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects typing in a textarea', async () => {
@@ -466,6 +473,7 @@ describe('basic Form element tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/textarea`);
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -509,7 +517,7 @@ describe('basic Form element tests', () => {
     const inputNode = changesAfterType.find(x => x.tagName === 'TEXTAREA');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects checking a checkbox', async () => {
@@ -529,6 +537,7 @@ describe('basic Form element tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/cbox`);
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -563,7 +572,7 @@ describe('basic Form element tests', () => {
     const inputNode = changesAfterType.find(x => x.tagName === 'INPUT');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
 
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects changing a radio', async () => {
@@ -583,6 +592,7 @@ describe('basic Form element tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/radio`);
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -621,7 +631,7 @@ describe('basic Form element tests', () => {
     expect(focusRecords).toHaveLength(3);
     const inputNode = changesAfterType.find(x => x.attributes?.id === 'radio2');
     expect(focusRecords[0].targetNodeId).toBe(inputNode.nodeId);
-    await tab.close();
+    await tab.session.close();
   });
 
   it('detects changing a select', async () => {
@@ -642,6 +652,7 @@ describe('basic Form element tests', () => {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/select`);
     await tab.waitForLoad('PaintingStable');
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -689,7 +700,7 @@ describe('basic Form element tests', () => {
     expect(
       changesAfterType.filter(x => x.action === DomActionType.property && x.nodeId === opt2.nodeId),
     ).toHaveLength(2);
-    await tab.close();
+    await tab.session.close();
   });
 });
 
@@ -726,6 +737,7 @@ function addMe2() {
     });
     const meta = await connectionToClient.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad('DomContentLoaded');
 
@@ -781,6 +793,6 @@ function addMe2() {
       attributes: { id: 'divPage2' },
       textContent: undefined,
     });
-    await tab.close();
+    await tab.session.close();
   });
 });

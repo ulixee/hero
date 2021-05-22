@@ -75,7 +75,7 @@ export default class PlaybarView extends ViewBackend {
     const commandLabel = tick.label;
     const commandResult =
       tick.eventType === 'command'
-        ? this.tabState.commands.find(x => x.id === tick.commandId)
+        ? this.tabState.commandsById.get(tick.commandId)
         : {
             duration: 0,
           };

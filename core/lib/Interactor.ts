@@ -27,6 +27,7 @@ import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
 import IViewport from '@secret-agent/interfaces/IViewport';
 import IElementRect from '@secret-agent/interfaces/IElementRect';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { getClientRectFnName, getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
@@ -48,7 +49,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get scrollOffset(): Promise<IPoint> {
-    return new JsPath(this.frameEnvironment).getWindowOffset().then(offset => {
+    return this.jsPath.getWindowOffset().then(offset => {
       return {
         x: offset.pageXOffset,
         y: offset.pageYOffset,
@@ -68,6 +69,10 @@ export default class Interactor implements IInteractionsHelper {
 
   private get tab(): Tab {
     return this.frameEnvironment.tab;
+  }
+
+  private get jsPath(): JsPath {
+    return this.frameEnvironment.jsPath;
   }
 
   private get mouse(): IPuppetMouse {
@@ -129,8 +134,11 @@ export default class Interactor implements IInteractionsHelper {
     if (mousePosition === null) {
       throw new Error('Null mouse position provided to agent.interact');
     }
-    const jsPath = new JsPath(this.frameEnvironment, mousePosition);
-    const rectResult = await jsPath.getClientRect(includeNodeVisibility);
+    const jsPath = this.jsPath;
+    const rectResult = await jsPath.exec<IElementRect>([
+      ...mousePosition,
+      [getClientRectFnName, includeNodeVisibility],
+    ]);
     const rect = rectResult.value;
     const nodePointer = rectResult.nodePointer as INodePointer;
 
@@ -199,14 +207,14 @@ export default class Interactor implements IInteractionsHelper {
         break;
       }
       case InteractionCommand.scroll: {
-        const windowBounds = await new JsPath(this.frameEnvironment).getWindowOffset();
+        const windowBounds = await this.jsPath.getWindowOffset();
         const scroll = await this.getScrollOffset(interaction.mousePosition, windowBounds);
 
         if (scroll) {
           const { deltaY, deltaX } = scroll;
           await this.mouse.wheel(scroll);
           // need to check for offset since wheel event doesn't wait for scroll
-          await new JsPath(this.frameEnvironment).waitForScrollOffset(
+          await this.jsPath.waitForScrollOffset(
             Math.max(0, deltaX + windowBounds.pageXOffset),
             Math.max(0, deltaY + windowBounds.pageYOffset),
           );
@@ -241,7 +249,7 @@ export default class Interactor implements IInteractionsHelper {
         if (isMousePositionNodeId(mousePosition)) {
           nodePointerId = mousePosition[0] as number;
         } else {
-          const nodeLookup = await new JsPath(this.frameEnvironment, mousePosition).getNodeId();
+          const nodeLookup = await this.jsPath.exec<number>([...mousePosition, [getNodeIdFnName]]);
           if (nodeLookup.value) {
             nodePointerId = nodeLookup.value;
           }
@@ -250,7 +258,7 @@ export default class Interactor implements IInteractionsHelper {
         const result = await this.moveMouseOverTarget(nodePointerId, interaction, resolvable);
 
         if (result.simulateOptionClick) {
-          await new JsPath(this.frameEnvironment, [nodePointerId]).simulateOptionClick();
+          await this.jsPath.simulateOptionClick([nodePointerId]);
           return;
         }
 
@@ -352,7 +360,10 @@ export default class Interactor implements IInteractionsHelper {
       const [x, y] = mousePosition as number[];
       return { x: round(x), y: round(y) };
     }
-    const clientRectResult = await new JsPath(this.frameEnvironment, mousePosition).getClientRect();
+    const clientRectResult = await this.jsPath.exec<IElementRect>([
+      ...mousePosition,
+      [getClientRectFnName],
+    ]);
     const nodePointer = clientRectResult.nodePointer as INodePointer;
 
     const point = this.createPointInRect(clientRectResult.value);

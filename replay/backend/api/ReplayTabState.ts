@@ -18,18 +18,12 @@ import ITickState from '~shared/interfaces/ITickState';
 import ReplayTime from '~backend/api/ReplayTime';
 import getResolvable from '~shared/utils/promise';
 
-let pageCounter = 0;
-
 export default class ReplayTabState extends EventEmitter {
   public ticks: ReplayTick[] = [];
-  public readonly commands: ICommandWithResult[] = [];
-  public readonly pages: { id: number; url: string; commandId: number }[] = [];
-  public readonly mouseEvents: IMouseEvent[] = [];
-  public readonly scrollEvents: IScrollRecord[] = [];
-  public readonly focusEvents: IFocusRecord[] = [];
-  public readonly paintEvents: IPaintEvent[] = [];
+  public readonly commandsById = new Map<number, ICommandWithResult>();
 
   public tabId: number;
+  public detachedFromTabId: number;
   public startOrigin: string;
   public urlOrigin: string;
   public viewportWidth: number;
@@ -53,6 +47,11 @@ export default class ReplayTabState extends EventEmitter {
 
   public isReady = getResolvable<void>();
 
+  private readonly mouseEvents: IMouseEvent[] = [];
+  private readonly scrollEvents: IScrollRecord[] = [];
+  private readonly focusEvents: IFocusRecord[] = [];
+  private readonly paintEvents: IPaintEvent[] = [];
+
   private currentTickIdx = -1;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
@@ -73,6 +72,7 @@ export default class ReplayTabState extends EventEmitter {
     this.startOrigin = tabMeta.startOrigin;
     this.viewportHeight = tabMeta.height;
     this.viewportWidth = tabMeta.width;
+    this.detachedFromTabId = tabMeta.detachedFromTabId;
     if (this.startOrigin) this.isReady.resolve();
     this.tabId = tabMeta.tabId;
     this.ticks.push(new ReplayTick(this, 'init', 0, -1, replayTime.start.getTime(), 'Load'));
@@ -89,11 +89,6 @@ export default class ReplayTabState extends EventEmitter {
       durationMillis: this.replayTime.millis,
       ticks: this.ticks.filter(x => x.isMajor()).map(x => x.playbarOffsetPercent),
     } as ITickState;
-  }
-
-  public getPageOffset(page: { id: number; url: string }) {
-    const pageToLoad = this.pages.find(x => x.id === page.id);
-    return this.ticks.find(x => x.commandId === pageToLoad.commandId)?.playbarOffsetPercent ?? 0;
   }
 
   public transitionToPreviousTick() {
@@ -187,6 +182,33 @@ export default class ReplayTabState extends EventEmitter {
     return changeEvents;
   }
 
+  public copyPaintEvents(
+    timestampRange: [number, number],
+    eventIndexRange: [number, number],
+  ): IPaintEvent[] {
+    const [startTimestamp, endTimestamp] = timestampRange;
+    const [startIndex, endIndex] = eventIndexRange;
+    const paintEvents: IPaintEvent[] = [];
+    for (const paintEvent of this.paintEvents) {
+      if (paintEvent.timestamp >= startTimestamp && paintEvent.timestamp <= endTimestamp) {
+        paintEvents.push({
+          timestamp: paintEvent.timestamp,
+          commandId: paintEvent.commandId,
+          changeEvents: paintEvent.changeEvents.filter(x => {
+            if (x.timestamp === startTimestamp) {
+              return x.eventIndex >= startIndex;
+            }
+            if (x.timestamp === endTimestamp) {
+              return x.eventIndex <= endIndex;
+            }
+            return true;
+          }),
+        });
+      }
+    }
+    return paintEvents;
+  }
+
   public loadTick(
     newTickIdx: number,
     specificPlaybarOffset?: number,
@@ -230,12 +252,19 @@ export default class ReplayTabState extends EventEmitter {
   }
 
   public loadCommand(command: ICommandWithResult) {
-    const existing = this.commands.find(x => x.id === command.id);
+    if (command.result && typeof command.result === 'string' && command.result.startsWith('"{')) {
+      try {
+        command.result = JSON.parse(command.result);
+      } catch (e) {
+        // didn't parse, just ignore
+      }
+    }
+    const existing = this.commandsById.get(command.id);
     if (existing) {
       Object.assign(existing, command);
     } else {
-      const idx = this.commands.length;
-      this.commands.push(command);
+      const idx = this.commandsById.size;
+      this.commandsById.set(command.id, command);
       const tick = new ReplayTick(
         this,
         'command',
@@ -260,6 +289,27 @@ export default class ReplayTabState extends EventEmitter {
     this.ticks.push(tick);
   }
 
+  public loadDetachedState(
+    detachedFromTabId: number,
+    paintEvents: IPaintEvent[],
+    timestamp: number,
+    commandId: number,
+    origin: string,
+  ): void {
+    this.detachedFromTabId = detachedFromTabId;
+    const flatEvent = <IPaintEvent>{ changeEvents: [], commandId, timestamp };
+    for (const paintEvent of paintEvents) {
+      flatEvent.changeEvents.push(...paintEvent.changeEvents);
+    }
+    this.paintEvents.push(flatEvent);
+    this.startOrigin = origin;
+    const tick = new ReplayTick(this, 'paint', 0, commandId, timestamp);
+    tick.isNewDocumentTick = true;
+    tick.documentOrigin = origin;
+    this.ticks.push(tick);
+    this.isReady.resolve();
+  }
+
   public loadDomChange(event: IDomChangeEvent) {
     const { commandId, action, textContent, timestamp } = event;
 
@@ -281,23 +331,32 @@ export default class ReplayTabState extends EventEmitter {
     if (lastPaintEvent?.timestamp === timestamp) {
       paintEvent = lastPaintEvent;
     } else {
-      paintEvent = this.paintEvents.find(x => x.timestamp === timestamp);
+      for (let i = this.paintEvents.length - 1; i >= 0; i -= 1) {
+        const paint = this.paintEvents[i];
+        if (!paint) continue;
+        if (paint.timestamp === timestamp) {
+          paintEvent = paint[i];
+          break;
+        }
+      }
     }
 
     if (paintEvent) {
       const events = paintEvent.changeEvents;
       events.push(event);
 
+      // if events are out of order, set the index of paints back to this index
       if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
         events.sort((a, b) => {
           if (a.frameIdPath === b.frameIdPath) {
-            if (a.timestamp === b.timestamp) return a.eventIndex - b.eventIndex;
-            return a.timestamp - b.timestamp;
+            return a.eventIndex - b.eventIndex;
           }
           return a.frameIdPath.localeCompare(b.frameIdPath);
         });
+
         const paintIndex = this.paintEvents.indexOf(paintEvent);
-        if (paintIndex < this.paintEventsLoadedIdx) this.paintEventsLoadedIdx = paintIndex - 1;
+        if (paintIndex !== -1 && paintIndex < this.paintEventsLoadedIdx)
+          this.paintEventsLoadedIdx = paintIndex - 1;
       }
     } else {
       paintEvent = {
@@ -314,11 +373,6 @@ export default class ReplayTabState extends EventEmitter {
       if (isMainFrame && action === DomActionType.newDocument) {
         tick.isNewDocumentTick = true;
         tick.documentOrigin = textContent;
-        this.pages.push({
-          id: (pageCounter += 1),
-          url: textContent,
-          commandId,
-        });
       }
 
       if (lastPaintEvent && lastPaintEvent.timestamp >= timestamp) {
@@ -377,7 +431,7 @@ export default class ReplayTabState extends EventEmitter {
       }
       switch (tick.eventType) {
         case 'command':
-          const command = this.commands.find(x => x.id === tick.commandId);
+          const command = this.commandsById.get(tick.commandId);
           if (command.resultNodeIds) {
             lastSelectedNodeIds = command.resultNodeIds;
           }

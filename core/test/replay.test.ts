@@ -93,10 +93,8 @@ describe('basic Replay API tests', () => {
     expect(firstCommand.name).toBe('goto');
     expect(commands[1].label).toBe('waitForLoad("PaintingStable")');
 
-    // 1 is just the new document
     const paintEvents = Object.values(paintMap);
-    expect(paintEvents[0]).toHaveLength(1);
-    expect(paintEvents[1]).toHaveLength(14);
+    expect(paintEvents[0]).toHaveLength(14);
 
     await Core.shutdown(true);
     if (api.readyState === WebSocket.OPEN) api.terminate();

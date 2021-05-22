@@ -7,13 +7,21 @@ import { convertJsPathArgs } from './SetupAwaitedHandler';
 export default class CoreCommandQueue {
   public lastCommandId = 0;
 
-  private readonly internalQueue: Queue;
+  private readonly internalState: {
+    queue: Queue;
+    batchSendCommands: { [command: string]: any[][] };
+  };
+
   private readonly sessionMarker: string = '';
+
+  private get internalQueue(): Queue {
+    return this.internalState.queue;
+  }
 
   constructor(
     private readonly meta: (ISessionMeta & { sessionName: string }) | null,
     private readonly connection: ConnectionToCore,
-    sharedQueue?: Queue,
+    internalState?: CoreCommandQueue['internalState'],
   ) {
     if (meta) {
       const markers = [
@@ -25,8 +33,33 @@ export default class CoreCommandQueue {
       this.sessionMarker = `\n\n${markers}`;
     }
 
-    this.internalQueue = sharedQueue ?? new Queue('CORE COMMANDS');
-    this.internalQueue.concurrency = 1;
+    if (internalState) {
+      this.internalState = internalState;
+    } else {
+      this.internalState = {
+        queue: new Queue('CORE COMMANDS', 1),
+        batchSendCommands: {},
+      };
+    }
+  }
+
+  public queueBatchedCommand(command: string, ...args: any[]): void {
+    this.internalState.batchSendCommands[command] ??= [];
+    this.internalState.batchSendCommands[command].push(args);
+    if (this.internalState.batchSendCommands[command].length > 1000) this.flush().catch(() => null);
+    this.internalQueue.enqueue(this.flush.bind(this));
+  }
+
+  public async flush(): Promise<void> {
+    for (const [command, args] of Object.entries(this.internalState.batchSendCommands)) {
+      delete this.internalState.batchSendCommands[command];
+      if (!args) continue;
+      await this.connection.sendRequest({
+        meta: this.meta,
+        command,
+        args,
+      });
+    }
   }
 
   public run<T>(command: string, ...args: any[]): Promise<T> {
@@ -68,6 +101,6 @@ export default class CoreCommandQueue {
   }
 
   public createSharedQueue(meta: ISessionMeta & { sessionName: string }): CoreCommandQueue {
-    return new CoreCommandQueue(meta, this.connection, this.internalQueue);
+    return new CoreCommandQueue(meta, this.connection, this.internalState);
   }
 }

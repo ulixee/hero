@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from 'child_process';
 import * as os from 'os';
 import Log from '@secret-agent/commons/Logger';
 import * as net from 'net';
-import { existsSync, unlinkSync } from 'fs';
+import { unlink } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { v1 as uuidv1 } from 'uuid';
@@ -30,7 +30,7 @@ export default abstract class BaseIpcHandler {
 
   private hasWaitListeners = false;
   private waitForConnect = new Resolvable<void>();
-  private readonly child: ChildProcess;
+  private child: ChildProcess;
   private readonly ipcServer = new net.Server();
   private ipcSocket: net.Socket;
   private isExited = false;
@@ -44,25 +44,19 @@ export default abstract class BaseIpcHandler {
 
     const mode = this.options.mode;
     this.handlerName = `${mode[0].toUpperCase() + mode.slice(1)}IpcHandler`;
-    this.cleanupSocketHandle();
 
     bindFunctions(this);
 
-    this.ipcServer.listen(this.options.ipcSocketPath);
-    this.ipcServer.once('connection', this.onIpcConnection.bind(this));
-
-    this.child = spawn(libPath, [JSON.stringify(options)], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      windowsHide: true,
-      cwd: options.storageDir,
+    unlink(this.options.ipcSocketPath, () => {
+      this.ipcServer.listen(this.options.ipcSocketPath);
+      this.spawnChild();
     });
-
-    this.bindChildListeners();
+    this.ipcServer.once('connection', this.onIpcConnection.bind(this));
   }
 
   public close(): void {
     const parentLogId = this.logger.info(`${this.handlerName}.Closing`);
-    if (this.isClosing) return;
+    if (this.isClosing || !this.child) return;
     this.isClosing = true;
 
     try {
@@ -121,17 +115,13 @@ export default abstract class BaseIpcHandler {
     this.waitForConnect.resolve();
   }
 
-  private cleanupSocketHandle(): void {
-    if (existsSync(this.options.ipcSocketPath)) unlinkSync(this.options.ipcSocketPath);
-  }
-
   private onExit(): void {
     if (this.isExited) return;
     this.isExited = true;
     this.beforeExit();
 
     this.ipcServer.unref().close(() => {
-      this.cleanupSocketHandle();
+      unlink(this.options.ipcSocketPath, () => null);
     });
     if (this.ipcSocket) {
       this.ipcSocket.unref().end();
@@ -175,7 +165,14 @@ export default abstract class BaseIpcHandler {
     this.logger.info(`${this.handlerName}.stderr: ${message}`);
   }
 
-  private bindChildListeners(): void {
+  private spawnChild(): void {
+    if (this.isClosing) return;
+    const options = this.options;
+    this.child = spawn(libPath, [JSON.stringify(options)], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
+      cwd: options.storageDir,
+    });
     const child = this.child;
     child.on('exit', this.onExit);
     child.on('error', this.onError);

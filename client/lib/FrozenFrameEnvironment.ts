@@ -1,7 +1,6 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import * as Util from 'util';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -14,28 +13,23 @@ import {
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Location';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import {
-  IElementIsolate,
-  IHTMLFrameElementIsolate,
-  IHTMLIFrameElementIsolate,
-  IHTMLObjectElementIsolate,
-  INodeIsolate,
-} from 'awaited-dom/base/interfaces/isolate';
+import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { getComputedVisibilityFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import {
+  getComputedStyleFnName,
+  getComputedVisibilityFnName,
+} from '@secret-agent/interfaces/jsPathFnNames';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
 import Agent from './Agent';
-import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import Tab from './Tab';
+import FrozenTab from './FrozenTab';
+import * as AwaitedHandler from './SetupAwaitedHandler';
 
-const { getState, setState } = StateMachine<FrameEnvironment, IState>();
+const { getState, setState } = StateMachine<FrozenFrameEnvironment, IState>();
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
@@ -43,11 +37,12 @@ const awaitedPathState = StateMachine<
 
 export interface IState {
   secretAgent: Agent;
-  tab: Tab;
+  tab: FrozenTab;
   coreFrame: Promise<CoreFrameEnvironment>;
+  prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
 }
 
-const propertyKeys: (keyof FrameEnvironment)[] = [
+const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
   'frameId',
   'url',
   'name',
@@ -59,12 +54,26 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
   'Request',
 ];
 
-export default class FrameEnvironment {
-  constructor(secretAgent: Agent, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
+export default class FrozenFrameEnvironment {
+  constructor(
+    secretAgent: Agent,
+    tab: FrozenTab,
+    coreFrame: Promise<CoreFrameEnvironment>,
+    prefetchedJsPaths: Promise<IJsPathResult[]>,
+  ) {
     setState(this, {
       secretAgent,
       tab,
       coreFrame,
+      prefetchedJsPaths: prefetchedJsPaths.then(x => {
+        const resultMap = new Map<string, IJsPathResult>();
+        for (let i = 0; i < x.length; i += 1) {
+          const result = x[i];
+          result.index = i;
+          resultMap.set(JSON.stringify(result.jsPath), result);
+        }
+        return resultMap;
+      }),
     });
   }
 
@@ -129,19 +138,39 @@ export default class FrameEnvironment {
     return createResponse(awaitedPath, { ...getState(this) });
   }
 
-  public async getFrameEnvironment(
-    element: IHTMLFrameElementIsolate | IHTMLIFrameElementIsolate | IHTMLObjectElementIsolate,
-  ): Promise<FrameEnvironment | null> {
-    const { tab } = getState(this);
-    return await tab.getFrameEnvironment(element);
-  }
-
-  public getComputedStyle(element: IElementIsolate, pseudoElement?: string): CSSStyleDeclaration {
-    return FrameEnvironment.getComputedStyle(element, pseudoElement);
+  public async getComputedStyle(
+    element: IElementIsolate,
+    pseudoElement?: string,
+  ): Promise<CSSStyleDeclaration & { [style: string]: string }> {
+    const { awaitedPath, coreFrame, awaitedOptions } = await AwaitedHandler.getAwaitedState(
+      awaitedPathState,
+      element,
+    );
+    const newPath = awaitedPath.addMethod(element, getComputedStyleFnName, pseudoElement);
+    const result = await AwaitedHandler.execJsPath<Record<string, string>>(
+      coreFrame,
+      awaitedOptions,
+      newPath.toJSON(),
+    );
+    const declaration = createCSSStyleDeclaration<IAwaitedOptions>(newPath, awaitedOptions);
+    const attributes = AwaitedHandler.cleanResult(
+      awaitedPathState,
+      declaration,
+      result,
+      new Error().stack,
+    );
+    Object.assign(declaration, attributes);
+    return declaration;
   }
 
   public async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    return await FrameEnvironment.getComputedVisibility(node);
+    if (!node) return { isVisible: false, nodeExists: false };
+    return await AwaitedHandler.delegate.runMethod<INodeVisibility, INodeIsolate>(
+      awaitedPathState,
+      node,
+      getComputedVisibilityFnName,
+      [],
+    );
   }
 
   // @deprecated 2021-04-30: Replaced with getComputedVisibility
@@ -154,34 +183,6 @@ export default class FrameEnvironment {
     return coreFrame.getJsValue<T>(path);
   }
 
-  public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLoad(LocationStatus.PaintingStable, options);
-  }
-
-  public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLoad(status, options);
-  }
-
-  public async waitForElement(
-    element: ISuperElement,
-    options?: IWaitForElementOptions,
-  ): Promise<void> {
-    if (!element) throw new Error('Element being waited for is null');
-    const { awaitedPath } = awaitedPathState.getState(element);
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForElement(awaitedPath.toJSON(), options);
-  }
-
-  public async waitForLocation(
-    trigger: ILocationTrigger,
-    options?: IWaitForOptions,
-  ): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this);
-    await coreFrame.waitForLocation(trigger, options);
-  }
-
   public toJSON(): any {
     // return empty so we can avoid infinite "stringifying" in jest
     return {
@@ -192,27 +193,6 @@ export default class FrameEnvironment {
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
   }
-
-  public static getComputedStyle(
-    element: IElementIsolate,
-    pseudoElement?: string,
-  ): CSSStyleDeclaration {
-    const { awaitedPath: elementAwaitedPath, awaitedOptions } = awaitedPathState.getState(element);
-    const awaitedPath = new AwaitedPath(null, 'window', [
-      'getComputedStyle',
-      getAwaitedPathAsMethodArg(elementAwaitedPath),
-      pseudoElement,
-    ]);
-    return createCSSStyleDeclaration<IAwaitedOptions>(
-      awaitedPath,
-      awaitedOptions,
-    ) as CSSStyleDeclaration;
-  }
-
-  public static async getComputedVisibility(node: INodeIsolate): Promise<INodeVisibility> {
-    if (!node) return { isVisible: false, nodeExists: false };
-    return await AwaitedHandler.runMethod(awaitedPathState, node, getComputedVisibilityFnName, []);
-  }
 }
 
 export function getFrameState(object: any): IState {
@@ -220,16 +200,7 @@ export function getFrameState(object: any): IState {
 }
 
 export function getCoreFrameEnvironment(
-  frameEnvironment: FrameEnvironment,
+  frameEnvironment: FrozenFrameEnvironment,
 ): Promise<CoreFrameEnvironment> {
   return getState(frameEnvironment).coreFrame;
-}
-// CREATE
-
-export function createFrame(
-  secretAgent: Agent,
-  tab: Tab,
-  coreFrame: Promise<CoreFrameEnvironment>,
-): FrameEnvironment {
-  return new FrameEnvironment(secretAgent, tab, coreFrame);
 }

@@ -72,19 +72,13 @@ export default class FrameNavigationsObserver {
 
     const top = this.navigations.top;
     if (top) {
-      if (status === LocationStatus.DomContentLoaded) {
-        if (
-          top.stateChanges.has(LoadStatus.DomContentLoaded) ||
-          top.stateChanges.has(LoadStatus.ContentPaint) ||
-          top.stateChanges.has(LoadStatus.Load)
-        ) {
-          return;
-        }
-      } else if (status === LocationStatus.PaintingStable) {
-        if (this.getPaintStableStatus().isStable) {
-          return;
-        }
-      } else if (top.stateChanges.has(status as LoadStatus)) {
+      if (top.stateChanges.has(status as LoadStatus)) {
+        return;
+      }
+      if (status === LocationStatus.DomContentLoaded && top.stateChanges.has(LoadStatus.Load)) {
+        return;
+      }
+      if (status === LocationStatus.PaintingStable && this.getPaintStableStatus().isStable) {
         return;
       }
     }

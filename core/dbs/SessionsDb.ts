@@ -1,6 +1,7 @@
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SessionsTable from '../models/SessionsTable';
+import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
 
 interface IDbOptions {
   readonly?: boolean;
@@ -10,6 +11,7 @@ interface IDbOptions {
 export default class SessionsDb {
   private static dbByBaseDir: { [dir: string]: SessionsDb } = {};
   public readonly sessions: SessionsTable;
+  public readonly detachedJsPathCalls: DetachedJsPathCallsTable;
   public readonly readonly: boolean;
   private readonly baseDir: string;
   private db: SqliteDatabase;
@@ -20,6 +22,7 @@ export default class SessionsDb {
     this.baseDir = baseDir;
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
+    this.detachedJsPathCalls = new DetachedJsPathCallsTable(this.db);
   }
 
   public findLatestSessionId(script: {

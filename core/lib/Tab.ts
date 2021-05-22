@@ -20,7 +20,7 @@ import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -29,8 +29,11 @@ import InjectedScripts from './InjectedScripts';
 import Session from './Session';
 import SessionState from './SessionState';
 import FrameNavigationsObserver from './FrameNavigationsObserver';
-import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
-import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
+import DomChangesTable, {
+  IDomChangeRecord,
+  IFrontendDomChangeEvent,
+} from '../models/DomChangesTable';
+import DetachedTabState from './DetachedTabState';
 
 const { log } = Log(module);
 
@@ -42,6 +45,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public puppetPage: IPuppetPage;
   public isClosing = false;
   public isReady: Promise<void>;
+  public isDetached = false;
 
   protected readonly logger: IBoundLog;
 
@@ -84,6 +88,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
+    isDetached: boolean,
     parentTabId?: number,
     windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
@@ -98,6 +103,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.parentTabId = parentTabId;
     this.createdAtCommandId = session.sessionState.lastCommand?.id;
     this.puppetPage = puppetPage;
+    this.isDetached = isDetached;
 
     for (const puppetFrame of puppetPage.frames) {
       const frame = new FrameEnvironment(this, puppetFrame);
@@ -114,7 +120,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
     this.listen();
     this.isReady = this.waitForReady();
-    this.commandRecorder = new CommandRecorder(this, this, this.mainFrameId, [
+    this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
       this.focus,
       this.getFrameEnvironments,
       this.goto,
@@ -216,15 +222,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const errors: Error[] = [];
 
     try {
-      if (this.navigations.top && this.puppetPage.mainFrame.isLoaded) {
-        await this.flushPageEventsRecorder();
-      }
-    } catch (error) {
-      // don't re-handle
-      errors.push(error);
-    }
-
-    try {
       const cancelMessage = 'Terminated command because session closing';
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
       for (const frame of this.frameEnvironmentsById.values()) {
@@ -314,10 +311,6 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public getLocationHref(): Promise<string> {
     return this.mainFrameEnvironment.getLocationHref();
-  }
-
-  public getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
-    return this.mainFrameEnvironment.getComputedVisibility(jsPath);
   }
 
   public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
@@ -425,7 +418,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     let newTab: Tab;
     const startTime = new Date();
     if (startCommandId >= 0) {
-      for (const tab of this.session.tabs) {
+      for (const tab of this.session.tabsById.values()) {
         if (tab.parentTabId === this.id && tab.createdAtCommandId >= startCommandId) {
           newTab = tab;
           break;
@@ -504,34 +497,44 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
-  public async flushPageEventsRecorder(): Promise<void> {
-    await Promise.all(
-      this.puppetPage.frames.map(async frame => {
-        try {
-          // don't wait for env to be available
-          if (!frame.canEvaluate(true)) return;
-
-          const results = await frame.evaluate<PageRecorderResultSet>(
-            `window.flushPageRecorder()`,
-            true,
-          );
-          await this.onPageRecorderEvents(results, frame.id);
-        } catch (error) {
-          // no op if it fails
-        }
-      }),
-    );
-    this.sessionState.db.flush();
-  }
-
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {
-    await this.flushPageEventsRecorder();
-
     const frameDomNodePaths = this.sessionState.db.frames.frameDomNodePathsById;
 
-    return this.sessionState.db.domChanges
-      .getFrameChanges(this.mainFrameId, sinceCommandId)
-      .map(x => DomChangesTable.toFrontendRecord(x, frameDomNodePaths));
+    return (await this.getFrameDomChanges(this.mainFrameId, sinceCommandId)).map(x =>
+      DomChangesTable.toFrontendRecord(x, frameDomNodePaths),
+    );
+  }
+
+  public async getFrameDomChanges(
+    frameId: string,
+    sinceCommandId: number,
+  ): Promise<IDomChangeRecord[]> {
+    await this.mainFrameEnvironment.flushPageEventsRecorder();
+    this.sessionState.db.flush();
+
+    return this.sessionState.db.domChanges.getFrameChanges(this.mainFrameId, sinceCommandId);
+  }
+
+  public async createDetachedState(): Promise<DetachedTabState> {
+    // need the dom to be loaded on the page
+    await this.navigationsObserver.waitForLoad(LoadStatus.DomContentLoaded);
+    // find last page load
+    const lastLoadedNavigation = this.navigations.getLastLoadedNavigation();
+    const domChanges = await this.getFrameDomChanges(
+      this.mainFrameId,
+      lastLoadedNavigation.startCommandId - 1,
+    );
+    const resources = this.sessionState.getResourceLookupMap(this.id);
+    this.logger.info('DetachingTab', {
+      url: lastLoadedNavigation.finalUrl,
+      domChangeIndices:
+        domChanges.length > 0
+          ? [domChanges[0].eventIndex, domChanges[domChanges.length - 1].eventIndex]
+          : [],
+      domChanges: domChanges.length,
+      resources: Object.keys(resources).length,
+    });
+    return new DetachedTabState(this.session, lastLoadedNavigation, domChanges, resources);
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,12 +546,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       sessionId: this.sessionId,
       url: this.url,
       createdAtCommandId: this.createdAtCommandId,
+      isDetached: this.isDetached,
     };
   }
 
   private async waitForReady(): Promise<void> {
     await this.mainFrameEnvironment.isReady;
-    if (this.session.options?.blockedResourceTypes) {
+    if (!this.isDetached && this.session.options?.blockedResourceTypes) {
       await this.setBlockedResourceTypes(this.session.options.blockedResourceTypes);
     }
   }
@@ -587,34 +591,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         return;
       }
 
-      this.onPageRecorderEvents(JSON.parse(payload), frameId);
+      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(JSON.parse(payload));
     }
-  }
-
-  private onPageRecorderEvents(results: PageRecorderResultSet, frameId: string) {
-    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
-    this.logger.stats('Tab.onPageEvents', {
-      tabId: this.id,
-      frameId,
-      dom: domChanges.length,
-      mouse: mouseEvents.length,
-      focusEvents: focusEvents.length,
-      scrollEvents: scrollEvents.length,
-      loadEvents,
-    });
-
-    const frame = this.frameEnvironmentsById.get(frameId);
-
-    frame.onDomRecorderLoadEvents(loadEvents);
-
-    this.sessionState.captureDomEvents(
-      this.id,
-      frameId,
-      domChanges,
-      mouseEvents,
-      focusEvents,
-      scrollEvents,
-    );
   }
 
   /////// REQUESTS EVENT HANDLERS  /////////////////////////////////////////////////////////////////
@@ -658,7 +636,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
   }
 
-  private async onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): Promise<void> {
+  private onResourceLoaded(event: IPuppetPageEvents['resource-loaded']): void {
     this.session.mitmRequestSession.browserRequestMatcher.onBrowserRequestedResourceExtraDetails(
       event.resource,
       this.id,
@@ -703,18 +681,30 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         }
       }
 
-      const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
-      const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
-      if (!event.resource.browserServedFromCache) {
-        resourceDetails.body = await event.body();
-        if (resourceDetails.body) {
-          delete resourceDetails.response.headers['content-encoding'];
-          delete resourceDetails.response.headers['Content-Encoding'];
-        }
-      }
-      const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
-      this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
+      setImmediate(r => this.checkForResourceCapture(r), event);
     }
+  }
+
+  private async checkForResourceCapture(
+    event: IPuppetPageEvents['resource-loaded'],
+  ): Promise<void> {
+    const resourcesWithBrowserRequestId = this.sessionState.getBrowserRequestResources(
+      event.resource.browserRequestId,
+    );
+
+    if (resourcesWithBrowserRequestId?.length) return;
+
+    const ctx = MitmRequestContext.createFromPuppetResourceRequest(event.resource);
+    const resourceDetails = MitmRequestContext.toEmittedResource(ctx);
+    if (!event.resource.browserServedFromCache) {
+      resourceDetails.body = await event.body();
+      if (resourceDetails.body) {
+        delete resourceDetails.response.headers['content-encoding'];
+        delete resourceDetails.response.headers['Content-Encoding'];
+      }
+    }
+    const resource = this.sessionState.captureResource(this.id, resourceDetails, true);
+    this.checkForResolvedNavigation(event.resource.browserRequestId, resource);
   }
 
   private onResourceFailed(event: IPuppetPageEvents['resource-failed']): void {
@@ -803,10 +793,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public static create(
     session: Session,
     puppetPage: IPuppetPage,
+    isDetached?: boolean,
     parentTab?: Tab,
     openParams?: { url: string; windowName: string; loaderId: string },
   ): Tab {
-    const tab = new Tab(session, puppetPage, parentTab?.id, openParams);
+    const tab = new Tab(session, puppetPage, isDetached, parentTab?.id, openParams);
     tab.logger.info('Tab.created', {
       parentTab: parentTab?.id,
       openParams,

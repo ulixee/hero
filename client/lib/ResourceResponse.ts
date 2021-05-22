@@ -1,8 +1,9 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import IResourceResponse from '@secret-agent/interfaces/IResourceResponse';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import * as Util from 'util';
 import CoreTab from './CoreTab';
 
 const { getState, setState } = StateMachine<ResourceResponse, IState>();
@@ -25,10 +26,6 @@ const propertyKeys: (keyof ResourceResponse)[] = [
 ];
 
 export default class ResourceResponse {
-  constructor() {
-    initializeConstantsAndProperties(this, [], propertyKeys);
-  }
-
   public get browserServedFromCache(): Promise<
     null | IHttpResourceLoadDetails['browserServedFromCache']
   > {
@@ -73,6 +70,10 @@ export default class ResourceResponse {
 
   public json(): Promise<any> {
     return this.text().then(JSON.parse);
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

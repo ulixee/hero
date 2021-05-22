@@ -10,7 +10,6 @@ import INodePointer from 'awaited-dom/base/INodePointer';
 import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {
@@ -43,6 +42,15 @@ export default class CoreFrameEnvironment {
 
   public async execJsPath<T = any>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
     return await this.commandQueue.run('FrameEnvironment.execJsPath', jsPath);
+  }
+
+  public recordDetachedJsPath(index: number, startTime: Date, endTime: Date): void {
+    this.commandQueue.queueBatchedCommand(
+      'FrameEnvironment.recordDetachedJsPaths',
+      index,
+      startTime.getTime(),
+      endTime.getTime(),
+    );
   }
 
   public async getJsValue<T>(expression: string): Promise<T> {
@@ -79,10 +87,6 @@ export default class CoreFrameEnvironment {
 
   public async removeCookie(name: string): Promise<boolean> {
     return await this.commandQueue.run('FrameEnvironment.removeCookie', name);
-  }
-
-  public async getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
-    return await this.commandQueue.run('FrameEnvironment.getComputedVisibility', jsPath);
   }
 
   public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {

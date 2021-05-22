@@ -11,7 +11,6 @@ import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventL
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { URL } from 'url';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
-import { IPuppetPageOptions } from '@secret-agent/interfaces/IPuppetContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;
@@ -47,7 +46,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
   private parentManager?: NetworkManager;
   private readonly registeredEvents: IRegisteredEventListener[];
-  private readonly mockNetworkRequests: IPuppetPageOptions['mockNetworkRequests'];
+  private mockNetworkRequests?: (
+    request: Protocol.Fetch.RequestPausedEvent,
+  ) => Promise<Protocol.Fetch.FulfillRequestRequest>;
+
   private readonly proxyConnectionOptions: IProxyConnectionOptions;
   private isChromeRetainingResources = false;
 
@@ -55,10 +57,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     devtoolsSession: DevtoolsSession,
     logger: IBoundLog,
     proxyConnectionOptions?: IProxyConnectionOptions,
-    mockNetworkRequests?: IPuppetPageOptions['mockNetworkRequests'],
   ) {
     super();
-    this.mockNetworkRequests = mockNetworkRequests;
     this.devtools = devtoolsSession;
     this.logger = logger.createChild(module);
     this.proxyConnectionOptions = proxyConnectionOptions;
@@ -92,7 +92,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (this.mockNetworkRequests) {
       return this.devtools
         .send('Fetch.enable', {
-          handleAuthRequests: true,
+          handleAuthRequests: !!this.proxyConnectionOptions?.password,
         })
         .catch(err => err);
     }
@@ -119,6 +119,23 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     for (const error of errors) {
       if (error && error instanceof Error) throw error;
     }
+  }
+
+  public async setNetworkInterceptor(
+    mockNetworkRequests: NetworkManager['mockNetworkRequests'],
+    disableSessionLogging: boolean,
+  ): Promise<void> {
+    this.mockNetworkRequests = mockNetworkRequests;
+    const promises: Promise<any>[] = [];
+    if (disableSessionLogging) {
+      promises.push(this.devtools.send('Network.disable'));
+    }
+    promises.push(
+      this.devtools.send('Fetch.enable', {
+        handleAuthRequests: !!this.proxyConnectionOptions?.password,
+      }),
+    );
+    await Promise.all(promises);
   }
 
   public close(): void {
@@ -181,25 +198,34 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       });
     }
 
-    // networkId corresponds to onNetworkRequestWillBeSent
-    const resource = <IPuppetResourceRequest>{
-      browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
-      resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
-      url: new URL(networkRequest.request.url),
-      method: networkRequest.request.method,
-      isSSL: networkRequest.request.url.startsWith('https'),
-      isFromRedirect: false,
-      isUpgrade: false,
-      isHttp2Push: false,
-      isServerHttp2: false,
-      isClientHttp2: false,
-      requestTime: new Date(),
-      clientAlpn: null,
-      hasUserGesture: false,
-      documentUrl: networkRequest.request.headers.Referer,
-      frameId: networkRequest.frameId,
-    };
-
+    let resource: IPuppetResourceRequest;
+    try {
+      // networkId corresponds to onNetworkRequestWillBeSent
+      resource = <IPuppetResourceRequest>{
+        browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
+        resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
+        url: new URL(networkRequest.request.url),
+        method: networkRequest.request.method,
+        isSSL: networkRequest.request.url.startsWith('https'),
+        isFromRedirect: false,
+        isUpgrade: false,
+        isHttp2Push: false,
+        isServerHttp2: false,
+        isClientHttp2: false,
+        requestTime: new Date(),
+        clientAlpn: null,
+        hasUserGesture: false,
+        documentUrl: networkRequest.request.headers.Referer,
+        frameId: networkRequest.frameId,
+      };
+    } catch (error) {
+      this.logger.warn('NetworkManager.onRequestPausedError', {
+        error,
+        url: networkRequest.request.url,
+        browserRequestId: networkRequest.requestId,
+      });
+      return;
+    }
     const existing = this.requestsById.get(resource.browserRequestId);
 
     if (existing) {
@@ -232,25 +258,34 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
     if (isNavigation) {
       this.navigationRequestIdsToLoaderId.set(networkRequest.requestId, networkRequest.loaderId);
     }
-
-    const resource = <IPuppetResourceRequest>{
-      url: new URL(networkRequest.request.url),
-      isSSL: networkRequest.request.url.startsWith('https'),
-      isFromRedirect: !!redirectedFromUrl,
-      isUpgrade: false,
-      isHttp2Push: false,
-      isServerHttp2: false,
-      isClientHttp2: false,
-      requestTime: new Date(networkRequest.wallTime * 1e3),
-      clientAlpn: null,
-      browserRequestId: networkRequest.requestId,
-      resourceType: getResourceTypeForChromeValue(networkRequest.type),
-      method: networkRequest.request.method,
-      hasUserGesture: networkRequest.hasUserGesture,
-      documentUrl: networkRequest.documentURL,
-      redirectedFromUrl,
-      frameId: networkRequest.frameId,
-    };
+    let resource: IPuppetResourceRequest;
+    try {
+      resource = <IPuppetResourceRequest>{
+        url: new URL(networkRequest.request.url),
+        isSSL: networkRequest.request.url.startsWith('https'),
+        isFromRedirect: !!redirectedFromUrl,
+        isUpgrade: false,
+        isHttp2Push: false,
+        isServerHttp2: false,
+        isClientHttp2: false,
+        requestTime: new Date(networkRequest.wallTime * 1e3),
+        clientAlpn: null,
+        browserRequestId: networkRequest.requestId,
+        resourceType: getResourceTypeForChromeValue(networkRequest.type),
+        method: networkRequest.request.method,
+        hasUserGesture: networkRequest.hasUserGesture,
+        documentUrl: networkRequest.documentURL,
+        redirectedFromUrl,
+        frameId: networkRequest.frameId,
+      };
+    } catch (error) {
+      this.logger.warn('NetworkManager.onNetworkRequestWillBeSentError', {
+        error,
+        url: networkRequest.request.url,
+        browserRequestId: networkRequest.requestId,
+      });
+      return;
+    }
 
     const publishing = this.getPublishingForRequestId(resource.browserRequestId, true);
     publishing.hasRequestWillBeSentEvent = true;
@@ -419,6 +454,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
 
     const resource = this.requestsById.get(requestId);
     if (resource) {
+      if (!resource.url || !resource.requestTime) {
+        return;
+      }
+
       if (canceled) resource.browserCanceled = true;
       if (blockedReason) resource.browserBlockedReason = blockedReason;
       if (errorText) resource.browserLoadFailure = errorText;
@@ -426,6 +465,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       if (!this.requestPublishingById.get(requestId)?.isPublished) {
         this.doEmitResourceRequested(requestId);
       }
+
       this.emit('resource-failed', {
         resource,
       });

@@ -46,6 +46,10 @@ export default abstract class SqliteTable<T> {
   }
 
   public flush(): void {
+    this.db.transaction(() => this.runPendingInserts()).immediate();
+  }
+
+  public runPendingInserts(): void {
     const records = [...this.pendingInserts];
     this.pendingInserts.length = 0;
 

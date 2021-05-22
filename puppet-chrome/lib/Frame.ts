@@ -117,6 +117,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
   ): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
+    const startUrl = this.url;
     const startOrigin = this.securityOrigin;
     const contextId = await this.waitForActiveContextId(isolateFromWebPageEnvironment);
     try {
@@ -141,7 +142,10 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     } catch (err) {
       let retries = options?.retriesWaitingForLoad ?? 0;
       // if we had a context id from a blank page, try again
-      if (!startOrigin && this.getActiveContextId(isolateFromWebPageEnvironment) !== contextId) {
+      if (
+        (!startOrigin || this.url !== startUrl) &&
+        this.getActiveContextId(isolateFromWebPageEnvironment) !== contextId
+      ) {
         retries += 1;
       }
       const isNotFoundError =

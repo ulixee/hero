@@ -7,56 +7,63 @@ const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
   domReplayer: fs.readFileSync(`${__dirname}/../injected-scripts/domReplayer.js`, 'utf8'),
   interactReplayer: fs.readFileSync(`${__dirname}/../injected-scripts/interactReplayer.js`, 'utf8'),
+  NodeTracker: fs.readFileSync(`${__dirname}/../injected-scripts/NodeTracker.js`, 'utf8'),
   jsPath: fs.readFileSync(`${__dirname}/../injected-scripts/jsPath.js`, 'utf8'),
   Fetcher: fs.readFileSync(`${__dirname}/../injected-scripts/Fetcher.js`, 'utf8'),
   MouseEvents: fs.readFileSync(`${__dirname}/../injected-scripts/MouseEvents.js`, 'utf8'),
-  domObserver: fs.readFileSync(`${__dirname}/../injected-scripts/pageEventsRecorder.js`, 'utf8'),
+  pageEventsRecorder: fs.readFileSync(
+    `${__dirname}/../injected-scripts/pageEventsRecorder.js`,
+    'utf8',
+  ),
 };
 const pageEventsCallbackName = '__saPageListenerCallback';
 
 const injectedScript = `(function installInjectedScripts() {
-const exports = {}; // workaround for ts adding an exports variable
-${stringifiedTypeSerializerClass};
+    const exports = {}; // workaround for ts adding an exports variable
+    ${stringifiedTypeSerializerClass};
 
-${pageScripts.jsPath};
-${pageScripts.Fetcher};
-${pageScripts.MouseEvents};
+    ${pageScripts.NodeTracker};
+    ${pageScripts.jsPath};
+    ${pageScripts.Fetcher};
+    ${pageScripts.MouseEvents};
 
-(function installDomRecorder(runtimeFunction) {
-   ${pageScripts.domObserver}
-})('${pageEventsCallbackName}');
+    (function installDomRecorder(runtimeFunction) {
+       ${pageScripts.pageEventsRecorder}
+    })('${pageEventsCallbackName}');
 
-window.SA = {
-  JsPath,
-  MouseEvents,
-  Fetcher,
-};
+    window.SA = {
+      JsPath,
+      MouseEvents,
+      Fetcher,
+    };
 
-${pageScripts.domStorage}
+    ${pageScripts.domStorage}
 })();`;
 
 const detachedInjectedScript = `(function installInjectedScripts() {
-const exports = {}; // workaround for ts adding an exports variable
-${stringifiedTypeSerializerClass};
+    const exports = {}; // workaround for ts adding an exports variable
+    ${stringifiedTypeSerializerClass};
 
-const TSON = TypeSerializer;
+    const TSON = TypeSerializer;
 
-${pageScripts.jsPath};
-${pageScripts.Fetcher};
+    ${pageScripts.NodeTracker};
+    ${pageScripts.jsPath};
+    ${pageScripts.Fetcher};
 
-window.SA = {
-  JsPath,
-  Fetcher,
-};
-})();`;
+    window.SA = {
+      JsPath,
+      Fetcher,
+    };
+    })();`;
 
 const replayDomAndInteractionScript = `
-if (typeof exports === 'undefined') {
-    var exports = {}; // workaround for ts adding an exports variable
-}
-${pageScripts.domReplayer};
+    if (typeof exports === 'undefined') {
+        var exports = {}; // workaround for ts adding an exports variable
+    }
+    ${pageScripts.NodeTracker};
+    ${pageScripts.domReplayer};
 
-${pageScripts.interactReplayer};
+    ${pageScripts.interactReplayer};
 `;
 
 const installedSymbol = Symbol('InjectedScripts.Installed');
@@ -107,6 +114,10 @@ export default class InjectedScripts {
       'properties',
     ];
     const records = domChanges.map(x => columns.map(col => x[col]));
+    if (!puppetPage[installedSymbol]) {
+      await this.installDetachedScripts(puppetPage);
+    }
+    // NOTE: NodeTracker is installed by detachedScripts
     const domScript = puppetPage[replayInstalledSymbol] ? '' : pageScripts.domReplayer;
     puppetPage[replayInstalledSymbol] = true;
     await puppetPage.mainFrame.evaluate(

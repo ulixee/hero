@@ -3,8 +3,9 @@ import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
@@ -17,82 +18,88 @@ export const delegate = {
   createNodePointer,
 };
 
+interface IStateHandler<TClass> {
+  getState(instance: TClass): any;
+  setState(instance: TClass, properties: any): void;
+  className?: string;
+}
+
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = delegate;
+AwaitedHandler.setStorageSymbol(Symbol.for('@secret-agent/InternalAwaitedState'));
 
 async function getProperty<T, TClass>(
-  self: AwaitedHandler<TClass>,
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
   name: string,
 ): Promise<T> {
-  const { awaitedPath, coreFrame } = await getAwaitedState(self, instance);
-
+  const { awaitedPath, coreFrame, awaitedOptions } = await getAwaitedState(stateHandler, instance);
   const finalPath = awaitedPath.addProperty(instance as any, name);
 
-  const result = await execJsPath<TClass, T>(self, coreFrame, instance, finalPath.toJSON());
-
-  return cleanResult(self, instance, result);
+  const result = await execJsPath<T>(coreFrame, awaitedOptions, finalPath.toJSON());
+  return cleanResult(stateHandler, instance, result, new Error().stack);
 }
 
 async function setProperty<T, TClass>(
-  self: AwaitedHandler<TClass>,
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
   name: string,
   value: T,
 ): Promise<void> {
-  await awaitRemoteInitializer(self.getState(instance));
-  self.setState(instance, { [name]: value });
+  await awaitRemoteInitializer(stateHandler.getState(instance));
+  stateHandler.setState(instance, { [name]: value });
 }
 
 async function runMethod<T, TClass>(
-  self: AwaitedHandler<TClass>,
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
   name: string,
   args: any[],
 ): Promise<T> {
-  const { awaitedPath, coreFrame } = await getAwaitedState(self, instance);
+  const { awaitedPath, coreFrame, awaitedOptions } = await getAwaitedState(stateHandler, instance);
   const finalPath = awaitedPath.addMethod(instance as any, name, ...args);
 
-  const result = await execJsPath<TClass, T>(self, coreFrame, instance, finalPath.toJSON());
-  return cleanResult(self, instance, result);
+  const result = await execJsPath<T>(coreFrame, awaitedOptions, finalPath.toJSON());
+  return cleanResult(stateHandler, instance, result, new Error().stack);
 }
 
 async function createNodePointer<TClass>(
-  self: AwaitedHandler<TClass>,
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
 ): Promise<INodePointer> {
-  const { awaitedPath, coreFrame } = await getAwaitedState(self, instance);
-  const finalPath = awaitedPath.addMethod(instance as any, getNodePointerFnName).toJSON();
-  const result = await execJsPath<TClass, null>(self, coreFrame, instance, finalPath);
+  const { awaitedPath, coreFrame, awaitedOptions } = await getAwaitedState(stateHandler, instance);
+  const finalPath = awaitedPath.addMethod(instance as any, getNodePointerFnName);
 
+  const result = await execJsPath<null>(coreFrame, awaitedOptions, finalPath.toJSON());
   return result?.nodePointer;
 }
 
 function runStatic<T, TClass>(
-  self: AwaitedHandler<TClass>,
+  stateHandler: IStateHandler<TClass>,
   _klass: Constructable<TClass>,
   name: string,
 ): T {
-  throw new NotImplementedError(`${self.className}.${name} static method not implemented`);
+  throw new NotImplementedError(`${stateHandler.className}.${name} static method not implemented`);
 }
 
 function construct<TClass>(self: AwaitedHandler<TClass>): TClass {
   throw new NotImplementedError(`${self.className} constructor not implemented`);
 }
 
-async function getAwaitedState<TClass>(
-  self: AwaitedHandler<TClass>,
+export async function getAwaitedState<TClass>(
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
 ): Promise<{
   awaitedPath: AwaitedPath;
   coreFrame: CoreFrameEnvironment;
+  awaitedOptions: IAwaitedOptions;
 }> {
   await awaitRemoteInitializer(instance);
-  const state = self.getState(instance);
+  const state = stateHandler.getState(instance);
   const awaitedPath = state.awaitedPath as AwaitedPath;
-  const { coreFrame } = state.awaitedOptions as IAwaitedOptions;
-  const awaitedCoreFrame = await coreFrame;
-  return { awaitedPath, coreFrame: awaitedCoreFrame };
+  const awaitedOptions = state.awaitedOptions as IAwaitedOptions;
+  const awaitedCoreFrame = await awaitedOptions.coreFrame;
+  return { awaitedPath, coreFrame: awaitedCoreFrame, awaitedOptions };
 }
 
 export function getAwaitedPathAsMethodArg(awaitedPath: AwaitedPath): string {
@@ -122,29 +129,44 @@ export function convertJsPathArgs(path: IJsPath): void {
   }
 }
 
-function execJsPath<TClass, T>(
-  self: AwaitedHandler<TClass>,
+export async function execJsPath<T>(
   coreFrame: CoreFrameEnvironment,
-  instance: TClass,
+  awaitedOptions: IAwaitedOptions & { prefetchedJsPaths?: Promise<Map<string, IJsPathResult>> },
   path: IJsPath,
 ): Promise<IExecJsPathResult<T>> {
   convertJsPathArgs(path);
+  if (awaitedOptions.prefetchedJsPaths) {
+    const prefetchedJsPaths = await awaitedOptions.prefetchedJsPaths;
+    const prefetched = prefetchedJsPaths.get(JSON.stringify(path));
+    if (prefetched) {
+      const result = prefetched.result;
+      coreFrame.recordDetachedJsPath(prefetched.index, new Date(), new Date());
+      return result;
+    }
+  }
   return coreFrame.execJsPath<T>(path);
 }
 
-function cleanResult<T, TClass>(
-  self: AwaitedHandler<TClass>,
+export function cleanResult<T, TClass>(
+  stateHandler: IStateHandler<TClass>,
   instance: TClass,
   result: IExecJsPathResult<T>,
+  startStack: string,
 ): T {
   if (!result) return null;
 
   if (result.nodePointer) {
-    self.setState(instance, {
+    stateHandler.setState(instance, {
       nodePointer: result.nodePointer,
     });
   }
-
+  if (result?.pathError) {
+    const error = new Error(result.pathError.error);
+    error.name = 'InjectedScriptError';
+    (error as any).pathState = result.pathError.pathState;
+    error.stack = startStack.replace('Error:', '').trim();
+    throw error;
+  }
   return result.value;
 }
 

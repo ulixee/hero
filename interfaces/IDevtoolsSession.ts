@@ -40,6 +40,6 @@ export interface IDevtoolsResponseMessage {
 export interface IDevtoolsEventMessage {
   sessionId: string;
   method: string;
-  params: object;
+  params: any;
   timestamp: Date;
 }

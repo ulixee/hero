@@ -1,8 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { BlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
-import { bindFunctions } from '@secret-agent/commons/utils';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
+import * as Util from 'util';
+import { bindFunctions, getCallSite } from '@secret-agent/commons/utils';
 import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@secret-agent/interfaces/IDomStorage';
@@ -15,7 +16,13 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger } from '@secret-agent/interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
+import {
+  IElementIsolate,
+  IHTMLFrameElementIsolate,
+  IHTMLIFrameElementIsolate,
+  IHTMLObjectElementIsolate,
+  INodeIsolate,
+} from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
@@ -40,6 +47,7 @@ import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
+import FrozenTab from './FrozenTab';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -79,7 +87,6 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
         target: getState(this).connection.getCoreSessionOrReject(),
       };
     });
-    initializeConstantsAndProperties(this, [], propertyKeys);
     bindFunctions(this);
 
     options.blockedResourceTypes =
@@ -200,8 +207,23 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       }
     } else {
       const session = await connection.getCoreSessionOrReject();
-      await session.configure(options);
+      await session.configure(getState(this).options);
     }
+  }
+
+  public detach(tab: Tab, key?: string): FrozenTab {
+    const callSitePath = getCallSite(module.filename, scriptInstance.entrypoint)
+      .map(x => `${x.getFileName()}:${x.getLineNumber()}:${x.getColumnNumber()}`)
+      .join('\n');
+
+    const coreTab = getCoreTab(tab);
+    const coreSession = getState(this).connection.getCoreSessionOrReject();
+
+    const detachedTab = coreSession.then(async session =>
+      session.detachTab(await coreTab, callSitePath, key),
+    );
+
+    return new FrozenTab(this, detachedTab);
   }
 
   public async focusTab(tab: Tab): Promise<void> {
@@ -224,7 +246,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   }
 
   public async getFrameEnvironment(
-    frameElement: IElementIsolate,
+    frameElement: IHTMLFrameElementIsolate | IHTMLIFrameElementIsolate | IHTMLObjectElementIsolate,
   ): Promise<FrameEnvironment | null> {
     return await this.activeTab.getFrameEnvironment(frameElement);
   }
@@ -335,6 +357,17 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
       if (onrejected) return onrejected(err);
       throw err;
     }
+  }
+
+  public toJSON(): any {
+    // return empty so we can avoid infinite "stringifying" in jest
+    return {
+      type: this.constructor.name,
+    };
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 }
 

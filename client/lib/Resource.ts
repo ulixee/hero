@@ -1,10 +1,11 @@
-import initializeConstantsAndProperties from 'awaited-dom/base/initializeConstantsAndProperties';
+import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import ResourceType from '@secret-agent/interfaces/ResourceType';
 import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
 import Timer from '@secret-agent/commons/Timer';
 import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOptions';
 import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
+import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
@@ -33,10 +34,6 @@ const propertyKeys: (keyof Resource)[] = [
 ];
 
 export default class Resource {
-  constructor() {
-    initializeConstantsAndProperties(this, [], propertyKeys);
-  }
-
   public get request(): ResourceRequest {
     return getState(this).request;
   }
@@ -69,6 +66,10 @@ export default class Resource {
 
   public json(): Promise<any> {
     return this.text().then(JSON.parse);
+  }
+
+  public [Util.inspect.custom](): any {
+    return inspectInstanceProperties(this, propertyKeys as any);
   }
 
   public static async waitFor(

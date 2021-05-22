@@ -3,7 +3,7 @@ import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import getNodePointerFnName from '@secret-agent/interfaces/getNodePointerFnName';
+import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import { Helpers } from '@secret-agent/testing';
 import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';

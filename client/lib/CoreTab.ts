@@ -142,7 +142,15 @@ export default class CoreTab implements IJsPathEventTarget {
     await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
   }
 
+  public async flush(): Promise<void> {
+    for (const frame of this.frameEnvironmentsById.values()) {
+      await frame.commandQueue.flush();
+    }
+    await this.commandQueue.flush();
+  }
+
   public async close(): Promise<void> {
+    await this.flush();
     await this.commandQueue.run('Tab.close');
     const session = this.connection.getSession(this.sessionId);
     session?.removeTab(this);

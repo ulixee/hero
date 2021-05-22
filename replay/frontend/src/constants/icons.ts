@@ -5,7 +5,6 @@ export const ICON_DOWN = require('~frontend/assets/icons/down.svg');
 export const ICON_UP = require('~frontend/assets/icons/up.svg');
 export const ICON_ARROW_RIGHT = require('~frontend/assets/icons/arrow-right.svg');
 
-
 export const ICON_BACK = require('~frontend/assets/icons/back.svg');
 export const ICON_FORWARD = require('~frontend/assets/icons/forward.svg');
 
@@ -28,3 +27,4 @@ export const ICON_PAUSE = require('~frontend/assets/icons/pause.svg');
 export const ICON_HOME = require('~frontend/assets/icons/home.svg');
 export const ICON_REFRESH = require('~frontend/assets/icons/refresh.svg');
 export const ICON_DASHBOARD = require('~frontend/assets/icons/dashboard.svg');
+export const ICON_BOOKMARK = require('~frontend/assets/icons/bookmarks.svg');

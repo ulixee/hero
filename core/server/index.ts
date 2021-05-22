@@ -5,7 +5,6 @@ import * as http from 'http';
 import { IncomingMessage, ServerResponse } from 'http';
 import { createPromise } from '@secret-agent/commons/utils';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-
 import Core, { GlobalPool } from '../index';
 import ConnectionToReplay from './ConnectionToReplay';
 import InjectedScripts from '../lib/InjectedScripts';
@@ -44,8 +43,11 @@ export default class CoreServer {
     this.httpServer.on('request', this.onRequest.bind(this));
     this.httpServer.on('connection', this.httpConnection.bind(this));
     this.addressHost = addressHost;
-    this.wsServer = new WebSocket.Server({ server: this.httpServer });
-    this.wsServer.on('connection', this.handleConnection.bind(this));
+    this.wsServer = new WebSocket.Server({
+      server: this.httpServer,
+      perMessageDeflate: { threshold: 500, serverNoContextTakeover: false },
+    });
+    this.wsServer.on('connection', this.handleWsConnection.bind(this));
     this.routes = [
       ['/replay/domReplayer.js', this.handleReplayerScriptRequest.bind(this)],
       [/\/replay\/([\d\w-]+)\/resource\/(\d+)/, this.handleResourceRequest.bind(this)],
@@ -117,7 +119,7 @@ export default class CoreServer {
     socket.on('close', () => this.sockets.delete(socket));
   }
 
-  private async handleConnection(ws: WebSocket, request: http.IncomingMessage): Promise<void> {
+  private async handleWsConnection(ws: WebSocket, request: http.IncomingMessage): Promise<void> {
     if (request.url === '/') {
       const connection = Core.addConnection();
       ws.on('message', message => {
@@ -174,21 +176,22 @@ export default class CoreServer {
   }
 
   private async handleResourceRequest(
-    _: IncomingMessage,
+    req: IncomingMessage,
     res: ServerResponse,
     [sessionId, resourceId],
   ): Promise<void> {
-    const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
+    const dataDir = (req.headers['x-data-location'] as string) ?? GlobalPool.sessionsDir;
     const endDate = new Date().getTime() + 5e3;
+    const db = SessionDb.getCached(sessionId, dataDir);
+
     do {
       const resource = db.resources.getResponse(Number(resourceId));
-      if (resource) {
+      req.socket.setKeepAlive(true);
+      if (resource && resource.statusCode) {
         const headers = JSON.parse(resource.responseHeaders ?? '{}');
         const responseHeaders: any = {
           connection: 'keep-alive',
           'content-encoding': resource.responseEncoding,
-          'x-replay-agent': `Secret Agent Replay v${pkg.version}`,
-          'x-original-headers': headers,
         };
         const location = headers.location ?? headers.Location;
         if (location) responseHeaders.location = location;

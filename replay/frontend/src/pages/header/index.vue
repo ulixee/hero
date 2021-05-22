@@ -36,7 +36,8 @@
     button(v-if="saSession.tabs.length > 1" @click="showTabs" ref="tabRef")
       .text {{activeTabIdx + 1}}/{{saSession.tabs.length}}
     .address-bar
-      Icon(:src="ICON_LOCK" :size=16 iconStyle="transform: 'scale(-1,1)'" disabled="true")
+      Icon(:src="addressIcon" :size=16 iconStyle="transform: 'scale(-1,1)'" disabled="true")
+      .detached(v-if="isFrozenTab") Frozen
       .text {{currentUrl}}
 
 </template>
@@ -54,6 +55,7 @@ import {
   ICON_NUMBER,
   ICON_SCRIPT,
   ICON_WINDOW,
+  ICON_BOOKMARK,
 } from '~frontend/constants/icons';
 import NoCache from '~frontend/lib/NoCache';
 import Icon from '~frontend/components/Icon.vue';
@@ -75,6 +77,7 @@ export default class HeaderPage extends Vue {
   readonly ICON_CLOCK = ICON_CLOCK;
   readonly ICON_NUMBER = ICON_NUMBER;
   readonly ICON_LOCK = ICON_LOCK;
+  readonly ICON_BOOKMARK = ICON_BOOKMARK;
   readonly ICON_WINDOW = ICON_WINDOW;
 
   $refs: any;
@@ -85,9 +88,20 @@ export default class HeaderPage extends Vue {
   currentUrl = 'Loading';
 
   location: IWindowLocation = 'Dashboard';
+
   saSession: ISaSession = null;
   hasBack = false;
   hasNext = false;
+
+  get isFrozenTab(): boolean {
+    if (!this.activeTabId) return false;
+    return !!this.saSession.tabs.find(x => x.tabId === this.activeTabId)?.detachedFromTabId;
+  }
+
+  get addressIcon() {
+    if (this.isFrozenTab) return ICON_BOOKMARK;
+    return ICON_LOCK;
+  }
 
   get sessionIndex() {
     return this.saSession.relatedSessions.findIndex(x => x.id === this.saSession.id) + 1;
@@ -115,8 +129,10 @@ export default class HeaderPage extends Vue {
       this.hasBack = hasBack;
     });
 
-    ipcRenderer.on('replay:new-tab', (e, tab) => {
-      this.saSession.tabs.push(tab);
+    ipcRenderer.on('replay:tab', (e, tab) => {
+      const index = this.saSession.tabs.findIndex(x => x.tabId === tab.tabId);
+      if (index === -1) this.saSession.tabs.push(tab);
+      else this.saSession.tabs[index] = tab;
     });
 
     ipcRenderer.on('replay:active-tab', (e, tabId) => {
@@ -177,12 +193,14 @@ export default class HeaderPage extends Vue {
     const overlayRect = this.$refs.tabRef.getBoundingClientRect().toJSON();
 
     const firstTabTime = moment(this.saSession.tabs[0].createdTime);
+    let tabLabelsById = new Map<number, string>();
+    let tabCounter = 0;
     const tabs = this.saSession.tabs.map((x, i) => {
       let label = '';
       let time = '';
-      if (i === 1) label = '2nd ';
-      else if (i === 2) label = '3rd ';
-      else if (i > 2) label = `${i + 1}th `;
+      if (tabCounter === 1) label = '2nd ';
+      else if (tabCounter === 2) label = '3rd ';
+      else if (tabCounter > 2) label = `${i + 1}th `;
 
       if (i === 0) {
         time = firstTabTime.format('h:mma');
@@ -196,8 +214,18 @@ export default class HeaderPage extends Vue {
           time = `+${secs}s`;
         }
       }
+      let title: string;
+      if (!x.detachedFromTabId) {
+        title = `${i + 1}/${this.saSession.tabs.length} - ${label}tab opened at ${time}`;
+        tabLabelsById.set(x.tabId, label || '1st ');
+        tabCounter += 1;
+      } else {
+        const sourceTabNumber = tabLabelsById.get(x.detachedFromTabId);
+        title = `${i + 1}/${
+          this.saSession.tabs.length
+        } - detached ${sourceTabNumber}tab at ${time}`;
+      }
 
-      const title = `${i + 1}/${this.saSession.tabs.length} - ${label}tab opened at ${time}`;
       return {
         title,
         isActive: this.activeTabId === x.tabId,
@@ -367,6 +395,17 @@ export default class HeaderPage extends Vue {
       border-radius: 4px;
       padding: 4px 10px;
       cursor: pointer;
+    }
+    .detached {
+      margin: auto 5px;
+      padding: 0 5px;
+      background: #3498db;
+      line-height: 20px;
+      color: white;
+      height: 20px;
+      border-radius: 5px;
+      font-size: 10px;
+      vertical-align: middle;
     }
     .address-bar {
       flex: 10;

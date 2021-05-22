@@ -16,9 +16,10 @@ import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { ILoadEvent } from '@secret-agent/interfaces/ILoadEvent';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -28,10 +29,9 @@ import CommandRecorder from './CommandRecorder';
 import FrameNavigations from './FrameNavigations';
 import { Serializable } from '../interfaces/ISerializable';
 import InjectedScriptError from './InjectedScriptError';
-import { JsPath } from './JsPath';
+import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
-
-export const SA_NOT_INSTALLED = 'SA_SCRIPT_NOT_INSTALLED';
+import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 
 const { log } = Log(module);
 
@@ -67,13 +67,17 @@ export default class FrameEnvironment {
   }
 
   public readonly navigationsObserver: TabNavigationObserver;
+
   public readonly navigations: FrameNavigations;
   public readonly tab: Tab;
+  public readonly jsPath: JsPath;
   public puppetFrame: IPuppetFrame;
   public isReady: Promise<Error | void>;
-
   public domNodeId: number;
+
   protected readonly logger: IBoundLog;
+  private prefetchedJsPaths: IJsPathResult[];
+  private readonly isDetached: boolean;
   private readonly interactor: Interactor;
   private isClosing = false;
   private readonly createdAtCommandId: number;
@@ -96,13 +100,16 @@ export default class FrameEnvironment {
       sessionId: tab.session.id,
       frameId: this.id,
     });
+    this.jsPath = new JsPath(this, tab.isDetached);
+    this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
     this.navigations = new FrameNavigations(frame.id, tab.sessionState);
     this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.interactor = new Interactor(this);
 
-    this.listen();
-    this.commandRecorder = new CommandRecorder(this, this.tab, this.id, [
+    // give tab time to setup
+    process.nextTick(() => this.listen());
+    this.commandRecorder = new CommandRecorder(this, tab.session, tab.id, this.id, [
       this.createRequest,
       this.execJsPath,
       this.fetch,
@@ -111,7 +118,6 @@ export default class FrameEnvironment {
       this.getJsValue,
       this.getLocationHref,
       this.interact,
-      this.getComputedVisibility,
       this.removeCookie,
       this.setCookie,
       this.waitForElement,
@@ -124,7 +130,12 @@ export default class FrameEnvironment {
   }
 
   public isAllowedCommand(method: string): boolean {
-    return this.commandRecorder.fnNames.has(method) || method === 'close';
+    return (
+      this.commandRecorder.fnNames.has(method) ||
+      method === 'close' ||
+      method === 'recordDetachedJsPath' ||
+      method === 'recordDetachedJsPaths'
+    );
   }
 
   public close(): void {
@@ -147,6 +158,9 @@ export default class FrameEnvironment {
   /////// COMMANDS /////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async interact(...interactionGroups: IInteractionGroups): Promise<void> {
+    if (this.isDetached) {
+      throw new Error("Sorry, you can't interact with a detached frame");
+    }
     await this.navigationsObserver.waitForReady();
     const interactionResolvable = createPromise<void>(120e3);
     this.waitTimeouts.push({
@@ -183,7 +197,34 @@ export default class FrameEnvironment {
     // if nothing loaded yet, return immediately
     if (!this.navigations.top) return null;
     await this.navigationsObserver.waitForReady();
-    return await new JsPath(this, jsPath).exec();
+    return await this.jsPath.exec(jsPath);
+  }
+
+  public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
+    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths);
+    return this.prefetchedJsPaths;
+  }
+
+  public recordDetachedJsPaths(...commands: [number, number, number][]): void {
+    for (const [index, startDate, endDate] of commands) {
+      this.recordDetachedJsPath(index, startDate, endDate);
+    }
+  }
+
+  public recordDetachedJsPath(index: number, startDate: number, endDate: number): void {
+    const entry = this.prefetchedJsPaths[index];
+    // only need to record start
+    this.sessionState.recordCommandStart({
+      name: 'execJsPath',
+      args: TypeSerializer.stringify([entry.jsPath]),
+      id: this.sessionState.commands.length + 1,
+      wasPrefetched: true,
+      tabId: this.tab.id,
+      frameId: this.id,
+      result: entry.result,
+      startDate,
+      endDate,
+    });
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {
@@ -266,14 +307,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return true;
   }
 
-  public async getComputedVisibility(jsPath: IJsPath): Promise<INodeVisibility> {
-    const isVisible = await new JsPath(this, jsPath).getComputedVisibility();
-    return isVisible.value;
-  }
-
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
     await this.navigationsObserver.waitForReady();
-    const nodeIdResult = await new JsPath(this, jsPath).getNodeId();
+    const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]]);
     if (!nodeIdResult.value) return null;
 
     const domId = nodeIdResult.value;
@@ -317,7 +353,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     try {
       while (!timer.isResolved()) {
         try {
-          const promise = new JsPath(this, jsPath).waitForElement(waitForVisible, timeoutPerTry);
+          const promise = this.jsPath.waitForElement(jsPath, waitForVisible, timeoutPerTry);
 
           const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
           let isValid = isNodeVisible.value?.isVisible;
@@ -336,17 +372,54 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   }
 
   public moveMouseToStartLocation(): Promise<void> {
+    if (this.isDetached) return;
     return this.interactor.initialize();
   }
 
-  public onDomRecorderLoadEvents(loadEvents: ILoadEvent[]): void {
-    for (const loadEvent of loadEvents) {
-      const [event, url, timestamp] = loadEvent;
+  public async flushPageEventsRecorder(): Promise<boolean> {
+    try {
+      // don't wait for env to be available
+      if (!this.puppetFrame.canEvaluate(true)) return false;
 
+      const results = await this.puppetFrame.evaluate<PageRecorderResultSet>(
+        `window.flushPageRecorder()`,
+        true,
+      );
+      return this.onPageRecorderEvents(results);
+    } catch (error) {
+      // no op if it fails
+    }
+    return false;
+  }
+
+  public onPageRecorderEvents(results: PageRecorderResultSet): boolean {
+    const [domChanges, mouseEvents, focusEvents, scrollEvents, loadEvents] = results;
+    const hasRecords = results.some(x => x.length > 0);
+    if (!hasRecords) return false;
+    this.logger.stats('FrameEnvironment.onPageEvents', {
+      tabId: this.id,
+      dom: domChanges.length,
+      mouse: mouseEvents.length,
+      focusEvents: focusEvents.length,
+      scrollEvents: scrollEvents.length,
+      loadEvents,
+    });
+
+    for (const [event, url, timestamp] of loadEvents) {
       const incomingStatus = pageStateToLoadStatus[event];
 
       this.navigations.onLoadStateChanged(incomingStatus, url, null, new Date(timestamp));
     }
+
+    this.sessionState.captureDomEvents(
+      this.tab.id,
+      this.id,
+      domChanges,
+      mouseEvents,
+      focusEvents,
+      scrollEvents,
+    );
+    return true;
   }
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,7 +462,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     try {
       if (this.isMainFrame) {
         // only install interactor on the main frame
-        await this.interactor.initialize();
+        await this.interactor?.initialize();
       } else {
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
         this.domNodeId = await this.puppetFrame.evaluateOnIsolatedFrameElement<number>(
