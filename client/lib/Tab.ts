@@ -32,6 +32,7 @@ import Agent, { IState as IAgentState } from './Agent';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
+import Dialog from './Dialog';
 
 const awaitedPathState = StateMachine<
   any,
@@ -49,6 +50,7 @@ export interface IState {
 
 interface IEventType {
   resource: Resource | WebsocketResource;
+  dialog: Dialog;
 }
 
 const propertyKeys: (keyof Tab)[] = [
@@ -147,7 +149,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async goto(href: string, timeoutMs?: number): Promise<Resource> {
     const coreTab = await getCoreTab(this);
     const resource = await coreTab.goto(href, timeoutMs);
-    return createResource(resource, Promise.resolve(coreTab));
+    return createResource(Promise.resolve(coreTab), resource);
   }
 
   public async goBack(timeoutMs?: number): Promise<string> {

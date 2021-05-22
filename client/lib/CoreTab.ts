@@ -14,6 +14,7 @@ import { createResource } from './Resource';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
+import { createDialog } from './Dialog';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -44,11 +45,11 @@ export default class CoreTab implements IJsPathEventTarget {
     this.eventHeap = new CoreEventHeap(this.meta, connection);
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));
 
-    if (!this.eventHeap.hasEventInterceptors('resource')) {
-      this.eventHeap.registerEventInterceptor('resource', (resource: IResourceMeta) => {
-        return [createResource(resource, Promise.resolve(this))];
-      });
-    }
+    const resolvedThis = Promise.resolve(this);
+    this.eventHeap.registerEventInterceptors({
+      resource: createResource.bind(null, resolvedThis),
+      dialog: createDialog.bind(null, resolvedThis),
+    });
   }
 
   public async getCoreFrameEnvironments(): Promise<CoreFrameEnvironment[]> {
@@ -123,6 +124,10 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async focusTab(): Promise<void> {
     await this.commandQueue.run('Tab.focus');
+  }
+
+  public async dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+    await this.commandQueue.run('Tab.dismissDialog', accept, promptText);
   }
 
   public async addEventListener(

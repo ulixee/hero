@@ -108,7 +108,7 @@ export default class FrozenTab {
   public async goto(href: string, timeoutMs?: number): Promise<Resource> {
     const coreTab = await getCoreTab(this);
     const resource = await coreTab.goto(href, timeoutMs);
-    return createResource(resource, Promise.resolve(coreTab));
+    return createResource(Promise.resolve(coreTab), resource);
   }
 
   public async goBack(timeoutMs?: number): Promise<string> {
