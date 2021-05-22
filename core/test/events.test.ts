@@ -30,7 +30,7 @@ describe('Core events tests', () => {
     await connection.addEventListener(meta, null, 'close');
     await Session.get(meta.sessionId).close();
 
-    expect(onEventFn.mock.calls.length).toBe(1);
+    expect(onEventFn.mock.calls).toHaveLength(1);
   });
 
   it('receives resource events', async () => {
@@ -50,7 +50,7 @@ describe('Core events tests', () => {
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
     // ToDo: this should really be 2; it's emitting base document as an resource
-    expect(onEventFn.mock.calls.length).toBe(4);
+    expect(onEventFn.mock.calls).toHaveLength(4);
   }, 10e3);
 
   it('removes event listeners', async () => {
@@ -64,7 +64,7 @@ describe('Core events tests', () => {
 
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/page1`);
-    await tab.waitForLoad(LocationStatus.PaintingStable);
+    await tab.waitForLoad(LocationStatus.AllContentLoaded);
 
     await connection.removeEventListener(meta, listenerId);
 
@@ -72,6 +72,6 @@ describe('Core events tests', () => {
     await tab.waitForLoad(LocationStatus.PaintingStable);
 
     // ToDo: this should really be 1; it's emitting base document as an resource
-    expect(onEventFn.mock.calls.length).toBe(2);
+    expect(onEventFn.mock.calls).toHaveLength(2);
   }, 10e3);
 });

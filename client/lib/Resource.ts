@@ -107,7 +107,7 @@ export default class Resource {
           if (idsSeen.has(resourceMeta.id)) continue;
           idsSeen.add(resourceMeta.id);
 
-          const resource = createResource(resourceMeta, Promise.resolve(coreTab));
+          const resource = createResource(Promise.resolve(coreTab), resourceMeta);
 
           let shouldInclude = true;
 
@@ -142,7 +142,7 @@ export default class Resource {
   }
 }
 
-export function createResource(resourceMeta: IResourceMeta, coreTab: Promise<CoreTab>): Resource {
+export function createResource(coreTab: Promise<CoreTab>, resourceMeta: IResourceMeta): Resource {
   if (resourceMeta.type === 'Websocket') {
     return createWebsocketResource(resourceMeta, coreTab);
   }

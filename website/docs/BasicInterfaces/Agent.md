@@ -210,7 +210,7 @@ Update existing configuration settings.
 
 See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
 
-### agent.detachTab*(tab\[, key])* {#detach-tab}
+### agent.detach*(tab\[, key])* {#detach-tab}
 
 Detach the given tab into a "Frozen" state. The `FrozenTab` contains a replica of the DOM and layout at the moment of detachment, and supports all the readonly activities of a normal Tab (eg, querySelectors, getComputedVisibility, getComputedStyle).
 

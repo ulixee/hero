@@ -21,6 +21,7 @@ import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOpti
 import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
+import IPuppetDialog from '@secret-agent/interfaces/IPuppetDialog';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -122,6 +123,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.isReady = this.waitForReady();
     this.commandRecorder = new CommandRecorder(this, this.session, this.id, this.mainFrameId, [
       this.focus,
+      this.dismissDialog,
       this.getFrameEnvironments,
       this.goto,
       this.goBack,
@@ -412,6 +414,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.puppetPage.screenshot(options.format, options.rectangle, options.jpegQuality);
   }
 
+  public dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+    return this.puppetPage.dismissDialog(accept, promptText);
+  }
+
   public async waitForNewTab(options: IWaitForOptions = {}): Promise<Tab> {
     // last command is the one running right now
     const startCommandId = options?.sinceCommandId ?? this.lastCommandId - 1;
@@ -565,6 +571,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     page.on('console', this.onConsole.bind(this), true);
     page.on('frame-created', this.onFrameCreated.bind(this), true);
     page.on('page-callback-triggered', this.onPageCallback.bind(this));
+    page.on('dialog-opening', this.onDialogOpening.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
@@ -788,6 +795,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
   }
 
+  private onDialogOpening(event: IPuppetPageEvents['dialog-opening']): void {
+    this.emit('dialog', event.dialog);
+  }
   // CREATE
 
   public static create(
@@ -810,6 +820,7 @@ interface ITabEventParams {
   close: null;
   'resource-requested': IResourceMeta;
   resource: IResourceMeta;
+  dialog: IPuppetDialog;
   'websocket-message': IWebsocketResourceMessage;
   'child-tab-created': Tab;
 }

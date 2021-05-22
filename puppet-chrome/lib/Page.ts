@@ -36,6 +36,7 @@ import ConsoleAPICalledEvent = Protocol.Runtime.ConsoleAPICalledEvent;
 import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
+import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -131,6 +132,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       ['Runtime.exceptionThrown', this.onRuntimeException.bind(this)],
       ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
       ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
+      ['Page.javascriptDialogOpening', this.onJavascriptDialogOpening.bind(this)],
       ['Page.windowOpen', this.onWindowOpen.bind(this)],
     ]);
 
@@ -201,6 +203,13 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     if (navigationResponse.errorText) throw new Error(navigationResponse.errorText);
     await this.framesManager.waitForFrame(navigationResponse, url, true);
     return { loaderId: navigationResponse.loaderId };
+  }
+
+  dismissDialog(accept: boolean, promptText?: string): Promise<void> {
+    return this.devtoolsSession.send('Page.handleJavaScriptDialog', {
+      accept,
+      promptText,
+    });
   }
 
   goBack(): Promise<string> {
@@ -429,5 +438,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   private onWindowOpen(event: WindowOpenEvent): void {
     this.windowOpenParams = event;
+  }
+
+  private onJavascriptDialogOpening(dialog: JavascriptDialogOpeningEvent): void {
+    this.emit('dialog-opening', { dialog });
   }
 }

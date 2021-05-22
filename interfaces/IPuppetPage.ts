@@ -7,6 +7,7 @@ import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';
 import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
 import { IPuppetWorker } from './IPuppetWorker';
 import IDevtoolsSession from './IDevtoolsSession';
+import IPuppetDialog from './IPuppetDialog';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   id: string;
@@ -20,6 +21,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
 
   isClosed: boolean;
   navigate(url: string, options?: { referrer?: string }): Promise<{ loaderId: string }>;
+  dismissDialog(accept: boolean, promptText?: string): Promise<void>;
   goBack(): Promise<string>;
   goForward(): Promise<string>;
   reload(): Promise<void>;
@@ -57,6 +59,7 @@ export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNet
   worker: { worker: IPuppetWorker };
   crashed: { error: Error; fatal?: boolean };
   console: { frameId: string; type: string; message: string; location: string };
+  'dialog-opening': { dialog: IPuppetDialog };
   'page-error': { frameId: string; error: Error };
   'page-callback-triggered': { name: string; frameId: string; payload: any };
 }

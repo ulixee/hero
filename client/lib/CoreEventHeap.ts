@@ -6,7 +6,7 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 const { log } = Log(module);
 
 type IListenerFn = (...args: any[]) => void;
-type IInterceptorFn = (...args: any[]) => any[];
+type IInterceptorFn = (...args: any[]) => any;
 
 export default class CoreEventHeap {
   private readonly connection: ConnectionToCore;
@@ -25,10 +25,12 @@ export default class CoreEventHeap {
     return this.eventInterceptors.has(type);
   }
 
-  public registerEventInterceptor(type: string, interceptor: IInterceptorFn): void {
-    const events = this.eventInterceptors.get(type) ?? [];
-    events.push(interceptor);
-    this.eventInterceptors.set(type, events);
+  public registerEventInterceptors(interceptors: { [type: string]: IInterceptorFn }): void {
+    for (const [type, interceptor] of Object.entries(interceptors)) {
+      const events = this.eventInterceptors.get(type) ?? [];
+      events.push(interceptor);
+      this.eventInterceptors.set(type, events);
+    }
   }
 
   public async addListener(
@@ -56,7 +58,9 @@ export default class CoreEventHeap {
       wrapped = (...args: any[]) => {
         let processedArgs = args;
         for (const fn of interceptorFns) {
-          processedArgs = fn(...processedArgs);
+          let result = fn(...processedArgs);
+          if (!Array.isArray(result)) result = [result];
+          processedArgs = result;
         }
         listenerFn(...processedArgs);
       };

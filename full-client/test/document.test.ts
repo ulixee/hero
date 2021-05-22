@@ -1,8 +1,9 @@
 import { Helpers } from '@secret-agent/testing';
 import { XPathResult } from '@secret-agent/interfaces/AwaitedDom';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { FrameEnvironment } from '@secret-agent/client';
-import { Handler, LocationStatus } from '../index';
+import { FrameEnvironment, LocationStatus } from '@secret-agent/client';
+import Dialog from '@secret-agent/client/lib/Dialog';
+import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
 let handler: Handler;
@@ -334,6 +335,27 @@ describe('basic Document tests', () => {
     const { document } = agent;
     const dataUrl = await document.querySelector('canvas').toDataURL();
     expect(dataUrl).toMatch(/data:image\/png.+/);
+  });
+
+  it('can dismiss dialogs', async () => {
+    koaServer.get('/dialog', ctx => {
+      ctx.body = `
+        <body>
+          <h1>Dialog page</h1>
+          <script type="text/javascript">
+           setTimeout(() => confirm('Do you want to do this'), 500);
+          </script>
+        </body>
+      `;
+    });
+    const agent = await openBrowser(`/dialog`);
+    const { document } = agent;
+    const dialogPromise = new Promise<Dialog>(resolve => agent.activeTab.on('dialog', resolve));
+    await expect(dialogPromise).resolves.toBeTruthy();
+    const dialog = await dialogPromise;
+    await (await dialog).dismiss(true);
+    // test that we don't hang here
+    await expect(document.querySelector('h1').textContent).resolves.toBeTruthy();
   });
 
   it('can get a dataset attribute', async () => {

@@ -50,10 +50,10 @@ export default class AwaitedEventListener {
         // need to give client time to register function sending events
         process.nextTick(() => tab.sessionState.onWebsocketMessages(resourceId, listener.listenFn));
       }
-    } else if (type) {
-      if (type === 'resource') {
-        listener.listenFn = this.triggerListenersWithType.bind(this, 'resource');
-        tab.on('resource', listener.listenFn);
+    } else if (type && tab) {
+      if (type !== 'close') {
+        listener.listenFn = this.triggerListenersWithType.bind(this, type);
+        tab.on(type as any, listener.listenFn);
       }
     }
 
@@ -68,9 +68,8 @@ export default class AwaitedEventListener {
     const { type, meta, listenFn, jsPath } = listener;
     const tab = Session.getTab(meta);
     if (tab) {
-      if (type === 'resource') {
-        tab.off('resource', listenFn);
-      }
+      tab.off(type as any, listenFn);
+
       if (isWebsocketListener(listener)) {
         tab.sessionState.stopWebsocketMessages(jsPath[1] as string, listenFn);
       }
