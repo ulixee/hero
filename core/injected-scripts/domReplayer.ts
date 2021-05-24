@@ -257,7 +257,9 @@ function onNewDocument(event: IFrontendDomChangeEvent) {
   );
 
   if (!isMainFrame()) {
-    window.location.href = href;
+    if (window.location.href !== href) {
+      window.location.href = href;
+    }
     return;
   }
 

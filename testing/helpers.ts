@@ -13,12 +13,12 @@ import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as Koa from 'koa';
 import * as KoaRouter from '@koa/router';
 import * as net from 'net';
+import * as tls from 'tls';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import Core, { CoreProcess } from '@secret-agent/core';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import MitmSocket from '@secret-agent/mitm-socket';
-
 import { Helpers } from './index';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
@@ -103,6 +103,7 @@ export async function runHttpsServer(
 
   const destroyServer = destroyServerFn(server);
 
+  bindSslListeners(server);
   const port = (server.address() as net.AddressInfo).port;
   const baseUrl = `https://localhost:${port}`;
   const httpServer: ITestHttpServer<https.Server> = {
@@ -274,6 +275,7 @@ export async function runHttp2Server(
     .listen(0, () => {
       h2ServerStarted.resolve();
     });
+  bindSslListeners(server);
   server.on('session', session => {
     sessions.add(session);
   });
@@ -376,12 +378,6 @@ export async function readableToBuffer(res: stream.Readable): Promise<Buffer> {
   return Buffer.concat(buffer);
 }
 
-export async function http2StreamToJson<T>(http2Stream: http2.Http2Stream): Promise<T> {
-  const buffer = await readableToBuffer(http2Stream);
-  const json = buffer.toString();
-  return JSON.parse(json);
-}
-
 export function afterEach(): Promise<void> {
   return closeAll(false);
 }
@@ -417,6 +413,13 @@ async function closeAll(isFinal = false): Promise<void> {
       }
     }),
   );
+}
+
+function bindSslListeners(server: tls.Server): void {
+  if (process.env.SSLKEYLOGFILE) {
+    const logFile = Fs.createWriteStream(process.env.SSLKEYLOGFILE, { flags: 'a' });
+    server.on('keylog', line => logFile.write(line));
+  }
 }
 
 export function onClose(closeFn: (() => Promise<any>) | (() => any), onlyCloseOnFinal = false) {

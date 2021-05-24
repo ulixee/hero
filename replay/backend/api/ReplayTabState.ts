@@ -383,7 +383,7 @@ export default class ReplayTabState extends EventEmitter {
         for (const t of this.ticks) {
           if (t.eventType !== 'paint') continue;
           const newIndex = this.paintEvents.findIndex(x => x.timestamp === t.timestamp);
-          if (t.eventTypeIdx !== newIndex) {
+          if (newIndex >= 0 && t.eventTypeIdx !== newIndex) {
             if (this.paintEventsLoadedIdx >= newIndex) this.paintEventsLoadedIdx = newIndex - 1;
             t.eventTypeIdx = newIndex;
           }

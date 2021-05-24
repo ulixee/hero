@@ -51,6 +51,7 @@ export default class CoreProcess {
     // whitelist env so we don't leak sensitive args out of this process.
     for (const [key, value] of Object.entries(process.env)) {
       const isWhitelisted =
+        key === 'SSLKEYLOGFILE' ||
         key === 'DEBUG' ||
         // legacy arg
         key === 'SHOW_BROWSER' ||

@@ -3,8 +3,8 @@
 package main
 
 import (
-    "net"
 	winio "github.com/Microsoft/go-winio"
+	"net"
 )
 
 func ListenOnDomain(path string) (net.Listener, error) {

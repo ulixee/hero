@@ -1,7 +1,9 @@
 package main
 
 import (
+	"io"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 
@@ -38,6 +40,15 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 	tlsConfig := tls.Config{
 		ServerName:         connectArgs.Servername,
 		InsecureSkipVerify: !sessionArgs.RejectUnauthorized,
+	}
+
+	if connectArgs.KeylogPath != "" {
+		var keylog io.Writer
+		keylog, err = os.OpenFile(connectArgs.KeylogPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+		if err != nil {
+			return nil, err
+		}
+		tlsConfig.KeyLogWriter = keylog
 	}
 
 	tlsConn := tls.UClient(dialConn, &tlsConfig, tls.HelloCustom)
