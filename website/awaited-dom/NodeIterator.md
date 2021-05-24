@@ -6,15 +6,15 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `filter` | `pointerBeforeReferenceNode`
+|     |     |
+| --- | --- |
+| `filter` | `pointerBeforeReferenceNode`
 `referenceNode` | `root`
-`whatToShow` |  | 
+`whatToShow` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `detach()` | `nextNode()`
-`previousNode()` |  | 
+|     |     |
+| --- | --- |
+| `detach()` | `nextNode()`
+`previousNode()` |  |

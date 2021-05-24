@@ -32,7 +32,7 @@ A <code>number</code> code representing the type of the result, as defined by th
 
 A <code>Node</code> representing the value of the single node result, which may be <code>null</code>.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .snapshotLength <div class="specs"><i>W3C</i></div> {#snapshotLength}
 
@@ -52,7 +52,7 @@ A <code>string</code> representing the value of the result if <code>resultType</
 
 If the result is a node set, this method iterates over it and returns the next node from it or <code>null</code> if there are no more nodes.
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .snapshotItem*(index)* <div class="specs"><i>W3C</i></div> {#snapshotItem}
 
@@ -63,4 +63,4 @@ Returns an item of the snapshot collection or <code>null</code> in case the inde
 
  - index `number`. Needs content.
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)

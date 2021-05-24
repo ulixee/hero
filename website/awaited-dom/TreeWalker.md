@@ -8,16 +8,16 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `currentNode` | `filter`
-`root` | `whatToShow` | 
+|     |     |
+| --- | --- |
+| `currentNode` | `filter`
+`root` | `whatToShow` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `firstChild()` | `lastChild()`
+|     |     |
+| --- | --- |
+| `firstChild()` | `lastChild()`
 `nextNode()` | `nextSibling()`
 `parentNode()` | `previousNode()`
-`previousSibling()` |  | 
+`previousSibling()` |  |

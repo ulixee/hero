@@ -7,9 +7,9 @@
 
 SuperHTMLElement implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [Element](./element) | [EventTarget](./event-target)
+|     |     |
+| --- | --- |
+| [Element](./element) | [EventTarget](./event-target)
 [HTMLAnchorElement](./html-anchor-element) | [HTMLAreaElement](./html-area-element)
 [HTMLAudioElement](./html-audio-element) | [HTMLBaseElement](./html-base-element)
 [HTMLBodyElement](./html-body-element) | [HTMLBRElement](./htmlbr-element)
@@ -45,4 +45,4 @@ SuperHTMLElement implements all the properties and methods of the following clas
 [HTMLTextAreaElement](./html-text-area-element) | [HTMLTimeElement](./html-time-element)
 [HTMLTitleElement](./html-title-element) | [HTMLTrackElement](./html-track-element)
 [HTMLUListElement](./htmlu-list-element) | [HTMLUnknownElement](./html-unknown-element)
-[HTMLVideoElement](./html-video-element) | [Node](./node) | 
+[HTMLVideoElement](./html-video-element) | [Node](./node) |

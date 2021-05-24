@@ -9,9 +9,9 @@
 
 SuperElement implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [Element](./element) | [EventTarget](./event-target)
+|     |     |
+| --- | --- |
+| [Element](./element) | [EventTarget](./event-target)
 [HTMLAnchorElement](./html-anchor-element) | [HTMLAreaElement](./html-area-element)
 [HTMLAudioElement](./html-audio-element) | [HTMLBaseElement](./html-base-element)
 [HTMLBodyElement](./html-body-element) | [HTMLBRElement](./htmlbr-element)
@@ -49,4 +49,4 @@ SuperElement implements all the properties and methods of the following classes:
 [HTMLUListElement](./htmlu-list-element) | [HTMLUnknownElement](./html-unknown-element)
 [HTMLVideoElement](./html-video-element) | [Node](./node)
 [SVGElement](./svg-element) | [SVGGraphicsElement](./svg-graphics-element)
-[SVGSVGElement](./svgsvg-element) | [SVGTitleElement](./svg-title-element) | 
+[SVGSVGElement](./svgsvg-element) | [SVGTitleElement](./svg-title-element) |

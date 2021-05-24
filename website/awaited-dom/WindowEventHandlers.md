@@ -6,11 +6,11 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onafterprint` | `onbeforeprint`
+|     |     |
+| --- | --- |
+| `onafterprint` | `onbeforeprint`
 `onbeforeunload` | `onhashchange`
 `onlanguagechange` | `onmessage`
 `onmessageerror` | `onpopstate`
 `onrejectionhandled` | `onstorage`
-`onunhandledrejection` | `onunload` | 
+`onunhandledrejection` | `onunload` |

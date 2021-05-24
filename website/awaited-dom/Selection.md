@@ -8,7 +8,7 @@
 
 Returns the <code>Node</code> in which the selection begins. Can return <code>null</code> if selection never existed in the document (e.g., an iframe that was never clicked on).
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .anchorOffset <div class="specs"><i>W3C</i></div> {#anchorOffset}
 
@@ -20,7 +20,7 @@ Returns a number representing the offset of the selection's anchor within the <c
 
 Returns the <code>Node</code> in which the selection ends. Can return <code>null</code> if selection never existed in the document (for example, in an <code>iframe</code> that was never clicked on).
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .focusOffset <div class="specs"><i>W3C</i></div> {#focusOffset}
 
@@ -55,7 +55,7 @@ A <code>Range</code> object that will be added to the selection.
 #### **Arguments**:
 
 
- - range [`Range`](./range). A <code>Range</code> object that will be added to the <code>Selection</code>.
+ - range [`Range`](/docs/awaited-dom/range). A <code>Range</code> object that will be added to the <code>Selection</code>.
 
 #### **Returns**: `Promise<void>`
 
@@ -66,7 +66,7 @@ Collapses the current selection to a single point.
 #### **Arguments**:
 
 
- - node [`Node`](./node). The caret location will be within this node. This value can also be set to <code>null</code> — if <code>null</code> is specified, the method will behave like <code>Selection.removeAllRanges()</code>, i.e. all ranges will be removed from the selection.
+ - node [`Node`](/docs/awaited-dom/node). The caret location will be within this node. This value can also be set to <code>null</code> — if <code>null</code> is specified, the method will behave like <code>Selection.removeAllRanges()</code>, i.e. all ranges will be removed from the selection.
  - offset `number`. The offset in <code>node</code> to which the selection will be collapsed. If not specified, the default value <code>0</code> is used.
 
 #### **Returns**: `Promise<void>`
@@ -90,7 +90,7 @@ Indicates if a certain node is part of the selection.
 #### **Arguments**:
 
 
- - node [`Node`](./node). The node that is being looked for in the selection.
+ - node [`Node`](/docs/awaited-dom/node). The node that is being looked for in the selection.
  - allowPartialContainment `boolean`. When <code>true</code>, <code>containsNode()</code> returns <code>true</code> when a part of the node is part of the selection. When <code>false</code>, <code>containsNode()</code> only returns <code>true</code> when the entire node is part of the selection. If not specified, the default value <code>false</code> is used.
 
 #### **Returns**: `Promise<boolean>`
@@ -114,7 +114,7 @@ Moves the focus of the selection to a specified point.
 #### **Arguments**:
 
 
- - node [`Node`](./node). The node within which the focus will be moved.
+ - node [`Node`](/docs/awaited-dom/node). The node within which the focus will be moved.
  - offset `number`. The offset position within <code>node</code> where the focus will be moved to. If not specified, the default value <code>0</code> is used.
 
 #### **Returns**: `Promise<void>`
@@ -128,7 +128,7 @@ Returns a <code>Range</code> object representing one of the ranges currently sel
 
  - index `number`. The zero-based index of the range to return. A negative number or a number greater than or equal to <code>Selection.rangeCount</code> will result in an error.
 
-#### **Returns**: [`Range`](./range)
+#### **Returns**: [`Range`](/docs/awaited-dom/range)
 
 ### .modify*(alter, direction, granularity)* <div class="specs"><i>W3C</i></div> {#modify}
 
@@ -156,7 +156,7 @@ Removes a range from the selection.
 #### **Arguments**:
 
 
- - range [`Range`](./range). A range object that will be removed to the selection.
+ - range [`Range`](/docs/awaited-dom/range). A range object that will be removed to the selection.
 
 #### **Returns**: `Promise<void>`
 
@@ -167,7 +167,7 @@ Adds all the children of the specified node to the selection.
 #### **Arguments**:
 
 
- - node [`Node`](./node). All children of <code>parentNode</code> will be selected. <code>parentNode</code> itself is not part of the selection.
+ - node [`Node`](/docs/awaited-dom/node). All children of <code>parentNode</code> will be selected. <code>parentNode</code> itself is not part of the selection.
 
 #### **Returns**: `Promise<void>`
 
@@ -178,9 +178,9 @@ Sets the selection to be a range including all or parts of two specified DOM nod
 #### **Arguments**:
 
 
- - anchorNode [`Node`](./node). The node at the start of the selection.
+ - anchorNode [`Node`](/docs/awaited-dom/node). The node at the start of the selection.
  - anchorOffset `number`. The number of child nodes from the start of the anchor node that should be excluded from the selection. So for example, if the value is 0 the whole node is included. If the value is 1, the whole node minus the first child node is included. And so on.
- - focusNode [`Node`](./node). The node at the end of the selection.
+ - focusNode [`Node`](/docs/awaited-dom/node). The node at the end of the selection.
  - focusOffset `number`. The number of child nodes from the start of the focus node that should be included in the selection. So for example, if the value is 0 the whole node is excluded. If the value is 1, the first child node is included. And so on.
 
 #### **Returns**: `Promise<void>`
@@ -192,7 +192,7 @@ Collapses the current selection to a single point. This is an alias for <code>co
 #### **Arguments**:
 
 
- - node [`Node`](./node). Needs content.
+ - node [`Node`](/docs/awaited-dom/node). Needs content.
  - offset `number`. Needs content.
 
 #### **Returns**: `Promise<void>`

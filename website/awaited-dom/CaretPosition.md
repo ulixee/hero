@@ -14,7 +14,7 @@ Returns a <code>long</code> representing the character offset in the caret posit
 
 Returns a <code>Node</code> containing the found node at the caret's position.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ## Methods
 
@@ -22,4 +22,4 @@ Returns a <code>Node</code> containing the found node at the caret's position.
 
 Needs content.
 
-#### **Returns**: [`DOMRect`](./dom-rect)
+#### **Returns**: [`DOMRect`](/docs/awaited-dom/dom-rect)

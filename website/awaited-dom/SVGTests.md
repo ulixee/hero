@@ -6,6 +6,6 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `requiredExtensions` | `systemLanguage` | 
+|     |     |
+| --- | --- |
+| `requiredExtensions` | `systemLanguage` |

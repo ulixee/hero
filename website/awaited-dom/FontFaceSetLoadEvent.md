@@ -6,19 +6,19 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `fontfaces` | `bubbles`
+|     |     |
+| --- | --- |
+| `fontfaces` | `bubbles`
 `cancelable` | `cancelBubble`
 `composed` | `currentTarget`
 `defaultPrevented` | `eventPhase`
 `isTrusted` | `target`
-`timeStamp` | `type` | 
+`timeStamp` | `type` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `composedPath()` | `initEvent()`
+|     |     |
+| --- | --- |
+| `composedPath()` | `initEvent()`
 `preventDefault()` | `stopImmediatePropagation()`
-`stopPropagation()` |  | 
+`stopPropagation()` |  |

@@ -33,7 +33,7 @@ A `string` representing the namespace URI of the attribute, or <code>null</code>
  </div>
  
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .prefix <div class="specs"><i>W3C</i></div> {#prefix}
 
@@ -63,13 +63,13 @@ Returns a `string` representing the base URL of the document containing the <cod
 
 Returns a live <code>NodeList</code> containing all the children of this node. <code>NodeList</code> being live means that if the children of the <code>Node</code> change, the <code>NodeList</code> object is automatically updated.
 
-#### **Type**: [`SuperNodeList`](./super-node-list)
+#### **Type**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ### .firstChild <div class="specs"><i>W3C</i></div> {#firstChild}
 
 Returns a <code>Node</code> representing the first direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .isConnected <div class="specs"><i>W3C</i></div> {#isConnected}
 
@@ -81,13 +81,13 @@ A boolean indicating whether or not the Node is connected (directly or indirectl
 
 Returns a <code>Node</code> representing the last direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .nextSibling <div class="specs"><i>W3C</i></div> {#nextSibling}
 
 Returns a <code>Node</code> representing the next node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .nodeName <div class="specs"><i>W3C</i></div> {#nodeName}
 
@@ -174,25 +174,25 @@ Returns / Sets the value of the current node.
 
 Returns the <code>Document</code> that this node belongs to. If the node is itself a document, returns <code>null</code>.
 
-#### **Type**: [`SuperDocument`](./super-document)
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### .parentElement <div class="specs"><i>W3C</i></div> {#parentElement}
 
 Returns an <code>Element</code> that is the parent of this node. If the node has no parent, or if that parent is not an <code>Element</code>, this property returns <code>null</code>.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .parentNode <div class="specs"><i>W3C</i></div> {#parentNode}
 
 Returns a <code>Node</code> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null</code>.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .previousSibling <div class="specs"><i>W3C</i></div> {#previousSibling}
 
 Returns a <code>Node</code> representing the previous node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
@@ -209,7 +209,7 @@ Compares the position of the current node against another node in any other docu
 #### **Arguments**:
 
 
- - other [`Node`](./node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
+ - other [`Node`](/docs/awaited-dom/node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
 
 #### **Returns**: `Promise<number>`
 
@@ -220,7 +220,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 #### **Arguments**:
 
 
- - other [`Node`](./node). Needs content.
+ - other [`Node`](/docs/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -236,7 +236,7 @@ Returns the context object's root which optionally includes the shadow root if i
       <li><code>composed</code>: A `boolean` that indicates whether the shadow root should be returned (<code>false</code>, the default), or a root node beyond shadow root (<code>true</code>).</li>
      </ul>
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
@@ -262,7 +262,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -273,7 +273,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -309,9 +309,9 @@ Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `appendChild()` | `cloneNode()`
+|     |     |
+| --- | --- |
+| `appendChild()` | `cloneNode()`
 `insertBefore()` | `removeChild()`
 `replaceChild()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()` | 
+`dispatchEvent()` | `removeEventListener()` |

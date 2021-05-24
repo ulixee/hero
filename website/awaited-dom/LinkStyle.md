@@ -10,4 +10,4 @@
 
 Returns the <code>CSSStyleSheet</code> object associated with the given element, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperStyleSheet`](./super-style-sheet)
+#### **Type**: [`SuperStyleSheet`](/docs/awaited-dom/super-style-sheet)

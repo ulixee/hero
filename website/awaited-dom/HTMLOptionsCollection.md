@@ -27,7 +27,7 @@ Returns the specific node at the given zero-based <code>index</code> into the li
 
  - index `number`. The position of the <code>Node</code> to be returned. Elements appear in an <code>HTMLCollection</code> in the same order in which they appear in the document's source.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .namedItem*(name)* <div class="specs"><i>W3C</i></div> {#namedItem}
 
@@ -38,7 +38,7 @@ Returns the specific node whose ID or, as a fallback, name matches the string sp
 
  - name `string`. Needs content.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .item*(index)* <div class="specs"><i>W3C</i></div> {#item}
 
@@ -49,18 +49,18 @@ Needs content.
 
  - index `number`. Needs content.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ## Unimplemented Specs
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `length` | `selectedIndex` | 
+|     |     |
+| --- | --- |
+| `length` | `selectedIndex` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `add()` | `remove()` | 
+|     |     |
+| --- | --- |
+| `add()` | `remove()` |

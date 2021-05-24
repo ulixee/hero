@@ -18,13 +18,13 @@ Represents the textual representation of the rule, e.g. "<code>h1,h2 { font-size
 
 Returns the containing rule, otherwise <code>null</code>. E.g. if this rule is a style rule inside an <code>@media</code> block, the parent rule would be that <code>CSSMediaRule</code>.
 
-#### **Type**: [`CSSRule`](./css-rule)
+#### **Type**: [`CSSRule`](/docs/awaited-dom/css-rule)
 
 ### .parentStyleSheet <div class="specs"><i>W3C</i></div> {#parentStyleSheet}
 
 Returns the <code>CSSStyleSheet</code> object for the style sheet that contains this rule
 
-#### **Type**: [`CSSStyleSheet`](./css-style-sheet)
+#### **Type**: [`CSSStyleSheet`](/docs/awaited-dom/css-style-sheet)
 
 ### .type <div class="specs"><i>W3C</i></div> {#type}
 

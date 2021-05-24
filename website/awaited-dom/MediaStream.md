@@ -24,22 +24,22 @@ A `string` containing 36 characters denoting a universally unique identifier (UU
 
 Returns a clone of the <code>MediaStream</code> object. The clone will, however, have a unique value for <code>id</code>.
 
-#### **Returns**: [`MediaStream`](./media-stream)
+#### **Returns**: [`MediaStream`](/docs/awaited-dom/media-stream)
 
 ## Unimplemented Specs
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onaddtrack` | `onremovetrack` | 
+|     |     |
+| --- | --- |
+| `onaddtrack` | `onremovetrack` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `addTrack()` | `getAudioTracks()`
+|     |     |
+| --- | --- |
+| `addTrack()` | `getAudioTracks()`
 `getTrackById()` | `getTracks()`
 `getVideoTracks()` | `removeTrack()`
 `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+`removeEventListener()` |  |

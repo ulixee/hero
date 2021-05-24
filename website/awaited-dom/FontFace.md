@@ -4,17 +4,17 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `display` | `family`
+|     |     |
+| --- | --- |
+| `display` | `family`
 `featureSettings` | `loaded`
 `status` | `stretch`
 `style` | `unicodeRange`
 `variant` | `variationSettings`
-`weight` |  | 
+`weight` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `load()` |  | 
+|     |     |
+| --- | --- |
+| `load()` |  |

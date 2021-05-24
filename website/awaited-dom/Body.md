@@ -36,12 +36,12 @@ Takes a <code>Response</code> stream and reads it to completion. It returns a pr
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `body` |  | 
+|     |     |
+| --- | --- |
+| `body` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `blob()` | `formData()` | 
+|     |     |
+| --- | --- |
+| `blob()` | `formData()` |

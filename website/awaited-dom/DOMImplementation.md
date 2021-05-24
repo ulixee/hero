@@ -14,7 +14,7 @@ Returns a `boolean` indicating if a given feature is supported or not. This func
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `createDocument()` | `createDocumentType()`
-`createHTMLDocument()` |  | 
+|     |     |
+| --- | --- |
+| `createDocument()` | `createDocumentType()`
+`createHTMLDocument()` |  |

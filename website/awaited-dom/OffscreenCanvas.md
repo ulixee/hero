@@ -42,13 +42,13 @@ Creates a <code>Blob</code> object representing the image contained in the canva
 
 Creates an <code>ImageBitmap</code> object from the most recently rendered image of the <code>OffscreenCanvas</code>.
 
-#### **Returns**: [`ImageBitmap`](./image-bitmap)
+#### **Returns**: [`ImageBitmap`](/docs/awaited-dom/image-bitmap)
 
 ## Unimplemented Specs
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `getContext()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()` | 
+|     |     |
+| --- | --- |
+| `getContext()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()` |

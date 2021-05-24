@@ -11,8 +11,8 @@
 
 SuperText implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [CDATASection](./cdata-section) | [CharacterData](./character-data)
+|     |     |
+| --- | --- |
+| [CDATASection](./cdata-section) | [CharacterData](./character-data)
 [EventTarget](./event-target) | [Node](./node)
-[Text](./text) |  | 
+[Text](./text) |  |

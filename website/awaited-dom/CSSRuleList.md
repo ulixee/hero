@@ -21,4 +21,4 @@ Returns the specific node at the given zero-based index into the list. Returns n
 
  - index `number`. Needs content.
 
-#### **Returns**: [`CSSRule`](./css-rule)
+#### **Returns**: [`CSSRule`](/docs/awaited-dom/css-rule)

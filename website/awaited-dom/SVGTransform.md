@@ -8,15 +8,15 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `angle` | `matrix`
-`type` |  | 
+|     |     |
+| --- | --- |
+| `angle` | `matrix`
+`type` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `setMatrix()` | `setRotate()`
+|     |     |
+| --- | --- |
+| `setMatrix()` | `setRotate()`
 `setScale()` | `setSkewX()`
-`setSkewY()` | `setTranslate()` | 
+`setSkewY()` | `setTranslate()` |

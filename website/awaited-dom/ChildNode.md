@@ -6,7 +6,7 @@
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `after()` | `before()`
-`remove()` | `replaceWith()` | 
+|     |     |
+| --- | --- |
+| `after()` | `before()`
+`remove()` | `replaceWith()` |

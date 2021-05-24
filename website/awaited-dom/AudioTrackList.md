@@ -23,20 +23,20 @@ Returns the <code>AudioTrack</code> found within the <code>AudioTrackList</code>
 
  - id `string`. A `string` indicating the ID of the track to locate within the track list.
 
-#### **Returns**: [`AudioTrack`](./audio-track)
+#### **Returns**: [`AudioTrack`](/docs/awaited-dom/audio-track)
 
 ## Unimplemented Specs
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onaddtrack` | `onchange`
-`onremovetrack` |  | 
+|     |     |
+| --- | --- |
+| `onaddtrack` | `onchange`
+`onremovetrack` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+|     |     |
+| --- | --- |
+| `addEventListener()` | `dispatchEvent()`
+`removeEventListener()` |  |

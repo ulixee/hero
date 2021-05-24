@@ -49,6 +49,6 @@ A getter that returns a <code>CSSOMString</code> representing a media query as t
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `mediaText` |  | 
+|     |     |
+| --- | --- |
+| `mediaText` |  |

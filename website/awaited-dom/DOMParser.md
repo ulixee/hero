@@ -14,4 +14,4 @@ Parse XML from a string
  - str `string`. Needs content.
  - type `SupportedType`. Needs content.
 
-#### **Returns**: [`SuperDocument`](./super-document)
+#### **Returns**: [`SuperDocument`](/docs/awaited-dom/super-document)

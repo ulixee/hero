@@ -39,7 +39,7 @@ Returns an item in the list by its index, or <code>null</code> if the index is o
 
  - index `number`. <code>index</code> is the index of the node to be fetched. The index is zero-based.
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .keys*()* <div class="specs"><i>W3C</i></div> {#keys}
 

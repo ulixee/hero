@@ -16,7 +16,7 @@ Returns a boolean that indicates whether delegatesFocus was set when the shadow 
 
 Returns a reference to the DOM element the <code>ShadowRoot</code>&nbsp;is attached to.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .innerHTML <div class="specs"><i>W3C</i></div> {#innerHTML}
 
@@ -40,13 +40,13 @@ Returns a `string` representing the base URL of the document containing the <cod
 
 Returns a live <code>NodeList</code> containing all the children of this node. <code>NodeList</code> being live means that if the children of the <code>Node</code> change, the <code>NodeList</code> object is automatically updated.
 
-#### **Type**: [`SuperNodeList`](./super-node-list)
+#### **Type**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ### .firstChild <div class="specs"><i>W3C</i></div> {#firstChild}
 
 Returns a <code>Node</code> representing the first direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .isConnected <div class="specs"><i>W3C</i></div> {#isConnected}
 
@@ -58,13 +58,13 @@ A boolean indicating whether or not the Node is connected (directly or indirectl
 
 Returns a <code>Node</code> representing the last direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .nextSibling <div class="specs"><i>W3C</i></div> {#nextSibling}
 
 Returns a <code>Node</code> representing the next node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .nodeName <div class="specs"><i>W3C</i></div> {#nodeName}
 
@@ -151,25 +151,25 @@ Returns / Sets the value of the current node.
 
 Returns the <code>Document</code> that this node belongs to. If the node is itself a document, returns <code>null</code>.
 
-#### **Type**: [`SuperDocument`](./super-document)
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### .parentElement <div class="specs"><i>W3C</i></div> {#parentElement}
 
 Returns an <code>Element</code> that is the parent of this node. If the node has no parent, or if that parent is not an <code>Element</code>, this property returns <code>null</code>.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .parentNode <div class="specs"><i>W3C</i></div> {#parentNode}
 
 Returns a <code>Node</code> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null</code>.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .previousSibling <div class="specs"><i>W3C</i></div> {#previousSibling}
 
 Returns a <code>Node</code> representing the previous node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
@@ -181,19 +181,19 @@ Returns / Sets the textual content of an element and all its descendants.
 
 Returns the <code>Element</code> within the shadow tree that has focus.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .fullscreenElement <div class="specs"><i>W3C</i></div> {#fullscreenElement}
 
 Returns the <code>Element</code> that's currently in full screen mode for this document.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .pointerLockElement <div class="specs"><i>W3C</i></div> {#pointerLockElement}
 
 Returns the element set as the target for mouse events while the pointer is locked. It returns&nbsp;<code>null</code> if lock is pending, the pointer is unlocked, or if the target is in another document.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .childElementCount <div class="specs"><i>W3C</i></div> {#childElementCount}
 
@@ -205,19 +205,19 @@ Returns the number of children of this <code>ParentNode</code> which are element
 
 Returns a live <code>HTMLCollection</code> containing all of the <code>Element</code> objects that are children of this <code>ParentNode</code>, omitting all of its non-element nodes.
 
-#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Type**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### .firstElementChild <div class="specs"><i>W3C</i></div> {#firstElementChild}
 
 Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .lastElementChild <div class="specs"><i>W3C</i></div> {#lastElementChild}
 
 Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ## Methods
 
@@ -228,7 +228,7 @@ Compares the position of the current node against another node in any other docu
 #### **Arguments**:
 
 
- - other [`Node`](./node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
+ - other [`Node`](/docs/awaited-dom/node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
 
 #### **Returns**: `Promise<number>`
 
@@ -239,7 +239,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 #### **Arguments**:
 
 
- - other [`Node`](./node). Needs content.
+ - other [`Node`](/docs/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -255,7 +255,7 @@ Returns the context object's root which optionally includes the shadow root if i
       <li><code>composed</code>: A `boolean` that indicates whether the shadow root should be returned (<code>false</code>, the default), or a root node beyond shadow root (<code>true</code>).</li>
      </ul>
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
@@ -281,7 +281,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -292,7 +292,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -334,7 +334,7 @@ Returns a <code>CaretPosition</code> object containing the DOM node containing t
  - x `number`. The horizontal coordinate of a point.
  - y `number`. The vertical coordinate of a point.
 
-#### **Returns**: [`CaretPosition`](./caret-position)
+#### **Returns**: [`CaretPosition`](/docs/awaited-dom/caret-position)
 
 ### .elementFromPoint*(x, y)* <div class="specs"><i>W3C</i></div> {#elementFromPoint}
 
@@ -346,13 +346,13 @@ Returns the topmost element at the specified coordinates.
  - x `number`. The horizontal coordinate of a point, relative to the left edge of the current viewport.
  - y `number`. The vertical coordinate of a point, relative to the top edge of the current viewport.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .getSelection*()* <div class="specs"><i>W3C</i></div> {#getSelection}
 
 Returns a <code>Selection</code> object representing the range of text selected by the user, or the current position of the caret.
 
-#### **Returns**: [`Selection`](./selection)
+#### **Returns**: [`Selection`](/docs/awaited-dom/selection)
 
 ### .getElementById*(elementId)* <div class="specs"><i>W3C</i></div> {#getElementById}
 
@@ -363,7 +363,7 @@ Needs content.
 
  - elementId `string`. Needs content.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .querySelector*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelector}
 
@@ -374,7 +374,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid compound selector list supported by the browser; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
@@ -385,17 +385,17 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid CSS selector string; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperNodeList`](./super-node-list)
+#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ## Unimplemented Specs
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `appendChild()` | `cloneNode()`
+|     |     |
+| --- | --- |
+| `appendChild()` | `cloneNode()`
 `insertBefore()` | `removeChild()`
 `replaceChild()` | `addEventListener()`
 `dispatchEvent()` | `removeEventListener()`
 `elementsFromPoint()` | `append()`
-`prepend()` |  | 
+`prepend()` |  |

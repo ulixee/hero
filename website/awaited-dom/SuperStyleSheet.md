@@ -7,6 +7,6 @@
 
 SuperStyleSheet implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [CSSStyleSheet](./css-style-sheet) | [StyleSheet](./style-sheet) | 
+|     |     |
+| --- | --- |
+| [CSSStyleSheet](./css-style-sheet) | [StyleSheet](./style-sheet) |

@@ -13,8 +13,8 @@ Evaluates the XPath expression on the given node or document.
 #### **Arguments**:
 
 
- - contextNode [`Node`](./node). A <code>Node</code> representing the context to use for evaluating the expression.
+ - contextNode [`Node`](/docs/awaited-dom/node). A <code>Node</code> representing the context to use for evaluating the expression.
  - type `number`. Specifies the type of result to be returned by evaluating the expression. This must be one of the <code>XPathResult.Constants</code>.
- - result [`XPathResult`](./x-path-result). Allows to specify a result object which may be reused and returned by this method. If this is specified as <code>null</code> or the implementation does not reuse the specified result, a new result object will be returned.
+ - result [`XPathResult`](/docs/awaited-dom/x-path-result). Allows to specify a result object which may be reused and returned by this method. If this is specified as <code>null</code> or the implementation does not reuse the specified result, a new result object will be returned.
 
-#### **Returns**: [`XPathResult`](./x-path-result)
+#### **Returns**: [`XPathResult`](/docs/awaited-dom/x-path-result)

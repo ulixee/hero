@@ -10,7 +10,7 @@
 
 The <code>Headers</code> object associated with the response.
 
-#### **Type**: [`Headers`](./headers)
+#### **Type**: [`Headers`](/docs/awaited-dom/headers)
 
 ### .ok <div class="specs"><i>W3C</i></div> {#ok}
 
@@ -78,14 +78,14 @@ Takes a <code>Response</code> stream and reads it to completion. It returns a pr
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `body` |  | 
+|     |     |
+| --- | --- |
+| `body` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `clone()` | `error()`
+|     |     |
+| --- | --- |
+| `clone()` | `error()`
 `redirect()` | `blob()`
-`formData()` |  | 
+`formData()` |  |

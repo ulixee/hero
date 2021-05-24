@@ -8,4 +8,4 @@
 
 Returns the <code>&lt;slot&gt;</code> the node is inserted in.
 
-#### **Type**: [`HTMLSlotElement`](./html-slot-element)
+#### **Type**: [`HTMLSlotElement`](/docs/awaited-dom/html-slot-element)

@@ -8,15 +8,15 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `length` | `numberOfItems` | 
+|     |     |
+| --- | --- |
+| `length` | `numberOfItems` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `appendItem()` | `clear()`
+|     |     |
+| --- | --- |
+| `appendItem()` | `clear()`
 `getItem()` | `initialize()`
 `insertItemBefore()` | `removeItem()`
-`replaceItem()` |  | 
+`replaceItem()` |  |

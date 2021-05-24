@@ -11,9 +11,9 @@
 
 SuperNode implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [Attr](./attr) | [CDATASection](./cdata-section)
+|     |     |
+| --- | --- |
+| [Attr](./attr) | [CDATASection](./cdata-section)
 [CharacterData](./character-data) | [Comment](./comment)
 [Document](./document) | [DocumentFragment](./document-fragment)
 [DocumentType](./document-type) | [Element](./element)
@@ -57,4 +57,4 @@ SuperNode implements all the properties and methods of the following classes:
 [ProcessingInstruction](./processing-instruction) | [ShadowRoot](./shadow-root)
 [SVGElement](./svg-element) | [SVGGraphicsElement](./svg-graphics-element)
 [SVGSVGElement](./svgsvg-element) | [SVGTitleElement](./svg-title-element)
-[Text](./text) | [XMLDocument](./xml-document) | 
+[Text](./text) | [XMLDocument](./xml-document) |

@@ -34,4 +34,4 @@ Needs content.
 
  - index `number`. Needs content.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
