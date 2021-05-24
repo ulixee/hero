@@ -4,6 +4,7 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@secret-agent/interfaces/ICookie';
 import { IInteractionGroups } from '@secret-agent/interfaces/IInteractions';
 import { URL } from 'url';
+import * as Fs from 'fs';
 import Timer from '@secret-agent/commons/Timer';
 import { createPromise } from '@secret-agent/commons/utils';
 import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
@@ -20,6 +21,7 @@ import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import * as Os from 'os';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -69,13 +71,15 @@ export default class FrameEnvironment {
   public readonly navigationsObserver: TabNavigationObserver;
 
   public readonly navigations: FrameNavigations;
+
   public readonly tab: Tab;
   public readonly jsPath: JsPath;
   public puppetFrame: IPuppetFrame;
   public isReady: Promise<Error | void>;
   public domNodeId: number;
-
   protected readonly logger: IBoundLog;
+
+  private puppetNodeIdsBySaNodeId: Record<number, string> = {};
   private prefetchedJsPaths: IJsPathResult[];
   private readonly isDetached: boolean;
   private readonly interactor: Interactor;
@@ -83,6 +87,7 @@ export default class FrameEnvironment {
   private readonly createdAtCommandId: number;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
+  private readonly cleanPaths: string[] = [];
 
   public get url(): string {
     return this.navigations.currentUrl;
@@ -120,6 +125,7 @@ export default class FrameEnvironment {
       this.interact,
       this.removeCookie,
       this.setCookie,
+      this.setFileInputFiles,
       this.waitForElement,
       this.waitForLoad,
       this.waitForLocation,
@@ -148,6 +154,9 @@ export default class FrameEnvironment {
       Timer.expireAll(this.waitTimeouts, new CanceledPromiseError(cancelMessage));
       this.navigationsObserver.cancelWaiting(cancelMessage);
       this.logger.stats('FrameEnvironment.Closed', { parentLogId });
+      for (const path of this.cleanPaths) {
+        Fs.promises.unlink(path).catch(() => null);
+      }
     } catch (error) {
       if (!error.message.includes('Target closed') && !(error instanceof CanceledPromiseError)) {
         this.logger.error('FrameEnvironment.ClosingError', { error, parentLogId });
@@ -447,6 +456,31 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.runFn<T>(fnName, callFn);
   }
 
+  public async getDomNodeId(puppetNodeId: string): Promise<number> {
+    const nodeId = await this.puppetFrame.evaluateOnNode<number>(
+      puppetNodeId,
+      'NodeTracker.watchNode(this)',
+    );
+    this.puppetNodeIdsBySaNodeId[nodeId] = puppetNodeId;
+    return nodeId;
+  }
+
+  public async setFileInputFiles(
+    jsPath: IJsPath,
+    files: { name: string; data: Buffer }[],
+  ): Promise<void> {
+    const puppetNodeId = this.puppetNodeIdsBySaNodeId[jsPath[0] as number];
+    const tmpDir = await Fs.promises.mkdtemp(`${Os.tmpdir()}/sa-upload`);
+    const filepaths: string[] = [];
+    for (const file of files) {
+      const fileName = `${tmpDir}/${file.name}`;
+      filepaths.push(fileName);
+      await Fs.promises.writeFile(fileName, file.data);
+    }
+    await this.puppetFrame.setFileInputFiles(puppetNodeId, filepaths);
+    this.cleanPaths.push(tmpDir);
+  }
+
   protected async runFn<T>(fnName: string, serializedFn: string): Promise<T> {
     const result = await this.puppetFrame.evaluate<T>(serializedFn, true);
 
@@ -464,10 +498,9 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         // only install interactor on the main frame
         await this.interactor?.initialize();
       } else {
+        const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
         // retrieve the domNode containing this frame (note: valid id only in the containing frame)
-        this.domNodeId = await this.puppetFrame.evaluateOnIsolatedFrameElement<number>(
-          'NodeTracker.watchNode(this)',
-        );
+        this.domNodeId = await this.getDomNodeId(frameElementNodeId);
       }
     } catch (error) {
       // This can happen if the node goes away. Still want to record frame

@@ -40,6 +40,7 @@ export function getCallSite(priorToFilename?: string, endFilename?: string): Cal
 }
 
 export function pickRandom<T>(array: T[]): T {
+  if (array.length === 1) return array[0];
   if (!array.length) throw new Error('Empty array provided to "pickRandom"');
   return array[Math.floor(Math.random() * array.length)];
 }

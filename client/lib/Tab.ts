@@ -33,6 +33,7 @@ import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
+import FileChooser from './FileChooser';
 
 const awaitedPathState = StateMachine<
   any,
@@ -183,6 +184,13 @@ export default class Tab extends AwaitedEventTarget<IEventType> {
   public async takeScreenshot(options?: IScreenshotOptions): Promise<Buffer> {
     const coreTab = await getCoreTab(this);
     return coreTab.takeScreenshot(options);
+  }
+
+  public async waitForFileChooser(options?: IWaitForOptions): Promise<FileChooser> {
+    const coreTab = await getCoreTab(this);
+    const prompt = await coreTab.waitForFileChooser(options);
+    const coreFrame = coreTab.frameEnvironmentsById.get(prompt.frameId);
+    return new FileChooser(Promise.resolve(coreFrame), prompt);
   }
 
   public async waitForPaintingStable(options?: IWaitForOptions): Promise<void> {

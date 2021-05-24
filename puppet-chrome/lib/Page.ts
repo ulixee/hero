@@ -37,6 +37,7 @@ import ExceptionThrownEvent = Protocol.Runtime.ExceptionThrownEvent;
 import WindowOpenEvent = Protocol.Page.WindowOpenEvent;
 import TargetInfo = Protocol.Target.TargetInfo;
 import JavascriptDialogOpeningEvent = Protocol.Page.JavascriptDialogOpeningEvent;
+import FileChooserOpenedEvent = Protocol.Page.FileChooserOpenedEvent;
 
 export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppetPage {
   public keyboard: Keyboard;
@@ -133,6 +134,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
       ['Runtime.consoleAPICalled', this.onRuntimeConsole.bind(this)],
       ['Target.attachedToTarget', this.onAttachedToTarget.bind(this)],
       ['Page.javascriptDialogOpening', this.onJavascriptDialogOpening.bind(this)],
+      ['Page.fileChooserOpened', this.onFileChooserOpened.bind(this)],
       ['Page.windowOpen', this.onWindowOpen.bind(this)],
     ]);
 
@@ -345,6 +347,9 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         })
         .catch(err => err),
       this.browserContext.initializePage(this),
+      this.devtoolsSession
+        .send('Page.setInterceptFileChooserDialog', { enabled: true })
+        .catch(err => err),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(err => err),
     ];
 
@@ -442,5 +447,19 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   private onJavascriptDialogOpening(dialog: JavascriptDialogOpeningEvent): void {
     this.emit('dialog-opening', { dialog });
+  }
+
+  private onFileChooserOpened(event: FileChooserOpenedEvent): void {
+    this.framesManager.framesById
+      .get(event.frameId)
+      .resolveNodeId(event.backendNodeId)
+      .then(objectId =>
+        this.emit('filechooser', {
+          objectId,
+          frameId: event.frameId,
+          selectMultiple: event.mode === 'selectMultiple',
+        }),
+      )
+      .catch(() => null);
   }
 }

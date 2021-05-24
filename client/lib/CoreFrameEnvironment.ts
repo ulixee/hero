@@ -89,6 +89,13 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.removeCookie', name);
   }
 
+  public async setFileInputFiles(
+    jsPath: IJsPath,
+    files: { name: string; data: Buffer }[],
+  ): Promise<void> {
+    return await this.commandQueue.run('FrameEnvironment.setFileInputFiles', jsPath, files);
+  }
+
   public async waitForElement(jsPath: IJsPath, opts: IWaitForElementOptions): Promise<void> {
     await this.commandQueue.run('FrameEnvironment.waitForElement', jsPath, opts);
   }

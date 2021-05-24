@@ -467,10 +467,10 @@ describe('basic Document tests', () => {
     const frame2Env = await agent.activeTab.getFrameEnvironment(frameElement2);
 
     expect(frame2Env).toBeTruthy();
+    await frame2Env.waitForLoad(LocationStatus.AllContentLoaded);
     await expect(frame2Env.document.querySelector('h1').textContent).resolves.toBe(
       'Subframe Page 2',
     );
-    await frame2Env.waitForLoad(LocationStatus.AllContentLoaded);
 
     const nestedFrameElement = frame2Env.document.querySelector('iframe');
     const nestedFrameEnv = await frame2Env.getFrameEnvironment(nestedFrameElement);

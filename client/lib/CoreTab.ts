@@ -7,6 +7,7 @@ import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSession
 import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
+import IFileChooserPrompt from '@secret-agent/interfaces/IFileChooserPrompt';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -25,7 +26,7 @@ export default class CoreTab implements IJsPathEventTarget {
     return this.frameEnvironmentsById.get(this.mainFrameId);
   }
 
-  protected frameEnvironmentsById = new Map<string, CoreFrameEnvironment>();
+  public frameEnvironmentsById = new Map<string, CoreFrameEnvironment>();
   protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly connection: ConnectionToCore;
   private readonly mainFrameId: string;
@@ -102,6 +103,10 @@ export default class CoreTab implements IJsPathEventTarget {
 
   public async takeScreenshot(options: IScreenshotOptions): Promise<Buffer> {
     return await this.commandQueue.run('Tab.takeScreenshot', options);
+  }
+
+  public async waitForFileChooser(options: IWaitForOptions): Promise<IFileChooserPrompt> {
+    return await this.commandQueue.run('Tab.waitForFileChooser', options);
   }
 
   public async waitForResource(

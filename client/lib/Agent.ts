@@ -48,6 +48,7 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
 import FrozenTab from './FrozenTab';
+import FileChooser from './FileChooser';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -330,6 +331,10 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
 
   public waitForElement(element: ISuperElement, options?: IWaitForElementOptions): Promise<void> {
     return this.activeTab.waitForElement(element, options);
+  }
+
+  public waitForFileChooser(options?: IWaitForOptions): Promise<FileChooser> {
+    return this.activeTab.waitForFileChooser(options);
   }
 
   public waitForLocation(trigger: ILocationTrigger, options?: IWaitForOptions): Promise<void> {

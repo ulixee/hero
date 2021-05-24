@@ -21,6 +21,8 @@
     - HumanEmulators
     - UserProfile
     - CookieStorage
+    - Dialog
+    - FileChooser
     - Resource
     - ResourceRequest
     - ResourceResponse
