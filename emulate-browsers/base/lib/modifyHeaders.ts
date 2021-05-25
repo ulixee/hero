@@ -115,14 +115,9 @@ function getOrderAndDefaults(
   if (!profiles && resourceType === 'Websocket') profiles = headerProfiles['Websocket Upgrade'];
   if (!profiles) return null;
 
-  let defaultOrders = profiles.filter(x => x.secureDomain === isSSL);
-
-  if (defaultOrders.length > 1) {
-    const methodOrders = defaultOrders.filter(x => x.method.toLowerCase() === method.toLowerCase());
-    if (methodOrders.length) {
-      defaultOrders = methodOrders;
-    }
-  }
+  let defaultOrders = profiles.filter(
+    x => x.secureDomain === isSSL && x.method.toLowerCase() === method.toLowerCase(),
+  );
 
   if (defaultOrders.length > 1) {
     const originDefaultOrders = defaultOrders.filter(x => x.originTypes.includes(originType));
@@ -131,14 +126,14 @@ function getOrderAndDefaults(
     }
   }
 
-  let defaultOrder = pickRandom(defaultOrders);
+  let defaultOrder = defaultOrders.length ? pickRandom(defaultOrders) : null;
   if (headers.Cookie || headers.cookie) {
     const withCookie = defaultOrders.find(x => x.order.includes('Cookie'));
     if (withCookie) defaultOrder = withCookie;
   }
 
   if (!defaultOrder) {
-    log.error('Headers.NotFound', { sessionId, resourceType, isSSL, method, originType });
+    log.warn('Headers.NotFound', { sessionId, resourceType, isSSL, method, originType });
     return null;
   }
 

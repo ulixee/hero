@@ -13,15 +13,18 @@ export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   isLoaded: boolean;
   isDefaultUrl: boolean;
   isAttached(): boolean;
+  resolveNodeId(backendNodeId: number): Promise<string>;
   waitForLoad(): Promise<void>;
   waitForLoader(loaderId?: string): Promise<Error | undefined>;
   canEvaluate(isolatedFromWebPageEnvironment: boolean): boolean;
+  getFrameElementNodeId(): Promise<string>;
   evaluate<T>(
     expression: string,
     isolateFromWebPageEnvironment?: boolean,
     options?: { shouldAwaitExpression?: boolean; retriesWaitingForLoad?: number },
   ): Promise<T>;
-  evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T>;
+  evaluateOnNode<T>(nodeId: string, expression: string): Promise<T>;
+  setFileInputFiles(nodeId: string, filePaths: string[]): Promise<void>;
   toJSON(): object;
 }
 

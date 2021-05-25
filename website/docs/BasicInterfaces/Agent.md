@@ -357,34 +357,38 @@ Alias for [Tab.goForward](/docs/basic-interfaces/tab#forward)
 
 Alias for [Tab.goto](/docs/basic-interfaces/tab#goto)
 
-### agent.getComputedVisibility*(element)*
+### agent.getComputedVisibility*(element)* {#get-computed-visibility}
 
 Alias for [Tab.getComputedVisibility](/docs/basic-interfaces/tab#get-computed-visibility)
 
-### agent.reload*(timeoutMs?)*
+### agent.reload*(timeoutMs?)* {#reload}
 
 Alias for [Tab.reload](/docs/basic-interfaces/tab#reload)
 
-### agent.takeScreenshot*(options?)*
+### agent.takeScreenshot*(options?)* {#take-screenshot}
 
 Alias for [Tab.takeScreenshot](/docs/basic-interfaces/tab#take-screenshot)
 
-### agent.waitForPaintingStable*()*
+### agent.waitForFileChooser*(options)* {#wait-for-file-chooser}
 
-Alias for [Tab.waitForLoad(PaintingStable)](/docs/basic-interfaces/tab#wait-for-load)
+Alias for [Tab.waitForFileChooser()](/docs/basic-interfaces/tab#wait-for-file-chooser)
 
-### agent.waitForResource*(filter, options)*
-
-Alias for [Tab.waitForResource](/docs/basic-interfaces/tab#wait-for-resource)
-
-### agent.waitForElement*(element, options)*
+### agent.waitForElement*(element, options)* {#wait-for-element}
 
 Alias for [Tab.waitForElement](/docs/basic-interfaces/tab#wait-for-element)
 
-### agent.waitForLocation*(trigger, options)*
+### agent.waitForLocation*(trigger, options)* {#wait-for-location}
 
 Alias for [Tab.waitForLocation](/docs/basic-interfaces/tab#wait-for-location)
 
-### agent.waitForMillis*(millis)*
+### agent.waitForMillis*(millis)* {#wait-for-millis}
 
 Alias for [Tab.waitForMillis](/docs/basic-interfaces/tab#wait-for-millis)
+
+### agent.waitForPaintingStable*()* {#wait-for-painting-stable}
+
+Alias for [Tab.waitForLoad(PaintingStable)](/docs/basic-interfaces/tab#wait-for-load)
+
+### agent.waitForResource*(filter, options)* {#wait-for-resource}
+
+Alias for [Tab.waitForResource](/docs/basic-interfaces/tab#wait-for-resource)

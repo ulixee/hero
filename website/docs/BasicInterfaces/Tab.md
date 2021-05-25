@@ -239,7 +239,7 @@ Alias for [tab.mainFrameEnvironment.getComputedVisibility](/docs/basic-interface
   - isFound `boolean`. Was the node found in the DOM.
   - isOnscreenVertical `boolean`. The node is on-screen vertically.
   - isOnscreenHorizontal `boolean`. The node is on-screen horizontally.
-  - hasContainingElement `boolean`. The node is an Element or has a containing Element providing layout. 
+  - hasContainingElement `boolean`. The node is an Element or has a containing Element providing layout.
   - isConnected `boolean`. The node is connected to the DOM.
   - hasCssOpacity `boolean`. The display `opacity` property is not "0".
   - hasCssDisplay `boolean`. The display `display` property is not "none".
@@ -270,20 +270,6 @@ Takes a screenshot of the current contents rendered in the browser.
 
 #### **Returns**: `Promise<Buffer>` Buffer with image bytes in base64.
 
-### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
-
-Wait for the [mainFrameEnvironment](#main-frame-environment) to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
-
-Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/basic-interfaces/frame-environment#wait-for-painting-stable).
-
-#### **Arguments**:
-
-- options `object` Optional
-  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
-  - sinceCommandId `number`. A `commandId` from which to look for load status changes.
-
-#### **Returns**: `Promise<void>`
-
 ### tab.waitForElement*(element)* {#wait-for-element}
 
 Wait until a specific element is present in the dom of the [mainFrameEnvironment](#main-frame-environment).
@@ -299,6 +285,20 @@ Alias for [tab.mainFrameEnvironment.waitForElement](/docs/basic-interfaces/frame
 
 #### **Returns**: `Promise`
 
+### tab.waitForPaintingStable*(options)* {#wait-for-painting-stable}
+
+Wait for the [mainFrameEnvironment](#main-frame-environment) to be loaded such that a user can see the main content above the fold, including on javascript-rendered pages (eg, Single Page Apps). This load event works around deficiencies in using the Document "load" event, which does not always trigger, and doesn't work for Single Page Apps.
+
+Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/basic-interfaces/frame-environment#wait-for-painting-stable).
+
+#### **Arguments**:
+
+- options `object` Optional
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+  - sinceCommandId `number`. A `commandId` from which to look for load status changes.
+
+#### **Returns**: `Promise<void>`
+
 If at the moment of calling this method, the selector already exists, the method will return immediately.
 
 ```js
@@ -309,6 +309,18 @@ await activeTab.waitForElement(elem, {
   waitForVisible: true,
 });
 ```
+
+### tab.waitForFileChooser*(options)* {#wait-for-file-chooser}
+
+Wait for a `file chooser` dialog to be prompted on the page. This is usually triggered by clicking on an `input` element with `type=file`.
+
+#### **Arguments**:
+
+- options `object` Optional
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+  - sinceCommandId `number`. A `commandId` from which to look for load status changes. Default is to look back to the command preceding this command (eg, a click or interact event).
+
+#### **Returns**: [`Promise<FileChooser>`](/docs/advanced/file-chooser)
 
 ### tab.waitForLoad*(status, options)* {#wait-for-load}
 
@@ -429,9 +441,27 @@ Waits for the specified number of milliseconds.
 
 #### **Returns**: `Promise`
 
+### tab.waitForMillis*(millis)* {#wait-for-millis}
+
+Waits for the specified number of milliseconds.
+
+#### **Arguments**:
+
+- millis `number`
+
+#### **Returns**: `Promise`
+
 ## Events
 
 SecretAgent's [EventTarget](/docs/basic-interfaces/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/basic-interfaces/event-target).
+
+### 'dialog' {#dialog}
+
+Emitted when a dialog is prompted on the screen
+
+#### **Arguments in callback**:
+
+- [`Dialog`](/docs/advanced/dialog)
 
 ### 'resource' {#resource-event}
 

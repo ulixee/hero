@@ -22,6 +22,7 @@ import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Loca
 import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
 import { LoadStatus } from '@secret-agent/interfaces/INavigation';
 import IPuppetDialog from '@secret-agent/interfaces/IPuppetDialog';
+import IFileChooserPrompt from '@secret-agent/interfaces/IFileChooserPrompt';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -53,6 +54,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private readonly commandRecorder: CommandRecorder;
   private readonly createdAtCommandId: number;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
+  private lastFileChooserEvent: {
+    event: IPuppetPageEvents['filechooser'];
+    atCommandId: number;
+  };
 
   public get navigations(): FrameNavigations {
     return this.mainFrameEnvironment.navigations;
@@ -130,6 +135,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.goForward,
       this.reload,
       this.takeScreenshot,
+      this.waitForFileChooser,
       this.waitForMillis,
       this.waitForNewTab,
       this.waitForResource,
@@ -499,6 +505,34 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return resourceMetas;
   }
 
+  public async waitForFileChooser(options?: IWaitForOptions): Promise<IFileChooserPrompt> {
+    let startCommandId = options?.sinceCommandId;
+
+    if (!startCommandId && this.sessionState.commands.length >= 2) {
+      startCommandId = this.sessionState.commands[this.sessionState.commands.length - 2]?.id;
+    }
+
+    let event: IPuppetPageEvents['filechooser'];
+    if (this.lastFileChooserEvent) {
+      const { atCommandId } = this.lastFileChooserEvent;
+      if (atCommandId >= startCommandId) {
+        event = this.lastFileChooserEvent.event;
+      }
+    }
+
+    if (!event) {
+      event = await this.puppetPage.waitOn('filechooser', null, options?.timeoutMs ?? 30e3);
+    }
+
+    const frameEnvironment = this.frameEnvironmentsById.get(event.frameId);
+    const nodeId = await frameEnvironment.getDomNodeId(event.objectId);
+    return {
+      jsPath: [nodeId],
+      frameId: event.frameId,
+      selectMultiple: event.selectMultiple,
+    };
+  }
+
   public waitForMillis(millis: number): Promise<void> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
@@ -572,6 +606,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     page.on('frame-created', this.onFrameCreated.bind(this), true);
     page.on('page-callback-triggered', this.onPageCallback.bind(this));
     page.on('dialog-opening', this.onDialogOpening.bind(this));
+    page.on('filechooser', this.onFileChooser.bind(this));
 
     // resource requested should registered before navigations so we can grab nav on new tab anchor clicks
     page.on('resource-will-be-requested', this.onResourceWillBeRequested.bind(this), true);
@@ -795,9 +830,16 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     this.sessionState.captureError(this.id, this.mainFrameId, `events.error`, error);
   }
 
+  /////// DIALOGS //////////////////////////////////////////////////////////////////////////////////
+
   private onDialogOpening(event: IPuppetPageEvents['dialog-opening']): void {
     this.emit('dialog', event.dialog);
   }
+
+  private onFileChooser(event: IPuppetPageEvents['filechooser']): void {
+    this.lastFileChooserEvent = { event, atCommandId: this.lastCommandId };
+  }
+
   // CREATE
 
   public static create(

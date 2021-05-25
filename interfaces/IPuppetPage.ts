@@ -60,6 +60,7 @@ export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNet
   crashed: { error: Error; fatal?: boolean };
   console: { frameId: string; type: string; message: string; location: string };
   'dialog-opening': { dialog: IPuppetDialog };
+  filechooser: { frameId: string; selectMultiple: boolean; objectId: string };
   'page-error': { frameId: string; error: Error };
   'page-callback-triggered': { name: string; frameId: string; payload: any };
 }

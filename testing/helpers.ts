@@ -12,6 +12,7 @@ import * as HttpProxyAgent from 'http-proxy-agent';
 import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as Koa from 'koa';
 import * as KoaRouter from '@koa/router';
+import * as KoaMulter from '@koa/multer';
 import * as net from 'net';
 import * as tls from 'tls';
 import * as http2 from 'http2';
@@ -31,6 +32,7 @@ export interface ITestKoaServer extends KoaRouter {
   onlyCloseOnFinal?: boolean;
   baseHost: string;
   baseUrl: string;
+  upload: KoaMulter.Instance;
 }
 export interface ITestHttpServer<T> {
   isClosing: boolean;
@@ -48,8 +50,10 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
   const router = new KoaRouter() as ITestKoaServer;
   const exampleOrgPath = Path.join(__dirname, 'html', 'example.org.html');
   const exampleOrgHtml = Fs.readFileSync(exampleOrgPath, 'utf-8');
+  const upload = KoaMulter(); // note you can pass `multer` options here
 
   koa.use(router.routes()).use(router.allowedMethods());
+
   const server = await new Promise<Server>(resolve => {
     const koaServer = koa
       .listen(() => {
@@ -79,6 +83,7 @@ export async function runKoaServer(onlyCloseOnFinal = true): Promise<ITestKoaSer
   needsClosing.push(router);
   router.koa = koa;
   router.server = server;
+  router.upload = upload;
 
   return router;
 }

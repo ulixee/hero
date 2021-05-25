@@ -162,17 +162,22 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
     }
   }
 
-  public async evaluateOnIsolatedFrameElement<T>(expression: string): Promise<T> {
+  public async setFileInputFiles(objectId: string, files: string[]): Promise<void> {
+    await this.devtoolsSession.send('DOM.setFileInputFiles', {
+      objectId,
+      files,
+    });
+  }
+
+  public async evaluateOnNode<T>(nodeId: string, expression: string): Promise<T> {
     if (this.closedWithError) throw this.closedWithError;
-    const objectId = await this.getParentElementId();
-    if (!objectId) return;
     try {
       const result = await this.devtoolsSession.send('Runtime.callFunctionOn', {
         functionDeclaration: `function executeRemoteFn() {
         return ${expression};
       }`,
         returnByValue: true,
-        objectId,
+        objectId: nodeId,
       });
       if (result.exceptionDetails) {
         throw ConsoleMessage.exceptionToError(result.exceptionDetails);
@@ -185,6 +190,31 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       if (err instanceof CanceledPromiseError) return;
       throw err;
     }
+  }
+
+  public async getFrameElementNodeId(): Promise<string> {
+    try {
+      if (!this.parentFrame || this.isolatedWorldElementObjectId)
+        return this.isolatedWorldElementObjectId;
+      const owner = await this.devtoolsSession.send('DOM.getFrameOwner', { frameId: this.id });
+      this.isolatedWorldElementObjectId = await this.parentFrame.resolveNodeId(owner.backendNodeId);
+      // don't dispose... will cleanup frame
+      return this.isolatedWorldElementObjectId;
+    } catch (error) {
+      // ignore errors looking this up
+      this.logger.info('Failed to lookup isolated node', {
+        frameId: this.id,
+        error,
+      });
+    }
+  }
+
+  public async resolveNodeId(backendNodeId: number): Promise<string> {
+    const result = await this.devtoolsSession.send('DOM.resolveNode', {
+      backendNodeId,
+      executionContextId: this.getActiveContextId(true),
+    });
+    return result.object.objectId;
   }
 
   /////// NAVIGATION ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,7 +446,7 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       if (!this.activeContextIds.has(executionContextId)) {
         this.activeContextIds.add(executionContextId);
         this.addContextId(executionContextId, false);
-        this.getParentElementId().catch(() => null);
+        this.getFrameElementNodeId().catch(() => null);
       }
 
       return executionContextId;
@@ -431,28 +461,6 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
         }
       }
       this.logger.warn('Failed to create isolated world.', {
-        frameId: this.id,
-        error,
-      });
-    }
-  }
-
-  private async getParentElementId(): Promise<string> {
-    try {
-      if (!this.parentFrame || this.isolatedWorldElementObjectId)
-        return this.isolatedWorldElementObjectId;
-      const owner = await this.devtoolsSession.send('DOM.getFrameOwner', { frameId: this.id });
-      const resolved = await this.devtoolsSession.send('DOM.resolveNode', {
-        backendNodeId: owner.backendNodeId,
-        executionContextId: this.parentFrame.getActiveContextId(true),
-        nodeId: owner.nodeId,
-      });
-      this.isolatedWorldElementObjectId = resolved.object.objectId;
-      // don't dispose... will cleanup frame
-      return this.isolatedWorldElementObjectId;
-    } catch (error) {
-      // ignore errors looking this up
-      this.logger.info('Failed to lookup isolated node', {
         frameId: this.id,
         error,
       });
