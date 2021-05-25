@@ -8,13 +8,13 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `unitType` | `value`
-`valueAsString` | `valueInSpecifiedUnits` | 
+|     |     |
+| --- | --- |
+| `unitType` | `value`
+`valueAsString` | `valueInSpecifiedUnits` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `convertToSpecifiedUnits()` | `newValueSpecifiedUnits()` | 
+|     |     |
+| --- | --- |
+| `convertToSpecifiedUnits()` | `newValueSpecifiedUnits()` |

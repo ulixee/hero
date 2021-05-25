@@ -16,7 +16,7 @@ A Boolean value which is&nbsp;<code>true</code>&nbsp;if the range is&nbsp;<stron
 
 The DOM <code>Node</code> in which the end of the range, as specified by the <code>endOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .endOffset <div class="specs"><i>W3C</i></div> {#endOffset}
 
@@ -28,7 +28,7 @@ An integer value indicating the offset, in characters, from the beginning of the
 
 The DOM <code>Node</code> in which the beginning of the range, as specified by the <code>startOffset</code>&nbsp;property,&nbsp;is located.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### .startOffset <div class="specs"><i>W3C</i></div> {#startOffset}
 

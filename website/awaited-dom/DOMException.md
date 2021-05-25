@@ -8,7 +8,7 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `code` | `message`
-`name` |  | 
+|     |     |
+| --- | --- |
+| `code` | `message`
+`name` |  |

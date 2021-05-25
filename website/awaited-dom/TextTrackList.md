@@ -8,14 +8,14 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `length` | `onaddtrack`
-`onchange` | `onremovetrack` | 
+|     |     |
+| --- | --- |
+| `length` | `onaddtrack`
+`onchange` | `onremovetrack` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `getTrackById()` | `addEventListener()`
-`dispatchEvent()` | `removeEventListener()` | 
+|     |     |
+| --- | --- |
+| `getTrackById()` | `addEventListener()`
+`dispatchEvent()` | `removeEventListener()` |

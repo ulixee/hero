@@ -7,7 +7,7 @@
 
 SuperHTMLCollection implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [HTMLCollection](./html-collection) | [HTMLCollectionBase](./html-collection-base)
-[HTMLOptionsCollection](./html-options-collection) |  | 
+|     |     |
+| --- | --- |
+| [HTMLCollection](./html-collection) | [HTMLCollectionBase](./html-collection-base)
+[HTMLOptionsCollection](./html-options-collection) |  |

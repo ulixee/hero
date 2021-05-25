@@ -16,19 +16,19 @@ Returns the number of children of this <code>ParentNode</code> which are element
 
 Returns a live <code>HTMLCollection</code> containing all of the <code>Element</code> objects that are children of this <code>ParentNode</code>, omitting all of its non-element nodes.
 
-#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Type**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### .firstElementChild <div class="specs"><i>W3C</i></div> {#firstElementChild}
 
 Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .lastElementChild <div class="specs"><i>W3C</i></div> {#lastElementChild}
 
 Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ## Methods
 
@@ -41,7 +41,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid compound selector list supported by the browser; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
@@ -52,12 +52,12 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid CSS selector string; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperNodeList`](./super-node-list)
+#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ## Unimplemented Specs
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `append()` | `prepend()` | 
+|     |     |
+| --- | --- |
+| `append()` | `prepend()` |

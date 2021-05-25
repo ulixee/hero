@@ -10,10 +10,10 @@
 
 Returns the <code>Element</code> immediately following this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list following this node.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### .previousElementSibling <div class="specs"><i>W3C</i></div> {#previousElementSibling}
 
 Returns the <code>Element</code> immediately prior to this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list prior to this node.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)

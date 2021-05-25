@@ -6,6 +6,6 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `animVal` | `baseVal` | 
+|     |     |
+| --- | --- |
+| `animVal` | `baseVal` |

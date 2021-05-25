@@ -21,4 +21,4 @@ Returns a <code>File</code> object representing the file at the specified index 
 
  - index `number`. Needs content.
 
-#### **Returns**: [`File`](./file)
+#### **Returns**: [`File`](/docs/awaited-dom/file)

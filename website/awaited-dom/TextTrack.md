@@ -6,18 +6,18 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `activeCues` | `cues`
+|     |     |
+| --- | --- |
+| `activeCues` | `cues`
 `id` | `inBandMetadataTrackDispatchType`
 `kind` | `label`
 `language` | `mode`
-`oncuechange` |  | 
+`oncuechange` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `addCue()` | `removeCue()`
+|     |     |
+| --- | --- |
+| `addCue()` | `removeCue()`
 `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+`removeEventListener()` |  |

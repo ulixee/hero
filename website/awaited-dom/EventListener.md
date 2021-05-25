@@ -6,6 +6,6 @@
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `handleEvent()` |  | 
+|     |     |
+| --- | --- |
+| `handleEvent()` |  |

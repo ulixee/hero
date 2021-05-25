@@ -12,36 +12,36 @@ On each documented class, you can find a list of the unimplemented methods and p
 
 Supers give you access to all properties and methods of dependent classes.
 
- |   |   | 
- | --- | --- | 
- | [SuperDocument](/docs/awaited-dom/super-document) | [SuperElement](/docs/awaited-dom/super-element)
+|     |     |
+| --- | --- |
+| [SuperDocument](/docs/awaited-dom/super-document) | [SuperElement](/docs/awaited-dom/super-element)
 [SuperHTMLCollection](/docs/awaited-dom/super-html-collection) | [SuperHTMLElement](/docs/awaited-dom/super-html-element)
 [SuperNode](/docs/awaited-dom/super-node) | [SuperNodeList](/docs/awaited-dom/super-node-list)
-[SuperStyleSheet](/docs/awaited-dom/super-style-sheet) | [SuperText](/docs/awaited-dom/super-text) | 
+[SuperStyleSheet](/docs/awaited-dom/super-style-sheet) | [SuperText](/docs/awaited-dom/super-text) |
 
 
 ## Document Interfaces
 
- |   |   | 
- | --- | --- | 
- | [Document](/docs/awaited-dom/document) | [DocumentFragment](/docs/awaited-dom/document-fragment)
+|     |     |
+| --- | --- |
+| [Document](/docs/awaited-dom/document) | [DocumentFragment](/docs/awaited-dom/document-fragment)
 [HTMLDocument](/docs/awaited-dom/html-document) | [XMLDocument](/docs/awaited-dom/xml-document)
-[XPathEvaluator](/docs/awaited-dom/x-path-evaluator) |  | 
+[XPathEvaluator](/docs/awaited-dom/x-path-evaluator) |  |
 
 
 ## Node Interfaces
 
- |   |   | 
- | --- | --- | 
- | [Comment](/docs/awaited-dom/comment) | [Element](/docs/awaited-dom/element)
-[Node](/docs/awaited-dom/node) | [Text](/docs/awaited-dom/text) | 
+|     |     |
+| --- | --- |
+| [Comment](/docs/awaited-dom/comment) | [Element](/docs/awaited-dom/element)
+[Node](/docs/awaited-dom/node) | [Text](/docs/awaited-dom/text) |
 
 
 ## HTML Elements
 
- |   |   | 
- | --- | --- | 
- | [HTMLAnchorElement](/docs/awaited-dom/html-anchor-element) | [HTMLAreaElement](/docs/awaited-dom/html-area-element)
+|     |     |
+| --- | --- |
+| [HTMLAnchorElement](/docs/awaited-dom/html-anchor-element) | [HTMLAreaElement](/docs/awaited-dom/html-area-element)
 [HTMLAudioElement](/docs/awaited-dom/html-audio-element) | [HTMLBRElement](/docs/awaited-dom/htmlbr-element)
 [HTMLBaseElement](/docs/awaited-dom/html-base-element) | [HTMLBodyElement](/docs/awaited-dom/html-body-element)
 [HTMLButtonElement](/docs/awaited-dom/html-button-element) | [HTMLCanvasElement](/docs/awaited-dom/html-canvas-element)
@@ -75,39 +75,39 @@ Supers give you access to all properties and methods of dependent classes.
 [HTMLTextAreaElement](/docs/awaited-dom/html-text-area-element) | [HTMLTimeElement](/docs/awaited-dom/html-time-element)
 [HTMLTitleElement](/docs/awaited-dom/html-title-element) | [HTMLTrackElement](/docs/awaited-dom/html-track-element)
 [HTMLUListElement](/docs/awaited-dom/htmlu-list-element) | [HTMLUnknownElement](/docs/awaited-dom/html-unknown-element)
-[HTMLVideoElement](/docs/awaited-dom/html-video-element) |  | 
+[HTMLVideoElement](/docs/awaited-dom/html-video-element) |  |
 
 
 ## SVG Elements
 
- |   |   | 
- | --- | --- | 
- | [SVGElement](/docs/awaited-dom/svg-element) | [SVGGraphicsElement](/docs/awaited-dom/svg-graphics-element)
-[SVGSVGElement](/docs/awaited-dom/svgsvg-element) | [SVGTitleElement](/docs/awaited-dom/svg-title-element) | 
+|     |     |
+| --- | --- |
+| [SVGElement](/docs/awaited-dom/svg-element) | [SVGGraphicsElement](/docs/awaited-dom/svg-graphics-element)
+[SVGSVGElement](/docs/awaited-dom/svgsvg-element) | [SVGTitleElement](/docs/awaited-dom/svg-title-element) |
 
 
 ## Array-like Interfaces
 
- |   |   | 
- | --- | --- | 
- | [HTMLCollection](/docs/awaited-dom/html-collection) | [HTMLOptionsCollection](/docs/awaited-dom/html-options-collection)
-[NodeList](/docs/awaited-dom/node-list) | [RadioNodeList](/docs/awaited-dom/radio-node-list) | 
+|     |     |
+| --- | --- |
+| [HTMLCollection](/docs/awaited-dom/html-collection) | [HTMLOptionsCollection](/docs/awaited-dom/html-options-collection)
+[NodeList](/docs/awaited-dom/node-list) | [RadioNodeList](/docs/awaited-dom/radio-node-list) |
 
 
 ## XPath Interfaces
 
- |   |   | 
- | --- | --- | 
- | [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathEvaluatorBase](/docs/awaited-dom/x-path-evaluator-base)
+|     |     |
+| --- | --- |
+| [XPathEvaluator](/docs/awaited-dom/x-path-evaluator) | [XPathEvaluatorBase](/docs/awaited-dom/x-path-evaluator-base)
 [XPathExpression](/docs/awaited-dom/x-path-expression) | [XPathNSResolver](/docs/awaited-dom/x-path-ns-resolver)
-[XPathResult](/docs/awaited-dom/x-path-result) |  | 
+[XPathResult](/docs/awaited-dom/x-path-result) |  |
 
 
 ## Miscellaneous Interfaces
 
- |   |   | 
- | --- | --- | 
- | [Attr](/docs/awaited-dom/attr) | [CharacterData](/docs/awaited-dom/character-data)
+|     |     |
+| --- | --- |
+| [Attr](/docs/awaited-dom/attr) | [CharacterData](/docs/awaited-dom/character-data)
 [EventTarget](/docs/awaited-dom/event-target) | [Request](/docs/awaited-dom/request)
-[Response](/docs/awaited-dom/response) | [Storage](/docs/awaited-dom/storage) | 
+[Response](/docs/awaited-dom/response) | [Storage](/docs/awaited-dom/storage) |
 

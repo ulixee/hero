@@ -4,18 +4,18 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onloading` | `onloadingdone`
+|     |     |
+| --- | --- |
+| `onloading` | `onloadingdone`
 `onloadingerror` | `ready`
-`status` |  | 
+`status` |  |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `add()` | `check()`
+|     |     |
+| --- | --- |
+| `add()` | `check()`
 `clear()` | `delete()`
 `forEach()` | `load()`
 `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+`removeEventListener()` |  |

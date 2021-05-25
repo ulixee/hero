@@ -14,9 +14,9 @@ Creates a parsed XPath expression with resolved namespaces.
 
 
  - expression `string`. A `string` representing representing the XPath expression to be created.
- - resolver [`XPathNSResolver`](./x-path-ns-resolver). Permits translation of all prefixes, including the <code>xml</code> namespace prefix, within the XPath expression into appropriate namespace URIs.
+ - resolver [`XPathNSResolver`](/docs/awaited-dom/x-path-ns-resolver). Permits translation of all prefixes, including the <code>xml</code> namespace prefix, within the XPath expression into appropriate namespace URIs.
 
-#### **Returns**: [`XPathExpression`](./x-path-expression)
+#### **Returns**: [`XPathExpression`](/docs/awaited-dom/x-path-expression)
 
 ### .evaluate*(expression, contextNode, resolver?, type?, result?)* <div class="specs"><i>W3C</i></div> {#evaluate}
 
@@ -26,17 +26,17 @@ Evaluates an XPath expression string and returns a result of the specified type 
 
 
  - expression `string`. A `string` representing the XPath expression to be parsed and evaluated.
- - contextNode [`Node`](./node). A <code>Node</code> representing the context to use for evaluating the expression.
- - resolver [`XPathNSResolver`](./x-path-ns-resolver). Permits translation of all prefixes, including the <code>xml</code> namespace prefix, within the XPath expression into appropriate namespace URIs.
+ - contextNode [`Node`](/docs/awaited-dom/node). A <code>Node</code> representing the context to use for evaluating the expression.
+ - resolver [`XPathNSResolver`](/docs/awaited-dom/x-path-ns-resolver). Permits translation of all prefixes, including the <code>xml</code> namespace prefix, within the XPath expression into appropriate namespace URIs.
  - type `number`. Specifies the type of result to be returned by evaluating the expression. This must be one of the <code>XPathResult.Constants</code>.
- - result [`XPathResult`](./x-path-result). Allows to specify a result object which may be reused and returned by this method. If this is specified as <code>null</code> or the implementation does not reuse the specified result, a new result object will be returned.
+ - result [`XPathResult`](/docs/awaited-dom/x-path-result). Allows to specify a result object which may be reused and returned by this method. If this is specified as <code>null</code> or the implementation does not reuse the specified result, a new result object will be returned.
 
-#### **Returns**: [`XPathResult`](./x-path-result)
+#### **Returns**: [`XPathResult`](/docs/awaited-dom/x-path-result)
 
 ## Unimplemented Specs
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `createNSResolver()` |  | 
+|     |     |
+| --- | --- |
+| `createNSResolver()` |  |

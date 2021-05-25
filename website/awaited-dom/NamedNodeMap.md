@@ -52,7 +52,7 @@ Returns the <code>Attr</code> at the given index, or <code>null</code> if the in
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `removeNamedItem()` | `removeNamedItemNS()`
-`setNamedItem()` | `setNamedItemNS()` | 
+|     |     |
+| --- | --- |
+| `removeNamedItem()` | `removeNamedItemNS()`
+`setNamedItem()` | `setNamedItemNS()` |

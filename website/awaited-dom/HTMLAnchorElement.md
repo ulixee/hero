@@ -32,7 +32,7 @@ Is a `string` that reflects the <code>rel</code> HTML attribute, specifying the 
 
 Returns a <code>DOMTokenList</code> that reflects the <code>rel</code> HTML attribute, as a list of tokens.
 
-#### **Type**: [`DOMTokenList`](./dom-token-list)
+#### **Type**: [`DOMTokenList`](/docs/awaited-dom/dom-token-list)
 
 ### elem.target <div class="specs"><i>W3C</i></div> {#target}
 
@@ -116,7 +116,7 @@ Returns a <code>double</code>, the distance from this element's left border to i
 
 Returns a <code>Element</code> that is the element from which all offset calculations are currently computed.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.offsetTop <div class="specs"><i>W3C</i></div> {#offsetTop}
 
@@ -152,13 +152,13 @@ Is a `boolean` representing the translation.
 
 Returns a <code>NamedNodeMap</code> object containing the assigned attributes of the corresponding HTML element.
 
-#### **Type**: [`NamedNodeMap`](./named-node-map)
+#### **Type**: [`NamedNodeMap`](/docs/awaited-dom/named-node-map)
 
 ### elem.classList <div class="specs"><i>W3C</i></div> {#classList}
 
 Returns a <code>DOMTokenList</code> containing the list of class attributes.
 
-#### **Type**: [`DOMTokenList`](./dom-token-list)
+#### **Type**: [`DOMTokenList`](/docs/awaited-dom/dom-token-list)
 
 ### elem.className <div class="specs"><i>W3C</i></div> {#className}
 
@@ -228,7 +228,7 @@ Is a `string` representing the markup of the element including its content. When
 
 Represents the part identifier(s) of the element (i.e. set using the <code>part</code> attribute), returned as a <code>DOMTokenList</code>.
 
-#### **Type**: [`DOMTokenList`](./dom-token-list)
+#### **Type**: [`DOMTokenList`](/docs/awaited-dom/dom-token-list)
 
 ### elem.prefix <div class="specs"><i>W3C</i></div> {#prefix}
 
@@ -264,7 +264,7 @@ Returns a `number` representing the scroll view width of the element.
 
 Returns the open shadow root that is hosted by the element, or null if no open shadow root is present.
 
-#### **Type**: [`ShadowRoot`](./shadow-root)
+#### **Type**: [`ShadowRoot`](/docs/awaited-dom/shadow-root)
 
 ### elem.slot <div class="specs"><i>W3C</i></div> {#slot}
 
@@ -288,13 +288,13 @@ Returns a `string` representing the base URL of the document containing the <cod
 
 Returns a live <code>NodeList</code> containing all the children of this node. <code>NodeList</code> being live means that if the children of the <code>Node</code> change, the <code>NodeList</code> object is automatically updated.
 
-#### **Type**: [`SuperNodeList`](./super-node-list)
+#### **Type**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ### elem.firstChild <div class="specs"><i>W3C</i></div> {#firstChild}
 
 Returns a <code>Node</code> representing the first direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.isConnected <div class="specs"><i>W3C</i></div> {#isConnected}
 
@@ -306,13 +306,13 @@ A boolean indicating whether or not the Node is connected (directly or indirectl
 
 Returns a <code>Node</code> representing the last direct child node of the node, or <code>null</code> if the node has no child.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.nextSibling <div class="specs"><i>W3C</i></div> {#nextSibling}
 
 Returns a <code>Node</code> representing the next node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.nodeName <div class="specs"><i>W3C</i></div> {#nodeName}
 
@@ -399,25 +399,25 @@ Returns / Sets the value of the current node.
 
 Returns the <code>Document</code> that this node belongs to. If the node is itself a document, returns <code>null</code>.
 
-#### **Type**: [`SuperDocument`](./super-document)
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### elem.parentElement <div class="specs"><i>W3C</i></div> {#parentElement}
 
 Returns an <code>Element</code> that is the parent of this node. If the node has no parent, or if that parent is not an <code>Element</code>, this property returns <code>null</code>.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.parentNode <div class="specs"><i>W3C</i></div> {#parentNode}
 
 Returns a <code>Node</code> that is the parent of this node. If there is no such node, like if this node is the top of the tree or if doesn't participate in a tree, this property returns <code>null</code>.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.previousSibling <div class="specs"><i>W3C</i></div> {#previousSibling}
 
 Returns a <code>Node</code> representing the previous node in the tree, or <code>null</code> if there isn't such node.
 
-#### **Type**: [`SuperNode`](./super-node)
+#### **Type**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.textContent <div class="specs"><i>W3C</i></div> {#textContent}
 
@@ -425,11 +425,77 @@ Returns / Sets the textual content of an element and all its descendants.
 
 #### **Type**: `Promise<string>`
 
+### elem.hash <div class="specs"><i>W3C</i></div> {#hash}
+
+This is a `string` containing a <code>'#'</code> followed by the fragment identifier of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.host <div class="specs"><i>W3C</i></div> {#host}
+
+This is a `string` containing the host, that is the <em>hostname</em>, and then, if the <em>port</em> of the URL is not empty (which can happen because it was not specified or because it was specified to be the default port of the URL's scheme), a <code>':'</code>, and the <em>port</em> of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.hostname <div class="specs"><i>W3C</i></div> {#hostname}
+
+This is a `string` containing the domain of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.href <div class="specs"><i>W3C</i></div> {#href}
+
+This a stringifier property that returns a `string` containing the whole URL, and allows the href to be updated.
+
+#### **Type**: `Promise<string>`
+
+### elem.origin <div class="specs"><i>W3C</i></div> {#origin}
+
+This returns a `string` containing the origin of the URL (that is its scheme, its domain and its port).
+
+#### **Type**: `Promise<string>`
+
+### elem.password <div class="specs"><i>W3C</i></div> {#password}
+
+This is a `string` containing the password specified before the domain name.
+
+#### **Type**: `Promise<string>`
+
+### elem.pathname <div class="specs"><i>W3C</i></div> {#pathname}
+
+This is a `string` containing an initial <code>'/'</code> followed by the path of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.port <div class="specs"><i>W3C</i></div> {#port}
+
+This is a `string` containing the port number of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.protocol <div class="specs"><i>W3C</i></div> {#protocol}
+
+This is a `string` containing the protocol scheme of the URL, including the final <code>':'</code>.
+
+#### **Type**: `Promise<string>`
+
+### elem.search <div class="specs"><i>W3C</i></div> {#search}
+
+This is a `string` containing a <code>'?'</code> followed by the parameters of the URL.
+
+#### **Type**: `Promise<string>`
+
+### elem.username <div class="specs"><i>W3C</i></div> {#username}
+
+This is a `string` containing the username specified before the domain name.
+
+#### **Type**: `Promise<string>`
+
 ### elem.style <div class="specs"><i>W3C</i></div> {#style}
 
 The <code><strong>style</strong></code> property is used to get as well as set the <em>inline</em> style of an element. When getting, it returns a <code>CSSStyleDeclaration</code> object that contains a list of all styles properties for that element with values assigned for the attributes that are defined in the element's inline <code>style</code> attribute.
 
-#### **Type**: [`CSSStyleDeclaration`](./css-style-declaration)
+#### **Type**: [`CSSStyleDeclaration`](/docs/awaited-dom/css-style-declaration)
 
 ### elem.contentEditable <div class="specs"><i>W3C</i></div> {#contentEditable}
 
@@ -447,7 +513,7 @@ Needs content.
 
 Needs content.
 
-#### **Type**: [`DOMStringMap`](./dom-string-map)
+#### **Type**: `Promise<Record<string, string>>`
 
 ### elem.nonce <div class="specs"><i>W3C</i></div> {#nonce}
 
@@ -465,13 +531,13 @@ Needs content.
 
 Returns the <code>Element</code> immediately following this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list following this node.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.previousElementSibling <div class="specs"><i>W3C</i></div> {#previousElementSibling}
 
 Returns the <code>Element</code> immediately prior to this node in its parent's children list, or <code>null</code> if there is no <code>Element</code> in the list prior to this node.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.childElementCount <div class="specs"><i>W3C</i></div> {#childElementCount}
 
@@ -483,25 +549,25 @@ Returns the number of children of this <code>ParentNode</code> which are element
 
 Returns a live <code>HTMLCollection</code> containing all of the <code>Element</code> objects that are children of this <code>ParentNode</code>, omitting all of its non-element nodes.
 
-#### **Type**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Type**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### elem.firstElementChild <div class="specs"><i>W3C</i></div> {#firstElementChild}
 
 Returns the first node which is both a child of this <code>ParentNode</code> <em>and</em> is also an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.lastElementChild <div class="specs"><i>W3C</i></div> {#lastElementChild}
 
 Returns the last node which is both a child of this <code>ParentNode</code> <em>and</em> is an <code>Element</code>, or <code>null</code> if there is none.
 
-#### **Type**: [`SuperElement`](./super-element)
+#### **Type**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.assignedSlot <div class="specs"><i>W3C</i></div> {#assignedSlot}
 
 Returns the <code>&lt;slot&gt;</code> the node is inserted in.
 
-#### **Type**: [`HTMLSlotElement`](./html-slot-element)
+#### **Type**: [`HTMLSlotElement`](/docs/awaited-dom/html-slot-element)
 
 ## Methods
 
@@ -521,7 +587,7 @@ Returns the <code>Element</code> which is the closest ancestor of the current el
  - selectors `string`. <code><var>selectors</var></code> is a `string` containing a selector list.<br>
       ex: <code>p:hover, .toto + q</code>
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.getAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getAttribute}
 
@@ -596,7 +662,7 @@ Returns a live <code>HTMLCollection</code> that contains all descendants of the 
 
  - classNames `string`. A `string` containing one or more class names to match on, separated by whitespace.
 
-#### **Returns**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### elem.getElementsByTagName*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagName}
 
@@ -607,7 +673,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
 
  - qualifiedName `string`. <code>tagName</code> is the qualified name to look for. The special string <code>"*"</code> represents all elements. For compatibility with XHTML, lower-case should be used.
 
-#### **Returns**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### elem.getElementsByTagNameNS*(namespace, localName)* <div class="specs"><i>W3C</i></div> {#getElementsByTagNameNS}
 
@@ -619,7 +685,7 @@ Returns a live <code>HTMLCollection</code> containing all descendant elements, o
  - namespace `string`. <code>namespaceURI</code> is the namespace URI of elements to look for (see <code>Element.namespaceURI</code> and <code>Attr.namespaceURI</code>). For example, if you need to look for XHTML elements, use the XHTML namespace URI, <span class="nowiki"><code>http://www.w3.org/1999/xhtml</code></span>.
  - localName `string`. <code>localName</code> is either the local name of elements to look for or the special value <code>"*"</code>, which matches all elements (see <code>Element.localName</code> and <code>Attr.localName</code>).
 
-#### **Returns**: [`SuperHTMLCollection`](./super-html-collection)
+#### **Returns**: [`SuperHTMLCollection`](/docs/awaited-dom/super-html-collection)
 
 ### elem.hasAttribute*(qualifiedName)* <div class="specs"><i>W3C</i></div> {#hasAttribute}
 
@@ -725,7 +791,7 @@ Compares the position of the current node against another node in any other docu
 #### **Arguments**:
 
 
- - other [`Node`](./node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
+ - other [`Node`](/docs/awaited-dom/node). The other <code>Node</code> with which to compare the first *<code>node</code>*’s document position.
 
 #### **Returns**: `Promise<number>`
 
@@ -736,7 +802,7 @@ Returns a `boolean` value indicating whether or not a node is a descendant of th
 #### **Arguments**:
 
 
- - other [`Node`](./node). Needs content.
+ - other [`Node`](/docs/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -752,7 +818,7 @@ Returns the context object's root which optionally includes the shadow root if i
       <li><code>composed</code>: A `boolean` that indicates whether the shadow root should be returned (<code>false</code>, the default), or a root node beyond shadow root (<code>true</code>).</li>
      </ul>
 
-#### **Returns**: [`SuperNode`](./super-node)
+#### **Returns**: [`SuperNode`](/docs/awaited-dom/super-node)
 
 ### elem.hasChildNodes*()* <div class="specs"><i>W3C</i></div> {#hasChildNodes}
 
@@ -778,7 +844,7 @@ Returns a `boolean` which indicates whether or not two nodes are of the same typ
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code>otherNode</code>: The <code>Node</code> to compare equality with.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -789,7 +855,7 @@ Returns a `boolean` value indicating whether or not the two nodes are the same (
 #### **Arguments**:
 
 
- - otherNode [`Node`](./node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
+ - otherNode [`Node`](/docs/awaited-dom/node). <code><var>otherNode</var></code>&nbsp;The <code>Node</code> to test against.
 
 #### **Returns**: `Promise<boolean>`
 
@@ -821,6 +887,12 @@ Clean up all the text nodes under this element (merge adjacent, remove empty).
 
 #### **Returns**: `Promise<void>`
 
+### elem.toString*()* <div class="specs"><i>W3C</i></div> {#toString}
+
+This returns a `string` containing the whole URL. It is a synonym for <code>HTMLHyperlinkElementUtils.href</code>, though it can't be used to modify the value.
+
+#### **Returns**: `Promise<string>`
+
 ### elem.blur*()* <div class="specs"><i>W3C</i></div> {#blur}
 
 Needs content.
@@ -842,7 +914,7 @@ Returns the first <code>Element</code> with the current element as root that mat
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid compound selector list supported by the browser; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperElement`](./super-element)
+#### **Returns**: [`SuperElement`](/docs/awaited-dom/super-element)
 
 ### elem.querySelectorAll*(selectors)* <div class="specs"><i>W3C</i></div> {#querySelectorAll}
 
@@ -853,68 +925,62 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 
  - selectors `string`. A `string` containing one or more selectors to match against. This string must be a valid CSS selector string; if it's not, a <code>SyntaxError</code> exception is thrown. See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_object_model/Locating_DOM_elements_using_selectors" target="mdnrel">Locating DOM elements using selectors</a> for more information about using selectors to identify elements. Multiple selectors may be specified by separating them using commas.
 
-#### **Returns**: [`SuperNodeList`](./super-node-list)
+#### **Returns**: [`SuperNodeList`](/docs/awaited-dom/super-node-list)
 
 ## Unimplemented Specs
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onfullscreenchange` | `onfullscreenerror`
-`hash` | `host`
-`hostname` | `href`
-`origin` | `password`
-`pathname` | `port`
-`protocol` | `search`
-`username` | `oncopy`
-`oncut` | `onpaste`
-`onabort` | `onanimationend`
-`onanimationiteration` | `onanimationstart`
-`onauxclick` | `onblur`
-`oncancel` | `oncanplay`
-`oncanplaythrough` | `onchange`
-`onclick` | `onclose`
-`oncontextmenu` | `oncuechange`
-`ondblclick` | `ondrag`
-`ondragend` | `ondragenter`
-`ondragleave` | `ondragover`
-`ondragstart` | `ondrop`
-`ondurationchange` | `onemptied`
-`onended` | `onerror`
-`onfocus` | `onformdata`
-`ongotpointercapture` | `oninput`
-`oninvalid` | `onkeydown`
-`onkeypress` | `onkeyup`
-`onload` | `onloadeddata`
-`onloadedmetadata` | `onloadstart`
-`onlostpointercapture` | `onmousedown`
-`onmouseenter` | `onmouseleave`
-`onmousemove` | `onmouseout`
-`onmouseover` | `onmouseup`
-`onpause` | `onplay`
-`onplaying` | `onpointercancel`
-`onpointerdown` | `onpointerenter`
-`onpointerleave` | `onpointermove`
-`onpointerout` | `onpointerover`
-`onpointerup` | `onprogress`
-`onratechange` | `onreset`
-`onresize` | `onscroll`
-`onseeked` | `onseeking`
-`onselect` | `onselectionchange`
-`onselectstart` | `onstalled`
-`onsubmit` | `onsuspend`
-`ontimeupdate` | `ontouchcancel`
-`ontouchend` | `ontouchmove`
-`ontouchstart` | `ontransitionend`
-`onvolumechange` | `onwaiting`
-`onwheel` |  | 
+|     |     |
+| --- | --- |
+| `onfullscreenchange` | `onfullscreenerror`
+`oncopy` | `oncut`
+`onpaste` | `onabort`
+`onanimationend` | `onanimationiteration`
+`onanimationstart` | `onauxclick`
+`onblur` | `oncancel`
+`oncanplay` | `oncanplaythrough`
+`onchange` | `onclick`
+`onclose` | `oncontextmenu`
+`oncuechange` | `ondblclick`
+`ondrag` | `ondragend`
+`ondragenter` | `ondragleave`
+`ondragover` | `ondragstart`
+`ondrop` | `ondurationchange`
+`onemptied` | `onended`
+`onerror` | `onfocus`
+`onformdata` | `ongotpointercapture`
+`oninput` | `oninvalid`
+`onkeydown` | `onkeypress`
+`onkeyup` | `onload`
+`onloadeddata` | `onloadedmetadata`
+`onloadstart` | `onlostpointercapture`
+`onmousedown` | `onmouseenter`
+`onmouseleave` | `onmousemove`
+`onmouseout` | `onmouseover`
+`onmouseup` | `onpause`
+`onplay` | `onplaying`
+`onpointercancel` | `onpointerdown`
+`onpointerenter` | `onpointerleave`
+`onpointermove` | `onpointerout`
+`onpointerover` | `onpointerup`
+`onprogress` | `onratechange`
+`onreset` | `onresize`
+`onscroll` | `onseeked`
+`onseeking` | `onselect`
+`onselectionchange` | `onselectstart`
+`onstalled` | `onsubmit`
+`onsuspend` | `ontimeupdate`
+`ontouchcancel` | `ontouchend`
+`ontouchmove` | `ontouchstart`
+`ontransitionend` | `onvolumechange`
+`onwaiting` | `onwheel` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `attachShadow()` | `computedStyleMap()`
+|     |     |
+| --- | --- |
+| `attachShadow()` | `computedStyleMap()`
 `insertAdjacentElement()` | `insertAdjacentHTML()`
 `insertAdjacentText()` | `releasePointerCapture()`
 `removeAttribute()` | `removeAttributeNode()`
@@ -927,8 +993,7 @@ Returns a <code>NodeList</code> representing a list of elements with the current
 `insertBefore()` | `removeChild()`
 `replaceChild()` | `addEventListener()`
 `dispatchEvent()` | `removeEventListener()`
-`toString()` | `animate()`
-`getAnimations()` | `after()`
-`before()` | `remove()`
-`replaceWith()` | `append()`
-`prepend()` |  | 
+`animate()` | `getAnimations()`
+`after()` | `before()`
+`remove()` | `replaceWith()`
+`append()` | `prepend()` |

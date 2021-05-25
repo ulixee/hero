@@ -65,6 +65,6 @@ Returns a promise that resolves with a `string` containing the entire contents o
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `stream()` |  | 
+|     |     |
+| --- | --- |
+| `stream()` |  |

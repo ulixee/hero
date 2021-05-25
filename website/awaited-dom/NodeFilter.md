@@ -6,6 +6,6 @@
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `acceptNode()` |  | 
+|     |     |
+| --- | --- |
+| `acceptNode()` |  |

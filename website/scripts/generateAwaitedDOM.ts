@@ -201,7 +201,7 @@ function urlify(type: string) {
     docUrls.get(`Promise<${type}[]>`) ??
     docUrls.get(`${type}[]`);
   if (url) {
-    return `[\`${type}\`](./${url})`;
+    return `[\`${type}\`](/docs/awaited-dom/${url})`;
   }
   return `\`${type}\``;
 }

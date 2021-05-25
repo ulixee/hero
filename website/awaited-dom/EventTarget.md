@@ -10,7 +10,7 @@
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+|     |     |
+| --- | --- |
+| `addEventListener()` | `dispatchEvent()`
+`removeEventListener()` |  |

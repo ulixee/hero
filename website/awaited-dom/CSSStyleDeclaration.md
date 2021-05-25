@@ -28,7 +28,7 @@ The number of properties. See the <code>item()</code> method below.
 
 The containing <code>CSSRule</code>.
 
-#### **Type**: [`CSSRule`](./css-rule)
+#### **Type**: [`CSSRule`](/docs/awaited-dom/css-rule)
 
 ## Methods
 

@@ -56,6 +56,6 @@ The y coordinate of the <code>DOMRect</code>'s origin.
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `fromRect()` |  | 
+|     |     |
+| --- | --- |
+| `fromRect()` |  |

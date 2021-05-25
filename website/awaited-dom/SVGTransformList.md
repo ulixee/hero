@@ -8,16 +8,16 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `length` | `numberOfItems` | 
+|     |     |
+| --- | --- |
+| `length` | `numberOfItems` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `appendItem()` | `clear()`
+|     |     |
+| --- | --- |
+| `appendItem()` | `clear()`
 `consolidate()` | `createSVGTransformFromMatrix()`
 `getItem()` | `initialize()`
 `insertItemBefore()` | `removeItem()`
-`replaceItem()` |  | 
+`replaceItem()` |  |

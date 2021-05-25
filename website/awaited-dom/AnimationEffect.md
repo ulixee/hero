@@ -6,7 +6,7 @@
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `getComputedTiming()` | `getTiming()`
-`updateTiming()` |  | 
+|     |     |
+| --- | --- |
+| `getComputedTiming()` | `getTiming()`
+`updateTiming()` |  |

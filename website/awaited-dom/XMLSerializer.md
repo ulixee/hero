@@ -11,6 +11,6 @@ Returns the serialized subtree of a string.
 #### **Arguments**:
 
 
- - root [`Node`](./node). Needs content.
+ - root [`Node`](/docs/awaited-dom/node). Needs content.
 
 #### **Returns**: `Promise<string>`

@@ -7,6 +7,6 @@
 
 SuperNodeList implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [NodeList](./node-list) | [RadioNodeList](./radio-node-list) | 
+|     |     |
+| --- | --- |
+| [NodeList](./node-list) | [RadioNodeList](./radio-node-list) |

@@ -32,19 +32,19 @@ A <code>double</code> that represents the video time that the cue will start bei
 
 The <code>TextTrack</code> that this cue belongs to, or <code>null</code> if it doesn't belong to any.
 
-#### **Type**: [`TextTrack`](./text-track)
+#### **Type**: [`TextTrack`](/docs/awaited-dom/text-track)
 
 ## Unimplemented Specs
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onenter` | `onexit` | 
+|     |     |
+| --- | --- |
+| `onenter` | `onexit` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `addEventListener()` | `dispatchEvent()`
-`removeEventListener()` |  | 
+|     |     |
+| --- | --- |
+| `addEventListener()` | `dispatchEvent()`
+`removeEventListener()` |  |

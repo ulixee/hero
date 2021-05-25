@@ -24,7 +24,7 @@ Needs content.
 
 Needs content.
 
-#### **Type**: [`Headers`](./headers)
+#### **Type**: [`Headers`](/docs/awaited-dom/headers)
 
 ### .integrity <div class="specs"><i>W3C</i></div> {#integrity}
 
@@ -116,13 +116,13 @@ Takes a <code>Response</code> stream and reads it to completion. It returns a pr
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `signal` | `body` | 
+|     |     |
+| --- | --- |
+| `signal` | `body` |
 
 #### Methods
 
- |   |   | 
- | --- | --- | 
- | `clone()` | `blob()`
-`formData()` |  | 
+|     |     |
+| --- | --- |
+| `clone()` | `blob()`
+`formData()` |  |

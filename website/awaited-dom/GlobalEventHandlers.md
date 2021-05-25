@@ -6,9 +6,9 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `onabort` | `onanimationend`
+|     |     |
+| --- | --- |
+| `onabort` | `onanimationend`
 `onanimationiteration` | `onanimationstart`
 `onauxclick` | `onblur`
 `oncancel` | `oncanplay`
@@ -47,4 +47,4 @@
 `ontouchend` | `ontouchmove`
 `ontouchstart` | `ontransitionend`
 `onvolumechange` | `onwaiting`
-`onwheel` |  | 
+`onwheel` |  |

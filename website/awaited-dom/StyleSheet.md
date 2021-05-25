@@ -6,9 +6,9 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `disabled` | `href`
+|     |     |
+| --- | --- |
+| `disabled` | `href`
 `media` | `ownerNode`
 `parentStyleSheet` | `title`
-`type` |  | 
+`type` |  |

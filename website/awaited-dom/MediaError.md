@@ -8,6 +8,6 @@
 
 #### Properties
 
- |   |   | 
- | --- | --- | 
- | `code` | `message` | 
+|     |     |
+| --- | --- |
+| `code` | `message` |

@@ -7,8 +7,8 @@
 
 SuperDocument implements all the properties and methods of the following classes:
 
- |   |   | 
- | --- | --- | 
- | [Document](./document) | [EventTarget](./event-target)
+|     |     |
+| --- | --- |
+| [Document](./document) | [EventTarget](./event-target)
 [HTMLDocument](./html-document) | [Node](./node)
-[XMLDocument](./xml-document) |  | 
+[XMLDocument](./xml-document) |  |
