@@ -241,6 +241,7 @@ export interface IGoTlsSocketConnectOpts {
   proxyAuth?: string;
   keepAlive?: boolean;
   isWebsocket?: boolean;
+  keylogPath?: string;
 }
 
 class Socks5ProxyConnectError extends Error {}

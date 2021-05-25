@@ -39,7 +39,7 @@ export default abstract class BaseIpcHandler {
 
   private readonly handlerName: string;
 
-  constructor(options: Partial<IGoIpcOpts>) {
+  protected constructor(options: Partial<IGoIpcOpts>) {
     this.options = this.getDefaultOptions(options);
 
     const mode = this.options.mode;

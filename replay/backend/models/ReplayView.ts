@@ -27,7 +27,7 @@ export default class ReplayView extends ViewBackend {
       nodeIntegrationInSubFrames: true,
       enableRemoteModule: false,
       partition: uuidv1(),
-      contextIsolation: false,
+      contextIsolation: true,
       webSecurity: false,
       javascript: false,
     });

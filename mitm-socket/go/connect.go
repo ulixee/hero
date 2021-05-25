@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"net"
+	"os"
 	"time"
 
 	utls "github.com/ulixee/utls"
@@ -123,9 +123,9 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, signals *Sig
 			return
 		}
 		protocol = uTlsConn.ConnectionState().NegotiatedProtocol
-	    tcpConn, ok := dialConn.(*net.TCPConn)
+		tcpConn, ok := dialConn.(*net.TCPConn)
 		if protocol == "h2" && ok {
-		    tcpConn.SetNoDelay(true)
+			tcpConn.SetNoDelay(true)
 		}
 	}
 
@@ -152,6 +152,7 @@ type ConnectArgs struct {
 	ProxyUrl    string
 	KeepAlive   bool
 	IsWebsocket bool
+	KeylogPath  string
 }
 
 type SessionArgs struct {

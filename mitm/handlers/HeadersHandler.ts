@@ -147,15 +147,28 @@ export default class HeadersHandler {
 
   public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext): void {
     const url = ctx.url;
-    if (ctx.isServerHttp2 && ctx.isClientHttp2 === false) {
-      if (!ctx.requestHeaders[HTTP2_HEADER_PATH])
-        ctx.requestHeaders[HTTP2_HEADER_PATH] = url.pathname + url.search;
-      if (!ctx.requestHeaders[HTTP2_HEADER_AUTHORITY])
-        ctx.requestHeaders[HTTP2_HEADER_AUTHORITY] = this.getRequestHeader<string>(ctx, 'host');
-      if (!ctx.requestHeaders[HTTP2_HEADER_SCHEME])
-        ctx.requestHeaders[HTTP2_HEADER_SCHEME] = 'https';
-      if (!ctx.requestHeaders[HTTP2_HEADER_METHOD])
-        ctx.requestHeaders[HTTP2_HEADER_METHOD] = ctx.method;
+    const oldHeaders = ctx.requestHeaders;
+    ctx.requestHeaders = Object.create(null);
+    // WORKAROUND: nodejs inserts headers in reverse to front of list, so will mess with the order
+    // to workaround, insert in reverse order
+    // https://github.com/nodejs/node/blob/e46c680bf2b211bbd52cf959ca17ee98c7f657f5/lib/internal/http2/util.js#L521
+    Object.assign(ctx.requestHeaders, {
+      [HTTP2_HEADER_PATH]: url.pathname + url.search,
+      [HTTP2_HEADER_SCHEME]: 'https',
+      [HTTP2_HEADER_AUTHORITY]:
+        oldHeaders[HTTP2_HEADER_AUTHORITY] ?? this.getRequestHeader<string>(ctx, 'host'),
+      [HTTP2_HEADER_METHOD]: ctx.method,
+    });
+
+    for (const header of Object.keys(oldHeaders)) {
+      const lowerKey = header.toLowerCase();
+      if (stripHttp1HeadersForH2.has(lowerKey) || startsWithProxyRegex.test(header)) {
+        continue;
+      }
+
+      if (!header.startsWith(':')) {
+        ctx.requestHeaders[header] = oldHeaders[header];
+      }
     }
 
     this.stripHttp1HeadersForHttp2(ctx);

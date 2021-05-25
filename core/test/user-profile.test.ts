@@ -3,6 +3,7 @@ import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
 import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { createPromise } from '@secret-agent/commons/utils';
 import Core from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
@@ -109,26 +110,27 @@ describe('UserProfile cookie tests', () => {
       const tab = Session.getTab(meta);
       const session = tab.session;
 
+      const dlfCookies = createPromise<string>();
+      const sameCookies = createPromise<string>();
+
       session.mitmRequestSession.blockedResources = {
         urls: ['https://dataliberationfoundation.org/cookie2'],
         types: [],
         handlerFn: (request, response) => {
-          dlfCookies = request.headers.cookie;
+          dlfCookies.resolve(request.headers.cookie);
           response.end(`<html><p>frame body</p></html>`);
           return true;
         },
       };
-      let dlfCookies = '';
-      let sameCookies = '';
       koaServer.get('/cross-cookie2', ctx => {
-        sameCookies = ctx.cookies.get('cookietest');
+        sameCookies.resolve(ctx.cookies.get('cookietest'));
         ctx.body = `<body><h1>cross cookies page</h1><iframe src="https://dataliberationfoundation.org/cookie2"/></body>`;
       });
       await tab.goto(`${koaServer.baseUrl}/cross-cookie2`);
       await tab.waitForLoad('PaintingStable');
 
-      expect(dlfCookies).toBe('cross1=1; cross2=2');
-      expect(sameCookies).toBe('mainsite');
+      await expect(dlfCookies).resolves.toBe('cross1=1; cross2=2');
+      await expect(sameCookies).resolves.toBe('mainsite');
       await tab.close();
     }
   });

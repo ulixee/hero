@@ -61,15 +61,42 @@ test('should be able to handle an http->http2 request', async () => {
 });
 
 test('should be able to handle an http2->http2 request', async () => {
+  let headers: any;
   const server = await Helpers.runHttp2Server((req, res1) => {
+    expect(
+      req.rawHeaders
+        .map((x, i) => {
+          if (i % 2 === 0) return x;
+          return undefined;
+        })
+        .filter(Boolean),
+    ).toEqual(Object.keys(headers));
     return res1.end('h2 secure as anything!');
   });
 
+  headers = {
+    ':method': 'GET',
+    ':authority': `${server.baseUrl.replace('https://', '')}`,
+    ':scheme': 'https',
+    ':path': '/temp1',
+    'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'upgrade-insecure-requests': 1,
+    'user-agent':
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36',
+    accept:
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'sec-fetch-site': 'none',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-user': '?1',
+    'sec-fetch-dest': 'document',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'en-US,en;q=0.9',
+  };
+
   const client = await createH2Connection('h2-to-h2', server.baseUrl);
 
-  const h2stream = client.request({
-    ':path': '/',
-  });
+  const h2stream = client.request(headers, { weight: 216 });
   const buffer = await Helpers.readableToBuffer(h2stream);
   expect(buffer.toString()).toBe('h2 secure as anything!');
 
