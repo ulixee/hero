@@ -32,7 +32,12 @@ const chromeResourceConversions = new Map<DevtoolsResourceType, ResourceType>([
   ['CSPViolationReport', 'CSP Violation Report'],
 ]);
 
-export function getResourceTypeForChromeValue(resourceType: DevtoolsResourceType): ResourceType {
+export function getResourceTypeForChromeValue(
+  resourceType: DevtoolsResourceType,
+  method: string,
+): ResourceType {
+  if (method === 'OPTIONS') return 'Preflight';
+
   return chromeResourceConversions.get(resourceType) ?? (resourceType as ResourceType);
 }
 

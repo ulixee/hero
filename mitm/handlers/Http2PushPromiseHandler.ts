@@ -47,7 +47,6 @@ export default class Http2PushPromiseHandler {
     const session = this.session;
     const sessionId = this.session.sessionId;
     const serverPushStream = this.context.serverToProxyResponse as http2.ClientHttp2Stream;
-    const headers = this.requestHeaders;
 
     if (BlockHandler.shouldBlockRequest(pushContext)) {
       await pushContext.browserHasRequested;
@@ -56,17 +55,7 @@ export default class Http2PushPromiseHandler {
       return serverPushStream.close(http2.constants.NGHTTP2_CANCEL);
     }
 
-    // emit request
-    if (!parentContext.isClientHttp2) {
-      log.warn('Http2Client.pushReceivedWithNonH2BrowserClient', {
-        sessionId,
-        path: headers[':path'],
-      });
-      pushContext.setState(ResourceState.PrematurelyClosed);
-      return serverPushStream.close(http2.constants.NGHTTP2_REFUSED_STREAM);
-    }
-
-    HeadersHandler.stripHttp1HeadersForHttp2(pushContext);
+    HeadersHandler.cleanPushHeaders(pushContext);
     this.onResponseHeadersPromise = new Promise<void>(resolve => {
       serverPushStream.once('push', (responseHeaders, responseFlags, responseRawHeaders) => {
         MitmRequestContext.readHttp2Response(

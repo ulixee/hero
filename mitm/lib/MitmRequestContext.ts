@@ -86,7 +86,6 @@ export default class MitmRequestContext {
       id: (this.contextIdCounter += 1),
       isSSL,
       isUpgrade,
-      isClientHttp2: clientToProxyRequest instanceof http2.Http2ServerRequest,
       isServerHttp2: false,
       isHttp2Push: false,
       method: clientToProxyRequest.method,
@@ -97,7 +96,7 @@ export default class MitmRequestContext {
       clientToProxyRequest,
       proxyToClientResponse,
       requestTime: new Date(),
-      clientAlpn: (clientToProxyRequest.socket as TLSSocket)?.alpnProtocol || 'http/1.1',
+      protocol: (clientToProxyRequest.socket as TLSSocket)?.alpnProtocol || 'http/1.1',
       documentUrl: clientToProxyRequest.headers.origin as string,
       originType: this.getOriginType(url, requestHeaders),
       didBlockResource: false,
@@ -131,9 +130,8 @@ export default class MitmRequestContext {
       url,
       method: requestHeaders[':method'],
       isServerHttp2: parentContext.isServerHttp2,
-      isClientHttp2: parentContext.isClientHttp2,
       requestSession: parentContext.requestSession,
-      clientAlpn: parentContext.clientAlpn,
+      protocol: parentContext.protocol,
       remoteAddress: parentContext.remoteAddress,
       localAddress: parentContext.localAddress,
       originType: parentContext.originType,
@@ -199,7 +197,7 @@ export default class MitmRequestContext {
       originalHeaders: ctx.requestOriginalHeaders,
       responseOriginalHeaders: ctx.responseOriginalHeaders,
       socketId: ctx.proxyToServerMitmSocket?.id,
-      clientAlpn: ctx.clientAlpn,
+      protocol: ctx.protocol,
       serverAlpn: ctx.proxyToServerMitmSocket?.alpn,
       didBlockResource: ctx.didBlockResource,
       executionMillis: (ctx.responseTime ?? new Date()).getTime() - ctx.requestTime.getTime(),
@@ -211,6 +209,7 @@ export default class MitmRequestContext {
 
   public static assignMitmSocket(ctx: IMitmRequestContext, mitmSocket: MitmSocket): void {
     ctx.proxyToServerMitmSocket = mitmSocket;
+    ctx.dnsResolvedIp = mitmSocket.dnsResolvedIp;
     ctx.isServerHttp2 = mitmSocket.isHttp2();
     ctx.localAddress = mitmSocket.localAddress;
     ctx.remoteAddress = mitmSocket.remoteAddress;

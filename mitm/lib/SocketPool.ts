@@ -20,7 +20,7 @@ export default class SocketPool {
   private queue: Queue;
   private logger: IBoundLog;
 
-  constructor(readonly origin: string, readonly maxConnections, readonly session: RequestSession) {
+  constructor(private origin: string, readonly maxConnections, readonly session: RequestSession) {
     this.origin = origin;
     this.logger = log.createChild(module, { sessionId: session.sessionId, origin });
     this.queue = new Queue('SOCKET TO ORIGIN');
@@ -34,13 +34,28 @@ export default class SocketPool {
     }
   }
 
+  public async isHttp2(
+    isWebsocket: boolean,
+    createSocket: () => Promise<MitmSocket>,
+  ): Promise<boolean> {
+    if (this.alpn) return this.alpn === 'h2';
+    if (this.queue.isActive) {
+      // eslint-disable-next-line require-await
+      const alpn = await this.queue.run(() => Promise.resolve(this.alpn));
+      if (alpn) return alpn === 'h2';
+    }
+    const socket = await this.getSocket(isWebsocket, createSocket);
+    this.freeSocket(socket);
+    return socket.isHttp2();
+  }
+
   public getSocket(
-    options: { isWebsocket: boolean },
+    isWebsocket: boolean,
     createSocket: () => Promise<MitmSocket>,
   ): Promise<MitmSocket> {
     return this.queue.run(async () => {
       const http2Session = this.getHttp2Session();
-      if (http2Session && !options.isWebsocket) {
+      if (http2Session && !isWebsocket) {
         return Promise.resolve(http2Session.mitmSocket);
       }
 
@@ -61,7 +76,7 @@ export default class SocketPool {
       this.all.add(mitmSocket);
 
       // don't put connections that can't be reused into the pool
-      if (!mitmSocket.isHttp2() && !options.isWebsocket) {
+      if (!mitmSocket.isHttp2() && !isWebsocket) {
         this.pool.add(mitmSocket);
       }
 

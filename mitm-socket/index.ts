@@ -18,9 +18,14 @@ export default class MitmSocket extends TypedEventEmitter<{
   eof: void;
   close: void;
 }> {
+  public get isWebsocket(): boolean {
+    return this.connectOpts.isWebsocket === true;
+  }
+
   public readonly socketPath: string;
   public alpn = 'http/1.1';
   public socket: net.Socket;
+  public dnsResolvedIp: string;
   public remoteAddress: string;
   public localAddress: string;
   public serverName: string;
@@ -28,6 +33,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public id = (idCounter += 1);
 
   public createTime: Date;
+  public dnsLookupTime: Date;
   public ipcConnectionTime: Date;
   public connectTime: Date;
   public errorTime: Date;
@@ -45,11 +51,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   private socketReadyPromise = new Resolvable<void>();
   private readonly callStack: string;
 
-  constructor(
-    readonly sessionId: string,
-    readonly connectOpts: IGoTlsSocketConnectOpts,
-    readonly isWebsocket: boolean = false,
-  ) {
+  constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     super();
     const id = uuid();
     this.callStack = new Error().stack.replace('Error:', '').trim();
@@ -234,14 +236,13 @@ export default class MitmSocket extends TypedEventEmitter<{
 export interface IGoTlsSocketConnectOpts {
   host: string;
   port: string;
-  isSsl?: boolean;
-  debug?: boolean;
-  servername: string;
-  proxyUrl?: string;
-  proxyAuth?: string;
+  isSsl: boolean;
   keepAlive?: boolean;
+  debug?: boolean;
+  servername?: string;
   isWebsocket?: boolean;
   keylogPath?: string;
+  proxyUrl?: string;
 }
 
 class Socks5ProxyConnectError extends Error {}

@@ -3,9 +3,9 @@ import * as http2 from 'http2';
 import { ClientHttp2Session, Http2ServerRequest } from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import * as https from 'https';
-import { RequestOptions } from 'https';
 import * as http from 'http';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
+import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
@@ -55,10 +55,11 @@ export default class MitmRequestAgent {
       port: url.port || (ctx.isSSL ? 443 : 80),
       headers: ctx.requestHeaders,
       rejectUnauthorized: allowUnverifiedCertificates === false,
+      // @ts-ignore
       insecureHTTPParser: true, // if we don't include this setting, invalid characters in http requests will blow up responses
-    } as any;
+    };
 
-    await this.assignSocket(ctx, requestSettings);
+    await this.assignSocket(ctx, requestSettings as any);
 
     ctx.cacheHandler.onRequest();
 
@@ -78,16 +79,16 @@ export default class MitmRequestAgent {
     if (!ctx.requestHeaders.host && !ctx.requestHeaders.Host) {
       ctx.requestHeaders.Host = ctx.url.host;
     }
+    HeadersHandler.cleanProxyHeaders(ctx);
     if (emulation.beforeHttpRequest) {
       await emulation.beforeHttpRequest(ctx);
     }
-    HeadersHandler.cleanHttp1RequestHeaders(ctx);
 
     requestSettings.headers = ctx.requestHeaders;
     return this.http1Request(ctx, requestSettings);
   }
 
-  public freeSocket(ctx: IMitmRequestContext): void {
+  public freeSocket(ctx: IMitmRequestContext, hasBeenUsed = true): void {
     if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
@@ -105,7 +106,7 @@ export default class MitmRequestAgent {
       return socket.close();
     }
 
-    socket.isReused = true;
+    socket.isReused = hasBeenUsed;
 
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
     pool?.freeSocket(ctx.proxyToServerMitmSocket);
@@ -123,59 +124,58 @@ export default class MitmRequestAgent {
     this.socketPoolByResolvedHost.clear();
   }
 
+  public async isHostAlpnH2(hostname: string, port: string): Promise<boolean> {
+    const pool = this.getSocketPoolByOrigin(`${hostname}:${port}`);
+
+    const options = { host: hostname, port, isSsl: true, keepAlive: true, servername: hostname };
+    return await pool.isHttp2(false, () => this.createSocketConnection(options));
+  }
+
   private async assignSocket(
     ctx: IMitmRequestContext,
-    options: RequestOptions,
+    options: IGoTlsSocketConnectOpts & { headers: IResourceHeaders },
   ): Promise<MitmSocket> {
     ctx.setState(ResourceState.GetSocket);
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
-    let isKeepAlive = true;
-    if (((options.headers.connection ?? options.headers.Connection) as string)?.match(/close/i)) {
-      isKeepAlive = false;
-    }
-    const mitmSocket = await pool.getSocket(
-      { isWebsocket: ctx.isUpgrade },
-      this.createSocketConnection.bind(this, ctx, options, isKeepAlive),
+
+    options.isSsl = ctx.isSSL;
+    options.keepAlive = !((options.headers.connection ??
+      options.headers.Connection) as string)?.match(/close/i);
+    options.isWebsocket = ctx.isUpgrade;
+
+    const mitmSocket = await pool.getSocket(options.isWebsocket, () =>
+      this.createSocketConnection(options),
     );
     MitmRequestContext.assignMitmSocket(ctx, mitmSocket);
     return mitmSocket;
   }
 
-  private async createSocketConnection(
-    ctx: IMitmRequestContext,
-    options: IGoTlsSocketConnectOpts,
-    keepAlive: boolean,
-  ): Promise<MitmSocket> {
+  private async createSocketConnection(options: IGoTlsSocketConnectOpts): Promise<MitmSocket> {
     const session = this.session;
 
-    ctx.setState(ResourceState.LookupDns);
+    const dnsLookupTime = new Date();
     const ipIfNeeded = await session.lookupDns(options.host);
-    ctx.dnsResolvedIp = ipIfNeeded || 'Not Found';
 
-    const mitmSocket = new MitmSocket(
-      session.sessionId,
-      {
-        host: ipIfNeeded || options.host,
-        port: String(options.port),
-        isSsl: ctx.isSSL,
-        servername: options.servername || options.host,
-        keepAlive,
-        isWebsocket: ctx.isUpgrade,
-        keylogPath: process.env.SSLKEYLOGFILE,
-      },
-      ctx.isUpgrade,
-    );
+    const mitmSocket = new MitmSocket(session.sessionId, {
+      host: ipIfNeeded || options.host,
+      port: String(options.port),
+      isSsl: options.isSsl,
+      servername: options.servername || options.host,
+      keepAlive: options.keepAlive,
+      isWebsocket: options.isWebsocket,
+      keylogPath: process.env.SSLKEYLOGFILE,
+    });
+    mitmSocket.dnsResolvedIp = ipIfNeeded;
+    mitmSocket.dnsLookupTime = dnsLookupTime;
     mitmSocket.on('connect', () => session.emit('socket-connect', { socket: mitmSocket }));
 
     if (session.upstreamProxyUrl) {
-      ctx.setState(ResourceState.GetUpstreamProxyUrl);
       mitmSocket.setProxyUrl(session.upstreamProxyUrl);
     }
 
-    ctx.setState(ResourceState.SocketConnect);
     await mitmSocket.connect(this.socketSession, 10e3);
 
-    if (ctx.isUpgrade) {
+    if (options.isWebsocket) {
       mitmSocket.socket.setNoDelay(true);
       mitmSocket.socket.setTimeout(0);
     }
@@ -183,14 +183,20 @@ export default class MitmRequestAgent {
   }
 
   private getSocketPoolByOrigin(origin: string): SocketPool {
-    if (!this.socketPoolByOrigin.has(origin)) {
+    let lookup = origin.split('://').pop();
+    if (!lookup.includes(':') && origin.includes('://')) {
+      const isSecure = origin.startsWith('wss://') || origin.startsWith('https://');
+      if (isSecure) lookup += ':443';
+      else lookup += ':80';
+    }
+    if (!this.socketPoolByOrigin.has(lookup)) {
       this.socketPoolByOrigin.set(
-        origin,
-        new SocketPool(origin, this.maxConnectionsPerOrigin, this.session),
+        lookup,
+        new SocketPool(lookup, this.maxConnectionsPerOrigin, this.session),
       );
     }
 
-    return this.socketPoolByOrigin.get(origin);
+    return this.socketPoolByOrigin.get(lookup);
   }
 
   private async http1Request(
@@ -223,22 +229,22 @@ export default class MitmRequestAgent {
 
     request.once('error', initError);
 
-    let response: http.IncomingMessage;
-    request.once('response', x => {
-      response = x;
+    let callbackArgs: any[];
+    request.once('response', (...args: any[]) => {
+      callbackArgs = args;
     });
-    request.once('upgrade', x => {
-      response = x;
+    request.once('upgrade', (...args: any[]) => {
+      callbackArgs = args;
     });
 
     // we have to rebroadcast because this function is async, so the handlers can register late
     const rebroadcastMissedEvent = (
       event: string,
-      handler: (result: any) => void,
+      handler: (...args: any[]) => void,
     ): http.ClientRequest => {
-      if ((event === 'response' || event === 'upgrade') && response) {
-        handler(response);
-        response = null;
+      if ((event === 'response' || event === 'upgrade') && callbackArgs) {
+        handler(...callbackArgs);
+        callbackArgs = null;
       }
       // hand off to another fn
       if (event === 'error') request.off('error', initError);
@@ -267,7 +273,7 @@ export default class MitmRequestAgent {
       ) {
         const socket = ctx.proxyToServerMitmSocket;
         socket.close();
-        await this.assignSocket(ctx, requestSettings);
+        await this.assignSocket(ctx, requestSettings as any);
         return this.http1Request(ctx, requestSettings);
       }
     }

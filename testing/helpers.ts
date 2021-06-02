@@ -20,6 +20,7 @@ import * as stream from 'stream';
 import Core, { CoreProcess } from '@secret-agent/core';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import MitmSocket from '@secret-agent/mitm-socket';
+import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import { Helpers } from './index';
 
 export const needsClosing: { close: () => Promise<any> | void; onlyCloseOnFinal?: boolean }[] = [];
@@ -269,6 +270,37 @@ export function httpGet(
   return httpRequest(urlStr, 'GET', proxyHost, proxyAuth, headers);
 }
 
+export async function http2Get(
+  host: string,
+  headers: { [':path']: string; [name: string]: string },
+  sessionId: string,
+  proxyUrl?: string,
+): Promise<string> {
+  const hostUrl = new URL(host);
+  const socketSession = new MitmSocketSession(sessionId, {
+    clientHelloId: 'Chrome79',
+    rejectUnauthorized: false,
+  });
+  Helpers.needsClosing.push(socketSession);
+
+  const tlsConnection = getTlsConnection(
+    Number(hostUrl.port ?? 443),
+    hostUrl.hostname,
+    false,
+    proxyUrl,
+  );
+  Helpers.onClose(() => tlsConnection.close());
+  await tlsConnection.connect(socketSession);
+
+  const client = http2.connect(host, {
+    createConnection: () => tlsConnection.socket,
+  });
+  Helpers.onClose(() => client.close());
+  const responseStream = await client.request(headers);
+  await new Promise(resolve => responseStream.once('response', resolve));
+  return (await readableToBuffer(responseStream)).toString();
+}
+
 export async function runHttp2Server(
   handler: (request: http2.Http2ServerRequest, response: http2.Http2ServerResponse) => void,
 ): Promise<ITestHttpServer<http2.Http2SecureServer>> {
@@ -357,16 +389,16 @@ export function getTlsConnection(
   serverPort: number,
   host = 'localhost',
   isWebsocket = false,
+  proxyUrl?: string,
 ): MitmSocket {
-  const tlsConnection = new MitmSocket(
-    `session${(sessionId += 1)}`,
-    {
-      host,
-      port: String(serverPort),
-      servername: host,
-    },
+  const tlsConnection = new MitmSocket(`session${(sessionId += 1)}`, {
+    host,
+    port: String(serverPort),
+    servername: host,
     isWebsocket,
-  );
+    isSsl: true,
+    proxyUrl,
+  });
   Helpers.onClose(() => tlsConnection.close());
   return tlsConnection;
 }

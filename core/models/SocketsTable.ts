@@ -12,7 +12,9 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
         ['serverName', 'TEXT'],
         ['localAddress', 'TEXT'],
         ['remoteAddress', 'TEXT'],
+        ['dnsResolvedIp', 'TEXT'],
         ['createTime', 'INTEGER'],
+        ['dnsLookupTime', 'INTEGER'],
         ['ipcConnectionTime', 'INTEGER'],
         ['connectTime', 'INTEGER'],
         ['errorTime', 'INTEGER'],
@@ -31,7 +33,9 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
       serverName,
       alpn,
       createTime,
+      dnsLookupTime,
       ipcConnectionTime,
+      dnsResolvedIp,
       connectTime,
       errorTime,
       connectError,
@@ -43,7 +47,9 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
       serverName,
       localAddress,
       remoteAddress,
+      dnsResolvedIp,
       createTime?.getTime(),
+      dnsLookupTime?.getTime(),
       ipcConnectionTime?.getTime(),
       connectTime?.getTime(),
       errorTime?.getTime(),
@@ -57,9 +63,11 @@ export interface ISocketRecord {
   id: number;
   localAddress: string;
   remoteAddress: string;
+  dnsResolvedIp: string;
   alpn: string;
   serverName: string;
   createTime: Date;
+  dnsLookupTime: Date;
   ipcConnectionTime: Date;
   connectTime: Date;
   errorTime: Date;

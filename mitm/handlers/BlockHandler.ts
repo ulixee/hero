@@ -29,7 +29,7 @@ export default class BlockHandler {
         'Content-Type': contentType,
         'Access-Control-Allow-Origin': '*',
       });
-      ctx.proxyToClientResponse.end();
+      ctx.proxyToClientResponse.end('');
     }
     // don't proceed
     return true;

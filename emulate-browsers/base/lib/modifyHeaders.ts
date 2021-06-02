@@ -8,64 +8,60 @@ const { log } = Log(module);
 export default function modifyHeaders(
   userAgentString: string,
   headerProfiles: IResourceHeaderDefaults,
-  hasCustomLocale: boolean,
+  locale: string,
   resource: IHttpResourceLoadDetails,
   sessionId: string,
 ) {
-  const defaultOrder = getOrderAndDefaults(headerProfiles, resource, sessionId);
-
-  const requestLowerHeaders = {};
-  for (const [key, value] of Object.entries(resource.requestHeaders)) {
-    requestLowerHeaders[key.toLowerCase()] = value;
-  }
+  const defaultOrder = getResourceHeaderDefaults(headerProfiles, resource, sessionId);
 
   const headers = resource.requestHeaders;
 
-  if (!defaultOrder || (resource.isClientHttp2 && resource.isServerHttp2)) {
+  // if no default order, at least ensure connection and user-agent
+  if (!defaultOrder) {
     const newHeaders: IResourceHeaders = {};
     let hasKeepAlive = false;
     for (const [header, value] of Object.entries(headers)) {
-      let key = header;
-      // don't capitalize sec-ch-ua headers!
-      if (resource.isServerHttp2 === false && !header.match(/^sec-ch-ua/i)) {
-        key = key
-          .split('-')
-          .map(x => `${x[0].toUpperCase()}${x.slice(1)}`)
-          .join('-');
-      }
-      if (header.match(/^connection/i)) hasKeepAlive = true;
+      const lower = toLowerCase(header);
+      if (lower === 'connection') hasKeepAlive = true;
 
-      if (header.match(/^user-agent/i) && value !== userAgentString) {
-        newHeaders[key] = userAgentString;
+      if (lower === 'user-agent') {
+        newHeaders[header] = userAgentString;
       } else {
-        newHeaders[key] = value;
+        newHeaders[header] = value;
       }
     }
-    if (!defaultOrder && !hasKeepAlive && !resource.isServerHttp2) {
+    if (!hasKeepAlive && !resource.isServerHttp2) {
       newHeaders.Connection = 'keep-alive';
     }
     return newHeaders;
   }
 
+  const isXhr = resource.resourceType === 'Fetch' || resource.resourceType === 'Xhr';
+
+  const requestLowerHeaders = {};
+  for (const [key, value] of Object.entries(resource.requestHeaders)) {
+    requestLowerHeaders[toLowerCase(key)] = value;
+  }
+
+  // First add headers in the default order
   const headerList: [string, string | string[]][] = [];
   for (const headerName of defaultOrder.order) {
     const defaults = defaultOrder.defaults[headerName];
-    const lowerName = headerName.toLowerCase();
+    const lowerName = toLowerCase(headerName);
     let value = requestLowerHeaders[lowerName];
 
-    // if header is an Sec-Fetch header, trust Chrome
-    if (value && lowerName.startsWith('sec-fetch')) {
+    if (lowerName === 'accept-language') {
+      value = `${locale};q=0.9`;
+      // if header is an Sec- header, trust Chrome
+    } else if (value && lowerName.startsWith('sec-')) {
       // keep given value
-    } else if (value && lowerName === 'accept-language' && hasCustomLocale) {
-      // keep given value
-    } else if (defaults && defaults.length) {
-      // trust that it's doing it's thing
-      if (!defaults.includes(value as string)) {
-        value = pickRandom(defaults);
-      }
+    } else if (value && lowerName === 'accept' && isXhr) {
+      // allow user to customize accept value on fetch/xhr
+    } else if (defaults && !defaults.includes(value as string)) {
+      value = pickRandom(defaults);
     }
 
-    if (lowerName === 'user-agent' && value !== userAgentString) {
+    if (lowerName === 'user-agent') {
       value = userAgentString;
     }
     if (value) {
@@ -73,24 +69,13 @@ export default function modifyHeaders(
     }
   }
 
-  const lowerNames = defaultOrder.order.map(x => x.toLowerCase());
+  // Now go through and add any custom headers
   let index = -1;
-  const fetchMode = requestLowerHeaders['sec-fetch-mode'];
   for (const [header, value] of Object.entries(headers)) {
     index += 1;
-    const lowerHeader = header.toLowerCase();
-    const isAlreadyIncluded = lowerNames.includes(lowerHeader);
+    const lowerHeader = toLowerCase(header);
+    const isAlreadyIncluded = defaultOrder.orderKeys.has(lowerHeader);
     if (isAlreadyIncluded) continue;
-
-    const isDefaultHeader =
-      defaultHeaders.includes(lowerHeader) ||
-      lowerHeader.startsWith('sec-') ||
-      lowerHeader.startsWith('proxy-');
-
-    const shouldIncludeOrigin = lowerHeader === 'origin' && fetchMode === 'cors';
-
-    // if default order does not include this header, strip it
-    if (isDefaultHeader && lowerHeader !== 'cookie' && !shouldIncludeOrigin) continue;
 
     // if past the end, reset the index to the last spot
     if (index >= headerList.length) index = headerList.length - 1;
@@ -105,119 +90,71 @@ export default function modifyHeaders(
   return newHeaders;
 }
 
-function getOrderAndDefaults(
+function getResourceHeaderDefaults(
   headerProfiles: IResourceHeaderDefaults,
   resource: IHttpResourceLoadDetails,
   sessionId: string,
-) {
+): Pick<IHeaderOrder, 'order' | 'orderKeys' | 'defaults'> {
   const { method, originType, requestHeaders: headers, resourceType, isSSL } = resource;
-  let profiles = headerProfiles[resourceType];
-  if (!profiles && resourceType === 'Websocket') profiles = headerProfiles['Websocket Upgrade'];
+
+  let protocol = resource.isServerHttp2 ? 'http2' : 'https';
+  if (!resource.isSSL) protocol = 'http';
+
+  let profiles = headerProfiles[protocol][resourceType];
+  if (!profiles && resourceType === 'Websocket')
+    profiles = headerProfiles[protocol].WebsocketUpgrade;
   if (!profiles) return null;
 
-  let defaultOrders = profiles.filter(
-    x => x.secureDomain === isSSL && x.method.toLowerCase() === method.toLowerCase(),
-  );
+  for (const defaultOrder of profiles) {
+    defaultOrder.orderKeys ??= new Set(defaultOrder.order.map(toLowerCase));
+  }
+
+  let defaultOrders = profiles.filter(x => x.method === method);
 
   if (defaultOrders.length > 1) {
-    const originDefaultOrders = defaultOrders.filter(x => x.originTypes.includes(originType));
-    if (originDefaultOrders.length) {
-      defaultOrders = originDefaultOrders;
+    const filtered = defaultOrders.filter(x => x.originTypes.includes(originType));
+    if (filtered.length) defaultOrders = filtered;
+  }
+
+  if (defaultOrders.length > 1 && (headers['sec-fetch-user'] || headers['Sec-Fetch-User'])) {
+    const filtered = defaultOrders.filter(x => x.orderKeys.has('sec-fetch-user'));
+    if (filtered.length) defaultOrders = filtered;
+  }
+
+  if (defaultOrders.length > 1) {
+    if (headers.Cookie || headers.cookie) {
+      const filtered = defaultOrders.filter(x => x.orderKeys.has('cookie'));
+      if (filtered.length) defaultOrders = filtered;
     }
   }
 
-  let defaultOrder = defaultOrders.length ? pickRandom(defaultOrders) : null;
-  if (headers.Cookie || headers.cookie) {
-    const withCookie = defaultOrders.find(x => x.order.includes('Cookie'));
-    if (withCookie) defaultOrder = withCookie;
-  }
+  const defaultOrder = defaultOrders.length ? pickRandom(defaultOrders) : null;
 
   if (!defaultOrder) {
     log.warn('Headers.NotFound', { sessionId, resourceType, isSSL, method, originType });
     return null;
   }
 
-  return {
-    order: defaultOrder.order,
-    defaults: defaultOrder.defaults,
-  };
+  return defaultOrder;
 }
 
 interface IResourceHeaderDefaults {
-  [resourceType: string]: {
-    originTypes: string[];
-    method: string;
-    secureDomain: boolean;
-    order: string[];
-    defaults: { [header: string]: string[] };
-  }[];
+  [protocol: string]: {
+    [resourceType: string]: IHeaderOrder[];
+  };
 }
 
-const defaultHeaders = [
-  'accept',
-  'accept-charset',
-  'accept-encoding',
-  'accept-language',
-  'accept-patch',
-  'accept-ranges',
-  'access-control-allow-credentials',
-  'access-control-allow-headers',
-  'access-control-allow-methods',
-  'access-control-allow-origin',
-  'access-control-expose-headers',
-  'access-control-max-age',
-  'access-control-request-headers',
-  'access-control-request-method',
-  'age',
-  'allow',
-  'alt-svc',
-  'authorization',
-  'cache-control',
-  'connection',
-  'content-disposition',
-  'content-encoding',
-  'content-language',
-  'content-length',
-  'content-location',
-  'content-range',
-  'content-type',
-  'cookie',
-  'date',
-  'expect',
-  'expires',
-  'forwarded',
-  'from',
-  'host',
-  'if-match',
-  'if-modified-since',
-  'if-none-match',
-  'if-range',
-  'if-unmodified-since',
-  'last-modified',
-  'location',
-  'origin',
-  'pragma',
-  'proxy-authenticate',
-  'proxy-authorization',
-  'proxy-connection',
-  'public-key-pins',
-  'range',
-  'referer',
-  'retry-after',
-  'sec-fetch-mode',
-  'sec-fetch-site',
-  'sec-fetch-user',
-  'sec-origin-policy',
-  'set-cookie',
-  'strict-transport-security',
-  'tk',
-  'trailer',
-  'transfer-encoding',
-  'upgrade',
-  'upgrade-insecure-requests',
-  'user-agent',
-  'vary',
-  'via',
-  'warning',
-  'www-authenticate',
-];
+interface IHeaderOrder {
+  originTypes: string[];
+  method: string;
+  order: string[];
+  defaults: { [header: string]: string[] };
+  orderKeys?: Set<string>; // constructed as accessed
+}
+
+const lowerCaseMap = new Map<string, string>();
+
+function toLowerCase(header: string): string {
+  if (!lowerCaseMap.has(header)) lowerCaseMap.set(header, header.toLowerCase());
+  return lowerCaseMap.get(header);
+}

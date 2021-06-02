@@ -10,6 +10,9 @@ export default class Queue {
   public concurrency = 1;
   public idletimeMillis = 500;
   public idlePromise = createPromise();
+  public get isActive(): boolean {
+    return (this.activeCount > 0 || this.queue.length > 0) && !this.stopDequeuing;
+  }
 
   private readonly abortPromise = new Resolvable<CanceledPromiseError>();
   private idleTimout: NodeJS.Timeout;

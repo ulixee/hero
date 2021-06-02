@@ -8,6 +8,7 @@ export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {
   type: 'service_worker' | 'shared_worker' | 'worker';
   hasLoadedResponse: boolean;
   isReady: Promise<Error | null>;
+  isInitializationSent: Promise<void>;
   evaluate<T>(expression: string, isInitializationScript?: boolean): Promise<T>;
 }
 

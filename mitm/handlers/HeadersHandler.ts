@@ -55,7 +55,8 @@ export default class HeadersHandler {
     if (ctx.resourceType === 'Websocket') {
       ctx.browserRequestId = await session.getWebsocketUpgradeRequestId(requestHeaders);
       requestedResource.browserRequestedPromise.resolve(null);
-    } else if (!ctx.resourceType) {
+    } else if (!ctx.resourceType || ctx.resourceType === 'Fetch') {
+      // if fetch, we need to wait for the browser request so we can see if we should use xhr order or fetch order
       await ctx.browserHasRequested;
     }
   }
@@ -64,11 +65,11 @@ export default class HeadersHandler {
     ctx: Pick<IHttpResourceLoadDetails, 'requestHeaders'>,
     name: string,
   ): T {
-    const lowerName = name.toLowerCase();
+    const lowerName = toLowerCase(name);
     const exactMatch = ctx.requestHeaders[name] ?? ctx.requestHeaders[lowerName];
     if (exactMatch) return exactMatch as any;
     for (const [key, value] of Object.entries(ctx.requestHeaders)) {
-      if (key.toLowerCase() === lowerName) {
+      if (toLowerCase(key) === lowerName) {
         return value as any;
       }
     }
@@ -84,12 +85,7 @@ export default class HeadersHandler {
 
       const canonizedKey = headerName.trim();
 
-      // if going h1->h2->h1, clean pseudo headers
-      if (ctx.isServerHttp2 && ctx.isClientHttp2 === false) {
-        if (canonizedKey[0] === ':') continue;
-      }
-
-      const lowerHeaderName = canonizedKey.toLowerCase();
+      const lowerHeaderName = toLowerCase(canonizedKey);
       if (
         // HPKP header => filter
         lowerHeaderName === PublicKeyPins ||
@@ -97,10 +93,6 @@ export default class HeadersHandler {
         lowerHeaderName === HTTP2_HEADER_STATUS ||
         lowerHeaderName === Http2Settings
       ) {
-        continue;
-      }
-      // if going h2->h1->h2, strip http1 headers before responding to client
-      if (ctx.isClientHttp2 && stripHttp1HeadersForH2.has(lowerHeaderName)) {
         continue;
       }
 
@@ -161,24 +153,27 @@ export default class HeadersHandler {
     });
 
     for (const header of Object.keys(oldHeaders)) {
-      const lowerKey = header.toLowerCase();
-      if (stripHttp1HeadersForH2.has(lowerKey) || startsWithProxyRegex.test(header)) {
+      const lowerKey = toLowerCase(header);
+      if (stripHttp1HeadersForH2.has(lowerKey) || lowerKey.startsWith('proxy-')) {
         continue;
       }
 
       if (!header.startsWith(':')) {
         ctx.requestHeaders[header] = oldHeaders[header];
       }
+      if (singleValueHttp2Headers.has(lowerKey)) {
+        const value = ctx.requestHeaders[header];
+        if (Array.isArray(value) && value.length) {
+          ctx.requestHeaders[header] = value[0];
+        }
+      }
     }
-
-    this.stripHttp1HeadersForHttp2(ctx);
   }
 
-  public static stripHttp1HeadersForHttp2(ctx: IMitmRequestContext): void {
-    // TODO: should be part of an emulator for h2 headers
+  public static cleanPushHeaders(ctx: IMitmRequestContext): void {
     for (const key of Object.keys(ctx.requestHeaders)) {
-      const lowerKey = key.toLowerCase();
-      if (stripHttp1HeadersForH2.has(lowerKey) || startsWithProxyRegex.test(key)) {
+      const lowerKey = toLowerCase(key);
+      if (stripHttp1HeadersForH2.has(lowerKey) || lowerKey.startsWith('proxy-')) {
         delete ctx.requestHeaders[key];
       }
       if (singleValueHttp2Headers.has(lowerKey)) {
@@ -190,21 +185,22 @@ export default class HeadersHandler {
     }
   }
 
-  public static cleanHttp1RequestHeaders(ctx: IMitmRequestContext): void {
+  public static cleanProxyHeaders(ctx: IMitmRequestContext): void {
     const headers = ctx.requestHeaders;
-    const removeH2Headers = ctx.isServerHttp2 === false && ctx.isClientHttp2 === true;
     for (const header of Object.keys(headers)) {
-      if (removeH2Headers && header[0] === ':') {
-        delete headers[header];
-      }
-      if (startsWithProxyRegex.test(header)) {
+      if (toLowerCase(header).startsWith('proxy-')) {
         delete headers[header];
       }
     }
   }
 }
 
-const startsWithProxyRegex = /^proxy-/i;
+const lowerCaseMap = new Map<string, string>();
+
+function toLowerCase(header: string): string {
+  if (!lowerCaseMap.has(header)) lowerCaseMap.set(header, header.toLowerCase());
+  return lowerCaseMap.get(header);
+}
 
 const resourceTypesBySecFetchDest = new Map<string, ResourceType>([
   ['document', 'Document'],
@@ -226,7 +222,7 @@ const resourceTypesBySecFetchDest = new Map<string, ResourceType>([
   ['embed', 'Other'], // guess
   ['object', 'Other'], // guess
   ['report', 'CSP Violation Report'],
-  ['worker', 'Other'], // guess
+  ['worker', 'Other'],
   ['serviceworker', 'Other'],
   ['sharedworker', 'Other'],
   ['track', 'Text Track'], // guess

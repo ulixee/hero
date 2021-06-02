@@ -62,18 +62,14 @@ export default class DnsOverTlsSocket {
 
   protected async connect(): Promise<void> {
     const dnsServer = this.dnsServer;
-    this.mitmSocket = new MitmSocket(
-      this.requestSession?.sessionId,
-      {
-        host: dnsServer.host,
-        port: String(dnsServer.port ?? 853),
-        isSsl: true,
-        servername: dnsServer.servername,
-        keepAlive: true,
-        debug: true,
-      },
-      false,
-    );
+    this.mitmSocket = new MitmSocket(this.requestSession?.sessionId, {
+      host: dnsServer.host,
+      port: String(dnsServer.port ?? 853),
+      isSsl: true,
+      servername: dnsServer.servername,
+      keepAlive: true,
+      debug: true,
+    });
     if (this.requestSession?.networkEmulation?.dns?.useUpstreamProxy) {
       const upstreamProxy = this.requestSession.upstreamProxyUrl;
       if (upstreamProxy) {

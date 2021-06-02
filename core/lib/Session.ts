@@ -339,7 +339,7 @@ export default class Session extends TypedEventEmitter<{
           5e3,
         ));
       }
-      await worker.isReady;
+      await worker.isInitializationSent;
       worker.hasLoadedResponse = true;
     } catch (error) {
       if (error instanceof CanceledPromiseError) return;
