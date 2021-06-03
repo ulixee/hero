@@ -69,7 +69,7 @@ test('should create up to a max number of secure connections per origin', async 
 
   const host = server.baseUrl.replace('https://', '');
   // @ts-ignore
-  expect(connectionsByOrigin.get(host).pool.size).toBe(2);
+  expect(connectionsByOrigin.get(host).pooled).toBe(2);
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(2);
@@ -112,7 +112,7 @@ test('should create new connections as needed when no keepalive', async () => {
   const host = server.baseUrl.replace('https://', '');
   // they all close after use, so should be gone now
   // @ts-ignore
-  expect(connectionsByOrigin.get(host).pool.size).toBe(0);
+  expect(connectionsByOrigin.get(host).pooled).toBe(0);
 
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
@@ -222,7 +222,7 @@ test('it should not put upgrade connections in a pool', async () => {
   // @ts-ignore
   const pool = session.requestAgent.socketPoolByOrigin.get(`localhost:${httpServer.port}`);
   // @ts-ignore
-  expect(pool.pool.size).toBe(0);
+  expect(pool.pooled).toBe(0);
 });
 
 test('it should reuse http2 connections', async () => {
@@ -253,7 +253,7 @@ test('it should reuse http2 connections', async () => {
   const host = baseUrl.replace('https://', '');
   // not reusable, so should not be here
   // @ts-ignore
-  expect(pool.get(host).pool.size).toBe(0);
+  expect(pool.get(host).pooled).toBe(0);
   // @ts-ignore
   expect(pool.get(host).http2Sessions).toHaveLength(1);
 });

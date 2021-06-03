@@ -217,7 +217,10 @@ export default class Session extends TypedEventEmitter<{
   ): Promise<void> {
     let mitmProxy = sharedMitmProxy;
     if (doesPuppetSupportBrowserContextProxy) {
-      this.isolatedMitmProxy = await MitmProxy.start();
+      this.isolatedMitmProxy = await MitmProxy.start(
+        GlobalPool.localProxyPortStart,
+        GlobalPool.sessionsDir,
+      );
       mitmProxy = this.isolatedMitmProxy;
     }
 

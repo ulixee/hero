@@ -8,7 +8,7 @@ export default abstract class SqliteTable<T> {
   protected defaultSortOrder?: string;
   protected insertCallbackFn?: (records: T[]) => void;
 
-  private pendingInserts: IRecord[] = [];
+  protected pendingInserts: IRecord[] = [];
 
   private insertSubscriptionRecords: T[] = [];
   private subscriptionThrottle: NodeJS.Timeout;
@@ -26,12 +26,19 @@ export default abstract class SqliteTable<T> {
     }
   }
 
-  public hasPending(cb?: (record: IRecord) => boolean): boolean {
-    if (!this.pendingInserts.length) return false;
-    if (cb) {
-      return this.pendingInserts.some(cb);
-    }
-    return true;
+  public findPendingInserts(cb: (record: IRecord) => boolean): IRecord[] {
+    return this.pendingInserts.filter(cb);
+  }
+
+  public findPendingRecords(cb: (record: IRecord) => boolean): T[] {
+    return this.pendingInserts.filter(cb).map(pending => {
+      const result: any = {};
+      for (let i = 0; i < pending.length; i += 1) {
+        const col = this.columns[i];
+        result[col[0]] = pending[i];
+      }
+      return result;
+    });
   }
 
   public subscribe(callbackFn: (records: T[]) => void): void {
@@ -43,10 +50,6 @@ export default abstract class SqliteTable<T> {
 
   public unsubscribe(): void {
     this.insertCallbackFn = null;
-  }
-
-  public flush(): void {
-    this.db.transaction(() => this.runPendingInserts()).immediate();
   }
 
   public runPendingInserts(): void {

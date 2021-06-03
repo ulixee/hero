@@ -88,7 +88,7 @@ export default class MitmRequestAgent {
     return this.http1Request(ctx, requestSettings);
   }
 
-  public freeSocket(ctx: IMitmRequestContext, hasBeenUsed = true): void {
+  public freeSocket(ctx: IMitmRequestContext): void {
     if (ctx.isUpgrade || ctx.isServerHttp2 || this.session.isClosing) {
       return;
     }
@@ -106,7 +106,7 @@ export default class MitmRequestAgent {
       return socket.close();
     }
 
-    socket.isReused = hasBeenUsed;
+    socket.isReused = true;
 
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
     pool?.freeSocket(ctx.proxyToServerMitmSocket);

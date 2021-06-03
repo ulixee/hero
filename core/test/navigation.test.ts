@@ -62,7 +62,7 @@ describe('basic Navigation tests', () => {
       ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
       ctx.body = `<html><body>
 <img src="/img.jpeg"/>
-<a href="/etagPage">Etag Page</a>
+<a href="/etagPage"></a>
 </body></html>`;
     });
     koaServer.get('/img.jpeg', async ctx => {

@@ -51,8 +51,12 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public updateResource(id: number, data: { tabId: number; browserRequestId: string }): void {
-    if (this.hasPending(x => x[0] === id)) {
-      this.flush();
+    const pendingInserts = this.findPendingInserts(x => x[0] === id);
+    if (pendingInserts.length) {
+      const pending = pendingInserts.pop();
+      pending[1] = data.browserRequestId;
+      pending[2] = data.tabId;
+      return;
     }
     this.db
       .prepare(`update ${this.tableName} set tabId=?, devtoolsRequestId=? where id=?`)
@@ -60,9 +64,9 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public get(id: number): IResourcesRecord {
-    if (this.hasPending(x => x[0] === id)) {
-      this.flush();
-    }
+    const pending = this.findPendingRecords(x => x[0] === id);
+    if (pending.length) return pending.pop();
+
     return this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
   }
 
@@ -187,13 +191,15 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public async getResourceBodyById(resourceId: number, decompress = true): Promise<Buffer> {
-    if (this.hasPending(x => x[0] === resourceId)) {
-      this.flush();
-    }
+    const pendingRecords = this.findPendingRecords(x => x[0] === resourceId);
 
-    const record = this.db
-      .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
-      .get(resourceId);
+    let record = pendingRecords.find(x => !!x.responseData);
+
+    if (!record) {
+      record = this.db
+        .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
+        .get(resourceId);
+    }
     if (!record) return null;
 
     const { responseData, responseEncoding } = record;

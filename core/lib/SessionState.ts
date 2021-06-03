@@ -213,49 +213,60 @@ export default class SessionState {
       return;
     }
 
-    const convertedMeta = this.resourceEventToMeta(tabId, resourceFailedEvent);
-    const resource = this.resourcesById.get(resourceId);
+    try {
+      const convertedMeta = this.resourceEventToMeta(tabId, resourceFailedEvent);
+      const resource = this.resourcesById.get(resourceId);
 
-    if (!resource) {
-      this.resourcesById.set(convertedMeta.id, convertedMeta);
-      this.db.resources.insert(tabId, convertedMeta, null, resourceFailedEvent, error);
-      return convertedMeta;
-    }
-
-    // if we already have this resource, we need to merge
-    const existingDbRecord = this.db.resources.get(resourceId);
-
-    existingDbRecord.type ??= convertedMeta.type;
-    resource.type ??= convertedMeta.type;
-    existingDbRecord.devtoolsRequestId ??= resourceFailedEvent.browserRequestId;
-    existingDbRecord.browserBlockedReason = resourceFailedEvent.browserBlockedReason;
-    existingDbRecord.browserCanceled = resourceFailedEvent.browserCanceled;
-    existingDbRecord.redirectedToUrl ??= resourceFailedEvent.redirectedToUrl;
-    existingDbRecord.statusCode ??= convertedMeta.response.statusCode;
-    existingDbRecord.statusMessage ??= convertedMeta.response.statusMessage;
-    existingDbRecord.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
-
-    if (convertedMeta.response.headers) {
-      const responseHeaders = JSON.stringify(convertedMeta.response.headers);
-      if (responseHeaders.length > existingDbRecord.responseHeaders?.length) {
-        existingDbRecord.responseHeaders = responseHeaders;
-        resource.response.headers = convertedMeta.response.headers;
+      if (!resource) {
+        this.resourcesById.set(convertedMeta.id, convertedMeta);
+        this.db.resources.insert(tabId, convertedMeta, null, resourceFailedEvent, error);
+        return convertedMeta;
       }
-    }
-    if (resourceFailedEvent.responseOriginalHeaders) {
-      const responseHeaders = JSON.stringify(resourceFailedEvent.responseOriginalHeaders);
-      if (responseHeaders.length > existingDbRecord.responseOriginalHeaders?.length) {
-        existingDbRecord.responseOriginalHeaders = responseHeaders;
+
+      // if we already have this resource, we need to merge
+      const existingDbRecord = this.db.resources.get(resourceId);
+
+      existingDbRecord.type ??= convertedMeta.type;
+      resource.type ??= convertedMeta.type;
+      existingDbRecord.devtoolsRequestId ??= resourceFailedEvent.browserRequestId;
+      existingDbRecord.browserBlockedReason = resourceFailedEvent.browserBlockedReason;
+      existingDbRecord.browserCanceled = resourceFailedEvent.browserCanceled;
+      existingDbRecord.redirectedToUrl ??= resourceFailedEvent.redirectedToUrl;
+      existingDbRecord.statusCode ??= convertedMeta.response.statusCode;
+      existingDbRecord.statusMessage ??= convertedMeta.response.statusMessage;
+      existingDbRecord.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
+
+      if (!resource.response) {
+        resource.response = convertedMeta.response ?? ({} as any);
       }
-    }
-    if (error) {
-      existingDbRecord.httpError = ResourcesTable.getErrorString(error);
-    }
 
-    resource.response.browserLoadFailure = convertedMeta.response.browserLoadFailure;
+      if (convertedMeta.response.headers) {
+        const responseHeaders = JSON.stringify(convertedMeta.response.headers);
+        if (responseHeaders.length > existingDbRecord.responseHeaders?.length) {
+          existingDbRecord.responseHeaders = responseHeaders;
+          resource.response.headers = convertedMeta.response.headers;
+        }
+      }
+      if (resourceFailedEvent.responseOriginalHeaders) {
+        const responseHeaders = JSON.stringify(resourceFailedEvent.responseOriginalHeaders);
+        if (responseHeaders.length > existingDbRecord.responseOriginalHeaders?.length) {
+          existingDbRecord.responseOriginalHeaders = responseHeaders;
+        }
+      }
+      if (error) {
+        existingDbRecord.httpError = ResourcesTable.getErrorString(error);
+      }
 
-    this.db.resources.save(existingDbRecord);
-    return resource;
+      resource.response.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
+
+      this.db.resources.save(existingDbRecord);
+      return resource;
+    } catch (saveError) {
+      this.logger.warn('SessionState.captureResourceFailed::ErrorSaving', {
+        error: saveError,
+        resourceFailedEvent,
+      });
+    }
   }
 
   public captureResourceError(

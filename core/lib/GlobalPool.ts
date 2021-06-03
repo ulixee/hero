@@ -34,6 +34,7 @@ export default class GlobalPool {
   private static _activeSessionCount = 0;
   private static puppets: Puppet[] = [];
   private static mitmServer: MitmProxy;
+  private static mitmStartPromise: Promise<MitmProxy>;
   private static waitingForAvailability: {
     options: ICreateSessionOptions;
     promise: IResolvablePromise<Session>;
@@ -141,7 +142,11 @@ export default class GlobalPool {
 
   private static async startMitm() {
     if (this.mitmServer || disableMitm === true) return;
-    this.mitmServer = await MitmProxy.start(this.localProxyPortStart, this.sessionsDir);
+    if (this.mitmStartPromise) await this.mitmStartPromise;
+    else {
+      this.mitmStartPromise = MitmProxy.start(this.localProxyPortStart, this.sessionsDir);
+      this.mitmServer = await this.mitmStartPromise;
+    }
   }
 
   private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
@@ -151,7 +156,6 @@ export default class GlobalPool {
     let puppet: Puppet;
     try {
       const session = new Session(options);
-      session.on('closing', this.releaseConnection.bind(this));
 
       puppet =
         this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
@@ -169,6 +173,7 @@ export default class GlobalPool {
       );
       await session.initialize(browserContext);
 
+      session.once('closing', this.releaseConnection.bind(this));
       return session;
     } catch (err) {
       this._activeSessionCount -= 1;

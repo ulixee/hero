@@ -101,7 +101,7 @@ test('should handle server closing connection', async () => {
   expect(buffer.toString()).toBe('h2 closing soon!');
 });
 
-it('should send response header arrays through proxy', async () => {
+test('should send response header arrays through proxy', async () => {
   const server = await Helpers.runHttp2Server((req, res1) => {
     res1.setHeader('x-test', ['1', '2']);
     res1.end('headers done');
@@ -220,12 +220,13 @@ test('should send trailers', async () => {
   expect(trailers['mr-trailer']).toBe('1');
 });
 
-async function createH2Connection(sessionId: string, url: string) {
+async function createH2Connection(sessionIdPrefix: string, url: string) {
   const hostUrl = new URL(url);
   const mitmServer = await MitmServer.start();
   Helpers.onClose(() => mitmServer.close());
 
-  const session = createSession(mitmServer, sessionId);
+  const session = createSession(mitmServer, sessionIdPrefix);
+  const sessionId = session.sessionId;
   const proxyCredentials = session.getProxyCredentials();
   const proxyHost = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
   const mitmSocketSession = new MitmSocketSession(sessionId, {
@@ -238,6 +239,7 @@ async function createH2Connection(sessionId: string, url: string) {
     host: 'localhost',
     port: hostUrl.port,
     servername: 'localhost',
+    keepAlive: true,
     isSsl: url.startsWith('https'),
     proxyUrl: proxyHost,
   });
