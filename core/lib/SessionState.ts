@@ -25,6 +25,7 @@ import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
 import { IJsPathHistory } from './JsPath';
+import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
 
@@ -397,44 +398,27 @@ export default class SessionState {
 
   ///////   FRAMES ///////
 
-  public captureFrameCreated(
-    tabId: number,
-    createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
-    domNodeId: number,
-  ): void {
-    const frame = {
-      id: createdFrame.id,
-      tabId,
-      domNodeId,
-      parentId: createdFrame.parentId,
-      name: createdFrame.name,
-      securityOrigin: createdFrame.securityOrigin,
-      startCommandId: this.lastCommand?.id,
-      createdTimestamp: new Date().getTime(),
-    } as IFrameRecord;
-    this.frames[createdFrame.id] = frame;
-    this.db.frames.insert(frame);
+  public captureFrameDetails(frame: FrameEnvironment): void {
+    this.db.frames.insert({
+      id: frame.id,
+      tabId: frame.tab.id,
+      domNodeId: frame.domNodeId,
+      parentId: frame.parentId,
+      devtoolsFrameId: frame.devtoolsFrameId,
+      name: frame.puppetFrame.name,
+      securityOrigin: frame.securityOrigin,
+      startCommandId: frame.createdAtCommandId,
+      createdTimestamp: frame.createdTime.getTime(),
+    });
   }
 
-  public updateFrameSecurityOrigin(
-    tabId: number,
-    frame: Pick<IFrameRecord, 'id' | 'name' | 'securityOrigin'>,
-  ): void {
-    const existing = this.frames[frame.id];
-    if (existing) {
-      existing.name = frame.name;
-      existing.securityOrigin = frame.securityOrigin;
-      existing.url = this.db.frames.insert(existing);
-    }
-  }
-
-  public captureError(tabId: number, frameId: string, source: string, error: Error): void {
+  public captureError(tabId: number, frameId: number, source: string, error: Error): void {
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
   public captureLog(
     tabId: number,
-    frameId: string,
+    frameId: number,
     consoleType: string,
     message: string,
     location?: string,
@@ -545,7 +529,7 @@ export default class SessionState {
 
   public captureDomEvents(
     tabId: number,
-    frameId: string,
+    frameId: number,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],

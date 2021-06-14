@@ -28,7 +28,7 @@
     "concurrently": "^5.2.0",
     "cross-env": "^7.0.2",
     "css-loader": "~3.5.3",
-    "node-sass": "^4.14.1",
+    "node-sass": "^6.0.0",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
     "sass-loader": "^8.0.2",

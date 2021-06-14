@@ -2,20 +2,21 @@ import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class FramesTable extends SqliteTable<IFrameRecord> {
-  public frameDomNodePathsById = new Map<string, string>();
+  public frameDomNodePathsById = new Map<number, string>();
 
   constructor(readonly db: SqliteDatabase) {
     super(
       db,
       'Frames',
       [
-        ['id', 'TEXT', 'NOT NULL PRIMARY KEY'],
+        ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER'],
         ['domNodeId', 'INTEGER'],
+        ['parentId', 'INTEGER'],
         ['name', 'TEXT'],
         ['securityOrigin', 'TEXT'],
         ['startCommandId', 'INTEGER'],
-        ['parentId', 'TEXT'],
+        ['devtoolsFrameId', 'TEXT'],
         ['createdTimestamp', 'INTEGER'],
       ],
       true,
@@ -28,10 +29,11 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
       frame.id,
       frame.tabId,
       frame.domNodeId,
+      frame.parentId,
       frame.name,
       frame.securityOrigin,
       frame.startCommandId,
-      frame.parentId,
+      frame.devtoolsFrameId,
       frame.createdTimestamp,
     ]);
   }
@@ -56,12 +58,13 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
 }
 
 export interface IFrameRecord {
-  id: string;
+  id: number;
   tabId: number;
+  parentId?: number; // if null, top level frame
   domNodeId?: number;
   startCommandId: number;
   name?: string;
   securityOrigin?: string;
-  parentId?: string; // if null, top level frame
+  devtoolsFrameId: string;
   createdTimestamp: number;
 }

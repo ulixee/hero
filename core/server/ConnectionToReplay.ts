@@ -30,7 +30,7 @@ export default class ConnectionToReplay {
     }
   >();
 
-  private readonly mainFrames = new Set<string>();
+  private readonly mainFrames = new Set<number>();
 
   private lastScriptState: IScriptState;
 
@@ -98,13 +98,13 @@ export default class ConnectionToReplay {
 
     db.tabs.subscribe(tabs => {
       for (const tab of tabs) {
-        if (!this.tabsById.has(tab.tabId)) {
-          this.addTabId(tab.tabId, tab.createdTime);
+        if (!this.tabsById.has(tab.id)) {
+          this.addTabId(tab.id, tab.createdTime);
         }
         if (tab.detachedAtCommandId) {
-          this.tabsById.get(tab.tabId).detachedFromTabId = tab.parentTabId;
+          this.tabsById.get(tab.id).detachedFromTabId = tab.parentId;
         }
-        const sessionTab = this.tabsById.get(tab.tabId);
+        const sessionTab = this.tabsById.get(tab.id);
         sessionTab.height = tab.viewportHeight;
         sessionTab.width = tab.viewportWidth;
       }

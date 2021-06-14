@@ -5,8 +5,8 @@ import IViewport from '@secret-agent/interfaces/IViewport';
 export default class TabsTable extends SqliteTable<ITabsRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Tabs', [
-      ['tabId', 'INTEGER'],
-      ['parentTabId', 'INTEGER'],
+      ['id', 'INTEGER'],
+      ['parentId', 'INTEGER'],
       ['detachedAtCommandId', 'INTEGER'],
       ['pageTargetId', 'TEXT'],
       ['sessionId', 'TEXT'],
@@ -42,8 +42,8 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
 }
 
 export interface ITabsRecord {
-  tabId: number;
-  parentTabId: number | null;
+  id: number;
+  parentId: number | null;
   detachedAtCommandId: number | null;
   pageTargetId: string;
   sessionId: string;

@@ -40,7 +40,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   private nextNavigationReason: { url: string; reason: NavigationReason };
 
-  constructor(readonly frameId: string, readonly sessionState: SessionState) {
+  constructor(readonly frameId: number, readonly sessionState: SessionState) {
     super();
     this.setEventsToLog(['navigation-requested', 'status-change']);
     this.logger = log.createChild(module, {

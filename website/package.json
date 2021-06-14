@@ -37,7 +37,7 @@
     "gridsome-plugin-pug": "^0.0.3",
     "gridsome-plugin-typescript": "git://github.com/calebjclark/gridsome-plugin-typescript.git",
     "json2md": "^1.7.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^6.0.0",
     "noderdom-detached": "git://github.com/ulixee/noderdom-detached.git#dist",
     "pug": "^3.0.2",
     "sass-loader": "^8.0.0",

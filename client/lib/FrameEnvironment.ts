@@ -72,7 +72,7 @@ export default class FrameEnvironment {
     return this.parentFrameId.then(x => !x);
   }
 
-  public get frameId(): Promise<string> {
+  public get frameId(): Promise<number> {
     return getCoreFrameEnvironment(this).then(x => x.frameId);
   }
 
@@ -86,7 +86,7 @@ export default class FrameEnvironment {
       .then(x => x.name);
   }
 
-  public get parentFrameId(): Promise<string | null> {
+  public get parentFrameId(): Promise<number | null> {
     return getCoreFrameEnvironment(this)
       .then(x => x.getFrameMeta())
       .then(x => x.parentFrameId);

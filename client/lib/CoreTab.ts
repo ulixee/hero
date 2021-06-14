@@ -26,10 +26,10 @@ export default class CoreTab implements IJsPathEventTarget {
     return this.frameEnvironmentsById.get(this.mainFrameId);
   }
 
-  public frameEnvironmentsById = new Map<string, CoreFrameEnvironment>();
+  public frameEnvironmentsById = new Map<number, CoreFrameEnvironment>();
   protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly connection: ConnectionToCore;
-  private readonly mainFrameId: string;
+  private readonly mainFrameId: number;
 
   constructor(meta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
     const { tabId, sessionId, frameId, sessionName } = meta;

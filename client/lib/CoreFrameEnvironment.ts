@@ -14,7 +14,7 @@ import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {
   public tabId: number;
-  public frameId: string;
+  public frameId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
 

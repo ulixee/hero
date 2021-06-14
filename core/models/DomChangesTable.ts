@@ -12,7 +12,7 @@ export declare type IFrontendDomChangeEvent = Omit<
 export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DomChanges', [
-      ['frameId', 'TEXT'],
+      ['frameId', 'INTEGER'],
       ['eventIndex', 'INTEGER'],
       ['action', 'INTEGER'],
       ['nodeId', 'INTEGER'],
@@ -32,7 +32,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     this.defaultSortOrder = 'timestamp ASC';
   }
 
-  public insert(tabId: number, frameId: string, commandId: number, change: IDomChangeEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, change: IDomChangeEvent) {
     const [action, nodeData, timestamp, eventIndex] = change;
     const record = [
       frameId,
@@ -55,7 +55,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     this.queuePendingInsert(record);
   }
 
-  public getFrameChanges(frameId: string, sinceCommandId?: number): IDomChangeRecord[] {
+  public getFrameChanges(frameId: number, sinceCommandId?: number): IDomChangeRecord[] {
     const query = this.db.prepare(
       `select * from ${this.tableName} where frameId =? and commandId > ?`,
     );
@@ -77,7 +77,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
 
   public static toFrontendRecord(
     record: IDomChangeRecord,
-    frameIdToNodePath: Map<string, string>,
+    frameIdToNodePath: Map<number, string>,
   ): IFrontendDomChangeEvent {
     return {
       action: record.action,
@@ -100,7 +100,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
 export interface IDomChangeRecord {
   commandId: number;
   tabId: number;
-  frameId: string;
+  frameId: number;
   nodeId: number;
   timestamp: number;
   eventIndex: number;

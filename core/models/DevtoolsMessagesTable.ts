@@ -1,9 +1,15 @@
+// eslint-disable-next-line max-classes-per-file
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import type { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
 import SqliteTable from '@secret-agent/commons/SqliteTable';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private fetchRequestIdToNetworkId = new Map<string, string>();
+  private pageIds = new IdAssigner();
+  private workerIds = new IdAssigner();
+  private frameIds = new IdAssigner();
+  private requestIds = new IdAssigner();
+
   private sentMessageIds: {
     id: number;
     sessionId: string;
@@ -13,12 +19,12 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DevtoolsMessages', [
-      ['direction', 'TEXT'],
-      ['pageTargetId', 'TEXT'],
-      ['workerTargetId', 'TEXT'],
-      ['frameId', 'TEXT'],
-      ['requestId', 'TEXT'],
-      ['sessionType', 'TEXT'],
+      ['send', 'INTEGER'],
+      ['pageNumber', 'INTEGER'],
+      ['workerNumber', 'INTEGER'],
+      ['frameNumber', 'INTEGER'],
+      ['requestNumber', 'INTEGER'],
+      ['isBrowserSession', 'INTEGER'],
       ['method', 'TEXT'],
       ['id', 'INTEGER'],
       ['params', 'TEXT'],
@@ -75,23 +81,32 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
         params.name === '__saPageListenerCallback' &&
         value?.length > 250
       ) {
-        return `${value.substr(0, 250)}... truncated ${params.payload.length - 250} chars`;
+        return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;
       }
 
-      // clean out post data (we have these in resources table)
+      if (
+        key === 'source' &&
+        event.method === 'Page.addScriptToEvaluateOnNewDocument' &&
+        value?.length > 50
+      ) {
+        return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
+      }
+
       if ((key === 'headers' || key === 'postData') && params.request) {
+        // clean out post data (we have these in resources table)
         return 'SA_REMOVED_FOR_DB';
       }
       return value;
     }
 
+    const workerId = event.workerTargetId;
     const record = [
-      event.direction,
-      pageId,
-      event.workerTargetId,
-      frameId,
-      requestId,
-      event.sessionType,
+      event.direction === 'send' ? 1 : undefined,
+      this.pageIds.get(pageId),
+      this.workerIds.get(workerId),
+      this.frameIds.get(frameId),
+      this.requestIds.get(requestId),
+      event.sessionType === 'browser' ? 1 : undefined,
       event.method,
       event.id,
       params ? JSON.stringify(params, paramsStringifyFilter) : undefined,
@@ -103,6 +118,18 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
   }
 }
 
+class IdAssigner {
+  private counter = 0;
+  private devtoolIdToNumeric = new Map<string, number>();
+  get(id: string): number {
+    if (!id) return undefined;
+    if (!this.devtoolIdToNumeric.has(id)) {
+      this.devtoolIdToNumeric.set(id, (this.counter += 1));
+    }
+    return this.devtoolIdToNumeric.get(id);
+  }
+}
+
 const filteredEventMethods = new Set([
   'Network.dataReceived', // Not useful to SA since we use Mitm
   'Page.domContentEventFired', // duplicated by Page.lifecycleEvent
@@ -110,12 +137,12 @@ const filteredEventMethods = new Set([
 ]);
 
 export interface IDevtoolsMessageRecord {
-  direction: 'send' | 'receive';
-  pageTargetId?: string;
-  workerTargetId?: string;
-  frameId?: string;
-  requestId?: string;
-  sessionType: 'page' | 'worker' | 'browser';
+  send: boolean;
+  pageNumber?: number;
+  workerNumber?: number;
+  frameNumber?: number;
+  requestNumber?: string;
+  isBrowserSession: boolean;
   method?: string;
   id?: number;
   params?: string;

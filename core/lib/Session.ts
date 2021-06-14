@@ -81,6 +81,7 @@ export default class Session extends TypedEventEmitter<{
   private detachedTabsById = new Map<number, Tab>();
 
   private tabIdCounter = 0;
+  private frameIdCounter = 0;
 
   constructor(readonly options: ICreateTabOptions) {
     super();
@@ -248,6 +249,10 @@ export default class Session extends TypedEventEmitter<{
 
   public nextTabId(): number {
     return (this.tabIdCounter += 1);
+  }
+
+  public nextFrameId(): number {
+    return (this.frameIdCounter += 1);
   }
 
   public exportUserProfile(): Promise<IUserProfile> {
@@ -462,6 +467,7 @@ export default class Session extends TypedEventEmitter<{
   }
 
   public static get(sessionId: string): Session {
+    if (!sessionId) return null;
     return this.byId[sessionId];
   }
 

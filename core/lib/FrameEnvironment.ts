@@ -38,16 +38,18 @@ import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
 const { log } = Log(module);
 
 export default class FrameEnvironment {
-  public get id(): string {
-    return this.puppetFrame.id;
-  }
-
   public get session(): Session {
     return this.tab.session;
   }
 
-  public get parentFrameId(): string {
-    return this.puppetFrame.parentId;
+  public get devtoolsFrameId(): string {
+    return this.puppetFrame.id;
+  }
+
+  public get parentId(): number {
+    if (this.puppetFrame.parentId) {
+      return this.tab.frameEnvironmentsByPuppetId.get(this.puppetFrame.parentId)?.id;
+    }
   }
 
   public get isAttached(): boolean {
@@ -60,20 +62,23 @@ export default class FrameEnvironment {
 
   public get childFrameEnvironments(): FrameEnvironment[] {
     return [...this.tab.frameEnvironmentsById.values()].filter(
-      x => x.parentFrameId === this.id && this.isAttached,
+      x => x.puppetFrame.parentId === this.devtoolsFrameId && this.isAttached,
     );
   }
 
   public get isMainFrame(): boolean {
-    return !this.parentFrameId;
+    return !this.puppetFrame.parentId;
   }
 
   public readonly navigationsObserver: TabNavigationObserver;
 
   public readonly navigations: FrameNavigations;
 
+  public readonly id: number;
   public readonly tab: Tab;
   public readonly jsPath: JsPath;
+  public readonly createdTime: Date;
+  public readonly createdAtCommandId: number;
   public puppetFrame: IPuppetFrame;
   public isReady: Promise<Error | void>;
   public domNodeId: number;
@@ -84,7 +89,6 @@ export default class FrameEnvironment {
   private readonly isDetached: boolean;
   private readonly interactor: Interactor;
   private isClosing = false;
-  private readonly createdAtCommandId: number;
   private waitTimeouts: { timeout: NodeJS.Timeout; reject: (reason?: any) => void }[] = [];
   private readonly commandRecorder: CommandRecorder;
   private readonly cleanPaths: string[] = [];
@@ -100,6 +104,8 @@ export default class FrameEnvironment {
   constructor(tab: Tab, frame: IPuppetFrame) {
     this.puppetFrame = frame;
     this.tab = tab;
+    this.createdTime = new Date();
+    this.id = tab.session.nextFrameId();
     this.logger = log.createChild(module, {
       tabId: tab.id,
       sessionId: tab.session.id,
@@ -108,7 +114,7 @@ export default class FrameEnvironment {
     this.jsPath = new JsPath(this, tab.isDetached);
     this.isDetached = tab.isDetached;
     this.createdAtCommandId = this.sessionState.lastCommand?.id;
-    this.navigations = new FrameNavigations(frame.id, tab.sessionState);
+    this.navigations = new FrameNavigations(this.id, tab.sessionState);
     this.navigationsObserver = new TabNavigationObserver(this.navigations);
     this.interactor = new Interactor(this);
 
@@ -436,9 +442,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
   public toJSON(): IFrameMeta {
     return {
       id: this.id,
+      parentFrameId: this.parentId,
       name: this.puppetFrame.name,
       tabId: this.tab.id,
-      parentFrameId: this.parentFrameId,
+      puppetId: this.devtoolsFrameId,
       url: this.navigations.currentUrl,
       securityOrigin: this.securityOrigin,
       sessionId: this.session.id,
@@ -509,7 +516,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         frameId: this.id,
       });
     }
-    this.sessionState.captureFrameCreated(this.tab.id, this.puppetFrame, this.domNodeId);
+    this.sessionState.captureFrameDetails(this);
   }
 
   private listen(): void {
@@ -543,7 +550,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         event.loaderId,
       );
     }
-    this.sessionState.updateFrameSecurityOrigin(this.tab.id, frame);
+    this.sessionState.captureFrameDetails(this);
   }
 
   // client-side frame navigations (form posts/gets, redirects/ page reloads)

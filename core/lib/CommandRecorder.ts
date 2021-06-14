@@ -15,7 +15,7 @@ export default class CommandRecorder {
     readonly owner: any,
     readonly session: Session,
     readonly tabId: number,
-    readonly frameId: string,
+    readonly frameId: number,
     fns: AsyncFunc[],
   ) {
     for (const fn of fns) {
