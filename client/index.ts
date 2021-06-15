@@ -15,10 +15,15 @@ import type Tab from './lib/Tab';
 import RemoteConnectionToCore from './connections/RemoteConnectionToCore';
 import ConnectionToCore from './connections/ConnectionToCore';
 import ConnectionFactory from './connections/ConnectionFactory';
+import { Observable } from './lib/ObjectObserver';
+import { readCommandLineArgs } from './lib/Input';
 
-export default new Agent();
+const input = readCommandLineArgs();
+
+export default new Agent({ input });
 
 export {
+  Observable,
   Handler,
   Agent,
   RemoteConnectionToCore,

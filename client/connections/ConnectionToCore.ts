@@ -52,7 +52,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   constructor(options?: IConnectionToCoreOptions) {
     super();
     this.options = options ?? { isPersistent: true };
-    this.commandQueue = new CoreCommandQueue(null, this);
+    this.commandQueue = new CoreCommandQueue(null, this, null);
     this.coreSessions = new CoreSessions(
       this.options.maxConcurrency,
       this.options.agentTimeoutMillis,
@@ -85,6 +85,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     if (!this.connectPromise) {
       this.connectPromise = new Resolvable();
       try {
+        const startTime = new Date();
         const connectError = await this.createConnection();
         if (connectError) throw connectError;
         if (this.isDisconnecting) throw new DisconnectedFromCoreError(this.resolvedHost);
@@ -92,6 +93,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
         if (this.connectPromise.isResolved) return;
 
         const connectResult = await this.internalSendRequestAndWait({
+          startDate: startTime,
           command: 'Core.connect',
           args: [this.connectOptions],
         });
@@ -122,11 +124,13 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
 
   public async disconnect(fatalError?: Error): Promise<void> {
     // user triggered disconnect sends a disconnect to Core
+    const startTime = new Date();
     await this.internalDisconnect(fatalError, async () => {
       try {
         await this.internalSendRequestAndWait(
           {
             command: 'Core.disconnect',
+            startDate: startTime,
             args: [fatalError],
           },
           2e3,
@@ -144,7 +148,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   ///////  PIPE FUNCTIONS  /////////////////////////////////////////////////////////////////////////////////////////////
 
   public async sendRequest(
-    payload: Omit<ICoreRequestPayload, 'messageId'>,
+    payload: Omit<ICoreRequestPayload, 'messageId' | 'sendDate'>,
   ): Promise<ICoreResponsePayload> {
     const result = await this.connect();
     if (result) throw result;
@@ -243,7 +247,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
 
   protected async internalSendRequestAndWait(
-    payload: Omit<ICoreRequestPayload, 'messageId'>,
+    payload: Omit<ICoreRequestPayload, 'messageId' | 'sendDate'>,
     timeoutMs?: number,
   ): Promise<ICoreResponsePayload> {
     const { promise, id, resolve } = this.createPendingResult();
@@ -257,6 +261,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     try {
       await this.internalSendRequest({
         messageId: id,
+        sendDate: new Date(),
         ...payload,
       });
     } catch (error) {
@@ -300,7 +305,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
       }
       this.rejectPendingRequest(pending, responseError);
     } else {
-      pending.resolve({ data: message.data, commandId: message.commandId });
+      pending.resolve({ data: message.data });
     }
   }
 

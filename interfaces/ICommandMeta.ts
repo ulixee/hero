@@ -5,7 +5,9 @@ export default interface ICommandMeta {
   name: string;
   wasPrefetched?: boolean;
   args?: string;
-  startDate: number;
+  clientStartDate?: number;
+  clientSendDate?: number;
+  runStartDate: number;
   endDate?: number;
   result?: any;
   resultType?: string;

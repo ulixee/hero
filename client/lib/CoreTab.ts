@@ -16,6 +16,7 @@ import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { createDialog } from './Dialog';
+import CoreSession from './CoreSession';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -30,8 +31,13 @@ export default class CoreTab implements IJsPathEventTarget {
   protected readonly meta: ISessionMeta & { sessionName: string };
   private readonly connection: ConnectionToCore;
   private readonly mainFrameId: number;
+  private readonly coreSession: CoreSession;
 
-  constructor(meta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
+  constructor(
+    meta: ISessionMeta & { sessionName: string },
+    connection: ConnectionToCore,
+    coreSession: CoreSession,
+  ) {
     const { tabId, sessionId, frameId, sessionName } = meta;
     this.tabId = tabId;
     this.sessionId = sessionId;
@@ -42,7 +48,8 @@ export default class CoreTab implements IJsPathEventTarget {
       sessionName,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(meta, connection);
+    this.commandQueue = new CoreCommandQueue(meta, connection, coreSession);
+    this.coreSession = coreSession;
     this.eventHeap = new CoreEventHeap(this.meta, connection);
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));
 
@@ -124,7 +131,11 @@ export default class CoreTab implements IJsPathEventTarget {
     const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.waitForNewTab', opts);
     const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
-    return new CoreTab({ ...this.meta, tabId: sessionMeta.tabId }, this.connection);
+    return new CoreTab(
+      { ...this.meta, tabId: sessionMeta.tabId },
+      this.connection,
+      this.coreSession,
+    );
   }
 
   public async focusTab(): Promise<void> {

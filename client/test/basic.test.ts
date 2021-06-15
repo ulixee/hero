@@ -4,6 +4,7 @@ import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload'
 import { Helpers } from '@secret-agent/testing';
 import { Agent, Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import { readCommandLineArgs } from '../lib/Input';
 
 afterAll(Helpers.afterAll);
 
@@ -62,5 +63,20 @@ describe('basic SecretAgent tests', () => {
       'Session.create',
       'Session.close',
     ]);
+  });
+
+  it('can read command line args', async () => {
+    process.argv[2] = '--input.city=Atlanta';
+    process.argv[3] = '--input.state="GA"';
+    process.argv[4] = '--input.address.number=9145';
+    process.argv[5] = '--input.address.street="Street Street"';
+    expect(readCommandLineArgs()).toEqual({
+      city: 'Atlanta',
+      state: 'GA',
+      address: {
+        number: '9145',
+        street: 'Street Street',
+      },
+    });
   });
 });

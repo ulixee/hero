@@ -16,6 +16,7 @@ const {
   Tab,
   XPathResult,
   LocationStatus,
+  Observable,
   LocationTrigger,
 } = cjsImport;
 
@@ -33,6 +34,7 @@ export {
   Node,
   FrameEnvironment,
   Tab,
+  Observable,
   XPathResult,
   LocationStatus,
   LocationTrigger,

@@ -4,7 +4,6 @@ import Core, { CoreProcess, Session } from '@secret-agent/core/index';
 import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
 import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
 import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -173,14 +172,14 @@ describe('waitForAllDispatchesSettled', () => {
 
         await agent.goto('any url 2');
       },
-      { test: 1 },
+      { input: { test: 1 } },
     );
 
     handler.dispatchAgent(
       async agent => {
         await agent.goto(koaServer.baseUrl);
       },
-      { test: 2 },
+      { input: { test: 1 } },
     );
 
     const dispatchResult = await handler.waitForAllDispatchesSettled();
@@ -188,7 +187,9 @@ describe('waitForAllDispatchesSettled', () => {
     expect(dispatchResult[failedAgentSessionId]).toBeTruthy();
     expect(dispatchResult[failedAgentSessionId].error).toBeTruthy();
     expect(dispatchResult[failedAgentSessionId].error.message).toMatch('invalid url');
-    expect(dispatchResult[failedAgentSessionId].args).toStrictEqual({ test: 1 });
+    expect(dispatchResult[failedAgentSessionId].options.input).toStrictEqual({
+      test: 1,
+    });
   });
 });
 
@@ -322,7 +323,7 @@ describe('connectionToCore', () => {
     let localConnections = 0;
 
     const waits: Promise<any>[] = [];
-    const waitForAgent = async (agent: Agent, waitForGoto: IResolvablePromise<any>) => {
+    const waitForAgent = async (agent: Agent) => {
       await agent.goto(koaServer.baseUrl);
       const host = await agent.coreHost;
       if (host === spawnedCoreHost) spawnedConnections += 1;
@@ -330,13 +331,13 @@ describe('connectionToCore', () => {
 
       // don't wait
       const promise = agent.waitForMillis(10e3);
-      waitForGoto.resolve();
+      agent.input.resolve();
       await expect(promise).rejects.toThrowError('Disconnected');
     };
     for (let i = 0; i < 4; i += 1) {
       const waitForGoto = createPromise();
       waits.push(waitForGoto.promise);
-      handler.dispatchAgent(waitForAgent, waitForGoto);
+      handler.dispatchAgent(waitForAgent, { input: waitForGoto });
     }
 
     await Promise.all(waits);

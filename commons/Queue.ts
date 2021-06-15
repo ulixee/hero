@@ -26,17 +26,6 @@ export default class Queue {
     if (concurrency) this.concurrency = concurrency;
   }
 
-  public enqueue<T>(cb: AsyncCallback<T>, timeoutMillis?: number): void {
-    const promise = createPromise<T>(timeoutMillis);
-
-    this.queue.push({
-      promise,
-      cb,
-      startStack: new Error('').stack.slice(8), // "Error: \n" is 8 chars
-    });
-    // don't run next!!
-  }
-
   public run<T>(cb: AsyncCallback<T>, timeoutMillis?: number): Promise<T> {
     const promise = createPromise<T>(timeoutMillis);
 

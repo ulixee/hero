@@ -16,7 +16,9 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
         ['name', 'TEXT'],
         ['wasPrefetched', 'INTEGER'],
         ['args', 'TEXT'],
-        ['startDate', 'INTEGER'],
+        ['clientStartDate', 'INTEGER'],
+        ['clientSendDate', 'INTEGER'],
+        ['runStartDate', 'INTEGER'],
         ['endDate', 'INTEGER'],
         ['result', 'TEXT'],
         ['resultType', 'TEXT'],
@@ -24,7 +26,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       true,
     );
     this.getQuery = db.prepare(`select * from ${this.tableName} where id = ? limit 1`);
-    this.defaultSortOrder = 'startDate ASC';
+    this.defaultSortOrder = 'id ASC';
   }
 
   public insert(commandMeta: ICommandMeta) {
@@ -35,7 +37,9 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       commandMeta.name,
       commandMeta.wasPrefetched ? 1 : 0,
       commandMeta.args,
-      commandMeta.startDate,
+      commandMeta.clientStartDate,
+      commandMeta.clientSendDate,
+      commandMeta.runStartDate,
       commandMeta.endDate,
       TypeSerializer.stringify(commandMeta.result),
       commandMeta.result?.constructor

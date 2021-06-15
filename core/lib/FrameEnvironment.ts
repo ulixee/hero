@@ -22,6 +22,7 @@ import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import * as Os from 'os';
+import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -145,8 +146,7 @@ export default class FrameEnvironment {
     return (
       this.commandRecorder.fnNames.has(method) ||
       method === 'close' ||
-      method === 'recordDetachedJsPath' ||
-      method === 'recordDetachedJsPaths'
+      method === 'recordDetachedJsPath'
     );
   }
 
@@ -220,16 +220,10 @@ export default class FrameEnvironment {
     return this.prefetchedJsPaths;
   }
 
-  public recordDetachedJsPaths(...commands: [number, number, number][]): void {
-    for (const [index, startDate, endDate] of commands) {
-      this.recordDetachedJsPath(index, startDate, endDate);
-    }
-  }
-
-  public recordDetachedJsPath(index: number, startDate: number, endDate: number): void {
+  public recordDetachedJsPath(index: number, runStartDate: number, endDate: number): void {
     const entry = this.prefetchedJsPaths[index];
-    // only need to record start
-    this.sessionState.recordCommandStart({
+
+    const commandMeta = <ICommandMeta>{
       name: 'execJsPath',
       args: TypeSerializer.stringify([entry.jsPath]),
       id: this.sessionState.commands.length + 1,
@@ -237,9 +231,19 @@ export default class FrameEnvironment {
       tabId: this.tab.id,
       frameId: this.id,
       result: entry.result,
-      startDate,
+      runStartDate,
       endDate,
-    });
+    };
+    if (this.sessionState.nextCommandMeta) {
+      const { commandId, sendDate, startDate: clientStartDate } = this.sessionState.nextCommandMeta;
+      this.sessionState.nextCommandMeta = null;
+      commandMeta.id = commandId;
+      commandMeta.clientSendDate = sendDate?.getTime();
+      commandMeta.clientStartDate = clientStartDate?.getTime();
+    }
+
+    // only need to record start
+    this.sessionState.recordCommandStart(commandMeta);
   }
 
   public async createRequest(input: string | number, init?: IRequestInit): Promise<INodePointer> {

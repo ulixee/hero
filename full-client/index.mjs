@@ -17,6 +17,7 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  Observable,
 } = cjsImport;
 
 export {
@@ -36,6 +37,7 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  Observable,
 };
 
 export default cjsImport.default;

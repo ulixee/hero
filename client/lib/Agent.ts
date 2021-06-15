@@ -52,6 +52,7 @@ import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
 import getClientExtenderPluginClass from './getClientExtenderPluginClass';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
+import Output, { createObservableOutput } from './Output';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -73,6 +74,7 @@ const propertyKeys: (keyof Agent)[] = [
   'sessionId',
   'meta',
   'tabs',
+  'output',
   'frameEnvironments',
   'mainFrameEnvironment',
   'coreHost',
@@ -86,6 +88,10 @@ const propertyKeys: (keyof Agent)[] = [
 export default class Agent extends AwaitedEventTarget<{ close: void }> implements IAgent {
   protected static options: IAgentDefaults = { ...DefaultOptions };
 
+  public readonly input: { command?: string } & any;
+
+  #output: Output;
+
   constructor(options: IAgentCreateOptions = {}) {
     super(() => {
       return {
@@ -97,6 +103,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
     options.blockedResourceTypes =
       options.blockedResourceTypes || Agent.options.defaultBlockedResourceTypes;
     options.userProfile = options.userProfile || Agent.options.defaultUserProfile;
+    this.input = options.input;
 
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
@@ -113,6 +120,24 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
       },
       plugins: [],
     });
+  }
+
+  public get output(): any | any[] {
+    if (!this.#output) {
+      const coreSession = getState(this)
+        .connection.getCoreSessionOrReject()
+        .catch(() => null);
+      this.#output = createObservableOutput(coreSession);
+    }
+    return this.#output;
+  }
+
+  public set output(value: any | any[]) {
+    const output = this.output;
+    for (const key of Object.keys(output)) {
+      delete output[key];
+    }
+    Object.assign(this.output, value);
   }
 
   public get activeTab(): Tab {
@@ -462,7 +487,8 @@ class SessionConnection {
     }
     this.hasConnected = true;
     const { plugins } = getState(this.agent);
-    const { showReplay, connectionToCore, ...options } = getState(this.agent).options;
+    const { showReplay, connectionToCore, ...options } = getState(this.agent)
+      .options as IAgentCreateOptions;
 
     const connection = ConnectionFactory.createConnection(
       connectionToCore ?? { isPersistent: false },

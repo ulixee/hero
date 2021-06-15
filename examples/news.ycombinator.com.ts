@@ -1,4 +1,4 @@
-import agent from 'secret-agent';
+import agent, { Observable } from 'secret-agent';
 
 // process.env.SA_SHOW_BROWSER = 'true';
 
@@ -10,8 +10,6 @@ async function run() {
   console.log('\n-- PRINTING location.href ---------');
   console.log(await agent.url);
 
-  const results = [];
-
   const stories = await agent.document.querySelectorAll('.athing');
   let lastStory;
   for (const story of stories) {
@@ -20,48 +18,30 @@ async function run() {
     await agent.interact({
       move: story,
     });
+    const record = Observable({} as any);
+    agent.output.push(record);
 
     const titleElem = await story.querySelector('a.storylink');
 
-    let score;
-    try {
-      score = parseInt((await extraElem.querySelector('.score').textContent) ?? '0', 10);
-    } catch (error) {
-      score = 0;
-    }
-    const id = await story.getAttribute('id');
-    const age = await extraElem.querySelector('.age a').textContent;
-    const title = await titleElem.textContent;
-
-    let contributor;
-    try {
-      contributor = await extraElem.querySelector('.hnuser').textContent;
-    } catch (error) {
-      contributor = '';
-    }
+    record.score = parseInt(
+      await extraElem.querySelector('.score').textContent.catch(() => '0'),
+      10,
+    );
+    record.id = await story.getAttribute('id');
+    record.age = await extraElem.querySelector('.age a').textContent;
+    record.title = await titleElem.textContent;
+    const contributor = await extraElem.querySelector('.hnuser').textContent.catch(() => '');
+    record.contributor = { id: contributor, username: contributor };
 
     const links = [...(await extraElem.querySelectorAll('.subtext > a'))];
     const commentsLink = links[links.length - 1];
     const commentText = await commentsLink.textContent;
-    const commentCount = commentText.includes('comment')
+    record.commentCount = commentText.includes('comment')
       ? parseInt(commentText.trim().match(/(\d+)\s/)[0], 10)
       : 0;
 
     lastStory = commentsLink;
-    const url = await titleElem.getAttribute('href');
-
-    results.push({
-      id,
-      title,
-      score,
-      age,
-      url,
-      commentCount,
-      contributor: {
-        id: contributor,
-        username: contributor,
-      },
-    });
+    record.url = await titleElem.getAttribute('href');
   }
 
   if (lastStory) {
@@ -77,7 +57,7 @@ async function run() {
   }
 
   console.log('-- PRINTING extracted results ---------------');
-  console.log(results);
+  console.log(agent.output);
 
   console.log('-------------------------------------');
   console.log('DONE');

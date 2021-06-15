@@ -21,10 +21,10 @@ import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import ResourcesTable from '../models/ResourcesTable';
-import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
 import { IJsPathHistory } from './JsPath';
+import { IOutputChangeRecord } from '../models/OutputTable';
 import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
@@ -42,10 +42,11 @@ export default class SessionState {
   public viewport: IViewport;
   public readonly db: SessionDb;
 
+  public nextCommandMeta: { commandId: number; startDate: Date; sendDate: Date };
+
   private readonly sessionName: string;
   private readonly scriptInstanceMeta: IScriptInstanceMeta;
   private readonly createDate = new Date();
-  private readonly frames: { [frameId: number]: IFrameRecord } = {};
   private readonly resourcesById = new Map<number, IResourceMeta>();
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
   private websocketListeners: {
@@ -514,7 +515,7 @@ export default class SessionState {
     let lastCommandName: string;
     if (lastCommand) {
       lastCommandName = lastCommand.name;
-      const commandDate = new Date(lastCommand.endDate ?? lastCommand.startDate);
+      const commandDate = new Date(lastCommand.endDate ?? lastCommand.runStartDate);
       if (commandDate > lastActivityDate) {
         lastActivityDate = commandDate;
       }
@@ -560,13 +561,13 @@ export default class SessionState {
 
   public getCommandForTimestamp(lastCommand: ICommandMeta, timestamp: number): ICommandMeta {
     let command = lastCommand;
-    if (command.startDate <= timestamp && command.endDate > timestamp) {
+    if (command.runStartDate <= timestamp && command.endDate > timestamp) {
       return command;
     }
 
     for (let i = this.commands.length - 1; i >= 0; i -= 1) {
       command = this.commands[i];
-      if (command.startDate <= timestamp) break;
+      if (command.runStartDate <= timestamp) break;
     }
     return command;
   }
@@ -620,5 +621,12 @@ export default class SessionState {
       new Date(),
       key,
     );
+  }
+
+  public recordOutputChanges(changes: IOutputChangeRecord[]) {
+    this.nextCommandMeta = null;
+    for (const change of changes) {
+      this.db.output.insert(change);
+    }
   }
 }

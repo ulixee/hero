@@ -10,6 +10,7 @@ async function run() {
   const html = await agent.document.documentElement.outerHTML;
   console.log('-- PRINTING outerHTML ---------------');
   console.log(html);
+  agent.output.html = html;
 
   console.log('-------------------------------------');
   console.log('DONE');

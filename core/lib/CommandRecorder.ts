@@ -50,6 +50,14 @@ export default class CommandRecorder {
       args: args.length ? TypeSerializer.stringify(args) : undefined,
     } as ICommandMeta;
 
+    if (sessionState.nextCommandMeta) {
+      const { commandId, sendDate, startDate } = sessionState.nextCommandMeta;
+      sessionState.nextCommandMeta = null;
+      commandMeta.id = commandId;
+      commandMeta.clientSendDate = sendDate?.getTime();
+      commandMeta.clientStartDate = startDate?.getTime();
+    }
+
     if (frameId) {
       const tab = session.getTab(tabId);
       const frame = tab.frameEnvironmentsById.get(frameId);
@@ -59,7 +67,7 @@ export default class CommandRecorder {
 
     let result: T;
     try {
-      commandMeta.startDate = new Date().getTime();
+      commandMeta.runStartDate = new Date().getTime();
       sessionState.recordCommandStart(commandMeta);
 
       result = await commandFn.call(this.owner, ...args);

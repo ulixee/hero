@@ -10,12 +10,12 @@ import ConnectionFactory from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
 type SettledDispatchesBySessionId = {
-  [sessionId: string]: { args: any; error?: Error; retries: number };
+  [sessionId: string]: { options: IAgentCreateOptions; error?: Error; retries: number };
 };
 type PendingDispatch = {
   resolution: Promise<Error | void>;
   sessionId?: string;
-  args: any;
+  options: IAgentCreateOptions;
   retries: number;
 };
 
@@ -74,50 +74,20 @@ export default class Handler {
     }
   }
 
-  public dispatchAgent<T>(
-    runFn: (agent: Agent, args?: T) => Promise<void>,
-    args?: T,
+  public dispatchAgent(
+    runFn: (agent: Agent) => Promise<void>,
     createAgentOptions?: IAgentCreateOptions,
-    pendingDispatch?: PendingDispatch,
   ): void {
     const options = {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
 
-    const dispatched: PendingDispatch = pendingDispatch ?? { args, resolution: null, retries: 0 };
-
-    // if no available connection, return
-    const connection = this.getConnection();
-    if (!connection) {
-      dispatched.resolution = Promise.resolve(
-        new Error("There aren't any connections available to dispatch this agent"),
-      );
-      this.dispatches.push(dispatched);
-      return;
-    }
-
-    dispatched.resolution = connection
-      .useAgent(options, async agent => {
-        try {
-          dispatched.sessionId = await agent.sessionId;
-          await runFn(agent, args);
-        } finally {
-          await agent.close();
-        }
-      })
-      .catch(err => {
-        const canRetry =
-          !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
-        if (canRetry && !this.isClosing && this.connections.length) {
-          dispatched.retries += 1;
-          return this.dispatchAgent(runFn, args, createAgentOptions, dispatched);
-        }
-
-        return err;
-      });
-
-    this.dispatches.push(dispatched);
+    this.internalDispatchAgent(runFn, options, {
+      options,
+      resolution: null,
+      retries: 0,
+    });
   }
 
   public async createAgent(createAgentOptions: IAgentCreateOptions = {}): Promise<Agent> {
@@ -177,9 +147,9 @@ export default class Handler {
       this.dispatches.length = 0;
 
       await Promise.all(dispatches.map(x => x.resolution));
-      for (const { sessionId, resolution, args, retries } of dispatches) {
+      for (const { sessionId, resolution, options, retries } of dispatches) {
         const error = <Error>await resolution;
-        result[sessionId] = { args, error, retries };
+        result[sessionId] = { options, error, retries };
       }
 
       await new Promise(setImmediate);
@@ -193,6 +163,44 @@ export default class Handler {
     this.isClosing = true;
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.disconnect(error).catch(() => null)));
+  }
+
+  private internalDispatchAgent(
+    runFn: (agent: Agent) => Promise<void>,
+    options: IAgentCreateOptions,
+    dispatched: PendingDispatch,
+  ): void {
+    // if no available connection, return
+    const connection = this.getConnection();
+    if (!connection) {
+      dispatched.resolution = Promise.resolve(
+        new Error("There aren't any connections available to dispatch this agent"),
+      );
+      this.dispatches.push(dispatched);
+      return;
+    }
+
+    dispatched.resolution = connection
+      .useAgent(options, async agent => {
+        try {
+          dispatched.sessionId = await agent.sessionId;
+          await runFn(agent);
+        } finally {
+          await agent.close();
+        }
+      })
+      .catch(err => {
+        const canRetry =
+          !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
+        if (canRetry && !this.isClosing && this.connections.length) {
+          dispatched.retries += 1;
+          return this.internalDispatchAgent(runFn, options, dispatched);
+        }
+
+        return err;
+      });
+
+    this.dispatches.push(dispatched);
   }
 
   private getAvailableConnections(): ConnectionToCore[] {
