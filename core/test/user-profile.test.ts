@@ -74,8 +74,9 @@ describe('UserProfile cookie tests', () => {
       const meta = await connection.createSession();
       const tab = Session.getTab(meta);
       const session = tab.session;
+      Helpers.needsClosing.push(session);
       session.mitmRequestSession.blockedResources = {
-        urls: ['https://dataliberationfoundation.org/cookie'],
+        urls: ['https://dataliberationfoundation.org/*'],
         types: [],
         handlerFn(request, response) {
           response.setHeader('Set-Cookie', [
@@ -101,7 +102,7 @@ describe('UserProfile cookie tests', () => {
       expect(profile.cookies[0].value).toBe('mainsite');
       expect(profile.cookies[1].name).toBe('cross1');
       expect(profile.cookies[1].value).toBe('1');
-      await tab.close();
+      await session.close();
     }
     {
       const meta = await connection.createSession({
@@ -109,12 +110,13 @@ describe('UserProfile cookie tests', () => {
       });
       const tab = Session.getTab(meta);
       const session = tab.session;
+      Helpers.needsClosing.push(session);
 
       const dlfCookies = createPromise<string>();
       const sameCookies = createPromise<string>();
 
       session.mitmRequestSession.blockedResources = {
-        urls: ['https://dataliberationfoundation.org/cookie2'],
+        urls: ['https://dataliberationfoundation.org/*'],
         types: [],
         handlerFn: (request, response) => {
           dlfCookies.resolve(request.headers.cookie);
@@ -131,7 +133,7 @@ describe('UserProfile cookie tests', () => {
 
       await expect(dlfCookies).resolves.toBe('cross1=1; cross2=2');
       await expect(sameCookies).resolves.toBe('mainsite');
-      await tab.close();
+      await session.close();
     }
   });
 });
@@ -140,6 +142,7 @@ describe('UserProfile Dom storage tests', () => {
   it('should be able to save and restore local/session storage', async () => {
     const meta = await connection.createSession();
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
 
     koaServer.get('/local', ctx => {
       ctx.body = `<body>
@@ -188,6 +191,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
       userProfile: profile,
     });
     const tab2 = Session.getTab(meta2);
+    Helpers.needsClosing.push(tab2.session);
 
     await tab2.goto(`${koaServer.baseUrl}/localrestore`);
     await tab2.waitForLoad('PaintingStable');
@@ -245,6 +249,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
       },
     });
     const tab = Session.getTab(meta);
+    Helpers.needsClosing.push(tab.session);
 
     koaServer.get('/local-change-pre', ctx => {
       ctx.body = `<body>
@@ -295,8 +300,9 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
       const meta = await connection.createSession();
       const tab = Session.getTab(meta);
       const session = tab.session;
+      Helpers.needsClosing.push(session);
       session.mitmRequestSession.blockedResources = {
-        urls: ['http://dataliberationfoundation.org/storage'],
+        urls: ['http://dataliberationfoundation.org/*'],
         types: [],
         handlerFn: (request, response) => {
           response.end(`<html><body><p>frame body</p>
@@ -325,7 +331,7 @@ localStorage.setItem('cross', '1');
       profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
-      await tab.close();
+      await session.close();
     }
     {
       const meta = await connection.createSession({
@@ -333,9 +339,10 @@ localStorage.setItem('cross', '1');
       });
       const tab = Session.getTab(meta);
       const session = tab.session;
+      Helpers.needsClosing.push(session);
 
       session.mitmRequestSession.blockedResources = {
-        urls: ['http://dataliberationfoundation.org/storage2'],
+        urls: ['http://dataliberationfoundation.org/*'],
         types: [],
         handlerFn: (request, response) => {
           response.end(`<html>
@@ -378,7 +385,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
         'textContent',
       ]);
       expect(crossContent.value).toBe('1');
-      await tab.close();
+      await session.close();
 
       const history = tab.navigations.history;
       expect(history).toHaveLength(1);
@@ -477,11 +484,11 @@ describe('UserProfile IndexedDb tests', () => {
     let profile: IUserProfile;
     {
       const meta = await connection.createSession();
-      const core = Session.getTab(meta);
-      Helpers.needsClosing.push(core);
-      await core.goto(`${koaServer.baseUrl}/db`);
-      await core.waitForLoad('PaintingStable');
-      await core.waitForElement(['document', ['querySelector', 'body.ready']]);
+      const tab = Session.getTab(meta);
+      Helpers.needsClosing.push(tab.session);
+      await tab.goto(`${koaServer.baseUrl}/db`);
+      await tab.waitForLoad('PaintingStable');
+      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
 
       profile = await connection.exportUserProfile(meta);
       expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
@@ -502,14 +509,14 @@ describe('UserProfile IndexedDb tests', () => {
       const meta = await connection.createSession({
         userProfile: profile,
       });
-      const core = Session.getTab(meta);
-      Helpers.needsClosing.push(core);
+      const tab = Session.getTab(meta);
+      Helpers.needsClosing.push(tab.session);
 
-      await core.goto(`${koaServer.baseUrl}/dbrestore`);
-      await core.waitForLoad('PaintingStable');
-      await core.waitForElement(['document', ['querySelector', 'body.ready']]);
+      await tab.goto(`${koaServer.baseUrl}/dbrestore`);
+      await tab.waitForLoad('PaintingStable');
+      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-      const recordsJson = await core.execJsPath<string>([
+      const recordsJson = await tab.execJsPath<string>([
         'document',
         ['querySelector', '#records'],
         'textContent',
@@ -518,7 +525,7 @@ describe('UserProfile IndexedDb tests', () => {
 
       expect(records).toHaveLength(2);
       expect(records[0].child.name).toBe('Richard');
-      const indexLookupJson = await core.execJsPath<string>([
+      const indexLookupJson = await tab.execJsPath<string>([
         'document',
         ['querySelector', '#richard'],
         'textContent',
@@ -526,7 +533,7 @@ describe('UserProfile IndexedDb tests', () => {
       const indexLookup = JSON.parse(indexLookupJson.value);
       expect(indexLookup.id).toBe(1);
 
-      const typePreservation = await core.execJsPath([
+      const typePreservation = await tab.execJsPath([
         'document',
         ['querySelector', '#date-type'],
         'textContent',

@@ -14,6 +14,8 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['devtoolsRequestId', 'TEXT'],
         ['tabId', 'INTEGER'],
+        ['socketId', 'INTEGER'],
+        ['protocol', 'TEXT'],
         ['type', 'TEXT'],
         ['receivedAtCommandId', 'INTEGER'],
         ['seenAtCommandId', 'INTEGER'],
@@ -32,8 +34,6 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
         ['responseTimestamp', 'INTEGER'],
         ['responseEncoding', 'TEXT'],
         ['responseData', 'BLOB'],
-        ['socketId', 'INTEGER'],
-        ['clientAlpn', 'TEXT'],
         ['dnsResolvedIp', 'TEXT'],
         ['isHttp2Push', 'INTEGER'],
         ['usedArtificialCache', 'INTEGER'],
@@ -51,12 +51,62 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public updateResource(id: number, data: { tabId: number; browserRequestId: string }): void {
-    if (this.hasPending(x => x[0] === id)) {
-      this.flush();
+    const pendingInserts = this.findPendingInserts(x => x[0] === id);
+    if (pendingInserts.length) {
+      const pending = pendingInserts.pop();
+      pending[1] = data.browserRequestId;
+      pending[2] = data.tabId;
+      return;
     }
     this.db
       .prepare(`update ${this.tableName} set tabId=?, devtoolsRequestId=? where id=?`)
       .run(data.tabId, data.browserRequestId, id);
+  }
+
+  public get(id: number): IResourcesRecord {
+    const pending = this.findPendingRecords(x => x[0] === id);
+    if (pending.length) return pending.pop();
+
+    return this.db.prepare(`select * from ${this.tableName} where id=?`).get(id);
+  }
+
+  public save(record: IResourcesRecord): void {
+    return this.queuePendingInsert([
+      record.id,
+      record.devtoolsRequestId,
+      record.tabId,
+      record.socketId,
+      record.protocol,
+      record.type,
+      record.receivedAtCommandId,
+      record.seenAtCommandId,
+      record.requestMethod,
+      record.requestUrl,
+      record.requestHeaders,
+      record.requestTrailers,
+      record.requestTimestamp,
+      record.requestPostData,
+      record.redirectedToUrl,
+      record.statusCode,
+      record.statusMessage,
+      record.responseUrl,
+      record.responseHeaders,
+      record.responseTrailers,
+      record.responseTimestamp,
+      record.responseEncoding,
+      record.responseData,
+      record.dnsResolvedIp,
+      record.isHttp2Push ? 1 : 0,
+      record.usedArtificialCache ? 1 : 0,
+      record.didUserScriptBlockResource ? 1 : 0,
+      record.requestOriginalHeaders,
+      record.responseOriginalHeaders,
+      record.httpError,
+      record.browserServedFromCache,
+      record.browserLoadFailure,
+      record.browserBlockedReason,
+      record.browserCanceled ? 1 : 0,
+    ]);
   }
 
   public insert(
@@ -68,7 +118,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       redirectedToUrl?: string;
       originalHeaders: IResourceHeaders;
       responseOriginalHeaders?: IResourceHeaders;
-      clientAlpn: string;
+      protocol: string;
       dnsResolvedIp?: string;
       wasCached?: boolean;
       didBlockResource: boolean;
@@ -79,17 +129,8 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
     },
     error?: Error,
   ) {
-    let errorString: string;
-    if (error) {
-      if (typeof error === 'string') errorString = error;
-      else
-        errorString = JSON.stringify({
-          name: error.name,
-          stack: error.stack,
-          message: error.message,
-          ...error,
-        });
-    }
+    const errorString = ResourcesTable.getErrorString(error);
+
     let contentEncoding: string;
     if (meta.response && meta.response.headers) {
       contentEncoding = <string>(
@@ -100,6 +141,8 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.id,
       extras.browserRequestId,
       tabId,
+      extras.socketId,
+      extras.protocol,
       meta.type,
       meta.receivedAtCommandId,
       null,
@@ -118,8 +161,6 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       meta.response?.timestamp,
       contentEncoding,
       meta.response ? body : undefined,
-      extras.socketId,
-      extras.clientAlpn,
       extras.dnsResolvedIp,
       extras.isHttp2Push ? 1 : 0,
       extras.wasCached ? 1 : 0,
@@ -150,25 +191,41 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   }
 
   public async getResourceBodyById(resourceId: number, decompress = true): Promise<Buffer> {
-    if (this.hasPending(x => x[0] === resourceId)) {
-      this.flush();
-    }
+    const pendingRecords = this.findPendingRecords(x => x[0] === resourceId);
 
-    const record = this.db
-      .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
-      .get(resourceId);
+    let record = pendingRecords.find(x => !!x.responseData);
+
+    if (!record) {
+      record = this.db
+        .prepare(`select responseData, responseEncoding from ${this.tableName} where id=? limit 1`)
+        .get(resourceId);
+    }
     if (!record) return null;
 
     const { responseData, responseEncoding } = record;
     if (!decompress) return responseData;
     return await decodeBuffer(responseData, responseEncoding);
   }
+
+  public static getErrorString(error: Error | string): string {
+    if (error) {
+      if (typeof error === 'string') return error;
+      return JSON.stringify({
+        name: error.name,
+        stack: error.stack,
+        message: error.message,
+        ...error,
+      });
+    }
+  }
 }
 
 export interface IResourcesRecord {
   id: number;
-  devtoolsRequestId: number;
+  devtoolsRequestId: string;
   tabId: number;
+  socketId: number;
+  protocol: string;
   type: ResourceType;
   receivedAtCommandId: number;
   seenAtCommandId: number;
@@ -187,8 +244,6 @@ export interface IResourcesRecord {
   responseTimestamp: number;
   responseEncoding: string;
   responseData?: Buffer;
-  socketId: number;
-  clientAlpn: string;
   dnsResolvedIp?: string;
   usedArtificialCache: boolean;
   didUserScriptBlockResource: boolean;

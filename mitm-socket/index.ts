@@ -1,11 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import * as net from 'net';
 import { unlink } from 'fs';
-import * as os from 'os';
-import { v1 as uuid } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import { createIpcSocketPath } from '@secret-agent/commons/IpcUtils';
 import MitmSocketSession from './lib/MitmSocketSession';
 
 const { log } = Log(module);
@@ -18,9 +17,14 @@ export default class MitmSocket extends TypedEventEmitter<{
   eof: void;
   close: void;
 }> {
+  public get isWebsocket(): boolean {
+    return this.connectOpts.isWebsocket === true;
+  }
+
   public readonly socketPath: string;
   public alpn = 'http/1.1';
   public socket: net.Socket;
+  public dnsResolvedIp: string;
   public remoteAddress: string;
   public localAddress: string;
   public serverName: string;
@@ -28,6 +32,7 @@ export default class MitmSocket extends TypedEventEmitter<{
   public id = (idCounter += 1);
 
   public createTime: Date;
+  public dnsLookupTime: Date;
   public ipcConnectionTime: Date;
   public connectTime: Date;
   public errorTime: Date;
@@ -45,20 +50,14 @@ export default class MitmSocket extends TypedEventEmitter<{
   private socketReadyPromise = new Resolvable<void>();
   private readonly callStack: string;
 
-  constructor(
-    readonly sessionId: string,
-    readonly connectOpts: IGoTlsSocketConnectOpts,
-    readonly isWebsocket: boolean = false,
-  ) {
+  constructor(readonly sessionId: string, readonly connectOpts: IGoTlsSocketConnectOpts) {
     super();
-    const id = uuid();
     this.callStack = new Error().stack.replace('Error:', '').trim();
     this.serverName = connectOpts.servername;
     this.logger = log.createChild(module, { sessionId });
     this.connectOpts.isSsl ??= true;
 
-    this.socketPath =
-      os.platform() === 'win32' ? `\\\\.\\pipe\\sa-${id}` : `${os.tmpdir()}/sa-${id}.sock`;
+    this.socketPath = createIpcSocketPath(`sa-${sessionId}-${this.id}`);
 
     // start listening
     this.server = new net.Server().unref();
@@ -234,14 +233,13 @@ export default class MitmSocket extends TypedEventEmitter<{
 export interface IGoTlsSocketConnectOpts {
   host: string;
   port: string;
-  isSsl?: boolean;
-  debug?: boolean;
-  servername: string;
-  proxyUrl?: string;
-  proxyAuth?: string;
+  isSsl: boolean;
   keepAlive?: boolean;
+  debug?: boolean;
+  servername?: string;
   isWebsocket?: boolean;
   keylogPath?: string;
+  proxyUrl?: string;
 }
 
 class Socks5ProxyConnectError extends Error {}

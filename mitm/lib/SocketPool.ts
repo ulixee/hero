@@ -13,45 +13,61 @@ export default class SocketPool {
   public alpn: string;
   public isClosing = false;
   private all = new Set<MitmSocket>();
-  private pool = new Set<MitmSocket>();
-  private free: MitmSocket[] = [];
+  private pooled = 0;
+  private free = new Set<MitmSocket>();
   private pending: Resolvable<void>[] = [];
   private readonly http2Sessions: IHttp2Session[] = [];
   private queue: Queue;
   private logger: IBoundLog;
 
-  constructor(readonly origin: string, readonly maxConnections, readonly session: RequestSession) {
-    this.origin = origin;
+  constructor(origin: string, readonly maxConnections, readonly session: RequestSession) {
     this.logger = log.createChild(module, { sessionId: session.sessionId, origin });
     this.queue = new Queue('SOCKET TO ORIGIN');
   }
 
   public freeSocket(socket: MitmSocket): void {
-    this.free.push(socket);
+    this.free.add(socket);
     const pending = this.pending.shift();
     if (pending) {
       pending.resolve();
     }
   }
 
+  public async isHttp2(
+    isWebsocket: boolean,
+    createSocket: () => Promise<MitmSocket>,
+  ): Promise<boolean> {
+    if (this.alpn) return this.alpn === 'h2';
+    if (this.queue.isActive) {
+      // eslint-disable-next-line require-await
+      const alpn = await this.queue.run(() => Promise.resolve(this.alpn));
+      if (alpn) return alpn === 'h2';
+    }
+    const socket = await this.getSocket(isWebsocket, createSocket);
+    this.freeSocket(socket);
+    return socket.isHttp2();
+  }
+
   public getSocket(
-    options: { isWebsocket: boolean },
+    isWebsocket: boolean,
     createSocket: () => Promise<MitmSocket>,
   ): Promise<MitmSocket> {
     return this.queue.run(async () => {
       const http2Session = this.getHttp2Session();
-      if (http2Session && !options.isWebsocket) {
+      if (http2Session && !isWebsocket) {
         return Promise.resolve(http2Session.mitmSocket);
       }
 
-      if (this.pool.size >= this.maxConnections && (this.pending.length || !this.free.length)) {
+      if (this.pooled >= this.maxConnections && (this.pending.length || this.free.size === 0)) {
         const pending = new Resolvable<void>();
         this.pending.push(pending);
         await pending.promise;
       }
 
-      if (this.free.length) {
-        return this.free.shift();
+      if (this.free.size) {
+        const first = this.free.values().next().value;
+        this.free.delete(first);
+        return first;
       }
 
       const mitmSocket = await createSocket();
@@ -61,8 +77,8 @@ export default class SocketPool {
       this.all.add(mitmSocket);
 
       // don't put connections that can't be reused into the pool
-      if (!mitmSocket.isHttp2() && !options.isWebsocket) {
-        this.pool.add(mitmSocket);
+      if (!mitmSocket.isHttp2() && !isWebsocket) {
+        this.pooled += 1;
       }
 
       return mitmSocket;
@@ -88,7 +104,7 @@ export default class SocketPool {
       socket.close();
     }
     this.all.clear();
-    this.pool.clear();
+    this.free.clear();
     this.queue.stop(new CanceledPromiseError('Shutting down socket pool'));
   }
 
@@ -106,19 +122,17 @@ export default class SocketPool {
   }
 
   private onSocketClosed(socket: MitmSocket): void {
-    this.pool.delete(socket);
-
     this.logger.stats('Socket closed');
     this.session.emit('socket-close', { socket });
 
-    this.pool.delete(socket);
-
-    const freeIdx = this.free.indexOf(socket);
-    if (freeIdx >= 0) this.free.splice(freeIdx, 1);
+    this.free.delete(socket);
+    if (this.all.delete(socket)) {
+      this.pooled -= 1;
+    }
 
     if (this.session.isClosing || socket.isWebsocket) return;
 
-    if (this.pool.size < this.maxConnections) this.pending.shift()?.resolve();
+    if (this.pooled < this.maxConnections) this.pending.shift()?.resolve();
   }
 
   private closeHttp2Session(session: IHttp2Session): void {

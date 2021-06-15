@@ -786,8 +786,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       MitmRequestContext.toEmittedResource({ id: resourceId, ...resource } as any),
       loadError,
     );
-
-    this.checkForResolvedNavigation(browserRequestId, resourceMeta, loadError);
+    if (resourceMeta) this.checkForResolvedNavigation(browserRequestId, resourceMeta, loadError);
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {

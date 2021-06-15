@@ -5,9 +5,9 @@ import * as net from 'net';
 import { unlink } from 'fs';
 import Resolvable from '@secret-agent/commons/Resolvable';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { v1 as uuidv1 } from 'uuid';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@secret-agent/commons/utils';
+import { createId, createIpcSocketPath } from '@secret-agent/commons/IpcUtils';
 
 const ext = os.platform() === 'win32' ? '.exe' : '';
 const libPath = `${__dirname}/../dist/connect${ext}`;
@@ -187,13 +187,9 @@ export default abstract class BaseIpcHandler {
     const mode = options.mode || 'proxy';
     options.mode = mode;
 
-    const id = `${mode}-${uuidv1()}`;
     if (options.ipcSocketPath === undefined) {
-      if (os.platform() === 'win32') {
-        options.ipcSocketPath = `\\\\.\\pipe\\sa-ipc-${id}`;
-      } else {
-        options.ipcSocketPath = `${os.tmpdir()}/sa-ipc-${id}.sock`;
-      }
+      const id = createId();
+      options.ipcSocketPath = createIpcSocketPath(`sa-ipc-${mode}-${id}`);
     }
     return options as IGoIpcOpts;
   }

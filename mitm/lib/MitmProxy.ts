@@ -2,12 +2,14 @@ import * as net from 'net';
 import { Socket } from 'net';
 import * as http from 'http';
 import { IncomingMessage } from 'http';
+import * as https from 'https';
 import * as http2 from 'http2';
 import Log from '@secret-agent/commons/Logger';
 import * as Os from 'os';
 import * as Path from 'path';
 import { createPromise } from '@secret-agent/commons/utils';
 import CertificateGenerator from '@secret-agent/mitm-socket/lib/CertificateGenerator';
+import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession from '../handlers/RequestSession';
@@ -41,6 +43,10 @@ export default class MitmProxy {
     return (this.http2Server.address() as net.AddressInfo)?.port;
   }
 
+  public get httpsPort(): number | undefined {
+    return (this.httpsServer.address() as net.AddressInfo)?.port;
+  }
+
   // used if this is a one-off proxy
   private isolatedProxyForSessionId?: string;
 
@@ -51,8 +57,10 @@ export default class MitmProxy {
 
   private readonly options: IMitmProxyOptions;
   private readonly httpServer: http.Server;
+  private readonly httpsServer: https.Server;
+
   private readonly http2Server: http2.Http2SecureServer;
-  private readonly serverConnects: net.Socket[] = [];
+  private readonly serverConnects = new Set<net.Socket>();
 
   private isClosing = false;
 
@@ -69,7 +77,13 @@ export default class MitmProxy {
     this.httpServer.on('request', this.onHttpRequest.bind(this, false));
     this.httpServer.on('upgrade', this.onHttpUpgrade.bind(this, false));
 
-    this.http2Server = http2.createSecureServer({ allowHTTP1: true });
+    this.httpsServer = https.createServer({ insecureHTTPParser: true });
+    this.httpsServer.on('connect', this.onHttpConnect.bind(this));
+    this.httpsServer.on('tlsClientError', this.onClientError.bind(this, true));
+    this.httpsServer.on('request', this.onHttpRequest.bind(this, true));
+    this.httpsServer.on('upgrade', this.onHttpUpgrade.bind(this, true));
+
+    this.http2Server = http2.createSecureServer();
     this.http2Server.on('sessionError', this.onClientError.bind(this, true));
     this.http2Server.on('request', this.onHttpRequest.bind(this, true));
     this.http2Server.on('upgrade', this.onHttpUpgrade.bind(this, true));
@@ -92,19 +106,23 @@ export default class MitmProxy {
       }
     }
 
-    while (this.serverConnects.length) {
-      const connect = this.serverConnects.shift();
+    for (const connect of this.serverConnects) {
       destroyConnection(connect);
     }
+    this.secureContexts = {};
+    try {
+      this.httpServer.close();
+    } catch (err) {
+      errors.push(err);
+    }
 
-    delete this.secureContexts;
     try {
       this.http2Server.close();
     } catch (err) {
       errors.push(err);
     }
     try {
-      this.httpServer.close();
+      this.httpsServer.close();
     } catch (err) {
       errors.push(err);
     }
@@ -142,7 +160,7 @@ export default class MitmProxy {
 
   protected async listen(): Promise<this> {
     await startServer(this.httpServer, this.options.port ?? 0);
-
+    await startServer(this.httpsServer);
     await startServer(this.http2Server);
 
     // don't listen for errors until server already started
@@ -154,8 +172,8 @@ export default class MitmProxy {
 
   private async onHttpRequest(
     isSSL: boolean,
-    clientToProxyRequest: http2.Http2ServerRequest,
-    proxyToClientResponse: http2.Http2ServerResponse,
+    clientToProxyRequest: http.IncomingMessage | http2.Http2ServerRequest,
+    proxyToClientResponse: http.ServerResponse | http2.Http2ServerResponse,
   ): Promise<void> {
     const sessionId = this.readSessionId(
       clientToProxyRequest.headers,
@@ -259,8 +277,11 @@ export default class MitmProxy {
     if (!sessionId) {
       return RequestSession.sendNeedsAuth(socket);
     }
-    this.serverConnects.push(socket);
-    socket.on('error', this.onConnectError.bind(this, request.url, 'ClientToProxy.ConnectError'));
+    this.serverConnects.add(socket);
+    socket.on('error', error => {
+      this.onConnectError(request.url, 'ClientToProxy.ConnectError', error);
+      this.serverConnects.delete(socket);
+    });
 
     socket.write('HTTP/1.1 200 Connection established\r\n\r\n');
     // we need first byte of data to detect if request is SSL encrypted
@@ -271,26 +292,51 @@ export default class MitmProxy {
     socket.pause();
 
     let proxyToProxyPort = this.httpPort;
+
     // for https we create a new connect back to the https server so we can have the proper cert and see the traffic
     if (MitmProxy.isTlsByte(head)) {
       // URL is in the form 'hostname:port'
-      const hostname = request.url.split(':', 2)[0];
+      const [hostname, port] = request.url.split(':', 2);
 
       if (!this.secureContexts[hostname]) {
         this.secureContexts[hostname] = this.addSecureContext(hostname);
       }
-      await this.secureContexts[hostname];
-      proxyToProxyPort = this.http2Port;
-    }
 
-    // for http, we are proxying to clear out the buffer (for websockets in particular)
-    // NOTE: this probably can be optimized away for http
+      let isHttp2 = true;
+      try {
+        const requestSession = this.sessionById[sessionId];
+        if (requestSession.bypassAllWithEmptyResponse) {
+          isHttp2 = false;
+        } else if (
+          !requestSession.shouldBlockRequest(`https://${hostname}:${port}`) &&
+          !requestSession.shouldBlockRequest(`https://${hostname}`)
+        ) {
+          const agent = requestSession.requestAgent;
+          isHttp2 = await agent.isHostAlpnH2(hostname, port);
+        }
+      } catch (error) {
+        if (error instanceof CanceledPromiseError) return;
+        log.warn('Connect.AlpnLookupError', {
+          hostname,
+          error,
+          sessionId,
+        });
+      }
+
+      await this.secureContexts[hostname];
+      if (isHttp2) {
+        proxyToProxyPort = this.http2Port;
+      } else {
+        proxyToProxyPort = this.httpsPort;
+      }
+    }
 
     const connectedPromise = createPromise();
     const proxyConnection = net.connect(
       { port: proxyToProxyPort, allowHalfOpen: false },
       connectedPromise.resolve,
     );
+    this.serverConnects.add(proxyConnection);
     proxyConnection.on('error', error => {
       this.onConnectError(request.url, 'ProxyToProxy.ConnectError', error);
       if (!socket.destroyed && socket.writable && socket.readable) {
@@ -298,14 +344,17 @@ export default class MitmProxy {
       }
     });
 
-    proxyConnection.on('end', () => destroyConnection(socket));
-    proxyConnection.on('close', () => destroyConnection(socket));
-    socket.on('close', () => destroyConnection(proxyConnection));
-    socket.on('end', this.removeSocketConnect.bind(this, socket));
+    proxyConnection.once('end', () => this.serverConnects.delete(proxyConnection));
+    socket.once('end', () => this.serverConnects.delete(socket));
+
+    proxyConnection.once('close', () => destroyConnection(socket));
+    socket.once('close', () => destroyConnection(proxyConnection));
 
     await connectedPromise;
     this.registerProxySession(proxyConnection, sessionId);
 
+    socket.setNoDelay(true);
+    proxyConnection.setNoDelay(true);
     // create a tunnel back to the same proxy
     socket.pipe(proxyConnection).pipe(socket);
     if (head.length) socket.emit('data', head);
@@ -376,17 +425,12 @@ export default class MitmProxy {
     }
   }
 
-  private removeSocketConnect(socket: net.Socket): void {
-    const idx = this.serverConnects.indexOf(socket);
-    if (idx < 0) return;
-    this.serverConnects.splice(idx, 1);
-  }
-
   private async addSecureContext(hostname: string): Promise<void> {
     if (hostname.includes(':')) hostname = hostname.split(':').shift();
 
     const cert = await MitmProxy.getCertificate(hostname);
     this.http2Server.addContext(hostname, cert);
+    this.httpsServer.addContext(hostname, cert);
   }
 
   /////// SESSION ID MGMT //////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,14 +452,14 @@ export default class MitmProxy {
 
   private registerProxySession(loopbackProxySocket: net.Socket, sessionId: string): void {
     // local port is the side that originates from our http server
-    this.portsBySessionId[sessionId] = this.portsBySessionId[sessionId] || new Set();
+    this.portsBySessionId[sessionId] ??= new Set();
     this.portsBySessionId[sessionId].add(loopbackProxySocket.localPort);
     this.sessionIdByPort[loopbackProxySocket.localPort] = sessionId;
   }
 
   public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
     if (this.certificateGenerator == null) {
-      const baseDir = sslCaDir || defaultStorageDirectory;
+      const baseDir = sslCaDir ?? defaultStorageDirectory;
       this.networkDb = new NetworkDb(baseDir);
       this.certificateGenerator = new CertificateGenerator({ storageDir: baseDir });
     }
@@ -483,14 +527,11 @@ function destroyConnection(socket: net.Socket): void {
 function startServer(
   server: http.Server | http2.Http2SecureServer,
   listenPort?: number,
-): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
     try {
       server.once('error', reject);
-      server.listen(listenPort, () => {
-        const port = (server.address() as net.AddressInfo).port;
-        resolve(port);
-      });
+      server.listen(listenPort, resolve);
     } catch (err) {
       reject(err);
     }

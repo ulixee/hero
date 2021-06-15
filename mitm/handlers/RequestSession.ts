@@ -152,7 +152,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
       return false;
     }
     for (const blockedUrlFragment of this.blockedResources.urls) {
-      if (url.includes(blockedUrlFragment)) {
+      if (url.includes(blockedUrlFragment) || url.match(blockedUrlFragment)) {
         return true;
       }
     }
@@ -253,7 +253,7 @@ export interface IRequestSessionRequestEvent {
   id: number;
   request: IResourceRequest;
   serverAlpn: string;
-  clientAlpn: string;
+  protocol: string;
   socketId: number;
   isHttp2Push: boolean;
   didBlockResource: boolean;

@@ -18,11 +18,16 @@ import ExecutionContextCreatedEvent = Protocol.Runtime.ExecutionContextCreatedEv
 export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IPuppetWorker {
   public readonly browserContext: BrowserContext;
   public isReady: Promise<Error | null>;
-  public hasLoadedResponse = false;
+  public get isInitializationSent(): Promise<void> {
+    return this.initializationSent.promise;
+  }
 
+  public hasLoadedResponse = false;
   public readonly devtoolsSession: DevtoolsSession;
 
   protected readonly logger: IBoundLog;
+
+  private readonly initializationSent = createPromise<void>();
   private readonly networkManager: NetworkManager;
   private readonly targetInfo: TargetInfo;
 
@@ -66,9 +71,9 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     this.isReady = this.initialize(parentNetworkManager).catch(err => err);
   }
 
-  async initialize(pageNetworkManager: NetworkManager): Promise<void> {
+  initialize(pageNetworkManager: NetworkManager): Promise<void> {
     const emulator = this.browserContext.emulator;
-    await Promise.all([
+    const result = Promise.all([
       this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
         // web workers can use parent network
         if (err.message.includes(`'Fetch.enable' wasn't found`)) return;
@@ -86,6 +91,8 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
         : null,
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
+    setImmediate(() => this.initializationSent.resolve());
+    return result.then(() => null);
   }
 
   async evaluate<T>(expression: string, isInitializationScript = false): Promise<T> {

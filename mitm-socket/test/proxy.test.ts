@@ -40,6 +40,7 @@ test('should be able to send a request through a proxy', async () => {
     port: String(server.port),
     servername: 'localhost',
     proxyUrl: `http://localhost:${proxyPort}`,
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect(mitmSocketSession);
@@ -95,6 +96,7 @@ test('should be able to use a socks5 proxy', async () => {
     port: String(server.port),
     servername: 'localhost',
     proxyUrl: `socks5://localhost:${proxyPort}`,
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect(mitmSocketSession);
@@ -133,6 +135,7 @@ test('should be able to use a socks5 proxy with auth', async () => {
     port: String(server.port),
     servername: 'localhost',
     proxyUrl: `socks5://foo:bar@localhost:${proxyPort}`,
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
   await tlsConnection.connect(mitmSocketSession);

@@ -203,7 +203,10 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       // networkId corresponds to onNetworkRequestWillBeSent
       resource = <IPuppetResourceRequest>{
         browserRequestId: networkRequest.networkId ?? networkRequest.requestId,
-        resourceType: getResourceTypeForChromeValue(networkRequest.resourceType),
+        resourceType: getResourceTypeForChromeValue(
+          networkRequest.resourceType,
+          networkRequest.request.method,
+        ),
         url: new URL(networkRequest.request.url),
         method: networkRequest.request.method,
         isSSL: networkRequest.request.url.startsWith('https'),
@@ -211,9 +214,8 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        isClientHttp2: false,
         requestTime: new Date(),
-        clientAlpn: null,
+        protocol: null,
         hasUserGesture: false,
         documentUrl: networkRequest.request.headers.Referer,
         frameId: networkRequest.frameId,
@@ -267,11 +269,13 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
         isUpgrade: false,
         isHttp2Push: false,
         isServerHttp2: false,
-        isClientHttp2: false,
         requestTime: new Date(networkRequest.wallTime * 1e3),
-        clientAlpn: null,
+        protocol: null,
         browserRequestId: networkRequest.requestId,
-        resourceType: getResourceTypeForChromeValue(networkRequest.type),
+        resourceType: getResourceTypeForChromeValue(
+          networkRequest.type,
+          networkRequest.request.method,
+        ),
         method: networkRequest.request.method,
         hasUserGesture: networkRequest.hasUserGesture,
         documentUrl: networkRequest.documentURL,
@@ -409,7 +413,7 @@ export class NetworkManager extends TypedEventEmitter<IPuppetNetworkEvents> {
       resource.status = response.status;
       resource.statusMessage = response.statusText;
       resource.remoteAddress = `${response.remoteIPAddress}:${response.remotePort}`;
-      resource.clientAlpn = response.protocol;
+      resource.protocol = response.protocol;
       resource.responseUrl = response.url;
       resource.responseTime = new Date();
       if (response.fromDiskCache) resource.browserServedFromCache = 'disk';

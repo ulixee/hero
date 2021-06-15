@@ -19,6 +19,7 @@ import { IScrollEvent } from '@secret-agent/interfaces/IScrollEvent';
 import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
 import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
+import ResourcesTable from '../models/ResourcesTable';
 import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -203,25 +204,69 @@ export default class SessionState {
     resourceFailedEvent: IRequestSessionResponseEvent,
     error: Error,
   ): IResourceMeta {
-    let resourceId = resourceFailedEvent.id;
+    const resourceId = resourceFailedEvent.id;
     if (!resourceId) {
-      const resources = this.getBrowserRequestResources(resourceFailedEvent.browserRequestId);
-      resourceId = resources?.length ? resources[0].resourceId : null;
+      this.logger.warn('Session.FailedResourceWithoutId', {
+        resourceFailedEvent,
+        error,
+      });
+      return;
     }
-    const convertedMeta = this.resourceEventToMeta(tabId, resourceFailedEvent);
-    let resourceMeta = this.getResourceMeta(resourceId);
-    if (!resourceMeta) {
-      resourceMeta = convertedMeta;
-      this.resourcesById.set(resourceMeta.id, resourceMeta);
-    }
-    if (convertedMeta.response) {
-      resourceMeta.response ??= convertedMeta.response;
-      for (const [key, value] of Object.entries(convertedMeta.response)) {
-        if (value) resourceMeta.response[key] = value;
+
+    try {
+      const convertedMeta = this.resourceEventToMeta(tabId, resourceFailedEvent);
+      const resource = this.resourcesById.get(resourceId);
+
+      if (!resource) {
+        this.resourcesById.set(convertedMeta.id, convertedMeta);
+        this.db.resources.insert(tabId, convertedMeta, null, resourceFailedEvent, error);
+        return convertedMeta;
       }
+
+      // if we already have this resource, we need to merge
+      const existingDbRecord = this.db.resources.get(resourceId);
+
+      existingDbRecord.type ??= convertedMeta.type;
+      resource.type ??= convertedMeta.type;
+      existingDbRecord.devtoolsRequestId ??= resourceFailedEvent.browserRequestId;
+      existingDbRecord.browserBlockedReason = resourceFailedEvent.browserBlockedReason;
+      existingDbRecord.browserCanceled = resourceFailedEvent.browserCanceled;
+      existingDbRecord.redirectedToUrl ??= resourceFailedEvent.redirectedToUrl;
+      existingDbRecord.statusCode ??= convertedMeta.response.statusCode;
+      existingDbRecord.statusMessage ??= convertedMeta.response.statusMessage;
+      existingDbRecord.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
+
+      if (!resource.response) {
+        resource.response = convertedMeta.response ?? ({} as any);
+      }
+
+      if (convertedMeta.response.headers) {
+        const responseHeaders = JSON.stringify(convertedMeta.response.headers);
+        if (responseHeaders.length > existingDbRecord.responseHeaders?.length) {
+          existingDbRecord.responseHeaders = responseHeaders;
+          resource.response.headers = convertedMeta.response.headers;
+        }
+      }
+      if (resourceFailedEvent.responseOriginalHeaders) {
+        const responseHeaders = JSON.stringify(resourceFailedEvent.responseOriginalHeaders);
+        if (responseHeaders.length > existingDbRecord.responseOriginalHeaders?.length) {
+          existingDbRecord.responseOriginalHeaders = responseHeaders;
+        }
+      }
+      if (error) {
+        existingDbRecord.httpError = ResourcesTable.getErrorString(error);
+      }
+
+      resource.response.browserLoadFailure = convertedMeta.response?.browserLoadFailure;
+
+      this.db.resources.save(existingDbRecord);
+      return resource;
+    } catch (saveError) {
+      this.logger.warn('SessionState.captureResourceFailed::ErrorSaving', {
+        error: saveError,
+        resourceFailedEvent,
+      });
     }
-    this.db.resources.insert(tabId, resourceMeta, null, resourceFailedEvent, error);
-    return resourceMeta;
   }
 
   public captureResourceError(

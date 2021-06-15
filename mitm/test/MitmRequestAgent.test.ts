@@ -67,8 +67,9 @@ test('should create up to a max number of secure connections per origin', async 
   }
   await Promise.all(promises);
 
+  const host = server.baseUrl.replace('https://', '');
   // @ts-ignore
-  expect(connectionsByOrigin.get(server.baseUrl).pool.size).toBe(2);
+  expect(connectionsByOrigin.get(host).pooled).toBe(2);
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
   expect(uniquePorts.size).toBe(2);
@@ -108,9 +109,10 @@ test('should create new connections as needed when no keepalive', async () => {
   }
   await Promise.all(promises);
 
+  const host = server.baseUrl.replace('https://', '');
   // they all close after use, so should be gone now
   // @ts-ignore
-  expect(connectionsByOrigin.get(server.baseUrl).pool.size).toBe(0);
+  expect(connectionsByOrigin.get(host).pooled).toBe(0);
 
   await session.close();
   const uniquePorts = new Set<number>(remotePorts);
@@ -218,9 +220,9 @@ test('it should not put upgrade connections in a pool', async () => {
   await new Promise(resolve => wsClient.on('open', resolve));
 
   // @ts-ignore
-  const pool = session.requestAgent.socketPoolByOrigin.get(`ws://localhost:${httpServer.port}`);
+  const pool = session.requestAgent.socketPoolByOrigin.get(`localhost:${httpServer.port}`);
   // @ts-ignore
-  expect(pool.pool.size).toBe(0);
+  expect(pool.pooled).toBe(0);
 });
 
 test('it should reuse http2 connections', async () => {
@@ -231,7 +233,6 @@ test('it should reuse http2 connections', async () => {
   const baseUrl = httpServer.baseUrl;
 
   const mitmServer = await startMitmServer();
-  const mitmUrl = `http://localhost:${mitmServer.port}`;
   const session = createMitmSession(mitmServer);
 
   // @ts-ignore
@@ -239,20 +240,22 @@ test('it should reuse http2 connections', async () => {
 
   const proxyCredentials = session.getProxyCredentials();
 
+  const proxyUrl = `http://${proxyCredentials}@localhost:${mitmServer.port}`;
   process.env.MITM_ALLOW_INSECURE = 'true';
   const results = await Promise.all([
-    Helpers.httpGet(`${baseUrl}/test1`, mitmUrl, proxyCredentials),
-    Helpers.httpGet(`${baseUrl}/test2`, mitmUrl, proxyCredentials),
-    Helpers.httpGet(`${baseUrl}/test3`, mitmUrl, proxyCredentials),
+    Helpers.http2Get(baseUrl, { ':path': '/test1' }, session.sessionId, proxyUrl),
+    Helpers.http2Get(baseUrl, { ':path': '/test2' }, session.sessionId, proxyUrl),
+    Helpers.http2Get(baseUrl, { ':path': '/test3' }, session.sessionId, proxyUrl),
   ]);
   expect(results).toStrictEqual(['/test1', '/test2', '/test3']);
 
   process.env.MITM_ALLOW_INSECURE = 'false';
+  const host = baseUrl.replace('https://', '');
   // not reusable, so should not be here
   // @ts-ignore
-  expect(pool.get(baseUrl).pool.size).toBe(0);
+  expect(pool.get(host).pooled).toBe(0);
   // @ts-ignore
-  expect(pool.get(baseUrl).http2Sessions).toHaveLength(1);
+  expect(pool.get(host).http2Sessions).toHaveLength(1);
 });
 
 async function startMitmServer() {

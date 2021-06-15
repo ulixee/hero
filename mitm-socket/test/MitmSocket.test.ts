@@ -63,6 +63,7 @@ test('should be able to hit google using a Chrome Emulator', async () => {
     host: 'google.com',
     port: '443',
     servername: 'google.com',
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 
@@ -85,6 +86,7 @@ test('should be able to hit gstatic using a Chrome Emulator', async () => {
     host: 'www.gstatic.com',
     port: '443',
     servername: 'www.gstatic.com',
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 
@@ -115,6 +117,7 @@ test('should be able to hit a server that disconnects', async () => {
     port: String(server.port),
     servername: 'localhost',
     keepAlive: true,
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 
@@ -152,6 +155,7 @@ test.skip('should be able to get scripts from unpkg using Chrome emulator', asyn
     host: 'unpkg.com',
     port: '443',
     servername: 'unpkg.com',
+    isSsl: true,
   });
   Helpers.onClose(async () => tlsConnection.close());
 

@@ -6,7 +6,6 @@ import OriginType from './OriginType';
 export default interface IHttpResourceLoadDetails {
   isSSL: boolean;
   isUpgrade: boolean;
-  isClientHttp2: boolean;
   isServerHttp2: boolean;
   isHttp2Push: boolean;
   remoteAddress?: string;
@@ -19,7 +18,7 @@ export default interface IHttpResourceLoadDetails {
   previousUrl?: string;
   firstRedirectingUrl?: string; // track back to first redirection
   redirectedToUrl?: string;
-  clientAlpn: string;
+  protocol: string;
   dnsResolvedIp?: string;
   url: URL;
   method: string;
