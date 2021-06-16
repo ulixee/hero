@@ -11,11 +11,13 @@ import { Handler } from 'secret-agent';
   const agent = handler.createAgent();
   await agent.goto('https://ulixee.org');
 
-  async function getDatasetCost(agent: Agent, dataset) {
+  async function getDatasetCost(agent: Agent) {
+    const dataset = agent.input;
     await agent.goto(`https://ulixee.org${dataset.href}`);
     const cost = agent.document.querySelector('.cost .large-text');
+    agent.output.cost = await cost.textContent;
 
-    console.log('Cost of %s is %s', dataset.name, await cost.textContent);
+    console.log('Cost of %s is %s', dataset.name, agent.output.cost);
   }
 
   const links = await agent.document.querySelectorAll('a.DatasetSummary');
@@ -24,7 +26,10 @@ import { Handler } from 'secret-agent';
     const href = await link.getAttribute('href');
     handler.dispatchAgent(getDatasetCost, {
       name,
-      href,
+      input: {
+        name,
+        href,
+      },
     });
   }
 
@@ -146,6 +151,7 @@ NOTE: when using this method, you must call [`agent.close()`](/docs/basic-interf
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
+  - input `object`. An object containing properties to attach to the agent (more frequently used with [`dispatchAgent`](#dispatch-agent))
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 
 See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
@@ -168,7 +174,7 @@ const { Handler } = require('secret-agent');
 })();
 ```
 
-### handler.dispatchAgent*(callbackFn, userArg?, createAgentOptions?)* {#dispatch-agent}
+### handler.dispatchAgent*(callbackFn, createAgentOptions?)* {#dispatch-agent}
 
 This method allows you queue up functions that should be called as soon as a connection can allocate a new Agent. All configurations available to `createAgent` are available here.
 
@@ -178,10 +184,7 @@ On Disconnecting: if a Core is shut-down or the handler closes a coreConnection 
 
 #### **Arguments**:
 
-- callbackFn `(agent, userArg?) => Promise`. An asynchronous function that will be passed an initialized Agent and your userArg (if provided)
-  - agent `Agent`. An `Agent` initialized with the options provided as `handler.defaultAgentOptions` and via `createAgentOptions` to the `dispatchAgent` method.
-  - userArg `any`. Sends back your data if you provided any.
-- userArg `any`. An optional parameter to pass into your callback.
+- callbackFn `(agent) => Promise`. An asynchronous function that will be passed an initialized [Agent](/docs/basic-interfaces/agent) with the given `createAgentOptions` configuration.
 - createAgentOptions `object`. Options used to create a new agent. Takes all options available to [`createAgent()`](#create-agent).
 
 #### **Returns**: void
@@ -192,18 +195,25 @@ const { Handler } = require('secret-agent');
 (async () => {
   const handler = new Handler({ maxConcurrency: 2 });
 
-  handler.dispatchAgent(async (agent, url) => {
-    await agent.goto(url);
-    const links = await agent.document.querySelectorAll('a');
-    for (const link of links) {
-      const href = await link.getAttribute('href');
-      handler.dispatchAgent(async (agent0, link) => {
-        await agent0.goto(link);
-        const body = await agent0.document.body.textContent;
-      }, href);
-    }
-    // send in data
-  }, 'https://dataliberationfoundation.org');
+  handler.dispatchAgent(
+    async agent => {
+      const { url } = agent.input;
+      await agent.goto(url);
+      const links = await agent.document.querySelectorAll('a');
+      for (const link of links) {
+        const href = await link.getAttribute('href');
+        handler.dispatchAgent(
+          async agent0 => {
+            await agent0.goto(agent0.input.link);
+            const body = await agent0.document.body.textContent;
+          },
+          { input: { href } },
+        );
+      }
+      // send in data
+    },
+    { input: { url: 'https://dataliberationfoundation.org' } },
+  );
 
   // resolves when all dispatched agents are completed or an error occurs
   await handler.waitForAllDispatches();

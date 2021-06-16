@@ -4,6 +4,9 @@ import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import * as WebSocket from 'ws';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { createPromise } from '@secret-agent/commons/utils';
+import Output from '@secret-agent/client/lib/Output';
+import ReplayOutput from '@secret-agent/replay/backend/api/ReplayOutput';
+import ObjectObserver from '@secret-agent/client/lib/ObjectObserver';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 
@@ -99,4 +102,53 @@ describe('basic Replay API tests', () => {
     await Core.shutdown(true);
     if (api.readyState === WebSocket.OPEN) api.terminate();
   }, 20e3);
+
+  it('should be able to rebuild an output', async () => {
+    const observable = new ObjectObserver(new Output());
+
+    const clientOutput = observable.proxy;
+    const replayOutput = new ReplayOutput();
+    let id = 0;
+    observable.onChanges = changes => {
+      const changesToRecord = changes.map(change => ({
+        type: change.type,
+        value: JSON.stringify(change.value),
+        path: JSON.stringify(change.path),
+        lastCommandId: id,
+        timestamp: new Date().getTime(),
+      }));
+      replayOutput.onOutput(changesToRecord);
+    };
+
+    clientOutput.test = 1;
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    clientOutput.sub = { nested: true, str: 'test', num: 1 };
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    delete clientOutput.sub.num;
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    delete clientOutput.sub;
+    delete clientOutput.test;
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    clientOutput.array = [{ test: 1 }, { test: 2 }, { test: 3 }];
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    clientOutput.array.splice(1, 1);
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+
+    id += 1;
+    clientOutput.array.push({ test: 0 });
+    clientOutput.array.sort((a, b) => {
+      return a.test - b.test;
+    });
+    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
+  });
 });

@@ -10,6 +10,7 @@ import ReplayResources from '~backend/api/ReplayResources';
 import getResolvable from '~shared/utils/promise';
 import ReplayTabState from '~backend/api/ReplayTabState';
 import ReplayTime from '~backend/api/ReplayTime';
+import ReplayOutput from '~backend/api/ReplayOutput';
 
 export default class ReplayApi {
   public static serverProcess: ChildProcess;
@@ -26,6 +27,7 @@ export default class ReplayApi {
   public lastCommandName: string;
   public showUnresponsiveMessage = true;
   public hasAllData = false;
+  public output = new ReplayOutput();
 
   public onTabChange?: (tab: ReplayTabState) => any;
 
@@ -155,7 +157,6 @@ export default class ReplayApi {
 
   private async onMessage(messageData: WebSocket.Data): Promise<void> {
     const { event, data } = parseJSON(messageData);
-
     if (event === 'trailer') {
       this.hasAllData = true;
       for (const tab of this.tabsById.values()) tab.hasAllData = true;
@@ -185,6 +186,8 @@ export default class ReplayApi {
       this.lastActivityDate = data.lastActivityDate ? new Date(data.lastActivityDate) : null;
       this.lastCommandName = data.lastCommandName;
       for (const tab of this.tabsById.values()) tabsWithChanges.add(tab);
+    } else if (event === 'output') {
+      this.output.onOutput(data);
     } else {
       if (!this.replayTime.close) {
         this.replayTime.update();
@@ -192,9 +195,9 @@ export default class ReplayApi {
 
       for (const record of data) {
         const tabId = record.tabId;
-        const timestamp: number = record.timestamp ?? record.startDate;
         let tab = this.getTab(tabId);
         if (!tab) {
+          const timestamp = Number(record.timestamp ?? record.startDate);
           console.log('New Tab created in replay');
           tab = this.onApiHasNewTab(tabId, timestamp);
         }

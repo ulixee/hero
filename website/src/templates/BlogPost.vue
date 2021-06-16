@@ -19,6 +19,7 @@ query Post ($path: String!) {
 import { Component, Vue } from 'vue-property-decorator';
 
 @Component({
+    // @ts-ignore
   metaInfo() {
     // @ts-ignore
     const { title, headings } = this.$page.record;

@@ -7,7 +7,6 @@ import AppView from './AppView';
 import ReplayView from './ReplayView';
 import IWindowLocation, { InternalLocations } from '~shared/interfaces/IWindowLocation';
 import ViewBackend from '~backend/models/ViewBackend';
-import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import generateContextMenu from '~backend/menus/generateContextMenu';
 import { ISessionTab } from '~shared/interfaces/ISaSession';
@@ -200,7 +199,7 @@ export default class Window {
       height: this.fullscreen ? height : height - toolbarContentHeight,
     };
     if (this.isReplayActive) {
-      bounds.height -= TOOLBAR_HEIGHT;
+      bounds.height -= this.replayView.toolbarHeight;
     }
     return bounds;
   }

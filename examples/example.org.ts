@@ -11,11 +11,14 @@ async function run() {
   console.log('-- PRINTING outerHTML ---------------');
   console.log(html);
   agent.output.html = html;
+  agent.output.title = await agent.document.title;
+  agent.output.intro = await agent.document.querySelector('p').textContent;
 
   console.log('-------------------------------------');
-  console.log('DONE');
 
   await agent.close();
+
+  console.log('OUTPUT from https://example.org', agent.output);
 }
 
 run().catch(error => console.log(error));

@@ -1,4 +1,5 @@
 export const ICON_ADD = require('~frontend/assets/icons/add.svg');
+export const ICON_BRACKETS = require('~frontend/assets/icons/brackets.svg');
 export const ICON_CLOSE = require('~frontend/assets/icons/close.svg');
 export const ICON_MORE = require('~frontend/assets/icons/more.svg');
 export const ICON_DOWN = require('~frontend/assets/icons/down.svg');

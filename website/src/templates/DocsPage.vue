@@ -60,6 +60,7 @@ import generateLinks from '../lib/generateLinks';
 const links = generateLinks();
 
 @Component({
+    // @ts-ignore
   metaInfo() {
     // @ts-ignore
     const { title, headings } = this.$page.record;

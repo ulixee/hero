@@ -285,7 +285,7 @@ export default class ReplayTabState extends EventEmitter {
 
     const idx = array.length;
     array.push(event);
-    const tick = new ReplayTick(this, eventType, idx, event.commandId, event.timestamp);
+    const tick = new ReplayTick(this, eventType, idx, event.commandId, Number(event.timestamp));
     this.ticks.push(tick);
   }
 

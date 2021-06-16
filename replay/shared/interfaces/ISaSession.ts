@@ -57,3 +57,11 @@ export interface IScrollRecord {
   commandId: number;
   timestamp: number;
 }
+
+export interface IOutputChange {
+  type: 'insert' | 'delete' | 'update' | 'reorder';
+  path: string;
+  value: string;
+  lastCommandId: number;
+  timestamp: number;
+}
