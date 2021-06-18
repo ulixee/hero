@@ -110,7 +110,8 @@ describe('waitForAllDispatches', () => {
       });
     }
 
-    await handler.waitForAllDispatches();
+    const results = await handler.waitForAllDispatches();
+    expect(results).toHaveLength(10);
     expect(counter).toBe(10);
     expect(await agent1.sessionId).toBeTruthy();
   });
@@ -178,18 +179,21 @@ describe('waitForAllDispatchesSettled', () => {
     handler.dispatchAgent(
       async agent => {
         await agent.goto(koaServer.baseUrl);
+        agent.output = { result: 1 };
       },
       { input: { test: 1 } },
     );
 
     const dispatchResult = await handler.waitForAllDispatchesSettled();
-    expect(Object.keys(dispatchResult)).toHaveLength(2);
-    expect(dispatchResult[failedAgentSessionId]).toBeTruthy();
-    expect(dispatchResult[failedAgentSessionId].error).toBeTruthy();
-    expect(dispatchResult[failedAgentSessionId].error.message).toMatch('invalid url');
-    expect(dispatchResult[failedAgentSessionId].options.input).toStrictEqual({
+    expect(dispatchResult).toHaveLength(2);
+    expect(dispatchResult[0].error).toBeTruthy();
+    expect(dispatchResult[0].error.message).toMatch('invalid url');
+    expect(dispatchResult[0].options.input).toStrictEqual({
       test: 1,
     });
+
+    expect(dispatchResult[1].error).not.toBeTruthy();
+    expect(dispatchResult[1].output).toStrictEqual({ result: 1 });
   });
 });
 

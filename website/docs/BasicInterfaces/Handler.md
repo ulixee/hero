@@ -16,8 +16,6 @@ import { Handler } from 'secret-agent';
     await agent.goto(`https://ulixee.org${dataset.href}`);
     const cost = agent.document.querySelector('.cost .large-text');
     agent.output.cost = await cost.textContent;
-
-    console.log('Cost of %s is %s', dataset.name, agent.output.cost);
   }
 
   const links = await agent.document.querySelectorAll('a.DatasetSummary');
@@ -33,7 +31,12 @@ import { Handler } from 'secret-agent';
     });
   }
 
-  await handler.waitForAllDispatches();
+  const results = await handler.waitForAllDispatches(); 
+  for (const result of results) {
+    const cost = result.output.cost;
+    const name = result.input.name;
+    console.log('Cost of %s is %s', name, cost);
+  }
   await handler.close();
 })();
 ```
@@ -225,15 +228,18 @@ const { Handler } = require('secret-agent');
 
 Waits for all agents which have been created using `dispatchAgent` to complete. If any errors are thrown by Agents, the first exception will be thrown upon awaiting this method.
 
-#### **Returns**: `Promise`
+#### **Returns**: `Promise<DispatchResult[]>`
+
+- DispatchResult
+  - sessionId `string key`. The session id assigned to the dispatched Agent.
+  - name `string`. The name assigned to this session.
+  - input `any`. Any input arguments passed to the dispatched Agent.
+  - output `any?`. The object set to agent.output if no error thrown.
+  - error `Error?`. An error if one has been thrown during dispatch.
+  - options `CreateAgentOptions`. Any arguments passed to the dispatched Agent.
 
 ### handler.waitForAllDispatchesSettled*()* {#wait-for-all-dispatches-settled}
 
 Waits for all agents which have been created using `dispatchAgent` to complete or throw an error. This method will always wait for all dispatches to finish, regardless of errors thrown. This is different from `waitForAllDispatches`, which will throw on any dispatch errors.
 
-#### **Returns**: `Promise<DispatchResults>`
-
-- DispatchResults { [sessionId: string]: { args?: any, error?: Error } }
-  - sessionId `string key`. The session id assigned to the dispatched Agent.
-  - args `any`. Any arguments passed to the dispatched Agent.
-  - error `Error?`. An error if one has been thrown during dispatch.
+#### **Returns**: `Promise<DispatchResult[]>`
