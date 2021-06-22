@@ -110,9 +110,9 @@ export default class Playbar extends Vue {
   }
 
   private async playbackTick() {
-    const next = await ipcRenderer.invoke('next-tick', this.tickRealtimeOffsetMs ?? 0);
+    const next = await ipcRenderer.invoke('next-tick', this.tickRealtimeOffsetMs ?? 0) ?? {};
     this.currentTickValue = next.playbarOffset || 0;
-    let millisToNextTick = Number(next.millisToNextTick || 0);
+    let millisToNextTick = Number(next.millisToNextTick || 10);
 
     console.log(
       'Playbar at %s. Next tick in %s. Previous offset of %s',

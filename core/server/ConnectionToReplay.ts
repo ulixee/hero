@@ -183,7 +183,11 @@ export default class ConnectionToReplay {
       const resourcesToSend = [];
 
       for (const resource of resources) {
-        if (resource.requestMethod !== 'GET' || !resource.responseHeaders) continue;
+        if (
+          (resource.type !== 'Document' && resource.requestMethod !== 'GET') ||
+          !resource.responseHeaders
+        )
+          continue;
         resourcesToSend.push({
           url: resource.requestUrl,
           id: resource.id,
