@@ -7,5 +7,4 @@ export default interface IAgentCreateOptions
   name?: string;
   showReplay?: boolean;
   connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
-  input?: { command?: string } & any;
 }

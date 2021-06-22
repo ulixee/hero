@@ -20,6 +20,7 @@ import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
 import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import ResourcesTable from '../models/ResourcesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -76,10 +77,7 @@ export default class SessionState {
     sessionId: string,
     sessionName: string | null,
     scriptInstanceMeta: IScriptInstanceMeta,
-    browserEmulatorId: string,
-    humanEmulatorId: string,
     viewport: IViewport,
-    timezoneId: string,
   ) {
     this.sessionId = sessionId;
     this.sessionName = sessionName;
@@ -107,22 +105,35 @@ export default class SessionState {
       );
     }
 
-    this.db.session.insert(
-      sessionId,
-      sessionName,
-      browserEmulatorId,
-      humanEmulatorId,
-      this.createDate,
-      scriptInstanceMeta?.id,
-      scriptInstanceMeta?.entrypoint,
-      scriptInstanceMeta?.startDate,
-      timezoneId,
-      viewport,
-    );
-
     loggerSessionIdNames.set(sessionId, sessionName);
 
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
+  }
+
+  public recordSession(options: {
+    browserEmulatorId: string;
+    browserVersion: string;
+    humanEmulatorId: string;
+    timezoneId?: string;
+    locale?: string;
+    sessionOptions: ISessionCreateOptions;
+  }) {
+    const { sessionName, scriptInstanceMeta, ...optionsToStore } = options.sessionOptions;
+    this.db.session.insert(
+      this.sessionId,
+      this.sessionName,
+      options.browserEmulatorId,
+      options.browserVersion,
+      options.humanEmulatorId,
+      this.createDate,
+      this.scriptInstanceMeta?.id,
+      this.scriptInstanceMeta?.entrypoint,
+      this.scriptInstanceMeta?.startDate,
+      options.timezoneId,
+      this.viewport,
+      options.locale,
+      optionsToStore,
+    );
   }
 
   public recordCommandStart(commandMeta: ICommandMeta) {

@@ -1,6 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
 import Log from '@secret-agent/commons/Logger';
-import ICreateTabOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -19,10 +18,11 @@ import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { IBoundLog } from "@secret-agent/interfaces/ILog";
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { MitmProxy } from '@secret-agent/mitm/index';
-import IViewport from "@secret-agent/interfaces/IViewport";
+import IViewport from '@secret-agent/interfaces/IViewport';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
@@ -31,7 +31,7 @@ import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
-import Plugins from "./Plugins";
+import Plugins from './Plugins';
 import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
@@ -84,15 +84,19 @@ export default class Session extends TypedEventEmitter<{
   private tabIdCounter = 0;
   private frameIdCounter = 0;
 
-  constructor(readonly options: ICreateTabOptions) {
+  constructor(readonly options: ISessionCreateOptions) {
     super();
     this.id = uuidv1();
     Session.byId[this.id] = this;
+    const providedOptions = { ...options };
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
 
     const { userAgent: userAgentSelector, browserEmulatorId, humanEmulatorId } = options;
-    this.plugins = new Plugins({ userAgentSelector, browserEmulatorId, humanEmulatorId }, this.logger);
+    this.plugins = new Plugins(
+      { userAgentSelector, browserEmulatorId, humanEmulatorId },
+      this.logger,
+    );
 
     this.browserEngine = this.plugins.browserEngine;
 
@@ -103,15 +107,17 @@ export default class Session extends TypedEventEmitter<{
 
     this.plugins.configure(options);
     this.timezoneId = options.timezoneId || '';
-    this.viewport = options.viewport || {
-      positionX: 0,
-      positionY: 0,
-      screenWidth: 1440,
-      screenHeight: 900,
-      width: 1440,
-      height: 900,
-      deviceScaleFactor: 1,
-    } as IViewport;
+    this.viewport =
+      options.viewport ||
+      ({
+        positionX: 0,
+        positionY: 0,
+        screenWidth: 1440,
+        screenHeight: 900,
+        width: 1440,
+        height: 900,
+        deviceScaleFactor: 1,
+      } as IViewport);
 
     this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
@@ -119,16 +125,17 @@ export default class Session extends TypedEventEmitter<{
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
-      this.plugins.browserEmulator.id,
-      this.plugins.humanEmulator.id,
       this.viewport,
-      this.timezoneId,
     );
-    this.mitmRequestSession = new RequestSession(
-      this.id,
-      this.plugins,
-      this.upstreamProxyUrl,
-    );
+    this.sessionState.recordSession({
+      browserEmulatorId: this.plugins.browserEmulator.id,
+      browserVersion: this.browserEngine.fullVersion,
+      humanEmulatorId: this.plugins.humanEmulator.id,
+      locale: this.plugins.browserEmulator.locale,
+      timezoneId: this.plugins.browserEmulator.timezoneId,
+      sessionOptions: providedOptions,
+    });
+    this.mitmRequestSession = new RequestSession(this.id, this.plugins, this.upstreamProxyUrl);
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,

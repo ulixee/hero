@@ -486,6 +486,7 @@ class SessionConnection {
       throw coreSession;
     }
     this.hasConnected = true;
+
     const { plugins } = getState(this.agent);
     const { showReplay, connectionToCore, ...options } = getState(this.agent)
       .options as IAgentCreateOptions;

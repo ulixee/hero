@@ -11,6 +11,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['id', 'TEXT'],
         ['name', 'TEXT'],
         ['browserEmulatorId', 'TEXT'],
+        ['browserVersion', 'TEXT'],
         ['humanEmulatorId', 'TEXT'],
         ['screenWidth', 'INTEGER'],
         ['screenHeight', 'INTEGER'],
@@ -21,6 +22,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
         ['scriptEntrypoint', 'TEXT'],
         ['scriptStartDate', 'INTEGER'],
         ['timezoneId', 'TEXT'],
+        ['locale', 'TEXT'],
+        ['createSessionOptions', 'TEXT'],
       ],
       true,
     );
@@ -30,6 +33,7 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     id: string,
     name: string,
     browserEmulatorId: string,
+    browserVersion: string,
     humanEmulatorId: string,
     startDate: Date,
     scriptInstanceId: string,
@@ -37,11 +41,14 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
     scriptStartDate: number,
     timezoneId: string,
     viewport: IViewport,
+    locale: string,
+    createSessionOptions: any,
   ) {
     const record = [
       id,
       name,
       browserEmulatorId,
+      browserVersion,
       humanEmulatorId,
       viewport.screenWidth,
       viewport.screenHeight,
@@ -52,6 +59,8 @@ export default class SessionTable extends SqliteTable<ISessionRecord> {
       scriptEntrypoint,
       scriptStartDate,
       timezoneId,
+      locale,
+      JSON.stringify(createSessionOptions),
     ];
     this.insertNow(record);
   }
@@ -73,6 +82,7 @@ export interface ISessionRecord {
   id: string;
   name: string;
   browserEmulatorId: string;
+  browserVersion: string;
   humanEmulatorId: string;
   screenWidth: number;
   screenHeight: number;
@@ -83,4 +93,6 @@ export interface ISessionRecord {
   scriptEntrypoint: string;
   scriptStartDate: number;
   timezoneId: string;
+  locale: string;
+  createSessionOptions: string;
 }

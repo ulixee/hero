@@ -20,7 +20,6 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import BrowserEmulators from '../lib/BrowserEmulators';
 import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);

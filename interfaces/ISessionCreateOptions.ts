@@ -13,5 +13,6 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   timezoneId?: string;
   locale?: string;
   upstreamProxyUrl?: string;
+  input?: { command?: string } & any;
   dependencyMap?: { [clientPluginId: string]: string[] }
 }
