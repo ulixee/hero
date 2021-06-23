@@ -20,8 +20,9 @@ let context: IPuppetContext;
 beforeAll(async () => {
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
-  puppet.start();
+  await puppet.start();
   const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  plugins.browserEmulator.onNewPuppetPage = null;
   context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close().catch(), true);
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });

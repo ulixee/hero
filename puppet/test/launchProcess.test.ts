@@ -32,8 +32,7 @@ describe('launchProcess', () => {
       ...browserEngine,
       executablePath: 'random-invalid-path',
     });
-    await browser.start();
-    await expect(browser.isReady).rejects.toThrowError('Failed to launch');
+    await expect(browser.start()).rejects.toThrowError('Failed to launch');
   });
 
   it('should be callable twice', async () => {

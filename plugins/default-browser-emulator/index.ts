@@ -29,7 +29,7 @@ import configureSessionTls from './lib/helpers/configureSessionTls';
 import FirstPartyCookiesPlugin from './lib/plugins/FirstPartyCookiesPlugin';
 import DataLoader from './lib/DataLoader';
 import IBrowserData from './interfaces/IBrowserData';
-import selectBrowserEngineOption from "./lib/helpers/selectBrowserEngineOption";
+import selectBrowserEngineOption from './lib/helpers/selectBrowserEngineOption';
 
 const dataLoader = new DataLoader(__dirname);
 export const latestBrowserEngineId = 'chrome-88-0';
@@ -54,7 +54,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
     }
   }
 
-  configure(config: IBrowserEmulatorConfig) {
+  configure(config: IBrowserEmulatorConfig): void {
     if (!config) return;
 
     config.locale = config.locale || this.locale || this.data.browserConfig.defaultLocale;
@@ -70,19 +70,19 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
     this.timezoneId = config.timezoneId;
   }
 
-  public async onDnsConfiguration(settings: IDnsSettings): Promise<void> {
+  public onDnsConfiguration(settings: IDnsSettings): void {
     configureSessionDns(this, settings);
   }
 
-  public async onTcpConfiguration(settings: ITcpSettings): Promise<void> {
+  public onTcpConfiguration(settings: ITcpSettings): void {
     configureSessionTcp(this, settings);
   }
 
-  public async onTlsConfiguration(settings: ITlsSettings): Promise<void> {
+  public onTlsConfiguration(settings: ITlsSettings): void {
     configureSessionTls(this, settings);
   }
 
-  public async beforeHttpRequest(resource: IHttpResourceLoadDetails): Promise<void> {
+  public beforeHttpRequest(resource: IHttpResourceLoadDetails): void {
     modifyHeaders(this, this.data, resource);
   }
 
@@ -95,7 +95,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
       setLocale(this, devtools),
       setScreensize(this, devtools),
       setActiveAndFocused(this, devtools),
-      // setPageDomOverrides(this, this.data, page),
+      setPageDomOverrides(this, this.data, page),
     ]);
   }
 
@@ -103,15 +103,20 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
     const devtools = worker.devtoolsSession;
     return Promise.all([
       setUserAgent(this, devtools),
-      // setWorkerDomOverrides(this, this.data, worker),
+      setWorkerDomOverrides(this, this.data, worker),
     ]);
   }
 
-  public static selectBrowserMeta(userAgentSelector?: string) {
+  public static selectBrowserMeta(
+    userAgentSelector?: string,
+  ): { browserEngine: BrowserEngine; userAgentOption: IUserAgentOption } {
     const userAgentOption = selectUserAgentOption(userAgentSelector, dataLoader.userAgentOptions);
     const { browserName, browserVersion } = userAgentOption;
-    const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`
-    const browserEngineOption = selectBrowserEngineOption(browserEngineId, dataLoader.browserEngineOptions);
+    const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;
+    const browserEngineOption = selectBrowserEngineOption(
+      browserEngineId,
+      dataLoader.browserEngineOptions,
+    );
     const browserEngine = new BrowserEngine(dataLoader.pkg.name, browserEngineOption);
     return { browserEngine, userAgentOption };
   }

@@ -47,7 +47,6 @@ import { Keyboard } from './Keyboard';
  *
  * @public
  */
-let startStamp;
 
 export default class Mouse {
   public position: IPoint = { x: 0, y: 0 };
@@ -59,7 +58,6 @@ export default class Mouse {
   constructor(devtoolsSession: DevtoolsSession, keyboard: Keyboard) {
     this.devtoolsSession = devtoolsSession;
     this.keyboard = keyboard;
-    startStamp = Date.now();
   }
 
   async move(x: number, y: number): Promise<void> {
@@ -68,13 +66,7 @@ export default class Mouse {
     if (roundedX === this.position.x && roundedY === this.position.y) return;
     this.position.x = roundedX;
     this.position.y = roundedY;
-    console.log('mouse.move: ', Date.now() - startStamp, {
-      type: 'mouseMoved',
-      button: this.button,
-      x: this.position.x,
-      y: this.position.y,
-      modifiers: this.keyboard.modifiers,
-    });
+
     await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mouseMoved',
       button: this.button,
@@ -82,7 +74,6 @@ export default class Mouse {
       y: this.position.y,
       modifiers: this.keyboard.modifiers,
     });
-    console.log('mouse.moved: ', Date.now() - startStamp);
   }
 
   async down(options: IMouseOptions = {}): Promise<void> {

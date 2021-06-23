@@ -19,8 +19,8 @@ export interface IBrowserEmulatorClass {
 }
 
 export interface ISelectBrowserMeta {
-  userAgentOption: IUserAgentOption,
-  browserEngine: IBrowserEngine
+  userAgentOption: IUserAgentOption;
+  browserEngine: IBrowserEngine;
 }
 
 export interface IBrowserEmulator extends IBrowserEmulatorMethods, IBrowserEmulatorConfig {
@@ -37,19 +37,19 @@ export interface IBrowserEmulator extends IBrowserEmulatorMethods, IBrowserEmula
 }
 
 export interface IBrowserEmulatorMethods {
-  configure?(options: IBrowserEmulatorConfig): void;
+  configure?(options: IBrowserEmulatorConfig): Promise<any> | void;
 
-  onDnsConfiguration?(settings: IDnsSettings): void;
-  onTcpConfiguration?(settings: ITcpSettings): void;
-  onTlsConfiguration?(settings: ITlsSettings): void;
+  onDnsConfiguration?(settings: IDnsSettings): Promise<any> | void;
+  onTcpConfiguration?(settings: ITcpSettings): Promise<any> | void;
+  onTlsConfiguration?(settings: ITlsSettings): Promise<any> | void;
 
-  beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any>;
-  beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any>;
+  beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any> | void;
+  beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;
 
   onNewPuppetPage?(page: IPuppetPage): Promise<any>;
   onNewPuppetWorker?(worker: IPuppetWorker): Promise<any>;
 
-  websiteHasFirstPartyInteraction?(url: URL): void; // needed for implementing first-party cookies
+  websiteHasFirstPartyInteraction?(url: URL): Promise<any> | void; // needed for implementing first-party cookies
 }
 
 export interface IBrowserEmulatorConfig {

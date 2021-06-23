@@ -25,7 +25,7 @@ let puppet: Puppet;
 beforeAll(async () => {
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
-  puppet.start();
+  await puppet.start();
 });
 
 afterAll(Helpers.afterAll);

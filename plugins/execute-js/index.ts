@@ -1,9 +1,4 @@
-import ClientExtender from './src/ClientExtender';
-import CoreExtender from './src/CoreExtender';
+import ClientExtender from './lib/ClientExtender';
+import CoreExtender from './lib/CoreExtender';
 
-export {
-  ClientExtender,
-  CoreExtender,
-}
-
-
+export { ClientExtender, CoreExtender };

@@ -18,8 +18,6 @@ import * as pkg from './package.json';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
-let startStamp;
-
 @HumanEmulatorClassDecorator
 export default class DefaultHumanEmulator extends HumanEmulatorBase {
   public static id = pkg.name.replace('@secret-agent/', '');
@@ -35,11 +33,6 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
   public static wordsPerMinuteRange = [30, 50];
 
   private millisPerCharacter: number;
-
-  constructor(options) {
-    super(options);
-    startStamp = Date.now();
-  }
 
   public getStartingMousePoint(helper: IInteractionsHelper): Promise<IPoint> {
     const viewport = helper.viewport;
@@ -60,22 +53,18 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
   ): Promise<void> {
     const millisPerCharacter = this.calculateMillisPerChar();
 
-    console.log('TIMESTAMP: ', Date.now() - startStamp);
     for (let i = 0; i < interactionGroups.length; i += 1) {
       if (i > 0) {
         const millis = Math.random() * DefaultHumanEmulator.maxDelayBetweenInteractions;
-        console.log('TIMESTAMP - delay ', millis);
         await delay(millis);
       }
       for (const step of interactionGroups[i]) {
         if (step.command === InteractionCommand.scroll) {
-          console.log('TIMESTAMP - scroll ', Date.now() - startStamp);
           await this.scroll(step, runFn, helper);
           continue;
         }
 
         if (step.command === InteractionCommand.move) {
-          console.log('TIMESTAMP - moveMouse ', Date.now() - startStamp);
           await this.moveMouse(step, runFn, helper);
           continue;
         }
@@ -84,14 +73,7 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
           step.command === InteractionCommand.click ||
           step.command === InteractionCommand.doubleclick
         ) {
-          console.log('TIMESTAMP - moveMouseAndClick ', Date.now() - startStamp);
-          try {
-            console.log('------------------');
-            await this.moveMouseAndClick(step, runFn, helper);
-          } catch (error) {
-            console.log('TIMESTAMP - ERROR ', Date.now() - startStamp);
-            throw error;
-          }
+          await this.moveMouseAndClick(step, runFn, helper);
           continue;
         }
 
@@ -99,18 +81,15 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
           for (const keyboardCommand of step.keyboardCommands) {
             if ('string' in keyboardCommand) {
               for (const char of keyboardCommand.string) {
-                console.log('TIMESTAMP - getKeyboardCommandWithDelay ', Date.now() - startStamp);
                 await runFn(this.getKeyboardCommandWithDelay({ string: char }, millisPerCharacter));
               }
             } else {
-              console.log('TIMESTAMP - getKeyboardCommandWithDelay ', Date.now() - startStamp);
               await runFn(this.getKeyboardCommandWithDelay(keyboardCommand, millisPerCharacter));
             }
           }
           continue;
         }
 
-        console.log('TIMESTAMP - runFn ', Date.now() - startStamp);
         await runFn(step);
       }
     }
@@ -150,16 +129,13 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
     const originalMousePosition = [...interactionStep.mousePosition];
     interactionStep.delayMillis = Math.floor(Math.random() * 100);
 
-    console.log('TIMESTAMP - lookupBoundingRect ', Date.now() - startStamp);
     const targetRect = await helper.lookupBoundingRect(
       nodeId ? [nodeId] : interactionStep.mousePosition,
       true,
     );
 
     const targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
-    console.log('TIMESTAMP - moveMouseToPoint ', Date.now() - startStamp);
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, runFn, helper);
-    console.log('TIMESTAMP - lookupBoundingRect ', Date.now() - startStamp);
     const finalRect = didMoveMouse
       ? await helper.lookupBoundingRect([targetRect.nodeId], true, true)
       : targetRect;
@@ -184,10 +160,15 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
         if (isScroll) {
           const scrollToStep = interactionStep;
           if (targetRect.nodeId) scrollToStep.mousePosition = [targetRect.nodeId];
-          console.log('TIMESTAMP - scroll ', Date.now() - startStamp);
           await this.scroll(scrollToStep, runFn, helper);
         }
-        return this.moveMouseAndClick(interactionStep, runFn, helper, targetRect.nodeId, retries + 1);
+        return this.moveMouseAndClick(
+          interactionStep,
+          runFn,
+          helper,
+          targetRect.nodeId,
+          retries + 1,
+        );
       }
       throw new Error(
         'Element or mousePosition remains out of viewport after 2 attempts to move it into view',
@@ -199,7 +180,6 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
       throwOnFail: boolean,
     ) => Promise<IMouseUpResult> = null;
     if (targetRect.nodeId && targetRect.elementTag !== 'option') {
-      console.log('TIMESTAMP - createMouseupTrigger ', Date.now() - startStamp);
       const listener = await helper.createMouseupTrigger(targetRect.nodeId);
       clickConfirm = listener.didTrigger;
     }
@@ -209,7 +189,6 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
       interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
     }
 
-    console.log('TIMESTAMP - runFn ', Date.now() - startStamp);
     await runFn(interactionStep);
 
     if (clickConfirm !== null) {
@@ -242,11 +221,7 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
     });
 
     if (!vector.length) return false;
-    let i = 0;
-    console.log('VECTORS = ', vector.length);
     for (const { x, y } of vector) {
-      i += 1;
-      console.log(`TIMESTAMP - VECTOR ${i}`, Date.now() - startStamp, { x, y });
       await runFn({
         mousePosition: [x, y],
         command: InteractionCommand.move,

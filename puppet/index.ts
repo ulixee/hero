@@ -4,10 +4,10 @@ import Log from '@secret-agent/commons/Logger';
 import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import Resolvable from '@secret-agent/commons/Resolvable';
 import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
@@ -17,95 +17,86 @@ let puppBrowserCounter = 1;
 export default class Puppet {
   public readonly id: number;
   public readonly browserEngine: IBrowserEngine;
-  public isShuttingDown: boolean;
-  public get supportsBrowserContextProxy(): Promise<boolean> {
-    return this.browserFeaturesPromise.promise;
-  }
+  public supportsBrowserContextProxy: boolean;
+  private readonly launchArguments: string[] = [];
+  private readonly launcher: IPuppetLauncher;
+  private isShuttingDown = false;
+  private isStarted = false;
+  private browser: IPuppetBrowser;
 
-  private browserFeaturesPromise = new Resolvable<boolean>();
-  private browserOrError: Promise<IPuppetBrowser | Error>;
-
-  public get isReady(): Promise<IPuppetBrowser> {
-    return this.browserOrError.then(x => {
-      if (x instanceof Error) throw x;
-      return x;
-    });
-  }
-
-  constructor(browserEngine: IBrowserEngine) {
+  constructor(browserEngine: IBrowserEngine, args: IPuppetLaunchArgs = {}) {
     this.browserEngine = browserEngine;
-    this.isShuttingDown = false;
     this.id = puppBrowserCounter;
-    this.browserOrError = null;
+    if (browserEngine.name === 'chrome') {
+      if (browserEngine.isHeaded) args.showBrowser = true;
+      this.launchArguments = PuppetChrome.getLaunchArgs(args, browserEngine);
+      this.launcher = PuppetChrome;
+    } else {
+      throw new Error(`No Puppet launcher available for ${this.browserEngine.name}`);
+    }
     puppBrowserCounter += 1;
   }
 
-  public start(args: IPuppetLaunchArgs = {}): Promise<IPuppetBrowser | Error> {
-    if (this.browserOrError) {
-      return this.browserOrError;
-    }
-    this.isShuttingDown = false;
-
-    let launcher: IPuppetLauncher;
-    if (this.browserEngine.name === 'chrome') {
-      launcher = PuppetChrome;
-    }
-
-    this.browserOrError = this.launchEngine(launcher, args).catch(err => err);
-    return this.browserOrError;
-  }
-
-  public async newContext(
-    plugins: IPlugins,
-    logger: IBoundLog,
-    proxy?: IProxyConnectionOptions,
-  ) {
-    const browser = await this.browserOrError;
-    if (browser instanceof Error) throw browser;
-    if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(plugins, logger, proxy);
-  }
-
-  public async close() {
-    if (this.isShuttingDown) return;
-    this.isShuttingDown = true;
-    log.stats('Puppet.Closing');
-
-    const browserPromise = this.browserOrError;
-    this.browserOrError = null;
-
+  public async start(): Promise<Puppet> {
     try {
-      const browser = await browserPromise;
-      if (browser && !(browser instanceof Error)) await browser.close();
-    } catch (error) {
-      log.error('Puppet.Closing:Error', { sessionId: null, error });
-    }
-  }
+      this.isStarted = true;
 
-  private async launchEngine(
-    launcher: IPuppetLauncher,
-    args: IPuppetLaunchArgs,
-  ): Promise<IPuppetBrowser> {
-    try {
-      const launchArgs = launcher.getLaunchArgs(args, this.browserEngine);
+      if (this.browserEngine.verifyLaunchable) {
+        await this.browserEngine.verifyLaunchable();
+      }
 
-      if (this.browserEngine.verifyLaunchable) await this.browserEngine.verifyLaunchable();
+      const launchedProcess = await launchProcess(
+        this.browserEngine.executablePath,
+        this.launchArguments,
+        {},
+      );
 
-      const launchedProcess = await launchProcess(this.browserEngine.executablePath, launchArgs, {});
+      this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
 
-      const browser = await launcher.createPuppet(launchedProcess, this.browserEngine);
+      const features = await this.browser.getFeatures();
+      this.supportsBrowserContextProxy = features?.supportsPerBrowserContextProxy ?? false;
 
-      const features = await browser.getFeatures();
-
-      this.browserFeaturesPromise.resolve(features?.supportsPerBrowserContextProxy);
-      return browser;
+      return this;
     } catch (err) {
-      const launchError = launcher.translateLaunchError(err);
+      const launchError = this.launcher.translateLaunchError(err);
       throw new PuppetLaunchError(
         launchError.message,
         launchError.stack,
         launchError.isSandboxError,
       );
+    }
+  }
+
+  public isSameEngine(other: Puppet): boolean {
+    return (
+      this.browserEngine.executablePath === other.browserEngine.executablePath &&
+      this.launchArguments.toString() === other.launchArguments.toString()
+    );
+  }
+
+  public newContext(
+    plugins: IPlugins,
+    logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
+  ): Promise<IPuppetContext> {
+    if (!this.isStarted || !this.browser) {
+      throw new Error('This Puppet instance has not had start() called on it');
+    }
+    if (this.isShuttingDown) throw new Error('Shutting down');
+    return this.browser.newContext(plugins, logger, proxy);
+  }
+
+  public async close() {
+    if (this.isShuttingDown || !this.isStarted) return;
+    this.isShuttingDown = true;
+    log.stats('Puppet.Closing');
+
+    try {
+      await this.browser?.close();
+    } catch (error) {
+      log.error('Puppet.Closing:Error', { sessionId: null, error });
+    } finally {
+      log.stats('Puppet.closed');
     }
   }
 }

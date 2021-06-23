@@ -4,12 +4,11 @@ import CoreExtenderBase from '@secret-agent/plugin-utils/lib/CoreExtenderBase';
 
 const { name: pluginId } = require('../package.json');
 
-
 export default class ExecuteJsCorePlugin extends CoreExtenderBase {
   public static id = pluginId;
 
   public async onCommand(
-    { command, puppetPage }: IOnCommandMeta,
+    { puppetPage }: IOnCommandMeta,
     fnName: string,
     serializedFn: string,
   ): Promise<any> {

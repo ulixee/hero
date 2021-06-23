@@ -12,8 +12,9 @@ import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
 import IPoint from '@secret-agent/interfaces/IPoint';
 import {
   IBrowserEmulator,
-  IBrowserEmulatorConfig, ISelectBrowserMeta
-} from "@secret-agent/interfaces/IPluginBrowserEmulator";
+  IBrowserEmulatorConfig,
+  ISelectBrowserMeta,
+} from '@secret-agent/interfaces/IPluginBrowserEmulator';
 import { IHumanEmulator } from '@secret-agent/interfaces/IPluginHumanEmulator';
 import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IPlugin, { IPluginClass } from '@secret-agent/interfaces/IPlugin';
@@ -53,7 +54,8 @@ export default class Plugins implements IPlugins {
     const HumanEmulator = Core.pluginMap.humanEmulatorsById[humanEmulatorId];
     if (!HumanEmulator) throw new Error(`Human emulator ${humanEmulatorId} was not found`);
 
-    const { browserEngine, userAgentOption } = options.selectBrowserMeta || BrowserEmulator.selectBrowserMeta(userAgentSelector);
+    const { browserEngine, userAgentOption } =
+      options.selectBrowserMeta || BrowserEmulator.selectBrowserMeta(userAgentSelector);
     this.createOptions = { browserEngine, logger, plugins: this };
     this.browserEngine = browserEngine;
 
@@ -122,11 +124,8 @@ export default class Plugins implements IPlugins {
   ): Promise<void> {
     const plugin = this.instances.filter(p => p.playInteractions).pop();
     if (plugin && plugin.playInteractions) {
-      console.log(`USING plugin.playInteractions (${plugin.id})`);
       await plugin.playInteractions(interactionGroups, runFn, helper);
-      console.log('FINISHED plugin.playInteractions');
     } else {
-      console.log('NOT USING plugin.playInteractions');
       for (const interactionGroup of interactionGroups) {
         for (const interactionStep of interactionGroup) {
           await runFn(interactionStep);

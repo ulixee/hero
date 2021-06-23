@@ -162,7 +162,10 @@ export default class Handler {
       }),
     );
     // keep going if there are new things queued
-    if (this.dispatches.length) return this.waitForAllDispatches();
+    if (this.dispatches.length) {
+      await new Promise(setImmediate);
+      return this.waitForAllDispatches();
+    }
   }
 
   public async waitForAllDispatchesSettled(): Promise<SettledDispatchesBySessionId> {

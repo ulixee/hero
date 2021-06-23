@@ -1,9 +1,10 @@
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import {
-  IBrowserEmulator,
   BrowserEmulatorClassDecorator,
-  IBrowserEmulatorClass, ISelectBrowserMeta
-} from "@secret-agent/interfaces/IPluginBrowserEmulator";
+  IBrowserEmulator,
+  IBrowserEmulatorClass,
+  ISelectBrowserMeta,
+} from '@secret-agent/interfaces/IPluginBrowserEmulator';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
@@ -51,6 +52,7 @@ export default class BrowserEmulatorBase implements IBrowserEmulator {
     this.logger = logger;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public static selectBrowserMeta(userAgentSelector: string): ISelectBrowserMeta {
     throw new Error('selectBrowserMeta() is missing implementation');
   }

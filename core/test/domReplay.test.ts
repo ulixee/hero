@@ -179,7 +179,7 @@ describe('basic Dom Replay tests', () => {
     const session = tab.session;
 
     const mirrorChrome = new Puppet(session.browserEngine);
-    mirrorChrome.start();
+    await mirrorChrome.start();
     Helpers.onClose(() => mirrorChrome.close());
 
     const mirrorContext = await mirrorChrome.newContext(session.plugins, log.createChild(module));

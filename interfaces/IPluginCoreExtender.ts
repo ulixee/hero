@@ -2,7 +2,7 @@ import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { IBrowserEmulatorMethods } from './IPluginBrowserEmulator';
 import { IHumanEmulatorMethods } from './IPluginHumanEmulator';
 import { PluginTypes } from './IPluginTypes';
-import IPluginCreateOptions from "./IPluginCreateOptions";
+import IPluginCreateOptions from './IPluginCreateOptions';
 
 export interface ICoreExtenderClass {
   id: string;
@@ -20,4 +20,5 @@ export interface IOnCommandMeta {
   puppetPage: IPuppetPage;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function CoreExtenderClassDecorator(constructor: ICoreExtenderClass): void {}

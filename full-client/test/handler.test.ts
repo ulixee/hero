@@ -17,12 +17,15 @@ afterAll(Helpers.afterAll);
 
 describe('Full client Handler', () => {
   it('allows you to run concurrent tasks', async () => {
+    koaServer.get('/handler', ctx => {
+      ctx.body = `<html><head><title>Handler page</title></head><body><h1>Here</h1></body></html>`;
+    });
     const concurrency = 5;
     const handler = new Handler({
       maxConcurrency: concurrency,
       host: await Core.server.address,
     });
-    Helpers.onClose(() => handler.close());
+    Helpers.needsClosing.push(handler);
     const sessionsRunning = new Map<string, boolean>();
     let hasReachedMax = false;
     const runningAtSameTime: string[][] = [];
@@ -37,7 +40,7 @@ describe('Full client Handler', () => {
           if (isRunning) concurrent.push(session);
         }
         runningAtSameTime.push(concurrent);
-        await agent.goto(koaServer.baseUrl);
+        await agent.goto(`${koaServer.baseUrl}/handler`);
         await agent.document.title;
 
         while (!hasReachedMax && runningAtSameTime.length < concurrency) {
@@ -52,8 +55,6 @@ describe('Full client Handler', () => {
     await handler.waitForAllDispatches();
 
     expect(runningAtSameTime.filter(x => x.length > concurrency)).toHaveLength(0);
-
-    await handler.close();
   });
 
   it('waits for an agent to close that is checked out', async () => {
@@ -94,7 +95,7 @@ describe('waitForAllDispatches', () => {
       maxConcurrency: 2,
       host: await Core.server.address,
     });
-    Helpers.onClose(() => handler.close(), true);
+    Helpers.needsClosing.push(handler);
 
     const agent1 = await handler.createAgent();
     let counter = 0;
@@ -120,7 +121,7 @@ describe('waitForAllDispatches', () => {
       maxConcurrency: 2,
       host: await Core.server.address,
     });
-    Helpers.onClose(() => handler.close(), true);
+    Helpers.needsClosing.push(handler);
 
     const agent1 = await handler.createAgent();
 
@@ -156,7 +157,7 @@ describe('waitForAllDispatchesSettled', () => {
       maxConcurrency: 2,
       host: await Core.server.address,
     });
-    Helpers.onClose(() => handler.close(), true);
+    Helpers.needsClosing.push(handler);
 
     let failedAgentSessionId: string;
     handler.dispatchAgent(

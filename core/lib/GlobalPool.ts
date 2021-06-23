@@ -90,40 +90,16 @@ export default class GlobalPool {
       });
   }
 
-  private static async addPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
-    const existing = this.getPuppet(browserEngine);
-    if (existing) {
-      if (existing instanceof Error) throw existing;
-      return existing;
-    }
+  private static getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+    const args = this.getPuppetLaunchArgs();
+    const puppet = new Puppet(browserEngine, args);
 
-    if (!this.defaultLaunchArgs) {
-      this.defaultLaunchArgs = {
-        showBrowser: Boolean(
-          JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
-        ),
-        disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
-        noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
-        disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
-        enableMitm: !disableMitm,
-      };
-    }
+    const existing = this.puppets.find(x => x.isSameEngine(puppet));
+    if (existing) return Promise.resolve(existing);
 
-    const puppet = new Puppet(browserEngine);
     this.puppets.push(puppet);
 
-    const browserOrError = await puppet.start({
-      ...this.defaultLaunchArgs,
-      proxyPort: this.mitmServer?.port,
-      showBrowser: browserEngine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
-    });
-    if (browserOrError instanceof Error) throw browserOrError;
-    return puppet;
-  }
-
-  private static getPuppet(browserEngine?: IBrowserEngine) {
-    if (!browserEngine) return this.puppets[0];
-    return this.puppets.find(x => x.browserEngine === browserEngine);
+    return puppet.start();
   }
 
   private static async startMitm() {
@@ -139,15 +115,13 @@ export default class GlobalPool {
     await this.startMitm();
 
     this._activeSessionCount += 1;
-    let puppet: Puppet;
     try {
       const session = new Session(options);
 
-      puppet =
-        this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
+      const puppet = await this.getPuppet(session.browserEngine);
 
       if (disableMitm !== true) {
-        await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
+        await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);
       }
 
       const browserContext = await puppet.newContext(
@@ -193,6 +167,22 @@ export default class GlobalPool {
 
     log.info('TransferredChromeToWaitingAcquirer');
     return true;
+  }
+
+  private static getPuppetLaunchArgs() {
+    this.defaultLaunchArgs ??= {
+      showBrowser: Boolean(
+        JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
+      ),
+      disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
+      noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
+      disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
+      enableMitm: !disableMitm,
+    };
+    return {
+      ...this.defaultLaunchArgs,
+      proxyPort: this.mitmServer?.port,
+    };
   }
 
   public static get sessionsDir(): string {

@@ -201,12 +201,7 @@ export default class Interactor implements IInteractionsHelper {
     switch (interaction.command) {
       case InteractionCommand.move: {
         const { x, y } = await this.getPositionXY(interaction.mousePosition);
-        try {
-          await this.mouse.move(x, y);
-        } catch (error) {
-          console.log('ERROR: ', error);
-          throw error;
-        }
+        await this.mouse.move(x, y);
         break;
       }
       case InteractionCommand.scroll: {

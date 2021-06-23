@@ -23,7 +23,7 @@ let puppet: Puppet;
 beforeAll(async () => {
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
-  puppet.start();
+  await puppet.start();
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -52,10 +52,18 @@ test('it should mimic a chrome object', async () => {
     )) as any,
   ).window;
   if (debug) console.log(inspect(structure.chrome, false, null, true));
+
+  const structureJson = JSON.stringify(structure.chrome, (key, value) => {
+    if (key === '_$value' || key === '_$invocation') return undefined;
+    return value;
+  });
+
+  const chromeJson = JSON.stringify(chrome, (key, value) => {
+    if (key === '_$value' || key === '_$invocation') return undefined;
+    return value;
+  });
   // must delete csi's invocation since it's different on each run
-  delete structure.chrome.csi._$invocation;
-  delete chrome.csi._$invocation;
-  expect(structure.chrome).toStrictEqual(chrome);
+  expect(structureJson).toBe(chromeJson);
 }, 60e3);
 
 test('it should update loadtimes and csi values', async () => {

@@ -19,6 +19,7 @@ import { IScrollEvent } from '@secret-agent/interfaces/IScrollEvent';
 import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
 import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import ResourcesTable from '../models/ResourcesTable';
 import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
@@ -438,7 +439,11 @@ export default class SessionState {
     message: string,
     location?: string,
   ): void {
-    this.logger.info('Window.console', { message });
+    let level = 'info';
+    if (message.startsWith('ERROR:') && message.includes(injectedSourceUrl)) {
+      level = 'error';
+    }
+    this.logger[level]('Window.console', { message });
     this.db.pageLogs.insert(tabId, frameId, consoleType, message, new Date(), location);
   }
 

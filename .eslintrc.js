@@ -65,15 +65,15 @@ module.exports = {
       },
     },
     {
-      files: 'plugin-utils/test/*.ts',
+      files: 'plugin*/**/test/*.ts',
       rules: {
         'no-console': 'off',
       },
     },
     {
-      files: 'plugins/default-browser-emulator/**/*.ts',
+      files: 'plugin*/**/*.d.ts',
       rules: {
-        'require-await': 'off', // Turn off while waiting
+        'import/no-extraneous-dependencies': 'off',
       },
     },
     {

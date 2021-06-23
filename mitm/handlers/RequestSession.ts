@@ -11,7 +11,6 @@ import * as net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Log from '@secret-agent/commons/Logger';
 import MitmSocket from '@secret-agent/mitm-socket/index';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import IPlugins from '@secret-agent/interfaces/IPlugins';
 import { URL } from 'url';
 import MitmRequestAgent from '../lib/MitmRequestAgent';

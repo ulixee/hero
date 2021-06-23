@@ -63,7 +63,6 @@ export default class SessionDb {
   constructor(baseDir: string, id: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = id;
-    console.log('CREATING ', `${baseDir}/${id}.db`);
     this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
