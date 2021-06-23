@@ -75,7 +75,8 @@
     "source-map-support": "^0.5.19",
     "tar": "^6.1.0",
     "uuid": "^8.3.2",
-    "ws": "^7.4.4"
+    "ws": "^7.4.4",
+    "@secret-agent/commons": "^1.4.1-alpha.4"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.113",

@@ -16,13 +16,7 @@ const copyArgs = [
   '.*ignore',
 ];
 if (isBuild) {
-  copyArgs.push(
-    'testing/*/**',
-    'core/test/html/**',
-    'puppet/test/*/**',
-    'mitm-socket/dist/*',
-    'yarn.lock',
-  );
+  copyArgs.push('testing/*/**', 'core/test/html/**', 'puppet/test/*/**', 'yarn.lock');
 }
 
 for (const workspace of workspaces) {

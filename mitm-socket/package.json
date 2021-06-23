@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node install.js",
-    "build-install": "npm run build",
-    "postinstall": "npm run build"
+    "build-install": "npm run build"
   },
   "dependencies": {
     "@secret-agent/commons": "1.4.1-alpha.4",

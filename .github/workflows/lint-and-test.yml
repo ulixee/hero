@@ -112,14 +112,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Install mitm
-        run: yarn run build
-        working-directory: ./mitm-socket
-        env:
-          SA_REBUILD_MITM_SOCKET: true
-
-      - name: Copy built mitm
-        run: cp -r mitm-socket/dist build/mitm-socket
+      - name: Copy mitm source
+        run: cp -r mitm-socket/go build/mitm-socket/go
 
       - name: Build modules
         run: yarn --network-timeout 1000000
@@ -127,6 +121,7 @@ jobs:
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          SA_REBUILD_MITM_SOCKET: 1
 
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}

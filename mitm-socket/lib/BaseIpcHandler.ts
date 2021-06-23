@@ -8,9 +8,13 @@ import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@secret-agent/commons/utils';
 import { createId, createIpcSocketPath } from '@secret-agent/commons/IpcUtils';
+import * as Fs from 'fs';
+import * as Path from 'path';
 
 const ext = os.platform() === 'win32' ? '.exe' : '';
-const libPath = `${__dirname}/../dist/connect${ext}`;
+const libPath = Path.join(__dirname, '/../dist/', `connect${ext}`);
+
+const distExists = Fs.existsSync(libPath);
 
 const { log } = Log(module);
 
@@ -41,6 +45,10 @@ export default abstract class BaseIpcHandler {
 
   protected constructor(options: Partial<IGoIpcOpts>) {
     this.options = this.getDefaultOptions(options);
+
+    if (!distExists) {
+      throw new Error(`Required files missing! The MitmSocket library was not found at ${libPath}`);
+    }
 
     const mode = this.options.mode;
     this.handlerName = `${mode[0].toUpperCase() + mode.slice(1)}IpcHandler`;
