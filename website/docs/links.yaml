@@ -17,8 +17,8 @@
 
 - title: Advanced
   items:
-    - BrowserEmulators
-    - HumanEmulators
+#    - BrowserEmulators
+#    - HumanEmulators
     - UserProfile
     - CookieStorage
     - Dialog
