@@ -12,7 +12,8 @@ export default class ExecuteJsCorePlugin extends CoreExtenderBase {
     fnName: string,
     serializedFn: string,
   ): Promise<any> {
-    return await this.runFn(puppetPage, fnName, serializedFn);
+    const response = await this.runFn(puppetPage, fnName, serializedFn);
+    return response;
   }
 
   private async runFn(puppetPage: IPuppetPage, fnName: string, serializedFn: string) {

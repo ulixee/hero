@@ -538,12 +538,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
   }
 
-  public async runPluginCommand(pluginId: string, command: string, ...args: any[]): Promise<any> {
+  public async runPluginCommand(sendToPluginId, args: any[]): Promise<any> {
     const commandMeta = {
-      command,
       puppetPage: this.puppetPage,
     };
-    return await this.session.plugins.onPluginCommand(pluginId, commandMeta, args);
+    return await this.session.plugins.onPluginCommand(sendToPluginId, commandMeta, args);
   }
 
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {

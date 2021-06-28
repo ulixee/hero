@@ -22,8 +22,15 @@ export default class ExecuteJsClientPlugin extends ClientExtenderBase {
   // PRIVATE
 
   private executeJs(fn, sendToCore): Promise<any> {
-    const fnName = fn.name;
-    const serializedFn = fn.toString();
-    return sendToCore(pluginId, fnName, serializedFn);
+    let fnName;
+    let fnSerialized;
+    if (typeof fn === 'string') {
+      fnName = '';
+      fnSerialized = fn;
+    } else {
+      fnName = fn.name;
+      fnSerialized = `(${fn.toString()})();`;
+    }
+    return sendToCore(pluginId, fnName, fnSerialized);
   }
 }

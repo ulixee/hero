@@ -16,7 +16,6 @@ export interface ICoreExtender extends IBrowserEmulatorMethods, IHumanEmulatorMe
 }
 
 export interface IOnCommandMeta {
-  command: string;
   puppetPage: IPuppetPage;
 }
 

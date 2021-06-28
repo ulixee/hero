@@ -26,6 +26,7 @@ beforeAll(async () => {
   );
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
+  Helpers.onClose(() => coreServer.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);

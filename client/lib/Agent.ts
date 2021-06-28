@@ -496,9 +496,9 @@ class SessionConnection {
     return await coreSession;
   }
 
-  private async sendToActiveTab(pluginId: string, ...args: any[]): Promise<any> {
+  private async sendToActiveTab(sendToPluginId: string, ...args: any[]): Promise<any> {
     const coreSession = (await this._coreSession) as CoreSession;
     const coreTab = coreSession.tabsById.get(await this._activeTab.tabId);
-    return coreTab.commandQueue.run('Tab.runPluginCommand', pluginId, args);
+    return coreTab.commandQueue.run('Tab.runPluginCommand', sendToPluginId, args);
   }
 }

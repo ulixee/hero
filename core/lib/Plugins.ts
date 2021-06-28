@@ -40,6 +40,7 @@ export default class Plugins implements IPlugins {
   private readonly instances: ICoreExtender[] = [];
   private readonly instanceById: { [id: string]: ICoreExtender } = {};
   private readonly createOptions: IPluginCreateOptions;
+  private readonly logger: IBoundLog;
 
   constructor(options: IOptionsCreate, logger: IBoundLog) {
     const {
@@ -57,6 +58,7 @@ export default class Plugins implements IPlugins {
     const { browserEngine, userAgentOption } =
       options.selectBrowserMeta || BrowserEmulator.selectBrowserMeta(userAgentSelector);
     this.createOptions = { browserEngine, logger, plugins: this };
+    this.logger = logger;
     this.browserEngine = browserEngine;
 
     this.browserEmulator = new BrowserEmulator(this.createOptions, userAgentOption);
@@ -143,11 +145,12 @@ export default class Plugins implements IPlugins {
 
   // PLUGIN COMMANDS
 
-  public async onPluginCommand(pluginId: string, commandMeta: IOnCommandMeta, args: any[]) {
-    const plugin = this.instanceById[pluginId];
+  public async onPluginCommand(sendToPluginId: string, commandMeta: IOnCommandMeta, args: any[]): Promise<any> {
+    const plugin = this.instanceById[sendToPluginId];
     if (plugin && plugin.onCommand) {
       return await plugin.onCommand(commandMeta, ...args);
     }
+    this.logger.warn(`Plugin (${sendToPluginId}) could not be found for command`);
   }
 
   // ADDING PLUGINS TO THE STACK

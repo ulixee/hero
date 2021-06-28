@@ -2,11 +2,11 @@
 // https://github.com/microsoft/TypeScript/issues/10859
 import {} from '@secret-agent/client';
 
-type RecaptchaPluginAdditions = {
-  executeJs(fn: (...args: any[]) => any);
+type ExecuteJsPluginAdditions = {
+  executeJs(fn: string | ((...args: any[]) => any));
 };
 
 declare module '@secret-agent/client' {
-  interface Agent extends RecaptchaPluginAdditions {}
-  interface Tab extends RecaptchaPluginAdditions {}
+  interface Agent extends ExecuteJsPluginAdditions {}
+  interface Tab extends ExecuteJsPluginAdditions {}
 }
