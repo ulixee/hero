@@ -1,10 +1,10 @@
-import { Agent } from 'secret-agent';
+import { Agent, LocationStatus } from 'secret-agent';
 import { Helpers } from '@secret-agent/testing';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
 import Core from '@secret-agent/core';
 import ConnectionToClient from '@secret-agent/core/server/ConnectionToClient';
-import CoreServer from "@secret-agent/core/server";
+import CoreServer from '@secret-agent/core/server';
 import ExecuteJsCorePlugin from '../lib/CoreExtender';
 
 let koaServer: ITestKoaServer;
@@ -43,13 +43,15 @@ test('it should match older userAgent strings', async () => {
     userAgent,
     connectionToCore: {
       host: await coreServer.address,
-    }
+    },
   });
   Helpers.onClose(() => agent.close(), true);
   agent.use(ExecuteJsPlugin);
 
   await agent.goto(`${koaServer.baseUrl}/test1`);
-  const response = await agent.executeJs(function testFn() { // eslint-disable-line prefer-arrow-callback
+  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  const response = await agent.executeJs(() => {
+    // eslint-disable-line prefer-arrow-callback
     // @ts-ignore
     return window.testRun();
   });

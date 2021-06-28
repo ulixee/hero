@@ -8,10 +8,12 @@ import { IPuppetNetworkEvents } from './IPuppetNetworkEvents';
 import { IPuppetWorker } from './IPuppetWorker';
 import IDevtoolsSession from './IDevtoolsSession';
 import IPuppetDialog from './IPuppetDialog';
+import IPuppetContext from './IPuppetContext';
 
 export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   id: string;
   devtoolsSession: IDevtoolsSession;
+  browserContext: IPuppetContext;
   mouse: IPuppetMouse;
   keyboard: IPuppetKeyboard;
   frames: IPuppetFrame[];

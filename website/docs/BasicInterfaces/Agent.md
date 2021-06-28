@@ -76,6 +76,10 @@ const { Agent } = require('secret-agent');
   - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (~) allows for dynamic options. See  
   - browserEmulatorId `string`. Emulates the unique properties that help SecretAgent look like a normal browser.
   - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
+  - geolocation `IGeolocation`. Overrides the geolocation of the user. Will automatically grant permissions to all origins for geolocation.
+    - latitude `number`. Latitude between -90 and 90.
+    - longitude `number`. Longitude between -180 and 180.
+    - accuracy `number`. Non-negative accuracy value. Defaults to random number 40-50.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
@@ -150,6 +154,7 @@ Retrieves metadata about the agent configuration:
 - humanEmulatorId `string`. The id of the [Human Emulator](/docs/advanced/human-emulators) in use.
 - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
 - locale `string`. The configured locale in use (eg, en-US).
+- geolocation `IGeolocation`. The configured geolocation of the user (if set).
 - viewport `IViewport`. The emulated viewport size and location.
 - blockedResourceTypes `BlockedResourceType[]`. The blocked resource types.
 - upstreamProxyUrl `string`. The proxy url in use for this agent.

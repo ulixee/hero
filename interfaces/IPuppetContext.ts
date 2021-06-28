@@ -1,12 +1,18 @@
 import { URL } from 'url';
+import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
 import { ICookie } from './ICookie';
 import ITypedEventEmitter from './ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
 import { IPuppetWorker } from './IPuppetWorker';
 
 export default interface IPuppetContext extends ITypedEventEmitter<IPuppetContextEvents> {
+  id: string;
   workersById: Map<string, IPuppetWorker>;
   defaultPageInitializationFn: (page: IPuppetPage) => Promise<any>;
+  sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(
+    method: T,
+    params?: ProtocolMapping.Commands[T]['paramsType'][0],
+  ): Promise<ProtocolMapping.Commands[T]['returnType']>;
 
   newPage(options?: IPuppetPageOptions): Promise<IPuppetPage>;
   close(): Promise<void>;

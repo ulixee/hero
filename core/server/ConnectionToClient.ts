@@ -183,7 +183,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
     const session = Session.get(meta.sessionId);
-    const { plugins, viewport, locale, timezoneId } = session;
+    const { plugins, viewport, locale, timezoneId, geolocation } = session;
     const { userAgentString, operatingSystemPlatform } = plugins.browserEmulator;
     return <IAgentMeta>{
       sessionId: session.id,
@@ -195,6 +195,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       viewport,
       locale,
       timezoneId,
+      geolocation,
       userAgentString,
       operatingSystemPlatform,
     };
