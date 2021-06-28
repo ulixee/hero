@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
-const https = require('https');
 const fs = require('fs');
 const os = require('os');
+const { httpGet } = require('@secret-agent/commons/downloadFile');
 const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
 const packageJson = require('./package.json');
@@ -68,7 +68,10 @@ You can install golang ${goVersionNeeded} (https://golang.org/) and run "go buil
   saveVersion();
   console.log('Successfully downloaded');
   process.exit(0);
-})();
+})().catch(err => {
+  console.log('Could not install MitmSocket library', err);
+  process.exit(1);
+});
 
 function tryBuild(programName) {
   const goVersionNeeded = getGoVersionNeeded();
@@ -117,9 +120,13 @@ function buildFilename() {
 
 function download(filepath) {
   return new Promise((resolve, reject) => {
-    const req = https.get(filepath, async res => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return download(res.headers.location).then(resolve).catch(reject);
+    const req = httpGet(filepath, async res => {
+      if (res.statusCode >= 400) {
+        return reject(
+          new Error(
+            `ERROR downloading needed Secret Agent library - ${res.statusCode}:${res.statusMessage}`,
+          ),
+        );
       }
 
       try {

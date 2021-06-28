@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import * as Fs from 'fs';
-import * as Https from 'https';
 import * as Tar from 'tar';
 import * as ProgressBar from 'progress';
 import { createGunzip } from 'zlib';
 import * as os from 'os';
 import * as Path from 'path';
 import { IncomingMessage } from 'http';
+import { httpGet } from '@secret-agent/commons/downloadFile';
 import { getInstallDirectory, isBinaryInstalled, recordVersion, version } from './Utils';
 
 if (Boolean(JSON.parse(process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD ?? 'false')) === true) {
@@ -71,16 +71,16 @@ if (isBinaryInstalled()) {
 
 function download(filepath: string): Promise<IncomingMessage> {
   return new Promise<IncomingMessage>((resolve, reject) => {
-    const req = Https.get(filepath, res => {
-      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        return download(res.headers.location).then(resolve).catch(reject);
+    const req = httpGet(filepath, res => {
+      if (res.statusCode >= 400) {
+        return reject(
+          new Error(
+            `ERROR downloading needed Secret Agent library - ${res.statusCode}:${res.statusMessage}`,
+          ),
+        );
       }
 
-      try {
-        resolve(res);
-      } catch (err) {
-        reject(err);
-      }
+      resolve(res);
     });
     req.on('error', err => {
       console.log('ERROR downloading needed Secret Agent library %s', filepath, err);

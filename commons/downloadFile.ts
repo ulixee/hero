@@ -42,7 +42,10 @@ export default function downloadFile(
   }
 }
 
-function httpGet(url: string, response: (x: http.IncomingMessage) => void): http.ClientRequest {
+export function httpGet(
+  url: string,
+  response: (x: http.IncomingMessage) => void,
+): http.ClientRequest {
   const options = getRequestOptionsWithProxy(url);
   const httpModule = options.protocol === 'https:' ? https : http;
 
