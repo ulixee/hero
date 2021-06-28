@@ -111,6 +111,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
     userAgentSelector?: string,
   ): { browserEngine: BrowserEngine; userAgentOption: IUserAgentOption } {
     const userAgentOption = selectUserAgentOption(userAgentSelector, dataLoader.userAgentOptions);
+
     const { browserName, browserVersion } = userAgentOption;
     const browserEngineId = `${browserName}-${browserVersion.major}-${browserVersion.minor}`;
     const browserEngineOption = selectBrowserEngineOption(

@@ -158,15 +158,15 @@ function createUserAgentOption(userAgentString: string): IUserAgentOption {
   return {
     browserName,
     browserVersion: {
-      major: String(browserVersionMajor),
-      minor: String(browserVersionMinor),
-      patch: String(browserVersionPatch),
+      major: browserVersionMajor ? String(browserVersionMajor) : '1',
+      minor: browserVersionMinor ? String(browserVersionMinor) : '0',
+      patch: browserVersionPatch ? String(browserVersionPatch) : undefined,
     },
     operatingSystemName,
     operatingSystemPlatform: '',
     operatingSystemVersion: {
-      major: String(osVersionMajor),
-      minor: String(osVersionMinor),
+      major: osVersionMajor ? String(osVersionMajor) : undefined,
+      minor: osVersionMinor ? String(osVersionMinor) : undefined,
     },
     string: userAgentString,
   };
