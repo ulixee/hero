@@ -27,7 +27,7 @@
       "path": "replay/tsconfig.json"
     },
     {
-      "path": "emulate-browsers/base/injected-scripts/tsconfig.json"
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
@@ -44,7 +44,7 @@
     "website",
     "core/injected-scripts",
     "examples/*.js",
-    "emulate-browsers/base/injected-scripts",
-    "emulate-browsers/**/data"
+    "plugins/default-browser-emulator/injected-scripts",
+    "plugins/default-browser-emulator/data"
   ]
 }

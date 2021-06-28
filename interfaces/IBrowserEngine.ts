@@ -5,7 +5,9 @@ export default interface IBrowserEngine {
   fullVersion: string;
   executablePath: string;
   executablePathEnvVar: string;
+
   isHeaded?: boolean;
+  verifyLaunchable?(): Promise<any>;
   getLaunchArguments?(puppetOptions: IPuppetLaunchArgs, defaultArguments: string[]): string[];
 }
 

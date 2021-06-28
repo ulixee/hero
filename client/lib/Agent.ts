@@ -4,7 +4,7 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import * as Util from 'util';
 import { bindFunctions, getCallSite } from '@secret-agent/commons/utils';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@secret-agent/interfaces/IDomStorage';
 import IUserProfile from '@secret-agent/interfaces/IUserProfile';
@@ -27,6 +27,8 @@ import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDecla
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { IClientExtender } from '@secret-agent/interfaces/IPluginClientExtender';
+import IAgent from '@secret-agent/interfaces/IAgent';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -47,6 +49,7 @@ import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
+import getClientExtenderPluginClass from './getClientExtenderPluginClass';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 
@@ -61,7 +64,8 @@ const { getState, setState } = StateMachine<Agent, IState>();
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  options: ICreateSessionOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
+  options: ISessionCreateOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
+  plugins: IClientExtender[];
 }
 
 const propertyKeys: (keyof Agent)[] = [
@@ -79,7 +83,7 @@ const propertyKeys: (keyof Agent)[] = [
   'Request',
 ];
 
-export default class Agent extends AwaitedEventTarget<{ close: void }> {
+export default class Agent extends AwaitedEventTarget<{ close: void }> implements IAgent {
   protected static options: IAgentDefaults = { ...DefaultOptions };
 
   constructor(options: IAgentCreateOptions = {}) {
@@ -105,7 +109,9 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
         ...options,
         sessionName,
         scriptInstanceMeta: scriptInstance.meta,
+        dependencyMap: {},
       },
+      plugins: [],
     });
   }
 
@@ -273,6 +279,17 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> {
   public async exportUserProfile(): Promise<IUserProfile> {
     const coreTab = await getCoreTab(this.activeTab);
     return await coreTab.exportUserProfile();
+  }
+
+  // PLUGINS
+
+  public use(PluginObject): Agent {
+    const ClientExtender = getClientExtenderPluginClass(PluginObject);
+    const { plugins, options } = getState(this);
+    const plugin = new ClientExtender();
+    plugins.push(plugin);
+    options.dependencyMap[ClientExtender.id] = ClientExtender.coreDependencyIds || [];
+    return this;
   }
 
   /////// METHODS THAT DELEGATE TO ACTIVE TAB //////////////////////////////////////////////////////////////////////////
@@ -444,6 +461,7 @@ class SessionConnection {
       throw coreSession;
     }
     this.hasConnected = true;
+    const { plugins } = getState(this.agent);
     const { showReplay, connectionToCore, ...options } = getState(this.agent).options;
 
     const connection = ConnectionFactory.createConnection(
@@ -462,15 +480,25 @@ class SessionConnection {
       });
     }
 
-    const session = this._coreSession.then(value => {
+    const coreSession = this._coreSession.then(value => {
       if (value instanceof CoreSession) return value;
       throw value;
     });
 
-    const coreTab = session.then(x => x.firstTab).catch(err => err);
+    const coreTab = coreSession.then(x => x.firstTab).catch(err => err);
     this._activeTab = createTab(this.agent, coreTab);
     this._tabs = [this._activeTab];
 
-    return await session;
+    for (const plugin of plugins) {
+      await plugin.onAgent(this.agent, this.sendToActiveTab.bind(this));
+    }
+
+    return await coreSession;
+  }
+
+  private async sendToActiveTab(sendToPluginId: string, ...args: any[]): Promise<any> {
+    const coreSession = (await this._coreSession) as CoreSession;
+    const coreTab = coreSession.tabsById.get(await this._activeTab.tabId);
+    return coreTab.commandQueue.run('Tab.runPluginCommand', sendToPluginId, args);
   }
 }

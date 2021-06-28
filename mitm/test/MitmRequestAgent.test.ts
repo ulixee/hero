@@ -1,15 +1,23 @@
-import { Helpers } from '@secret-agent/testing';
-import { getProxyAgent, runHttpsServer } from '@secret-agent/testing/helpers';
-import * as WebSocket from 'ws';
-import * as HttpProxyAgent from 'http-proxy-agent';
 import { IncomingHttpHeaders, IncomingMessage } from 'http';
 import { URL } from 'url';
 import * as https from 'https';
 import * as net from 'net';
+import * as WebSocket from 'ws';
+import * as HttpProxyAgent from 'http-proxy-agent';
+import { Helpers } from '@secret-agent/testing';
+import { getProxyAgent, runHttpsServer } from '@secret-agent/testing/helpers';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';
 import HeadersHandler from '../handlers/HeadersHandler';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
+
+const { log } = Log(module);
+const browserEmulatorId = BrowserEmulator.id;
+const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
 const mocks = {
   HeadersHandler: {
@@ -267,7 +275,8 @@ async function startMitmServer() {
 let counter = 1;
 function createMitmSession(mitmServer: MitmServer) {
   counter += 1;
-  const session = new RequestSession(`${counter}`, 'any agent', null);
+  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const session = new RequestSession(`${counter}`, plugins, null);
   mitmServer.registerSession(session, false);
   return session;
 }

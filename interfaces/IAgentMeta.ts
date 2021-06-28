@@ -1,8 +1,8 @@
-import ICreateSessionOptions from './ICreateSessionOptions';
+import ISessionCreateOptions from './ISessionCreateOptions';
 
 export default interface IAgentMeta
-  extends Omit<Required<ICreateSessionOptions>, 'userProfile' | 'scriptInstanceMeta'> {
+  extends Omit<Required<ISessionCreateOptions>, 'userProfile' | 'scriptInstanceMeta'> {
   userAgentString: string;
-  osPlatform: string;
+  operatingSystemPlatform: string;
   sessionId: string;
 }

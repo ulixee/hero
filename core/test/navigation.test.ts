@@ -1,20 +1,29 @@
+import * as Fs from 'fs';
 import { Helpers } from '@secret-agent/testing';
 import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Location';
 import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
-import * as Fs from 'fs';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
+import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
 import FrameNavigationsObserver from '../lib/FrameNavigationsObserver';
+import CoreServer from '../server';
 
 let koaServer: ITestKoaServer;
-let connection: ConnectionToClient;
+let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  connection = Core.addConnection();
-  await connection.connect();
-  Helpers.onClose(() => connection.disconnect(), true);
+  const coreServer = new CoreServer();
+  await coreServer.listen({ port: 0 });
+  Core.use(
+    class BasicHumanEmulator extends HumanEmulatorBase {
+      static id = 'basic';
+    },
+  );
+  connectionToClient = Core.addConnection();
+  await connectionToClient.connect();
+  Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
 });
 
@@ -61,9 +70,9 @@ describe('basic Navigation tests', () => {
       ctx.set('ETag', `W/\\"d02-48a7cf4b62c40\\"`);
       ctx.set('Last-Modified', `Sat, 03 Jul 2010 14:59:53 GMT`);
       ctx.body = `<html><body>
-<img src="/img.jpeg"/>
-<a href="/etagPage"></a>
-</body></html>`;
+  <img src="/img.jpeg"/>
+  <a href="/etagPage"></a>
+  </body></html>`;
     });
     koaServer.get('/img.jpeg', async ctx => {
       ctx.set('ETag', `W/\\"d02-48a7cf4b62c41\\"`);
@@ -93,17 +102,17 @@ describe('basic Navigation tests', () => {
     });
     koaServer.get('/etag2', ctx => {
       ctx.body = `<html><body>
-<img src="/img2.jpeg"/>
-<a href="/etagPage">Etag Page</a>
-<script>
- for (let i = 0; i< 100; i+=1) {
-    const elements = document.querySelectorAll('a');
-    const newElement = document.createElement('div');
-    newElement.textContent = 'hi';
-    elements[0].append(newElement)
- }
-</script>
-</body></html>`;
+  <img src="/img2.jpeg"/>
+  <a href="/etagPage">Etag Page</a>
+  <script>
+   for (let i = 0; i< 100; i+=1) {
+      const elements = document.querySelectorAll('a');
+      const newElement = document.createElement('div');
+      newElement.textContent = 'hi';
+      elements[0].append(newElement)
+   }
+  </script>
+  </body></html>`;
     });
     const { tab } = await createSession();
 
@@ -237,7 +246,7 @@ describe('basic Navigation tests', () => {
     const currentUrl = await tab.getLocationHref();
 
     expect(currentUrl).toBe(navigateToUrl);
-  });
+  }, 60e3);
 
   it('handles navigation via link clicks', async () => {
     const startingUrl = `${koaServer.baseUrl}/click`;
@@ -541,9 +550,9 @@ describe('PaintingStable tests', () => {
 });
 
 async function createSession(
-  options?: ICreateSessionOptions,
+  options?: ISessionCreateOptions,
 ): Promise<{ session: Session; tab: Tab }> {
-  const meta = await connection.createSession(options);
+  const meta = await connectionToClient.createSession(options);
   const tab = Session.getTab(meta);
   Helpers.needsClosing.push(tab.session);
   return { session: tab.session, tab };

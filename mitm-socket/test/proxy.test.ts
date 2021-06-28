@@ -21,7 +21,7 @@ let sessionId = 0;
 let mitmSocketSession: MitmSocketSession;
 beforeAll(() => {
   mitmSocketSession = new MitmSocketSession('proxy.test', {
-    clientHelloId: 'Chrome83',
+    clientHelloId: 'chrome-83',
     rejectUnauthorized: false,
   });
   Helpers.onClose(() => mitmSocketSession.close(), true);

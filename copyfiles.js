@@ -9,7 +9,7 @@ const workspaces = pkg.workspaces.packages.map(x => x.replace('/*', ''));
 
 const copyArgs = [
   '-e "node_modules"',
-  'emulate-browsers/**/data/**',
+  'plugins/default-browser-emulator/data/**',
   'examples/*.js',
   'examples/*.mjs',
   'mitm-socket/go/*.*',

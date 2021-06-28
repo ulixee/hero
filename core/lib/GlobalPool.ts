@@ -4,7 +4,7 @@ import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import Log from '@secret-agent/commons/Logger';
 import { MitmProxy } from '@secret-agent/mitm';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import Puppet from '@secret-agent/puppet';
 import * as Os from 'os';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
@@ -12,14 +12,12 @@ import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingW
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
-import BrowserEmulators from './BrowserEmulators';
 
 const { log } = Log(module);
 let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
 const disableMitm = Boolean(JSON.parse(process.env.SA_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
-  public static defaultBrowserEmulatorId = BrowserEmulators.defaultId;
   public static maxConcurrentAgentsCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
@@ -36,31 +34,19 @@ export default class GlobalPool {
   private static mitmServer: MitmProxy;
   private static mitmStartPromise: Promise<MitmProxy>;
   private static waitingForAvailability: {
-    options: ICreateSessionOptions;
+    options: ISessionCreateOptions;
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start(browserEmulatorIds?: string[]) {
-    browserEmulatorIds = browserEmulatorIds ?? [];
+  public static async start() {
     log.info('StartingGlobalPool', {
       sessionId: null,
-      browserEmulatorIds,
     });
     await this.startMitm();
-
-    for (const emulatorId of browserEmulatorIds) {
-      const BrowserEmulator = BrowserEmulators.getClassById(emulatorId);
-      if (!BrowserEmulator) {
-        throw new Error(`BrowserEmulator was not found: ${emulatorId}`);
-      }
-      const puppet = await this.addPuppet(BrowserEmulator.engine);
-      await puppet.isReady;
-    }
-
     this.resolveWaitingConnection();
   }
 
-  public static createSession(options: ICreateSessionOptions) {
+  public static createSession(options: ISessionCreateOptions) {
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
@@ -104,40 +90,16 @@ export default class GlobalPool {
       });
   }
 
-  private static async addPuppet(engine: IBrowserEngine): Promise<Puppet> {
-    const existing = this.getPuppet(engine);
-    if (existing) {
-      if (existing instanceof Error) throw existing;
-      return existing;
-    }
+  private static getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+    const args = this.getPuppetLaunchArgs();
+    const puppet = new Puppet(browserEngine, args);
 
-    if (!this.defaultLaunchArgs) {
-      this.defaultLaunchArgs = {
-        showBrowser: Boolean(
-          JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
-        ),
-        disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
-        noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
-        disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
-        enableMitm: !disableMitm,
-      };
-    }
+    const existing = this.puppets.find(x => x.isSameEngine(puppet));
+    if (existing) return Promise.resolve(existing);
 
-    const puppet = new Puppet(engine);
     this.puppets.push(puppet);
 
-    const browserOrError = await puppet.start({
-      ...this.defaultLaunchArgs,
-      proxyPort: this.mitmServer?.port,
-      showBrowser: engine.isHeaded ?? this.defaultLaunchArgs.showBrowser,
-    });
-    if (browserOrError instanceof Error) throw browserOrError;
-    return puppet;
-  }
-
-  private static getPuppet(engine?: IBrowserEngine) {
-    if (!engine) return this.puppets[0];
-    return this.puppets.find(x => x.engine === engine);
+    return puppet.start();
   }
 
   private static async startMitm() {
@@ -149,23 +111,21 @@ export default class GlobalPool {
     }
   }
 
-  private static async createSessionNow(options: ICreateSessionOptions): Promise<Session> {
+  private static async createSessionNow(options: ISessionCreateOptions): Promise<Session> {
     await this.startMitm();
 
     this._activeSessionCount += 1;
-    let puppet: Puppet;
     try {
       const session = new Session(options);
 
-      puppet =
-        this.getPuppet(session.browserEngine) ?? (await this.addPuppet(session.browserEngine));
+      const puppet = await this.getPuppet(session.browserEngine);
 
       if (disableMitm !== true) {
-        await session.registerWithMitm(this.mitmServer, await puppet.supportsBrowserContextProxy);
+        await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);
       }
 
       const browserContext = await puppet.newContext(
-        session.browserEmulator,
+        session.plugins,
         log.createChild(module, {
           sessionId: session.id,
         }),
@@ -207,6 +167,22 @@ export default class GlobalPool {
 
     log.info('TransferredChromeToWaitingAcquirer');
     return true;
+  }
+
+  private static getPuppetLaunchArgs() {
+    this.defaultLaunchArgs ??= {
+      showBrowser: Boolean(
+        JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
+      ),
+      disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
+      noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
+      disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
+      enableMitm: !disableMitm,
+    };
+    return {
+      ...this.defaultLaunchArgs,
+      proxyPort: this.mitmServer?.port,
+    };
   }
 
   public static get sessionsDir(): string {

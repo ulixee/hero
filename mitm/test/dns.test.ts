@@ -1,9 +1,16 @@
-import INetworkEmulation from '@secret-agent/interfaces/INetworkEmulation';
 import { LookupAddress, promises as nodeDns } from 'dns';
 import { Helpers } from '@secret-agent/testing';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
+import CoreExtenderBase from '@secret-agent/plugin-utils/lib/CoreExtenderBase';
+import Core from '@secret-agent/core';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
 import RequestSession from '../handlers/RequestSession';
+
+const { log } = Log(module);
 
 const CloudFlare = {
   host: '1.1.1.1',
@@ -23,19 +30,23 @@ const Quad9 = {
 let dns: Dns;
 let requestSession: RequestSession;
 beforeAll(() => {
-  requestSession = new RequestSession(
-    'dns.test',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
-    null,
-    {
-      socketSettings: {
-        tlsClientHelloId: 'Chrome83',
-      },
-      dns: {
-        dnsOverTlsConnection: Quad9,
-      },
-    } as INetworkEmulation,
+  Core.use(
+    class CustomPlugin extends CoreExtenderBase {
+      static id = 'test';
+
+      onTlsConfiguration(settings) {
+        settings.tlsClientHelloId = 'chrome-83';
+      }
+
+      onDnsConfiguration(settings) {
+        settings.dnsOverTlsConnection = Quad9;
+      }
+    },
   );
+  const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
+  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+
+  requestSession = new RequestSession('dns.test', plugins, null);
   Helpers.onClose(() => requestSession.close(), true);
   dns = new Dns(requestSession);
 });
@@ -48,7 +59,10 @@ afterAll(() => {
 describe('DnsOverTlsSocket', () => {
   let cloudflareDnsSocket: DnsOverTlsSocket;
   beforeAll(() => {
-    cloudflareDnsSocket = new DnsOverTlsSocket(CloudFlare, requestSession);
+    cloudflareDnsSocket = new DnsOverTlsSocket(
+      { dnsOverTlsConnection: CloudFlare },
+      requestSession,
+    );
   });
   afterAll(() => {
     cloudflareDnsSocket.close();
@@ -76,7 +90,7 @@ describe('DnsOverTlsSocket', () => {
   test('should be able to lookup with google', async () => {
     let socket: DnsOverTlsSocket;
     try {
-      socket = new DnsOverTlsSocket(Google, requestSession);
+      socket = new DnsOverTlsSocket({ dnsOverTlsConnection: Google }, requestSession);
       const response = await socket.lookupARecords('ulixee.org');
       expect(response.answers).toHaveLength(2);
     } finally {

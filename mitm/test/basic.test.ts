@@ -8,12 +8,20 @@ import * as WebSocket from 'ws';
 import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Plugins from '@secret-agent/core/lib/Plugins';
+import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@secret-agent/commons/Logger';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
 import MitmServer from '../lib/MitmProxy';
 import HeadersHandler from '../handlers/HeadersHandler';
 import HttpUpgradeHandler from '../handlers/HttpUpgradeHandler';
 import { parseRawHeaders } from '../lib/Utils';
+
+const { log } = Log(module);
+const browserEmulatorId = BrowserEmulator.id;
+const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
 
 const mocks = {
   httpRequestHandler: {
@@ -340,7 +348,7 @@ describe('basic MitM tests', () => {
     const proxyHost = `http://localhost:${mitmServer.port}`;
 
     const session = createSession(mitmServer);
-    session.networkEmulation.beforeHttpRequest = jest.fn();
+    session.plugins.beforeHttpRequest = jest.fn();
     session.browserRequestMatcher.onBrowserRequestedResource(
       {
         browserRequestId: '25.123',
@@ -363,7 +371,7 @@ describe('basic MitM tests', () => {
 
     await Helpers.httpGet(`${httpServer.url}page1`, proxyHost, proxyCredentials);
 
-    expect(session.networkEmulation.beforeHttpRequest).toHaveBeenCalledTimes(1);
+    expect(session.plugins.beforeHttpRequest).toHaveBeenCalledTimes(1);
     expect(onresponse).toHaveBeenCalledTimes(1);
 
     const [responseEvent] = onresponse.mock.calls[0];
@@ -384,7 +392,8 @@ describe('basic MitM tests', () => {
 });
 
 function createSession(mitmProxy: MitmServer, upstreamProxyUrl: string = null) {
-  const session = new RequestSession(`${(sessionCounter += 1)}`, 'any agent', upstreamProxyUrl);
+  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const session = new RequestSession(`${(sessionCounter += 1)}`, plugins, upstreamProxyUrl);
   mitmProxy.registerSession(session, false);
   Helpers.needsClosing.push(session);
 

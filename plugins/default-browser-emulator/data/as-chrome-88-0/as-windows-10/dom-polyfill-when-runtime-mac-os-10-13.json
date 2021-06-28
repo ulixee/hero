@@ -1,0 +1,59 @@
+{
+  "add": [
+    {
+      "path": "window.Notification.prototype",
+      "propertyName": "image",
+      "prevProperty": "close",
+      "property": {
+        "_$flags": "ce",
+        "_$accessException": "TypeError: Illegal invocation",
+        "_$get": "function get image() { [native code] }",
+        "_$getToStringToString": "function toString() { [native code] }"
+      }
+    }
+  ],
+  "remove": [
+    {
+      "path": "window",
+      "propertyName": "BarcodeDetector"
+    },
+    {
+      "path": "window.Navigator.prototype",
+      "propertyName": "webdriver"
+    },
+    {
+      "path": "window.navigator",
+      "propertyName": "webdriver"
+    },
+    {
+      "path": "window.Text.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "createShadowRoot"
+    },
+    {
+      "path": "window.Element.prototype",
+      "propertyName": "getDestinationInsertionPoints"
+    },
+    {
+      "path": "window.Document.prototype",
+      "propertyName": "registerElement"
+    },
+    {
+      "path": "window",
+      "propertyName": "cdc_adoQpoasnfa76pfcZLmcfl"
+    },
+    {
+      "path": "window.document",
+      "propertyName": "$cdc_asdjflasutopfhvcZLmcfl"
+    },
+    {
+      "path": "window.HTMLLinkElement.prototype",
+      "propertyName": "import"
+    }
+  ],
+  "modify": [],
+  "reorder": []
+}

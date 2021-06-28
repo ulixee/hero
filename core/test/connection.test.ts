@@ -1,12 +1,12 @@
 import { Helpers } from '@secret-agent/testing';
 import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
-import { DependenciesMissingError } from '@secret-agent/puppet/lib/DependenciesMissingError';
-import DependencyInstaller from '@secret-agent/puppet/lib/DependencyInstaller';
-import * as ValidateHostDeps from '@secret-agent/puppet/lib/validateHostDependencies';
 import { Log } from '@secret-agent/commons/Logger';
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
-import BrowserEmulators from '@secret-agent/core/lib/BrowserEmulators';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import { DependenciesMissingError } from '@secret-agent/plugin-utils/lib/DependenciesMissingError';
+import DependencyInstaller from '@secret-agent/plugin-utils/lib/DependencyInstaller';
+import * as ValidateHostDeps from '@secret-agent/plugin-utils/lib/validateHostDependencies';
+import Core from '../index';
 import CoreServer from '../server';
 
 const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
@@ -84,11 +84,17 @@ describe('basic connection tests', () => {
   });
 
   it('should throw an error informing how to install dependencies', async () => {
-    class ChromeTest extends ChromeLatest {
+    class CustomEmulator extends BrowserEmulator {
       public static id = 'emulate-test';
-      public static engine = { ...ChromeLatest.engine };
+      public static selectBrowserMeta() {
+        const meta = super.selectBrowserMeta();
+        meta.browserEngine.getLaunchArguments = (options, defaultArguments) => {
+          return defaultArguments;
+        };
+        return meta;
+      }
     }
-    BrowserEmulators.load(ChromeTest as any);
+    Core.use(CustomEmulator as any);
 
     logError.mockClear();
     validate.mockClear();
@@ -108,6 +114,7 @@ describe('basic connection tests', () => {
         host: await coreServer.address,
       },
     });
+    Helpers.needsClosing.push(agent1);
 
     try {
       await agent1;
@@ -122,6 +129,5 @@ describe('basic connection tests', () => {
     expect(error).toMatch('PuppetLaunchError');
     expect(error).toMatch('You can resolve this by running');
     expect(validate).toHaveBeenCalledTimes(1);
-    await agent1.close();
   });
 });

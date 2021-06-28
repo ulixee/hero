@@ -8,15 +8,25 @@ import {
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { inspect } from 'util';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
+import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
 import ConnectionToClient from '../server/ConnectionToClient';
+import CoreServer from '../server';
 
 inspect.defaultOptions.colors = true;
 inspect.defaultOptions.depth = null;
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
+  const coreServer = new CoreServer();
+  await coreServer.listen({ port: 0 });
+  Core.use(
+    class BasicHumanEmulator extends HumanEmulatorBase {
+      static id = 'basic';
+    },
+  );
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
+  Helpers.onClose(() => coreServer.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -56,7 +66,7 @@ describe('basic Detach tests', () => {
       ctx.body = body;
     });
     const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'skipper',
+      humanEmulatorId: 'basic',
     });
     const session = Session.get(meta.sessionId);
     const tab = Session.getTab(meta);
@@ -96,7 +106,7 @@ describe('basic Detach tests', () => {
     });
 
     const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'skipper',
+      humanEmulatorId: 'basic',
     });
     const session = Session.get(meta.sessionId);
     const tab = Session.getTab(meta);

@@ -2,11 +2,15 @@ import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOption
 import { LocationTrigger } from '@secret-agent/interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import { IHumanEmulatorClass } from '@secret-agent/interfaces/IPluginHumanEmulator';
+import { IBrowserEmulatorClass } from '@secret-agent/interfaces/IPluginBrowserEmulator';
+import { ICoreExtenderClass } from '@secret-agent/interfaces/IPluginCoreExtender';
+import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
+import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
+import DefaultHumanEmulator from '@secret-agent/default-human-emulator';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
 import CoreProcess from './lib/CoreProcess';
-import BrowserEmulators from './lib/BrowserEmulators';
-import HumanEmulators from './lib/HumanEmulators';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
@@ -14,11 +18,24 @@ import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 
-export { GlobalPool, Tab, Session, LocationTrigger, CoreProcess, BrowserEmulators, HumanEmulators };
+export { GlobalPool, Tab, Session, LocationTrigger, CoreProcess };
 
 export default class Core {
   public static server = new CoreServer();
   public static readonly connections: ConnectionToClient[] = [];
+  public static pluginMap: {
+    humanEmulatorsById: { [id: string]: IHumanEmulatorClass }
+    browserEmulatorsById: { [id: string]: IBrowserEmulatorClass }
+    coreExtenders: ICoreExtenderClass[];
+  } = {
+    humanEmulatorsById: {
+      [DefaultHumanEmulator.id]: DefaultHumanEmulator,
+    },
+    browserEmulatorsById: {
+      [DefaultBrowserEmulator.id]: DefaultBrowserEmulator,
+    },
+    coreExtenders: [],
+  };
 
   public static onShutdown: () => void;
 
@@ -37,6 +54,18 @@ export default class Core {
     return connection;
   }
 
+  public static use(Plugin: IHumanEmulatorClass | IBrowserEmulatorClass | ICoreExtenderClass) {
+    if (Plugin.pluginType === PluginTypes.HumanEmulator) {
+      this.pluginMap.humanEmulatorsById[Plugin.id] = Plugin;
+    } else if (Plugin.pluginType === PluginTypes.BrowserEmulator) {
+      this.pluginMap.browserEmulatorsById[Plugin.id] = Plugin;
+    } else if (Plugin.pluginType === PluginTypes.CoreExtender) {
+      this.pluginMap.coreExtenders.push(Plugin);
+    } else {
+      throw new Error('Unknown plugin type');
+    }
+  }
+
   public static async start(
     options: ICoreConfigureOptions = {},
     isExplicitlyStarted = true,
@@ -51,12 +80,7 @@ export default class Core {
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
-    const {
-      localProxyPortStart,
-      sessionsDir,
-      browserEmulatorIds,
-      maxConcurrentAgentsCount,
-    } = options;
+    const { localProxyPortStart, sessionsDir, maxConcurrentAgentsCount } = options;
 
     if (maxConcurrentAgentsCount !== undefined)
       GlobalPool.maxConcurrentAgentsCount = maxConcurrentAgentsCount;
@@ -68,7 +92,7 @@ export default class Core {
       GlobalPool.sessionsDir = options.sessionsDir;
     }
 
-    await GlobalPool.start(browserEmulatorIds);
+    await GlobalPool.start();
 
     await this.server.listen({ port: options.coreServerPort });
 

@@ -23,8 +23,8 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 	var spec tls.ClientHelloSpec
 	if sessionArgs.ClientHelloId == "Safari13" {
 		spec = GetSafari13Spec()
-	} else if strings.HasPrefix(sessionArgs.ClientHelloId, "Chrome") {
-		chromeVersionBit := strings.Split(sessionArgs.ClientHelloId, "Chrome")[1]
+	} else if strings.HasPrefix(sessionArgs.ClientHelloId, "chrome-") {
+		chromeVersionBit := strings.Split(sessionArgs.ClientHelloId, "chrome-")[1]
 		chromeVersion, _ := strconv.ParseInt(chromeVersionBit, 10, 0)
 		// lowest supported is chrome 72, otherwise channel id extensions crop up
 		if chromeVersion < 83 {

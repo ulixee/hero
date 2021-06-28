@@ -23,7 +23,7 @@ import IPoint from '@secret-agent/interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/interfaces/IPuppetInput';
-import IHumanEmulator from '@secret-agent/interfaces/IHumanEmulator';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IViewport from '@secret-agent/interfaces/IViewport';
 import IElementRect from '@secret-agent/interfaces/IElementRect';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
@@ -58,7 +58,7 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public get viewport(): IViewport {
-    return this.frameEnvironment.session.browserEmulator.configuration.viewport;
+    return this.frameEnvironment.session.viewport;
   }
 
   public logger: IBoundLog;
@@ -83,8 +83,8 @@ export default class Interactor implements IInteractionsHelper {
     return this.tab.puppetPage.keyboard;
   }
 
-  private get humanEmulator(): IHumanEmulator {
-    return this.tab.session.humanEmulator;
+  private get plugins(): IPlugins {
+    return this.tab.session.plugins;
   }
 
   constructor(frameEnvironment: FrameEnvironment) {
@@ -96,17 +96,15 @@ export default class Interactor implements IInteractionsHelper {
   }
 
   public async initialize(): Promise<void> {
-    if (this.humanEmulator.getStartingMousePoint) {
-      this.mouse.position = await this.humanEmulator.getStartingMousePoint(this);
-    }
+    const startingMousePosition = await this.plugins.getStartingMousePoint(this);
+    this.mouse.position = startingMousePosition || this.mouse.position;
   }
 
   public play(interactions: IInteractionGroups, resolvablePromise: IResolvablePromise<any>): void {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
     this.preInteractionPaintStableStatus = this.frameEnvironment.navigationsObserver.getPaintStableStatus();
-    const humanEmulator = this.humanEmulator;
-    humanEmulator
+    this.plugins
       .playInteractions(finalInteractions, this.playInteraction.bind(this, resolvablePromise), this)
       .then(resolvablePromise.resolve)
       .catch(resolvablePromise.reject);

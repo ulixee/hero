@@ -1,10 +1,10 @@
 import { randomBytes } from 'crypto';
 import * as dnsPacket from 'dns-packet';
-import { ConnectionOptions } from 'tls';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import MitmSocket from '@secret-agent/mitm-socket/index';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IDnsSettings from "@secret-agent/interfaces/IDnsSettings";
 import { addTypedEventListener, removeEventListeners } from '@secret-agent/commons/eventUtils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
@@ -14,14 +14,14 @@ const { log } = Log(module);
 
 export default class DnsOverTlsSocket {
   public get host(): string {
-    return this.dnsServer.host;
+    return this.dnsSettings.dnsOverTlsConnection?.host;
   }
 
   public get isActive(): boolean {
     return this.mitmSocket.isReusable() && !this.isClosing;
   }
 
-  private readonly dnsServer: ConnectionOptions;
+  private readonly dnsSettings: IDnsSettings;
   private mitmSocket: MitmSocket;
   private isConnected: Promise<void>;
 
@@ -38,10 +38,10 @@ export default class DnsOverTlsSocket {
   private requestSession: RequestSession | undefined;
   private logger: IBoundLog;
 
-  constructor(dnsServer: ConnectionOptions, requestSession: RequestSession, onClose?: () => void) {
+  constructor(dnsSettings: IDnsSettings, requestSession: RequestSession, onClose?: () => void) {
     this.requestSession = requestSession;
     this.logger = log.createChild({ sessionId: requestSession.sessionId });
-    this.dnsServer = dnsServer;
+    this.dnsSettings = dnsSettings;
     this.onClose = onClose;
   }
 
@@ -61,16 +61,16 @@ export default class DnsOverTlsSocket {
   }
 
   protected async connect(): Promise<void> {
-    const dnsServer = this.dnsServer;
+    const { host, port, servername } = this.dnsSettings.dnsOverTlsConnection || {};
     this.mitmSocket = new MitmSocket(this.requestSession?.sessionId, {
-      host: dnsServer.host,
-      port: String(dnsServer.port ?? 853),
+      host,
+      servername,
+      port: String(port ?? 853),
       isSsl: true,
-      servername: dnsServer.servername,
       keepAlive: true,
       debug: true,
     });
-    if (this.requestSession?.networkEmulation?.dns?.useUpstreamProxy) {
+    if (this.dnsSettings.useUpstreamProxy) {
       const upstreamProxy = this.requestSession.upstreamProxyUrl;
       if (upstreamProxy) {
         this.mitmSocket.setProxyUrl(upstreamProxy);

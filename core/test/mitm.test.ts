@@ -1,5 +1,4 @@
 import { Helpers } from '@secret-agent/testing';
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
 import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
 import { createPromise } from '@secret-agent/commons/utils';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
@@ -17,7 +16,7 @@ const mocks = {
 let koa: ITestKoaServer;
 beforeAll(async () => {
   koa = await Helpers.runKoaServer(true);
-  await GlobalPool.start([ChromeLatest.id]);
+  await GlobalPool.start();
 });
 
 beforeEach(async () => {

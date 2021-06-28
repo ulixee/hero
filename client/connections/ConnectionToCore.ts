@@ -4,7 +4,7 @@ import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload'
 import { bindFunctions, createPromise } from '@secret-agent/commons/utils';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import Log from '@secret-agent/commons/Logger';
-import ICreateSessionOptions from '@secret-agent/interfaces/ICreateSessionOptions';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
@@ -37,7 +37,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   private get connectOptions(): ICoreConfigureOptions & { isPersistent: boolean } {
     return {
       coreServerPort: this.options.coreServerPort,
-      browserEmulatorIds: this.options.browserEmulatorIds,
       localProxyPortStart: this.options.localProxyPortStart,
       sessionsDir: this.options.sessionsDir,
       isPersistent: this.options.isPersistent,
@@ -97,7 +96,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
           args: [this.connectOptions],
         });
         if (connectResult?.data) {
-          const { maxConcurrency, browserEmulatorIds } = connectResult.data;
+          const { maxConcurrency } = connectResult.data;
           if (
             maxConcurrency &&
             (!this.options.maxConcurrency || maxConcurrency < this.options.maxConcurrency)
@@ -109,7 +108,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
             this.coreSessions.concurrency = maxConcurrency;
             this.options.maxConcurrency = maxConcurrency;
           }
-          this.options.browserEmulatorIds ??= browserEmulatorIds ?? [];
         }
         this.emit('connected');
       } catch (err) {
@@ -190,7 +188,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     return this.isDisconnecting === false && this.coreSessions.hasAvailability();
   }
 
-  public async createSession(options: ICreateSessionOptions): Promise<CoreSession> {
+  public async createSession(options: ISessionCreateOptions): Promise<CoreSession> {
     try {
       const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
       const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);

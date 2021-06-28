@@ -16,7 +16,7 @@ import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventL
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import Resolvable from '@secret-agent/commons/Resolvable';
@@ -39,7 +39,7 @@ export class BrowserContext
 
   public workersById = new Map<string, IPuppetWorker>();
   public pagesById = new Map<string, Page>();
-  public emulator: IBrowserEmulator;
+  public plugins: IPlugins;
   public proxy: IProxyConnectionOptions;
 
   private attachedTargetIds = new Set<string>();
@@ -57,13 +57,13 @@ export class BrowserContext
 
   constructor(
     browser: Browser,
-    emulator: IBrowserEmulator,
+    plugins: IPlugins,
     contextId: string,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ) {
     super();
-    this.emulator = emulator;
+    this.plugins = plugins;
     this.browser = browser;
     this.id = contextId;
     this.logger = logger.createChild(module, {
@@ -122,9 +122,7 @@ export class BrowserContext
     if (this.pageOptionsByTargetId.get(page.targetId)?.runPageScripts === false) return;
 
     const promises = [this.defaultPageInitializationFn(page).catch(err => err)];
-    if (this.emulator?.onNewPuppetPage) {
-      promises.push(this.emulator.onNewPuppetPage(page).catch(err => err));
-    }
+    promises.push(this.plugins.onNewPuppetPage(page).catch(err => err));
     return Promise.all(promises);
   }
 

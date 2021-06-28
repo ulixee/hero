@@ -1,8 +1,8 @@
-import ICreateSessionOptions from './ICreateSessionOptions';
+import ISessionCreateOptions from './ISessionCreateOptions';
 
 export default interface IConfigureSessionOptions
   extends Pick<
-    ICreateSessionOptions,
+    ISessionCreateOptions,
     | 'userProfile'
     | 'viewport'
     | 'timezoneId'

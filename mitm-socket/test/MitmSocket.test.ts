@@ -15,7 +15,7 @@ afterEach(Helpers.afterEach);
 let mitmSocketSession: MitmSocketSession;
 beforeAll(() => {
   mitmSocketSession = new MitmSocketSession('mitmSocket.test', {
-    clientHelloId: 'Chrome72',
+    clientHelloId: 'chrome-72',
     rejectUnauthorized: false,
   });
   Helpers.onClose(() => mitmSocketSession.close(), true);
@@ -55,7 +55,7 @@ test('should handle http2 requests', async () => {
 
 test('should be able to hit google using a Chrome Emulator', async () => {
   const socketSession = new MitmSocketSession('mitmSocket.test', {
-    clientHelloId: 'Chrome79',
+    clientHelloId: 'chrome-79',
     rejectUnauthorized: false,
   });
   Helpers.needsClosing.push(socketSession);
@@ -147,7 +147,7 @@ test('should be able to hit a server that disconnects', async () => {
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip('should be able to get scripts from unpkg using Chrome emulator', async () => {
   const socketSession = new MitmSocketSession('mitmSocket.test', {
-    clientHelloId: 'Chrome79',
+    clientHelloId: 'chrome-79',
     rejectUnauthorized: false,
   });
   Helpers.needsClosing.push(socketSession);

@@ -1,13 +1,24 @@
 import { Helpers } from '@secret-agent/testing';
 import { createPromise } from '@secret-agent/commons/utils';
+import Core from '@secret-agent/core';
+import CoreServer from '@secret-agent/core/server';
+import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
 import * as Fs from 'fs';
 import { Handler } from '../index';
 
 let koaServer;
 let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler({ maxConcurrency: 1 });
-  Helpers.onClose(() => handler.close(), true);
+  const coreServer = new CoreServer();
+  await coreServer.listen({ port: 0 });
+  Core.use(class BasicHumanEmulator extends HumanEmulatorBase {
+    static id = 'basic';
+  });
+  handler = new Handler({ maxConcurrency: 1, host: await coreServer.address });
+  Helpers.onClose(() => {
+    handler.close();
+    coreServer.close();
+  }, true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);

@@ -4,12 +4,16 @@ import { LocationStatus } from '@secret-agent/interfaces/Location';
 import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
+import HumanEmulatorBase from "@secret-agent/plugin-utils/lib/HumanEmulatorBase";
 import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
+  Core.use(class BasicHumanEmulator extends HumanEmulatorBase {
+    static id = 'basic';
+  });
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();
@@ -34,7 +38,7 @@ function addMe() {
 </body>`;
     });
     const meta = await connectionToClient.createSession({
-      humanEmulatorId: 'skipper',
+      humanEmulatorId: 'basic',
     });
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);

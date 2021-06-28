@@ -29,8 +29,8 @@ export default class CommandRecorder {
     });
   }
 
-  private async runCommandFn<T>(fn: AsyncFunc, ...args: any[]): Promise<T> {
-    if (!this.fnNames.has(fn.name)) throw new Error(`Unsupported function requested ${fn.name}`);
+  private async runCommandFn<T>(commandFn: AsyncFunc, ...args: any[]): Promise<T> {
+    if (!this.fnNames.has(commandFn.name)) throw new Error(`Unsupported function requested ${commandFn.name}`);
 
     const { session } = this;
     const sessionState = session.sessionState;
@@ -46,7 +46,7 @@ export default class CommandRecorder {
       id: commandHistory.length + 1,
       tabId,
       frameId,
-      name: fn.name,
+      name: commandFn.name,
       args: args.length ? TypeSerializer.stringify(args) : undefined,
     } as ICommandMeta;
 
@@ -62,7 +62,7 @@ export default class CommandRecorder {
       commandMeta.startDate = new Date().getTime();
       sessionState.recordCommandStart(commandMeta);
 
-      result = await fn.call(this.owner, ...args);
+      result = await commandFn.call(this.owner, ...args);
       return result;
     } catch (err) {
       result = err;

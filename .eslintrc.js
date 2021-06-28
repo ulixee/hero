@@ -65,15 +65,15 @@ module.exports = {
       },
     },
     {
-      files: 'emulate-browsers/base/test/*.ts',
+      files: 'plugin*/**/test/*.ts',
       rules: {
         'no-console': 'off',
       },
     },
     {
-      files: 'emulate-browsers/**/*.ts',
+      files: 'plugin*/**/*.d.ts',
       rules: {
-        'require-await': 'off', // Turn off while waiting
+        'import/no-extraneous-dependencies': 'off',
       },
     },
     {
@@ -114,6 +114,7 @@ module.exports = {
     {
       files: [
         '**/install*',
+        '**/installer/index*',
         '**/*Install*',
         '**/prepare-*.js',
         '**/scripts/*.ts',

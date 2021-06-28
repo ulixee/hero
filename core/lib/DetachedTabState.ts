@@ -54,11 +54,12 @@ export default class DetachedTabState {
       this.detachedAtCommandId,
       loader.loaderId,
     );
-    await page.mainFrame.waitForLoader(loader.loaderId);
     await Promise.all([
+      page.mainFrame.waitForLoader(loader.loaderId),
+      page.mainFrame.waitForLoad('DOMContentLoaded'),
       InjectedScripts.installDetachedScripts(page),
-      InjectedScripts.restoreDom(page, this.domChanges),
     ]);
+    await InjectedScripts.restoreDom(page, this.domChanges);
   }
 
   public mockNetworkRequests: Parameters<

@@ -139,6 +139,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.waitForMillis,
       this.waitForNewTab,
       this.waitForResource,
+      this.runPluginCommand,
       // DO NOT ADD waitForReady
     ]);
   }
@@ -535,6 +536,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public waitForMillis(millis: number): Promise<void> {
     return new Timer(millis, this.waitTimeouts).waitForTimeout();
+  }
+
+  public async runPluginCommand(sendToPluginId, args: any[]): Promise<any> {
+    const commandMeta = {
+      puppetPage: this.puppetPage,
+    };
+    return await this.session.plugins.onPluginCommand(sendToPluginId, commandMeta, args);
   }
 
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {

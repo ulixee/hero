@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
+import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 
 const pageScripts = {
@@ -137,7 +138,8 @@ export default class InjectedScripts {
     }
 
     window.replayDomChanges(events);
-})()`,
+})()
+//# sourceURL=${injectedSourceUrl}`,
       true,
     );
   }

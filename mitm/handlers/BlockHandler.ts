@@ -4,13 +4,13 @@ import ResourceState from '../interfaces/ResourceState';
 export default class BlockHandler {
   public static shouldBlockRequest(ctx: IMitmRequestContext): boolean {
     ctx.setState(ResourceState.BlockHandler);
-    const session = ctx.requestSession;
-    if (!session) return false;
-    if (session.isClosing) return true;
+    const requestSession = ctx.requestSession;
+    if (!requestSession) return false;
+    if (requestSession.isClosing) return true;
 
     const shouldBlock =
-      (ctx.resourceType && session.blockedResources?.types?.includes(ctx.resourceType)) ||
-      session.shouldBlockRequest(ctx.url.href);
+      (ctx.resourceType && requestSession.blockedResources?.types?.includes(ctx.resourceType)) ||
+      requestSession.shouldBlockRequest(ctx.url.href);
 
     if (!shouldBlock) return false;
     ctx.didBlockResource = shouldBlock;
@@ -21,7 +21,7 @@ export default class BlockHandler {
     }
 
     if (ctx.proxyToClientResponse) {
-      if (session.blockHandler(ctx.clientToProxyRequest, ctx.proxyToClientResponse)) {
+      if (requestSession.blockHandler(ctx.clientToProxyRequest, ctx.proxyToClientResponse)) {
         return true;
       }
 

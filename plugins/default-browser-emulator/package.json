@@ -1,0 +1,22 @@
+{
+  "name": "@secret-agent/default-browser-emulator",
+  "version": "1.4.1-alpha.4",
+  "description": "Browser emulator generated from DoubleAgent data",
+  "main": "index.js",
+  "dependencies": {
+    "@secret-agent/commons": "1.4.1-alpha.4",
+    "@secret-agent/interfaces": "1.4.1-alpha.4",
+    "@secret-agent/plugin-utils": "1.4.1-alpha.4",
+    "compare-versions": "^3.6.0",
+    "tough-cookie": "^4.0.0",
+    "ua-parser-js": "^0.7.22"
+  },
+  "devDependencies": {
+    "@secret-agent/testing": "1.4.1-alpha.4",
+    "@secret-agent/core": "1.4.1-alpha.4",
+    "@secret-agent/puppet": "1.4.1-alpha.4",
+    "@types/tough-cookie": "^4.0.0",
+    "secret-agent": "1.4.1-alpha.4",
+    "source-map-loader": "^0.2.4"
+  }
+}

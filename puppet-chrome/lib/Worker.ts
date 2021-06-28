@@ -72,7 +72,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
   }
 
   initialize(pageNetworkManager: NetworkManager): Promise<void> {
-    const emulator = this.browserContext.emulator;
+    const { plugins } = this.browserContext;
     const result = Promise.all([
       this.networkManager.initializeFromParent(pageNetworkManager).catch(err => {
         // web workers can use parent network
@@ -80,15 +80,13 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
         throw err;
       }),
       this.devtoolsSession.send('Runtime.enable'),
-      emulator?.onNewPuppetWorker
-        ? emulator.onNewPuppetWorker(this).catch(error => {
-            if (error instanceof CanceledPromiseError) return;
-            this.logger.error('Emulator.onNewPuppetWorkerError', {
-              error,
-            });
-            throw error;
-          })
-        : null,
+      plugins.onNewPuppetWorker(this).catch(error => {
+        if (error instanceof CanceledPromiseError) return;
+        this.logger.error('Emulator.onNewPuppetWorkerError', {
+          error,
+        });
+        throw error;
+      }),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
     setImmediate(() => this.initializationSent.resolve());

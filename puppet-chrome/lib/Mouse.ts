@@ -47,6 +47,7 @@ import { Keyboard } from './Keyboard';
  *
  * @public
  */
+
 export default class Mouse {
   public position: IPoint = { x: 0, y: 0 };
 
@@ -65,6 +66,7 @@ export default class Mouse {
     if (roundedX === this.position.x && roundedY === this.position.y) return;
     this.position.x = roundedX;
     this.position.y = roundedY;
+
     await this.devtoolsSession.send('Input.dispatchMouseEvent', {
       type: 'mouseMoved',
       button: this.button,

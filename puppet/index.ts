@@ -4,14 +4,11 @@ import Log from '@secret-agent/commons/Logger';
 import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import { existsSync } from 'fs';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import IBrowserEmulator from '@secret-agent/interfaces/IBrowserEmulator';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
+import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import launchProcess from './lib/launchProcess';
-import { validateHostRequirements } from './lib/validateHostDependencies';
-import { EngineFetcher } from './lib/EngineFetcher';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
@@ -19,98 +16,49 @@ const { log } = Log(module);
 let puppBrowserCounter = 1;
 export default class Puppet {
   public readonly id: number;
-  public readonly engine: IBrowserEngine;
-  public isShuttingDown: boolean;
-  public get supportsBrowserContextProxy(): Promise<boolean> {
-    return this.browserFeaturesPromise.promise;
-  }
+  public readonly browserEngine: IBrowserEngine;
+  public supportsBrowserContextProxy: boolean;
+  private readonly launchArguments: string[] = [];
+  private readonly launcher: IPuppetLauncher;
+  private isShuttingDown = false;
+  private isStarted = false;
+  private browser: IPuppetBrowser;
 
-  private browserFeaturesPromise = new Resolvable<boolean>();
-  private browserOrError: Promise<IPuppetBrowser | Error>;
-
-  public get isReady(): Promise<IPuppetBrowser> {
-    return this.browserOrError.then(x => {
-      if (x instanceof Error) throw x;
-      return x;
-    });
-  }
-
-  constructor(engine: IBrowserEngine) {
-    this.engine = engine;
-    this.isShuttingDown = false;
+  constructor(browserEngine: IBrowserEngine, args: IPuppetLaunchArgs = {}) {
+    this.browserEngine = browserEngine;
     this.id = puppBrowserCounter;
-    this.browserOrError = null;
+    if (browserEngine.name === 'chrome') {
+      if (browserEngine.isHeaded) args.showBrowser = true;
+      this.launchArguments = PuppetChrome.getLaunchArgs(args, browserEngine);
+      this.launcher = PuppetChrome;
+    } else {
+      throw new Error(`No Puppet launcher available for ${this.browserEngine.name}`);
+    }
     puppBrowserCounter += 1;
   }
 
-  public start(args: IPuppetLaunchArgs = {}): Promise<IPuppetBrowser | Error> {
-    if (this.browserOrError) {
-      return this.browserOrError;
-    }
-    this.isShuttingDown = false;
-
-    let launcher: IPuppetLauncher;
-    if (this.engine.name === 'chrome') {
-      launcher = PuppetChrome;
-    }
-
-    this.browserOrError = this.launchEngine(launcher, args).catch(err => err);
-    return this.browserOrError;
-  }
-
-  public async newContext(
-    emulator: IBrowserEmulator,
-    logger: IBoundLog,
-    proxy?: IProxyConnectionOptions,
-  ) {
-    const browser = await this.browserOrError;
-    if (browser instanceof Error) throw browser;
-    if (this.isShuttingDown) throw new Error('Shutting down');
-    return browser.newContext(emulator, logger, proxy);
-  }
-
-  public async close() {
-    if (this.isShuttingDown) return;
-    this.isShuttingDown = true;
-    log.stats('Puppet.Closing');
-
-    const browserPromise = this.browserOrError;
-    this.browserOrError = null;
-
+  public async start(): Promise<Puppet> {
     try {
-      const browser = await browserPromise;
-      if (browser && !(browser instanceof Error)) await browser.close();
-    } catch (error) {
-      log.error('Puppet.Closing:Error', { sessionId: null, error });
-    }
-  }
+      this.isStarted = true;
 
-  private async launchEngine(
-    launcher: IPuppetLauncher,
-    args: IPuppetLaunchArgs,
-  ): Promise<IPuppetBrowser> {
-    const executablePath = this.engine.executablePath;
+      if (this.browserEngine.verifyLaunchable) {
+        await this.browserEngine.verifyLaunchable();
+      }
 
-    if (!existsSync(executablePath)) {
-      throw await this.noExecutableAtPathError(executablePath);
-    }
+      const launchedProcess = await launchProcess(
+        this.browserEngine.executablePath,
+        this.launchArguments,
+        {},
+      );
 
-    try {
-      const launchArgs = launcher.getLaunchArgs(args, this.engine);
+      this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
 
-      // exists, but can't launch, try to launch
-      await validateHostRequirements(this.engine);
+      const features = await this.browser.getFeatures();
+      this.supportsBrowserContextProxy = features?.supportsPerBrowserContextProxy ?? false;
 
-      const launchedProcess = await launchProcess(executablePath, launchArgs, {});
-
-      const browser = await launcher.createPuppet(launchedProcess, this.engine);
-
-      const features = await browser.getFeatures();
-
-      this.browserFeaturesPromise.resolve(features?.supportsPerBrowserContextProxy);
-      return browser;
+      return this;
     } catch (err) {
-      const launchError = launcher.translateLaunchError(err);
+      const launchError = this.launcher.translateLaunchError(err);
       throw new PuppetLaunchError(
         launchError.message,
         launchError.stack,
@@ -119,27 +67,36 @@ export default class Puppet {
     }
   }
 
-  private noExecutableAtPathError(executablePath: string): Error {
-    const engineFetcher = new EngineFetcher(this.engine.name, this.engine.fullVersion);
+  public isSameEngine(other: Puppet): boolean {
+    return (
+      this.browserEngine.executablePath === other.browserEngine.executablePath &&
+      this.launchArguments.toString() === other.launchArguments.toString()
+    );
+  }
 
-    let remedyMessage = `No executable exists at "${executablePath}"`;
-
-    // If this is the default install path, suggest further installation directions
-    if (executablePath === engineFetcher.executablePath) {
-      const majorBrowserVersion = this.engine.fullVersion.split('.').shift();
-      remedyMessage = `Please re-install the browser engine:
--------------------------------------------------
--------------- NPM INSTALL ----------------------
--------------------------------------------------
-
- npm install @secret-agent/emulate-${this.engine.name}-${majorBrowserVersion}
-
--------------------------------------------------
-`;
+  public newContext(
+    plugins: IPlugins,
+    logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
+  ): Promise<IPuppetContext> {
+    if (!this.isStarted || !this.browser) {
+      throw new Error('This Puppet instance has not had start() called on it');
     }
+    if (this.isShuttingDown) throw new Error('Shutting down');
+    return this.browser.newContext(plugins, logger, proxy);
+  }
 
-    return new Error(`Failed to launch ${this.engine.name} ${this.engine.fullVersion}:
+  public async close() {
+    if (this.isShuttingDown || !this.isStarted) return;
+    this.isShuttingDown = true;
+    log.stats('Puppet.Closing');
 
-${remedyMessage}`);
+    try {
+      await this.browser?.close();
+    } catch (error) {
+      log.error('Puppet.Closing:Error', { sessionId: null, error });
+    } finally {
+      log.stats('Puppet.closed');
+    }
   }
 }

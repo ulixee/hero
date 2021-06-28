@@ -50,7 +50,7 @@ RUN cat /etc/*-release
 # NOTE: this installs the monorepo, but you could also install secret-agent directly + and desired browsers
 # we will automatically install dependencies
 RUN cd /app/secret-agent && yarn \
-    && $(npx puppet-install-deps) \
+    && $(npx install-browser-deps) \
     && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
     && mkdir -p /home/sagent/Downloads \
     && mkdir -p /home/sagent/.cache \

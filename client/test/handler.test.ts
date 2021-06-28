@@ -50,7 +50,6 @@ describe('Handler', () => {
     const handler = new Handler(
       new Piper({
         maxConcurrency: concurrency,
-        browserEmulatorIds: ['chrome-latest'],
       }),
     );
     Helpers.needsClosing.push(handler);

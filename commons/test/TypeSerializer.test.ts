@@ -1,5 +1,5 @@
 import Puppet from '@secret-agent/puppet';
-import ChromeLatest from '@secret-agent/emulate-chrome-latest';
+import BrowserEmulator from '@secret-agent/default-browser-emulator';
 import TypeSerializer, { stringifiedTypeSerializerClass } from '../TypeSerializer';
 import { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
 import logger from '../Logger';
@@ -36,13 +36,13 @@ test('it should be able to serialize a complex object in nodejs', () => {
 });
 
 test('should be able to serialize and deserialize in a browser window', async () => {
-  const puppet = new Puppet(ChromeLatest.engine);
+  const { browserEngine } = BrowserEmulator.selectBrowserMeta();
+  const puppet = new Puppet(browserEngine);
   try {
     await puppet.start();
     const context = await puppet.newContext(
       {
         userAgentString: 'Page tests',
-        configuration: {},
         async onNewPuppetPage(): Promise<any> {
           return null;
         },
