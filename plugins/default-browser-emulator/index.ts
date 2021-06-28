@@ -13,6 +13,7 @@ import IViewport from '@secret-agent/interfaces/IViewport';
 import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
+import IGeolocation from '@secret-agent/interfaces/IGeolocation';
 import Viewports from './lib/Viewports';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
 import setPageDomOverrides from './lib/setPageDomOverrides';
@@ -30,6 +31,7 @@ import FirstPartyCookiesPlugin from './lib/plugins/FirstPartyCookiesPlugin';
 import DataLoader from './lib/DataLoader';
 import IBrowserData from './interfaces/IBrowserData';
 import selectBrowserEngineOption from './lib/helpers/selectBrowserEngineOption';
+import setGeolocation from './lib/helpers/setGeolocation';
 
 const dataLoader = new DataLoader(__dirname);
 export const latestBrowserEngineId = 'chrome-88-0';
@@ -42,6 +44,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
   public timezoneId: string;
   public locale: string;
   public viewport: IViewport;
+  public geolocation: IGeolocation;
 
   protected readonly data: IBrowserData;
 
@@ -64,10 +67,12 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
       Viewports.getDefault(this.data.windowBaseFraming, this.data.windowFraming);
     config.timezoneId =
       config.timezoneId || this.timezoneId || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    config.geolocation = config.geolocation || this.geolocation;
 
     this.locale = config.locale;
     this.viewport = config.viewport;
     this.timezoneId = config.timezoneId;
+    this.geolocation = config.geolocation;
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
@@ -96,6 +101,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
       setScreensize(this, devtools),
       setActiveAndFocused(this, devtools),
       setPageDomOverrides(this, this.data, page),
+      setGeolocation(this, page),
     ]);
   }
 

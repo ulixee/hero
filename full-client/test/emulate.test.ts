@@ -187,6 +187,22 @@ describe('mouse', () => {
   });
 });
 
+describe('geolocation', () => {
+  it('should be able to set a geolocation', async () => {
+    const agent = await handler.createAgent({ geolocation: { longitude: 10, latitude: 10 } });
+    Helpers.needsClosing.push(agent);
+    await agent.goto(koaServer.baseUrl);
+
+    const geolocation = await agent.getJsValue(`new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
+        resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+      }))`);
+    expect(geolocation).toEqual({
+      latitude: 10,
+      longitude: 10,
+    });
+  });
+});
+
 describe('user agent and platform', () => {
   const propsToGet = `appVersion, platform, userAgent`.split(',').map(x => x.trim());
 

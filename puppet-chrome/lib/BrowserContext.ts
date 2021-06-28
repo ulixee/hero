@@ -41,13 +41,13 @@ export class BrowserContext
   public pagesById = new Map<string, Page>();
   public plugins: IPlugins;
   public proxy: IProxyConnectionOptions;
+  public readonly id: string;
 
   private attachedTargetIds = new Set<string>();
   private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
   private creatingTargetPromises: Promise<void>[] = [];
   private readonly browser: Browser;
-  private readonly id: string;
 
   private isClosing = false;
 
@@ -302,7 +302,7 @@ export class BrowserContext
     });
   }
 
-  private sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(
+  sendWithBrowserDevtoolsSession<T extends keyof ProtocolMapping.Commands>(
     method: T,
     params: ProtocolMapping.Commands[T]['paramsType'][0] = {},
   ): Promise<ProtocolMapping.Commands[T]['returnType']> {

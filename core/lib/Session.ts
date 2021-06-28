@@ -23,6 +23,7 @@ import { MitmProxy } from '@secret-agent/mitm/index';
 import IViewport from '@secret-agent/interfaces/IViewport';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
+import IGeolocation from '@secret-agent/interfaces/IGeolocation';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
@@ -52,6 +53,7 @@ export default class Session extends TypedEventEmitter<{
   public viewport: IViewport;
   public timezoneId: string;
   public locale: string;
+  public geolocation: IGeolocation;
 
   public upstreamProxyUrl: string | null;
   public readonly mitmRequestSession: RequestSession;
@@ -104,6 +106,7 @@ export default class Session extends TypedEventEmitter<{
       this.userProfile = options.userProfile;
     }
     this.upstreamProxyUrl = options.upstreamProxyUrl;
+    this.geolocation = options.geolocation;
 
     this.plugins.configure(options);
     this.timezoneId = options.timezoneId || '';

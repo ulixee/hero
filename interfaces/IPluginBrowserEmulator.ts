@@ -10,6 +10,7 @@ import IBrowserEngine from './IBrowserEngine';
 import { PluginTypes } from './IPluginTypes';
 import IPluginCreateOptions from './IPluginCreateOptions';
 import IUserAgentOption, { IVersion } from './IUserAgentOption';
+import IGeolocation from './IGeolocation';
 
 export interface IBrowserEmulatorClass {
   id: string;
@@ -54,6 +55,7 @@ export interface IBrowserEmulatorMethods {
 
 export interface IBrowserEmulatorConfig {
   viewport?: IViewport;
+  geolocation?: IGeolocation;
   timezoneId?: string;
   locale?: string;
 }
