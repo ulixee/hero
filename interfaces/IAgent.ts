@@ -1,9 +1,7 @@
 import { ISuperDocument } from 'awaited-dom/base/interfaces/super';
-import { IElementIsolate } from 'awaited-dom/base/interfaces/isolate';
 import IUserProfile from './IUserProfile';
 import IAgentMeta from './IAgentMeta';
 import IDomStorage from './IDomStorage';
-import IWaitForOptions from './IWaitForOptions';
 import ITab from './ITab';
 
 export default interface IAgent {

@@ -20,11 +20,13 @@ import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
 import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
 import ResourcesTable from '../models/ResourcesTable';
-import { IFrameRecord } from '../models/FramesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
 import { IJsPathHistory } from './JsPath';
+import { IOutputChangeRecord } from '../models/OutputTable';
+import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
 
@@ -41,10 +43,11 @@ export default class SessionState {
   public viewport: IViewport;
   public readonly db: SessionDb;
 
+  public nextCommandMeta: { commandId: number; startDate: Date; sendDate: Date };
+
   private readonly sessionName: string;
   private readonly scriptInstanceMeta: IScriptInstanceMeta;
   private readonly createDate = new Date();
-  private readonly frames: { [frameId: number]: IFrameRecord } = {};
   private readonly resourcesById = new Map<number, IResourceMeta>();
   private readonly websocketMessages: IWebsocketResourceMessage[] = [];
   private websocketListeners: {
@@ -74,10 +77,7 @@ export default class SessionState {
     sessionId: string,
     sessionName: string | null,
     scriptInstanceMeta: IScriptInstanceMeta,
-    browserEmulatorId: string,
-    humanEmulatorId: string,
     viewport: IViewport,
-    timezoneId: string,
   ) {
     this.sessionId = sessionId;
     this.sessionName = sessionName;
@@ -105,22 +105,35 @@ export default class SessionState {
       );
     }
 
-    this.db.session.insert(
-      sessionId,
-      sessionName,
-      browserEmulatorId,
-      humanEmulatorId,
-      this.createDate,
-      scriptInstanceMeta?.id,
-      scriptInstanceMeta?.entrypoint,
-      scriptInstanceMeta?.startDate,
-      timezoneId,
-      viewport,
-    );
-
     loggerSessionIdNames.set(sessionId, sessionName);
 
     this.logSubscriptionId = LogEvents.subscribe(this.onLogEvent.bind(this));
+  }
+
+  public recordSession(options: {
+    browserEmulatorId: string;
+    browserVersion: string;
+    humanEmulatorId: string;
+    timezoneId?: string;
+    locale?: string;
+    sessionOptions: ISessionCreateOptions;
+  }) {
+    const { sessionName, scriptInstanceMeta, ...optionsToStore } = options.sessionOptions;
+    this.db.session.insert(
+      this.sessionId,
+      this.sessionName,
+      options.browserEmulatorId,
+      options.browserVersion,
+      options.humanEmulatorId,
+      this.createDate,
+      this.scriptInstanceMeta?.id,
+      this.scriptInstanceMeta?.entrypoint,
+      this.scriptInstanceMeta?.startDate,
+      options.timezoneId,
+      this.viewport,
+      options.locale,
+      optionsToStore,
+    );
   }
 
   public recordCommandStart(commandMeta: ICommandMeta) {
@@ -397,44 +410,27 @@ export default class SessionState {
 
   ///////   FRAMES ///////
 
-  public captureFrameCreated(
-    tabId: number,
-    createdFrame: Pick<IFrameRecord, 'id' | 'parentId' | 'name' | 'securityOrigin'>,
-    domNodeId: number,
-  ): void {
-    const frame = {
-      id: createdFrame.id,
-      tabId,
-      domNodeId,
-      parentId: createdFrame.parentId,
-      name: createdFrame.name,
-      securityOrigin: createdFrame.securityOrigin,
-      startCommandId: this.lastCommand?.id,
-      createdTimestamp: new Date().getTime(),
-    } as IFrameRecord;
-    this.frames[createdFrame.id] = frame;
-    this.db.frames.insert(frame);
+  public captureFrameDetails(frame: FrameEnvironment): void {
+    this.db.frames.insert({
+      id: frame.id,
+      tabId: frame.tab.id,
+      domNodeId: frame.domNodeId,
+      parentId: frame.parentId,
+      devtoolsFrameId: frame.devtoolsFrameId,
+      name: frame.puppetFrame.name,
+      securityOrigin: frame.securityOrigin,
+      startCommandId: frame.createdAtCommandId,
+      createdTimestamp: frame.createdTime.getTime(),
+    });
   }
 
-  public updateFrameSecurityOrigin(
-    tabId: number,
-    frame: Pick<IFrameRecord, 'id' | 'name' | 'securityOrigin'>,
-  ): void {
-    const existing = this.frames[frame.id];
-    if (existing) {
-      existing.name = frame.name;
-      existing.securityOrigin = frame.securityOrigin;
-      existing.url = this.db.frames.insert(existing);
-    }
-  }
-
-  public captureError(tabId: number, frameId: string, source: string, error: Error): void {
+  public captureError(tabId: number, frameId: number, source: string, error: Error): void {
     this.db.pageLogs.insert(tabId, frameId, source, error.stack || String(error), new Date());
   }
 
   public captureLog(
     tabId: number,
-    frameId: string,
+    frameId: number,
     consoleType: string,
     message: string,
     location?: string,
@@ -530,7 +526,7 @@ export default class SessionState {
     let lastCommandName: string;
     if (lastCommand) {
       lastCommandName = lastCommand.name;
-      const commandDate = new Date(lastCommand.endDate ?? lastCommand.startDate);
+      const commandDate = new Date(lastCommand.endDate ?? lastCommand.runStartDate);
       if (commandDate > lastActivityDate) {
         lastActivityDate = commandDate;
       }
@@ -545,7 +541,7 @@ export default class SessionState {
 
   public captureDomEvents(
     tabId: number,
-    frameId: string,
+    frameId: number,
     domChanges: IDomChangeEvent[],
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
@@ -576,13 +572,13 @@ export default class SessionState {
 
   public getCommandForTimestamp(lastCommand: ICommandMeta, timestamp: number): ICommandMeta {
     let command = lastCommand;
-    if (command.startDate <= timestamp && command.endDate > timestamp) {
+    if (command.runStartDate <= timestamp && command.endDate > timestamp) {
       return command;
     }
 
     for (let i = this.commands.length - 1; i >= 0; i -= 1) {
       command = this.commands[i];
-      if (command.startDate <= timestamp) break;
+      if (command.runStartDate <= timestamp) break;
     }
     return command;
   }
@@ -636,5 +632,12 @@ export default class SessionState {
       new Date(),
       key,
     );
+  }
+
+  public recordOutputChanges(changes: IOutputChangeRecord[]) {
+    this.nextCommandMeta = null;
+    for (const change of changes) {
+      this.db.output.insert(change);
+    }
   }
 }

@@ -21,6 +21,7 @@ import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
+import OutputTable from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -40,6 +41,7 @@ export default class SessionDb {
   public readonly frames: FramesTable;
   public readonly frameNavigations: FrameNavigationsTable;
   public readonly sockets: SocketsTable;
+  public readonly output: OutputTable;
   public readonly resources: ResourcesTable;
   public readonly resourceStates: ResourceStatesTable;
   public readonly websocketMessages: WebsocketMessagesTable;
@@ -84,6 +86,7 @@ export default class SessionDb {
     this.scrollEvents = new ScrollEventsTable(this.db);
     this.sessionLogs = new SessionLogsTable(this.db);
     this.devtoolsMessages = new DevtoolsMessagesTable(this.db);
+    this.output = new OutputTable(this.db);
 
     this.tables.push(
       this.commands,
@@ -102,6 +105,7 @@ export default class SessionDb {
       this.scrollEvents,
       this.sessionLogs,
       this.devtoolsMessages,
+      this.output,
     );
 
     if (!readonly) {

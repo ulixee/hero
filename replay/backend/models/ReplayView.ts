@@ -9,6 +9,7 @@ import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IRectangle from '~shared/interfaces/IRectangle';
 import { DomActionType, IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
 import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import OutputView from '~backend/models/OutputView';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
 
@@ -17,6 +18,12 @@ export default class ReplayView extends ViewBackend {
   public replayApi: ReplayApi;
   public tabState: ReplayTabState;
   public readonly playbarView: PlaybarView;
+  public readonly outputView: OutputView;
+
+  public readonly toolbarHeight = TOOLBAR_HEIGHT;
+  public outputWidth = 300;
+
+  private previousWidth = 300;
 
   private isTabLoaded = false;
   private lastInactivityMillis = 0;
@@ -33,6 +40,7 @@ export default class ReplayView extends ViewBackend {
     });
 
     this.playbarView = new PlaybarView(window);
+    this.outputView = new OutputView(window, this);
     this.checkResponsive = this.checkResponsive.bind(this);
 
     let resizeTimeout;
@@ -97,15 +105,41 @@ export default class ReplayView extends ViewBackend {
     this.playbarView.onTickHover(rect, tickValue);
   }
 
+  public toggleOutputView(show: boolean): void {
+    const bounds = this.bounds;
+    if (show === false) {
+      this.previousWidth = this.outputWidth;
+      this.outputWidth = 0;
+    } else {
+      this.outputWidth = this.previousWidth;
+    }
+    this.fixBounds(bounds);
+  }
+
+  public growOutputView(diffX: number): void {
+    const bounds = this.bounds;
+    this.outputWidth += diffX;
+    this.fixBounds(bounds);
+  }
+
   public fixBounds(newBounds: { x: number; width: number; y: any; height: number }) {
     this.playbarView.fixBounds({
       x: 0,
       y: newBounds.height + newBounds.y,
       width: newBounds.width,
-      height: TOOLBAR_HEIGHT,
+      height: this.toolbarHeight,
     });
+    this.outputView.fixBounds({
+      x: newBounds.width - this.outputWidth,
+      y: newBounds.y,
+      width: this.outputWidth,
+      height: newBounds.height,
+    });
+    newBounds.width -= this.outputWidth;
     super.fixBounds(newBounds);
+    this.bounds.width += this.outputWidth;
     this.sizeWebContentsToFit();
+    this.window.browserWindow.addBrowserView(this.outputView.browserView);
     this.window.browserWindow.addBrowserView(this.playbarView.browserView);
   }
 
@@ -113,6 +147,7 @@ export default class ReplayView extends ViewBackend {
     if (this.isAttached) return;
     super.attach();
     this.playbarView.attach();
+    this.outputView.attach();
     this.interceptHttpRequests();
     this.webContents.openDevTools({ mode: 'detach', activate: false });
   }
@@ -122,7 +157,10 @@ export default class ReplayView extends ViewBackend {
     super.detach();
     // clear out everytime we detach
     this._browserView = null;
-    if (detachPlaybar) this.playbarView.detach();
+    if (detachPlaybar) {
+      this.outputView.detach();
+      this.playbarView.detach();
+    }
   }
 
   public async onTickDrag(tickValue: number) {
@@ -197,7 +235,7 @@ export default class ReplayView extends ViewBackend {
 
     this.browserView.webContents.enableDeviceEmulation({
       deviceScaleFactor: 1,
-      screenPosition: 'desktop',
+      screenPosition: 'mobile',
       viewSize,
       scale,
       viewPosition,
@@ -241,6 +279,7 @@ export default class ReplayView extends ViewBackend {
       ? domChanges.map(x => columns.map(col => x[col]))
       : undefined;
     this.webContents.send('dom:apply', columns, compressedChanges, ...events.slice(1));
+    this.outputView.setCommandId(this.tabState.currentTick.commandId);
     this.window.setAddressBarUrl(this.tabState.urlOrigin);
   }
 
@@ -291,6 +330,7 @@ export default class ReplayView extends ViewBackend {
 
   private clearReplayApi() {
     if (this.replayApi) {
+      this.outputView.clear();
       this.webContents.session.setPreloads([]);
       this.replayApi.onTabChange = null;
       this.replayApi.close();
@@ -302,6 +342,7 @@ export default class ReplayView extends ViewBackend {
     if (this.tabState) {
       this.tabState.off('tick:changes', this.checkResponsive);
       this.tabState = null;
+      this.outputView.clear();
       this.detach(false);
     }
   }

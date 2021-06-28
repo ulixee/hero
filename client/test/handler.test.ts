@@ -70,7 +70,7 @@ describe('Handler', () => {
       sessionsRunning.set(sessionId, false);
     };
     for (let i = 0; i < 100; i += 1) {
-      handler.dispatchAgent(runFn, i);
+      handler.dispatchAgent(runFn, { input: i });
       expectedCalls.push('Session.create', 'Session.close');
     }
 

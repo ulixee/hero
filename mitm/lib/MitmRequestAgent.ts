@@ -400,13 +400,6 @@ export default class MitmRequestAgent {
       }
     });
 
-    proxyToServerH2Client.on('close', () => {
-      log.stats('Http2.close', {
-        sessionId: this.session.sessionId,
-        origin,
-      });
-    });
-
     originSocketPool.registerHttp2Session(proxyToServerH2Client, ctx.proxyToServerMitmSocket);
 
     return proxyToServerH2Client;

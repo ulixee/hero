@@ -156,10 +156,6 @@ export default class MitmSocket extends TypedEventEmitter<{
       this.remoteAddress = message.remoteAddress;
       this.localAddress = message.localAddress;
       this.emit('connect');
-      this.logger.stats('MitmSocket.Connected', {
-        alpn: this.alpn,
-        host: this.connectOpts?.host,
-      });
       this.connectPromise.resolve();
     } else if (status === 'error') {
       this.onError(message.error);

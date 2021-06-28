@@ -70,7 +70,6 @@ describe('basic Full Client tests', () => {
       async agent => {
         await agent.goto(`${koaServer.baseUrl}/`);
       },
-      null,
       {
         upstreamProxyUrl: koaServer.baseUrl,
       },

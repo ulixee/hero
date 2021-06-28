@@ -257,6 +257,13 @@ export default class Application {
       Window.current?.replayView?.onTickHover(containerRect, tickValue);
     });
 
+    ipcMain.on('toggle-output-panel', (e, isShowing) => {
+      Window.current?.replayView?.toggleOutputView(isShowing);
+    });
+
+    ipcMain.on('output-drag', (e, diffX) => {
+      Window.current?.replayView?.growOutputView(diffX);
+    });
     // SETTINGS
 
     ipcMain.on('settings:save', (e, { settings }: { settings: string }) => {

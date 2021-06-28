@@ -43,7 +43,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   public readonly id: number;
   public readonly parentTabId?: number;
   public readonly session: Session;
-  public readonly frameEnvironmentsById = new Map<string, FrameEnvironment>();
+  public readonly frameEnvironmentsById = new Map<number, FrameEnvironment>();
+  public readonly frameEnvironmentsByPuppetId = new Map<string, FrameEnvironment>();
   public puppetPage: IPuppetPage;
   public isClosing = false;
   public isReady: Promise<void>;
@@ -83,14 +84,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.session.id;
   }
 
-  public get mainFrameId(): string {
-    return this.puppetPage.mainFrame.id;
+  public get mainFrameId(): number {
+    return this.mainFrameEnvironment.id;
   }
 
   public get mainFrameEnvironment(): FrameEnvironment {
-    return this.frameEnvironmentsById.get(this.mainFrameId);
+    return this.frameEnvironmentsByPuppetId.get(this.puppetPage.mainFrame.id);
   }
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   private constructor(
     session: Session,
     puppetPage: IPuppetPage,
@@ -113,6 +115,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
     for (const puppetFrame of puppetPage.frames) {
       const frame = new FrameEnvironment(this, puppetFrame);
+      this.frameEnvironmentsByPuppetId.set(frame.devtoolsFrameId, frame);
       this.frameEnvironmentsById.set(frame.id, frame);
     }
 
@@ -525,11 +528,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       event = await this.puppetPage.waitOn('filechooser', null, options?.timeoutMs ?? 30e3);
     }
 
-    const frameEnvironment = this.frameEnvironmentsById.get(event.frameId);
+    const frameEnvironment = this.frameEnvironmentsByPuppetId.get(event.frameId);
     const nodeId = await frameEnvironment.getDomNodeId(event.objectId);
     return {
       jsPath: [nodeId],
-      frameId: event.frameId,
+      frameId: frameEnvironment.id,
       selectMultiple: event.selectMultiple,
     };
   }
@@ -554,7 +557,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async getFrameDomChanges(
-    frameId: string,
+    frameId: number,
     sinceCommandId: number,
   ): Promise<IDomChangeRecord[]> {
     await this.mainFrameEnvironment.flushPageEventsRecorder();
@@ -633,7 +636,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private onPageCallback(event: IPuppetPageEvents['page-callback-triggered']): void {
     if (event.name === InjectedScripts.PageEventsCallbackName) {
       const { frameId, payload } = event;
-      if (!frameId || !this.frameEnvironmentsById.has(frameId)) {
+      if (!frameId || !this.frameEnvironmentsByPuppetId.has(frameId)) {
         log.warn('DomRecorder.bindingCalledBeforeExecutionTracked', {
           sessionId: this.sessionId,
           payload,
@@ -641,7 +644,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         return;
       }
 
-      this.frameEnvironmentsById.get(frameId).onPageRecorderEvents(JSON.parse(payload));
+      this.frameEnvironmentsByPuppetId.get(frameId).onPageRecorderEvents(JSON.parse(payload));
     }
   }
 
@@ -653,7 +656,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const { browserRequestId } = resource;
     const url = resource.url.href;
 
-    const navigations = this.frameEnvironmentsById.get(frameId)?.navigations ?? this.navigations;
+    const navigations =
+      this.frameEnvironmentsByPuppetId.get(frameId)?.navigations ?? this.navigations;
 
     if (isDocumentNavigation && !navigations.top) {
       navigations.onNavigationRequested(
@@ -691,7 +695,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       event.resource,
       this.id,
     );
-    const frame = this.frameEnvironmentsById.get(event.frameId) ?? this.mainFrameEnvironment;
+    const frame = this.frameEnvironmentsByPuppetId.get(event.frameId) ?? this.mainFrameEnvironment;
     if (
       !!event.resource.browserServedFromCache &&
       event.resource.url?.href === frame.navigations?.top?.requestedUrl &&
@@ -798,7 +802,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
-    const frame = this.frameEnvironmentsById.get(event.frameId) ?? this.mainFrameEnvironment;
+    const frame = this.frameEnvironmentsByPuppetId.get(event.frameId) ?? this.mainFrameEnvironment;
 
     frame.navigations.onHttpResponded(event.browserRequestId, event.url, event.loaderId);
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
@@ -810,8 +814,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   private onFrameCreated(event: IPuppetPageEvents['frame-created']): void {
-    if (this.frameEnvironmentsById.has(event.frame.id)) return;
+    if (this.frameEnvironmentsByPuppetId.has(event.frame.id)) return;
     const frame = new FrameEnvironment(this, event.frame);
+    this.frameEnvironmentsByPuppetId.set(frame.devtoolsFrameId, frame);
     this.frameEnvironmentsById.set(frame.id, frame);
   }
 
@@ -820,12 +825,14 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private onPageError(event: IPuppetPageEvents['page-error']): void {
     const { error, frameId } = event;
     this.logger.info('Window.pageError', { error, frameId });
-    this.sessionState.captureError(this.id, frameId, `events.page-error`, error);
+    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
+    this.sessionState.captureError(this.id, translatedFrameId, `events.page-error`, error);
   }
 
   private onConsole(event: IPuppetPageEvents['console']): void {
     const { frameId, type, message, location } = event;
-    this.sessionState.captureLog(this.id, frameId, type, message, location);
+    const translatedFrameId = this.frameEnvironmentsByPuppetId.get(frameId)?.id;
+    this.sessionState.captureLog(this.id, translatedFrameId, type, message, location);
   }
 
   private onTargetCrashed(event: IPuppetPageEvents['crashed']): void {

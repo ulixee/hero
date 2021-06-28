@@ -1,6 +1,6 @@
 export default interface ISessionMeta {
   tabId?: number;
-  frameId?: string;
+  frameId?: number;
   sessionId: string;
   sessionsDataLocation?: string;
 }

@@ -2,7 +2,7 @@ import type IResolvablePromise from './IResolvablePromise';
 
 export default interface INavigation {
   id: number;
-  frameId: string;
+  frameId: number;
   resourceId: IResolvablePromise<number>;
   browserRequestId: string;
   loaderId: string;

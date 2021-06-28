@@ -49,12 +49,10 @@ import agent from 'secret-agent';
   await agent.goto('https://example.org');
   const title = await agent.document.title;
   const intro = await agent.document.querySelector('p').textContent;
+  agent.output = { title, intro };
   await agent.close();
 
-  console.log('Retrieved from https://example.org', {
-    title,
-    intro,
-  });
+  console.log('Retrieved from https://example.org', agent.output);
 })();
 ```
 

@@ -53,6 +53,7 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
   const links = generateLinks();
 
   @Component({
+      // @ts-ignore
     metaInfo() {
       // @ts-ignore
       const { title, headings } = this.$page.record;

@@ -1,7 +1,7 @@
 export default interface ICommandWithResult {
   id: number;
   tabId: number;
-  frameId: string;
+  frameId: number;
   label: string;
   name: string;
   args?: string;

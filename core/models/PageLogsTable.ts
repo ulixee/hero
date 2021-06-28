@@ -5,7 +5,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'PageLogs', [
       ['tabId', 'INTEGER'],
-      ['frameId', 'TEXT'],
+      ['frameId', 'INTEGER'],
       ['type', 'TEXT'],
       ['message', 'TEXT'],
       ['timestamp', 'INTEGER'],
@@ -15,7 +15,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
 
   public insert(
     tabId: number,
-    frameId: string,
+    frameId: number,
     type: string,
     message: string,
     date: Date,
@@ -27,7 +27,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
 
 export interface IPageLogRecord {
   tabId: number;
-  frameId: string;
+  frameId: number;
   type: string;
   message: string;
   timestamp: number;

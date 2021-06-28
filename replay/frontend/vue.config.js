@@ -20,6 +20,7 @@ module.exports = {
     'list-menu': './src/pages/list-menu/index.ts',
     playbar: './src/pages/playbar/index.ts',
     'message-overlay': './src/pages/message-overlay/index.ts',
+    output: './src/pages/output/index.ts',
     'locations-menu': './src/pages/locations-menu/index.ts',
     'main-menu': './src/pages/main-menu/index.ts',
     settings: './src/pages/settings/index.ts',

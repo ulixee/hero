@@ -13,8 +13,9 @@
           template(v-slot:mark="{ pos, value }" )
             .vue-slider-mark(:style="{ left: `${pos}%`, height:'100%', width:'4px' }", :class="{hovered:isHovered(value)}")
               .vue-slider-mark-step
-      .results
-        | Results
+      button.output(@click.prevent="toggleOutput" :class="{selected:isShowingOutput}")
+        span.label Output
+        Icon(:src="ICON_BRACKETS" :size="14" )
 </template>
 
 <script lang="ts">
@@ -22,7 +23,7 @@ import { ipcRenderer } from 'electron';
 import { Component, Vue } from 'vue-property-decorator';
 import Icon from '~frontend/components/Icon.vue';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
-import { ICON_PAUSE, ICON_PLAY } from '~frontend/constants/icons';
+import { ICON_PAUSE, ICON_PLAY, ICON_BRACKETS } from '~frontend/constants/icons';
 import NoCache from '~frontend/lib/NoCache';
 import VueSlider from 'vue-slider-component';
 import 'vue-slider-component/theme/default.css';
@@ -30,9 +31,11 @@ import ITickState from '~shared/interfaces/ITickState';
 import { getTheme } from '~shared/utils/themes';
 import settings from '~frontend/lib/settings';
 
+// @ts-ignore
 @Component({ components: { Icon, VueSlider } })
 export default class Playbar extends Vue {
   private readonly ICON_PLAY = ICON_PLAY;
+  private readonly ICON_BRACKETS = ICON_BRACKETS;
   private readonly ICON_PAUSE = ICON_PAUSE;
 
   private hoveredValue = '';
@@ -43,6 +46,7 @@ export default class Playbar extends Vue {
   private isPlaying = false;
 
   private nextTimeout: number;
+  private isShowingOutput = true;
 
   private get theme() {
     return getTheme(settings.theme);
@@ -106,9 +110,9 @@ export default class Playbar extends Vue {
   }
 
   private async playbackTick() {
-    const next = await ipcRenderer.invoke('next-tick', this.tickRealtimeOffsetMs ?? 0);
+    const next = await ipcRenderer.invoke('next-tick', this.tickRealtimeOffsetMs ?? 0) ?? {};
     this.currentTickValue = next.playbarOffset || 0;
-    let millisToNextTick = Number(next.millisToNextTick || 0);
+    let millisToNextTick = Number(next.millisToNextTick || 10);
 
     console.log(
       'Playbar at %s. Next tick in %s. Previous offset of %s',
@@ -134,6 +138,11 @@ export default class Playbar extends Vue {
   private pause() {
     this.isPlaying = false;
     clearTimeout(this.nextTimeout);
+  }
+
+  private toggleOutput() {
+    this.isShowingOutput = !this.isShowingOutput;
+    ipcRenderer.send('toggle-output-panel', this.isShowingOutput);
   }
 
   private isHovered(value: number) {
@@ -295,6 +304,24 @@ export default class Playbar extends Vue {
           top: calc(50% - 8px);
         }
       }
+    }
+  }
+  .output {
+    border: 1px solid var(--toolbarBorderColor);
+    border-radius: 4px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &.selected {
+      background: rgba(0, 0, 0, 0.1);
+      color: #3c3c3c;
+    }
+
+    .label {
+      margin-right: 5px;
+      vertical-align: top;
+      font-size: 1.1em;
     }
   }
 }

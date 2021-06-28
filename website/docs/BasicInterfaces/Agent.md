@@ -30,6 +30,23 @@ Agent instances can have multiple [Tabs](/docs/basic-interfaces/tab), but only a
 
 Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/advanced/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
+## Default Instance {#default}
+
+A default instance is automatically initialized and available as the default export of `secret-agent`.
+
+The default instance can receive configuration via command line arguments. Any args starting with `--input.*` will be processed. The resulting json object is available as [`agent.input`](#input)
+
+```js
+// script.js
+const agent = require('secret-agent');
+
+console.log(agent.input); // { secret: "true", agent: "true" }
+```
+
+```bash
+$ node script.js --input.secret=true --input.agent=true
+```
+
 ## Constructor
 
 ### new Agent*(options)* {#constructor}
@@ -64,6 +81,7 @@ const { Agent } = require('secret-agent');
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
+  - input `object`. An object containing properties to attach to the agent. NOTE: if using the default agent, this object will be populated with command line variables starting with `--input.{json path}`. The `{json path}` will be translated into an object set to `agent.input`.
   - showReplay `boolean`. Whether or not to show the Replay UI. Can also be set with an env variable: `SA_SHOW_REPLAY=true`.
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. Dns over Tls requests will also use this proxy, if provided. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 
@@ -89,19 +107,22 @@ Returns a reference to the main Document for the active tab.
 
 Alias for [activeTab.document](/docs/basic-interfaces/tab#document)
 
-### agent.mainFrameEnvironment {#main-frame-environment}
-
-Returns a reference to the document of the [mainFrameEnvironment](#main-frame-environment) of the active tab.
-
-Alias for [tab.mainFrameEnvironment.document](/docs/basic-interfaces/frame-environment#document).
-
-#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
-
 ### agent.frameEnvironments {#frame-environments}
 
 Returns a list of [FrameEnvironments](/docs/basic-interfaces/frame-environment) loaded for the active tab.
 
-#### **Type**: [`Promise<Frame[]>`](/docs/basic-interfaces/frame-environment).
+#### **Type**: [`Promise<FrameEnvironment[]>`](/docs/basic-interfaces/frame-environment).
+
+### agent.input {#input}
+
+Contains the input configuration (if any) for this agent. This might come from:
+
+- [`Handler.dispatchAgent`](/docs/basic-interfaces/handler#dispatch-agent)
+- or the [default `agent`](#default)
+
+NOTE: if using the default agent, this object will be populated with command line variables starting with `--input.*`. The parameters will be translated into an object set to `agent.input`.
+
+#### **Type**: Object
 
 ### agent.lastCommandId {#lastCommandId}
 
@@ -110,6 +131,14 @@ An execution point that refers to a command run on this instance (`waitForElemen
 #### **Type**: `Promise<number>`
 
 Alias for [activeTab.lastCommandId](/docs/basic-interfaces/tab#lastCommandId)
+
+### agent.mainFrameEnvironment {#main-frame-environment}
+
+Returns a reference to the document of the [mainFrameEnvironment](#main-frame-environment) of the active tab.
+
+Alias for [tab.mainFrameEnvironment.document](/docs/basic-interfaces/frame-environment#document).
+
+#### **Type**: [`SuperDocument`](/docs/awaited-dom/super-document)
 
 ### agent.meta {#meta}
 
@@ -127,6 +156,35 @@ Retrieves metadata about the agent configuration:
 - userAgentString `string`. The user agent string used in Http requests and within the DOM.
 
 #### **Type**: `Promise<IAgentMeta>`
+
+### agent.output {#output}
+
+Agent output is an object used to track any data you collect during your session. Output will be shown in Replay during playback for easy visual playback of data collection.
+
+Output is able to act like an Array or an Object. It will serialize properly in either use-case.
+
+NOTE: any object you assign into Output is "copied" into the Output object. You should not expect further changes to the source object to synchronize.
+
+```js
+const agent = require('secret-agent');
+
+(async () => {
+  await agent.goto('https://www.google.com');
+  const document = agent.document;
+
+  for (const link of await document.querySelectorAll('a')) {
+    agent.output.push({ // will display in Replay UI.
+      text: await link.textContent,
+      href: await link.href,
+    });
+  }
+   
+  console.log(agent.output);  
+  await agent.close();
+})();
+```
+
+#### **Type**: `Output`. An array-like object.
 
 ### agent.sessionId {#sessionId}
 
@@ -229,29 +287,29 @@ NOTE: you can detach the same `Tab` multiple times per script. Each instance wil
 #### **Returns**: `FrozenTab`
 
 ```js
-  await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
-  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
+await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
 
-  const frozenTab = await agent.detach(agent.activeTab);
-  const { document } = frozenTab;
+const frozenTab = await agent.detach(agent.activeTab);
+const { document } = frozenTab;
 
-  const versions = [];
-  // 1.  First run will run as normal. 
-  // 2+. Next runs will pre-fetch everything run against the frozenTab
-  // NOTE: Every time your script changes, SecretAgent will re-learn what to pre-fetch.
-  const wrapperElements = await document.querySelectorAll('.RefList');
-  for (const elem of wrapperElements) {
-    const innerText = await elem.querySelector('.RefList-title').innerText;
-    if (innerText === 'Tags') {
-      const aElems = await elem.querySelectorAll('ul.RefList-items li a');
+const versions = agent.output;
+// 1.  First run will run as normal.
+// 2+. Next runs will pre-fetch everything run against the frozenTab
+// NOTE: Every time your script changes, SecretAgent will re-learn what to pre-fetch.
+const wrapperElements = await document.querySelectorAll('.RefList');
+for (const elem of wrapperElements) {
+  const innerText = await elem.querySelector('.RefList-title').innerText;
+  if (innerText === 'Tags') {
+    const aElems = await elem.querySelectorAll('ul.RefList-items li a');
 
-      for (const aElem of aElems) {
-        const version = await aElem.innerText;
-        versions.push(version);
-      }
+    for (const aElem of aElems) {
+      const version = await aElem.innerText;
+      versions.push(version);
     }
   }
-  await agent.close();
+}
+await agent.close();
 ```
 
 ### agent.exportUserProfile*()* {#export-profile}

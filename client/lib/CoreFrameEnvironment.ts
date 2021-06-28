@@ -14,7 +14,7 @@ import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {
   public tabId: number;
-  public frameId: string;
+  public frameId: number;
   public sessionId: string;
   public commandQueue: CoreCommandQueue;
 
@@ -44,13 +44,12 @@ export default class CoreFrameEnvironment {
     return await this.commandQueue.run('FrameEnvironment.execJsPath', jsPath);
   }
 
-  public recordDetachedJsPath(index: number, startTime: Date, endTime: Date): void {
-    this.commandQueue.queueBatchedCommand(
-      'FrameEnvironment.recordDetachedJsPaths',
-      index,
-      startTime.getTime(),
-      endTime.getTime(),
-    );
+  public recordDetachedJsPath(index: number, startDate: Date, endDate: Date): void {
+    this.commandQueue.record({
+      commandId: this.commandQueue.nextCommandId,
+      command: 'FrameEnvironment.recordDetachedJsPath',
+      args: [index, startDate.getTime(), endDate.getTime()],
+    });
   }
 
   public async getJsValue<T>(expression: string): Promise<T> {

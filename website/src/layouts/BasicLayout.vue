@@ -5,14 +5,9 @@ CoreLayout.BasicLayout
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import Logo from '../assets/logo.svg';
+import { Component, Vue } from 'vue-property-decorator';
 
-@Component({
-  components: {
-    Logo,
-  },
-})
+@Component
 export default class BasicLayout extends Vue {}
 </script>
 

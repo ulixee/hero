@@ -19,6 +19,15 @@ export default class CoreSession implements IJsPathEventTarget {
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
 
+  public get lastCommandId(): number {
+    return this.commandId;
+  }
+
+  public get nextCommandId(): number {
+    this.commandId += 1;
+    return this.commandId;
+  }
+
   public get firstTab(): CoreTab {
     return [...this.tabsById.values()][0];
   }
@@ -34,6 +43,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   protected readonly meta: ISessionMeta;
   private readonly connection: ConnectionToCore;
+  private commandId = 0;
 
   constructor(sessionMeta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
     const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
@@ -45,7 +55,7 @@ export default class CoreSession implements IJsPathEventTarget {
     };
     this.connection = connection;
     loggerSessionIdNames.set(sessionId, sessionName);
-    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connection);
+    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connection, this);
     this.eventHeap = new CoreEventHeap(this.meta, connection);
 
     this.addTab(sessionMeta);
@@ -58,6 +68,13 @@ export default class CoreSession implements IJsPathEventTarget {
     } else {
       this.eventHeap.incomingEvent(meta, listenerId, eventData);
     }
+  }
+
+  public recordOutput(
+    changes: { type: string; value: any; path: string; timestamp: Date }[],
+  ): void {
+    for (const change of changes) (change as any).lastCommandId = this.lastCommandId;
+    this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
   }
 
   public getAgentMeta(): Promise<IAgentMeta> {
@@ -80,7 +97,7 @@ export default class CoreSession implements IJsPathEventTarget {
     if (!this.tabsById.has(tabMeta.tabId)) {
       this.tabsById.set(
         tabMeta.tabId,
-        new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connection),
+        new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connection, this),
       );
     }
   }
@@ -98,7 +115,7 @@ export default class CoreSession implements IJsPathEventTarget {
       meta: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
     }>('Session.detachTab', tab.tabId, callSitePath, key);
-    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection);
+    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection, this);
     this.frozenTabsById.set(meta.tabId, coreTab);
     return {
       coreTab,

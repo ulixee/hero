@@ -25,7 +25,9 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
         ...log.data,
       };
     }
-    const data = log.data
+    const context = log.data?.context;
+
+    let data = log.data
       ? JSON.stringify(log.data, (key, value) => {
           if (value instanceof Error) {
             return {
@@ -34,16 +36,29 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
               ...value,
             };
           }
+          if (value === context) {
+            if (!Object.keys(value).length) return undefined;
+
+            const ctx: any = {};
+            for (const x of Object.keys(value)) {
+              if (x === 'sessionId' || x === 'browserContextId') continue;
+              ctx[x] = value[x];
+            }
+            if (!Object.keys(ctx).length) return undefined;
+            return ctx;
+          }
           return value;
         })
       : null;
+    if (data === '{}') data = undefined;
+
     return this.queuePendingInsert([
       log.id,
       log.timestamp.getTime(),
       log.action,
       log.level,
       log.module,
-      log.sessionId !== null ? 0 : 1,
+      log.sessionId === null ? 1 : undefined,
       log.parentId,
       data,
     ]);

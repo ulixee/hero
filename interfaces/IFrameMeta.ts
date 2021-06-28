@@ -1,7 +1,7 @@
 export default interface IFrameMeta {
-  id: string;
+  id: number;
   tabId: number;
-  parentFrameId: string | null;
+  parentFrameId: number;
   securityOrigin: string;
   url: string;
   name: string;

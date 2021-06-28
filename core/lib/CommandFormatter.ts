@@ -76,13 +76,15 @@ export default class CommandFormatter {
 
   public static parseResult(meta: ICommandMeta): ICommandWithResult {
     const duration = meta.endDate
-      ? new Date(meta.endDate).getTime() - new Date(meta.startDate).getTime()
+      ? new Date(meta.endDate).getTime() -
+        new Date(meta.clientStartDate ?? meta.runStartDate).getTime()
       : null;
 
     const command: ICommandWithResult = {
       ...meta,
       label: CommandFormatter.toString(meta),
       duration,
+      startDate: meta.clientStartDate ?? meta.runStartDate,
       isError: false,
       result: undefined,
     };

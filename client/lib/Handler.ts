@@ -9,13 +9,20 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 
-type SettledDispatchesBySessionId = {
-  [sessionId: string]: { args: any; error?: Error; retries: number };
+type SettledDispatch = {
+  sessionId: string;
+  name: string;
+  error?: Error;
+  output: any;
+  input: any;
+  options: IAgentCreateOptions;
+  retries: number;
 };
+
 type PendingDispatch = {
-  resolution: Promise<Error | void>;
+  resolution: Promise<Error | any>;
   sessionId?: string;
-  args: any;
+  options: IAgentCreateOptions;
   retries: number;
 };
 
@@ -74,50 +81,20 @@ export default class Handler {
     }
   }
 
-  public dispatchAgent<T>(
-    runFn: (agent: Agent, args?: T) => Promise<void>,
-    args?: T,
+  public dispatchAgent(
+    runFn: (agent: Agent) => Promise<void>,
     createAgentOptions?: IAgentCreateOptions,
-    pendingDispatch?: PendingDispatch,
   ): void {
     const options = {
       ...this.defaultAgentOptions,
       ...createAgentOptions,
     };
 
-    const dispatched: PendingDispatch = pendingDispatch ?? { args, resolution: null, retries: 0 };
-
-    // if no available connection, return
-    const connection = this.getConnection();
-    if (!connection) {
-      dispatched.resolution = Promise.resolve(
-        new Error("There aren't any connections available to dispatch this agent"),
-      );
-      this.dispatches.push(dispatched);
-      return;
-    }
-
-    dispatched.resolution = connection
-      .useAgent(options, async agent => {
-        try {
-          dispatched.sessionId = await agent.sessionId;
-          await runFn(agent, args);
-        } finally {
-          await agent.close();
-        }
-      })
-      .catch(err => {
-        const canRetry =
-          !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
-        if (canRetry && !this.isClosing && this.connections.length) {
-          dispatched.retries += 1;
-          return this.dispatchAgent(runFn, args, createAgentOptions, dispatched);
-        }
-
-        return err;
-      });
-
-    this.dispatches.push(dispatched);
+    this.internalDispatchAgent(runFn, options, {
+      options,
+      resolution: null,
+      retries: 0,
+    });
   }
 
   public async createAgent(createAgentOptions: IAgentCreateOptions = {}): Promise<Agent> {
@@ -146,46 +123,48 @@ export default class Handler {
     return await promise.promise;
   }
 
-  public async waitForAllDispatches(): Promise<void> {
-    const dispatches = [...this.dispatches];
-    // clear out dispatches everytime you check it
-    this.dispatches.length = 0;
+  public async waitForAllDispatches(): Promise<SettledDispatch[]> {
+    const settledDispatches = new Map<PendingDispatch, Promise<SettledDispatch>>();
     const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
-    await Promise.all(
-      dispatches.map(async dispatch => {
-        const err = await dispatch.resolution;
-        if (err) {
-          const marker = `------WAIT FOR ALL DISPATCHES`.padEnd(50, '-');
-          err.stack += `\n${marker}\n${startStack}`;
-          throw err;
-        }
-      }),
-    );
-    // keep going if there are new things queued
-    if (this.dispatches.length) {
-      await new Promise(setImmediate);
-      return this.waitForAllDispatches();
-    }
-  }
-
-  public async waitForAllDispatchesSettled(): Promise<SettledDispatchesBySessionId> {
-    const result: SettledDispatchesBySessionId = {};
 
     do {
-      const dispatches = [...this.dispatches];
       // clear out dispatches everytime you check it
-      this.dispatches.length = 0;
+      const dispatches = this.dispatches.splice(0);
 
-      await Promise.all(dispatches.map(x => x.resolution));
-      for (const { sessionId, resolution, args, retries } of dispatches) {
-        const error = <Error>await resolution;
-        result[sessionId] = { args, error, retries };
+      // put in request order
+      for (const dispatch of dispatches) {
+        settledDispatches.set(
+          dispatch,
+          this.resolveDispatch(startStack, dispatch).then(x => {
+            if (x.error) throw x.error;
+            return x;
+          }),
+        );
       }
+      await Promise.all(settledDispatches.values());
 
       await new Promise(setImmediate);
     } while (this.dispatches.length);
 
-    return result;
+    return await Promise.all(settledDispatches.values());
+  }
+
+  public async waitForAllDispatchesSettled(): Promise<SettledDispatch[]> {
+    const settledDispatches = new Map<PendingDispatch, Promise<SettledDispatch>>();
+    const startStack = new Error('').stack.slice(8); // "Error: \n" is 8 chars
+
+    do {
+      // clear out dispatches everytime you check it
+      const dispatches = this.dispatches.splice(0);
+      for (const dispatch of dispatches) {
+        settledDispatches.set(dispatch, this.resolveDispatch(startStack, dispatch));
+      }
+      await Promise.all(settledDispatches.values());
+
+      await new Promise(setImmediate);
+    } while (this.dispatches.length);
+
+    return await Promise.all(settledDispatches.values());
   }
 
   public async close(error?: Error): Promise<void> {
@@ -193,6 +172,70 @@ export default class Handler {
     this.isClosing = true;
     // eslint-disable-next-line promise/no-promise-in-callback
     await Promise.all(this.connections.map(x => x.disconnect(error).catch(() => null)));
+  }
+
+  private async resolveDispatch(
+    startStack: string,
+    dispatch: PendingDispatch,
+  ): Promise<SettledDispatch> {
+    const { sessionId, resolution, options, retries } = dispatch;
+    const dispatchResolution = <SettledDispatch>{
+      options: { ...options, connectionToCore: undefined },
+      name: options.name,
+      sessionId,
+      error: undefined,
+      output: undefined,
+      retries,
+    };
+    const result = await resolution;
+    if (result instanceof Error) {
+      const marker = `------WAIT FOR ALL DISPATCHES`.padEnd(50, '-');
+      result.stack += `\n${marker}\n${startStack}`;
+      dispatchResolution.error = result;
+    } else {
+      dispatchResolution.output = result;
+    }
+    return dispatchResolution;
+  }
+
+  private internalDispatchAgent(
+    runFn: (agent: Agent) => Promise<void>,
+    options: IAgentCreateOptions,
+    dispatched: PendingDispatch,
+  ): void {
+    // if no available connection, return
+    const connection = this.getConnection();
+    if (!connection) {
+      dispatched.resolution = Promise.resolve(
+        new Error("There aren't any connections available to dispatch this agent"),
+      );
+      this.dispatches.push(dispatched);
+      return;
+    }
+
+    dispatched.resolution = connection
+      .useAgent(options, async agent => {
+        try {
+          dispatched.sessionId = await agent.sessionId;
+          dispatched.options.name = await agent.sessionName;
+          await runFn(agent);
+        } finally {
+          await agent.close();
+        }
+        return agent.output.toJSON();
+      })
+      .catch(err => {
+        const canRetry =
+          !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
+        if (canRetry && !this.isClosing && this.connections.length) {
+          dispatched.retries += 1;
+          return this.internalDispatchAgent(runFn, options, dispatched);
+        }
+
+        return err;
+      });
+
+    this.dispatches.push(dispatched);
   }
 
   private getAvailableConnections(): ConnectionToCore[] {

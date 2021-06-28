@@ -20,6 +20,7 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
+import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -43,6 +44,8 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     ['Session.close', 'closeSession'],
     ['Session.configure', 'configure'],
     ['Session.detachTab', 'detachTab'],
+    ['Session.flush', 'flush'],
+    ['Session.recordOutput', 'recordOutput'],
     ['Session.getAgentMeta', 'getAgentMeta'],
     ['Session.exportUserProfile', 'exportUserProfile'],
     ['Session.getTabs', 'getTabs'],
@@ -54,8 +57,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
   public async handleRequest(payload: ICoreRequestPayload): Promise<void> {
-    const { messageId, command, meta } = payload;
-
+    const { commandId, startDate, sendDate, messageId, command, meta, recordCommands } = payload;
     const session = meta?.sessionId ? Session.get(meta.sessionId) : undefined;
 
     // json converts args to null which breaks undefined argument handlers
@@ -64,11 +66,12 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     let data: any;
     try {
       this.hasActiveCommand = true;
-      data = await this.executeCommand(command, args, meta);
+      if (recordCommands) await this.recordCommands(meta, sendDate, recordCommands);
+      data = await this.executeCommand(command, args, meta, { commandId, startDate, sendDate });
     } catch (error) {
+      const isClosing = session?.isClosing || this.isClosing;
       // if we're closing, don't emit errors
-      let shouldSkipLogging =
-        (this.isClosing || session?.isClosing) && error instanceof CanceledPromiseError;
+      let shouldSkipLogging = isClosing && error instanceof CanceledPromiseError;
 
       // don't log timeouts when explicitly provided timeout (NOTE: doesn't cover goto)
       if (args && error instanceof TimeoutError) {
@@ -85,20 +88,17 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       if ((isChildProcess === false && shouldSkipLogging === false) || isLaunchError) {
         log.error('ConnectionToClient.HandleRequestError', {
           error,
-          sessionId: session?.id ?? meta?.sessionId,
+          sessionId: meta?.sessionId,
         });
       }
       data = this.serializeError(error);
-      data.isDisconnecting = this.isClosing || session?.isClosing;
+      data.isDisconnecting = isClosing;
     } finally {
       this.hasActiveCommand = false;
     }
 
-    const commandId = session?.sessionState?.lastCommand?.id;
-
     const response: ICoreResponsePayload = {
       responseId: messageId,
-      commandId,
       data,
     };
     this.emit('message', response);
@@ -151,6 +151,10 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  public flush(meta: ISessionMeta): void {
+    log.info('SessionFlushing', { sessionId: meta.sessionId });
+  }
+
   public getTabs(meta: ISessionMeta): ISessionMeta[] {
     const session = Session.get(meta.sessionId);
     return [...session.tabsById.values()]
@@ -170,6 +174,11 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       meta: this.getSessionMeta(detachedTab),
       prefetchedJsPaths,
     };
+  }
+
+  public recordOutput(meta: ISessionMeta, ...changes: IOutputChangeRecord[]): void {
+    const session = Session.get(meta.sessionId);
+    session.recordOutput(changes);
   }
 
   public getAgentMeta(meta: ISessionMeta): IAgentMeta {
@@ -243,7 +252,35 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
 
-  private async executeCommand(command: string, args: any[], meta: ISessionMeta): Promise<any> {
+  private async recordCommands(
+    meta: ISessionMeta,
+    sendDate: Date,
+    recordCommands: ICoreRequestPayload['recordCommands'],
+  ): Promise<void> {
+    for (const { command, args, commandId, startDate } of recordCommands) {
+      try {
+        const cleanArgs = args.map(x => (x === null ? undefined : x));
+        await this.executeCommand(command, cleanArgs, meta, {
+          commandId,
+          startDate,
+          sendDate,
+        });
+      } catch (error) {
+        log.warn('RecordingCommandsFailed', {
+          sessionId: meta.sessionId,
+          error,
+          command,
+        });
+      }
+    }
+  }
+
+  private async executeCommand(
+    command: string,
+    args: any[],
+    meta: ISessionMeta,
+    commandMeta: { commandId: number; startDate: Date; sendDate: Date },
+  ): Promise<any> {
     const target = command.split('.').shift();
     if (target === 'Core' || target === 'Session') {
       if (!this.clientExposedMethods.has(command)) {
@@ -256,11 +293,13 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       }
 
       const session = Session.get(meta.sessionId);
+      session.sessionState.nextCommandMeta = commandMeta;
       if (!session) {
         return new SessionClosedOrMissingError(
           `The requested command (${command}) references a session that is closed or invalid.`,
         );
       }
+
       return await this[method](meta, ...args);
     }
 
@@ -271,6 +310,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
         `The requested command (${command}) references a tab that is no longer part of session or has been closed.`,
       );
     }
+    tab.session.sessionState.nextCommandMeta = commandMeta;
 
     const method = command.split('.').pop();
 
