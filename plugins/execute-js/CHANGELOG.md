@@ -1,0 +1,18 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* a number of tweaks to get client extender plugins working ([bc89574](https://github.com/ulixee/secret-agent/commit/bc8957491b4b3180b67796ae9eb2487250a839df))
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+
+
+### Features
+
+* **core:** geolocation feature ([0ecbb14](https://github.com/ulixee/secret-agent/commit/0ecbb14307c6cdebb99cf2e2ab3c3d27702aa6fa))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))

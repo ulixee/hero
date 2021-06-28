@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* **mitm:** http2 header order wrong ([801b3c8](https://github.com/ulixee/secret-agent/commit/801b3c84a18f6eee51464d889edf9e01134fba9a))
+
+
+### Features
+
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/testing

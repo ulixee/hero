@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/testing",
-  "version": "1.4.1-alpha.4",
+  "version": "1.5.0",
   "description": "Helpers and stubs for testing",
   "main": "index.js",
   "private": true,
@@ -8,19 +8,19 @@
     "node": ">=13.2.0"
   },
   "dependencies": {
+    "@koa/multer": "^3.0.0",
     "@koa/router": "^8.0.8",
-    "@secret-agent/commons": "1.4.1-alpha.4",
-    "@secret-agent/core": "1.4.1-alpha.4",
-    "@secret-agent/mitm-socket": "1.4.1-alpha.4",
+    "@secret-agent/commons": "1.5.0",
+    "@secret-agent/core": "1.5.0",
+    "@secret-agent/mitm-socket": "1.5.0",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
     "koa": "^2.11.0",
-    "@koa/multer": "^3.0.0",
     "multer": "^1.4.2"
   },
   "devDependencies": {
     "@types/koa": "^2.11.3",
-    "@types/koa__router": "^8.0.2",
-    "@types/koa__multer": "^2.0.2"
+    "@types/koa__multer": "^2.0.2",
+    "@types/koa__router": "^8.0.2"
   }
 }

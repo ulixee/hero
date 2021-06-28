@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* **mitm:** proper errors when mitm binary missing ([382669f](https://github.com/ulixee/secret-agent/commit/382669fb2d86c86e010bf16ed3cdd0391d047f85))
+* navigation test hanging ([115418a](https://github.com/ulixee/secret-agent/commit/115418aa7b9d73e9ee74051a26faac4d3bea1a9f))
+* **dns:** handle dns socket disconnect ([8149e61](https://github.com/ulixee/secret-agent/commit/8149e61d8eb6ea26e0e5a6c92a9f8abc6eb6dccf))
+* **mitm:** clean premature shutdown errors ([8037c64](https://github.com/ulixee/secret-agent/commit/8037c6470593994cdb05a0c3a761d982472e1601))
+* **mitm:** fix install script, reuse same h2 conn ([ebb0693](https://github.com/ulixee/secret-agent/commit/ebb06933879575c2bbaf311a50ac0e3ecc2ae843))
+* **mitm:** handle malformed urls ([7190390](https://github.com/ulixee/secret-agent/commit/71903904ae63b9fc2a236002c1420b0a0d95e299))
+* **mitm:** http2 header order wrong ([801b3c8](https://github.com/ulixee/secret-agent/commit/801b3c84a18f6eee51464d889edf9e01134fba9a))
+* **mitm:** remove blocking actions ([4a75179](https://github.com/ulixee/secret-agent/commit/4a75179bc0bd1081a489e3a83d1f1dc57e50990e))
+
+
+### Features
+
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 

@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* a number of tweaks to get client extender plugins working ([bc89574](https://github.com/ulixee/secret-agent/commit/bc8957491b4b3180b67796ae9eb2487250a839df))
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+* **client:** add key to detached tab ([5c9ed99](https://github.com/ulixee/secret-agent/commit/5c9ed998d370d407bc45d47fb6af3528cf6bba05))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+* **replay:** fix assets in different data location ([082dcff](https://github.com/ulixee/secret-agent/commit/082dcffea00c25ba72a39e9b4f3f405406657db4))
+
+
+### Features
+
+* **client:** update awaited-dom ([f9699fb](https://github.com/ulixee/secret-agent/commit/f9699fbadb2c2020e88056edb33eeb5331ed1556))
+* **client+core:** input/outputs ([d48a1de](https://github.com/ulixee/secret-agent/commit/d48a1de1ae5f293fdb884ae23c2402cf4e14ee36))
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **core:** detached tab ([9e32e47](https://github.com/ulixee/secret-agent/commit/9e32e47f2e0c17a138593f554d966a346d2800e5))
+* **core:** geolocation feature ([0ecbb14](https://github.com/ulixee/secret-agent/commit/0ecbb14307c6cdebb99cf2e2ab3c3d27702aa6fa))
+* **core:** javascript dialog handling ([e02d84b](https://github.com/ulixee/secret-agent/commit/e02d84b3f1d5c01da5c2b581c6889922584a92d0))
+* **core:** prefetch jsPaths from prior runs ([4f523bd](https://github.com/ulixee/secret-agent/commit/4f523bdbafe18c19517831edd8d0b325dd023de4))
+* **core:** store agent options in session table ([aab1025](https://github.com/ulixee/secret-agent/commit/aab1025ccef2f3545743d98ec728161c47b51493))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+* **plugin:** chrome dependencies in npm packages ([62d99c9](https://github.com/ulixee/secret-agent/commit/62d99c90b0bc653f568eff9cf2279109f2d24bfe))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **emulators:** move installation into emulators ([351c58d](https://github.com/ulixee/secret-agent/commit/351c58d2fb3333725370bfb1dbc29027005ced8a))
+* **interfaces:** fix devtools command typing ([00af054](https://github.com/ulixee/secret-agent/commit/00af054cc6c971c59b35c964bbe3ba568aadb151))
+* **replay:** show frozen tabs ([d2eff14](https://github.com/ulixee/secret-agent/commit/d2eff14ac12b06dfb1325a41f542c5ae9714a471))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/interfaces

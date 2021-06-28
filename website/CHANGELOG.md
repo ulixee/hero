@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* hid BrowserEmulator and HumanEmulator docs until I finish rewriting them ([de8a549](https://github.com/ulixee/secret-agent/commit/de8a5499955914be64992274bc3a0c8df656d437))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+* **deps:** peg awaited dom version ([3e6ffaf](https://github.com/ulixee/secret-agent/commit/3e6ffaf52cdf2933a5608417ee7178ed36512aa8))
+* **docs:** absolute urls to nested links ([480092b](https://github.com/ulixee/secret-agent/commit/480092b03ce1b708fb8d9cff52090f1aea59087e))
+* **docs:** frame link broken ([d428fd3](https://github.com/ulixee/secret-agent/commit/d428fd38101c0d58f4f69aa98eb0efd2de5e92da))
+
+
+### Features
+
+* **client:** add output to handlers ([1c143b4](https://github.com/ulixee/secret-agent/commit/1c143b4e84145a4eb5e8df0e52c7d69c64efeb7a))
+* **client:** update awaited-dom ([f9699fb](https://github.com/ulixee/secret-agent/commit/f9699fbadb2c2020e88056edb33eeb5331ed1556))
+* **core:** geolocation feature ([0ecbb14](https://github.com/ulixee/secret-agent/commit/0ecbb14307c6cdebb99cf2e2ab3c3d27702aa6fa))
+* **core:** javascript dialog handling ([e02d84b](https://github.com/ulixee/secret-agent/commit/e02d84b3f1d5c01da5c2b581c6889922584a92d0))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **replay:** add output streaming to replay ([dd0f3b8](https://github.com/ulixee/secret-agent/commit/dd0f3b87518c5967c41b8d79829f80899769ee6d))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **docs:** add detached documentation ([18bbc64](https://github.com/ulixee/secret-agent/commit/18bbc646ba1129e95e98cd45f953b15a5d7a36e0))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/website

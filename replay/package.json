@@ -10,7 +10,7 @@
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
   "description": "A browser for visually replaying your scraper scripts",
-  "version": "1.4.1-alpha.4",
+  "version": "1.5.0",
   "main": "./app.js",
   "files": [
     "index.js",
@@ -66,6 +66,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
+    "@secret-agent/commons": "1.5.0",
     "compare-versions": "^3.6.0",
     "core-js": "^3.6.5",
     "electron-log": "^4.3.2",
@@ -75,8 +76,7 @@
     "source-map-support": "^0.5.19",
     "tar": "^6.1.0",
     "uuid": "^8.3.2",
-    "ws": "^7.4.4",
-    "@secret-agent/commons": "^1.4.1-alpha.4"
+    "ws": "^7.4.4"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.113",

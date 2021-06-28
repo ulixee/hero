@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* **core:** flushing outside transactions ([5abd143](https://github.com/ulixee/secret-agent/commit/5abd1439e875880c683f24e9b87fec0e4331b24c))
+* **core:** noscript messing up frozen tabs ([6c55805](https://github.com/ulixee/secret-agent/commit/6c558056985bd8049940ad76543aa535f7790bbb))
+* **mitm:** http2 header order wrong ([801b3c8](https://github.com/ulixee/secret-agent/commit/801b3c84a18f6eee51464d889edf9e01134fba9a))
+* **mitm:** proper errors when mitm binary missing ([382669f](https://github.com/ulixee/secret-agent/commit/382669fb2d86c86e010bf16ed3cdd0391d047f85))
+* **replay:** fix assets in different data location ([082dcff](https://github.com/ulixee/secret-agent/commit/082dcffea00c25ba72a39e9b4f3f405406657db4))
+* **replay:** show post navigations correctly ([f452cc4](https://github.com/ulixee/secret-agent/commit/f452cc44f405f64cff2f7c070af9440e39176696)), closes [#259](https://github.com/ulixee/secret-agent/issues/259)
+
+
+### Features
+
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **core:** detached tab ([9e32e47](https://github.com/ulixee/secret-agent/commit/9e32e47f2e0c17a138593f554d966a346d2800e5))
+* **replay:** add output streaming to replay ([dd0f3b8](https://github.com/ulixee/secret-agent/commit/dd0f3b87518c5967c41b8d79829f80899769ee6d))
+* **replay:** show frozen tabs ([d2eff14](https://github.com/ulixee/secret-agent/commit/d2eff14ac12b06dfb1325a41f542c5ae9714a471))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/replay

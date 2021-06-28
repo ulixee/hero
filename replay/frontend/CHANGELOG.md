@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* **core:** noscript messing up frozen tabs ([6c55805](https://github.com/ulixee/secret-agent/commit/6c558056985bd8049940ad76543aa535f7790bbb))
+* **replay:** fix assets in different data location ([082dcff](https://github.com/ulixee/secret-agent/commit/082dcffea00c25ba72a39e9b4f3f405406657db4))
+* **replay:** show post navigations correctly ([f452cc4](https://github.com/ulixee/secret-agent/commit/f452cc44f405f64cff2f7c070af9440e39176696)), closes [#259](https://github.com/ulixee/secret-agent/issues/259)
+
+
+### Features
+
+* **replay:** add output streaming to replay ([dd0f3b8](https://github.com/ulixee/secret-agent/commit/dd0f3b87518c5967c41b8d79829f80899769ee6d))
+* **replay:** show frozen tabs ([d2eff14](https://github.com/ulixee/secret-agent/commit/d2eff14ac12b06dfb1325a41f542c5ae9714a471))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/replay-frontend

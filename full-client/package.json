@@ -1,23 +1,23 @@
 {
   "name": "secret-agent",
-  "version": "1.4.1-alpha.4",
+  "version": "1.5.0",
   "description": "The Web Browser Built for Scraping",
   "exports": {
     "import": "./index.mjs",
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@secret-agent/client": "1.4.1-alpha.4",
-    "@secret-agent/commons": "1.4.1-alpha.4",
-    "@secret-agent/core": "1.4.1-alpha.4",
-    "@secret-agent/interfaces": "1.4.1-alpha.4",
-    "@secret-agent/execute-js-plugin": "1.4.1-alpha.4"
+    "@secret-agent/client": "1.5.0",
+    "@secret-agent/commons": "1.5.0",
+    "@secret-agent/core": "1.5.0",
+    "@secret-agent/execute-js-plugin": "1.5.0",
+    "@secret-agent/interfaces": "1.5.0"
   },
   "devDependencies": {
-    "@secret-agent/plugin-utils": "1.4.1-alpha.4",
-    "@secret-agent/default-browser-emulator": "1.4.1-alpha.4",
-    "@secret-agent/mitm": "1.4.1-alpha.4",
-    "@secret-agent/testing": "1.4.1-alpha.4",
+    "@secret-agent/default-browser-emulator": "1.5.0",
+    "@secret-agent/mitm": "1.5.0",
+    "@secret-agent/plugin-utils": "1.5.0",
+    "@secret-agent/testing": "1.5.0",
     "fpcollect": "^1.0.4",
     "fpscanner": "^0.1.5",
     "ws": "^7.4.4"

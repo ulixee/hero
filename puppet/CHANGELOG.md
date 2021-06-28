@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+* correctly match Dns error message in test ([9071d80](https://github.com/ulixee/secret-agent/commit/9071d8021459bd3642bef1116b791c55967d3071))
+
+
+### Features
+
+* **plugin:** chrome dependencies in npm packages ([62d99c9](https://github.com/ulixee/secret-agent/commit/62d99c90b0bc653f568eff9cf2279109f2d24bfe))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **emulators:** drive devtools from emulator ([d71b9cd](https://github.com/ulixee/secret-agent/commit/d71b9cd734c3621e25ddb5bd53544d1b7dcba504))
+* **emulators:** move installation into emulators ([351c58d](https://github.com/ulixee/secret-agent/commit/351c58d2fb3333725370bfb1dbc29027005ced8a))
+* extracted browser emulators to their own repos ([e2ee11a](https://github.com/ulixee/secret-agent/commit/e2ee11ac6609f6eb6b9afa3a6b83bddb13d30201))
+* **emulators:** move launch args into emulators ([6888736](https://github.com/ulixee/secret-agent/commit/6888736ca15d4a299a2a32a31568f61a5a90d1ce))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/puppet

@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+* **client:** add key to detached tab ([5c9ed99](https://github.com/ulixee/secret-agent/commit/5c9ed998d370d407bc45d47fb6af3528cf6bba05))
+* **core:** noscript messing up frozen tabs ([6c55805](https://github.com/ulixee/secret-agent/commit/6c558056985bd8049940ad76543aa535f7790bbb))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+* **mitm:** clean premature shutdown errors ([8037c64](https://github.com/ulixee/secret-agent/commit/8037c6470593994cdb05a0c3a761d982472e1601))
+* **mitm:** handle malformed urls ([7190390](https://github.com/ulixee/secret-agent/commit/71903904ae63b9fc2a236002c1420b0a0d95e299))
+* **puppet:** wait for loader before new tab ([d045701](https://github.com/ulixee/secret-agent/commit/d045701d00f421b529b5aafd32e1e25a1a15da38))
+
+
+### Features
+
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **core:** detached tab ([9e32e47](https://github.com/ulixee/secret-agent/commit/9e32e47f2e0c17a138593f554d966a346d2800e5))
+* **core:** geolocation feature ([0ecbb14](https://github.com/ulixee/secret-agent/commit/0ecbb14307c6cdebb99cf2e2ab3c3d27702aa6fa))
+* **core:** javascript dialog handling ([e02d84b](https://github.com/ulixee/secret-agent/commit/e02d84b3f1d5c01da5c2b581c6889922584a92d0))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **emulators:** drive devtools from emulator ([d71b9cd](https://github.com/ulixee/secret-agent/commit/d71b9cd734c3621e25ddb5bd53544d1b7dcba504))
+* **emulators:** move launch args into emulators ([6888736](https://github.com/ulixee/secret-agent/commit/6888736ca15d4a299a2a32a31568f61a5a90d1ce))
+* **interfaces:** fix devtools command typing ([00af054](https://github.com/ulixee/secret-agent/commit/00af054cc6c971c59b35c964bbe3ba568aadb151))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+* **plugin:** chrome dependencies in npm packages ([62d99c9](https://github.com/ulixee/secret-agent/commit/62d99c90b0bc653f568eff9cf2279109f2d24bfe))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **mitm:** move mitm control to emulators ([d944805](https://github.com/ulixee/secret-agent/commit/d944805edd92a52c5c7eb7a46e3d5de13c6e12cb))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/puppet-chrome

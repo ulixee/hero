@@ -1,13 +1,13 @@
 {
   "name": "@secret-agent/default-human-emulator",
-  "version": "1.4.1-alpha.4",
+  "version": "1.5.0",
   "description": "Default human emulator based on Xetera/ghost-cursor for SecretAgent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/interfaces": "1.4.1-alpha.4",
-    "@secret-agent/plugin-utils": "1.4.1-alpha.4"
+    "@secret-agent/interfaces": "1.5.0",
+    "@secret-agent/plugin-utils": "1.5.0"
   },
   "devDependencies": {
-    "@secret-agent/commons": "1.4.1-alpha.4"
+    "@secret-agent/commons": "1.5.0"
   }
 }

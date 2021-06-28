@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+* navigation test hanging ([115418a](https://github.com/ulixee/secret-agent/commit/115418aa7b9d73e9ee74051a26faac4d3bea1a9f))
+* **core:** flaky tests, fix interact with string ([0d708dd](https://github.com/ulixee/secret-agent/commit/0d708ddfaddd3a03c9043cbc3d952836bc6e3350))
+* **core:** flushing outside transactions ([5abd143](https://github.com/ulixee/secret-agent/commit/5abd1439e875880c683f24e9b87fec0e4331b24c))
+* **core:** store detached in sessions db ([4b228f3](https://github.com/ulixee/secret-agent/commit/4b228f35157fc92dffc8e4c077e35f91bbb24e51))
+* **dns:** handle dns socket disconnect ([8149e61](https://github.com/ulixee/secret-agent/commit/8149e61d8eb6ea26e0e5a6c92a9f8abc6eb6dccf))
+* **mitm:** clean premature shutdown errors ([8037c64](https://github.com/ulixee/secret-agent/commit/8037c6470593994cdb05a0c3a761d982472e1601))
+* **mitm:** fix install script, reuse same h2 conn ([ebb0693](https://github.com/ulixee/secret-agent/commit/ebb06933879575c2bbaf311a50ac0e3ecc2ae843))
+* **mitm:** handle malformed urls ([7190390](https://github.com/ulixee/secret-agent/commit/71903904ae63b9fc2a236002c1420b0a0d95e299))
+* **mitm:** http2 header order wrong ([801b3c8](https://github.com/ulixee/secret-agent/commit/801b3c84a18f6eee51464d889edf9e01134fba9a))
+* correctly match Dns error message in test ([9071d80](https://github.com/ulixee/secret-agent/commit/9071d8021459bd3642bef1116b791c55967d3071))
+* fixed issues with dns looking test ([e5bbb28](https://github.com/ulixee/secret-agent/commit/e5bbb286b5c88a24dafc04a611114c2bfaec83ac))
+
+
+### Features
+
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+* **mitm:** move mitm control to emulators ([d944805](https://github.com/ulixee/secret-agent/commit/d944805edd92a52c5c7eb7a46e3d5de13c6e12cb))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 

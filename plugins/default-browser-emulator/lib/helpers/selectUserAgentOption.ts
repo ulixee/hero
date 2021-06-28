@@ -1,8 +1,8 @@
 import { UAParser } from 'ua-parser-js';
 import { pickRandom } from '@secret-agent/commons/utils';
-import IUserAgentOption, { IVersion } from "@secret-agent/interfaces/IUserAgentOption";
-import { IDataUserAgentOption, IDataUserAgentOptions } from "../../interfaces/IBrowserData";
-import { latestChromeBrowserVersion } from "../../index";
+import IUserAgentOption, { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
+import { IDataUserAgentOption, IDataUserAgentOptions } from '../../interfaces/IBrowserData';
+import { latestChromeBrowserVersion } from '../../index';
 
 const compareVersions = require('compare-versions');
 
@@ -11,6 +11,7 @@ export default function selectUserAgentOption(
   dataUserAgentOptions: IDataUserAgentOptions,
 ): IUserAgentOption {
   userAgentSelector = userAgentSelector?.trim();
+  if (userAgentSelector === 'chrome-latest') userAgentSelector = '';
 
   if (!userAgentSelector) {
     const filteredOptions = dataUserAgentOptions.filter(x => {
@@ -34,7 +35,10 @@ function pickRandomUserAgentOption(dataUserAgentOptions: IDataUserAgentOptions) 
   return convertToUserAgentOption(dataUserAgentOption);
 }
 
-function findUserAgentOption(userAgentSelector: string, dataUserAgentOptions: IDataUserAgentOptions) {
+function findUserAgentOption(
+  userAgentSelector: string,
+  dataUserAgentOptions: IDataUserAgentOptions,
+) {
   const selectors = extractUserAgentSelectors(userAgentSelector);
 
   const filteredOptions = dataUserAgentOptions.filter(userAgentOption => {
@@ -47,9 +51,9 @@ function findUserAgentOption(userAgentSelector: string, dataUserAgentOptions: ID
 
 function convertToUserAgentOption(dataUserAgentOption: IDataUserAgentOption) {
   return {
-  ...dataUserAgentOption,
+    ...dataUserAgentOption,
     strings: undefined,
-    string: pickRandom(dataUserAgentOption.strings)
+    string: pickRandom(dataUserAgentOption.strings),
   } as IUserAgentOption;
 }
 
@@ -58,8 +62,6 @@ function isSelectorMatch(userAgentOption: IDataUserAgentOption, selectors: ISele
 
   const browserVersion = convertToSemVer(userAgentOption.browserVersion);
   const operatingSystemVersion = convertToSemVer(userAgentOption.operatingSystemVersion);
-
-  compareVersions(browserVersion, );
 
   for (const { name, matches } of selectors) {
     let version: string;
@@ -73,7 +75,6 @@ function isSelectorMatch(userAgentOption: IDataUserAgentOption, selectors: ISele
       const isMatch = compareVersions(version, match.version, match.operator);
       if (isMatch) return true;
     }
-
   }
   return false;
 }
@@ -101,12 +102,12 @@ function extractUserAgentSelectors(userAgentSelector: string): ISelector[] {
     .map(x => x.trim());
   for (const part of parts) {
     const matches = part.match(/^([a-z\s-]+)([\s><=]+)?([0-9.]+)?/);
-    if (!matches) continue;
-    const [rawName, rawOperator, rawVersion] = matches[0];
+    if (!matches?.length) continue;
+    const [rawName, rawOperator, rawVersion] = matches.slice(1);
     const name = cleanupName(rawName);
     const operator = cleanupOperator(rawOperator);
     const version = cleanupVersion(rawVersion);
-    selectorByName[name] = selectorByName[name] || {  name, matches: [] };
+    selectorByName[name] = selectorByName[name] || { name, matches: [] };
     selectorByName[name].matches.push({ operator, version });
   }
 
@@ -140,16 +141,10 @@ function createUserAgentOption(userAgentString: string): IUserAgentOption {
   const [browserVersionMajor, browserVersionMinor, browserVersionPatch] = uaBrowser.version
     .split('.')
     .map(x => Number(x));
-  const browserName = (uaBrowser.name || '')
-    .toLowerCase()
-    .replace(' ', '-');
+  const browserName = (uaBrowser.name || '').toLowerCase().replace(' ', '-');
 
-  let [osVersionMajor, osVersionMinor] = uaOs.version
-    .split('.')
-    .map(x => Number(x));
-  const operatingSystemName = (uaOs.name || '')
-    .toLowerCase()
-    .replace(' ', '-');
+  let [osVersionMajor, osVersionMinor] = uaOs.version.split('.').map(x => Number(x));
+  const operatingSystemName = (uaOs.name || '').toLowerCase().replace(' ', '-');
   if (osVersionMajor === 10 && osVersionMinor === 16) {
     osVersionMajor = 11;
     osVersionMinor = undefined;

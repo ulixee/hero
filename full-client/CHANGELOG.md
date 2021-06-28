@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* eslint errors, tests hanging ([e413531](https://github.com/ulixee/secret-agent/commit/e4135311adc2a7841bbe1ec7d0cbe7c8f339468a))
+* **core:** flaky tests, fix interact with string ([0d708dd](https://github.com/ulixee/secret-agent/commit/0d708ddfaddd3a03c9043cbc3d952836bc6e3350))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+
+
+### Features
+
+* **client:** add output to handlers ([1c143b4](https://github.com/ulixee/secret-agent/commit/1c143b4e84145a4eb5e8df0e52c7d69c64efeb7a))
+* **client:** allow awaiting xpath ([708dfd9](https://github.com/ulixee/secret-agent/commit/708dfd9ad09fbead841c88bdc54582fd7fe10868)), closes [#239](https://github.com/ulixee/secret-agent/issues/239)
+* **client+core:** input/outputs ([d48a1de](https://github.com/ulixee/secret-agent/commit/d48a1de1ae5f293fdb884ae23c2402cf4e14ee36))
+* **core:** geolocation feature ([0ecbb14](https://github.com/ulixee/secret-agent/commit/0ecbb14307c6cdebb99cf2e2ab3c3d27702aa6fa))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **client:** update awaited-dom ([f9699fb](https://github.com/ulixee/secret-agent/commit/f9699fbadb2c2020e88056edb33eeb5331ed1556))
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **core:** detached tab ([9e32e47](https://github.com/ulixee/secret-agent/commit/9e32e47f2e0c17a138593f554d966a346d2800e5))
+* **core:** javascript dialog handling ([e02d84b](https://github.com/ulixee/secret-agent/commit/e02d84b3f1d5c01da5c2b581c6889922584a92d0))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* extracted browser emulators to their own repos ([e2ee11a](https://github.com/ulixee/secret-agent/commit/e2ee11ac6609f6eb6b9afa3a6b83bddb13d30201))
+* **emulators:** drive devtools from emulator ([d71b9cd](https://github.com/ulixee/secret-agent/commit/d71b9cd734c3621e25ddb5bd53544d1b7dcba504))
+* **mitm:** move mitm control to emulators ([d944805](https://github.com/ulixee/secret-agent/commit/d944805edd92a52c5c7eb7a46e3d5de13c6e12cb))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package secret-agent

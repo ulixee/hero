@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
+
+
+### Bug Fixes
+
+* **mitm:** proper errors when mitm binary missing ([382669f](https://github.com/ulixee/secret-agent/commit/382669fb2d86c86e010bf16ed3cdd0391d047f85))
+* navigation test hanging ([115418a](https://github.com/ulixee/secret-agent/commit/115418aa7b9d73e9ee74051a26faac4d3bea1a9f))
+* **core:** flushing outside transactions ([5abd143](https://github.com/ulixee/secret-agent/commit/5abd1439e875880c683f24e9b87fec0e4331b24c))
+* **core:** noscript messing up frozen tabs ([6c55805](https://github.com/ulixee/secret-agent/commit/6c558056985bd8049940ad76543aa535f7790bbb))
+* **core:** update attachedstate to nodepointer ([1bec22a](https://github.com/ulixee/secret-agent/commit/1bec22a329b6da410fb7de0a36bcd6e19b23f902))
+* **mitm:** remove blocking actions ([4a75179](https://github.com/ulixee/secret-agent/commit/4a75179bc0bd1081a489e3a83d1f1dc57e50990e))
+* **puppet:** wait for loader before new tab ([d045701](https://github.com/ulixee/secret-agent/commit/d045701d00f421b529b5aafd32e1e25a1a15da38))
+* **replay:** fix assets in different data location ([082dcff](https://github.com/ulixee/secret-agent/commit/082dcffea00c25ba72a39e9b4f3f405406657db4))
+
+
+### Features
+
+* **client+core:** input/outputs ([d48a1de](https://github.com/ulixee/secret-agent/commit/d48a1de1ae5f293fdb884ae23c2402cf4e14ee36))
+* added support for plugins ([0fda55d](https://github.com/ulixee/secret-agent/commit/0fda55d7a57d300d765c462389e76da0e1fe0822))
+* **core:** compress dom changes ([ef7def9](https://github.com/ulixee/secret-agent/commit/ef7def9fcd7c72ef56a6a334e68562348fdbf7a3))
+* **core:** prefetch jsPaths from prior runs ([4f523bd](https://github.com/ulixee/secret-agent/commit/4f523bdbafe18c19517831edd8d0b325dd023de4))
+* **core:** waitForFileChooser ([cf3beb9](https://github.com/ulixee/secret-agent/commit/cf3beb9b3d06dbd3548e5a23746641f5addbfade))
+* **emulators:** drive devtools from emulator ([d71b9cd](https://github.com/ulixee/secret-agent/commit/d71b9cd734c3621e25ddb5bd53544d1b7dcba504))
+* **mitm:** determine alpn on proxy connect ([398735d](https://github.com/ulixee/secret-agent/commit/398735d4dd8ab219c520da775e92f42ee9889544))
+* **replay:** show frozen tabs ([d2eff14](https://github.com/ulixee/secret-agent/commit/d2eff14ac12b06dfb1325a41f542c5ae9714a471))
+
+
+
+
+
 ## [1.4.1-alpha.4](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.3...v1.4.1-alpha.4) (2021-04-20)
 
 **Note:** Version bump only for package @secret-agent/commons
