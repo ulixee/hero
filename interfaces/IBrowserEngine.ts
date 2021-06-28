@@ -5,13 +5,10 @@ export default interface IBrowserEngine {
   fullVersion: string;
   executablePath: string;
   executablePathEnvVar: string;
+  launchArguments: string[];
+  isInstalled: boolean;
 
   isHeaded?: boolean;
   verifyLaunchable?(): Promise<any>;
-  getLaunchArguments?(puppetOptions: IPuppetLaunchArgs, defaultArguments: string[]): string[];
+  beforeLaunch?(puppetOptions: IPuppetLaunchArgs): void;
 }
-
-export type IBrowserEngineConfig = Pick<
-  IBrowserEngine,
-  'name' | 'fullVersion' | 'executablePathEnvVar'
->;

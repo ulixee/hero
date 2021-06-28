@@ -1,6 +1,6 @@
-import { ICoreExtender } from "./IPluginCoreExtender";
-import IPluginType  from "./IPluginTypes";
-import IPluginCreateOptions from "./IPluginCreateOptions";
+import { ICoreExtender } from './IPluginCoreExtender';
+import IPluginType from './IPluginTypes';
+import IPluginCreateOptions from './IPluginCreateOptions';
 
 export default interface IPlugin extends ICoreExtender {}
 

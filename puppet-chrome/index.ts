@@ -44,13 +44,15 @@ const PuppetLauncher: IPuppetLauncher = {
       chromeArguments.push('--headless');
     }
 
-    if (browserEngine.getLaunchArguments) {
-      return browserEngine.getLaunchArguments(options, chromeArguments);
-    }
+    browserEngine.launchArguments = chromeArguments;
+    browserEngine.beforeLaunch(options);
 
-    return chromeArguments;
+    return browserEngine.launchArguments;
   },
-  async createPuppet(process: ILaunchedProcess, browserEngine: IBrowserEngine): Promise<IPuppetBrowser> {
+  async createPuppet(
+    process: ILaunchedProcess,
+    browserEngine: IBrowserEngine,
+  ): Promise<IPuppetBrowser> {
     const { transport, close } = process;
     try {
       const connection = new Connection(transport);
