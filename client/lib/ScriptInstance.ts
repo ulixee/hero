@@ -7,7 +7,7 @@ const { log } = Log(module);
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
-  public readonly entrypoint = require.main.filename;
+  public readonly entrypoint = require.main?.filename ?? process.argv[1];
   public readonly startDate = new Date().getTime();
   private sessionNameCountByName: { [name: string]: number } = {};
 

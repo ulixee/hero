@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.1](https://github.com/ulixee/secret-agent/compare/v1.5.0...v1.5.1) (2021-06-28)
+
+
+### Bug Fixes
+
+* remove console logs, basic emulator bug ([c028062](https://github.com/ulixee/secret-agent/commit/c028062a8130caa4cae1c65381bc66a55a6cf45b))
+
+
+
+
+
 # [1.5.0](https://github.com/ulixee/secret-agent/compare/v1.4.1-alpha.4...v1.5.0) (2021-06-28)
 
 
