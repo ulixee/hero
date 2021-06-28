@@ -2722,6 +2722,22 @@
   dependencies:
     "@octokit/openapi-types" "^7.0.0"
 
+"@secret-agent/chrome-88-0@^4324.182.0":
+  version "4324.182.0"
+  resolved "https://registry.yarnpkg.com/@secret-agent/chrome-88-0/-/chrome-88-0-4324.182.0.tgz#426c033153ba8e9cf3b280aad8cabb355dedbc18"
+  integrity sha512-ctHOOE/WQ2VDV8A3n2raricf1/WuNsXxL4EqCwwuJ7F0CkWg2dWiAcH1Umgzp0NA/UN/8txRs3r6qTHKRDVP9g==
+  dependencies:
+    "@secret-agent/chrome-app" "*1.0.0"
+
+"@secret-agent/chrome-app@*1.0.0", "@secret-agent/chrome-app@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@secret-agent/chrome-app/-/chrome-app-1.0.0.tgz#c7821aa3cb7695c34b7e670dfcd5933c5c768fb6"
+  integrity sha512-7AaTD5W87YeP0Y5Kyc23x4zEfewV+9nrJf/NTcFA22MO3mvQQR9G8DPHnaappwK3PwIUVnBMNpUdv/1dz/1T6g==
+  dependencies:
+    https-proxy-agent "^5.0.0"
+    progress "^2.0.3"
+    tar "^6.1.0"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"

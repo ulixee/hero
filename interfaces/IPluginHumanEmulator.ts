@@ -2,7 +2,7 @@ import { IInteractionGroups, IInteractionStep } from './IInteractions';
 import { PluginTypes } from './IPluginTypes';
 import IInteractionsHelper from './IInteractionsHelper';
 import IPoint from './IPoint';
-import IPluginCreateOptions from "./IPluginCreateOptions";
+import IPluginCreateOptions from './IPluginCreateOptions';
 
 export interface IHumanEmulatorClass {
   id: string;

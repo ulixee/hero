@@ -9,12 +9,12 @@ const { log } = Log(module);
 const browserEmulatorId = CustomBrowserEmulator.id;
 
 describe('launchProcess', () => {
-  const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
   beforeAll(async () => {
     Core.use(CustomBrowserEmulator);
   });
 
   it('should reject all promises when browser is closed', async () => {
+    const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
     const browser = await new Puppet(browserEngine);
     await browser.start();
     const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
@@ -28,14 +28,14 @@ describe('launchProcess', () => {
   });
 
   it('should reject if executable path is invalid', async () => {
-    const browser = new Puppet({
-      ...browserEngine,
-      executablePath: 'random-invalid-path',
-    });
+    const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
+    browserEngine.executablePath = 'random-invalid-path';
+    const browser = new Puppet(browserEngine);
     await expect(browser.start()).rejects.toThrowError('Failed to launch');
   });
 
   it('should be callable twice', async () => {
+    const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
     const browser = await new Puppet(browserEngine);
     await Promise.all([browser.close(), browser.close()]);
     await expect(browser.close()).resolves.toBe(undefined);

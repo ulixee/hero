@@ -3,13 +3,13 @@ import agent, { Agent, Handler } from '@secret-agent/client';
 import * as http from 'http';
 import { Log } from '@secret-agent/commons/Logger';
 import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import { DependenciesMissingError } from '@secret-agent/plugin-utils/lib/DependenciesMissingError';
-import DependencyInstaller from '@secret-agent/plugin-utils/lib/DependencyInstaller';
-import * as ValidateHostDeps from '@secret-agent/plugin-utils/lib/validateHostDependencies';
+import { DependenciesMissingError } from '@secret-agent/chrome-app/lib/DependenciesMissingError';
+import { DependencyInstaller } from '@secret-agent/chrome-app/lib/DependencyInstaller';
+import ChromeApp from '@secret-agent/chrome-app/index';
 import Core from '../index';
 import CoreServer from '../server';
 
-const validate = jest.spyOn(ValidateHostDeps, 'validateHostRequirements');
+const validate = jest.spyOn(DependencyInstaller.prototype, 'validate');
 const logError = jest.spyOn(Log.prototype, 'error');
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
@@ -87,11 +87,11 @@ describe('basic connection tests', () => {
     class CustomEmulator extends BrowserEmulator {
       public static id = 'emulate-test';
       public static selectBrowserMeta() {
-        const meta = super.selectBrowserMeta();
-        meta.browserEngine.getLaunchArguments = (options, defaultArguments) => {
-          return defaultArguments;
-        };
-        return meta;
+        return super.selectBrowserMeta();
+      }
+
+      public static onBrowserWillLaunch() {
+        // don't change launch args so it doesn't reuse a previous one
       }
     }
     Core.use(CustomEmulator as any);
@@ -100,7 +100,7 @@ describe('basic connection tests', () => {
     validate.mockClear();
     validate.mockImplementationOnce(() => {
       throw new DependenciesMissingError(
-        `You can resolve this by running the apt dependency installer at:${DependencyInstaller.aptScriptPath}`,
+        `You can resolve this by running the apt dependency installer at:${ChromeApp.aptScriptPath}`,
         'Chrome',
         ['libnacl'],
       );

@@ -18,7 +18,6 @@ export default class Puppet {
   public readonly id: number;
   public readonly browserEngine: IBrowserEngine;
   public supportsBrowserContextProxy: boolean;
-  private readonly launchArguments: string[] = [];
   private readonly launcher: IPuppetLauncher;
   private isShuttingDown = false;
   private isStarted = false;
@@ -29,7 +28,7 @@ export default class Puppet {
     this.id = puppBrowserCounter;
     if (browserEngine.name === 'chrome') {
       if (browserEngine.isHeaded) args.showBrowser = true;
-      this.launchArguments = PuppetChrome.getLaunchArgs(args, browserEngine);
+      PuppetChrome.getLaunchArgs(args, browserEngine);
       this.launcher = PuppetChrome;
     } else {
       throw new Error(`No Puppet launcher available for ${this.browserEngine.name}`);
@@ -47,7 +46,7 @@ export default class Puppet {
 
       const launchedProcess = await launchProcess(
         this.browserEngine.executablePath,
-        this.launchArguments,
+        this.browserEngine.launchArguments,
         {},
       );
 
@@ -70,7 +69,8 @@ export default class Puppet {
   public isSameEngine(other: Puppet): boolean {
     return (
       this.browserEngine.executablePath === other.browserEngine.executablePath &&
-      this.launchArguments.toString() === other.launchArguments.toString()
+      this.browserEngine.launchArguments.toString() ===
+        other.browserEngine.launchArguments.toString()
     );
   }
 

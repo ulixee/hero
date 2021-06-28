@@ -3,5 +3,4 @@ export default interface IBrowserEngineOption {
   name: string;
   fullVersion: string;
   features: string[];
-  executablePathEnvVar: string;
 }

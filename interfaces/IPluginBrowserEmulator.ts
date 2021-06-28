@@ -16,6 +16,14 @@ export interface IBrowserEmulatorClass {
   id: string;
   pluginType: PluginTypes.BrowserEmulator;
   selectBrowserMeta: (userAgentSelector: string) => ISelectBrowserMeta;
+  onBrowserWillLaunch?(
+    browserEngine: IBrowserEngine,
+    launchSettings: {
+      showBrowser?: boolean;
+      disableGpu?: boolean;
+      disableDevtools?: boolean;
+    },
+  ): Promise<any> | void;
   new (createOptions: IPluginCreateOptions, userAgentOption: IUserAgentOption): IBrowserEmulator;
 }
 

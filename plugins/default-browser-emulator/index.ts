@@ -32,6 +32,7 @@ import DataLoader from './lib/DataLoader';
 import IBrowserData from './interfaces/IBrowserData';
 import selectBrowserEngineOption from './lib/helpers/selectBrowserEngineOption';
 import setGeolocation from './lib/helpers/setGeolocation';
+import { configureBrowserLaunchArgs } from './lib/helpers/configureBrowserLaunchArgs';
 
 const dataLoader = new DataLoader(__dirname);
 export const latestBrowserEngineId = 'chrome-88-0';
@@ -124,7 +125,18 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
       browserEngineId,
       dataLoader.browserEngineOptions,
     );
-    const browserEngine = new BrowserEngine(dataLoader.pkg.name, browserEngineOption);
+    const browserEngine = new BrowserEngine(this, browserEngineOption);
     return { browserEngine, userAgentOption };
+  }
+
+  public static onBrowserWillLaunch(
+    browserEngine: BrowserEngine,
+    options: {
+      showBrowser?: boolean;
+      disableGpu?: boolean;
+      disableDevtools?: boolean;
+    },
+  ): void {
+    configureBrowserLaunchArgs(browserEngine, options);
   }
 }
