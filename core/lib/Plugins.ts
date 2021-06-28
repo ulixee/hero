@@ -52,7 +52,11 @@ export default class Plugins implements IPlugins {
     const BrowserEmulator = Core.pluginMap.browserEmulatorsById[browserEmulatorId];
     if (!BrowserEmulator) throw new Error(`Browser emulator ${browserEmulatorId} was not found`);
 
-    const HumanEmulator = Core.pluginMap.humanEmulatorsById[humanEmulatorId];
+    let HumanEmulator = Core.pluginMap.humanEmulatorsById[humanEmulatorId];
+    // Backwards compatibility for 1.4.X > 1.5.0
+    if (!HumanEmulator && humanEmulatorId === 'basic') {
+      HumanEmulator = Core.pluginMap.humanEmulatorsById[DefaultHumanEmulatorId];
+    }
     if (!HumanEmulator) throw new Error(`Human emulator ${humanEmulatorId} was not found`);
 
     const { browserEngine, userAgentOption } =
@@ -145,7 +149,11 @@ export default class Plugins implements IPlugins {
 
   // PLUGIN COMMANDS
 
-  public async onPluginCommand(sendToPluginId: string, commandMeta: IOnCommandMeta, args: any[]): Promise<any> {
+  public async onPluginCommand(
+    sendToPluginId: string,
+    commandMeta: IOnCommandMeta,
+    args: any[],
+  ): Promise<any> {
     const plugin = this.instanceById[sendToPluginId];
     if (plugin && plugin.onCommand) {
       return await plugin.onCommand(commandMeta, ...args);

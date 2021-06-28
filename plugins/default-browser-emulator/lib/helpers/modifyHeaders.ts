@@ -2,7 +2,7 @@ import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import { pickRandom } from '@secret-agent/commons/utils';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '../../index';
-import IBrowserData, { IDataHeaderOrder, IDataHeaders } from "../../interfaces/IBrowserData";
+import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 
 export default function modifyHeaders(
   browserEmulator: BrowserEmulator,
@@ -133,7 +133,7 @@ function getResourceHeaderDefaults(
   const defaultOrder = defaultOrders.length ? pickRandom(defaultOrders) : null;
 
   if (!defaultOrder) {
-    browserEmulator.logger.error('Headers.NotFound', { resourceType, isSSL, method, originType });
+    browserEmulator.logger.info('Headers.NotFound', { resourceType, isSSL, method, originType });
     return null;
   }
 
