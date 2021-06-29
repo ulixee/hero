@@ -11,7 +11,6 @@ import IRect from '@secret-agent/interfaces/IRect';
 import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
 import IPoint from '@secret-agent/interfaces/IPoint';
 import IViewport from '@secret-agent/interfaces/IViewport';
-import type IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
 import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
@@ -140,14 +139,27 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
       ? await helper.lookupBoundingRect([targetRect.nodeId], true, true)
       : targetRect;
 
-    const isFinalRectVisible = this.isRectVisible(finalRect, helper);
+    if (targetRect.elementTag === 'option') {
+      // if this is an option element, we have to do a specialized click, so let the Interactor handle
+      return await runFn(interactionStep);
+    }
+
+    const viewport = helper.viewport;
+    const isRectInViewport =
+      isVisible(finalRect.y, finalRect.height, viewport.height) &&
+      isVisible(finalRect.x, finalRect.width, viewport.width);
+
     // make sure target is still visible
-    if (!isFinalRectVisible || !isWithinRect(targetPoint, finalRect)) {
+    if (
+      !finalRect.nodeVisibility.isVisible ||
+      !isRectInViewport ||
+      !isWithinRect(targetPoint, finalRect)
+    ) {
       // need to try again
       if (retries < 2) {
-        const isScroll = !isFinalRectVisible;
+        const isScroll = !isRectInViewport;
         helper.logger.info(
-          `Click mousePosition not in viewport after mouse moves. Moving${
+          `"Click" mousePosition not in viewport after mouse moves. Moving${
             isScroll ? ' and scrolling' : ''
           } to a new point.`,
           {
@@ -158,7 +170,7 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
           },
         );
         if (isScroll) {
-          const scrollToStep = interactionStep;
+          const scrollToStep = { ...interactionStep };
           if (targetRect.nodeId) scrollToStep.mousePosition = [targetRect.nodeId];
           await this.scroll(scrollToStep, runFn, helper);
         }
@@ -170,30 +182,34 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
           retries + 1,
         );
       }
+
+      helper.logger.error(
+        'Interaction.click - moving over target before click did not hover over expected "Interaction.mousePosition" element.',
+        {
+          'Interaction.mousePosition': originalMousePosition,
+          target: {
+            nodeId: finalRect.nodeId,
+            nodeVisibility: finalRect.nodeVisibility,
+            domCoordinates: { x: targetPoint.x, y: targetPoint.y },
+          },
+        },
+      );
+
       throw new Error(
         'Element or mousePosition remains out of viewport after 2 attempts to move it into view',
       );
     }
 
-    let clickConfirm: (
-      mousePosition: IMousePosition,
-      throwOnFail: boolean,
-    ) => Promise<IMouseUpResult> = null;
-    if (targetRect.nodeId && targetRect.elementTag !== 'option') {
+    let clickConfirm: () => Promise<any>;
+    if (targetRect.nodeId) {
       const listener = await helper.createMouseupTrigger(targetRect.nodeId);
-      clickConfirm = listener.didTrigger;
+      clickConfirm = listener.didTrigger.bind(listener, originalMousePosition, true);
     }
 
-    if (targetRect.elementTag !== 'option') {
-      // if this is an option element, we have to do a specialized click, so let the Interactor handle
-      interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
-    }
+    interactionStep.mousePosition = [targetPoint.x, targetPoint.y];
 
     await runFn(interactionStep);
-
-    if (clickConfirm !== null) {
-      await clickConfirm(originalMousePosition, true);
-    }
+    if (clickConfirm) await clickConfirm();
   }
 
   protected async moveMouse(
@@ -362,14 +378,6 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
       points.push(scrollToPoint);
     }
     return points;
-  }
-
-  private isRectVisible(rect: IRect, helper: IInteractionsHelper): boolean {
-    const viewport = helper.viewport;
-    return (
-      isVisible(rect.y, rect.height, viewport.height) &&
-      isVisible(rect.x, rect.width, viewport.width)
-    );
   }
 }
 
