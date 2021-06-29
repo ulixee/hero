@@ -60,7 +60,7 @@ export function configureBrowserLaunchArgs(
     engine.launchArguments.push(
       `--user-data-dir=${Path.join(
         os.tmpdir(),
-        this.fullVersion.replace('.', '-'),
+        engine.fullVersion.replace('.', '-'),
         '-data',
         String((sessionDirCounter += 1)),
       )}`,
