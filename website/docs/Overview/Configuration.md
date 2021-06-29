@@ -8,7 +8,7 @@ Configuration variables can be defined at a few levels:
 
 The internal `@secret-agent/core` module can receive several configuration options on [start](#core-start), or when a [Handler](/docs/basic-interfaces/handler) or [Agent](/docs/basic-interfaces/agent) establishes a [connection](/docs/advanced/connection-to-core).
 
-###  Connection To Core <div class="specs"><i>Agent</i></div>
+### Connection To Core <div class="specs"><i>Agent</i></div>
 
 The [ConnectionToCore](/docs/advanced/connection-to-core) to be used by a [Handler](/docs/basic-interfaces/handler) or [Agent](/docs/basic-interfaces/agent).
 
@@ -97,17 +97,9 @@ Configures a proxy url to route traffic through for a given Agent. This function
 
 An upstream proxy url should be a fully formatted url to the proxy. If your proxy is socks5, start it with `socks5://`, http `http://` or `https://` as needed. An upstream proxy url can optionally include the user authentication parameters in the url. It will be parsed out and used as the authentication.
 
-### Browsers Emulator Ids <div class="specs"><i>Connection</i><i>Agent</i><i>Core</i></div>
+### Browsers Emulator Id <div class="specs"><i>Agent</i></div>
 
-Configures which [BrowserEmulators](/docs/advanced/browser-emulators) to enable or use in a given Agent.
-
-At an Agent level, `browserEmulatorId` configures the module to use.
-
-- Configurable via [`Handler.createAgent()`](/docs/basic-interfaces/handler#create-agent) or [`Handler.dispatchAgent()`](/docs/basic-interfaces/handler#dispatch-agent).
-
-At a Connection or Core level, `browserEmulatorIds` indicates a list of modules to initialize before any Agents are created.
-
-- Configurable via [`Core.start()`](#core-start) or [`ConnectionToCore`](/docs/advanced/connection-to-core).
+Configures which [BrowserEmulator](/docs/advanced/browser-emulators) to use in a given Agent.
 
 ### Human Emulator Id <div class="specs"><i>Agent</i></div>
 
@@ -127,8 +119,6 @@ Update existing settings.
   - maxConcurrentAgentsCount `number` defaults to `10`. Limit concurrent Agent sessions running at any given time.
   - localProxyPortStart `number` defaults to `any open port`. Starting internal port to use for the mitm proxy.
   - sessionsDir `string` defaults to `os.tmpdir()/.secret-agent`. Directory to store session files and mitm certificates.
-  - defaultBlockedResourceTypes `string[]` defaults to `[None]`. Controls enabled browser resources.
-  - defaultUserProfile `IUserProfile`. Define user cookies, session, and more.
-  - replayServerPort `number`. Port to start a live replay server on. Defaults to "any open port".
+  - coreServerPort `number`. Port to run the Core Websocket/Replay server on.
 
 #### **Returns**: `Promise`
