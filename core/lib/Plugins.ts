@@ -20,6 +20,7 @@ import IPlugins from '@secret-agent/interfaces/IPlugins';
 import IPlugin, { IPluginClass } from '@secret-agent/interfaces/IPlugin';
 import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
+import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import Core from '../index';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
@@ -30,9 +31,12 @@ interface IOptionsCreate {
   humanEmulatorId?: string;
   browserEmulatorId?: string;
   selectBrowserMeta?: ISelectBrowserMeta;
+  dependencyMap?: { [clientPluginId: string]: string[] };
 }
 
 export default class Plugins implements IPlugins {
+  public static pluginClassesById: { [id: string]: IPluginClass } = {};
+
   public readonly browserEngine: IBrowserEngine;
   public readonly browserEmulator: IBrowserEmulator;
   public readonly humanEmulator: IHumanEmulator;
@@ -45,6 +49,7 @@ export default class Plugins implements IPlugins {
   constructor(options: IOptionsCreate, logger: IBoundLog) {
     const {
       userAgentSelector,
+      dependencyMap,
       browserEmulatorId = DefaultBrowserEmulatorId,
       humanEmulatorId = DefaultHumanEmulatorId,
     } = options;
@@ -62,15 +67,36 @@ export default class Plugins implements IPlugins {
     const { browserEngine, userAgentOption } =
       options.selectBrowserMeta || BrowserEmulator.selectBrowserMeta(userAgentSelector);
     this.createOptions = { browserEngine, logger, plugins: this };
-    this.logger = logger;
     this.browserEngine = browserEngine;
+    this.logger = logger;
 
     this.browserEmulator = new BrowserEmulator(this.createOptions, userAgentOption);
     this.addPluginInstance(this.browserEmulator);
 
     this.humanEmulator = new HumanEmulator(this.createOptions);
     this.addPluginInstance(this.humanEmulator);
+
     Core.pluginMap.coreExtenders.forEach(x => this.use(x));
+
+    if (dependencyMap && Core.allowDynamicPluginDependencies) {
+      Object.entries(dependencyMap).forEach(([clientPluginId, dependentPluginIds]) => {
+        dependentPluginIds.forEach(pluginId => {
+          if (this.instanceById[pluginId]) return;
+          this.logger.info(`Dynamically using ${pluginId} required by ${clientPluginId}`);
+          const Plugin = this.require(pluginId);
+          if (!Plugin) {
+            this.logger.warn(`Could not find ${pluginId} required by ${clientPluginId}`);
+            return;
+          }
+          const CoreExtender = (Plugin as any).CoreExtender || Plugin;
+          if (CoreExtender.pluginType !== PluginTypes.CoreExtender) {
+            this.logger.warn(`Could not use ${pluginId} because it's not a CoreExtender`);
+            return;
+          }
+          this.use(CoreExtender);
+        });
+      });
+    }
   }
 
   // BROWSER EMULATORS
@@ -164,11 +190,26 @@ export default class Plugins implements IPlugins {
   // ADDING PLUGINS TO THE STACK
 
   public use(Plugin: IPluginClass) {
+    if (this.instanceById[Plugin.id]) return;
     this.addPluginInstance(new Plugin(this.createOptions));
   }
 
   private addPluginInstance(plugin: IPlugin) {
     this.instances.push(plugin);
     this.instanceById[plugin.id] = plugin;
+  }
+
+  private require(pluginId: string): IPluginClass {
+    if (!Plugins.pluginClassesById[pluginId]) {
+      try {
+        // eslint-disable-next-line global-require,import/no-dynamic-require
+        const Plugin = require(pluginId);
+        if (!Plugin) return;
+        Plugins.pluginClassesById[pluginId] = Plugin.default || Plugin;
+      } catch (error) {
+        return;
+      }
+    }
+    return Plugins.pluginClassesById[pluginId];
   }
 }

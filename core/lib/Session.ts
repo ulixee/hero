@@ -94,9 +94,9 @@ export default class Session extends TypedEventEmitter<{
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
 
-    const { userAgent: userAgentSelector, browserEmulatorId, humanEmulatorId } = options;
+    const { userAgent: userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap } = options;
     this.plugins = new Plugins(
-      { userAgentSelector, browserEmulatorId, humanEmulatorId },
+      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap },
       this.logger,
     );
 
