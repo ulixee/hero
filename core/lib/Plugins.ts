@@ -205,7 +205,7 @@ export default class Plugins implements IPlugins {
         // eslint-disable-next-line global-require,import/no-dynamic-require
         const Plugin = require(pluginId);
         if (!Plugin) return;
-        Plugins.pluginClassesById[pluginId] = Plugin;
+        Plugins.pluginClassesById[pluginId] = Plugin.default || Plugin;
       } catch (error) {
         return;
       }
