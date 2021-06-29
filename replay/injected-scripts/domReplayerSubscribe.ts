@@ -15,12 +15,32 @@ window.getIsMainFrame = function () {
 };
 window.debugToConsole = false;
 
-console.log(
-  'Loaded: isMain=%s, pid=%s, href=%s',
-  window.getIsMainFrame(),
-  process?.pid,
-  window.location.href,
-);
+if (process.isMainFrame) {
+  console.log(`
+  __,                     _,
+ (                 _/_   / |               _/_
+  \`.  _  _, _   _  /    /--|  _,  _  _ _   /
+(___)(/_(__/ (_(/_(__ _/   |_(_)_(/_/ / /_(__
+                              /|
+                             (/
+`);
+  console.group('About SecretAgent Replay');
+  const osMessage =
+    process.platform === 'win32'
+      ? `\n\nWindows users: you can add this line to the beginning of your script 'process.env.SA_SHOW_BROWSER="true"'.`
+      : '';
+  console.log(
+    `This is a high fidelity %c"Replay"%c of your scraping session.
+
+It is NOT a live Chrome view, so if you notice Javascript is not loaded or cookies/console are not working, that's just because this is not the headless Chrome running your actual script :).
+
+To launch a real browser, use the env variable %cSA_SHOW_BROWSER=true${osMessage}`,
+    'font-weight:bold',
+    'font-weight:normal',
+    'background:#eee;padding:2px;',
+  );
+  console.groupEnd();
+}
 
 function debugLog(message: string, ...args: any[]) {
   if (window.debugToConsole) {
@@ -29,6 +49,13 @@ function debugLog(message: string, ...args: any[]) {
   if (!window.debugLogs) window.debugLogs = [];
   window.debugLogs.push({ message, args });
 }
+
+debugLog(
+  'Loaded: isMain=%s, pid=%s, href=%s',
+  window.getIsMainFrame(),
+  process?.pid,
+  window.location.href,
+);
 
 if (process.isMainFrame) {
   ipcRenderer.on(
