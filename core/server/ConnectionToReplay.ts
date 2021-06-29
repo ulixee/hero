@@ -219,8 +219,8 @@ export default class ConnectionToReplay {
       return;
     }
 
-    this.lastScriptState = scriptState;
     const lastState = <IScriptState>{ ...(this.lastScriptState ?? {}) };
+    this.lastScriptState = scriptState;
     if (
       lastState.hasRecentErrors !== scriptState.hasRecentErrors ||
       lastState.closeDate !== scriptState.closeDate ||

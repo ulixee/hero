@@ -28,6 +28,8 @@ export default class ReplayView extends ViewBackend {
   private isTabLoaded = false;
   private lastInactivityMillis = 0;
 
+  private checkResponsiveInterval: NodeJS.Timeout;
+
   public constructor(window: Window) {
     super(window, {
       preload: domReplayerScript,
@@ -42,6 +44,7 @@ export default class ReplayView extends ViewBackend {
     this.playbarView = new PlaybarView(window);
     this.outputView = new OutputView(window, this);
     this.checkResponsive = this.checkResponsive.bind(this);
+    this.checkResponsiveInterval = setInterval(this.timerCheckResponsive.bind(this), 500).unref();
 
     let resizeTimeout;
     this.window.browserWindow.on('resize', () => {
@@ -325,6 +328,12 @@ export default class ReplayView extends ViewBackend {
       );
     } else {
       Application.instance.overlayManager.getByName('message-overlay').hide();
+    }
+  }
+
+  private timerCheckResponsive(): void {
+    if (this.replayApi && this.tabState && this.isTabLoaded && !this.tabState.replayTime.close) {
+      this.checkResponsive();
     }
   }
 

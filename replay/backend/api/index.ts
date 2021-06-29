@@ -176,6 +176,7 @@ export default class ReplayApi {
 
     // don't load api data until the session is ready
     await this.isReady;
+    this.lastActivityDate ??= new Date();
 
     const tabsWithChanges = new Set<ReplayTabState>();
 
