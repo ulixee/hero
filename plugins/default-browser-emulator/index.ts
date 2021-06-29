@@ -14,6 +14,7 @@ import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions'
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
 import IGeolocation from '@secret-agent/interfaces/IGeolocation';
+import { randomBytes } from 'crypto';
 import Viewports from './lib/Viewports';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
 import setPageDomOverrides from './lib/setPageDomOverrides';
@@ -51,7 +52,19 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
 
   constructor(createOptions: IPluginCreateOptions, userAgentOption: IUserAgentOption) {
     super(createOptions, userAgentOption);
-    this.data = dataLoader.as(userAgentOption);
+    this.data = dataLoader.as(userAgentOption) as any;
+
+    this.data.deviceMemory = Math.ceil(Math.random() * 4) * 2;
+    this.data.videoDevice = {
+      deviceId: randomBytes(32).toString('hex'),
+      groupId: randomBytes(32).toString('hex'),
+    };
+    this.data.webGLParameters = {
+      // UNMASKED_VENDOR_WEBGL
+      37445: 'Intel Inc.',
+      // UNMASKED_RENDERER_WEBGL
+      37446: 'Intel Iris OpenGL Engine',
+    };
 
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
       createOptions.plugins.use(FirstPartyCookiesPlugin);
