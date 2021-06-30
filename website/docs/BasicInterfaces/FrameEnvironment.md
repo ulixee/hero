@@ -122,7 +122,7 @@ const response = await mainFrame.fetch(postUrl, {
 });
 ```
 
-### frameEnvironment.getFrameEnvironment*(frameElement)* {#find-frame}
+### frameEnvironment.getFrameEnvironment*(frameElement)* {#get-frame-environment}
 
 Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corresponding to the provided HTMLFrameElement or HTMLIFrameElement. Use this function to attach to the full environment of the given DOM element.
 
@@ -137,7 +137,7 @@ await agent.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ifra
 const { document } = agent.activeTab;
 const iframeElement = document.querySelector('iframe.interactive');
 
-const iframe = await agent.findFrame(iframeElement);
+const iframe = await agent.getFrameEnvironment(iframeElement);
 
 const h4 = await iframe.document.querySelector('h4').textContent; // should be something like HTML demo: <iframe>
 ```

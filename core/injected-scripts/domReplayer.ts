@@ -54,7 +54,8 @@ window.addEventListener('message', ev => {
     frameNodePath = ev.data.frameNodePath;
   }
   const event = ev.data.event;
-  replayDomEvent(event);
+  domChangeList.push(event);
+  if (document.readyState !== 'loading') applyDomChanges([]);
 });
 
 function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {

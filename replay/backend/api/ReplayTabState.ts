@@ -335,7 +335,7 @@ export default class ReplayTabState extends EventEmitter {
         const paint = this.paintEvents[i];
         if (!paint) continue;
         if (paint.timestamp === timestamp) {
-          paintEvent = paint[i];
+          paintEvent = paint;
           break;
         }
       }
@@ -346,7 +346,7 @@ export default class ReplayTabState extends EventEmitter {
       events.push(event);
 
       // if events are out of order, set the index of paints back to this index
-      if (events.length > 0 && events[events.length - 1].eventIndex > event.eventIndex) {
+      if (events.length > 1 && events[events.length - 2].eventIndex > event.eventIndex) {
         events.sort((a, b) => {
           if (a.frameIdPath === b.frameIdPath) {
             return a.eventIndex - b.eventIndex;
