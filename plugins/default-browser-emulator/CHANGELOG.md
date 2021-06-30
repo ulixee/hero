@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
+
+
+### Bug Fixes
+
+* **core:** headed mode broken ([9d6ad5b](https://github.com/ulixee/secret-agent/commit/9d6ad5b54fb2d7464c3cbae90653a04af16d5c1f))
+* **plugins:** inconsistent dom env properties ([405e91b](https://github.com/ulixee/secret-agent/commit/405e91bc07fd7225c6eebe8d46843242c8527c48))
+
+
+
+
+
 ## [1.5.1](https://github.com/ulixee/secret-agent/compare/v1.5.0...v1.5.1) (2021-06-28)
 
 

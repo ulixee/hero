@@ -1,17 +1,17 @@
 {
   "name": "@secret-agent/commons",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Common utilities for Secret Agent",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/interfaces": "1.5.1",
+    "@secret-agent/interfaces": "1.5.2",
     "https-proxy-agent": "^5.0.0",
     "source-map-support": "^0.5.19",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@secret-agent/default-browser-emulator": "1.5.1",
-    "@secret-agent/puppet": "1.5.1",
+    "@secret-agent/default-browser-emulator": "1.5.2",
+    "@secret-agent/puppet": "1.5.2",
     "@types/better-sqlite3": "^5.4.1"
   }
 }

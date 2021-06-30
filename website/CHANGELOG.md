@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
+
+
+### Bug Fixes
+
+* **docs:** wrong frame api ([66733e5](https://github.com/ulixee/secret-agent/commit/66733e541d8315d95fb71fc3da9896c0626cec61))
+
+
+
+
+
 ## [1.5.1](https://github.com/ulixee/secret-agent/compare/v1.5.0...v1.5.1) (2021-06-28)
 
 **Note:** Version bump only for package @secret-agent/website

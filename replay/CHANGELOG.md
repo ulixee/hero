@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
+
+
+### Bug Fixes
+
+* **replay:** iframe display when load too quick ([784a0ef](https://github.com/ulixee/secret-agent/commit/784a0efbe61e64062dcf8bd110cc6c8ddffd2902))
+* **replay:** replay notifier breaks on unhandled ([21b38c5](https://github.com/ulixee/secret-agent/commit/21b38c58e80c720ab24798ece7c9d0e2448d14e0))
+
+
+
+
+
 ## [1.5.1](https://github.com/ulixee/secret-agent/compare/v1.5.0...v1.5.1) (2021-06-28)
 
 **Note:** Version bump only for package @secret-agent/replay

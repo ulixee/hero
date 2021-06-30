@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
+
+
+### Bug Fixes
+
+* **replay:** iframe display when load too quick ([784a0ef](https://github.com/ulixee/secret-agent/commit/784a0efbe61e64062dcf8bd110cc6c8ddffd2902))
+* **replay:** replay notifier breaks on unhandled ([21b38c5](https://github.com/ulixee/secret-agent/commit/21b38c58e80c720ab24798ece7c9d0e2448d14e0))
+* when importing plugins try default on require ([be0f7d5](https://github.com/ulixee/secret-agent/commit/be0f7d5f285152cadb4eb62aad54ea4827b1fdef))
+
+
+### Features
+
+* **core:** improve mouse message when not there ([b9711d6](https://github.com/ulixee/secret-agent/commit/b9711d6b3b27882ff2be711382464243493d71a7))
+* dynamically require core extender plugins required by client ([f069514](https://github.com/ulixee/secret-agent/commit/f069514fc01916437a37c281354a64eb4f14839f))
+
+
+
+
+
 ## [1.5.1](https://github.com/ulixee/secret-agent/compare/v1.5.0...v1.5.1) (2021-06-28)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@secret-agent/mitm-socket",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Man-in-the-middle socket library to emulate TLS and TCP settings",
   "main": "index.js",
   "scripts": {
@@ -8,12 +8,12 @@
     "build-install": "npm run build"
   },
   "dependencies": {
-    "@secret-agent/commons": "1.5.1",
-    "@secret-agent/interfaces": "1.5.1",
+    "@secret-agent/commons": "1.5.2",
+    "@secret-agent/interfaces": "1.5.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@secret-agent/testing": "1.5.1",
+    "@secret-agent/testing": "1.5.2",
     "@types/ws": "^7.2.4",
     "proxy": "^1.0.1",
     "simple-socks": "^2.1.0",
