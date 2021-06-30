@@ -49,7 +49,6 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   public readonly browserRequestMatcher: BrowserRequestMatcher;
 
-  public willWriteResponseBody?: (context: IHttpResourceLoadDetails) => Promise<void>;
   // use this to bypass the mitm and just return a dummy response (ie for UserProfile setup)
   public bypassAllWithEmptyResponse: boolean;
 

@@ -15,9 +15,6 @@ import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSession
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
 import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { MitmProxy } from '@secret-agent/mitm/index';
 import IViewport from '@secret-agent/interfaces/IViewport';
@@ -94,7 +91,12 @@ export default class Session extends TypedEventEmitter<{
     this.logger = log.createChild(module, { sessionId: this.id });
     this.awaitedEventListener = new AwaitedEventListener(this);
 
-    const { userAgent: userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap } = options;
+    const {
+      userAgent: userAgentSelector,
+      browserEmulatorId,
+      humanEmulatorId,
+      dependencyMap,
+    } = options;
     this.plugins = new Plugins(
       { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap },
       this.logger,
@@ -249,7 +251,6 @@ export default class Session extends TypedEventEmitter<{
     context.defaultPageInitializationFn = InjectedScripts.install;
 
     const requestSession = this.mitmRequestSession;
-    requestSession.willWriteResponseBody = this.beforeSendingMitmHttpResponse.bind(this);
     requestSession.on('request', this.onMitmRequest.bind(this));
     requestSession.on('response', this.onMitmResponse.bind(this));
     requestSession.on('http-error', this.onMitmError.bind(this));
@@ -331,43 +332,6 @@ export default class Session extends TypedEventEmitter<{
 
   public recordOutput(changes: IOutputChangeRecord[]) {
     this.sessionState.recordOutputChanges(changes);
-  }
-
-  private async beforeSendingMitmHttpResponse(resource: IHttpResourceLoadDetails): Promise<void> {
-    // wait for share and service worker "envs" to load before returning response
-    const secFetchDest = (resource.requestHeaders['sec-fetch-dest'] ??
-      resource.requestHeaders['Sec-Fetch-Dest']) as string;
-
-    // NOTE: not waiting for "workers" because the worker isn't attached until the response comes in
-    if (!secFetchDest || !['sharedworker', 'serviceworker'].includes(secFetchDest)) {
-      return;
-    }
-
-    const workerType = secFetchDest.replace('worker', '_worker');
-
-    function match(worker: IPuppetWorker): boolean {
-      if (worker.hasLoadedResponse) return false;
-      return workerType === worker.type && worker.url === resource.url.href;
-    }
-    let worker: IPuppetWorker;
-    try {
-      for (const value of this.browserContext.workersById.values()) {
-        if (match(value)) worker = value;
-      }
-
-      if (!worker) {
-        ({ worker } = await this.browserContext.waitOn(
-          'worker',
-          event => match(event.worker),
-          5e3,
-        ));
-      }
-      await worker.isInitializationSent;
-      worker.hasLoadedResponse = true;
-    } catch (error) {
-      if (error instanceof CanceledPromiseError) return;
-      throw error;
-    }
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {

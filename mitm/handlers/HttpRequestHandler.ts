@@ -223,10 +223,6 @@ export default class HttpRequestHandler extends BaseHttpHandler {
 
     context.setState(ResourceState.WriteProxyToClientResponseBody);
 
-    if (context.requestSession.willWriteResponseBody) {
-      await context.requestSession.willWriteResponseBody(context);
-    }
-
     for await (const chunk of serverToProxyResponse) {
       const data = context.cacheHandler.onResponseData(chunk as Buffer);
       this.safeWriteToClient(data);
