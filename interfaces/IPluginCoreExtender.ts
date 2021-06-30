@@ -1,4 +1,4 @@
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { IPuppetPage } from './IPuppetPage';
 import { IBrowserEmulatorMethods } from './IPluginBrowserEmulator';
 import { IHumanEmulatorMethods } from './IPluginHumanEmulator';
 import { PluginTypes } from './IPluginTypes';
