@@ -387,6 +387,8 @@ export default class Interactor implements IInteractionsHelper {
     interaction: IInteractionStep,
     resolvable: IResolvablePromise,
   ): Promise<{ domCoordinates: IPoint; simulateOptionClick?: boolean }> {
+    let targetPoint: IPoint;
+    let nodeVisibility: INodeVisibility;
     // try 2x to hover over the expected target
     for (let retryNumber = 0; retryNumber < 2; retryNumber += 1) {
       const rect = await this.lookupBoundingRect([nodeId], false, true);
@@ -394,8 +396,8 @@ export default class Interactor implements IInteractionsHelper {
       if (rect.elementTag === 'option') {
         return { simulateOptionClick: true, domCoordinates: null };
       }
-
-      const targetPoint = this.createPointInRect({
+      nodeVisibility = rect.nodeVisibility;
+      targetPoint = this.createPointInRect({
         tag: rect.elementTag,
         ...rect,
       });
@@ -433,6 +435,18 @@ export default class Interactor implements IInteractionsHelper {
       });
     }
 
+    this.logger.error(
+      'Interaction.click - moving over target before click did not hover over expected "Interaction.mousePosition" element.',
+      {
+        'Interaction.mousePosition': interaction.mousePosition,
+        target: {
+          nodeId,
+          nodeVisibility,
+          domCoordinates: { x: targetPoint.x, y: targetPoint.y },
+        },
+      },
+    );
+
     throw new Error(
       'Interaction.click - could not move mouse over target provided by "Interaction.mousePosition".',
     );
@@ -444,7 +458,7 @@ export default class Interactor implements IInteractionsHelper {
     mousePosition: IMousePosition,
   ) {
     let extras = '';
-    const isNodeHidden = mouseUpResult.expectedNodeVisibility.isVisible;
+    const isNodeHidden = mouseUpResult.expectedNodeVisibility.isVisible === false;
     if (isNodeHidden && nodeId) {
       extras = `\n\nNOTE: The target node is not visible in the dom.`;
     }

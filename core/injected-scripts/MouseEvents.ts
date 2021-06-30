@@ -11,6 +11,11 @@ class MouseEvents {
 
     const node = NodeTracker.getWatchedNodeWithId(nodeId);
     if (!node) throw new Error('Node not found');
+    if (!node.isConnected) {
+      throw new Error(
+        `Target node for "${mouseEvent}" is not connected to the DOM, and won't receive mouse events.`,
+      );
+    }
 
     if (mouseEvent === 'mouseover') {
       this.pendingMouseover = new EventResolvable(nodeId, () => {
