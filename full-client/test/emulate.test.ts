@@ -204,7 +204,7 @@ describe('geolocation', () => {
 });
 
 describe('user agent and platform', () => {
-  const propsToGet = `appVersion, platform, userAgent`.split(',').map(x => x.trim());
+  const propsToGet = `appVersion, platform, userAgent, deviceMemory`.split(',').map(x => x.trim());
 
   it('should add user agent and platform to window & frames', async () => {
     const agent = await handler.createAgent();
@@ -267,7 +267,7 @@ describe('user agent and platform', () => {
     expect(agentMeta.operatingSystemPlatform).toBe(windowParams.platform);
 
     for (const prop of propsToGet) {
-      expect(frameParams[prop]).toStrictEqual(windowParams[prop]);
+      expect(`${prop}=${frameParams[prop]}`).toStrictEqual(`${prop}=${windowParams[prop]}`);
     }
   });
 
@@ -323,13 +323,17 @@ describe('user agent and platform', () => {
     await agent.click(agent.document.querySelector('a'));
 
     const page2WindowParams = await getParams();
-    for (const key of propsToGet) {
-      expect(page2WindowParams[key]).toBe(page1WindowParams[key]);
+    for (const prop of propsToGet) {
+      expect(`${prop}=${page2WindowParams[prop]}`).toStrictEqual(
+        `${prop}=${page1WindowParams[prop]}`,
+      );
     }
 
     const page2StartParams = await agent.getJsValue('startPageVars');
-    for (const key of propsToGet) {
-      expect(page2StartParams[key]).toBe(page1WindowParams[key]);
+    for (const prop of propsToGet) {
+      expect(`${prop}=${page2StartParams[prop]}`).toStrictEqual(
+        `${prop}=${page1WindowParams[prop]}`,
+      );
     }
 
     await agent.click(agent.document.querySelector('a'));
@@ -395,6 +399,7 @@ describe('user agent and platform', () => {
     for (const prop of propsToGet) {
       const windowValue = await agent.getJsValue(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
+      expect(`${prop}=${params[prop]}`).toStrictEqual(`${prop}=${windowValue}`);
     }
   });
 
@@ -514,6 +519,9 @@ self.addEventListener('message', async event => {
     expect(windowScope.userAgent).toBe(dedicatedWorker.userAgent);
     expect(windowScope.userAgent).toBe(serviceWorker.userAgent);
     expect(windowScope.userAgent).toBe(sharedWorker.userAgent);
+    expect(windowScope.memory).toBe(dedicatedWorker.memory);
+    expect(windowScope.memory).toBe(serviceWorker.memory);
+    expect(windowScope.memory).toBe(sharedWorker.memory);
     await agent.close();
   });
 

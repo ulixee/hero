@@ -3,7 +3,7 @@ import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
 import Core, { Session } from '@secret-agent/core';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { Handler } from '../index';
+import { Handler, LocationStatus } from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 
@@ -298,4 +298,51 @@ test('should not leave stack trace markers when calling in page functions', asyn
   expect(queryAllTest).toBe(
     `Error: All Error\n    at HTMLDocument.outerFunction [as querySelectorAll] (${url}:11:19)\n    at <anonymous>:1:10`,
   );
+});
+
+test('should not have too much recursion in prototype', async () => {
+  const agent = await handler.createAgent();
+  Helpers.needsClosing.push(agent);
+  const tabId = await agent.activeTab.tabId;
+  const sessionId = await agent.sessionId;
+  const tab = Session.getTab({ tabId, sessionId });
+  const page = tab.puppetPage;
+  await agent.goto(`${koaServer.baseUrl}`);
+  await agent.activeTab.waitForLoad(LocationStatus.AllContentLoaded);
+
+  const error = await page.evaluate<{ message: string; name: string }>(`(() => {
+    const apiFunction = Object.getOwnPropertyDescriptor(Navigator.prototype, 'deviceMemory').get;
+
+    try {
+      Object.setPrototypeOf(apiFunction, apiFunction) + ''
+      return true
+    } catch (error) {
+    console.log(error)
+      return {
+        name: error.constructor.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    }
+  })();`);
+
+  expect(error.name).toBe('TypeError');
+
+  const error2 = await page.evaluate<{ message: string; name: string }>(`(() => {
+  const apiFunction = WebGL2RenderingContext.prototype.getParameter;
+
+  try {
+    Object.setPrototypeOf(apiFunction, apiFunction) + ''
+    return true
+  } catch (error) {
+  console.log(error)
+    return {
+      name: error.constructor.name,
+      message: error.message,
+      stack: error.stack,
+    }
+  }
+})();`);
+
+  expect(error2.name).toBe('TypeError');
 });

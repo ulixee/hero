@@ -34,6 +34,17 @@ Object.defineProperty(Function.prototype, 'toString', {
         throw error;
       }
     },
+    setPrototypeOf(target: any, v: any): boolean {
+      let protoTarget = v;
+      if (v === Function.prototype.toString) {
+        protoTarget = target;
+      }
+      try {
+        return ObjectCached.setPrototypeOf(target, protoTarget);
+      } catch (error) {
+        throw cleanErrorStack(error, null, true);
+      }
+    },
   }),
 });
 overriddenFns.set(Function.prototype.toString, nativeToStringFunctionString);
@@ -50,13 +61,21 @@ const ReflectCached = {
   getOwnPropertyDescriptor: Reflect.getOwnPropertyDescriptor.bind(Reflect),
 };
 
+const ObjectCached = {
+  setPrototypeOf: Object.setPrototypeOf.bind(Object),
+};
+
 enum ProxyOverride {
   callOriginal = '_____invoke_original_____',
 }
 
 declare let sourceUrl: string;
 
-function cleanErrorStack(error: Error, replaceLineFn?: (line: string, index: number) => string) {
+function cleanErrorStack(
+  error: Error,
+  replaceLineFn?: (line: string, index: number) => string,
+  startAfterSourceUrl = false,
+) {
   if (!error.stack) return error;
 
   const split = error.stack.includes('\r\n') ? '\r\n' : '\n';
@@ -65,6 +84,9 @@ function cleanErrorStack(error: Error, replaceLineFn?: (line: string, index: num
   for (let i = 0; i < stack.length; i += 1) {
     let line = stack[i];
     if (line.includes(sourceUrl)) {
+      if (startAfterSourceUrl === true) {
+        newStack.length = 1;
+      }
       continue;
     }
     if (replaceLineFn) line = replaceLineFn(line, i);
@@ -138,6 +160,17 @@ function proxyFunction<T, K extends keyof T>(
       }
       return ReflectCached.apply(...arguments);
     },
+    setPrototypeOf(target: any, v: any): boolean {
+      let protoTarget = v;
+      if (v === descriptorOwner[functionName]) {
+        protoTarget = target;
+      }
+      try {
+        return ObjectCached.setPrototypeOf(target, protoTarget);
+      } catch (error) {
+        throw cleanErrorStack(error, null, true);
+      }
+    },
   });
   overriddenFns.set(descriptorOwner[functionName] as any, toString);
   return thisObject[functionName];
@@ -163,6 +196,17 @@ function proxyGetter<T, K extends keyof T>(
         if (result !== ProxyOverride.callOriginal) return result;
       }
       return ReflectCached.apply(...arguments);
+    },
+    setPrototypeOf(target: any, v: any): boolean {
+      let protoTarget = v;
+      if (v === descriptor.get) {
+        protoTarget = target;
+      }
+      try {
+        return ObjectCached.setPrototypeOf(target, protoTarget);
+      } catch (error) {
+        throw cleanErrorStack(error, null, true);
+      }
     },
   });
   overriddenFns.set(descriptor.get, toString);

@@ -1,7 +1,8 @@
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import IBrowserEngineOption from '@secret-agent/interfaces/IBrowserEngineOption';
 
-export default interface IBrowserData extends Omit<IDataCore, 'browserEngineOptions' | 'userAgentOptions'> {
+export default interface IBrowserData
+  extends Omit<IDataCore, 'browserEngineOptions' | 'userAgentOptions'> {
   browserConfig: IDataBrowserConfig;
   clienthello: IDataClienthello;
   codecs: IDataCodecs;
@@ -11,6 +12,12 @@ export default interface IBrowserData extends Omit<IDataCore, 'browserEngineOpti
   domPolyfill: IDataDomPolyfill;
   windowBaseFraming: IDataWindowFraming;
   headers: IDataHeaders;
+  deviceMemory?: number;
+  videoDevice?: {
+    deviceId: string;
+    groupId: string;
+  };
+  webGLParameters?: Record<string, string | number | boolean>;
 }
 
 export interface IDataBrowserConfig {

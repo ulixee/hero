@@ -1,4 +1,3 @@
-import { randomBytes } from 'crypto';
 import { BrowserEmulatorBase } from '@secret-agent/plugin-utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
@@ -13,8 +12,7 @@ export default function loadDomOverrides(
   domOverrides.add('Error.captureStackTrace');
   domOverrides.add('Error.constructor');
 
-  const deviceMemory = Math.ceil(Math.random() * 4) * 2;
-  domOverrides.add('navigator.deviceMemory', { memory: deviceMemory });
+  domOverrides.add('navigator.deviceMemory', { memory: data.deviceMemory });
   domOverrides.add('navigator', {
     userAgentString: emulator.userAgentString,
     platform: emulator.operatingSystemPlatform,
@@ -22,10 +20,7 @@ export default function loadDomOverrides(
   });
 
   domOverrides.add('MediaDevices.prototype.enumerateDevices', {
-    videoDevice: {
-      deviceId: randomBytes(32).toString('hex'),
-      groupId: randomBytes(32).toString('hex'),
-    },
+    videoDevice: data.videoDevice,
   });
 
   domOverrides.add('Notification.permission');
@@ -68,12 +63,7 @@ export default function loadDomOverrides(
 
   const windowNavigator = data.windowNavigator;
   domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
-  domOverrides.add('WebGLRenderingContext.prototype.getParameter', {
-    // UNMASKED_VENDOR_WEBGL
-    37445: 'Intel Inc.',
-    // UNMASKED_RENDERER_WEBGL
-    37446: 'Intel Iris OpenGL Engine',
-  });
+  domOverrides.add('WebGLRenderingContext.prototype.getParameter', data.webGLParameters);
   domOverrides.add('console.debug');
   domOverrides.add('HTMLIFrameElement.prototype');
   domOverrides.add('Element.prototype.attachShadow');
