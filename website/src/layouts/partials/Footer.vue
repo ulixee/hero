@@ -1,8 +1,8 @@
 <template>
   <footer class="text-center">
     An open source project by
-    <g-link to="/contributor/calebjclark/">@calebjclark</g-link>,
-    <g-link to="/contributor/blakebyrnes/">@blakebyrnes</g-link>,
+    <g-link to="https://github.com/calebjclark">@calebjclark</g-link>,
+    <g-link to="https://github.com/blakebyrnes">@blakebyrnes</g-link>,
     and the <g-link to="https://dataliberationfoundation.org">Data Liberation Foundation</g-link>.
 
     <g-link to="/assets/" style="margin-left: .5rem">Logo & assets</g-link>
