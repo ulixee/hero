@@ -57,14 +57,12 @@ export function configureBrowserLaunchArgs(
   );
 
   if (options.showBrowser) {
-    engine.launchArguments.push(
-      `--user-data-dir=${Path.join(
-        os.tmpdir(),
-        engine.fullVersion.replace('.', '-'),
-        '-data',
-        String((sessionDirCounter += 1)),
-      )}`,
-    ); // required to allow multiple browsers to be headed
+    const dataDir = Path.join(
+      os.tmpdir(),
+      engine.fullVersion.replace('.', '-'),
+      `${String(Date.now()).substr(0, 10)}-${(sessionDirCounter += 1)}`,
+    );
+    engine.launchArguments.push(`--user-data-dir=${dataDir}`); // required to allow multiple browsers to be headed
 
     if (!options.disableDevtools) engine.launchArguments.push('--auto-open-devtools-for-tabs');
   } else {
