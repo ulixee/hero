@@ -47,7 +47,6 @@ export default class Puppet {
       const launchedProcess = await launchProcess(
         this.browserEngine.executablePath,
         this.browserEngine.launchArguments,
-        {},
       );
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
