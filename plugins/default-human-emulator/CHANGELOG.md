@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.3](https://github.com/ulixee/secret-agent/compare/v1.5.2...v1.5.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* **mitm:** workers timing out on init ([42b8e5c](https://github.com/ulixee/secret-agent/commit/42b8e5cdb6a466252e8ea20c3a1037dfc7b43999))
+
+
+
+
+
 ## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
 
 

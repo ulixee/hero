@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.3](https://github.com/ulixee/secret-agent/compare/v1.5.2...v1.5.3) (2021-07-01)
+
+
+### Bug Fixes
+
+* **interfaces:** remove looping reference ([83d6d88](https://github.com/ulixee/secret-agent/commit/83d6d8807b515b036980490eace7d80550b27f53))
+* **mitm:** workers timing out on init ([42b8e5c](https://github.com/ulixee/secret-agent/commit/42b8e5cdb6a466252e8ea20c3a1037dfc7b43999))
+* **puppet:** headed not launching on ubuntu ([6f8a9a1](https://github.com/ulixee/secret-agent/commit/6f8a9a17857e952bbcedfa26aede9bd2451604c4)), closes [#272](https://github.com/ulixee/secret-agent/issues/272)
+* **website:** fix contributors links ([e816b3b](https://github.com/ulixee/secret-agent/commit/e816b3be3782b5382a07886c684e98964142247d))
+
+
+
+
+
 ## [1.5.2](https://github.com/ulixee/secret-agent/compare/v1.5.1...v1.5.2) (2021-06-30)
 
 
