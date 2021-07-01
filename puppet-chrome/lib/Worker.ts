@@ -6,6 +6,7 @@ import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/interfaces/IPu
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import IPlugins from '@secret-agent/interfaces/IPlugins';
 import { BrowserContext } from './BrowserContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
@@ -80,15 +81,10 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
         throw err;
       }),
       this.devtoolsSession.send('Runtime.enable'),
-      plugins.onNewPuppetWorker(this).catch(error => {
-        if (error instanceof CanceledPromiseError) return;
-        this.logger.error('Emulator.onNewPuppetWorkerError', {
-          error,
-        });
-        throw error;
-      }),
+      this.initializeEmulation(plugins),
       this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
     ]);
+
     setImmediate(() => this.initializationSent.resolve());
     return result.then(() => null);
   }
@@ -122,6 +118,34 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
       url: this.url,
       type: this.type,
     };
+  }
+
+  private initializeEmulation(plugins: IPlugins): Promise<any> {
+    if (!plugins.onNewPuppetWorker) return;
+
+    return Promise.all([
+      plugins.onNewPuppetWorker(this),
+      this.devtoolsSession.send('Debugger.enable'),
+      this.devtoolsSession.send('Debugger.setBreakpointByUrl', {
+        lineNumber: 0,
+        url: this.targetInfo.url,
+      }),
+    ])
+      .then(this.resumeAfterEmulation.bind(this))
+      .catch(error => {
+        if (error instanceof CanceledPromiseError) return;
+        this.logger.error('Emulator.onNewPuppetWorkerError', {
+          error,
+        });
+        throw error;
+      });
+  }
+
+  private resumeAfterEmulation(): Promise<any> {
+    return Promise.all([
+      this.devtoolsSession.send('Runtime.runIfWaitingForDebugger'),
+      this.devtoolsSession.send('Debugger.disable'),
+    ]);
   }
 
   private onContextCreated(event: ExecutionContextCreatedEvent): void {

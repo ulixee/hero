@@ -6,7 +6,7 @@ export default class BlockHandler {
     ctx.setState(ResourceState.BlockHandler);
     const requestSession = ctx.requestSession;
     if (!requestSession) return false;
-    if (requestSession.isClosing) return true;
+    if (requestSession.isClosing) return false;
 
     const shouldBlock =
       (ctx.resourceType && requestSession.blockedResources?.types?.includes(ctx.resourceType)) ||

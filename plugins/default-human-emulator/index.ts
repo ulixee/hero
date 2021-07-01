@@ -131,6 +131,7 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
     const targetRect = await helper.lookupBoundingRect(
       nodeId ? [nodeId] : interactionStep.mousePosition,
       true,
+      true,
     );
 
     const targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
