@@ -34,6 +34,7 @@ import Agent from './Agent';
 import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
+import { IMousePosition } from '../interfaces/IInteractions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
 const awaitedPathState = StateMachine<
@@ -224,6 +225,15 @@ export function getCoreFrameEnvironment(
 ): Promise<CoreFrameEnvironment> {
   return getState(frameEnvironment).coreFrame;
 }
+
+export function getCoreFrameEnvironmentForPosition(
+  mousePosition: IMousePosition,
+): Promise<CoreFrameEnvironment> {
+  const state = awaitedPathState.getState(mousePosition);
+  if (!state) return;
+  return state?.awaitedOptions?.coreFrame;
+}
+
 // CREATE
 
 export function createFrame(

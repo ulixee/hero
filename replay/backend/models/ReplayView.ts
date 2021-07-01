@@ -247,7 +247,12 @@ export default class ReplayView extends ViewBackend {
   }
 
   private async publishTickChanges(
-    events: [IFrontendDomChangeEvent[], number[], IFrontendMouseEvent, IScrollRecord],
+    events: [
+      IFrontendDomChangeEvent[],
+      { frameIdPath: string; nodeIds: number[] },
+      IFrontendMouseEvent,
+      IScrollRecord,
+    ],
   ) {
     if (!events || !events.length) return;
     const [domChanges] = events;

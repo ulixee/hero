@@ -6,6 +6,7 @@ export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'ScrollEvents', [
       ['tabId', 'INTEGER'],
+      ['frameId', 'INTEGER'],
       ['scrollX', 'INTEGER'],
       ['scrollY', 'INTEGER'],
       ['commandId', 'INTEGER'],
@@ -13,15 +14,16 @@ export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
     ]);
   }
 
-  public insert(tabId: number, commandId: number, scrollEvent: IScrollEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, scrollEvent: IScrollEvent) {
     const [scrollX, scrollY, timestamp] = scrollEvent;
-    const record = [tabId, scrollX, scrollY, commandId, timestamp];
+    const record = [tabId, frameId, scrollX, scrollY, commandId, timestamp];
     this.queuePendingInsert(record);
   }
 }
 
 export interface IScrollRecord {
   tabId: number;
+  frameId: number;
   scrollX: number;
   scrollY: number;
   commandId: number;

@@ -51,8 +51,8 @@ export default class Interactor implements IInteractionsHelper {
   public get scrollOffset(): Promise<IPoint> {
     return this.jsPath.getWindowOffset().then(offset => {
       return {
-        x: offset.pageXOffset,
-        y: offset.pageYOffset,
+        x: offset.scrollX,
+        y: offset.scrollY,
       };
     });
   }
@@ -133,10 +133,11 @@ export default class Interactor implements IInteractionsHelper {
       throw new Error('Null mouse position provided to agent.interact');
     }
     const jsPath = this.jsPath;
-    const rectResult = await jsPath.exec<IElementRect>([
-      ...mousePosition,
-      [getClientRectFnName, includeNodeVisibility],
-    ]);
+    const containerOffset = await this.frameEnvironment.getContainerOffset();
+    const rectResult = await jsPath.exec<IElementRect>(
+      [...mousePosition, [getClientRectFnName, includeNodeVisibility]],
+      containerOffset,
+    );
     const rect = rectResult.value;
     const nodePointer = rectResult.nodePointer as INodePointer;
 
@@ -213,8 +214,8 @@ export default class Interactor implements IInteractionsHelper {
           await this.mouse.wheel(scroll);
           // need to check for offset since wheel event doesn't wait for scroll
           await this.jsPath.waitForScrollOffset(
-            Math.max(0, deltaX + windowBounds.pageXOffset),
-            Math.max(0, deltaY + windowBounds.pageYOffset),
+            Math.max(0, deltaX + windowBounds.scrollX),
+            Math.max(0, deltaY + windowBounds.scrollY),
           );
         }
         break;
@@ -247,7 +248,10 @@ export default class Interactor implements IInteractionsHelper {
         if (isMousePositionNodeId(mousePosition)) {
           nodePointerId = mousePosition[0] as number;
         } else {
-          const nodeLookup = await this.jsPath.exec<number>([...mousePosition, [getNodeIdFnName]]);
+          const nodeLookup = await this.jsPath.exec<number>(
+            [...mousePosition, [getNodeIdFnName]],
+            null,
+          );
           if (nodeLookup.value) {
             nodePointerId = nodeLookup.value;
           }
@@ -336,8 +340,8 @@ export default class Interactor implements IInteractionsHelper {
 
     if (isMousePositionCoordinate(targetPosition)) {
       const [x, y] = targetPosition as IMousePositionXY;
-      const deltaX = x - windowBounds.pageXOffset;
-      const deltaY = y - windowBounds.pageYOffset;
+      const deltaX = x - windowBounds.scrollX;
+      const deltaY = y - windowBounds.scrollY;
       return { deltaX, deltaY };
     }
 
@@ -358,10 +362,11 @@ export default class Interactor implements IInteractionsHelper {
       const [x, y] = mousePosition as number[];
       return { x: round(x), y: round(y) };
     }
-    const clientRectResult = await this.jsPath.exec<IElementRect>([
-      ...mousePosition,
-      [getClientRectFnName],
-    ]);
+    const containerOffset = await this.frameEnvironment.getContainerOffset();
+    const clientRectResult = await this.jsPath.exec<IElementRect>(
+      [...mousePosition, [getClientRectFnName]],
+      containerOffset,
+    );
     const nodePointer = clientRectResult.nodePointer as INodePointer;
 
     const point = this.createPointInRect(clientRectResult.value);

@@ -33,8 +33,8 @@ class MouseEvents {
           : undefined;
 
         const result: IMouseUpResult = {
-          pageX: event.pageX - window.pageXOffset,
-          pageY: event.pageY - window.pageYOffset,
+          pageX: event.pageX - window.scrollX,
+          pageY: event.pageY - window.scrollY,
           targetNodeId,
           relatedTargetNodeId,
           didClickLocation: node.contains(event.target as Node) || node === event.target,

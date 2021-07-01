@@ -8,11 +8,11 @@ export default class ReplayTick {
 
   public documentLoadPaintIndex: number;
 
-  public highlightNodeIds?: number[] = null;
+  public highlightNodeIds?: { frameIdPath: string; nodeIds: number[] } = null;
   public paintEventIdx?: number = null;
-  public scrollEventIdx?: number = null;
-  public focusEventIdx?: number = null;
-  public mouseEventIdx?: number = null;
+  public scrollEventTick?: number = null;
+  public focusEventTick?: number = null;
+  public mouseEventTick?: number = null;
   public get playbarOffsetPercent() {
     return this._playbarOffsetPercent;
   }
@@ -28,7 +28,7 @@ export default class ReplayTick {
   constructor(
     state: ReplayTabState,
     readonly eventType: IEventType,
-    public eventTypeIdx: number,
+    public eventTypeTick: number,
     readonly commandId: number,
     readonly timestamp: number,
     readonly label?: string,

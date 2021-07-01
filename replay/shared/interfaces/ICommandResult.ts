@@ -9,6 +9,7 @@ export default interface ICommandWithResult {
   endDate?: number;
   duration: number;
   isError: boolean;
+  frameIdPath?: string;
   result: any;
   resultType?: string;
   resultNodeIds?: number[];

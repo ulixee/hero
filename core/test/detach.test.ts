@@ -159,7 +159,10 @@ describe('basic Detach tests', () => {
 
     // now should be able to create a second detached tab and replay the paths with same result
     const { detachedTab: secondDetached } = await session.detachTab(tab, 'callsite3');
-    const prefetch = await secondDetached.mainFrameEnvironment.jsPath.runJsPaths(jsPaths);
+    const prefetch = await secondDetached.mainFrameEnvironment.jsPath.runJsPaths(jsPaths, {
+      x: 0,
+      y: 0,
+    });
 
     const manualResults = [];
     for (let i = 0; i < execJsPath.mock.calls.length; i += 1) {

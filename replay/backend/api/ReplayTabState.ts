@@ -47,9 +47,9 @@ export default class ReplayTabState extends EventEmitter {
 
   public isReady = getResolvable<void>();
 
-  private readonly mouseEvents: IMouseEvent[] = [];
-  private readonly scrollEvents: IScrollRecord[] = [];
-  private readonly focusEvents: IFocusRecord[] = [];
+  private readonly mouseEventsByTick: Record<number, IMouseEvent> = {};
+  private readonly scrollEventsByTick: Record<number, IScrollRecord> = {};
+  private readonly focusEventsByTick: Record<number, IFocusRecord> = {};
   private readonly paintEvents: IPaintEvent[] = [];
 
   private currentTickIdx = -1;
@@ -212,7 +212,12 @@ export default class ReplayTabState extends EventEmitter {
   public loadTick(
     newTickIdx: number,
     specificPlaybarOffset?: number,
-  ): [IFrontendDomChangeEvent[], number[], IFrontendMouseEvent, IScrollRecord] {
+  ): [
+    IFrontendDomChangeEvent[],
+    { frameIdPath: string; nodeIds: number[] },
+    IFrontendMouseEvent,
+    IScrollRecord,
+  ] {
     if (newTickIdx === this.currentTickIdx) return;
     const newTick = this.ticks[newTickIdx];
 
@@ -230,13 +235,14 @@ export default class ReplayTabState extends EventEmitter {
     this.currentPlaybarOffsetPct = playbarOffset;
 
     const paintEvents = this.setPaintIndex(newTick);
-    const mouseEvent = this.mouseEvents[newTick.mouseEventIdx];
-    const scrollEvent = this.scrollEvents[newTick.scrollEventIdx];
+    const mouseEvent = this.mouseEventsByTick[newTick.mouseEventTick];
+    const scrollEvent = this.scrollEventsByTick[newTick.scrollEventTick];
     const nodesToHighlight = newTick.highlightNodeIds;
 
     let frontendMouseEvent: IFrontendMouseEvent;
     if (mouseEvent) {
       frontendMouseEvent = {
+        frameIdPath: mouseEvent.frameIdPath,
         pageX: mouseEvent.pageX,
         pageY: mouseEvent.pageY,
         offsetX: mouseEvent.offsetX,
@@ -278,14 +284,19 @@ export default class ReplayTabState extends EventEmitter {
   }
 
   public loadPageEvent(eventType: IEventType, event: IDomEvent) {
-    let array: IDomEvent[];
-    if (eventType === 'mouse') array = this.mouseEvents;
-    if (eventType === 'focus') array = this.focusEvents;
-    if (eventType === 'scroll') array = this.scrollEvents;
+    let events: Record<number, IDomEvent>;
+    if (eventType === 'mouse') events = this.mouseEventsByTick;
+    if (eventType === 'focus') events = this.focusEventsByTick;
+    if (eventType === 'scroll') events = this.scrollEventsByTick;
 
-    const idx = array.length;
-    array.push(event);
-    const tick = new ReplayTick(this, eventType, idx, event.commandId, Number(event.timestamp));
+    events[event.timestamp] = event;
+    const tick = new ReplayTick(
+      this,
+      eventType,
+      event.timestamp,
+      event.commandId,
+      Number(event.timestamp),
+    );
     this.ticks.push(tick);
   }
 
@@ -383,9 +394,9 @@ export default class ReplayTabState extends EventEmitter {
         for (const t of this.ticks) {
           if (t.eventType !== 'paint') continue;
           const newIndex = this.paintEvents.findIndex(x => x.timestamp === t.timestamp);
-          if (newIndex >= 0 && t.eventTypeIdx !== newIndex) {
+          if (newIndex >= 0 && t.eventTypeTick !== newIndex) {
             if (this.paintEventsLoadedIdx >= newIndex) this.paintEventsLoadedIdx = newIndex - 1;
-            t.eventTypeIdx = newIndex;
+            t.eventTypeTick = newIndex;
           }
         }
       }
@@ -412,60 +423,69 @@ export default class ReplayTabState extends EventEmitter {
     }
 
     let lastPaintEventIdx: number = null;
-    let lastScrollEventIdx: number = null;
-    let lastFocusEventIdx: number = null;
-    let lastMouseEventIdx: number = null;
-    let lastSelectedNodeIds: number[] = null;
+    let lastScrollEventTick: number = null;
+    let lastFocusEventTick: number = null;
+    let lastMouseEventTick: number = null;
+    let lastSelectedNodeIds: { frameIdPath: string; nodeIds: number[] } = null;
     let documentLoadPaintIndex: number = null;
     let documentOrigin = this.startOrigin;
     for (const tick of this.ticks) {
       // if new doc, reset the markers
       if (tick.isNewDocumentTick) {
-        lastFocusEventIdx = null;
-        lastScrollEventIdx = null;
-        lastPaintEventIdx = tick.eventTypeIdx;
-        documentLoadPaintIndex = tick.eventTypeIdx;
+        lastFocusEventTick = null;
+        lastScrollEventTick = null;
+        lastPaintEventIdx = tick.eventTypeTick;
+        documentLoadPaintIndex = tick.eventTypeTick;
         documentOrigin = tick.documentOrigin;
-        lastMouseEventIdx = null;
+        lastMouseEventTick = null;
         lastSelectedNodeIds = null;
       }
       switch (tick.eventType) {
         case 'command':
           const command = this.commandsById.get(tick.commandId);
           if (command.resultNodeIds) {
-            lastSelectedNodeIds = command.resultNodeIds;
+            lastSelectedNodeIds = {
+              nodeIds: command.resultNodeIds,
+              frameIdPath: command.frameIdPath,
+            };
           }
           break;
         case 'focus':
-          lastFocusEventIdx = tick.eventTypeIdx;
-          const focusEvent = this.focusEvents[lastFocusEventIdx];
+          lastFocusEventTick = tick.eventTypeTick;
+          const focusEvent = this.focusEventsByTick[tick.eventTypeTick];
           if (focusEvent.event === 0 && focusEvent.targetNodeId) {
-            lastSelectedNodeIds = [focusEvent.targetNodeId];
+            lastSelectedNodeIds = {
+              nodeIds: [focusEvent.targetNodeId],
+              frameIdPath: focusEvent.frameIdPath,
+            };
           } else if (focusEvent.event === 1) {
             lastSelectedNodeIds = null;
           }
 
           break;
         case 'paint':
-          lastPaintEventIdx = tick.eventTypeIdx;
+          lastPaintEventIdx = tick.eventTypeTick;
           break;
         case 'scroll':
-          lastScrollEventIdx = tick.eventTypeIdx;
+          lastScrollEventTick = tick.eventTypeTick;
           break;
         case 'mouse':
-          lastMouseEventIdx = tick.eventTypeIdx;
-          const mouseEvent = this.mouseEvents[lastMouseEventIdx];
+          lastMouseEventTick = tick.eventTypeTick;
+          const mouseEvent = this.mouseEventsByTick[tick.eventTypeTick];
           if (mouseEvent.event === 1 && mouseEvent.targetNodeId) {
-            lastSelectedNodeIds = [mouseEvent.targetNodeId];
+            lastSelectedNodeIds = {
+              nodeIds: [mouseEvent.targetNodeId],
+              frameIdPath: mouseEvent.frameIdPath,
+            };
           } else if (mouseEvent.event === 2) {
             lastSelectedNodeIds = null;
           }
           break;
       }
 
-      tick.focusEventIdx = lastFocusEventIdx;
-      tick.scrollEventIdx = lastScrollEventIdx;
-      tick.mouseEventIdx = lastMouseEventIdx;
+      tick.focusEventTick = lastFocusEventTick;
+      tick.scrollEventTick = lastScrollEventTick;
+      tick.mouseEventTick = lastMouseEventTick;
       tick.paintEventIdx = lastPaintEventIdx;
       tick.documentLoadPaintIndex = documentLoadPaintIndex;
       tick.documentOrigin = documentOrigin;

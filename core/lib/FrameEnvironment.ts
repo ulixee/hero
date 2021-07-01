@@ -23,6 +23,7 @@ import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
 import TypeSerializer from '@secret-agent/commons/TypeSerializer';
 import * as Os from 'os';
 import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
+import IPoint from '@secret-agent/interfaces/IPoint';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -48,9 +49,14 @@ export default class FrameEnvironment {
   }
 
   public get parentId(): number {
+    return this.parentFrame?.id;
+  }
+
+  public get parentFrame(): FrameEnvironment | null {
     if (this.puppetFrame.parentId) {
-      return this.tab.frameEnvironmentsByPuppetId.get(this.puppetFrame.parentId)?.id;
+      return this.tab.frameEnvironmentsByPuppetId.get(this.puppetFrame.parentId);
     }
+    return null;
   }
 
   public get isAttached(): boolean {
@@ -212,11 +218,13 @@ export default class FrameEnvironment {
     // if nothing loaded yet, return immediately
     if (!this.navigations.top) return null;
     await this.navigationsObserver.waitForReady();
-    return await this.jsPath.exec(jsPath);
+    const containerOffset = await this.getContainerOffset();
+    return await this.jsPath.exec(jsPath, containerOffset);
   }
 
   public async prefetchExecJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
-    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths);
+    const containerOffset = await this.getContainerOffset();
+    this.prefetchedJsPaths = await this.jsPath.runJsPaths(jsPaths, containerOffset);
     return this.prefetchedJsPaths;
   }
 
@@ -328,7 +336,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   public async getChildFrameEnvironment(jsPath: IJsPath): Promise<IFrameMeta> {
     await this.navigationsObserver.waitForReady();
-    const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]]);
+    const nodeIdResult = await this.jsPath.exec<number>([...jsPath, [getNodeIdFnName]], null);
     if (!nodeIdResult.value) return null;
 
     const domId = nodeIdResult.value;
@@ -372,7 +380,13 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     try {
       while (!timer.isResolved()) {
         try {
-          const promise = this.jsPath.waitForElement(jsPath, waitForVisible, timeoutPerTry);
+          const containerOffset = await this.getContainerOffset();
+          const promise = this.jsPath.waitForElement(
+            jsPath,
+            containerOffset,
+            waitForVisible,
+            timeoutPerTry,
+          );
 
           const isNodeVisible = await timer.waitForPromise(promise, timeoutMessage);
           let isValid = isNodeVisible.value?.isVisible;
@@ -474,6 +488,23 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     );
     this.puppetNodeIdsBySaNodeId[nodeId] = puppetNodeId;
     return nodeId;
+  }
+
+  public async getContainerOffset(): Promise<IPoint> {
+    if (!this.parentId) return { x: 0, y: 0 };
+    const parentOffset = await this.parentFrame.getContainerOffset();
+    const frameElementNodeId = await this.puppetFrame.getFrameElementNodeId();
+    const thisOffset = await this.puppetFrame.evaluateOnNode<IPoint>(
+      frameElementNodeId,
+      `(() => {
+      const rect = this.getBoundingClientRect().toJSON();
+      return { x:rect.x, y:rect.y};
+ })()`,
+    );
+    return {
+      x: thisOffset.x + parentOffset.x,
+      y: thisOffset.y + parentOffset.y,
+    };
   }
 
   public async setFileInputFiles(

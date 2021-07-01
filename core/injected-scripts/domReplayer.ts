@@ -9,6 +9,7 @@ declare global {
     getIsMainFrame?: () => boolean;
     debugLogs: any[];
     debugToConsole: boolean;
+    selfFrameIdPath: string;
     getNodeById(id: number): Node;
   }
 }
@@ -26,7 +27,6 @@ enum DomActionType {
 
 const SHADOW_NODE_TYPE = 40;
 
-let frameNodePath: string;
 const domChangeList = [];
 
 if (!window.debugLogs) window.debugLogs = [];
@@ -50,11 +50,11 @@ window.replayDomChanges = function replayDomChanges(changeEvents: IFrontendDomCh
 };
 
 window.addEventListener('message', ev => {
-  if (ev.data.frameNodePath) {
-    frameNodePath = ev.data.frameNodePath;
+  if (ev.data.action !== 'replayDomChanges') return;
+  if (ev.data.recipientFrameIdPath && !window.selfFrameIdPath) {
+    window.selfFrameIdPath = ev.data.recipientFrameIdPath;
   }
-  const event = ev.data.event;
-  domChangeList.push(event);
+  domChangeList.push(ev.data.event);
   if (document.readyState !== 'loading') applyDomChanges([]);
 });
 
@@ -74,14 +74,12 @@ function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
 /////// DOM REPLAYER ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function replayDomEvent(event: IFrontendDomChangeEvent) {
-  if (!frameNodePath) {
-    if (isMainFrame() ?? true) {
-      frameNodePath = 'main';
-    }
+  if (!window.selfFrameIdPath && isMainFrame()) {
+    window.selfFrameIdPath = 'main';
   }
 
   const { action, textContent, frameIdPath } = event;
-  if (frameIdPath && frameIdPath !== frameNodePath) {
+  if (frameIdPath && frameIdPath !== window.selfFrameIdPath) {
     delegateToSubframe(event);
     return;
   }
@@ -198,28 +196,29 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
 
 const pendingFrameCreationEvents = new Map<
   string,
-  { frameNodePath: string; event: IFrontendDomChangeEvent }[]
+  { recipientFrameIdPath: string; event: IFrontendDomChangeEvent; action: string }[]
 >();
+(window as any).pendingFrameCreationEvents = pendingFrameCreationEvents;
 function delegateToSubframe(event: IFrontendDomChangeEvent) {
   const childPath = event.frameIdPath
-    .replace(frameNodePath, '')
+    .replace(window.selfFrameIdPath, '')
     .split('_')
     .filter(Boolean)
     .map(Number);
 
   const childId = childPath.shift();
-  const childFrameNodePath = `${frameNodePath}_${childId}`;
+  const recipientFrameIdPath = `${window.selfFrameIdPath}_${childId}`;
 
   const node = getNode(childId);
   if (!node) {
-    if (!pendingFrameCreationEvents.has(childFrameNodePath)) {
-      pendingFrameCreationEvents.set(childFrameNodePath, []);
+    if (!pendingFrameCreationEvents.has(recipientFrameIdPath)) {
+      pendingFrameCreationEvents.set(recipientFrameIdPath, []);
     }
     // queue for pending events
     pendingFrameCreationEvents
-      .get(childFrameNodePath)
-      .push({ frameNodePath: childFrameNodePath, event });
-    debugLog('Frame: not loaded yet, queuing pending', childFrameNodePath);
+      .get(recipientFrameIdPath)
+      .push({ recipientFrameIdPath, event, action: 'replayDomChanges' });
+    debugLog('Frame: not loaded yet, queuing pending', recipientFrameIdPath);
     return;
   }
 
@@ -235,14 +234,16 @@ function delegateToSubframe(event: IFrontendDomChangeEvent) {
     debugLog('Frame: without window', frame);
     return;
   }
-  if (pendingFrameCreationEvents.has(childFrameNodePath)) {
-    for (const ev of pendingFrameCreationEvents.get(childFrameNodePath)) {
-      frame.contentWindow.postMessage(ev, '*');
-    }
-    pendingFrameCreationEvents.delete(childFrameNodePath);
+  const events = [{ recipientFrameIdPath, event, action: 'replayDomChanges' }];
+
+  if (pendingFrameCreationEvents.has(recipientFrameIdPath)) {
+    events.unshift(...pendingFrameCreationEvents.get(recipientFrameIdPath));
+    pendingFrameCreationEvents.delete(recipientFrameIdPath);
   }
 
-  frame.contentWindow.postMessage({ frameNodePath: childFrameNodePath, event }, '*');
+  for (const message of events) {
+    frame.contentWindow.postMessage(message, '*');
+  }
 }
 
 function onNewDocument(event: IFrontendDomChangeEvent) {
@@ -373,7 +374,7 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
         }
       }
       if (node instanceof HTMLIFrameElement) {
-        debugLog('Frame: frameNodePath=%s', `${frameNodePath}_${data.nodeId}`);
+        debugLog('Added Child Frame: frameIdPath=%s', `${window.selfFrameIdPath}_${data.nodeId}`);
       }
       if (data.tagName === 'NOSCRIPT') {
         const sheet = new CSSStyleSheet();
