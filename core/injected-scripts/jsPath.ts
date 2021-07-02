@@ -2,6 +2,7 @@
 import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
 import type INodePointer from 'awaited-dom/base/INodePointer';
 import IElementRect from '@secret-agent/interfaces/IElementRect';
+import IPoint from '@secret-agent/interfaces/IPoint';
 import { IJsPathError } from '@secret-agent/interfaces/IJsPathError';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
@@ -45,8 +46,8 @@ class JsPath {
     return {
       innerHeight: window.innerHeight || document.documentElement.clientHeight,
       innerWidth: window.innerWidth || document.documentElement.clientWidth,
-      pageYOffset: window.pageYOffset || document.documentElement.scrollTop,
-      pageXOffset: window.pageXOffset || document.documentElement.scrollLeft,
+      scrollY: window.scrollY || document.documentElement.scrollTop,
+      scrollX: window.scrollX || document.documentElement.scrollLeft,
     };
   }
 
@@ -83,8 +84,11 @@ class JsPath {
     }
   }
 
-  public static async exec(jsPath: IJsPath): Promise<IExecJsPathResult<any>> {
-    const objectAtPath = new ObjectAtPath(jsPath);
+  public static async exec(
+    jsPath: IJsPath,
+    containerOffset: IPoint,
+  ): Promise<IExecJsPathResult<any>> {
+    const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
     try {
       const result = <IExecJsPathResult<any>>{
         value: await objectAtPath.lookup().objectAtPath,
@@ -113,13 +117,14 @@ class JsPath {
 
   public static async execJsPaths(
     jsPaths: { jsPath: IJsPath; sourceIndex: number }[],
+    containerOffset: IPoint,
   ): Promise<{ jsPath: IJsPath; result: IExecJsPathResult<any> }[]> {
     const resultMapByPathIndex: { [index: number]: IExecJsPathResult<any>[] } = {};
     const results: { jsPath: IJsPath; result: IExecJsPathResult<any> }[] = [];
 
     async function runFn(queryIndex: number, jsPath: IJsPath): Promise<void> {
       // copy into new array so original stays clean
-      const result = await JsPath.exec([...jsPath]);
+      const result = await JsPath.exec([...jsPath], containerOffset);
       results.push({ jsPath, result });
 
       (resultMapByPathIndex[queryIndex] ??= []).push(result);
@@ -153,10 +158,11 @@ class JsPath {
 
   public static async waitForElement(
     jsPath: IJsPath,
+    containerOffset: IPoint,
     waitForVisible: boolean,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
-    const objectAtPath = new ObjectAtPath(jsPath);
+    const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
     try {
       return await new Promise<IExecJsPathResult<INodeVisibility>>(async resolve => {
         const end = new Date();
@@ -229,8 +235,8 @@ class ObjectAtPath {
     const rect = element.getBoundingClientRect();
 
     return {
-      y: rect.y,
-      x: rect.x,
+      y: rect.y + this.containerOffset.y,
+      x: rect.x + this.containerOffset.x,
       height: rect.height,
       width: rect.width,
       tag: element.tagName?.toLowerCase(),
@@ -281,10 +287,11 @@ class ObjectAtPath {
     return this.objectAtPath?.nodeType === this.objectAtPath?.TEXT_NODE;
   }
 
-  constructor(readonly jsPath: IJsPath) {
+  constructor(readonly jsPath: IJsPath, readonly containerOffset: IPoint = { x: 0, y: 0 }) {
     if (!jsPath?.length) return;
+    this.containerOffset = containerOffset;
 
-    // @ts-ignore - start listening for events since we've just looked up something on this frane
+    // @ts-ignore - start listening for events since we've just looked up something on this frame
     if ('listenForInteractionEvents' in window) window.listenForInteractionEvents();
 
     if (
@@ -332,8 +339,10 @@ class ObjectAtPath {
     const rect = this.boundingClientRect;
     visibility.boundingClientRect = rect;
     visibility.hasDimensions = !(rect.width === 0 && rect.height === 0);
-    visibility.isOnscreenVertical = rect.y + rect.height > 0 && rect.y < window.innerHeight;
-    visibility.isOnscreenHorizontal = rect.x + rect.width > 0 && rect.x < window.innerWidth;
+    visibility.isOnscreenVertical =
+      rect.y + rect.height > 0 && rect.y < window.innerHeight + this.containerOffset.y;
+    visibility.isOnscreenHorizontal =
+      rect.x + rect.width > 0 && rect.x < window.innerWidth + this.containerOffset.x;
 
     visibility.isVisible = Object.values(visibility).every(x => x !== false);
     return visibility;
@@ -352,7 +361,7 @@ class ObjectAtPath {
           if (typeof x !== 'string') return x;
           if (!x.startsWith('$$jsPath=')) return x;
           const innerPath = JSON.parse(x.split('$$jsPath=').pop());
-          const sub = new ObjectAtPath(innerPath).lookup();
+          const sub = new ObjectAtPath(innerPath, this.containerOffset).lookup();
           return sub.objectAtPath;
         });
         // handlers for getComputedStyle/Visibility/getNodeId/getBoundingRect

@@ -26,6 +26,7 @@ export interface ISessionTab {
 }
 
 export interface IMouseEvent {
+  frameIdPath: string;
   commandId: number;
   pageX: number;
   pageY: number;
@@ -44,6 +45,7 @@ export interface IFrontendMouseEvent
 }
 
 export interface IFocusRecord {
+  frameIdPath: string;
   event: 0 | 1;
   commandId: number;
   targetNodeId?: number;
@@ -52,6 +54,7 @@ export interface IFocusRecord {
 }
 
 export interface IScrollRecord {
+  frameIdPath: string;
   scrollX: number;
   scrollY: number;
   commandId: number;

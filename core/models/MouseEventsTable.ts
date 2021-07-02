@@ -6,6 +6,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'MouseEvents', [
       ['tabId', 'INTEGER'],
+      ['frameId', 'INTEGER'],
       ['event', 'INTEGER'],
       ['commandId', 'INTEGER'],
       ['pageX', 'INTEGER'],
@@ -19,7 +20,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(tabId: number, commandId: number, mouseEvent: IMouseEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, mouseEvent: IMouseEvent) {
     const [
       event,
       pageX,
@@ -33,6 +34,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ] = mouseEvent;
     const record = [
       tabId,
+      frameId,
       event,
       commandId,
       pageX,
@@ -50,6 +52,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
 
 export interface IMouseEventRecord {
   tabId: number;
+  frameId: number;
   event: MouseEventType;
   commandId: number;
   pageX: number;

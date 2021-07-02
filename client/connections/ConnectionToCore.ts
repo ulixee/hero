@@ -299,6 +299,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
         this.isDisconnecting ||
         responseError.name === SessionClosedOrMissingError.name ||
         (responseError as any).isDisconnecting === true;
+      delete (responseError as any).isDisconnecting;
 
       if (!isInternalRequest && isDisconnected) {
         responseError = new DisconnectedFromCoreError(this.resolvedHost);

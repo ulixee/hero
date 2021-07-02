@@ -11,6 +11,7 @@ export default interface ICommandWithResult {
   isError: boolean;
   result: any;
   resultType?: string;
+  frameIdPath?: string;
   resultNodeIds?: number[];
   resultNodeType?: string;
   failedJsPathStepIndex?: number;

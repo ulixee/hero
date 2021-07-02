@@ -122,23 +122,25 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
     interactionStep: IInteractionStep,
     runFn: (interactionStep: IInteractionStep) => Promise<void>,
     helper: IInteractionsHelper,
-    nodeId?: number,
+    lockedNodeId?: number,
     retries = 0,
   ): Promise<void> {
     const originalMousePosition = [...interactionStep.mousePosition];
     interactionStep.delayMillis = Math.floor(Math.random() * 100);
 
-    const targetRect = await helper.lookupBoundingRect(
-      nodeId ? [nodeId] : interactionStep.mousePosition,
+    let targetRect = await helper.lookupBoundingRect(
+      lockedNodeId ? [lockedNodeId] : interactionStep.mousePosition,
       true,
       true,
     );
 
+    const { nodeId } = targetRect;
+
     const targetPoint = getRandomRectPoint(targetRect, DefaultHumanEmulator.boxPaddingPercent);
     const didMoveMouse = await this.moveMouseToPoint(targetPoint, targetRect.width, runFn, helper);
-    const finalRect = didMoveMouse
-      ? await helper.lookupBoundingRect([targetRect.nodeId], true, true)
-      : targetRect;
+    if (didMoveMouse) {
+      targetRect = await helper.lookupBoundingRect([nodeId], true, true);
+    }
 
     if (targetRect.elementTag === 'option') {
       // if this is an option element, we have to do a specialized click, so let the Interactor handle
@@ -147,14 +149,14 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
 
     const viewport = helper.viewport;
     const isRectInViewport =
-      isVisible(finalRect.y, finalRect.height, viewport.height) &&
-      isVisible(finalRect.x, finalRect.width, viewport.width);
+      isVisible(targetRect.y, targetRect.height, viewport.height) &&
+      isVisible(targetRect.x, targetRect.width, viewport.width);
 
     // make sure target is still visible
     if (
-      !finalRect.nodeVisibility.isVisible ||
+      !targetRect.nodeVisibility.isVisible ||
       !isRectInViewport ||
-      !isWithinRect(targetPoint, finalRect)
+      !isWithinRect(targetPoint, targetRect)
     ) {
       // need to try again
       if (retries < 2) {
@@ -165,34 +167,29 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
           } to a new point.`,
           {
             interactionStep,
-            nodeId: targetRect.nodeId,
-            nodeVisibility: finalRect.nodeVisibility,
+            nodeId,
+            nodeVisibility: targetRect.nodeVisibility,
             retries,
           },
         );
         if (isScroll) {
           const scrollToStep = { ...interactionStep };
-          if (targetRect.nodeId) scrollToStep.mousePosition = [targetRect.nodeId];
+          if (nodeId) scrollToStep.mousePosition = [nodeId];
           await this.scroll(scrollToStep, runFn, helper);
         }
-        return this.moveMouseAndClick(
-          interactionStep,
-          runFn,
-          helper,
-          targetRect.nodeId,
-          retries + 1,
-        );
+        return this.moveMouseAndClick(interactionStep, runFn, helper, nodeId, retries + 1);
       }
 
       helper.logger.error(
-        'Interaction.click - moving over target before click did not hover over expected "Interaction.mousePosition" element.',
+        'Interaction.click - mousePosition not in viewport after mouse moves to prepare for click.',
         {
           'Interaction.mousePosition': originalMousePosition,
           target: {
-            nodeId: finalRect.nodeId,
-            nodeVisibility: finalRect.nodeVisibility,
+            nodeId,
+            nodeVisibility: targetRect.nodeVisibility,
             domCoordinates: { x: targetPoint.x, y: targetPoint.y },
           },
+          viewport,
         },
       );
 
@@ -202,8 +199,8 @@ export default class DefaultHumanEmulator extends HumanEmulatorBase {
     }
 
     let clickConfirm: () => Promise<any>;
-    if (targetRect.nodeId) {
-      const listener = await helper.createMouseupTrigger(targetRect.nodeId);
+    if (nodeId) {
+      const listener = await helper.createMouseupTrigger(nodeId);
       clickConfirm = listener.didTrigger.bind(listener, originalMousePosition, true);
     }
 

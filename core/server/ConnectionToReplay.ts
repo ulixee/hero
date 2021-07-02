@@ -155,6 +155,7 @@ export default class ConnectionToReplay {
     db.commands.subscribe(commands => {
       const commandsWithResults = commands.map(CommandFormatter.parseResult);
       for (const command of commandsWithResults) {
+        command.frameIdPath = db.frames.frameDomNodePathsById.get(command.frameId);
         this.addTabId(command.tabId, command.startDate);
       }
       this.send('commands', commandsWithResults);
@@ -163,15 +164,26 @@ export default class ConnectionToReplay {
 
     const mouseFilter = [MouseEventType.MOVE, MouseEventType.DOWN, MouseEventType.UP];
     db.mouseEvents.subscribe(mouseEvents => {
-      const toPublish = mouseEvents.filter(x => mouseFilter.includes(x.event));
+      const toPublish = mouseEvents
+        .filter(x => mouseFilter.includes(x.event))
+        .map(x => {
+          (x as any).frameIdPath = db.frames.frameDomNodePathsById.get(x.frameId);
+          return x;
+        });
       if (toPublish.length) this.send('mouse-events', toPublish);
     });
 
     db.scrollEvents.subscribe(scroll => {
+      for (const evt of scroll) {
+        (evt as any).frameIdPath = db.frames.frameDomNodePathsById.get(evt.frameId);
+      }
       this.send('scroll-events', scroll);
     });
 
     db.focusEvents.subscribe(events => {
+      for (const evt of events) {
+        (evt as any).frameIdPath = db.frames.frameDomNodePathsById.get(evt.frameId);
+      }
       this.send('focus-events', events);
     });
 

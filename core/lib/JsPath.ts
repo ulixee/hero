@@ -7,6 +7,7 @@ import Log from '@secret-agent/commons/Logger';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import IPoint from '@secret-agent/interfaces/IPoint';
 import FrameEnvironment from './FrameEnvironment';
 import InjectedScripts from './InjectedScripts';
 import { Serializable } from '../interfaces/ISerializable';
@@ -36,16 +37,23 @@ export class JsPath {
     });
   }
 
-  public exec<T>(jsPath: IJsPath): Promise<IExecJsPathResult<T>> {
-    return this.runJsPath<T>(`exec`, jsPath);
+  public exec<T>(jsPath: IJsPath, containerOffset: IPoint): Promise<IExecJsPathResult<T>> {
+    return this.runJsPath<T>(`exec`, jsPath, containerOffset);
   }
 
   public waitForElement(
     jsPath: IJsPath,
+    containerOffset: IPoint,
     waitForVisible: boolean,
     timeoutMillis: number,
   ): Promise<IExecJsPathResult<INodeVisibility>> {
-    return this.runJsPath<INodeVisibility>(`waitForElement`, jsPath, waitForVisible, timeoutMillis);
+    return this.runJsPath<INodeVisibility>(
+      `waitForElement`,
+      jsPath,
+      containerOffset,
+      waitForVisible,
+      timeoutMillis,
+    );
   }
 
   public simulateOptionClick(jsPath: IJsPath): Promise<IExecJsPathResult<boolean>> {
@@ -68,12 +76,16 @@ export class JsPath {
     );
   }
 
-  public async runJsPaths(jsPaths: IJsPathHistory[]): Promise<IJsPathResult[]> {
+  public async runJsPaths(
+    jsPaths: IJsPathHistory[],
+    containerOffset: IPoint,
+  ): Promise<IJsPathResult[]> {
     if (!jsPaths?.length) return [];
 
     const results = await this.frameEnvironment.runIsolatedFn<IJsPathResult[]>(
       `${InjectedScripts.JsPath}.execJsPaths`,
       jsPaths as any,
+      containerOffset,
     );
 
     for (const { result, jsPath } of results) {

@@ -48,11 +48,15 @@ import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
-import FrameEnvironment, { getCoreFrameEnvironment } from './FrameEnvironment';
+import FrameEnvironment, {
+  getCoreFrameEnvironment,
+  getCoreFrameEnvironmentForPosition,
+} from './FrameEnvironment';
 import getClientExtenderPluginClass from './getClientExtenderPluginClass';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import Output, { createObservableOutput } from './Output';
+import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -273,7 +277,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
   // INTERACT METHODS
 
   public async click(mousePosition: IMousePosition): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
+    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     await Interactor.run(coreFrame, [{ click: mousePosition }]);
   }
 
@@ -284,12 +289,15 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
   }
 
   public async interact(...interactions: IInteractions): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    if (!interactions.length) return;
+    let coreFrame = await getCoreFrameForInteractions(interactions);
+    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     await Interactor.run(coreFrame, interactions);
   }
 
   public async scrollTo(mousePosition: IMousePosition): Promise<void> {
-    const coreFrame = await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
+    let coreFrame = await getCoreFrameEnvironmentForPosition(mousePosition);
+    coreFrame ??= await getCoreFrameEnvironment(this.activeTab.mainFrameEnvironment);
     await Interactor.run(coreFrame, [{ [Command.scroll]: mousePosition }]);
   }
 
@@ -415,6 +423,18 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
+  }
+}
+
+async function getCoreFrameForInteractions(
+  interactions: IInteractions,
+): Promise<CoreFrameEnvironment> {
+  for (const interaction of interactions) {
+    if (typeof interaction !== 'object') continue;
+    for (const element of Object.values(interaction)) {
+      const coreFrame = await getCoreFrameEnvironmentForPosition(element);
+      if (coreFrame) return coreFrame;
+    }
   }
 }
 

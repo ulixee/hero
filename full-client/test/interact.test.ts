@@ -212,4 +212,45 @@ describe('basic Interact tests', () => {
 
     expect(await agent.activeTab.getJsValue('lastClicked')).toBe('clickedit');
   });
+
+  it('should be able to click an element in an iframe', async () => {
+    koaServer.get('/interact-frame', ctx => {
+      ctx.body = `
+        <body>
+        <h1>Iframe Page</h1>
+        <br/><br/>
+        <iframe src="/innerFrame" id="frame1" style="height:300px"></iframe>
+        </body>
+      `;
+    });
+    koaServer.get('/innerFrame', ctx => {
+      ctx.body = `<body>
+   <div style="margin-top: 200px">
+     <a href="#none" onclick="clickit()">Empty clicker</a>
+   </div>
+  <script>
+    let lastClicked = '';
+    function clickit() {
+      lastClicked = 'clickedit';
+    }
+  </script>
+
+</body>`;
+    });
+
+    const agent = await handler.createAgent();
+    Helpers.needsClosing.push(agent);
+    await agent.goto(`${koaServer.baseUrl}/interact-frame`);
+    await agent.waitForPaintingStable();
+
+    const frameElement = agent.document.querySelector('#frame1');
+    await agent.waitForElement(frameElement);
+    const frameEnv = await agent.activeTab.getFrameEnvironment(frameElement);
+    await frameEnv.waitForLoad(LocationStatus.AllContentLoaded);
+
+    await agent.click(frameEnv.document.querySelector('a'));
+    expect(await frameEnv.getJsValue('lastClicked')).toBe('clickedit');
+
+    await agent.close();
+  });
 });

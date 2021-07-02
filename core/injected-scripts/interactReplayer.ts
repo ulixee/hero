@@ -3,9 +3,19 @@
 import type { IScrollRecord } from '@secret-agent/core/models/ScrollEventsTable';
 import type { IMouseEventRecord } from '@secret-agent/core/models/MouseEventsTable';
 
+declare global {
+  interface Window {
+    selfFrameIdPath: string;
+  }
+}
+
 interface IFrontendMouseEvent extends Omit<IMouseEventRecord, 'commandId' | 'timestamp' | 'event'> {
+  frameIdPath: string;
   viewportWidth: number;
   viewportHeight: number;
+}
+interface IFrontendScrollRecord extends IScrollRecord {
+  frameIdPath: string;
 }
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
@@ -14,14 +24,72 @@ let replayShadow: ShadowRoot;
 let lastHighlightNodes: number[] = [];
 
 window.replayInteractions = function replayInteractions(resultNodeIds, mouseEvent, scrollEvent) {
-  createReplayItems();
-  if (resultNodeIds !== undefined) highlightNodes(resultNodeIds);
-  if (mouseEvent) updateMouse(mouseEvent);
-  if (scrollEvent) updateScroll(scrollEvent);
-  if (mouseEvent || scrollEvent || resultNodeIds) {
-    document.body.appendChild(replayNode);
-  }
+  highlightNodes(resultNodeIds);
+  updateMouse(mouseEvent);
+  updateScroll(scrollEvent);
 };
+
+const events = {
+  scroll: updateScroll,
+  mouse: updateMouse,
+  highlight: highlightNodes,
+  'clear-mouse': clearMouse,
+  'clear-highlights': clearHighlights,
+};
+
+window.addEventListener('message', ev => {
+  if (!ev.data.action) return;
+  const { action, event } = ev.data;
+  const handler = events[action];
+  if (handler) {
+    handler(event);
+    if (action.startsWith('clear-')) {
+      for (const other of document.querySelectorAll('iframe,frame')) {
+        postToFrame(other, { action });
+      }
+    }
+  }
+});
+
+function postToFrame(node: Node, data: any) {
+  const contentWindow = (node as HTMLIFrameElement).contentWindow;
+  if (contentWindow) contentWindow.postMessage(data, '*');
+}
+
+function debugLog(message: string, ...args: any[]) {
+  if (window.debugToConsole) {
+    // eslint-disable-next-line prefer-rest-params,no-console
+    console.log(...arguments);
+  }
+  window.debugLogs.push({ message, args });
+}
+
+function delegateInteractToSubframe(event: { frameIdPath: string }, action: string) {
+  if (!event?.frameIdPath) {
+    debugLog('Delegate requested on event without frameIdPath', event, action);
+    return;
+  }
+  const childPath = event.frameIdPath
+    .replace(window.selfFrameIdPath, '')
+    .split('_')
+    .filter(Boolean)
+    .map(Number);
+
+  const childId = childPath.shift();
+
+  const frame = window.getNodeById(childId) as HTMLIFrameElement;
+
+  const allFrames = document.querySelectorAll('iframe,frame');
+  for (const other of allFrames) {
+    if (other !== frame) postToFrame(other, { action: `clear-${action}` });
+  }
+
+  if (!frame?.contentWindow) {
+    debugLog('Interaction frame?.contentWindow not found', frame);
+    return;
+  }
+  frame.contentWindow.postMessage({ event, action }, '*');
+}
 
 const highlightElements: HTMLElement[] = [];
 
@@ -42,7 +110,22 @@ function checkOverflows() {
   }
 }
 
-function highlightNodes(nodeIds: number[]) {
+function clearHighlights() {
+  lastHighlightNodes = [];
+  highlightElements.forEach(x => x.remove());
+}
+
+function highlightNodes(nodes: { frameIdPath: string; nodeIds: number[] }) {
+  if (nodes === undefined) return;
+  if (nodes && nodes?.frameIdPath !== window.selfFrameIdPath) {
+    clearHighlights();
+    // delegate to subframe
+    delegateInteractToSubframe(nodes, 'highlight');
+    return;
+  }
+
+  createReplayItems();
+  const nodeIds = nodes?.nodeIds;
   lastHighlightNodes = nodeIds;
   const length = nodeIds ? nodeIds.length : 0;
   try {
@@ -56,7 +139,7 @@ function highlightNodes(nodeIds: number[]) {
         highlightElements.push(hoverNode);
       }
       if (!node) {
-        highlightElements[i].remove();
+        hoverNode.remove();
         continue;
       }
       const element = node.nodeType === node.TEXT_NODE ? node.parentElement : (node as Element);
@@ -93,7 +176,21 @@ const elementDisplayCache = new Map<HTMLElement, string>();
 const offsetsAtPageY = new Map<number, { pageOffset: number; elementOffset: number }>();
 const offsetBlock = 100;
 
+function clearMouse() {
+  lastMouseEvent = null;
+  if (mouse) mouse.style.display = 'none';
+}
+
 function updateMouse(mouseEvent: IFrontendMouseEvent) {
+  if (!mouseEvent) return;
+  if (mouseEvent.frameIdPath !== window.selfFrameIdPath) {
+    clearMouse();
+    delegateInteractToSubframe(mouseEvent, 'mouse');
+    return;
+  }
+
+  createReplayItems();
+
   lastMouseEvent = mouseEvent;
   if (mouseEvent.pageX !== undefined) {
     const targetNode = window.getNodeById(mouseEvent.targetNodeId) as HTMLElement;
@@ -166,7 +263,11 @@ function getOffsetElement(element: HTMLElement) {
   return element;
 }
 
-function updateScroll(scrollEvent: IScrollRecord) {
+function updateScroll(scrollEvent: IFrontendScrollRecord) {
+  if (!scrollEvent) return;
+  if (scrollEvent.frameIdPath !== window.selfFrameIdPath) {
+    return delegateInteractToSubframe(scrollEvent, 'scroll');
+  }
   window.scroll({
     behavior: 'auto',
     top: scrollEvent.scrollY,
@@ -178,6 +279,9 @@ function updateScroll(scrollEvent: IScrollRecord) {
 
 let isInitialized = false;
 function createReplayItems() {
+  if (replayNode && !replayNode.isConnected) {
+    document.body.appendChild(replayNode);
+  }
   if (isInitialized) return;
   isInitialized = true;
 
@@ -276,7 +380,9 @@ function createReplayItems() {
   document.addEventListener('submit', cancelEvent, true);
   document.addEventListener('scroll', () => checkOverflows());
   window.addEventListener('resize', () => {
-    if (lastHighlightNodes) highlightNodes(lastHighlightNodes);
+    if (lastHighlightNodes)
+      highlightNodes({ frameIdPath: window.selfFrameIdPath, nodeIds: lastHighlightNodes });
     if (lastMouseEvent) updateMouse(lastMouseEvent);
   });
+  document.body.appendChild(replayNode);
 }

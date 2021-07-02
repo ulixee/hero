@@ -323,11 +323,6 @@ export default class ReplayApi {
       stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
       shell: true,
       windowsHide: true,
-      env: {
-        NODE_ENV: process.env.NODE_ENV,
-        SA_REPLAY_DEBUG: process.env.SA_REPLAY_DEBUG,
-        DEBUG: process.env.DEBUG,
-      },
     });
 
     child.on('error', console.error);

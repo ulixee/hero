@@ -556,17 +556,17 @@ export default class SessionState {
 
     for (const mouseEvent of mouseEvents) {
       lastCommand = this.getCommandForTimestamp(lastCommand, mouseEvent[8]);
-      this.db.mouseEvents.insert(tabId, lastCommand.id, mouseEvent);
+      this.db.mouseEvents.insert(tabId, frameId, lastCommand.id, mouseEvent);
     }
 
     for (const focusEvent of focusEvents) {
       lastCommand = this.getCommandForTimestamp(lastCommand, focusEvent[3]);
-      this.db.focusEvents.insert(tabId, lastCommand.id, focusEvent);
+      this.db.focusEvents.insert(tabId, frameId, lastCommand.id, focusEvent);
     }
 
     for (const scrollEvent of scrollEvents) {
       lastCommand = this.getCommandForTimestamp(lastCommand, scrollEvent[2]);
-      this.db.scrollEvents.insert(tabId, lastCommand.id, scrollEvent);
+      this.db.scrollEvents.insert(tabId, frameId, lastCommand.id, scrollEvent);
     }
   }
 
