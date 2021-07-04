@@ -4,7 +4,7 @@ import { Helpers } from '@secret-agent/testing';
 import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
 import { Command } from '@secret-agent/client/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
+import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
 import { Handler, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -13,7 +13,7 @@ beforeAll(async () => {
   const coreServer = new CoreServer();
   await coreServer.listen({ port: 0 });
   Core.use(
-    class BasicHumanEmulator extends HumanEmulatorBase {
+    class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );

@@ -2,9 +2,11 @@ import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOption
 import { LocationTrigger } from '@secret-agent/interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
 import Resolvable from '@secret-agent/commons/Resolvable';
-import { IHumanEmulatorClass } from '@secret-agent/interfaces/IPluginHumanEmulator';
-import { IBrowserEmulatorClass } from '@secret-agent/interfaces/IPluginBrowserEmulator';
-import { ICoreExtenderClass } from '@secret-agent/interfaces/IPluginCoreExtender';
+import {
+  IHumanEmulatorClass,
+  IBrowserEmulatorClass,
+  ICorePluginClass,
+} from '@secret-agent/interfaces/ICorePlugin';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
 import DefaultHumanEmulator from '@secret-agent/default-human-emulator';
@@ -24,9 +26,9 @@ export default class Core {
   public static server = new CoreServer();
   public static readonly connections: ConnectionToClient[] = [];
   public static pluginMap: {
-    humanEmulatorsById: { [id: string]: IHumanEmulatorClass }
-    browserEmulatorsById: { [id: string]: IBrowserEmulatorClass }
-    coreExtenders: ICoreExtenderClass[];
+    humanEmulatorsById: { [id: string]: IHumanEmulatorClass };
+    browserEmulatorsById: { [id: string]: IBrowserEmulatorClass };
+    corePlugins: ICorePluginClass[];
   } = {
     humanEmulatorsById: {
       [DefaultHumanEmulator.id]: DefaultHumanEmulator,
@@ -34,7 +36,7 @@ export default class Core {
     browserEmulatorsById: {
       [DefaultBrowserEmulator.id]: DefaultBrowserEmulator,
     },
-    coreExtenders: [],
+    corePlugins: [],
   };
 
   public static onShutdown: () => void;
@@ -55,13 +57,13 @@ export default class Core {
     return connection;
   }
 
-  public static use(Plugin: IHumanEmulatorClass | IBrowserEmulatorClass | ICoreExtenderClass) {
-    if (Plugin.pluginType === PluginTypes.HumanEmulator) {
-      this.pluginMap.humanEmulatorsById[Plugin.id] = Plugin;
-    } else if (Plugin.pluginType === PluginTypes.BrowserEmulator) {
-      this.pluginMap.browserEmulatorsById[Plugin.id] = Plugin;
-    } else if (Plugin.pluginType === PluginTypes.CoreExtender) {
-      this.pluginMap.coreExtenders.push(Plugin);
+  public static use(CorePlugin: ICorePluginClass) {
+    if (CorePlugin.type === PluginTypes.HumanEmulator) {
+      this.pluginMap.humanEmulatorsById[CorePlugin.id] = CorePlugin as IHumanEmulatorClass;
+    } else if (CorePlugin.type === PluginTypes.BrowserEmulator) {
+      this.pluginMap.browserEmulatorsById[CorePlugin.id] = CorePlugin as IBrowserEmulatorClass;
+    } else if (CorePlugin.type === PluginTypes.CorePlugin) {
+      this.pluginMap.corePlugins.push(CorePlugin);
     } else {
       throw new Error('Unknown plugin type');
     }

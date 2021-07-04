@@ -1,10 +1,10 @@
 import { LookupAddress, promises as nodeDns } from 'dns';
 import { Helpers } from '@secret-agent/testing';
 import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
-import CoreExtenderBase from '@secret-agent/plugin-utils/lib/CoreExtenderBase';
+import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
 import Core from '@secret-agent/core';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
@@ -31,7 +31,7 @@ let dns: Dns;
 let requestSession: RequestSession;
 beforeAll(() => {
   Core.use(
-    class CustomPlugin extends CoreExtenderBase {
+    class CustomPlugin extends CorePlugin {
       static id = 'test';
 
       onTlsConfiguration(settings) {
@@ -44,7 +44,7 @@ beforeAll(() => {
     },
   );
   const selectBrowserMeta = BrowserEmulator.selectBrowserMeta();
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
 
   requestSession = new RequestSession('dns.test', plugins, null);
   Helpers.onClose(() => requestSession.close(), true);

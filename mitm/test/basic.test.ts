@@ -9,7 +9,7 @@ import * as Url from 'url';
 import { createPromise } from '@secret-agent/commons/utils';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
@@ -392,7 +392,7 @@ describe('basic MitM tests', () => {
 });
 
 function createSession(mitmProxy: MitmServer, upstreamProxyUrl: string = null) {
-  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
   const session = new RequestSession(`${(sessionCounter += 1)}`, plugins, upstreamProxyUrl);
   mitmProxy.registerSession(session, false);
   Helpers.needsClosing.push(session);

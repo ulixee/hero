@@ -4,16 +4,18 @@ import { LocationStatus } from '@secret-agent/interfaces/Location';
 import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { ITestKoaServer } from '@secret-agent/testing/helpers';
 import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
-import HumanEmulatorBase from "@secret-agent/plugin-utils/lib/HumanEmulatorBase";
+import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
 import ConnectionToClient from '../server/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  Core.use(class BasicHumanEmulator extends HumanEmulatorBase {
-    static id = 'basic';
-  });
+  Core.use(
+    class BasicHumanEmulator extends HumanEmulator {
+      static id = 'basic';
+    },
+  );
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
   koaServer = await Helpers.runKoaServer();

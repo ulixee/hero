@@ -23,7 +23,7 @@ import IPoint from '@secret-agent/interfaces/IPoint';
 import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
 import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/interfaces/IPuppetInput';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import IViewport from '@secret-agent/interfaces/IViewport';
 import IElementRect from '@secret-agent/interfaces/IElementRect';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
@@ -83,7 +83,7 @@ export default class Interactor implements IInteractionsHelper {
     return this.tab.puppetPage.keyboard;
   }
 
-  private get plugins(): IPlugins {
+  private get plugins(): ICorePlugins {
     return this.tab.session.plugins;
   }
 

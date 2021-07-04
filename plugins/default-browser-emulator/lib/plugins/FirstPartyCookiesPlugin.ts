@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import CoreExtenderBase from '@secret-agent/plugin-utils/lib/CoreExtenderBase';
+import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
 import {
   canonicalDomain,
   Cookie,
@@ -15,7 +15,7 @@ import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
 import { createPromise } from '@secret-agent/commons/utils';
 import DomOverridesBuilder from '../DomOverridesBuilder';
 
-export default class FirstPartyCookiesPlugin extends CoreExtenderBase {
+export default class FirstPartyCookiesPlugin extends CorePlugin {
   private cookieJar = new CookieJar(null, { rejectPublicSuffixes: false });
   // track sites per safari ITP that are considered to have "first party user interaction"
   private sitesWithUserInteraction: string[] = [];

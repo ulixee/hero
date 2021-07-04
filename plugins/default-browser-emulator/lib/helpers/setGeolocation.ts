@@ -1,9 +1,9 @@
-import { IBrowserEmulator } from '@secret-agent/interfaces/IPluginBrowserEmulator';
 import { assert } from '@secret-agent/commons/utils';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import BrowserEmulator from '../../index';
 
 export default function setActiveAndFocused(
-  emulator: IBrowserEmulator,
+  emulator: BrowserEmulator,
   page: IPuppetPage,
 ): Promise<any> {
   const location = emulator.geolocation;

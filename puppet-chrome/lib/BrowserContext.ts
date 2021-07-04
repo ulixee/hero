@@ -16,7 +16,7 @@ import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventL
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import Resolvable from '@secret-agent/commons/Resolvable';
@@ -39,7 +39,7 @@ export class BrowserContext
 
   public workersById = new Map<string, IPuppetWorker>();
   public pagesById = new Map<string, Page>();
-  public plugins: IPlugins;
+  public plugins: ICorePlugins;
   public proxy: IProxyConnectionOptions;
   public readonly id: string;
 
@@ -57,7 +57,7 @@ export class BrowserContext
 
   constructor(
     browser: Browser,
-    plugins: IPlugins,
+    plugins: ICorePlugins,
     contextId: string,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,

@@ -1,4 +1,4 @@
-import BrowserEmulatorBase from '@secret-agent/plugin-utils/lib/BrowserEmulatorBase';
+import BrowserEmulator from '@secret-agent/plugin-utils/lib/BrowserEmulator';
 import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
 import IDnsSettings from '@secret-agent/interfaces/IDnsSettings';
 import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
@@ -7,10 +7,10 @@ import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulatorConfig,
-} from '@secret-agent/interfaces/IPluginBrowserEmulator';
+} from '@secret-agent/interfaces/ICorePlugin';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IViewport from '@secret-agent/interfaces/IViewport';
-import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
+import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
 import IGeolocation from '@secret-agent/interfaces/IGeolocation';
@@ -40,7 +40,7 @@ export const latestBrowserEngineId = 'chrome-88-0';
 export const latestChromeBrowserVersion = { major: '88', minor: '0' };
 
 @BrowserEmulatorClassDecorator
-export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
+export default class DefaultBrowserEmulator extends BrowserEmulator {
   public static id = dataLoader.pkg.name.replace('@secret-agent/', '');
 
   public timezoneId: string;
@@ -50,9 +50,9 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
 
   protected readonly data: IBrowserData;
 
-  constructor(createOptions: IPluginCreateOptions, userAgentOption: IUserAgentOption) {
-    super(createOptions, userAgentOption);
-    this.data = dataLoader.as(userAgentOption) as any;
+  constructor(createOptions: ICorePluginCreateOptions) {
+    super(createOptions);
+    this.data = dataLoader.as(createOptions.userAgentOption) as any;
 
     this.data.deviceMemory = Math.ceil(Math.random() * 4) * 2;
     this.data.videoDevice = {
@@ -67,7 +67,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulatorBase {
     };
 
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
-      createOptions.plugins.use(FirstPartyCookiesPlugin);
+      createOptions.corePlugins.use(FirstPartyCookiesPlugin);
     }
   }
 

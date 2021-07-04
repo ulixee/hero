@@ -1,10 +1,10 @@
-import { BrowserEmulatorBase } from '@secret-agent/plugin-utils';
+import { BrowserEmulator } from '@secret-agent/plugin-utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
 
 export default function loadDomOverrides(
-  emulator: BrowserEmulatorBase,
+  emulator: BrowserEmulator,
   data: IBrowserData,
 ): DomOverridesBuilder {
   const domOverrides = new DomOverridesBuilder();

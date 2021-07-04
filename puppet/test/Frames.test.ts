@@ -3,7 +3,7 @@ import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import Core from '@secret-agent/core';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { TestServer } from './server';
 import Puppet from '../index';
@@ -22,7 +22,7 @@ describe('Frames', () => {
   beforeAll(async () => {
     Core.use(CustomBrowserEmulator);
     const { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
-    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+    const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
     server = await TestServer.create(0);
     puppet = new Puppet(browserEngine);
     await puppet.start();

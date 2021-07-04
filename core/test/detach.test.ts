@@ -8,7 +8,7 @@ import {
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { inspect } from 'util';
 import { LocationStatus } from '@secret-agent/interfaces/Location';
-import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
+import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
 import ConnectionToClient from '../server/ConnectionToClient';
 import CoreServer from '../server';
 
@@ -20,7 +20,7 @@ beforeAll(async () => {
   const coreServer = new CoreServer();
   await coreServer.listen({ port: 0 });
   Core.use(
-    class BasicHumanEmulator extends HumanEmulatorBase {
+    class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );

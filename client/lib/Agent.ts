@@ -27,7 +27,7 @@ import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDecla
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { IClientExtender } from '@secret-agent/interfaces/IPluginClientExtender';
+import { IClientPlugin } from '@secret-agent/interfaces/IClientPlugin';
 import IAgent from '@secret-agent/interfaces/IAgent';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
@@ -52,7 +52,7 @@ import FrameEnvironment, {
   getCoreFrameEnvironment,
   getCoreFrameEnvironmentForPosition,
 } from './FrameEnvironment';
-import getClientExtenderPluginClass from './getClientExtenderPluginClass';
+import getClientPluginClass from './getClientPluginClass';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import Output, { createObservableOutput } from './Output';
@@ -70,7 +70,7 @@ export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
   options: ISessionCreateOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
-  plugins: IClientExtender[];
+  clientPlugins: IClientPlugin[];
 }
 
 const propertyKeys: (keyof Agent)[] = [
@@ -122,7 +122,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
         scriptInstanceMeta: scriptInstance.meta,
         dependencyMap: {},
       },
-      plugins: [],
+      clientPlugins: [],
     });
   }
 
@@ -317,11 +317,11 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
   // PLUGINS
 
   public use(PluginObject): Agent {
-    const ClientExtender = getClientExtenderPluginClass(PluginObject);
-    const { plugins, options } = getState(this);
-    const plugin = new ClientExtender();
-    plugins.push(plugin);
-    options.dependencyMap[ClientExtender.id] = ClientExtender.coreDependencyIds || [];
+    const ClientPlugin = getClientPluginClass(PluginObject);
+    const { clientPlugins, options } = getState(this);
+    const clientPlugin = new ClientPlugin();
+    clientPlugins.push(clientPlugin);
+    options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     return this;
   }
 
@@ -507,7 +507,7 @@ class SessionConnection {
     }
     this.hasConnected = true;
 
-    const { plugins } = getState(this.agent);
+    const { clientPlugins } = getState(this.agent);
     const { showReplay, connectionToCore, ...options } = getState(this.agent)
       .options as IAgentCreateOptions;
 
@@ -536,16 +536,16 @@ class SessionConnection {
     this._activeTab = createTab(this.agent, coreTab);
     this._tabs = [this._activeTab];
 
-    for (const plugin of plugins) {
-      await plugin.onAgent(this.agent, this.sendToActiveTab.bind(this));
+    for (const clientPlugin of clientPlugins) {
+      await clientPlugin.onAgent(this.agent, this.sendToActiveTab.bind(this));
     }
 
     return await coreSession;
   }
 
-  private async sendToActiveTab(sendToPluginId: string, ...args: any[]): Promise<any> {
+  private async sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
     const coreSession = (await this._coreSession) as CoreSession;
     const coreTab = coreSession.tabsById.get(await this._activeTab.tabId);
-    return coreTab.commandQueue.run('Tab.runPluginCommand', sendToPluginId, args);
+    return coreTab.commandQueue.run('Tab.runPluginCommand', toPluginId, args);
   }
 }

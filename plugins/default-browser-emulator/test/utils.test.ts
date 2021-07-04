@@ -3,7 +3,7 @@ import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
 import Log from '@secret-agent/commons/Logger';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
@@ -64,7 +64,7 @@ test('should be able to override a function', async () => {
 
 test('should override a function and clean error stacks', async () => {
   const httpServer = await Helpers.runHttpServer();
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
   const context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
@@ -103,7 +103,7 @@ test('should override Errors properly on https pages', async () => {
   const httpServer = await Helpers.runHttpsServer((req, res) => {
     res.end(`<html lang="en"><body><h1>Hi</h1></body></html>`);
   });
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
   const context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close());
   const page = await context.newPage();

@@ -5,7 +5,7 @@ import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import { Connection } from './Connection';
 import { BrowserContext } from './BrowserContext';
@@ -39,7 +39,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   }
 
   public async newContext(
-    plugins: IPlugins,
+    plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ): Promise<BrowserContext> {

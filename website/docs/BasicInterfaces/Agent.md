@@ -74,7 +74,7 @@ const { Agent } = require('secret-agent');
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
   - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (~) allows for dynamic options.
-  - browserEmulatorId `string`. Emulates the unique properties that help SecretAgent look like a normal browser.
+  - browserEmulatorId `string`. Emulates the properties that help SecretAgent look like a normal browser.
   - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
   - geolocation `IGeolocation`. Overrides the geolocation of the user. Will automatically grant permissions to all origins for geolocation.
     - latitude `number`. Latitude between -90 and 90.
@@ -323,6 +323,18 @@ Returns a json representation of the underlying browser state for saving. This c
 
 #### **Returns**: [`Promise<IUserProfile>`](/docs/advanced/user-profile)
 
+### agent.focusTab*(tab)* {#focus-tab}
+
+Bring a tab to the forefront. This will route all interaction (`click`, `type`, etc) methods to the tab provided as an argument.
+
+#### **Arguments**:
+
+- tab `Tab` The Tab which will become the `activeTab`.
+
+#### **Returns**: `Promise<void>`
+
+Alias for [Tab.focus()](/docs/basic-interfaces/tab#focus)
+
 ### agent.interact*(interaction\[, interaction, ...])* {#interact}
 
 Executes a series of mouse and keyboard interactions.
@@ -357,17 +369,49 @@ Executes a keyboard interactions. This is a shortcut for `agent.interact({ type:
 
 Refer to the [Interactions page](/docs/basic-interfaces/interactions) for details on how to construct keyboard interactions.
 
-### agent.focusTab*(tab)* {#focus-tab}
+### agent.use*(plugin)*
 
-Bring a tab to the forefront. This will route all interaction (`click`, `type`, etc) methods to the tab provided as an argument.
+Add a plugin to the current instance. This must be called before any other agent methods. 
 
 #### **Arguments**:
 
-- tab `Tab` The Tab which will become the `activeTab`.
+- plugin `ClientPlugin` | `array` | `object` | `string` 
 
-#### **Returns**: `Promise<void>`
+#### **Returns**: `this` The same Agent instance (for optional chaining)
 
-Alias for [Tab.focus()](/docs/basic-interfaces/tab#focus)
+If an array is passed, then any client plugins found in the array are registered. If an object, than any client plugins found in the object's values are registered. If a string, it must be a valid npm package name available in the current environment or it must be an absolute path to a file that exports one or more plugins -- Agent will attempt to dynamically require it.
+
+Also, if a string is passed -- regardless of whether it's an npm package or absolute path -- the same will also be registered in Core (however, the same is not true for arrays or objects). For example, you can easily register a Core plugin directly from Client:
+
+```javascript
+import agent from '@secret-agent';
+
+agent.use('@secret-agent/tattle-plugin');
+```
+
+The following three examples all work:
+
+Use an already-imported plugin:
+```javascript
+import agent from '@secret-agent';
+import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
+
+agent.use(ExecuteJsPlugin);
+```
+
+Use an NPM package name (if it's publicly available):
+```javascript
+import agent from '@secret-agent';
+
+agent.use('@secret-agent/execute-js-plugin');
+```
+
+Use an absolute path to file that exports one or more plugins:
+```javascript
+import agent from '@secret-agent';
+
+agent.use(require.resolve('./CustomPlugins'));
+```
 
 ### agent.waitForNewTab*()* {#wait-for-new-tab}
 

@@ -2,7 +2,7 @@ import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulator,
   IBrowserEmulatorConfig,
-} from '@secret-agent/interfaces/IPluginBrowserEmulator';
+} from '@secret-agent/interfaces/ICorePlugin';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
@@ -39,7 +39,7 @@ const userAgentOption: IUserAgentOption = {
 @BrowserEmulatorClassDecorator
 export default class CustomBrowserEmulator implements IBrowserEmulator {
   static id = id;
-  static pluginType: PluginTypes.BrowserEmulator = PluginTypes.BrowserEmulator;
+  static type: PluginTypes.BrowserEmulator = PluginTypes.BrowserEmulator;
 
   id = id;
   browserName = userAgentOption.browserName;

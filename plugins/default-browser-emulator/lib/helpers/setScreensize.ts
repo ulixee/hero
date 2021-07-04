@@ -1,7 +1,10 @@
-import IDevtoolsSession from "@secret-agent/interfaces/IDevtoolsSession";
-import { IBrowserEmulator } from "@secret-agent/plugin-utils";
+import IDevtoolsSession from '@secret-agent/interfaces/IDevtoolsSession';
+import BrowserEmulator from '../../index';
 
-export default async function setScreensize(emulator: IBrowserEmulator, devtools: IDevtoolsSession): Promise<void> {
+export default async function setScreensize(
+  emulator: BrowserEmulator,
+  devtools: IDevtoolsSession,
+): Promise<void> {
   const { viewport } = emulator;
   if (!viewport) return;
   await devtools.send('Emulation.setDeviceMetricsOverride', {

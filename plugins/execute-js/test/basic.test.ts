@@ -5,7 +5,7 @@ import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
 import Core from '@secret-agent/core';
 import ConnectionToClient from '@secret-agent/core/server/ConnectionToClient';
 import CoreServer from '@secret-agent/core/server';
-import ExecuteJsCorePlugin from '../lib/CoreExtender';
+import ExecuteJsCorePlugin from '../lib/CorePlugin';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;

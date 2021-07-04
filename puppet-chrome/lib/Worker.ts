@@ -6,7 +6,7 @@ import { IPuppetWorker, IPuppetWorkerEvents } from '@secret-agent/interfaces/IPu
 import { createPromise } from '@secret-agent/commons/utils';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import { BrowserContext } from './BrowserContext';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
@@ -120,7 +120,7 @@ export class Worker extends TypedEventEmitter<IPuppetWorkerEvents> implements IP
     };
   }
 
-  private initializeEmulation(plugins: IPlugins): Promise<any> {
+  private initializeEmulation(plugins: ICorePlugins): Promise<any> {
     if (!plugins.onNewPuppetWorker) return;
 
     return Promise.all([

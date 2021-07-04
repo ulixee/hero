@@ -5,7 +5,7 @@ import { ITestHttpServer } from '@secret-agent/testing/helpers';
 import Puppet from '@secret-agent/puppet';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
 import Log from '@secret-agent/commons/Logger';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import BrowserEmulator from '../index';
@@ -21,7 +21,7 @@ beforeAll(async () => {
   puppet = new Puppet(selectBrowserMeta.browserEngine);
   Helpers.onClose(() => puppet.close(), true);
   await puppet.start();
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
   plugins.browserEmulator.onNewPuppetPage = null;
   context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close().catch(), true);

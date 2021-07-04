@@ -1,10 +1,10 @@
-import { BrowserEmulatorBase } from '@secret-agent/plugin-utils';
+import { BrowserEmulator } from '@secret-agent/plugin-utils';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IBrowserData from '../interfaces/IBrowserData';
 import loadDomOverrides from './loadDomOverrides';
 
 export default function setWorkerDomOverrides(
-  emulator: BrowserEmulatorBase,
+  emulator: BrowserEmulator,
   data: IBrowserData,
   worker: IPuppetWorker,
 ): Promise<any[]> {

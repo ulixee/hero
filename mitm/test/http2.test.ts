@@ -5,7 +5,7 @@ import MitmSocket from '@secret-agent/mitm-socket';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
@@ -262,7 +262,7 @@ async function createH2Connection(sessionIdPrefix: string, url: string) {
 
 let sessionCounter = 0;
 function createSession(mitmProxy: MitmServer, sessionId = '') {
-  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
   const session = new RequestSession(
     `${sessionId}${(sessionCounter += 1)}`,
     plugins,

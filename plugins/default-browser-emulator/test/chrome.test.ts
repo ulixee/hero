@@ -4,7 +4,7 @@ import * as Helpers from '@secret-agent/testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
@@ -102,7 +102,7 @@ test('it should update loadtimes and csi values', async () => {
 }, 60e3);
 
 async function createPage() {
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
   const context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close());
   const page = await context.newPage();

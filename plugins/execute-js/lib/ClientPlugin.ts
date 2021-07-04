@@ -1,9 +1,9 @@
-import { ISendToCoreFn } from '@secret-agent/interfaces/IPluginClientExtender';
-import ClientExtenderBase from '@secret-agent/plugin-utils/lib/ClientExtenderBase';
+import { ISendToCoreFn } from '@secret-agent/interfaces/IClientPlugin';
+import ClientPlugin from '@secret-agent/plugin-utils/lib/ClientPlugin';
 
 const { name: pluginId } = require('../package.json');
 
-export default class ExecuteJsClientPlugin extends ClientExtenderBase {
+export default class ExecuteJsClientPlugin extends ClientPlugin {
   public static id = pluginId;
   public static coreDependencyIds = [pluginId];
 

@@ -17,8 +17,6 @@
 
 - title: Advanced
   items:
-#    - BrowserEmulators
-#    - HumanEmulators
     - UserProfile
     - CookieStorage
     - Dialog
@@ -31,6 +29,12 @@
     - Remote
     - Session
     - SessionReplay
+- title: Plugins
+  items:
+    - Client Plugins
+    - Core Plugins
+    - Browser Emulators
+    - Human Emulators
 - title: Contribute
   items:
     - How to contribute

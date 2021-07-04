@@ -4,7 +4,7 @@ import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Locati
 import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
 import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
 import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
+import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';
@@ -17,7 +17,7 @@ beforeAll(async () => {
   const coreServer = new CoreServer();
   await coreServer.listen({ port: 0 });
   Core.use(
-    class BasicHumanEmulator extends HumanEmulatorBase {
+    class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );

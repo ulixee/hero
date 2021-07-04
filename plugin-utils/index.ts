@@ -2,12 +2,12 @@ import {
   IBrowserEmulator,
   IBrowserEmulatorClass,
   BrowserEmulatorClassDecorator,
-} from '@secret-agent/interfaces/IPluginBrowserEmulator';
-import BrowserEmulatorBase from './lib/BrowserEmulatorBase';
+} from '@secret-agent/interfaces/ICorePlugin';
+import BrowserEmulator from './lib/BrowserEmulator';
 
 export {
   BrowserEmulatorClassDecorator,
-  BrowserEmulatorBase,
+  BrowserEmulator,
   IBrowserEmulator,
   IBrowserEmulatorClass,
 };
