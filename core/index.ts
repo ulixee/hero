@@ -10,6 +10,9 @@ import {
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
 import DefaultHumanEmulator from '@secret-agent/default-human-emulator';
+import extractPlugins from '@secret-agent/plugin-utils/lib/utils/extractPlugins';
+import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
+import { IPluginClass } from '@secret-agent/interfaces/IPlugin';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
 import CoreProcess from './lib/CoreProcess';
@@ -28,7 +31,7 @@ export default class Core {
   public static pluginMap: {
     humanEmulatorsById: { [id: string]: IHumanEmulatorClass };
     browserEmulatorsById: { [id: string]: IBrowserEmulatorClass };
-    corePlugins: ICorePluginClass[];
+    corePluginsById: { [id: string]: ICorePluginClass };
   } = {
     humanEmulatorsById: {
       [DefaultHumanEmulator.id]: DefaultHumanEmulator,
@@ -36,12 +39,12 @@ export default class Core {
     browserEmulatorsById: {
       [DefaultBrowserEmulator.id]: DefaultBrowserEmulator,
     },
-    corePlugins: [],
+    corePluginsById: {},
   };
 
   public static onShutdown: () => void;
 
-  public static allowDynamicPluginDependencies = true;
+  public static allowDynamicPluginLoading = true;
   private static wasManuallyStarted = false;
   private static isClosing: Promise<void>;
   private static isStarting = false;
@@ -57,15 +60,22 @@ export default class Core {
     return connection;
   }
 
-  public static use(CorePlugin: ICorePluginClass) {
-    if (CorePlugin.type === PluginTypes.HumanEmulator) {
-      this.pluginMap.humanEmulatorsById[CorePlugin.id] = CorePlugin as IHumanEmulatorClass;
-    } else if (CorePlugin.type === PluginTypes.BrowserEmulator) {
-      this.pluginMap.browserEmulatorsById[CorePlugin.id] = CorePlugin as IBrowserEmulatorClass;
-    } else if (CorePlugin.type === PluginTypes.CorePlugin) {
-      this.pluginMap.corePlugins.push(CorePlugin);
+  public static use(PluginObject: string | ICorePluginClass | { [name: string]: IPluginClass }) {
+    let Plugins: IPluginClass[];
+    if (typeof PluginObject === 'string') {
+      Plugins = requirePlugins(PluginObject as string);
     } else {
-      throw new Error('Unknown plugin type');
+      Plugins = extractPlugins(PluginObject as any);
+    }
+
+    for (const Plugin of Plugins) {
+      if (Plugin.type === PluginTypes.HumanEmulator) {
+        this.pluginMap.humanEmulatorsById[Plugin.id] = Plugin as IHumanEmulatorClass;
+      } else if (Plugin.type === PluginTypes.BrowserEmulator) {
+        this.pluginMap.browserEmulatorsById[Plugin.id] = Plugin as IBrowserEmulatorClass;
+      } else if (Plugin.type === PluginTypes.CorePlugin) {
+        this.pluginMap.corePluginsById[Plugin.id] = Plugin;
+      }
     }
   }
 

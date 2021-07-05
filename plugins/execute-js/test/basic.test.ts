@@ -14,7 +14,7 @@ beforeAll(async () => {
   coreServer = new CoreServer();
   await coreServer.listen({ port: 0 });
   Core.use(ExecuteJsCorePlugin);
-  Core.allowDynamicPluginDependencies = false;
+  Core.allowDynamicPluginLoading = false;
   koaServer = await Helpers.runKoaServer();
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => {

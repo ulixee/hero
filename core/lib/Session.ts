@@ -96,9 +96,10 @@ export default class Session extends TypedEventEmitter<{
       browserEmulatorId,
       humanEmulatorId,
       dependencyMap,
+      corePluginPaths,
     } = options;
     this.plugins = new CorePlugins(
-      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap },
+      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap, corePluginPaths },
       this.logger,
     );
 

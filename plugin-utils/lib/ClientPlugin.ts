@@ -1,6 +1,5 @@
-import {
+import IClientPlugin, {
   ClientPluginClassDecorator,
-  IClientPlugin,
   IClientPluginClass,
 } from '@secret-agent/interfaces/IClientPlugin';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';

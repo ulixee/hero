@@ -16,11 +16,14 @@ import ICorePlugin, {
   ISelectBrowserMeta,
   ICorePluginClass,
   IOnClientCommandMeta,
+  IBrowserEmulatorClass,
+  IHumanEmulatorClass,
 } from '@secret-agent/interfaces/ICorePlugin';
 import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
+import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
 import Core from '../index';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
@@ -31,7 +34,12 @@ interface IOptionsCreate {
   humanEmulatorId?: string;
   browserEmulatorId?: string;
   selectBrowserMeta?: ISelectBrowserMeta;
-  dependencyMap?: { [clientPluginId: string]: string[] };
+  dependencyMap?: IDependencyMap;
+  corePluginPaths?: string[];
+}
+
+interface IDependencyMap {
+  [clientPluginId: string]: string[];
 }
 
 export default class CorePlugins implements ICorePlugins {
@@ -50,17 +58,30 @@ export default class CorePlugins implements ICorePlugins {
     const {
       userAgentSelector,
       dependencyMap,
+      corePluginPaths,
       browserEmulatorId = DefaultBrowserEmulatorId,
       humanEmulatorId = DefaultHumanEmulatorId,
     } = options;
 
-    const BrowserEmulator = Core.pluginMap.browserEmulatorsById[browserEmulatorId];
+    let BrowserEmulator = Core.pluginMap.browserEmulatorsById[browserEmulatorId];
+    if (!BrowserEmulator) {
+      BrowserEmulator = requirePlugins<IBrowserEmulatorClass>(
+        browserEmulatorId,
+        PluginTypes.BrowserEmulator,
+      )[0];
+    }
     if (!BrowserEmulator) throw new Error(`Browser emulator ${browserEmulatorId} was not found`);
 
     let HumanEmulator = Core.pluginMap.humanEmulatorsById[humanEmulatorId];
     // Backwards compatibility for 1.4.X > 1.5.0
     if (!HumanEmulator && humanEmulatorId === 'basic') {
       HumanEmulator = Core.pluginMap.humanEmulatorsById[DefaultHumanEmulatorId];
+    }
+    if (!HumanEmulator) {
+      HumanEmulator = requirePlugins<IHumanEmulatorClass>(
+        humanEmulatorId,
+        PluginTypes.HumanEmulator,
+      )[0];
     }
     if (!HumanEmulator) throw new Error(`Human emulator ${humanEmulatorId} was not found`);
 
@@ -76,26 +97,15 @@ export default class CorePlugins implements ICorePlugins {
     this.humanEmulator = new HumanEmulator(this.createOptions);
     this.addPluginInstance(this.humanEmulator);
 
-    Core.pluginMap.corePlugins.forEach(x => this.use(x));
+    Object.values(Core.pluginMap.corePluginsById).forEach(x => this.use(x));
 
-    if (dependencyMap && Core.allowDynamicPluginDependencies) {
-      Object.entries(dependencyMap).forEach(([clientPluginId, dependentPluginIds]) => {
-        dependentPluginIds.forEach(corePluginId => {
-          if (this.instanceById[corePluginId]) return;
-          this.logger.info(`Dynamically using ${corePluginId} required by ${clientPluginId}`);
-          const PluginObject = this.require(corePluginId);
-          if (!PluginObject) {
-            this.logger.warn(`Could not find ${corePluginId} required by ${clientPluginId}`);
-            return;
-          }
-          const CorePlugin = (PluginObject as any).CorePlugin || PluginObject;
-          if (CorePlugin.type !== PluginTypes.CorePlugin) {
-            this.logger.warn(`Could not use ${corePluginId} because it's not a CorePlugin`);
-            return;
-          }
-          this.use(CorePlugin);
-        });
-      });
+    if (Core.allowDynamicPluginLoading) {
+      if (dependencyMap) {
+        this.loadDependencies(dependencyMap);
+      }
+      if (corePluginPaths) {
+        this.loadCorePluginPaths(corePluginPaths);
+      }
     }
   }
 
@@ -211,5 +221,27 @@ export default class CorePlugins implements ICorePlugins {
       }
     }
     return CorePlugins.corePluginClassesById[corePluginId];
+  }
+
+  private loadDependencies(dependencyMap: IDependencyMap) {
+    Object.entries(dependencyMap).forEach(([clientPluginId, corePluginIds]) => {
+      corePluginIds.forEach(corePluginId => {
+        if (this.instanceById[corePluginId]) return;
+        if (Core.pluginMap.corePluginsById[corePluginId]) return;
+        this.logger.info(`Dynamically requiring ${corePluginId} requested by ${clientPluginId}`);
+        const Plugin = requirePlugins<ICorePluginClass>(corePluginId, PluginTypes.CorePlugin)[0];
+        if (!Plugin) throw new Error(`Could not find ${corePluginId}`);
+
+        this.use(Plugin);
+      });
+    });
+  }
+
+  private loadCorePluginPaths(corePluginPaths: string[]) {
+    for (const corePluginPath of corePluginPaths) {
+      if (Core.pluginMap.corePluginsById[corePluginPath]) return;
+      const Plugins = requirePlugins<ICorePluginClass>(corePluginPath, PluginTypes.CorePlugin);
+      Plugins.forEach(Plugin => this.use(Plugin));
+    }
   }
 }

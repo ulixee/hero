@@ -27,8 +27,13 @@ import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDecla
 import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
 import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { IClientPlugin } from '@secret-agent/interfaces/IClientPlugin';
+import IClientPlugin, { IClientPluginClass } from '@secret-agent/interfaces/IClientPlugin';
 import IAgent from '@secret-agent/interfaces/IAgent';
+import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
+import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
+import filterPlugins from '@secret-agent/plugin-utils/lib/utils/filterPlugins';
+import extractPlugins from '@secret-agent/plugin-utils/lib/utils/extractPlugins';
+import { IPluginClass } from '@secret-agent/interfaces/IPlugin';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -52,7 +57,6 @@ import FrameEnvironment, {
   getCoreFrameEnvironment,
   getCoreFrameEnvironmentForPosition,
 } from './FrameEnvironment';
-import getClientPluginClass from './getClientPluginClass';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import Output, { createObservableOutput } from './Output';
@@ -121,6 +125,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
         sessionName,
         scriptInstanceMeta: scriptInstance.meta,
         dependencyMap: {},
+        corePluginPaths: [],
       },
       clientPlugins: [],
     });
@@ -316,12 +321,32 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
 
   // PLUGINS
 
-  public use(PluginObject): Agent {
-    const ClientPlugin = getClientPluginClass(PluginObject);
+  public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): Agent {
     const { clientPlugins, options } = getState(this);
-    const clientPlugin = new ClientPlugin();
-    clientPlugins.push(clientPlugin);
-    options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
+    const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
+
+    if (typeof PluginObject === 'string') {
+      const Plugins = requirePlugins(PluginObject as string);
+      const CorePlugins = filterPlugins(Plugins, PluginTypes.CorePlugin);
+      const ClientPlugins = filterPlugins<IClientPluginClass>(Plugins, PluginTypes.ClientPlugin);
+      if (CorePlugins.length) {
+        options.corePluginPaths.push(PluginObject);
+      }
+      ClientPlugins.forEach(ClientPlugin => (ClientPluginsById[ClientPlugin.id] = ClientPlugin));
+    } else {
+      const ClientPlugins = extractPlugins<IClientPluginClass>(
+        PluginObject as any,
+        PluginTypes.ClientPlugin,
+      );
+      ClientPlugins.forEach(ClientPlugin => (ClientPluginsById[ClientPlugin.id] = ClientPlugin));
+    }
+
+    Object.values(ClientPluginsById).forEach(ClientPlugin => {
+      const clientPlugin = new ClientPlugin();
+      clientPlugins.push(clientPlugin);
+      options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
+    });
+
     return this;
   }
 
