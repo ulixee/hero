@@ -7,7 +7,7 @@
 
 Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `agent.use()`.
 
-Our recommendation is to use the CorePlugin base class provided by @secret-agent/plugin-utils, which handles setting most of the required properties and methods, all except the static `id` property. Here's a simple plugin that adds a single hello() method to agent, which outputs to the browser's console.
+We recommend using the CorePlugin base class provided by @secret-agent/plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to agent, which outputs to the browser's console.
 
 ```javascript
 import { ClientPlugin, CorePlugin } from '@secret-agent/plugin-utils';
@@ -68,7 +68,7 @@ This tells SecretAgent that the plugin is a CorePlugin. It must always be set.
 
 
 ## Instance Method Hooks
-All the following methods are optional. Add them to your plugin as desired.
+The following methods are optional. Add them to your plugin as needed.
 
 ### configure<em>(config)</em>
 
@@ -82,6 +82,8 @@ This hook is called during the initialization of a session/browserEmulator as we
   - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
   - locale `string`. The configured locale in use (eg, en-US).
 
+Modify any value in the object to change it session-wide.
+
 #### **Returns** `void`
 
 ### onClientCommand<em>(meta, ...args)</em> *optional*
@@ -89,15 +91,17 @@ This method is called every time a ClientPlugin calls sendToCore to this plugin'
 
 #### **Arguments**:
 - meta `OnClientommandMeta`. This object currently has a single property - puppetPage.
-- args: `any[]`. Whatever args Client passed to sendToCore.
+- args: `any[]`. Whatever args the ClientPlugin passed through sendToCore.
 
-#### **Returns** `void`
+#### **Returns** `Promise`
 
-### onDnsConfiguration?(settings: IDnsSettings): `Promise | void`
+### onDnsConfiguration<em>(settings: IDnsSettings)</em>
 
-Configures the DNS over Tls connection that Chrome defaults to using if your DNS provider supports it.
+Configures the DNS over TLS connection that Chrome defaults to using if your DNS provider supports it.
 
-### onTcpConfiguration?(settings: ITcpSettings): `Promise | void`
+#### **Returns** `Promise`
+
+### onTcpConfiguration<em>(settings: ITcpSettings)</em>
 
 Some Tcp settings vary based on the Operating System making http requests.
 Current supports:
@@ -105,30 +109,53 @@ Current supports:
 - `windowSize`
 - `ttl`
 
+Alter the object's values to change session-wide.
 
-### onTlsConfiguration?(settings: ITlsSettings): Promise
+#### **Returns** `Promise`
+
+### onTlsConfiguration<em>(settings: ITlsSettings)</em>
 
 Emulate the ClientHello signature, which can vary between browser versions
 
-### beforeHttpRequest?(request: IHttpResourceLoadDetails): `Promise | void`
+#### **Returns** `Promise`
+
+### beforeHttpRequest<em>(request: IHttpResourceLoadDetails)</em>
 
 A callback is provided for each HTTP request where you are given the opportunity to re-order, re-case, and add or remove headers so that they resemble real browser requests. Headless Chrome is known to provide headers is different order on occasion from headed. See [https://github.com/ulixee/double-agent](https://github.com/ulixee/double-agent) for details.
 
-### beforeHttpResponse?(resource: IHttpResourceLoadDetails): `Promise | void`
+#### **Returns** `Promise`
+
+### beforeHttpResponse<em>(resource: IHttpResourceLoadDetails)</em>
 
 Callbacks on each cookie set, and to return the valid list of cookies. This callback can be used to simulate cookie behavior that varies from the underlying browser - for instance Safari 13.
 
-### onNewPuppetPage?(page: IPuppetPage): `Promise | void`
-Browser Emulators provide a way to configure 1 or more script to be run on each new document and iframe. The scripts are used to override, add and remove properties and functions that differ in headless vs headed browsers.
+#### **Returns** `Promise`
 
-To "add" overrides that are missing from the DOM, it's recommended that your fork and edit existing BrowserEmulators, or extend an existing one. We've structured the included Browser emulators so that you can quickly see what has been overridden, and you can override the `loadDomOverrides` function as below to add additional overrides.
+### onNewPuppetPage<em>(page: IPuppetPage)</em>
+This is called every time a new page/iframe is loaded. Use this hook to modify the DOM environment (i.e., to emulate various browser features) before a website loads.
 
-### onNewPuppetWorker?(worker: IPuppetWorker): `Promise | void`
+#### **Returns** `Promise`
 
-### websiteHasFirstPartyInteraction?(url: URL): `Promise | void`
+### onNewPuppetWorker<em>(worker: IPuppetWorker)</em>
+
+This is called every time a new worker is loaded within a page. Use this hook to modify the DOM environment (i.e., to emulate various browser features) before a website loads.
+
+#### **Returns** `Promise`
+
+### websiteHasFirstPartyInteraction<em>(url: URL)</em>
 
 Callback to indicate a domain has "first-party" interaction. Some browsers, like Safari 13.1, started granting cookie storage to websites only after a user has directly interacted with them.
 
-### playInteractions(interactions, runFn, helper)
+#### **Returns** `Promise`
+
+### playInteractions<em>(interactions, runFn, helper)</em>
+
+Use this method if you want to change the speed or randomness of user Interactions (mouse movements, typing, etc).
+
+#### **Returns** `Promise`
   
-### getStartingMousePoint(helper)
+### getStartingMousePoint<em>(helper)</em>
+
+This is used within Core to run the mouse Interactions correctly.
+
+#### **Returns** `Promise`

@@ -6,7 +6,7 @@
 
 Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `agent.use()`.
 
-Our recommendation is to use the ClientPlugin base class provided by @secret-agent/plugin-utils, which handles setting most of the required properties and methods, all except the static `id` property. Here's a simple plugin that adds a single hello() method to agent: 
+We recommend using the ClientPlugin base class in @secret-agent/plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to agent: 
 
 ```javascript
 import { ClientPlugin } from '@secret-agent/plugin-utils';
@@ -46,7 +46,7 @@ A new instance of ClientPlugin is created for every agent instance. Use a constr
 ## Class Properties
 
 ### ClientPlugin.id *required*
-This must be unique across all your SecretAgent client plugins. We recommend setting this to your plugin's npm package name.
+This must be unique across all your SecretAgent client plugins. We recommend using your plugin's npm package name.
 #### **Type**: `string`
 
 ```javascript
