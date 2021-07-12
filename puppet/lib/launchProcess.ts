@@ -21,6 +21,7 @@ import * as Path from 'path';
 import Log from '@secret-agent/commons/Logger';
 import ILaunchedProcess from '@secret-agent/interfaces/ILaunchedProcess';
 import Resolvable from '@secret-agent/commons/Resolvable';
+import * as Fs from 'fs';
 import { WebSocketTransport } from './WebSocketTransport';
 
 const { log } = Log(module);
@@ -44,6 +45,11 @@ export default async function launchProcess(
     env,
     stdio,
   });
+
+  const dataDir = processArguments
+    .find(x => x.startsWith('--user-data-dir='))
+    ?.split('--user-data-dir=')
+    ?.pop();
   // Prevent Unhandled 'error' event.
   launchedProcess.on('error', () => {});
 
@@ -109,9 +115,20 @@ export default async function launchProcess(
       } else {
         launchedProcess.kill('SIGKILL');
       }
+      if (dataDir) cleanDataDir(dataDir);
       return closed;
     } catch (error) {
       // might have already been kill off
+    }
+  }
+
+  function cleanDataDir(datadir: string, retries = 3): void {
+    try {
+      if (Fs.existsSync(datadir)) Fs.rmdirSync(dataDir, { recursive: true });
+    } catch (err) {
+      if (retries >= 0) {
+        cleanDataDir(datadir, retries - 1);
+      }
     }
   }
 }
