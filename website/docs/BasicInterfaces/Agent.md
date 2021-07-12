@@ -74,8 +74,8 @@ const { Agent } = require('secret-agent');
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to automatically booting up and connecting to a local `Core`.
   - name `string`. This is used to generate a unique sessionName.
   - userAgent `strong`. This sets your browser's user agent string. Prefixing this string with a tilde (~) allows for dynamic options.
-  - browserEmulatorId `string`. Emulates the properties that help SecretAgent look like a normal browser.
-  - humanEmulatorId `string`. Drives human-like mouse/keyboard movements.
+  - browserEmulatorId `string` defaults to `default-browser-emulator`. Chooses the BrowserEmulator plugin which emulates the properties that help SecretAgent look like a normal browser.
+  - humanEmulatorId `string` defaults to `default-human-emulator`. Chooses the HumanEmulator plugin which drives the mouse/keyboard movements.
   - geolocation `IGeolocation`. Overrides the geolocation of the user. Will automatically grant permissions to all origins for geolocation.
     - latitude `number`. Latitude between -90 and 90.
     - longitude `number`. Longitude between -180 and 180.
