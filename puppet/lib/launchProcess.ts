@@ -115,10 +115,20 @@ export default async function launchProcess(
       } else {
         launchedProcess.kill('SIGKILL');
       }
-      if (dataDir) Fs.rmdirSync(dataDir, { recursive: true });
+      if (dataDir) cleanDataDir(dataDir);
       return closed;
     } catch (error) {
       // might have already been kill off
+    }
+  }
+
+  function cleanDataDir(datadir: string, retries = 3): void {
+    try {
+      if (Fs.existsSync(datadir)) Fs.rmdirSync(dataDir, { recursive: true });
+    } catch (err) {
+      if (retries >= 0) {
+        cleanDataDir(datadir, retries - 1);
+      }
     }
   }
 }
