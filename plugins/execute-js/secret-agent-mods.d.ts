@@ -3,7 +3,7 @@
 import {} from '@secret-agent/client';
 
 type ExecuteJsPluginAdditions = {
-  executeJs(fn: string | ((...args: any[]) => any));
+  executeJs(fn: string | ((...args: any[]) => any), ...args: any[]);
 };
 
 declare module '@secret-agent/client' {

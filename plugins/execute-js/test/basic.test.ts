@@ -60,3 +60,34 @@ test('it should run function in browser and return response', async () => {
 });
 
 
+test('it should run function in browser and return incr', async () => {
+  koaServer.get('/test2', ctx => {
+    ctx.body = `<body>
+<script>
+    window.testRun = function(num) {
+      return num + 1;
+    }
+</script>
+</body>`;
+  });
+
+  const userAgent =
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
+  const agent = new Agent({
+    userAgent,
+    connectionToCore: {
+      host: await coreServer.address,
+    },
+  });
+  Helpers.onClose(() => agent.close(), true);
+  agent.use(ExecuteJsPlugin);
+
+  await agent.goto(`${koaServer.baseUrl}/test2`);
+  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  const response = await agent.executeJs((num) => {
+    // @ts-ignore
+    return window.testRun(num);
+  }, 1);
+  expect(response).toEqual(2);
+  await agent.close();
+});
