@@ -5,7 +5,7 @@ import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
 import Core from '@secret-agent/core';
 import ConnectionToClient from '@secret-agent/core/server/ConnectionToClient';
 import CoreServer from '@secret-agent/core/server';
-import ExecuteJsCorePlugin from '../lib/CoreExtender';
+import ExecuteJsCorePlugin from '../lib/CorePlugin';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
@@ -14,7 +14,7 @@ beforeAll(async () => {
   coreServer = new CoreServer();
   await coreServer.listen({ port: 0 });
   Core.use(ExecuteJsCorePlugin);
-  Core.allowDynamicPluginDependencies = false;
+  Core.allowDynamicPluginLoading = false;
   koaServer = await Helpers.runKoaServer();
   connectionToClient = Core.addConnection();
   Helpers.onClose(() => {

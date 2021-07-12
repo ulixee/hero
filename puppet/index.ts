@@ -4,7 +4,7 @@ import Log from '@secret-agent/commons/Logger';
 import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
@@ -74,7 +74,7 @@ export default class Puppet {
   }
 
   public newContext(
-    plugins: IPlugins,
+    plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
   ): Promise<IPuppetContext> {

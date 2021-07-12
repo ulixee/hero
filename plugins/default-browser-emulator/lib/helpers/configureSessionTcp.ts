@@ -1,4 +1,4 @@
-import { IBrowserEmulator } from '@secret-agent/interfaces/IPluginBrowserEmulator';
+import { IBrowserEmulator } from '@secret-agent/interfaces/ICorePlugin';
 import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
 import getTcpSettingsForOs from '../utils/getTcpSettingsForOs';
 

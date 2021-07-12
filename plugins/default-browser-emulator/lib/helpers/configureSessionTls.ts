@@ -1,4 +1,4 @@
-import { IBrowserEmulator } from '@secret-agent/interfaces/IPluginBrowserEmulator';
+import { IBrowserEmulator } from '@secret-agent/interfaces/ICorePlugin';
 import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
 
 export default function configureSessionTcp(

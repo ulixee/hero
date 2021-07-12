@@ -1,14 +1,14 @@
-import { IOnCommandMeta } from '@secret-agent/interfaces/IPluginCoreExtender';
+import { IOnClientCommandMeta } from '@secret-agent/interfaces/ICorePlugin';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import CoreExtenderBase from '@secret-agent/plugin-utils/lib/CoreExtenderBase';
+import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
 
 const { name: pluginId } = require('../package.json');
 
-export default class ExecuteJsCorePlugin extends CoreExtenderBase {
+export default class ExecuteJsCorePlugin extends CorePlugin {
   public static id = pluginId;
 
-  public async onCommand(
-    { puppetPage }: IOnCommandMeta,
+  public async onClientCommand(
+    { puppetPage }: IOnClientCommandMeta,
     fnName: string,
     serializedFn: string,
   ): Promise<any> {

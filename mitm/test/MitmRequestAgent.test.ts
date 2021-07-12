@@ -7,7 +7,7 @@ import * as HttpProxyAgent from 'http-proxy-agent';
 import { Helpers } from '@secret-agent/testing';
 import { getProxyAgent, runHttpsServer } from '@secret-agent/testing/helpers';
 import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Log from '@secret-agent/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
@@ -275,7 +275,7 @@ async function startMitmServer() {
 let counter = 1;
 function createMitmSession(mitmServer: MitmServer) {
   counter += 1;
-  const plugins = new Plugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
   const session = new RequestSession(`${counter}`, plugins, null);
   mitmServer.registerSession(session, false);
   return session;

@@ -4,19 +4,19 @@ import {
   HumanEmulatorClassDecorator,
   IHumanEmulator,
   IHumanEmulatorClass,
-} from '@secret-agent/interfaces/IPluginHumanEmulator';
-import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
+} from '@secret-agent/interfaces/ICorePlugin';
+import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
 
 @HumanEmulatorClassDecorator
-export default class HumanEmulatorBase implements IHumanEmulator {
+export default class HumanEmulator implements IHumanEmulator {
   public static readonly id: string;
-  public static readonly pluginType = PluginTypes.HumanEmulator;
+  public static readonly type = PluginTypes.HumanEmulator;
 
   public readonly id: string;
 
   private readonly logger: IBoundLog;
 
-  constructor({ logger }: IPluginCreateOptions) {
+  constructor({ logger }: ICorePluginCreateOptions) {
     this.id = (this.constructor as IHumanEmulatorClass).id;
     this.logger = logger;
   }

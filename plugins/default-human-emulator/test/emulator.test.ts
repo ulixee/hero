@@ -2,7 +2,7 @@ import { IInteractionStep, InteractionCommand } from '@secret-agent/interfaces/I
 import IViewport from '@secret-agent/interfaces/IViewport';
 import Log from '@secret-agent/commons/Logger';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
+import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
 import HumanEmulator, { isVisible } from '../index';
 
 const { log } = Log(module);
@@ -15,7 +15,7 @@ beforeAll(() => {
 describe('typing', () => {
   test('should spread out characters based on a wpm range', async () => {
     HumanEmulator.wordsPerMinuteRange = [34, 34];
-    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as IPluginCreateOptions);
+    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as ICorePluginCreateOptions);
     const groups = [
       [
         {
@@ -73,7 +73,7 @@ describe('deltaToVisible', () => {
 
 describe('move', () => {
   test('should break a move into a series of moves', async () => {
-    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as IPluginCreateOptions);
+    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as ICorePluginCreateOptions);
     const commands = [];
     // @ts-ignore
     await humanEmulator.scroll(
@@ -120,7 +120,7 @@ describe('move', () => {
 
 describe('scroll', () => {
   test('should break a scroll into a curve', async () => {
-    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as IPluginCreateOptions);
+    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as ICorePluginCreateOptions);
     const commands = [];
     // @ts-ignore
     await humanEmulator.scroll(
@@ -165,7 +165,7 @@ describe('scroll', () => {
   });
 
   test('should not scroll if over half in screen', async () => {
-    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as IPluginCreateOptions);
+    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as ICorePluginCreateOptions);
     const commands = [];
     // @ts-ignore
     await humanEmulator.scroll(
@@ -210,7 +210,7 @@ describe('scroll', () => {
   });
 
   test('should not exceed max pixels per scroll', async () => {
-    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as IPluginCreateOptions);
+    const humanEmulator = new HumanEmulator({ logger: log as IBoundLog } as ICorePluginCreateOptions);
     const commands: IInteractionStep[] = [];
     // @ts-ignore
     await humanEmulator.scroll(

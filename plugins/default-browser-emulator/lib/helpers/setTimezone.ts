@@ -1,7 +1,10 @@
-import IDevtoolsSession from "@secret-agent/interfaces/IDevtoolsSession";
-import { IBrowserEmulator } from "@secret-agent/plugin-utils";
+import IDevtoolsSession from '@secret-agent/interfaces/IDevtoolsSession';
+import BrowserEmulator from '../../index';
 
-export default async function setTimezone(emulator: IBrowserEmulator, devtools: IDevtoolsSession): Promise<void> {
+export default async function setTimezone(
+  emulator: BrowserEmulator,
+  devtools: IDevtoolsSession,
+): Promise<void> {
   const { timezoneId } = emulator;
   if (!timezoneId) return;
   try {

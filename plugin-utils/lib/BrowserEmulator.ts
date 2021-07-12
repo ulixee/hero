@@ -4,17 +4,17 @@ import {
   IBrowserEmulator,
   IBrowserEmulatorClass,
   ISelectBrowserMeta,
-} from '@secret-agent/interfaces/IPluginBrowserEmulator';
+} from '@secret-agent/interfaces/ICorePlugin';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import IPluginCreateOptions from '@secret-agent/interfaces/IPluginCreateOptions';
+import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
-import IUserAgentOption, { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
+import { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
 
 @BrowserEmulatorClassDecorator
-export default class BrowserEmulatorBase implements IBrowserEmulator {
+export default class BrowserEmulator implements IBrowserEmulator {
   public static readonly id: string;
-  public static readonly pluginType = PluginTypes.BrowserEmulator;
+  public static readonly type = PluginTypes.BrowserEmulator;
 
   public readonly id: string;
 
@@ -29,15 +29,10 @@ export default class BrowserEmulatorBase implements IBrowserEmulator {
   public readonly browserEngine: IBrowserEngine;
   public readonly logger: IBoundLog;
 
-  protected readonly plugins: IPlugins;
+  protected readonly corePlugins: ICorePlugins;
 
-  constructor(
-    { browserEngine, plugins, logger }: IPluginCreateOptions,
-    userAgentOption: IUserAgentOption,
-  ) {
-    // @ts-ignore
+  constructor({ userAgentOption, browserEngine, corePlugins, logger }: ICorePluginCreateOptions) {
     this.id = (this.constructor as IBrowserEmulatorClass).id;
-
     this.browserName = userAgentOption.browserName;
     this.browserVersion = userAgentOption.browserVersion;
 
@@ -48,7 +43,7 @@ export default class BrowserEmulatorBase implements IBrowserEmulator {
     this.userAgentString = userAgentOption.string;
     this.browserEngine = browserEngine;
 
-    this.plugins = plugins;
+    this.corePlugins = corePlugins;
     this.logger = logger;
   }
 

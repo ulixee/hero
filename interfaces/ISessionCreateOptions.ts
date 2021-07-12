@@ -17,4 +17,5 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   input?: { command?: string } & any;
   geolocation?: IGeolocation;
   dependencyMap?: { [clientPluginId: string]: string[] };
+  corePluginPaths?: string[];
 }

@@ -89,8 +89,8 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
       return (await coreTab).commandQueue.run('Tab.runPluginCommand', pluginId, args);
     }
 
-    for (const plugin of agentState.getState(agent).plugins) {
-      plugin.onTab(agent, this, sendToTab);
+    for (const clientPlugin of agentState.getState(agent).clientPlugins) {
+      clientPlugin.onTab(agent, this, sendToTab);
     }
   }
 

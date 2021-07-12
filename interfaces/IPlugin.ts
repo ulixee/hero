@@ -1,11 +1,17 @@
-import { ICoreExtender } from './IPluginCoreExtender';
-import IPluginType from './IPluginTypes';
-import IPluginCreateOptions from './IPluginCreateOptions';
+import ICorePlugin, {
+  IBrowserEmulator,
+  IBrowserEmulatorClass,
+  ICorePluginClass,
+  IHumanEmulator,
+  IHumanEmulatorClass,
+} from './ICorePlugin';
+import IClientPlugin, { IClientPluginClass } from './IClientPlugin';
 
-export default interface IPlugin extends ICoreExtender {}
+type IPlugin = IClientPlugin | ICorePlugin | IBrowserEmulator | IHumanEmulator;
+export default IPlugin;
 
-export interface IPluginClass {
-  id: string;
-  pluginType: IPluginType;
-  new (createOptions: IPluginCreateOptions): IPlugin;
-}
+export type IPluginClass =
+  | IClientPluginClass
+  | ICorePluginClass
+  | IBrowserEmulatorClass
+  | IHumanEmulatorClass;

@@ -1,6 +1,6 @@
-import ClientExtender from './lib/ClientExtender';
-import CoreExtender from './lib/CoreExtender';
+import ClientPlugin from './lib/ClientPlugin';
+import CorePlugin from './lib/CorePlugin';
 
-export { ClientExtender, CoreExtender };
+export { ClientPlugin, CorePlugin };
 
-export default { ClientExtender, CoreExtender };
+export default { ClientPlugin, CorePlugin };

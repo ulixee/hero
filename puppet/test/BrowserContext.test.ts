@@ -2,9 +2,10 @@ import BrowserEmulator from '@secret-agent/default-browser-emulator';
 import { URL } from 'url';
 import Log from '@secret-agent/commons/Logger';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Core from '@secret-agent/core';
+import { IBrowserEmulatorConfig } from '@secret-agent/interfaces/ICorePlugin';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';
@@ -38,7 +39,7 @@ describe('BrowserContext', () => {
 
   describe('basic', () => {
     it('should create new context', async () => {
-      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       expect(context).toBeTruthy();
@@ -47,11 +48,11 @@ describe('BrowserContext', () => {
 
     it('should isolate localStorage and cookies', async () => {
       // Create two incognito contexts.
-      const plugins1 = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins1 = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       const context1 = await puppet.newContext(plugins1, log);
       needsClosing.push(context1);
 
-      const plugins2 = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins2 = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       const context2 = await puppet.newContext(plugins2, log);
       needsClosing.push(context2);
 
@@ -84,14 +85,14 @@ describe('BrowserContext', () => {
     });
 
     it('close() should work for empty context', async () => {
-      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       await expect(context.close()).resolves.toBe(undefined);
     });
 
     it('close() should be callable twice', async () => {
-      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       const context = await puppet.newContext(plugins, log);
       needsClosing.push(context);
       await Promise.all([context.close(), context.close()]);
@@ -102,22 +103,24 @@ describe('BrowserContext', () => {
   describe('emulator', () => {
     it('should set for all pages', async () => {
       {
-        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
         const { browserEmulator } = plugins;
         const context = await puppet.newContext(plugins, log);
-        needsClosing.push(context);
         const page = await context.newPage();
+        const config: IBrowserEmulatorConfig = {};
+        plugins.configure(config);
+        needsClosing.push(context);
         needsClosing.push(page);
         expect(await page.evaluate(`navigator.userAgent`)).toBe(browserEmulator.userAgentString);
         expect(await page.evaluate(`navigator.platform`)).toBe(
           browserEmulator.operatingSystemPlatform,
         );
         expect(await page.evaluate(`navigator.languages`)).toStrictEqual(['en']);
-        expect(await page.evaluate('screen.height')).toBe(browserEmulator.viewport.height);
+        expect(await page.evaluate('screen.height')).toBe(config.viewport?.height);
         await context.close();
       }
       {
-        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
         plugins.browserEmulator.operatingSystemPlatform = 'Windows';
         plugins.browserEmulator.userAgentString = 'foobar';
         plugins.configure({
@@ -151,7 +154,7 @@ describe('BrowserContext', () => {
 
     it('should work for subframes', async () => {
       {
-        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
         const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
         const page = await context.newPage();
@@ -162,7 +165,7 @@ describe('BrowserContext', () => {
         await context.close();
       }
       {
-        const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+        const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
         plugins.browserEmulator.userAgentString = 'foobar';
         const context = await puppet.newContext(plugins, log);
         needsClosing.push(context);
@@ -188,7 +191,7 @@ describe('BrowserContext', () => {
     let context: IPuppetContext;
     let page: ITestPage;
     beforeEach(async () => {
-      const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+      const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
       context = await puppet.newContext(plugins, log);
       page = createTestPage(await context.newPage());
     });

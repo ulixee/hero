@@ -1,5 +1,5 @@
 import Log from '@secret-agent/commons/Logger';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Core from '@secret-agent/core';
 import Puppet from '../index';
@@ -17,7 +17,7 @@ describe('launchProcess', () => {
     const browserEngine = CustomBrowserEmulator.selectBrowserMeta().browserEngine;
     const browser = await new Puppet(browserEngine);
     await browser.start();
-    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+    const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
     const page = await (await browser.newContext(plugins, log)).newPage();
     let error = null;
     const neverResolves = page.evaluate(`new Promise(r => {})`).catch(e => (error = e));

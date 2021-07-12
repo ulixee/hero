@@ -1,11 +1,13 @@
 export enum PluginTypes {
-  ClientExtender = 'ClientExtender',
-  CoreExtender = 'CoreExtender',
-  BrowserEmulator = 'BrowserEmulator',
-  HumanEmulator = 'HumanEmulator',
+  ClientPlugin = 'ClientPlugin',
+  CorePlugin = 'CorePlugin',
+  BrowserEmulator = 'CorePlugin:BrowserEmulator',
+  HumanEmulator = 'CorePlugin:HumanEmulator',
 }
 
-type IPluginType = keyof typeof PluginTypes;
+type ValueOf<T> = T[keyof T];
+
+type IPluginType = ValueOf<PluginTypes>;
 
 export default IPluginType;
 

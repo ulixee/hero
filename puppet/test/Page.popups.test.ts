@@ -1,9 +1,10 @@
 import Log from '@secret-agent/commons/Logger';
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import Core from '@secret-agent/core';
+import { IBrowserEmulatorConfig } from '@secret-agent/interfaces/ICorePlugin';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';
@@ -25,10 +26,11 @@ describe('Page.popups', () => {
     server = await TestServer.create(0);
     puppet = new Puppet(browserEngine);
     await puppet.start();
-    const plugins = new Plugins({ browserEmulatorId }, log as IBoundLog);
+    const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
+    const config: IBrowserEmulatorConfig = { locale: 'en-GB' };
+    plugins.browserEmulator.configure(config);
     plugins.browserEmulator.userAgentString = 'popupcity';
     plugins.browserEmulator.operatingSystemPlatform = 'Windows95';
-    plugins.browserEmulator.locale = 'en-GB';
 
     context = await puppet.newContext(plugins, log);
     capturePuppetContextLogs(context, `${browserEngine.fullVersion}-Page.popups-test`);

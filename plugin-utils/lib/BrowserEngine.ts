@@ -3,7 +3,7 @@ import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import IBrowserEngineOption from '@secret-agent/interfaces/IBrowserEngineOption';
 import IBrowserEngineFetcher from '@secret-agent/interfaces/IBrowserEngineFetcher';
 import ChromeApp from '@secret-agent/chrome-app';
-import { IBrowserEmulatorClass } from '@secret-agent/interfaces/IPluginBrowserEmulator';
+import { IBrowserEmulatorClass } from '@secret-agent/interfaces/ICorePlugin';
 
 export default class BrowserEngine implements IBrowserEngine {
   public name: string;

@@ -6,19 +6,19 @@ import {
   IMousePositionXY,
   InteractionCommand,
 } from '@secret-agent/interfaces/IInteractions';
-import { HumanEmulatorClassDecorator } from '@secret-agent/interfaces/IPluginHumanEmulator';
+import { HumanEmulatorClassDecorator } from '@secret-agent/interfaces/ICorePlugin';
 import IRect from '@secret-agent/interfaces/IRect';
 import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
 import IPoint from '@secret-agent/interfaces/IPoint';
 import IViewport from '@secret-agent/interfaces/IViewport';
-import HumanEmulatorBase from '@secret-agent/plugin-utils/lib/HumanEmulatorBase';
+import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
 
 // ATTRIBUTION: heavily borrowed/inspired by https://github.com/Xetera/ghost-cursor
 
 @HumanEmulatorClassDecorator
-export default class DefaultHumanEmulator extends HumanEmulatorBase {
+export default class DefaultHumanEmulator extends HumanEmulator {
   public static id = pkg.name.replace('@secret-agent/', '');
 
   public static overshootSpread = 2;

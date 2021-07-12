@@ -29,7 +29,7 @@ import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
-import Plugins from './Plugins';
+import CorePlugins from './CorePlugins';
 import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
@@ -45,7 +45,7 @@ export default class Session extends TypedEventEmitter<{
   public readonly id: string;
   public readonly baseDir: string;
   public browserEngine: IBrowserEngine;
-  public plugins: Plugins;
+  public plugins: CorePlugins;
 
   public viewport: IViewport;
   public timezoneId: string;
@@ -96,9 +96,10 @@ export default class Session extends TypedEventEmitter<{
       browserEmulatorId,
       humanEmulatorId,
       dependencyMap,
+      corePluginPaths,
     } = options;
-    this.plugins = new Plugins(
-      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap },
+    this.plugins = new CorePlugins(
+      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap, corePluginPaths },
       this.logger,
     );
 
@@ -136,8 +137,8 @@ export default class Session extends TypedEventEmitter<{
       browserEmulatorId: this.plugins.browserEmulator.id,
       browserVersion: this.browserEngine.fullVersion,
       humanEmulatorId: this.plugins.humanEmulator.id,
-      locale: this.plugins.browserEmulator.locale,
-      timezoneId: this.plugins.browserEmulator.timezoneId,
+      locale: options.locale,
+      timezoneId: options.timezoneId,
       sessionOptions: providedOptions,
     });
     this.mitmRequestSession = new RequestSession(this.id, this.plugins, this.upstreamProxyUrl);

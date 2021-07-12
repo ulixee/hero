@@ -11,7 +11,7 @@ import * as net from 'net';
 import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
 import Log from '@secret-agent/commons/Logger';
 import MitmSocket from '@secret-agent/mitm-socket/index';
-import IPlugins from '@secret-agent/interfaces/IPlugins';
+import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import { URL } from 'url';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -56,7 +56,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
 
   constructor(
     readonly sessionId: string,
-    readonly plugins: IPlugins,
+    readonly plugins: ICorePlugins,
     public upstreamProxyUrl?: string,
   ) {
     super();

@@ -56,7 +56,7 @@ test('it should work even if dependency not registered through Core.use', async 
   await agent.close();
 });
 
-test('it should fail if dependency not registered and allowDynamicPluginDependencies = false', async () => {
+test('it should fail if dependency not registered and allowDynamicPluginLoading = false', async () => {
   koaServer.get('/test2', ctx => {
     ctx.body = `<body>
 <script>
@@ -67,7 +67,7 @@ test('it should fail if dependency not registered and allowDynamicPluginDependen
 </body>`;
   });
 
-  Core.allowDynamicPluginDependencies = false;
+  Core.allowDynamicPluginLoading = false;
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
   const agent = new Agent({

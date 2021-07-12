@@ -4,7 +4,7 @@ import { inspect } from 'util';
 import * as Helpers from '@secret-agent/testing/helpers';
 import Puppet from '@secret-agent/puppet';
 import Log from '@secret-agent/commons/Logger';
-import Plugins from '@secret-agent/core/lib/Plugins';
+import CorePlugins from '@secret-agent/core/lib/CorePlugins';
 import { IBoundLog } from '@secret-agent/interfaces/ILog';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
@@ -35,7 +35,7 @@ const debug = process.env.DEBUG || false;
 
 test('it should override plugins in a browser window', async () => {
   const httpServer = await Helpers.runHttpServer();
-  const plugins = new Plugins({ selectBrowserMeta }, log as IBoundLog);
+  const plugins = new CorePlugins({ selectBrowserMeta }, log as IBoundLog);
   const context = await puppet.newContext(plugins, log);
   Helpers.onClose(() => context.close());
   const page = await context.newPage();
