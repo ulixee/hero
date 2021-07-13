@@ -1,3 +1,14 @@
+import * as macOsVersionAliasMap from "../data/macOsVersionAliasMap.json";
+
+export function convertMacOsVersionString(versionString: string) {
+  let newVersionString = macOsVersionAliasMap[versionString];
+  if (!newVersionString) {
+    const [majorVersion] = versionString.split('.');
+    newVersionString = macOsVersionAliasMap[`${majorVersion}.*`];
+  }
+  return newVersionString || versionString;
+}
+
 export function findClosestVersionMatch(versionToMatch: string, versions: string[]) {
   if (versions.length === 1 && versions[0] === 'ALL') return 'ALL';
 

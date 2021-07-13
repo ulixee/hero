@@ -12,7 +12,7 @@ import IBrowserData, {
 } from '../interfaces/IBrowserData';
 import DataLoader, { loadData } from './DataLoader';
 import getLocalOperatingSystemMeta from './utils/getLocalOperatingSystemMeta';
-import { findClosestVersionMatch } from './VersionUtils';
+import { convertMacOsVersionString, findClosestVersionMatch } from "./VersionUtils";
 
 const localOsMeta = getLocalOperatingSystemMeta();
 
@@ -118,6 +118,13 @@ function createBrowserId(userAgentOption: IUserAgentOption) {
 
 function createOperatingSystemId(userAgentOption: IUserAgentOption) {
   const { operatingSystemName: name, operatingSystemVersion: version } = userAgentOption;
-  const minor = name.startsWith('win') && version.minor === '0' ? null : version.minor;
-  return [name, version.major, minor].filter(x => x).join('-');
+  let { major, minor } = version;
+
+  if (name.startsWith('mac')) {
+    [major, minor] = convertMacOsVersionString([major, minor].filter(x => x).join('.')).split('.');
+  } else if (name.startsWith('win') && version.minor === '0') {
+    minor = null;
+  }
+
+  return [name, major, minor].filter(x => x).join('-');
 }
