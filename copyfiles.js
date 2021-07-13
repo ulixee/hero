@@ -9,14 +9,14 @@ const workspaces = pkg.workspaces.packages.map(x => x.replace('/*', ''));
 
 const copyArgs = [
   '-e "node_modules"',
-  'plugins/default-browser-emulator/data/**',
-  'examples/*.js',
-  'examples/*.mjs',
-  'mitm-socket/go/*.*',
+  'hero/plugins/default-browser-emulator/data/**',
+  'hero/examples/*.js',
+  'hero/examples/*.mjs',
+  'hero/mitm-socket/go/*.*',
   '.*ignore',
 ];
 if (isBuild) {
-  copyArgs.push('testing/*/**', 'core/test/html/**', 'puppet/test/*/**', 'yarn.lock');
+  copyArgs.push('testing/*/**', 'hero/core/test/html/**', 'hero/puppet/test/*/**', 'yarn.lock');
 }
 
 for (const workspace of workspaces) {
