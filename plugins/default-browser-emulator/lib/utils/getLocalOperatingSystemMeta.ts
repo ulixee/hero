@@ -1,7 +1,6 @@
 import * as Os from 'os';
-import { convertVersionsToTree, getClosestNumberMatch } from '../VersionUtils';
+import { convertMacOsVersionString, convertVersionsToTree, getClosestNumberMatch } from "../VersionUtils";
 import * as darwinToMacOsVersionMap from '../../data/darwinToMacOsVersionMap.json';
-import * as macOsVersionAliasMap from '../../data/macOsVersionAliasMap.json';
 import * as windowsToWindowsVersionMap from '../../data/windowsToWindowsVersionMap.json';
 
 export default function getLocalOperatingSystemMeta() {
@@ -75,12 +74,3 @@ const platformToOsName = {
 
 const darwinVersionTree = convertVersionsToTree(Object.keys(darwinToMacOsVersionMap));
 const windowsVersionTree = convertVersionsToTree(Object.keys(windowsToWindowsVersionMap));
-
-function  convertMacOsVersionString(versionString: string) {
-  let newVersionString = macOsVersionAliasMap[versionString];
-  if (!newVersionString) {
-    const [majorVersion] = versionString.split('.');
-    newVersionString = macOsVersionAliasMap[`${majorVersion}.*`];
-  }
-  return newVersionString || versionString;
-}
