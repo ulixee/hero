@@ -14,7 +14,7 @@ import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreate
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
 import IGeolocation from '@secret-agent/interfaces/IGeolocation';
-import { randomBytes } from 'crypto';
+import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
 import Viewports from './lib/Viewports';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
 import setPageDomOverrides from './lib/setPageDomOverrides';
@@ -34,6 +34,10 @@ import IBrowserData from './interfaces/IBrowserData';
 import selectBrowserEngineOption from './lib/helpers/selectBrowserEngineOption';
 import setGeolocation from './lib/helpers/setGeolocation';
 import { configureBrowserLaunchArgs } from './lib/helpers/configureBrowserLaunchArgs';
+import loadDomOverrides from './lib/loadDomOverrides';
+import DomOverridesBuilder from './lib/DomOverridesBuilder';
+import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
+import configureHttp2Session from './lib/helpers/configureHttp2Session';
 
 const dataLoader = new DataLoader(__dirname);
 export const latestBrowserEngineId = 'chrome-88-0';
@@ -49,26 +53,19 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   public geolocation: IGeolocation;
 
   protected readonly data: IBrowserData;
+  private readonly domOverridesBuilder: DomOverridesBuilder;
 
   constructor(createOptions: ICorePluginCreateOptions) {
     super(createOptions);
     this.data = dataLoader.as(createOptions.userAgentOption) as any;
 
-    this.data.deviceMemory = Math.ceil(Math.random() * 4) * 2;
-    this.data.videoDevice = {
-      deviceId: randomBytes(32).toString('hex'),
-      groupId: randomBytes(32).toString('hex'),
-    };
-    this.data.webGLParameters = {
-      // UNMASKED_VENDOR_WEBGL
-      37445: 'Intel Inc.',
-      // UNMASKED_RENDERER_WEBGL
-      37446: 'Intel Iris OpenGL Engine',
-    };
+    // set default device profile options
+    configureDeviceProfile(this.deviceProfile);
 
     if (this.data.browserConfig.features.includes('FirstPartyCookies')) {
       createOptions.corePlugins.use(FirstPartyCookiesPlugin);
     }
+    this.domOverridesBuilder = loadDomOverrides(this, this.data);
   }
 
   configure(config: IBrowserEmulatorConfig): void {
@@ -105,6 +102,13 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     modifyHeaders(this, this.data, resource);
   }
 
+  public onHttp2SessionConnect(
+    request: IHttpResourceLoadDetails,
+    settings: IHttp2ConnectSettings,
+  ): void {
+    configureHttp2Session(this, this.data, request, settings);
+  }
+
   public onNewPuppetPage(page: IPuppetPage): Promise<any> {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
@@ -114,7 +118,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
       setLocale(this, devtools),
       setScreensize(this, devtools),
       setActiveAndFocused(this, devtools),
-      setPageDomOverrides(this, this.data, page),
+      setPageDomOverrides(this.domOverridesBuilder, this.data, page),
       setGeolocation(this, page),
     ]);
   }
@@ -123,7 +127,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     const devtools = worker.devtoolsSession;
     return Promise.all([
       setUserAgent(this, devtools),
-      setWorkerDomOverrides(this, this.data, worker),
+      setWorkerDomOverrides(this.domOverridesBuilder, this.data, worker),
     ]);
   }
 

@@ -9,15 +9,10 @@ export default interface IBrowserData
   windowChrome: IDataWindowChrome;
   windowFraming: IDataWindowFraming;
   windowNavigator: IDataWindowNavigator;
+  http2Settings: IDataHttp2Settings;
   domPolyfill: IDataDomPolyfill;
   windowBaseFraming: IDataWindowFraming;
   headers: IDataHeaders;
-  deviceMemory?: number;
-  videoDevice?: {
-    deviceId: string;
-    groupId: string;
-  };
-  webGLParameters?: Record<string, string | number | boolean>;
 }
 
 export interface IDataBrowserConfig {
@@ -53,6 +48,13 @@ export interface IDataCodecs {
   videoSupport: any;
   webRtcAudioCodecs: any;
   webRtcVideoCodecs: any;
+}
+
+export interface IDataHttp2Settings {
+  settings: any;
+  ping: string;
+  initialWindowSize: number;
+  firstFrameWindowSize: number;
 }
 
 export interface IDataCore {

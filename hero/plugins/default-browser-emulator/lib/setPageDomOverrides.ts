@@ -1,11 +1,12 @@
-import { BrowserEmulator } from "@secret-agent/plugin-utils";
 import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
 import IBrowserData from '../interfaces/IBrowserData';
-import loadDomOverrides from './loadDomOverrides';
+import DomOverridesBuilder from './DomOverridesBuilder';
 
-export default async function setPageDomOverrides(emulator: BrowserEmulator, data: IBrowserData, page: IPuppetPage) {
-  const domOverrides = loadDomOverrides(emulator, data);
-
+export default async function setPageDomOverrides(
+  domOverrides: DomOverridesBuilder,
+  data: IBrowserData,
+  page: IPuppetPage,
+) {
   const scripts = domOverrides.build();
   const promises: Promise<any>[] = [];
   for (const script of scripts) {

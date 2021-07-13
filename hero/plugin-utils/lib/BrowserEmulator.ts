@@ -10,6 +10,7 @@ import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreate
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
 import { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
+import IDeviceProfile from '@secret-agent/interfaces/IDeviceProfile';
 
 @BrowserEmulatorClassDecorator
 export default class BrowserEmulator implements IBrowserEmulator {
@@ -28,10 +29,17 @@ export default class BrowserEmulator implements IBrowserEmulator {
   public readonly userAgentString: string;
   public readonly browserEngine: IBrowserEngine;
   public readonly logger: IBoundLog;
+  public readonly deviceProfile: IDeviceProfile;
 
   protected readonly corePlugins: ICorePlugins;
 
-  constructor({ userAgentOption, browserEngine, corePlugins, logger }: ICorePluginCreateOptions) {
+  constructor({
+    userAgentOption,
+    browserEngine,
+    corePlugins,
+    logger,
+    deviceProfile,
+  }: ICorePluginCreateOptions) {
     this.id = (this.constructor as IBrowserEmulatorClass).id;
     this.browserName = userAgentOption.browserName;
     this.browserVersion = userAgentOption.browserVersion;
@@ -45,6 +53,7 @@ export default class BrowserEmulator implements IBrowserEmulator {
 
     this.corePlugins = corePlugins;
     this.logger = logger;
+    this.deviceProfile = deviceProfile ?? {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

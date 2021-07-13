@@ -24,6 +24,8 @@ import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreate
 import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
+import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
+import IDeviceProfile from '@secret-agent/interfaces/IDeviceProfile';
 import Core from '../index';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
@@ -31,6 +33,7 @@ const DefaultHumanEmulatorId = 'default-human-emulator';
 
 interface IOptionsCreate {
   userAgentSelector?: string;
+  deviceProfile?: IDeviceProfile;
   humanEmulatorId?: string;
   browserEmulatorId?: string;
   selectBrowserMeta?: ISelectBrowserMeta;
@@ -87,7 +90,13 @@ export default class CorePlugins implements ICorePlugins {
 
     const { browserEngine, userAgentOption } =
       options.selectBrowserMeta || BrowserEmulator.selectBrowserMeta(userAgentSelector);
-    this.createOptions = { browserEngine, userAgentOption, logger, corePlugins: this };
+    this.createOptions = {
+      browserEngine,
+      userAgentOption,
+      logger,
+      corePlugins: this,
+      deviceProfile: options.deviceProfile,
+    };
     this.browserEngine = browserEngine;
     this.logger = logger;
 
@@ -136,6 +145,17 @@ export default class CorePlugins implements ICorePlugins {
   public async onNewPuppetWorker(worker: IPuppetWorker): Promise<void> {
     await Promise.all(
       this.instances.filter(p => p.onNewPuppetWorker).map(p => p.onNewPuppetWorker(worker)),
+    );
+  }
+
+  public async onHttp2SessionConnect(
+    resource: IHttpResourceLoadDetails,
+    settings: IHttp2ConnectSettings,
+  ): Promise<void> {
+    await Promise.all(
+      this.instances
+        .filter(p => p.onHttp2SessionConnect)
+        .map(p => p.onHttp2SessionConnect(resource, settings)),
     );
   }
 

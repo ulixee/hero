@@ -52,6 +52,7 @@ export default class CustomBrowserEmulator implements IBrowserEmulator {
   locale = locale;
   viewport = viewport;
   timezoneId = timezoneId;
+  deviceProfile = {};
 
   configure(config: IBrowserEmulatorConfig): void {
     config.locale = config.locale || this.locale;

@@ -37,6 +37,15 @@ Cookies for all loaded "origins" for the browsing session.
 
 #### **Type**: [`Cookie[]`](/docs/advanced/cookie-storage#cookie)
 
+### deviceProfile
+
+An object containing hardware device properties emulated in this userProfile like memory and gpu information.
+
+#### **Type**: `object`
+  - deviceMemory `number`. The amount of memory specified for this machine
+  - webGlParameters `object`. Key value of WebGlParameters to override (ie, { 37445: 'WebGl Vendor' })
+  - videoDevice `object { deviceId: string, groupId: string }`. A video device to emulate if none is present, such as on a headless server.
+
 ### storage
 
 An object with a key for each "security origin" of a page, and value all the associated [DomStorage](#dom-storage).
@@ -49,3 +58,10 @@ An object with a key for each "security origin" of a page, and value all the ass
 #### **Type**: `object { [origin: string]: DomStorage }`
   - key `string`. The "security origin" of a page or iFrame as defined by Chrome.
   - value [DomStorage](#dom-storage). The `DomStorage` entry for the given origin.
+
+### userAgentString
+
+The user agent used in this profile. Many sites that track user fingerprint information track the useragent information and expect it to remain the same. You can still override this (eg, to update a browser version) by overriding the `userAgent` parameter when constructing a new [`Agent`](/docs/basic-interfaces/agent).
+
+#### **Type** string
+

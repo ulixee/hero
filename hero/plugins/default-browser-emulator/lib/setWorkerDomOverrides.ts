@@ -1,14 +1,12 @@
-import { BrowserEmulator } from '@secret-agent/plugin-utils';
 import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
 import IBrowserData from '../interfaces/IBrowserData';
-import loadDomOverrides from './loadDomOverrides';
+import DomOverridesBuilder from './DomOverridesBuilder';
 
 export default function setWorkerDomOverrides(
-  emulator: BrowserEmulator,
+  domOverrides: DomOverridesBuilder,
   data: IBrowserData,
   worker: IPuppetWorker,
 ): Promise<any[]> {
-  const domOverrides = loadDomOverrides(emulator, data);
   const scripts = domOverrides.build([
     'Error.captureStackTrace',
     'Error.constructor',

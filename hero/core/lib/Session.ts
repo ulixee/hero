@@ -92,22 +92,30 @@ export default class Session extends TypedEventEmitter<{
     this.awaitedEventListener = new AwaitedEventListener(this);
 
     const {
-      userAgent: userAgentSelector,
       browserEmulatorId,
       humanEmulatorId,
       dependencyMap,
       corePluginPaths,
+      userProfile,
+      userAgent,
     } = options;
+
+    const userAgentSelector = userAgent ?? userProfile?.userAgentString;
     this.plugins = new CorePlugins(
-      { userAgentSelector, browserEmulatorId, humanEmulatorId, dependencyMap, corePluginPaths },
+      {
+        userAgentSelector,
+        browserEmulatorId,
+        humanEmulatorId,
+        dependencyMap,
+        corePluginPaths,
+        deviceProfile: userProfile?.deviceProfile,
+      },
       this.logger,
     );
 
     this.browserEngine = this.plugins.browserEngine;
 
-    if (options.userProfile) {
-      this.userProfile = options.userProfile;
-    }
+    this.userProfile = options.userProfile;
     this.upstreamProxyUrl = options.upstreamProxyUrl;
     this.geolocation = options.geolocation;
 

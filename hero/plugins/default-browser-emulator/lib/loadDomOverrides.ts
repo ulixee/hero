@@ -11,8 +11,9 @@ export default function loadDomOverrides(
 
   domOverrides.add('Error.captureStackTrace');
   domOverrides.add('Error.constructor');
+  const deviceProfile = emulator.deviceProfile;
 
-  domOverrides.add('navigator.deviceMemory', { memory: data.deviceMemory });
+  domOverrides.add('navigator.deviceMemory', { memory: deviceProfile.deviceMemory });
   domOverrides.add('navigator', {
     userAgentString: emulator.userAgentString,
     platform: emulator.operatingSystemPlatform,
@@ -20,7 +21,7 @@ export default function loadDomOverrides(
   });
 
   domOverrides.add('MediaDevices.prototype.enumerateDevices', {
-    videoDevice: data.videoDevice,
+    videoDevice: deviceProfile.videoDevice,
   });
 
   domOverrides.add('Notification.permission');
@@ -63,7 +64,7 @@ export default function loadDomOverrides(
 
   const windowNavigator = data.windowNavigator;
   domOverrides.add('navigator.plugins', parseNavigatorPlugins(windowNavigator.navigator));
-  domOverrides.add('WebGLRenderingContext.prototype.getParameter', data.webGLParameters);
+  domOverrides.add('WebGLRenderingContext.prototype.getParameter', deviceProfile.webGlParameters);
   domOverrides.add('console.debug');
   domOverrides.add('HTMLIFrameElement.prototype');
   domOverrides.add('Element.prototype.attachShadow');
