@@ -1,0 +1,438 @@
+{
+  "navigator": {
+    "_$protos": ["Navigator.prototype", "Object.prototype"],
+    "plugins": {
+      "0": {
+        "0": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "2": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/postscript"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "ps"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "PostScript"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": ["Plugin.prototype", "Object.prototype"],
+        "name": {
+          "_$type": "string",
+          "_$value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 3
+        },
+        "_$type": "object",
+        "_$flags": "ce",
+        "_$value": "{0: {},1: {},2: {}}"
+      },
+      "_$protos": ["PluginArray.prototype", "Object.prototype"],
+      "WebKit built-in PDF": {
+        "0": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "1": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "text/pdf"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "pdf"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "Portable Document Format"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "2": {
+          "_$protos": ["MimeType.prototype", "Object.prototype"],
+          "type": {
+            "_$type": "string",
+            "_$value": "application/postscript"
+          },
+          "suffixes": {
+            "_$type": "string",
+            "_$value": "ps"
+          },
+          "description": {
+            "_$type": "string",
+            "_$value": "PostScript"
+          },
+          "_$type": "object",
+          "_$flags": "ce",
+          "_$value": "{}"
+        },
+        "_$protos": ["Plugin.prototype", "Object.prototype"],
+        "name": {
+          "_$type": "string",
+          "_$value": "WebKit built-in PDF"
+        },
+        "filename": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": ""
+        },
+        "length": {
+          "_$type": "number",
+          "_$value": 3
+        },
+        "_$type": "object",
+        "_$flags": "c",
+        "_$value": "{0: {},1: {},2: {}}"
+      },
+      "length": {
+        "_$type": "number",
+        "_$value": 1
+      },
+      "_$type": "object"
+    },
+    "mimeTypes": {
+      "0": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "ce",
+        "_$value": "{}"
+      },
+      "1": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "text/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "ce",
+        "_$value": "{}"
+      },
+      "2": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/postscript"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "ps"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "PostScript"
+        },
+        "_$type": "object",
+        "_$flags": "ce",
+        "_$value": "{}"
+      },
+      "_$protos": ["MimeTypeArray.prototype", "Object.prototype"],
+      "application/pdf": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "c",
+        "_$value": "{}"
+      },
+      "text/pdf": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "text/pdf"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "pdf"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "Portable Document Format"
+        },
+        "_$type": "object",
+        "_$flags": "c",
+        "_$value": "{}"
+      },
+      "application/postscript": {
+        "_$protos": ["MimeType.prototype", "Object.prototype"],
+        "type": {
+          "_$type": "string",
+          "_$value": "application/postscript"
+        },
+        "suffixes": {
+          "_$type": "string",
+          "_$value": "ps"
+        },
+        "description": {
+          "_$type": "string",
+          "_$value": "PostScript"
+        },
+        "_$type": "object",
+        "_$flags": "c",
+        "_$value": "{}"
+      },
+      "length": {
+        "_$type": "number",
+        "_$value": 3
+      },
+      "_$type": "object"
+    },
+    "cookieEnabled": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "geolocation": {
+      "_$protos": ["Object.prototype"],
+      "getCurrentPosition": {
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "getCurrentPosition"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "_$type": "function",
+        "_$value": "function getCurrentPosition() {\n    [native code]\n}",
+        "_$function": "function getCurrentPosition() {\n    [native code]\n}",
+        "_$invocation": "TypeError: Not enough arguments"
+      },
+      "watchPosition": {
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "watchPosition"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "_$type": "function",
+        "_$value": "function watchPosition() {\n    [native code]\n}",
+        "_$function": "function watchPosition() {\n    [native code]\n}",
+        "_$invocation": "TypeError: Not enough arguments"
+      },
+      "clearWatch": {
+        "name": {
+          "_$type": "string",
+          "_$flags": "c",
+          "_$value": "clearWatch"
+        },
+        "length": {
+          "_$type": "number",
+          "_$flags": "c",
+          "_$value": 1
+        },
+        "_$type": "function",
+        "_$value": "function clearWatch() {\n    [native code]\n}",
+        "_$function": "function clearWatch() {\n    [native code]\n}",
+        "_$invocation": "TypeError: Not enough arguments"
+      },
+      "_$type": "object"
+    },
+    "mediaDevices": {
+      "_$protos": ["MediaDevices.prototype", "EventTarget.prototype", "Object.prototype"],
+      "ondevicechange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "webdriver": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "appCodeName": {
+      "_$type": "string",
+      "_$value": "Mozilla"
+    },
+    "appName": {
+      "_$type": "string",
+      "_$value": "Netscape"
+    },
+    "appVersion": {
+      "_$type": "string",
+      "_$value": "5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Safari/605.1.15"
+    },
+    "platform": {
+      "_$type": "string",
+      "_$value": "MacIntel"
+    },
+    "product": {
+      "_$type": "string",
+      "_$value": "Gecko"
+    },
+    "productSub": {
+      "_$type": "string",
+      "_$value": "20030107"
+    },
+    "userAgent": {
+      "_$type": "string",
+      "_$value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1.2 Safari/605.1.15"
+    },
+    "vendor": {
+      "_$type": "string",
+      "_$value": "Apple Computer, Inc."
+    },
+    "vendorSub": {
+      "_$type": "string",
+      "_$value": ""
+    },
+    "language": {
+      "_$type": "string",
+      "_$value": "en-US"
+    },
+    "languages": {
+      "0": {
+        "_$type": "string",
+        "_$flags": "e",
+        "_$value": "en-US"
+      },
+      "_$protos": ["Array.prototype", "Object.prototype"],
+      "_$isFrozen": true,
+      "_$isSealed": true,
+      "length": {
+        "_$type": "number",
+        "_$flags": "",
+        "_$value": 1
+      },
+      "_$type": "array",
+      "_$value": "[en-US]"
+    },
+    "onLine": {
+      "_$type": "boolean",
+      "_$value": true
+    },
+    "serviceWorker": {
+      "_$protos": ["ServiceWorkerContainer.prototype", "EventTarget.prototype", "Object.prototype"],
+      "controller": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "ready": {
+        "_$value": "Promise",
+        "_$type": "object"
+      },
+      "oncontrollerchange": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "onmessage": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "onmessageerror": {
+        "_$type": "object",
+        "_$value": null
+      },
+      "_$type": "object"
+    },
+    "_$type": "object",
+    "_$flags": "ce",
+    "_$get": "function navigator() {\n    [native code]\n}",
+    "_$getToStringToString": "function toString() {\n    [native code]\n}"
+  }
+}

@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "outDir": "../../../build-dist"
-  },
-  "include": ["./*.ts", "./*.js", ".eslintrc.js"],
-  "exclude": ["node_modules", "build-dist"]
-}
