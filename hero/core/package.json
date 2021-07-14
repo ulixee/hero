@@ -32,7 +32,7 @@
     "@secret-agent/chrome-app": "1.0.0",
     "@secret-agent/client": "1.5.4",
     "@secret-agent/core": "1.5.4",
-    "@secret-agent/plugin-utils": "1.5.3",
+    "@secret-agent/plugin-utils": "1.5.4",
     "@secret-agent/puppet-chrome": "1.5.4",
     "@secret-agent/replay": "1.5.4",
     "@secret-agent/testing": "1.5.4",

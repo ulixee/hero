@@ -21,8 +21,8 @@
       "hero/full-client",
       "hero/puppet",
       "hero/puppet-chrome",
-      "mitm",
-      "mitm-socket",
+      "hero/mitm",
+      "hero/mitm-socket",
       "replay",
       "commons"
     ]

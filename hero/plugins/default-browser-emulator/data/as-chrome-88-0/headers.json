@@ -120,6 +120,29 @@
           "Accept-Encoding": ["gzip, deflate"],
           "Accept-Language": ["en-US,en;q=0.9"]
         }
+      },
+      {
+        "originTypes": ["none"],
+        "method": "GET",
+        "order": [
+          "Host",
+          "Connection",
+          "Cache-Control",
+          "Upgrade-Insecure-Requests",
+          "User-Agent",
+          "Accept",
+          "Accept-Encoding",
+          "Accept-Language"
+        ],
+        "defaults": {
+          "Connection": ["keep-alive"],
+          "Upgrade-Insecure-Requests": ["1"],
+          "Accept": [
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+          ],
+          "Accept-Encoding": ["gzip, deflate"],
+          "Accept-Language": ["en-US,en;q=0.9"]
+        }
       }
     ],
     "WebsocketUpgrade": [
@@ -728,6 +751,34 @@
           "Connection": ["keep-alive"],
           "Accept": ["*/*"],
           "Sec-Fetch-Site": ["same-site", "cross-site"],
+          "Sec-Fetch-Mode": ["cors"],
+          "Sec-Fetch-Dest": ["empty"],
+          "Accept-Encoding": ["gzip, deflate, br"],
+          "Accept-Language": ["en-US,en;q=0.9"]
+        }
+      },
+      {
+        "originTypes": ["same-origin"],
+        "method": "POST",
+        "order": [
+          "Host",
+          "Connection",
+          "Content-Length",
+          "Content-Type",
+          "User-Agent",
+          "Accept",
+          "Origin",
+          "Sec-Fetch-Site",
+          "Sec-Fetch-Mode",
+          "Sec-Fetch-Dest",
+          "Referer",
+          "Accept-Encoding",
+          "Accept-Language"
+        ],
+        "defaults": {
+          "Connection": ["keep-alive"],
+          "Accept": ["*/*"],
+          "Sec-Fetch-Site": ["same-origin"],
           "Sec-Fetch-Mode": ["cors"],
           "Sec-Fetch-Dest": ["empty"],
           "Accept-Encoding": ["gzip, deflate, br"],
