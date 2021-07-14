@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.4](https://github.com/ulixee/secret-agent/compare/v1.5.3...v1.5.4) (2021-07-14)
+
+
+### Bug Fixes
+
+* **mitm:** http2 session frame emulator data ([1e61a91](https://github.com/ulixee/secret-agent/commit/1e61a91dad0f575ddbdde9dc66acba7e8de62df6))
+* fixed paths ([6a28d80](https://github.com/ulixee/secret-agent/commit/6a28d8069111356e0b63d23003187ecd08a365b8))
+* fixed some unclear documentation related to plugins ([9868428](https://github.com/ulixee/secret-agent/commit/98684285e5218808f506fad1cdf68c0e4662e017))
+* useragent was not correctly parsing mac os 11 ([3a177ed](https://github.com/ulixee/secret-agent/commit/3a177edb690f0f6373942720f3fdf304a2aad596))
+* **core:** fix interact with elements in iframes ([c0c7a6e](https://github.com/ulixee/secret-agent/commit/c0c7a6e0b93fddf418edf1298bb2d1419ebd65ed))
+* **puppet:** clean data dir on close ([6c2b85f](https://github.com/ulixee/secret-agent/commit/6c2b85f007656192a8c103c2aa6752a0de3ab091))
+* **puppet:** retry on failure to delete chrome dir ([ccb07b3](https://github.com/ulixee/secret-agent/commit/ccb07b3a9f77e51ce35fbd20dd6a5b8c7310eaf4))
+
+
+### Features
+
+* args can now be passed into ExecuteJsPlugin ([0ed06f0](https://github.com/ulixee/secret-agent/commit/0ed06f0e98a3076c04e5a1aedd5e0dfc53ac6392))
+* first stab at documenting plugins + simplified plugin architecture ([fcaa3cf](https://github.com/ulixee/secret-agent/commit/fcaa3cfdca98b6f85128c196369d63ae40642df1))
+* register Core plugins through agent.use ([eb08964](https://github.com/ulixee/secret-agent/commit/eb0896454ed1e265459fc174a937f666c975844d))
+
+
+
+
+
 ## [1.5.3](https://github.com/ulixee/secret-agent/compare/v1.5.2...v1.5.3) (2021-07-01)
 
 

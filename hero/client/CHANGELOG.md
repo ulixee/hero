@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.4](https://github.com/ulixee/secret-agent/compare/v1.5.3...v1.5.4) (2021-07-14)
+
+
+### Bug Fixes
+
+* fixed paths ([6a28d80](https://github.com/ulixee/secret-agent/commit/6a28d8069111356e0b63d23003187ecd08a365b8))
+
+
+
+
+
 ## [1.5.3](https://github.com/ulixee/secret-agent/compare/v1.5.2...v1.5.3) (2021-07-01)
 
 **Note:** Version bump only for package @secret-agent/client

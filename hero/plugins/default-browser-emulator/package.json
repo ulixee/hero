@@ -1,23 +1,23 @@
 {
   "name": "@secret-agent/default-browser-emulator",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Browser emulator generated from DoubleAgent data",
   "main": "index.js",
   "dependencies": {
     "@secret-agent/chrome-88-0": "^4324.182.0",
-    "@secret-agent/commons": "1.5.3",
-    "@secret-agent/interfaces": "1.5.3",
-    "@secret-agent/plugin-utils": "1.5.3",
+    "@secret-agent/commons": "1.5.4",
+    "@secret-agent/interfaces": "1.5.4",
+    "@secret-agent/plugin-utils": "1.5.4",
     "compare-versions": "^3.6.0",
     "tough-cookie": "^4.0.0",
     "ua-parser-js": "^0.7.22"
   },
   "devDependencies": {
-    "@secret-agent/core": "1.5.3",
-    "@secret-agent/puppet": "1.5.3",
-    "@secret-agent/testing": "1.5.3",
+    "@secret-agent/core": "1.5.4",
+    "@secret-agent/puppet": "1.5.4",
+    "@secret-agent/testing": "1.5.4",
     "@types/tough-cookie": "^4.0.0",
-    "secret-agent": "1.5.3",
+    "secret-agent": "1.5.4",
     "source-map-loader": "^0.2.4"
   }
 }

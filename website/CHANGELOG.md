@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.5.4](https://github.com/ulixee/secret-agent/compare/v1.5.3...v1.5.4) (2021-07-14)
+
+
+### Bug Fixes
+
+* **mitm:** http2 session frame emulator data ([1e61a91](https://github.com/ulixee/secret-agent/commit/1e61a91dad0f575ddbdde9dc66acba7e8de62df6))
+* fixed some unclear documentation related to plugins ([9868428](https://github.com/ulixee/secret-agent/commit/98684285e5218808f506fad1cdf68c0e4662e017))
+
+
+### Features
+
+* first stab at documenting plugins + simplified plugin architecture ([fcaa3cf](https://github.com/ulixee/secret-agent/commit/fcaa3cfdca98b6f85128c196369d63ae40642df1))
+
+
+
+
+
 ## [1.5.3](https://github.com/ulixee/secret-agent/compare/v1.5.2...v1.5.3) (2021-07-01)
 
 
