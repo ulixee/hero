@@ -3,7 +3,7 @@ import agent, { Observable } from 'secret-agent';
 // process.env.SA_SHOW_BROWSER = 'true';
 
 async function run() {
-  await agent.configure({ userAgent: '~ chrome >= 88' });
+  await agent.configure({ userAgent: '~ chrome = 88.*' });
   await agent.goto('https://news.ycombinator.com/');
   await agent.waitForPaintingStable();
 

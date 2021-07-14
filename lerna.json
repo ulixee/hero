@@ -5,6 +5,7 @@
     "hero/client",
     "hero/core",
     "hero/interfaces",
+    "here/plugin-utils",
     "hero/plugins/*",
     "hero/full-client",
     "hero/puppet",
