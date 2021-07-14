@@ -1,5 +1,3 @@
-// @ts-ignore
-import * as nodeCommon from '_http_common';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import * as http from 'http';
 import * as http2 from 'http2';
@@ -81,8 +79,6 @@ export default class HeadersHandler {
   ): IResourceHeaders {
     const headers: IResourceHeaders = {};
     for (const [headerName, value] of Object.entries(originalRawHeaders)) {
-      if (nodeCommon._checkInvalidHeaderChar(value)) continue;
-
       const canonizedKey = headerName.trim();
 
       const lowerHeaderName = toLowerCase(canonizedKey);
@@ -135,6 +131,21 @@ export default class HeadersHandler {
         else stream.sendTrailers(trailers ?? {});
       });
     }
+  }
+
+  public static prepareHttp2RequestHeadersForSave(
+    headers: IMitmRequestContext['requestHeaders'],
+  ): IMitmRequestContext['requestHeaders'] {
+    const order: string[] = [];
+    for (const key of Object.keys(headers)) {
+      if (key.startsWith(':')) order.unshift(key);
+      else order.push(key);
+    }
+    const newHeaders = {};
+    for (const key of order) {
+      newHeaders[key] = headers[key];
+    }
+    return newHeaders;
   }
 
   public static prepareRequestHeadersForHttp2(ctx: IMitmRequestContext): void {

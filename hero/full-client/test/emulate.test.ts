@@ -206,6 +206,44 @@ describe('geolocation', () => {
 describe('user agent and platform', () => {
   const propsToGet = `appVersion, platform, userAgent, deviceMemory`.split(',').map(x => x.trim());
 
+  it('should be able to configure a userAgent', async () => {
+    const userAgent =
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4472.124 Safari/537.36';
+    const agent = await handler.createAgent({
+      userAgent,
+    });
+    Helpers.needsClosing.push(agent);
+
+    const agentMeta = await agent.meta;
+    expect(agentMeta.userAgentString).toBe(userAgent);
+  });
+
+  it('should be able to configure a userAgent with a range', async () => {
+    const agent = await handler.createAgent({
+      userAgent: '~ chrome >= 88 && chrome < 89',
+    });
+    Helpers.needsClosing.push(agent);
+
+    const agentMeta = await agent.meta;
+    const chromeMatch = agentMeta.userAgentString.match(/Chrome\/(\d+)/);
+    expect(chromeMatch).toBeTruthy();
+    const version = Number(chromeMatch[1]);
+    expect(version).toBe(88);
+  });
+
+  it('should be able to configure a userAgent with a wildcard', async () => {
+    const agent = await handler.createAgent({
+      userAgent: '~ chrome = 88.x',
+    });
+    Helpers.needsClosing.push(agent);
+
+    const agentMeta = await agent.meta;
+    const chromeMatch = agentMeta.userAgentString.match(/Chrome\/(\d+)/);
+    expect(chromeMatch).toBeTruthy();
+    const version = Number(chromeMatch[1]);
+    expect(version).toBe(88);
+  });
+
   it('should add user agent and platform to window & frames', async () => {
     const agent = await handler.createAgent();
     Helpers.needsClosing.push(agent);

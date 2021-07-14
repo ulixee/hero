@@ -30,6 +30,8 @@ export default class UserProfile {
     return {
       cookies,
       storage,
+      userAgentString: session.plugins.browserEmulator.userAgentString,
+      deviceProfile: session.plugins.browserEmulator.deviceProfile,
     } as IUserProfile;
   }
 

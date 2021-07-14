@@ -14,8 +14,13 @@ import { IPuppetPage } from './IPuppetPage';
 import { IPuppetWorker } from './IPuppetWorker';
 import IViewport from './IViewport';
 import IGeolocation from './IGeolocation';
+import IDeviceProfile from './IDeviceProfile';
+import IHttp2ConnectSettings from './IHttp2ConnectSettings';
 
-export default interface ICorePlugin extends ICorePluginMethods, IBrowserEmulatorMethods, IHumanEmulatorMethods {
+export default interface ICorePlugin
+  extends ICorePluginMethods,
+    IBrowserEmulatorMethods,
+    IHumanEmulatorMethods {
   id: string;
 }
 
@@ -94,6 +99,7 @@ export interface IBrowserEmulator extends ICorePlugin {
   operatingSystemVersion: IVersion;
 
   userAgentString: string;
+  deviceProfile: IDeviceProfile;
 }
 
 export interface IBrowserEmulatorMethods {
@@ -103,6 +109,10 @@ export interface IBrowserEmulatorMethods {
   onTcpConfiguration?(settings: ITcpSettings): Promise<any> | void;
   onTlsConfiguration?(settings: ITlsSettings): Promise<any> | void;
 
+  onHttp2SessionConnect?(
+    request: IHttpResourceLoadDetails,
+    settings: IHttp2ConnectSettings,
+  ): Promise<any> | void;
   beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any> | void;
   beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;
 

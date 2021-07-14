@@ -55,6 +55,8 @@ describe('UserProfile cookie tests', () => {
     await tab2.waitForLoad('PaintingStable');
     expect(cookie).not.toBeTruthy();
 
+    expect(profile.userAgentString).toBeTruthy();
+
     const meta3 = await connection.createSession({
       userProfile: profile,
     });
@@ -62,6 +64,9 @@ describe('UserProfile cookie tests', () => {
     Helpers.needsClosing.push(tab3.session);
     const cookiesBefore = await connection.exportUserProfile(meta3);
     expect(cookiesBefore.cookies).toHaveLength(1);
+    expect(cookiesBefore.userAgentString).toBe(profile.userAgentString);
+    expect(tab3.session.plugins.browserEmulator.userAgentString).toBe(profile.userAgentString);
+    expect(cookiesBefore.deviceProfile).toEqual(profile.deviceProfile);
 
     await tab3.goto(`${koaServer.baseUrl}/cookie2`);
     await tab3.waitForLoad('PaintingStable');

@@ -71,10 +71,10 @@ function isSelectorMatch(userAgentOption: IDataUserAgentOption, selectors: ISele
       version = operatingSystemVersion;
     } else continue;
 
-    for (const match of matches) {
-      const isMatch = compareVersions(version, match.version, match.operator);
-      if (isMatch) return true;
-    }
+    const isMatch = matches.every(match =>
+      compareVersions.compare(version, match.version, match.operator),
+    );
+    if (isMatch) return true;
   }
   return false;
 }
@@ -101,14 +101,23 @@ function extractUserAgentSelectors(userAgentSelector: string): ISelector[] {
     .split('&')
     .map(x => x.trim());
   for (const part of parts) {
-    const matches = part.match(/^([a-z\s-]+)([\s><=]+)?([0-9.]+)?/);
+    const matches = part.match(/^([a-z\s-]+)([\s><=]+)?([0-9.x*]+)?/);
     if (!matches?.length) continue;
     const [rawName, rawOperator, rawVersion] = matches.slice(1);
     const name = cleanupName(rawName);
     const operator = cleanupOperator(rawOperator);
-    const version = cleanupVersion(rawVersion);
+    let version = cleanupVersion(rawVersion);
     selectorByName[name] = selectorByName[name] || { name, matches: [] };
-    selectorByName[name].matches.push({ operator, version });
+
+    if (operator === '=') {
+      const versionParts = version.split('.');
+      const missingParts = 3 - versionParts.length;
+      for (let i = 0; i < missingParts; i += 1) {
+        versionParts.push('*');
+      }
+      version = versionParts.join('.');
+    }
+    if (version) selectorByName[name].matches.push({ operator, version });
   }
 
   return Object.values(selectorByName);
@@ -130,7 +139,7 @@ function cleanupOperator(operator: string) {
 }
 
 function cleanupVersion(version: string) {
-  return version.trim().replace(/[^0-9]+/g, '.');
+  return version.trim().replace(/[^0-9x*]+/g, '.');
 }
 
 function createUserAgentOption(userAgentString: string): IUserAgentOption {

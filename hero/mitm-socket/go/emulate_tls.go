@@ -44,7 +44,7 @@ func EmulateTls(dialConn net.Conn, addr string, sessionArgs SessionArgs, connect
 
 	if connectArgs.KeylogPath != "" {
 		var keylog io.Writer
-		keylog, err = os.OpenFile(connectArgs.KeylogPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+		keylog, err = os.OpenFile(connectArgs.KeylogPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
 		if err != nil {
 			return nil, err
 		}

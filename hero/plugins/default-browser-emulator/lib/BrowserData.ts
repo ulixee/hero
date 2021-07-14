@@ -6,13 +6,14 @@ import IBrowserData, {
   IDataCodecs,
   IDataDomPolyfill,
   IDataHeaders,
+  IDataHttp2Settings,
   IDataWindowChrome,
   IDataWindowFraming,
   IDataWindowNavigator,
 } from '../interfaces/IBrowserData';
 import DataLoader, { loadData } from './DataLoader';
 import getLocalOperatingSystemMeta from './utils/getLocalOperatingSystemMeta';
-import { convertMacOsVersionString, findClosestVersionMatch } from "./VersionUtils";
+import { convertMacOsVersionString, findClosestVersionMatch } from './VersionUtils';
 
 const localOsMeta = getLocalOperatingSystemMeta();
 
@@ -24,10 +25,15 @@ export default class BrowserData implements IBrowserData {
 
   constructor(dataLoader: DataLoader, userAgentOption: IUserAgentOption) {
     const browserId = createBrowserId(userAgentOption);
-    const operatingSystemById = createOperatingSystemId(userAgentOption);
+    const os = getOperatingSystemParts(userAgentOption);
     this.dataLoader = dataLoader;
     this.baseDataDir = `${dataLoader.dataDir}/as-${browserId}`;
-    this.osDataDir = `${this.baseDataDir}/as-${operatingSystemById}`;
+    this.osDataDir = `${this.baseDataDir}/as-${os.name}-${os.version}`;
+    if (!this.dataLoader.isSupportedEmulator(this.osDataDir)) {
+      const otherVersions = this.dataLoader.getBrowserOperatingSystemVersions(browserId, os.name);
+      const closestVersionMatch = findClosestVersionMatch(os.version, otherVersions);
+      this.osDataDir = `${this.baseDataDir}/as-${os.name}-${closestVersionMatch}`;
+    }
   }
 
   public get pkg(): any {
@@ -54,6 +60,10 @@ export default class BrowserData implements IBrowserData {
     return loadData(`${this.osDataDir}/codecs.json`);
   }
 
+  public get http2Settings(): IDataHttp2Settings {
+    return loadData(`${this.osDataDir}/http2-session.json`);
+  }
+
   public get windowChrome(): IDataWindowChrome {
     try {
       return loadData(`${this.osDataDir}/window-chrome.json`);
@@ -72,8 +82,7 @@ export default class BrowserData implements IBrowserData {
 
   public get domPolyfill(): IDataDomPolyfill {
     try {
-      this.domPolyfillFilename =
-        this.domPolyfillFilename || extractPolyfillFilename(this.osDataDir);
+      this.domPolyfillFilename ??= extractPolyfillFilename(this.osDataDir);
       return loadData(`${this.osDataDir}/${this.domPolyfillFilename}`);
     } catch (e) {
       return undefined;
@@ -81,16 +90,23 @@ export default class BrowserData implements IBrowserData {
   }
 }
 
-function extractPolyfillFilename(dataDir: string) {
-  const filenames: string[] = Fs.readdirSync(dataDir);
-  const filenameMap = {};
-  for (const filename of filenames) {
-    const matches = filename.match(/^dom-polyfill-when-runtime-([a-z-]+)(-([0-9-]+))?.json$/);
-    if (!matches) continue;
+const polyfillFilesByDatadir: {
+  [dataDir: string]: { [osName: string]: { [osVersion: string]: string } };
+} = {};
 
-    const [osName, _, osVersion] = matches.slice(1); // eslint-disable-line @typescript-eslint/naming-convention,@typescript-eslint/no-unused-vars
-    filenameMap[osName] = filenameMap[osName] || {};
-    filenameMap[osName][osVersion || 'ALL'] = filename;
+function extractPolyfillFilename(dataDir: string) {
+  let filenameMap = polyfillFilesByDatadir[dataDir];
+  if (!filenameMap) {
+    filenameMap = {};
+    polyfillFilesByDatadir[dataDir] = filenameMap;
+    for (const filename of Fs.readdirSync(dataDir)) {
+      const matches = filename.match(/^dom-polyfill-when-runtime-([a-z-]+)(-([0-9-]+))?.json$/);
+      if (!matches) continue;
+
+      const [osName, _, osVersion] = matches.slice(1); // eslint-disable-line @typescript-eslint/naming-convention,@typescript-eslint/no-unused-vars
+      filenameMap[osName] = filenameMap[osName] || {};
+      filenameMap[osName][osVersion || 'ALL'] = filename;
+    }
   }
 
   if (!filenameMap[localOsMeta.name]) {
@@ -116,7 +132,7 @@ function createBrowserId(userAgentOption: IUserAgentOption) {
   return [browserName, browserVersion.major, browserVersion.minor].filter(x => x).join('-');
 }
 
-function createOperatingSystemId(userAgentOption: IUserAgentOption) {
+function getOperatingSystemParts(userAgentOption: IUserAgentOption) {
   const { operatingSystemName: name, operatingSystemVersion: version } = userAgentOption;
   let { major, minor } = version;
 
@@ -125,6 +141,6 @@ function createOperatingSystemId(userAgentOption: IUserAgentOption) {
   } else if (name.startsWith('win') && version.minor === '0') {
     minor = null;
   }
-
-  return [name, major, minor].filter(x => x).join('-');
+  const finalVersion = [major, minor].filter(x => x).join('-');
+  return { name, version: finalVersion };
 }

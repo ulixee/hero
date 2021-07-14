@@ -3,42 +3,56 @@
     "id": "chrome-83-0",
     "name": "chrome",
     "fullVersion": "83.0.4103.61",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-84-0",
     "name": "chrome",
     "fullVersion": "84.0.4147.135",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-85-0",
     "name": "chrome",
     "fullVersion": "85.0.4183.102",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-86-0",
     "name": "chrome",
     "fullVersion": "86.0.4240.198",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-87-0",
     "name": "chrome",
     "fullVersion": "87.0.4280.141",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-88-0",
     "name": "chrome",
     "fullVersion": "88.0.4324.150",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   },
   {
     "id": "chrome-89-0",
     "name": "chrome",
     "fullVersion": "89.0.4389.114",
-    "features": ["headless"]
+    "features": [
+      "headless"
+    ]
   }
 ]

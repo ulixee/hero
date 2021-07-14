@@ -8,6 +8,8 @@ import MitmSocketSession from '@secret-agent/mitm-socket/lib/MitmSocketSession';
 import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
 import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
 import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
+import Resolvable from '@secret-agent/commons/Resolvable';
+import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';
 import RequestSession from '../handlers/RequestSession';
@@ -283,15 +285,15 @@ export default class MitmRequestAgent {
 
   /////// ////////// Http2 helpers //////////////////////////////////////////////////////////////////
 
-  private http2Request(ctx: IMitmRequestContext): http2.ClientHttp2Stream {
-    const client = this.createHttp2Session(ctx);
+  private async http2Request(ctx: IMitmRequestContext): Promise<http2.ClientHttp2Stream> {
+    const client = await this.createHttp2Session(ctx);
     ctx.setState(ResourceState.CreateProxyToServerRequest);
     const weight = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.state?.weight;
 
-    return client.request(ctx.requestHeaders, { waitForTrailers: true, weight });
+    return client.request(ctx.requestHeaders, { waitForTrailers: true, weight, exclusive: true });
   }
 
-  private createHttp2Session(ctx: IMitmRequestContext): ClientHttp2Session {
+  private async createHttp2Session(ctx: IMitmRequestContext): Promise<ClientHttp2Session> {
     const origin = ctx.url.origin;
     let originSocketPool: SocketPool;
     let resolvedHost: string;
@@ -312,11 +314,32 @@ export default class MitmRequestAgent {
     const session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
 
     ctx.setState(ResourceState.CreateH2Session);
-    const clientSettings = session?.remoteSettings;
-    const proxyToServerH2Client = http2.connect(origin, {
-      settings: clientSettings,
-      createConnection: () => ctx.proxyToServerMitmSocket.socket,
-    });
+
+    const settings: IHttp2ConnectSettings = {
+      settings: session?.remoteSettings,
+      localWindowSize: session?.state.localWindowSize,
+    };
+    if (ctx.requestSession.plugins.onHttp2SessionConnect) {
+      await ctx.requestSession.plugins.onHttp2SessionConnect(ctx, settings);
+    }
+
+    const connectPromise = new Resolvable<void>();
+    const proxyToServerH2Client = http2.connect(
+      origin,
+      {
+        settings: settings.settings,
+        createConnection: () => ctx.proxyToServerMitmSocket.socket,
+      },
+      async remoteSession => {
+        if ('setLocalWindowSize' in remoteSession && settings.localWindowSize) {
+          // @ts-ignore
+          remoteSession.setLocalWindowSize(settings.localWindowSize);
+          await new Promise(setImmediate);
+        }
+        connectPromise.resolve();
+      },
+    );
+
     if (session) {
       session.on('ping', bytes => {
         proxyToServerH2Client.ping(bytes, () => null);
@@ -352,11 +375,11 @@ export default class MitmRequestAgent {
       if (session && !session.destroyed) session.destroy();
     });
 
-    proxyToServerH2Client.on('remoteSettings', settings => {
+    proxyToServerH2Client.on('remoteSettings', remoteSettings => {
       log.stats('Http2Client.remoteSettings', {
         sessionId: this.session.sessionId,
         origin,
-        settings,
+        settings: remoteSettings,
       });
     });
 
@@ -402,6 +425,7 @@ export default class MitmRequestAgent {
 
     originSocketPool.registerHttp2Session(proxyToServerH2Client, ctx.proxyToServerMitmSocket);
 
+    await connectPromise;
     return proxyToServerH2Client;
   }
 }
