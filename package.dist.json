@@ -13,16 +13,16 @@
   },
   "workspaces": {
     "packages": [
-      "hero/client",
-      "hero/core",
-      "hero/interfaces",
-      "hero/plugin-utils",
-      "hero/plugins/*",
-      "hero/full-client",
-      "hero/puppet",
-      "hero/puppet-chrome",
-      "hero/mitm",
-      "hero/mitm-socket",
+      "client",
+      "core",
+      "interfaces",
+      "plugin-utils",
+      "plugins/*",
+      "full-client",
+      "puppet",
+      "puppet-chrome",
+      "mitm",
+      "mitm-socket",
       "replay",
       "commons"
     ]

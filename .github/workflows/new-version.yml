@@ -70,6 +70,6 @@ jobs:
         with:
           version: v0.160.0
           args: release --rm-dist --debug
-          workdir: ${{ github.workspace }}/hero/mitm-socket
+          workdir: ${{ github.workspace }}/mitm-socket
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
