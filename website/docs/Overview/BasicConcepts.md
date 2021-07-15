@@ -77,4 +77,4 @@ const doc = await agent.fetch('https://secretagent.dev/docs/overview/configurati
 
 ## Mice and Keyboards Are Human Too
 
-SecretAgent drives mice and keyboards with [Human Emulators](/docs/advanced/human-emulators). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.
+SecretAgent drives mice and keyboards with [Human Emulators](/docs/plugins/human-emulators). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.

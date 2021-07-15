@@ -98,7 +98,7 @@ Sets default properties to apply to any new Agent created. Accepts any of the co
 
 #### **Returns**: `IAgentCreateOptions`
 
-See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/plugins/browser-emulators) and [HumanEmulators](/docs/plugins/human-emulators).
 
 #### **Type**: [`Tab`](/docs/basic-interfaces/tab)
 
@@ -156,7 +156,7 @@ NOTE: when using this method, you must call [`agent.close()`](/docs/basic-interf
   - input `object`. An object containing properties to attach to the agent (more frequently used with [`dispatchAgent`](#dispatch-agent))
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
 
-See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/plugins/browser-emulators) and [HumanEmulators](/docs/plugins/human-emulators).
 
 #### **Returns**: [`Promise<Agent>`](/docs/basic-interfaces/agent)
 

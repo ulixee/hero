@@ -116,7 +116,7 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
       setUserAgent(this, devtools),
       setTimezone(this, devtools),
       setLocale(this, devtools),
-      setScreensize(this, devtools),
+      setScreensize(this, page, devtools),
       setActiveAndFocused(this, devtools),
       setPageDomOverrides(this.domOverridesBuilder, this.data, page),
       setGeolocation(this, page),

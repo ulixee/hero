@@ -6,11 +6,12 @@ import {
 import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
 import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
 import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
+import IViewport from '@secret-agent/interfaces/IViewport';
 
 const id = 'test';
 const locale = 'en';
 const timezoneId = 'est';
-const viewport = {
+const viewport: IViewport = {
   screenHeight: 900,
   screenWidth: 1024,
   positionY: 0,

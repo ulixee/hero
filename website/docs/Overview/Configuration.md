@@ -99,11 +99,11 @@ An upstream proxy url should be a fully formatted url to the proxy. If your prox
 
 ### Browsers Emulator Id <div class="specs"><i>Agent</i></div>
 
-Configures which [BrowserEmulator](/docs/advanced/browser-emulators) to use in a given Agent.
+Configures which [BrowserEmulator](/docs/plugins/browser-emulators) to use in a given Agent.
 
 ### Human Emulator Id <div class="specs"><i>Agent</i></div>
 
-Configures which [HumanEmulator](/docs/advanced/human-emulators) to use in an Agent instance.
+Configures which [HumanEmulator](/docs/plugins/human-emulators) to use in an Agent instance.
 
 ## Core Configuration
 

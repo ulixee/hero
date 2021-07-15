@@ -1,6 +1,6 @@
 # Session
 
-> A Session tracks a single "scraping" session. It tracks and coordinates the [HumanEmulator](/docs/advanced/human-emulators), [BrowserEmulator](/docs/advanced/browser-emulators) and [SecretAgent](/docs/basic-interfaces/agent) that will be used.
+> A Session tracks a single "scraping" session. It tracks and coordinates the [HumanEmulator](/docs/plugins/human-emulators), [BrowserEmulator](/docs/plugins/browser-emulators) and [SecretAgent](/docs/basic-interfaces/agent) that will be used.
 
 Sessions store data into a Sqlite database using a module called SessionState. This database tracks all the information needed to recreate a session in [SessionReplay](/docs/advanced/session-replay).
 

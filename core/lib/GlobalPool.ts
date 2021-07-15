@@ -174,7 +174,7 @@ export default class GlobalPool {
       showBrowser: Boolean(
         JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
       ),
-      disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'false')),
+      disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'true')),
       noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
       disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
       enableMitm: !disableMitm,

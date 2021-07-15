@@ -421,6 +421,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
+    options.rectangle.scale ??= 1;
     return this.puppetPage.screenshot(options.format, options.rectangle, options.jpegQuality);
   }
 
