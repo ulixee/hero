@@ -12,7 +12,7 @@ Multiple Interactions can be passed through as multiple arguments:
 agent.interact({ click: [250, 356] }, { type: 'hello world' });
 ```
 
-The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](/docs/advanced/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
+The timing of Interactions are controlled by an emulation layer, called [HumanEmulators](/docs/plugins/human-emulators), which generate realistic-looking, human-like movements on the remote webpage.
 
 Interaction Commands fall into three broad categories:
 

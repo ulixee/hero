@@ -1,6 +1,7 @@
 import * as Path from 'path';
 import * as os from 'os';
 import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
+import { defaultScreen } from '../Viewports';
 
 let sessionDirCounter = 0;
 
@@ -50,6 +51,8 @@ export function configureBrowserLaunchArgs(
     '--password-store=basic', // Avoid potential instability of using Gnome Keyring or KDE wallet.
     '--use-mock-keychain', // Use mock keychain on Mac to prevent blocking permissions dialogs
     '--allow-running-insecure-content',
+
+    `--window-size=${defaultScreen.width},${defaultScreen.height}`,
 
     // don't leak private ip
     '--force-webrtc-ip-handling-policy=default_public_interface_only',

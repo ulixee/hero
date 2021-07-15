@@ -124,7 +124,11 @@ export default async function launchProcess(
 
   function cleanDataDir(datadir: string, retries = 3): void {
     try {
-      if (Fs.existsSync(datadir)) Fs.rmdirSync(dataDir, { recursive: true });
+      if (Fs.existsSync(datadir)) {
+        // rmdir is deprecated in node 16+
+        const fn = 'rmSync' in Fs ? 'rmSync' : 'rmdirSync';
+        Fs[fn](dataDir, { recursive: true });
+      }
     } catch (err) {
       if (retries >= 0) {
         cleanDataDir(datadir, retries - 1);

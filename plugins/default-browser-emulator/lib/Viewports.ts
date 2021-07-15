@@ -1,5 +1,5 @@
 import IViewport from '@secret-agent/interfaces/IViewport';
-import { IDataWindowFraming } from "../interfaces/IBrowserData";
+import { IDataWindowFraming } from '../interfaces/IBrowserData';
 
 const defaultWindowFraming = {
   screenGapLeft: 0,
@@ -10,12 +10,17 @@ const defaultWindowFraming = {
   frameBorderHeight: 0,
 };
 
+export const defaultScreen = {
+  width: 1440,
+  height: 900,
+};
+
 export default class Viewports {
   static getDefault(windowBaseFraming: IDataWindowFraming, windowFraming: IDataWindowFraming) {
     windowFraming = windowFraming || { ...defaultWindowFraming };
     const base = windowBaseFraming || { ...defaultWindowFraming };
-    const screenWidth = 1440;
-    const screenHeight = 900;
+    const screenWidth = defaultScreen.width;
+    const screenHeight = defaultScreen.height;
 
     const windowInnerWidth =
       screenWidth - (base.screenGapLeft + base.screenGapRight + base.frameBorderWidth);

@@ -12,7 +12,7 @@ You can remove the library and reinstall or rebuild manually using npm run build
 
 #### Browser Emulators
 
-When you install SecretAgent, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/advanced/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+When you install SecretAgent, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
 
 Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple SecretAgent npm installations.
 

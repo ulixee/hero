@@ -28,7 +28,7 @@ Agent instances can have multiple [Tabs](/docs/basic-interfaces/tab), but only a
 
 #### Sandboxed
 
-Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/advanced/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
+Each Agent instance creates a private environment with its own cache, cookies, session data and [BrowserEmulator](/docs/plugins/browser-emulators). No data is shared between instances -- each operates within an airtight sandbox to ensure no identities leak across requests.
 
 ## Default Instance {#default}
 
@@ -83,6 +83,13 @@ const { Agent } = require('secret-agent');
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
   - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width and height. If not provided, the most popular resolution is used from [statcounter.com](https://gs.statcounter.com/screen-resolution-stats/desktop/united-states-of-america).
+    - width `number`. The page width in pixels (minimum 0, maximum 10000000).
+    - height `number`. The page height in pixels (minimum 0, maximum 10000000).
+    - deviceScaleFactor `number` defaults to 1. Specify device scale factor (can be thought of as dpr).
+    - screenWidth? `number`. The optional screen width in pixels (minimum 0, maximum 10000000).
+    - screenHeight? `number`. The optional screen height in pixels (minimum 0, maximum 10000000).
+    - positionX? `number`. Optional override browser X position on screen in pixels (minimum 0, maximum 10000000).
+    - positionY? `number`. Optional override browser Y position on screen in pixels (minimum 0, maximum 10000000).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - input `object`. An object containing properties to attach to the agent. NOTE: if using the default agent, this object will be populated with command line variables starting with `--input.{json path}`. The `{json path}` will be translated into an object set to `agent.input`.
@@ -150,8 +157,8 @@ Retrieves metadata about the agent configuration:
 
 - sessionId `string`. The session identifier.
 - sessionName `string`. The unique session name that will be visible in Replay.
-- browserEmulatorId `string`. The id of the [Browser Emulator](/docs/advanced/browser-emulators) in use.
-- humanEmulatorId `string`. The id of the [Human Emulator](/docs/advanced/human-emulators) in use.
+- browserEmulatorId `string`. The id of the [Browser Emulator](/docs/plugins/browser-emulators) in use.
+- humanEmulatorId `string`. The id of the [Human Emulator](/docs/plugins/human-emulators) in use.
 - timezoneId `string`. The configured unicode TimezoneId or host default (eg, America/New_York).
 - locale `string`. The configured locale in use (eg, en-US).
 - geolocation `IGeolocation`. The configured geolocation of the user (if set).
@@ -267,14 +274,14 @@ Update existing configuration settings.
   - userProfile `IUserProfile`. Previous user's cookies, session, etc.
   - timezoneId `string`. Overrides the host timezone. A list of valid ids are available at [unicode.org](https://unicode-org.github.io/cldr-staging/charts/37/supplemental/zone_tzid.html)
   - locale `string`. Overrides the host languages settings (eg, en-US). Locale will affect navigator.language value, Accept-Language request header value as well as number and date formatting rules.
-  - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width.
+  - viewport `IViewport`. Sets the emulated screen size, window position in the screen, inner/outer width. (See constructor for parameters).
   - blockedResourceTypes `BlockedResourceType[]`. Controls browser resource loading. Valid options are listed [here](/docs/overview/configuration#blocked-resources).
   - upstreamProxyUrl `string`. A socks5 or http proxy url (and optional auth) to use for all HTTP requests in this session. The optional "auth" should be included in the UserInfo section of the url, eg: `http://username:password@proxy.com:80`.
   - connectionToCore `options | ConnectionToCore`. An object containing `IConnectionToCoreOptions` used to connect, or an already created `ConnectionToCore` instance. Defaults to booting up and connecting to a local `Core`.
 
 #### **Returns**: `Promise`
 
-See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/advanced/browser-emulators) and [HumanEmulators](/docs/advanced/human-emulators).
+See the [Configuration](/docs/overview/configuration) page for more details on `options` and its defaults. You may also want to explore [BrowserEmulators](/docs/plugins/browser-emulators) and [HumanEmulators](/docs/plugins/human-emulators).
 
 ### agent.detach*(tab\[, key])* {#detach-tab}
 
