@@ -113,7 +113,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Copy mitm source
-        run: cp -r hero/mitm-socket/go build/hero/mitm-socket/go
+        run: cp -r mitm-socket/go build/mitm-socket/go
 
       - name: Build modules
         run: yarn --network-timeout 1000000
@@ -134,11 +134,11 @@ jobs:
         env:
           SA_SHOW_REPLAY: false
           NODE_ENV: test
-          SA_SESSIONS_DIR: hero/.sessions
+          SA_SESSIONS_DIR: .sessions
 
       - name: 'Tar files'
         if: ${{ failure() }}
-        run: tar -cvf test-dbs.tar ./build/hero/.sessions
+        run: tar -cvf test-dbs.tar ./build/.sessions
 
       - name: Upload Databases
         if: ${{ failure() }}

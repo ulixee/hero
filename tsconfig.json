@@ -21,13 +21,13 @@
   },
   "references": [
     {
-      "path": "hero/core/injected-scripts/tsconfig.json"
+      "path": "core/injected-scripts/tsconfig.json"
     },
     {
       "path": "replay/tsconfig.json"
     },
     {
-      "path": "hero/plugins/default-browser-emulator/injected-scripts/tsconfig.json"
+      "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
     }
   ],
   "include": ["**/*.ts", "**/*.js", "**/*.json", ".eslintrc.js"],
@@ -42,9 +42,9 @@
     "replay",
     "replay/injected-scripts",
     "website",
-    "hero/core/injected-scripts",
+    "core/injected-scripts",
     "examples/*.js",
-    "hero/plugins/default-browser-emulator/injected-scripts",
-    "hero/plugins/default-browser-emulator/data"
+    "plugins/default-browser-emulator/injected-scripts",
+    "plugins/default-browser-emulator/data"
   ]
 }

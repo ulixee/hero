@@ -56,7 +56,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*hero/client/**/*.ts', '*hero/interfaces/**/*.ts', 'commons/**/*.ts', 'hero/mitm*/**/*.ts'],
+      files: ['*client/**/*.ts', '*interfaces/**/*.ts', 'commons/**/*.ts', 'mitm*/**/*.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',
@@ -65,13 +65,13 @@ module.exports = {
       },
     },
     {
-      files: 'hero/plugin*/**/test/*.ts',
+      files: 'plugin*/**/test/*.ts',
       rules: {
         'no-console': 'off',
       },
     },
     {
-      files: 'hero/plugin*/**/*.d.ts',
+      files: 'plugin*/**/*.d.ts',
       rules: {
         'import/no-extraneous-dependencies': 'off',
       },
@@ -131,7 +131,7 @@ module.exports = {
     '**/test/assets/**',
     'build',
     'build-dist',
-    'hero/examples/*.js',
+    'examples/*.js',
     '**/build/**',
     '**/dist/**',
     '**/*.md',

@@ -1,8 +1,0 @@
-{
-  "settings": {
-    "maxConcurrentStreams": 100,
-    "maxHeaderListSize": 4294967295
-  },
-  "initialWindowSize": 65535,
-  "firstFrameWindowSize": 10551295
-}

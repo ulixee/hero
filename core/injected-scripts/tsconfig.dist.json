@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": false,
+    "inlineSourceMap": false,
+    "removeComments": true,
+    "outDir": "../../build-dist/core/injected-scripts"
+  }
+}
