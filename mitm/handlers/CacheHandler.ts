@@ -4,7 +4,7 @@ import ResourceState from '../interfaces/ResourceState';
 import HeadersHandler from './HeadersHandler';
 
 export default class CacheHandler {
-  public static isEnabled = Boolean(JSON.parse(process.env.SA_ENABLE_MITM_CACHE ?? 'false'));
+  public static isEnabled = Boolean(JSON.parse(process.env.HERO_ENABLE_MITM_CACHE ?? 'false'));
   public didProposeCachedResource = false;
   public shouldServeCachedData = false;
   private readonly data: Buffer[] = [];

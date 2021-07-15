@@ -1,11 +1,11 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import { inspect } from 'util';
-import * as Helpers from '@secret-agent/testing/helpers';
-import Puppet from '@secret-agent/puppet';
-import Log from '@secret-agent/commons/Logger';
-import CorePlugins from '@secret-agent/core/lib/CorePlugins';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import * as Helpers from '@ulixee/testing/helpers';
+import Puppet from '@ulixee/hero-puppet';
+import Log from '@ulixee/commons/Logger';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import BrowserEmulator from '../index';
 import * as pluginsChrome from './plugins-Chrome.json';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';

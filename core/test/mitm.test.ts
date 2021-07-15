@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import MitmRequestContext from '@secret-agent/mitm/lib/MitmRequestContext';
-import { createPromise } from '@secret-agent/commons/utils';
-import { LocationStatus } from '@secret-agent/interfaces/Location';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Resolvable from '@secret-agent/commons/Resolvable';
+import { Helpers } from '@ulixee/testing';
+import MitmRequestContext from '@ulixee/hero-mitm/lib/MitmRequestContext';
+import { createPromise } from '@ulixee/commons/utils';
+import { LocationStatus } from '@ulixee/hero-interfaces/Location';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import Resolvable from '@ulixee/commons/Resolvable';
 import GlobalPool from '../lib/GlobalPool';
 import Core, { Session } from '../index';
 

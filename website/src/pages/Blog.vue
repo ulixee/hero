@@ -38,7 +38,7 @@ export default {
     Pager,
   },
   metaInfo: {
-    title: 'SecretAgent Blog Posts',
+    title: 'Ulixee Blog Posts',
   },
 };
 </script>

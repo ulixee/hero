@@ -7,7 +7,7 @@ BasicLayout.Why
       h2 Open-Data is Still Out of Reach
       .mission
         p.
-          The goal of SecretAgent is to move the world toward data openness.
+          The goal of Ulixee is to move the world toward data openness.
           <a href="https://dataliberationfoundation.org">We</a> believe data openness is essential for the
           startup ecosystem and innovation in general.
 
@@ -29,7 +29,7 @@ BasicLayout.Why
         to figure out how to differentiate bots from real users using real browsers.
 
       p.
-        SecretAgent can fully emulate human browsers at every layer of the TCP/HTTP stack. Out of the box, the
+        Ulixee can fully emulate human browsers at every layer of the TCP/HTTP stack. Out of the box, the
         <a href="https://gs.statcounter.com/browser-version-market-share/desktop/worldwide/">top 3</a> most popular browsers are ready to plug-in.
 
 
@@ -53,7 +53,7 @@ BasicLayout.Why
           });
 
       p.
-        SecretAgent lets developers directly access the full DOM spec running in a real browser, without any context switching.
+        Ulixee lets developers directly access the full DOM spec running in a real browser, without any context switching.
 
       p.
         Use the DOM API you already know:
@@ -77,7 +77,7 @@ BasicLayout.Why
         hard to get back and figure out how to work around it for the next time.
 
       p.
-        SecretAgent comes with Replay - a high fidelity visual replay of every single scraping session. It's a full HTML based replica
+        Ulixee comes with Replay - a high fidelity visual replay of every single scraping session. It's a full HTML based replica
         of all the page assets, DOM, http requests, etc. You can pull up the Replay agent and watch until the script breaks..
         then <i>fix it</i> inside Replay until you're back up and running.
 

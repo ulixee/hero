@@ -1,19 +1,19 @@
 {
-  "name": "@secret-agent/plugin-utils",
+  "name": "@ulixee/hero-plugin-utils",
   "version": "1.5.4",
-  "description": "SecretAgent client that runs remotely",
+  "description": "Hero client that runs remotely",
   "scripts": {},
   "dependencies": {
-    "@secret-agent/chrome-app": "1.0.0",
-    "@secret-agent/commons": "1.5.4",
-    "@secret-agent/interfaces": "1.5.4",
+    "@ulixee/chrome-app": "1.0.1",
+    "@ulixee/commons": "1.5.4",
+    "@ulixee/hero-interfaces": "1.5.4",
     "progress": "^2.0.3",
     "tar": "^6.1.0"
   },
   "devDependencies": {
-    "@secret-agent/core": "1.5.4",
-    "@secret-agent/default-browser-emulator": "1.5.4",
-    "@secret-agent/puppet": "1.5.4",
-    "@secret-agent/testing": "1.5.4"
+    "@ulixee/hero-core": "1.5.4",
+    "@ulixee/default-browser-emulator": "1.5.4",
+    "@ulixee/hero-puppet": "1.5.4",
+    "@ulixee/testing": "1.5.4"
   }
 }

@@ -1,12 +1,13 @@
 ```
-import agent from 'secret-agent';
-import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
+import Hero from '@ulixee/hero';
+import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
 
-agent.use(ExecuteJsPlugin);
+Hero.use(ExecuteJsPlugin);
 
 (function run() {
-    await agent.goto('https://news.ycombinator.com');
-    const title = await agent.executeJs(() => {
+    const hero = new Hero();
+    await hero.goto('https://news.ycombinator.com');
+    const title = await hero.executeJs(() => {
          return window.document.title;
     });
 })();

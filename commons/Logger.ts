@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import ILog, { ILogData } from '@secret-agent/interfaces/ILog';
+import ILog, { ILogData } from '@ulixee/hero-interfaces/ILog';
 import { inspect } from 'util';
 
 const hasBeenLoggedSymbol = Symbol.for('hasBeenLogged');
@@ -211,5 +211,5 @@ interface ILogBuilder {
 
 function extractPathFromModule(module: NodeModule): string {
   const fullPath = typeof module === 'string' ? module : module.filename || module.id || '';
-  return fullPath.replace(/^(.*)\/secret-agent\/(.*)$/, '$2');
+  return fullPath.replace(/^(.*)\/ulixee\/(.*)$/, '$2');
 }

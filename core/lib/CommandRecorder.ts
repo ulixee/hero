@@ -1,7 +1,7 @@
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Log from '@secret-agent/commons/Logger';
-import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/Logger';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import TypeSerializer from '@ulixee/commons/TypeSerializer';
 import Session from './Session';
 import Tab from './Tab';
 

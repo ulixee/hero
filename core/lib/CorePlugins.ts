@@ -1,14 +1,14 @@
 import { URL } from 'url';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import IDnsSettings from '@secret-agent/interfaces/IDnsSettings';
-import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
-import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
-import { IInteractionGroups, IInteractionStep } from '@secret-agent/interfaces/IInteractions';
-import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
-import IPoint from '@secret-agent/interfaces/IPoint';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
+import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
+import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
+import { IInteractionGroups, IInteractionStep } from '@ulixee/hero-interfaces/IInteractions';
+import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
 import ICorePlugin, {
   IHumanEmulator,
   IBrowserEmulator,
@@ -18,14 +18,14 @@ import ICorePlugin, {
   IOnClientCommandMeta,
   IBrowserEmulatorClass,
   IHumanEmulatorClass,
-} from '@secret-agent/interfaces/ICorePlugin';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
-import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
-import IDeviceProfile from '@secret-agent/interfaces/IDeviceProfile';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
+import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
+import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import Core from '../index';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';

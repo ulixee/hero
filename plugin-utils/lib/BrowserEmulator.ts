@@ -1,16 +1,16 @@
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulator,
   IBrowserEmulatorClass,
   ISelectBrowserMeta,
-} from '@secret-agent/interfaces/ICorePlugin';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
-import { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
-import IDeviceProfile from '@secret-agent/interfaces/IDeviceProfile';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import { IVersion } from '@ulixee/hero-interfaces/IUserAgentOption';
+import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 
 @BrowserEmulatorClassDecorator
 export default class BrowserEmulator implements IBrowserEmulator {

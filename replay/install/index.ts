@@ -7,10 +7,10 @@ import { createGunzip } from 'zlib';
 import * as os from 'os';
 import * as Path from 'path';
 import { IncomingMessage } from 'http';
-import { httpGet } from '@secret-agent/commons/downloadFile';
+import { httpGet } from '@ulixee/commons/downloadFile';
 import { getInstallDirectory, isBinaryInstalled, recordVersion, version } from './Utils';
 
-if (Boolean(JSON.parse(process.env.SA_REPLAY_SKIP_BINARY_DOWNLOAD ?? 'false')) === true) {
+if (Boolean(JSON.parse(process.env.HERO_REPLAY_SKIP_BINARY_DOWNLOAD ?? 'false')) === true) {
   process.exit(0);
 }
 
@@ -35,10 +35,10 @@ if (isBinaryInstalled()) {
   );
   const length = parseInt(response.headers['content-length'], 10);
 
-  const tmpFile = Path.join(os.tmpdir(), 'SecretAgentReplay.tar.gz');
+  const tmpFile = Path.join(os.tmpdir(), 'UlixeeReplay.tar.gz');
   const output = Fs.createWriteStream(tmpFile, { autoClose: true });
 
-  const bar = new ProgressBar(' Downloading SecretAgent Replay [:bar]  :percent :etas', {
+  const bar = new ProgressBar(' Downloading Ulixee Replay [:bar]  :percent :etas', {
     complete: '=',
     incomplete: ' ',
     width: 20,
@@ -75,7 +75,7 @@ function download(filepath: string): Promise<IncomingMessage> {
       if (res.statusCode >= 400) {
         return reject(
           new Error(
-            `ERROR downloading needed Secret Agent library - ${res.statusCode}:${res.statusMessage}`,
+            `ERROR downloading required  library - ${res.statusCode}:${res.statusMessage}`,
           ),
         );
       }
@@ -83,7 +83,7 @@ function download(filepath: string): Promise<IncomingMessage> {
       resolve(res);
     });
     req.on('error', err => {
-      console.log('ERROR downloading needed Secret Agent library %s', filepath, err);
+      console.log('ERROR downloading required MitM library %s', filepath, err);
       reject(err);
     });
   });

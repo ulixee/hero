@@ -1,11 +1,11 @@
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import {
   HumanEmulatorClassDecorator,
   IHumanEmulator,
   IHumanEmulatorClass,
-} from '@secret-agent/interfaces/ICorePlugin';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
 
 @HumanEmulatorClassDecorator
 export default class HumanEmulator implements IHumanEmulator {

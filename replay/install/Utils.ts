@@ -8,7 +8,7 @@ const packageJson = require('../package.json');
 const { version } = packageJson;
 
 export function getInstallDirectory() {
-  return Path.join(getCacheDirectory(), 'secret-agent', 'replay');
+  return Path.join(getCacheDirectory(), 'ulixee', 'replay');
 }
 
 export { version };
@@ -67,15 +67,15 @@ function getPlatformExecutable() {
   switch (platform) {
     case 'mas':
     case 'darwin':
-      return 'SecretAgentReplay.app/Contents/MacOS/SecretAgentReplay';
+      return 'UlixeeReplay.app/Contents/MacOS/UlixeeReplay';
     case 'freebsd':
     case 'openbsd':
     case 'linux':
-      return `replay-${version}-linux/secretagentreplay`;
+      return `replay-${version}-linux/ulixeereplay`;
     case 'win32':
-      return `replay-${version}-win/SecretAgentReplay.exe`;
+      return `replay-${version}-win/UlixeeReplay.exe`;
     default:
-      throw new Error(`SecretAgent Replay builds are not available on platform: ${platform}`);
+      throw new Error(`Ulixee Replay builds are not available on platform: ${platform}`);
   }
 }
 

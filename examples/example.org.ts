@@ -1,24 +1,24 @@
-import agent from 'secret-agent';
+import hero from '@ulixee/hero';
 
 async function run() {
-  await agent.goto('https://example.org/');
-  await agent.waitForPaintingStable();
+  await hero.goto('https://example.org/');
+  await hero.waitForPaintingStable();
 
   console.log('\n-- PRINTING location.href ---------');
-  console.log(await agent.url);
+  console.log(await hero.url);
 
-  const html = await agent.document.documentElement.outerHTML;
+  const html = await hero.document.documentElement.outerHTML;
   console.log('-- PRINTING outerHTML ---------------');
   console.log(html);
-  agent.output.html = html;
-  agent.output.title = await agent.document.title;
-  agent.output.intro = await agent.document.querySelector('p').textContent;
+  hero.output.html = html;
+  hero.output.title = await hero.document.title;
+  hero.output.intro = await hero.document.querySelector('p').textContent;
 
   console.log('-------------------------------------');
 
-  await agent.close();
+  await hero.close();
 
-  console.log('OUTPUT from https://example.org', agent.output);
+  console.log('OUTPUT from https://example.org', hero.output);
 }
 
 run().catch(error => console.log(error));

@@ -1,22 +1,22 @@
 {
-  "name": "@secret-agent/monorepo",
+  "name": "@ulixee/hero-monorepo",
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {
-    "start:website": "yarn workspace @secret-agent/website start",
+    "start:website": "yarn workspace @ulixee/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
-    "build": "yarn tsc && yarn workspace @secret-agent/replay build:frontend && cd build && yarn",
+    "build": "yarn tsc && yarn workspace @ulixee/replay build:frontend && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
-    "build:dist-local": "yarn build:dist && yarn workspace @secret-agent/replay build:dist-local && cd build-dist && SA_REBUILD_MITM_SOCKET=1 yarn",
-    "build:docker": "yarn build:dist && docker build -t secret-agent .",
+    "build:dist-local": "yarn build:dist && yarn workspace @ulixee/replay build:dist-local && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
+    "build:docker": "yarn build:dist && docker build -t hero .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
     "copy:dist": "cross-env OUT_DIR=build-dist node copyfiles.js",
     "copy:build": "cross-env OUT_DIR=build node copyfiles.js",
-    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @secret-agent/replay build:backend",
-    "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @secret-agent/replay build:backend-paths\"",
+    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @ulixee/replay build:backend",
+    "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @ulixee/replay build:backend-paths\"",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
-    "clean": "tsc -b --clean  tsconfig.json && yarn workspace @secret-agent/replay clean",
+    "clean": "tsc -b --clean  tsconfig.json && yarn workspace @ulixee/replay clean",
     "test": "yarn copy:build && cd build && yarn test",
     "lint": "eslint --cache ./"
   },
@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/ulixee/secret-agent/issues"
   },
-  "homepage": "https://secretagent.dev",
+  "homepage": "https://ulixee.org",
   "engines": {
     "node": ">=13.2.0"
   },

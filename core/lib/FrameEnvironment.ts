@@ -1,29 +1,29 @@
-import Log from '@secret-agent/commons/Logger';
-import { ILocationTrigger, IPipelineStatus } from '@secret-agent/interfaces/Location';
+import Log from '@ulixee/commons/Logger';
+import { ILocationTrigger, IPipelineStatus } from '@ulixee/hero-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@secret-agent/interfaces/ICookie';
-import { IInteractionGroups } from '@secret-agent/interfaces/IInteractions';
+import { ICookie } from '@ulixee/hero-interfaces/ICookie';
+import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import { URL } from 'url';
 import * as Fs from 'fs';
-import Timer from '@secret-agent/commons/Timer';
-import { createPromise } from '@secret-agent/commons/utils';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import Timer from '@ulixee/commons/Timer';
+import { createPromise } from '@ulixee/commons/utils';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
+import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
-import { IPuppetFrame, IPuppetFrameEvents } from '@secret-agent/interfaces/IPuppetFrame';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import { IPuppetFrame, IPuppetFrameEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
-import { LoadStatus } from '@secret-agent/interfaces/INavigation';
-import { getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
+import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
+import { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
+import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import TypeSerializer from '@ulixee/commons/TypeSerializer';
 import * as Os from 'os';
-import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
-import IPoint from '@secret-agent/interfaces/IPoint';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -303,9 +303,9 @@ export default class FrameEnvironment {
     if (!this.navigations.top && this.puppetFrame.url === 'about:blank') {
       throw new Error(`Chrome won't allow you to set cookies on a blank tab.
 
-SecretAgent supports two options to set cookies:
+Hero supports two options to set cookies:
 a) Goto a url first and then set cookies on the activeTab
-b) Use the UserProfile feature to set cookies for 1 or more domains before they're loaded (https://secretagent.dev/docs/advanced/user-profile)
+b) Use the UserProfile feature to set cookies for 1 or more domains before they're loaded (https://ulixee.org/docs/advanced/user-profile)
       `);
     }
 

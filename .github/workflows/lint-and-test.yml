@@ -44,15 +44,15 @@ jobs:
         run: yarn install --immutable --network-timeout 1000000
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
-          SA_SKIP_DOWNLOAD: 1
+          HERO_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          HERO_SKIP_DOWNLOAD: 1
 
       - name: Run "build" step
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn tsc
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
-          SA_SKIP_DOWNLOAD: 1
+          HERO_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          HERO_SKIP_DOWNLOAD: 1
 
       - name: Run  Lint
         run: NODE_OPTIONS=--max-old-space-size=4096 yarn lint
@@ -120,8 +120,8 @@ jobs:
         working-directory: ./build
         env:
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-          SA_REPLAY_SKIP_BINARY_DOWNLOAD: 1
-          SA_REBUILD_MITM_SOCKET: 1
+          HERO_REPLAY_SKIP_BINARY_DOWNLOAD: 1
+          HERO_REBUILD_MITM_SOCKET: 1
 
       - name: Linux - Apt Install Chrome(s)
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -132,9 +132,9 @@ jobs:
         run: yarn jest --testTimeout=60000 --maxWorkers=2
         working-directory: ./build
         env:
-          SA_SHOW_REPLAY: false
+          HERO_SHOW_REPLAY: false
           NODE_ENV: test
-          SA_SESSIONS_DIR: .sessions
+          HERO_SESSIONS_DIR: .sessions
 
       - name: 'Tar files'
         if: ${{ failure() }}

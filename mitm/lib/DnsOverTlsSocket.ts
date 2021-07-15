@@ -1,13 +1,13 @@
 import { randomBytes } from 'crypto';
 import * as dnsPacket from 'dns-packet';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
-import MitmSocket from '@secret-agent/mitm-socket/index';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IDnsSettings from "@secret-agent/interfaces/IDnsSettings";
-import { addTypedEventListener, removeEventListeners } from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Log from '@secret-agent/commons/Logger';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/utils';
+import MitmSocket from '@ulixee/hero-mitm-socket/index';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IDnsSettings from "@ulixee/hero-interfaces/IDnsSettings";
+import { addTypedEventListener, removeEventListeners } from '@ulixee/commons/eventUtils';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/Logger';
 import RequestSession from '../handlers/RequestSession';
 
 const { log } = Log(module);

@@ -5,29 +5,29 @@ import {
   IMousePosition,
   IMousePositionXY,
   InteractionCommand,
-} from '@secret-agent/interfaces/IInteractions';
-import { assert } from '@secret-agent/commons/utils';
+} from '@ulixee/hero-interfaces/IInteractions';
+import { assert } from '@ulixee/commons/utils';
 import {
   getKeyboardKey,
   IKeyboardKey,
   KeyboardKeys,
-} from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
-import IRect from '@secret-agent/interfaces/IRect';
-import IWindowOffset from '@secret-agent/interfaces/IWindowOffset';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { INodePointer } from '@secret-agent/interfaces/AwaitedDom';
-import IPoint from '@secret-agent/interfaces/IPoint';
-import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { IPuppetKeyboard, IPuppetMouse } from '@secret-agent/interfaces/IPuppetInput';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import IElementRect from '@secret-agent/interfaces/IElementRect';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { getClientRectFnName, getNodeIdFnName } from '@secret-agent/interfaces/jsPathFnNames';
+} from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
+import IRect from '@ulixee/hero-interfaces/IRect';
+import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import Log from '@ulixee/commons/Logger';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
+import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { IPuppetKeyboard, IPuppetMouse } from '@ulixee/hero-interfaces/IPuppetInput';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import IElementRect from '@ulixee/hero-interfaces/IElementRect';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { getClientRectFnName, getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 import { JsPath } from './JsPath';
@@ -130,7 +130,7 @@ export default class Interactor implements IInteractionsHelper {
       };
     }
     if (mousePosition === null) {
-      throw new Error('Null mouse position provided to agent.interact');
+      throw new Error('Null mouse position provided to hero.interact');
     }
     const jsPath = this.jsPath;
     const containerOffset = await this.frameEnvironment.getContainerOffset();
@@ -469,7 +469,7 @@ export default class Interactor implements IInteractionsHelper {
     }
     if (this.preInteractionPaintStableStatus?.isStable === false) {
       if (!extras) extras += '\n\nNOTE:';
-      extras += ` You might have more predictable results by waiting for the page to stabilize before triggering this click -- agent.waitForPaintingStable()`;
+      extras += ` You might have more predictable results by waiting for the page to stabilize before triggering this click -- hero.waitForPaintingStable()`;
     }
     this.logger.error(
       `Interaction.click did not trigger mouseup on expected "Interaction.mousePosition" path.${extras}`,

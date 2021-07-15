@@ -1,21 +1,21 @@
-import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
+import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
-import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
-import Log from '@secret-agent/commons/Logger';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import PuppetLaunchError from '@secret-agent/puppet/lib/PuppetLaunchError';
-import IUserProfile from '@secret-agent/interfaces/IUserProfile';
-import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
-import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
+import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import Log from '@ulixee/commons/Logger';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import PuppetLaunchError from '@ulixee/hero-puppet/lib/PuppetLaunchError';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import SessionClosedOrMissingError from '@ulixee/commons/SessionClosedOrMissingError';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -46,7 +46,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     ['Session.detachTab', 'detachTab'],
     ['Session.flush', 'flush'],
     ['Session.recordOutput', 'recordOutput'],
-    ['Session.getAgentMeta', 'getAgentMeta'],
+    ['Session.getHeroMeta', 'getHeroMeta'],
     ['Session.exportUserProfile', 'exportUserProfile'],
     ['Session.getTabs', 'getTabs'],
     ['Session.waitForNewTab', 'waitForNewTab'],
@@ -111,7 +111,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     this.isClosing = false;
     await Core.start(options, false);
     return {
-      maxConcurrency: GlobalPool.maxConcurrentAgentsCount,
+      maxConcurrency: GlobalPool.maxConcurrentHerosCount,
     };
   }
 
@@ -181,11 +181,11 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     session.recordOutput(changes);
   }
 
-  public getAgentMeta(meta: ISessionMeta): IAgentMeta {
+  public getHeroMeta(meta: ISessionMeta): IHeroMeta {
     const session = Session.get(meta.sessionId);
     const { plugins, viewport, locale, timezoneId, geolocation } = session;
     const { userAgentString, operatingSystemPlatform } = plugins.browserEmulator;
-    return <IAgentMeta>{
+    return <IHeroMeta>{
       sessionId: session.id,
       sessionName: session.options.sessionName,
       browserEmulatorId: plugins.browserEmulator.id,

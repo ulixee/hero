@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -33,47 +33,47 @@ afterEach(Helpers.afterEach);
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(exampleUrl);
-    const elem = agent.document.querySelector('a');
-    await agent.click(elem);
+    await hero.goto(exampleUrl);
+    const elem = hero.document.querySelector('a');
+    await hero.click(elem);
 
-    const resources = await agent.waitForResource({ type: 'Fetch' });
+    const resources = await hero.waitForResource({ type: 'Fetch' });
     expect(resources).toHaveLength(1);
-    await agent.close();
+    await hero.close();
   });
 
   it('waits for a resource loaded since a previous command id', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(exampleUrl);
+    await hero.goto(exampleUrl);
     let lastCommandId: number;
     for (let i = 0; i <= 4; i += 1) {
-      const elem = agent.document.querySelector('a');
-      await agent.click(elem);
-      const resources = await agent.waitForResource(
+      const elem = hero.document.querySelector('a');
+      await hero.click(elem);
+      const resources = await hero.waitForResource(
         { type: 'Fetch' },
         { sinceCommandId: lastCommandId },
       );
-      lastCommandId = await agent.lastCommandId;
+      lastCommandId = await hero.lastCommandId;
       expect(resources).toHaveLength(1);
       expect(resources[0].url).toContain(`counter=${i}`);
     }
-    await agent.close();
+    await hero.close();
   });
 
-  it('cancels a pending resource on agent close', async () => {
+  it('cancels a pending resource on hero close', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(exampleUrl);
+    await hero.goto(exampleUrl);
 
-    const waitForResource = agent.waitForResource({ type: 'Fetch' });
+    const waitForResource = hero.waitForResource({ type: 'Fetch' });
     // eslint-disable-next-line jest/valid-expect
     const waitError = expect(waitForResource).rejects.toThrowError('disconnected');
-    await agent.close();
+    await hero.close();
     await waitError;
   });
 });

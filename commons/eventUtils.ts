@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import ITypedEventEmitter from '@secret-agent/interfaces/ITypedEventEmitter';
-import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import ITypedEventEmitter from '@ulixee/hero-interfaces/ITypedEventEmitter';
+import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import { createPromise } from './utils';
 import IPendingWaitEvent, { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 

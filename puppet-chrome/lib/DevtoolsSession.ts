@@ -17,15 +17,15 @@
 
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/utils';
 import IDevtoolsSession, {
   DevtoolsEvents,
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
-} from '@secret-agent/interfaces/IDevtoolsSession';
+} from '@ulixee/hero-interfaces/IDevtoolsSession';
 import ProtocolError from './ProtocolError';
 import { Connection } from './Connection';
 import RemoteObject = Protocol.Runtime.RemoteObject;

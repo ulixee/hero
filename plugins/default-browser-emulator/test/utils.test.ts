@@ -1,10 +1,10 @@
-import * as Helpers from '@secret-agent/testing/helpers';
+import * as Helpers from '@ulixee/testing/helpers';
 import { inspect } from 'util';
-import Puppet from '@secret-agent/puppet';
-import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
-import Log from '@secret-agent/commons/Logger';
-import CorePlugins from '@secret-agent/core/lib/CorePlugins';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Puppet from '@ulixee/hero-puppet';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import Log from '@ulixee/commons/Logger';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 // @ts-ignore
 // eslint-disable-next-line import/extensions
 import { proxyFunction } from '../injected-scripts/_proxyUtils';

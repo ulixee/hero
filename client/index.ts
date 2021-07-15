@@ -1,15 +1,15 @@
 // setup must go first
 import './lib/SetupAwaitedHandler';
-import { BlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
-import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
-import { InteractionCommand, MouseButton } from '@secret-agent/interfaces/IInteractions';
-import { Node, XPathResult } from '@secret-agent/interfaces/AwaitedDom';
-import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Location';
-import IAgentCreateOptions from './interfaces/IAgentCreateOptions';
+import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
+import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import { InteractionCommand, MouseButton } from '@ulixee/hero-interfaces/IInteractions';
+import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
+import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import Handler from './lib/Handler';
-import Agent from './lib/Agent';
+import Hero from './lib/Hero';
 import type FrameEnvironment from './lib/FrameEnvironment';
 import type Tab from './lib/Tab';
 import RemoteConnectionToCore from './connections/RemoteConnectionToCore';
@@ -20,12 +20,12 @@ import { readCommandLineArgs } from './lib/Input';
 
 const input = readCommandLineArgs();
 
-export default new Agent({ input });
+export default new Hero({ input });
 
 export {
   Observable,
   Handler,
-  Agent,
+  Hero,
   RemoteConnectionToCore,
   ConnectionToCore,
   ConnectionFactory,
@@ -34,7 +34,7 @@ export {
   ResourceType,
   KeyboardKeys,
   BlockedResourceType,
-  IAgentCreateOptions,
+  IHeroCreateOptions,
   IConnectionToCoreOptions,
   Node,
   FrameEnvironment,

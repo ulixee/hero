@@ -2,19 +2,19 @@
 
 ### Installation Errors or ENOENT
 
-SecretAgent operates with a few different spawned processes:
+Hero operates with a few different spawned processes:
 
 #### Socket Connect
 
-Each socket created by the browser is proxied through a `Go` process that emulates the TLS signatures of the headed version of the browser engine being used. A small library is placed in `node_modules/@secret-agent/mitm-socket/dist` during installation. If this is unsuccessful, or aborts, you will see errors.
+Each socket created by the browser is proxied through a `Go` process that emulates the TLS signatures of the headed version of the browser engine being used. A small library is placed in `node_modules/@ulixee/hero-mitm-socket/dist` during installation. If this is unsuccessful, or aborts, you will see errors.
 
-You can remove the library and reinstall or rebuild manually using npm run build in the `@secret-agent/mitm-socket` directory with environmental variable: `SA_REBUILD_MITM_SOCKET=true`.
+You can remove the library and reinstall or rebuild manually using npm run build in the `@ulixee/hero-mitm-socket` directory with environmental variable: `HERO_REBUILD_MITM_SOCKET=true`.
 
 #### Browser Emulators
 
-When you install SecretAgent, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
+When you install Hero, it also downloads a recent version of Chrome 83 (~277MB Mac, ~282MB Linux, ~280MB Win). Each [BrowserEmulator](/docs/plugins/browser-emulators) you install (ie, Chrome80, Safari13) can install additional browser engines as needed.
 
-Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple SecretAgent npm installations.
+Browsers will be saved to a shared location on each OS. Each browser version will be downloaded only once and can be shared across multiple Hero npm installations.
 
 - Mac: ~/Library/Cache/
 - Linux: ~/.cache (environment variable XDG_CACHE_HOME)
@@ -22,22 +22,23 @@ Browsers will be saved to a shared location on each OS. Each browser version wil
 
 #### Replay
 
-SecretAgent also installs an app called [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions. Replay is ~200MB unpacked. To skip download (ie, in a production environment), you can set the following environmental variable: `SA_REPLAY_SKIP_BINARY_DOWNLOAD=true`.
+Hero also installs an app called [Replay](/docs/advanced/session-replay) to debug and troubleshoot sessions. Replay is ~200MB unpacked. To skip download (ie, in a production environment), you can set the following environmental variable: `HERO_REPLAY_SKIP_BINARY_DOWNLOAD=true`.
 
-If you continue to have problems, [let us know](https://github.com/ulixee/secret-agent/issues).
+If you continue to have problems, [let us know](https://github.com/ulixee/ulixee/issues).
 
 ### Debugging Logs
 
-By default, SecretAgent logs everything to a [Session](/docs/advanced/session) database that is created per Agent instance. The SessionLogs table contains all debug logs.
+By default, Hero logs everything to a [Session](/docs/advanced/session) database that is created per Hero instance. The SessionLogs table contains all debug logs.
 
 To output logs to the console during operation, you can set the environmental variable `DEBUG=true`.
 
 ```js
 process.env.DEBUG = true;
-import agent from 'secret-agent';
+import Hero from '@ulixee/hero';
 
 (async () => {
-  await agent.goto('https://url.com');
+  const hero = new Hero();
+  await hero.goto('https://url.com');
 })();
 ```
 
@@ -51,8 +52,8 @@ If you'd like to customize log output, you can inject your own logger so long as
 For example:
 
 ```js
-const debug = require('debug')('MySecretAgent');
-const Logger = require('@secret-agent/commons/Logger')
+const debug = require('debug')('MyHero');
+const Logger = require('@ulixee/commons/Logger')
 
 Logger.injectLogger({
   stats(action, data) {
@@ -72,4 +73,4 @@ Logger.injectLogger({
 
 ### Problems after an upgrade
 
-If you have problems after upgrading, [let us know](https://github.com/ulixee/secret-agent/issues).
+If you have problems after upgrading, [let us know](https://github.com/ulixee/ulixee/issues).

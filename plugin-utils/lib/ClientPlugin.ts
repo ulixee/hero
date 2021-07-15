@@ -1,8 +1,8 @@
 import IClientPlugin, {
   ClientPluginClassDecorator,
   IClientPluginClass,
-} from '@secret-agent/interfaces/IClientPlugin';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
+} from '@ulixee/hero-interfaces/IClientPlugin';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 
 @ClientPluginClassDecorator
 export default class ClientPlugin implements IClientPlugin {

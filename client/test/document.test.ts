@@ -2,11 +2,11 @@
 import '../lib/SetupAwaitedHandler';
 
 import { getState as getElementState } from 'awaited-dom/base/official-klasses/Element';
-import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
-import { Helpers } from '@secret-agent/testing';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
+import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
+import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import { Helpers } from '@ulixee/testing';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
@@ -59,10 +59,10 @@ describe('document tests', () => {
     }
 
     const handler = new Handler(new Piper());
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    const element = agent.document.querySelector('h1');
+    const element = hero.document.querySelector('h1');
     const jsPath = getElementState(element).awaitedPath.toJSON();
     expect(jsPath[0]).toBe('document');
     expect(jsPath[1]).toMatchObject(['querySelector', 'h1']);
@@ -70,7 +70,7 @@ describe('document tests', () => {
     const superElement = await element;
     await superElement.tagName;
 
-    await agent.close();
+    await hero.close();
     await handler.close();
 
     const outgoingCommands = outgoing.mock.calls;

@@ -1,11 +1,11 @@
 import { LookupAddress, promises as nodeDns } from 'dns';
-import { Helpers } from '@secret-agent/testing';
-import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import CorePlugins from '@secret-agent/core/lib/CorePlugins';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Log from '@secret-agent/commons/Logger';
-import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
-import Core from '@secret-agent/core';
+import { Helpers } from '@ulixee/testing';
+import BrowserEmulator from '@ulixee/default-browser-emulator';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/Logger';
+import CorePlugin from '@ulixee/hero-plugin-utils/lib/CorePlugin';
+import Core from '@ulixee/hero-core';
 import DnsOverTlsSocket from '../lib/DnsOverTlsSocket';
 import { Dns } from '../lib/Dns';
 import RequestSession from '../handlers/RequestSession';

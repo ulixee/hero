@@ -2,11 +2,11 @@ import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulator,
   IBrowserEmulatorConfig,
-} from '@secret-agent/interfaces/ICorePlugin';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
-import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
-import IViewport from '@secret-agent/interfaces/IViewport';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
+import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
 
 const id = 'test';
 const locale = 'en';

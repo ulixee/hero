@@ -85,7 +85,7 @@ CoreLayout.has-sidebar.AwaitedDomPage(:footer="false")
     private get editLink() {
       let path = this.currentPath;
       if ((path.match(new RegExp('/', 'g')) || []).length == 1) path = path + '/README';
-      return `https://github.com/ulixee/secret-agent/blob/master/website${path}.md`;
+      return `https://github.com/ulixee/ulixee/blob/master/website${path}.md`;
     }
 
     private get items() {

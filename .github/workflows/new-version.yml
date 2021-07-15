@@ -21,7 +21,7 @@ jobs:
       - name: Yarn install
         run: yarn install --network-timeout 1000000
         env:
-          SA_SKIP_DOWNLOAD: true
+          HERO_SKIP_DOWNLOAD: true
 
       - name: Build
         run: yarn build

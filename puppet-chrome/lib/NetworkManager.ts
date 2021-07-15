@@ -1,16 +1,16 @@
 import { Protocol } from 'devtools-protocol';
-import { getResourceTypeForChromeValue } from '@secret-agent/interfaces/ResourceType';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
+import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/ResourceType';
+import * as eventUtils from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
 import {
   IPuppetNetworkEvents,
   IPuppetResourceRequest,
-} from '@secret-agent/interfaces/IPuppetNetworkEvents';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+} from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import { URL } from 'url';
-import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
+import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import { DevtoolsSession } from './DevtoolsSession';
 import AuthChallengeResponse = Protocol.Fetch.AuthChallengeResponseResponse;
 import Fetch = Protocol.Fetch;

@@ -44,7 +44,7 @@ export default function generateAppMenu() {
           () => {
             ipcMain.emit('open-file');
           },
-          'Open SecretAgent Script',
+          'Open Hero Script',
         ),
         {
           type: 'separator',
@@ -142,7 +142,7 @@ export default function generateAppMenu() {
           click: () => {
             const dir = Path.join(
               Window.current.replayApi?.saSession?.dataLocation ??
-                Path.join(Os.tmpdir(), '.secret-agent'),
+                Path.join(Os.tmpdir(), '.ulixee'),
             );
             if (Window.current.replayApi?.saSession) {
               return shell.showItemInFolder(

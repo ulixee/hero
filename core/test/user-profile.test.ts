@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import IUserProfile from '@secret-agent/interfaces/IUserProfile';
-import HttpRequestHandler from '@secret-agent/mitm/handlers/HttpRequestHandler';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { createPromise } from '@secret-agent/commons/utils';
+import { Helpers } from '@ulixee/testing';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import HttpRequestHandler from '@ulixee/hero-mitm/handlers/HttpRequestHandler';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { createPromise } from '@ulixee/commons/utils';
 import Core from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';

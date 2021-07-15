@@ -1,14 +1,14 @@
-import { Helpers } from '@secret-agent/testing';
+import { Helpers } from '@ulixee/testing';
 import * as Proxy from 'proxy';
 import * as http from 'http';
 import {
   getTlsConnection,
   httpGetWithSocket,
   readableToBuffer,
-} from '@secret-agent/testing/helpers';
+} from '@ulixee/testing/helpers';
 import * as WebSocket from 'ws';
 import * as socks5 from 'simple-socks';
-import { createPromise } from '@secret-agent/commons/utils';
+import { createPromise } from '@ulixee/commons/utils';
 import * as http2 from 'http2';
 import MitmSocket from '../index';
 import MitmSocketSession from '../lib/MitmSocketSession';

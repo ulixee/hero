@@ -1,4 +1,4 @@
-import IDeviceProfile from '@secret-agent/interfaces/IDeviceProfile';
+import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import { randomBytes } from 'crypto';
 
 export default function configureDeviceProfile(deviceProfile: IDeviceProfile): void {

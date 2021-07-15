@@ -1,5 +1,5 @@
-import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
-import IBrowserEngineOption from '@secret-agent/interfaces/IBrowserEngineOption';
+import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
+import IBrowserEngineOption from '@ulixee/hero-interfaces/IBrowserEngineOption';
 
 export default interface IBrowserData
   extends Omit<IDataCore, 'browserEngineOptions' | 'userAgentOptions'> {

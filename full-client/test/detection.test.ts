@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
+import { Helpers } from '@ulixee/testing';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
-import Core, { Session } from '@secret-agent/core';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Core, { Session } from '@ulixee/hero-core';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler, LocationStatus } from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
@@ -68,11 +68,11 @@ afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
 test('widevine detection', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(koaServer.baseUrl);
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(koaServer.baseUrl);
 
-  const accessKey = await agent
+  const accessKey = await hero
     .getJsValue(
       `navigator.requestMediaKeySystemAccess('com.widevine.alpha', [{
       initDataTypes: ['cenc'],
@@ -111,9 +111,9 @@ test('should pass FpScanner', async () => {
     });
   });
 
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}/collect`);
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}/collect`);
 
   const data = await analyzePromise;
   const results = fpscanner.analyseFingerprint(data);
@@ -128,12 +128,12 @@ test('should pass FpScanner', async () => {
 }, 30e3);
 
 test('should not be denied for notifications but prompt for permissions', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}`);
-  const activeTab = await agent.activeTab;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}`);
+  const activeTab = await hero.activeTab;
   const tabId = await activeTab.tabId;
-  const sessionId = await agent.sessionId;
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
   const permissions = await page.evaluate<any>(`(async () => {
@@ -152,11 +152,11 @@ test('should not be denied for notifications but prompt for permissions', async 
 });
 
 test('should not leave markers on permissions.query.toString', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  const tabId = await agent.activeTab.tabId;
-  await agent.goto(`${koaServer.baseUrl}`);
-  const sessionId = await agent.sessionId;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  const tabId = await hero.activeTab.tabId;
+  await hero.goto(`${koaServer.baseUrl}`);
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
   const perms: any = await page.evaluate(`(() => {
@@ -179,11 +179,11 @@ test('should not leave markers on permissions.query.toString', async () => {
 });
 
 test('should not recurse the toString function', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}`);
-  const tabId = await agent.activeTab.tabId;
-  const sessionId = await agent.sessionId;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}`);
+  const tabId = await hero.activeTab.tabId;
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
   const isHeadless = await page.evaluate(`(() => {
@@ -200,11 +200,11 @@ test('should not recurse the toString function', async () => {
 });
 
 test('should properly maintain stack traces in toString', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}`);
-  const tabId = await agent.activeTab.tabId;
-  const sessionId = await agent.sessionId;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}`);
+  const tabId = await hero.activeTab.tabId;
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
   await page.evaluate(`(() => {
@@ -236,11 +236,11 @@ test('should properly maintain stack traces in toString', async () => {
 
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  const tabId = await agent.activeTab.tabId;
-  await agent.goto(koaServer.baseUrl);
-  const sessionId = await agent.sessionId;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  const tabId = await hero.activeTab.tabId;
+  await hero.goto(koaServer.baseUrl);
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
   await page.evaluate(`(() => {
@@ -260,8 +260,8 @@ document.querySelector = (function (orig) {
 });
 
 test('should not leave stack trace markers when calling in page functions', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
   koaServer.get('/marker', ctx => {
     ctx.body = `
 <body>
@@ -282,10 +282,10 @@ test('should not leave stack trace markers when calling in page functions', asyn
     `;
   });
   const url = `${koaServer.baseUrl}/marker`;
-  await agent.goto(url);
-  await agent.waitForPaintingStable();
-  const tabId = await agent.activeTab.tabId;
-  const sessionId = await agent.sessionId;
+  await hero.goto(url);
+  await hero.waitForPaintingStable();
+  const tabId = await hero.activeTab.tabId;
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
 
   const pageFunction = await tab.getJsValue('errorCheck()');
@@ -301,14 +301,14 @@ test('should not leave stack trace markers when calling in page functions', asyn
 });
 
 test('should not have too much recursion in prototype', async () => {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  const tabId = await agent.activeTab.tabId;
-  const sessionId = await agent.sessionId;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  const tabId = await hero.activeTab.tabId;
+  const sessionId = await hero.sessionId;
   const tab = Session.getTab({ tabId, sessionId });
   const page = tab.puppetPage;
-  await agent.goto(`${koaServer.baseUrl}`);
-  await agent.activeTab.waitForLoad(LocationStatus.AllContentLoaded);
+  await hero.goto(`${koaServer.baseUrl}`);
+  await hero.activeTab.waitForLoad(LocationStatus.AllContentLoaded);
 
   const error = await page.evaluate<{ message: string; name: string }>(`(() => {
     const apiFunction = Object.getOwnPropertyDescriptor(Navigator.prototype, 'deviceMemory').get;

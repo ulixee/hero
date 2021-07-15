@@ -1,10 +1,10 @@
 {
-  "name": "@secret-agent/monorepo",
+  "name": "@ulixee/hero-monorepo",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start:website": "yarn workspace @secret-agent/website start",
-    "test": "cross-env SA_SHOW_REPLAY=false NODE_ENV=test SA_SESSIONS_DIR=.sessions-test jest"
+    "start:website": "yarn workspace @ulixee/website start",
+    "test": "cross-env HERO_SHOW_REPLAY=false NODE_ENV=test HERO_SESSIONS_DIR=.sessions-test jest"
   },
   "devDependencies": {
     "jest": "^26.6.3",

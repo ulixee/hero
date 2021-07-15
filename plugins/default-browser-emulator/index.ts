@@ -1,20 +1,20 @@
-import BrowserEmulator from '@secret-agent/plugin-utils/lib/BrowserEmulator';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import IDnsSettings from '@secret-agent/interfaces/IDnsSettings';
-import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
-import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import BrowserEmulator from '@ulixee/hero-plugin-utils/lib/BrowserEmulator';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
+import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
+import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulatorConfig,
-} from '@secret-agent/interfaces/ICorePlugin';
-import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
-import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
-import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
-import IGeolocation from '@secret-agent/interfaces/IGeolocation';
-import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
+import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
+import BrowserEngine from '@ulixee/hero-plugin-utils/lib/BrowserEngine';
+import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
+import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
 import Viewports from './lib/Viewports';
 import setWorkerDomOverrides from './lib/setWorkerDomOverrides';
 import setPageDomOverrides from './lib/setPageDomOverrides';
@@ -45,7 +45,7 @@ export const latestChromeBrowserVersion = { major: '88', minor: '0' };
 
 @BrowserEmulatorClassDecorator
 export default class DefaultBrowserEmulator extends BrowserEmulator {
-  public static id = dataLoader.pkg.name.replace('@secret-agent/', '');
+  public static id = dataLoader.pkg.name.replace('@ulixee/', '');
 
   public timezoneId: string;
   public locale: string;

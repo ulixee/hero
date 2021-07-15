@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Core, { CoreProcess, Session } from '@secret-agent/core/index';
-import DisconnectedFromCoreError from '@secret-agent/client/connections/DisconnectedFromCoreError';
-import { Agent, RemoteConnectionToCore } from '@secret-agent/client/index';
-import { createPromise } from '@secret-agent/commons/utils';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import Core, { CoreProcess, Session } from '@ulixee/hero-core/index';
+import DisconnectedFromCoreError from '@ulixee/hero/connections/DisconnectedFromCoreError';
+import { Hero, RemoteConnectionToCore } from '@ulixee/hero/index';
+import { createPromise } from '@ulixee/commons/utils';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -31,16 +31,16 @@ describe('Full client Handler', () => {
 
     for (let i = 0; i < 6; i += 1) {
       // eslint-disable-next-line @typescript-eslint/no-loop-func
-      handler.dispatchAgent(async agent => {
-        const sessionId = await agent.sessionId;
+      handler.dispatchHero(async hero => {
+        const sessionId = await hero.sessionId;
         sessionsRunning.set(sessionId, true);
         const concurrent: string[] = [];
         for (const [session, isRunning] of sessionsRunning) {
           if (isRunning) concurrent.push(session);
         }
         runningAtSameTime.push(concurrent);
-        await agent.goto(`${koaServer.baseUrl}/handler`);
-        await agent.document.title;
+        await hero.goto(`${koaServer.baseUrl}/handler`);
+        await hero.document.title;
 
         while (!hasReachedMax && runningAtSameTime.length < concurrency) {
           await new Promise(setImmediate);
@@ -56,53 +56,53 @@ describe('Full client Handler', () => {
     expect(runningAtSameTime.filter(x => x.length > concurrency)).toHaveLength(0);
   });
 
-  it('waits for an agent to close that is checked out', async () => {
+  it('waits for an hero to close that is checked out', async () => {
     const handler = new Handler({
       maxConcurrency: 2,
       host: await Core.server.address,
     });
     Helpers.needsClosing.push(handler);
 
-    const agent1 = await handler.createAgent();
-    const agent2 = await handler.createAgent();
-    await expect(agent1.sessionId).resolves.toBeTruthy();
-    await expect(agent2.sessionId).resolves.toBeTruthy();
-    const agent3 = handler.createAgent();
+    const hero1 = await handler.createHero();
+    const hero2 = await handler.createHero();
+    await expect(hero1.sessionId).resolves.toBeTruthy();
+    await expect(hero2.sessionId).resolves.toBeTruthy();
+    const hero3 = handler.createHero();
 
-    Helpers.needsClosing.push(agent2);
+    Helpers.needsClosing.push(hero2);
 
-    async function isAgent3Available(millis = 100): Promise<boolean> {
+    async function isHero3Available(millis = 100): Promise<boolean> {
       const result = await Promise.race([
-        agent3,
+        hero3,
         new Promise(resolve => setTimeout(() => resolve('not avail'), millis)),
       ]);
       return result !== 'not avail';
     }
 
-    await expect(isAgent3Available(0)).resolves.toBe(false);
+    await expect(isHero3Available(0)).resolves.toBe(false);
 
-    await agent1.close();
+    await hero1.close();
 
-    await expect(isAgent3Available(5e3)).resolves.toBe(true);
-    await (await agent3).close();
+    await expect(isHero3Available(5e3)).resolves.toBe(true);
+    await (await hero3).close();
   });
 });
 
 describe('waitForAllDispatches', () => {
-  it('should not wait for an agent created through createAgent', async () => {
+  it('should not wait for an hero created through createHero', async () => {
     const handler = new Handler({
       maxConcurrency: 2,
       host: await Core.server.address,
     });
     Helpers.needsClosing.push(handler);
 
-    const agent1 = await handler.createAgent();
+    const hero1 = await handler.createHero();
     let counter = 0;
     for (let i = 0; i < 5; i += 1) {
       // eslint-disable-next-line @typescript-eslint/no-loop-func
-      handler.dispatchAgent(async () => {
+      handler.dispatchHero(async () => {
         counter += 1;
-        handler.dispatchAgent(async () => {
+        handler.dispatchHero(async () => {
           counter += 1;
           await new Promise(resolve => setTimeout(resolve, 25 * Math.random()));
         });
@@ -113,7 +113,7 @@ describe('waitForAllDispatches', () => {
     const results = await handler.waitForAllDispatches();
     expect(results).toHaveLength(10);
     expect(counter).toBe(10);
-    expect(await agent1.sessionId).toBeTruthy();
+    expect(await hero1.sessionId).toBeTruthy();
   });
 
   it('should bubble up errors that occur when waiting for all', async () => {
@@ -123,28 +123,28 @@ describe('waitForAllDispatches', () => {
     });
     Helpers.needsClosing.push(handler);
 
-    const agent1 = await handler.createAgent();
+    const hero1 = await handler.createHero();
 
     const tab = Session.getTab({
-      sessionId: await agent1.sessionId,
-      tabId: await agent1.activeTab.tabId,
+      sessionId: await hero1.sessionId,
+      tabId: await hero1.activeTab.tabId,
     });
     jest.spyOn(tab, 'goto').mockImplementation(async url => {
       throw new Error(`invalid url "${url}"`);
     });
 
-    await expect(agent1.goto('any url')).rejects.toThrow('invalid url "any url"');
+    await expect(hero1.goto('any url')).rejects.toThrow('invalid url "any url"');
 
-    handler.dispatchAgent(async agent => {
+    handler.dispatchHero(async hero => {
       const tab2 = Session.getTab({
-        sessionId: await agent.sessionId,
-        tabId: await agent.activeTab.tabId,
+        sessionId: await hero.sessionId,
+        tabId: await hero.activeTab.tabId,
       });
       jest.spyOn(tab2, 'goto').mockImplementation(async url => {
         throw new Error(`invalid url "${url}"`);
       });
 
-      await agent.goto('any url 2');
+      await hero.goto('any url 2');
     });
 
     await expect(handler.waitForAllDispatches()).rejects.toThrow('invalid url "any url 2"');
@@ -159,27 +159,27 @@ describe('waitForAllDispatchesSettled', () => {
     });
     Helpers.needsClosing.push(handler);
 
-    let failedAgentSessionId: string;
-    handler.dispatchAgent(
-      async agent => {
-        failedAgentSessionId = await agent.sessionId;
+    let failedHeroSessionId: string;
+    handler.dispatchHero(
+      async hero => {
+        failedHeroSessionId = await hero.sessionId;
         const tab = Session.getTab({
-          sessionId: failedAgentSessionId,
-          tabId: await agent.activeTab.tabId,
+          sessionId: failedHeroSessionId,
+          tabId: await hero.activeTab.tabId,
         });
         jest.spyOn(tab, 'goto').mockImplementation(async url => {
           throw new Error(`invalid url "${url}"`);
         });
 
-        await agent.goto('any url 2');
+        await hero.goto('any url 2');
       },
       { input: { test: 1 } },
     );
 
-    handler.dispatchAgent(
-      async agent => {
-        await agent.goto(koaServer.baseUrl);
-        agent.output = { result: 1 };
+    handler.dispatchHero(
+      async hero => {
+        await hero.goto(koaServer.baseUrl);
+        hero.output = { result: 1 };
       },
       { input: { test: 1 } },
     );
@@ -212,10 +212,10 @@ describe('connectionToCore', () => {
 
     const waitForGoto = createPromise();
     const dispatchErrorPromise = createPromise<Error>();
-    handler.dispatchAgent(async agent => {
+    handler.dispatchHero(async hero => {
       try {
-        await agent.goto(koaServer.baseUrl);
-        const promise = agent.waitForMillis(10e3);
+        await hero.goto(koaServer.baseUrl);
+        const promise = hero.waitForMillis(10e3);
         await new Promise(resolve => setTimeout(resolve, 50));
         waitForGoto.resolve();
         await promise;
@@ -248,10 +248,10 @@ describe('connectionToCore', () => {
 
     const waitForGoto = createPromise();
     const dispatchErrorPromise = createPromise<Error>();
-    handler.dispatchAgent(async agent => {
+    handler.dispatchHero(async hero => {
       try {
-        await agent.goto(koaServer.baseUrl);
-        const promise = agent.waitForMillis(10e3);
+        await hero.goto(koaServer.baseUrl);
+        const promise = hero.waitForMillis(10e3);
         await new Promise(resolve => setTimeout(resolve, 50));
         waitForGoto.resolve();
         await promise;
@@ -290,10 +290,10 @@ describe('connectionToCore', () => {
 
     const waitForGoto = createPromise();
     let dispatchError: Error = null;
-    handler.dispatchAgent(async agent => {
+    handler.dispatchHero(async hero => {
       try {
-        await agent.goto(koaServer.baseUrl);
-        const promise = agent.waitForMillis(10e3);
+        await hero.goto(koaServer.baseUrl);
+        const promise = hero.waitForMillis(10e3);
         waitForGoto.resolve();
         await promise;
       } catch (error) {
@@ -327,21 +327,21 @@ describe('connectionToCore', () => {
     let localConnections = 0;
 
     const waits: Promise<any>[] = [];
-    const waitForAgent = async (agent: Agent) => {
-      await agent.goto(koaServer.baseUrl);
-      const host = await agent.coreHost;
+    const waitForHero = async (hero: Hero) => {
+      await hero.goto(koaServer.baseUrl);
+      const host = await hero.coreHost;
       if (host === spawnedCoreHost) spawnedConnections += 1;
       else localConnections += 1;
 
       // don't wait
-      const promise = agent.waitForMillis(10e3);
-      agent.input.resolve();
+      const promise = hero.waitForMillis(10e3);
+      hero.input.resolve();
       await expect(promise).rejects.toThrowError('Disconnected');
     };
     for (let i = 0; i < 4; i += 1) {
       const waitForGoto = createPromise();
       waits.push(waitForGoto.promise);
-      handler.dispatchAgent(waitForAgent, { input: waitForGoto });
+      handler.dispatchHero(waitForHero, { input: waitForGoto });
     }
 
     await Promise.all(waits);
@@ -385,7 +385,7 @@ describe('connectionToCore', () => {
     await handler.close();
   });
 
-  it('can re-queue dispatched agents that never started', async () => {
+  it('can re-queue dispatched heros that never started', async () => {
     const coreHost = await CoreProcess.spawn({});
     Helpers.onClose(() => CoreProcess.kill('SIGINT'));
     const connection1 = new RemoteConnectionToCore({
@@ -399,11 +399,11 @@ describe('connectionToCore', () => {
 
     const waitForGoto = createPromise();
     const dispatchErrorPromise = createPromise<Error>();
-    handler.dispatchAgent(async agent => {
+    handler.dispatchHero(async hero => {
       try {
-        await agent.goto(koaServer.baseUrl);
+        await hero.goto(koaServer.baseUrl);
         // create a command we can disconnect from (don't await yet)
-        const promise = agent.waitForMillis(5e3);
+        const promise = hero.waitForMillis(5e3);
         await new Promise(resolve => setTimeout(resolve, 50));
         waitForGoto.resolve();
         await promise;
@@ -414,18 +414,18 @@ describe('connectionToCore', () => {
     });
 
     let counter = 0;
-    const incr = async agent => {
-      await agent.goto(koaServer.baseUrl);
+    const incr = async hero => {
+      await hero.goto(koaServer.baseUrl);
       counter += 1;
     };
-    handler.dispatchAgent(incr);
-    handler.dispatchAgent(incr);
+    handler.dispatchHero(incr);
+    handler.dispatchHero(incr);
 
     // first 2 will be queued against the first connection
     const coreHost2 = await Core.server.address;
     await handler.addConnectionToCore({ maxConcurrency: 2, host: coreHost2 });
-    handler.dispatchAgent(incr);
-    handler.dispatchAgent(incr);
+    handler.dispatchHero(incr);
+    handler.dispatchHero(incr);
     await waitForGoto.promise;
 
     // disconnect the first connection. the first two handlers should get re-queued

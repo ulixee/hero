@@ -1,17 +1,17 @@
 import * as http from 'http';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
-import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/utils';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import IResourceRequest from '@ulixee/hero-interfaces/IResourceRequest';
+import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import * as http2 from 'http2';
-import IResourceResponse from '@secret-agent/interfaces/IResourceResponse';
+import IResourceResponse from '@ulixee/hero-interfaces/IResourceResponse';
 import * as net from 'net';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import Log from '@secret-agent/commons/Logger';
-import MitmSocket from '@secret-agent/mitm-socket/index';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import Log from '@ulixee/commons/Logger';
+import MitmSocket from '@ulixee/hero-mitm-socket/index';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { URL } from 'url';
 import MitmRequestAgent from '../lib/MitmRequestAgent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
@@ -117,7 +117,7 @@ export default class RequestSession extends TypedEventEmitter<IRequestSessionEve
   }
 
   public getProxyCredentials(): string {
-    return `secret-agent:${this.sessionId}`;
+    return `ulixee:${this.sessionId}`;
   }
 
   public close(): void {

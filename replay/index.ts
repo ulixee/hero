@@ -40,20 +40,20 @@ try {
 
 let apiStartPath: string;
 try {
-  apiStartPath = require.resolve('@secret-agent/core/start');
+  apiStartPath = require.resolve('@ulixee/hero-core/start');
 } catch (err) {
-  // not installed locally (not full-client)
+  // not installed locally (not main)
 }
 
 let hasLocalReplay = false;
 try {
   require.resolve('./app');
-  hasLocalReplay = Boolean(JSON.parse(process.env.SA_USE_REPLAY_BINARY ?? 'false')) === false;
+  hasLocalReplay = Boolean(JSON.parse(process.env.HERO_USE_REPLAY_BINARY ?? 'false')) === false;
 } catch (err) {
   // not installed locally
 }
 
-const showDebugLogs = Boolean(JSON.parse(process.env.SA_REPLAY_DEBUG ?? 'false'));
+const showDebugLogs = Boolean(JSON.parse(process.env.HERO_REPLAY_DEBUG ?? 'false'));
 
 export async function replay(launchArgs: IReplayScriptRegistration): Promise<any> {
   const {
@@ -115,7 +115,7 @@ export async function openReplayApp(...extraArgs: string[]) {
   if (isLocalBuildPresent()) {
     child = await launchReplay(getLocalBuildPath(), ['--local-build-launch', ...extraArgs]);
   } else if (hasLocalReplay) {
-    const replayPath = require.resolve('@secret-agent/replay');
+    const replayPath = require.resolve('@ulixee/replay');
     child = await launchReplay(
       'yarn electron',
       [replayPath, '--electron-launch', ...extraArgs],

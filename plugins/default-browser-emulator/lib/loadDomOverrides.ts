@@ -1,4 +1,4 @@
-import { BrowserEmulator } from '@secret-agent/plugin-utils';
+import { BrowserEmulator } from '@ulixee/hero-plugin-utils';
 import DomOverridesBuilder from './DomOverridesBuilder';
 import IBrowserData from '../interfaces/IBrowserData';
 import parseNavigatorPlugins from './utils/parseNavigatorPlugins';
@@ -76,21 +76,21 @@ export default function loadDomOverrides(
     frameBorderHeight: data.windowFraming.frameBorderHeight,
   });
 
-  const agentCodecs = data.codecs;
-  if (agentCodecs) {
+  const codecs = data.codecs;
+  if (codecs) {
     domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
-      audioCodecs: agentCodecs.audioSupport,
-      videoCodecs: agentCodecs.videoSupport,
+      audioCodecs: codecs.audioSupport,
+      videoCodecs: codecs.videoSupport,
     });
     domOverrides.add('MediaRecorder.isTypeSupported', {
       supportedCodecs: [
-        ...agentCodecs.audioSupport.recordingFormats,
-        ...agentCodecs.videoSupport.recordingFormats,
+        ...codecs.audioSupport.recordingFormats,
+        ...codecs.videoSupport.recordingFormats,
       ],
     });
     domOverrides.add('RTCRtpSender.getCapabilities', {
-      videoCodecs: agentCodecs.webRtcVideoCodecs,
-      audioCodecs: agentCodecs.webRtcAudioCodecs,
+      videoCodecs: codecs.webRtcVideoCodecs,
+      audioCodecs: codecs.webRtcAudioCodecs,
     });
   }
 

@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
-import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
+import SqliteTable from '@ulixee/commons/SqliteTable';
+import ResourceState from '@ulixee/hero-mitm/interfaces/ResourceState';
 
 const resourceStates = Object.keys(ResourceState).filter(
   x => ResourceState[x] === x,

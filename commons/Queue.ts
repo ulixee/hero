@@ -1,4 +1,4 @@
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
 import { createPromise } from './utils';
 import { CanceledPromiseError } from './interfaces/IPendingWaitEvent';
 import Resolvable from './Resolvable';

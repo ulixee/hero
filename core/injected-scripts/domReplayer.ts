@@ -1,6 +1,6 @@
 // NOTE: do not use node dependencies
 
-import type { IFrontendDomChangeEvent } from '@secret-agent/core/models/DomChangesTable';
+import type { IFrontendDomChangeEvent } from '@ulixee/hero-core/models/DomChangesTable';
 
 declare global {
   interface Window {

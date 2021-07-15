@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
-import { createPromise } from '@secret-agent/commons/utils';
-import Core from '@secret-agent/core';
-import CoreServer from '@secret-agent/core/server';
-import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
+import { Helpers } from '@ulixee/testing';
+import { createPromise } from '@ulixee/commons/utils';
+import Core from '@ulixee/hero-core';
+import CoreServer from '@ulixee/hero-core/server';
+import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import * as Fs from 'fs';
 import { Handler } from '../index';
 
@@ -45,14 +45,14 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const agent = await handler.createAgent({ humanEmulatorId: 'basic' });
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/get-upload`);
-    await agent.waitForPaintingStable();
-    const input = await agent.document.querySelector('#files');
-    await agent.click(input);
-    const chooser = await agent.waitForFileChooser();
+    await hero.goto(`${koaServer.baseUrl}/get-upload`);
+    await hero.waitForPaintingStable();
+    const input = await hero.document.querySelector('#files');
+    await hero.click(input);
+    const chooser = await hero.waitForFileChooser();
     await chooser.chooseFiles(`${__dirname}/html/worker.js`);
 
     await expect(input.files.length).resolves.toBe(1);
@@ -62,7 +62,7 @@ describe('Filechooser tests', () => {
     expect(body).toBe(actualText);
     await expect(input.files.item(0).type).resolves.toBe('text/javascript');
 
-    await agent.click(agent.document.querySelector('#submitter'));
+    await hero.click(hero.document.querySelector('#submitter'));
     await didSubmit.promise;
   });
 
@@ -86,17 +86,17 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const agent = await handler.createAgent({ humanEmulatorId: 'basic' });
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    Helpers.needsClosing.push(hero);
 
     const file1 = await Fs.promises.readFile(`${__dirname}/filechooser.test.js`);
     const file2 = await Fs.promises.readFile(`${__dirname}/filechooser.test.js.map`);
 
-    await agent.goto(`${koaServer.baseUrl}/get-upload-multi`);
-    await agent.waitForPaintingStable();
-    const input = await agent.document.querySelector('#sourcefiles');
-    await agent.click(input);
-    const chooser = await agent.waitForFileChooser();
+    await hero.goto(`${koaServer.baseUrl}/get-upload-multi`);
+    await hero.waitForPaintingStable();
+    const input = await hero.document.querySelector('#sourcefiles');
+    await hero.click(input);
+    const chooser = await hero.waitForFileChooser();
     await chooser.chooseFiles(
       { data: file1, name: 'filechooser.test.js' },
       { data: file2, name: 'filechooser.test.js.map' },
@@ -108,7 +108,7 @@ describe('Filechooser tests', () => {
     expect(body).toStrictEqual(file1);
     await expect(input.files.item(0).type).resolves.toBe('text/javascript');
 
-    await agent.click(agent.document.querySelector('input[type=submit]'));
+    await hero.click(hero.document.querySelector('input[type=submit]'));
     await didSubmit.promise;
   });
 });

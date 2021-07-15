@@ -1,9 +1,9 @@
 import * as Fs from 'fs';
-import { Helpers } from '@secret-agent/testing';
-import { GlobalPool } from '@secret-agent/core';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import Viewports from '@secret-agent/default-browser-emulator/lib/Viewports';
+import { Helpers } from '@ulixee/testing';
+import { GlobalPool } from '@ulixee/hero-core';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import Resolvable from '@ulixee/commons/Resolvable';
+import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -12,29 +12,29 @@ beforeAll(async () => {
   handler = new Handler();
   Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentAgentsCount = 3;
+  GlobalPool.maxConcurrentHerosCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('basic Emulator tests', () => {
   it('should be able to set a timezoneId', async () => {
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       timezoneId: 'America/Los_Angeles',
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
     await new Promise(resolve => setTimeout(resolve, 1e3));
 
-    await agent.goto(`${koaServer.baseUrl}`);
+    await hero.goto(`${koaServer.baseUrl}`);
 
     const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
-    const timezoneOffset = await agent.getJsValue('new Date(1479579154987).toString()');
+    const timezoneOffset = await hero.getJsValue('new Date(1479579154987).toString()');
     expect(timezoneOffset).toBe(formatted);
   });
 
   it('should affect accept-language header', async () => {
-    const agent = await handler.createAgent({ locale: 'en-GB,en' });
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero({ locale: 'en-GB,en' });
+    Helpers.needsClosing.push(hero);
 
     let acceptLanguage = '';
     koaServer.get('/headers', ctx => {
@@ -42,68 +42,68 @@ describe('basic Emulator tests', () => {
       ctx.body = '<html></html>';
     });
 
-    await agent.goto(`${koaServer.baseUrl}/headers`);
+    await hero.goto(`${koaServer.baseUrl}/headers`);
     expect(acceptLanguage).toBe('en-GB,en;q=0.9');
   });
 
   it('should affect navigator.language', async () => {
-    const agent = await handler.createAgent({ locale: 'fr-CH,fr-CA' });
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero({ locale: 'fr-CH,fr-CA' });
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}`);
-    const result = await agent.getJsValue(`navigator.language`);
+    await hero.goto(`${koaServer.baseUrl}`);
+    const result = await hero.getJsValue(`navigator.language`);
     expect(result).toBe('fr-CH');
 
-    const result2 = await agent.getJsValue(`navigator.languages`);
+    const result2 = await hero.getJsValue(`navigator.languages`);
     expect(result2).toStrictEqual(['fr-CH', 'fr-CA']);
   });
 
   it('should format number', async () => {
     {
-      const agent = await handler.createAgent({ locale: 'en-US,en;q=0.9' });
-      Helpers.needsClosing.push(agent);
+      const hero = await handler.createHero({ locale: 'en-US,en;q=0.9' });
+      Helpers.needsClosing.push(hero);
 
-      await agent.goto(`${koaServer.baseUrl}`);
-      const result = await agent.getJsValue(`(1000000.5).toLocaleString()`);
+      await hero.goto(`${koaServer.baseUrl}`);
+      const result = await hero.getJsValue(`(1000000.5).toLocaleString()`);
       expect(result).toBe('1,000,000.5');
     }
     {
-      const agent = await handler.createAgent({ locale: 'fr-CH' });
-      Helpers.needsClosing.push(agent);
+      const hero = await handler.createHero({ locale: 'fr-CH' });
+      Helpers.needsClosing.push(hero);
 
-      await agent.goto(`${koaServer.baseUrl}`);
+      await hero.goto(`${koaServer.baseUrl}`);
 
-      const result = await agent.getJsValue(`(1000000.5).toLocaleString()`);
+      const result = await hero.getJsValue(`(1000000.5).toLocaleString()`);
       expect(result).toBe('1 000 000,5');
     }
   });
 
   it('should format date', async () => {
     {
-      const agent = await handler.createAgent({
+      const hero = await handler.createHero({
         locale: 'en-US',
         timezoneId: 'America/Los_Angeles',
       });
-      Helpers.needsClosing.push(agent);
+      Helpers.needsClosing.push(hero);
 
-      await agent.goto(`${koaServer.baseUrl}`);
+      await hero.goto(`${koaServer.baseUrl}`);
 
       const formatted = 'Sat Nov 19 2016 10:12:34 GMT-0800 (Pacific Standard Time)';
 
-      const result = await agent.getJsValue(`new Date(1479579154987).toString()`);
+      const result = await hero.getJsValue(`new Date(1479579154987).toString()`);
       expect(result).toBe(formatted);
     }
     {
-      const agent = await handler.createAgent({
+      const hero = await handler.createHero({
         locale: 'de-DE',
         timezoneId: 'Europe/Berlin',
       });
-      Helpers.needsClosing.push(agent);
+      Helpers.needsClosing.push(hero);
 
-      await agent.goto(`${koaServer.baseUrl}`);
+      await hero.goto(`${koaServer.baseUrl}`);
 
       const formatted = 'Sat Nov 19 2016 19:12:34 GMT+0100 (Mitteleuropäische Normalzeit)';
-      const result = await agent.getJsValue(`new Date(1479579154987).toString()`);
+      const result = await hero.getJsValue(`new Date(1479579154987).toString()`);
       expect(result).toBe(formatted);
     }
   });
@@ -120,30 +120,30 @@ describe('setScreensize', () => {
       frameBorderHeight: 0,
     };
     const viewport = Viewports.getDefault(windowFraming, windowFraming);
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       viewport,
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}`);
-    const screenWidth = await agent.getJsValue('screen.width');
+    await hero.goto(`${koaServer.baseUrl}`);
+    const screenWidth = await hero.getJsValue('screen.width');
     expect(screenWidth).toBe(viewport.screenWidth);
-    const screenHeight = await agent.getJsValue('screen.height');
+    const screenHeight = await hero.getJsValue('screen.height');
     expect(screenHeight).toBe(viewport.screenHeight);
 
-    const screenX = await agent.getJsValue('screenX');
+    const screenX = await hero.getJsValue('screenX');
     expect(screenX).toBe(viewport.positionX);
-    const screenY = await agent.getJsValue('screenY');
+    const screenY = await hero.getJsValue('screenY');
     expect(screenY).toBe(viewport.positionY);
 
-    const innerWidth = await agent.getJsValue('innerWidth');
+    const innerWidth = await hero.getJsValue('innerWidth');
     expect(innerWidth).toBe(viewport.width);
-    const innerHeight = await agent.getJsValue('innerHeight');
+    const innerHeight = await hero.getJsValue('innerHeight');
     expect(innerHeight).toBe(viewport.height);
   });
 
   it('should support Media Queries', async () => {
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       viewport: {
         width: 200,
         height: 200,
@@ -153,47 +153,47 @@ describe('setScreensize', () => {
         positionX: 0,
       },
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    expect(await agent.getJsValue(`matchMedia('(min-device-width: 100px)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(min-device-width: 300px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(max-device-width: 100px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(max-device-width: 300px)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(device-width: 500px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(device-width: 200px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(min-device-width: 100px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(min-device-width: 300px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(max-device-width: 100px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(max-device-width: 300px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(device-width: 500px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(device-width: 200px)').matches`)).toBe(true);
 
-    expect(await agent.getJsValue(`matchMedia('(min-device-height: 100px)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(min-device-height: 300px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(max-device-height: 100px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(max-device-height: 300px)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(device-height: 500px)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(min-device-height: 100px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(min-device-height: 300px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(max-device-height: 100px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(max-device-height: 300px)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(device-height: 500px)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(device-height: 200px)').matches`)).toBe(true);
   });
 });
 
 describe('mouse', () => {
   it('should emulate the hover media feature', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    expect(await agent.getJsValue(`matchMedia('(hover: none)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(hover: hover)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(any-hover: none)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(any-hover: hover)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(pointer: coarse)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(pointer: fine)').matches`)).toBe(true);
-    expect(await agent.getJsValue(`matchMedia('(any-pointer: coarse)').matches`)).toBe(false);
-    expect(await agent.getJsValue(`matchMedia('(any-pointer: fine)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(hover: none)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(hover: hover)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(any-hover: none)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(any-hover: hover)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(pointer: coarse)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(pointer: fine)').matches`)).toBe(true);
+    expect(await hero.getJsValue(`matchMedia('(any-pointer: coarse)').matches`)).toBe(false);
+    expect(await hero.getJsValue(`matchMedia('(any-pointer: fine)').matches`)).toBe(true);
   });
 });
 
 describe('geolocation', () => {
   it('should be able to set a geolocation', async () => {
-    const agent = await handler.createAgent({ geolocation: { longitude: 10, latitude: 10 } });
-    Helpers.needsClosing.push(agent);
-    await agent.goto(koaServer.baseUrl);
+    const hero = await handler.createHero({ geolocation: { longitude: 10, latitude: 10 } });
+    Helpers.needsClosing.push(hero);
+    await hero.goto(koaServer.baseUrl);
 
-    const geolocation = await agent.getJsValue(`new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
+    const geolocation = await hero.getJsValue(`new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
         resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude });
       }))`);
     expect(geolocation).toEqual({
@@ -203,52 +203,52 @@ describe('geolocation', () => {
   });
 });
 
-describe('user agent and platform', () => {
+describe('user hero and platform', () => {
   const propsToGet = `appVersion, platform, userAgent, deviceMemory`.split(',').map(x => x.trim());
 
   it('should be able to configure a userAgent', async () => {
     const userAgent =
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4472.124 Safari/537.36';
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       userAgent,
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
-    expect(agentMeta.userAgentString).toBe(userAgent);
+    const heroMeta = await hero.meta;
+    expect(heroMeta.userAgentString).toBe(userAgent);
   });
 
   it('should be able to configure a userAgent with a range', async () => {
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       userAgent: '~ chrome >= 88 && chrome < 89',
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
-    const chromeMatch = agentMeta.userAgentString.match(/Chrome\/(\d+)/);
+    const heroMeta = await hero.meta;
+    const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
     expect(version).toBe(88);
   });
 
   it('should be able to configure a userAgent with a wildcard', async () => {
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       userAgent: '~ chrome = 88.x',
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
-    const chromeMatch = agentMeta.userAgentString.match(/Chrome\/(\d+)/);
+    const heroMeta = await hero.meta;
+    const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
     expect(version).toBe(88);
   });
 
-  it('should add user agent and platform to window & frames', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+  it('should add user hero and platform to window & frames', async () => {
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
+    const heroMeta = await hero.meta;
 
     const requestUserAgentStrings: string[] = [];
 
@@ -284,15 +284,15 @@ describe('user agent and platform', () => {
 
     /////// TEST BEGIN /////
 
-    await agent.goto(`${koaServer.baseUrl}/agent-test`);
+    await hero.goto(`${koaServer.baseUrl}/agent-test`);
     const frameParams = await frameXhr;
 
     for (const useragent of requestUserAgentStrings) {
-      expect(useragent).toBe(agentMeta.userAgentString);
+      expect(useragent).toBe(heroMeta.userAgentString);
     }
 
     async function getJsValue(jsValue: string) {
-      const result = await agent.getJsValue(jsValue);
+      const result = await hero.getJsValue(jsValue);
       return result;
     }
 
@@ -301,8 +301,8 @@ describe('user agent and platform', () => {
       windowParams[prop] = await getJsValue(`navigator.${prop}`);
     }
 
-    expect(agentMeta.userAgentString).toBe(windowParams.userAgent);
-    expect(agentMeta.operatingSystemPlatform).toBe(windowParams.platform);
+    expect(heroMeta.userAgentString).toBe(windowParams.userAgent);
+    expect(heroMeta.operatingSystemPlatform).toBe(windowParams.platform);
 
     for (const prop of propsToGet) {
       expect(`${prop}=${frameParams[prop]}`).toStrictEqual(`${prop}=${windowParams[prop]}`);
@@ -310,10 +310,10 @@ describe('user agent and platform', () => {
   });
 
   it('should maintain user agent and platform across navigations', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
+    const heroMeta = await hero.meta;
 
     const requestUserAgentStrings: string[] = [];
 
@@ -346,19 +346,19 @@ describe('user agent and platform', () => {
     async function getParams() {
       const windowParams: any = {};
       for (const prop of propsToGet) {
-        windowParams[prop] = await agent.getJsValue(`navigator.${prop}`);
+        windowParams[prop] = await hero.getJsValue(`navigator.${prop}`);
       }
       return windowParams;
     }
 
-    await agent.goto(`${koaServer.baseUrl}/page1`);
+    await hero.goto(`${koaServer.baseUrl}/page1`);
 
     const page1WindowParams = await getParams();
 
-    expect(agentMeta.userAgentString).toBe(page1WindowParams.userAgent);
-    expect(agentMeta.operatingSystemPlatform).toBe(page1WindowParams.platform);
+    expect(heroMeta.userAgentString).toBe(page1WindowParams.userAgent);
+    expect(heroMeta.operatingSystemPlatform).toBe(page1WindowParams.platform);
 
-    await agent.click(agent.document.querySelector('a'));
+    await hero.click(hero.document.querySelector('a'));
 
     const page2WindowParams = await getParams();
     for (const prop of propsToGet) {
@@ -367,34 +367,34 @@ describe('user agent and platform', () => {
       );
     }
 
-    const page2StartParams = await agent.getJsValue('startPageVars');
+    const page2StartParams = await hero.getJsValue('startPageVars');
     for (const prop of propsToGet) {
       expect(`${prop}=${page2StartParams[prop]}`).toStrictEqual(
         `${prop}=${page1WindowParams[prop]}`,
       );
     }
 
-    await agent.click(agent.document.querySelector('a'));
+    await hero.click(hero.document.querySelector('a'));
     const page3WindowParams = await getParams();
     for (const key of propsToGet) {
       expect(page3WindowParams[key]).toBe(page1WindowParams[key]);
     }
 
-    await agent.goBack();
+    await hero.goBack();
     const backParams = await getParams();
     for (const key of propsToGet) {
       expect(backParams[key]).toBe(page1WindowParams[key]);
     }
     for (const useragent of requestUserAgentStrings) {
-      expect(useragent).toBe(agentMeta.userAgentString);
+      expect(useragent).toBe(heroMeta.userAgentString);
     }
   });
 
-  it('should add user agent and platform to dedicated workers', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+  it('should add user hero and platform to dedicated workers', async () => {
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
+    const heroMeta = await hero.meta;
 
     const requestUserAgentStrings: string[] = [];
 
@@ -427,25 +427,25 @@ describe('user agent and platform', () => {
       });
     });
 
-    await agent.goto(`${koaServer.baseUrl}/workers-test`);
+    await hero.goto(`${koaServer.baseUrl}/workers-test`);
     const params = await xhr;
 
     for (const useragent of requestUserAgentStrings) {
-      expect(useragent).toBe(agentMeta.userAgentString);
+      expect(useragent).toBe(heroMeta.userAgentString);
     }
 
     for (const prop of propsToGet) {
-      const windowValue = await agent.getJsValue(`navigator.${prop}`);
+      const windowValue = await hero.getJsValue(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
       expect(`${prop}=${params[prop]}`).toStrictEqual(`${prop}=${windowValue}`);
     }
   });
 
-  it('should add user agent and platform to service workers', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+  it('should add user hero and platform to service workers', async () => {
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    const agentMeta = await agent.meta;
+    const heroMeta = await hero.meta;
 
     const requestUserAgentStrings: string[] = [];
 
@@ -506,15 +506,15 @@ self.addEventListener('message', async event => {
 
     /////// TEST BEGIN /////
 
-    await agent.goto(`${koaServer.baseUrl}/sw-test`);
+    await hero.goto(`${koaServer.baseUrl}/sw-test`);
     const params = await xhr;
 
     for (const useragent of requestUserAgentStrings) {
-      expect(useragent).toBe(agentMeta.userAgentString);
+      expect(useragent).toBe(heroMeta.userAgentString);
     }
 
     for (const prop of propsToGet) {
-      const windowValue = await agent.getJsValue(`navigator.${prop}`);
+      const windowValue = await hero.getJsValue(`navigator.${prop}`);
       expect(params[prop]).toStrictEqual(windowValue);
     }
   });
@@ -546,9 +546,9 @@ self.addEventListener('message', async event => {
 
     jsonResult = new Resolvable<string>();
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${httpsServer.baseUrl}/creepjs/tests/workers.html`);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${httpsServer.baseUrl}/creepjs/tests/workers.html`);
 
     const result = JSON.parse(await jsonResult.promise);
     expect(result).toBeTruthy();
@@ -560,16 +560,16 @@ self.addEventListener('message', async event => {
     expect(windowScope.memory).toBe(dedicatedWorker.memory);
     expect(windowScope.memory).toBe(serviceWorker.memory);
     expect(windowScope.memory).toBe(sharedWorker.memory);
-    await agent.close();
+    await hero.close();
   });
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('should load creepjs', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    await agent.goto('https://abrahamjuliot.github.io/creepjs/tests/workers.html');
-    await agent.waitForPaintingStable();
-    const cols = await agent.document.querySelectorAll('.col-six');
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    await hero.goto('https://abrahamjuliot.github.io/creepjs/tests/workers.html');
+    await hero.waitForPaintingStable();
+    const cols = await hero.document.querySelectorAll('.col-six');
     for (const col of cols) {
       const background = await col.getAttribute('style');
       expect(background.trim()).toBe('background: none');

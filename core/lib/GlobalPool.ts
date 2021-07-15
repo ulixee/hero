@@ -1,31 +1,31 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
-import Log from '@secret-agent/commons/Logger';
-import { MitmProxy } from '@secret-agent/mitm';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import Puppet from '@secret-agent/puppet';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/utils';
+import Log from '@ulixee/commons/Logger';
+import { MitmProxy } from '@ulixee/hero-mitm';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import Puppet from '@ulixee/hero-puppet';
 import * as Os from 'os';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 
 const { log } = Log(module);
-let sessionsDir = process.env.SA_SESSIONS_DIR || Path.join(Os.tmpdir(), '.secret-agent'); // transferred to GlobalPool below class definition
-const disableMitm = Boolean(JSON.parse(process.env.SA_DISABLE_MITM ?? 'false'));
+let sessionsDir = process.env.HERO_SESSIONS_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
+const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
-  public static maxConcurrentAgentsCount = 10;
+  public static maxConcurrentHerosCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
 
   public static get hasAvailability() {
-    return this.activeSessionCount < GlobalPool.maxConcurrentAgentsCount;
+    return this.activeSessionCount < GlobalPool.maxConcurrentHerosCount;
   }
 
   private static defaultLaunchArgs: IPuppetLaunchArgs;
@@ -51,7 +51,7 @@ export default class GlobalPool {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
-      maxConcurrentAgentsCount: this.maxConcurrentAgentsCount,
+      maxConcurrentHerosCount: this.maxConcurrentHerosCount,
     });
 
     if (!this.hasAvailability) {
@@ -172,11 +172,11 @@ export default class GlobalPool {
   private static getPuppetLaunchArgs() {
     this.defaultLaunchArgs ??= {
       showBrowser: Boolean(
-        JSON.parse(process.env.SA_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
+        JSON.parse(process.env.HERO_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),
       ),
-      disableDevtools: Boolean(JSON.parse(process.env.SA_DISABLE_DEVTOOLS ?? 'true')),
-      noChromeSandbox: Boolean(JSON.parse(process.env.SA_NO_CHROME_SANDBOX ?? 'false')),
-      disableGpu: Boolean(JSON.parse(process.env.SA_DISABLE_GPU ?? 'false')),
+      disableDevtools: Boolean(JSON.parse(process.env.HERO_DISABLE_DEVTOOLS ?? 'true')),
+      noChromeSandbox: Boolean(JSON.parse(process.env.HERO_NO_CHROME_SANDBOX ?? 'false')),
+      disableGpu: Boolean(JSON.parse(process.env.HERO_DISABLE_GPU ?? 'false')),
       enableMitm: !disableMitm,
     };
     return {

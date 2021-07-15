@@ -15,7 +15,7 @@
  */
 import IObservableChange, {
   ObservableChangeType,
-} from '@secret-agent/interfaces/IObservableChange';
+} from '@ulixee/hero-interfaces/IObservableChange';
 
 export default class ObjectObserver implements ProxyHandler<any> {
   private static key = Symbol.for('object-observer-key-v0');

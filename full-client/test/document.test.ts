@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
-import { XPathResult } from '@secret-agent/interfaces/AwaitedDom';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { FrameEnvironment, LocationStatus } from '@secret-agent/client';
-import Dialog from '@secret-agent/client/lib/Dialog';
+import { Helpers } from '@ulixee/testing';
+import { XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { FrameEnvironment, LocationStatus } from '@ulixee/hero';
+import Dialog from '@ulixee/hero/lib/Dialog';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -17,10 +17,10 @@ afterEach(Helpers.afterEach);
 
 describe('basic Document tests', () => {
   it('runs goto', async () => {
-    const agent = await openBrowser('/');
-    const url = await agent.document.location.host;
-    const html = await agent.document.body.outerHTML;
-    const linkText = await agent.document.querySelector('a').textContent;
+    const hero = await openBrowser('/');
+    const url = await hero.document.location.host;
+    const html = await hero.document.body.outerHTML;
+    const linkText = await hero.document.querySelector('a').textContent;
     expect(html).toMatch('Example Domain');
     expect(linkText).toBe('More information...');
     expect(url).toBe(koaServer.baseHost);
@@ -36,14 +36,14 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/page`);
-    const links = await agent.document.querySelectorAll('a');
+    const hero = await openBrowser(`/page`);
+    const links = await hero.document.querySelectorAll('a');
 
     for (const link of links) {
-      await agent.interact({ click: link, waitForElementVisible: link });
-      await agent.waitForLocation('change');
+      await hero.interact({ click: link, waitForElementVisible: link });
+      await hero.waitForLocation('change');
     }
-    const finalUrl = await agent.url;
+    const finalUrl = await hero.url;
     expect(finalUrl).toBe(`${koaServer.baseUrl}/page#page3`);
   });
 
@@ -62,12 +62,12 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/refresh`);
-    const links = agent.document.querySelectorAll('a');
+    const hero = await openBrowser(`/refresh`);
+    const links = hero.document.querySelectorAll('a');
     const links1 = await links;
     expect([...links1]).toHaveLength(1);
     expect([...(await links1.values())]).toHaveLength(1);
-    await agent.click([...(await links1.values())][0]);
+    await hero.click([...(await links1.values())][0]);
 
     expect([...(await links)]).toHaveLength(2);
     expect([...(await links1)]).toHaveLength(1);
@@ -92,13 +92,13 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/reiterate`);
-    const ul = await agent.document.querySelector('ul');
+    const hero = await openBrowser(`/reiterate`);
+    const ul = await hero.document.querySelector('ul');
     const lis = await ul.getElementsByTagName('li');
     expect(Array.from(lis)).toHaveLength(3);
 
-    const link = await agent.document.querySelector('a');
-    await agent.click(link);
+    const link = await hero.document.querySelector('a');
+    await hero.click(link);
     try {
       // should throw
       for (const child of lis) {
@@ -126,16 +126,16 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser('/refresh-element');
-    await agent.waitForPaintingStable();
-    const lastChild = await agent.document.body.firstElementChild;
+    const hero = await openBrowser('/refresh-element');
+    await hero.waitForPaintingStable();
+    const lastChild = await hero.document.body.firstElementChild;
     expect(await lastChild.getAttribute('id')).toBe('first');
-    await agent.click(lastChild);
+    await hero.click(lastChild);
 
     const refreshedChild = await lastChild;
     expect(await refreshedChild.getAttribute('id')).toBe('first');
 
-    const updatedChild = await agent.document.body.firstElementChild;
+    const updatedChild = await hero.document.body.firstElementChild;
     expect(await updatedChild.getAttribute('id')).toBe('number2');
   });
 
@@ -151,9 +151,9 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/index`);
+    const hero = await openBrowser(`/index`);
 
-    const element2Text = await agent.document.querySelectorAll('li')[1].textContent;
+    const element2Text = await hero.document.querySelectorAll('li')[1].textContent;
     expect(element2Text).toBe('2');
   });
 
@@ -171,11 +171,11 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/xpath`);
+    const hero = await openBrowser(`/xpath`);
 
-    const headings = await agent.document.evaluate(
+    const headings = await hero.document.evaluate(
       '/html/body//h2',
-      agent.document,
+      hero.document,
       null,
       XPathResult.ANY_TYPE,
       null,
@@ -202,22 +202,22 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/xpath-wait`);
+    const hero = await openBrowser(`/xpath-wait`);
 
-    const headings = agent.document.evaluate(
+    const headings = hero.document.evaluate(
       '/html/body//h2',
-      agent.document,
+      hero.document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     );
-    await agent.waitForElement(headings.singleNodeValue, { waitForVisible: true });
+    await hero.waitForElement(headings.singleNodeValue, { waitForVisible: true });
     await expect(headings.singleNodeValue.textContent).resolves.toBe('Here I am');
   });
 
   it("returns null for elements that don't exist", async () => {
-    const agent = await openBrowser(`/`);
-    const { document } = agent;
+    const hero = await openBrowser(`/`);
+    const { document } = hero;
     const element = await document.querySelector('#this-element-aint-there');
     expect(element).toBe(null);
   });
@@ -244,53 +244,53 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/isVisible`);
-    const { document } = agent;
+    const hero = await openBrowser(`/isVisible`);
+    const { document } = hero;
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-1')),
+      hero.getComputedVisibility(document.querySelector('#elem-1')),
     ).resolves.toMatchObject({
       isVisible: true,
     });
     // visibility
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-2')),
+      hero.getComputedVisibility(document.querySelector('#elem-2')),
     ).resolves.toMatchObject({
       isVisible: false,
       hasCssVisibility: false,
     });
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-3')),
+      hero.getComputedVisibility(document.querySelector('#elem-3')),
     ).resolves.toMatchObject({
       isVisible: true,
     });
     // layout
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-4')),
+      hero.getComputedVisibility(document.querySelector('#elem-4')),
     ).resolves.toMatchObject({
       isVisible: false,
       hasDimensions: false,
     });
     // opacity
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-5')),
+      hero.getComputedVisibility(document.querySelector('#elem-5')),
     ).resolves.toMatchObject({
       isVisible: false,
       hasCssOpacity: false,
     });
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-6')),
+      hero.getComputedVisibility(document.querySelector('#elem-6')),
     ).resolves.toMatchObject({
       isVisible: true,
     });
     // overlay
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-7')),
+      hero.getComputedVisibility(document.querySelector('#elem-7')),
     ).resolves.toMatchObject({
       isVisible: true,
       isUnobstructedByOtherElements: true,
     });
     await expect(
-      agent.getComputedVisibility(document.querySelector('#elem-8')),
+      hero.getComputedVisibility(document.querySelector('#elem-8')),
     ).resolves.toMatchObject({
       isVisible: false,
       isUnobstructedByOtherElements: false,
@@ -304,13 +304,13 @@ describe('basic Document tests', () => {
           <div style="opacity: 0.1" id="elem-2">Opacity 0.1</div>
         </body>`;
     });
-    const agent = await openBrowser(`/computedStyle`);
-    const { document } = agent;
-    const elem1Style = agent.activeTab.getComputedStyle(document.querySelector('#elem-1'));
+    const hero = await openBrowser(`/computedStyle`);
+    const { document } = hero;
+    const elem1Style = hero.activeTab.getComputedStyle(document.querySelector('#elem-1'));
     const opacity = await elem1Style.getPropertyValue('opacity');
     expect(opacity).toBe('0');
 
-    const elem2Style = agent.activeTab.getComputedStyle(document.querySelector('#elem-2'));
+    const elem2Style = hero.activeTab.getComputedStyle(document.querySelector('#elem-2'));
     const opacity2 = await elem2Style.getPropertyValue('opacity');
     expect(opacity2).toBe('0.1');
   });
@@ -331,8 +331,8 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/canvas`);
-    const { document } = agent;
+    const hero = await openBrowser(`/canvas`);
+    const { document } = hero;
     const dataUrl = await document.querySelector('canvas').toDataURL();
     expect(dataUrl).toMatch(/data:image\/png.+/);
   });
@@ -348,9 +348,9 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/dialog`);
-    const { document } = agent;
-    const dialogPromise = new Promise<Dialog>(resolve => agent.activeTab.on('dialog', resolve));
+    const hero = await openBrowser(`/dialog`);
+    const { document } = hero;
+    const dialogPromise = new Promise<Dialog>(resolve => hero.activeTab.on('dialog', resolve));
     await expect(dialogPromise).resolves.toBeTruthy();
     const dialog = await dialogPromise;
     await (await dialog).dismiss(true);
@@ -366,8 +366,8 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/dataset`);
-    const { document } = agent;
+    const hero = await openBrowser(`/dataset`);
+    const { document } = hero;
     const dataset = await document.querySelector('#main').dataset;
     expect(dataset).toEqual({ id: '1', name: 'name' });
   });
@@ -392,8 +392,8 @@ describe('basic Document tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/shadow`);
-    const { document } = agent;
+    const hero = await openBrowser(`/shadow`);
+    const { document } = hero;
     const shadowRoot = document.querySelector('#header').shadowRoot;
     const h1Text = await shadowRoot.querySelector('h1').textContent;
     expect(h1Text).toBe('Hello Shadow DOM');
@@ -420,13 +420,13 @@ describe('basic Document tests', () => {
       `;
     });
 
-    const agent = await openBrowser(`/iframePage`);
+    const hero = await openBrowser(`/iframePage`);
 
-    const outerH1 = await agent.document.querySelector('h1').textContent;
+    const outerH1 = await hero.document.querySelector('h1').textContent;
     expect(outerH1).toBe('Iframe Page');
 
     let innerFrame: FrameEnvironment;
-    for (const frame of await agent.activeTab.frameEnvironments) {
+    for (const frame of await hero.activeTab.frameEnvironments) {
       await frame.waitForLoad(LocationStatus.DomContentLoaded);
       const url = await frame.url;
       if (url.endsWith('/subFrame')) {
@@ -438,7 +438,7 @@ describe('basic Document tests', () => {
     const innerH1 = await innerFrame.document.querySelector('h1').textContent;
     expect(innerH1).toBe('Subframe Page');
 
-    await agent.close();
+    await hero.close();
   });
 
   it('can find the Frame object for an iframe', async () => {
@@ -460,11 +460,11 @@ describe('basic Document tests', () => {
 </body>`;
     });
 
-    const agent = await openBrowser(`/iframePage2`);
+    const hero = await openBrowser(`/iframePage2`);
 
-    const frameElement2 = agent.document.querySelector('#frame2');
-    await agent.waitForElement(frameElement2);
-    const frame2Env = await agent.activeTab.getFrameEnvironment(frameElement2);
+    const frameElement2 = hero.document.querySelector('#frame2');
+    await hero.waitForElement(frameElement2);
+    const frame2Env = await hero.activeTab.getFrameEnvironment(frameElement2);
 
     expect(frame2Env).toBeTruthy();
     await frame2Env.waitForLoad(LocationStatus.AllContentLoaded);
@@ -479,14 +479,14 @@ describe('basic Document tests', () => {
     await nestedFrameEnv.waitForLoad(LocationStatus.AllContentLoaded);
     await expect(nestedFrameEnv.document.body.innerHTML).resolves.toBe('<h1>Subframe Page 1</h1>');
 
-    await agent.close();
+    await hero.close();
   }, 130e3);
 });
 
 async function openBrowser(path: string) {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}${path}`);
-  await agent.waitForPaintingStable();
-  return agent;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}${path}`);
+  await hero.waitForPaintingStable();
+  return hero;
 }

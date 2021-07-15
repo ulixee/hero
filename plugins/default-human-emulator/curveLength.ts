@@ -1,4 +1,4 @@
-import IPoint from '@secret-agent/interfaces/IPoint';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
 
 // Legendre-Gauss abscissae with n=24 (x_i values, defined at i=n as the roots of the nth order Legendre polynomial Pn(x))
 const Tvalues = [

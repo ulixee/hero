@@ -1,4 +1,4 @@
-import IPoint from '@secret-agent/interfaces/IPoint';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
 import curveLength from './curveLength';
 
 // class extract from https://github.com/Pomax/bezierjs

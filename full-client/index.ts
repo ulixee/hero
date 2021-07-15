@@ -1,14 +1,14 @@
-import '@secret-agent/commons/SourceMapSupport';
-import agent, {
+import '@ulixee/commons/SourceMapSupport';
+import hero, {
   ConnectionFactory,
   IConnectionToCoreOptions,
   RemoteConnectionToCore,
-} from '@secret-agent/client';
-import { CoreProcess } from '@secret-agent/core';
-import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
+} from '@ulixee/hero';
+import { CoreProcess } from '@ulixee/hero-core';
+import ShutdownHandler from '@ulixee/commons/ShutdownHandler';
 
-export * from '@secret-agent/client';
-export default agent;
+export * from '@ulixee/hero';
+export default hero;
 
 let coreHost: Promise<string>;
 

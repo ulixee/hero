@@ -1,22 +1,22 @@
 # Core Plugins
 
-> Core plugins extend SecretAgent's backend functionality at the Core level. These plugins have full control over TCP fingerprinting, header order, HTML rendering, audio codecs and thousands of other variables that allow undetectable emulation of any browser you desire.
+> Core plugins extend Hero's backend functionality at the Core level. These plugins have full control over TCP fingerprinting, header order, HTML rendering, audio codecs and thousands of other variables that allow undetectable emulation of any browser you desire.
 
 ## Creating Your Own Core Plugin
 
-Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `agent.use()`.
+Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `hero.use()`.
 
-We recommend using the CorePlugin base class provided by @secret-agent/plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to agent, which outputs to the browser's console.
+We recommend using the CorePlugin base class provided by @ulixee/hero-plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to hero, which outputs to the browser's console.
 
 ```javascript
-import { ClientPlugin, CorePlugin } from '@secret-agent/plugin-utils';
+import { ClientPlugin, CorePlugin } from '@ulixee/hero-plugin-utils';
 
 export class ClientHelloPlugin extends ClientPlugin {
   static readonly id = 'hello-plugin';
 
-  onAgent(agent, sendToCore) {
-    agent.hello = async (name) => await sendToCore('hello-plugin', name));
-  }
+  onHero(hero, sendToCore) {
+    hero.hello = async (name) => await sendToCore('hello-plugin', name);  
+  } 
 }
 
 export class CoreHelloPlugin extends CorePlugin {
@@ -30,14 +30,14 @@ export class CoreHelloPlugin extends CorePlugin {
 
 As shown above, you can export multiple plugins from the same file. Also a client/core plugin combination can share the same `id` (unlike two core plugins, which must each have unique ids).
 
-To register this plugin in SecretAgent, just pass it to `agent.use()`. In the following example we pass through a path to the plugin file instead of the plugin class itself -- we're doing this because by default Core runs in a separate process from Client.
+To register this plugin in Hero, just pass it to `hero.use()`. In the following example we pass through a path to the plugin file instead of the plugin class itself -- we're doing this because by default Core runs in a separate process from Client.
 
 ```javascript
-import agent from 'secret-agent';
+import hero from '@ulixee/hero';
 
-agent.use(require.resolve('./HelloPlugin'));
+hero.use(require.resolve('./HelloPlugin'));
 
-await agent.hello('World');
+await hero.hello('World');
 ```
 
 The rest of this page documents the various functionalities you can add to your class.
@@ -46,7 +46,7 @@ The rest of this page documents the various functionalities you can add to your 
 
 ### new CorePlugin<em>(createOptions)</em>
 
-New instance of CorePlugin is created for every agent instance. The createOptions object has three properties.
+New instance of CorePlugin is created for every hero instance. The createOptions object has three properties.
 
 #### **Arguments**:
 
@@ -66,7 +66,7 @@ This should usually be set to the plugin's npm package name.
 
 ### CorePlugin.type _required_
 
-This tells SecretAgent that the plugin is a CorePlugin. It must always be set.
+This tells Hero that the plugin is a CorePlugin. It must always be set.
 
 #### **Type**: `string`. This must always be set to `'CorePlugin'`.
 
@@ -76,7 +76,7 @@ The following methods are optional. Add them to your plugin as needed.
 
 ### configure<em>(config)</em>
 
-This hook is called during the initialization of a session/browserEmulator as well as every time agent.configure is called from the client.
+This hook is called during the initialization of a session/browserEmulator as well as every time hero.configure is called from the client.
 
 #### **Arguments**:
 

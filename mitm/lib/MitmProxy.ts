@@ -4,12 +4,12 @@ import * as http from 'http';
 import { IncomingMessage } from 'http';
 import * as https from 'https';
 import * as http2 from 'http2';
-import Log from '@secret-agent/commons/Logger';
+import Log from '@ulixee/commons/Logger';
 import * as Os from 'os';
 import * as Path from 'path';
-import { createPromise } from '@secret-agent/commons/utils';
-import CertificateGenerator from '@secret-agent/mitm-socket/lib/CertificateGenerator';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { createPromise } from '@ulixee/commons/utils';
+import CertificateGenerator from '@ulixee/hero-mitm-socket/lib/CertificateGenerator';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmProxyOptions from '../interfaces/IMitmProxyOptions';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession from '../handlers/RequestSession';
@@ -20,9 +20,9 @@ const { log } = Log(module);
 const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 const defaultStorageDirectory =
-  process.env.SA_NETWORK_DIR ??
-  process.env.SA_SESSIONS_DIR ??
-  Path.join(Os.tmpdir(), '.secret-agent');
+  process.env.HERO_NETWORK_DIR ??
+  process.env.HERO_SESSIONS_DIR ??
+  Path.join(Os.tmpdir(), '.ulixee');
 
 /**
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
@@ -311,8 +311,8 @@ export default class MitmProxy {
           !requestSession.shouldBlockRequest(`https://${hostname}:${port}`) &&
           !requestSession.shouldBlockRequest(`https://${hostname}`)
         ) {
-          const agent = requestSession.requestAgent;
-          isHttp2 = await agent.isHostAlpnH2(hostname, port);
+          const hero = requestSession.requestAgent;
+          isHttp2 = await hero.isHostAlpnH2(hostname, port);
         }
       } catch (error) {
         if (error instanceof CanceledPromiseError) return;

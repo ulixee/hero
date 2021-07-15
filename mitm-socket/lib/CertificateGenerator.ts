@@ -1,7 +1,7 @@
-import Log from '@secret-agent/commons/Logger';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Log from '@ulixee/commons/Logger';
+import Resolvable from '@ulixee/commons/Resolvable';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import BaseIpcHandler from './BaseIpcHandler';
 
 const { log } = Log(module);

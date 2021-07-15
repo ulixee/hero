@@ -1,5 +1,5 @@
 import { ChildProcess, fork } from 'child_process';
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 
 const start = require.resolve('../start');
 
@@ -13,7 +13,7 @@ export default class CoreProcess {
         detached: false,
         stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
         env: {
-          SA_TEMPORARY_CORE: 'true',
+          HERO_TEMPORARY_CORE: 'true',
           ...process.env,
         },
       });

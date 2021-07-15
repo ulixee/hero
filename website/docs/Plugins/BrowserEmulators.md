@@ -1,17 +1,17 @@
 # Browser Emulators
 
-> BrowserEmulators are a special class of core plugins that help SecretAgent disguise itself as different browsers.
+> BrowserEmulators are a special class of core plugins that help Hero disguise itself as different browsers.
 
 The biggest difference that BrowserEmulators have over standard CorePlugins is that only a single instance is ever run within a session -- i.e. you cannot use two BrowserEmulators within the same session. In addition, the Browser Emulator is always run before any standard Core Plugins, and as such, the Browser Emulator is responsible for choosing which browser engine to use (i.e., Chrome 88 vs Chrome 91).
 
-ADVICE: Unless you have access to the exact data that a browser resembles, it's recommended that you extend `@secret-agent/default-browser-emulator` with additional overrides.
+ADVICE: Unless you have access to the exact data that a browser resembles, it's recommended that you extend `@ulixee/default-browser-emulator` with additional overrides.
 
 ## Special Class Properties
 
 BrowserEmulators have all the same class properties as core plugins, with one significant change, the type property` must always be set to `CorePlugin:BrowserEmulator` instead of just `CorePlugin`: 
 
 ### BrowserEmulator.type *required*
-This tells SecretAgent the plugin is a special BrowserEmulator.
+This tells Hero the plugin is a special BrowserEmulator.
 #### **Type**: `string`. This must always be set to `'CorePlugin:BrowserEmulator'`.
 
 ## Special Class Methods
@@ -20,7 +20,7 @@ BrowserEmulators require a method that receives a userAgentSelector and returns 
 
 ### selectBrowserMeta<em>(userAgentSelector)</em> *required*
 
-See @secret-agent/default-browser-emulator for an implementation example.
+See @ulixee/default-browser-emulator for an implementation example.
 
 #### **Returns** `SelectBrowserMeta`
 
@@ -35,7 +35,7 @@ This is called every time a new browser engine is started, which may not be ever
 
 ## Special Instance Properties
 
-Browser Emulators require a few extra properties than standard Core Plugins. These are all related to the browser engine selected by the emulator. See `@secret-agent/default-browser-emulator` for an implementation example.
+Browser Emulators require a few extra properties than standard Core Plugins. These are all related to the browser engine selected by the emulator. See `@ulixee/default-browser-emulator` for an implementation example.
 
 ### browserName *required*
 #### **Type**: `string`.

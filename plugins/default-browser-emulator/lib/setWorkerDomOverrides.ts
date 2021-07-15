@@ -1,4 +1,4 @@
-import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
+import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IBrowserData from '../interfaces/IBrowserData';
 import DomOverridesBuilder from './DomOverridesBuilder';
 

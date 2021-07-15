@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IWebsocketResourceMessage from '@secret-agent/interfaces/IWebsocketResourceMessage';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
+import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
+import SqliteTable from '@ulixee/commons/SqliteTable';
 
 export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessageRecord> {
   constructor(readonly db: SqliteDatabase) {

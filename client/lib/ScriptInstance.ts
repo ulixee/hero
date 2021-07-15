@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
-import IScriptInstanceMeta from '@secret-agent/interfaces/IScriptInstanceMeta';
-import Log from '@secret-agent/commons/Logger';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
+import Log from '@ulixee/commons/Logger';
 import CoreSession from './CoreSession';
 
 const { log } = Log(module);
@@ -21,7 +21,7 @@ export default class ScriptInstance {
 
   public async launchReplay(session: CoreSession): Promise<void> {
     // eslint-disable-next-line global-require
-    const { replay } = require('@secret-agent/replay/index');
+    const { replay } = require('@ulixee/replay/index');
     try {
       await replay({
         scriptInstanceId: this.id,

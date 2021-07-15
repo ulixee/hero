@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -21,11 +21,11 @@ describe('basic Detach tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/detach-1`);
-    const links = await agent.document.querySelectorAll('a').length;
+    const hero = await openBrowser(`/detach-1`);
+    const links = await hero.document.querySelectorAll('a').length;
     expect(links).toBe(1);
 
-    const frozenTab = await agent.detach(agent.activeTab);
+    const frozenTab = await hero.detach(hero.activeTab);
     const detachedTab = await frozenTab.document.querySelectorAll('a').length;
     expect(detachedTab).toBe(1);
   });
@@ -45,31 +45,31 @@ describe('basic Detach tests', () => {
         </body>
       `;
     });
-    const agent = await openBrowser(`/detach-grow`);
-    const links = await agent.document.querySelectorAll('a').length;
+    const hero = await openBrowser(`/detach-grow`);
+    const links = await hero.document.querySelectorAll('a').length;
     expect(links).toBe(1);
 
-    const frozenTab = await agent.detach(agent.activeTab);
+    const frozenTab = await hero.detach(hero.activeTab);
     const detachedTab = await frozenTab.document.querySelectorAll('a').length;
     expect(detachedTab).toBe(1);
 
-    await agent.click(agent.document.querySelector('a'));
-    const linksAfterClick = await agent.document.querySelectorAll('a').length;
+    await hero.click(hero.document.querySelector('a'));
+    const linksAfterClick = await hero.document.querySelectorAll('a').length;
     expect(linksAfterClick).toBe(2);
 
     const detachedLinksAfterClick = await frozenTab.document.querySelectorAll('a').length;
     expect(detachedLinksAfterClick).toBe(1);
 
-    const frozenTab2 = await agent.detach(agent.activeTab);
+    const frozenTab2 = await hero.detach(hero.activeTab);
     const detachedTab2 = await frozenTab2.document.querySelectorAll('a').length;
     expect(detachedTab2).toBe(2);
   });
 });
 
 async function openBrowser(path: string) {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}${path}`);
-  await agent.waitForPaintingStable();
-  return agent;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}${path}`);
+  await hero.waitForPaintingStable();
+  return hero;
 }

@@ -1,5 +1,5 @@
 export default interface ICoreConfigureOptions {
-  maxConcurrentAgentsCount?: number;
+  maxConcurrentHerosCount?: number;
   localProxyPortStart?: number;
   coreServerPort?: number;
   sessionsDir?: string;

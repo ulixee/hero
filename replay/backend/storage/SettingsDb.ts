@@ -2,7 +2,7 @@ import BaseDb from './BaseDb';
 import ISettings from '~shared/interfaces/ISettings';
 
 const defaultSettings = {
-  theme: 'secret-agent-light',
+  theme: 'ulixee-light',
   themeAuto: true,
 };
 

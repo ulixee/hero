@@ -12,14 +12,14 @@ mkdir -p assets
 if [ -d "./mac" ]; then
   cd mac
   echo "Packing mac"
-  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac.tar.gz" SecretAgentReplay.app
+  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac.tar.gz" UlixeeReplay.app
   cd ..
 fi
 
 if [ -d "./mac-arm64" ]; then
   cd "mac-arm64"
   echo "Packing mac-arm64"
-  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac-arm64.tar.gz" SecretAgentReplay.app
+  tar -czf "../assets/replay-${PACKAGE_VERSION}-mac-arm64.tar.gz" UlixeeReplay.app
   cd ..
 fi
 

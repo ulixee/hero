@@ -1,5 +1,5 @@
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import { Helpers } from '@secret-agent/testing/index';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import { Helpers } from '@ulixee/testing/index';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
@@ -58,8 +58,8 @@ describe('Handler', () => {
     const runningAtSameTime: string[][] = [];
     const expectedCalls: string[] = [];
 
-    const runFn = async (agent): Promise<any> => {
-      const sessionId = await agent.sessionId;
+    const runFn = async (hero): Promise<any> => {
+      const sessionId = await hero.sessionId;
       sessionsRunning.set(sessionId, true);
       const concurrent: string[] = [];
       for (const [session, isRunning] of sessionsRunning) {
@@ -70,7 +70,7 @@ describe('Handler', () => {
       sessionsRunning.set(sessionId, false);
     };
     for (let i = 0; i < 100; i += 1) {
-      handler.dispatchAgent(runFn, { input: i });
+      handler.dispatchHero(runFn, { input: i });
       expectedCalls.push('Session.create', 'Session.close');
     }
 
@@ -87,7 +87,7 @@ describe('Handler', () => {
     );
   });
 
-  it('has a max concurrency for "created" agents', async () => {
+  it('has a max concurrency for "created" heros', async () => {
     let counter = 0;
     let listenerId = 0;
     outgoing.mockImplementation(({ command }) => {
@@ -117,25 +117,25 @@ describe('Handler', () => {
     const handler = new Handler(connection);
     Helpers.needsClosing.push(handler);
 
-    const agent1 = await handler.createAgent();
-    const agent2 = await handler.createAgent();
-    await expect(agent1.sessionId).resolves.toBe('1');
-    await expect(agent2.sessionId).resolves.toBe('2');
-    const agent3 = handler.createAgent();
+    const hero1 = await handler.createHero();
+    const hero2 = await handler.createHero();
+    await expect(hero1.sessionId).resolves.toBe('1');
+    await expect(hero2.sessionId).resolves.toBe('2');
+    const hero3 = handler.createHero();
 
-    async function isAgent3Available(): Promise<boolean> {
+    async function isHero3Available(): Promise<boolean> {
       const result = await Promise.race([
-        agent3,
+        hero3,
         new Promise(resolve => setTimeout(() => resolve('not avail'), 100)),
       ]);
       return result !== 'not avail';
     }
 
-    await expect(isAgent3Available()).resolves.toBe(false);
+    await expect(isHero3Available()).resolves.toBe(false);
 
-    await agent1.close();
+    await hero1.close();
     connection.onMessage({ listenerId: '1', meta: { sessionId: '1' }, eventArgs: [] });
     await new Promise(setImmediate);
-    await expect(isAgent3Available()).resolves.toBe(true);
+    await expect(isHero3Available()).resolves.toBe(true);
   });
 });

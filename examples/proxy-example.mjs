@@ -1,4 +1,4 @@
-import agent from 'secret-agent';
+import agent from '@ulixee/hero';
 
 (async () => {
   await agent.configure({

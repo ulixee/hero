@@ -13,11 +13,11 @@ We need to write documentation on what methods are properties are available in a
 
 ## Example
 
-DetachedDOM stands alone outside the context of SecretAgent or BrowserInstance. For example, here we load and parse a local HTML file:
+DetachedDOM stands alone outside the context of Hero or BrowserInstance. For example, here we load and parse a local HTML file:
 
 ```js
 const fs = require('fs');
-const { DetachedDOM } = require('secret-agent');
+const { DetachedDOM } = require('@ulixee/hero');
 
 const html = fs.readFileSync('/docs/basic-interfaces/saved.html', 'utf-8');
 const document = DetachedDOM.load(html);

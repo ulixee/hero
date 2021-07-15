@@ -1,4 +1,4 @@
-import IDevtoolsSession from '@secret-agent/interfaces/IDevtoolsSession';
+import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
 import BrowserEmulator from '../../index';
 
 export default async function setTimezone(

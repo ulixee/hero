@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import { stringifiedTypeSerializerClass } from '@secret-agent/commons/TypeSerializer';
-import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { stringifiedTypeSerializerClass } from '@ulixee/commons/TypeSerializer';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 
 const pageScripts = {
@@ -32,7 +32,7 @@ const injectedScript = `(function installInjectedScripts() {
        ${pageScripts.pageEventsRecorder}
     })('${pageEventsCallbackName}');
 
-    window.SA = {
+    window.HERO = {
       JsPath,
       MouseEvents,
       Fetcher,
@@ -51,7 +51,7 @@ const detachedInjectedScript = `(function installInjectedScripts() {
     ${pageScripts.jsPath};
     ${pageScripts.Fetcher};
 
-    window.SA = {
+    window.HERO = {
       JsPath,
       Fetcher,
     };
@@ -71,8 +71,8 @@ const installedSymbol = Symbol('InjectedScripts.Installed');
 const replayInstalledSymbol = Symbol('InjectedScripts.replayInstalled');
 
 export default class InjectedScripts {
-  public static JsPath = `SA.JsPath`;
-  public static Fetcher = `SA.Fetcher`;
+  public static JsPath = `HERO.JsPath`;
+  public static Fetcher = `HERO.Fetcher`;
   public static PageEventsCallbackName = pageEventsCallbackName;
 
   public static install(puppetPage: IPuppetPage): Promise<any> {

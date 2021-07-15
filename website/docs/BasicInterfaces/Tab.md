@@ -1,12 +1,12 @@
 # Tab
 
-A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying document with its own page lifecycle and resources. Many of the tab functions are available from the SecretAgent object.
+A Tab is similar to a tab in a consumer browser. Each Tab drives an underlying document with its own page lifecycle and resources. Many of the tab functions are available from the Hero object.
 
 ## Constructor
 
-A default tab is provided in each Agent instance. Navigate by using the [agent.goto](/docs/basic-interfaces/agent#goto) method.
+A default tab is provided in each Hero instance. Navigate by using the [hero.goto](/docs/basic-interfaces/hero#goto) method.
 
-When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Agent instance. These can be discovered using the [agent.tabs](/docs/basic-interfaces/agent#tabs) method, or waiting with [agent.waitForNewTab()](/docs/basic-interfaces/agent#wait-for-new-tab).
+When a new window is "popped up" (ie, `<a href="/new-place" target="_blank"`), a tab will automatically be associated with the Hero instance. These can be discovered using the [hero.tabs](/docs/basic-interfaces/hero#tabs) method, or waiting with [hero.waitForNewTab()](/docs/basic-interfaces/hero#wait-for-new-tab).
 
 ## Properties
 
@@ -34,7 +34,7 @@ Returns a list of [Frames](/docs/basic-interfaces/frame-environment) loaded for 
 
 ### tab.lastCommandId {#lastCommandId}
 
-An execution point that refers to a command run on this Agent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
+An execution point that refers to a command run on this Hero instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
 
 #### **Type**: `Promise<number>`
 
@@ -84,7 +84,7 @@ Alias for [tab.mainFrameEnvironment.Request](/docs/basic-interfaces/frame-enviro
 
 ### tab.close*()* {#close}
 
-Closes the current tab only (will close the whole Agent instance if there are no open tabs).
+Closes the current tab only (will close the whole Hero instance if there are no open tabs).
 
 #### **Returns**: `Promise`
 
@@ -110,8 +110,8 @@ Alias for [tab.mainFrameEnvironment.fetch](/docs/basic-interfaces/frame-environm
 const origin = 'https://dataliberationfoundation.org/';
 const getUrl = 'https://dataliberationfoundation.org/mission';
 
-await agent.goto(origin);
-const response = await agent.fetch(getUrl);
+await hero.goto(origin);
+const response = await hero.fetch(getUrl);
 ```
 
 Http Post example with a body:
@@ -120,8 +120,8 @@ Http Post example with a body:
 const origin = 'https://dataliberationfoundation.org/';
 const postUrl = 'https://dataliberationfoundation.org/nopost';
 
-await agent.goto(origin);
-const response = await agent.fetch(postUrl, {
+await hero.goto(origin);
+const response = await hero.fetch(postUrl, {
   method: 'post',
   headers: {
     Authorization: 'Basic ZWx1c3VhcmlvOnlsYWNsYXZl',
@@ -140,7 +140,7 @@ Alias for [FrameEnvironment.getFrameEnvironment](/docs/basic-interfaces/frame-en
 
 ### tab.focus*()* {#focus}
 
-Make this tab the `activeTab` within a browser, which directs many SecretAgent methods to this tab.
+Make this tab the `activeTab` within a browser, which directs many Hero methods to this tab.
 
 #### **Returns**: `Promise`
 
@@ -158,8 +158,8 @@ Alias for [tab.mainFrameEnvironment.getComputedStyle](/docs/basic-interfaces/fra
 #### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/awaited-dom/cssstyledeclaration)
 
 ```js
-await agent.goto('https://dataliberationfoundation.org');
-const { document, getComputedStyle } = agent.activeTab;
+await hero.goto('https://dataliberationfoundation.org');
+const { document, getComputedStyle } = hero.activeTab;
 const selector = document.querySelector('h1');
 const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
@@ -181,8 +181,8 @@ Alias for [tab.mainFrameEnvironment.getJsValue](/docs/basic-interfaces/frame-env
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-await agent.goto('https://dataliberationfoundation.org');
-const navigatorAgent = await agent.activeTab.getJsValue(`navigator.userAgent`);
+await hero.goto('https://dataliberationfoundation.org');
+const navigatorAgent = await hero.activeTab.getJsValue(`navigator.userAgent`);
 ```
 
 ### tab.goBack*(timeoutMs)* {#back}
@@ -207,7 +207,7 @@ Navigates forward in the navigation history stack.
 
 ### tab.goto*(locationHref, timeoutMs?)* {#goto}
 
-Executes a navigation request for the document associated with the parent SecretAgent instance.
+Executes a navigation request for the document associated with the parent Hero instance.
 
 #### **Arguments**:
 
@@ -302,7 +302,7 @@ Alias for [tab.mainFrameEnvironment.waitForPaintingStable](/docs/basic-interface
 If at the moment of calling this method, the selector already exists, the method will return immediately.
 
 ```js
-const { activeTab, document } = agent;
+const { activeTab, document } = hero;
 
 const elem = document.querySelector('a.visible');
 await activeTab.waitForElement(elem, {
@@ -377,7 +377,7 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const { user, activeTab, document } = agent;
+const { user, activeTab, document } = hero;
 await activeTab.goto('http://example.com');
 
 await user.click(document.querySelector('a'));
@@ -404,12 +404,12 @@ Wait until a specific image, stylesheet, script, websocket or other resource URL
 #### **Returns**: [`Promise<Resource[]>`](/docs/advanced/resource)
 
 ```js
-const { user, activeTab, document } = agent;
+const { user, activeTab, document } = hero;
 
 await activeTab.goto('http://example.com');
 
 const elem = document.querySelector('a');
-await agent.click(elem);
+await hero.click(elem);
 
 // get all Fetches that have occurred on the page thus far.
 const allFetchResources = await activeTab.waitForResource({
@@ -419,7 +419,7 @@ const allFetchResources = await activeTab.waitForResource({
 const lastCommandId = activeTab.lastCommandId;
 
 const button = document.querySelector('#submit');
-await agent.click(button);
+await hero.click(button);
 
 const xhrsAfterSubmit = await activeTab.waitForResource(
   {
@@ -453,7 +453,7 @@ Waits for the specified number of milliseconds.
 
 ## Events
 
-SecretAgent's [EventTarget](/docs/basic-interfaces/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/basic-interfaces/event-target).
+Hero's [EventTarget](/docs/basic-interfaces/event-target) interface deviates from the official W3C implementation in that it adds several additional method aliases such as `on` and `off`. [Learn more](/docs/basic-interfaces/event-target).
 
 ### 'dialog' {#dialog}
 

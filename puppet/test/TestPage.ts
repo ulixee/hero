@@ -1,8 +1,8 @@
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import { IPuppetFrame } from '@secret-agent/interfaces/IPuppetFrame';
-import { IKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import { keyDefinitions } from '@secret-agent/puppet-chrome/interfaces/USKeyboardLayout';
-import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { IPuppetFrame } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { IKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { keyDefinitions } from '@ulixee/hero-puppet-chrome/interfaces/USKeyboardLayout';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import * as Fs from 'fs';
 
 export interface ITestPage extends IPuppetPage {
@@ -16,7 +16,7 @@ export interface ITestPage extends IPuppetPage {
 }
 
 export function capturePuppetContextLogs(context: IPuppetContext, id: string): void {
-  const outDir = process.env.SA_SESSIONS_DIR;
+  const outDir = process.env.HERO_SESSIONS_DIR;
 
   if (!Fs.existsSync(outDir)) Fs.mkdirSync(outDir, { recursive: true });
 

@@ -5,20 +5,20 @@
       Nav.flex-fit
       SearchForm
       nav.header-actions.flex
-        a(aria-label="Twitter" href="//twitter.com/SecretAgentDev" rel="noopener noreferrer" target="_blank" title="Follow us on Twitter")
+        a(aria-label="Twitter" href="//twitter.com/Ulixee" rel="noopener noreferrer" target="_blank" title="Follow us on Twitter")
           twitter-logo
         a(aria-label="Discord" href="//discord.gg/ydycFGU" rel="noopener noreferrer" class="hide-for-small" target="_blank" title="Join our discord")
           discord-logo
         .has-dropdown
-          a(aria-label="github" href="//github.com/ulixee/secret-agent" rel="noopener noreferrer" target="_blank" title="SecretAgent @ GitHub")
+          a(aria-label="github" href="//github.com/ulixee/ulixee" rel="noopener noreferrer" target="_blank" title="Ulixee @ GitHub")
             github-logo(height="20px" width="20px")
             span.hide-for-small(style="margin-left:5px;") v{{ $static.metadata.browserVersion }}
           .dropdown
-            a(href="//github.com/ulixee/secret-agent" rel="noopener noreferrer" target="_blank")
+            a(href="//github.com/ulixee/ulixee" rel="noopener noreferrer" target="_blank")
               | Repository
-            a(href="//github.com/ulixee/secret-agent/issues" rel="noopener noreferrer" target="_blank")
+            a(href="//github.com/ulixee/ulixee/issues" rel="noopener noreferrer" target="_blank")
               | Issues
-            a(href="//github.com/ulixee/secret-agent/projects/1" rel="noopener noreferrer" target="_blank")
+            a(href="//github.com/ulixee/ulixee/projects/1" rel="noopener noreferrer" target="_blank")
               | Roadmap
 </template>
 

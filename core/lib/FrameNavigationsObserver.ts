@@ -1,17 +1,17 @@
-import { assert, createPromise } from '@secret-agent/commons/utils';
+import { assert, createPromise } from '@ulixee/commons/utils';
 import type {
   ILocationStatus,
   ILocationTrigger,
   IPipelineStatus,
-} from '@secret-agent/interfaces/Location';
-import { LocationStatus, LocationTrigger, PipelineStatus } from '@secret-agent/interfaces/Location';
-import { LoadStatus, NavigationReason } from '@secret-agent/interfaces/INavigation';
-import type ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
-import type IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import type IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+} from '@ulixee/hero-interfaces/Location';
+import { LocationStatus, LocationTrigger, PipelineStatus } from '@ulixee/hero-interfaces/Location';
+import { LoadStatus, NavigationReason } from '@ulixee/hero-interfaces/INavigation';
+import type ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import type IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
+import type IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import * as moment from 'moment';
-import type { IBoundLog } from '@secret-agent/interfaces/ILog';
+import type { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import type FrameNavigations from './FrameNavigations';
 
 export default class FrameNavigationsObserver {

@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const CertificateManager = require('@secret-agent/mitm-socket/lib/CertificateGenerator').default;
+const CertificateManager = require('@ulixee/hero-mitm-socket/lib/CertificateGenerator').default;
 
 module.exports = async () => {
   try {

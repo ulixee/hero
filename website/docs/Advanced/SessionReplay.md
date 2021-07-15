@@ -4,7 +4,7 @@
 
 #### High Fidelity
 
-Everytime you create a new [Agent](/docs/basic-interfaces/agent), a [Session](/docs/advanced/session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, iFrame updates, and everything else we can measure on the page. 
+Everytime you create a new [Hero](/docs/basic-interfaces/hero), a [Session](/docs/advanced/session) records every DOM change, click, mouse movement, "value" change for elements, Shadow DOM changes, iFrame updates, and everything else we can measure on the page. 
 
 Replay "reconstructs" your page using all these events from every single micro-tick that occurred during your scrape.
 
@@ -19,7 +19,7 @@ Replay operates by replaying recorded assets and changes. It does not require an
 
 #### Realtime or Recorded
 
-When you launch a SecretAgent script, Replay launches to show you what's happening right as it occurs in your script. There's some delay recording, transferring and replaying, but it can be a really useful tool to try changes out and run them.
+When you launch a Hero script, Replay launches to show you what's happening right as it occurs in your script. There's some delay recording, transferring and replaying, but it can be a really useful tool to try changes out and run them.
 
 Remote recordings are also easy to download and play in Replay to find the source of errors or unexpected results.
 

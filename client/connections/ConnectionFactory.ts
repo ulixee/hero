@@ -1,4 +1,4 @@
-import Log from '@secret-agent/commons/Logger';
+import Log from '@ulixee/commons/Logger';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
 import RemoteConnectionToCore from './RemoteConnectionToCore';
@@ -22,7 +22,7 @@ export default class ConnectionFactory {
     } else {
       if (!this.createLocalConnection) {
         throw new Error(
-          `You need to install the full "npm i secret-agent" installation to use local connections.
+          `You need to install the full "npm i ulixee" installation to use local connections.
 
 If you meant to connect to a remote host, include the "host" parameter for your connection`,
         );

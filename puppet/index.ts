@@ -1,13 +1,13 @@
-import PuppetChrome from '@secret-agent/puppet-chrome';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Log from '@secret-agent/commons/Logger';
-import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
-import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
-import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
-import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
-import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
+import PuppetChrome from '@ulixee/hero-puppet-chrome';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/Logger';
+import IPuppetLauncher from '@ulixee/hero-interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
+import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 

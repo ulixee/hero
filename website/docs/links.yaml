@@ -7,7 +7,7 @@
 
 - title: Basic Interfaces
   items:
-    - Agent
+    - Hero
     - Handler
     - Tab
     - FrameEnvironment

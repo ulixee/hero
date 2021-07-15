@@ -1,9 +1,9 @@
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import { loggerSessionIdNames } from '@ulixee/commons/Logger';
+import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -77,8 +77,8 @@ export default class CoreSession implements IJsPathEventTarget {
     this.commandQueue.record({ command: 'Session.recordOutput', args: changes });
   }
 
-  public getAgentMeta(): Promise<IAgentMeta> {
-    return this.commandQueue.run('Session.getAgentMeta');
+  public getHeroMeta(): Promise<IHeroMeta> {
+    return this.commandQueue.run('Session.getHeroMeta');
   }
 
   public async configure(options?: Partial<IConfigureSessionOptions>): Promise<void> {

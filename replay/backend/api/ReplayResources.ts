@@ -66,7 +66,7 @@ export default class ReplayResources {
         const headers: any = {
           'Cache-Control': 'public, max-age=604800, immutable',
           'Content-Type': contentType,
-          'X-Replay-Agent': `Secret Agent Replay v${packageJson.version}`,
+          'X-Replay-Agent': `Ulixee Replay v${packageJson.version}`,
         };
         if (res.headers.location) {
           headers.location = res.headers.location;

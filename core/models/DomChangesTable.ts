@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
-import { DomActionType, IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
+import SqliteTable from '@ulixee/commons/SqliteTable';
+import { DomActionType, IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 
 export declare type IFrontendDomChangeEvent = Omit<
   IDomChangeRecord,

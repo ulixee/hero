@@ -1,10 +1,10 @@
 // NOTE: do not use node dependencies
 // eslint-disable-next-line max-classes-per-file
-import { IDomChangeEvent, INodeData } from '@secret-agent/interfaces/IDomChangeEvent';
-import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
-import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
-import { IScrollEvent } from '@secret-agent/interfaces/IScrollEvent';
-import { ILoadEvent } from '@secret-agent/interfaces/ILoadEvent';
+import { IDomChangeEvent, INodeData } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
+import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
+import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
+import { ILoadEvent } from '@ulixee/hero-interfaces/ILoadEvent';
 
 enum DomActionType {
   newDocument = 0,

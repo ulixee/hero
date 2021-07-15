@@ -1,5 +1,5 @@
-import { assert } from '@secret-agent/commons/utils';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { assert } from '@ulixee/commons/utils';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import BrowserEmulator from '../../index';
 
 export default function setActiveAndFocused(

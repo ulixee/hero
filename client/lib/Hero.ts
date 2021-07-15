@@ -1,21 +1,21 @@
 // eslint-disable-next-line max-classes-per-file
-import { BlockedResourceType } from '@secret-agent/interfaces/ITabOptions';
+import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import * as Util from 'util';
-import { bindFunctions, getCallSite } from '@secret-agent/commons/utils';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
+import { bindFunctions, getCallSite } from '@ulixee/commons/utils';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
-import IDomStorage from '@secret-agent/interfaces/IDomStorage';
-import IUserProfile from '@secret-agent/interfaces/IUserProfile';
+import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
-import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOptions';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
-import { ILocationTrigger } from '@secret-agent/interfaces/Location';
+import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
+import { ILocationTrigger } from '@ulixee/hero-interfaces/Location';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
   IHTMLFrameElementIsolate,
@@ -24,16 +24,16 @@ import {
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
-import IAgentMeta from '@secret-agent/interfaces/IAgentMeta';
-import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import IClientPlugin, { IClientPluginClass } from '@secret-agent/interfaces/IClientPlugin';
-import IAgent from '@secret-agent/interfaces/IAgent';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
-import filterPlugins from '@secret-agent/plugin-utils/lib/utils/filterPlugins';
-import extractPlugins from '@secret-agent/plugin-utils/lib/utils/extractPlugins';
-import { IPluginClass } from '@secret-agent/interfaces/IPlugin';
+import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import IClientPlugin, { IClientPluginClass } from '@ulixee/hero-interfaces/IClientPlugin';
+import IHero from '@ulixee/hero-interfaces/IHero';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
+import filterPlugins from '@ulixee/hero-plugin-utils/lib/utils/filterPlugins';
+import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
+import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import WebsocketResource from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import Resource from './Resource';
@@ -44,12 +44,12 @@ import IInteractions, {
   ITypeInteraction,
 } from '../interfaces/IInteractions';
 import Tab, { createTab, getCoreTab } from './Tab';
-import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
+import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
-import IAgentDefaults from '../interfaces/IAgentDefaults';
+import IHeroDefaults from '../interfaces/IHeroDefaults';
 import CoreSession from './CoreSession';
-import IAgentConfigureOptions from '../interfaces/IAgentConfigureOptions';
+import IHeroConfigureOptions from '../interfaces/IHeroConfigureOptions';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
@@ -68,16 +68,16 @@ export const DefaultOptions = {
 };
 const scriptInstance = new ScriptInstance();
 
-const { getState, setState } = StateMachine<Agent, IState>();
+const { getState, setState } = StateMachine<Hero, IState>();
 
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  options: ISessionCreateOptions & Pick<IAgentCreateOptions, 'connectionToCore' | 'showReplay'>;
+  options: ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
   clientPlugins: IClientPlugin[];
 }
 
-const propertyKeys: (keyof Agent)[] = [
+const propertyKeys: (keyof Hero)[] = [
   'document',
   'sessionId',
   'meta',
@@ -93,14 +93,14 @@ const propertyKeys: (keyof Agent)[] = [
   'Request',
 ];
 
-export default class Agent extends AwaitedEventTarget<{ close: void }> implements IAgent {
-  protected static options: IAgentDefaults = { ...DefaultOptions };
+export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
+  protected static options: IHeroDefaults = { ...DefaultOptions };
 
   public readonly input: { command?: string } & any;
 
   #output: Output;
 
-  constructor(options: IAgentCreateOptions = {}) {
+  constructor(options: IHeroCreateOptions = {}) {
     super(() => {
       return {
         target: getState(this).connection.getCoreSessionOrReject(),
@@ -109,8 +109,8 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
     bindFunctions(this);
 
     options.blockedResourceTypes =
-      options.blockedResourceTypes || Agent.options.defaultBlockedResourceTypes;
-    options.userProfile = options.userProfile || Agent.options.defaultUserProfile;
+      options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;
+    options.userProfile = options.userProfile || Hero.options.defaultUserProfile;
     this.input = options.input;
 
     const sessionName = scriptInstance.generateSessionName(options.name);
@@ -178,9 +178,9 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
     return Promise.resolve(getState(this).options.sessionName);
   }
 
-  public get meta(): Promise<IAgentMeta> {
+  public get meta(): Promise<IHeroMeta> {
     const coreSession = getState(this).connection.getCoreSessionOrReject();
-    return coreSession.then(x => x.getAgentMeta());
+    return coreSession.then(x => x.getHeroMeta());
   }
 
   public get storage(): Promise<IDomStorage> {
@@ -226,7 +226,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
     await tab.close();
   }
 
-  public async configure(configureOptions: IAgentConfigureOptions): Promise<void> {
+  public async configure(configureOptions: IHeroConfigureOptions): Promise<void> {
     const { options } = getState(this);
     setState(this, {
       options: {
@@ -243,7 +243,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
         configureOptions.connectionToCore !== undefined
       ) {
         throw new Error(
-          'This agent has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
+          'This hero has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
         );
       }
     } else {
@@ -321,7 +321,7 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
 
   // PLUGINS
 
-  public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): Agent {
+  public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): Hero {
     const { clientPlugins, options } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
@@ -422,9 +422,9 @@ export default class Agent extends AwaitedEventTarget<{ close: void }> implement
 
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public async then<TResult1 = Agent, TResult2 = never>(
+  public async then<TResult1 = Hero, TResult2 = never>(
     onfulfilled?:
-      | ((value: Omit<Agent, 'then'>) => PromiseLike<TResult1> | TResult1)
+      | ((value: Omit<Hero, 'then'>) => PromiseLike<TResult1> | TResult1)
       | undefined
       | null,
     onrejected?: ((reason: any) => PromiseLike<TResult2> | TResult2) | undefined | null,
@@ -488,7 +488,7 @@ class SessionConnection {
   private _activeTab: Tab;
   private _tabs: Tab[] = [];
 
-  constructor(private agent: Agent) {}
+  constructor(private hero: Hero) {}
 
   public async refreshedTabs(): Promise<Tab[]> {
     const session = await this.getCoreSessionOrReject();
@@ -497,7 +497,7 @@ class SessionConnection {
     for (const coreTab of coreTabs) {
       const hasTab = tabIds.includes(coreTab.tabId);
       if (!hasTab) {
-        const tab = createTab(this.agent, Promise.resolve(coreTab));
+        const tab = createTab(this.hero, Promise.resolve(coreTab));
         this._tabs.push(tab);
       }
     }
@@ -532,9 +532,9 @@ class SessionConnection {
     }
     this.hasConnected = true;
 
-    const { clientPlugins } = getState(this.agent);
-    const { showReplay, connectionToCore, ...options } = getState(this.agent)
-      .options as IAgentCreateOptions;
+    const { clientPlugins } = getState(this.hero);
+    const { showReplay, connectionToCore, ...options } = getState(this.hero)
+      .options as IHeroCreateOptions;
 
     const connection = ConnectionFactory.createConnection(
       connectionToCore ?? { isPersistent: false },
@@ -543,7 +543,7 @@ class SessionConnection {
 
     this._coreSession = connection.createSession(options).catch(err => err);
 
-    const defaultShowReplay = Boolean(JSON.parse(process.env.SA_SHOW_REPLAY ?? 'true'));
+    const defaultShowReplay = Boolean(JSON.parse(process.env.HERO_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {
       this._coreSession = this._coreSession.then(async x => {
@@ -558,11 +558,11 @@ class SessionConnection {
     });
 
     const coreTab = coreSession.then(x => x.firstTab).catch(err => err);
-    this._activeTab = createTab(this.agent, coreTab);
+    this._activeTab = createTab(this.hero, coreTab);
     this._tabs = [this._activeTab];
 
     for (const clientPlugin of clientPlugins) {
-      await clientPlugin.onAgent(this.agent, this.sendToActiveTab.bind(this));
+      await clientPlugin.onHero(this.hero, this.sendToActiveTab.bind(this));
     }
 
     return await coreSession;

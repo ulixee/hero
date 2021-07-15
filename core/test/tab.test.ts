@@ -1,6 +1,6 @@
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import Core from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';

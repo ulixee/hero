@@ -1,10 +1,10 @@
-import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
+import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import * as http from 'http';
 import * as http2 from 'http2';
-import OriginType from '@secret-agent/interfaces/OriginType';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
+import OriginType from '@ulixee/hero-interfaces/OriginType';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import { URL } from 'url';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import { parseRawHeaders } from '../lib/Utils';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import ResourceState from '../interfaces/ResourceState';

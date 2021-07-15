@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-const SetupAwaitedHandler = require('@secret-agent/client/lib/SetupAwaitedHandler');
+const SetupAwaitedHandler = require('@ulixee/hero/lib/SetupAwaitedHandler');
 
 // Jest tries to deeply recursively extract properties from objects when a test breaks - this does not play nice with AwaitedDom
 const originGetProperty = SetupAwaitedHandler.delegate.getProperty;

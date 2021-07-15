@@ -1,29 +1,29 @@
-import { assert } from '@secret-agent/commons/utils';
+import { assert } from '@ulixee/commons/utils';
 import IPuppetContext, {
   IPuppetContextEvents,
   IPuppetPageOptions,
-} from '@secret-agent/interfaces/IPuppetContext';
-import { ICookie } from '@secret-agent/interfaces/ICookie';
+} from '@ulixee/hero-interfaces/IPuppetContext';
+import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
 import {
   addTypedEventListener,
   removeEventListeners,
   TypedEventEmitter,
-} from '@secret-agent/commons/eventUtils';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { IPuppetWorker } from '@secret-agent/interfaces/IPuppetWorker';
+} from '@ulixee/commons/eventUtils';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import IProxyConnectionOptions from '@secret-agent/interfaces/IProxyConnectionOptions';
-import Resolvable from '@secret-agent/commons/Resolvable';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
+import Resolvable from '@ulixee/commons/Resolvable';
 import {
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,
-} from '@secret-agent/interfaces/IDevtoolsSession';
+} from '@ulixee/hero-interfaces/IDevtoolsSession';
 import { Page } from './Page';
 import { Browser } from './Browser';
 import { DevtoolsSession } from './DevtoolsSession';

@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
+import CorePlugin from '@ulixee/hero-plugin-utils/lib/CorePlugin';
 import {
   canonicalDomain,
   Cookie,
@@ -8,11 +8,11 @@ import {
   getPublicSuffix,
   permuteDomain,
 } from 'tough-cookie';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import SameSiteContext from '@secret-agent/commons/interfaces/SameSiteContext';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { createPromise } from '@secret-agent/commons/utils';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import SameSiteContext from '@ulixee/commons/interfaces/SameSiteContext';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/utils';
 import DomOverridesBuilder from '../DomOverridesBuilder';
 
 export default class FirstPartyCookiesPlugin extends CorePlugin {
@@ -70,7 +70,7 @@ export default class FirstPartyCookiesPlugin extends CorePlugin {
   }
 
   public onNewPuppetPage(page: IPuppetPage): Promise<any> {
-    const cookieCallbackName = 'SecretAgentSetCookie';
+    const cookieCallbackName = 'HeroSetCookie';
     const domOverrides = new DomOverridesBuilder();
     domOverrides.add('Document.prototype.cookie', {
       callbackName: cookieCallbackName,

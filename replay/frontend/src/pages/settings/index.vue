@@ -7,8 +7,8 @@
     .title Theme variant
     select(v-model="theme" @change="onThemeChange")
       option(value="auto") Auto
-      option(value="secret-agent-light") Light
-      option(value="secret-agent-dark") Dark
+      option(value="ulixee-light") Light
+      option(value="ulixee-dark") Dark
 </template>
 
 <script lang="ts">

@@ -1,9 +1,9 @@
-import Queue from '@secret-agent/commons/Queue';
-import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import MitmSocket from '@secret-agent/mitm-socket';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Queue from '@ulixee/commons/Queue';
+import Log from '@ulixee/commons/Logger';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import MitmSocket from '@ulixee/hero-mitm-socket';
+import Resolvable from '@ulixee/commons/Resolvable';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { ClientHttp2Session } from 'http2';
 import RequestSession from '../handlers/RequestSession';
 

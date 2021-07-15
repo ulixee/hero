@@ -1,8 +1,8 @@
-import IUserProfile from '@secret-agent/interfaces/IUserProfile';
-import IDomStorage from '@secret-agent/interfaces/IDomStorage';
-import Log from '@secret-agent/commons/Logger';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import { assert } from '@secret-agent/commons/utils';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
+import Log from '@ulixee/commons/Logger';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import { assert } from '@ulixee/commons/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
 

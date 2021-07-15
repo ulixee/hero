@@ -22,8 +22,8 @@ For each version, we stripped out the auto-update features and converted them to
 
 On Debian/Ubuntu, Chrome often needs packages to be installed. We re-bundled the .deb control file into a new installer that can be run after you extract the chrome executable - this makes setting up CI or docker very simple for 1 or more Chrome installations.
 
-## SecretAgent
-SecretAgent has been updated to use Chrome everywhere. Our emulators have "polyfills" auto-generated for how to resemble Chrome headed when running each version headless. The changes are significant enough from Chromium that you need to actually use Chrome underneath. 
+## Ulixee Hero
+Hero has been updated to use Chrome everywhere. Our emulators have "polyfills" auto-generated for how to resemble Chrome headed when running each version headless. The changes are significant enough from Chromium that you need to actually use Chrome underneath. 
 
 No changes should be visible in your scripts, but you might see some installation changes as you go to upgrade. We also experienced some changes in no-sandbox features when running on Docker. Your mileage here may vary. 
 

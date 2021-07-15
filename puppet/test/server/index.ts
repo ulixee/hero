@@ -23,7 +23,7 @@ import * as Path from 'path';
 import { Server as WebSocketServer } from 'ws';
 import { AddressInfo, Socket } from 'net';
 import { createGzip } from 'zlib';
-import Log from '@secret-agent/commons/Logger';
+import Log from '@ulixee/commons/Logger';
 
 const { log } = Log(module);
 const fulfillSymbol = Symbol('fulfill callback');

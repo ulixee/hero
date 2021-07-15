@@ -1,7 +1,7 @@
-import { Helpers } from '@secret-agent/testing';
-import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { LocationStatus } from '@secret-agent/interfaces/Location';
+import { Helpers } from '@ulixee/testing';
+import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 

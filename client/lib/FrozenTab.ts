@@ -7,19 +7,19 @@ import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
-import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import CookieStorage from './CookieStorage';
-import Agent from './Agent';
+import Hero from './Hero';
 import FrozenFrameEnvironment from './FrozenFrameEnvironment';
 
 const { getState, setState } = StateMachine<FrozenTab, IState>();
 
 export interface IState {
-  secretAgent: Agent;
+  hero: Hero;
   coreTab: Promise<CoreTab>;
   mainFrameEnvironment: FrozenFrameEnvironment;
   frameEnvironments: FrozenFrameEnvironment[];
@@ -39,17 +39,17 @@ const propertyKeys: (keyof FrozenTab)[] = [
 
 export default class FrozenTab {
   constructor(
-    secretAgent: Agent,
+    hero: Hero,
     tabAndJsPathsPromise: Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }>,
   ) {
     const mainFrameEnvironment = new FrozenFrameEnvironment(
-      secretAgent,
+      hero,
       this,
       tabAndJsPathsPromise.then(x => x.coreTab).then(x => x.mainFrameEnvironment),
       tabAndJsPathsPromise.then(x => x.prefetchedJsPaths),
     );
     setState(this, {
-      secretAgent,
+      hero,
       coreTab: tabAndJsPathsPromise.then(x => x.coreTab),
       mainFrameEnvironment,
       frameEnvironments: [mainFrameEnvironment],

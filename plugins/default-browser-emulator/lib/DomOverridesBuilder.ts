@@ -1,6 +1,6 @@
 import * as fs from 'fs';
-import INewDocumentInjectedScript from '@secret-agent/interfaces/INewDocumentInjectedScript';
-import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import INewDocumentInjectedScript from '@ulixee/hero-interfaces/INewDocumentInjectedScript';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 
 const cache: { [name: string]: string } = {};
 const shouldCache = process.env.NODE_ENV === 'production';

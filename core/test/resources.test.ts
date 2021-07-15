@@ -1,6 +1,6 @@
-import { Helpers } from '@secret-agent/testing';
-import Core, { Session } from '@secret-agent/core';
-import Resolvable from '@secret-agent/commons/Resolvable';
+import { Helpers } from '@ulixee/testing';
+import Core, { Session } from '@ulixee/hero-core';
+import Resolvable from '@ulixee/commons/Resolvable';
 import ConnectionToClient from '../server/ConnectionToClient';
 
 let connection: ConnectionToClient;

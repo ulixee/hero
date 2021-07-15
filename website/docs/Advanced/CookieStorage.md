@@ -7,7 +7,7 @@ The CookieStorage class allows you to get set and remove cookies from the main f
 CookieStorage cannot be instantiated. You must retrieve a cookieStorage instance from a [Tab](/docs/basic-interfaces/tab):
 
 ```js
-const cookieStorage = agent.activeTab.cookieStorage;
+const cookieStorage = hero.activeTab.cookieStorage;
 ```
 
 ## Properties

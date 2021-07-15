@@ -1,5 +1,5 @@
-import { IBrowserEmulator } from '@secret-agent/interfaces/ICorePlugin';
-import ITcpSettings from '@secret-agent/interfaces/ITcpSettings';
+import { IBrowserEmulator } from '@ulixee/hero-interfaces/ICorePlugin';
+import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
 import getTcpSettingsForOs from '../utils/getTcpSettingsForOs';
 
 export default function configureSessionTcp(

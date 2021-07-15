@@ -1,4 +1,4 @@
-import { IVersion } from '@secret-agent/interfaces/IUserAgentOption';
+import { IVersion } from '@ulixee/hero-interfaces/IUserAgentOption';
 
 export default function getTcpSettingsForOs(name: string, version: IVersion) {
   if (!name) return null;

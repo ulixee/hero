@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import { assert } from '@secret-agent/commons/utils';
-import { IPuppetKeyboard } from '@secret-agent/interfaces/IPuppetInput';
+import { IKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { assert } from '@ulixee/commons/utils';
+import { IPuppetKeyboard } from '@ulixee/hero-interfaces/IPuppetInput';
 import { IKeyDefinition, keyDefinitions } from '../interfaces/USKeyboardLayout';
 import { DevtoolsSession } from './DevtoolsSession';
 

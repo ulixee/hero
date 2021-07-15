@@ -1,7 +1,7 @@
 import { IncomingMessage } from 'http';
-import Logger from '@secret-agent/commons/Logger';
-import { createPromise } from '@secret-agent/commons/utils';
-import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
+import Logger from '@ulixee/commons/Logger';
+import { createPromise } from '@ulixee/commons/utils';
+import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 import SessionDb, { ISessionLookup, ISessionLookupArgs } from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';

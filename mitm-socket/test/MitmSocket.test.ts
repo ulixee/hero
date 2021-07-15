@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import { createPromise } from '@secret-agent/commons/utils';
+import { Helpers } from '@ulixee/testing';
+import { createPromise } from '@ulixee/commons/utils';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import * as WebSocket from 'ws';
-import { getTlsConnection, httpGetWithSocket } from '@secret-agent/testing/helpers';
+import { getTlsConnection, httpGetWithSocket } from '@ulixee/testing/helpers';
 import * as https from 'https';
 import { IncomingMessage } from 'http';
 import MitmSocket from '../index';
@@ -42,7 +42,7 @@ test('should handle http2 requests', async () => {
   await tlsConnection.connect(mitmSocketSession);
   expect(tlsConnection.alpn).toBe('h2');
 
-  const client = http2.connect('https://secretagent.dev', {
+  const client = http2.connect('https://ulixee.org', {
     createConnection: () => tlsConnection.socket,
   });
   closeAfterTest(client);

@@ -1,6 +1,6 @@
-import { IBrowserEmulator } from '@secret-agent/plugin-utils';
-import IHttp2ConnectSettings from '@secret-agent/interfaces/IHttp2ConnectSettings';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import { IBrowserEmulator } from '@ulixee/hero-plugin-utils';
+import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import IBrowserData from '../../interfaces/IBrowserData';
 
 export default function configureHttp2Session(

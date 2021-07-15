@@ -1,13 +1,13 @@
 {
-  "name": "@secret-agent/default-human-emulator",
+  "name": "@ulixee/default-human-emulator",
   "version": "1.5.4",
-  "description": "Default human emulator based on Xetera/ghost-cursor for SecretAgent",
+  "description": "Default human emulator based on Xetera/ghost-cursor for Hero",
   "main": "index.js",
   "dependencies": {
-    "@secret-agent/interfaces": "1.5.4",
-    "@secret-agent/plugin-utils": "1.5.4"
+    "@ulixee/hero-interfaces": "1.5.4",
+    "@ulixee/hero-plugin-utils": "1.5.4"
   },
   "devDependencies": {
-    "@secret-agent/commons": "1.5.4"
+    "@ulixee/commons": "1.5.4"
   }
 }

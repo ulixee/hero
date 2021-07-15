@@ -13,7 +13,7 @@ console.log(`Logging to ${log.transports.file.getFile().path}`);
 
 (process.env as any).ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
-app.name = 'SecretAgent';
+app.name = 'Ulixee';
 app.allowRendererProcessReuse = true;
 app.commandLine.appendSwitch('--enable-transparent-visuals');
 

@@ -3,24 +3,24 @@ import {
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
   ISocketEvent,
-} from '@secret-agent/mitm/handlers/RequestSession';
-import IWebsocketMessage from '@secret-agent/interfaces/IWebsocketMessage';
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@secret-agent/commons/Logger';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import INavigation, { LoadStatus } from '@secret-agent/interfaces/INavigation';
-import IScriptInstanceMeta from '@secret-agent/interfaces/IScriptInstanceMeta';
-import IWebsocketResourceMessage from '@secret-agent/interfaces/IWebsocketResourceMessage';
-import type { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
-import ResourceState from '@secret-agent/mitm/interfaces/ResourceState';
-import { IScrollEvent } from '@secret-agent/interfaces/IScrollEvent';
-import { IFocusEvent } from '@secret-agent/interfaces/IFocusEvent';
-import { IMouseEvent } from '@secret-agent/interfaces/IMouseEvent';
-import { IDomChangeEvent } from '@secret-agent/interfaces/IDomChangeEvent';
-import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
+} from '@ulixee/hero-mitm/handlers/RequestSession';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/Logger';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import INavigation, { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
+import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
+import type { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
+import ResourceState from '@ulixee/hero-mitm/interfaces/ResourceState';
+import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
+import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
+import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
+import { IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ResourcesTable from '../models/ResourcesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';

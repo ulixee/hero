@@ -1,7 +1,7 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
-import IResourceRequest from '@secret-agent/interfaces/IResourceRequest';
+import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
+import IResourceRequest from '@ulixee/hero-interfaces/IResourceRequest';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 

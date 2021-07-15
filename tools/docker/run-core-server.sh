@@ -8,4 +8,4 @@ docker run -it --rm --ipc=host --user sagent \
     --security-opt seccomp="$current_path/seccomp_profile.json" \
     -p "$port:$port" \
     -e DEBUG=1 \
-    secret-agent node core/start "{\"coreServerPort\":$port}"
+    ulixee node core/start "{\"coreServerPort\":$port}"

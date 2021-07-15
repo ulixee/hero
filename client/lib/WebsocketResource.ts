@@ -1,9 +1,9 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import IWebsocketMessage from '@secret-agent/interfaces/IWebsocketMessage';
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
+import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';

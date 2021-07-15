@@ -1,6 +1,6 @@
 module.exports = {
-  titleTemplate: 'SecretAgent - The Web Browser Built for Scraping',
-  siteUrl: 'https://secretagent.dev',
+  titleTemplate: 'Hero - The Web Browser Built for Scraping',
+  siteUrl: 'https://ulixee.org',
   pathPrefix: '/',
   outputDir: '../build-dist/website',
   templates: {},
@@ -83,8 +83,8 @@ module.exports = {
       options: {
         contentTypes: ['Post'],
         feedOptions: {
-          title: 'SecretAgent Blog',
-          description: 'A blog about scraping, features and experiences developing SecretAgent',
+          title: 'Ulixee Blog',
+          description: 'A blog about scraping, features and experiences developing Ulixee',
         },
         rss: {
           enabled: true,

@@ -1,12 +1,12 @@
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import ICorePlugin, {
   CorePluginClassDecorator,
   ICorePluginClass,
-} from '@secret-agent/interfaces/ICorePlugin';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import ICorePlugins from '@secret-agent/interfaces/ICorePlugins';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 
 @CorePluginClassDecorator
 export default class CorePlugin implements ICorePlugin {

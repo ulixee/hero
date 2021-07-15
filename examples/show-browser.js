@@ -1,6 +1,6 @@
-const { Agent } = require('secret-agent');
+const { Agent } = require('@ulixee/hero');
 
-process.env.SA_SHOW_BROWSER = 'true';
+process.env.HERO_SHOW_BROWSER = 'true';
 
 (async () => {
   const url = `https://dataliberationfoundation.org/`;

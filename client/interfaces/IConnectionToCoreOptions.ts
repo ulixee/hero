@@ -1,9 +1,9 @@
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 
 export default interface IConnectionToCoreOptions
-  extends Omit<ICoreConfigureOptions, 'maxConcurrentAgentsCount'> {
+  extends Omit<ICoreConfigureOptions, 'maxConcurrentHerosCount'> {
   host?: string | Promise<string>;
   maxConcurrency?: number;
-  agentTimeoutMillis?: number;
+  heroTimeoutMillis?: number;
   isPersistent?: boolean; // variable to tell server to keep around connection. Defaults to true
 }

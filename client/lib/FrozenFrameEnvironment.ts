@@ -15,16 +15,16 @@ import {
 import Request from 'awaited-dom/impl/official-klasses/Request';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import { IElementIsolate, INodeIsolate } from 'awaited-dom/base/interfaces/isolate';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import {
   getComputedStyleFnName,
   getComputedVisibilityFnName,
-} from '@secret-agent/interfaces/jsPathFnNames';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+} from '@ulixee/hero-interfaces/jsPathFnNames';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
-import Agent from './Agent';
+import Hero from './Hero';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import FrozenTab from './FrozenTab';
 import * as AwaitedHandler from './SetupAwaitedHandler';
@@ -36,7 +36,7 @@ const awaitedPathState = StateMachine<
 >();
 
 export interface IState {
-  secretAgent: Agent;
+  hero: Hero;
   tab: FrozenTab;
   coreFrame: Promise<CoreFrameEnvironment>;
   prefetchedJsPaths: Promise<Map<string, IJsPathResult>>;
@@ -56,13 +56,13 @@ const propertyKeys: (keyof FrozenFrameEnvironment)[] = [
 
 export default class FrozenFrameEnvironment {
   constructor(
-    secretAgent: Agent,
+    hero: Hero,
     tab: FrozenTab,
     coreFrame: Promise<CoreFrameEnvironment>,
     prefetchedJsPaths: Promise<IJsPathResult[]>,
   ) {
     setState(this, {
-      secretAgent,
+      hero,
       tab,
       coreFrame,
       prefetchedJsPaths: prefetchedJsPaths.then(x => {

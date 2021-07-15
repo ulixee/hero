@@ -1,4 +1,4 @@
-import IViewport from '@secret-agent/interfaces/IViewport';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
 import { IDataWindowFraming } from '../interfaces/IBrowserData';
 
 const defaultWindowFraming = {

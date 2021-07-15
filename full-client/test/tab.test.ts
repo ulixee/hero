@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
-import { Command } from '@secret-agent/client/interfaces/IInteractions';
-import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
+import { Helpers } from '@ulixee/testing';
+import { Command } from '@ulixee/hero/interfaces/IInteractions';
+import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import * as os from 'os';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -28,41 +28,41 @@ afterEach(Helpers.afterEach);
 
 describe('Multi-tab scenarios', () => {
   it('can wait for another tab', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/tabTest`);
-    const tab1 = agent.activeTab;
-    const url = await agent.document.location.host;
+    await hero.goto(`${koaServer.baseUrl}/tabTest`);
+    const tab1 = hero.activeTab;
+    const url = await hero.document.location.host;
     expect(url).toBe(koaServer.baseHost);
 
-    await agent.click(agent.document.querySelector('a'));
-    const newTab = await agent.waitForNewTab();
+    await hero.click(hero.document.querySelector('a'));
+    const newTab = await hero.waitForNewTab();
 
-    expect(await agent.tabs).toHaveLength(2);
-    expect(newTab.tabId).not.toBe(agent.activeTab.tabId);
+    expect(await hero.tabs).toHaveLength(2);
+    expect(newTab.tabId).not.toBe(hero.activeTab.tabId);
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/newTab`);
-    await agent.focusTab(newTab);
-    expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab`);
-    const { document } = agent;
+    await hero.focusTab(newTab);
+    expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab`);
+    const { document } = hero;
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
-    await agent.click(agent.document.querySelector('a'));
-    expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
+    await hero.click(hero.document.querySelector('a'));
+    expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
-    const meta = await agent.meta;
-    // make sure user agent is wired up
-    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    const meta = await hero.meta;
+    // make sure user hero is wired up
+    const navigatorAgent = await hero.getJsValue('navigator.userAgent');
     expect(navigatorAgent).toBe(meta.userAgentString);
 
     // make sure polyfills ran
-    const csi = await agent.getJsValue<any>('chrome.csi()');
+    const csi = await hero.getJsValue<any>('chrome.csi()');
     expect(csi.startE).toBeTruthy();
 
-    await agent.closeTab(newTab);
-    const newTabList = await agent.tabs;
+    await hero.closeTab(newTab);
+    const newTabList = await hero.tabs;
     expect(newTabList).toHaveLength(1);
-    expect(agent.activeTab).toBe(tab1);
+    expect(hero.activeTab).toBe(tab1);
   });
 
   it('can wait for resources in each tab', async () => {
@@ -90,18 +90,18 @@ describe('Multi-tab scenarios', () => {
       ctx.body = `<body><h1>Final</h1></body>`;
     });
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/page1`);
-    await agent.waitForPaintingStable();
-    expect(await agent.tabs).toHaveLength(1);
-    expect(await agent.url).toBe(`${koaServer.baseUrl}/page1`);
+    await hero.goto(`${koaServer.baseUrl}/page1`);
+    await hero.waitForPaintingStable();
+    expect(await hero.tabs).toHaveLength(1);
+    expect(await hero.url).toBe(`${koaServer.baseUrl}/page1`);
 
-    const startCommandId = await agent.lastCommandId;
-    await agent.click(agent.document.querySelector('a'));
+    const startCommandId = await hero.lastCommandId;
+    await hero.click(hero.document.querySelector('a'));
 
-    const tab1 = agent.activeTab;
+    const tab1 = hero.activeTab;
     const page1Logos = await tab1.waitForResource({
       url: '/logo.png',
     });
@@ -112,9 +112,9 @@ describe('Multi-tab scenarios', () => {
       `${koaServer.baseUrl}/logo.png`,
       `${koaServer.baseUrl}/logo.png?page=page1`,
     ]);
-    await agent.waitForNewTab({ sinceCommandId: startCommandId });
+    await hero.waitForNewTab({ sinceCommandId: startCommandId });
 
-    const tabs = await agent.tabs;
+    const tabs = await hero.tabs;
     expect(tabs).toHaveLength(2);
     const tab2 = tabs[1];
     const page2Logos = await tab2.waitForResource({
@@ -124,9 +124,9 @@ describe('Multi-tab scenarios', () => {
     expect(await page2Logos[0].request.url).toBe(`${koaServer.baseUrl}/logo.png?page=page2`);
     await tab2.focus();
     await tab2.waitForPaintingStable();
-    await agent.click(tab2.document.querySelector('#fwd'));
+    await hero.click(tab2.document.querySelector('#fwd'));
     await tab2.waitForLocation('change');
-    expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);
+    expect(await hero.url).toBe(`${koaServer.baseUrl}/page3`);
     expect(await tab2.url).toBe(`${koaServer.baseUrl}/page3`);
     expect(await tab1.url).toBe(`${koaServer.baseUrl}/page1`);
   }, 30e3);
@@ -138,36 +138,36 @@ describe('Multi-tab scenarios', () => {
 </body>`;
     });
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/tabTest2`);
+    await hero.goto(`${koaServer.baseUrl}/tabTest2`);
     const newTabKey = os.platform() === 'darwin' ? KeyboardKeys.MetaLeft : KeyboardKeys.ControlLeft;
-    await agent.interact({
+    await hero.interact({
       [Command.keyDown]: newTabKey,
     });
-    await agent.click(agent.document.querySelector('a'));
-    const newTab = await agent.waitForNewTab();
+    await hero.click(hero.document.querySelector('a'));
+    const newTab = await hero.waitForNewTab();
 
-    expect(await newTab.tabId).not.toBe(await agent.activeTab.tabId);
+    expect(await newTab.tabId).not.toBe(await hero.activeTab.tabId);
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/newTab`);
-    await agent.focusTab(newTab);
+    await hero.focusTab(newTab);
     const { document } = newTab;
     expect(await document.querySelector('#newTabHeader').textContent).toBe('You are here');
 
-    await agent.click(document.querySelector('a'));
-    expect(await agent.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
+    await hero.click(document.querySelector('a'));
+    expect(await hero.activeTab.url).toBe(`${koaServer.baseUrl}/newTab#hash`);
 
-    const meta = await agent.meta;
-    // make sure user agent is wired up
-    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    const meta = await hero.meta;
+    // make sure user hero is wired up
+    const navigatorAgent = await hero.getJsValue('navigator.userAgent');
     expect(navigatorAgent).toBe(meta.userAgentString);
 
     // make sure polyfills ran
-    const csi = await agent.getJsValue<any>('chrome.csi()');
+    const csi = await hero.getJsValue<any>('chrome.csi()');
     expect(csi.startE).toBeTruthy();
 
-    await agent.closeTab(newTab);
+    await hero.closeTab(newTab);
   });
 
   it('can handle new tabs created in js callbacks', async () => {
@@ -193,24 +193,24 @@ document.querySelector('a').addEventListener('click', event => {
 </body>`;
     });
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/ajaxTab`);
-    await agent.click(agent.document.querySelector('a'));
-    const newTab = await agent.waitForNewTab();
+    await hero.goto(`${koaServer.baseUrl}/ajaxTab`);
+    await hero.click(hero.document.querySelector('a'));
+    const newTab = await hero.waitForNewTab();
 
-    expect(await newTab.tabId).not.toBe(await agent.activeTab.tabId);
+    expect(await newTab.tabId).not.toBe(await hero.activeTab.tabId);
     expect(await newTab.url).toBe(`${koaServer.baseUrl}/ajaxNewResult`);
-    await agent.focusTab(newTab);
+    await hero.focusTab(newTab);
     const { document } = newTab;
     expect(await document.querySelector('h1').textContent).toBe('Overridden Result');
 
-    const meta = await agent.meta;
-    // make sure user agent is wired up
-    const navigatorAgent = await agent.getJsValue('navigator.userAgent');
+    const meta = await hero.meta;
+    // make sure user hero is wired up
+    const navigatorAgent = await hero.getJsValue('navigator.userAgent');
     expect(navigatorAgent).toBe(meta.userAgentString);
 
-    await agent.closeTab(newTab);
+    await hero.closeTab(newTab);
   });
 });

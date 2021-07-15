@@ -4,7 +4,7 @@ A FrameEnvironment represents a browsing context which allows you to interact wi
 
 ## Constructor
 
-Frames cannot be constructed in SecretAgent. They're made available through the [tab.frameEnvironments](/docs/basic-interfaces/tab#frame-environments) array.
+Frames cannot be constructed in Hero. They're made available through the [tab.frameEnvironments](/docs/basic-interfaces/tab#frame-environments) array.
 
 ## Properties
 
@@ -28,7 +28,7 @@ An identifier for the frameEnvironment.
 
 ### frameEnvironment.lastCommandId {#lastCommandId}
 
-An execution point that refers to a command run on this Agent instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
+An execution point that refers to a command run on this Hero instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
 
 #### **Type**: `Promise<number>`
 
@@ -67,11 +67,11 @@ The url of the active frameEnvironment.
 Returns a constructor for a [Request](/docs/awaited-dom/request) object that can be sent to [frameEnvironment.fetch(request)](#fetch).
 
 ```js
-const { Request, fetch } = agent;
+const { Request, fetch } = hero;
 const url = 'https://dataliberationfoundation.org';
 const request = new Request(url, {
   headers: {
-    'X-From': 'https://secretagent.dev',
+    'X-From': 'https://ulixee.org',
   },
 });
 const response = await fetch(request);
@@ -98,8 +98,8 @@ Perform a native "fetch" request in the current frame environment.
 const origin = 'https://dataliberationfoundation.org/';
 const getUrl = 'https://dataliberationfoundation.org/mission';
 
-await agent.goto(origin);
-const mainFrame = agent.mainFrameEnvironment;
+await hero.goto(origin);
+const mainFrame = hero.mainFrameEnvironment;
 const response = await mainFrame.fetch(getUrl);
 ```
 
@@ -109,8 +109,8 @@ Http Post example with a body:
 const origin = 'https://dataliberationfoundation.org/';
 const postUrl = 'https://dataliberationfoundation.org/nopost';
 
-await agent.goto(origin);
-const mainFrame = agent.mainFrameEnvironment;
+await hero.goto(origin);
+const mainFrame = hero.mainFrameEnvironment;
 const response = await mainFrame.fetch(postUrl, {
   method: 'post',
   headers: {
@@ -133,11 +133,11 @@ Get the [FrameEnvironment](/docs/basic-interfaces/frame-environment) object corr
 #### **Returns**: [`Promise<Frame>`](/docs/basic-interfaces/frame-environment)
 
 ```js
-await agent.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe');
-const { document } = agent.activeTab;
+await hero.goto('https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe');
+const { document } = hero.activeTab;
 const iframeElement = document.querySelector('iframe.interactive');
 
-const iframe = await agent.getFrameEnvironment(iframeElement);
+const iframe = await hero.getFrameEnvironment(iframeElement);
 
 const h4 = await iframe.document.querySelector('h4').textContent; // should be something like HTML demo: <iframe>
 ```
@@ -154,8 +154,8 @@ Perform a native `Window.getComputedStyle` request in the current frame context 
 #### **Returns**: [`Promise<CssStyleDeclaration>`](/docs/awaited-dom/cssstyledeclaration)
 
 ```js
-await agent.goto('https://dataliberationfoundation.org');
-const { document, getComputedStyle } = agent.activeTab;
+await hero.goto('https://dataliberationfoundation.org');
+const { document, getComputedStyle } = hero.activeTab;
 const selector = document.querySelector('h1');
 const style = await getComputedStyle(selector);
 const opacity = await style.getProperty('opacity');
@@ -203,8 +203,8 @@ Extract any publicly accessible javascript value from the FrameEnvironment.
 #### **Returns**: `Promise<SerializedValue>`
 
 ```js
-await agent.goto('https://dataliberationfoundation.org');
-const navigatorAgent = await agent.activeFrame.getJsValue(`navigator.userAgent`);
+await hero.goto('https://dataliberationfoundation.org');
+const navigatorAgent = await hero.activeFrame.getJsValue(`navigator.userAgent`);
 ```
 
 ### frameEnvironment.isElementVisible*(element)* {#is-element-visible}
@@ -252,7 +252,7 @@ Wait until a specific element is present in the dom.
 If at the moment of calling this method, the selector already exists, the method will return immediately.
 
 ```js
-const { activeTab, document } = agent;
+const { activeTab, document } = hero;
 
 const elem = document.querySelector('a.visible');
 await activeFrame.waitForElement(elem, {
@@ -311,7 +311,7 @@ Location changes are triggered in one of two ways:
 The following example waits for a new page to load after clicking on an anchor tag:
 
 ```js
-const { user, activeTab, document } = agent;
+const { user, activeTab, document } = hero;
 await activeFrame.goto('http://example.com');
 
 await user.click(document.querySelector('a'));

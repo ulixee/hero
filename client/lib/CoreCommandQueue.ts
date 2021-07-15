@@ -1,7 +1,7 @@
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import Queue from '@secret-agent/commons/Queue';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import Queue from '@ulixee/commons/Queue';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';
 import ICommandCounter from '../interfaces/ICommandCounter';

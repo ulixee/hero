@@ -12,19 +12,19 @@
                         span.value(v-else :class="'value-' + node.type") {{formatValue(node)}}
                         span.comma(v-if="node.showComma") ,
             .Explainer(v-else)
-                h4 Agent Output
-                p This panel shows output set using "agent.output".
-                p You can use the "agent.output" object as an array:
+                h4 Hero Output
+                p This panel shows output set using "hero.output".
+                p You can use the "hero.output" object as an array:
                 pre
-                    | agent.output.push({
+                    | hero.output.push({
                     |   text,
                     |   href,
                     | })
                 p Or as an object:
                 pre
-                    | agent.output.text = text;
-                p As you set each data-entry, it will stream into this panel as the same json you'll get if you print agent.output:
-                pre console.log(agent.output);
+                    | hero.output.text = text;
+                p As you set each data-entry, it will stream into this panel as the same json you'll get if you print hero.output:
+                pre console.log(hero.output);
             .Datasize(v-if="dataSize") Output size: {{dataSize}}
 </template>
 

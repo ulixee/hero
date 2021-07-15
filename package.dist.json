@@ -1,9 +1,9 @@
 {
-  "name": "@secret-agent/monorepo",
+  "name": "@ulixee/hero-monorepo",
   "private": true,
   "license": "MIT",
   "scripts": {
-    "postinstall": "yarn workspace @secret-agent/mitm-socket postinstall"
+    "postinstall": "yarn workspace @ulixee/hero-mitm-socket postinstall"
   },
   "devDependencies": {
     "lerna": "^3.4.3"

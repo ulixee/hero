@@ -1,5 +1,5 @@
 import * as Fs from 'fs';
-import IUserAgentOption from '@secret-agent/interfaces/IUserAgentOption';
+import IUserAgentOption from '@ulixee/hero-interfaces/IUserAgentOption';
 import IBrowserData, {
   IDataBrowserConfig,
   IDataClienthello,

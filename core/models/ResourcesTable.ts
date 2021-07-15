@@ -1,9 +1,9 @@
-import decodeBuffer from '@secret-agent/commons/decodeBuffer';
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
+import decodeBuffer from '@ulixee/commons/decodeBuffer';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
-import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
+import SqliteTable from '@ulixee/commons/SqliteTable';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {

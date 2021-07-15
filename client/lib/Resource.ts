@@ -1,10 +1,10 @@
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import ResourceType from '@secret-agent/interfaces/ResourceType';
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import Timer from '@secret-agent/commons/Timer';
-import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOptions';
-import TimeoutError from '@secret-agent/commons/interfaces/TimeoutError';
+import ResourceType from '@ulixee/hero-interfaces/ResourceType';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import Timer from '@ulixee/commons/Timer';
+import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
+import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import ResourceRequest, { createResourceRequest } from './ResourceRequest';

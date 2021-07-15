@@ -1,10 +1,10 @@
-import ConsoleMessage from '@secret-agent/puppet-chrome/lib/ConsoleMessage';
-import Log from '@secret-agent/commons/Logger';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
-import CorePlugins from '@secret-agent/core/lib/CorePlugins';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Core from '@secret-agent/core';
+import ConsoleMessage from '@ulixee/hero-puppet-chrome/lib/ConsoleMessage';
+import Log from '@ulixee/commons/Logger';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Core from '@ulixee/hero-core';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';

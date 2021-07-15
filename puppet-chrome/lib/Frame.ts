@@ -1,17 +1,17 @@
-import { createPromise } from '@secret-agent/commons/utils';
+import { createPromise } from '@ulixee/commons/utils';
 import {
   ILifecycleEvents,
   IPuppetFrame,
   IPuppetFrameEvents,
-} from '@secret-agent/interfaces/IPuppetFrame';
+} from '@ulixee/hero-interfaces/IPuppetFrame';
 import { URL } from 'url';
 import Protocol from 'devtools-protocol';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import { NavigationReason } from '@secret-agent/interfaces/INavigation';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import Resolvable from '@secret-agent/commons/Resolvable';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import { NavigationReason } from '@ulixee/hero-interfaces/INavigation';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import Resolvable from '@ulixee/commons/Resolvable';
 import ProtocolError from './ProtocolError';
 import { DevtoolsSession } from './DevtoolsSession';
 import ConsoleMessage from './ConsoleMessage';

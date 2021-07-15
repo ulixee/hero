@@ -14,10 +14,10 @@ import {
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Location';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
+import { ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
   IHTMLFrameElementIsolate,
@@ -25,12 +25,12 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import { getComputedVisibilityFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
-import Agent from './Agent';
+import Hero from './Hero';
 import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
@@ -43,7 +43,7 @@ const awaitedPathState = StateMachine<
 >();
 
 export interface IState {
-  secretAgent: Agent;
+  hero: Hero;
   tab: Tab;
   coreFrame: Promise<CoreFrameEnvironment>;
 }
@@ -61,9 +61,9 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
 ];
 
 export default class FrameEnvironment {
-  constructor(secretAgent: Agent, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
+  constructor(hero: Hero, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
     setState(this, {
-      secretAgent,
+      hero,
       tab,
       coreFrame,
     });
@@ -237,9 +237,9 @@ export function getCoreFrameEnvironmentForPosition(
 // CREATE
 
 export function createFrame(
-  secretAgent: Agent,
+  hero: Hero,
   tab: Tab,
   coreFrame: Promise<CoreFrameEnvironment>,
 ): FrameEnvironment {
-  return new FrameEnvironment(secretAgent, tab, coreFrame);
+  return new FrameEnvironment(hero, tab, coreFrame);
 }

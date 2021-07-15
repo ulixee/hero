@@ -1,6 +1,6 @@
-import IResourceHeaders from '@secret-agent/interfaces/IResourceHeaders';
-import { pickRandom } from '@secret-agent/commons/utils';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
+import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
+import { pickRandom } from '@ulixee/commons/utils';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '../../index';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';
 

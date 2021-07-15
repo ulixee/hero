@@ -279,7 +279,7 @@ export default class Application {
     ipcMain.on('open-file', async () => {
       const result = await dialog.showOpenDialog({
         properties: ['openFile', 'showHiddenFiles'],
-        defaultPath: Path.join(Os.tmpdir(), '.secret-agent'),
+        defaultPath: Path.join(Os.tmpdir(), '.ulixee'),
         filters: [
           { name: 'All Files', extensions: ['js', 'ts', 'db'] },
           { name: 'Session Database', extensions: ['db'] },

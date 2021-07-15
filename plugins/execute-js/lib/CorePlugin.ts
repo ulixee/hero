@@ -1,6 +1,6 @@
-import { IOnClientCommandMeta } from '@secret-agent/interfaces/ICorePlugin';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import CorePlugin from '@secret-agent/plugin-utils/lib/CorePlugin';
+import { IOnClientCommandMeta } from '@ulixee/hero-interfaces/ICorePlugin';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import CorePlugin from '@ulixee/hero-plugin-utils/lib/CorePlugin';
 
 const { name: pluginId } = require('../package.json');
 

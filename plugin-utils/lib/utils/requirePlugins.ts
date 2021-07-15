@@ -1,5 +1,5 @@
-import { IPluginClass } from '@secret-agent/interfaces/IPlugin';
-import IPluginType from '@secret-agent/interfaces/IPluginTypes';
+import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
+import IPluginType from '@ulixee/hero-interfaces/IPluginTypes';
 import extractPlugins from './extractPlugins';
 import filterPlugins from './filterPlugins';
 

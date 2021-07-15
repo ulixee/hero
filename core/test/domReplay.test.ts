@@ -1,9 +1,9 @@
-import Core, { Session } from '@secret-agent/core';
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import Puppet from '@secret-agent/puppet';
-import Log from '@secret-agent/commons/Logger';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Core, { Session } from '@ulixee/hero-core';
+import { Helpers } from '@ulixee/testing';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import Puppet from '@ulixee/hero-puppet';
+import Log from '@ulixee/commons/Logger';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import ConnectionToClient from '../server/ConnectionToClient';
 import InjectedScripts from '../lib/InjectedScripts';
 

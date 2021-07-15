@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 import Protocol from 'devtools-protocol';
-import { IPuppetPage, IPuppetPageEvents } from '@secret-agent/interfaces/IPuppetPage';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
-import { assert, createPromise } from '@secret-agent/commons/utils';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IRect from '@secret-agent/interfaces/IRect';
+import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
+import * as eventUtils from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { assert, createPromise } from '@ulixee/commons/utils';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IRect from '@ulixee/hero-interfaces/IRect';
 import { DevtoolsSession } from './DevtoolsSession';
 import { NetworkManager } from './NetworkManager';
 import { Keyboard } from './Keyboard';

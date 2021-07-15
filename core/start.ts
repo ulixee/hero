@@ -1,6 +1,6 @@
-import '@secret-agent/commons/SourceMapSupport';
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
-import Log from '@secret-agent/commons/Logger';
+import '@ulixee/commons/SourceMapSupport';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import Log from '@ulixee/commons/Logger';
 import Core from '.';
 
 const { log } = Log(module);
@@ -13,7 +13,7 @@ const { log } = Log(module);
     log.stats('Exiting Core Process');
     process.exit();
   };
-  await Core.start(startOptions, !process.env.SA_TEMPORARY_CORE);
+  await Core.start(startOptions, !process.env.HERO_TEMPORARY_CORE);
 })().catch(error => {
   log.error('ERROR starting core', {
     error,

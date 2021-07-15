@@ -1,10 +1,10 @@
 import * as Fs from 'fs';
-import { Helpers } from '@secret-agent/testing';
-import { LocationStatus, LocationTrigger } from '@secret-agent/interfaces/Location';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import { getLogo, ITestKoaServer } from '@secret-agent/testing/helpers';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
+import { Helpers } from '@ulixee/testing';
+import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { getLogo, ITestKoaServer } from '@ulixee/testing/helpers';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Session from '../lib/Session';

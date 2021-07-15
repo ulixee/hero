@@ -1,10 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
-import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import type INodePointer from 'awaited-dom/base/INodePointer';
-import IElementRect from '@secret-agent/interfaces/IElementRect';
-import IPoint from '@secret-agent/interfaces/IPoint';
-import { IJsPathError } from '@secret-agent/interfaces/IJsPathError';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
+import IElementRect from '@ulixee/hero-interfaces/IElementRect';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
+import { IJsPathError } from '@ulixee/hero-interfaces/IJsPathError';
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import { IJsPath, IPathStep } from 'awaited-dom/base/AwaitedPath';
 
 const pointerFnName = '__getNodePointer__';

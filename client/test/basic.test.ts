@@ -1,15 +1,15 @@
-import Core from '@secret-agent/core/index';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
-import { Helpers } from '@secret-agent/testing';
-import { Agent, Handler } from '../index';
+import Core from '@ulixee/hero-core/index';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
+import { Helpers } from '@ulixee/testing';
+import { Hero, Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import { readCommandLineArgs } from '../lib/Input';
 
 afterAll(Helpers.afterAll);
 
-describe('basic SecretAgent tests', () => {
-  it("doesn't connect until an agent is used for a pre-established connection", async () => {
+describe('basic Hero tests', () => {
+  it("doesn't connect until an hero is used for a pre-established connection", async () => {
     const outgoing = jest.fn<any, any>(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
@@ -30,7 +30,7 @@ describe('basic SecretAgent tests', () => {
     expect(Object.keys(Core.connections)).toHaveLength(0);
   });
 
-  it('creates and closes an agent', async () => {
+  it('creates and closes an hero', async () => {
     const outgoing = jest.fn(
       async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
         if (command === 'Session.create') {
@@ -54,8 +54,8 @@ describe('basic SecretAgent tests', () => {
       protected createConnection = () => Promise.resolve(null);
       protected destroyConnection = () => Promise.resolve(null);
     }
-    const agent = await new Agent({ connectionToCore: new Piper() });
-    await agent.close();
+    const hero = await new Hero({ connectionToCore: new Piper() });
+    await hero.close();
 
     const outgoingCommands = outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([

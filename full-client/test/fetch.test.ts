@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -14,10 +14,10 @@ afterEach(Helpers.afterEach);
 
 describe('Fetch tests', () => {
   it('should be able to fetch from top level', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await expect(agent.fetch('https://dataliberationfoundation.org')).rejects.toThrowError(
+    await expect(hero.fetch('https://dataliberationfoundation.org')).rejects.toThrowError(
       'need to use a "goto"',
     );
   });
@@ -26,12 +26,12 @@ describe('Fetch tests', () => {
     koaServer.get('/fetch', ctx => {
       ctx.body = { got: 'it' };
     });
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForPaintingStable();
-    const result = await agent.fetch('/fetch');
+    await hero.goto(`${koaServer.baseUrl}/`);
+    await hero.waitForPaintingStable();
+    const result = await hero.fetch('/fetch');
     const json = await result.json();
     expect(json).toStrictEqual({ got: 'it' });
   });
@@ -47,12 +47,12 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: '2' };
     });
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForPaintingStable();
+    await hero.goto(`${koaServer.baseUrl}/`);
+    await hero.waitForPaintingStable();
 
-    const response = await agent.fetch(`${koaServer.baseUrl}/post`, {
+    const response = await hero.fetch(`${koaServer.baseUrl}/post`, {
       method: 'post',
       headers: {
         Accept: 'application/json',
@@ -72,12 +72,12 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: 'request' };
     });
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForPaintingStable();
+    await hero.goto(`${koaServer.baseUrl}/`);
+    await hero.waitForPaintingStable();
 
-    const { Request, fetch } = agent;
+    const { Request, fetch } = hero;
     const request = new Request(`${koaServer.baseUrl}/request`, {
       headers: {
         header1: 'sent',
@@ -94,12 +94,12 @@ describe('Fetch tests', () => {
     koaServer.get('/buffer', ctx => {
       ctx.body = Buffer.from('This is a test');
     });
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(`${koaServer.baseUrl}/`);
-    await agent.waitForPaintingStable();
+    await hero.goto(`${koaServer.baseUrl}/`);
+    await hero.waitForPaintingStable();
 
-    const response = await agent.fetch(`${koaServer.baseUrl}/buffer`);
+    const response = await hero.fetch(`${koaServer.baseUrl}/buffer`);
 
     const buff = await response.arrayBuffer();
 

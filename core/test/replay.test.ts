@@ -1,12 +1,12 @@
-import Core, { Session } from '@secret-agent/core';
-import { Helpers } from '@secret-agent/testing';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
+import Core, { Session } from '@ulixee/hero-core';
+import { Helpers } from '@ulixee/testing';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import * as WebSocket from 'ws';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import { createPromise } from '@secret-agent/commons/utils';
-import Output from '@secret-agent/client/lib/Output';
-import ReplayOutput from '@secret-agent/replay/backend/api/ReplayOutput';
-import ObjectObserver from '@secret-agent/client/lib/ObjectObserver';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { createPromise } from '@ulixee/commons/utils';
+import Output from '@ulixee/hero/lib/Output';
+import ReplayOutput from '@ulixee/replay/backend/api/ReplayOutput';
+import ObjectObserver from '@ulixee/hero/lib/ObjectObserver';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 

@@ -1,16 +1,16 @@
 # Remote
 
-SecretAgent operates out of the box over WebSockets. You'll eventually want to launch Core on a server where clients can remotely access it.
+Hero operates out of the box over WebSockets. You'll eventually want to launch Core on a server where clients can remotely access it.
 
-You'll need a simple script to start the server on the machine where the `secret-agent` npm package is installed. Make sure to open the port you allocate on any firewall that a client might have to pass through:
+You'll need a simple script to start the server on the machine where the `ulixee` npm package is installed. Make sure to open the port you allocate on any firewall that a client might have to pass through:
 
 ## Setting Up a Server Process
 
-Below is code you can use to start Core in your own server process. NOTE: you can also simply run the 'start.js' script that is packaged with `@secret-agent/core` at `@secret-agent/core/start`;
+Below is code you can use to start Core in your own server process. NOTE: you can also simply run the 'start.js' script that is packaged with `@ulixee/hero-core` at `@ulixee/hero-core/start`;
 
 ```javascript
 // SERVER ip is 122.22.232.1
-const Core = require('@secret-agent/core');
+const Core = require('@ulixee/hero-core');
 
 (async () => {
   Core.onShutdown = () => {
@@ -23,20 +23,21 @@ const Core = require('@secret-agent/core');
 
 ## Setting Up the Client
 
-Your [Agent](/docs/basic-interfaces/agent) or [Handler](/docs/basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
+Your [Hero](/docs/basic-interfaces/hero) or [Handler](/docs/basic-interfaces/handler) must be configured to point at this Remote Core (and any others you've set up).
 
-NOTE: you can use the `@secret-agent/client` npm package if you don't want to install a full browser engine on the machine coordinating all your scrapes. That example is shown below.
+NOTE: you can use the `@ulixee/hero` npm package if you don't want to install a full browser engine on the machine coordinating all your scrapes. That example is shown below.
 
 ```javascript
-const agent = require('@secret-agent/client');
+const Hero = require('@ulixee/hero');
 
 (async () => {
-  await agent.configure({
+  const hero = new Hero();
+  await hero.configure({
     connectionToCore: {
       host: 'localhost:7007',
     },
   });
 
-  await agent.goto('https://ulixee.org');
+  await hero.goto('https://ulixee.org');
 })().catch(console.log);
 ```

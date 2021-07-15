@@ -5,13 +5,13 @@ import {
   IMousePosition,
   IMousePositionXY,
   InteractionCommand,
-} from '@secret-agent/interfaces/IInteractions';
-import { HumanEmulatorClassDecorator } from '@secret-agent/interfaces/ICorePlugin';
-import IRect from '@secret-agent/interfaces/IRect';
-import IInteractionsHelper from '@secret-agent/interfaces/IInteractionsHelper';
-import IPoint from '@secret-agent/interfaces/IPoint';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
+} from '@ulixee/hero-interfaces/IInteractions';
+import { HumanEmulatorClassDecorator } from '@ulixee/hero-interfaces/ICorePlugin';
+import IRect from '@ulixee/hero-interfaces/IRect';
+import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
+import IPoint from '@ulixee/hero-interfaces/IPoint';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import generateVector from './generateVector';
 import * as pkg from './package.json';
 
@@ -19,7 +19,7 @@ import * as pkg from './package.json';
 
 @HumanEmulatorClassDecorator
 export default class DefaultHumanEmulator extends HumanEmulator {
-  public static id = pkg.name.replace('@secret-agent/', '');
+  public static id = pkg.name.replace('@ulixee/', '');
 
   public static overshootSpread = 2;
   public static overshootRadius = 5;

@@ -1,10 +1,10 @@
 import { ISuperDocument } from 'awaited-dom/base/interfaces/super';
 import IUserProfile from './IUserProfile';
-import IAgentMeta from './IAgentMeta';
+import IHeroMeta from './IHeroMeta';
 import IDomStorage from './IDomStorage';
 import ITab from './ITab';
 
-export default interface IAgent {
+export default interface IHero {
   activeTab: ITab;
 
   document: ISuperDocument;
@@ -19,7 +19,7 @@ export default interface IAgent {
 
   sessionName: Promise<string>;
 
-  meta: Promise<IAgentMeta>;
+  meta: Promise<IHeroMeta>;
 
   storage: Promise<IDomStorage>;
 
@@ -37,7 +37,7 @@ export default interface IAgent {
 
   closeTab(tab: ITab): Promise<void>;
 
-  // configure(configureOptions: IAgentConfigureOptions): Promise<void>;
+  // configure(configureOptions: IHeroConfigureOptions): Promise<void>;
 
   focusTab(tab: ITab): Promise<void>;
 

@@ -91,7 +91,7 @@ export default class DocsPage extends Vue {
 
   private get editLink() {
     let path = this.items[this.currentIndex]?.editLink ?? this.currentPath;
-    return `https://github.com/ulixee/secret-agent/tree/master/website${path}.md`;
+    return `https://github.com/ulixee/ulixee/tree/master/website${path}.md`;
   }
 
   private get items() {

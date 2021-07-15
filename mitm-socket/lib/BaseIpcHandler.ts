@@ -1,13 +1,13 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as os from 'os';
-import Log from '@secret-agent/commons/Logger';
+import Log from '@ulixee/commons/Logger';
 import * as net from 'net';
 import { unlink } from 'fs';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import { bindFunctions } from '@secret-agent/commons/utils';
-import { createId, createIpcSocketPath } from '@secret-agent/commons/IpcUtils';
+import Resolvable from '@ulixee/commons/Resolvable';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import { bindFunctions } from '@ulixee/commons/utils';
+import { createId, createIpcSocketPath } from '@ulixee/commons/IpcUtils';
 import * as Fs from 'fs';
 import * as Path from 'path';
 

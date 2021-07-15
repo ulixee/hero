@@ -1,11 +1,11 @@
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@secret-agent/commons/eventUtils';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import IRegisteredEventListener from '@secret-agent/interfaces/IRegisteredEventListener';
-import { IPuppetFrameManagerEvents } from '@secret-agent/interfaces/IPuppetFrame';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import injectedSourceUrl from '@secret-agent/interfaces/injectedSourceUrl';
+import * as eventUtils from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { IPuppetFrameManagerEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { DevtoolsSession } from './DevtoolsSession';
 import Frame from './Frame';
 import FrameNavigatedEvent = Protocol.Page.FrameNavigatedEvent;
@@ -21,7 +21,7 @@ import FrameRequestedNavigationEvent = Protocol.Page.FrameRequestedNavigationEve
 import Page = Protocol.Page;
 
 export const DEFAULT_PAGE = 'about:blank';
-export const ISOLATED_WORLD = '__sa_world__';
+export const ISOLATED_WORLD = '__hero_world__';
 
 export default class FramesManager extends TypedEventEmitter<IPuppetFrameManagerEvents> {
   public framesById = new Map<string, Frame>();

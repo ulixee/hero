@@ -1,4 +1,4 @@
-import IMouseUpResult from '@secret-agent/interfaces/IMouseUpResult';
+import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
 import FrameEnvironment from './FrameEnvironment';
 
 export default class MouseupListener {
@@ -11,12 +11,12 @@ export default class MouseupListener {
   }
 
   public register(): Promise<void> {
-    return this.frameEnvironment.runIsolatedFn('SA.MouseEvents.listenFor', 'mouseup', this.nodeId);
+    return this.frameEnvironment.runIsolatedFn('HERO.MouseEvents.listenFor', 'mouseup', this.nodeId);
   }
 
   public async didTriggerMouseEvent(): Promise<IMouseUpResult> {
     return await this.frameEnvironment.runIsolatedFn<IMouseUpResult>(
-      'SA.MouseEvents.didTrigger',
+      'HERO.MouseEvents.didTrigger',
       'mouseup',
       this.nodeId,
     );

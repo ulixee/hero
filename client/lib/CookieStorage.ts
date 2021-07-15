@@ -1,6 +1,6 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
-import { ICookie } from '@secret-agent/interfaces/ICookie';
+import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
+import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 const { getState, setState } = StateMachine<CookieStorage, IState>();

@@ -61,7 +61,7 @@ function processPackageJson(packagePath) {
     finalPackageJson.types = finalPackageJson.main.replace('.js', '.d.ts');
   }
 
-  if (finalPackageJson.name === 'secret-agent') {
+  if (finalPackageJson.name === '@ulixee/hero') {
     fs.copyFileSync(readmePath, `${packagePath}/README.md`);
   }
 

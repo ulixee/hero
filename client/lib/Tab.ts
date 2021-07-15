@@ -6,11 +6,11 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@secret-agent/interfaces/Location';
-import IWaitForResourceOptions from '@secret-agent/interfaces/IWaitForResourceOptions';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
+import { ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
+import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import {
   IElementIsolate,
   IHTMLFrameElementIsolate,
@@ -18,10 +18,10 @@ import {
   IHTMLObjectElementIsolate,
   INodeIsolate,
 } from 'awaited-dom/base/interfaces/isolate';
-import IScreenshotOptions from '@secret-agent/interfaces/IScreenshotOptions';
+import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
-import { INodeVisibility } from '@secret-agent/interfaces/INodeVisibility';
-import ITab from "@secret-agent/interfaces/ITab";
+import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
+import ITab from "@ulixee/hero-interfaces/ITab";
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
@@ -29,7 +29,7 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Agent, { IState as IAgentState } from './Agent';
+import Hero, { IState as IHeroState } from './Hero';
 import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
@@ -41,10 +41,10 @@ const awaitedPathState = StateMachine<
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
 >();
 const { getState, setState } = StateMachine<Tab, IState>();
-const agentState = StateMachine<Agent, IAgentState>();
+const heroState = StateMachine<Hero, IHeroState>();
 
 export interface IState {
-  agent: Agent;
+  hero: Hero;
   coreTab: Promise<CoreTab>;
   mainFrameEnvironment: FrameEnvironment;
   frameEnvironments: FrameEnvironment[];
@@ -69,17 +69,17 @@ const propertyKeys: (keyof Tab)[] = [
 ];
 
 export default class Tab extends AwaitedEventTarget<IEventType> implements ITab {
-  constructor(agent: Agent, coreTab: Promise<CoreTab>) {
+  constructor(hero: Hero, coreTab: Promise<CoreTab>) {
     super(() => {
       return { target: coreTab };
     });
     const mainFrameEnvironment = new FrameEnvironment(
-      agent,
+      hero,
       this,
       coreTab.then(x => x.mainFrameEnvironment),
     );
     setState(this, {
-      agent,
+      hero,
       coreTab,
       mainFrameEnvironment,
       frameEnvironments: [mainFrameEnvironment],
@@ -89,8 +89,8 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
       return (await coreTab).commandQueue.run('Tab.runPluginCommand', pluginId, args);
     }
 
-    for (const clientPlugin of agentState.getState(agent).clientPlugins) {
-      clientPlugin.onTab(agent, this, sendToTab);
+    for (const clientPlugin of heroState.getState(hero).clientPlugins) {
+      clientPlugin.onTab(hero, this, sendToTab);
     }
   }
 
@@ -237,14 +237,14 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
   }
 
   public focus(): Promise<void> {
-    const { agent, coreTab } = getState(this);
-    agentState.getState(agent).connection.activeTab = this;
+    const { hero, coreTab } = getState(this);
+    heroState.getState(hero).connection.activeTab = this;
     return coreTab.then(x => x.focusTab());
   }
 
   public close(): Promise<void> {
-    const { agent, coreTab } = getState(this);
-    const { connection } = agentState.getState(agent);
+    const { hero, coreTab } = getState(this);
+    const { connection } = heroState.getState(hero);
     connection.closeTab(this);
     return coreTab.then(x => x.close());
   }
@@ -272,7 +272,7 @@ async function getOrCreateFrameEnvironment(
     const frameId = await frameEnvironment.frameId;
     if (frameId === coreFrame.frameId) return frameEnvironment;
   }
-  const frameEnvironment = new FrameEnvironment(state.agent, tab, Promise.resolve(coreFrame));
+  const frameEnvironment = new FrameEnvironment(state.hero, tab, Promise.resolve(coreFrame));
   frameEnvironments.push(frameEnvironment);
   return frameEnvironment;
 }
@@ -305,6 +305,6 @@ export function getCoreTab(tab: Tab): Promise<CoreTab> {
 
 // CREATE
 
-export function createTab(agent: Agent, coreTab: Promise<CoreTab>): Tab {
-  return new Tab(agent, coreTab);
+export function createTab(hero: Hero, coreTab: Promise<CoreTab>): Tab {
+  return new Tab(hero, coreTab);
 }

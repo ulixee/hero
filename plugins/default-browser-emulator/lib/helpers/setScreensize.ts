@@ -1,5 +1,5 @@
-import IDevtoolsSession from '@secret-agent/interfaces/IDevtoolsSession';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import BrowserEmulator from '../../index';
 
 export default async function setScreensize(

@@ -38,27 +38,27 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
-WORKDIR /app/secret-agent
+WORKDIR /app/ulixee
 
-COPY ./build-dist /app/secret-agent/
+COPY ./build-dist /app/ulixee/
 
 RUN cat /etc/*-release
 
 # Add user so we don't need --no-sandbox.
 # same layer as yarn install to keep re-chowned files from using up several hundred MBs more space
 
-# NOTE: this installs the monorepo, but you could also install secret-agent directly + and desired browsers
+# NOTE: this installs the monorepo, but you could also install ulixee directly + and desired browsers
 # we will automatically install dependencies
-RUN cd /app/secret-agent && yarn \
+RUN cd /app/ulixee && yarn \
     && $(npx install-browser-deps) \
     && groupadd -r sagent && useradd -r -g sagent -G audio,video sagent \
     && mkdir -p /home/sagent/Downloads \
     && mkdir -p /home/sagent/.cache \
     && chown -R sagent:sagent /home/sagent \
-    && chown -R sagent:sagent /app/secret-agent \
-    && mv ~/.cache/secret-agent /home/sagent/.cache/ \
+    && chown -R sagent:sagent /app/ulixee \
+    && mv ~/.cache/ulixee /home/sagent/.cache/ \
     && chmod 777 /tmp \
-    && chmod -R 777 /home/sagent/.cache/secret-agent
+    && chmod -R 777 /home/sagent/.cache/ulixee
 
 # Add below to run as unprivileged user.
 USER sagent

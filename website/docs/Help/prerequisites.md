@@ -1,6 +1,6 @@
 # Prerequisites
 
-To get started with SecretAgent, you’ll need to have the following software tools installed:
+To get started with Hero, you’ll need to have the following software tools installed:
 
 ### Node.js
 

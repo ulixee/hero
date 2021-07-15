@@ -2,7 +2,7 @@
 .Logo(@contextmenu="rightClick" oncontextmenu="return false;")
   g-link.logo__link(to="/" title="Back to home")
     Logo.logo__svg(alt="Home")
-    span.logo__name SecretAgent
+    span.logo__name Ulixee
 </template>
 
 <script>

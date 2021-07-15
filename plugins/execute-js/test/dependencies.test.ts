@@ -1,10 +1,10 @@
-import { Agent, LocationStatus } from 'secret-agent';
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import ExecuteJsPlugin from '@secret-agent/execute-js-plugin';
-import Core from '@secret-agent/core';
-import ConnectionToClient from '@secret-agent/core/server/ConnectionToClient';
-import CoreServer from '@secret-agent/core/server';
+import { Hero, LocationStatus } from '@ulixee/hero';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
+import Core from '@ulixee/hero-core';
+import ConnectionToClient from '@ulixee/hero-core/server/ConnectionToClient';
+import CoreServer from '@ulixee/hero-core/server';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
@@ -37,23 +37,23 @@ test('it should work even if dependency not registered through Core.use', async 
 
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const agent = new Agent({
+  const hero = new Hero({
     userAgent,
     connectionToCore: {
       host: await coreServer.address,
     },
   });
-  Helpers.onClose(() => agent.close(), true);
-  agent.use(ExecuteJsPlugin);
+  Helpers.onClose(() => hero.close(), true);
+  hero.use(ExecuteJsPlugin);
 
-  await agent.goto(`${koaServer.baseUrl}/test2`);
-  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-  const response = await agent.executeJs(() => {
+  await hero.goto(`${koaServer.baseUrl}/test2`);
+  await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  const response = await hero.executeJs(() => {
     // @ts-ignore
     return window.testRun();
   });
   expect(response).toEqual('ItWorks');
-  await agent.close();
+  await hero.close();
 });
 
 test('it should fail if dependency not registered and allowDynamicPluginLoading = false', async () => {
@@ -70,21 +70,21 @@ test('it should fail if dependency not registered and allowDynamicPluginLoading 
   Core.allowDynamicPluginLoading = false;
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const agent = new Agent({
+  const hero = new Hero({
     userAgent,
     connectionToCore: {
       host: await coreServer.address,
     },
   });
-  Helpers.onClose(() => agent.close(), true);
-  agent.use(ExecuteJsPlugin);
+  Helpers.onClose(() => hero.close(), true);
+  hero.use(ExecuteJsPlugin);
 
-  await agent.goto(`${koaServer.baseUrl}/test2`);
-  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-  const response = await agent.executeJs(() => {
+  await hero.goto(`${koaServer.baseUrl}/test2`);
+  await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  const response = await hero.executeJs(() => {
     // @ts-ignore
     return window.testRun();
   });
   expect(response).toEqual(undefined);
-  await agent.close();
+  await hero.close();
 });

@@ -1,11 +1,11 @@
-import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import BrowserEmulator from '@ulixee/default-browser-emulator';
 import { URL } from 'url';
-import Log from '@secret-agent/commons/Logger';
-import IPuppetContext from '@secret-agent/interfaces/IPuppetContext';
-import CorePlugins from '@secret-agent/core/lib/CorePlugins';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import Core from '@secret-agent/core';
-import { IBrowserEmulatorConfig } from '@secret-agent/interfaces/ICorePlugin';
+import Log from '@ulixee/commons/Logger';
+import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Core from '@ulixee/hero-core';
+import { IBrowserEmulatorConfig } from '@ulixee/hero-interfaces/ICorePlugin';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { createTestPage, ITestPage } from './TestPage';

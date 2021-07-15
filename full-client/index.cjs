@@ -1,3 +1,3 @@
 require('./index.js');
 
-module.exports = require('@secret-agent/client');
+module.exports = require('@ulixee/hero');

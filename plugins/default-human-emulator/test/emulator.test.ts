@@ -1,8 +1,8 @@
-import { IInteractionStep, InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import ICorePluginCreateOptions from '@secret-agent/interfaces/ICorePluginCreateOptions';
+import { IInteractionStep, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import Log from '@ulixee/commons/Logger';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
 import HumanEmulator, { isVisible } from '../index';
 
 const { log } = Log(module);

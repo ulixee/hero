@@ -1,6 +1,6 @@
 import * as Path from 'path';
 import * as os from 'os';
-import BrowserEngine from '@secret-agent/plugin-utils/lib/BrowserEngine';
+import BrowserEngine from '@ulixee/hero-plugin-utils/lib/BrowserEngine';
 import { defaultScreen } from '../Viewports';
 
 let sessionDirCounter = 0;

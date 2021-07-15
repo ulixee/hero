@@ -1,5 +1,5 @@
-import { IBrowserEmulator } from '@secret-agent/interfaces/ICorePlugin';
-import ITlsSettings from '@secret-agent/interfaces/ITlsSettings';
+import { IBrowserEmulator } from '@ulixee/hero-interfaces/ICorePlugin';
+import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
 
 export default function configureSessionTcp(
   browserEmulator: IBrowserEmulator,

@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import type { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
+import type { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
+import SqliteTable from '@ulixee/commons/SqliteTable';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private fetchRequestIdToNetworkId = new Map<string, string>();
@@ -94,7 +94,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
       if ((key === 'headers' || key === 'postData') && params.request) {
         // clean out post data (we have these in resources table)
-        return 'SA_REMOVED_FOR_DB';
+        return 'HERO_REMOVED_FOR_DB';
       }
       return value;
     }
@@ -131,7 +131,7 @@ class IdAssigner {
 }
 
 const filteredEventMethods = new Set([
-  'Network.dataReceived', // Not useful to SA since we use Mitm
+  'Network.dataReceived', // Not useful to Ulixee since we use Mitm
   'Page.domContentEventFired', // duplicated by Page.lifecycleEvent
   'Page.loadEventFired', // duplicated by Page.lifecycleEvent
 ]);

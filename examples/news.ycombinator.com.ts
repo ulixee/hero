@@ -1,25 +1,25 @@
-import agent, { Observable } from 'secret-agent';
+import hero, { Observable } from '@ulixee/hero';
 
-// process.env.SA_SHOW_BROWSER = 'true';
+// process.env.HERO_SHOW_BROWSER = 'true';
 
 async function run() {
-  await agent.configure({ userAgent: '~ chrome = 88' });
-  await agent.goto('https://news.ycombinator.com/');
-  await agent.waitForPaintingStable();
+  await hero.configure({ userAgent: '~ chrome = 88' });
+  await hero.goto('https://news.ycombinator.com/');
+  await hero.waitForPaintingStable();
 
   console.log('\n-- PRINTING location.href ---------');
-  console.log(await agent.url);
+  console.log(await hero.url);
 
-  const stories = await agent.document.querySelectorAll('.athing');
+  const stories = await hero.document.querySelectorAll('.athing');
   let lastStory;
   for (const story of stories) {
-    await agent.waitForMillis(200);
+    await hero.waitForMillis(200);
     const extraElem = await story.nextElementSibling;
-    await agent.interact({
+    await hero.interact({
       move: story,
     });
     const record = Observable({} as any);
-    agent.output.push(record);
+    hero.output.push(record);
 
     const titleElem = await story.querySelector('a.storylink');
 
@@ -45,24 +45,24 @@ async function run() {
   }
 
   if (lastStory) {
-    await agent.click(lastStory);
-    await agent.waitForLocation('change');
-    await agent.waitForElement(agent.document.querySelector('textarea'));
-    await agent.click(agent.document.querySelector('textarea'));
-    await agent.type('Hackernews!');
-    const comments = [...(await agent.document.querySelectorAll('.commtext'))];
-    await agent.interact({
+    await hero.click(lastStory);
+    await hero.waitForLocation('change');
+    await hero.waitForElement(hero.document.querySelector('textarea'));
+    await hero.click(hero.document.querySelector('textarea'));
+    await hero.type('Hackernews!');
+    const comments = [...(await hero.document.querySelectorAll('.commtext'))];
+    await hero.interact({
       move: comments[comments.length - 1],
     });
   }
 
   console.log('-- PRINTING extracted results ---------------');
-  console.log(agent.output);
+  console.log(hero.output);
 
   console.log('-------------------------------------');
   console.log('DONE');
 
-  await agent.close();
+  await hero.close();
 }
 
 run().catch(error => console.log(error));

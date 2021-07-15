@@ -1,6 +1,6 @@
 # Basic Concepts
 
-## Each Agent instance Has a Unique User
+## Each Hero Instance Has a Unique User
 
 - user-agent
 - ip address
@@ -11,20 +11,20 @@
 - screen details
 - 100s more
 
-Note: IP addresses are set through upstreamProxyUrl on each Agent.
+Note: IP addresses are set through upstreamProxyUrl on each Hero.
 
 ## The DOM Has Finally Been Awaited
 
 The easiest way to explain Dynamic DOM is with some comparison examples. Let's say you want to load a URL and loop through a list of items.
 
-### Doing It with SecretAgent
+### Doing It with Hero
 
-Here's how you would do it with SecretAgent:
+Here's how you would do it with Hero:
 
 ```js
-import agent from 'secret-agent';
+import Hero from '@ulixee/hero';
 
-const { document } = agent;
+const { document } = hero;
 
 const elems = document.querySelectorAll('ul');
 for (const elem of await elems) {
@@ -33,7 +33,7 @@ for (const elem of await elems) {
 }
 ```
 
-SecretAgent's Dynamic DOM allows you to keep all calls within your script context. It also follows the W3C spec to a T. In fact, go ahead and copy lines 3 through 7 and run paste them into your browser's DevTools. They run perfectly.
+Hero's Dynamic DOM allows you to keep all calls within your script context. It also follows the W3C spec to a T. In fact, go ahead and copy lines 3 through 7 and run paste them into your browser's DevTools. They run perfectly.
 
 ### Doing It with Puppeteer
 
@@ -62,19 +62,20 @@ When used in a simple example as show above, Puppeteer's approach seems okay. Ho
 
 ## Headless Browsers Need Not Always Render
 
-When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. SecretAgent allows you to [turn off](/docs/overview/configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
+When you're trying to eke out performance, a common technique is to disable rendering various parts of a webpage. Hero allows you to [turn off](/docs/overview/configuration#blocked-resources) everything from the style and images of a page, to the javascript environment. You can even simulate making http requests from inside a loaded web page, without ever loading the page.
 
 ```js
-import agent from 'secret-agent';
+import Hero from '@ulixee/hero';
 
-await agent.configure({
+const hero = new Hero();
+await hero.configure({
   blockedResourceTypes: ['All'],
 });
-await agent.goto('https://secretagent.dev');
-// referer will be https://secretagent.dev
-const doc = await agent.fetch('https://secretagent.dev/docs/overview/configuration');
+await hero.goto('https://ulixee.org');
+// referer will be https://ulixee.org
+const doc = await hero.fetch('https://ulixee.org/docs/overview/configuration');
 ```
 
 ## Mice and Keyboards Are Human Too
 
-SecretAgent drives mice and keyboards with [Human Emulators](/docs/plugins/human-emulators). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.
+Hero drives mice and keyboards with [Human Emulators](/docs/plugins/human-emulators). Human emulators translate your clicks and moves into randomized human-like patterns that can pass bot-blocker checks.

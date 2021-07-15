@@ -2,7 +2,7 @@
   .HomeScreen.Screen
     .content
       img(src="../../assets/logo.svg")
-      h1 SecretAgent Replay
+      h1 Hero Replay
       button(@click="openFile") Open Script
 </template>
 

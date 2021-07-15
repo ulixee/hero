@@ -1,14 +1,14 @@
-import Core, { Session } from '@secret-agent/core';
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import Core, { Session } from '@ulixee/hero-core';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import {
   getComputedVisibilityFnName,
   getNodePointerFnName,
-} from '@secret-agent/interfaces/jsPathFnNames';
+} from '@ulixee/hero-interfaces/jsPathFnNames';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import { inspect } from 'util';
-import { LocationStatus } from '@secret-agent/interfaces/Location';
-import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
+import { LocationStatus } from '@ulixee/hero-interfaces/Location';
+import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import ConnectionToClient from '../server/ConnectionToClient';
 import CoreServer from '../server';
 

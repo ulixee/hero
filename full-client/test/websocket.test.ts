@@ -1,12 +1,12 @@
-import { Helpers } from '@secret-agent/testing';
-import MitmServer from '@secret-agent/mitm/lib/MitmProxy';
-import { createPromise } from '@secret-agent/commons/utils';
+import { Helpers } from '@ulixee/testing';
+import MitmServer from '@ulixee/hero-mitm/lib/MitmProxy';
+import { createPromise } from '@ulixee/commons/utils';
 import * as WebSocket from 'ws';
-import HttpUpgradeHandler from '@secret-agent/mitm/handlers/HttpUpgradeHandler';
-import WebsocketResource from '@secret-agent/client/lib/WebsocketResource';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
+import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { AddressInfo } from 'net';
-import Core from '@secret-agent/core/index';
+import Core from '@ulixee/hero-core/index';
 import { Handler } from '../index';
 
 let handler: Handler;
@@ -66,17 +66,17 @@ describe('Websocket tests', () => {
   </script>
 </html>`;
     });
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(`${koaServer.baseUrl}/ws-test`);
+    await hero.goto(`${koaServer.baseUrl}/ws-test`);
 
-    await agent.waitForElement(agent.document.querySelector('h1'));
+    await hero.waitForElement(hero.document.querySelector('h1'));
     await serverMessagePromise.promise;
     expect(receivedMessages).toHaveLength(20);
 
     expect(upgradeSpy).toHaveBeenCalledTimes(1);
 
-    const resources = await agent.waitForResource({ type: 'Websocket' });
+    const resources = await hero.waitForResource({ type: 'Websocket' });
     expect(resources).toHaveLength(1);
 
     const [wsResource] = resources as WebsocketResource[];
@@ -89,10 +89,10 @@ describe('Websocket tests', () => {
         broadcast.resolve();
       }
     });
-    await agent.interact({ move: [10, 10] });
+    await hero.interact({ move: [10, 10] });
     await broadcast.promise;
     expect(messagesCtr).toBe(41);
 
-    await agent.close();
+    await hero.close();
   });
 });

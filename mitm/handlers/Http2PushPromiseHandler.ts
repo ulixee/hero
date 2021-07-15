@@ -1,7 +1,7 @@
 import * as http2 from 'http2';
 import { ClientHttp2Stream, ServerHttp2Stream } from 'http2';
-import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import BlockHandler from './BlockHandler';

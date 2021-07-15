@@ -22,7 +22,7 @@
           .text ({{sessionIndex}} of {{saSession.relatedSessions.length}}) {{sessionName}}
       template(v-else-if="location")
         .name-section.section(@mousedown="showLocationOverlay($event, 'locations-menu')")
-          .text SecretAgent
+          .text Hero
 
     .right-buttons
       AppButton(

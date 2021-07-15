@@ -1,10 +1,10 @@
-import Core from '@secret-agent/core';
-import CoreServer from '@secret-agent/core/server';
-import { Helpers } from '@secret-agent/testing';
-import { KeyboardKeys } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import { Command } from '@secret-agent/client/interfaces/IInteractions';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import HumanEmulator from '@secret-agent/plugin-utils/lib/HumanEmulator';
+import Core from '@ulixee/hero-core';
+import CoreServer from '@ulixee/hero-core/server';
+import { Helpers } from '@ulixee/testing';
+import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { Command } from '@ulixee/hero/interfaces/IInteractions';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import { Handler, LocationStatus } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -36,26 +36,26 @@ describe('basic Interact tests', () => {
     const httpServer = await Helpers.runHttpServer({ onPost });
     const url = httpServer.url;
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${url}page1`);
-    await agent.document.querySelector('#input').focus();
-    await agent.waitForMillis(50);
-    await agent.interact({ type: text });
-    await agent.waitForMillis(20);
-    await agent.click(agent.document.querySelector('#submit-button'));
-    await agent.waitForLocation('change');
-    const html = await agent.document.documentElement.outerHTML;
+    await hero.goto(`${url}page1`);
+    await hero.document.querySelector('#input').focus();
+    await hero.waitForMillis(50);
+    await hero.interact({ type: text });
+    await hero.waitForMillis(20);
+    await hero.click(hero.document.querySelector('#submit-button'));
+    await hero.waitForLocation('change');
+    const html = await hero.document.documentElement.outerHTML;
     expect(html).toBe(`<html><head></head><body>${text}</body></html>`);
     expect(onPost).toHaveBeenCalledTimes(1);
 
-    await agent.close();
+    await hero.close();
     await httpServer.close();
   }, 30e3);
 
   it('should clean up cookies between runs', async () => {
-    const agent1 = await handler.createAgent();
+    const hero1 = await handler.createHero();
     let setCookieValue = 'ulixee=test1';
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
@@ -64,19 +64,19 @@ describe('basic Interact tests', () => {
     });
     const url = httpServer.url;
 
-    Helpers.needsClosing.push(agent1);
+    Helpers.needsClosing.push(hero1);
     {
-      await agent1.goto(url);
+      await hero1.goto(url);
 
-      const cookie = await agent1.activeTab.cookieStorage.getItem('ulixee');
+      const cookie = await hero1.activeTab.cookieStorage.getItem('ulixee');
       expect(cookie.value).toBe('test1');
     }
 
     {
       setCookieValue = 'ulixee2=test2';
-      await agent1.goto(url);
+      await hero1.goto(url);
 
-      const cookieStorage = await agent1.activeTab.cookieStorage;
+      const cookieStorage = await hero1.activeTab.cookieStorage;
       expect(await cookieStorage.length).toBe(2);
       const cookie1 = await cookieStorage.getItem('ulixee');
       expect(cookie1.value).toBe('test1');
@@ -86,20 +86,20 @@ describe('basic Interact tests', () => {
 
     {
       setCookieValue = 'ulixee3=test3';
-      // should be able to get a second agent out of the pool
-      const agent2 = await handler.createAgent();
-      Helpers.needsClosing.push(agent2);
-      await agent2.goto(url);
+      // should be able to get a second hero out of the pool
+      const hero2 = await handler.createHero();
+      Helpers.needsClosing.push(hero2);
+      await hero2.goto(url);
 
-      const cookieStorage = await agent2.activeTab.cookieStorage;
+      const cookieStorage = await hero2.activeTab.cookieStorage;
       expect(await cookieStorage.length).toBe(1);
       const cookie = await cookieStorage.getItem('ulixee3');
       expect(cookie.value).toBe('test3');
 
-      await agent2.close();
+      await hero2.close();
     }
 
-    await agent1.close();
+    await hero1.close();
   }, 20e3);
 
   it('should be able to combine a waitForElementVisible and a click', async () => {
@@ -116,17 +116,17 @@ describe('basic Interact tests', () => {
       `;
     });
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${koaServer.baseUrl}/waitTest`);
-    await agent.waitForPaintingStable();
-    const readyLink = agent.document.querySelector('a.ready');
-    await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
-    await agent.waitForLocation('change');
-    const finalUrl = await agent.url;
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${koaServer.baseUrl}/waitTest`);
+    await hero.waitForPaintingStable();
+    const readyLink = hero.document.querySelector('a.ready');
+    await hero.interact({ click: readyLink, waitForElementVisible: readyLink });
+    await hero.waitForLocation('change');
+    const finalUrl = await hero.url;
     expect(finalUrl).toBe(`${koaServer.baseUrl}/finish`);
 
-    await agent.close();
+    await hero.close();
   });
 
   it('should be able to type various combinations of characters', async () => {
@@ -138,18 +138,18 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${koaServer.baseUrl}/keys`);
-    await agent.waitForPaintingStable();
-    const textarea = agent.document.querySelector('textarea');
-    await agent.click(textarea);
-    await agent.type('Test!');
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${koaServer.baseUrl}/keys`);
+    await hero.waitForPaintingStable();
+    const textarea = hero.document.querySelector('textarea');
+    await hero.click(textarea);
+    await hero.type('Test!');
     expect(await textarea.value).toBe('Test!');
-    await agent.type(KeyboardKeys.Backspace);
+    await hero.type(KeyboardKeys.Backspace);
     expect(await textarea.value).toBe('Test');
 
-    await agent.interact(
+    await hero.interact(
       { [Command.keyDown]: KeyboardKeys.Shift },
       { [Command.keyPress]: KeyboardKeys.ArrowLeft },
       { [Command.keyPress]: KeyboardKeys.ArrowLeft },
@@ -159,7 +159,7 @@ describe('basic Interact tests', () => {
     );
 
     expect(await textarea.value).toBe('T');
-    await agent.close();
+    await hero.close();
   });
 
   it('should be able to click on the same element twice', async () => {
@@ -170,17 +170,17 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       humanEmulatorId: 'basic',
     });
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${koaServer.baseUrl}/twice`);
-    await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-    const logo = agent.document.querySelector('#spot');
-    await expect(agent.interact({ click: logo })).resolves.toBeUndefined();
-    await agent.waitForMillis(100);
-    await expect(agent.interact({ click: logo })).resolves.toBeUndefined();
-    await agent.close();
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${koaServer.baseUrl}/twice`);
+    await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+    const logo = hero.document.querySelector('#spot');
+    await expect(hero.interact({ click: logo })).resolves.toBeUndefined();
+    await hero.waitForMillis(100);
+    await expect(hero.interact({ click: logo })).resolves.toBeUndefined();
+    await hero.close();
   });
 
   it('can accept empty commands', async () => {
@@ -199,18 +199,18 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const agent = await handler.createAgent({ humanEmulatorId: 'basic' });
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${koaServer.baseUrl}/empty-click`);
-    await agent.activeTab.waitForLoad(LocationStatus.PaintingStable);
-    await agent.interact(
+    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${koaServer.baseUrl}/empty-click`);
+    await hero.activeTab.waitForLoad(LocationStatus.PaintingStable);
+    await hero.interact(
       {
-        [Command.move]: agent.document.querySelector('a'),
+        [Command.move]: hero.document.querySelector('a'),
       },
       'click',
     );
 
-    expect(await agent.activeTab.getJsValue('lastClicked')).toBe('clickedit');
+    expect(await hero.activeTab.getJsValue('lastClicked')).toBe('clickedit');
   });
 
   it('should be able to click an element in an iframe', async () => {
@@ -238,19 +238,19 @@ describe('basic Interact tests', () => {
 </body>`;
     });
 
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    await agent.goto(`${koaServer.baseUrl}/interact-frame`);
-    await agent.waitForPaintingStable();
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    await hero.goto(`${koaServer.baseUrl}/interact-frame`);
+    await hero.waitForPaintingStable();
 
-    const frameElement = agent.document.querySelector('#frame1');
-    await agent.waitForElement(frameElement);
-    const frameEnv = await agent.activeTab.getFrameEnvironment(frameElement);
+    const frameElement = hero.document.querySelector('#frame1');
+    await hero.waitForElement(frameElement);
+    const frameEnv = await hero.activeTab.getFrameEnvironment(frameElement);
     await frameEnv.waitForLoad(LocationStatus.AllContentLoaded);
 
-    await agent.click(frameEnv.document.querySelector('a'));
+    await hero.click(frameEnv.document.querySelector('a'));
     expect(await frameEnv.getJsValue('lastClicked')).toBe('clickedit');
 
-    await agent.close();
+    await hero.close();
   });
 });

@@ -4,10 +4,10 @@
   },
   "main": "./index.js",
   "dependencies": {
+    "@ulixee/commons": "^1.5.4",
     "progress": "^2.0.3",
     "tar": "^6.1.0",
     "compare-versions": "^3.6.0",
-    "proper-lockfile": "^4.1.1",
-    "@secret-agent/commons": "^1.4.1-alpha.5"
+    "proper-lockfile": "^4.1.1"
   }
 }

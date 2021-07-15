@@ -4,7 +4,7 @@ BasicLayout.Home
     .post-header.container-md.mb-x2
       h1 The Web Browser  Built for Scraping
       p.
-        SecretAgent is a headless browser that’s nearly impossible to detect. It achieves this by emulating real users.
+        Ulixee is a headless browser that’s nearly impossible to detect. It achieves this by emulating real users.
         And it has powerful auto-replay functionality that lets you create and debug scripts in record setting time.
       a.button(href="/docs") Get Started
 

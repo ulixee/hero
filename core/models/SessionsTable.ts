@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/SqliteTable';
 
 export default class SessionsTable extends SqliteTable<ISessionRecord> {
   constructor(readonly db: SqliteDatabase) {

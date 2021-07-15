@@ -1,7 +1,7 @@
 import * as http from 'http';
 import * as http2 from 'http2';
-import IHttpResourceLoadDetails from '@secret-agent/interfaces/IHttpResourceLoadDetails';
-import MitmSocket from '@secret-agent/mitm-socket';
+import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
+import MitmSocket from '@ulixee/hero-mitm-socket';
 import RequestSession from '../handlers/RequestSession';
 import CacheHandler from '../handlers/CacheHandler';
 import ResourceState from './ResourceState';

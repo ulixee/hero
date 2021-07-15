@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { Handler } from '../index';
 
 let handler: Handler;
@@ -30,22 +30,22 @@ describe('basic waitForLocation change detections', () => {
 
     const startUrl = `${koaServer.baseUrl}/start`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(startUrl);
-    const firstUrl = await agent.url;
-    await agent.waitForPaintingStable();
-    const button = agent.document.querySelector('button');
-    await agent.waitForElement(button);
+    await hero.goto(startUrl);
+    const firstUrl = await hero.url;
+    await hero.waitForPaintingStable();
+    const button = hero.document.querySelector('button');
+    await hero.waitForElement(button);
 
-    await agent.interact({ click: button });
-    await agent.waitForLocation('change');
-    const lastUrl = await agent.url;
+    await hero.interact({ click: button });
+    await hero.waitForLocation('change');
+    const lastUrl = await hero.url;
 
     expect(firstUrl).toBe(startUrl);
     expect(lastUrl).toBe(finishUrl);
 
-    await agent.close();
+    await hero.close();
   });
 
   it('should trigger a location change if location changed but also redirected', async () => {
@@ -73,19 +73,19 @@ describe('basic waitForLocation change detections', () => {
     });
 
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const agent = await handler.createAgent();
-    await agent.goto(`${koaServer.baseUrl}/page1`);
-    const startlink = agent.document.querySelector('a');
-    await agent.interact({ click: startlink, waitForElementVisible: startlink });
-    await agent.waitForLocation('change');
-    expect(await agent.url).toBe(`${koaServer.baseUrl}/page3`);
+    const hero = await handler.createHero();
+    await hero.goto(`${koaServer.baseUrl}/page1`);
+    const startlink = hero.document.querySelector('a');
+    await hero.interact({ click: startlink, waitForElementVisible: startlink });
+    await hero.waitForLocation('change');
+    expect(await hero.url).toBe(`${koaServer.baseUrl}/page3`);
 
-    const nextlink = agent.document.querySelector('a');
-    await agent.interact({ click: nextlink, waitForElementVisible: nextlink });
-    await agent.waitForLocation('change');
-    expect(await agent.url).toBe(`${koaServer.baseUrl}/finish`);
+    const nextlink = hero.document.querySelector('a');
+    await hero.interact({ click: nextlink, waitForElementVisible: nextlink });
+    await hero.waitForLocation('change');
+    expect(await hero.url).toBe(`${koaServer.baseUrl}/finish`);
 
-    await agent.close();
+    await hero.close();
   });
 
   it('should support 2 location changes', async () => {
@@ -108,28 +108,28 @@ describe('basic waitForLocation change detections', () => {
     const startUrl = `${koaServer.baseUrl}/loc1`;
     const page2Url = `${koaServer.baseUrl}/loc2`;
     const finishUrl = `${koaServer.baseUrl}/loc3`;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(startUrl);
-    const firstUrl = await agent.url;
-    await agent.waitForPaintingStable();
-    const readyLink = agent.document.querySelector('a');
-    await agent.interact({ click: readyLink, waitForElementVisible: readyLink });
-    await agent.waitForLocation('change');
-    const secondUrl = await agent.url;
-    await agent.waitForPaintingStable();
+    await hero.goto(startUrl);
+    const firstUrl = await hero.url;
+    await hero.waitForPaintingStable();
+    const readyLink = hero.document.querySelector('a');
+    await hero.interact({ click: readyLink, waitForElementVisible: readyLink });
+    await hero.waitForLocation('change');
+    const secondUrl = await hero.url;
+    await hero.waitForPaintingStable();
 
-    const readyLink2 = agent.document.querySelector('a');
-    await agent.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
-    await agent.waitForLocation('change');
-    await agent.waitForPaintingStable();
-    const lastUrl = await agent.url;
+    const readyLink2 = hero.document.querySelector('a');
+    await hero.interact({ click: readyLink2, waitForElementVisible: readyLink2 });
+    await hero.waitForLocation('change');
+    await hero.waitForPaintingStable();
+    const lastUrl = await hero.url;
 
     expect(firstUrl).toBe(startUrl);
     expect(secondUrl).toBe(page2Url);
     expect(lastUrl).toBe(finishUrl);
 
-    await agent.close();
+    await hero.close();
   });
 
   it('should support timing out a location change', async () => {
@@ -144,19 +144,19 @@ describe('basic waitForLocation change detections', () => {
       ctx.body = `<body><h1>Loaded 2</h1></body>`;
     });
 
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
-    await agent.goto(`${koaServer.baseUrl}/loaded1`);
-    await agent.waitForPaintingStable();
-    const link = agent.document.querySelector('a');
-    await agent.click(link);
-    await agent.waitForLocation('change', { timeoutMs: 500 });
-    await agent.waitForPaintingStable();
-    expect(await agent.url).toBe(`${koaServer.baseUrl}/loaded2`);
+    await hero.goto(`${koaServer.baseUrl}/loaded1`);
+    await hero.waitForPaintingStable();
+    const link = hero.document.querySelector('a');
+    await hero.click(link);
+    await hero.waitForLocation('change', { timeoutMs: 500 });
+    await hero.waitForPaintingStable();
+    expect(await hero.url).toBe(`${koaServer.baseUrl}/loaded2`);
 
-    await expect(agent.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrowError(
+    await expect(hero.waitForLocation('change', { timeoutMs: 500 })).rejects.toThrowError(
       'Timeout',
     );
-    await agent.close();
+    await hero.close();
   });
 });

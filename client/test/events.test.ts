@@ -1,5 +1,5 @@
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
@@ -36,8 +36,8 @@ describe('events', () => {
     const handler = new Handler(testConnection);
 
     let isClosed = false;
-    const agent = await handler.createAgent();
-    await agent.on('close', () => {
+    const hero = await handler.createHero();
+    await hero.on('close', () => {
       isClosed = true;
     });
 
@@ -46,7 +46,7 @@ describe('events', () => {
       listenerId: 'listener-id',
       eventArgs: [],
     });
-    await agent.close();
+    await hero.close();
 
     const outgoingCommands = spy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
@@ -63,14 +63,14 @@ describe('events', () => {
     const handler = new Handler(testConnection);
 
     let eventCount = 0;
-    const agent = await handler.createAgent();
+    const hero = await handler.createHero();
 
     const onResourceFn = (resource): void => {
       expect(resource).toBeInstanceOf(Resource);
       eventCount += 1;
     };
 
-    await agent.activeTab.on('resource', onResourceFn);
+    await hero.activeTab.on('resource', onResourceFn);
 
     testConnection.onMessage({
       meta: sessionMeta,
@@ -95,7 +95,7 @@ describe('events', () => {
     await new Promise(setImmediate);
     expect(eventCount).toBe(2);
 
-    await agent.activeTab.off('resource', onResourceFn);
+    await hero.activeTab.off('resource', onResourceFn);
     testConnection.onMessage({
       meta: sessionMeta,
       listenerId: 'listener-id',

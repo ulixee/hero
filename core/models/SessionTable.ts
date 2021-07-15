@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import SqliteTable from '@ulixee/commons/SqliteTable';
 
 export default class SessionTable extends SqliteTable<ISessionRecord> {
   constructor(readonly db: SqliteDatabase) {

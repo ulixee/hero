@@ -1,5 +1,5 @@
-import Puppet from '@secret-agent/puppet';
-import BrowserEmulator from '@secret-agent/default-browser-emulator';
+import Puppet from '@ulixee/hero-puppet';
+import BrowserEmulator from '@ulixee/default-browser-emulator';
 import TypeSerializer, { stringifiedTypeSerializerClass } from '../TypeSerializer';
 import { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
 import logger from '../Logger';

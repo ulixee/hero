@@ -1,7 +1,7 @@
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import { Helpers } from '@secret-agent/testing/index';
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import { Helpers } from '@ulixee/testing/index';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { Handler } from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
@@ -52,10 +52,10 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({ url: '/test.js' });
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({ url: '/test.js' });
     expect(resources).toHaveLength(1);
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 
@@ -73,12 +73,12 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({ url: '/test2.js' });
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({ url: '/test2.js' });
     expect(resources).toHaveLength(1);
     expect(attempts).toBe(3);
 
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 
@@ -96,11 +96,11 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({ type: 'Xhr' });
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({ type: 'Xhr' });
     expect(resources).toHaveLength(2);
 
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 
@@ -118,11 +118,11 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({ url: '/test3.js' });
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({ url: '/test3.js' });
     expect(resources).toHaveLength(2);
 
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 
@@ -142,8 +142,8 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test1.js') {
           done();
@@ -154,7 +154,7 @@ describe('waitForResource', () => {
     expect(resources).toHaveLength(1);
     expect(resources[0].url).toBe('/test1.js');
 
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 
@@ -184,8 +184,8 @@ describe('waitForResource', () => {
 
     const handler = new Handler(new Piper());
     Helpers.needsClosing.push(handler);
-    const agent = await handler.createAgent();
-    const resources = await agent.waitForResource({
+    const hero = await handler.createHero();
+    const resources = await hero.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test5.js') {
           done();
@@ -198,7 +198,7 @@ describe('waitForResource', () => {
     });
     expect(resources).toHaveLength(4);
 
-    await agent.close();
+    await hero.close();
     await handler.close();
   });
 });

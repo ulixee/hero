@@ -1,11 +1,11 @@
-import { Helpers } from '@secret-agent/testing';
-import agent, { Agent, Handler } from '@secret-agent/client';
+import { Helpers } from '@ulixee/testing';
+import hero, { Hero, Handler } from '@ulixee/hero';
 import * as http from 'http';
-import { Log } from '@secret-agent/commons/Logger';
-import BrowserEmulator from '@secret-agent/default-browser-emulator';
-import { DependenciesMissingError } from '@secret-agent/chrome-app/lib/DependenciesMissingError';
-import { DependencyInstaller } from '@secret-agent/chrome-app/lib/DependencyInstaller';
-import ChromeApp from '@secret-agent/chrome-app/index';
+import { Log } from '@ulixee/commons/Logger';
+import BrowserEmulator from '@ulixee/default-browser-emulator';
+import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
+import { DependencyInstaller } from '@ulixee/chrome-app/lib/DependencyInstaller';
+import ChromeApp from '@ulixee/chrome-app/index';
 import Core from '../index';
 import CoreServer from '../server';
 
@@ -31,56 +31,56 @@ describe('basic connection tests', () => {
     const handler = new Handler({
       host: await coreServer.address,
     });
-    const handlerAgent = await handler.createAgent();
-    const sessionId = await handlerAgent.sessionId;
+    const handlerHero = await handler.createHero();
+    const sessionId = await handlerHero.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await handlerAgent.goto(url);
+    await handlerHero.goto(url);
 
-    const html = await handlerAgent.document.documentElement.outerHTML;
+    const html = await handlerHero.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await handlerAgent.close();
+    await handlerHero.close();
     await handler.close();
   });
 
-  it('should be able to set a new connection on the default agent', async () => {
+  it('should be able to set a new connection on the default hero', async () => {
     // bind a core server to core
-    await agent.configure({
+    await hero.configure({
       connectionToCore: {
         host: await coreServer.address,
       },
     });
-    const sessionId = await agent.sessionId;
+    const sessionId = await hero.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await agent.goto(url);
+    await hero.goto(url);
 
-    const html = await agent.document.documentElement.outerHTML;
+    const html = await hero.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await agent.close();
+    await hero.close();
   });
 
-  it('should be able to configure a new agent', async () => {
+  it('should be able to configure a new hero', async () => {
     // bind a core server to core
-    const customAgent = new Agent({
+    const customHero = new Hero({
       connectionToCore: {
         host: await coreServer.address,
       },
     });
-    const sessionId = await customAgent.sessionId;
+    const sessionId = await customHero.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await customAgent.goto(url);
+    await customHero.goto(url);
 
-    const html = await customAgent.document.documentElement.outerHTML;
+    const html = await customHero.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await customAgent.close();
+    await customHero.close();
   });
 
   it('should throw an error informing how to install dependencies', async () => {
@@ -108,16 +108,16 @@ describe('basic connection tests', () => {
 
     logError.mockImplementationOnce(() => null /* no op*/);
 
-    const agent1 = new Agent({
+    const hero1 = new Hero({
       browserEmulatorId: 'emulate-test',
       connectionToCore: {
         host: await coreServer.address,
       },
     });
-    Helpers.needsClosing.push(agent1);
+    Helpers.needsClosing.push(hero1);
 
     try {
-      await agent1;
+      await hero1;
     } catch (err) {
       // eslint-disable-next-line jest/no-try-expect
       expect(String(err)).toMatch(

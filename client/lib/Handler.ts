@@ -1,10 +1,10 @@
-import { createPromise, pickRandom } from '@secret-agent/commons/utils';
-import ShutdownHandler from '@secret-agent/commons/ShutdownHandler';
-import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import IAgentCreateOptions from '../interfaces/IAgentCreateOptions';
+import { createPromise, pickRandom } from '@ulixee/commons/utils';
+import ShutdownHandler from '@ulixee/commons/ShutdownHandler';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
-import Agent from './Agent';
+import Hero from './Hero';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import ConnectionFactory from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
@@ -15,14 +15,14 @@ type SettledDispatch = {
   error?: Error;
   output: any;
   input: any;
-  options: IAgentCreateOptions;
+  options: IHeroCreateOptions;
   retries: number;
 };
 
 type PendingDispatch = {
   resolution: Promise<Error | any>;
   sessionId?: string;
-  options: IAgentCreateOptions;
+  options: IHeroCreateOptions;
   retries: number;
 };
 
@@ -30,7 +30,7 @@ const { log } = Log(module);
 
 export default class Handler {
   public disconnectedDispatchRetries = 3;
-  public defaultAgentOptions: IAgentCreateOptions = {};
+  public defaultHeroOptions: IHeroCreateOptions = {};
   public get coreHosts(): Promise<string[]> {
     return Promise.all(this.connections.map(x => x.hostOrError)).then(x => {
       const hosts: string[] = [];
@@ -81,45 +81,45 @@ export default class Handler {
     }
   }
 
-  public dispatchAgent(
-    runFn: (agent: Agent) => Promise<void>,
-    createAgentOptions?: IAgentCreateOptions,
+  public dispatchHero(
+    runFn: (hero: Hero) => Promise<void>,
+    createHeroOptions?: IHeroCreateOptions,
   ): void {
     const options = {
-      ...this.defaultAgentOptions,
-      ...createAgentOptions,
+      ...this.defaultHeroOptions,
+      ...createHeroOptions,
     };
 
-    this.internalDispatchAgent(runFn, options, {
+    this.internalDispatchHero(runFn, options, {
       options,
       resolution: null,
       retries: 0,
     });
   }
 
-  public async createAgent(createAgentOptions: IAgentCreateOptions = {}): Promise<Agent> {
+  public async createHero(createHeroOptions: IHeroCreateOptions = {}): Promise<Hero> {
     const options = {
-      ...this.defaultAgentOptions,
-      ...createAgentOptions,
+      ...this.defaultHeroOptions,
+      ...createHeroOptions,
     };
-    const promise = createPromise<Agent>();
+    const promise = createPromise<Hero>();
 
     const connection = this.getConnection();
 
     connection
-      .useAgent(options, agent => {
-        return agent
+      .useHero(options, hero => {
+        return hero
           .then(() => {
-            // don't return until agent is closed
-            const onClose = new Promise<void>(resolve => agent.once('close', resolve));
-            promise.resolve(agent);
+            // don't return until hero is closed
+            const onClose = new Promise<void>(resolve => hero.once('close', resolve));
+            promise.resolve(hero);
             return onClose;
           })
           .catch(promise.reject);
       })
       .catch(promise.reject);
 
-    // NOTE: keep await to ensure createAgent stays in stack trace
+    // NOTE: keep await to ensure createHero stays in stack trace
     return await promise.promise;
   }
 
@@ -198,38 +198,38 @@ export default class Handler {
     return dispatchResolution;
   }
 
-  private internalDispatchAgent(
-    runFn: (agent: Agent) => Promise<void>,
-    options: IAgentCreateOptions,
+  private internalDispatchHero(
+    runFn: (hero: Hero) => Promise<void>,
+    options: IHeroCreateOptions,
     dispatched: PendingDispatch,
   ): void {
     // if no available connection, return
     const connection = this.getConnection();
     if (!connection) {
       dispatched.resolution = Promise.resolve(
-        new Error("There aren't any connections available to dispatch this agent"),
+        new Error("There aren't any connections available to dispatch this hero"),
       );
       this.dispatches.push(dispatched);
       return;
     }
 
     dispatched.resolution = connection
-      .useAgent(options, async agent => {
+      .useHero(options, async hero => {
         try {
-          dispatched.sessionId = await agent.sessionId;
-          dispatched.options.name = await agent.sessionName;
-          await runFn(agent);
+          dispatched.sessionId = await hero.sessionId;
+          dispatched.options.name = await hero.sessionName;
+          await runFn(hero);
         } finally {
-          await agent.close();
+          await hero.close();
         }
-        return agent.output.toJSON();
+        return hero.output.toJSON();
       })
       .catch(err => {
         const canRetry =
           !dispatched.sessionId && dispatched.retries < this.disconnectedDispatchRetries;
         if (canRetry && !this.isClosing && this.connections.length) {
           dispatched.retries += 1;
-          return this.internalDispatchAgent(runFn, options, dispatched);
+          return this.internalDispatchHero(runFn, options, dispatched);
         }
 
         return err;

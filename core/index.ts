@@ -1,18 +1,18 @@
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
-import { LocationTrigger } from '@secret-agent/interfaces/Location';
-import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
-import Resolvable from '@secret-agent/commons/Resolvable';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
+import Resolvable from '@ulixee/commons/Resolvable';
 import {
   IHumanEmulatorClass,
   IBrowserEmulatorClass,
   ICorePluginClass,
-} from '@secret-agent/interfaces/ICorePlugin';
-import { PluginTypes } from '@secret-agent/interfaces/IPluginTypes';
-import DefaultBrowserEmulator from '@secret-agent/default-browser-emulator';
-import DefaultHumanEmulator from '@secret-agent/default-human-emulator';
-import extractPlugins from '@secret-agent/plugin-utils/lib/utils/extractPlugins';
-import requirePlugins from '@secret-agent/plugin-utils/lib/utils/requirePlugins';
-import { IPluginClass } from '@secret-agent/interfaces/IPlugin';
+} from '@ulixee/hero-interfaces/ICorePlugin';
+import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
+import DefaultBrowserEmulator from '@ulixee/default-browser-emulator';
+import DefaultHumanEmulator from '@ulixee/default-human-emulator';
+import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
+import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
+import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import ConnectionToClient from './server/ConnectionToClient';
 import CoreServer from './server';
 import CoreProcess from './lib/CoreProcess';
@@ -93,10 +93,10 @@ export default class Core {
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
-    const { localProxyPortStart, sessionsDir, maxConcurrentAgentsCount } = options;
+    const { localProxyPortStart, sessionsDir, maxConcurrentHerosCount } = options;
 
-    if (maxConcurrentAgentsCount !== undefined)
-      GlobalPool.maxConcurrentAgentsCount = maxConcurrentAgentsCount;
+    if (maxConcurrentHerosCount !== undefined)
+      GlobalPool.maxConcurrentHerosCount = maxConcurrentHerosCount;
 
     if (localProxyPortStart !== undefined)
       GlobalPool.localProxyPortStart = options.localProxyPortStart;

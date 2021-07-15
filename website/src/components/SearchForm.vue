@@ -33,7 +33,7 @@
 
         import('docsearch.js').then(({ default: docsearch }) => {
           docsearch({
-            indexName: 'secretagent',
+            indexName: 'ulixee',
             inputSelector: `#${this.id}-input`,
             apiKey: 'b975ccd9d9a93db63dd14f8d0baee5eb',
             debug: process.env.NODE_ENV === 'development'

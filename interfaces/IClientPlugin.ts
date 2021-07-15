@@ -1,12 +1,12 @@
 import { PluginTypes } from './IPluginTypes';
-import IAgent from './IAgent';
+import IHero from './IHero';
 import ITab from './ITab';
 
 export default interface IClientPlugin {
   id: string;
 
-  onAgent?(agent: IAgent, sendToCore: ISendToCoreFn): void;
-  onTab?(agent: IAgent, tab: ITab, sendToCore: ISendToCoreFn): void;
+  onHero?(hero: IHero, sendToCore: ISendToCoreFn): void;
+  onTab?(hero: IHero, tab: ITab, sendToCore: ISendToCoreFn): void;
 }
 
 export interface IClientPluginClass {

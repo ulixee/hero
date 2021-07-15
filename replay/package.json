@@ -1,5 +1,5 @@
 {
-  "name": "@secret-agent/replay",
+  "name": "@ulixee/replay",
   "author": "Data Liberation Foundation",
   "contributors": [
     "Caleb Clark",
@@ -8,7 +8,7 @@
   "bin": {
     "replay": "./bin.js"
   },
-  "repository": "git@github.com:ulixee/secret-agent.git",
+  "repository": "git@github.com:ulixee/ulixee.git",
   "description": "A browser for visually replaying your scraper scripts",
   "version": "1.5.4",
   "main": "./app.js",
@@ -18,8 +18,8 @@
     "install/*"
   ],
   "build": {
-    "appId": "dev.secretagent.replay",
-    "productName": "SecretAgentReplay",
+    "appId": "dev.ulixee.replay",
+    "productName": "UlixeeReplay",
     "mac": {
       "target": {
         "target": "dir",
@@ -35,7 +35,7 @@
       "artifactName": "replay-${version}-${os}${ext}"
     },
     "linux": {
-      "executableName": "secretagentreplay",
+      "executableName": "ulixeereplay",
       "category": "Network",
       "target": "dir",
       "artifactName": "replay-${version}-${os}${ext}"
@@ -61,12 +61,12 @@
     "start:backend": "cross-env CLEAR_LOGS=true WEBPACK_DEV_SERVER_URL=http://localhost:8080 NODE_ENV=development electron ../build/replay",
     "start:frontend": "cd frontend && yarn dev",
     "start": "electron ../build/replay",
-    "logs": "touch ~/Library/Logs/@secret-agent/replay/main.log && tail -f -100 ~/Library/Logs/@secret-agent/replay/main.log"
+    "logs": "touch ~/Library/Logs/@ulixee/replay/main.log && tail -f -100 ~/Library/Logs/@ulixee/replay/main.log"
   },
   "license": "MIT",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
-    "@secret-agent/commons": "1.5.4",
+    "@ulixee/commons": "1.5.4",
     "compare-versions": "^3.6.0",
     "core-js": "^3.6.5",
     "electron-log": "^4.3.2",

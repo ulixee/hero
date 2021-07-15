@@ -1,10 +1,10 @@
-import IPuppetBrowser from '@secret-agent/interfaces/IPuppetBrowser';
-import ILaunchedProcess from '@secret-agent/interfaces/ILaunchedProcess';
-import IPuppetLauncher from '@secret-agent/interfaces/IPuppetLauncher';
+import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
+import ILaunchedProcess from '@ulixee/hero-interfaces/ILaunchedProcess';
+import IPuppetLauncher from '@ulixee/hero-interfaces/IPuppetLauncher';
 import * as os from 'os';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import { IPuppetLaunchError } from '@secret-agent/interfaces/IPuppetLaunchError';
-import IPuppetLaunchArgs from '@secret-agent/interfaces/IPuppetLaunchArgs';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import { IPuppetLaunchError } from '@ulixee/hero-interfaces/IPuppetLaunchError';
+import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import { Browser } from './lib/Browser';
 import { Connection } from './lib/Connection';
 
@@ -32,7 +32,7 @@ const PuppetLauncher: IPuppetLauncher = {
       if (runningAsRoot) {
         // eslint-disable-next-line no-console
         console.warn(
-          'WARNING: Secret-Agent is being run under "root" user - disabling Chrome sandbox! ' +
+          'WARNING: Hero is being run under "root" user - disabling Chrome sandbox! ' +
             'Run under regular user to get rid of this warning.',
         );
         chromeArguments.push('--no-sandbox');
@@ -80,8 +80,8 @@ const PuppetLauncher: IPuppetLauncher = {
         `\nChrome sandboxing failed!`,
         `================================`,
         `To workaround sandboxing issues, do either of the following:`,
-        `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/secret-agent/tree/master/tools/docker)`,
-        `  - (alternative): Launch Chrome without sandbox using 'SA_NO_CHROME_SANDBOX=false' environmental variable`,
+        `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/ulixee/tree/master/tools/docker)`,
+        `  - (alternative): Launch Chrome without sandbox using 'HERO_NO_CHROME_SANDBOX=false' environmental variable`,
         `================================`,
         ``,
       ].join('\n');

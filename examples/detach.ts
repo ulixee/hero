@@ -1,4 +1,4 @@
-import agent, { LocationStatus } from 'secret-agent';
+import hero, { LocationStatus } from '@ulixee/hero';
 
 /**
  * The first run of this will result in a script taking 60+ seconds.
@@ -8,12 +8,12 @@ import agent, { LocationStatus } from 'secret-agent';
 
 async function run() {
   console.time('Detach');
-  await agent.goto('https://chromium.googlesource.com/chromium/src/+refs');
-  await agent.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-  await agent.waitForPaintingStable();
+  await hero.goto('https://chromium.googlesource.com/chromium/src/+refs');
+  await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  await hero.waitForPaintingStable();
 
   console.timeLog('Detach', 'got sync result');
-  const frozenTab = await agent.detach(agent.activeTab);
+  const frozenTab = await hero.detach(hero.activeTab);
   console.timeLog('Detach', 'detached');
   const { document } = frozenTab;
   console.log(document);
@@ -21,7 +21,7 @@ async function run() {
   const wrapperElements = await document.querySelectorAll('.RefList');
   console.log(wrapperElements);
   console.timeLog('Detach', 'wrapped list');
-  const versions = agent.output;
+  const versions = hero.output;
   for (const elem of wrapperElements) {
     console.log(elem);
     const innerText = await elem.querySelector('.RefList-title').innerText;
@@ -41,7 +41,7 @@ async function run() {
   }
   console.log(versions.length);
   console.timeEnd('Detach');
-  await agent.close();
+  await hero.close();
 }
 
 run().catch(error => console.log(error));

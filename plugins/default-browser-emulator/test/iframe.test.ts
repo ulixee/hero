@@ -1,9 +1,9 @@
-import { Helpers } from '@secret-agent/testing';
-import Core, { Session } from '@secret-agent/core';
-import { InteractionCommand } from '@secret-agent/interfaces/IInteractions';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import CoreServerConnection from '@secret-agent/core/server/ConnectionToClient';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { Helpers } from '@ulixee/testing';
+import Core, { Session } from '@ulixee/hero-core';
+import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import CoreServerConnection from '@ulixee/hero-core/server/ConnectionToClient';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 
 let koaServer: ITestKoaServer;
 let coreServerConnection: CoreServerConnection;

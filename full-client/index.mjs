@@ -2,7 +2,7 @@ import cjsImport from './index.js';
 
 const {
   Handler,
-  Agent,
+  Hero,
   RemoteConnectionToCore,
   ConnectionToCore,
   ConnectionFactory,
@@ -22,7 +22,7 @@ const {
 
 export {
   Handler,
-  Agent,
+  Hero,
   RemoteConnectionToCore,
   ConnectionToCore,
   ConnectionFactory,

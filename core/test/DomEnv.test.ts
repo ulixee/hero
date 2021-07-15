@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing/index';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
+import { Helpers } from '@ulixee/testing/index';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
 import ConnectionToClient from '../server/ConnectionToClient';
 import Core, { Session } from '../index';
 

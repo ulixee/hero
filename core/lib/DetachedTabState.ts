@@ -1,7 +1,7 @@
-import INavigation from '@secret-agent/interfaces/INavigation';
-import IResourceMeta from '@secret-agent/interfaces/IResourceMeta';
-import { DomActionType } from '@secret-agent/interfaces/IDomChangeEvent';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import INavigation from '@ulixee/hero-interfaces/INavigation';
+import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
+import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';

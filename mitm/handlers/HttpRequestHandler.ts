@@ -1,7 +1,7 @@
 import * as http from 'http';
-import Log, { hasBeenLoggedSymbol } from '@secret-agent/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
 import { ClientHttp2Stream, Http2ServerRequest, Http2ServerResponse } from 'http2';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import HeadersHandler from './HeadersHandler';
 import MitmRequestContext from '../lib/MitmRequestContext';

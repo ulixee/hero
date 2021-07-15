@@ -1,15 +1,15 @@
-import { IInteractionGroups } from '@secret-agent/interfaces/IInteractions';
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import { ILocationStatus, ILocationTrigger } from '@secret-agent/interfaces/Location';
+import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import { ILocationStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { ICookie } from '@secret-agent/interfaces/ICookie';
-import IWaitForElementOptions from '@secret-agent/interfaces/IWaitForElementOptions';
-import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
+import { ICookie } from '@ulixee/hero-interfaces/ICookie';
+import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
+import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import INodePointer from 'awaited-dom/base/INodePointer';
-import ISetCookieOptions from '@secret-agent/interfaces/ISetCookieOptions';
-import IWaitForOptions from '@secret-agent/interfaces/IWaitForOptions';
-import IFrameMeta from '@secret-agent/interfaces/IFrameMeta';
+import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
+import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
+import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import CoreCommandQueue from './CoreCommandQueue';
 
 export default class CoreFrameEnvironment {

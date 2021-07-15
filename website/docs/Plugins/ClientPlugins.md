@@ -1,39 +1,39 @@
 # Client Plugins
 
-> Client plugins extend SecretAgent's frontend functionality at the Client interface level. YOu can use them to add extra properties and methods to the agent and/or tab instances.
+> Client plugins extend Hero's frontend functionality at the Client interface level. YOu can use them to add extra properties and methods to the hero and/or tab instances.
 
 ## Creating Your Own Client Plugin
 
-Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `agent.use()`.
+Adding a new plugin is as simple as creating a javascript class with the correct properties and methods, then registering it with `hero.use()`.
 
-We recommend using the ClientPlugin base class in @secret-agent/plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to agent: 
+We recommend using the ClientPlugin base class in @ulixee/hero-plugin-utils, which handles setting most of the required properties and methods, everything except the static `id` property. Here's a simple plugin that adds a single hello() method to hero: 
 
 ```javascript
-import { ClientPlugin } from '@secret-agent/plugin-utils';
+import { ClientPlugin } from '@ulixee/hero-plugin-utils';
 
 export default class ClientHelloPlugin extends ClientPlugin {
   static readonly id = 'client-hello-plugin';
   // static type handled by ClientPlugin base
 
-  onAgent(agent) {
-    agent.hello = (name) => console.log(`Hello ${name}`));
+  onHero(hero) {
+    hero.hello = (name) => console.log(`Hello ${name}`));
   } 
 }
 ```
 
-To register this ClientHelloPlugin in SecretAgent, just pass it to `agent.use()`:
+To register this ClientHelloPlugin in Hero, just pass it to `hero.use()`:
 
 ```javascript
-import agent from 'secret-agent';
+import hero from '@ulixee/hero';
 import ClientHelloPlugin from './ClientHelloPlugin';
 
-agent.use(ClientHelloPlugin);
+hero.use(ClientHelloPlugin);
 ```
 
-Your agent instance now supports the hello() method:
+Your hero instance now supports the hello() method:
 
 ```javascript
-agent.hello('World');
+hero.hello('World');
 ```
 
 The rest of this page documents the various functionalities you can add to your class.
@@ -41,12 +41,12 @@ The rest of this page documents the various functionalities you can add to your 
 ## Constructor
 
 ### new ClientPlugin<em>()</em>
-A new instance of ClientPlugin is created for every agent instance. Use a constructor if you want to hook into the plugin's initialization. The constructor receives no arguments.
+A new instance of ClientPlugin is created for every hero instance. Use a constructor if you want to hook into the plugin's initialization. The constructor receives no arguments.
 
 ## Class Properties
 
 ### ClientPlugin.id *required*
-This must be unique across all your SecretAgent client plugins. We recommend using your plugin's npm package name.
+This must be unique across all your Hero client plugins. We recommend using your plugin's npm package name.
 #### **Type**: `string`
 
 ```javascript
@@ -59,7 +59,7 @@ export default ClientHelloPlugin extends ClientPlugin {
 ```
 
 ### ClientPlugin.type *required*
-This must always be set to `'ClientPlugin'`. It's how SecretAgent differentiates between different plugin types. If your class extended the ClientPlugin base in @secret-agent/utils then this is already set.
+This must always be set to `'ClientPlugin'`. It's how Hero differentiates between different plugin types. If your class extended the ClientPlugin base in @ulixee/utils then this is already set.
 #### **Type**: `string` This must always be set to `'ClientPlugin'`.
 
 ### ClientPlugin.coreDependencyIds *optional*
@@ -67,19 +67,19 @@ Use this property to specify a list of core pluginIds that your ClientPlugin nee
 #### **Type**: `string[]`
 
 ## Instance Method Hooks
-The following methods are all optional. Use them when you want to hook into a specific SecretAgent flow:
+The following methods are all optional. Use them when you want to hook into a specific Hero flow:
 
-### onAgent<em>(agent, sendToCore)</em> *optional*
-This method is called every time a new Agent in initialized.
+### onHero<em>(hero, sendToCore)</em> *optional*
+This method is called every time a new Hero in initialized.
 #### **Arguments**:
-- agent `Agent`
+- hero `Hero`
 - sendToCore: `(toPluginId: string, ...args: any[]) => Promise<any>`
 #### **Returns** `void`
 
-### onTab<em>(agent, tab, sendToCore)</em> *optional*
+### onTab<em>(hero, tab, sendToCore)</em> *optional*
 This method is called every time a new Tab in initialized.
 #### **Arguments**:
-- agent `Agent`
+- hero `Hero`
 - tab `Tab`
 - sendToCore: `(toPluginId: string, ...args: any[]) => Promise<any>`
 #### **Returns** `void`

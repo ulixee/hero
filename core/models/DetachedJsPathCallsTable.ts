@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
-import IScriptInstanceMeta from '@secret-agent/interfaces/IScriptInstanceMeta';
+import SqliteTable from '@ulixee/commons/SqliteTable';
+import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import { IJsPathHistory } from '../lib/JsPath';
 
 export default class DetachedJsPathCallsTable extends SqliteTable<IDetachedJsPathCallsRecord> {

@@ -1,9 +1,9 @@
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import * as WebSocket from 'ws';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
-import { createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
+import TypeSerializer from '@ulixee/commons/TypeSerializer';
+import { createPromise } from '@ulixee/commons/utils';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from './ConnectionToCore';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';

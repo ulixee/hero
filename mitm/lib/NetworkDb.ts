@@ -1,7 +1,7 @@
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
-import SqliteTable from '@secret-agent/commons/SqliteTable';
-import Log from '@secret-agent/commons/Logger';
+import SqliteTable from '@ulixee/commons/SqliteTable';
+import Log from '@ulixee/commons/Logger';
 import CertificatesTable from '../models/CertificatesTable';
 
 const { log } = Log(module);

@@ -1,12 +1,12 @@
-import { Handler } from 'secret-agent';
+import { Handler } from '@ulixee/hero';
 
 (async function run() {
   const handler = new Handler();
-  handler.dispatchAgent(async agent => {
+  handler.dispatchHero(async agent => {
     await agent.goto('https://news.ycombinator.com');
     await agent.waitForPaintingStable();
   });
-  handler.dispatchAgent(async agent => {
+  handler.dispatchHero(async agent => {
     await agent.goto('https://news.ycombinator.com/newest');
     await agent.waitForPaintingStable();
   });

@@ -1,9 +1,9 @@
 import { existsSync } from 'fs';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IBrowserEngineOption from '@secret-agent/interfaces/IBrowserEngineOption';
-import IBrowserEngineFetcher from '@secret-agent/interfaces/IBrowserEngineFetcher';
-import ChromeApp from '@secret-agent/chrome-app';
-import { IBrowserEmulatorClass } from '@secret-agent/interfaces/ICorePlugin';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import IBrowserEngineOption from '@ulixee/hero-interfaces/IBrowserEngineOption';
+import IBrowserEngineFetcher from '@ulixee/hero-interfaces/IBrowserEngineFetcher';
+import ChromeApp from '@ulixee/chrome-app';
+import { IBrowserEmulatorClass } from '@ulixee/hero-interfaces/ICorePlugin';
 
 export default class BrowserEngine implements IBrowserEngine {
   public name: string;
@@ -46,7 +46,7 @@ export default class BrowserEngine implements IBrowserEngine {
 -------------- NPM INSTALL ----------------------
 -------------------------------------------------
 
- npm install @secret-agent/${this.engineOption.id}
+ npm install @ulixee/${this.engineOption.id}
 
 -------------------------------------------------
 `;
@@ -73,7 +73,7 @@ ${remedyMessage}`);
     }
     try {
       // eslint-disable-next-line global-require,import/no-dynamic-require
-      let ChromeAtMajorVersion = require(`@secret-agent/${option.id}`);
+      let ChromeAtMajorVersion = require(`@ulixee/${option.id}`);
       if (ChromeAtMajorVersion.default) {
         ChromeAtMajorVersion = ChromeAtMajorVersion.default;
       }

@@ -1,4 +1,4 @@
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
 import Resolvable from './Resolvable';
 import CallSite = NodeJS.CallSite;
 

@@ -1,8 +1,8 @@
-import ICommandMeta from '@secret-agent/interfaces/ICommandMeta';
-import { IInteractionGroup } from '@secret-agent/interfaces/IInteractions';
-import { getKeyboardKey } from '@secret-agent/interfaces/IKeyboardLayoutUS';
-import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
-import TypeSerializer from '@secret-agent/commons/TypeSerializer';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import { IInteractionGroup } from '@ulixee/hero-interfaces/IInteractions';
+import { getKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
+import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
+import TypeSerializer from '@ulixee/commons/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {

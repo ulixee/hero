@@ -1,5 +1,5 @@
-import Log from '@secret-agent/commons/Logger';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
+import Log from '@ulixee/commons/Logger';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
 import MitmSocket from '..';
 import BaseIpcHandler, { IGoIpcOpts } from './BaseIpcHandler';
 

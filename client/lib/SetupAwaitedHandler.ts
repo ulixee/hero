@@ -2,10 +2,10 @@ import AwaitedHandler, { NotImplementedError } from 'awaited-dom/base/AwaitedHan
 import AwaitedPath, { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import Constructable from 'awaited-dom/base/Constructable';
 import INodePointer from 'awaited-dom/base/INodePointer';
-import IExecJsPathResult from '@secret-agent/interfaces/IExecJsPathResult';
-import { getNodePointerFnName } from '@secret-agent/interfaces/jsPathFnNames';
+import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
+import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import StateMachine from 'awaited-dom/base/StateMachine';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
@@ -26,7 +26,7 @@ interface IStateHandler<TClass> {
 
 // Sets up AwaitedHandler initializer hooks. See Noderdom/AwaitedDOM
 AwaitedHandler.delegate = delegate;
-AwaitedHandler.setStorageSymbol(Symbol.for('@secret-agent/InternalAwaitedState'));
+AwaitedHandler.setStorageSymbol(Symbol.for('@ulixee/InternalAwaitedState'));
 
 async function getProperty<T, TClass>(
   stateHandler: IStateHandler<TClass>,

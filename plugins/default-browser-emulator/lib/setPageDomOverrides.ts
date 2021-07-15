@@ -1,4 +1,4 @@
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserData from '../interfaces/IBrowserData';
 import DomOverridesBuilder from './DomOverridesBuilder';
 

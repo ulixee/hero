@@ -1,5 +1,5 @@
-import { Helpers } from '@secret-agent/testing';
-import Resource from '@secret-agent/client/lib/Resource';
+import { Helpers } from '@ulixee/testing';
+import Resource from '@ulixee/hero/lib/Resource';
 import { Handler } from '../index';
 
 let koaServer;
@@ -15,11 +15,11 @@ afterEach(Helpers.afterEach);
 describe('basic Full Client tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(exampleUrl);
-    const url = await agent.document.location.host;
+    await hero.goto(exampleUrl);
+    const url = await hero.document.location.host;
     expect(url).toBe(koaServer.baseHost);
   });
 
@@ -42,15 +42,15 @@ describe('basic Full Client tests', () => {
       ctx.statusCode = 500;
     });
 
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       blockedResourceTypes: ['BlockAssets'],
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
     const resources: Resource[] = [];
-    await agent.activeTab.on('resource', event => resources.push(event));
-    await agent.goto(`${koaServer.baseUrl}/block`);
-    await agent.waitForPaintingStable();
+    await hero.activeTab.on('resource', event => resources.push(event));
+    await hero.goto(`${koaServer.baseUrl}/block`);
+    await hero.waitForPaintingStable();
     await new Promise(setImmediate);
     expect(resources).toHaveLength(1);
     expect(await resources[0].response.statusCode).toBe(200);
@@ -58,17 +58,17 @@ describe('basic Full Client tests', () => {
   });
 
   it('should get unreachable proxy errors in the client', async () => {
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       upstreamProxyUrl: koaServer.baseUrl,
     });
-    Helpers.needsClosing.push(agent);
-    await expect(agent.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
+    Helpers.needsClosing.push(hero);
+    await expect(hero.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
   });
 
   it('should get errors in dispatch', async () => {
-    handler.dispatchAgent(
-      async agent => {
-        await agent.goto(`${koaServer.baseUrl}/`);
+    handler.dispatchHero(
+      async hero => {
+        await hero.goto(`${koaServer.baseUrl}/`);
       },
       {
         upstreamProxyUrl: koaServer.baseUrl,
@@ -79,20 +79,20 @@ describe('basic Full Client tests', () => {
   });
 
   it('runs goto with no document loaded', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
-    const url = await agent.document.location.host;
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
+    const url = await hero.document.location.host;
     expect(url).toBe(null);
   });
 
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const agent = await handler.createAgent({
+    const hero = await handler.createHero({
       locale: 'en-US,en',
     });
-    Helpers.needsClosing.push(agent);
+    Helpers.needsClosing.push(hero);
 
-    const resource = await agent.goto(exampleUrl);
+    const resource = await hero.goto(exampleUrl);
 
     const { request, response } = resource;
     expect(await request.headers).toMatchObject({
@@ -124,8 +124,8 @@ describe('basic Full Client tests', () => {
   });
 
   it('can get and set cookies', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
     koaServer.get('/cookies', ctx => {
       ctx.cookies.set('Cookie1', 'This is a test', {
@@ -134,15 +134,15 @@ describe('basic Full Client tests', () => {
       ctx.body = '';
     });
 
-    await agent.goto(`${koaServer.baseUrl}/cookies`);
-    const cookieStorage = agent.activeTab.cookieStorage;
+    await hero.goto(`${koaServer.baseUrl}/cookies`);
+    const cookieStorage = hero.activeTab.cookieStorage;
     {
       expect(await cookieStorage.length).toBe(1);
       const cookie = await cookieStorage.getItem('Cookie1');
       expect(cookie.expires).toBe('-1');
       expect(cookie.httpOnly).toBe(true);
       // httponly not in doc
-      const documentCookies = await agent.getJsValue('document.cookie');
+      const documentCookies = await hero.getJsValue('document.cookie');
       expect(documentCookies).toBe('');
     }
     {
@@ -154,38 +154,38 @@ describe('basic Full Client tests', () => {
       expect(Math.round(Number(cookie.expires))).toBe(expires.getTime());
       expect(cookie.httpOnly).toBe(false);
 
-      const documentCookies = await agent.getJsValue('document.cookie');
+      const documentCookies = await hero.getJsValue('document.cookie');
       expect(documentCookies).toBe('Cookie2=test2');
     }
     // test deleting
     {
       await cookieStorage.removeItem('Cookie2');
       expect(await cookieStorage.length).toBe(1);
-      const documentCookies = await agent.getJsValue('document.cookie');
+      const documentCookies = await hero.getJsValue('document.cookie');
       expect(documentCookies).toBe('');
     }
   });
 
   it('should send a friendly message if trying to set cookies before a url is loaded', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await expect(agent.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
+    await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
       "Chrome won't allow you to set cookies on a blank tab.",
     );
   });
 
   it('can get and set localStorage', async () => {
-    const agent = await handler.createAgent();
-    Helpers.needsClosing.push(agent);
+    const hero = await handler.createHero();
+    Helpers.needsClosing.push(hero);
 
-    await agent.goto(`${koaServer.baseUrl}/`);
-    const localStorage = agent.activeTab.localStorage;
+    await hero.goto(`${koaServer.baseUrl}/`);
+    const localStorage = hero.activeTab.localStorage;
     expect(await localStorage.length).toBe(0);
     await localStorage.setItem('Test1', 'here');
     expect(await localStorage.length).toBe(1);
 
-    await expect(agent.getJsValue('localStorage.getItem("Test1")')).resolves.toBe('here');
+    await expect(hero.getJsValue('localStorage.getItem("Test1")')).resolves.toBe('here');
 
     expect(await localStorage.key(0)).toBe('Test1');
     await localStorage.removeItem('Test1');

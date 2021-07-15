@@ -1,5 +1,5 @@
-import { ISendToCoreFn } from '@secret-agent/interfaces/IClientPlugin';
-import ClientPlugin from '@secret-agent/plugin-utils/lib/ClientPlugin';
+import { ISendToCoreFn } from '@ulixee/hero-interfaces/IClientPlugin';
+import ClientPlugin from '@ulixee/hero-plugin-utils/lib/ClientPlugin';
 
 const { name: pluginId } = require('../package.json');
 
@@ -7,8 +7,8 @@ export default class ExecuteJsClientPlugin extends ClientPlugin {
   public static id = pluginId;
   public static coreDependencyIds = [pluginId];
 
-  public onAgent(agent, sendToCore: ISendToCoreFn) {
-    agent.executeJs = (fn, ...args) => {
+  public onHero(hero, sendToCore: ISendToCoreFn) {
+    hero.executeJs = (fn, ...args) => {
       return this.executeJs(fn, sendToCore, args);
     };
   }

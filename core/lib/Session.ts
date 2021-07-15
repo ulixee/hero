@@ -1,26 +1,26 @@
 import { v1 as uuidv1 } from 'uuid';
-import Log from '@secret-agent/commons/Logger';
+import Log from '@ulixee/commons/Logger';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
   IRequestSessionResponseEvent,
   IResourceStateChangeEvent,
   ISocketEvent,
-} from '@secret-agent/mitm/handlers/RequestSession';
-import IPuppetContext, { IPuppetContextEvents } from '@secret-agent/interfaces/IPuppetContext';
-import IUserProfile from '@secret-agent/interfaces/IUserProfile';
-import { IPuppetPage } from '@secret-agent/interfaces/IPuppetPage';
-import IBrowserEngine from '@secret-agent/interfaces/IBrowserEngine';
-import IConfigureSessionOptions from '@secret-agent/interfaces/IConfigureSessionOptions';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import { IBoundLog } from '@secret-agent/interfaces/ILog';
-import { MitmProxy } from '@secret-agent/mitm/index';
-import IViewport from '@secret-agent/interfaces/IViewport';
-import IJsPathResult from '@secret-agent/interfaces/IJsPathResult';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import IGeolocation from '@secret-agent/interfaces/IGeolocation';
+} from '@ulixee/hero-mitm/handlers/RequestSession';
+import IPuppetContext, { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
+import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
+import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
+import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
+import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { MitmProxy } from '@ulixee/hero-mitm/index';
+import IViewport from '@ulixee/hero-interfaces/IViewport';
+import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';

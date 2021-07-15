@@ -1,4 +1,4 @@
-import Queue from '@secret-agent/commons/Queue';
+import Queue from '@ulixee/commons/Queue';
 import CoreSession from './CoreSession';
 
 export default class CoreSessions {

@@ -1,8 +1,8 @@
-import { Helpers } from '@secret-agent/testing';
-import { ITestKoaServer } from '@secret-agent/testing/helpers';
-import Core from '@secret-agent/core';
-import SessionDb from '@secret-agent/core/dbs/SessionDb';
-import GlobalPool from '@secret-agent/core/lib/GlobalPool';
+import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/testing/helpers';
+import Core from '@ulixee/hero-core';
+import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
+import GlobalPool from '@ulixee/hero-core/lib/GlobalPool';
 import { Handler, Observable } from '../index';
 
 let koaServer: ITestKoaServer;
@@ -18,18 +18,18 @@ afterEach(Helpers.afterEach);
 
 describe('Output tests', () => {
   test('records object changes', async () => {
-    const agent = await openBrowser('/');
-    const output = agent.output;
+    const hero = await openBrowser('/');
+    const output = hero.output;
     output.started = new Date();
-    const url = await agent.url;
-    const title = await agent.document.title;
+    const url = await hero.url;
+    const title = await hero.document.title;
     output.page = {
       url,
       title,
     };
     output.page.data = Buffer.from('I am buffer');
-    const sessionId = await agent.sessionId;
-    await agent.close();
+    const sessionId = await hero.sessionId;
+    await hero.close();
 
     const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
     const outputs = db.output.all();
@@ -68,8 +68,8 @@ describe('Output tests', () => {
   });
 
   test('can add array-ish items to the main object', async () => {
-    const agent = await openBrowser('/');
-    const output = agent.output;
+    const hero = await openBrowser('/');
+    const output = hero.output;
     const date = new Date();
     output.push({
       url: 'https://url.com',
@@ -77,8 +77,8 @@ describe('Output tests', () => {
       date,
       buffer: Buffer.from('whatever'),
     });
-    const sessionId = await agent.sessionId;
-    await agent.close();
+    const sessionId = await hero.sessionId;
+    await hero.close();
 
     const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
     const outputs = db.output.all();
@@ -108,15 +108,15 @@ describe('Output tests', () => {
   });
 
   test('can add observables directly', async () => {
-    const agent = await openBrowser('/');
-    const output = agent.output;
+    const hero = await openBrowser('/');
+    const output = hero.output;
     const record = Observable({} as any);
     output.push(record);
     record.test = 1;
     record.watch = 2;
     record.any = { more: true };
-    const sessionId = await agent.sessionId;
-    await agent.close();
+    const sessionId = await hero.sessionId;
+    await hero.close();
 
     const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
     const outputs = db.output.all();
@@ -140,14 +140,14 @@ describe('Output tests', () => {
   });
 
   test('can replace the main object', async () => {
-    const agent = await openBrowser('/');
-    agent.output.test = 'true';
-    agent.output = {
+    const hero = await openBrowser('/');
+    hero.output.test = 'true';
+    hero.output = {
       try: true,
       another: false,
     };
-    const sessionId = await agent.sessionId;
-    await agent.close();
+    const sessionId = await hero.sessionId;
+    await hero.close();
 
     const db = new SessionDb(GlobalPool.sessionsDir, sessionId, { readonly: true });
     const outputs = db.output.all();
@@ -173,7 +173,7 @@ describe('Output tests', () => {
       lastCommandId: 2,
       path: '["try"]',
     });
-    expect(JSON.stringify(agent.output)).toEqual(
+    expect(JSON.stringify(hero.output)).toEqual(
       JSON.stringify({
         try: true,
         another: false,
@@ -183,9 +183,9 @@ describe('Output tests', () => {
 });
 
 async function openBrowser(path: string) {
-  const agent = await handler.createAgent();
-  Helpers.needsClosing.push(agent);
-  await agent.goto(`${koaServer.baseUrl}${path}`);
-  await agent.waitForPaintingStable();
-  return agent;
+  const hero = await handler.createHero();
+  Helpers.needsClosing.push(hero);
+  await hero.goto(`${koaServer.baseUrl}${path}`);
+  await hero.waitForPaintingStable();
+  return hero;
 }

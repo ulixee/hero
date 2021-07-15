@@ -1,22 +1,22 @@
-import ICoreRequestPayload from '@secret-agent/interfaces/ICoreRequestPayload';
-import ICoreEventPayload from '@secret-agent/interfaces/ICoreEventPayload';
-import ICoreResponsePayload from '@secret-agent/interfaces/ICoreResponsePayload';
-import { bindFunctions, createPromise } from '@secret-agent/commons/utils';
-import IResolvablePromise from '@secret-agent/interfaces/IResolvablePromise';
-import Log from '@secret-agent/commons/Logger';
-import ISessionCreateOptions from '@secret-agent/interfaces/ISessionCreateOptions';
-import ISessionMeta from '@secret-agent/interfaces/ISessionMeta';
-import { CanceledPromiseError } from '@secret-agent/commons/interfaces/IPendingWaitEvent';
-import ICoreConfigureOptions from '@secret-agent/interfaces/ICoreConfigureOptions';
-import { TypedEventEmitter } from '@secret-agent/commons/eventUtils';
-import SessionClosedOrMissingError from '@secret-agent/commons/SessionClosedOrMissingError';
-import Resolvable from '@secret-agent/commons/Resolvable';
-import ICoreConnectionEventPayload from '@secret-agent/interfaces/ICoreConnectionEventPayload';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
+import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
+import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
+import { bindFunctions, createPromise } from '@ulixee/commons/utils';
+import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import Log from '@ulixee/commons/Logger';
+import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import SessionClosedOrMissingError from '@ulixee/commons/SessionClosedOrMissingError';
+import Resolvable from '@ulixee/commons/Resolvable';
+import ICoreConnectionEventPayload from '@ulixee/hero-interfaces/ICoreConnectionEventPayload';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
-import { IAgentCreateOptions } from '../index';
-import Agent from '../lib/Agent';
+import { IHeroCreateOptions } from '../index';
+import Hero from '../lib/Hero';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
@@ -55,7 +55,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     this.commandQueue = new CoreCommandQueue(null, this, null);
     this.coreSessions = new CoreSessions(
       this.options.maxConcurrency,
-      this.options.agentTimeoutMillis,
+      this.options.heroTimeoutMillis,
     );
 
     if (this.options.host) {
@@ -172,19 +172,19 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
 
-  public useAgent(
-    options: IAgentCreateOptions,
-    callbackFn: (agent: Agent) => Promise<any>,
+  public useHero(
+    options: IHeroCreateOptions,
+    callbackFn: (hero: Hero) => Promise<any>,
   ): Promise<void> {
     // just kick off
     this.connect().catch(() => null);
     return this.coreSessions.waitForAvailable(() => {
-      const agent = new Agent({
+      const hero = new Hero({
         ...options,
         connectionToCore: this,
       });
 
-      return callbackFn(agent);
+      return callbackFn(hero);
     });
   }
 
