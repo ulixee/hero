@@ -25,5 +25,4 @@ emulators/data/DOM-*.json
 **/dist
 /.eslintcache
 /.network.db
-/website/scripts/generateAwaitedDOM.js
 connect

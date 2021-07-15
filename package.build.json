@@ -3,7 +3,6 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start:website": "yarn workspace @ulixee/website start",
     "test": "cross-env HERO_SHOW_REPLAY=false NODE_ENV=test HERO_SESSIONS_DIR=.sessions-test jest"
   },
   "devDependencies": {
@@ -27,8 +26,7 @@
       "replay",
       "replay/frontend",
       "testing",
-      "commons",
-      "website"
+      "commons"
     ]
   },
   "resolutions": {

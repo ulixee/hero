@@ -1,4 +1,0 @@
-*.log
-.cache
-src/.temp
-node_modules
