@@ -141,12 +141,12 @@ export default function generateAppMenu() {
           label: 'Reveal in Sessions Directory',
           click: () => {
             const dir = Path.join(
-              Window.current.replayApi?.saSession?.dataLocation ??
+              Window.current.replayApi?.heroSession?.dataLocation ??
                 Path.join(Os.tmpdir(), '.ulixee'),
             );
-            if (Window.current.replayApi?.saSession) {
+            if (Window.current.replayApi?.heroSession) {
               return shell.showItemInFolder(
-                `${Path.join(dir, Window.current.replayApi?.saSession.id)}.db`,
+                `${Path.join(dir, Window.current.replayApi?.heroSession.id)}.db`,
               );
             }
             return shell.openPath(dir);

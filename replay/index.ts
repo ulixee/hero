@@ -94,7 +94,7 @@ export async function replay(launchArgs: IReplayScriptRegistration): Promise<any
       return;
     }
 
-    await openReplayApp('--sa-replay');
+    await openReplayApp('--show-replay');
 
     if (!(await registerScript(scriptMeta))) {
       console.log("Couldn't register this script with the Replay app.", scriptMeta);

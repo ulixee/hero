@@ -17,7 +17,7 @@ const pageScripts = {
     'utf8',
   ),
 };
-const pageEventsCallbackName = '__saPageListenerCallback';
+const pageEventsCallbackName = '__heroPageListenerCallback';
 
 const injectedScript = `(function installInjectedScripts() {
     const exports = {}; // workaround for ts adding an exports variable

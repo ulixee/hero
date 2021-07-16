@@ -55,15 +55,15 @@ export default class Application {
     this.registrationServer = new ScriptRegistrationServer(this.registerScript.bind(this));
     Menu.setApplicationMenu(generateAppMenu());
 
-    const defaultNodePath = process.argv.find(x => x.startsWith('--sa-default-node-path='));
+    const defaultNodePath = process.argv.find(x => x.startsWith('--default-node-path='));
 
     if (defaultNodePath) {
-      const nodePath = defaultNodePath.split('--sa-default-node-path=').pop();
+      const nodePath = defaultNodePath.split('--default-node-path=').pop();
       console.log('Default nodePath provided', nodePath);
       ReplayApi.nodePath = nodePath;
     }
 
-    if (!process.argv.includes('--sa-replay')) {
+    if (!process.argv.includes('--show-replay')) {
       this.createWindowIfNeeded();
     }
   }
@@ -85,7 +85,7 @@ export default class Application {
   private shouldAppendToOpenReplayScript(replay: IReplayMeta) {
     const { scriptInstanceId, scriptStartDate } = replay;
     const windowWithScriptRun = Window.list.find(x => {
-      const session = x.replayApi?.saSession;
+      const session = x.replayApi?.heroSession;
       if (!session) return false;
       return (
         session.scriptInstanceId === scriptInstanceId &&
@@ -119,16 +119,16 @@ export default class Application {
     }
 
     storage.addToHistory({
-      dataLocation: replayApi.saSession.dataLocation,
-      sessionName: replayApi.saSession.name,
-      scriptInstanceId: replayApi.saSession.scriptInstanceId,
-      scriptEntrypoint: replayApi.saSession.scriptEntrypoint,
+      dataLocation: replayApi.heroSession.dataLocation,
+      sessionName: replayApi.heroSession.name,
+      scriptInstanceId: replayApi.heroSession.scriptInstanceId,
+      scriptEntrypoint: replayApi.heroSession.scriptEntrypoint,
     });
 
     let existingWindow = Window.current;
     if (findOpenReplayScriptWindow) {
       existingWindow = Window.list.find(
-        x => x.replayApi?.saSession?.scriptEntrypoint === replayApi.saSession.scriptEntrypoint,
+        x => x.replayApi?.heroSession?.scriptEntrypoint === replayApi.heroSession.scriptEntrypoint,
       );
     }
 
@@ -225,7 +225,7 @@ export default class Application {
     });
 
     ipcMain.on('navigate-to-session', (e, session: { id: string; name: string }) => {
-      const current = Window.current.replayApi.saSession;
+      const current = Window.current.replayApi.heroSession;
       const replayMeta: IReplayMeta = {
         sessionId: session.id,
         sessionName: session.name,

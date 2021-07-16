@@ -10,16 +10,16 @@
         :size=18
       )
     .location(ref="location")
-      template(v-if="saSession")
+      template(v-if="heroSession")
         .script-section.section(@mousedown="showLocationOverlay($event, 'locations-menu')")
           Icon(:src="ICON_SCRIPT" :size=16 iconStyle="transform: 'scale(-1,1)'")
           .text {{scriptName}}
         .session-section.section(@mousedown="showLocationOverlay($event, 'script-instances-menu')")
           Icon(:src="ICON_CLOCK" :size=16 iconStyle="transform: 'scale(-1,1)'")
           .text {{scriptInstanceDate}}
-        .window-section.section(@mousedown="showLocationOverlay($event, 'sessions-menu')" v-if="saSession.relatedSessions.length > 1")
+        .window-section.section(@mousedown="showLocationOverlay($event, 'sessions-menu')" v-if="heroSession.relatedSessions.length > 1")
           Icon(:src="ICON_NUMBER" :size=16 iconStyle="transform: 'scale(-1,1)'")
-          .text ({{sessionIndex}} of {{saSession.relatedSessions.length}}) {{sessionName}}
+          .text ({{sessionIndex}} of {{heroSession.relatedSessions.length}}) {{sessionName}}
       template(v-else-if="location")
         .name-section.section(@mousedown="showLocationOverlay($event, 'locations-menu')")
           .text Hero
@@ -32,9 +32,9 @@
         :icon="ICON_FORWARD"
         :size=18
       )
-  .UrlBar(v-if="saSession")
-    button(v-if="saSession.tabs.length > 1" @click="showTabs" ref="tabRef")
-      .text {{activeTabIdx + 1}}/{{saSession.tabs.length}}
+  .UrlBar(v-if="heroSession")
+    button(v-if="heroSession.tabs.length > 1" @click="showTabs" ref="tabRef")
+      .text {{activeTabIdx + 1}}/{{heroSession.tabs.length}}
     .address-bar
       Icon(:src="addressIcon" :size=16 iconStyle="transform: 'scale(-1,1)'" disabled="true")
       .detached(v-if="isFrozenTab") Frozen
@@ -63,7 +63,7 @@ import os from 'os';
 import IWindowLocation from '~shared/interfaces/IWindowLocation';
 import { dateToTimeAgo } from '~shared/utils/formatters';
 import AppButton from '~frontend/pages/header/components/AppButton.vue';
-import ISaSession from '~shared/interfaces/ISaSession';
+import IHeroSession from '~shared/interfaces/IheroSession';
 import { getTheme } from '~shared/utils/themes';
 import moment from 'moment';
 import Path from 'path';
@@ -89,13 +89,13 @@ export default class HeaderPage extends Vue {
 
   location: IWindowLocation = 'Dashboard';
 
-  saSession: ISaSession = null;
+  heroSession: IHeroSession = null;
   hasBack = false;
   hasNext = false;
 
   get isFrozenTab(): boolean {
     if (!this.activeTabId) return false;
-    return !!this.saSession.tabs.find(x => x.tabId === this.activeTabId)?.detachedFromTabId;
+    return !!this.heroSession.tabs.find(x => x.tabId === this.activeTabId)?.detachedFromTabId;
   }
 
   get addressIcon() {
@@ -104,11 +104,11 @@ export default class HeaderPage extends Vue {
   }
 
   get sessionIndex() {
-    return this.saSession.relatedSessions.findIndex(x => x.id === this.saSession.id) + 1;
+    return this.heroSession.relatedSessions.findIndex(x => x.id === this.heroSession.id) + 1;
   }
 
   get sessionName() {
-    let name = this.saSession.name;
+    let name = this.heroSession.name;
     if (name.length > 30) {
       return name.substr(0, 30) + '... ';
     }
@@ -116,23 +116,23 @@ export default class HeaderPage extends Vue {
   }
 
   get activeTabIdx() {
-    return this.saSession.tabs.findIndex(x => x.tabId === this.activeTabId);
+    return this.heroSession.tabs.findIndex(x => x.tabId === this.activeTabId);
   }
 
   mounted() {
     ipcRenderer.on('location:updated', (e, args) => {
-      const { location, saSession, hasNext, hasBack } = args;
+      const { location, heroSession, hasNext, hasBack } = args;
       console.log('location:updated', args);
       this.location = location ?? null;
-      this.saSession = saSession ?? null;
+      this.heroSession = heroSession ?? null;
       this.hasNext = hasNext;
       this.hasBack = hasBack;
     });
 
     ipcRenderer.on('replay:tab', (e, tab) => {
-      const index = this.saSession.tabs.findIndex(x => x.tabId === tab.tabId);
-      if (index === -1) this.saSession.tabs.push(tab);
-      else this.saSession.tabs[index] = tab;
+      const index = this.heroSession.tabs.findIndex(x => x.tabId === tab.tabId);
+      if (index === -1) this.heroSession.tabs.push(tab);
+      else this.heroSession.tabs[index] = tab;
     });
 
     ipcRenderer.on('replay:active-tab', (e, tabId) => {
@@ -150,16 +150,16 @@ export default class HeaderPage extends Vue {
 
   get scriptInstanceDate() {
     if (
-      this.saSession.relatedScriptInstances?.length &&
-      this.saSession.scriptStartDate === this.saSession.relatedScriptInstances[0].startDate
+      this.heroSession.relatedScriptInstances?.length &&
+      this.heroSession.scriptStartDate === this.heroSession.relatedScriptInstances[0].startDate
     ) {
       return 'Latest';
     }
-    return dateToTimeAgo(this.saSession.scriptStartDate);
+    return dateToTimeAgo(this.heroSession.scriptStartDate);
   }
 
   get scriptName() {
-    return this.saSession.scriptEntrypoint.split(Path.sep).filter(Boolean).slice(-2).join('/');
+    return this.heroSession.scriptEntrypoint.split(Path.sep).filter(Boolean).slice(-2).join('/');
   }
 
   @NoCache
@@ -173,7 +173,7 @@ export default class HeaderPage extends Vue {
       '--toolbarHeight': `${TOOLBAR_HEIGHT}px`,
       '--toolbarBackgroundColor': theme.toolbarBackgroundColor,
       '--toolbarBorderBottomColor': theme.toolbarBottomLineBackgroundColor,
-      '--navbarWidth': this.saSession?.relatedSessions?.length > 1 ? '60%' : '40%',
+      '--navbarWidth': this.heroSession?.relatedSessions?.length > 1 ? '60%' : '40%',
     };
   }
 
@@ -192,10 +192,10 @@ export default class HeaderPage extends Vue {
   showTabs() {
     const overlayRect = this.$refs.tabRef.getBoundingClientRect().toJSON();
 
-    const firstTabTime = moment(this.saSession.tabs[0].createdTime);
+    const firstTabTime = moment(this.heroSession.tabs[0].createdTime);
     let tabLabelsById = new Map<number, string>();
     let tabCounter = 0;
-    const tabs = this.saSession.tabs.map((x, i) => {
+    const tabs = this.heroSession.tabs.map((x, i) => {
       let label = '';
       let time = '';
       if (tabCounter === 1) label = '2nd ';
@@ -216,13 +216,13 @@ export default class HeaderPage extends Vue {
       }
       let title: string;
       if (!x.detachedFromTabId) {
-        title = `${i + 1}/${this.saSession.tabs.length} - ${label}tab opened at ${time}`;
+        title = `${i + 1}/${this.heroSession.tabs.length} - ${label}tab opened at ${time}`;
         tabLabelsById.set(x.tabId, label || '1st ');
         tabCounter += 1;
       } else {
         const sourceTabNumber = tabLabelsById.get(x.detachedFromTabId);
         title = `${i + 1}/${
-          this.saSession.tabs.length
+          this.heroSession.tabs.length
         } - detached ${sourceTabNumber}tab at ${time}`;
       }
 
@@ -258,14 +258,14 @@ export default class HeaderPage extends Vue {
     overlayRect.width = parentWidth - fromLeft;
 
     if (name === 'script-instances-menu') {
-      const instances = this.saSession.relatedScriptInstances.map((x, i) => {
+      const instances = this.heroSession.relatedScriptInstances.map((x, i) => {
         return {
           id: x.id,
           title: i === 0 ? 'Latest' : dateToTimeAgo(x.startDate),
           scriptInstanceId: x.id,
-          isActive: this.saSession.scriptInstanceId === x.id,
-          dataLocation: this.saSession.dataLocation,
-          sessionName: this.saSession.name,
+          isActive: this.heroSession.scriptInstanceId === x.id,
+          dataLocation: this.heroSession.dataLocation,
+          sessionName: this.heroSession.name,
         };
       });
       ipcRenderer.send(
@@ -281,10 +281,10 @@ export default class HeaderPage extends Vue {
         'overlay:show',
         'list-menu',
         overlayRect,
-        this.saSession.relatedSessions.map((x, i) => ({
+        this.heroSession.relatedSessions.map((x, i) => ({
           id: x.id,
           title: x.name,
-          isActive: this.saSession.name === x.name,
+          isActive: this.heroSession.name === x.name,
           name: x.name,
         })),
         'ICON_NUMBER',

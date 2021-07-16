@@ -197,7 +197,7 @@ export default abstract class BaseIpcHandler {
 
     if (options.ipcSocketPath === undefined) {
       const id = createId();
-      options.ipcSocketPath = createIpcSocketPath(`sa-ipc-${mode}-${id}`);
+      options.ipcSocketPath = createIpcSocketPath(`ipc-${mode}-${id}`);
     }
     return options as IGoIpcOpts;
   }

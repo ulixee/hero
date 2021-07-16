@@ -1,4 +1,4 @@
-export default interface ISaSession {
+export default interface IHeroSession {
   id: string;
   name: string;
   tabs: ISessionTab[];
