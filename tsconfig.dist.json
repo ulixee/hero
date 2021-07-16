@@ -29,7 +29,6 @@
     "build-dist",
     "replay",
     "examples",
-    "website",
     "core/injected-scripts",
     "plugins/default-browser-emulator/injected-scripts",
     "plugins/default-browser-emulator/data"

@@ -13,8 +13,7 @@
     "mitm",
     "replay",
     "testing",
-    "commons",
-    "website"
+    "commons"
   ],
   "useWorkspaces": true
 }

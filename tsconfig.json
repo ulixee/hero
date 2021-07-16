@@ -41,7 +41,6 @@
     "build-dist",
     "replay",
     "replay/injected-scripts",
-    "website",
     "core/injected-scripts",
     "examples/*.js",
     "plugins/default-browser-emulator/injected-scripts",

@@ -3,7 +3,6 @@
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {
-    "start:website": "yarn workspace @ulixee/website start",
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
     "build": "yarn tsc && yarn workspace @ulixee/replay build:frontend && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
@@ -90,8 +89,7 @@
       "replay",
       "replay/frontend",
       "testing",
-      "commons",
-      "website"
+      "commons"
     ]
   },
   "lint-staged": {

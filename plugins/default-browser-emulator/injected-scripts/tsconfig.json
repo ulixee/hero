@@ -21,7 +21,6 @@
     "**/dist",
     "**/build*",
     "**/replay",
-    "**/website",
     "**/injected-scripts"
   ]
 }

@@ -1,7 +1,7 @@
 const pkg = require('./package.json');
 
 const workspaces = pkg.workspaces.packages
-  .filter(x => !x.startsWith('replay') && x !== 'website')
+  .filter(x => !x.startsWith('replay'))
   .map(x => x.replace('/*', ''));
 
 module.exports = {

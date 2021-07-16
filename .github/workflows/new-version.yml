@@ -44,17 +44,6 @@ jobs:
           tag_name="${GITHUB_REF##*/}"
           hub release edit "${assets[@]}" -m "" "$tag_name"
 
-      - name: Build Webite
-        run: yarn build
-        working-directory: ./website
-
-      - name: Deploy Website
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build-dist/website
-          commit_message: "[skip ci] Updates"
-
   socket:
     runs-on: ubuntu-latest
     steps:

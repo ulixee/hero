@@ -1,5 +1,4 @@
 build
-website
 replay
 **/*.ts
 **/node_modules

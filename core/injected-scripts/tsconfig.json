@@ -12,5 +12,5 @@
     "outDir": "../../build/core/injected-scripts"
   },
   "include": ["*.ts", ".eslintrc.js"],
-  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist", "**/replay", "**/website"]
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist", "**/replay"]
 }
