@@ -1,4 +1,4 @@
-import { Handler, Hero } from '@ulixee/hero';
+import { Handler, Hero } from '@ulixee/hero-full-client';
 
 (async () => {
   const handler = new Handler({ maxConcurrency: 2 });

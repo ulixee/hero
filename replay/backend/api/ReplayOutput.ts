@@ -1,4 +1,4 @@
-import { IOutputChange } from '~shared/interfaces/ISaSession';
+import { IOutputChange } from '~shared/interfaces/IHeroSession';
 
 interface IOutputAtCommand {
   output: any;

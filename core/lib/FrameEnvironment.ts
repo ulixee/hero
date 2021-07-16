@@ -91,7 +91,7 @@ export default class FrameEnvironment {
   public domNodeId: number;
   protected readonly logger: IBoundLog;
 
-  private puppetNodeIdsBySaNodeId: Record<number, string> = {};
+  private puppetNodeIdsByHeroNodeId: Record<number, string> = {};
   private prefetchedJsPaths: IJsPathResult[];
   private readonly isDetached: boolean;
   private readonly interactor: Interactor;
@@ -486,7 +486,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       puppetNodeId,
       'NodeTracker.watchNode(this)',
     );
-    this.puppetNodeIdsBySaNodeId[nodeId] = puppetNodeId;
+    this.puppetNodeIdsByHeroNodeId[nodeId] = puppetNodeId;
     return nodeId;
   }
 
@@ -511,7 +511,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     jsPath: IJsPath,
     files: { name: string; data: Buffer }[],
   ): Promise<void> {
-    const puppetNodeId = this.puppetNodeIdsBySaNodeId[jsPath[0] as number];
+    const puppetNodeId = this.puppetNodeIdsByHeroNodeId[jsPath[0] as number];
     const tmpDir = await Fs.promises.mkdtemp(`${Os.tmpdir()}/sa-upload`);
     const filepaths: string[] = [];
     for (const file of files) {

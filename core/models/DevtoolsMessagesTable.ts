@@ -78,7 +78,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       if (
         key === 'payload' &&
         event.method === 'Runtime.bindingCalled' &&
-        params.name === '__saPageListenerCallback' &&
+        params.name === '__heroPageListenerCallback' &&
         value?.length > 250
       ) {
         return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;

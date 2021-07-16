@@ -1,6 +1,7 @@
-import hero from '@ulixee/hero';
+import hero from '@ulixee/hero-full-client';
 
 async function run() {
+  await hero.configure({ showReplay: true });
   await hero.goto('https://example.org/');
   await hero.waitForPaintingStable();
 

@@ -4,7 +4,7 @@ import * as Path from 'path';
 import * as Http from 'http';
 import * as Fs from 'fs';
 import { app, ProtocolResponse } from 'electron';
-import ISaSession, { ISessionTab } from '~shared/interfaces/ISaSession';
+import IHeroSession, { ISessionTab } from '~shared/interfaces/IHeroSession';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import ReplayResources from '~backend/api/ReplayResources';
 import getResolvable from '~shared/utils/promise';
@@ -20,7 +20,7 @@ export default class ReplayApi {
   private static replayScriptCacheByHost = new Map<string, string>();
   private static localApiHost: URL;
 
-  public readonly saSession: ISaSession;
+  public readonly heroSession: IHeroSession;
   public tabsById = new Map<number, ReplayTabState>();
   public apiHost: URL;
   public lastActivityDate: Date;
@@ -48,7 +48,7 @@ export default class ReplayApi {
 
   constructor(apiHost: URL, replay: IReplayMeta) {
     this.apiHost = apiHost;
-    this.saSession = {
+    this.heroSession = {
       ...replay,
       name: replay.sessionName,
       id: replay.sessionId,
@@ -56,11 +56,11 @@ export default class ReplayApi {
 
     const headers: any = {};
     for (const [key, value] of Object.entries({
-      'data-location': this.saSession.dataLocation,
-      'session-name': this.saSession.name,
-      'session-id': this.saSession.id,
-      'script-instance-id': this.saSession.scriptInstanceId,
-      'script-entrypoint': this.saSession.scriptEntrypoint,
+      'data-location': this.heroSession.dataLocation,
+      'session-name': this.heroSession.name,
+      'session-id': this.heroSession.id,
+      'script-instance-id': this.heroSession.scriptInstanceId,
+      'script-entrypoint': this.heroSession.scriptEntrypoint,
     })) {
       if (value) headers[key] = value;
     }
@@ -77,7 +77,7 @@ export default class ReplayApi {
     ReplayApi.websockets.add(this.websocket);
     this.websocket.on('close', () => {
       ReplayApi.websockets.delete(this.websocket);
-      console.log('Ws Session closed', this.saSession.id);
+      console.log('Ws Session closed', this.heroSession.id);
     });
     this.websocket.on('message', this.onMessage.bind(this));
   }
@@ -138,8 +138,8 @@ export default class ReplayApi {
     }
 
     const localHost = ReplayApi.localApiHost;
-    const apiHost = `http://${localHost.host}/replay/${this.saSession.id}`;
-    return this.resources.getContent(resource.id, apiHost, this.saSession.dataLocation);
+    const apiHost = `http://${localHost.host}/replay/${this.heroSession.id}`;
+    return this.resources.getContent(resource.id, apiHost, this.heroSession.dataLocation);
   }
 
   public close(): void {
@@ -252,12 +252,12 @@ export default class ReplayApi {
     return tab;
   }
 
-  private onSession(data: ISaSession) {
+  private onSession(data: IHeroSession) {
     // parse strings to dates from api
     data.startDate = new Date(data.startDate);
     data.closeDate = data.closeDate ? new Date(data.closeDate) : null;
 
-    Object.assign(this.saSession, data);
+    Object.assign(this.heroSession, data);
 
     console.log(`Loaded ReplayApi.sessionMeta`, {
       sessionId: data.id,

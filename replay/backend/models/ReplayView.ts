@@ -8,7 +8,7 @@ import Application from '~backend/Application';
 import { TOOLBAR_HEIGHT } from '~shared/constants/design';
 import IRectangle from '~shared/interfaces/IRectangle';
 import { DomActionType, IFrontendDomChangeEvent } from '~shared/interfaces/IDomChangeEvent';
-import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/ISaSession';
+import { IFrontendMouseEvent, IScrollRecord } from '~shared/interfaces/IHeroSession';
 import OutputView from '~backend/models/OutputView';
 
 const domReplayerScript = require.resolve('../../injected-scripts/domReplayerSubscribe');
@@ -304,6 +304,8 @@ export default class ReplayView extends ViewBackend {
   }
 
   private checkResponsive() {
+    if (!this.replayApi) return;
+
     const lastActivityMillis =
       new Date().getTime() - (this.replayApi.lastActivityDate ?? new Date()).getTime();
 

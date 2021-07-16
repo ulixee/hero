@@ -60,8 +60,7 @@ function debugLog(message: string, ...args: any[]) {
   if (window.debugToConsole) {
     // eslint-disable-next-line prefer-rest-params,no-console
     console.log(...arguments);
-  }
-  window.debugLogs.push({ message, args });
+  } else if (window.debugLogs) window.debugLogs.push({ message, args });
 }
 
 function delegateInteractToSubframe(event: { frameIdPath: string }, action: string) {
@@ -135,7 +134,7 @@ function highlightNodes(nodes: { frameIdPath: string; nodeIds: number[] }) {
       const node = window.getNodeById(nodeIds[i]);
       let hoverNode = highlightElements[i];
       if (!hoverNode) {
-        hoverNode = document.createElement('sa-highlight');
+        hoverNode = document.createElement('hero-highlight');
         highlightElements.push(hoverNode);
       }
       if (!node) {
@@ -278,29 +277,29 @@ function updateScroll(scrollEvent: IFrontendScrollRecord) {
 /////// BUILD UI ELEMENTS //////////////////////////////////////////////////////////////////////////////////////////////
 
 let isInitialized = false;
-function createReplayItems() {
+function createReplayItems(showChromeAlive = false) {
   if (replayNode && !replayNode.isConnected) {
     document.body.appendChild(replayNode);
   }
   if (isInitialized) return;
   isInitialized = true;
 
-  replayNode = document.createElement('sa-replay');
-  replayNode.style.zIndex = '10000000';
+  replayNode = document.createElement('hero-replay');
+  replayNode.style.zIndex = '2147483647';
 
   replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
-  showMoreUp = document.createElement('sa-overflow');
+  showMoreUp = document.createElement('hero-overflow');
   showMoreUp.style.top = '0';
-  showMoreUp.innerHTML = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
+  showMoreUp.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
 
-  showMoreDown = document.createElement('sa-overflow');
+  showMoreDown = document.createElement('hero-overflow');
   showMoreDown.style.bottom = '0';
-  showMoreDown.innerHTML = `<sa-overflow-bar>&nbsp;</sa-overflow-bar>`;
+  showMoreDown.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
 
   const styleElement = document.createElement('style');
   styleElement.textContent = `
-  sa-overflow-bar {
+  hero-overflow-bar {
     width: 500px;
     background-color:#3498db;
     margin:0 auto;
@@ -309,7 +308,7 @@ function createReplayItems() {
     display:block;
   }
 
-  sa-overflow {
+  hero-overflow {
     z-index: 2147483647;
     display:block;
     width:100%;
@@ -318,7 +317,7 @@ function createReplayItems() {
     pointer-events: none;
   }
 
-  sa-highlight {
+  hero-highlight {
     z-index: 2147483647;
     position:absolute;
     box-shadow: 1px 1px 3px 0 #3498db;
@@ -328,7 +327,7 @@ function createReplayItems() {
     pointer-events: none;
   }
 
-  sa-mouse-pointer {
+  hero-mouse-pointer {
     pointer-events: none;
     position: absolute;
     top: 0;
@@ -343,30 +342,30 @@ function createReplayItems() {
     padding: 0;
     transition: background .2s, border-radius .2s, border-color .2s;
   }
-  sa-mouse-pointer.button-1 {
+  hero-mouse-pointer.button-1 {
     transition: none;
     background: rgba(0,0,0,0.9);
   }
-  sa-mouse-pointer.button-2 {
+  hero-mouse-pointer.button-2 {
     transition: none;
     border-color: rgba(0,0,255,0.9);
   }
-  sa-mouse-pointer.button-3 {
+  hero-mouse-pointer.button-3 {
     transition: none;
     border-radius: 4px;
   }
-  sa-mouse-pointer.button-4 {
+  hero-mouse-pointer.button-4 {
     transition: none;
     border-color: rgba(255,0,0,0.9);
   }
-  sa-mouse-pointer.button-5 {
+  hero-mouse-pointer.button-5 {
     transition: none;
     border-color: rgba(0,255,0,0.9);
   }
 `;
   replayShadow.appendChild(styleElement);
 
-  mouse = document.createElement('sa-mouse-pointer');
+  mouse = document.createElement('hero-mouse-pointer');
   mouse.style.display = 'none';
   replayShadow.appendChild(mouse);
 

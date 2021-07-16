@@ -57,7 +57,7 @@ export default class MitmSocket extends TypedEventEmitter<{
     this.logger = log.createChild(module, { sessionId });
     this.connectOpts.isSsl ??= true;
 
-    this.socketPath = createIpcSocketPath(`sa-${sessionId}-${this.id}`);
+    this.socketPath = createIpcSocketPath(`hero-${sessionId}-${this.id}`);
 
     // start listening
     this.server = new net.Server().unref();

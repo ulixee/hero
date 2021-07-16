@@ -6,7 +6,7 @@ import {
   IMouseEvent,
   IScrollRecord,
   ISessionTab,
-} from '~shared/interfaces/ISaSession';
+} from '~shared/interfaces/IHeroSession';
 import ReplayTick, { IEventType } from '~backend/api/ReplayTick';
 import IPaintEvent from '~shared/interfaces/IPaintEvent';
 import {

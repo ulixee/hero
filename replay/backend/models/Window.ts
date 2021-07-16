@@ -9,7 +9,7 @@ import IWindowLocation, { InternalLocations } from '~shared/interfaces/IWindowLo
 import ViewBackend from '~backend/models/ViewBackend';
 import IReplayMeta from '~shared/interfaces/IReplayMeta';
 import generateContextMenu from '~backend/menus/generateContextMenu';
-import { ISessionTab } from '~shared/interfaces/ISaSession';
+import { ISessionTab } from '~shared/interfaces/IHeroSession';
 
 export default class Window {
   public static list: Window[] = [];
@@ -129,14 +129,14 @@ export default class Window {
 
     this.appView.detach();
 
-    this.logHistory({ replayMeta: replayApi.saSession }, navigateToHistoryIdx);
+    this.logHistory({ replayMeta: replayApi.heroSession }, navigateToHistoryIdx);
 
     this.activeView = this.replayView;
     await this.replayView.load(replayApi);
     await this.fixBounds();
 
     this.sendToRenderer('location:updated', {
-      saSession: replayApi.saSession,
+      saSession: replayApi.heroSession,
       hasNext: this.hasNext(),
       hasBack: this.hasBack(),
     });
@@ -145,14 +145,14 @@ export default class Window {
   public addRelatedSession(related: { id: string; name: string }) {
     if (
       !this.replayApi ||
-      this.replayApi.saSession.relatedSessions.some(x => x.id === related.id)
+      this.replayApi.heroSession.relatedSessions.some(x => x.id === related.id)
     ) {
       return;
     }
 
-    this.replayApi.saSession.relatedSessions.push(related);
+    this.replayApi.heroSession.relatedSessions.push(related);
     this.sendToRenderer('location:updated', {
-      saSession: this.replayApi.saSession,
+      saSession: this.replayApi.heroSession,
       hasNext: this.hasNext(),
       hasBack: this.hasBack(),
     });
