@@ -18,14 +18,14 @@ let sessionsDir = process.env.HERO_SESSIONS_DIR || Path.join(Os.tmpdir(), '.ulix
 const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
-  public static maxConcurrentHerosCount = 10;
+  public static maxConcurrentHeroesCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
 
   public static get hasAvailability() {
-    return this.activeSessionCount < GlobalPool.maxConcurrentHerosCount;
+    return this.activeSessionCount < GlobalPool.maxConcurrentHeroesCount;
   }
 
   private static defaultLaunchArgs: IPuppetLaunchArgs;
@@ -51,7 +51,7 @@ export default class GlobalPool {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
-      maxConcurrentHerosCount: this.maxConcurrentHerosCount,
+      maxConcurrentHeroesCount: this.maxConcurrentHeroesCount,
     });
 
     if (!this.hasAvailability) {

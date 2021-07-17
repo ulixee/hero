@@ -1,24 +1,14 @@
 import { Helpers } from '@ulixee/testing';
 import { createPromise } from '@ulixee/commons/utils';
-import Core from '@ulixee/hero-core';
-import CoreServer from '@ulixee/hero-core/server';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import * as Fs from 'fs';
-import { Handler } from '../index';
+import Hero, { Core } from '../index';
 
 let koaServer;
-let handler: Handler;
 beforeAll(async () => {
-  const coreServer = new CoreServer();
-  await coreServer.listen({ port: 0 });
   Core.use(class BasicHumanEmulator extends HumanEmulator {
     static id = 'basic';
   });
-  handler = new Handler({ maxConcurrency: 1, host: await coreServer.address });
-  Helpers.onClose(() => {
-    handler.close();
-    coreServer.close();
-  }, true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -45,7 +35,7 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    const hero = new Hero({ humanEmulatorId: 'basic' });
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/get-upload`);
@@ -86,7 +76,7 @@ describe('Filechooser tests', () => {
 </html>`;
     });
 
-    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    const hero = new Hero({ humanEmulatorId: 'basic' });
     Helpers.needsClosing.push(hero);
 
     const file1 = await Fs.promises.readFile(`${__dirname}/filechooser.test.js`);

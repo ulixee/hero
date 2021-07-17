@@ -1,9 +1,9 @@
-import hero, { Observable } from '@ulixee/hero-full-client';
+import Hero, { Observable } from '@ulixee/hero';
 
 // process.env.HERO_SHOW_BROWSER = 'true';
 
 async function run() {
-  await hero.configure({ userAgent: '~ chrome = 88', showReplay: true });
+  const hero = new Hero({ userAgent: '~ chrome = 88', showReplay: true });
   await hero.goto('https://news.ycombinator.com/');
   await hero.waitForPaintingStable();
 

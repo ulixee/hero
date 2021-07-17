@@ -1,15 +1,17 @@
 import Log from '@ulixee/commons/Logger';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
-import RemoteConnectionToCore from './RemoteConnectionToCore';
+import RemoteServerConnectionToCore from './RemoteServerConnectionToCore';
 
 const { log } = Log(module);
 
+export type ICreateConnectionToCoreFn = (options: IConnectionToCoreOptions) => ConnectionToCore;
+
 export default class ConnectionFactory {
-  public static createLocalConnection?: (options: IConnectionToCoreOptions) => ConnectionToCore;
 
   public static createConnection(
     options: IConnectionToCoreOptions | ConnectionToCore,
+    overrideCreateConnectionToCoreFn?: ICreateConnectionToCoreFn,
   ): ConnectionToCore {
     if (options instanceof ConnectionToCore) {
       // NOTE: don't run connect on an instance
@@ -17,17 +19,16 @@ export default class ConnectionFactory {
     }
 
     let connection: ConnectionToCore;
-    if (options.host) {
-      connection = new RemoteConnectionToCore(options);
+    if (overrideCreateConnectionToCoreFn) {
+      connection = overrideCreateConnectionToCoreFn(options);
+    } else if (options.host) {
+      connection = new RemoteServerConnectionToCore(options);
     } else {
-      if (!this.createLocalConnection) {
-        throw new Error(
-          `You need to install the full "npm i ulixee" installation to use local connections.
-
-If you meant to connect to a remote host, include the "host" parameter for your connection`,
-        );
-      }
-      connection = this.createLocalConnection(options);
+      throw new Error(
+        'Hero Core could not be found locally' +
+        '\n' +
+        'If you meant to connect to a remote host, include the "host" parameter for your connection'
+      );
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

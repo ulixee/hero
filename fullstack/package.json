@@ -1,7 +1,7 @@
 {
-  "name": "@ulixee/hero-full-client",
+  "name": "@ulixee/hero-fullstack",
   "version": "1.5.4",
-  "description": "The Web Browser Built for Scraping",
+  "description": "The fullstack Hero (client + core)",
   "exports": {
     "import": "./index.mjs",
     "require": "./index.cjs"

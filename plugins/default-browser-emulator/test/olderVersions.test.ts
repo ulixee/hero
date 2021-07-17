@@ -1,4 +1,4 @@
-import { Hero } from '@ulixee/hero-full-client';
+import Hero from '@ulixee/hero-fullstack';
 import { Helpers } from '@ulixee/testing';
 
 afterAll(Helpers.afterAll);

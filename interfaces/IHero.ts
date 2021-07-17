@@ -37,8 +37,6 @@ export default interface IHero {
 
   closeTab(tab: ITab): Promise<void>;
 
-  // configure(configureOptions: IHeroConfigureOptions): Promise<void>;
-
   focusTab(tab: ITab): Promise<void>;
 
   // waitForNewTab(options?: IWaitForOptions): Promise<ITab>;

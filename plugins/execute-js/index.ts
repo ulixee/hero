@@ -1,3 +1,4 @@
+// / <reference path="./hero-mods.d.ts"/>
 import ClientPlugin from './lib/ClientPlugin';
 import CorePlugin from './lib/CorePlugin';
 

@@ -3,13 +3,10 @@ import { XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { FrameEnvironment, LocationStatus } from '@ulixee/hero';
 import Dialog from '@ulixee/hero/lib/Dialog';
-import { Handler } from '../index';
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler();
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -484,7 +481,7 @@ describe('basic Document tests', () => {
 });
 
 async function openBrowser(path: string) {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}${path}`);
   await hero.waitForPaintingStable();

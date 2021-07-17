@@ -111,7 +111,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     this.isClosing = false;
     await Core.start(options, false);
     return {
-      maxConcurrency: GlobalPool.maxConcurrentHerosCount,
+      maxConcurrency: GlobalPool.maxConcurrentHeroesCount,
     };
   }
 

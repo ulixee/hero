@@ -1,4 +1,4 @@
-import hero, { LocationStatus } from '@ulixee/hero-full-client';
+import Hero, { LocationStatus } from '@ulixee/hero';
 
 /**
  * The first run of this will result in a script taking 60+ seconds.
@@ -8,6 +8,7 @@ import hero, { LocationStatus } from '@ulixee/hero-full-client';
 
 async function run() {
   console.time('Detach');
+  const hero = new Hero();
   await hero.goto('https://chromium.googlesource.com/chromium/src/+refs');
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
   await hero.waitForPaintingStable();

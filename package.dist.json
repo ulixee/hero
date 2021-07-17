@@ -15,10 +15,10 @@
     "packages": [
       "client",
       "core",
+      "fullstack",
       "interfaces",
       "plugin-utils",
       "plugins/*",
-      "full-client",
       "puppet",
       "puppet-chrome",
       "mitm",

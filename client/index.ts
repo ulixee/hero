@@ -8,38 +8,30 @@ import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
-import Handler from './lib/Handler';
 import Hero from './lib/Hero';
-import type FrameEnvironment from './lib/FrameEnvironment';
 import type Tab from './lib/Tab';
-import RemoteConnectionToCore from './connections/RemoteConnectionToCore';
+import type FrameEnvironment from './lib/FrameEnvironment';
+import RemoteServerConnectionToCore from './connections/RemoteServerConnectionToCore';
 import ConnectionToCore from './connections/ConnectionToCore';
-import ConnectionFactory from './connections/ConnectionFactory';
 import { Observable } from './lib/ObjectObserver';
-import { readCommandLineArgs } from './lib/Input';
 
-const input = readCommandLineArgs();
-
-export default new Hero({ input });
+export default Hero;
 
 export {
   Observable,
-  Handler,
-  Hero,
-  RemoteConnectionToCore,
+  RemoteServerConnectionToCore,
   ConnectionToCore,
-  ConnectionFactory,
   InteractionCommand,
   MouseButton,
   ResourceType,
   KeyboardKeys,
   BlockedResourceType,
-  IHeroCreateOptions,
-  IConnectionToCoreOptions,
   Node,
   FrameEnvironment,
   Tab,
   XPathResult,
   LocationStatus,
   LocationTrigger,
+  IHeroCreateOptions,
+  IConnectionToCoreOptions,
 };

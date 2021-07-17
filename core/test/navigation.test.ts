@@ -6,21 +6,19 @@ import { getLogo, ITestKoaServer } from '@ulixee/testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import Core, { Tab } from '../index';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import FrameNavigationsObserver from '../lib/FrameNavigationsObserver';
-import CoreServer from '../server';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  const coreServer = new CoreServer();
-  await coreServer.listen({ port: 0 });
   Core.use(
     class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );
+  await Core.start();
   connectionToClient = Core.addConnection();
   await connectionToClient.connect();
   Helpers.onClose(() => connectionToClient.disconnect(), true);

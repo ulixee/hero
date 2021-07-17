@@ -3,7 +3,7 @@ import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import HumanEmulator from '@ulixee/default-human-emulator';
 import { getLogo, ITestKoaServer } from '@ulixee/testing/helpers';
 import Core, { Session } from '../index';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;

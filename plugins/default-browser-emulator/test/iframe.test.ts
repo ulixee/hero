@@ -2,7 +2,7 @@ import { Helpers } from '@ulixee/testing';
 import Core, { Session } from '@ulixee/hero-core';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import CoreServerConnection from '@ulixee/hero-core/server/ConnectionToClient';
+import CoreServerConnection from '@ulixee/hero-core/connections/ConnectionToClient';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 
 let koaServer: ITestKoaServer;

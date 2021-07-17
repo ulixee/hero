@@ -1,7 +1,7 @@
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import Resource from '../lib/Resource';
-import { Handler } from '../index';
+import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const sessionMeta = {
@@ -33,10 +33,9 @@ beforeEach(() => {
 
 describe('events', () => {
   it('receives close event', async () => {
-    const handler = new Handler(testConnection);
+    const hero = new Hero({ connectionToCore: testConnection });
 
     let isClosed = false;
-    const hero = await handler.createHero();
     await hero.on('close', () => {
       isClosed = true;
     });
@@ -52,7 +51,6 @@ describe('events', () => {
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
       'Session.create',
-      'Session.addEventListener', // automatic close tracker
       'Session.addEventListener', // user added close listener
       'Session.close',
     ]);
@@ -60,10 +58,9 @@ describe('events', () => {
   });
 
   it('adds and removes event listeners', async () => {
-    const handler = new Handler(testConnection);
-
     let eventCount = 0;
-    const hero = await handler.createHero();
+
+    const hero = new Hero({ connectionToCore: testConnection });
 
     const onResourceFn = (resource): void => {
       expect(resource).toBeInstanceOf(Resource);

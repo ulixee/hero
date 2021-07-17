@@ -1,12 +1,12 @@
-import Core, { Session } from '@ulixee/hero-core';
 import { Helpers } from '@ulixee/testing';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 import { MouseEventType } from '../models/MouseEventsTable';
+import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;

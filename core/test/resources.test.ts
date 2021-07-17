@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/testing';
-import Core, { Session } from '@ulixee/hero-core';
 import Resolvable from '@ulixee/commons/Resolvable';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
+import Core, { Session } from '../index';
 
 let connection: ConnectionToClient;
 beforeAll(() => {

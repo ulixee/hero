@@ -49,8 +49,7 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import CoreSession from './CoreSession';
-import IHeroConfigureOptions from '../interfaces/IHeroConfigureOptions';
-import ConnectionFactory from '../connections/ConnectionFactory';
+import ConnectionFactory, { ICreateConnectionToCoreFn } from "../connections/ConnectionFactory";
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, {
@@ -70,10 +69,12 @@ const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
+type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
+
 export interface IState {
   connection: SessionConnection;
   isClosing: boolean;
-  options: ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
+  options: IStateOptions;
   clientPlugins: IClientPlugin[];
 }
 
@@ -96,8 +97,6 @@ const propertyKeys: (keyof Hero)[] = [
 export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
   protected static options: IHeroDefaults = { ...DefaultOptions };
 
-  public readonly input: { command?: string } & any;
-
   #output: Output;
 
   constructor(options: IHeroCreateOptions = {}) {
@@ -111,22 +110,23 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
     options.blockedResourceTypes =
       options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;
     options.userProfile = options.userProfile || Hero.options.defaultUserProfile;
-    this.input = options.input;
 
     const sessionName = scriptInstance.generateSessionName(options.name);
     delete options.name;
-    const connection = new SessionConnection(this);
+    options = {
+      ...options,
+      sessionName,
+      scriptInstanceMeta: scriptInstance.meta,
+      dependencyMap: {},
+      corePluginPaths: [],
+    } as IStateOptions;
+
+    const connection = new SessionConnection(this, options);
 
     setState(this, {
       connection,
       isClosing: false,
-      options: {
-        ...options,
-        sessionName,
-        scriptInstanceMeta: scriptInstance.meta,
-        dependencyMap: {},
-        corePluginPaths: [],
-      },
+      options,
       clientPlugins: [],
     });
   }
@@ -224,32 +224,6 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
 
   public async closeTab(tab: Tab): Promise<void> {
     await tab.close();
-  }
-
-  public async configure(configureOptions: IHeroConfigureOptions): Promise<void> {
-    const { options } = getState(this);
-    setState(this, {
-      options: {
-        ...options,
-        ...configureOptions,
-      },
-    });
-
-    const connection = getState(this).connection;
-    // if already setup, call configure
-    if (connection.hasConnected) {
-      if (
-        configureOptions.showReplay !== undefined ||
-        configureOptions.connectionToCore !== undefined
-      ) {
-        throw new Error(
-          'This hero has already connected to a Core - it cannot be reconnected. You can use a Handler, or initialize the connection earlier in your script.',
-        );
-      }
-    } else {
-      const session = await connection.getCoreSessionOrReject();
-      await session.configure(getState(this).options);
-    }
   }
 
   public detach(tab: Tab, key?: string): FrozenTab {
@@ -488,7 +462,19 @@ class SessionConnection {
   private _activeTab: Tab;
   private _tabs: Tab[] = [];
 
-  constructor(private hero: Hero) {}
+  constructor(private hero: Hero, stateOptions: IStateOptions) {
+    const { connectionToCore, ...options } = stateOptions;
+
+    // @ts-ignore
+    const createConnectionToCoreFn: ICreateConnectionToCoreFn = hero.constructor.createConnectionToCore;
+    const connection = ConnectionFactory.createConnection(
+      connectionToCore ?? { isPersistent: false },
+      createConnectionToCoreFn,
+    );
+
+    this._connection = connection;
+    this._coreSession = connection.createSession(options).catch(err => err);
+  }
 
   public async refreshedTabs(): Promise<Tab[]> {
     const session = await this.getCoreSessionOrReject();
@@ -533,16 +519,7 @@ class SessionConnection {
     this.hasConnected = true;
 
     const { clientPlugins } = getState(this.hero);
-    const { showReplay, connectionToCore, ...options } = getState(this.hero)
-      .options as IHeroCreateOptions;
-
-    const connection = ConnectionFactory.createConnection(
-      connectionToCore ?? { isPersistent: false },
-    );
-    this._connection = connection;
-
-    this._coreSession = connection.createSession(options).catch(err => err);
-
+    const { showReplay } = getState(this.hero).options as IHeroCreateOptions;
     const defaultShowReplay = Boolean(JSON.parse(process.env.HERO_SHOW_REPLAY ?? 'true'));
 
     if (showReplay ?? defaultShowReplay) {

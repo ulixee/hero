@@ -1,11 +1,8 @@
-import cjsImport from './index.js';
-
-const {
-  Handler,
-  Hero,
-  RemoteConnectionToCore,
+import '@ulixee/commons/SourceMapSupport';
+import {
+  Observable,
+  RemoteServerConnectionToCore,
   ConnectionToCore,
-  ConnectionFactory,
   InteractionCommand,
   MouseButton,
   ResourceType,
@@ -17,15 +14,19 @@ const {
   XPathResult,
   LocationStatus,
   LocationTrigger,
-  Observable,
-} = cjsImport;
+} from '@ulixee/hero';
+import Core from '@ulixee/hero-core';
+import Hero from './lib/Hero';
+
+Core.start().catch(error => {
+  console.log('ERROR starting Core within Fullstack', error);
+});
 
 export {
-  Handler,
-  Hero,
-  RemoteConnectionToCore,
+  Core,
+  Observable,
+  RemoteServerConnectionToCore,
   ConnectionToCore,
-  ConnectionFactory,
   InteractionCommand,
   MouseButton,
   ResourceType,
@@ -37,7 +38,6 @@ export {
   XPathResult,
   LocationStatus,
   LocationTrigger,
-  Observable,
-};
+}
 
-export default cjsImport.default;
+export default Hero;

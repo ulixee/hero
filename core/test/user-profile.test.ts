@@ -5,7 +5,7 @@ import HttpRequestHandler from '@ulixee/hero-mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { createPromise } from '@ulixee/commons/utils';
 import Core from '../index';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 
 let koaServer: ITestKoaServer;

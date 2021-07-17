@@ -3,13 +3,10 @@ import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import * as os from 'os';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Handler } from '../index';
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler();
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/tabTest', ctx => {
     ctx.body = `<body>
@@ -28,7 +25,7 @@ afterEach(Helpers.afterEach);
 
 describe('Multi-tab scenarios', () => {
   it('can wait for another tab', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/tabTest`);
@@ -90,7 +87,7 @@ describe('Multi-tab scenarios', () => {
       ctx.body = `<body><h1>Final</h1></body>`;
     });
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/page1`);
@@ -138,7 +135,7 @@ describe('Multi-tab scenarios', () => {
 </body>`;
     });
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/tabTest2`);
@@ -193,7 +190,7 @@ document.querySelector('a').addEventListener('click', event => {
 </body>`;
     });
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/ajaxTab`);

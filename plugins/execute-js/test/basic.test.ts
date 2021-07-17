@@ -1,26 +1,16 @@
-import { Hero, LocationStatus } from '@ulixee/hero';
+import Hero, { LocationStatus, Core } from '@ulixee/hero-fullstack';
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
-import Core from '@ulixee/hero-core';
-import ConnectionToClient from '@ulixee/hero-core/server/ConnectionToClient';
-import CoreServer from '@ulixee/hero-core/server';
 import ExecuteJsCorePlugin from '../lib/CorePlugin';
 
 let koaServer: ITestKoaServer;
-let connectionToClient: ConnectionToClient;
-let coreServer;
 beforeAll(async () => {
-  coreServer = new CoreServer();
-  await coreServer.listen({ port: 0 });
   Core.use(ExecuteJsCorePlugin);
   Core.allowDynamicPluginLoading = false;
   koaServer = await Helpers.runKoaServer();
-  connectionToClient = Core.addConnection();
   Helpers.onClose(() => {
-    connectionToClient.disconnect();
     koaServer.close();
-    coreServer.close();
   }, true);
 });
 
@@ -40,17 +30,13 @@ test('it should run function in browser and return response', async () => {
 
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({
-    userAgent,
-    connectionToCore: {
-      host: await coreServer.address,
-    },
-  });
+  const hero = new Hero({ userAgent });
   Helpers.onClose(() => hero.close(), true);
   hero.use(ExecuteJsPlugin);
 
   await hero.goto(`${koaServer.baseUrl}/test1`);
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  // @ts-ignore
   const response = await hero.executeJs(() => {
     // @ts-ignore
     return window.testRun();
@@ -73,17 +59,13 @@ test('it should run function in browser and return incr', async () => {
 
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
-  const hero = new Hero({
-    userAgent,
-    connectionToCore: {
-      host: await coreServer.address,
-    },
-  });
+  const hero = new Hero({ userAgent });
   Helpers.onClose(() => hero.close(), true);
   hero.use(ExecuteJsPlugin);
 
   await hero.goto(`${koaServer.baseUrl}/test2`);
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
+  // @ts-ignore
   const response = await hero.executeJs((num) => {
     // @ts-ignore
     return window.testRun(num);

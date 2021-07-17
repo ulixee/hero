@@ -421,7 +421,7 @@ export function afterEach(): Promise<void> {
 
 export async function afterAll(): Promise<void> {
   await closeAll(true);
-  await Core.shutdown(true);
+  await Core.shutdown();
   await CoreProcess.kill();
 }
 

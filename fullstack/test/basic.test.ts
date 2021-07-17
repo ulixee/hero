@@ -1,12 +1,9 @@
 import { Helpers } from '@ulixee/testing';
 import Resource from '@ulixee/hero/lib/Resource';
-import { Handler } from '../index';
+import Hero from '../index';
 
 let koaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler({ maxConcurrency: 1 });
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -15,7 +12,7 @@ afterEach(Helpers.afterEach);
 describe('basic Full Client tests', () => {
   it('runs goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(exampleUrl);
@@ -42,7 +39,7 @@ describe('basic Full Client tests', () => {
       ctx.statusCode = 500;
     });
 
-    const hero = await handler.createHero({
+    const hero = new Hero({
       blockedResourceTypes: ['BlockAssets'],
     });
     Helpers.needsClosing.push(hero);
@@ -58,28 +55,15 @@ describe('basic Full Client tests', () => {
   });
 
   it('should get unreachable proxy errors in the client', async () => {
-    const hero = await handler.createHero({
+    const hero = new Hero({
       upstreamProxyUrl: koaServer.baseUrl,
     });
     Helpers.needsClosing.push(hero);
     await expect(hero.goto(`${koaServer.baseUrl}/`)).rejects.toThrow();
   });
 
-  it('should get errors in dispatch', async () => {
-    handler.dispatchHero(
-      async hero => {
-        await hero.goto(`${koaServer.baseUrl}/`);
-      },
-      {
-        upstreamProxyUrl: koaServer.baseUrl,
-      },
-    );
-
-    await expect(handler.waitForAllDispatches()).rejects.toThrow();
-  });
-
   it('runs goto with no document loaded', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     const url = await hero.document.location.host;
     expect(url).toBe(null);
@@ -87,7 +71,7 @@ describe('basic Full Client tests', () => {
 
   it('gets the resource back from a goto', async () => {
     const exampleUrl = `${koaServer.baseUrl}/`;
-    const hero = await handler.createHero({
+    const hero = new Hero({
       locale: 'en-US,en',
     });
     Helpers.needsClosing.push(hero);
@@ -124,7 +108,7 @@ describe('basic Full Client tests', () => {
   });
 
   it('can get and set cookies', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     koaServer.get('/cookies', ctx => {
@@ -167,7 +151,7 @@ describe('basic Full Client tests', () => {
   });
 
   it('should send a friendly message if trying to set cookies before a url is loaded', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await expect(hero.activeTab.cookieStorage.setItem('test', 'test')).rejects.toThrowError(
@@ -176,7 +160,7 @@ describe('basic Full Client tests', () => {
   });
 
   it('can get and set localStorage', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/`);
