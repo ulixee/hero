@@ -9,7 +9,6 @@
     },
     "./start": "./start.js",
     "./lib/*": "./lib/*.js",
-    "./lib/CoreProcess": "./lib/CoreProcess.js",
     "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
     "./server": "./server/index.js"
   },

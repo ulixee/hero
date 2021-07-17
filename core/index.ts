@@ -14,7 +14,6 @@ import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
 import ConnectionToClient from './connections/ConnectionToClient';
-import CoreProcess from './lib/CoreProcess';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
@@ -22,7 +21,7 @@ import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 
-export { GlobalPool, Tab, Session, LocationTrigger, CoreProcess };
+export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core {
   public static readonly connections: ConnectionToClient[] = [];
