@@ -1,7 +1,7 @@
 import Log from '@ulixee/commons/Logger';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
-import RemoteServerConnectionToCore from './RemoteServerConnectionToCore';
+import ConnectionToRemoteCoreServer from './ConnectionToRemoteCoreServer';
 
 const { log } = Log(module);
 
@@ -22,7 +22,7 @@ export default class ConnectionFactory {
     if (overrideCreateConnectionToCoreFn) {
       connection = overrideCreateConnectionToCoreFn(options);
     } else if (options.host) {
-      connection = new RemoteServerConnectionToCore(options);
+      connection = new ConnectionToRemoteCoreServer(options);
     } else {
       throw new Error(
         'Hero Core could not be found locally' +

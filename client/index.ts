@@ -11,7 +11,7 @@ import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
 import Hero from './lib/Hero';
 import type Tab from './lib/Tab';
 import type FrameEnvironment from './lib/FrameEnvironment';
-import RemoteServerConnectionToCore from './connections/RemoteServerConnectionToCore';
+import ConnectionToRemoteCoreServer from './connections/ConnectionToRemoteCoreServer';
 import ConnectionToCore from './connections/ConnectionToCore';
 import { Observable } from './lib/ObjectObserver';
 
@@ -19,7 +19,7 @@ export default Hero;
 
 export {
   Observable,
-  RemoteServerConnectionToCore,
+  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,

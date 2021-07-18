@@ -4,13 +4,13 @@ import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToClient from '@ulixee/hero-core/connections/ConnectionToClient';
 import TypeSerializer from '@ulixee/commons/TypeSerializer';
 
-export default class LocalConnectionToCore extends ConnectionToCore {
+export default class ConnectionToLocalCore extends ConnectionToCore {
   public static shouldSerialize = false;
 
   #connectionToClient: ConnectionToClient;
 
   protected async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
-    if (LocalConnectionToCore.shouldSerialize) {
+    if (ConnectionToLocalCore.shouldSerialize) {
       const json = TypeSerializer.stringify(payload);
       payload = TypeSerializer.parse(json.toString(), 'CLIENT');
     }
@@ -24,7 +24,7 @@ export default class LocalConnectionToCore extends ConnectionToCore {
   protected async createConnection(): Promise<Error | null> {
     this.#connectionToClient = Core.addConnection();
     this.#connectionToClient.on('message', payload => {
-      if (LocalConnectionToCore.shouldSerialize) {
+      if (ConnectionToLocalCore.shouldSerialize) {
         const message = TypeSerializer.stringify(payload);
         payload = TypeSerializer.parse(message.toString(), 'LOCAL CORE');
       }

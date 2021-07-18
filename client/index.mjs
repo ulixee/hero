@@ -3,7 +3,7 @@ import cjsImport from './index.js';
 const {
   Hero,
   Observable,
-  RemoteServerConnectionToCore,
+  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
@@ -21,7 +21,7 @@ const {
 export {
   Hero,
   Observable,
-  RemoteServerConnectionToCore,
+  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,

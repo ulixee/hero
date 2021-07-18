@@ -1,7 +1,7 @@
 import '@ulixee/commons/SourceMapSupport';
 import {
   Observable,
-  RemoteServerConnectionToCore,
+  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,
@@ -25,7 +25,7 @@ Core.start().catch(error => {
 export {
   Core,
   Observable,
-  RemoteServerConnectionToCore,
+  ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
   MouseButton,

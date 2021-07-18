@@ -8,7 +8,7 @@ import ConnectionToCore from './ConnectionToCore';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
-export default class RemoteServerConnectionToCore extends ConnectionToCore {
+export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
   private webSocketOrError: IResolvablePromise<WebSocket | Error>;
 
   constructor(options: IConnectionToCoreOptions) {
