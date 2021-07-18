@@ -50,7 +50,7 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import CoreSession from './CoreSession';
-import ConnectionFactory from '../connections/ConnectionFactory';
+import ConnectionFactory, { ICreateConnectionToCoreFn } from "../connections/ConnectionFactory";
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, {
@@ -99,6 +99,7 @@ type IClassEvents = {
 };
 
 export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
+  public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
   private static emitter = new EventEmitter();
 
