@@ -3,7 +3,7 @@ import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import Core, { Session } from '../index';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 
 let koaServer: ITestKoaServer;
 let connection: ConnectionToClient;

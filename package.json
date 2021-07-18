@@ -78,10 +78,10 @@
     "packages": [
       "client",
       "core",
+      "fullstack",
       "interfaces",
       "plugin-utils",
       "plugins/*",
-      "full-client",
       "mitm",
       "mitm-socket",
       "puppet",

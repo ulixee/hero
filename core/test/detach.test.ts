@@ -1,4 +1,4 @@
-import Core, { Session } from '@ulixee/hero-core';
+import { inspect } from 'util';
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import {
@@ -6,27 +6,25 @@ import {
   getNodePointerFnName,
 } from '@ulixee/hero-interfaces/jsPathFnNames';
 import INodePointer from 'awaited-dom/base/INodePointer';
-import { inspect } from 'util';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import ConnectionToClient from '../server/ConnectionToClient';
-import CoreServer from '../server';
+import Core, { Session } from '../index';
+import ConnectionToClient from '../connections/ConnectionToClient';
 
 inspect.defaultOptions.colors = true;
 inspect.defaultOptions.depth = null;
 let koaServer: ITestKoaServer;
 let connectionToClient: ConnectionToClient;
 beforeAll(async () => {
-  const coreServer = new CoreServer();
-  await coreServer.listen({ port: 0 });
   Core.use(
     class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );
+  await Core.start();
   connectionToClient = Core.addConnection();
+  await connectionToClient.connect();
   Helpers.onClose(() => connectionToClient.disconnect(), true);
-  Helpers.onClose(() => coreServer.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);

@@ -1,13 +1,10 @@
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Handler } from '../index';
+import Hero from '../index';
 
-let handler: Handler;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  handler = new Handler();
   koaServer = await Helpers.runKoaServer(true);
-  Helpers.onClose(() => handler.close(), true);
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -30,7 +27,7 @@ describe('basic waitForLocation change detections', () => {
 
     const startUrl = `${koaServer.baseUrl}/start`;
     const finishUrl = `${koaServer.baseUrl}/finish`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(startUrl);
     const firstUrl = await hero.url;
@@ -73,7 +70,7 @@ describe('basic waitForLocation change detections', () => {
     });
 
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const hero = await handler.createHero();
+    const hero = new Hero();
     await hero.goto(`${koaServer.baseUrl}/page1`);
     const startlink = hero.document.querySelector('a');
     await hero.interact({ click: startlink, waitForElementVisible: startlink });
@@ -108,7 +105,7 @@ describe('basic waitForLocation change detections', () => {
     const startUrl = `${koaServer.baseUrl}/loc1`;
     const page2Url = `${koaServer.baseUrl}/loc2`;
     const finishUrl = `${koaServer.baseUrl}/loc3`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(startUrl);
     const firstUrl = await hero.url;
@@ -144,8 +141,7 @@ describe('basic waitForLocation change detections', () => {
       ctx.body = `<body><h1>Loaded 2</h1></body>`;
     });
 
-    const hero = await handler.createHero();
-
+    const hero = new Hero();
     await hero.goto(`${koaServer.baseUrl}/loaded1`);
     await hero.waitForPaintingStable();
     const link = hero.document.querySelector('a');

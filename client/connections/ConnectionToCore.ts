@@ -36,7 +36,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   private connectPromise: IResolvablePromise<Error | null>;
   private get connectOptions(): ICoreConfigureOptions & { isPersistent: boolean } {
     return {
-      coreServerPort: this.options.coreServerPort,
       localProxyPortStart: this.options.localProxyPortStart,
       sessionsDir: this.options.sessionsDir,
       isPersistent: this.options.isPersistent,

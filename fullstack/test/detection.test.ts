@@ -1,20 +1,15 @@
 import { Helpers } from '@ulixee/testing';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
-import Core, { Session } from '@ulixee/hero-core';
+import { Session } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Handler, LocationStatus } from '../index';
+import Hero, { LocationStatus } from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');
 
-let handler: Handler;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await Core.start();
-  handler = new Handler({ host: await Core.server.address });
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
-
   koaServer.get('/fpCollect.min.js', ctx => {
     ctx.set('Content-Type', 'application/javascript');
     ctx.body = Fs.readFileSync(fpCollectPath, 'utf-8')
@@ -68,7 +63,7 @@ afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
 test('widevine detection', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(koaServer.baseUrl);
 
@@ -111,7 +106,7 @@ test('should pass FpScanner', async () => {
     });
   });
 
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}/collect`);
 
@@ -128,7 +123,7 @@ test('should pass FpScanner', async () => {
 }, 30e3);
 
 test('should not be denied for notifications but prompt for permissions', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}`);
   const activeTab = await hero.activeTab;
@@ -152,7 +147,7 @@ test('should not be denied for notifications but prompt for permissions', async 
 });
 
 test('should not leave markers on permissions.query.toString', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   const tabId = await hero.activeTab.tabId;
   await hero.goto(`${koaServer.baseUrl}`);
@@ -179,7 +174,7 @@ test('should not leave markers on permissions.query.toString', async () => {
 });
 
 test('should not recurse the toString function', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}`);
   const tabId = await hero.activeTab.tabId;
@@ -200,7 +195,7 @@ test('should not recurse the toString function', async () => {
 });
 
 test('should properly maintain stack traces in toString', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}`);
   const tabId = await hero.activeTab.tabId;
@@ -236,7 +231,7 @@ test('should properly maintain stack traces in toString', async () => {
 
 // https://github.com/digitalhurricane-io/puppeteer-detection-100-percent
 test('should not leave stack trace markers when calling getJsValue', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   const tabId = await hero.activeTab.tabId;
   await hero.goto(koaServer.baseUrl);
@@ -260,7 +255,7 @@ document.querySelector = (function (orig) {
 });
 
 test('should not leave stack trace markers when calling in page functions', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   koaServer.get('/marker', ctx => {
     ctx.body = `
@@ -301,7 +296,7 @@ test('should not leave stack trace markers when calling in page functions', asyn
 });
 
 test('should not have too much recursion in prototype', async () => {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   const tabId = await hero.activeTab.tabId;
   const sessionId = await hero.sessionId;

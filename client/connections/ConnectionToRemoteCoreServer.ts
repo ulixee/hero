@@ -1,5 +1,5 @@
-import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import * as WebSocket from 'ws';
+import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import TypeSerializer from '@ulixee/commons/TypeSerializer';
 import { createPromise } from '@ulixee/commons/utils';
 import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
@@ -8,7 +8,7 @@ import ConnectionToCore from './ConnectionToCore';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
-export default class RemoteConnectionToCore extends ConnectionToCore {
+export default class ConnectionToRemoteCoreServer extends ConnectionToCore {
   private webSocketOrError: IResolvablePromise<WebSocket | Error>;
 
   constructor(options: IConnectionToCoreOptions) {

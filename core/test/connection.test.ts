@@ -1,25 +1,19 @@
 import { Helpers } from '@ulixee/testing';
-import hero, { Hero, Handler } from '@ulixee/hero';
+import Hero, { Core } from '@ulixee/hero-fullstack';
 import * as http from 'http';
 import { Log } from '@ulixee/commons/Logger';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
 import { DependencyInstaller } from '@ulixee/chrome-app/lib/DependencyInstaller';
 import ChromeApp from '@ulixee/chrome-app/index';
-import Core from '../index';
-import CoreServer from '../server';
 
 const validate = jest.spyOn(DependencyInstaller.prototype, 'validate');
 const logError = jest.spyOn(Log.prototype, 'error');
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
-let coreServer: CoreServer;
 
 beforeAll(async () => {
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
-  coreServer = new CoreServer();
-  Helpers.onClose(() => coreServer.close(), true);
-  await coreServer.listen({ port: 0 });
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
@@ -28,30 +22,22 @@ describe('basic connection tests', () => {
   it('should goto and waitForLocation', async () => {
     // bind a core server to core
 
-    const handler = new Handler({
-      host: await coreServer.address,
-    });
-    const handlerHero = await handler.createHero();
-    const sessionId = await handlerHero.sessionId;
+    const hero = new Hero();
+    const sessionId = await hero.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await handlerHero.goto(url);
+    await hero.goto(url);
 
-    const html = await handlerHero.document.documentElement.outerHTML;
+    const html = await hero.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await handlerHero.close();
-    await handler.close();
+    await hero.close();
   });
 
   it('should be able to set a new connection on the default hero', async () => {
     // bind a core server to core
-    await hero.configure({
-      connectionToCore: {
-        host: await coreServer.address,
-      },
-    });
+    const hero = new Hero();
     const sessionId = await hero.sessionId;
     expect(sessionId).toBeTruthy();
 
@@ -66,21 +52,17 @@ describe('basic connection tests', () => {
 
   it('should be able to configure a new hero', async () => {
     // bind a core server to core
-    const customHero = new Hero({
-      connectionToCore: {
-        host: await coreServer.address,
-      },
-    });
-    const sessionId = await customHero.sessionId;
+    const hero = new Hero();
+    const sessionId = await hero.sessionId;
     expect(sessionId).toBeTruthy();
 
     const { url } = httpServer;
-    await customHero.goto(url);
+    await hero.goto(url);
 
-    const html = await customHero.document.documentElement.outerHTML;
+    const html = await hero.document.documentElement.outerHTML;
     expect(html).toBe('<html><head></head><body>Hello world</body></html>');
 
-    await customHero.close();
+    await hero.close();
   });
 
   it('should throw an error informing how to install dependencies', async () => {
@@ -110,9 +92,6 @@ describe('basic connection tests', () => {
 
     const hero1 = new Hero({
       browserEmulatorId: 'emulate-test',
-      connectionToCore: {
-        host: await coreServer.address,
-      },
     });
     Helpers.needsClosing.push(hero1);
 

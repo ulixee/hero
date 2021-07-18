@@ -2,7 +2,7 @@ import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { Helpers } from '@ulixee/testing/index';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
-import { Handler } from '../index';
+import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 let payloadHandler: (payload: ICoreRequestPayload) => ICoreResponsePayload = () => null;
@@ -50,13 +50,11 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({ url: '/test.js' });
     expect(resources).toHaveLength(1);
     await hero.close();
-    await handler.close();
   });
 
   it('should try more than once to get files', async () => {
@@ -71,15 +69,13 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({ url: '/test2.js' });
     expect(resources).toHaveLength(1);
     expect(attempts).toBe(3);
 
     await hero.close();
-    await handler.close();
   });
 
   it('should return multiple files if many match on one round trip', async () => {
@@ -94,14 +90,12 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({ type: 'Xhr' });
     expect(resources).toHaveLength(2);
 
     await hero.close();
-    await handler.close();
   });
 
   it('should match multiple files by url', async () => {
@@ -116,14 +110,12 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({ url: '/test3.js' });
     expect(resources).toHaveLength(2);
 
     await hero.close();
-    await handler.close();
   });
 
   it('should allow a user to specify a match function', async () => {
@@ -140,9 +132,8 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test1.js') {
@@ -155,7 +146,6 @@ describe('waitForResource', () => {
     expect(resources[0].url).toBe('/test1.js');
 
     await hero.close();
-    await handler.close();
   });
 
   it('should run multiple batches when a match function is provided', async () => {
@@ -182,9 +172,8 @@ describe('waitForResource', () => {
       }
     };
 
-    const handler = new Handler(new Piper());
-    Helpers.needsClosing.push(handler);
-    const hero = await handler.createHero();
+    const hero = new Hero({ connectionToCore: new Piper() });
+    Helpers.needsClosing.push(hero);
     const resources = await hero.waitForResource({
       filterFn(resource, done) {
         if (resource.url === '/test5.js') {
@@ -199,6 +188,5 @@ describe('waitForResource', () => {
     expect(resources).toHaveLength(4);
 
     await hero.close();
-    await handler.close();
   });
 });

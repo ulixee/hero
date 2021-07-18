@@ -4,22 +4,19 @@ import { GlobalPool } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import Resolvable from '@ulixee/commons/Resolvable';
 import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
-import { Handler } from '../index';
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler();
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentHerosCount = 3;
+  GlobalPool.maxConcurrentHeroesCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
 
 describe('basic Emulator tests', () => {
   it('should be able to set a timezoneId', async () => {
-    const hero = await handler.createHero({
+    const hero = new Hero({
       timezoneId: 'America/Los_Angeles',
     });
     Helpers.needsClosing.push(hero);
@@ -33,7 +30,7 @@ describe('basic Emulator tests', () => {
   });
 
   it('should affect accept-language header', async () => {
-    const hero = await handler.createHero({ locale: 'en-GB,en' });
+    const hero = new Hero({ locale: 'en-GB,en' });
     Helpers.needsClosing.push(hero);
 
     let acceptLanguage = '';
@@ -47,7 +44,7 @@ describe('basic Emulator tests', () => {
   });
 
   it('should affect navigator.language', async () => {
-    const hero = await handler.createHero({ locale: 'fr-CH,fr-CA' });
+    const hero = new Hero({ locale: 'fr-CH,fr-CA' });
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}`);
@@ -60,7 +57,7 @@ describe('basic Emulator tests', () => {
 
   it('should format number', async () => {
     {
-      const hero = await handler.createHero({ locale: 'en-US,en;q=0.9' });
+      const hero = new Hero({ locale: 'en-US,en;q=0.9' });
       Helpers.needsClosing.push(hero);
 
       await hero.goto(`${koaServer.baseUrl}`);
@@ -68,7 +65,7 @@ describe('basic Emulator tests', () => {
       expect(result).toBe('1,000,000.5');
     }
     {
-      const hero = await handler.createHero({ locale: 'fr-CH' });
+      const hero = new Hero({ locale: 'fr-CH' });
       Helpers.needsClosing.push(hero);
 
       await hero.goto(`${koaServer.baseUrl}`);
@@ -80,7 +77,7 @@ describe('basic Emulator tests', () => {
 
   it('should format date', async () => {
     {
-      const hero = await handler.createHero({
+      const hero = new Hero({
         locale: 'en-US',
         timezoneId: 'America/Los_Angeles',
       });
@@ -94,7 +91,7 @@ describe('basic Emulator tests', () => {
       expect(result).toBe(formatted);
     }
     {
-      const hero = await handler.createHero({
+      const hero = new Hero({
         locale: 'de-DE',
         timezoneId: 'Europe/Berlin',
       });
@@ -120,7 +117,7 @@ describe('setScreensize', () => {
       frameBorderHeight: 0,
     };
     const viewport = Viewports.getDefault(windowFraming, windowFraming);
-    const hero = await handler.createHero({
+    const hero = new Hero({
       viewport,
     });
     Helpers.needsClosing.push(hero);
@@ -143,7 +140,7 @@ describe('setScreensize', () => {
   });
 
   it('should support Media Queries', async () => {
-    const hero = await handler.createHero({
+    const hero = new Hero({
       viewport: {
         width: 200,
         height: 200,
@@ -173,7 +170,7 @@ describe('setScreensize', () => {
 
 describe('mouse', () => {
   it('should emulate the hover media feature', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     expect(await hero.getJsValue(`matchMedia('(hover: none)').matches`)).toBe(false);
@@ -189,7 +186,7 @@ describe('mouse', () => {
 
 describe('geolocation', () => {
   it('should be able to set a geolocation', async () => {
-    const hero = await handler.createHero({ geolocation: { longitude: 10, latitude: 10 } });
+    const hero = new Hero({ geolocation: { longitude: 10, latitude: 10 } });
     Helpers.needsClosing.push(hero);
     await hero.goto(koaServer.baseUrl);
 
@@ -209,7 +206,7 @@ describe('user hero and platform', () => {
   it('should be able to configure a userAgent', async () => {
     const userAgent =
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4472.124 Safari/537.36';
-    const hero = await handler.createHero({
+    const hero = new Hero({
       userAgent,
     });
     Helpers.needsClosing.push(hero);
@@ -219,7 +216,7 @@ describe('user hero and platform', () => {
   });
 
   it('should be able to configure a userAgent with a range', async () => {
-    const hero = await handler.createHero({
+    const hero = new Hero({
       userAgent: '~ chrome >= 88 && chrome < 89',
     });
     Helpers.needsClosing.push(hero);
@@ -232,7 +229,7 @@ describe('user hero and platform', () => {
   });
 
   it('should be able to configure a userAgent with a wildcard', async () => {
-    const hero = await handler.createHero({
+    const hero = new Hero({
       userAgent: '~ chrome = 88.x',
     });
     Helpers.needsClosing.push(hero);
@@ -245,7 +242,7 @@ describe('user hero and platform', () => {
   });
 
   it('should add user hero and platform to window & frames', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     const heroMeta = await hero.meta;
@@ -310,7 +307,7 @@ describe('user hero and platform', () => {
   });
 
   it('should maintain user agent and platform across navigations', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     const heroMeta = await hero.meta;
@@ -391,7 +388,7 @@ describe('user hero and platform', () => {
   });
 
   it('should add user hero and platform to dedicated workers', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     const heroMeta = await hero.meta;
@@ -442,7 +439,7 @@ describe('user hero and platform', () => {
   });
 
   it('should add user hero and platform to service workers', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     const heroMeta = await hero.meta;
@@ -546,7 +543,7 @@ self.addEventListener('message', async event => {
 
     jsonResult = new Resolvable<string>();
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${httpsServer.baseUrl}/creepjs/tests/workers.html`);
 
@@ -565,7 +562,7 @@ self.addEventListener('message', async event => {
 
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('should load creepjs', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto('https://abrahamjuliot.github.io/creepjs/tests/workers.html');
     await hero.waitForPaintingStable();

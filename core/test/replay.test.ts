@@ -1,7 +1,5 @@
-import Core, { Session } from '@ulixee/hero-core';
 import { Helpers } from '@ulixee/testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import * as WebSocket from 'ws';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { createPromise } from '@ulixee/commons/utils';
 import Output from '@ulixee/hero/lib/Output';
@@ -9,6 +7,8 @@ import ReplayOutput from '@ulixee/replay/backend/api/ReplayOutput';
 import ObjectObserver from '@ulixee/hero/lib/ObjectObserver';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
+import ConnectionToReplay from "../connections/ConnectionToReplay";
+import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -38,20 +38,12 @@ describe('basic Replay API tests', () => {
     Helpers.onClose(() => connection.disconnect());
     const meta = await connection.createSession();
 
-    const api = new WebSocket(`${await Core.server.address}/replay`, {
-      headers: {
-        'data-location': meta.sessionsDataLocation,
-        'session-id': meta.sessionId,
-      },
-    });
     const commandMap: { [id: string]: ICommandWithResult } = {};
-    const paintMap: {
-      [timestamp: number]: IDomChangeRecord[];
-    } = {};
+    const paintMap: { [timestamp: number]: IDomChangeRecord[] } = {};
     const gotCommandsPromise = createPromise();
-    api.on('message', async message => {
-      const { event, data } = JSON.parse(message.toString());
 
+    const onReplayMessage = async message => {
+      const { event, data } = JSON.parse(message.toString());
       if (event === 'commands') {
         for (const command of data) {
           commandMap[command.id] = command;
@@ -65,7 +57,13 @@ describe('basic Replay API tests', () => {
           paintMap[change.timestamp].push(change);
         }
       }
-    });
+    };
+
+    const connectionToReplay = new ConnectionToReplay(onReplayMessage, {
+      dataLocation: meta.sessionsDataLocation,
+      sessionId: meta.sessionId,
+    } as any);
+    const requestReplayPromise = connectionToReplay.handleRequest();
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/test1`);
     await tab.waitForLoad('PaintingStable');
@@ -89,6 +87,7 @@ describe('basic Replay API tests', () => {
     const location = await tab.execJsPath(['location', 'href']);
     expect(location.value).toBe(`${koaServer.baseUrl}/test2`);
 
+
     await gotCommandsPromise.promise;
 
     const commands = Object.values(commandMap);
@@ -99,8 +98,9 @@ describe('basic Replay API tests', () => {
     const paintEvents = Object.values(paintMap);
     expect(paintEvents[0]).toHaveLength(14);
 
-    await Core.shutdown(true);
-    if (api.readyState === WebSocket.OPEN) api.terminate();
+    await Core.shutdown();
+    await requestReplayPromise;
+    connectionToReplay.close();
   }, 20e3);
 
   it('should be able to rebuild an output', async () => {

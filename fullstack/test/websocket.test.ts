@@ -6,15 +6,11 @@ import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import { AddressInfo } from 'net';
-import Core from '@ulixee/hero-core/index';
-import { Handler } from '../index';
+import Hero, { Core } from "../index";
 
-let handler: Handler;
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
-  await Core.start();
-  handler = new Handler({ host: await Core.server.address });
-  Helpers.onClose(() => handler.close(), true);
+  Helpers.onClose(() => Core.shutdown(), true);
   koaServer = await Helpers.runKoaServer();
 });
 
@@ -66,8 +62,7 @@ describe('Websocket tests', () => {
   </script>
 </html>`;
     });
-    const hero = await handler.createHero();
-
+    const hero = new Hero();
     await hero.goto(`${koaServer.baseUrl}/ws-test`);
 
     await hero.waitForElement(hero.document.querySelector('h1'));

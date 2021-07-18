@@ -1,16 +1,13 @@
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import Core from '@ulixee/hero-core';
 import SessionDb from '@ulixee/hero-core/dbs/SessionDb';
 import GlobalPool from '@ulixee/hero-core/lib/GlobalPool';
-import { Handler, Observable } from '../index';
+import Hero, { Core, Observable } from "../index";
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
   await Core.start();
-  handler = new Handler({ host: await Core.server.address });
-  Helpers.onClose(() => handler.close(), true);
+  Helpers.onClose(() => Core.shutdown(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -183,7 +180,7 @@ describe('Output tests', () => {
 });
 
 async function openBrowser(path: string) {
-  const hero = await handler.createHero();
+  const hero = new Hero();
   Helpers.needsClosing.push(hero);
   await hero.goto(`${koaServer.baseUrl}${path}`);
   await hero.waitForPaintingStable();

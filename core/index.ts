@@ -13,9 +13,7 @@ import DefaultHumanEmulator from '@ulixee/default-human-emulator';
 import extractPlugins from '@ulixee/hero-plugin-utils/lib/utils/extractPlugins';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import { IPluginClass } from '@ulixee/hero-interfaces/IPlugin';
-import ConnectionToClient from './server/ConnectionToClient';
-import CoreServer from './server';
-import CoreProcess from './lib/CoreProcess';
+import ConnectionToClient from './connections/ConnectionToClient';
 import Session from './lib/Session';
 import Tab from './lib/Tab';
 import GlobalPool from './lib/GlobalPool';
@@ -23,10 +21,9 @@ import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
 
-export { GlobalPool, Tab, Session, LocationTrigger, CoreProcess };
+export { GlobalPool, Tab, Session, LocationTrigger };
 
 export default class Core {
-  public static server = new CoreServer();
   public static readonly connections: ConnectionToClient[] = [];
   public static pluginMap: {
     humanEmulatorsById: { [id: string]: IHumanEmulatorClass };
@@ -93,10 +90,10 @@ export default class Core {
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
-    const { localProxyPortStart, sessionsDir, maxConcurrentHerosCount } = options;
+    const { localProxyPortStart, sessionsDir, maxConcurrentHeroesCount } = options;
 
-    if (maxConcurrentHerosCount !== undefined)
-      GlobalPool.maxConcurrentHerosCount = maxConcurrentHerosCount;
+    if (maxConcurrentHeroesCount !== undefined)
+      GlobalPool.maxConcurrentHeroesCount = maxConcurrentHeroesCount;
 
     if (localProxyPortStart !== undefined)
       GlobalPool.localProxyPortStart = options.localProxyPortStart;
@@ -107,20 +104,13 @@ export default class Core {
 
     await GlobalPool.start();
 
-    await this.server.listen({ port: options.coreServerPort });
-
-    const host = await this.server.address;
-
     log.info('Core started', {
-      coreHost: await Core.server.address,
       sessionId: null,
       parentLogId: startLogId,
     });
-    // if started as a subprocess, send back the host
-    if (process.send) process.send(host);
   }
 
-  public static async shutdown(force = false): Promise<void> {
+  public static async shutdown(): Promise<void> {
     if (this.isClosing) return this.isClosing;
 
     const isClosing = new Resolvable<void>();
@@ -134,7 +124,6 @@ export default class Core {
         shutDownErrors.push(error),
       );
       await GlobalPool.close().catch(error => shutDownErrors.push(error));
-      await this.server.close(!force).catch(error => shutDownErrors.push(error));
 
       this.wasManuallyStarted = false;
       if (Core.onShutdown) Core.onShutdown();

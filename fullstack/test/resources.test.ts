@@ -1,12 +1,9 @@
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Handler } from '../index';
+import Hero from "../index";
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler({ maxConcurrency: 2 });
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
   koaServer.get('/test', ctx => {
     ctx.body = `<html>
@@ -33,7 +30,7 @@ afterEach(Helpers.afterEach);
 describe('basic resource tests', () => {
   it('waits for a resource', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(exampleUrl);
     const elem = hero.document.querySelector('a');
@@ -46,7 +43,7 @@ describe('basic resource tests', () => {
 
   it('waits for a resource loaded since a previous command id', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(exampleUrl);
     let lastCommandId: number;
@@ -66,7 +63,7 @@ describe('basic resource tests', () => {
 
   it('cancels a pending resource on hero close', async () => {
     const exampleUrl = `${koaServer.baseUrl}/test`;
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(exampleUrl);
 

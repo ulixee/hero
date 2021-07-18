@@ -1,12 +1,9 @@
 import { Helpers } from '@ulixee/testing';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Handler } from '../index';
+import Hero from '../index';
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  handler = new Handler();
-  Helpers.onClose(() => handler.close(), true);
   koaServer = await Helpers.runKoaServer();
 });
 afterAll(Helpers.afterAll);
@@ -14,7 +11,7 @@ afterEach(Helpers.afterEach);
 
 describe('Fetch tests', () => {
   it('should be able to fetch from top level', async () => {
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await expect(hero.fetch('https://dataliberationfoundation.org')).rejects.toThrowError(
@@ -26,7 +23,7 @@ describe('Fetch tests', () => {
     koaServer.get('/fetch', ctx => {
       ctx.body = { got: 'it' };
     });
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${koaServer.baseUrl}/`);
@@ -47,7 +44,7 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: '2' };
     });
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(`${koaServer.baseUrl}/`);
     await hero.waitForPaintingStable();
@@ -72,7 +69,7 @@ describe('Fetch tests', () => {
 
       ctx.body = { got: 'request' };
     });
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(`${koaServer.baseUrl}/`);
     await hero.waitForPaintingStable();
@@ -94,7 +91,7 @@ describe('Fetch tests', () => {
     koaServer.get('/buffer', ctx => {
       ctx.body = Buffer.from('This is a test');
     });
-    const hero = await handler.createHero();
+    const hero = new Hero();
 
     await hero.goto(`${koaServer.baseUrl}/`);
     await hero.waitForPaintingStable();

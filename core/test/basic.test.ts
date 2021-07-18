@@ -11,9 +11,9 @@ describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    await connection.connect({ maxConcurrentHerosCount: 5 });
+    await connection.connect({ maxConcurrentHeroesCount: 5 });
 
-    expect(GlobalPool.maxConcurrentHerosCount).toBe(5);
+    expect(GlobalPool.maxConcurrentHeroesCount).toBe(5);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     await Core.shutdown();
@@ -22,10 +22,10 @@ describe('basic Core tests', () => {
   it('runs createTab', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    await connection.connect({ maxConcurrentHerosCount: 2 });
+    await connection.connect({ maxConcurrentHeroesCount: 2 });
     await connection.createSession();
 
-    expect(GlobalPool.maxConcurrentHerosCount).toBe(2);
+    expect(GlobalPool.maxConcurrentHeroesCount).toBe(2);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
     await Core.shutdown();
@@ -71,14 +71,14 @@ describe('basic Core tests', () => {
   it('should be able to get multiple entries out of the pool', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    GlobalPool.maxConcurrentHerosCount = 3;
-    await connection.connect({ maxConcurrentHerosCount: 3 });
+    GlobalPool.maxConcurrentHeroesCount = 3;
+    await connection.connect({ maxConcurrentHeroesCount: 3 });
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
         response.setHeader('Set-Cookie', 'ulixee=test1');
       },
     });
-    expect(GlobalPool.maxConcurrentHerosCount).toBe(3);
+    expect(GlobalPool.maxConcurrentHeroesCount).toBe(3);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     const tab1 = Session.getTab(await connection.createSession());

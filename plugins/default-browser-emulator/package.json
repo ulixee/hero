@@ -13,8 +13,9 @@
     "ua-parser-js": "^0.7.22"
   },
   "devDependencies": {
-    "@ulixee/hero-full-client": "1.5.4",
+    "@ulixee/hero": "1.5.4",
     "@ulixee/hero-core": "1.5.4",
+    "@ulixee/hero-fullstack": "1.5.4",
     "@ulixee/hero-puppet": "1.5.4",
     "@ulixee/testing": "1.5.4",
     "@types/tough-cookie": "^4.0.0",

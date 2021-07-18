@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/testing/index';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;

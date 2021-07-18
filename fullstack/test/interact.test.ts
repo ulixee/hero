@@ -1,27 +1,17 @@
-import Core from '@ulixee/hero-core';
-import CoreServer from '@ulixee/hero-core/server';
 import { Helpers } from '@ulixee/testing';
 import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
-import { Handler, LocationStatus } from '../index';
+import Hero, { Core, LocationStatus } from "../index";
 
 let koaServer: ITestKoaServer;
-let handler: Handler;
 beforeAll(async () => {
-  const coreServer = new CoreServer();
-  await coreServer.listen({ port: 0 });
   Core.use(
     class BasicHumanEmulator extends HumanEmulator {
       static id = 'basic';
     },
   );
-  handler = new Handler({ host: await coreServer.address });
-  Helpers.onClose(() => {
-    handler.close();
-    coreServer.close();
-  }, true);
   koaServer = await Helpers.runKoaServer(true);
 });
 afterAll(Helpers.afterAll);
@@ -36,7 +26,7 @@ describe('basic Interact tests', () => {
     const httpServer = await Helpers.runHttpServer({ onPost });
     const url = httpServer.url;
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
 
     await hero.goto(`${url}page1`);
@@ -55,7 +45,7 @@ describe('basic Interact tests', () => {
   }, 30e3);
 
   it('should clean up cookies between runs', async () => {
-    const hero1 = await handler.createHero();
+    const hero1 = new Hero();
     let setCookieValue = 'ulixee=test1';
     const httpServer = await Helpers.runHttpServer({
       addToResponse: response => {
@@ -87,7 +77,7 @@ describe('basic Interact tests', () => {
     {
       setCookieValue = 'ulixee3=test3';
       // should be able to get a second hero out of the pool
-      const hero2 = await handler.createHero();
+      const hero2 = new Hero();
       Helpers.needsClosing.push(hero2);
       await hero2.goto(url);
 
@@ -116,7 +106,7 @@ describe('basic Interact tests', () => {
       `;
     });
     koaServer.get('/finish', ctx => (ctx.body = `Finished!`));
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/waitTest`);
     await hero.waitForPaintingStable();
@@ -138,7 +128,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/keys`);
     await hero.waitForPaintingStable();
@@ -170,9 +160,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const hero = await handler.createHero({
-      humanEmulatorId: 'basic',
-    });
+    const hero = new Hero({ humanEmulatorId: 'basic' });
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/twice`);
     await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
@@ -199,7 +187,7 @@ describe('basic Interact tests', () => {
         </body>
       `;
     });
-    const hero = await handler.createHero({ humanEmulatorId: 'basic' });
+    const hero = new Hero({ humanEmulatorId: 'basic' });
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/empty-click`);
     await hero.activeTab.waitForLoad(LocationStatus.PaintingStable);
@@ -238,7 +226,7 @@ describe('basic Interact tests', () => {
 </body>`;
     });
 
-    const hero = await handler.createHero();
+    const hero = new Hero();
     Helpers.needsClosing.push(hero);
     await hero.goto(`${koaServer.baseUrl}/interact-frame`);
     await hero.waitForPaintingStable();

@@ -1,11 +1,11 @@
-import Core, { Session } from '@ulixee/hero-core';
 import { Helpers } from '@ulixee/testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import Puppet from '@ulixee/hero-puppet';
 import Log from '@ulixee/commons/Logger';
 import { ITestKoaServer } from '@ulixee/testing/helpers';
-import ConnectionToClient from '../server/ConnectionToClient';
+import ConnectionToClient from '../connections/ConnectionToClient';
 import InjectedScripts from '../lib/InjectedScripts';
+import Core, { Session } from '../index';
 
 const { log } = Log(module);
 

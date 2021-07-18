@@ -1,4 +1,3 @@
-import { IncomingMessage } from 'http';
 import Logger from '@ulixee/commons/Logger';
 import { createPromise } from '@ulixee/commons/utils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
@@ -34,15 +33,14 @@ export default class ConnectionToReplay {
 
   private lastScriptState: IScriptState;
 
-  constructor(readonly sendMessage: (data: string) => Promise<unknown>, request: IncomingMessage) {
+  constructor(readonly sendMessage: (data: string) => Promise<unknown>, lookupArgs: ISessionLookupArgs) {
     this.pendingPushes.push(this.sessionClosedPromise.promise);
-    const { headers } = request;
     this.lookupArgs = {
-      scriptInstanceId: headers['script-instance-id'] as string,
-      scriptEntrypoint: headers['script-entrypoint'] as string,
-      sessionName: headers['session-name'] as string,
-      dataLocation: headers['data-location'] as string,
-      sessionId: headers['session-id'] as string,
+      scriptInstanceId: lookupArgs.scriptInstanceId as string,
+      scriptEntrypoint: lookupArgs.scriptEntrypoint as string,
+      sessionName: lookupArgs.sessionName as string,
+      dataLocation: lookupArgs.dataLocation as string,
+      sessionId: lookupArgs.sessionId as string,
     };
   }
 

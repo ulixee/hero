@@ -17,7 +17,7 @@ import * as net from 'net';
 import * as tls from 'tls';
 import * as http2 from 'http2';
 import * as stream from 'stream';
-import Core, { CoreProcess } from '@ulixee/hero-core';
+import Core from '@ulixee/hero-core';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import MitmSocket from '@ulixee/hero-mitm-socket';
 import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
@@ -421,8 +421,7 @@ export function afterEach(): Promise<void> {
 
 export async function afterAll(): Promise<void> {
   await closeAll(true);
-  await Core.shutdown(true);
-  await CoreProcess.kill();
+  await Core.shutdown();
 }
 
 async function closeAll(isFinal = false): Promise<void> {
