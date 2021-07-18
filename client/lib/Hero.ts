@@ -427,27 +427,27 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
     this.emitter.removeListener(eventType, listenerFn);
   }
 
+  public static once<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    this.emitter.once(eventType, listenerFn);
+  }
+  
   // aliases
 
   public static on<K extends keyof IClassEvents>(
     eventType: K,
     listenerFn: (event: IClassEvents[K]) => any,
   ): void {
-    return this.addListener(eventType, listenerFn);
+    this.addListener(eventType, listenerFn);
   }
 
   public static off<K extends keyof IClassEvents>(
     eventType: K,
     listenerFn: (event: IClassEvents[K]) => any,
   ): void {
-    return this.removeListener(eventType, listenerFn);
-  }
-
-  public static once<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
-  ): void {
-    return this.addListener(eventType, listenerFn);
+    this.removeListener(eventType, listenerFn);
   }
 }
 
