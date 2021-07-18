@@ -1,8 +1,8 @@
 import * as Fs from 'fs';
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import { getLogo, ITestKoaServer } from '@ulixee/testing/helpers';
+import { getLogo, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import Core, { Tab } from '../index';

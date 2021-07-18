@@ -1,6 +1,6 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';

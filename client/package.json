@@ -17,6 +17,6 @@
   },
   "devDependencies": {
     "@ulixee/hero-core": "1.5.4",
-    "@ulixee/testing": "1.5.4"
+    "@ulixee/hero-testing": "1.5.4"
   }
 }

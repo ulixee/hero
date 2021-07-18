@@ -1,5 +1,5 @@
 {
-  "name": "@ulixee/testing",
+  "name": "@ulixee/hero-testing",
   "version": "1.5.4",
   "description": "Helpers and stubs for testing",
   "main": "index.js",

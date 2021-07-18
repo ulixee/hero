@@ -20,7 +20,6 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -45,7 +44,6 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     ['Session.configure', 'configure'],
     ['Session.detachTab', 'detachTab'],
     ['Session.flush', 'flush'],
-    ['Session.recordOutput', 'recordOutput'],
     ['Session.getHeroMeta', 'getHeroMeta'],
     ['Session.exportUserProfile', 'exportUserProfile'],
     ['Session.getTabs', 'getTabs'],
@@ -174,11 +172,6 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       meta: this.getSessionMeta(detachedTab),
       prefetchedJsPaths,
     };
-  }
-
-  public recordOutput(meta: ISessionMeta, ...changes: IOutputChangeRecord[]): void {
-    const session = Session.get(meta.sessionId);
-    session.recordOutput(changes);
   }
 
   public getHeroMeta(meta: ISessionMeta): IHeroMeta {

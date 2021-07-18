@@ -1,7 +1,7 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import HumanEmulator from '@ulixee/default-human-emulator';
-import { getLogo, ITestKoaServer } from '@ulixee/testing/helpers';
+import { getLogo, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Core, { Session } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 

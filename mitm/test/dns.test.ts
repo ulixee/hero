@@ -1,5 +1,5 @@
 import { LookupAddress, promises as nodeDns } from 'dns';
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import { IBoundLog } from '@ulixee/hero-interfaces/ILog';

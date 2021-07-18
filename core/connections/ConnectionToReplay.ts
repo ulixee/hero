@@ -185,10 +185,6 @@ export default class ConnectionToReplay {
       this.send('focus-events', events);
     });
 
-    db.output.subscribe(events => {
-      this.send('output', events);
-    });
-
     db.resources.subscribe(resources => {
       const resourcesToSend = [];
 

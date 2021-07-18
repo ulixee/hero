@@ -16,7 +16,7 @@
     "@ulixee/hero-core": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/default-browser-emulator": "1.5.4",
-    "@ulixee/testing": "1.5.4",
+    "@ulixee/hero-testing": "1.5.4",
     "@types/ws": "^7.2.4",
     "agent-base": "4.3.0",
     "http-proxy-agent": "^4.0.1",

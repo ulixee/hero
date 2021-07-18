@@ -1,6 +1,6 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { FrameEnvironment, LocationStatus } from '@ulixee/hero';
 import Dialog from '@ulixee/hero/lib/Dialog';
 import Hero from '../index';

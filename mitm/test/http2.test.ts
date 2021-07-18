@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import * as http2 from 'http2';
 import { URL } from 'url';
 import MitmSocket from '@ulixee/hero-mitm-socket';

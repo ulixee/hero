@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import Hero, { Core } from '@ulixee/hero-fullstack';
 import * as http from 'http';
 import { Log } from '@ulixee/commons/Logger';

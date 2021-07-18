@@ -1,5 +1,5 @@
-import { Helpers } from '@ulixee/testing';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { Helpers } from '@ulixee/hero-testing';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero from "../index";
 
 let koaServer: ITestKoaServer;

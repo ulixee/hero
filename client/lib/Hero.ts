@@ -49,7 +49,7 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import CoreSession from './CoreSession';
-import ConnectionFactory, { ICreateConnectionToCoreFn } from "../connections/ConnectionFactory";
+import ConnectionFactory from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, {
@@ -58,7 +58,6 @@ import FrameEnvironment, {
 } from './FrameEnvironment';
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
-import Output, { createObservableOutput } from './Output';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 
 export const DefaultOptions = {
@@ -69,7 +68,8 @@ const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
-type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
+type IStateOptions = ISessionCreateOptions &
+  Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
 
 export interface IState {
   connection: SessionConnection;
@@ -83,7 +83,6 @@ const propertyKeys: (keyof Hero)[] = [
   'sessionId',
   'meta',
   'tabs',
-  'output',
   'frameEnvironments',
   'mainFrameEnvironment',
   'coreHost',
@@ -96,8 +95,6 @@ const propertyKeys: (keyof Hero)[] = [
 
 export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
   protected static options: IHeroDefaults = { ...DefaultOptions };
-
-  #output: Output;
 
   constructor(options: IHeroCreateOptions = {}) {
     super(() => {
@@ -123,30 +120,20 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
 
     const connection = new SessionConnection(this, options);
 
+    // This is our hook into @ulixee/databox
+    const possibleDatabox = options.databox || options;
+    const databox: any = possibleDatabox?.constructor.name === 'Databox' ? possibleDatabox : null;
+    if (databox) {
+      // should pull off other options
+      databox.externalController = this;
+    }
+
     setState(this, {
       connection,
       isClosing: false,
       options,
       clientPlugins: [],
     });
-  }
-
-  public get output(): any | any[] {
-    if (!this.#output) {
-      const coreSession = getState(this)
-        .connection.getCoreSessionOrReject()
-        .catch(() => null);
-      this.#output = createObservableOutput(coreSession);
-    }
-    return this.#output;
-  }
-
-  public set output(value: any | any[]) {
-    const output = this.output;
-    for (const key of Object.keys(output)) {
-      delete output[key];
-    }
-    Object.assign(this.output, value);
   }
 
   public get activeTab(): Tab {
@@ -465,8 +452,7 @@ class SessionConnection {
   constructor(private hero: Hero, stateOptions: IStateOptions) {
     const { connectionToCore, ...options } = stateOptions;
 
-    // @ts-ignore
-    const createConnectionToCoreFn: ICreateConnectionToCoreFn = hero.constructor.createConnectionToCore;
+    const createConnectionToCoreFn = (hero.constructor as any).createConnectionToCore;
     const connection = ConnectionFactory.createConnection(
       connectionToCore ?? { isPersistent: false },
       createConnectionToCoreFn,

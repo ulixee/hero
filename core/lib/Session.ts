@@ -30,7 +30,6 @@ import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
 import CorePlugins from './CorePlugins';
-import { IOutputChangeRecord } from '../models/OutputTable';
 
 const { log } = Log(module);
 
@@ -337,10 +336,6 @@ export default class Session extends TypedEventEmitter<{
 
   public onAwaitedEvent(payload: ICoreEventPayload) {
     this.emit('awaited-event', payload);
-  }
-
-  public recordOutput(changes: IOutputChangeRecord[]) {
-    this.sessionState.recordOutputChanges(changes);
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {

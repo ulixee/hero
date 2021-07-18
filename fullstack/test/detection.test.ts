@@ -1,8 +1,8 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import * as Fs from 'fs';
 import * as fpscanner from 'fpscanner';
 import { Session } from '@ulixee/hero-core';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero, { LocationStatus } from '../index';
 
 const fpCollectPath = require.resolve('fpcollect/src/fpCollect.js');

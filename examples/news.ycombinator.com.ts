@@ -1,4 +1,4 @@
-import Hero, { Observable } from '@ulixee/hero';
+import Hero from '@ulixee/hero';
 
 // process.env.HERO_SHOW_BROWSER = 'true';
 
@@ -11,15 +11,17 @@ async function run() {
   console.log(await hero.url);
 
   const stories = await hero.document.querySelectorAll('.athing');
+  const records: any[] = [];
   let lastStory;
+
   for (const story of stories) {
     await hero.waitForMillis(200);
     const extraElem = await story.nextElementSibling;
     await hero.interact({
       move: story,
     });
-    const record = Observable({} as any);
-    hero.output.push(record);
+    const record: any = {};
+    records.push(record);
 
     const titleElem = await story.querySelector('a.storylink');
 
@@ -57,7 +59,7 @@ async function run() {
   }
 
   console.log('-- PRINTING extracted results ---------------');
-  console.log(hero.output);
+  console.log(records);
 
   console.log('-------------------------------------');
   console.log('DONE');

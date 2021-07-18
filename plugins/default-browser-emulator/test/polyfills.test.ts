@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { inspect } from 'util';
-import * as Helpers from '@ulixee/testing/helpers';
-import { ITestHttpServer } from '@ulixee/testing/helpers';
+import * as Helpers from '@ulixee/hero-testing/helpers';
+import { ITestHttpServer } from '@ulixee/hero-testing/helpers';
 import Puppet from '@ulixee/hero-puppet';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import Log from '@ulixee/commons/Logger';

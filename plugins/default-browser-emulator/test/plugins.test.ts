@@ -1,7 +1,7 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
 import { inspect } from 'util';
-import * as Helpers from '@ulixee/testing/helpers';
+import * as Helpers from '@ulixee/hero-testing/helpers';
 import Puppet from '@ulixee/hero-puppet';
 import Log from '@ulixee/commons/Logger';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';

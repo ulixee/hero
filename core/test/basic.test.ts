@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing/index';
+import { Helpers } from '@ulixee/hero-testing/index';
 import Core, { GlobalPool } from '../index';
 import Session from '../lib/Session';
 

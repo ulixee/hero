@@ -1,10 +1,7 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { createPromise } from '@ulixee/commons/utils';
-import Output from '@ulixee/hero/lib/Output';
-import ReplayOutput from '@ulixee/replay/backend/api/ReplayOutput';
-import ObjectObserver from '@ulixee/hero/lib/ObjectObserver';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import ConnectionToReplay from "../connections/ConnectionToReplay";
@@ -102,53 +99,4 @@ describe('basic Replay API tests', () => {
     await requestReplayPromise;
     connectionToReplay.close();
   }, 20e3);
-
-  it('should be able to rebuild an output', async () => {
-    const observable = new ObjectObserver(new Output());
-
-    const clientOutput = observable.proxy;
-    const replayOutput = new ReplayOutput();
-    let id = 0;
-    observable.onChanges = changes => {
-      const changesToRecord = changes.map(change => ({
-        type: change.type,
-        value: JSON.stringify(change.value),
-        path: JSON.stringify(change.path),
-        lastCommandId: id,
-        timestamp: new Date().getTime(),
-      }));
-      replayOutput.onOutput(changesToRecord);
-    };
-
-    clientOutput.test = 1;
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    clientOutput.sub = { nested: true, str: 'test', num: 1 };
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    delete clientOutput.sub.num;
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    delete clientOutput.sub;
-    delete clientOutput.test;
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    clientOutput.array = [{ test: 1 }, { test: 2 }, { test: 3 }];
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    clientOutput.array.splice(1, 1);
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-
-    id += 1;
-    clientOutput.array.push({ test: 0 });
-    clientOutput.array.sort((a, b) => {
-      return a.test - b.test;
-    });
-    expect(replayOutput.getLatestOutput(id).output).toEqual(clientOutput.toJSON());
-  });
 });
