@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import Resolvable from '@ulixee/commons/Resolvable';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';

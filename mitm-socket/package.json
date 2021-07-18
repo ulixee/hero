@@ -13,7 +13,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@ulixee/testing": "1.5.4",
+    "@ulixee/hero-testing": "1.5.4",
     "@types/ws": "^7.2.4",
     "proxy": "^1.0.1",
     "simple-socks": "^2.1.0",

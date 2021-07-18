@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import Resource from '@ulixee/hero/lib/Resource';
 import Hero from '../index';
 

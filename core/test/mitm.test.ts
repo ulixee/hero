@@ -1,8 +1,8 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import MitmRequestContext from '@ulixee/hero-mitm/lib/MitmRequestContext';
 import { createPromise } from '@ulixee/commons/utils';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Resolvable from '@ulixee/commons/Resolvable';
 import GlobalPool from '../lib/GlobalPool';
 import Core, { Session } from '../index';

@@ -1,11 +1,11 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import * as Proxy from 'proxy';
 import * as http from 'http';
 import {
   getTlsConnection,
   httpGetWithSocket,
   readableToBuffer,
-} from '@ulixee/testing/helpers';
+} from '@ulixee/hero-testing/helpers';
 import * as WebSocket from 'ws';
 import * as socks5 from 'simple-socks';
 import { createPromise } from '@ulixee/commons/utils';

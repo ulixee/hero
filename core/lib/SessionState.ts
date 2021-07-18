@@ -25,7 +25,6 @@ import ResourcesTable from '../models/ResourcesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
 import { IJsPathHistory } from './JsPath';
-import { IOutputChangeRecord } from '../models/OutputTable';
 import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
@@ -632,12 +631,5 @@ export default class SessionState {
       new Date(),
       key,
     );
-  }
-
-  public recordOutputChanges(changes: IOutputChangeRecord[]) {
-    this.nextCommandMeta = null;
-    for (const change of changes) {
-      this.db.output.insert(change);
-    }
   }
 }

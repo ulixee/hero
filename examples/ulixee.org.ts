@@ -2,6 +2,7 @@ import Queue from 'p-queue';
 import Hero from '@ulixee/hero-fullstack';
 
 (async () => {
+  let cost = '0';
   async function getDatasetCost({ name, href }) {
     if (!href.startsWith('http')) href = `https://ulixee.org${href}`;
     const hero = new Hero();
@@ -9,9 +10,8 @@ import Hero from '@ulixee/hero-fullstack';
     await hero.goto(href);
     await hero.waitForPaintingStable();
     console.log('Page Loaded', href);
-    const cost = await hero.document.querySelector('.cost .large-text').textContent;
+    cost = await hero.document.querySelector('.cost .large-text').textContent;
     console.log('Cost of %s is %s', name, cost);
-    hero.output.cost = cost;
     await hero.close();
   }
 
@@ -28,4 +28,6 @@ import Hero from '@ulixee/hero-fullstack';
 
   await hero.close();
   await queue.onIdle();
+
+  console.log({ cost });
 })();

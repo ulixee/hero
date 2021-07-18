@@ -7,10 +7,8 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
-    "./start": "./start.js",
     "./lib/*": "./lib/*.js",
-    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
-    "./server": "./server/index.js"
+    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.4",
@@ -34,7 +32,7 @@
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/hero-puppet-chrome": "1.5.4",
     "@ulixee/replay": "1.5.4",
-    "@ulixee/testing": "1.5.4",
+    "@ulixee/hero-testing": "1.5.4",
     "@types/better-sqlite3": "^5.4.1",
     "@types/json-socket": "^0.1.17",
     "http-proxy-agent": "^4.0.1",

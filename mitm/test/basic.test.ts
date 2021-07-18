@@ -1,6 +1,6 @@
 import * as http from 'http';
 import { IncomingHttpHeaders } from 'http';
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import * as HttpProxyAgent from 'http-proxy-agent';
 import { URL } from 'url';
 import { AddressInfo } from 'net';

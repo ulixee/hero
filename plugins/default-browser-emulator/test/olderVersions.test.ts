@@ -1,5 +1,5 @@
 import Hero from '@ulixee/hero-fullstack';
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);

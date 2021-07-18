@@ -13,12 +13,10 @@ import type Tab from './lib/Tab';
 import type FrameEnvironment from './lib/FrameEnvironment';
 import ConnectionToRemoteCoreServer from './connections/ConnectionToRemoteCoreServer';
 import ConnectionToCore from './connections/ConnectionToCore';
-import { Observable } from './lib/ObjectObserver';
 
 export default Hero;
 
 export {
-  Observable,
   ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,

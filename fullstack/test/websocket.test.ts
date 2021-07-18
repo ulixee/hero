@@ -1,10 +1,10 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import MitmServer from '@ulixee/hero-mitm/lib/MitmProxy';
 import { createPromise } from '@ulixee/commons/utils';
 import * as WebSocket from 'ws';
 import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import { AddressInfo } from 'net';
 import Hero, { Core } from "../index";
 

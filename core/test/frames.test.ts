@@ -1,5 +1,5 @@
-import { ITestKoaServer } from '@ulixee/testing/helpers';
-import { Helpers } from '@ulixee/testing';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
+import { Helpers } from '@ulixee/hero-testing';
 import Core, { Session } from '../index';
 
 let koaServer: ITestKoaServer;

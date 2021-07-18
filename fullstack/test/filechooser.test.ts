@@ -1,4 +1,4 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { createPromise } from '@ulixee/commons/utils';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import * as Fs from 'fs';

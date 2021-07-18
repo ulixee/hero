@@ -1,7 +1,7 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import Core, { Session } from '@ulixee/hero-core';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import CoreServerConnection from '@ulixee/hero-core/connections/ConnectionToClient';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 

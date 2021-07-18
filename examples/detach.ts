@@ -22,7 +22,7 @@ async function run() {
   const wrapperElements = await document.querySelectorAll('.RefList');
   console.log(wrapperElements);
   console.timeLog('Detach', 'wrapped list');
-  const versions = hero.output;
+  const versions = [];
   for (const elem of wrapperElements) {
     console.log(elem);
     const innerText = await elem.querySelector('.RefList-title').innerText;

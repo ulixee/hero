@@ -1,6 +1,6 @@
 import Hero, { LocationStatus, Core } from '@ulixee/hero-fullstack';
-import { Helpers } from '@ulixee/testing';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { Helpers } from '@ulixee/hero-testing';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ExecuteJsPlugin from '@ulixee/execute-js-plugin';
 import ExecuteJsCorePlugin from '../lib/CorePlugin';
 

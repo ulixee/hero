@@ -1,6 +1,6 @@
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 

@@ -1,5 +1,5 @@
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { Helpers } from '@ulixee/testing/index';
+import { Helpers } from '@ulixee/hero-testing/index';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import Hero from '../index';

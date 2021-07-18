@@ -1,8 +1,8 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { Command } from '@ulixee/hero/interfaces/IInteractions';
 import { KeyboardKeys } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import * as os from 'os';
-import { ITestKoaServer } from '@ulixee/testing/helpers';
+import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Hero from '../index';
 
 let koaServer: ITestKoaServer;

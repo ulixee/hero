@@ -1,6 +1,5 @@
 import '@ulixee/commons/SourceMapSupport';
 import {
-  Observable,
   ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,
@@ -19,12 +18,11 @@ import Core from '@ulixee/hero-core';
 import Hero from './lib/Hero';
 
 Core.start().catch(error => {
-  console.log('ERROR starting Core within Fullstack', error);
+  console.log('ERROR starting Core within Fullstack', error); // eslint-disable-line no-console
 });
 
 export {
   Core,
-  Observable,
   ConnectionToRemoteCoreServer,
   ConnectionToCore,
   InteractionCommand,

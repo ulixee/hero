@@ -1,4 +1,4 @@
-import * as Helpers from '@ulixee/testing/helpers';
+import * as Helpers from '@ulixee/hero-testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@ulixee/hero-puppet';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';

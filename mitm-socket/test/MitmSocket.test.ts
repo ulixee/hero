@@ -1,9 +1,9 @@
-import { Helpers } from '@ulixee/testing';
+import { Helpers } from '@ulixee/hero-testing';
 import { createPromise } from '@ulixee/commons/utils';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import * as WebSocket from 'ws';
-import { getTlsConnection, httpGetWithSocket } from '@ulixee/testing/helpers';
+import { getTlsConnection, httpGetWithSocket } from '@ulixee/hero-testing/helpers';
 import * as https from 'https';
 import { IncomingMessage } from 'http';
 import MitmSocket from '../index';
