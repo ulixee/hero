@@ -1,8 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
+import * as Util from 'util';
+import { EventEmitter } from 'events';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import * as Util from 'util';
 import { bindFunctions, getCallSite } from '@ulixee/commons/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
@@ -93,8 +94,13 @@ const propertyKeys: (keyof Hero)[] = [
   'Request',
 ];
 
+type IClassEvents = {
+  new: Hero;
+};
+
 export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
   protected static options: IHeroDefaults = { ...DefaultOptions };
+  private static emitter = new EventEmitter();
 
   constructor(options: IHeroCreateOptions = {}) {
     super(() => {
@@ -103,6 +109,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
       };
     });
     bindFunctions(this);
+    (this.constructor as any).emitter.emit('new', this, options);
 
     options.blockedResourceTypes =
       options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;
@@ -119,14 +126,6 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
     } as IStateOptions;
 
     const connection = new SessionConnection(this, options);
-
-    // This is our hook into @ulixee/databox
-    const possibleDatabox = options.databox || options;
-    const databox: any = possibleDatabox?.constructor.name === 'Databox' ? possibleDatabox : null;
-    if (databox) {
-      // should pull off other options
-      databox.externalController = this;
-    }
 
     setState(this, {
       connection,
@@ -409,6 +408,45 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
 
   public [Util.inspect.custom](): any {
     return inspectInstanceProperties(this, propertyKeys as any);
+  }
+
+  // CLASS EVENT EMITTER ///////////////////////////////////////////////////////////////////////////////////////////////
+
+  public static addListener<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    this.emitter.addListener(eventType, listenerFn);
+  }
+
+  public static removeListener<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    this.emitter.removeListener(eventType, listenerFn);
+  }
+
+  // aliases
+
+  public static on<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    return this.addListener(eventType, listenerFn);
+  }
+
+  public static off<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    return this.removeListener(eventType, listenerFn);
+  }
+
+  public static once<K extends keyof IClassEvents>(
+    eventType: K,
+    listenerFn: (event: IClassEvents[K]) => any,
+  ): void {
+    return this.addListener(eventType, listenerFn);
   }
 }
 
