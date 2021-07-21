@@ -53,8 +53,12 @@ export default class CertificateGenerator extends BaseIpcHandler {
     if (this.isClosing) return;
     const message = JSON.parse(rawMessage);
     if (this.options.debug) {
+      const toLog = { ...message };
+      if (message.status === 'init') {
+        toLog.privateKey = `-----BEGIN RSA PRIVATE KEY-----\n...key used by man-in-the-middle removed for logs...\n-----END RSA PRIVATE KEY-----\n`;
+      }
       this.logger.info('CertificateGenerator.onMessage', {
-        ...message,
+        ...toLog,
       });
     }
 

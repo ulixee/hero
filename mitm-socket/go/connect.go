@@ -101,7 +101,7 @@ func handleSocket(connectArgs ConnectArgs, sessionArgs SessionArgs, signals *Sig
 	domainSocketPiper := &DomainSocketPiper{
 		client:  domainConn,
 		id:      connectArgs.Id,
-		debug:   sessionArgs.Debug,
+		debug:   sessionArgs.DebugData,
 		signals: signals,
 	}
 	defer domainSocketPiper.Close()
@@ -162,5 +162,6 @@ type SessionArgs struct {
 	TcpTtl             int
 	TcpWindowSize      int
 	Debug              bool
+	DebugData          bool
 	Mode               string
 }

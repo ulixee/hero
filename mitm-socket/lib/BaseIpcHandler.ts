@@ -212,4 +212,5 @@ export interface IGoIpcOpts {
   tcpWindowSize?: number;
   rejectUnauthorized?: boolean;
   debug?: boolean;
+  debugData?: boolean; // include bytes read from client/remote (NOTE: lots of output)
 }
