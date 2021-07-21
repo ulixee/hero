@@ -467,7 +467,9 @@ export default class Session extends TypedEventEmitter<{
     return session.tabsById.get(meta.tabId) ?? session.detachedTabsById.get(meta.tabId);
   }
 
-  public static sessionsWithBrowserEngine(engine: IBrowserEngine): Session[] {
-    return Object.values(this.byId).filter(x => x.browserEngine === engine);
+  public static sessionsWithBrowserEngine(
+    isEngineMatch: (engine: IBrowserEngine) => boolean,
+  ): Session[] {
+    return Object.values(this.byId).filter(x => isEngineMatch(x.browserEngine));
   }
 }

@@ -186,7 +186,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       if (!top || top.resourceId.isResolved) continue;
 
       if (
-        finalUrl === top.finalUrl ||
+        (top.finalUrl && finalUrl === top.finalUrl) ||
         requestedUrl === top.requestedUrl ||
         browserRequestId === top.browserRequestId
       ) {

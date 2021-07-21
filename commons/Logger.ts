@@ -143,7 +143,7 @@ function translateToPrintable(
       result.error = value;
     }
     const printable = translateValueToPrintable(value);
-    if (!printable) continue;
+    if (printable === null || printable === undefined) continue;
     printData[key] = printable;
   }
   return result;

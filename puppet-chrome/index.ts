@@ -45,7 +45,7 @@ const PuppetLauncher: IPuppetLauncher = {
     }
 
     browserEngine.launchArguments = chromeArguments;
-    browserEngine.beforeLaunch(options);
+    if (browserEngine.beforeLaunch) browserEngine.beforeLaunch(options);
 
     return browserEngine.launchArguments;
   },

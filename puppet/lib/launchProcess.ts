@@ -80,10 +80,16 @@ export default async function launchProcess(
     log.warn(`${exe}.stderr`, { message: line, sessionId: null });
   });
 
+  let hasRunOnClose = false;
+  const runOnClose = () => {
+    if (hasRunOnClose) return;
+    if (onClose) onClose();
+    hasRunOnClose = true;
+  };
   let processKilled = false;
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;
-    if (onClose) onClose();
+    runOnClose();
 
     if (!websocketEndpointResolvable.isResolved) {
       websocketEndpointResolvable.reject(new Error('Chrome exited during launch'));
@@ -118,7 +124,7 @@ export default async function launchProcess(
         launchedProcess.kill('SIGKILL');
       }
       if (dataDir) cleanDataDir(dataDir);
-      if (onClose) onClose();
+      runOnClose();
       return closed;
     } catch (error) {
       // might have already been kill off

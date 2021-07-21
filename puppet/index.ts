@@ -71,14 +71,6 @@ export default class Puppet {
     }
   }
 
-  public isSameEngine(other: Puppet): boolean {
-    return (
-      this.browserEngine.executablePath === other.browserEngine.executablePath &&
-      this.browserEngine.launchArguments.toString() ===
-        other.browserEngine.launchArguments.toString()
-    );
-  }
-
   public newContext(
     plugins: ICorePlugins,
     logger: IBoundLog,
