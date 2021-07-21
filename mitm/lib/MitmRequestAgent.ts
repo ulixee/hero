@@ -17,6 +17,7 @@ import HeadersHandler from '../handlers/HeadersHandler';
 import ResourceState from '../interfaces/ResourceState';
 import SocketPool from './SocketPool';
 import Http2PushPromiseHandler from '../handlers/Http2PushPromiseHandler';
+import Http2SessionBinding from './Http2SessionBinding';
 
 const { log } = Log(module);
 
@@ -142,8 +143,9 @@ export default class MitmRequestAgent {
     const pool = this.getSocketPoolByOrigin(ctx.url.origin);
 
     options.isSsl = ctx.isSSL;
-    options.keepAlive = !((options.headers.connection ??
-      options.headers.Connection) as string)?.match(/close/i);
+    options.keepAlive = !(
+      (options.headers.connection ?? options.headers.Connection) as string
+    )?.match(/close/i);
     options.isWebsocket = ctx.isUpgrade;
 
     const mitmSocket = await pool.getSocket(options.isWebsocket, () =>
@@ -311,13 +313,13 @@ export default class MitmRequestAgent {
     const existing = originSocketPool.getHttp2Session();
     if (existing) return existing.client;
 
-    const session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
+    const clientToProxyH2Session = (ctx.clientToProxyRequest as Http2ServerRequest).stream?.session;
 
     ctx.setState(ResourceState.CreateH2Session);
 
     const settings: IHttp2ConnectSettings = {
-      settings: session?.remoteSettings,
-      localWindowSize: session?.state.localWindowSize,
+      settings: clientToProxyH2Session?.remoteSettings,
+      localWindowSize: clientToProxyH2Session?.state.localWindowSize,
     };
     if (ctx.requestSession.plugins.onHttp2SessionConnect) {
       await ctx.requestSession.plugins.onHttp2SessionConnect(ctx, settings);
@@ -340,81 +342,24 @@ export default class MitmRequestAgent {
       },
     );
 
-    if (session) {
-      session.on('ping', bytes => {
-        proxyToServerH2Client.ping(bytes, () => null);
-      });
-    }
-
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const binding = new Http2SessionBinding(clientToProxyH2Session, proxyToServerH2Client, {
+      sessionId: this.session.sessionId,
+      origin,
+    });
     proxyToServerH2Client.on('stream', async (stream, headers, flags, rawHeaders) => {
       try {
         const pushPromise = new Http2PushPromiseHandler(ctx, stream, headers, flags, rawHeaders);
         await pushPromise.onRequest();
       } catch (error) {
         log.warn('Http2.ClientToProxy.ReadPushPromiseError', {
-          sessionId: ctx.requestSession.sessionId,
+          sessionId: this.session.sessionId,
           rawHeaders,
           error,
         });
       }
     });
-    proxyToServerH2Client.on('error', error => {
-      log.warn('Http2Client.error', {
-        sessionId: this.session.sessionId,
-        origin,
-        error,
-      });
-      if (session && !session.destroyed) session.destroy(error);
-    });
-
-    proxyToServerH2Client.on('close', () => {
-      log.info('Http2Client.close', {
-        sessionId: this.session.sessionId,
-        origin,
-      });
-      if (session && !session.destroyed) session.destroy();
-    });
-
-    proxyToServerH2Client.on('remoteSettings', remoteSettings => {
-      log.stats('Http2Client.remoteSettings', {
-        sessionId: this.session.sessionId,
-        origin,
-        settings: remoteSettings,
-      });
-    });
-
-    proxyToServerH2Client.on('frameError', (frameType: number, errorCode: number) => {
-      log.warn('Http2Client.frameError', {
-        sessionId: this.session.sessionId,
-        origin,
-        frameType,
-        errorCode,
-      });
-    });
-
-    proxyToServerH2Client.on('goaway', args => {
-      log.stats('Http2.goaway', {
-        sessionId: this.session.sessionId,
-        origin,
-        args,
-      });
-    });
-
-    proxyToServerH2Client.on('altsvc', (alt, altOrigin) => {
-      log.stats('Http2.altsvc', {
-        sessionId: this.session.sessionId,
-        origin,
-        altOrigin,
-        alt,
-      });
-    });
-
     proxyToServerH2Client.on('origin', origins => {
-      log.stats('Http2.origin', {
-        sessionId: this.session.sessionId,
-        origin,
-        origins,
-      });
       for (const svcOrigin of origins) {
         this.getSocketPoolByOrigin(svcOrigin).registerHttp2Session(
           proxyToServerH2Client,

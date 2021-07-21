@@ -29,6 +29,7 @@ export default class GlobalPool {
     return this.activeSessionCount < GlobalPool.maxConcurrentHeroesCount;
   }
 
+  private static isClosing = false;
   private static defaultLaunchArgs: IPuppetLaunchArgs;
   private static _activeSessionCount = 0;
   private static puppets: Puppet[] = [];
@@ -39,15 +40,14 @@ export default class GlobalPool {
     promise: IResolvablePromise<Session>;
   }[] = [];
 
-  public static async start() {
+  public static async start(): Promise<void> {
     log.info('StartingGlobalPool', {
       sessionId: null,
     });
     await this.startMitm();
-    this.resolveWaitingConnection();
   }
 
-  public static createSession(options: ISessionCreateOptions) {
+  public static createSession(options: ISessionCreateOptions): Promise<Session> {
     log.info('AcquiringChrome', {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
@@ -64,7 +64,7 @@ export default class GlobalPool {
   }
 
   public static close(): Promise<void> {
-    if (this.isClosing) return;
+    if (this.isClosing) return Promise.resolve();
     this.isClosing = true;
     const logId = log.stats('GlobalPool.Closing');
 
