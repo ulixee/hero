@@ -36,6 +36,7 @@ const { log } = Log(module);
 export default class Session extends TypedEventEmitter<{
   closing: void;
   closed: void;
+  'all-tabs-closed': void;
   'awaited-event': ICoreEventPayload;
 }> {
   private static readonly byId: { [id: string]: Session } = {};
@@ -439,7 +440,12 @@ export default class Session extends TypedEventEmitter<{
   private registerTab(tab: Tab, page: IPuppetPage) {
     const id = tab.id;
     this.tabsById.set(id, tab);
-    tab.on('close', () => this.tabsById.delete(id));
+    tab.on('close', () => {
+      this.tabsById.delete(id);
+      if (this.tabsById.size === 0 && this.detachedTabsById.size === 0) {
+        this.emit('all-tabs-closed');
+      }
+    });
     page.popupInitializeFn = this.onNewTab.bind(this, tab);
     return tab;
   }
@@ -459,5 +465,9 @@ export default class Session extends TypedEventEmitter<{
     const session = this.get(meta.sessionId);
     if (!session) return undefined;
     return session.tabsById.get(meta.tabId) ?? session.detachedTabsById.get(meta.tabId);
+  }
+
+  public static sessionsWithBrowserEngine(engine: IBrowserEngine): Session[] {
+    return Object.values(this.byId).filter(x => x.browserEngine === engine);
   }
 }

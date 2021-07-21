@@ -12,6 +12,7 @@ import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEve
 import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
+import DevtoolsPreferences from './DevtoolsPreferences';
 
 const { log } = Log(module);
 let sessionsDir = process.env.HERO_SESSIONS_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
@@ -63,6 +64,8 @@ export default class GlobalPool {
   }
 
   public static close(): Promise<void> {
+    if (this.isClosing) return;
+    this.isClosing = true;
     const logId = log.stats('GlobalPool.Closing');
 
     for (const { promise } of this.waitingForAvailability) {
@@ -99,10 +102,19 @@ export default class GlobalPool {
 
     this.puppets.push(puppet);
 
-    return puppet.start();
+    const browserDir = browserEngine.executablePath.split(browserEngine.fullVersion).shift();
+
+    const preferencesInterceptor = new DevtoolsPreferences(
+      `${browserDir}/devtoolsPreferences.json`,
+    );
+
+    return puppet.start({
+      attachToDevtools: preferencesInterceptor.installOnConnect,
+      onClose: this.onEngineClosed.bind(this, browserEngine),
+    });
   }
 
-  private static async startMitm() {
+  private static async startMitm(): Promise<void> {
     if (this.mitmServer || disableMitm === true) return;
     if (this.mitmStartPromise) await this.mitmStartPromise;
     else {
@@ -142,7 +154,20 @@ export default class GlobalPool {
     }
   }
 
-  private static releaseConnection() {
+  private static async onEngineClosed(engine: IBrowserEngine): Promise<void> {
+    if (this.isClosing) return;
+    for (const session of Session.sessionsWithBrowserEngine(engine)) {
+      await session.close();
+    }
+    log.info('PuppetEngine.closed', {
+      engine,
+      sessionId: null,
+    });
+    const idx = this.puppets.findIndex(x => x.browserEngine === engine);
+    if (idx >= 0) this.puppets.splice(idx, 1);
+  }
+
+  private static releaseConnection(): void {
     this._activeSessionCount -= 1;
 
     const wasTransferred = this.resolveWaitingConnection();
@@ -155,7 +180,7 @@ export default class GlobalPool {
     }
   }
 
-  private static resolveWaitingConnection() {
+  private static resolveWaitingConnection(): boolean {
     if (!this.waitingForAvailability.length) {
       return false;
     }
@@ -169,7 +194,7 @@ export default class GlobalPool {
     return true;
   }
 
-  private static getPuppetLaunchArgs() {
+  private static getPuppetLaunchArgs(): IPuppetLaunchArgs {
     this.defaultLaunchArgs ??= {
       showBrowser: Boolean(
         JSON.parse(process.env.HERO_SHOW_BROWSER ?? process.env.SHOW_BROWSER ?? 'false'),

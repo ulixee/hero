@@ -247,6 +247,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     try {
+      this.puppetPage.off('close', this.close);
       // run this one individually
       await this.puppetPage.close();
     } catch (error) {
@@ -612,6 +613,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private listen(): void {
     const page = this.puppetPage;
 
+    this.close = this.close.bind(this);
+    page.on('close', this.close);
     page.on('page-error', this.onPageError.bind(this), true);
     page.on('crashed', this.onTargetCrashed.bind(this));
     page.on('console', this.onConsole.bind(this), true);

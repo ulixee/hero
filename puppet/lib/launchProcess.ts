@@ -31,6 +31,7 @@ const logProcessExit = process.env.NODE_ENV !== 'test';
 export default async function launchProcess(
   executablePath: string,
   processArguments: string[],
+  onClose?: () => any,
   env?: NodeJS.ProcessEnv,
 ): Promise<ILaunchedProcess> {
   const stdio: StdioOptions = ['ignore', 'pipe', 'pipe'];
@@ -82,6 +83,7 @@ export default async function launchProcess(
   let processKilled = false;
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;
+    if (onClose) onClose();
 
     if (!websocketEndpointResolvable.isResolved) {
       websocketEndpointResolvable.reject(new Error('Chrome exited during launch'));
@@ -116,6 +118,7 @@ export default async function launchProcess(
         launchedProcess.kill('SIGKILL');
       }
       if (dataDir) cleanDataDir(dataDir);
+      if (onClose) onClose();
       return closed;
     } catch (error) {
       // might have already been kill off

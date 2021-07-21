@@ -134,8 +134,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     clearTimeout(this.autoShutdownTimer);
     const closeAll: Promise<any>[] = [];
     for (const id of this.sessionIds) {
-      const promise = Session.get(id)?.close();
-      if (promise) closeAll.push(promise.catch(err => err));
+      closeAll.push(this.closeSession({ sessionId: id }).catch(err => err));
     }
     await Promise.all(closeAll);
     this.isPersistent = false;
