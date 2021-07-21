@@ -41,6 +41,7 @@ export default class GlobalPool {
   }[] = [];
 
   public static async start(): Promise<void> {
+    this.isClosing = false;
     log.info('StartingGlobalPool', {
       sessionId: null,
     });
