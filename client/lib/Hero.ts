@@ -50,7 +50,7 @@ import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import CoreSession from './CoreSession';
-import ConnectionFactory, { ICreateConnectionToCoreFn } from "../connections/ConnectionFactory";
+import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, {
@@ -483,8 +483,9 @@ class SessionConnection {
     });
   }
 
-  private _connection: ConnectionToCore;
-  private _coreSession: Promise<CoreSession | Error>;
+  private readonly _connection: ConnectionToCore;
+  private readonly didCreateConnection: boolean = false;
+  private readonly _coreSession: Promise<CoreSession | Error>;
   private _activeTab: Tab;
   private _tabs: Tab[] = [];
 
@@ -497,8 +498,23 @@ class SessionConnection {
       createConnectionToCoreFn,
     );
 
+    if (connection !== connectionToCore) {
+      this.didCreateConnection = true;
+    }
+
     this._connection = connection;
     this._coreSession = connection.createSession(options).catch(err => err);
+
+    const defaultShowReplay = Boolean(JSON.parse(process.env.HERO_SHOW_REPLAY ?? 'false'));
+
+    const launchReplay = options?.showReplay ?? defaultShowReplay;
+
+    if (launchReplay) {
+      this._coreSession = this._coreSession.then(async x => {
+        if (x instanceof CoreSession) await scriptInstance.launchReplay(x);
+        return x;
+      });
+    }
   }
 
   public async refreshedTabs(): Promise<Tab[]> {
@@ -520,6 +536,9 @@ class SessionConnection {
     const sessionOrError = await this._coreSession;
     if (sessionOrError instanceof CoreSession) {
       await sessionOrError.close();
+    }
+    if (this.didCreateConnection) {
+      await this._connection.disconnect();
     }
   }
 
@@ -544,15 +563,6 @@ class SessionConnection {
     this.hasConnected = true;
 
     const { clientPlugins } = getState(this.hero);
-    const { showReplay } = getState(this.hero).options as IHeroCreateOptions;
-    const defaultShowReplay = Boolean(JSON.parse(process.env.HERO_SHOW_REPLAY ?? 'true'));
-
-    if (showReplay ?? defaultShowReplay) {
-      this._coreSession = this._coreSession.then(async x => {
-        if (x instanceof CoreSession) await scriptInstance.launchReplay(x);
-        return x;
-      });
-    }
 
     const coreSession = this._coreSession.then(value => {
       if (value instanceof CoreSession) return value;

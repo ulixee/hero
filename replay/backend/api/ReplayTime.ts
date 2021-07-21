@@ -16,7 +16,7 @@ export default class ReplayTime {
       this.millis = close.getTime() - start.getTime();
     } else {
       // add 10 seconds to end time
-      this.millis = (new Date().getTime() - start.getTime()) * 1.25;
+      this.millis = (Date.now() - start.getTime()) * 1.25;
     }
   }
 }

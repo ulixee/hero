@@ -1,4 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing/index';
+import Resolvable from '@ulixee/commons/Resolvable';
 import Core, { GlobalPool } from '../index';
 import Session from '../lib/Session';
 
@@ -119,4 +120,94 @@ describe('basic Core tests', () => {
     expect(GlobalPool.activeSessionCount).toBe(0);
     await httpServer.close();
   }, 15e3);
+
+  it('should emit events when all session tabs are closed', async () => {
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    GlobalPool.maxConcurrentHeroesCount = 10;
+    await connection.connect();
+    const httpServer = await Helpers.runHttpServer();
+
+    const tab = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(httpServer.url);
+    const allTabsClosed = jest.fn();
+    tab.session.on('all-tabs-closed', allTabsClosed);
+
+    await tab.close();
+
+    expect(allTabsClosed).toBeCalledTimes(1);
+    await Core.shutdown();
+  });
+
+  it('should emit browser windows all closed event', async () => {
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    GlobalPool.maxConcurrentHeroesCount = 10;
+    await connection.connect();
+    const httpServer = await Helpers.runHttpServer();
+
+    const tab = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab.session);
+    await tab.goto(httpServer.url);
+
+    const tab2 = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab2.session);
+    await tab2.goto(httpServer.url);
+
+    const browserWindowsClosed = jest.fn();
+
+    GlobalPool.events.on('browser-closed-all-windows', ({ puppet }) => {
+      browserWindowsClosed();
+      return puppet.close();
+    });
+
+    await tab.close();
+
+    expect(browserWindowsClosed).toBeCalledTimes(0);
+    await tab2.close();
+    expect(browserWindowsClosed).toBeCalledTimes(1);
+    await Core.shutdown();
+  });
+
+  it('should emit all browsers closed event', async () => {
+    const connection = Core.addConnection();
+    Helpers.onClose(() => connection.disconnect());
+    await connection.connect();
+
+    const tab = Session.getTab(await connection.createSession());
+    Helpers.needsClosing.push(tab.session);
+
+    const allBrowsersTriggered = new Resolvable<void>();
+    const allBrowsersClosedEvent = jest.fn();
+    GlobalPool.events.on('all-browsers-closed', () => {
+      allBrowsersTriggered.resolve();
+      allBrowsersClosedEvent();
+    });
+
+    // @ts-ignore
+    const puppets = GlobalPool.puppets;
+    expect(puppets).toHaveLength(1);
+
+    const puppet1 = puppets[0];
+    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+
+    // @ts-ignore
+    const puppet2 = await GlobalPool.getPuppet({
+      ...puppet1.browserEngine,
+      launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
+    });
+
+    expect(puppets).toHaveLength(2);
+    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+
+    await tab.close();
+    await puppet1.close();
+    expect(allBrowsersClosedEvent).toBeCalledTimes(0);
+
+    await puppet2.close();
+    await allBrowsersTriggered.promise;
+    expect(allBrowsersClosedEvent).toBeCalledTimes(1);
+    await Core.shutdown();
+  });
 });

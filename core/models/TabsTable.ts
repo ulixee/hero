@@ -9,7 +9,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
       ['parentId', 'INTEGER'],
       ['detachedAtCommandId', 'INTEGER'],
       ['pageTargetId', 'TEXT'],
-      ['sessionId', 'TEXT'],
+      ['devtoolsSessionId', 'TEXT'],
       ['viewportWidth', 'INTEGER'],
       ['viewportHeight', 'INTEGER'],
       ['browserPositionX', 'INTEGER'],
@@ -36,7 +36,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
       viewPort.height,
       viewPort.positionX,
       viewPort.positionY,
-      new Date().getTime(),
+      Date.now(),
     ]);
   }
 }
@@ -46,7 +46,7 @@ export interface ITabsRecord {
   parentId: number | null;
   detachedAtCommandId: number | null;
   pageTargetId: string;
-  sessionId: string;
+  devtoolsSessionId: string;
   viewportWidth: number;
   viewportHeight: number;
   browserPositionX: number;

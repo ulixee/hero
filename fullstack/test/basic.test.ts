@@ -131,7 +131,7 @@ describe('basic Full Client tests', () => {
     }
     {
       const expires = new Date();
-      expires.setTime(new Date().getTime() + 10e3);
+      expires.setTime(Date.now() + 10e3);
       await cookieStorage.setItem('Cookie2', 'test2', { expires });
       expect(await cookieStorage.length).toBe(2);
       const cookie = await cookieStorage.getItem('Cookie2');

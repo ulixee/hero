@@ -42,8 +42,8 @@ export default class Core {
   public static onShutdown: () => void;
 
   public static allowDynamicPluginLoading = true;
+  public static isClosing: Promise<void>;
   private static wasManuallyStarted = false;
-  private static isClosing: Promise<void>;
   private static isStarting = false;
 
   public static addConnection(): ConnectionToClient {
@@ -107,6 +107,7 @@ export default class Core {
     log.info('Core started', {
       sessionId: null,
       parentLogId: startLogId,
+      sessionsDir: GlobalPool.sessionsDir,
     });
   }
 

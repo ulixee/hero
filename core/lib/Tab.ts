@@ -186,7 +186,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       if (!top || top.resourceId.isResolved) continue;
 
       if (
-        finalUrl === top.finalUrl ||
+        (top.finalUrl && finalUrl === top.finalUrl) ||
         requestedUrl === top.requestedUrl ||
         browserRequestId === top.browserRequestId
       ) {
@@ -247,6 +247,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     }
 
     try {
+      this.puppetPage.off('close', this.close);
       // run this one individually
       await this.puppetPage.close();
     } catch (error) {
@@ -447,7 +448,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     // wait for a real url to be requested
     if (newTab.url === 'about:blank' || !newTab.url) {
       let timeoutMs = options?.timeoutMs ?? 10e3;
-      const millis = new Date().getTime() - startTime.getTime();
+      const millis = Date.now() - startTime.getTime();
       timeoutMs -= millis;
       await newTab.navigations.waitOn('navigation-requested', null, timeoutMs).catch(() => null);
     }
@@ -612,6 +613,8 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   private listen(): void {
     const page = this.puppetPage;
 
+    this.close = this.close.bind(this);
+    page.on('close', this.close);
     page.on('page-error', this.onPageError.bind(this), true);
     page.on('crashed', this.onTargetCrashed.bind(this));
     page.on('console', this.onConsole.bind(this), true);

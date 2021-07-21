@@ -63,24 +63,26 @@ export default abstract class BaseIpcHandler {
   }
 
   public close(): void {
+    if (this.isClosing) return;
     const parentLogId = this.logger.info(`${this.handlerName}.Closing`);
-    if (this.isClosing || !this.child) return;
     this.isClosing = true;
 
-    try {
-      // fix for node 13 throwing errors on closed sockets
-      this.child.stdin.on('error', () => {
-        // catch
-      });
-      // NOTE: windows writes to stdin
-      // MUST SEND SIGNALS BEFORE DISABLING PIPE!!
-      this.child.send('disconnect');
-    } catch (err) {
-      // don't log epipes
-    }
+    if (this.child) {
+      try {
+        // fix for node 13 throwing errors on closed sockets
+        this.child.stdin.on('error', () => {
+          // catch
+        });
+        // NOTE: windows writes to stdin
+        // MUST SEND SIGNALS BEFORE DISABLING PIPE!!
+        this.child.send('disconnect');
+      } catch (err) {
+        // don't log epipes
+      }
 
-    this.child.kill('SIGINT');
-    this.child.unref();
+      this.child.kill('SIGINT');
+      this.child.unref();
+    }
 
     try {
       this.onExit();
@@ -212,4 +214,5 @@ export interface IGoIpcOpts {
   tcpWindowSize?: number;
   rejectUnauthorized?: boolean;
   debug?: boolean;
+  debugData?: boolean; // include bytes read from client/remote (NOTE: lots of output)
 }

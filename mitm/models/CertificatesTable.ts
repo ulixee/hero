@@ -31,7 +31,7 @@ export default class CertificatesTable extends SqliteTable<ICertificateRecord> {
     if (!record) {
       return null;
     }
-    const millisUntilExpire = (record.expireDate as any) - new Date().getTime();
+    const millisUntilExpire = (record.expireDate as any) - Date.now();
     if (millisUntilExpire < 60 * 60e3) {
       return null;
     }

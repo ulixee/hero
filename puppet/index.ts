@@ -8,6 +8,7 @@ import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
+import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
@@ -36,7 +37,10 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public async start(): Promise<Puppet> {
+  public async start(options?: {
+    attachToDevtools?: (session: IDevtoolsSession) => Promise<any>;
+    onClose?: () => any;
+  }): Promise<Puppet> {
     try {
       this.isStarted = true;
 
@@ -47,9 +51,11 @@ export default class Puppet {
       const launchedProcess = await launchProcess(
         this.browserEngine.executablePath,
         this.browserEngine.launchArguments,
+        options?.onClose,
       );
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
+      this.browser.onDevtoolsAttached = options?.attachToDevtools;
 
       const features = await this.browser.getFeatures();
       this.supportsBrowserContextProxy = features?.supportsPerBrowserContextProxy ?? false;
@@ -63,14 +69,6 @@ export default class Puppet {
         launchError.isSandboxError,
       );
     }
-  }
-
-  public isSameEngine(other: Puppet): boolean {
-    return (
-      this.browserEngine.executablePath === other.browserEngine.executablePath &&
-      this.browserEngine.launchArguments.toString() ===
-        other.browserEngine.launchArguments.toString()
-    );
   }
 
   public newContext(

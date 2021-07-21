@@ -287,7 +287,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
     return worker.isReady;
   }
 
-  async close(): Promise<void> {
+  async close(timeoutMs = 5e3): Promise<void> {
     if (this.devtoolsSession.isConnected() && !this.isClosed) {
       // trigger beforeUnload
       try {
@@ -298,7 +298,10 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
         }
       }
     }
-    return this.closePromise.promise;
+
+    const timeout = setTimeout(() => this.didClose(), timeoutMs);
+    await this.closePromise.promise;
+    clearTimeout(timeout);
   }
 
   onTargetKilled(errorCode: number): void {
@@ -311,17 +314,22 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
 
   didClose(closeError?: Error): void {
     this.isClosed = true;
-    this.framesManager.close(closeError);
-    this.networkManager.close();
-    eventUtils.removeEventListeners(this.registeredEvents);
-    this.cancelPendingEvents('Page closed', ['close']);
-    Promise.all([...this.workersById.values()].map(x => x.close()))
-      .finally(() => this.closePromise.resolve())
-      .catch(error => {
-        this.logger.error('Page.closeWorkersError', {
-          error,
-        });
+    try {
+      this.framesManager.close(closeError);
+      this.networkManager.close();
+      eventUtils.removeEventListeners(this.registeredEvents);
+      this.cancelPendingEvents('Page closed', ['close']);
+      for (const worker of this.workersById.values()) {
+        worker.close();
+      }
+    } catch (error) {
+      this.logger.error('Page.closeWorkersError', {
+        error,
       });
+    } finally {
+      this.closePromise.resolve();
+      this.emit('close');
+    }
   }
 
   private async navigateToHistory(delta: number): Promise<string> {

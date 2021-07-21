@@ -19,6 +19,7 @@ const { log } = Log(module);
 export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
   public readonly browserContextsById = new Map<string, BrowserContext>();
   public readonly devtoolsSession: DevtoolsSession;
+  public onDevtoolsAttached?: (session: DevtoolsSession) => Promise<any>;
 
   private readonly connection: Connection;
 
@@ -127,6 +128,17 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
       if (!devtoolsSession) return;
       devtoolsSession.send('Runtime.runIfWaitingForDebugger').catch(() => null);
     }
+
+    if (
+      targetInfo.type === 'other' &&
+      targetInfo.url.startsWith('devtools://devtools') &&
+      this.onDevtoolsAttached
+    ) {
+      const devtoolsSession = this.connection.getSession(sessionId);
+      this.onDevtoolsAttached(devtoolsSession).catch(() => null);
+      return;
+    }
+
     if (event.waitingForDebugger && targetInfo.type === 'other') {
       const devtoolsSession = this.connection.getSession(sessionId);
       if (!devtoolsSession) return;

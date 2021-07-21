@@ -198,7 +198,7 @@ export default class ReplayView extends ViewBackend {
         const nextTickTime = new Date(this.tabState.nextTick.timestamp);
         const currentTickTime = new Date(this.tabState.currentTick.timestamp);
         const diff = nextTickTime.getTime() - currentTickTime.getTime();
-        const fnDuration = new Date().getTime() - startTime.getTime();
+        const fnDuration = Date.now() - startTime.getTime();
         millisToNextTick = diff - fnDuration + startMillisDeficit;
       }
 
@@ -307,7 +307,7 @@ export default class ReplayView extends ViewBackend {
     if (!this.replayApi) return;
 
     const lastActivityMillis =
-      new Date().getTime() - (this.replayApi.lastActivityDate ?? new Date()).getTime();
+      Date.now() - (this.replayApi.lastActivityDate ?? new Date()).getTime();
 
     if (lastActivityMillis < this.lastInactivityMillis) {
       this.lastInactivityMillis = lastActivityMillis;
