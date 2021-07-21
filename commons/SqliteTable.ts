@@ -88,7 +88,7 @@ export default abstract class SqliteTable<T> {
   private addRecordToPublish(record: IRecord): void {
     if (!this.insertCallbackFn) return;
     this.insertSubscriptionRecords.push(this.insertToObject(record));
-    if (new Date().getTime() - this.lastSubscriptionPublishTime.getTime() > 500) {
+    if (Date.now() - this.lastSubscriptionPublishTime.getTime() > 500) {
       return this.publishPendingRecords();
     }
     clearTimeout(this.subscriptionThrottle);

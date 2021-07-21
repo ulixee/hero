@@ -6,6 +6,15 @@ import { IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
 import { IScrollEvent } from '@ulixee/hero-interfaces/IScrollEvent';
 import { ILoadEvent } from '@ulixee/hero-interfaces/ILoadEvent';
 
+declare global {
+  interface Window {
+    extractDomChanges(): PageRecorderResultSet;
+    flushPageRecorder(): PageRecorderResultSet;
+    listenForInteractionEvents(): void;
+  }
+}
+declare const runtimeFunction: string;
+
 enum DomActionType {
   newDocument = 0,
   location = 1,
@@ -32,10 +41,8 @@ export type PageRecorderResultSet = [
 ];
 const SHADOW_NODE_TYPE = 40;
 
-// @ts-ignore
-const eventsCallback = (window[runtimeFunction] as unknown) as (data: string) => void;
-// @ts-ignore
-delete window[runtimeFunction];
+// callback binding
+const eventsCallback = window[runtimeFunction] as unknown as (data: string) => void;
 
 let lastUploadDate: Date;
 
@@ -88,7 +95,7 @@ class PageEventsRecorder {
     }
     isStarted = true;
 
-    const stamp = new Date().getTime();
+    const stamp = Date.now();
     // preload with a document
     this.domChanges.push([
       DomActionType.newDocument,
@@ -140,7 +147,7 @@ class PageEventsRecorder {
   public trackFocus(eventType: FocusType, focusEvent: FocusEvent) {
     const nodeId = NodeTracker.getNodeId(focusEvent.target as Node);
     const relatedNodeId = NodeTracker.getNodeId(focusEvent.relatedTarget as Node);
-    const time = new Date().getTime();
+    const time = Date.now();
     const event = [eventType as any, nodeId, relatedNodeId, time] as IFocusEvent;
     this.focusEvents.push(event);
     this.getPropertyChanges(time, this.domChanges);
@@ -159,23 +166,24 @@ class PageEventsRecorder {
       mouseEvent.buttons,
       nodeId,
       relatedNodeId,
-      new Date().getTime(),
+      Date.now(),
     ] as IMouseEvent;
+
     this.mouseEvents.push(event);
   }
 
   public trackScroll(scrollX: number, scrollY: number) {
-    this.scrollEvents.push([scrollX, scrollY, new Date().getTime()]);
+    this.scrollEvents.push([scrollX, scrollY, Date.now()]);
   }
 
   public onLoadEvent(name: string) {
     this.start();
-    this.loadEvents.push([name, window.self.location.href, new Date().getTime()]);
+    this.loadEvents.push([name, window.self.location.href, Date.now()]);
     this.uploadChanges();
   }
 
   public checkForAllPropertyChanges() {
-    this.getPropertyChanges(new Date().getTime(), this.domChanges);
+    this.getPropertyChanges(Date.now(), this.domChanges);
   }
 
   public get pageResultset(): PageRecorderResultSet {
@@ -260,7 +268,7 @@ class PageEventsRecorder {
   }
 
   private getLocationChange(changeUnixTime: number, changes: IDomChangeEvent[]) {
-    const timestamp = changeUnixTime || new Date().getTime();
+    const timestamp = changeUnixTime || Date.now();
     const currentLocation = window.self.location.href;
     if (this.location !== currentLocation) {
       this.location = currentLocation;
@@ -310,7 +318,7 @@ class PageEventsRecorder {
   }
 
   private checkForStylesheetChanges(changeUnixTime: number, changes: IDomChangeEvent[]) {
-    const timestamp = changeUnixTime || new Date().getTime();
+    const timestamp = changeUnixTime || Date.now();
     for (const [style, current] of this.stylesheets) {
       if (!style.sheet || !style.isConnected) continue;
       const sheet = style.sheet as CSSStyleSheet;
@@ -335,7 +343,7 @@ class PageEventsRecorder {
 
   private convertMutationsToChanges(mutations: MutationRecord[]) {
     const changes: IDomChangeEvent[] = [];
-    const stamp = new Date().getTime();
+    const stamp = Date.now();
 
     this.getLocationChange(stamp, changes);
     this.getPropertyChanges(stamp, changes);
@@ -573,16 +581,12 @@ const defaultNamespaceUri = 'http://www.w3.org/1999/xhtml';
 const propertiesToCheck = ['value', 'selected', 'checked'];
 
 const recorder = new PageEventsRecorder();
-
-// @ts-ignore
 window.extractDomChanges = () => recorder.extractChanges();
-// @ts-ignore
 window.flushPageRecorder = () => recorder.flushAndReturnLists();
-// @ts-ignore
 window.listenForInteractionEvents = () => recorder.listenToInteractionEvents();
 
 const interval = setInterval(() => {
-  if (!lastUploadDate || new Date().getTime() - lastUploadDate.getTime() > 1e3) {
+  if (!lastUploadDate || Date.now() - lastUploadDate.getTime() > 1e3) {
     // if we haven't uploaded in 1 second, make sure nothing is pending
     requestAnimationFrame(() => recorder.uploadChanges());
   }

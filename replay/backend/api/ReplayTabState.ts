@@ -225,7 +225,7 @@ export default class ReplayTabState extends EventEmitter {
     if (!newTick) return;
     if (!this.replayTime.close) {
       // give ticks time to load. TODO: need a better strategy for this
-      if (new Date().getTime() - new Date(newTick.timestamp).getTime() < 2e3) return;
+      if (Date.now() - new Date(newTick.timestamp).getTime() < 2e3) return;
     }
 
     // console.log('Loading tick %s', newTickIdx);
@@ -503,8 +503,7 @@ export default class ReplayTabState extends EventEmitter {
   public checkBroadcast() {
     clearTimeout(this.broadcastTimer);
 
-    const shouldBroadcast =
-      !this.lastBroadcast || new Date().getTime() - this.lastBroadcast.getTime() > 500;
+    const shouldBroadcast = !this.lastBroadcast || Date.now() - this.lastBroadcast.getTime() > 500;
 
     // if we haven't updated in 500ms, do so now
     if (shouldBroadcast) {

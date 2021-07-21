@@ -447,7 +447,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     // wait for a real url to be requested
     if (newTab.url === 'about:blank' || !newTab.url) {
       let timeoutMs = options?.timeoutMs ?? 10e3;
-      const millis = new Date().getTime() - startTime.getTime();
+      const millis = Date.now() - startTime.getTime();
       timeoutMs -= millis;
       await newTab.navigations.waitOn('navigation-requested', null, timeoutMs).catch(() => null);
     }

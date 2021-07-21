@@ -26,7 +26,7 @@ class JsPath {
       top = maxScrollY;
     }
 
-    const endTime = new Date().getTime() + (timeoutMillis ?? 50);
+    const endTime = Date.now() + (timeoutMillis ?? 50);
     let count = 0;
     do {
       if (Math.abs(window.scrollX - left) <= 1 && Math.abs(window.scrollY - top) <= 1) {
@@ -37,7 +37,7 @@ class JsPath {
       }
       await new Promise(requestAnimationFrame);
       count += 1;
-    } while (new Date().getTime() < endTime);
+    } while (Date.now() < endTime);
 
     return false;
   }
