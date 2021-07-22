@@ -277,7 +277,7 @@ function updateScroll(scrollEvent: IFrontendScrollRecord) {
 /////// BUILD UI ELEMENTS //////////////////////////////////////////////////////////////////////////////////////////////
 
 let isInitialized = false;
-function createReplayItems(showChromeAlive = false) {
+function createReplayItems() {
   if (replayNode && !replayNode.isConnected) {
     document.body.appendChild(replayNode);
   }

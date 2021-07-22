@@ -10,7 +10,7 @@ import { Connection } from './lib/Connection';
 
 const PuppetLauncher: IPuppetLauncher = {
   getLaunchArgs(options: IPuppetLaunchArgs, browserEngine: IBrowserEngine) {
-    const chromeArguments = [];
+    const chromeArguments = browserEngine.launchArguments ?? [];
     if (options.proxyPort !== undefined) {
       chromeArguments.push(
         // Use proxy for localhost URLs
@@ -19,11 +19,7 @@ const PuppetLauncher: IPuppetLauncher = {
       );
     }
 
-    chromeArguments.push(
-      '--remote-debugging-port=0',
-      '--enable-logging',
-      '--ignore-certificate-errors',
-    );
+    chromeArguments.push('--remote-debugging-port=0', '--ignore-certificate-errors');
 
     if (options.noChromeSandbox === true) {
       chromeArguments.push('--no-sandbox');
@@ -44,7 +40,6 @@ const PuppetLauncher: IPuppetLauncher = {
       chromeArguments.push('--headless');
     }
 
-    browserEngine.launchArguments = chromeArguments;
     if (browserEngine.beforeLaunch) browserEngine.beforeLaunch(options);
 
     return browserEngine.launchArguments;

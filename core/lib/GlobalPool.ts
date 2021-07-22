@@ -31,7 +31,7 @@ export default class GlobalPool {
   }
 
   public static events = new TypedEventEmitter<{
-    'browser-closed-all-windows': { puppet: Puppet };
+    'browser-has-no-open-windows': { puppet: Puppet };
     'all-browsers-closed': void;
   }>();
 
@@ -110,17 +110,14 @@ export default class GlobalPool {
     if (existing) return Promise.resolve(existing);
 
     this.puppets.push(puppet);
-
+    puppet.once('close', this.onEngineClosed.bind(this, browserEngine));
     const browserDir = browserEngine.executablePath.split(browserEngine.fullVersion).shift();
 
     const preferencesInterceptor = new DevtoolsPreferences(
       `${browserDir}/devtoolsPreferences.json`,
     );
 
-    return puppet.start({
-      attachToDevtools: preferencesInterceptor.installOnConnect,
-      onClose: this.onEngineClosed.bind(this, browserEngine),
-    });
+    return puppet.start(preferencesInterceptor.installOnConnect);
   }
 
   private static async startMitm(): Promise<void> {
@@ -198,7 +195,7 @@ export default class GlobalPool {
     );
 
     if (puppet) {
-      this.events.emit('browser-closed-all-windows', { puppet });
+      this.events.emit('browser-has-no-open-windows', { puppet });
     }
   }
 

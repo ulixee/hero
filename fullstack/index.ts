@@ -25,7 +25,7 @@ Core.start().catch(error => {
 });
 
 if (process.env.NODE_ENV !== 'test') {
-  GlobalPool.events.on('browser-closed-all-windows', ({ puppet }) => puppet.close());
+  GlobalPool.events.on('browser-has-no-open-windows', ({ puppet }) => puppet.close());
   GlobalPool.events.on('all-browsers-closed', () => Core.shutdown());
 }
 export {

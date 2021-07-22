@@ -9,13 +9,14 @@ import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOpt
 import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
+import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 
 const { log } = Log(module);
 
 let puppBrowserCounter = 1;
-export default class Puppet {
+export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public readonly id: number;
   public readonly browserEngine: IBrowserEngine;
   public supportsBrowserContextProxy: boolean;
@@ -24,7 +25,10 @@ export default class Puppet {
   private isStarted = false;
   private browser: IPuppetBrowser;
 
+  private onClose: () => Promise<any>;
+
   constructor(browserEngine: IBrowserEngine, args: IPuppetLaunchArgs = {}) {
+    super();
     this.browserEngine = browserEngine;
     this.id = puppBrowserCounter;
     if (browserEngine.name === 'chrome') {
@@ -37,10 +41,9 @@ export default class Puppet {
     puppBrowserCounter += 1;
   }
 
-  public async start(options?: {
-    attachToDevtools?: (session: IDevtoolsSession) => Promise<any>;
-    onClose?: () => any;
-  }): Promise<Puppet> {
+  public async start(
+    attachToDevtools?: (session: IDevtoolsSession) => Promise<any>,
+  ): Promise<Puppet> {
     try {
       this.isStarted = true;
 
@@ -51,11 +54,11 @@ export default class Puppet {
       const launchedProcess = await launchProcess(
         this.browserEngine.executablePath,
         this.browserEngine.launchArguments,
-        options?.onClose,
+        this.browserDidClose.bind(this),
       );
 
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
-      this.browser.onDevtoolsAttached = options?.attachToDevtools;
+      this.browser.onDevtoolsAttached = attachToDevtools;
 
       const features = await this.browser.getFeatures();
       this.supportsBrowserContextProxy = features?.supportsPerBrowserContextProxy ?? false;
@@ -93,7 +96,12 @@ export default class Puppet {
     } catch (error) {
       log.error('Puppet.Closing:Error', { sessionId: null, error });
     } finally {
-      log.stats('Puppet.closed');
+      this.emit('close');
+      log.stats('Puppet.Closed');
     }
+  }
+
+  private browserDidClose() {
+    this.emit('close');
   }
 }

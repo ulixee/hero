@@ -1,4 +1,4 @@
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 // process.env.HERO_SHOW_BROWSER = 'true';
 

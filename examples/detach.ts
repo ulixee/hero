@@ -1,4 +1,4 @@
-import Hero, { LocationStatus } from '@ulixee/hero';
+import Hero, { LocationStatus } from '@ulixee/hero-fullstack';
 
 /**
  * The first run of this will result in a script taking 60+ seconds.
