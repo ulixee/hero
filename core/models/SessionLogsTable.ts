@@ -58,7 +58,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
       log.action,
       log.level,
       log.module,
-      log.sessionId === null ? 1 : undefined,
+      !log.sessionId ? 1 : undefined,
       log.parentId,
       data,
     ]);

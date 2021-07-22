@@ -1,4 +1,4 @@
-import Hero from '@ulixee/hero';
+import Hero from '@ulixee/hero-fullstack';
 
 async function run() {
   const hero = new Hero({ showReplay: true });

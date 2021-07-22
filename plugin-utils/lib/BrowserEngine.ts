@@ -25,7 +25,7 @@ export default class BrowserEngine implements IBrowserEngine {
     this.browserEmulator = browserEmulator;
     this.engineFetcher = this.loadEngineFetcher(browserEngineOption);
     if (this.engineFetcher.launchArgs?.length) {
-      this.launchArguments.push(...this.engineFetcher?.launchArgs);
+      this.launchArguments.push(...this.engineFetcher.launchArgs);
     }
     this.engineOption = browserEngineOption;
     this.name = browserEngineOption.name;

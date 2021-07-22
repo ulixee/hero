@@ -127,7 +127,7 @@ export default class Core {
       await GlobalPool.close().catch(error => shutDownErrors.push(error));
 
       this.wasManuallyStarted = false;
-      if (Core.onShutdown) Core.onShutdown();
+      if (this.onShutdown) this.onShutdown();
       isClosing.resolve();
     } catch (error) {
       isClosing.reject(error);
@@ -138,6 +138,7 @@ export default class Core {
         errors: shutDownErrors.length ? shutDownErrors : undefined,
       });
     }
+    return isClosing.promise;
   }
 
   public static logUnhandledError(clientError: Error, fatalError = false): void {
