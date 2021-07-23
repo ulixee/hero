@@ -104,11 +104,22 @@ export default abstract class SqliteTable<T> {
   }
 
   private createTableStatement(): string {
+    const primaryKey = this.columns.filter(x => x[2]?.includes('PRIMARY KEY'));
+    let primaryKeyAddon = '';
+    if (primaryKey.length > 1) {
+      primaryKeyAddon = `PRIMARY KEY (${primaryKey.map(x => x[0]).join(', ')})`;
+      for (const key of primaryKey) {
+        key.length = 2;
+      }
+    }
     const definitions = this.columns.map(x => {
       let columnDef = `${x[0]} ${x[1]}`;
       if (x.length > 2) columnDef = `${columnDef} ${x[2]}`;
       return columnDef;
     });
+    if (primaryKeyAddon) {
+      definitions.push(primaryKeyAddon);
+    }
     return `CREATE TABLE IF NOT EXISTS ${this.tableName} (${definitions})`;
   }
 

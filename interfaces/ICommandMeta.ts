@@ -11,4 +11,7 @@ export default interface ICommandMeta {
   endDate?: number;
   result?: any;
   resultType?: string;
+  run: number;
+  reusedCommandFromRun?: number;
+  url?: string; // url at time of command
 }

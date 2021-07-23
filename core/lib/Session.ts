@@ -57,6 +57,7 @@ export default class Session extends TypedEventEmitter<{
   public sessionState: SessionState;
   public browserContext?: IPuppetContext;
   public userProfile?: IUserProfile;
+  public resumeCounter = 0;
 
   public tabsById = new Map<number, Tab>();
 
@@ -78,6 +79,7 @@ export default class Session extends TypedEventEmitter<{
   private commandRecorder: CommandRecorder;
   private isolatedMitmProxy?: MitmProxy;
   private _isClosing = false;
+  private isResettingState = false;
   private detachedTabsById = new Map<number, Tab>();
 
   private tabIdCounter = 0;
@@ -100,6 +102,11 @@ export default class Session extends TypedEventEmitter<{
       userAgent,
     } = options;
 
+    if (!options.showBrowser) {
+      options.showBrowser = false;
+      options.showBrowserInteractions = false;
+    }
+
     const userAgentSelector = userAgent ?? userProfile?.userAgentString;
     this.plugins = new CorePlugins(
       {
@@ -114,6 +121,7 @@ export default class Session extends TypedEventEmitter<{
     );
 
     this.browserEngine = this.plugins.browserEngine;
+    this.browserEngine.isHeaded ??= options.showBrowser;
 
     this.userProfile = options.userProfile;
     this.upstreamProxyUrl = options.upstreamProxyUrl;
@@ -121,6 +129,7 @@ export default class Session extends TypedEventEmitter<{
 
     this.plugins.configure(options);
     this.timezoneId = options.timezoneId || '';
+    this.locale = options.locale;
     this.viewport =
       options.viewport ||
       ({
@@ -145,6 +154,8 @@ export default class Session extends TypedEventEmitter<{
       browserEmulatorId: this.plugins.browserEmulator.id,
       browserVersion: this.browserEngine.fullVersion,
       humanEmulatorId: this.plugins.humanEmulator.id,
+      userAgentString: this.plugins.browserEmulator.userAgentString,
+      deviceProfile: this.plugins.browserEmulator.deviceProfile,
       locale: options.locale,
       timezoneId: options.timezoneId,
       sessionOptions: providedOptions,
@@ -257,7 +268,8 @@ export default class Session extends TypedEventEmitter<{
       await UserProfile.install(this);
     }
 
-    context.defaultPageInitializationFn = InjectedScripts.install;
+    context.defaultPageInitializationFn = page =>
+      InjectedScripts.install(page, this.options.showBrowserInteractions);
 
     const requestSession = this.mitmRequestSession;
     requestSession.on('request', this.onMitmRequest.bind(this));
@@ -294,6 +306,50 @@ export default class Session extends TypedEventEmitter<{
     this.registerTab(tab, page);
     await tab.isReady;
     return tab;
+  }
+
+  public getLastActiveTab(): Tab {
+    for (let idx = this.sessionState.commands.length - 1; idx >= 0; idx -= 1) {
+      const command = this.sessionState.commands[idx];
+      if (command.tabId) {
+        const tab = this.tabsById.get(command.tabId);
+        if (tab && !tab.isClosing) return tab;
+      }
+    }
+    return null;
+  }
+
+  public async resetStorage(): Promise<void> {
+    const securityOrigins = new Set<string>();
+    this.isResettingState = true;
+    try {
+      for (const tab of this.tabsById.values()) {
+        const clearPromises: Promise<void>[] = [];
+        for (const frame of tab.frameEnvironmentsById.values()) {
+          const origin = frame.puppetFrame.securityOrigin;
+          if (!securityOrigins.has(origin)) {
+            const promise = tab.puppetPage.devtoolsSession
+              .send('Storage.clearDataForOrigin', {
+                origin,
+                storageTypes: 'all',
+              })
+              .catch(err => err);
+            clearPromises.push(promise);
+            securityOrigins.add(origin);
+          }
+        }
+        await Promise.all(clearPromises);
+        await tab.close();
+      }
+      // after we're all the way cleared, install user profile again
+      if (this.userProfile) {
+        await UserProfile.install(this);
+      }
+      // pop a new tab on
+      await this.createTab();
+    } finally {
+      this.isResettingState = false;
+    }
   }
 
   public async close() {
@@ -442,7 +498,7 @@ export default class Session extends TypedEventEmitter<{
     this.tabsById.set(id, tab);
     tab.on('close', () => {
       this.tabsById.delete(id);
-      if (this.tabsById.size === 0 && this.detachedTabsById.size === 0) {
+      if (this.tabsById.size === 0 && this.detachedTabsById.size === 0 && !this.isResettingState) {
         this.emit('all-tabs-closed');
       }
     });

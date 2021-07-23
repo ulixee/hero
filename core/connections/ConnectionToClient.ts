@@ -20,6 +20,7 @@ import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
+import SessionDb from '../dbs/SessionDb';
 
 const { log } = Log(module);
 
@@ -201,18 +202,38 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   public async createSession(options: ISessionCreateOptions = {}): Promise<ISessionMeta> {
     if (this.isClosing) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
-    const session = await GlobalPool.createSession(options);
+    let session: Session;
+    let tab: Tab;
+    if (options.sessionResume) {
+      session = await this.resumeSession(options);
+      tab = session?.getLastActiveTab();
+    }
+
+    if (!session) {
+      session = await GlobalPool.createSession(options);
+    }
     this.sessionIds.add(session.id);
     session.on('awaited-event', this.emit.bind(this, 'message'));
     session.on('closing', () => this.sessionIds.delete(session.id));
     session.on('closed', this.checkForAutoShutdown.bind(this));
 
-    const tab = await session.createTab();
+    tab ??= await session.createTab();
     return this.getSessionMeta(tab);
   }
 
   public async closeSession(sessionMeta: ISessionMeta): Promise<void> {
-    await Session.get(sessionMeta.sessionId)?.close();
+    const session = Session.get(sessionMeta.sessionId);
+    if (!session) return;
+    // if this session is set to keep alive and core is closing,
+    if (session.options.sessionKeepAlive && !Core.isClosing) {
+      this.sessionIds.delete(session.id);
+      session.removeAllListeners('closing');
+      session.removeAllListeners('closed');
+      session.removeAllListeners('awaited-event');
+      return;
+    }
+
+    await session.close();
   }
 
   public configure(sessionMeta: ISessionMeta, options: IConfigureSessionOptions): Promise<void> {
@@ -333,6 +354,51 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
       return await frameEnvironment[method](...args);
     }
+  }
+
+  private async resumeSession(options: ISessionCreateOptions): Promise<Session> {
+    const { sessionResume } = options;
+    const session = Session.get(sessionResume.sessionId);
+    if (session) {
+      Object.assign(session.options, options);
+      session.resumeCounter += 1;
+
+      if (sessionResume.startLocation === 'sessionStart') {
+        await session.resetStorage();
+        // create a new tab
+      }
+      return session;
+    }
+
+    // if session not active, re-create
+    const db = SessionDb.getCached(sessionResume.sessionId, GlobalPool.sessionsDir);
+    if (!db) {
+      const data = [
+        ''.padEnd(50, '-'),
+        `------HERO SESSION ID`.padEnd(50, '-'),
+        `------${GlobalPool.sessionsDir}`.padEnd(50, '-'),
+        `------${sessionResume.sessionId ?? ''}`.padEnd(50, '-'),
+        ''.padEnd(50, '-'),
+      ].join('\n');
+
+      throw new Error(
+        `You're trying to resume a Hero session that could not be located.
+${data}`,
+      );
+    }
+
+    const sessionDb = db.session.get();
+    options.userAgent = sessionDb.userAgentString;
+    options.locale = sessionDb.locale;
+    options.timezoneId = sessionDb.timezoneId;
+    options.viewport = sessionDb.viewport;
+
+    options.geolocation ??= sessionDb.createSessionOptions?.geolocation;
+    options.userProfile ??= sessionDb.createSessionOptions?.userProfile;
+    options.userProfile ??= {};
+    options.userProfile.deviceProfile ??= sessionDb.deviceProfile;
+
+    return GlobalPool.createSession(options);
   }
 
   private checkForAutoShutdown(): void {

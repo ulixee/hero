@@ -11,6 +11,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       'Commands',
       [
         ['id', 'INTEGER', 'NOT NULL PRIMARY KEY'],
+        ['run', 'INTEGER', 'NOT NULL PRIMARY KEY'],
         ['tabId', 'INTEGER'],
         ['frameId', 'INTEGER'],
         ['name', 'TEXT'],
@@ -22,6 +23,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
         ['endDate', 'INTEGER'],
         ['result', 'TEXT'],
         ['resultType', 'TEXT'],
+        ['reusedCommandFromRun', 'INTEGER'],
       ],
       true,
     );
@@ -30,8 +32,11 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
   }
 
   public insert(commandMeta: ICommandMeta) {
+    commandMeta.resultType = commandMeta.result?.constructor?.name ?? typeof commandMeta.result;
+
     this.queuePendingInsert([
       commandMeta.id,
+      commandMeta.run,
       commandMeta.tabId,
       commandMeta.frameId,
       commandMeta.name,
@@ -42,9 +47,8 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
       commandMeta.runStartDate,
       commandMeta.endDate,
       TypeSerializer.stringify(commandMeta.result),
-      commandMeta.result?.constructor
-        ? commandMeta.result.constructor.name
-        : typeof commandMeta.result,
+      commandMeta.resultType,
+      commandMeta.reusedCommandFromRun,
     ]);
   }
 

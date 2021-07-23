@@ -13,6 +13,7 @@ export default class DetachedTabState {
   }
 
   public detachedAtCommandId: number;
+
   public get domChangeRange(): { indexRange: [number, number]; timestampRange: [number, number] } {
     if (!this.domChanges?.length) {
       return { indexRange: [-1, 1], timestampRange: [-1, 1] };
@@ -57,49 +58,49 @@ export default class DetachedTabState {
     await Promise.all([
       page.mainFrame.waitForLoader(loader.loaderId),
       page.mainFrame.waitForLoad('DOMContentLoaded'),
-      InjectedScripts.installDetachedScripts(page),
+      InjectedScripts.installDetachedScripts(page, tab.session.options.showBrowserInteractions),
     ]);
     await InjectedScripts.restoreDom(page, this.domChanges);
   }
 
-  public mockNetworkRequests: Parameters<
-    IPuppetPage['setNetworkRequestInterceptor']
-  >[0] = async request => {
-    const { url, method } = request.request;
-    if (request.resourceType === 'Document' && url === this.url) {
+  public mockNetworkRequests: Parameters<IPuppetPage['setNetworkRequestInterceptor']>[0] =
+    async request => {
+      const { url, method } = request.request;
+      if (request.resourceType === 'Document' && url === this.url) {
+        return {
+          requestId: request.requestId,
+          responseCode: 200,
+          responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
+          body: Buffer.from(`${this.doctype}<html><head></head><body></body></html>`).toString(
+            'base64',
+          ),
+        };
+      }
+
+      const match = this.resourceLookup[`${method}_${url}`]?.shift();
+      if (!match) return null;
+
+      const { headers, isJavascript } = this.getMockHeaders(match);
+      if (isJavascript || request.resourceType === 'Script') {
+        return {
+          requestId: request.requestId,
+          responseCode: 200,
+          responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
+          body: '',
+        };
+      }
+
+      const body =
+        (await this.session.sessionState.getResourceData(match.id, false))?.toString('base64') ??
+        '';
+
       return {
         requestId: request.requestId,
-        responseCode: 200,
-        responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
-        body: Buffer.from(`${this.doctype}<html><head></head><body></body></html>`).toString(
-          'base64',
-        ),
+        body,
+        responseHeaders: headers,
+        responseCode: match.response.statusCode,
       };
-    }
-
-    const match = this.resourceLookup[`${method}_${url}`]?.shift();
-    if (!match) return null;
-
-    const { headers, isJavascript } = this.getMockHeaders(match);
-    if (isJavascript || request.resourceType === 'Script') {
-      return {
-        requestId: request.requestId,
-        responseCode: 200,
-        responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }],
-        body: '',
-      };
-    }
-
-    const body =
-      (await this.session.sessionState.getResourceData(match.id, false))?.toString('base64') ?? '';
-
-    return {
-      requestId: request.requestId,
-      body,
-      responseHeaders: headers,
-      responseCode: match.response.statusCode,
     };
-  };
 
   public toJSON(): any {
     return {
@@ -110,9 +111,10 @@ export default class DetachedTabState {
     };
   }
 
-  private getMockHeaders(
-    resource: IResourceMeta,
-  ): { isJavascript: boolean; headers: { name: string; value: string }[] } {
+  private getMockHeaders(resource: IResourceMeta): {
+    isJavascript: boolean;
+    headers: { name: string; value: string }[];
+  } {
     const headers: { name: string; value: string }[] = [];
     let isJavascript = false;
 

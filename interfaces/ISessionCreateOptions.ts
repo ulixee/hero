@@ -6,6 +6,12 @@ import IGeolocation from './IGeolocation';
 
 export default interface ISessionCreateOptions extends ISessionOptions {
   sessionName?: string;
+  sessionKeepAlive?: boolean;
+  sessionResume?: {
+    startLocation: 'currentLocation' | 'pageStart' | 'sessionStart';
+    sessionId: string;
+  };
+
   browserEmulatorId?: string;
   userAgent?: string;
   scriptInstanceMeta?: IScriptInstanceMeta;
@@ -18,4 +24,8 @@ export default interface ISessionCreateOptions extends ISessionOptions {
   geolocation?: IGeolocation;
   dependencyMap?: { [clientPluginId: string]: string[] };
   corePluginPaths?: string[];
+
+  showBrowser?: boolean;
+  showBrowserInteractions?: boolean;
+  allowManualBrowserInteraction?: boolean;
 }
