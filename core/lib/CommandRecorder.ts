@@ -1,4 +1,4 @@
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/TypeSerializer';

@@ -6,7 +6,7 @@ import INavigation, {
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import { createPromise } from '@ulixee/commons/utils';
 import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import SessionState from './SessionState';
 

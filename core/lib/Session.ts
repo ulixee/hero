@@ -15,7 +15,7 @@ import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionO
 import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { MitmProxy } from '@ulixee/hero-mitm/index';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';

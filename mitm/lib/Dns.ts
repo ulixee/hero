@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import * as net from 'net';
 import { promises as dns } from 'dns';
 import { createPromise } from '@ulixee/commons/utils';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
 import DnsOverTlsSocket from './DnsOverTlsSocket';
 import RequestSession from '../handlers/RequestSession';

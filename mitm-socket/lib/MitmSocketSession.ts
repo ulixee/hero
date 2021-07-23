@@ -1,5 +1,5 @@
 import Log from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import MitmSocket from '..';
 import BaseIpcHandler, { IGoIpcOpts } from './BaseIpcHandler';
 

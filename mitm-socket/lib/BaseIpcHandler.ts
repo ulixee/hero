@@ -4,7 +4,7 @@ import Log from '@ulixee/commons/Logger';
 import * as net from 'net';
 import { unlink } from 'fs';
 import Resolvable from '@ulixee/commons/Resolvable';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { bindFunctions } from '@ulixee/commons/utils';
 import { createId, createIpcSocketPath } from '@ulixee/commons/IpcUtils';

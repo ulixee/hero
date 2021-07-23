@@ -5,7 +5,7 @@ import { inspect } from 'util';
 import Puppet from '@ulixee/hero-puppet';
 import Log from '@ulixee/commons/Logger';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import BrowserEmulator from '../index';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';
 import DomExtractor = require('./DomExtractor');

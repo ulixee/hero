@@ -1,6 +1,6 @@
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import Resolvable from '@ulixee/commons/Resolvable';

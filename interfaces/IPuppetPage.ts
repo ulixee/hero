@@ -1,6 +1,6 @@
 import Protocol from 'devtools-protocol';
-import IRegisteredEventListener from './IRegisteredEventListener';
-import ITypedEventEmitter from './ITypedEventEmitter';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import IRect from './IRect';
 import { IPuppetFrame, IPuppetFrameManagerEvents } from './IPuppetFrame';
 import { IPuppetKeyboard, IPuppetMouse } from './IPuppetInput';

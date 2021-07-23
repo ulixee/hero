@@ -1,12 +1,12 @@
 import { randomBytes } from 'crypto';
 import * as dnsPacket from 'dns-packet';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/utils';
 import MitmSocket from '@ulixee/hero-mitm-socket/index';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IDnsSettings from "@ulixee/hero-interfaces/IDnsSettings";
 import { addTypedEventListener, removeEventListeners } from '@ulixee/commons/eventUtils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import RequestSession from '../handlers/RequestSession';
 

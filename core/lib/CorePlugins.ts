@@ -1,5 +1,5 @@
 import { URL } from 'url';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';

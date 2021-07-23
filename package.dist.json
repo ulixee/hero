@@ -24,7 +24,7 @@
       "mitm",
       "mitm-socket",
       "replay",
-      "commons"
+      "../../commons/build"
     ]
   },
   "resolutions": {

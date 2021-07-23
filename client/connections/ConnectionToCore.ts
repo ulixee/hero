@@ -2,7 +2,7 @@ import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import { bindFunctions, createPromise } from '@ulixee/commons/utils';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import Log from '@ulixee/commons/Logger';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';

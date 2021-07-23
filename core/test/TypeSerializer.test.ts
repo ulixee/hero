@@ -1,8 +1,8 @@
 import Puppet from '@ulixee/hero-puppet';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
-import TypeSerializer, { stringifiedTypeSerializerClass } from '../TypeSerializer';
-import { CanceledPromiseError } from '../interfaces/IPendingWaitEvent';
-import logger from '../Logger';
+import TypeSerializer, { stringifiedTypeSerializerClass } from '@ulixee/commons/TypeSerializer';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
+import logger from '@ulixee/commons/Logger';
 
 const { log } = logger(module);
 

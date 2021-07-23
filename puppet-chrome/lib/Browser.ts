@@ -3,7 +3,7 @@ import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
 import { assert } from '@ulixee/commons/utils';
 import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
 import Log from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';

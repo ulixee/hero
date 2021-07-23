@@ -11,8 +11,8 @@ import {
   removeEventListeners,
   TypedEventEmitter,
 } from '@ulixee/commons/eventUtils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';

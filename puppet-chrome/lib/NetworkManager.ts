@@ -7,8 +7,8 @@ import {
   IPuppetResourceRequest,
 } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { URL } from 'url';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import { DevtoolsSession } from './DevtoolsSession';

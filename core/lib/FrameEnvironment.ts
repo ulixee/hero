@@ -13,7 +13,7 @@ import { IRequestInit } from 'awaited-dom/base/interfaces/official';
 import { IPuppetFrame, IPuppetFrameEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ISetCookieOptions from '@ulixee/hero-interfaces/ISetCookieOptions';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';

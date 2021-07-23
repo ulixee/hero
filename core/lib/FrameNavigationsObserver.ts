@@ -8,10 +8,10 @@ import { LocationStatus, LocationTrigger, PipelineStatus } from '@ulixee/hero-in
 import { LoadStatus, NavigationReason } from '@ulixee/hero-interfaces/INavigation';
 import type ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import type IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import type IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import type IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import * as moment from 'moment';
-import type { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import type { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import type FrameNavigations from './FrameNavigations';
 
 export default class FrameNavigationsObserver {

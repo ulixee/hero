@@ -1,7 +1,7 @@
 import * as EventUtils from '@ulixee/commons/eventUtils';
 import { addEventListeners, TypedEventEmitter } from '@ulixee/commons/eventUtils';
 import Log from '@ulixee/commons/Logger';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import IConnectionTransport, {
   IConnectionTransportEvents,
 } from '@ulixee/hero-interfaces/IConnectionTransport';

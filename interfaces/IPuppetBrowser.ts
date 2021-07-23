@@ -1,4 +1,4 @@
-import { IBoundLog } from './ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IPuppetContext from './IPuppetContext';
 import IProxyConnectionOptions from './IProxyConnectionOptions';
 import ICorePlugins from './ICorePlugins';

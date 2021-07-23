@@ -2,7 +2,7 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
 import TypeSerializer from '@ulixee/commons/TypeSerializer';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import INodePointer from 'awaited-dom/base/INodePointer';

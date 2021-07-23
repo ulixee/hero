@@ -4,7 +4,7 @@ import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import Core from '@ulixee/hero-core';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { TestServer } from './server';
 import Puppet from '../index';
 import { capturePuppetContextLogs, createTestPage, ITestPage } from './TestPage';

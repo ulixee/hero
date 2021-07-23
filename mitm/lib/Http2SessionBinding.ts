@@ -1,6 +1,6 @@
 import { Http2Session } from 'http2';
 import { Log } from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { bindFunctions } from '@ulixee/commons/utils';
 
 export default class Http2SessionBinding {

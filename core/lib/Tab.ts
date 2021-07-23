@@ -9,7 +9,7 @@ import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';

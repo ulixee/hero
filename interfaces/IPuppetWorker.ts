@@ -1,4 +1,4 @@
-import ITypedEventEmitter from './ITypedEventEmitter';
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import IDevtoolsSession from './IDevtoolsSession';
 
 export interface IPuppetWorker extends ITypedEventEmitter<IPuppetWorkerEvents> {

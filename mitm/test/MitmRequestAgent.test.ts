@@ -8,7 +8,7 @@ import { Helpers } from '@ulixee/hero-testing';
 import { getProxyAgent, runHttpsServer } from '@ulixee/hero-testing/helpers';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';

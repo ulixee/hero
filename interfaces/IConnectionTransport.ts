@@ -1,4 +1,4 @@
-import ITypedEventEmitter from './ITypedEventEmitter';
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 
 export default interface IConnectionTransport
   extends ITypedEventEmitter<IConnectionTransportEvents> {

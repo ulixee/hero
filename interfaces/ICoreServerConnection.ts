@@ -1,5 +1,5 @@
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import ICoreRequestPayload from './ICoreRequestPayload';
-import ITypedEventEmitter from './ITypedEventEmitter';
 import ICoreResponsePayload from './ICoreResponsePayload';
 import ICoreEventPayload from './ICoreEventPayload';
 

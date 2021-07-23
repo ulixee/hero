@@ -1,5 +1,5 @@
 import PuppetChrome from '@ulixee/hero-puppet-chrome';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import IPuppetLauncher from '@ulixee/hero-interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';

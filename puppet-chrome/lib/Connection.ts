@@ -22,7 +22,7 @@ import {
 import IConnectionTransport, {
   IConnectionTransportEvents,
 } from '@ulixee/hero-interfaces/IConnectionTransport';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Log from '@ulixee/commons/Logger';
 import { URL } from 'url';
 import * as http from 'http';

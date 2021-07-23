@@ -6,7 +6,7 @@ import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import MitmServer from '../lib/MitmProxy';
 import RequestSession from '../handlers/RequestSession';

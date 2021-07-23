@@ -19,7 +19,7 @@ import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/utils';
 import IDevtoolsSession, {
   DevtoolsEvents,

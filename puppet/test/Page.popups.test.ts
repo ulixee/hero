@@ -2,7 +2,7 @@ import Log from '@ulixee/commons/Logger';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Core from '@ulixee/hero-core';
 import { IBrowserEmulatorConfig } from '@ulixee/hero-interfaces/ICorePlugin';
 import { TestServer } from './server';

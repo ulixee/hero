@@ -1,6 +1,6 @@
 import * as Fs from 'fs';
 import * as Path from 'path';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/utils';
 import Log from '@ulixee/commons/Logger';
 import { MitmProxy } from '@ulixee/hero-mitm';

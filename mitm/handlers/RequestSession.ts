@@ -1,5 +1,5 @@
 import * as http from 'http';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/utils';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';

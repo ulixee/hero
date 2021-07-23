@@ -10,7 +10,7 @@ import { createPromise } from '@ulixee/commons/utils';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/Logger';
 import HttpRequestHandler from '../handlers/HttpRequestHandler';
 import RequestSession, { IRequestSessionRequestEvent } from '../handlers/RequestSession';
