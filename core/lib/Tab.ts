@@ -23,6 +23,7 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
 import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -36,6 +37,7 @@ import DomChangesTable, {
   IFrontendDomChangeEvent,
 } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
+import CommandFormatter from './CommandFormatter';
 
 const { log } = Log(module);
 
@@ -548,6 +550,46 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       puppetPage: this.puppetPage,
     };
     return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
+  }
+
+  public willRunCommand(command: ICommandMeta): void {
+    if (this.session.options.showBrowserInteractions) {
+      const fadeGrowlAfterMs: number = undefined;
+      const commandName = CommandFormatter.toString(command);
+      this.puppetPage.mainFrame
+        .evaluate(
+          `window.showCommandGrowl(${command.id}, ${JSON.stringify(
+            commandName,
+          )}, ${fadeGrowlAfterMs})`,
+        )
+        .catch(() => null);
+
+      if (command.frameId) {
+        const frame = this.frameEnvironmentsById.get(command.frameId);
+        const trackMouse = true;
+        const hideMouse = false;
+        const hideOverlays = false;
+
+        const prevFrameId = this.sessionState.lastCommand?.frameId;
+        if (prevFrameId && prevFrameId !== frame.id) {
+          this.frameEnvironmentsById
+            .get(prevFrameId)
+            .puppetFrame.evaluate(`window.toggleCommandActive(false, true, true);`)
+            .catch(() => null);
+        }
+
+        frame.puppetFrame
+          .evaluate(`window.toggleCommandActive(${trackMouse}, ${hideMouse}, ${hideOverlays});`)
+          .catch(() => null);
+      }
+    }
+  }
+
+  public didRunCommand(command: ICommandMeta): void {
+    if (this.session.options.showBrowserInteractions) {
+      const frame = this.frameEnvironmentsById.get(command.frameId);
+      frame?.puppetFrame.evaluate(`window.toggleCommandActive(false)`).catch(() => null);
+    }
   }
 
   public async getMainFrameDomChanges(sinceCommandId?: number): Promise<IFrontendDomChangeEvent[]> {

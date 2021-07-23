@@ -169,6 +169,18 @@ class PageEventsRecorder {
       Date.now(),
     ] as IMouseEvent;
 
+    if ('replayInteractions' in window) {
+      const [, pageX, pageY, offsetX, offsetY, buttons] = event;
+      window.replayInteractions(undefined, {
+        buttons,
+        frameIdPath: '',
+        offsetX,
+        pageX,
+        pageY,
+        offsetY,
+        targetNodeId: nodeId,
+      });
+    }
     this.mouseEvents.push(event);
   }
 

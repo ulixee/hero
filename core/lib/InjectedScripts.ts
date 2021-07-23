@@ -41,6 +41,22 @@ const injectedScript = `(function installInjectedScripts() {
     ${pageScripts.domStorage}
 })();`;
 
+const showInteractionScript = `(function installInteractionsScript() {
+    const exports = {}; // workaround for ts adding an exports variable
+
+    window.selfFrameIdPath = '';
+    window.blockClickAndSubmit = false;
+
+    if (!('getNodeById' in window)) {
+      window.getNodeById = function getNodeById(id) {
+        if (id === null || id === undefined) return null;
+        return NodeTracker.getWatchedNodeWithId(id, false);
+      };
+    }
+
+    ${pageScripts.interactReplayer};
+})();`;
+
 const detachedInjectedScript = `(function installInjectedScripts() {
     const exports = {}; // workaround for ts adding an exports variable
     ${stringifiedTypeSerializerClass};
@@ -55,7 +71,7 @@ const detachedInjectedScript = `(function installInjectedScripts() {
       JsPath,
       Fetcher,
     };
-    })();`;
+})();`;
 
 const replayDomAndInteractionScript = `
     if (typeof exports === 'undefined') {
@@ -75,7 +91,7 @@ export default class InjectedScripts {
   public static Fetcher = `HERO.Fetcher`;
   public static PageEventsCallbackName = pageEventsCallbackName;
 
-  public static install(puppetPage: IPuppetPage): Promise<any> {
+  public static install(puppetPage: IPuppetPage, showInteractions = false): Promise<any> {
     if (puppetPage[installedSymbol]) return;
     puppetPage[installedSymbol] = true;
 
@@ -83,6 +99,7 @@ export default class InjectedScripts {
       puppetPage.addPageCallback(pageEventsCallbackName),
       puppetPage.addNewDocumentScript(injectedScript, true),
       puppetPage.addNewDocumentScript(`delete window.${pageEventsCallbackName}`, false),
+      showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
     ]);
   }
 
@@ -90,11 +107,17 @@ export default class InjectedScripts {
     return replayDomAndInteractionScript;
   }
 
-  public static async installDetachedScripts(puppetPage: IPuppetPage): Promise<void> {
+  public static async installDetachedScripts(
+    puppetPage: IPuppetPage,
+    showInteractions = false,
+  ): Promise<void> {
     if (puppetPage[installedSymbol]) return;
     puppetPage[installedSymbol] = true;
 
-    await puppetPage.addNewDocumentScript(detachedInjectedScript, true);
+    await Promise.all([
+      puppetPage.addNewDocumentScript(detachedInjectedScript, true),
+      showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
+    ]);
   }
 
   public static async restoreDom(

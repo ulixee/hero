@@ -431,13 +431,20 @@ class ObjectAtPath {
       preview: generateNodePreview(objectAtPath),
     } as INodePointer;
 
+    const ids = [nodeId];
+
     if (isIterableOrArray(objectAtPath)) {
       state.iterableItems = Array.from(objectAtPath);
 
       if (state.iterableItems.length && isCustomType(state.iterableItems[0])) {
         state.iterableIsState = true;
         state.iterableItems = state.iterableItems.map(x => this.createNodePointer(x));
+        ids.push(...(state.iterableItems as any).map(x => x.id));
       }
+    }
+
+    if ('replayInteractions' in window) {
+      window.replayInteractions({ frameIdPath: '', nodeIds: ids });
     }
 
     return state;

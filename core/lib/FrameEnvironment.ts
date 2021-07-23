@@ -241,6 +241,7 @@ export default class FrameEnvironment {
       result: entry.result,
       runStartDate,
       endDate,
+      run: this.session.resumeCounter,
     };
     if (this.sessionState.nextCommandMeta) {
       const { commandId, sendDate, startDate: clientStartDate } = this.sessionState.nextCommandMeta;

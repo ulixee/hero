@@ -21,6 +21,7 @@ import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
 import { IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
+import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import ResourcesTable from '../models/ResourcesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -113,8 +114,10 @@ export default class SessionState {
     browserEmulatorId: string;
     browserVersion: string;
     humanEmulatorId: string;
+    userAgentString: string;
     timezoneId?: string;
     locale?: string;
+    deviceProfile?: IDeviceProfile;
     sessionOptions: ISessionCreateOptions;
   }) {
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = options.sessionOptions;
@@ -123,12 +126,14 @@ export default class SessionState {
       this.sessionName,
       options.browserEmulatorId,
       options.browserVersion,
+      options.userAgentString,
       options.humanEmulatorId,
       this.createDate,
       this.scriptInstanceMeta?.id,
       this.scriptInstanceMeta?.entrypoint,
       this.scriptInstanceMeta?.startDate,
       options.timezoneId,
+      options.deviceProfile,
       this.viewport,
       options.locale,
       optionsToStore,
@@ -340,13 +345,8 @@ export default class SessionState {
     tabId: number,
     resourceEvent: IRequestSessionResponseEvent | IRequestSessionRequestEvent,
   ): IResourceMeta {
-    const {
-      request,
-      response,
-      resourceType,
-      browserRequestId,
-      redirectedToUrl,
-    } = resourceEvent as IRequestSessionResponseEvent;
+    const { request, response, resourceType, browserRequestId, redirectedToUrl } =
+      resourceEvent as IRequestSessionResponseEvent;
 
     if (browserRequestId) {
       // NOTE: browserRequestId can be shared amongst redirects

@@ -6,6 +6,9 @@ import type { IMouseEventRecord } from '@ulixee/hero-core/models/MouseEventsTabl
 declare global {
   interface Window {
     selfFrameIdPath: string;
+    blockClickAndSubmit: boolean;
+    showCommandGrowl(id: number, name: string, fadeAfterMs?: number);
+    toggleCommandActive(trackMouse: boolean, hideMouse: boolean, hideOverlays: boolean);
   }
 }
 
@@ -20,8 +23,44 @@ interface IFrontendScrollRecord extends IScrollRecord {
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
 let replayNode: HTMLElement;
+let commandGrowl: HTMLElement;
+let commandText: HTMLElement;
+let hideCommandTimeout: any;
+let shouldTrackMouse = false;
+
 let replayShadow: ShadowRoot;
 let lastHighlightNodes: number[] = [];
+
+window.showCommandGrowl = function showCommandGrowl(
+  id: number,
+  name: string,
+  fadeAfterMs?: number,
+) {
+  clearTimeout(hideCommandTimeout);
+  createReplayItems();
+  commandGrowl.classList.remove('fade');
+  commandGrowl.dataset.commandId = String(id);
+  commandText.textContent = name;
+  if (fadeAfterMs) hideCommandTimeout = setTimeout(hideCommandGrowl, fadeAfterMs);
+};
+
+window.toggleCommandActive = function toggleCommandActive(
+  trackMouse: boolean,
+  hideMouse: boolean,
+  hideOverlays: boolean,
+) {
+  shouldTrackMouse = trackMouse;
+  if (hideMouse) mouse.style.display = 'none';
+  if (hideOverlays === true) {
+    highlightElements.forEach(x => x.remove());
+    highlightElements.length = 0;
+    lastHighlightNodes = [];
+  }
+};
+
+function hideCommandGrowl() {
+  if (commandGrowl) commandGrowl.classList.add('fade');
+}
 
 window.replayInteractions = function replayInteractions(resultNodeIds, mouseEvent, scrollEvent) {
   highlightNodes(resultNodeIds);
@@ -181,7 +220,7 @@ function clearMouse() {
 }
 
 function updateMouse(mouseEvent: IFrontendMouseEvent) {
-  if (!mouseEvent) return;
+  if (!mouseEvent || !shouldTrackMouse) return;
   if (mouseEvent.frameIdPath !== window.selfFrameIdPath) {
     clearMouse();
     delegateInteractToSubframe(mouseEvent, 'mouse');
@@ -289,6 +328,14 @@ function createReplayItems() {
 
   replayShadow = replayNode.attachShadow({ mode: 'closed' });
 
+  commandGrowl = document.createElement('hero-command');
+  const label = document.createElement('command-label');
+  label.textContent = 'Command';
+  commandText = document.createElement('command-text');
+  commandGrowl.append(label, commandText);
+  commandGrowl.classList.add('fade');
+  replayShadow.appendChild(commandGrowl);
+
   showMoreUp = document.createElement('hero-overflow');
   showMoreUp.style.top = '0';
   showMoreUp.innerHTML = `<hero-overflow-bar>&nbsp;</hero-overflow-bar>`;
@@ -325,6 +372,41 @@ function createReplayItems() {
     border:1px solid #3498db;
     padding:5px;
     pointer-events: none;
+  }
+
+  hero-command {
+    z-index: 2147483647;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    margin: 0 !important;
+    bottom: 0;
+    height: 110px;
+    width: 100%;
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.9;
+    background: #eee;
+    border-top: 2px solid rgba(0,0,0,.15);
+    box-shadow: 0 -2px 9px rgb(0 0 0 / 10%);
+    transition: opacity .2s;
+    vertical-align: middle;
+  }
+
+  hero-command command-text, hero-command command-label {
+    display: flex;
+    box-sizing: border-box;
+    font-size: 14px;
+    line-height: 30px;
+    color: black;
+  }
+  hero-command command-label {
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  hero-command.fade {
+    opacity: 0;
   }
 
   hero-mouse-pointer {
@@ -375,8 +457,11 @@ function createReplayItems() {
     return false;
   }
 
-  document.addEventListener('click', cancelEvent, true);
-  document.addEventListener('submit', cancelEvent, true);
+  if (window.blockClickAndSubmit !== false) {
+    document.addEventListener('click', cancelEvent, true);
+    document.addEventListener('submit', cancelEvent, true);
+  }
+
   document.addEventListener('scroll', () => checkOverflows());
   window.addEventListener('resize', () => {
     if (lastHighlightNodes)
