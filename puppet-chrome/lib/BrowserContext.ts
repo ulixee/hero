@@ -1,4 +1,4 @@
-import { assert } from '@ulixee/commons/utils';
+import { assert } from '@ulixee/commons/lib/utils';
 import IPuppetContext, {
   IPuppetContextEvents,
   IPuppetPageOptions,
@@ -10,7 +10,7 @@ import {
   addTypedEventListener,
   removeEventListeners,
   TypedEventEmitter,
-} from '@ulixee/commons/eventUtils';
+} from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
@@ -19,7 +19,7 @@ import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import {
   IDevtoolsEventMessage,
   IDevtoolsResponseMessage,

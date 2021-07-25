@@ -8,7 +8,7 @@ import IWebsocketMessage from '@ulixee/hero-interfaces/IWebsocketMessage';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/Logger';
+import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import INavigation, { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';

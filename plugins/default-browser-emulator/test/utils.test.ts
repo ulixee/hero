@@ -2,7 +2,7 @@ import * as Helpers from '@ulixee/hero-testing/helpers';
 import { inspect } from 'util';
 import Puppet from '@ulixee/hero-puppet';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 // @ts-ignore

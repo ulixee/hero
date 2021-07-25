@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { IKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import { assert } from '@ulixee/commons/utils';
+import { assert } from '@ulixee/commons/lib/utils';
 import { IPuppetKeyboard } from '@ulixee/hero-interfaces/IPuppetInput';
 import { IKeyDefinition, keyDefinitions } from '../interfaces/USKeyboardLayout';
 import { DevtoolsSession } from './DevtoolsSession';

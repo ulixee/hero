@@ -1,4 +1,4 @@
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import * as http from 'http';
 import * as http2 from 'http2';
 import { ClientHttp2Stream } from 'http2';

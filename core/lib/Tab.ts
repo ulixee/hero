@@ -1,14 +1,14 @@
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { IBlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import * as Url from 'url';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
-import Timer from '@ulixee/commons/Timer';
+import Timer from '@ulixee/commons/lib/Timer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';

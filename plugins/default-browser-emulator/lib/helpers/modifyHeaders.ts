@@ -1,5 +1,5 @@
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
-import { pickRandom } from '@ulixee/commons/utils';
+import { pickRandom } from '@ulixee/commons/lib/utils';
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import BrowserEmulator from '../../index';
 import IBrowserData, { IDataHeaderOrder, IDataHeaders } from '../../interfaces/IBrowserData';

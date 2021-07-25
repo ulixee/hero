@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing';
 import MitmServer from '@ulixee/hero-mitm/lib/MitmProxy';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import * as WebSocket from 'ws';
 import HttpUpgradeHandler from '@ulixee/hero-mitm/handlers/HttpUpgradeHandler';
 import WebsocketResource from '@ulixee/hero/lib/WebsocketResource';

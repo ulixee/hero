@@ -2,7 +2,7 @@ import * as Fs from 'fs';
 import { Helpers } from '@ulixee/hero-testing';
 import { GlobalPool } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
 import Hero from '../index';
 

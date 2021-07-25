@@ -8,7 +8,7 @@ import {
 } from '@ulixee/hero-testing/helpers';
 import * as WebSocket from 'ws';
 import * as socks5 from 'simple-socks';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import * as http2 from 'http2';
 import MitmSocket from '../index';
 import MitmSocketSession from '../lib/MitmSocketSession';

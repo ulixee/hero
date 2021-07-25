@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import { bindFunctions, getCallSite } from '@ulixee/commons/utils';
+import { bindFunctions, getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';

@@ -1,4 +1,4 @@
-import { assert } from '@ulixee/commons/utils';
+import { assert } from '@ulixee/commons/lib/utils';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import BrowserEmulator from '../../index';
 

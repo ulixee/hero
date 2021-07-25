@@ -4,7 +4,7 @@ import * as Helpers from '@ulixee/hero-testing/helpers';
 import { ITestHttpServer } from '@ulixee/hero-testing/helpers';
 import Puppet from '@ulixee/hero-puppet';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { getOverrideScript } from '../lib/DomOverridesBuilder';

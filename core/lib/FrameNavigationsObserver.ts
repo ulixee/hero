@@ -1,4 +1,4 @@
-import { assert, createPromise } from '@ulixee/commons/utils';
+import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import type {
   ILocationStatus,
   ILocationTrigger,

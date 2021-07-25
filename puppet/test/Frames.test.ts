@@ -1,5 +1,5 @@
 import BrowserEmulator from '@ulixee/default-browser-emulator';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import Core from '@ulixee/hero-core';

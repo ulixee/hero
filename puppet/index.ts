@@ -1,6 +1,6 @@
 import PuppetChrome from '@ulixee/hero-puppet-chrome';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import IPuppetLauncher from '@ulixee/hero-interfaces/IPuppetLauncher';
 import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
@@ -9,7 +9,7 @@ import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOpt
 import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import IDevtoolsSession from '@ulixee/hero-interfaces/IDevtoolsSession';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import launchProcess from './lib/launchProcess';
 import PuppetLaunchError from './lib/PuppetLaunchError';
 

@@ -1,6 +1,6 @@
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IPuppetFrameManagerEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';

@@ -1,13 +1,13 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as os from 'os';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import * as net from 'net';
 import { unlink } from 'fs';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { bindFunctions } from '@ulixee/commons/utils';
-import { createId, createIpcSocketPath } from '@ulixee/commons/IpcUtils';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
+import { createId, createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
 import * as Fs from 'fs';
 import * as Path from 'path';
 

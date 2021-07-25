@@ -1,4 +1,4 @@
-import '@ulixee/commons/SourceMapSupport';
+import '@ulixee/commons/lib/SourceMapSupport';
 import {
   BlockedResourceType,
   ConnectionToCore,
@@ -15,7 +15,7 @@ import {
   XPathResult,
 } from '@ulixee/hero';
 import Core, { GlobalPool } from '@ulixee/hero-core';
-import ShutdownHandler from '@ulixee/commons/ShutdownHandler';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import Hero from './lib/Hero';
 
 ShutdownHandler.exitOnSignal = false;

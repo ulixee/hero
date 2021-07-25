@@ -2,7 +2,7 @@ import inspectInstanceProperties from 'awaited-dom/base/inspectInstancePropertie
 import StateMachine from 'awaited-dom/base/StateMachine';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
-import Timer from '@ulixee/commons/Timer';
+import Timer from '@ulixee/commons/lib/Timer';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import * as Util from 'util';

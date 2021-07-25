@@ -1,7 +1,7 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
-import { loggerSessionIdNames } from '@ulixee/commons/Logger';
+import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import CoreCommandQueue from './CoreCommandQueue';

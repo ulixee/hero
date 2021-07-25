@@ -1,5 +1,5 @@
 import DefaultHero, { IConnectionToCoreOptions } from '@ulixee/hero';
-import ShutdownHandler from '@ulixee/commons/ShutdownHandler';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import ConnectionToLocalCore from './ConnectionToLocalCore';
 
 export default class Hero extends DefaultHero {

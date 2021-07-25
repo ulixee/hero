@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Core, { Session } from '../index';
 

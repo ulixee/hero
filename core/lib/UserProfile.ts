@@ -1,8 +1,8 @@
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { assert } from '@ulixee/commons/utils';
+import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import InjectedScripts from './InjectedScripts';
 

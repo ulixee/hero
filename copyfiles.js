@@ -4,7 +4,7 @@ const Fs = require('fs');
 const pkg = require('./package.json');
 
 const copyToDir = process.env.OUT_DIR;
-const isBuild = copyToDir === 'build';
+const isStandardBuild = copyToDir === 'build';
 const workspaces = pkg.workspaces.packages.map(x => x.replace('/*', ''));
 
 const copyArgs = [
@@ -15,7 +15,7 @@ const copyArgs = [
   'mitm-socket/go/*.*',
   '.*ignore',
 ];
-if (isBuild) {
+if (isStandardBuild) {
   copyArgs.push('testing/*/**', 'core/test/html/**', 'puppet/test/*/**', 'yarn.lock');
 }
 
@@ -28,10 +28,10 @@ for (const workspace of workspaces) {
   );
 }
 
-if (isBuild) copyArgs.push('-a');
+if (isStandardBuild) copyArgs.push('-a');
 
 copyfiles([...copyArgs, copyToDir], {}, () => {
-  if (isBuild) {
+  if (isStandardBuild) {
     Fs.copyFileSync(`${__dirname}/package.build.json`, `${__dirname}/build/package.json`);
   }
   // eslint-disable-next-line no-console

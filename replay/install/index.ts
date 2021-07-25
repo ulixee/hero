@@ -7,7 +7,7 @@ import { createGunzip } from 'zlib';
 import * as os from 'os';
 import * as Path from 'path';
 import { IncomingMessage } from 'http';
-import { httpGet } from '@ulixee/commons/downloadFile';
+import { httpGet } from '@ulixee/commons/lib/downloadFile';
 import { getInstallDirectory, isBinaryInstalled, recordVersion, version } from './Utils';
 
 if (Boolean(JSON.parse(process.env.HERO_REPLAY_SKIP_BINARY_DOWNLOAD ?? 'false')) === true) {

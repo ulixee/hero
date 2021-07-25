@@ -1,6 +1,6 @@
 import * as http2 from 'http2';
 import { ClientHttp2Stream, ServerHttp2Stream } from 'http2';
-import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from '../lib/MitmRequestContext';

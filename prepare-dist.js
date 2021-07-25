@@ -47,7 +47,6 @@ function processPackageJson(packagePath) {
     ...defaults,
     scripts: overridesJson.scripts,
     dependencies: overridesJson.dependencies || packageJson.dependencies,
-    engine: packageJson.engine, // this is used by emulators
     bin: packageJson.bin,
   };
 

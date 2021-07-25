@@ -2,7 +2,7 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { IInteractionGroup } from '@ulixee/hero-interfaces/IInteractions';
 import { getKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
-import TypeSerializer from '@ulixee/commons/TypeSerializer';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {

@@ -1,7 +1,7 @@
 import * as WebSocket from 'ws';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
-import TypeSerializer from '@ulixee/commons/TypeSerializer';
-import { createPromise } from '@ulixee/commons/utils';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ConnectionToCore from './ConnectionToCore';

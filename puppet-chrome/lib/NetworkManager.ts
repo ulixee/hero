@@ -1,7 +1,7 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/ResourceType';
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import {
   IPuppetNetworkEvents,
   IPuppetResourceRequest,

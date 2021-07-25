@@ -16,10 +16,10 @@
  */
 import Protocol from 'devtools-protocol';
 import { IPuppetPage, IPuppetPageEvents } from '@ulixee/hero-interfaces/IPuppetPage';
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
-import { assert, createPromise } from '@ulixee/commons/utils';
+import { assert, createPromise } from '@ulixee/commons/lib/utils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IRect from '@ulixee/hero-interfaces/IRect';

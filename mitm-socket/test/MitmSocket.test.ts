@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import * as http2 from 'http2';
 import * as stream from 'stream';
 import * as WebSocket from 'ws';

@@ -1,8 +1,8 @@
 import { Protocol } from 'devtools-protocol';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import { assert } from '@ulixee/commons/utils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { assert } from '@ulixee/commons/lib/utils';
 import IPuppetBrowser from '@ulixee/hero-interfaces/IPuppetBrowser';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';

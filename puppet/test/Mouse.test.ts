@@ -1,5 +1,5 @@
 import { IKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';

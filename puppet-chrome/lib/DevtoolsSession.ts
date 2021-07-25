@@ -18,9 +18,9 @@
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import { Protocol } from 'devtools-protocol';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import IDevtoolsSession, {
   DevtoolsEvents,
   IDevtoolsEventMessage,

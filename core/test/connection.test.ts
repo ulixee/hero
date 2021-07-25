@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import Hero, { Core } from '@ulixee/hero-fullstack';
 import * as http from 'http';
-import { Log } from '@ulixee/commons/Logger';
+import { Log } from '@ulixee/commons/lib/Logger';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
 import { DependencyInstaller } from '@ulixee/chrome-app/lib/DependencyInstaller';
