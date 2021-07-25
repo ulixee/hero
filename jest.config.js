@@ -1,7 +1,12 @@
+const Fs = require('fs');
+const Path = require('path');
 const pkg = require('./package.json');
 
 const workspaces = pkg.workspaces.packages
-  .filter(x => !x.startsWith('replay'))
+  .filter(x => {
+    if (x.startsWith('replay')) return false;
+    return (Fs.existsSync(Path.resolve(__dirname, x)));
+  })
   .map(x => x.replace('/*', ''));
 
 module.exports = {
