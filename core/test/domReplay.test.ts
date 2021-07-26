@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import Puppet from '@ulixee/hero-puppet';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import InjectedScripts from '../lib/InjectedScripts';

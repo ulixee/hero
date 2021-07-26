@@ -1,4 +1,4 @@
-import type IResolvablePromise from './IResolvablePromise';
+import type IResolvablePromise from '@ulixee/commons/interfaces//IResolvablePromise';
 
 export default interface INavigation {
   id: number;

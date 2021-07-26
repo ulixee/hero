@@ -18,12 +18,12 @@ import {
   addTypedEventListener,
   removeEventListeners,
   TypedEventEmitter,
-} from '@ulixee/commons/eventUtils';
+} from '@ulixee/commons/lib/eventUtils';
 import IConnectionTransport, {
   IConnectionTransportEvents,
 } from '@ulixee/hero-interfaces/IConnectionTransport';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
-import Log from '@ulixee/commons/Logger';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import Log from '@ulixee/commons/lib/Logger';
 import { URL } from 'url';
 import * as http from 'http';
 import { DevtoolsSession } from './DevtoolsSession';

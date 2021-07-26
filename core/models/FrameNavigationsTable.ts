@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import INavigation, { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
   private idCounter = 0;

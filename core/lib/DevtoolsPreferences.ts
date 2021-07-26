@@ -16,7 +16,7 @@
  */
 import IDevtoolsSession, { Protocol } from '@ulixee/hero-interfaces/IDevtoolsSession';
 import * as fs from 'fs';
-import { bindFunctions } from '@ulixee/commons/utils';
+import { bindFunctions } from '@ulixee/commons/lib/utils';
 import BindingCalledEvent = Protocol.Runtime.BindingCalledEvent;
 
 const devtoolsPreferencesCallback = '_DevtoolsPreferencesCallback';

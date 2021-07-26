@@ -1,14 +1,14 @@
 import { Protocol } from 'devtools-protocol';
 import { getResourceTypeForChromeValue } from '@ulixee/hero-interfaces/ResourceType';
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import {
   IPuppetNetworkEvents,
   IPuppetResourceRequest,
 } from '@ulixee/hero-interfaces/IPuppetNetworkEvents';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { URL } from 'url';
 import IProxyConnectionOptions from '@ulixee/hero-interfaces/IProxyConnectionOptions';
 import { DevtoolsSession } from './DevtoolsSession';

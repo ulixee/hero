@@ -1,5 +1,5 @@
-import Logger from '@ulixee/commons/Logger';
-import { createPromise } from '@ulixee/commons/utils';
+import Logger from '@ulixee/commons/lib/Logger';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import DomChangesTable, { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 import SessionDb, { ISessionLookup, ISessionLookupArgs } from '../dbs/SessionDb';

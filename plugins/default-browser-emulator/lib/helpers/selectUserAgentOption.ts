@@ -1,5 +1,5 @@
 import { UAParser } from 'ua-parser-js';
-import { pickRandom } from '@ulixee/commons/utils';
+import { pickRandom } from '@ulixee/commons/lib/utils';
 import IUserAgentOption, { IVersion } from '@ulixee/hero-interfaces/IUserAgentOption';
 import { IDataUserAgentOption, IDataUserAgentOptions } from '../../interfaces/IBrowserData';
 import { latestChromeBrowserVersion } from '../../index';

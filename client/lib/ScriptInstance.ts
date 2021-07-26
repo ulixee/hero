@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import CoreSession from './CoreSession';
 
 const { log } = Log(module);

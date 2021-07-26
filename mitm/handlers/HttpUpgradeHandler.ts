@@ -1,6 +1,6 @@
 import * as net from 'net';
 import * as http from 'http';
-import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
 import MitmRequestContext from '../lib/MitmRequestContext';
 import BaseHttpHandler from './BaseHttpHandler';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';

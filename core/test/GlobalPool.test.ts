@@ -1,5 +1,5 @@
 import { Helpers } from '@ulixee/hero-testing/index';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import * as http from 'http';
 import { ITestHttpServer } from '@ulixee/hero-testing/helpers';
 import Core, { GlobalPool } from '../index';

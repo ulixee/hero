@@ -1,6 +1,6 @@
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 const { log } = Log(module);

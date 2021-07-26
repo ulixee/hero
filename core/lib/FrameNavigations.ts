@@ -4,10 +4,10 @@ import INavigation, {
   NavigationState,
 } from '@ulixee/hero-interfaces/INavigation';
 import { LocationStatus } from '@ulixee/hero-interfaces/Location';
-import { createPromise } from '@ulixee/commons/utils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
-import Log from '@ulixee/commons/Logger';
+import { createPromise } from '@ulixee/commons/lib/utils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import Log from '@ulixee/commons/lib/Logger';
 import SessionState from './SessionState';
 
 interface IFrameNavigationEvents {

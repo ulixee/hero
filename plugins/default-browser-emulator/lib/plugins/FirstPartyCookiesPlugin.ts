@@ -11,8 +11,8 @@ import {
 import IHttpResourceLoadDetails from '@ulixee/hero-interfaces/IHttpResourceLoadDetails';
 import SameSiteContext from '@ulixee/commons/interfaces/SameSiteContext';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
-import { createPromise } from '@ulixee/commons/utils';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import DomOverridesBuilder from '../DomOverridesBuilder';
 
 export default class FirstPartyCookiesPlugin extends CorePlugin {

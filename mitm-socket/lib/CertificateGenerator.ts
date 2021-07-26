@@ -1,6 +1,6 @@
-import Log from '@ulixee/commons/Logger';
-import Resolvable from '@ulixee/commons/Resolvable';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import BaseIpcHandler from './BaseIpcHandler';
 

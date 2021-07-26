@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import ResourceState from '@ulixee/hero-mitm/interfaces/ResourceState';
 
 const resourceStates = Object.keys(ResourceState).filter(

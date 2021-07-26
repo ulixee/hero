@@ -1,4 +1,4 @@
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import ConnectionToCore from './ConnectionToCore';
 import ConnectionToRemoteCoreServer from './ConnectionToRemoteCoreServer';

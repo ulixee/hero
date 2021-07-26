@@ -6,7 +6,7 @@ import {
   IMousePositionXY,
   InteractionCommand,
 } from '@ulixee/hero-interfaces/IInteractions';
-import { assert } from '@ulixee/commons/utils';
+import { assert } from '@ulixee/commons/lib/utils';
 import {
   getKeyboardKey,
   IKeyboardKey,
@@ -16,12 +16,12 @@ import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
 import IRect from '@ulixee/hero-interfaces/IRect';
 import IWindowOffset from '@ulixee/hero-interfaces/IWindowOffset';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import Log from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/lib/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { INodePointer } from '@ulixee/hero-interfaces/AwaitedDom';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import IMouseUpResult from '@ulixee/hero-interfaces/IMouseUpResult';
-import IResolvablePromise from '@ulixee/hero-interfaces/IResolvablePromise';
+import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { IPuppetKeyboard, IPuppetMouse } from '@ulixee/hero-interfaces/IPuppetInput';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import IViewport from '@ulixee/hero-interfaces/IViewport';

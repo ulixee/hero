@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { stringifiedTypeSerializerClass } from '@ulixee/commons/TypeSerializer';
+import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { IFrontendDomChangeEvent } from '../models/DomChangesTable';
 

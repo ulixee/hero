@@ -18,9 +18,9 @@ import * as childProcess from 'child_process';
 import { StdioOptions } from 'child_process';
 import * as readline from 'readline';
 import * as Path from 'path';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import ILaunchedProcess from '@ulixee/hero-interfaces/ILaunchedProcess';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import * as Fs from 'fs';
 import { WebSocketTransport } from './WebSocketTransport';
 

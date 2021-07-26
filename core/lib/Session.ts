@@ -1,5 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import RequestSession, {
   IRequestSessionHttpErrorEvent,
   IRequestSessionRequestEvent,
@@ -12,10 +12,10 @@ import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { MitmProxy } from '@ulixee/hero-mitm/index';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';

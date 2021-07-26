@@ -2,7 +2,7 @@ import Core from '@ulixee/hero-core';
 import { ConnectionToCore } from '@ulixee/hero';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToClient from '@ulixee/hero-core/connections/ConnectionToClient';
-import TypeSerializer from '@ulixee/commons/TypeSerializer';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class ConnectionToLocalCore extends ConnectionToCore {
   public static shouldSerialize = false;

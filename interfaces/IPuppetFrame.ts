@@ -1,5 +1,5 @@
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { NavigationReason } from './INavigation';
-import ITypedEventEmitter from './ITypedEventEmitter';
 
 export interface IPuppetFrame extends ITypedEventEmitter<IPuppetFrameEvents> {
   id: string;

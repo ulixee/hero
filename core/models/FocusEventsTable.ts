@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { FocusEventType, IFocusEvent } from '@ulixee/hero-interfaces/IFocusEvent';
 
 export default class FocusEventsTable extends SqliteTable<IFocusRecord> {

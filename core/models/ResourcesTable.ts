@@ -1,9 +1,9 @@
-import decodeBuffer from '@ulixee/commons/decodeBuffer';
+import decodeBuffer from '@ulixee/commons/lib/decodeBuffer';
 import IResourceMeta from '@ulixee/hero-interfaces/IResourceMeta';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
   constructor(readonly db: SqliteDatabase) {

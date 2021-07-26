@@ -7,7 +7,7 @@ import * as http from 'http';
 import { IncomingMessage, RequestListener, Server } from 'http';
 import * as https from 'https';
 import { Agent } from 'https';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import * as HttpProxyAgent from 'http-proxy-agent';
 import * as HttpsProxyAgent from 'https-proxy-agent';
 import * as Koa from 'koa';

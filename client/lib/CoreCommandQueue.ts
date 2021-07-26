@@ -1,6 +1,6 @@
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import Queue from '@ulixee/commons/Queue';
+import Queue from '@ulixee/commons/lib/Queue';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import { convertJsPathArgs } from './SetupAwaitedHandler';

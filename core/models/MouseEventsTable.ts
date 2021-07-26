@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import { IMouseEvent } from '@ulixee/hero-interfaces/IMouseEvent';
 
 export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {

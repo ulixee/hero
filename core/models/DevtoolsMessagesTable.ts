@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import type { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageRecord> {
   private fetchRequestIdToNetworkId = new Map<string, string>();

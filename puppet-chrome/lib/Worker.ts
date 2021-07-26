@@ -1,10 +1,10 @@
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Protocol from 'devtools-protocol';
 import { IPuppetWorker, IPuppetWorkerEvents } from '@ulixee/hero-interfaces/IPuppetWorker';
-import { createPromise } from '@ulixee/commons/utils';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { createPromise } from '@ulixee/commons/lib/utils';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import { BrowserContext } from './BrowserContext';

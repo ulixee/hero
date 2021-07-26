@@ -1,7 +1,7 @@
 import { IInteractionStep, InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
-import Log from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Log from '@ulixee/commons/lib/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
 import HumanEmulator, { isVisible } from '../index';
 

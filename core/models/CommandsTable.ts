@@ -1,7 +1,7 @@
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { Database as SqliteDatabase, Statement } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/SqliteTable';
-import TypeSerializer from '@ulixee/commons/TypeSerializer';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 
 export default class CommandsTable extends SqliteTable<ICommandMeta> {
   private readonly getQuery: Statement;

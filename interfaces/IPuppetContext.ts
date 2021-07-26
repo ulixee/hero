@@ -1,7 +1,7 @@
 import { URL } from 'url';
 import ProtocolMapping from 'devtools-protocol/types/protocol-mapping';
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { ICookie } from './ICookie';
-import ITypedEventEmitter from './ITypedEventEmitter';
 import { IPuppetPage } from './IPuppetPage';
 import { IPuppetWorker } from './IPuppetWorker';
 

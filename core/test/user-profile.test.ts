@@ -3,7 +3,7 @@ import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import HttpRequestHandler from '@ulixee/hero-mitm/handlers/HttpRequestHandler';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import Core from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';

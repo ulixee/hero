@@ -89,7 +89,7 @@
       "replay",
       "replay/frontend",
       "testing",
-      "commons"
+      "../commons/build"
     ]
   },
   "lint-staged": {

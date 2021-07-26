@@ -1,5 +1,5 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
 export default class FramesTable extends SqliteTable<IFrameRecord> {
   public frameDomNodePathsById = new Map<number, string>();

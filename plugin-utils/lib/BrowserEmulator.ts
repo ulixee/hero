@@ -1,4 +1,4 @@
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulator,

@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
-const { httpGet } = require('@ulixee/commons/downloadFile');
+const { httpGet } = require('@ulixee/commons/lib/downloadFile');
 const { createHash } = require('crypto');
 const { gunzipSync } = require('zlib');
 const packageJson = require('./package.json');

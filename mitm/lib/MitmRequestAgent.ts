@@ -1,14 +1,14 @@
 import MitmSocket, { IGoTlsSocketConnectOpts } from '@ulixee/hero-mitm-socket';
 import * as http2 from 'http2';
 import { ClientHttp2Session, Http2ServerRequest } from 'http2';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import * as https from 'https';
 import * as http from 'http';
 import MitmSocketSession from '@ulixee/hero-mitm-socket/lib/MitmSocketSession';
 import IResourceHeaders from '@ulixee/hero-interfaces/IResourceHeaders';
 import ITcpSettings from '@ulixee/hero-interfaces/ITcpSettings';
 import ITlsSettings from '@ulixee/hero-interfaces/ITlsSettings';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
 import IMitmRequestContext from '../interfaces/IMitmRequestContext';
 import MitmRequestContext from './MitmRequestContext';

@@ -1,12 +1,12 @@
-import * as EventUtils from '@ulixee/commons/eventUtils';
-import { addEventListeners, TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import Log from '@ulixee/commons/Logger';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import * as EventUtils from '@ulixee/commons/lib/eventUtils';
+import { addEventListeners, TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Log from '@ulixee/commons/lib/Logger';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import IConnectionTransport, {
   IConnectionTransportEvents,
 } from '@ulixee/hero-interfaces/IConnectionTransport';
 import * as WebSocket from 'ws';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 
 const { log } = Log(module);
 

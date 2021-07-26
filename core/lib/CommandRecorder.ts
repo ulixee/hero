@@ -1,7 +1,7 @@
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
-import Log from '@ulixee/commons/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
+import Log from '@ulixee/commons/lib/Logger';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
-import TypeSerializer from '@ulixee/commons/TypeSerializer';
+import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import Session from './Session';
 import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';

@@ -1,6 +1,6 @@
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Core from '@ulixee/hero-core';
 import Puppet from '../index';
 import CustomBrowserEmulator from './_CustomBrowserEmulator';

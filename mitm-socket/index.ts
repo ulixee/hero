@@ -1,10 +1,10 @@
 // eslint-disable-next-line max-classes-per-file
 import * as net from 'net';
 import { unlink } from 'fs';
-import Log from '@ulixee/commons/Logger';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import Resolvable from '@ulixee/commons/Resolvable';
-import { createIpcSocketPath } from '@ulixee/commons/IpcUtils';
+import Log from '@ulixee/commons/lib/Logger';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { createIpcSocketPath } from '@ulixee/commons/lib/IpcUtils';
 import MitmSocketSession from './lib/MitmSocketSession';
 
 const { log } = Log(module);

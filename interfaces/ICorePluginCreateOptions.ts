@@ -1,4 +1,4 @@
-import { IBoundLog } from './ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import IBrowserEngine from './IBrowserEngine';
 import ICorePlugins from './ICorePlugins';
 import IUserAgentOption from './IUserAgentOption';

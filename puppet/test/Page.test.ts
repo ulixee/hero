@@ -1,9 +1,9 @@
 import ConsoleMessage from '@ulixee/hero-puppet-chrome/lib/ConsoleMessage';
-import Log from '@ulixee/commons/Logger';
+import Log from '@ulixee/commons/lib/Logger';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import CorePlugins from '@ulixee/hero-core/lib/CorePlugins';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Core from '@ulixee/hero-core';
 import { TestServer } from './server';
 import Puppet from '../index';

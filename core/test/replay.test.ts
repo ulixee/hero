@@ -1,7 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import { createPromise } from '@ulixee/commons/utils';
+import { createPromise } from '@ulixee/commons/lib/utils';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IDomChangeRecord } from '../models/DomChangesTable';
 import ConnectionToReplay from "../connections/ConnectionToReplay";

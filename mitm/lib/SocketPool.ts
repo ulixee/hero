@@ -1,8 +1,8 @@
-import Queue from '@ulixee/commons/Queue';
-import Log from '@ulixee/commons/Logger';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import Queue from '@ulixee/commons/lib/Queue';
+import Log from '@ulixee/commons/lib/Logger';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import MitmSocket from '@ulixee/hero-mitm-socket';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import { ClientHttp2Session } from 'http2';
 import RequestSession from '../handlers/RequestSession';

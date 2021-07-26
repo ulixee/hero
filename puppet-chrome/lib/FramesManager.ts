@@ -1,9 +1,9 @@
 import Protocol from 'devtools-protocol';
-import * as eventUtils from '@ulixee/commons/eventUtils';
-import { TypedEventEmitter } from '@ulixee/commons/eventUtils';
-import IRegisteredEventListener from '@ulixee/hero-interfaces/IRegisteredEventListener';
+import * as eventUtils from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import { IPuppetFrameManagerEvents } from '@ulixee/hero-interfaces/IPuppetFrame';
-import { IBoundLog } from '@ulixee/hero-interfaces/ILog';
+import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { DevtoolsSession } from './DevtoolsSession';

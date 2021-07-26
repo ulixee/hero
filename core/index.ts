@@ -1,7 +1,7 @@
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
-import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/Logger';
-import Resolvable from '@ulixee/commons/Resolvable';
+import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
 import {
   IHumanEmulatorClass,
   IBrowserEmulatorClass,

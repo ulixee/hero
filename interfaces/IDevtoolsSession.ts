@@ -1,6 +1,6 @@
 import { ProtocolMapping } from 'devtools-protocol/types/protocol-mapping';
 import Protocol from 'devtools-protocol';
-import ITypedEventEmitter from './ITypedEventEmitter';
+import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 import { FilterFlags, FilterOutFlags } from './AllowedNames';
 
 export declare type DevtoolsEvents = {

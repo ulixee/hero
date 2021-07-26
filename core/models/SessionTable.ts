@@ -1,6 +1,6 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
-import SqliteTable from '@ulixee/commons/SqliteTable';
+import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 
