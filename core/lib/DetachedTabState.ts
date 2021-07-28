@@ -58,7 +58,13 @@ export default class DetachedTabState {
     await Promise.all([
       page.mainFrame.waitForLoader(loader.loaderId),
       page.mainFrame.waitForLoad('DOMContentLoaded'),
-      InjectedScripts.installDetachedScripts(page, tab.session.options.showBrowserInteractions),
+      InjectedScripts.installDetachedScripts(page, this.session.options.showBrowserInteractions),
+      page.devtoolsSession.send('Emulation.setDeviceMetricsOverride', {
+        height: this.session.options.viewport.height,
+        width: this.session.options.viewport.width,
+        deviceScaleFactor: this.session.options.viewport.deviceScaleFactor,
+        mobile: false,
+      }),
     ]);
     await InjectedScripts.restoreDom(page, this.domChanges);
   }
@@ -91,8 +97,7 @@ export default class DetachedTabState {
       }
 
       const body =
-        (await this.session.sessionState.getResourceData(match.id, false))?.toString('base64') ??
-        '';
+        (await this.session.sessionState.getResourceData(match.id, true))?.toString('base64') ?? '';
 
       return {
         requestId: request.requestId,

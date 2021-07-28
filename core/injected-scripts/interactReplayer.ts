@@ -12,21 +12,28 @@ declare global {
   }
 }
 
-interface IFrontendMouseEvent extends Omit<IMouseEventRecord, 'commandId' | 'timestamp' | 'event'> {
+export interface IHighlightedNodes {
   frameIdPath: string;
-  viewportWidth: number;
-  viewportHeight: number;
+  nodeIds: number[];
 }
-interface IFrontendScrollRecord extends IScrollRecord {
+
+export interface IFrontendMouseEvent
+  extends Omit<IMouseEventRecord, 'frameId' | 'tabId' | 'commandId' | 'timestamp' | 'event'> {
   frameIdPath: string;
 }
+
+export interface IFrontendScrollEvent
+  extends Omit<IScrollRecord, 'frameId' | 'tabId' | 'commandId' | 'timestamp'> {
+  frameIdPath: string;
+}
+
 let maxHighlightTop = -1;
 let minHighlightTop = 10e3;
 let replayNode: HTMLElement;
 let commandGrowl: HTMLElement;
 let commandText: HTMLElement;
 let hideCommandTimeout: any;
-let shouldTrackMouse = false;
+let shouldTrackMouse = true;
 
 let replayShadow: ShadowRoot;
 let lastHighlightNodes: number[] = [];
@@ -62,7 +69,11 @@ function hideCommandGrowl() {
   if (commandGrowl) commandGrowl.classList.add('fade');
 }
 
-window.replayInteractions = function replayInteractions(resultNodeIds, mouseEvent, scrollEvent) {
+window.replayInteractions = function replayInteractions(
+  resultNodeIds: IHighlightedNodes,
+  mouseEvent: IFrontendMouseEvent,
+  scrollEvent: IFrontendScrollEvent,
+) {
   highlightNodes(resultNodeIds);
   updateMouse(mouseEvent);
   updateScroll(scrollEvent);
@@ -153,7 +164,7 @@ function clearHighlights() {
   highlightElements.forEach(x => x.remove());
 }
 
-function highlightNodes(nodes: { frameIdPath: string; nodeIds: number[] }) {
+function highlightNodes(nodes: IHighlightedNodes) {
   if (nodes === undefined) return;
   if (nodes && nodes?.frameIdPath !== window.selfFrameIdPath) {
     clearHighlights();
@@ -301,7 +312,7 @@ function getOffsetElement(element: HTMLElement) {
   return element;
 }
 
-function updateScroll(scrollEvent: IFrontendScrollRecord) {
+function updateScroll(scrollEvent: IFrontendScrollEvent) {
   if (!scrollEvent) return;
   if (scrollEvent.frameIdPath !== window.selfFrameIdPath) {
     return delegateInteractToSubframe(scrollEvent, 'scroll');
@@ -381,7 +392,7 @@ function createReplayItems() {
     box-sizing: border-box;
     margin: 0 !important;
     bottom: 0;
-    height: 110px;
+    height: fit-content;
     width: 100%;
     position: fixed;
     pointer-events: none;

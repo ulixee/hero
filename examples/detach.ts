@@ -1,14 +1,33 @@
-import Hero, { LocationStatus } from '@ulixee/hero-fullstack';
+import Hero, { LocationStatus } from '@ulixee/hero';
+import * as Fs from 'fs';
 
 /**
  * The first run of this will result in a script taking 60+ seconds.
  *
  * Subsequent runs will "learn" the queries that ran against the frozenTab and run significantly faster.
  */
+const sessionIdPath = `${__dirname}/detached.txt`;
+const resumeSessionId = Fs.existsSync(sessionIdPath)
+  ? Fs.readFileSync(sessionIdPath, 'utf8')
+  : undefined;
 
 async function run() {
   console.time('Detach');
-  const hero = new Hero();
+  const hero = new Hero({
+    showBrowserInteractions: true, // disable to remove mouse movements and node highlights (can be detected by page!)
+    showBrowser: true,
+    sessionKeepAlive: true,
+    sessionResume: {
+      startLocation: 'currentLocation', // 'currentLocation | pageStart', // default: currentLocation
+      sessionId: resumeSessionId,
+    },
+    allowManualBrowserInteraction: true, // enables mouse/keyboard input in headed browser
+    connectionToCore: {
+      host: `ws://localhost:1337`, // NOTE: you need to start your own Ulixee server
+    },
+  });
+  const sessionId = await hero.sessionId;
+  Fs.writeFileSync(sessionIdPath, sessionId);
   await hero.goto('https://chromium.googlesource.com/chromium/src/+refs');
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
   await hero.waitForPaintingStable();

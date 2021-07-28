@@ -3,6 +3,11 @@ import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import { stringifiedTypeSerializerClass } from '@ulixee/commons/lib/TypeSerializer';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import { IFrontendDomChangeEvent } from '../models/DomChangesTable';
+import {
+  IFrontendMouseEvent,
+  IFrontendScrollEvent,
+  IHighlightedNodes,
+} from '../injected-scripts/interactReplayer';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
@@ -45,7 +50,7 @@ const showInteractionScript = `(function installInteractionsScript() {
     const exports = {}; // workaround for ts adding an exports variable
 
     window.selfFrameIdPath = '';
-    window.blockClickAndSubmit = false;
+    if (!'blockClickAndSubmit' in window) window.blockClickAndSubmit = false;
 
     if (!('getNodeById' in window)) {
       window.getNodeById = function getNodeById(id) {
@@ -64,6 +69,7 @@ const detachedInjectedScript = `(function installInjectedScripts() {
     const TSON = TypeSerializer;
 
     ${pageScripts.NodeTracker};
+    ${pageScripts.domReplayer};
     ${pageScripts.jsPath};
     ${pageScripts.Fetcher};
 
@@ -73,18 +79,7 @@ const detachedInjectedScript = `(function installInjectedScripts() {
     };
 })();`;
 
-const replayDomAndInteractionScript = `
-    if (typeof exports === 'undefined') {
-        var exports = {}; // workaround for ts adding an exports variable
-    }
-    ${pageScripts.NodeTracker};
-    ${pageScripts.domReplayer};
-
-    ${pageScripts.interactReplayer};
-`;
-
 const installedSymbol = Symbol('InjectedScripts.Installed');
-const replayInstalledSymbol = Symbol('InjectedScripts.replayInstalled');
 
 export default class InjectedScripts {
   public static JsPath = `HERO.JsPath`;
@@ -103,10 +98,6 @@ export default class InjectedScripts {
     ]);
   }
 
-  public static getReplayScript(): string {
-    return replayDomAndInteractionScript;
-  }
-
   public static async installDetachedScripts(
     puppetPage: IPuppetPage,
     showInteractions = false,
@@ -117,6 +108,7 @@ export default class InjectedScripts {
     await Promise.all([
       puppetPage.addNewDocumentScript(detachedInjectedScript, true),
       showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
+      puppetPage.addNewDocumentScript(`window.blockClickAndSubmit = true;`, true),
     ]);
   }
 
@@ -136,22 +128,17 @@ export default class InjectedScripts {
       'attributeNamespaces',
       'attributes',
       'properties',
+      'frameIdPath',
     ];
     const records = domChanges.map(x => columns.map(col => x[col]));
     if (!puppetPage[installedSymbol]) {
       await this.installDetachedScripts(puppetPage);
     }
-    // NOTE: NodeTracker is installed by detachedScripts
-    const domScript = puppetPage[replayInstalledSymbol] ? '' : pageScripts.domReplayer;
-    puppetPage[replayInstalledSymbol] = true;
+
     await puppetPage.mainFrame.evaluate(
       `(function replayEvents(){
     const exports = {};
     window.isMainFrame = true;
-
-    (() => {
-        ${domScript};
-    })();
 
     const records = ${JSON.stringify(records).replace(/,null/g, ',')};
     const events = [];
@@ -165,6 +152,21 @@ export default class InjectedScripts {
 //# sourceURL=${injectedSourceUrl}`,
       true,
     );
+  }
+
+  public static async replayInteractions(
+    puppetPage: IPuppetPage,
+    highlightNodeIds: IHighlightedNodes,
+    mouse: IFrontendMouseEvent,
+    scroll: IFrontendScrollEvent,
+  ): Promise<void> {
+    const args = [highlightNodeIds, mouse, scroll]
+      .map(x => {
+        if (!x) return 'undefined';
+        return JSON.stringify(x);
+      })
+      .join(', ');
+    await puppetPage.mainFrame.evaluate(`window.replayInteractions(${args});`, true);
   }
 
   public static async installDomStorageRestore(puppetPage: IPuppetPage): Promise<void> {

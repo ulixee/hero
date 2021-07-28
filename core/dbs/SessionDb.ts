@@ -10,13 +10,12 @@ import WebsocketMessagesTable from '../models/WebsocketMessagesTable';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
 import FramesTable from '../models/FramesTable';
 import PageLogsTable from '../models/PageLogsTable';
-import SessionTable from '../models/SessionTable';
+import SessionTable, { ISessionRecord } from '../models/SessionTable';
 import MouseEventsTable from '../models/MouseEventsTable';
 import FocusEventsTable from '../models/FocusEventsTable';
 import ScrollEventsTable from '../models/ScrollEventsTable';
 import SessionLogsTable from '../models/SessionLogsTable';
 import SessionsDb from './SessionsDb';
-import SessionState from '../lib/SessionState';
 import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
@@ -164,7 +163,7 @@ export default class SessionDb {
     return this.byId.get(sessionId);
   }
 
-  public static findWithRelated(scriptArgs: ISessionLookupArgs): ISessionLookup {
+  public static find(scriptArgs: ISessionFindArgs): ISessionFindResult {
     let { dataLocation, sessionId } = scriptArgs;
 
     const ext = Path.extname(dataLocation);
@@ -180,34 +179,26 @@ export default class SessionDb {
       if (!sessionId) return null;
     }
 
-    const activeSession = SessionState.registry.get(sessionId);
-
-    const sessionDb = activeSession?.db ?? this.getCached(sessionId, dataLocation, true);
+    const sessionDb = this.getCached(sessionId, dataLocation, true);
 
     const session = sessionDb.session.get();
-    const related = sessionsDb.findRelatedSessions(session);
 
     return {
-      ...related,
+      session,
       dataLocation,
-      sessionDb,
-      sessionState: activeSession,
     };
   }
 }
 
-export interface ISessionLookup {
-  sessionDb: SessionDb;
+export interface ISessionFindResult {
+  session: ISessionRecord;
   dataLocation: string;
-  sessionState: SessionState;
-  relatedSessions: { id: string; name: string }[];
-  relatedScriptInstances: { id: string; startDate: number; defaultSessionId: string }[];
 }
 
-export interface ISessionLookupArgs {
-  scriptInstanceId: string;
-  sessionName: string;
-  scriptEntrypoint: string;
-  dataLocation: string;
-  sessionId: string;
+export interface ISessionFindArgs {
+  scriptInstanceId?: string;
+  sessionName?: string;
+  scriptEntrypoint?: string;
+  dataLocation?: string;
+  sessionId?: string;
 }

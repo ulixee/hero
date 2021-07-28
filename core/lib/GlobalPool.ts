@@ -100,7 +100,7 @@ export default class GlobalPool {
       });
   }
 
-  private static getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+  public static getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
     const args = this.getPuppetLaunchArgs();
     const puppet = new Puppet(browserEngine, args);
 
