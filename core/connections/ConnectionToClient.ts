@@ -204,7 +204,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     clearTimeout(this.autoShutdownTimer);
     let session: Session;
     let tab: Tab;
-    if (options.sessionResume) {
+    if (options.sessionResume?.sessionId) {
       session = await this.resumeSession(options);
       tab = session?.getLastActiveTab();
     }
@@ -371,7 +371,12 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     }
 
     // if session not active, re-create
-    const db = SessionDb.getCached(sessionResume.sessionId, GlobalPool.sessionsDir);
+    let db: SessionDb;
+    try {
+      db = SessionDb.getCached(sessionResume.sessionId, GlobalPool.sessionsDir, true);
+    } catch (err) {
+      // not found
+    }
     if (!db) {
       const data = [
         ''.padEnd(50, '-'),
@@ -388,15 +393,7 @@ ${data}`,
     }
 
     const sessionDb = db.session.get();
-    options.userAgent = sessionDb.userAgentString;
-    options.locale = sessionDb.locale;
-    options.timezoneId = sessionDb.timezoneId;
-    options.viewport = sessionDb.viewport;
-
-    options.geolocation ??= sessionDb.createSessionOptions?.geolocation;
-    options.userProfile ??= sessionDb.createSessionOptions?.userProfile;
-    options.userProfile ??= {};
-    options.userProfile.deviceProfile ??= sessionDb.deviceProfile;
+    Session.restoreOptionsFromSessionRecord(options, sessionDb);
 
     return GlobalPool.createSession(options);
   }

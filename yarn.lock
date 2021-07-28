@@ -3271,6 +3271,15 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
+"@ulixee/commons@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-1.5.4.tgz#dd492ed2460119cdd416cc9db9d176c345aec079"
+  integrity sha512-tvPUgUXcu5dyA8DtwbgTfzG+k6ArfTAYOr9YBiAKEbzcks6QsPiUbvRN2bK+qRDlzXSjAOm0d9vIu6oEuI+64Q==
+  dependencies:
+    https-proxy-agent "^5.0.0"
+    source-map-support "^0.5.19"
+    uuid "^8.3.2"
+
 "@vue/babel-helper-vue-jsx-merge-props@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@vue/babel-helper-vue-jsx-merge-props/-/babel-helper-vue-jsx-merge-props-1.2.1.tgz#31624a7a505fb14da1d58023725a4c5f270e6a81"

@@ -26,10 +26,10 @@ export default class SessionsDb {
   }
 
   public findLatestSessionId(script: {
-    sessionName: string;
-    scriptInstanceId: string;
+    sessionName?: string;
+    scriptInstanceId?: string;
     scriptEntrypoint?: string;
-  }) {
+  }): string {
     const { sessionName, scriptEntrypoint, scriptInstanceId } = script;
     if (sessionName && scriptInstanceId) {
       // find default session if current not available
@@ -45,7 +45,10 @@ export default class SessionsDb {
     }
   }
 
-  public findRelatedSessions(session: { scriptEntrypoint: string; scriptInstanceId: string }) {
+  public findRelatedSessions(session: {
+    scriptEntrypoint: string;
+    scriptInstanceId: string;
+  }): ISessionsFindRelatedResult {
     const otherSessions = this.sessions.findByScriptEntrypoint(session.scriptEntrypoint);
     const relatedScriptInstances: {
       id: string;
@@ -95,4 +98,9 @@ export default class SessionsDb {
     }
     return this.dbByBaseDir[baseDir];
   }
+}
+
+export interface ISessionsFindRelatedResult {
+  relatedSessions: { id: string; name: string }[];
+  relatedScriptInstances: { id: string; startDate: number; defaultSessionId: string }[];
 }

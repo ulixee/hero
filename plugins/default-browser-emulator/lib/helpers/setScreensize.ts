@@ -22,8 +22,8 @@ export default async function setScreensize(
         return devtools.send('Browser.setWindowBounds', {
           windowId,
           bounds: {
-            width: viewport.width,
-            height: viewport.height,
+            width: viewport.screenWidth,
+            height: viewport.screenHeight + 20,
             windowState: 'normal',
           },
         });

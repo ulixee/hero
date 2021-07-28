@@ -8,7 +8,8 @@
       "require": "./index.cjs"
     },
     "./lib/*": "./lib/*.js",
-    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js"
+    "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
+    "./connections/*": "./connections/*.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.4",

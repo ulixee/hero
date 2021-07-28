@@ -30,6 +30,7 @@ import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
 import CorePlugins from './CorePlugins';
+import { ISessionRecord } from '../models/SessionTable';
 
 const { log } = Log(module);
 
@@ -509,6 +510,22 @@ export default class Session extends TypedEventEmitter<{
   private async newPage() {
     if (this._isClosing) throw new Error('Cannot create tab, shutting down');
     return await this.browserContext.newPage();
+  }
+
+  public static restoreOptionsFromSessionRecord(
+    options: ISessionCreateOptions,
+    record: ISessionRecord,
+  ): ISessionCreateOptions {
+    options.userAgent = record.userAgentString;
+    options.locale = record.locale;
+    options.timezoneId = record.timezoneId;
+    options.viewport = record.viewport;
+
+    options.geolocation ??= record.createSessionOptions?.geolocation;
+    options.userProfile ??= record.createSessionOptions?.userProfile;
+    options.userProfile ??= {};
+    options.userProfile.deviceProfile ??= record.deviceProfile;
+    return options;
   }
 
   public static get(sessionId: string): Session {

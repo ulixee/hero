@@ -1,7 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 
-export default class SessionsTable extends SqliteTable<ISessionRecord> {
+export default class SessionsTable extends SqliteTable<ISessionsRecord> {
   constructor(readonly db: SqliteDatabase) {
     super(db, 'Sessions', [
       ['id', 'TEXT'],
@@ -32,20 +32,20 @@ export default class SessionsTable extends SqliteTable<ISessionRecord> {
     this.insertNow(record);
   }
 
-  public findByName(name: string, scriptInstanceId: string): ISessionRecord {
+  public findByName(name: string, scriptInstanceId: string): ISessionsRecord {
     const sql = `SELECT * FROM ${this.tableName} WHERE name=? AND scriptInstanceId=? ORDER BY scriptStartDate DESC, startDate DESC LIMIT 1`;
-    return this.db.prepare(sql).get([name, scriptInstanceId]) as ISessionRecord;
+    return this.db.prepare(sql).get([name, scriptInstanceId]) as ISessionsRecord;
   }
 
-  public findByScriptEntrypoint(scriptEntrypoint, limit = 50): ISessionRecord[] {
+  public findByScriptEntrypoint(scriptEntrypoint, limit = 50): ISessionsRecord[] {
     const sql = `SELECT * FROM ${
       this.tableName
     } WHERE scriptEntrypoint=? ORDER BY scriptStartDate DESC, startDate DESC limit ${limit ?? 50}`;
-    return this.db.prepare(sql).all([scriptEntrypoint]) as ISessionRecord[];
+    return this.db.prepare(sql).all([scriptEntrypoint]) as ISessionsRecord[];
   }
 }
 
-export interface ISessionRecord {
+export interface ISessionsRecord {
   id: string;
   name: string;
   startDate: string;
