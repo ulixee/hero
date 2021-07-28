@@ -66,7 +66,7 @@
   "license": "MIT",
   "dependencies": {
     "@babel/runtime-corejs3": "^7.11.2",
-    "@ulixee/commons": "1.5.4",
+    "@ulixee/commons": "1.5.5",
     "compare-versions": "^3.6.0",
     "core-js": "^3.6.5",
     "electron-log": "^4.3.2",

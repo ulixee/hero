@@ -7,12 +7,14 @@
       "import": "./index.mjs",
       "require": "./index.cjs"
     },
+    "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
     "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
-    "./connections/*": "./connections/*.js"
+    "./connections/*": "./connections/*.js",
+    "./connector": "./connector.js"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.4",
+    "@ulixee/commons": "1.5.5",
     "@ulixee/default-browser-emulator": "1.5.4",
     "@ulixee/default-human-emulator": "1.5.4",
     "@ulixee/hero-interfaces": "1.5.4",

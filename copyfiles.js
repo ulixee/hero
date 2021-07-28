@@ -5,7 +5,7 @@ const pkg = require('./package.json');
 
 const copyToDir = process.env.OUT_DIR;
 const isStandardBuild = copyToDir === 'build';
-const workspaces = pkg.workspaces.packages.map(x => x.replace('/*', ''));
+const workspaces = pkg.workspaces?.packages.map(x => x.replace('/*', '')).filter(x => !x.startsWith('../')) || [];
 
 const copyArgs = [
   '-e "node_modules"',
