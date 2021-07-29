@@ -1,5 +1,5 @@
-import Core, { GlobalPool } from '@ulixee/hero-core';
 import * as WebSocket from 'ws';
+import Core, { GlobalPool } from '@ulixee/hero-core';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';

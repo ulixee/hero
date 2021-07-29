@@ -7,7 +7,7 @@
     "require": "./index.cjs"
   },
   "dependencies": {
-    "@ulixee/commons": "1.5.4",
+    "@ulixee/commons": "1.5.5",
     "@ulixee/hero-interfaces": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/replay": "1.5.4",
