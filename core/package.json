@@ -10,8 +10,7 @@
     "./package.json": "./package.json",
     "./lib/*": "./lib/*.js",
     "./lib/BrowserEmulators": "./lib/BrowserEmulators.js",
-    "./connections/*": "./connections/*.js",
-    "./connector": "./connector.js"
+    "./connections/*": "./connections/*.js"
   },
   "dependencies": {
     "@ulixee/commons": "1.5.5",
