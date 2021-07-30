@@ -1,7 +1,7 @@
 import Hero from '@ulixee/hero-fullstack';
 
 async function run() {
-  const hero = new Hero({ showReplay: true });
+  const hero = new Hero();
   await hero.goto('https://example.org/');
   await hero.waitForPaintingStable();
 

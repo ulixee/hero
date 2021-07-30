@@ -4,7 +4,7 @@
   "description": "Hero client that runs remotely",
   "scripts": {},
   "dependencies": {
-    "@ulixee/chrome-app": "1.0.1",
+    "@ulixee/chrome-app": "1.0.2",
     "@ulixee/commons": "1.5.5",
     "@ulixee/hero-interfaces": "1.5.4",
     "progress": "^2.0.3",

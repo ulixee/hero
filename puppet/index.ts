@@ -21,11 +21,9 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public readonly browserEngine: IBrowserEngine;
   public supportsBrowserContextProxy: boolean;
   private readonly launcher: IPuppetLauncher;
-  private isShuttingDown = false;
+  private isShuttingDown: Promise<Error | void>;
   private isStarted = false;
   private browser: IPuppetBrowser;
-
-  private onClose: () => Promise<any>;
 
   constructor(browserEngine: IBrowserEngine, args: IPuppetLaunchArgs = {}) {
     super();
@@ -87,17 +85,19 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
   }
 
   public async close() {
-    if (this.isShuttingDown || !this.isStarted) return;
-    this.isShuttingDown = true;
-    log.stats('Puppet.Closing');
+    if (!this.isStarted) return;
+    if (this.isShuttingDown) return this.isShuttingDown;
+
+    const parentLogId = log.stats('Puppet.Closing');
 
     try {
-      await this.browser?.close();
+      this.isShuttingDown = this.browser?.close();
+      await this.isShuttingDown;
     } catch (error) {
-      log.error('Puppet.Closing:Error', { sessionId: null, error });
+      log.error('Puppet.Closing:Error', { parentLogId, sessionId: null, error });
     } finally {
       this.emit('close');
-      log.stats('Puppet.Closed');
+      log.stats('Puppet.Closed', { parentLogId, sessionId: null });
     }
   }
 

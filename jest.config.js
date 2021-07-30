@@ -4,7 +4,6 @@ const pkg = require('./package.json');
 
 const workspaces = pkg.workspaces.packages
   .filter(x => {
-    if (x.startsWith('replay')) return false;
     if (x.startsWith('../')) return false;
     return (Fs.existsSync(Path.resolve(__dirname, x)));
   })

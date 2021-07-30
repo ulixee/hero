@@ -7,6 +7,5 @@ export default interface IHeroCreateOptions
     Omit<ISessionCreateOptions, 'scriptInstanceMeta' | 'sessionName' | 'dependencyMap'>
   > {
   name?: string;
-  showReplay?: boolean;
   connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
 }

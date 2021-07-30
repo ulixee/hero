@@ -24,9 +24,6 @@
       "path": "core/injected-scripts/tsconfig.json"
     },
     {
-      "path": "replay/tsconfig.json"
-    },
-    {
       "path": "plugins/default-browser-emulator/injected-scripts/tsconfig.json"
     }
   ],
@@ -39,8 +36,6 @@
     "**/build",
     "build",
     "build-dist",
-    "replay",
-    "replay/injected-scripts",
     "core/injected-scripts",
     "examples/*.js",
     "plugins/default-browser-emulator/injected-scripts",

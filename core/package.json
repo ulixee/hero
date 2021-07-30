@@ -28,12 +28,11 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@ulixee/chrome-app": "1.0.1",
+    "@ulixee/chrome-app": "1.0.2",
     "@ulixee/hero": "1.5.4",
     "@ulixee/hero-fullstack": "1.5.4",
     "@ulixee/hero-plugin-utils": "1.5.4",
     "@ulixee/hero-puppet-chrome": "1.5.4",
-    "@ulixee/replay": "1.5.4",
     "@ulixee/hero-testing": "1.5.4",
     "@types/better-sqlite3": "^5.4.1",
     "@types/json-socket": "^0.1.17",

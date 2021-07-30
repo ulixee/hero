@@ -44,7 +44,7 @@ module.exports = {
     'import/external-module-folders': workspacesWithModules,
     'import/resolver': {
       typescript: {
-        project: ['tsconfig.json', 'replay/tsconfig.json', 'replay/frontend/tsconfig.json'],
+        project: ['tsconfig.json'],
       },
     },
   },

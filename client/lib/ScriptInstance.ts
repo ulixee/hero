@@ -1,9 +1,5 @@
 import { v1 as uuidv1 } from 'uuid';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
-import Log from '@ulixee/commons/lib/Logger';
-import CoreSession from './CoreSession';
-
-const { log } = Log(module);
 
 export default class ScriptInstance {
   public readonly id: string = uuidv1();
@@ -17,23 +13,6 @@ export default class ScriptInstance {
       entrypoint: this.entrypoint,
       startDate: this.startDate,
     };
-  }
-
-  public async launchReplay(session: CoreSession): Promise<void> {
-    // eslint-disable-next-line global-require
-    const { replay } = require('@ulixee/replay/index');
-    try {
-      await replay({
-        scriptInstanceId: this.id,
-        scriptStartDate: this.startDate,
-        sessionsDataLocation: session.sessionsDataLocation,
-        replayApiUrl: await session.replayApiUrl,
-        sessionId: session.sessionId,
-        sessionName: session.sessionName,
-      });
-    } catch (error) {
-      log.warn('Error launching Replay application', { sessionId: session.sessionId, error });
-    }
   }
 
   public generateSessionName(name: string, shouldCleanName = true): string {
