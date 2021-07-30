@@ -6,44 +6,6 @@ on:
       - 'v*'
 
 jobs:
-  replay-and-site:
-    runs-on: macos-latest
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v1
-
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14
-
-      - name: Yarn install
-        run: yarn install --network-timeout 1000000
-        env:
-          HERO_SKIP_DOWNLOAD: true
-
-      - name: Build
-        run: yarn build
-
-      - name: Electron Builder
-        run: yarn build:pack
-        working-directory: ./replay
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload to Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -x
-          assets=()
-          for asset in ./build/replay/dist/assets/*; do
-            assets+=("-a" "$asset")
-          done
-          tag_name="${GITHUB_REF##*/}"
-          hub release edit "${assets[@]}" -m "" "$tag_name"
-
   socket:
     runs-on: ubuntu-latest
     steps:

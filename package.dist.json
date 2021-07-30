@@ -23,7 +23,6 @@
       "puppet-chrome",
       "mitm",
       "mitm-socket",
-      "replay",
       "../../commons/build"
     ]
   },

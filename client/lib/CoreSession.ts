@@ -32,15 +32,6 @@ export default class CoreSession implements IJsPathEventTarget {
     return [...this.tabsById.values()][0];
   }
 
-  public get replayApiUrl(): Promise<string> {
-    return this.connection.hostOrError.then(x => {
-      if (x instanceof Error) {
-        throw x;
-      }
-      return `${x}/replay`;
-    });
-  }
-
   protected readonly meta: ISessionMeta;
   private readonly connection: ConnectionToCore;
   private commandId = 0;

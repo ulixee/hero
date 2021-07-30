@@ -69,8 +69,7 @@ const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
-type IStateOptions = ISessionCreateOptions &
-  Pick<IHeroCreateOptions, 'connectionToCore' | 'showReplay'>;
+type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
 
 export interface IState {
   connection: SessionConnection;
@@ -433,7 +432,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
   ): void {
     this.emitter.once(eventType, listenerFn);
   }
-  
+
   // aliases
 
   public static on<K extends keyof IClassEvents>(
@@ -504,17 +503,6 @@ class SessionConnection {
 
     this._connection = connection;
     this._coreSession = connection.createSession(options).catch(err => err);
-
-    const defaultShowReplay = Boolean(JSON.parse(process.env.HERO_SHOW_REPLAY ?? 'false'));
-
-    const launchReplay = options?.showReplay ?? defaultShowReplay;
-
-    if (launchReplay) {
-      this._coreSession = this._coreSession.then(async x => {
-        if (x instanceof CoreSession) await scriptInstance.launchReplay(x);
-        return x;
-      });
-    }
   }
 
   public async refreshedTabs(): Promise<Tab[]> {

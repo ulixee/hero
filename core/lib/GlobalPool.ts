@@ -73,7 +73,11 @@ export default class GlobalPool {
   public static close(): Promise<void> {
     if (this.isClosing) return Promise.resolve();
     this.isClosing = true;
-    const logId = log.stats('GlobalPool.Closing');
+    const logId = log.stats('GlobalPool.Closing', {
+      sessionId: null,
+      puppets: this.puppets.length,
+      waitingForAvailability: this.waitingForAvailability.length
+    });
 
     for (const { promise } of this.waitingForAvailability) {
       promise.reject(new CanceledPromiseError('Puppet pool shutting down'));

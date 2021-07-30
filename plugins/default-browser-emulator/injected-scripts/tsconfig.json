@@ -20,7 +20,6 @@
     "**/node_modules",
     "**/dist",
     "**/build*",
-    "**/replay",
     "**/injected-scripts"
   ]
 }

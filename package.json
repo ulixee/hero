@@ -4,18 +4,18 @@
   "description": "The Web Browser Built for Scraping",
   "scripts": {
     "bump-version": "lerna version prerelease --no-push --conventional-commits",
-    "build": "yarn tsc && yarn workspace @ulixee/replay build:frontend && cd build && yarn",
+    "build": "yarn tsc && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
-    "build:dist-local": "yarn build:dist && yarn workspace @ulixee/replay build:dist-local && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
+    "build:dist-local": "yarn build:dist && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
     "build:docker": "yarn build:dist && docker build -t hero .",
     "build:ci": "yarn tsc && cd build && yarn install",
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
     "copy:dist": "cross-env OUT_DIR=build-dist node copyfiles.js",
     "copy:build": "cross-env OUT_DIR=build node copyfiles.js",
-    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js && yarn workspace @ulixee/replay build:backend",
-    "watch": "tsc-watch -b -w tsconfig.json --onSuccess \"yarn workspace @ulixee/replay build:backend-paths\"",
+    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js",
+    "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
-    "clean": "tsc -b --clean  tsconfig.json && yarn workspace @ulixee/replay clean",
+    "clean": "tsc -b --clean  tsconfig.json",
     "test": "yarn copy:build && cd build && yarn test",
     "lint": "eslint --cache ./"
   },
@@ -71,7 +71,6 @@
     "prettier": "^2.2.1",
     "pretty-quick": "^3.1.0",
     "shx": "^0.3.3",
-    "tsc-watch": "^4.2.9",
     "typescript": "~4.1.2"
   },
   "workspaces": {
@@ -86,8 +85,6 @@
       "mitm-socket",
       "puppet",
       "puppet-chrome",
-      "replay",
-      "replay/frontend",
       "testing",
       "../commons/build"
     ]
@@ -101,7 +98,6 @@
     ]
   },
   "resolutions": {
-    "remark-slug": "git://github.com/ulixee/remark-slug.git",
     "tough-cookie": "^4.0.0"
   }
 }
