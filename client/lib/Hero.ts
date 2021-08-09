@@ -94,7 +94,7 @@ const propertyKeys: (keyof Hero)[] = [
 ];
 
 type IClassEvents = {
-  new: Hero;
+  new: [Hero, IHeroCreateOptions];
 };
 
 export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
@@ -414,21 +414,21 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
 
   public static addListener<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
+    listenerFn: (...args: IClassEvents[K]) => any,
   ): void {
     this.emitter.addListener(eventType, listenerFn);
   }
 
   public static removeListener<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
+    listenerFn: (...args: IClassEvents[K]) => any,
   ): void {
     this.emitter.removeListener(eventType, listenerFn);
   }
 
   public static once<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
+    listenerFn: (...args: IClassEvents[K]) => any,
   ): void {
     this.emitter.once(eventType, listenerFn);
   }
@@ -437,14 +437,14 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
 
   public static on<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
+    listenerFn: (...args: IClassEvents[K]) => any,
   ): void {
     this.addListener(eventType, listenerFn);
   }
 
   public static off<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (event: IClassEvents[K]) => any,
+    listenerFn: (...args: IClassEvents[K]) => any,
   ): void {
     this.removeListener(eventType, listenerFn);
   }
