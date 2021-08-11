@@ -21,6 +21,7 @@ import IViewport from '@ulixee/hero-interfaces/IViewport';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
+import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import SessionState from './SessionState';
 import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
@@ -64,6 +65,14 @@ export default class Session extends TypedEventEmitter<{
 
   public get isClosing() {
     return this._isClosing;
+  }
+
+  public get summary(): ISessionSummary {
+    return {
+      id: this.id,
+      sessionsDataLocation: this.baseDir,
+      options: { ...this.options },
+    };
   }
 
   public mitmErrorsByUrl = new Map<
@@ -117,6 +126,7 @@ export default class Session extends TypedEventEmitter<{
         dependencyMap,
         corePluginPaths,
         deviceProfile: userProfile?.deviceProfile,
+        getSessionSummary: () => this.summary,
       },
       this.logger,
     );
