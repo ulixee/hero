@@ -16,6 +16,7 @@ import IViewport from './IViewport';
 import IGeolocation from './IGeolocation';
 import IDeviceProfile from './IDeviceProfile';
 import IHttp2ConnectSettings from './IHttp2ConnectSettings';
+import ISessionCreateOptions from './ISessionCreateOptions';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,
@@ -36,6 +37,7 @@ export interface ICorePluginMethods {
 
 export interface IOnClientCommandMeta {
   puppetPage: IPuppetPage;
+  sessionSummary: ISessionSummary;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,8 +60,12 @@ export interface IHumanEmulatorMethods {
     interactions: IInteractionGroups,
     runFn: (interaction: IInteractionStep) => Promise<void>,
     helper?: IInteractionsHelper,
+    sessionSummary?: ISessionSummary,
   ): Promise<void>;
-  getStartingMousePoint?(helper?: IInteractionsHelper): Promise<IPoint>;
+  getStartingMousePoint?(
+    helper?: IInteractionsHelper,
+    sessionSummary?: ISessionSummary,
+  ): Promise<IPoint>;
 }
 
 // decorator for human emulator classes. hacky way to check the class implements statics we need
@@ -103,23 +109,48 @@ export interface IBrowserEmulator extends ICorePlugin {
 }
 
 export interface IBrowserEmulatorMethods {
-  configure?(options: IBrowserEmulatorConfig): Promise<any> | void;
+  configure?(
+    options: IBrowserEmulatorConfig,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
 
-  onDnsConfiguration?(settings: IDnsSettings): Promise<any> | void;
-  onTcpConfiguration?(settings: ITcpSettings): Promise<any> | void;
-  onTlsConfiguration?(settings: ITlsSettings): Promise<any> | void;
+  onDnsConfiguration?(
+    settings: IDnsSettings,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
+  onTcpConfiguration?(
+    settings: ITcpSettings,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
+  onTlsConfiguration?(
+    settings: ITlsSettings,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
 
   onHttp2SessionConnect?(
     request: IHttpResourceLoadDetails,
     settings: IHttp2ConnectSettings,
+    sessionSummary?: ISessionSummary,
   ): Promise<any> | void;
-  beforeHttpRequest?(request: IHttpResourceLoadDetails): Promise<any> | void;
-  beforeHttpResponse?(resource: IHttpResourceLoadDetails): Promise<any> | void;
+  beforeHttpRequest?(
+    request: IHttpResourceLoadDetails,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
+  beforeHttpResponse?(
+    resource: IHttpResourceLoadDetails,
+    sessionSummary?: ISessionSummary,
+  ): Promise<any> | void;
 
-  onNewPuppetPage?(page: IPuppetPage): Promise<any>;
-  onNewPuppetWorker?(worker: IPuppetWorker): Promise<any>;
+  onNewPuppetPage?(page: IPuppetPage, sessionSummary?: ISessionSummary): Promise<any>;
+  onNewPuppetWorker?(worker: IPuppetWorker, sessionSummary?: ISessionSummary): Promise<any>;
 
-  websiteHasFirstPartyInteraction?(url: URL): Promise<any> | void; // needed for implementing first-party cookies
+  websiteHasFirstPartyInteraction?(url: URL, sessionSummary?: ISessionSummary): Promise<any> | void; // needed for implementing first-party cookies
+}
+
+export interface ISessionSummary {
+  id: string;
+  sessionsDataLocation: string;
+  options?: ISessionCreateOptions;
 }
 
 export interface IBrowserEmulatorConfig {

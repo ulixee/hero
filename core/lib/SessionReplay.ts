@@ -83,6 +83,13 @@ export default class SessionReplay {
         browserEmulatorId: this.session.browserEmulatorId,
         userAgentSelector: options.userAgent,
         deviceProfile: options?.userProfile?.deviceProfile,
+        getSessionSummary() {
+          return {
+            id: session.id,
+            options,
+            sessionsDataLocation: GlobalPool.sessionsDir,
+          };
+        },
       },
       log,
     );

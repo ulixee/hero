@@ -18,6 +18,7 @@ import ICorePlugin, {
   IOnClientCommandMeta,
   IBrowserEmulatorClass,
   IHumanEmulatorClass,
+  ISessionSummary,
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
 import ICorePluginCreateOptions from '@ulixee/hero-interfaces/ICorePluginCreateOptions';
@@ -39,6 +40,7 @@ interface IOptionsCreate {
   selectBrowserMeta?: ISelectBrowserMeta;
   dependencyMap?: IDependencyMap;
   corePluginPaths?: string[];
+  getSessionSummary?: () => ISessionSummary;
 }
 
 interface IDependencyMap {
@@ -56,6 +58,7 @@ export default class CorePlugins implements ICorePlugins {
   private readonly instanceById: { [id: string]: ICorePlugin } = {};
   private readonly createOptions: ICorePluginCreateOptions;
   private readonly logger: IBoundLog;
+  private readonly getSessionSummary: () => ISessionSummary;
 
   constructor(options: IOptionsCreate, logger: IBoundLog) {
     const {
@@ -64,7 +67,10 @@ export default class CorePlugins implements ICorePlugins {
       corePluginPaths,
       browserEmulatorId = DefaultBrowserEmulatorId,
       humanEmulatorId = DefaultHumanEmulatorId,
+      getSessionSummary,
     } = options;
+
+    this.getSessionSummary = getSessionSummary ?? (() => null);
 
     let BrowserEmulator = Core.pluginMap.browserEmulatorsById[browserEmulatorId];
     if (!BrowserEmulator) {
@@ -121,30 +127,46 @@ export default class CorePlugins implements ICorePlugins {
   // BROWSER EMULATORS
 
   public configure(options: IBrowserEmulatorConfig): void {
-    this.instances.filter(p => p.configure).forEach(p => p.configure(options));
+    const sessionSummary = this.getSessionSummary();
+    this.instances.filter(p => p.configure).forEach(p => p.configure(options, sessionSummary));
   }
 
   public onDnsConfiguration(settings: IDnsSettings): void {
-    this.instances.filter(p => p.onDnsConfiguration).forEach(p => p.onDnsConfiguration(settings));
+    const sessionSummary = this.getSessionSummary();
+    this.instances
+      .filter(p => p.onDnsConfiguration)
+      .forEach(p => p.onDnsConfiguration(settings, sessionSummary));
   }
 
   public onTcpConfiguration(settings: ITcpSettings): void {
-    this.instances.filter(p => p.onTcpConfiguration).forEach(p => p.onTcpConfiguration(settings));
+    const sessionSummary = this.getSessionSummary();
+    this.instances
+      .filter(p => p.onTcpConfiguration)
+      .forEach(p => p.onTcpConfiguration(settings, sessionSummary));
   }
 
   public onTlsConfiguration(settings: ITlsSettings): void {
-    this.instances.filter(p => p.onTlsConfiguration).forEach(p => p.onTlsConfiguration(settings));
+    const sessionSummary = this.getSessionSummary();
+    this.instances
+      .filter(p => p.onTlsConfiguration)
+      .forEach(p => p.onTlsConfiguration(settings, sessionSummary));
   }
 
   public async onNewPuppetPage(page: IPuppetPage): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
-      this.instances.filter(p => p.onNewPuppetPage).map(p => p.onNewPuppetPage(page)),
+      this.instances
+        .filter(p => p.onNewPuppetPage)
+        .map(p => p.onNewPuppetPage(page, sessionSummary)),
     );
   }
 
   public async onNewPuppetWorker(worker: IPuppetWorker): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
-      this.instances.filter(p => p.onNewPuppetWorker).map(p => p.onNewPuppetWorker(worker)),
+      this.instances
+        .filter(p => p.onNewPuppetWorker)
+        .map(p => p.onNewPuppetWorker(worker, sessionSummary)),
     );
   }
 
@@ -152,29 +174,37 @@ export default class CorePlugins implements ICorePlugins {
     resource: IHttpResourceLoadDetails,
     settings: IHttp2ConnectSettings,
   ): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
       this.instances
         .filter(p => p.onHttp2SessionConnect)
-        .map(p => p.onHttp2SessionConnect(resource, settings)),
+        .map(p => p.onHttp2SessionConnect(resource, settings, sessionSummary)),
     );
   }
 
   public async beforeHttpRequest(resource: IHttpResourceLoadDetails): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
-      this.instances.filter(p => p.beforeHttpRequest).map(p => p.beforeHttpRequest(resource)),
+      this.instances
+        .filter(p => p.beforeHttpRequest)
+        .map(p => p.beforeHttpRequest(resource, sessionSummary)),
     );
   }
 
   public async beforeHttpResponse(resource: IHttpResourceLoadDetails): Promise<any> {
+    const sessionSummary = this.getSessionSummary();
     await Promise.all(
-      this.instances.filter(p => p.beforeHttpResponse).map(p => p.beforeHttpResponse(resource)),
+      this.instances
+        .filter(p => p.beforeHttpResponse)
+        .map(p => p.beforeHttpResponse(resource, sessionSummary)),
     );
   }
 
   public websiteHasFirstPartyInteraction(url: URL): void {
+    const sessionSummary = this.getSessionSummary();
     this.instances
       .filter(p => p.websiteHasFirstPartyInteraction)
-      .forEach(p => p.websiteHasFirstPartyInteraction(url));
+      .forEach(p => p.websiteHasFirstPartyInteraction(url, sessionSummary));
   }
 
   // HUMAN EMULATORS
@@ -182,11 +212,12 @@ export default class CorePlugins implements ICorePlugins {
   public async playInteractions(
     interactionGroups: IInteractionGroups,
     runFn: (interaction: IInteractionStep) => Promise<void>,
-    helper?: IInteractionsHelper,
+    helper: IInteractionsHelper,
   ): Promise<void> {
+    const sessionSummary = this.getSessionSummary();
     const plugin = this.instances.filter(p => p.playInteractions).pop();
     if (plugin && plugin.playInteractions) {
-      await plugin.playInteractions(interactionGroups, runFn, helper);
+      await plugin.playInteractions(interactionGroups, runFn, helper, sessionSummary);
     } else {
       for (const interactionGroup of interactionGroups) {
         for (const interactionStep of interactionGroup) {
@@ -196,10 +227,11 @@ export default class CorePlugins implements ICorePlugins {
     }
   }
 
-  public async getStartingMousePoint(helper?: IInteractionsHelper): Promise<IPoint> {
+  public async getStartingMousePoint(helper: IInteractionsHelper): Promise<IPoint> {
     const plugin = this.instances.filter(p => p.getStartingMousePoint).pop();
+    const sessionSummary = this.getSessionSummary();
     if (plugin && plugin.getStartingMousePoint) {
-      return await plugin.getStartingMousePoint(helper);
+      return await plugin.getStartingMousePoint(helper, sessionSummary);
     }
   }
 
@@ -207,12 +239,18 @@ export default class CorePlugins implements ICorePlugins {
 
   public async onPluginCommand(
     toPluginId: string,
-    commandMeta: IOnClientCommandMeta,
+    commandMeta: Pick<IOnClientCommandMeta, 'puppetPage'>,
     args: any[],
   ): Promise<any> {
     const plugin = this.instanceById[toPluginId];
     if (plugin && plugin.onClientCommand) {
-      return await plugin.onClientCommand(commandMeta, ...args);
+      return await plugin.onClientCommand(
+        {
+          puppetPage: commandMeta.puppetPage,
+          sessionSummary: this.getSessionSummary(),
+        },
+        ...args,
+      );
     }
     this.logger.warn(`Plugin (${toPluginId}) could not be found for command`);
   }
@@ -229,11 +267,11 @@ export default class CorePlugins implements ICorePlugins {
     this.instanceById[corePlugin.id] = corePlugin;
   }
 
-  private require(corePluginId: string): ICorePluginClass {
+  private async require(corePluginId: string): Promise<ICorePluginClass> {
     if (!CorePlugins.corePluginClassesById[corePluginId]) {
       try {
         // eslint-disable-next-line global-require,import/no-dynamic-require
-        const CorePlugin = require(corePluginId);
+        const CorePlugin = await import(corePluginId);
         if (!CorePlugin) return;
         CorePlugins.corePluginClassesById[corePluginId] = CorePlugin.default || CorePlugin;
       } catch (error) {
