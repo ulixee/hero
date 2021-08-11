@@ -168,7 +168,7 @@ test('should be able to handle a reused socket that closes on server', async () 
   httpRequestSpy.mockImplementationOnce(async (ctx, settings) => {
     serverSocket.destroy();
     await new Promise(setImmediate);
-    return await originalFn(ctx, settings);
+    return await originalFn(ctx as any, settings);
   });
 
   {

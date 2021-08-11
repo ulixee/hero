@@ -468,7 +468,7 @@ function createReplayItems() {
     return false;
   }
 
-  if (window.blockClickAndSubmit !== false) {
+  if (window.blockClickAndSubmit) {
     document.addEventListener('click', cancelEvent, true);
     document.addEventListener('submit', cancelEvent, true);
   }

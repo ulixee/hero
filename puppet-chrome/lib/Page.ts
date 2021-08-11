@@ -51,7 +51,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   public popupInitializeFn?: (
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
-  ) => Promise<void>;
+  ) => Promise<any>;
 
   public devtoolsSession: DevtoolsSession;
   public targetId: string;

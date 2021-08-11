@@ -424,7 +424,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public takeScreenshot(options: IScreenshotOptions = {}): Promise<Buffer> {
-    options.rectangle.scale ??= 1;
+    if (options.rectangle) options.rectangle.scale ??= 1;
     return this.puppetPage.screenshot(options.format, options.rectangle, options.jpegQuality);
   }
 
@@ -572,22 +572,28 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
         const prevFrameId = this.sessionState.lastCommand?.frameId;
         if (prevFrameId && prevFrameId !== frame.id) {
-          this.frameEnvironmentsById
-            .get(prevFrameId)
-            .puppetFrame.evaluate(`window.toggleCommandActive(false, true, true);`)
-            .catch(() => null);
+          const prevPuppetFrame = this.frameEnvironmentsById.get(prevFrameId)?.puppetFrame;
+          if (prevPuppetFrame) {
+            prevPuppetFrame
+              .evaluate(`window.toggleCommandActive(false, true, true);`)
+              .catch(() => null);
+          }
         }
 
         frame.puppetFrame
           .evaluate(`window.toggleCommandActive(${trackMouse}, ${hideMouse}, ${hideOverlays});`)
           .catch(() => null);
       }
+    } else {
+      this.mainFrameEnvironment.puppetFrame
+        .evaluate(`window.toggleCommandActive(false)`)
+        .catch(() => null);
     }
   }
 
   public didRunCommand(command: ICommandMeta): void {
     if (this.session.options.showBrowserInteractions) {
-      const frame = this.frameEnvironmentsById.get(command.frameId);
+      const frame = this.frameEnvironmentsById.get(command.frameId) ?? this.mainFrameEnvironment;
       frame?.puppetFrame.evaluate(`window.toggleCommandActive(false)`).catch(() => null);
     }
   }

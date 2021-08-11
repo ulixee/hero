@@ -31,6 +31,8 @@ export default class GlobalPool {
   }
 
   public static events = new TypedEventEmitter<{
+    'session-created': { session: Session };
+    'browser-launched': { puppet: Puppet };
     'browser-has-no-open-windows': { puppet: Puppet };
     'all-browsers-closed': void;
   }>();
@@ -76,7 +78,7 @@ export default class GlobalPool {
     const logId = log.stats('GlobalPool.Closing', {
       sessionId: null,
       puppets: this.puppets.length,
-      waitingForAvailability: this.waitingForAvailability.length
+      waitingForAvailability: this.waitingForAvailability.length,
     });
 
     for (const { promise } of this.waitingForAvailability) {
@@ -104,7 +106,7 @@ export default class GlobalPool {
       });
   }
 
-  public static getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+  public static async getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
     const args = this.getPuppetLaunchArgs();
     const puppet = new Puppet(browserEngine, args);
 
@@ -121,7 +123,10 @@ export default class GlobalPool {
       `${browserDir}/devtoolsPreferences.json`,
     );
 
-    return puppet.start(preferencesInterceptor.installOnConnect);
+    await puppet.start(preferencesInterceptor.installOnConnect);
+    this.events.emit('browser-launched', { puppet });
+
+    return puppet;
   }
 
   private static async startMitm(): Promise<void> {
@@ -139,6 +144,7 @@ export default class GlobalPool {
     this._activeSessionCount += 1;
     try {
       const session = new Session(options);
+      this.events.emit('session-created', { session });
 
       const puppet = await this.getPuppet(session.browserEngine);
 
