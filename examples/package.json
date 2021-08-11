@@ -1,3 +1,5 @@
 {
-  "dependencies": {}
+  "dependencies": {
+    "yargs-parser": "^20.2.9"
+  }
 }

@@ -46,7 +46,12 @@ export default class FrameNavigationsObserver {
       last = command;
     }
     // handle cases like waitForLocation two times in a row
-    if (newCommand.name === 'waitForLocation' && last && last.name.startsWith('waitFor')) {
+    if (
+      newCommand.name === 'waitForLocation' &&
+      last &&
+      last.name.startsWith('waitFor') &&
+      last.name !== 'waitForMillis'
+    ) {
       this.defaultWaitForLocationCommandId = newCommand.id;
     }
   }
@@ -222,7 +227,12 @@ export default class FrameNavigationsObserver {
           previousLoadedUrl &&
           previousLoadedUrl !== history.finalUrl
         ) {
-          isLocationChange = true;
+          // Don't accept adding a slash as a page change
+          const isInPageUrlAdjust =
+            history.navigationReason === 'inPage' &&
+            history.finalUrl.replace(previousLoadedUrl, '').length <= 1;
+
+          if (!isInPageUrlAdjust) isLocationChange = true;
         }
 
         if (isLocationChange) {
@@ -236,7 +246,8 @@ export default class FrameNavigationsObserver {
       }
 
       if (
-        history.stateChanges.has(LoadStatus.HttpResponded) &&
+        (history.stateChanges.has(LoadStatus.HttpResponded) ||
+          history.stateChanges.has(LoadStatus.DomContentLoaded)) &&
         !history.stateChanges.has(LoadStatus.HttpRedirected)
       ) {
         previousLoadedUrl = history.finalUrl;

@@ -10,9 +10,10 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
 import SessionState from './SessionState';
 
-interface IFrameNavigationEvents {
+export interface IFrameNavigationEvents {
   'navigation-requested': INavigation;
   'status-change': {
+    id: number;
     url: string;
     stateChanges: { [state: string]: Date };
     newStatus: NavigationState;
@@ -77,6 +78,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     this.checkStoredNavigationReason(nextTop, url);
 
     const currentTop = this.top;
+    let shouldPublishLocationChange = false;
     // if in-page, set the state to match current top
     if (reason === 'inPage') {
       if (currentTop) {
@@ -93,12 +95,22 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
         nextTop.stateChanges.set(LoadStatus.ContentPaint, nextTop.initiatedTime);
         nextTop.resourceId.resolve(-1);
       }
+      shouldPublishLocationChange = true;
       nextTop.finalUrl = url;
     }
     this.history.push(nextTop);
 
     this.emit('navigation-requested', nextTop);
     this.captureNavigationUpdate(nextTop);
+    if (shouldPublishLocationChange) {
+      this.emit('status-change', {
+        id: nextTop.id,
+        newStatus: LoadStatus.ContentPaint,
+        url,
+        // @ts-ignore
+        stateChanges: Object.fromEntries(nextTop.stateChanges),
+      });
+    }
     return nextTop;
   }
 
@@ -295,6 +307,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     navigation.stateChanges.set(newStatus, statusChangeDate ?? new Date());
 
     this.emit('status-change', {
+      id: navigation.id,
       url: navigation.finalUrl ?? navigation.requestedUrl,
       // @ts-ignore - Typescript refuses to recognize this function
       stateChanges: Object.fromEntries(navigation.stateChanges),
