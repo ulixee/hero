@@ -151,7 +151,12 @@ export default class Core {
   }
 
   private static checkForAutoShutdown(): void {
-    if (Core.wasManuallyStarted || this.connections.some(x => x.isActive())) return;
+    if (
+      Core.wasManuallyStarted ||
+      this.connections.some(x => x.isActive()) ||
+      Session.hasKeepAliveSessions()
+    )
+      return;
 
     Core.shutdown().catch(error => {
       log.error('Core.autoShutdown', {

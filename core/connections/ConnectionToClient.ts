@@ -2,7 +2,11 @@ import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionO
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import {
+  addTypedEventListeners,
+  removeEventListeners,
+  TypedEventEmitter,
+} from '@ulixee/commons/lib/eventUtils';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
@@ -16,6 +20,7 @@ import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
 import SessionClosedOrMissingError from '@ulixee/commons/lib/SessionClosedOrMissingError';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
@@ -33,7 +38,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   public autoShutdownMillis = 500;
 
   private autoShutdownTimer: NodeJS.Timer;
-  private readonly sessionIds = new Set<string>();
+  private readonly sessionIds = new Map<string, IRegisteredEventListener[]>();
   private hasActiveCommand = false;
 
   private clientExposedMethods = new Map<string, keyof this & string>([
@@ -134,7 +139,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
     clearTimeout(this.autoShutdownTimer);
     const closeAll: Promise<any>[] = [];
-    for (const id of this.sessionIds) {
+    for (const id of this.sessionIds.keys()) {
       closeAll.push(this.closeSession({ sessionId: id }).catch(err => err));
     }
     await Promise.all(closeAll);
@@ -212,10 +217,14 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     if (!session) {
       session = await GlobalPool.createSession(options);
     }
-    this.sessionIds.add(session.id);
-    session.on('awaited-event', this.emit.bind(this, 'message'));
-    session.on('closing', () => this.sessionIds.delete(session.id));
-    session.on('closed', this.checkForAutoShutdown.bind(this));
+    this.sessionIds.set(
+      session.id,
+      addTypedEventListeners(session, [
+        ['awaited-event', this.emit.bind(this, 'message')],
+        ['closing', () => this.sessionIds.delete(session.id)],
+        ['closed', this.checkForAutoShutdown.bind(this)],
+      ]),
+    );
 
     tab ??= await session.createTab();
     return this.getSessionMeta(tab);
@@ -224,12 +233,11 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   public async closeSession(sessionMeta: ISessionMeta): Promise<void> {
     const session = Session.get(sessionMeta.sessionId);
     if (!session) return;
+
     // if this session is set to keep alive and core is closing,
     if (session.options.sessionKeepAlive && !Core.isClosing) {
-      this.sessionIds.delete(session.id);
-      session.removeAllListeners('closing');
-      session.removeAllListeners('closed');
-      session.removeAllListeners('awaited-event');
+      session.emit('kept-alive');
+      removeEventListeners(this.sessionIds.get(session.id) ?? []);
       return;
     }
 
@@ -360,13 +368,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     const { sessionResume } = options;
     const session = Session.get(sessionResume.sessionId);
     if (session) {
-      Object.assign(session.options, options);
-      session.resumeCounter += 1;
-
-      if (sessionResume.startLocation === 'sessionStart') {
-        await session.resetStorage();
-        // create a new tab
-      }
+      await session.resume(options);
       return session;
     }
 

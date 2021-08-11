@@ -37,7 +37,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
   popupInitializeFn?: (
     page: IPuppetPage,
     openParams: { url: string; windowName: string },
-  ) => Promise<void>;
+  ) => Promise<any>;
 
   setNetworkRequestInterceptor(
     networkRequestsFn: (
@@ -57,7 +57,7 @@ export interface IPuppetPage extends ITypedEventEmitter<IPuppetPageEvents> {
 }
 
 export interface IPuppetPageEvents extends IPuppetFrameManagerEvents, IPuppetNetworkEvents {
-  close: undefined;
+  close: void;
   worker: { worker: IPuppetWorker };
   crashed: { error: Error; fatal?: boolean };
   console: { frameId: string; type: string; message: string; location: string };

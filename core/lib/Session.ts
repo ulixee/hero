@@ -37,6 +37,9 @@ const { log } = Log(module);
 export default class Session extends TypedEventEmitter<{
   closing: void;
   closed: void;
+  resumed: void;
+  'kept-alive': void;
+  'tab-created': { tab: Tab };
   'all-tabs-closed': void;
   'awaited-event': ICoreEventPayload;
 }> {
@@ -317,7 +320,22 @@ export default class Session extends TypedEventEmitter<{
         if (tab && !tab.isClosing) return tab;
       }
     }
+    // if there are open tabs, send these as next option
+    for (const tab of this.tabsById.values()) {
+      if (!tab.isClosing) return tab;
+    }
     return null;
+  }
+
+  public async resume(options: ISessionCreateOptions): Promise<void> {
+    const { sessionResume } = options;
+    if (sessionResume.startLocation === 'sessionStart') {
+      await this.resetStorage();
+      // create a new tab
+    }
+    Object.assign(this.options, options);
+    this.resumeCounter += 1;
+    this.emit('resumed');
   }
 
   public async resetStorage(): Promise<void> {
@@ -504,6 +522,7 @@ export default class Session extends TypedEventEmitter<{
       }
     });
     page.popupInitializeFn = this.onNewTab.bind(this, tab);
+    this.emit('tab-created', { tab });
     return tab;
   }
 
@@ -538,6 +557,13 @@ export default class Session extends TypedEventEmitter<{
     const session = this.get(meta.sessionId);
     if (!session) return undefined;
     return session.tabsById.get(meta.tabId) ?? session.detachedTabsById.get(meta.tabId);
+  }
+
+  public static hasKeepAliveSessions(): boolean {
+    for (const session of Object.values(this.byId)) {
+      if (session.options.sessionKeepAlive) return true;
+    }
+    return false;
   }
 
   public static sessionsWithBrowserEngine(

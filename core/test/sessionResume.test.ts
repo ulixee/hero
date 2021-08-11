@@ -3,7 +3,7 @@ import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
 import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import Core, { Tab } from '../index';
+import Core, { GlobalPool, Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
 import Interactor from '../lib/Interactor';
@@ -31,6 +31,13 @@ describe('sessionResume tests when resume location is currentLocation', () => {
   test('should re-use commands multiple times', async () => {
     koaServer.get('/sessionResume', ctx => (ctx.body = `<body><h1>Hover me</h1></body>`));
     let sessionId: string;
+
+    const sessionEmittedFn = jest.spyOn(Session.prototype, 'emit');
+    const sessionCreatedFn = jest.fn();
+    const sessionResumedFn = jest.fn();
+    const sessionClosedFn = jest.fn();
+    const sessionKeptAliveFn = jest.fn();
+    GlobalPool.events.on('session-created', sessionCreatedFn);
     for (let i = 0; i < 5; i += 1) {
       const options: ISessionCreateOptions = { sessionKeepAlive: true };
       if (sessionId) {
@@ -40,6 +47,11 @@ describe('sessionResume tests when resume location is currentLocation', () => {
         };
       }
       const { session, tab } = await createSession(options);
+      if (i === 0) {
+        session.on('kept-alive', sessionKeptAliveFn);
+        session.on('resumed', sessionResumedFn);
+        session.on('closed', sessionClosedFn);
+      }
 
       if (sessionId) expect(sessionId).toBe(session.id);
 
@@ -58,7 +70,18 @@ describe('sessionResume tests when resume location is currentLocation', () => {
         session.sessionState.commands.length - 2,
       );
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
+      await connectionToClient.closeSession({ sessionId });
     }
+
+    expect(sessionCreatedFn).toHaveBeenCalledTimes(1);
+    expect(sessionClosedFn).toHaveBeenCalledTimes(0);
+    expect(sessionKeptAliveFn).toHaveBeenCalledTimes(5);
+    expect(sessionResumedFn).toHaveBeenCalledTimes(4);
+
+    // check all emitted events
+    expect(sessionEmittedFn.mock.calls.filter(x => x[0] === 'kept-alive')).toHaveLength(5);
+    expect(sessionEmittedFn.mock.calls.filter(x => x[0] === 'resumed')).toHaveLength(4);
+    expect(sessionEmittedFn.mock.calls.filter(x => x[0] === 'tab-created')).toHaveLength(1);
   });
 
   test('should run new commands when there are none matching', async () => {
