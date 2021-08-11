@@ -22,6 +22,7 @@ import Log from '@ulixee/commons/lib/Logger';
 import ILaunchedProcess from '@ulixee/hero-interfaces/ILaunchedProcess';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import * as Fs from 'fs';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { WebSocketTransport } from './WebSocketTransport';
 
 const { log } = Log(module);
@@ -108,6 +109,8 @@ export default async function launchProcess(
   });
 
   const wsEndpoint = await websocketEndpointResolvable.promise;
+  process.on('uncaughtExceptionMonitor', () => close());
+  ShutdownHandler.register(close);
   transport = new WebSocketTransport(wsEndpoint);
   await transport.waitForOpen;
 
