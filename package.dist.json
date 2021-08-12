@@ -1,32 +1,8 @@
 {
-  "name": "@ulixee/hero-monorepo",
-  "private": true,
-  "license": "MIT",
   "scripts": {
     "postinstall": "yarn workspace @ulixee/hero-mitm-socket postinstall"
   },
   "devDependencies": {
     "lerna": "^3.4.3"
-  },
-  "engines": {
-    "node": ">=13.2.0"
-  },
-  "workspaces": {
-    "packages": [
-      "client",
-      "core",
-      "fullstack",
-      "interfaces",
-      "plugin-utils",
-      "plugins/*",
-      "puppet",
-      "puppet-chrome",
-      "mitm",
-      "mitm-socket",
-      "../../commons/build"
-    ]
-  },
-  "resolutions": {
-    "tough-cookie": "^4.0.0"
   }
 }

@@ -40,6 +40,8 @@ RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 WORKDIR /app/ulixee
 
+## NOTE: this docker file builds out of /build-dist. You need to have run "yarn build:dist"
+
 COPY ./build-dist /app/ulixee/
 
 RUN cat /etc/*-release

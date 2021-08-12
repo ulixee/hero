@@ -3,7 +3,8 @@
   "private": true,
   "description": "The Web Browser Built for Scraping",
   "scripts": {
-    "bump-version": "lerna version prerelease --no-push --conventional-commits",
+    "prepare": "husky install",
+    "bump-version": "lerna version --conventional-commits --no-push --exact --force-publish",
     "build": "yarn tsc && cd build && yarn",
     "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
     "build:dist-local": "yarn build:dist && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
@@ -16,7 +17,7 @@
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json",
-    "test": "yarn copy:build && cd build && yarn test",
+    "test": "yarn copy:build && node ./prepare-build.js && cd build && yarn test",
     "lint": "eslint --cache ./"
   },
   "repository": "git@github.com:ulixee/secret-agent.git",
@@ -33,18 +34,11 @@
   "engines": {
     "node": ">=13.2.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm test",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
     "@types/jest": "^26.0.20",
-    "@types/node": "^13.13.34",
+    "@types/node": "^13.13.52",
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.17.0",
     "copyfiles": "^2.4.1",
@@ -62,7 +56,7 @@
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^4.3.0",
+    "husky": "^7.0.1",
     "jest": "^26.6.3",
     "jest-environment-node": "^26.6.2",
     "jest-summary-reporter": "^0.0.2",

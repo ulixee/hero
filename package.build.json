@@ -1,7 +1,4 @@
 {
-  "name": "@ulixee/hero-monorepo",
-  "private": true,
-  "license": "MIT",
   "scripts": {
     "test": "cross-env NODE_ENV=test HERO_SESSIONS_DIR=.sessions-test jest"
   },
@@ -10,24 +7,5 @@
     "jest-summary-reporter": "^0.0.2",
     "jest-environment-node": "^26.6.2",
     "cross-env": "^7.0.2"
-  },
-  "workspaces": {
-    "packages": [
-      "client",
-      "core",
-      "fullstack",
-      "interfaces",
-      "plugin-utils",
-      "plugins/*",
-      "puppet",
-      "puppet-chrome",
-      "mitm",
-      "mitm-socket",
-      "testing",
-      "../../commons/build"
-    ]
-  },
-  "resolutions": {
-    "tough-cookie": "^4.0.0"
   }
 }

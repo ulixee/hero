@@ -188,7 +188,7 @@ test('should handle cache headers for h2', async () => {
     if (req.headers[':path'] === '/cached') {
       etags.push(req.headers['if-none-match'] as string);
       res1.setHeader('etag', '"46e2aa1bef425becb0cb4651c23fff38:1573670083.753497"');
-      return res1.end(Buffer.from(['a', 'c']));
+      return res1.end('cached');
     }
     return res1.end('bad data');
   });
@@ -263,10 +263,7 @@ async function createH2Connection(sessionIdPrefix: string, url: string) {
 let sessionCounter = 0;
 function createSession(mitmProxy: MitmServer, sessionId = '') {
   const plugins = new CorePlugins({ browserEmulatorId, selectBrowserMeta }, log as IBoundLog);
-  const session = new RequestSession(
-    `${sessionId}${(sessionCounter += 1)}`,
-    plugins,
-  );
+  const session = new RequestSession(`${sessionId}${(sessionCounter += 1)}`, plugins);
   mitmProxy.registerSession(session, false);
   Helpers.needsClosing.push(session);
 
