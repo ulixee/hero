@@ -178,10 +178,17 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
   > {
     const dbs: { frameId: string; origin: string; databases: string[] }[] = [];
     for (const { origin, frameId } of this.framesManager.getSecurityOrigins()) {
-      const { databaseNames } = await this.devtoolsSession.send('IndexedDB.requestDatabaseNames', {
-        securityOrigin: origin,
-      });
-      dbs.push({ origin, frameId, databases: databaseNames });
+      try {
+        const { databaseNames } = await this.devtoolsSession.send(
+          'IndexedDB.requestDatabaseNames',
+          {
+            securityOrigin: origin,
+          },
+        );
+        dbs.push({ origin, frameId, databases: databaseNames });
+      } catch (err) {
+        // can throw if document not found in page
+      }
     }
     return dbs;
   }
