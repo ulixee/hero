@@ -15,8 +15,6 @@ import ICoreConnectionEventPayload from '@ulixee/hero-interfaces/ICoreConnection
 import IConnectionToCoreOptions from '../interfaces/IConnectionToCoreOptions';
 import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
-import { IHeroCreateOptions } from '../index';
-import Hero from '../lib/Hero';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
 
@@ -54,7 +52,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     this.commandQueue = new CoreCommandQueue(null, this, null);
     this.coreSessions = new CoreSessions(
       this.options.maxConcurrency,
-      this.options.heroTimeoutMillis,
+      this.options.instanceTimeoutMillis,
     );
 
     if (this.options.host) {
@@ -170,26 +168,6 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
     }
   }
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
-
-  public useHero(
-    options: IHeroCreateOptions,
-    callbackFn: (hero: Hero) => Promise<any>,
-  ): Promise<void> {
-    // just kick off
-    this.connect().catch(() => null);
-    return this.coreSessions.waitForAvailable(() => {
-      const hero = new Hero({
-        ...options,
-        connectionToCore: this,
-      });
-
-      return callbackFn(hero);
-    });
-  }
-
-  public canCreateSessionNow(): boolean {
-    return this.isDisconnecting === false && this.coreSessions.hasAvailability();
-  }
 
   public async createSession(options: ISessionCreateOptions): Promise<CoreSession> {
     try {

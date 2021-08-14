@@ -62,7 +62,7 @@ export default class SessionDb {
   constructor(baseDir: string, id: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
     this.sessionId = id;
-    this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
+    this.db = new Database(`${baseDir}/hero-instance-${id}.db`, { readonly, fileMustExist });
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }

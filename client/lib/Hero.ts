@@ -1,10 +1,9 @@
-// eslint-disable-next-line max-classes-per-file
 import * as Util from 'util';
 import { EventEmitter } from 'events';
 import { BlockedResourceType } from '@ulixee/hero-interfaces/ITabOptions';
 import StateMachine from 'awaited-dom/base/StateMachine';
 import inspectInstanceProperties from 'awaited-dom/base/inspectInstanceProperties';
-import { bindFunctions, getCallSite } from '@ulixee/commons/lib/utils';
+import { bindFunctions, createPromise, getCallSite } from '@ulixee/commons/lib/utils';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import IDomStorage from '@ulixee/hero-interfaces/IDomStorage';
@@ -49,9 +48,7 @@ import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
-import CoreSession from './CoreSession';
-import ConnectionFactory, { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
-import ConnectionToCore from '../connections/ConnectionToCore';
+import { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
 import FrameEnvironment, {
   getCoreFrameEnvironment,
@@ -60,6 +57,7 @@ import FrameEnvironment, {
 import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
+import ConnectionManager from './ConnectionManager';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -69,10 +67,10 @@ const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
-type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
+export type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
 
 export interface IState {
-  connection: SessionConnection;
+  connection: ConnectionManager;
   isClosing: boolean;
   options: IStateOptions;
   clientPlugins: IClientPlugin[];
@@ -97,17 +95,20 @@ type IClassEvents = {
   new: [Hero, IHeroCreateOptions];
 };
 
-export default class Hero extends AwaitedEventTarget<{ close: void }> implements IHero {
+export default class Hero extends AwaitedEventTarget<{ close: [], command: [string, number, any[]] }> implements IHero {
   public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
   private static emitter = new EventEmitter();
 
   constructor(options: IHeroCreateOptions = {}) {
-    super(() => {
+    const connectionManagerIsReady = createPromise();
+    super(async () => {
+      await connectionManagerIsReady.promise;
       return {
-        target: getState(this).connection.getCoreSessionOrReject(),
+        target: getState(this).connection.getConnectedCoreSessionOrReject(),
       };
     });
+
     bindFunctions(this);
     (this.constructor as any).emitter.emit('new', this, options);
 
@@ -125,7 +126,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
       corePluginPaths: [],
     } as IStateOptions;
 
-    const connection = new SessionConnection(this, options);
+    const connection = new ConnectionManager(this, options);
 
     setState(this, {
       connection,
@@ -133,6 +134,8 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
       options,
       clientPlugins: [],
     });
+
+    connectionManagerIsReady.resolve();
   }
 
   public get activeTab(): Tab {
@@ -156,7 +159,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
   }
 
   public get sessionId(): Promise<string> {
-    const coreSession = getState(this).connection.getCoreSessionOrReject();
+    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
     return coreSession.then(x => x.sessionId);
   }
 
@@ -165,7 +168,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
   }
 
   public get meta(): Promise<IHeroMeta> {
-    const coreSession = getState(this).connection.getCoreSessionOrReject();
+    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
     return coreSession.then(x => x.getHeroMeta());
   }
 
@@ -218,7 +221,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
       .join('\n');
 
     const coreTab = getCoreTab(tab);
-    const coreSession = getState(this).connection.getCoreSessionOrReject();
+    const coreSession = getState(this).connection.getConnectedCoreSessionOrReject();
 
     const detachedTab = coreSession.then(async session =>
       session.detachTab(await coreTab, callSitePath, key),
@@ -391,7 +394,7 @@ export default class Hero extends AwaitedEventTarget<{ close: void }> implements
   ): Promise<TResult1 | TResult2> {
     try {
       this.then = null;
-      await getState(this).connection.getCoreSessionOrReject();
+      await getState(this).connection.getConnectedCoreSessionOrReject();
       return onfulfilled(this);
     } catch (err) {
       if (onrejected) return onrejected(err);
@@ -459,118 +462,5 @@ async function getCoreFrameForInteractions(
       const coreFrame = await getCoreFrameEnvironmentForPosition(element);
       if (coreFrame) return coreFrame;
     }
-  }
-}
-
-// This class will lazily connect to core on first access of the tab properties
-class SessionConnection {
-  public hasConnected = false;
-
-  public get activeTab(): Tab {
-    this.getCoreSessionOrReject().catch(() => null);
-    return this._activeTab;
-  }
-
-  public set activeTab(value: Tab) {
-    this._activeTab = value;
-  }
-
-  public get host(): Promise<string> {
-    return this._connection?.hostOrError.then(x => {
-      if (x instanceof Error) throw x;
-      return x;
-    });
-  }
-
-  private readonly _connection: ConnectionToCore;
-  private readonly didCreateConnection: boolean = false;
-  private readonly _coreSession: Promise<CoreSession | Error>;
-  private _activeTab: Tab;
-  private _tabs: Tab[] = [];
-
-  constructor(private hero: Hero, stateOptions: IStateOptions) {
-    const { connectionToCore, ...options } = stateOptions;
-
-    const createConnectionToCoreFn = (hero.constructor as any).createConnectionToCore;
-    const connection = ConnectionFactory.createConnection(
-      connectionToCore ?? { isPersistent: false },
-      createConnectionToCoreFn,
-    );
-
-    if (connection !== connectionToCore) {
-      this.didCreateConnection = true;
-    }
-
-    this._connection = connection;
-    this._coreSession = connection.createSession(options).catch(err => err);
-  }
-
-  public async refreshedTabs(): Promise<Tab[]> {
-    const session = await this.getCoreSessionOrReject();
-    const coreTabs = await session.getTabs();
-    const tabIds = await Promise.all(this._tabs.map(x => x.tabId));
-    for (const coreTab of coreTabs) {
-      const hasTab = tabIds.includes(coreTab.tabId);
-      if (!hasTab) {
-        const tab = createTab(this.hero, Promise.resolve(coreTab));
-        this._tabs.push(tab);
-      }
-    }
-    return this._tabs;
-  }
-
-  public async close(): Promise<void> {
-    if (!this.hasConnected) return;
-    const sessionOrError = await this._coreSession;
-    if (sessionOrError instanceof CoreSession) {
-      await sessionOrError.close();
-    }
-    if (this.didCreateConnection) {
-      await this._connection.disconnect();
-    }
-  }
-
-  public closeTab(tab: Tab): void {
-    const tabIdx = this._tabs.indexOf(tab);
-    this._tabs.splice(tabIdx, 1);
-    if (this._tabs.length) {
-      this._activeTab = this._tabs[0];
-    }
-  }
-
-  public addTab(tab: Tab): void {
-    this._tabs.push(tab);
-  }
-
-  public async getCoreSessionOrReject(): Promise<CoreSession> {
-    if (this.hasConnected) {
-      const coreSession = await this._coreSession;
-      if (coreSession instanceof CoreSession) return coreSession;
-      throw coreSession;
-    }
-    this.hasConnected = true;
-
-    const { clientPlugins } = getState(this.hero);
-
-    const coreSession = this._coreSession.then(value => {
-      if (value instanceof CoreSession) return value;
-      throw value;
-    });
-
-    const coreTab = coreSession.then(x => x.firstTab).catch(err => err);
-    this._activeTab = createTab(this.hero, coreTab);
-    this._tabs = [this._activeTab];
-
-    for (const clientPlugin of clientPlugins) {
-      await clientPlugin.onHero(this.hero, this.sendToActiveTab.bind(this));
-    }
-
-    return await coreSession;
-  }
-
-  private async sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
-    const coreSession = (await this._coreSession) as CoreSession;
-    const coreTab = coreSession.tabsById.get(await this._activeTab.tabId);
-    return coreTab.commandQueue.run('Tab.runPluginCommand', toPluginId, args);
   }
 }

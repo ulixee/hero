@@ -6,40 +6,65 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 
 afterAll(Helpers.afterAll);
 
-describe('basic Hero tests', () => {
-  it('creates and closes an hero', async () => {
-    const outgoing = jest.fn(
-      async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-        if (command === 'Session.create') {
-          return {
-            data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
-          };
-        }
-      },
-    );
-
-    class Piper extends ConnectionToCore {
-      async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
-        const response = await outgoing(payload);
-        this.onMessage({
-          responseId: payload.messageId,
-          data: response?.data ?? {},
-          ...(response ?? {}),
-        });
+class MockedConnectionToCore extends ConnectionToCore {
+  public outgoing = jest.fn(
+    async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+      if (command === 'Session.create') {
+        return {
+          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+        };
       }
+    },
+  );
 
-      protected createConnection = () => Promise.resolve(null);
-      protected destroyConnection = () => Promise.resolve(null);
-    }
+  async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
+    const response = await this.outgoing(payload);
+    this.onMessage({
+      responseId: payload.messageId,
+      data: response?.data ?? {},
+      ...(response ?? {}),
+    });
+  }
 
-    const hero = await new Hero({ connectionToCore: new Piper() });
+  protected createConnection = () => Promise.resolve(null);
+  protected destroyConnection = () => Promise.resolve(null);
+}
+
+describe('basic Hero tests', () => {
+  it('creates and closes a hero', async () => {
+    const connectionToCore = new MockedConnectionToCore();
+    const hero = await new Hero({ connectionToCore });
     await hero.close();
 
-    const outgoingCommands = outgoing.mock.calls;
+    const outgoingCommands = connectionToCore.outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
       'Session.create',
       'Session.close',
     ]);
+  });
+
+  it('emits commandId events', async () => {
+    const connectionToCore = new MockedConnectionToCore();
+    const hero = await new Hero({ connectionToCore });
+    const events = [];
+
+    hero.on('command', (command, ...args) => {
+      events.push({ command, args });
+    });
+
+    await hero.close();
+
+    const outgoingCommands = connectionToCore.outgoing.mock.calls;
+    expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
+      'Core.connect',
+      'Session.create',
+      'Session.close',
+    ]);
+
+    expect(events).toMatchObject([{
+      command: 'Session.close',
+      args: [],
+    }]);
   });
 });

@@ -90,10 +90,10 @@ export default class Core {
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
-    const { localProxyPortStart, sessionsDir, maxConcurrentHeroesCount } = options;
+    const { localProxyPortStart, sessionsDir, maxConcurrentClientCount } = options;
 
-    if (maxConcurrentHeroesCount !== undefined)
-      GlobalPool.maxConcurrentHeroesCount = maxConcurrentHeroesCount;
+    if (maxConcurrentClientCount !== undefined)
+      GlobalPool.maxConcurrentClientCount = maxConcurrentClientCount;
 
     if (localProxyPortStart !== undefined)
       GlobalPool.localProxyPortStart = options.localProxyPortStart;

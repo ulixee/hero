@@ -18,7 +18,7 @@ export default class SessionsDb {
 
   constructor(baseDir: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
-    this.db = new Database(`${baseDir}/sessions.db`, { readonly, fileMustExist });
+    this.db = new Database(`${baseDir}/hero-instances.db`, { readonly, fileMustExist });
     this.baseDir = baseDir;
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);

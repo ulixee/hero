@@ -4,7 +4,7 @@ import Session from '../lib/Session';
 
 const shutdownSpy = jest.spyOn(Core, 'shutdown');
 beforeEach(() => {
-  GlobalPool.maxConcurrentHeroesCount = 10;
+  GlobalPool.maxConcurrentClientCount = 10;
 });
 afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
@@ -13,9 +13,9 @@ describe('basic Core tests', () => {
   it('starts, configures, and shuts down', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    await connection.connect({ maxConcurrentHeroesCount: 5 });
+    await connection.connect({ maxConcurrentClientCount: 5 });
 
-    expect(GlobalPool.maxConcurrentHeroesCount).toBe(5);
+    expect(GlobalPool.maxConcurrentClientCount).toBe(5);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     await Core.shutdown();
@@ -24,10 +24,10 @@ describe('basic Core tests', () => {
   it('runs createTab', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    await connection.connect({ maxConcurrentHeroesCount: 2 });
+    await connection.connect({ maxConcurrentClientCount: 2 });
     await connection.createSession();
 
-    expect(GlobalPool.maxConcurrentHeroesCount).toBe(2);
+    expect(GlobalPool.maxConcurrentClientCount).toBe(2);
     expect(GlobalPool.activeSessionCount).toBe(1);
 
     await Core.shutdown();

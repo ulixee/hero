@@ -11,7 +11,7 @@ beforeAll(async () => {
   httpServer = await Helpers.runHttpServer({ onlyCloseOnFinal: true });
 });
 beforeEach(() => {
-  GlobalPool.maxConcurrentHeroesCount = 10;
+  GlobalPool.maxConcurrentClientCount = 10;
 });
 afterEach(Helpers.afterEach);
 afterAll(Helpers.afterAll);
@@ -20,9 +20,9 @@ describe('GlobalPool tests', () => {
   it('should be able to get multiple entries out of the pool', async () => {
     const connection = Core.addConnection();
     Helpers.onClose(() => connection.disconnect());
-    GlobalPool.maxConcurrentHeroesCount = 3;
-    await connection.connect({ maxConcurrentHeroesCount: 3 });
-    expect(GlobalPool.maxConcurrentHeroesCount).toBe(3);
+    GlobalPool.maxConcurrentClientCount = 3;
+    await connection.connect({ maxConcurrentClientCount: 3 });
+    expect(GlobalPool.maxConcurrentClientCount).toBe(3);
     expect(GlobalPool.activeSessionCount).toBe(0);
 
     const tab1 = Session.getTab(await connection.createSession());

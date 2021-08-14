@@ -9,7 +9,7 @@ import Hero from '../index';
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
   koaServer = await Helpers.runKoaServer(true);
-  GlobalPool.maxConcurrentHeroesCount = 3;
+  GlobalPool.maxConcurrentClientCount = 3;
 });
 afterAll(Helpers.afterAll);
 afterEach(Helpers.afterEach);
