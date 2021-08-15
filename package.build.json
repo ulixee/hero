@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "cross-env NODE_ENV=test HERO_DATA_DIR=.sessions-test jest"
+    "test": "cross-env NODE_ENV=test HERO_DATA_DIR=.data-test jest"
   },
   "devDependencies": {
     "jest": "^26.6.3",

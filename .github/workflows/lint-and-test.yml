@@ -120,11 +120,11 @@ jobs:
         working-directory: ./build
         env:
           NODE_ENV: test
-          HERO_DATA_DIR: .sessions
+          HERO_DATA_DIR: .data
 
       - name: 'Tar files'
         if: ${{ failure() }}
-        run: tar -cvf test-dbs.tar ./build/.sessions
+        run: tar -cvf test-dbs.tar ./build/.data
 
       - name: Upload Databases
         if: ${{ failure() }}

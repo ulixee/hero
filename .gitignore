@@ -20,7 +20,7 @@ tsconfig.tsbuildinfo
 emulators/data/DOM-*.json
 
 /.mitm-ca
-.sessions
+.data
 .gh
 **/dist
 /.eslintcache

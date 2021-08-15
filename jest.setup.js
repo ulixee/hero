@@ -5,11 +5,11 @@ const CertificateManager = require('@ulixee/hero-mitm-socket/lib/CertificateGene
 
 module.exports = async () => {
   try {
-    fs.rmdirSync(`${__dirname}/.sessions-test`, { recursive: true });
-    fs.mkdirSync(`${__dirname}/.sessions-test`);
+    fs.rmdirSync(`${__dirname}/.data-test`, { recursive: true });
+    fs.mkdirSync(`${__dirname}/.data-test`);
     // generate certs
     const certManager = new CertificateManager({
-      storageDir: `${__dirname}/.sessions-test`,
+      storageDir: `${__dirname}/.data-test`,
     });
     await certManager.waitForConnected;
     certManager.close();
