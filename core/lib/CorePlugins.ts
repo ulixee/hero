@@ -10,14 +10,14 @@ import { IInteractionGroups, IInteractionStep } from '@ulixee/hero-interfaces/II
 import IInteractionsHelper from '@ulixee/hero-interfaces/IInteractionsHelper';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import ICorePlugin, {
-  IHumanEmulator,
   IBrowserEmulator,
-  IBrowserEmulatorConfig,
-  ISelectBrowserMeta,
-  ICorePluginClass,
-  IOnClientCommandMeta,
   IBrowserEmulatorClass,
+  IBrowserEmulatorConfig,
+  ICorePluginClass,
+  IHumanEmulator,
   IHumanEmulatorClass,
+  IOnClientCommandMeta,
+  ISelectBrowserMeta,
   ISessionSummary,
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import ICorePlugins from '@ulixee/hero-interfaces/ICorePlugins';
@@ -150,6 +150,14 @@ export default class CorePlugins implements ICorePlugins {
     this.instances
       .filter(p => p.onTlsConfiguration)
       .forEach(p => p.onTlsConfiguration(settings, sessionSummary));
+  }
+
+  public async onBrowserLaunchConfiguration(launchArguments: string[]): Promise<void> {
+    await Promise.all(
+      this.instances
+        .filter(p => p.onBrowserLaunchConfiguration)
+        .map(p => p.onBrowserLaunchConfiguration(launchArguments)),
+    );
   }
 
   public async onNewPuppetPage(page: IPuppetPage): Promise<void> {

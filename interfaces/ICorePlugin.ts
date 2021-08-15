@@ -114,6 +114,8 @@ export interface IBrowserEmulatorMethods {
     sessionSummary?: ISessionSummary,
   ): Promise<any> | void;
 
+  onBrowserLaunchConfiguration?(launchArguments: string[]): Promise<any> | void;
+
   onDnsConfiguration?(
     settings: IDnsSettings,
     sessionSummary?: ISessionSummary,

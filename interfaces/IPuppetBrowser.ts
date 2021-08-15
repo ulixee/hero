@@ -5,6 +5,7 @@ import ICorePlugins from './ICorePlugins';
 import IDevtoolsSession from './IDevtoolsSession';
 
 export default interface IPuppetBrowser {
+  id: string;
   onDevtoolsAttached?: (devtoolsSession: IDevtoolsSession) => Promise<any>;
   getFeatures(): Promise<{
     supportsPerBrowserContextProxy: boolean;

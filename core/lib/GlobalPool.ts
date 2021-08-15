@@ -14,6 +14,7 @@ import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import DevtoolsPreferences from './DevtoolsPreferences';
+import CorePlugins from './CorePlugins';
 
 const { log } = Log(module);
 let sessionsDir = process.env.HERO_SESSIONS_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
@@ -106,9 +107,11 @@ export default class GlobalPool {
       });
   }
 
-  public static async getPuppet(browserEngine: IBrowserEngine): Promise<Puppet> {
+  public static async getPuppet(plugins: CorePlugins): Promise<Puppet> {
     const args = this.getPuppetLaunchArgs();
+    const browserEngine = plugins.browserEngine;
     const puppet = new Puppet(browserEngine, args);
+    await plugins.onBrowserLaunchConfiguration(browserEngine.launchArguments);
 
     const existing = this.puppets.find(x =>
       this.isSameEngine(puppet.browserEngine, x.browserEngine),
@@ -146,7 +149,7 @@ export default class GlobalPool {
       const session = new Session(options);
       this.events.emit('session-created', { session });
 
-      const puppet = await this.getPuppet(session.browserEngine);
+      const puppet = await this.getPuppet(session.plugins);
 
       if (disableMitm !== true) {
         await session.registerWithMitm(this.mitmServer, puppet.supportsBrowserContextProxy);

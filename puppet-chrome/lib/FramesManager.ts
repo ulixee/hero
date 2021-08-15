@@ -207,7 +207,11 @@ export default class FramesManager extends TypedEventEmitter<IPuppetFrameManager
         executionContextId: context.id,
       });
     }
-    frame?.addContextId(context.id, context.name === '' || context.auxData?.isDefault === true);
+    const isDefault = context.name === '' || context.auxData?.isDefault === true;
+    const isHeroWorld = context.name === ISOLATED_WORLD;
+    if (isDefault || isHeroWorld) {
+      frame?.addContextId(context.id, isDefault);
+    }
   }
 
   /////// FRAMES ///////////////////////////////////////////////////////////////

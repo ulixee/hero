@@ -134,8 +134,14 @@ describe('GlobalPool tests', () => {
 
     // @ts-ignore
     const puppet2 = await GlobalPool.getPuppet({
-      ...puppet1.browserEngine,
-      launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
+      browserEngine: {
+        ...puppet1.browserEngine,
+        launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
+      },
+      onBrowserLaunchConfiguration(): Promise<void> {
+        return Promise.resolve();
+      },
+      humanEmulator: { id: 'basic' },
     });
 
     expect(puppets).toHaveLength(2);
