@@ -32,6 +32,7 @@ import CommandRecorder from './CommandRecorder';
 import DetachedTabState from './DetachedTabState';
 import CorePlugins from './CorePlugins';
 import { ISessionRecord } from '../models/SessionTable';
+import Core from '../index';
 
 const { log } = Log(module);
 
@@ -73,7 +74,6 @@ export default class Session extends TypedEventEmitter<{
   public get summary(): ISessionSummary {
     return {
       id: this.id,
-      sessionsDataLocation: this.baseDir,
       options: { ...this.options },
     };
   }
@@ -156,9 +156,7 @@ export default class Session extends TypedEventEmitter<{
         deviceScaleFactor: 1,
       } as IViewport);
 
-    this.baseDir = GlobalPool.sessionsDir;
     this.sessionState = new SessionState(
-      this.baseDir,
       this.id,
       options.sessionName,
       options.scriptInstanceMeta,
@@ -267,7 +265,7 @@ export default class Session extends TypedEventEmitter<{
     if (doesPuppetSupportBrowserContextProxy) {
       this.isolatedMitmProxy = await MitmProxy.start(
         GlobalPool.localProxyPortStart,
-        GlobalPool.sessionsDir,
+        Core.dataDir,
       );
       mitmProxy = this.isolatedMitmProxy;
     }

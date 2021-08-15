@@ -4,7 +4,6 @@ import sessionCommandsApi from './Session.commands';
 import sessionDomChangesApi from './Session.domChanges';
 import sessionInteractionsApi, { ISessionInteractionsResult } from './Session.interactions';
 import SessionDb from '../dbs/SessionDb';
-import { GlobalPool } from '../index';
 import { IMouseEventRecord } from '../models/MouseEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
@@ -14,11 +13,7 @@ import sessionTabsApi, { ISessionTab } from './Session.tabs';
 import { ISessionRecord } from '../models/SessionTable';
 
 export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksResult {
-  const sessionDb = SessionDb.getCached(
-    args.sessionId,
-    args.dataLocation ?? GlobalPool.sessionsDir,
-    true,
-  );
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
   const session = sessionDb.session.get();
   const { commands } = sessionCommandsApi(args);
   const { domChangesByTabId } = sessionDomChangesApi(args);
@@ -376,7 +371,6 @@ export interface ISessionTicksApi extends ICoreApi {
 
 export interface ISessionTicksArgs {
   sessionId: string;
-  dataLocation?: string;
   includeInteractionEvents?: boolean;
   includeCommands?: boolean;
   includePaintEvents?: boolean;

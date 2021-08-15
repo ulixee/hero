@@ -1,5 +1,4 @@
 import SessionDb from '../dbs/SessionDb';
-import { GlobalPool } from '../index';
 import { IMouseEventRecord, MouseEventType } from '../models/MouseEventsTable';
 import { IFocusRecord } from '../models/FocusEventsTable';
 import { IScrollRecord } from '../models/ScrollEventsTable';
@@ -8,11 +7,7 @@ import ICoreApi from '../interfaces/ICoreApi';
 export default function sessionInteractionsApi(
   args: ISessionInteractionsArgs,
 ): ISessionInteractionsResult {
-  const sessionDb = SessionDb.getCached(
-    args.sessionId,
-    args.dataLocation ?? GlobalPool.sessionsDir,
-    true,
-  );
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   function sort(a: { timestamp: number }, b: { timestamp: number }) {
     return a.timestamp - b.timestamp;
@@ -43,7 +38,6 @@ export interface ISessionInteractionsApi extends ICoreApi {
 
 export interface ISessionInteractionsArgs {
   sessionId: string;
-  dataLocation?: string;
   mouseEventsFilter?: MouseEventType[];
 }
 

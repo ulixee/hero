@@ -375,7 +375,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     // if session not active, re-create
     let db: SessionDb;
     try {
-      db = SessionDb.getCached(sessionResume.sessionId, GlobalPool.sessionsDir, true);
+      db = SessionDb.getCached(sessionResume.sessionId, true);
     } catch (err) {
       // not found
     }
@@ -383,7 +383,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       const data = [
         ''.padEnd(50, '-'),
         `------HERO SESSION ID`.padEnd(50, '-'),
-        `------${GlobalPool.sessionsDir}`.padEnd(50, '-'),
+        `------${Core.dataDir}`.padEnd(50, '-'),
         `------${sessionResume.sessionId ?? ''}`.padEnd(50, '-'),
         ''.padEnd(50, '-'),
       ].join('\n');
@@ -413,7 +413,6 @@ ${data}`,
     return {
       sessionId: session.id,
       frameId: tab.mainFrameId,
-      sessionsDataLocation: session.baseDir,
       tabId: tab.id,
     };
   }

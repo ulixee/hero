@@ -1,14 +1,9 @@
 import ResourceType from '@ulixee/hero-interfaces/ResourceType';
 import SessionDb from '../dbs/SessionDb';
-import { GlobalPool } from '../index';
 import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionResourcesApi(args: ISessionResourcesArgs): ISessionResourcesResult {
-  const sessionDb = SessionDb.getCached(
-    args.sessionId,
-    args.dataLocation ?? GlobalPool.sessionsDir,
-    true,
-  );
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   const resources = sessionDb.resources.all();
 
@@ -41,7 +36,6 @@ export default function sessionResourcesApi(args: ISessionResourcesArgs): ISessi
 
 export interface ISessionResourcesArgs {
   sessionId: string;
-  dataLocation?: string;
   omitWithoutResponse?: boolean;
   omitNonHttpGet?: boolean;
 }

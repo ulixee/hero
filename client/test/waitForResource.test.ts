@@ -13,7 +13,7 @@ const outgoing = jest.fn(
     if (response) return response;
     if (command === 'Session.create') {
       return {
-        data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+        data: { tabId: 'tab-id', sessionId: 'session-id' },
       };
     }
     if (command === 'Session.addEventListener') {

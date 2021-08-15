@@ -1,21 +1,18 @@
 import * as Fs from 'fs';
 import SessionDb from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
-import { GlobalPool } from '../index';
 import CommandFormatter from '../lib/CommandFormatter';
 
 export default function sessionsSearchApi(args: ISessionsSearchArgs): ISessionsSearchResult {
-  const dataLocation = args.dataLocation ?? GlobalPool.sessionsDir;
   const results = {
-    dataLocation,
     sessions: [],
   };
 
-  for (const dbName of Fs.readdirSync(dataLocation)) {
-    if (!dbName.endsWith('.db') || dbName === 'network.db' || dbName === 'sessions.db') continue;
+  for (const dbName of Fs.readdirSync(SessionDb.databaseDir)) {
+    if (!dbName.endsWith('.db')) continue;
 
     try {
-      const sessionDb = new SessionDb(dataLocation, dbName.replace('.db', ''), {
+      const sessionDb = new SessionDb(dbName.replace('.db', ''), {
         fileMustExist: true,
         readonly: true,
       });
@@ -68,12 +65,10 @@ export interface ISessionsSearchApi extends ICoreApi {
 }
 
 export interface ISessionsSearchArgs {
-  dataLocation?: string;
   commandArg?: string;
   devtoolsKey?: string;
 }
 export interface ISessionsSearchResult {
-  dataLocation: string;
   sessions: {
     id: string;
     name: string;

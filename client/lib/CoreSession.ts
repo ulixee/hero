@@ -16,7 +16,6 @@ export default class CoreSession implements IJsPathEventTarget {
   public frozenTabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
-  public sessionsDataLocation: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
   public emitter = new EventEmitter();
@@ -40,10 +39,9 @@ export default class CoreSession implements IJsPathEventTarget {
   private commandId = 0;
 
   constructor(sessionMeta: ISessionMeta & { sessionName: string }, connectionToCore: ConnectionToCore) {
-    const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
+    const { sessionId, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
-    this.sessionsDataLocation = sessionsDataLocation;
     this.meta = {
       sessionId,
     };

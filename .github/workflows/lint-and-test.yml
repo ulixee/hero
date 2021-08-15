@@ -120,7 +120,7 @@ jobs:
         working-directory: ./build
         env:
           NODE_ENV: test
-          HERO_SESSIONS_DIR: .sessions
+          HERO_DATA_DIR: .sessions
 
       - name: 'Tar files'
         if: ${{ failure() }}

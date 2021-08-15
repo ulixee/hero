@@ -1,16 +1,11 @@
 import SessionDb from '../dbs/SessionDb';
-import { GlobalPool } from '../index';
 import DomChangesTable, { IDomChangeRecord } from '../models/DomChangesTable';
 import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionDomChangesApi(
   args: ISessionDomChangesArgs,
 ): ISessionDomChangesResult {
-  const sessionDb = SessionDb.getCached(
-    args.sessionId,
-    args.dataLocation ?? GlobalPool.sessionsDir,
-    true,
-  );
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   const changes = sessionDb.domChanges.all();
 
@@ -46,7 +41,6 @@ export interface ISessionDomChangesApi extends ICoreApi {
 
 export interface ISessionDomChangesArgs {
   sessionId: string;
-  dataLocation?: string;
 }
 
 export interface ISessionDomChangesResult {

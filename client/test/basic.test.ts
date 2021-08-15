@@ -11,7 +11,7 @@ class MockedConnectionToCore extends ConnectionToCore {
     async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
       if (command === 'Session.create') {
         return {
-          data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+          data: { tabId: 'tab-id', sessionId: 'session-id' },
         };
       }
     },
@@ -49,8 +49,8 @@ describe('basic Hero tests', () => {
     const hero = await new Hero({ connectionToCore });
     const events = [];
 
-    hero.on('command', (command, ...args) => {
-      events.push({ command, args });
+    hero.on('command', (command, commandId, args) => {
+      events.push({ command, commandId, args });
     });
 
     await hero.close();
@@ -64,6 +64,7 @@ describe('basic Hero tests', () => {
 
     expect(events).toMatchObject([{
       command: 'Session.close',
+      commandId: 1,
       args: [],
     }]);
   });

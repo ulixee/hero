@@ -20,16 +20,14 @@ const { log } = Log(module);
 export default class SessionReplay {
   public tabsById = new Map<number, SessionReplayTab>();
   public session: ISessionRecord;
-  public dataLocation: string;
   public startTab: SessionReplayTab;
 
   private readonly resourceLookup: { [method_url: string]: ISessionResource[] } = {};
 
   private readonly documents: IDocument[] = [];
-  private get sessionArgs(): { sessionId: string; dataLocation: string } {
+  private get sessionArgs(): { sessionId: string } {
     return {
       sessionId: this.session.id,
-      dataLocation: this.dataLocation,
     };
   }
 
@@ -38,9 +36,8 @@ export default class SessionReplay {
   constructor(readonly connection: ConnectionToCoreApi, readonly debugLogging = false) {}
 
   public async load(args: ISessionFindArgs): Promise<void> {
-    const { session, dataLocation } = await this.connection.run({ api: 'Session.find', args });
+    const { session } = await this.connection.run({ api: 'Session.find', args });
     this.session = session;
-    this.dataLocation = dataLocation;
 
     const ticksResult = await this.connection.run({
       api: 'Session.ticks',
@@ -87,7 +84,6 @@ export default class SessionReplay {
           return {
             id: session.id,
             options,
-            sessionsDataLocation: GlobalPool.sessionsDir,
           };
         },
       },

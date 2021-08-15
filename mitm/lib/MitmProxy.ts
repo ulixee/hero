@@ -21,7 +21,7 @@ const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 const defaultStorageDirectory =
   process.env.HERO_NETWORK_DIR ??
-  process.env.HERO_SESSIONS_DIR ??
+  process.env.HERO_DATA_DIR ??
   Path.join(Os.tmpdir(), '.ulixee');
 
 /**

@@ -7,7 +7,6 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 const sessionMeta = {
   tabId: 1,
   sessionId: 'session-id',
-  sessionsDataLocation: '',
 };
 
 let testConnection: ConnectionToCore;
