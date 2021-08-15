@@ -11,8 +11,7 @@
     "puppet",
     "puppet-chrome",
     "mitm",
-    "testing",
-    "commons"
+    "testing"
   ],
   "useWorkspaces": true
 }

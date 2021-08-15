@@ -20,7 +20,14 @@ function processPackageJson(packagePath) {
     devDependencies: overridesJson.devDependencies || packageJson.devDependencies,
     workspaces: overridesJson.workspaces || packageJson.workspaces,
   };
-
+  if (finalPackageJson.workspaces) {
+    finalPackageJson.workspaces.packages = finalPackageJson.workspaces.packages.map(x => {
+      if (x.startsWith('../') && !fs.existsSync(`${buildDir}/${x}`)) {
+        return `../${x}`;
+      }
+      return x;
+    });
+  }
   console.log('writing', `${packagePath}/package.json`);
   fs.writeFileSync(`${packagePath}/package.json`, JSON.stringify(finalPackageJson, null, 2));
 }
