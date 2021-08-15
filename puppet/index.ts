@@ -17,6 +17,10 @@ const { log } = Log(module);
 
 let puppBrowserCounter = 1;
 export default class Puppet extends TypedEventEmitter<{ close: void }> {
+  public get browserId(): string {
+    return this.browser.id;
+  }
+
   public readonly id: number;
   public readonly browserEngine: IBrowserEngine;
   public supportsBrowserContextProxy: boolean;

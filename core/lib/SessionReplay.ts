@@ -96,7 +96,7 @@ export default class SessionReplay {
     plugins.browserEngine.isHeaded = true;
     plugins.configure(options);
 
-    const puppet = await GlobalPool.getPuppet(plugins.browserEngine);
+    const puppet = await GlobalPool.getPuppet(plugins);
     this.browserContext = await puppet.newContext(plugins, log);
 
     this.browserContext.defaultPageInitializationFn = page =>

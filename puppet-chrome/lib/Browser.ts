@@ -20,6 +20,9 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   public readonly browserContextsById = new Map<string, BrowserContext>();
   public readonly devtoolsSession: DevtoolsSession;
   public onDevtoolsAttached?: (session: DevtoolsSession) => Promise<any>;
+  public get id() {
+    return this.connection.rootSession.id;
+  }
 
   private readonly connection: Connection;
 

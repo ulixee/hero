@@ -43,6 +43,10 @@ export class BrowserContext
   public proxy: IProxyConnectionOptions;
   public readonly id: string;
 
+  public get browserId(): string {
+    return this.browser.id;
+  }
+
   private attachedTargetIds = new Set<string>();
   private pageOptionsByTargetId = new Map<string, IPuppetPageOptions>();
   private readonly createdTargetIds = new Set<string>();
