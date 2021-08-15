@@ -138,7 +138,7 @@ describe('GlobalPool tests', () => {
         ...puppet1.browserEngine,
         launchArguments: puppet1.browserEngine.launchArguments.slice(0, -1),
       },
-      onBrowserLaunchConfiguration(_: string[]): Promise<void> {
+      onBrowserLaunchConfiguration(): Promise<void> {
         return Promise.resolve();
       },
       humanEmulator: { id: 'basic' },

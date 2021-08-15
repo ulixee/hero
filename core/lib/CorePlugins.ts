@@ -27,7 +27,6 @@ import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import IHttp2ConnectSettings from '@ulixee/hero-interfaces/IHttp2ConnectSettings';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
-import IPuppetContext from '@ulixee/hero-interfaces/IPuppetContext';
 import Core from '../index';
 
 const DefaultBrowserEmulatorId = 'default-browser-emulator';
