@@ -92,10 +92,13 @@ const propertyKeys: (keyof Hero)[] = [
 ];
 
 type IClassEvents = {
-  new: [Hero, IHeroCreateOptions];
+  new: [heroInstance: Hero, heroCreateOptions: IHeroCreateOptions];
 };
 
-export default class Hero extends AwaitedEventTarget<{ close: [], command: [string, number, any[]] }> implements IHero {
+export default class Hero
+  extends AwaitedEventTarget<{ close: []; command: [name: string, commandId: number, args: any[]] }>
+  implements IHero
+{
   public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
   private static emitter = new EventEmitter();

@@ -9,7 +9,7 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
 
   public async addEventListener<K extends keyof T>(
     eventType: K,
-    listenerFn: (...args: any[]) => any,
+    listenerFn: (...argArray: T[K] & any[]) => any,
     options?,
   ): Promise<void> {
     const { target, jsPath } = await this.getEventTarget();
@@ -18,7 +18,7 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
 
   public async removeEventListener<K extends keyof T>(
     eventType: K,
-    listenerFn: (...args: any[]) => any,
+    listenerFn: (...argArray: T[K] & any[]) => any,
   ): Promise<void> {
     const { target, jsPath } = await this.getEventTarget();
     return (await target).removeEventListener(jsPath, eventType as string, listenerFn);
@@ -28,7 +28,7 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
 
   public on<K extends keyof T>(
     eventType: K,
-    listenerFn: (...args: any[]) => any,
+    listenerFn: (...args: T[K] & any[]) => any,
     options?,
   ): Promise<void> {
     return this.addEventListener(eventType, listenerFn, options);
@@ -36,14 +36,14 @@ export default class AwaitedEventTarget<T> implements IAwaitedEventTarget<T> {
 
   public off<K extends keyof T>(
     eventType: K,
-    listenerFn: (...args: any[]) => any,
+    listenerFn: (...argArray: T[K] & any[]) => any,
   ): Promise<void> {
     return this.removeEventListener(eventType, listenerFn);
   }
 
   public once<K extends keyof T>(
     eventType: K,
-    listenerFn: (...args: T[K] & any[]) => any,
+    listenerFn: (...argArray: T[K] & any[]) => any,
     options?,
   ): Promise<void> {
     const wrappedListener = (...args: any[]): Promise<void> | void => {
