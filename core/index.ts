@@ -1,3 +1,6 @@
+import * as Os from 'os';
+import * as Fs from 'fs';
+import * as Path from 'path';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import Log, { hasBeenLoggedSymbol } from '@ulixee/commons/lib/Logger';
@@ -20,6 +23,7 @@ import GlobalPool from './lib/GlobalPool';
 import Signals = NodeJS.Signals;
 
 const { log } = Log(module);
+let dataDir = process.env.HERO_DATA_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
 
 export { GlobalPool, Tab, Session, LocationTrigger };
 
@@ -90,16 +94,16 @@ export default class Core {
     this.isStarting = true;
     if (isExplicitlyStarted) this.wasManuallyStarted = true;
 
-    const { localProxyPortStart, sessionsDir, maxConcurrentHeroesCount } = options;
+    const { localProxyPortStart, maxConcurrentClientCount } = options;
 
-    if (maxConcurrentHeroesCount !== undefined)
-      GlobalPool.maxConcurrentHeroesCount = maxConcurrentHeroesCount;
+    if (maxConcurrentClientCount !== undefined)
+      GlobalPool.maxConcurrentClientCount = maxConcurrentClientCount;
 
     if (localProxyPortStart !== undefined)
       GlobalPool.localProxyPortStart = options.localProxyPortStart;
 
-    if (sessionsDir !== undefined) {
-      GlobalPool.sessionsDir = options.sessionsDir;
+    if (options.dataDir !== undefined) {
+      Core.dataDir = options.dataDir;
     }
 
     await GlobalPool.start();
@@ -107,7 +111,7 @@ export default class Core {
     log.info('Core started', {
       sessionId: null,
       parentLogId: startLogId,
-      sessionsDir: GlobalPool.sessionsDir,
+      dataDir: Core.dataDir,
     });
   }
 
@@ -165,7 +169,21 @@ export default class Core {
       });
     });
   }
+
+  public static get dataDir(): string {
+    return dataDir;
+  }
+
+  public static set dataDir(dir: string) {
+    const absoluteDataDir = Path.isAbsolute(dir) ? dir : Path.join(process.cwd(), dir);
+    if (!Fs.existsSync(`${absoluteDataDir}`)) {
+      Fs.mkdirSync(`${absoluteDataDir}`, { recursive: true });
+    }
+    dataDir = absoluteDataDir;
+  }
 }
+
+Core.dataDir = dataDir;
 
 ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
   process.once(name as Signals, async () => {

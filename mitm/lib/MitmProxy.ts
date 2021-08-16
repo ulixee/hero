@@ -21,7 +21,7 @@ const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 const defaultStorageDirectory =
   process.env.HERO_NETWORK_DIR ??
-  process.env.HERO_SESSIONS_DIR ??
+  process.env.HERO_DATA_DIR ??
   Path.join(Os.tmpdir(), '.ulixee');
 
 /**
@@ -460,6 +460,7 @@ export default class MitmProxy {
   public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
     if (this.certificateGenerator == null) {
       const baseDir = sslCaDir ?? defaultStorageDirectory;
+
       this.networkDb = new NetworkDb(baseDir);
       this.certificateGenerator = new CertificateGenerator({ storageDir: baseDir });
     }

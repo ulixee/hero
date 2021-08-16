@@ -60,7 +60,6 @@ export default class SessionState {
     [browserRequestId: string]: { resourceId: number; url: string }[];
   } = {};
 
-  private readonly sessionsDirectory: string;
   private lastErrorTime?: Date;
   private closeDate?: Date;
   private lastNavigationTime?: Date;
@@ -73,7 +72,6 @@ export default class SessionState {
   private readonly logSubscriptionId: number;
 
   constructor(
-    sessionsDirectory: string,
     sessionId: string,
     sessionName: string | null,
     scriptInstanceMeta: IScriptInstanceMeta,
@@ -88,12 +86,11 @@ export default class SessionState {
     });
     SessionState.registry.set(sessionId, this);
 
-    fs.mkdirSync(sessionsDirectory, { recursive: true });
-
-    this.db = new SessionDb(sessionsDirectory, sessionId);
-    this.sessionsDirectory = sessionsDirectory;
+    fs.mkdirSync(SessionDb.databaseDir, { recursive: true });
+    this.db = new SessionDb(sessionId);
     if (scriptInstanceMeta) {
-      const sessionsDb = SessionsDb.find(sessionsDirectory);
+      fs.mkdirSync(SessionsDb.databaseDir, { recursive: true });
+      const sessionsDb = SessionsDb.find();
       const sessionsTable = sessionsDb.sessions;
       sessionsTable.insert(
         sessionId,
@@ -609,7 +606,7 @@ export default class SessionState {
 
   /////// JsPath Calls
   public findDetachedJsPathCalls(callsite: string, key?: string): IJsPathHistory[] {
-    const sessionsDb = SessionsDb.find(this.sessionsDirectory);
+    const sessionsDb = SessionsDb.find();
     const detachedCalls = sessionsDb.detachedJsPathCalls.find(
       this.scriptInstanceMeta,
       callsite,
@@ -623,7 +620,7 @@ export default class SessionState {
 
   public recordDetachedJsPathCalls(calls: IJsPathHistory[], callsite: string, key?: string): void {
     if (!calls?.length) return;
-    const sessionsDb = SessionsDb.find(this.sessionsDirectory);
+    const sessionsDb = SessionsDb.find();
     sessionsDb.detachedJsPathCalls.insert(
       this.scriptInstanceMeta,
       callsite,

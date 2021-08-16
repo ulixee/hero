@@ -1,6 +1,6 @@
 import { Helpers } from '@ulixee/hero-testing/index';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
-import Core, { GlobalPool, Session } from '../index';
+import Core, { Session } from '../index';
 import DirectConnectionToCoreApi from '../connections/DirectConnectionToCoreApi';
 
 let koaServer: ITestKoaServer;
@@ -52,10 +52,7 @@ describe('basic Apis tests', () => {
 
     const result = await connection.run({
       api: 'Session.find',
-      args: {
-        dataLocation: GlobalPool.sessionsDir,
-        scriptEntrypoint: 'testEntrypoint.js',
-      },
+      args: { scriptEntrypoint: 'testEntrypoint.js' },
     });
     expect(result.session).toBeTruthy();
     expect(result.session.id).toBe(sessionId);
@@ -66,10 +63,7 @@ describe('basic Apis tests', () => {
 
     const result = await connection.run({
       api: 'Sessions.search',
-      args: {
-        dataLocation: GlobalPool.sessionsDir,
-        commandArg: 'api-test',
-      },
+      args: { commandArg: 'api-test' },
     });
     expect(result.sessions).toHaveLength(1);
     expect(result.sessions[0].id).toBe(sessionId);
@@ -80,10 +74,7 @@ describe('basic Apis tests', () => {
 
     const result = await connection.run({
       api: 'Session.tabs',
-      args: {
-        dataLocation: GlobalPool.sessionsDir,
-        sessionId,
-      },
+      args: { sessionId, },
     });
     expect(result.tabs).toHaveLength(1);
   });
@@ -93,10 +84,7 @@ describe('basic Apis tests', () => {
 
     const result = await connection.run({
       api: 'Session.ticks',
-      args: {
-        dataLocation: GlobalPool.sessionsDir,
-        sessionId,
-      },
+      args: { sessionId },
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(2);
@@ -112,7 +100,6 @@ describe('basic Apis tests', () => {
     const result = await connection.run({
       api: 'Session.ticks',
       args: {
-        dataLocation: GlobalPool.sessionsDir,
         sessionId,
         includePaintEvents: true,
         includeInteractionEvents: true,

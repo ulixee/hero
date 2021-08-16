@@ -151,7 +151,6 @@ export interface IBrowserEmulatorMethods {
 
 export interface ISessionSummary {
   id: string;
-  sessionsDataLocation: string;
   options?: ISessionCreateOptions;
 }
 

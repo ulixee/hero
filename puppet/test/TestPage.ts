@@ -16,7 +16,7 @@ export interface ITestPage extends IPuppetPage {
 }
 
 export function capturePuppetContextLogs(context: IPuppetContext, id: string): void {
-  const outDir = process.env.HERO_SESSIONS_DIR;
+  const outDir = process.env.HERO_DATA_DIR;
 
   if (!Fs.existsSync(outDir)) Fs.mkdirSync(outDir, { recursive: true });
 

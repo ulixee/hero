@@ -1,13 +1,8 @@
 import SessionDb from '../dbs/SessionDb';
-import { GlobalPool } from '../index';
 import ICoreApi from '../interfaces/ICoreApi';
 
 export default function sessionTabsApi(args: ISessionTabsArgs): ISessionTabsResult {
-  const sessionDb = SessionDb.getCached(
-    args.sessionId,
-    args.dataLocation ?? GlobalPool.sessionsDir,
-    true,
-  );
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   const tabs = sessionDb.tabs.all();
   const frames = sessionDb.frames.all();
@@ -49,7 +44,6 @@ export interface ISessionTabsApi extends ICoreApi {
 
 export interface ISessionTabsArgs {
   sessionId: string;
-  dataLocation?: string;
 }
 
 export interface ISessionTabsResult {

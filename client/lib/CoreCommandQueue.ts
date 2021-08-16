@@ -86,6 +86,7 @@ export default class CoreCommandQueue {
   public run<T>(command: string, ...args: any[]): Promise<T> {
     clearTimeout(this.flushOnTimeout);
     this.flushOnTimeout = null;
+
     if (this.connection.isDisconnecting) {
       return Promise.resolve(null);
     }
@@ -100,6 +101,7 @@ export default class CoreCommandQueue {
       .run<T>(async () => {
         const recordCommands = [...this.internalState.commandsToRecord];
         this.internalState.commandsToRecord.length = 0;
+        this.commandCounter?.emitter.emit('command', command, commandId, args);
 
         const response = await this.connection.sendRequest({
           meta: this.meta,

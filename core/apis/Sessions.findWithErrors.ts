@@ -2,23 +2,18 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as Fs from 'fs';
 import SessionDb from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
-import { GlobalPool } from '../index';
 import CommandFormatter from '../lib/CommandFormatter';
 
-export default function sessionsFindWithErrorsApi(
-  args: ISessionsFindWithErrorsArgs,
-): ISessionsFindWithErrorsResult {
-  const dataLocation = args.dataLocation ?? GlobalPool.sessionsDir;
+export default function sessionsFindWithErrorsApi(): ISessionsFindWithErrorsResult {
   const results = {
-    dataLocation,
     sessions: [],
   };
 
-  for (const dbName of Fs.readdirSync(dataLocation)) {
-    if (!dbName.endsWith('.db') || dbName === 'network.db' || dbName === 'sessions.db') continue;
+  for (const dbName of Fs.readdirSync(SessionDb.databaseDir)) {
+    if (!dbName.endsWith('.db')) continue;
 
     try {
-      const sessionDb = new SessionDb(dataLocation, dbName.replace('.db', ''), {
+      const sessionDb = new SessionDb(dbName.replace('.db', ''), {
         fileMustExist: true,
         readonly: true,
       });
@@ -83,15 +78,10 @@ export default function sessionsFindWithErrorsApi(
 }
 
 export interface ISessionsFindWithErrorsApi extends ICoreApi {
-  args: ISessionsFindWithErrorsArgs;
   result: ISessionsFindWithErrorsResult;
 }
 
-export interface ISessionsFindWithErrorsArgs {
-  dataLocation?: string;
-}
 export interface ISessionsFindWithErrorsResult {
-  dataLocation: string;
   sessions: {
     id: string;
     name: string;

@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
@@ -15,9 +16,9 @@ export default class CoreSession implements IJsPathEventTarget {
   public frozenTabsById = new Map<number, CoreTab>();
   public sessionId: string;
   public sessionName: string;
-  public sessionsDataLocation: string;
   public commandQueue: CoreCommandQueue;
   public eventHeap: CoreEventHeap;
+  public emitter = new EventEmitter();
 
   public get lastCommandId(): number {
     return this.commandId;
@@ -33,21 +34,21 @@ export default class CoreSession implements IJsPathEventTarget {
   }
 
   protected readonly meta: ISessionMeta;
-  private readonly connection: ConnectionToCore;
+
+  private readonly connectionToCore: ConnectionToCore;
   private commandId = 0;
 
-  constructor(sessionMeta: ISessionMeta & { sessionName: string }, connection: ConnectionToCore) {
-    const { sessionId, sessionsDataLocation, sessionName } = sessionMeta;
+  constructor(sessionMeta: ISessionMeta & { sessionName: string }, connectionToCore: ConnectionToCore) {
+    const { sessionId, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
-    this.sessionsDataLocation = sessionsDataLocation;
     this.meta = {
       sessionId,
     };
-    this.connection = connection;
+    this.connectionToCore = connectionToCore;
     loggerSessionIdNames.set(sessionId, sessionName);
-    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connection, this);
-    this.eventHeap = new CoreEventHeap(this.meta, connection);
+    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connectionToCore, this);
+    this.eventHeap = new CoreEventHeap(this.meta, connectionToCore);
 
     this.addTab(sessionMeta);
   }
@@ -81,7 +82,7 @@ export default class CoreSession implements IJsPathEventTarget {
     if (!this.tabsById.has(tabMeta.tabId)) {
       this.tabsById.set(
         tabMeta.tabId,
-        new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connection, this),
+        new CoreTab({ ...tabMeta, sessionName: this.sessionName }, this.connectionToCore, this),
       );
     }
   }
@@ -99,7 +100,7 @@ export default class CoreSession implements IJsPathEventTarget {
       meta: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
     }>('Session.detachTab', tab.tabId, callSitePath, key);
-    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connection, this);
+    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connectionToCore, this);
     this.frozenTabsById.set(meta.tabId, coreTab);
     return {
       coreTab,
@@ -118,7 +119,7 @@ export default class CoreSession implements IJsPathEventTarget {
       }
       await this.commandQueue.run('Session.close');
     } finally {
-      process.nextTick(() => this.connection.closeSession(this));
+      process.nextTick(() => this.connectionToCore.closeSession(this));
       loggerSessionIdNames.delete(this.sessionId);
     }
   }
@@ -129,7 +130,11 @@ export default class CoreSession implements IJsPathEventTarget {
     listenerFn: (...args: any[]) => void,
     options?,
   ): Promise<void> {
-    await this.eventHeap.addListener(jsPath, eventType, listenerFn, options);
+    if (eventType === 'command') {
+      this.emitter.on(eventType, listenerFn);
+    } else {
+      await this.eventHeap.addListener(jsPath, eventType, listenerFn, options);
+    }
   }
 
   public async removeEventListener(
@@ -137,6 +142,10 @@ export default class CoreSession implements IJsPathEventTarget {
     eventType: string,
     listenerFn: (...args: any[]) => void,
   ): Promise<void> {
-    await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
+    if (eventType === 'command') {
+      this.emitter.off(eventType, listenerFn);
+    } else {
+      await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
+    }
   }
 }

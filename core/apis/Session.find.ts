@@ -1,9 +1,7 @@
 import SessionDb, { ISessionFindArgs, ISessionFindResult } from '../dbs/SessionDb';
 import ICoreApi from '../interfaces/ICoreApi';
-import { GlobalPool } from '../index';
 
 export default function sessionFindApi(lookup: ISessionFindArgs): ISessionFindResult {
-  lookup.dataLocation ??= GlobalPool.sessionsDir;
   const sessionLookup = SessionDb.find(lookup);
 
   if (!sessionLookup) {

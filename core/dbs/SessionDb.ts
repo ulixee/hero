@@ -1,6 +1,5 @@
 import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase, Transaction } from 'better-sqlite3';
-import * as Path from 'path';
 import Log from '@ulixee/commons/lib/Logger';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
 import ResourcesTable from '../models/ResourcesTable';
@@ -20,6 +19,7 @@ import DevtoolsMessagesTable from '../models/DevtoolsMessagesTable';
 import TabsTable from '../models/TabsTable';
 import ResourceStatesTable from '../models/ResourceStatesTable';
 import SocketsTable from '../models/SocketsTable';
+import Core from '../index';
 
 const { log } = Log(module);
 
@@ -59,10 +59,10 @@ export default class SessionDb {
   private db: SqliteDatabase;
   private readonly tables: SqliteTable<any>[] = [];
 
-  constructor(baseDir: string, id: string, dbOptions: IDbOptions = {}) {
+  constructor(sessionId: string, dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
-    this.sessionId = id;
-    this.db = new Database(`${baseDir}/${id}.db`, { readonly, fileMustExist });
+    this.sessionId = sessionId;
+    this.db = new Database(`${SessionDb.databaseDir}/${sessionId}.db`, { readonly, fileMustExist });
     if (!readonly) {
       this.saveInterval = setInterval(this.flush.bind(this), 5e3).unref();
     }
@@ -150,11 +150,11 @@ export default class SessionDb {
     for (const table of this.tables) table.unsubscribe();
   }
 
-  public static getCached(sessionId: string, basePath: string, fileMustExist = false) {
+  public static getCached(sessionId: string, fileMustExist = false) {
     if (!this.byId.get(sessionId)?.db?.open) {
       this.byId.set(
         sessionId,
-        new SessionDb(basePath, sessionId, {
+        new SessionDb(sessionId, {
           readonly: true,
           fileMustExist,
         }),
@@ -164,41 +164,36 @@ export default class SessionDb {
   }
 
   public static find(scriptArgs: ISessionFindArgs): ISessionFindResult {
-    let { dataLocation, sessionId } = scriptArgs;
-
-    const ext = Path.extname(dataLocation);
-    if (ext === '.db') {
-      sessionId = Path.basename(dataLocation, ext);
-      dataLocation = Path.dirname(dataLocation);
-    }
+    let { sessionId } = scriptArgs;
 
     // NOTE: don't close db - it's from a shared cache
-    const sessionsDb = SessionsDb.find(dataLocation);
+    const sessionsDb = SessionsDb.find();
     if (!sessionId) {
       sessionId = sessionsDb.findLatestSessionId(scriptArgs);
       if (!sessionId) return null;
     }
 
-    const sessionDb = this.getCached(sessionId, dataLocation, true);
+    const sessionDb = this.getCached(sessionId, true);
 
     const session = sessionDb.session.get();
 
     return {
       session,
-      dataLocation,
     };
+  }
+
+  public static get databaseDir() {
+    return `${Core.dataDir}/hero-sessions`;
   }
 }
 
 export interface ISessionFindResult {
   session: ISessionRecord;
-  dataLocation: string;
 }
 
 export interface ISessionFindArgs {
   scriptInstanceId?: string;
   sessionName?: string;
   scriptEntrypoint?: string;
-  dataLocation?: string;
   sessionId?: string;
 }

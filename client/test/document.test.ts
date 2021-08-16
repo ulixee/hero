@@ -20,7 +20,7 @@ describe('document tests', () => {
         await new Promise(resolve => setTimeout(resolve, 5));
         if (command === 'Session.create') {
           return {
-            data: { tabId: 'tab-id', sessionId: 'session-id', sessionsDataLocation: '' },
+            data: { tabId: 'tab-id', sessionId: 'session-id' },
           };
         }
        if (command === 'FrameEnvironment.execJsPath') {

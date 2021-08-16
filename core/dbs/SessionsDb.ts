@@ -2,6 +2,7 @@ import * as Database from 'better-sqlite3';
 import { Database as SqliteDatabase } from 'better-sqlite3';
 import SessionsTable from '../models/SessionsTable';
 import DetachedJsPathCallsTable from '../models/DetachedJsPathCallsTable';
+import Core from '../index';
 
 interface IDbOptions {
   readonly?: boolean;
@@ -9,17 +10,15 @@ interface IDbOptions {
 }
 
 export default class SessionsDb {
-  private static dbByBaseDir: { [dir: string]: SessionsDb } = {};
+  private static instance: SessionsDb;
   public readonly sessions: SessionsTable;
   public readonly detachedJsPathCalls: DetachedJsPathCallsTable;
   public readonly readonly: boolean;
-  private readonly baseDir: string;
   private db: SqliteDatabase;
 
-  constructor(baseDir: string, dbOptions: IDbOptions = {}) {
+  constructor(dbOptions: IDbOptions = {}) {
     const { readonly = false, fileMustExist = false } = dbOptions;
-    this.db = new Database(`${baseDir}/sessions.db`, { readonly, fileMustExist });
-    this.baseDir = baseDir;
+    this.db = new Database(SessionsDb.databasePath, { readonly, fileMustExist });
     this.readonly = readonly;
     this.sessions = new SessionsTable(this.db);
     this.detachedJsPathCalls = new DetachedJsPathCallsTable(this.db);
@@ -82,21 +81,25 @@ export default class SessionsDb {
       this.db.close();
     }
     this.db = null;
-    delete SessionsDb.dbByBaseDir[this.baseDir];
+    SessionsDb.instance = undefined;
   }
 
   public static shutdown() {
-    for (const [key, db] of Object.entries(SessionsDb.dbByBaseDir)) {
-      db.close();
-      delete SessionsDb.dbByBaseDir[key];
-    }
+    this.instance?.close();
+    this.instance = undefined;
   }
 
-  public static find(baseDir: string) {
-    if (!this.dbByBaseDir[baseDir]) {
-      this.dbByBaseDir[baseDir] = new SessionsDb(baseDir);
-    }
-    return this.dbByBaseDir[baseDir];
+  public static find() {
+    this.instance = this.instance || new SessionsDb();
+    return this.instance;
+  }
+
+  public static get databaseDir() {
+    return `${Core.dataDir}`;
+  }
+
+  public static get databasePath() {
+    return `${this.databaseDir}/hero-sessions.db`;
   }
 }
 

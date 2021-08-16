@@ -1,12 +1,9 @@
-import * as Fs from 'fs';
-import * as Path from 'path';
 import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import Log from '@ulixee/commons/lib/Logger';
 import { MitmProxy } from '@ulixee/hero-mitm';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import Puppet from '@ulixee/hero-puppet';
-import * as Os from 'os';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import IPuppetLaunchArgs from '@ulixee/hero-interfaces/IPuppetLaunchArgs';
@@ -15,20 +12,20 @@ import SessionsDb from '../dbs/SessionsDb';
 import Session from './Session';
 import DevtoolsPreferences from './DevtoolsPreferences';
 import CorePlugins from './CorePlugins';
+import Core from '../index';
 
 const { log } = Log(module);
-let sessionsDir = process.env.HERO_SESSIONS_DIR || Path.join(Os.tmpdir(), '.ulixee'); // transferred to GlobalPool below class definition
 const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false'));
 
 export default class GlobalPool {
-  public static maxConcurrentHeroesCount = 10;
+  public static maxConcurrentClientCount = 10;
   public static localProxyPortStart = 0;
   public static get activeSessionCount() {
     return this._activeSessionCount;
   }
 
   public static get hasAvailability() {
-    return this.activeSessionCount < GlobalPool.maxConcurrentHeroesCount;
+    return this.activeSessionCount < GlobalPool.maxConcurrentClientCount;
   }
 
   public static events = new TypedEventEmitter<{
@@ -62,7 +59,7 @@ export default class GlobalPool {
       sessionId: null,
       activeSessionCount: this.activeSessionCount,
       waitingForAvailability: this.waitingForAvailability.length,
-      maxConcurrentHeroesCount: this.maxConcurrentHeroesCount,
+      maxConcurrentClientCount: this.maxConcurrentClientCount,
     });
 
     if (!this.hasAvailability) {
@@ -136,7 +133,7 @@ export default class GlobalPool {
     if (this.mitmServer || disableMitm === true) return;
     if (this.mitmStartPromise) await this.mitmStartPromise;
     else {
-      this.mitmStartPromise = MitmProxy.start(this.localProxyPortStart, this.sessionsDir);
+      this.mitmStartPromise = MitmProxy.start(this.localProxyPortStart, Core.dataDir);
       this.mitmServer = await this.mitmStartPromise;
     }
   }
@@ -261,18 +258,4 @@ export default class GlobalPool {
       engineA.launchArguments.toString() === engineB.launchArguments.toString()
     );
   }
-
-  public static get sessionsDir(): string {
-    return sessionsDir;
-  }
-
-  public static set sessionsDir(dir: string) {
-    const absoluteDir = Path.isAbsolute(dir) ? dir : Path.join(process.cwd(), dir);
-    if (!Fs.existsSync(`${absoluteDir}`)) {
-      Fs.mkdirSync(`${absoluteDir}`, { recursive: true });
-    }
-    sessionsDir = absoluteDir;
-  }
 }
-
-GlobalPool.sessionsDir = sessionsDir;
