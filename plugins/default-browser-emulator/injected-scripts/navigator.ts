@@ -12,6 +12,7 @@ if (args.userAgentString && self.navigator?.userAgent !== args.userAgentString) 
 proxyGetter(self.navigator, 'platform', () => args.platform, true);
 
 if ('setAppBadge' in self.navigator) {
+  // @ts-ignore
   proxyFunction(self.navigator, 'setAppBadge', (target, thisArg, argArray) => {
     let error: TypeError;
     if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {
@@ -36,6 +37,7 @@ if ('setAppBadge' in self.navigator) {
 }
 
 if ('clearAppBadge' in self.navigator) {
+  // @ts-ignore
   proxyFunction(self.navigator, 'clearAppBadge', (target, thisArg, argArray) => {
     let error: TypeError;
     if (Object.getPrototypeOf(thisArg) !== Navigator.prototype) {

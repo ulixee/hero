@@ -4,13 +4,13 @@ export default interface IJsPathEventTarget {
   addEventListener(
     jsPath: IJsPath | null,
     eventType: string,
-    listenerFn: (...args: any[]) => void,
+    listenerFn: (...args: any[]) => any,
     options?,
   ): Promise<void>;
 
   removeEventListener(
     jsPath: IJsPath | null,
     eventType: string,
-    listenerFn: (...args: any[]) => void,
+    listenerFn: (...args: any[]) => any,
   ): Promise<void>;
 }
