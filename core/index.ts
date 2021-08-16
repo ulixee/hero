@@ -183,6 +183,8 @@ export default class Core {
   }
 }
 
+Core.dataDir = dataDir;
+
 ['exit', 'SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(name => {
   process.once(name as Signals, async () => {
     await Core.shutdown();
