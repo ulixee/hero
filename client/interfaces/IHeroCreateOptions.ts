@@ -7,6 +7,5 @@ export default interface IHeroCreateOptions
     Omit<ISessionCreateOptions, 'scriptInstanceMeta' | 'sessionName' | 'dependencyMap'>
   > {
   name?: string;
-  databox?: any; // this is only here to stop typescript from throwing error
   connectionToCore?: IConnectionToCoreOptions | ConnectionToCore;
 }

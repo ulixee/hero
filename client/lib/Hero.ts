@@ -92,11 +92,14 @@ const propertyKeys: (keyof Hero)[] = [
 ];
 
 type IClassEvents = {
-  new: [heroInstance: Hero, heroCreateOptions: IHeroCreateOptions];
+  new: (heroInstance: Hero, heroCreateOptions: IHeroCreateOptions) => void;
 };
 
 export default class Hero
-  extends AwaitedEventTarget<{ close: []; command: [name: string, commandId: number, args: any[]] }>
+  extends AwaitedEventTarget<{
+    close: () => void;
+    command: (name: string, commandId: number, args: any[]) => void;
+  }>
   implements IHero
 {
   public static createConnectionToCore: ICreateConnectionToCoreFn;
@@ -420,38 +423,32 @@ export default class Hero
 
   public static addListener<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (...args: IClassEvents[K]) => any,
+    listenerFn: IClassEvents[K],
   ): void {
     this.emitter.addListener(eventType, listenerFn);
   }
 
   public static removeListener<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (...args: IClassEvents[K]) => any,
+    listenerFn: IClassEvents[K],
   ): void {
     this.emitter.removeListener(eventType, listenerFn);
   }
 
   public static once<K extends keyof IClassEvents>(
     eventType: K,
-    listenerFn: (...args: IClassEvents[K]) => any,
+    listenerFn: IClassEvents[K],
   ): void {
     this.emitter.once(eventType, listenerFn);
   }
 
   // aliases
 
-  public static on<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: (...args: IClassEvents[K]) => any,
-  ): void {
+  public static on<K extends keyof IClassEvents>(eventType: K, listenerFn: IClassEvents[K]): void {
     this.addListener(eventType, listenerFn);
   }
 
-  public static off<K extends keyof IClassEvents>(
-    eventType: K,
-    listenerFn: (...args: IClassEvents[K]) => any,
-  ): void {
+  public static off<K extends keyof IClassEvents>(eventType: K, listenerFn: IClassEvents[K]): void {
     this.removeListener(eventType, listenerFn);
   }
 }

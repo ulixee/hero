@@ -21,7 +21,7 @@ interface IState {
 }
 
 interface IEventType {
-  message: [message: IWebsocketMessage];
+  message: (message: IWebsocketMessage) => void;
 }
 
 const propertyKeys: (keyof WebsocketResource)[] = ['url', 'request', 'response'];

@@ -51,8 +51,8 @@ export interface IState {
 }
 
 interface IEventType {
-  resource: [resource: Resource | WebsocketResource];
-  dialog: [dialog: Dialog];
+  resource: (resource: Resource | WebsocketResource) => void;
+  dialog: (dialog: Dialog) => void;
 }
 
 const propertyKeys: (keyof Tab)[] = [
