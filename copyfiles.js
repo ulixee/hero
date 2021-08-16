@@ -10,6 +10,7 @@ const workspaces =
 const copyArgs = [
   '-e "node_modules"',
   'plugins/default-browser-emulator/data/**',
+  'package*.json',
   'examples/*.js',
   'examples/*.mjs',
   'mitm-socket/go/*.*',

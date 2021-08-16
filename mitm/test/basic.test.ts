@@ -381,7 +381,7 @@ describe('basic MitM tests', () => {
     expect(response).toBeTruthy();
     expect(request.url).toBe(`${httpServer.url}page1`);
     expect(resourceType).toBe('Document');
-    expect(response.remoteAddress).toContain(httpServer.port);
+    expect(response.remoteAddress).toContain(`${httpServer.port}`);
     expect(wasCached).toBe(false);
     expect(onError).not.toHaveBeenCalled();
     mocks.HeadersHandler.determineResourceType.mockImplementation(async () => ({} as any));
