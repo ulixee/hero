@@ -21,7 +21,7 @@ import {
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import ITab from "@ulixee/hero-interfaces/ITab";
+import ITab from '@ulixee/hero-interfaces/ITab';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
@@ -51,8 +51,8 @@ export interface IState {
 }
 
 interface IEventType {
-  resource: Resource | WebsocketResource;
-  dialog: Dialog;
+  resource: [resource: Resource | WebsocketResource];
+  dialog: [dialog: Dialog];
 }
 
 const propertyKeys: (keyof Tab)[] = [

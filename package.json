@@ -6,7 +6,7 @@
     "prepare": "husky install",
     "bump-version": "lerna version --conventional-commits --no-push --exact --force-publish",
     "build": "yarn tsc && cd build && yarn",
-    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js && shx cp package.dist.json build-dist/package.json",
+    "build:dist": "shx rm -rf build-dist && tsc -b tsconfig.dist.json && yarn copy:dist && node prepare-dist.js",
     "build:dist-local": "yarn build:dist && cd build-dist && HERO_REBUILD_MITM_SOCKET=1 yarn",
     "build:docker": "yarn build:dist && docker build -t hero .",
     "build:ci": "yarn tsc && cd build && yarn install",
