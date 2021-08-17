@@ -116,7 +116,7 @@ export default class Hero
     });
 
     bindFunctions(this);
-    (this.constructor as any).emitter.emit('new', this, options);
+    (this.constructor as typeof Hero).emitter.emit('new', this, options);
 
     options.blockedResourceTypes =
       options.blockedResourceTypes || Hero.options.defaultBlockedResourceTypes;

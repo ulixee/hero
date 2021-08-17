@@ -20,6 +20,12 @@ describe('basic Full Client tests', () => {
     expect(url).toBe(koaServer.baseHost);
   });
 
+  it('can provide a sessionId', async () => {
+    const hero = new Hero({ sessionId: 'session1' });
+    Helpers.needsClosing.push(hero);
+    expect(await hero.sessionId).toBe('session1');
+  });
+
   it('allows you to block resources', async () => {
     koaServer.get('/block', ctx => {
       ctx.body = `<html>

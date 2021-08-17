@@ -100,7 +100,18 @@ export default class Session extends TypedEventEmitter<{
 
   constructor(readonly options: ISessionCreateOptions) {
     super();
-    this.id = uuidv1();
+    if (options.sessionId) {
+      if (Session.byId[options.sessionId]) {
+        throw new Error('The pre-provided sessionId is already in use.');
+      }
+      // make sure this is a valid sessionid
+      if (/^[0-9a-zA-Z-]{1,48}/.test(options.sessionId) === false) {
+        throw new Error(
+          'Unsupported sessionId format provided. Must be 5-48 characters including: a-z, 0-9 and dashes.',
+        );
+      }
+    }
+    this.id = options.sessionId ?? uuidv1();
     Session.byId[this.id] = this;
     const providedOptions = { ...options };
     this.logger = log.createChild(module, { sessionId: this.id });
@@ -263,10 +274,7 @@ export default class Session extends TypedEventEmitter<{
   ): Promise<void> {
     let mitmProxy = sharedMitmProxy;
     if (doesPuppetSupportBrowserContextProxy) {
-      this.isolatedMitmProxy = await MitmProxy.start(
-        GlobalPool.localProxyPortStart,
-        Core.dataDir,
-      );
+      this.isolatedMitmProxy = await MitmProxy.start(GlobalPool.localProxyPortStart, Core.dataDir);
       mitmProxy = this.isolatedMitmProxy;
     }
 

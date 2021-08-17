@@ -75,7 +75,7 @@ const PuppetLauncher: IPuppetLauncher = {
         `\nChrome sandboxing failed!`,
         `================================`,
         `To workaround sandboxing issues, do either of the following:`,
-        `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/ulixee/tree/master/tools/docker)`,
+        `  - (preferred): Configure environment to support sandboxing (as here: https://github.com/ulixee/ulixee/tree/main/tools/docker)`,
         `  - (alternative): Launch Chrome without sandbox using 'HERO_NO_CHROME_SANDBOX=false' environmental variable`,
         `================================`,
         ``,

@@ -2016,6 +2016,15 @@
     progress "^2.0.3"
     tar "^6.1.0"
 
+"@ulixee/commons@1.5.5":
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/@ulixee/commons/-/commons-1.5.5.tgz#65c471d0f705816cf42ec9c695e2028bfa86558b"
+  integrity sha512-iSMgDYVERbXfsFhhGgrMH3oTA/R3tnc3Z+6pRIIqtFDGJqc/m0ManpWWhBly0iBSrEyy2lbKETk3cFu7WnaQzw==
+  dependencies:
+    https-proxy-agent "^5.0.0"
+    source-map-support "^0.5.19"
+    uuid "^8.3.2"
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
