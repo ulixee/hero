@@ -17,6 +17,7 @@ import CoreCommandQueue from '../lib/CoreCommandQueue';
 import CoreSession from '../lib/CoreSession';
 import CoreSessions from '../lib/CoreSessions';
 import DisconnectedFromCoreError from './DisconnectedFromCoreError';
+import { IHeroCreateOptions } from '../index';
 
 const { log } = Log(module);
 
@@ -169,8 +170,17 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
   ///////  SESSION FUNCTIONS  //////////////////////////////////////////////////////////////////////////////////////////
 
-  public async createSession(options: ISessionCreateOptions): Promise<CoreSession> {
+  public async createSession(
+    options: Omit<ISessionCreateOptions, 'externalIds' | 'sessionId'> &
+      Pick<IHeroCreateOptions, 'externalIds' | 'sessionId'>,
+  ): Promise<CoreSession> {
     try {
+      if (options.sessionId) options.sessionId = await options.sessionId;
+      if (options.externalIds) {
+        for (const [key, value] of Object.entries(options.externalIds)) {
+          options.externalIds[key] = await value;
+        }
+      }
       const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
       const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
       this.coreSessions.track(session);
