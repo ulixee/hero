@@ -5,6 +5,7 @@ import IViewport from './IViewport';
 import IGeolocation from './IGeolocation';
 
 export default interface ISessionCreateOptions extends ISessionOptions {
+  sessionId?: string;
   sessionName?: string;
   sessionKeepAlive?: boolean;
   sessionResume?: {
