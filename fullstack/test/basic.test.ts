@@ -26,6 +26,15 @@ describe('basic Full Client tests', () => {
     expect(await hero.sessionId).toBe('session1');
   });
 
+  it('can provide resolvable externalIds', async () => {
+    const hero = new Hero({
+      externalIds: { type1: new Promise<string>(resolve => setImmediate(resolve, '1')) },
+    });
+    Helpers.needsClosing.push(hero);
+    const meta = await hero.meta;
+    expect(meta.externalIds.type1).toBe('1');
+  });
+
   it('allows you to block resources', async () => {
     koaServer.get('/block', ctx => {
       ctx.body = `<html>

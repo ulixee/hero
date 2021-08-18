@@ -67,7 +67,8 @@ const scriptInstance = new ScriptInstance();
 
 const { getState, setState } = StateMachine<Hero, IState>();
 
-export type IStateOptions = ISessionCreateOptions & Pick<IHeroCreateOptions, 'connectionToCore'>;
+export type IStateOptions = Omit<ISessionCreateOptions, 'externalIds' | 'sessionId'> &
+  Pick<IHeroCreateOptions, 'connectionToCore' | 'externalIds' | 'sessionId'>;
 
 export interface IState {
   connection: ConnectionManager;

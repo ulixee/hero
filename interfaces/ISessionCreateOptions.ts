@@ -6,6 +6,7 @@ import IGeolocation from './IGeolocation';
 
 export default interface ISessionCreateOptions extends ISessionOptions {
   sessionId?: string;
+  externalIds?: { [id: string]: number | string | string[] | number[] };
   sessionName?: string;
   sessionKeepAlive?: boolean;
   sessionResume?: {

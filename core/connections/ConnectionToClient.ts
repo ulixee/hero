@@ -181,7 +181,8 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
   public getHeroMeta(meta: ISessionMeta): IHeroMeta {
     const session = Session.get(meta.sessionId);
-    const { plugins, viewport, locale, timezoneId, geolocation } = session;
+    const { plugins, viewport, locale, timezoneId, geolocation, options } = session;
+    const { externalIds } = options;
     const { userAgentString, operatingSystemPlatform } = plugins.browserEmulator;
     return <IHeroMeta>{
       sessionId: session.id,
@@ -190,6 +191,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       humanEmulatorId: plugins.humanEmulator.id,
       blockedResourceTypes: session.options.blockedResourceTypes,
       upstreamProxyUrl: session.upstreamProxyUrl,
+      externalIds,
       viewport,
       locale,
       timezoneId,
