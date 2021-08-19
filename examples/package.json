@@ -1,4 +1,7 @@
 {
+  "name": "@ulixee/hero-examples",
+  "version": "1.5.4",
+  "private": true,
   "dependencies": {
     "yargs-parser": "^20.2.9"
   }

@@ -75,7 +75,7 @@
       "fullstack",
       "interfaces",
       "plugin-utils",
-      "plugins/**",
+      "plugins/*",
       "mitm",
       "mitm-socket",
       "puppet",
