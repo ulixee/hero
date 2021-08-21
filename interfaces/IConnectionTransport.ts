@@ -2,11 +2,8 @@ import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
 
 export default interface IConnectionTransport
   extends ITypedEventEmitter<IConnectionTransportEvents> {
-  url?: string;
   send(body: string);
   close();
-  clone(): IConnectionTransport;
-  waitForOpen: Promise<void>;
 }
 
 export interface IConnectionTransportEvents {

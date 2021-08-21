@@ -62,8 +62,7 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
       this.browser = await this.launcher.createPuppet(launchedProcess, this.browserEngine);
       this.browser.onDevtoolsAttached = attachToDevtools;
 
-      const features = await this.browser.getFeatures();
-      this.supportsBrowserContextProxy = features?.supportsPerBrowserContextProxy ?? false;
+      this.supportsBrowserContextProxy = this.browser.majorVersion >= 85;
 
       return this;
     } catch (err) {

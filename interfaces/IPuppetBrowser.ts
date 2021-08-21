@@ -6,11 +6,10 @@ import IDevtoolsSession from './IDevtoolsSession';
 
 export default interface IPuppetBrowser {
   id: string;
+  name: string;
+  fullVersion: string;
+  majorVersion: number;
   onDevtoolsAttached?: (devtoolsSession: IDevtoolsSession) => Promise<any>;
-  getFeatures(): Promise<{
-    supportsPerBrowserContextProxy: boolean;
-    version: { major: string; minor: string };
-  }>;
   newContext(
     plugins: ICorePlugins,
     logger: IBoundLog,

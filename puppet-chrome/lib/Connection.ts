@@ -24,8 +24,6 @@ import IConnectionTransport, {
 } from '@ulixee/hero-interfaces/IConnectionTransport';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Log from '@ulixee/commons/lib/Logger';
-import { URL } from 'url';
-import * as http from 'http';
 import { DevtoolsSession } from './DevtoolsSession';
 
 const { log } = Log(module);
@@ -42,7 +40,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   constructor(readonly transport: IConnectionTransport) {
     super();
 
-    const messageSink = (transport as unknown) as TypedEventEmitter<IConnectionTransportEvents>;
+    const messageSink = transport as unknown as TypedEventEmitter<IConnectionTransportEvents>;
     this.registeredEvents = [
       addTypedEventListener(messageSink, 'message', this.onMessage.bind(this)),
       addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
@@ -50,24 +48,6 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
 
     this.rootSession = new DevtoolsSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
-  }
-
-  public getProtocol(): Promise<any> {
-    if (!this.transport.url) return Promise.resolve(null);
-
-    const port = new URL(this.transport.url).port;
-
-    return new Promise((resolve, reject) => {
-      const request = http.get(`http://localhost:${port}/json/protocol`, async res => {
-        const body: Buffer[] = [];
-        for await (const chunk of res) {
-          body.push(chunk);
-        }
-        resolve(JSON.parse(Buffer.concat(body).toString()));
-      });
-      request.on('error', reject);
-      request.end();
-    });
   }
 
   public sendMessage(message: object): number {

@@ -19,7 +19,7 @@ const PuppetLauncher: IPuppetLauncher = {
       );
     }
 
-    chromeArguments.push('--remote-debugging-port=0', '--ignore-certificate-errors');
+    chromeArguments.push('--remote-debugging-pipe', '--ignore-certificate-errors');
 
     if (options.noChromeSandbox === true) {
       chromeArguments.push('--no-sandbox');

@@ -13,7 +13,7 @@
     "copy:node_modules": "shx cp -r node_modules \"build/node_modules\"",
     "copy:dist": "cross-env OUT_DIR=build-dist node copyfiles.js",
     "copy:build": "cross-env OUT_DIR=build node copyfiles.js",
-    "tsc": "tsc -b tsconfig.json && yarn copy:build && node prepare-build.js",
+    "tsc": "tsc -b -i tsconfig.json && yarn copy:build && node prepare-build.js",
     "watch": "tsc -b -w tsconfig.json",
     "watch:dist": "tsc -b -w tsconfig.dist.json",
     "clean": "tsc -b --clean  tsconfig.json",
