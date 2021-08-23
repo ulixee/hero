@@ -14,18 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  addTypedEventListener,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@ulixee/commons/lib/eventUtils';
-import IConnectionTransport, {
-  IConnectionTransportEvents,
-} from '@ulixee/hero-interfaces/IConnectionTransport';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import IConnectionTransport from '@ulixee/hero-interfaces/IConnectionTransport';
 import Log from '@ulixee/commons/lib/Logger';
-import { URL } from 'url';
-import * as http from 'http';
 import { DevtoolsSession } from './DevtoolsSession';
 
 const { log } = Log(module);
@@ -37,37 +28,14 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   private lastId = 0;
   private sessionsById = new Map<string, DevtoolsSession>();
 
-  private readonly registeredEvents: IRegisteredEventListener[];
-
   constructor(readonly transport: IConnectionTransport) {
     super();
 
-    const messageSink = (transport as unknown) as TypedEventEmitter<IConnectionTransportEvents>;
-    this.registeredEvents = [
-      addTypedEventListener(messageSink, 'message', this.onMessage.bind(this)),
-      addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
-    ];
+    transport.onMessageFn = this.onMessage.bind(this);
+    transport.onCloseFns.push(this.onClosed);
 
     this.rootSession = new DevtoolsSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
-  }
-
-  public getProtocol(): Promise<any> {
-    if (!this.transport.url) return Promise.resolve(null);
-
-    const port = new URL(this.transport.url).port;
-
-    return new Promise((resolve, reject) => {
-      const request = http.get(`http://localhost:${port}/json/protocol`, async res => {
-        const body: Buffer[] = [];
-        for await (const chunk of res) {
-          body.push(chunk);
-        }
-        resolve(JSON.parse(Buffer.concat(body).toString()));
-      });
-      request.on('error', reject);
-      request.end();
-    });
   }
 
   public sendMessage(message: object): number {
@@ -119,7 +87,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
       session.onClosed();
       this.sessionsById.delete(id);
     }
-    removeEventListeners(this.registeredEvents);
+    this.transport.onMessageFn = null;
     this.emit('disconnected');
   }
 }

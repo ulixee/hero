@@ -1,9 +1,11 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "../../tsconfig.dist.json",
   "compilerOptions": {
     "sourceMap": false,
     "inlineSourceMap": false,
-    "removeComments": true,
-    "outDir": "../../build-dist/core/injected-scripts"
-  }
+    "removeComments": true
+  },
+  "references": [],
+  "include": ["*.ts", ".eslintrc.js"],
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist"]
 }

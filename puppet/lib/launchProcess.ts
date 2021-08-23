@@ -20,22 +20,21 @@ import * as readline from 'readline';
 import * as Path from 'path';
 import Log from '@ulixee/commons/lib/Logger';
 import ILaunchedProcess from '@ulixee/hero-interfaces/ILaunchedProcess';
-import Resolvable from '@ulixee/commons/lib/Resolvable';
 import * as Fs from 'fs';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
-import { WebSocketTransport } from './WebSocketTransport';
+import { PipeTransport } from './PipeTransport';
 
 const { log } = Log(module);
 
 const logProcessExit = process.env.NODE_ENV !== 'test';
 
-export default async function launchProcess(
+export default function launchProcess(
   executablePath: string,
   processArguments: string[],
   onClose?: () => any,
   env?: NodeJS.ProcessEnv,
 ): Promise<ILaunchedProcess> {
-  const stdio: StdioOptions = ['ignore', 'pipe', 'pipe'];
+  const stdio: StdioOptions = ['ignore', 'pipe', 'pipe', 'pipe', 'pipe'];
 
   log.info(`Puppet.LaunchProcess`, { sessionId: null, executablePath, processArguments });
   const launchedProcess = childProcess.spawn(executablePath, processArguments, {
@@ -71,12 +70,9 @@ export default async function launchProcess(
     if (line) log.stats(`${exe}.stdout`, { message: line, sessionId: null });
   });
 
-  const websocketEndpointResolvable = new Resolvable<string>();
   const stderr = readline.createInterface({ input: launchedProcess.stderr });
   stderr.on('line', line => {
     if (!line) return;
-    const match = line.match(/DevTools listening on (.*)/);
-    if (match) websocketEndpointResolvable.resolve(match[1].trim());
 
     log.warn(`${exe}.stderr`, { message: line, sessionId: null });
   });
@@ -88,18 +84,14 @@ export default async function launchProcess(
     hasRunOnClose = true;
   };
   let processKilled = false;
-  let transport: WebSocketTransport;
+  let transport: PipeTransport;
   launchedProcess.once('exit', (exitCode, signal) => {
     processKilled = true;
 
-    if (!websocketEndpointResolvable.isResolved) {
-      websocketEndpointResolvable.reject(new Error('Chrome exited during launch'));
-    } else {
-      try {
-        transport?.close();
-      } catch (error) {
-        // drown
-      }
+    try {
+      transport?.close();
+    } catch (error) {
+      // drown
     }
     if (logProcessExit) {
       log.stats(`${exe}.ProcessExited`, { exitCode, signal, sessionId: null });
@@ -108,11 +100,14 @@ export default async function launchProcess(
     if (dataDir) cleanDataDir(dataDir);
   });
 
-  const wsEndpoint = await websocketEndpointResolvable.promise;
   process.on('uncaughtExceptionMonitor', () => close());
   ShutdownHandler.register(close);
-  transport = new WebSocketTransport(wsEndpoint);
-  await transport.waitForOpen;
+  const { 3: pipeWrite, 4: pipeRead } = launchedProcess.stdio;
+  transport = new PipeTransport(
+    pipeWrite as NodeJS.WritableStream,
+    pipeRead as NodeJS.ReadableStream,
+  );
+  transport.onCloseFns.push(this.close);
 
   return Promise.resolve(<ILaunchedProcess>{
     transport,
@@ -120,23 +115,21 @@ export default async function launchProcess(
   });
 
   async function close(): Promise<void> {
-    if (launchedProcess.killed || processKilled) return;
-
     try {
-      transport.close();
-    } catch (error) {
-      // drown
-    }
-    try {
-      const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
-      if (process.platform === 'win32') {
-        childProcess.execSync(`taskkill /pid ${launchedProcess.pid} /T /F 2> nul`);
-      } else {
-        launchedProcess.kill('SIGKILL');
+      // attempt graceful close, but don't wait
+      if (transport) {
+        transport.end(JSON.stringify({ method: 'Browser.close', id: -1 }));
       }
-      if (dataDir) cleanDataDir(dataDir);
-      await closed;
-      runOnClose();
+      if (!launchedProcess.killed && !processKilled) {
+        const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
+        if (process.platform === 'win32') {
+          childProcess.execSync(`taskkill /pid ${launchedProcess.pid} /T /F 2> nul`);
+        } else {
+          launchedProcess.kill('SIGKILL');
+        }
+        launchedProcess.emit('exit');
+        await closed;
+      }
     } catch (error) {
       // might have already been kill off
     }

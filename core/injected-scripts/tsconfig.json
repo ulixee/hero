@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "experimentalDecorators": true,
     "composite": true,
@@ -8,9 +9,8 @@
     "noImplicitAny": false,
     "sourceMap": false,
     "declaration": true,
-    "allowJs": true,
-    "outDir": "../../build/core/injected-scripts"
+    "allowJs": true
   },
   "include": ["*.ts", ".eslintrc.js"],
-  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/dist", "**/replay"]
+  "exclude": ["**/tsconfig*.json", "**/node_modules", "**/build"]
 }

@@ -1,15 +1,6 @@
-import ITypedEventEmitter from '@ulixee/commons/interfaces/ITypedEventEmitter';
-
-export default interface IConnectionTransport
-  extends ITypedEventEmitter<IConnectionTransportEvents> {
-  url?: string;
+export default interface IConnectionTransport {
+  onMessageFn: (message: string) => void;
+  onCloseFns: (() => void)[];
   send(body: string);
   close();
-  clone(): IConnectionTransport;
-  waitForOpen: Promise<void>;
-}
-
-export interface IConnectionTransportEvents {
-  close: void;
-  message: string;
 }

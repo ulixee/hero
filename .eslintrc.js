@@ -1,4 +1,5 @@
 const Fs = require('fs');
+const Path = require('path');
 const pkg = require('./package.json');
 
 const workspaces = [];
@@ -36,7 +37,7 @@ module.exports = {
   ],
   plugins: ['monorepo-cop'],
   parserOptions: {
-    project: 'tsconfig.json',
+    project: Path.join(__dirname, 'tsconfig.json'),
     extraFileExtensions: ['.mjs'],
   },
   settings: {
