@@ -14,15 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  addTypedEventListener,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@ulixee/commons/lib/eventUtils';
-import IConnectionTransport, {
-  IConnectionTransportEvents,
-} from '@ulixee/hero-interfaces/IConnectionTransport';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import IConnectionTransport from '@ulixee/hero-interfaces/IConnectionTransport';
 import Log from '@ulixee/commons/lib/Logger';
 import { DevtoolsSession } from './DevtoolsSession';
 
@@ -35,16 +28,11 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
   private lastId = 0;
   private sessionsById = new Map<string, DevtoolsSession>();
 
-  private readonly registeredEvents: IRegisteredEventListener[];
-
   constructor(readonly transport: IConnectionTransport) {
     super();
 
-    const messageSink = transport as unknown as TypedEventEmitter<IConnectionTransportEvents>;
-    this.registeredEvents = [
-      addTypedEventListener(messageSink, 'message', this.onMessage.bind(this)),
-      addTypedEventListener(messageSink, 'close', this.onClosed.bind(this)),
-    ];
+    transport.onMessageFn = this.onMessage.bind(this);
+    transport.onCloseFns.push(this.onClosed);
 
     this.rootSession = new DevtoolsSession(this, 'browser', '');
     this.sessionsById.set('', this.rootSession);
@@ -99,7 +87,7 @@ export class Connection extends TypedEventEmitter<{ disconnected: void }> {
       session.onClosed();
       this.sessionsById.delete(id);
     }
-    removeEventListeners(this.registeredEvents);
+    this.transport.onMessageFn = null;
     this.emit('disconnected');
   }
 }

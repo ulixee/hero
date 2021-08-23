@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 import * as EventUtils from '@ulixee/commons/lib/eventUtils';
-import { addEventListeners, TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
+import { addEventListeners } from '@ulixee/commons/lib/eventUtils';
 import Log from '@ulixee/commons/lib/Logger';
 import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
-import IConnectionTransport, {
-  IConnectionTransportEvents,
-} from '@ulixee/hero-interfaces/IConnectionTransport';
 
 const { log } = Log(module);
 
-export class PipeTransport
-  extends TypedEventEmitter<IConnectionTransportEvents>
-  implements IConnectionTransport
-{
+export class PipeTransport {
   pipeWrite: NodeJS.WritableStream;
   pendingMessage: string;
   eventListeners: IRegisteredEventListener[];
 
+  public onMessageFn?: (message: string) => void;
+  public readonly onCloseFns: (() => void)[] = [];
+
+  private isClosing = false;
+
   constructor(pipeWrite: NodeJS.WritableStream, pipeRead: NodeJS.ReadableStream) {
-    super();
     this.pipeWrite = pipeWrite;
+    this.pipeWrite.on('error', error => {
+      if (this.isClosing) return;
+      log.error('PipeTransport.WriteError', { error, sessionId: null });
+    });
     this.pendingMessage = '';
     this.eventListeners = addEventListeners(pipeRead, [
       ['data', this.dispatch.bind(this)],
@@ -47,9 +49,14 @@ export class PipeTransport
     );
   }
 
+  end(message: string) {
+    this.isClosing = true;
+    this.send(message);
+    this.close();
+  }
+
   send(message: string) {
-    this.pipeWrite.write(message);
-    this.pipeWrite.write('\0');
+    this.pipeWrite.write(`${message}\0`);
   }
 
   close() {
@@ -57,9 +64,14 @@ export class PipeTransport
     EventUtils.removeEventListeners(this.eventListeners);
   }
 
+  private emit(message) {
+    if (this.onMessageFn) setImmediate(this.onMessageFn, message);
+  }
+
   private onReadClosed() {
     log.info('PipeTransport.Closed');
-    this.emit('close');
+    for (const close of this.onCloseFns) close();
+    this.close();
   }
 
   private dispatch(buffer: Buffer): void {
@@ -69,12 +81,12 @@ export class PipeTransport
       return;
     }
     const message = this.pendingMessage + buffer.toString(undefined, 0, end);
-    this.emit('message', message);
+    this.emit(message);
 
     let start = end + 1;
     end = buffer.indexOf('\0', start);
     while (end !== -1) {
-      this.emit('message', buffer.toString(undefined, start, end));
+      this.emit(buffer.toString(undefined, start, end));
       start = end + 1;
       end = buffer.indexOf('\0', start);
     }

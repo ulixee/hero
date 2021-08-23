@@ -62,6 +62,13 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     atCommandId: number;
   };
 
+  private onFrameCreatedResourceEventsByFrameId: {
+    [frameId: string]: {
+      type: keyof IPuppetPageEvents;
+      event: IPuppetPageEvents[keyof IPuppetPageEvents];
+    }[];
+  } = {};
+
   public get navigations(): FrameNavigations {
     return this.mainFrameEnvironment.navigations;
   }
@@ -708,8 +715,20 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const { browserRequestId } = resource;
     const url = resource.url.href;
 
-    const navigations =
-      this.frameEnvironmentsByPuppetId.get(frameId)?.navigations ?? this.navigations;
+    let navigations = this.frameEnvironmentsByPuppetId.get(frameId)?.navigations;
+    // if no frame id provided, use default
+    if (!frameId && !navigations) {
+      navigations = this.navigations;
+    }
+
+    if (!navigations && frameId) {
+      this.onFrameCreatedResourceEventsByFrameId[frameId] ??= [];
+      const events = this.onFrameCreatedResourceEventsByFrameId[frameId];
+      if (!events.some(x => x.event === event)) {
+        events.push({ event, type: 'resource-will-be-requested' });
+      }
+      return;
+    }
 
     if (isDocumentNavigation && !navigations.top) {
       navigations.onNavigationRequested(
@@ -747,7 +766,20 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       event.resource,
       this.id,
     );
-    const frame = this.frameEnvironmentsByPuppetId.get(event.frameId) ?? this.mainFrameEnvironment;
+
+    let frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
+    // if no frame id provided, use default
+    if (!frame && !event.frameId) frame = this.mainFrameEnvironment;
+
+    if (!frame && event.frameId) {
+      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
+      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
+      if (!events.some(x => x.event === event)) {
+        events.push({ event, type: 'resource-loaded' });
+      }
+      return;
+    }
+
     if (
       !!event.resource.browserServedFromCache &&
       event.resource.url?.href === frame.navigations?.top?.requestedUrl &&
@@ -854,7 +886,21 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   private onNavigationResourceResponse(event: IPuppetPageEvents['navigation-response']): void {
-    const frame = this.frameEnvironmentsByPuppetId.get(event.frameId) ?? this.mainFrameEnvironment;
+    let frame = this.frameEnvironmentsByPuppetId.get(event.frameId);
+
+    // if no frame id provided, use default
+    if (!frame && !event.frameId) {
+      frame = this.mainFrameEnvironment;
+    }
+
+    if (event.frameId && !frame) {
+      this.onFrameCreatedResourceEventsByFrameId[event.frameId] ??= [];
+      const events = this.onFrameCreatedResourceEventsByFrameId[event.frameId];
+      if (!events.some(x => x.event === event)) {
+        events.push({ event, type: 'navigation-response' });
+      }
+      return;
+    }
 
     frame.navigations.onHttpResponded(event.browserRequestId, event.url, event.loaderId);
     this.session.mitmRequestSession.recordDocumentUserActivity(event.url);
@@ -870,6 +916,17 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const frame = new FrameEnvironment(this, event.frame);
     this.frameEnvironmentsByPuppetId.set(frame.devtoolsFrameId, frame);
     this.frameEnvironmentsById.set(frame.id, frame);
+    const resourceEvents = this.onFrameCreatedResourceEventsByFrameId[frame.devtoolsFrameId];
+    if (resourceEvents) {
+      for (const { event: resourceEvent, type } of resourceEvents) {
+        if (type === 'resource-will-be-requested')
+          this.onResourceWillBeRequested(resourceEvent as any);
+        else if (type === 'navigation-response')
+          this.onNavigationResourceResponse(resourceEvent as any);
+        else if (type === 'resource-loaded') this.onResourceLoaded(resourceEvent as any);
+      }
+    }
+    delete this.onFrameCreatedResourceEventsByFrameId[frame.devtoolsFrameId];
   }
 
   /////// LOGGING EVENTS ///////////////////////////////////////////////////////////////////////////

@@ -107,7 +107,7 @@ export default function launchProcess(
     pipeWrite as NodeJS.WritableStream,
     pipeRead as NodeJS.ReadableStream,
   );
-  transport.once('close', close);
+  transport.onCloseFns.push(this.close);
 
   return Promise.resolve(<ILaunchedProcess>{
     transport,
@@ -118,7 +118,7 @@ export default function launchProcess(
     try {
       // attempt graceful close, but don't wait
       if (transport) {
-        transport.send(JSON.stringify({ method: 'Browser.close', id: -1 }));
+        transport.end(JSON.stringify({ method: 'Browser.close', id: -1 }));
       }
       if (!launchedProcess.killed && !processKilled) {
         const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));

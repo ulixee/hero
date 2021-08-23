@@ -6,6 +6,7 @@ import ConnectionToClientApi from '@ulixee/hero-core/connections/ConnectionToCli
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { ICoreApiRequest, ICoreApiResponse } from '@ulixee/hero-core/apis';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
+import Core from '@ulixee/hero-core';
 
 let idCounter = 0;
 class CoreApiServer extends ConnectionToClientApi {
@@ -86,6 +87,12 @@ class CoreApiServer extends ConnectionToClientApi {
 }
 
 (() => {
+  if (process.argv[2]) {
+    Core.dataDir = process.argv[2].startsWith('/')
+      ? process.argv[2]
+      : `${process.cwd()}/${process.argv[2]}`;
+    console.log('Loaded data dir from %s', Core.dataDir);
+  }
   const server = new CoreApiServer(1337);
   ShutdownHandler.register(() => {
     server.close();
