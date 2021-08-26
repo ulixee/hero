@@ -2,8 +2,10 @@ import StateMachine from 'awaited-dom/base/StateMachine';
 import { ISuperElement } from 'awaited-dom/base/interfaces/super';
 import { ISuperElementProperties } from 'awaited-dom/base/super-klasses/SuperElement';
 import SuperElement from 'awaited-dom/impl/super-klasses/SuperElement';
-import Interactor from './Interactor';
+import SuperNode from 'awaited-dom/impl/super-klasses/SuperNode';
+import SuperHTMLElement from 'awaited-dom/impl/super-klasses/SuperHTMLElement';
 import { ITypeInteraction } from '../interfaces/IInteractions';
+import Interactor from './Interactor';
 
 const { getState } = StateMachine<ISuperElement, ISuperElementProperties>();
 
@@ -21,8 +23,9 @@ declare module 'awaited-dom/base/interfaces/super' {
   interface ISuperHTMLElement extends IBaseExtend {}
 }
 
-Object.defineProperty(SuperElement.prototype, '$', {
-  get: function $() {
+for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
+  Object.defineProperty(Super.prototype, '$', {
+    get: function $() {
       const click = async (): Promise<void> => {
         const { awaitedOptions } = getState(this);
         const coreFrame = await awaitedOptions?.coreFrame
@@ -43,6 +46,7 @@ Object.defineProperty(SuperElement.prototype, '$', {
         await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
       };
 
-    return { click, type, waitForVisible };
-  }
-});
+      return { click, type, waitForVisible };
+    }
+  });
+}
