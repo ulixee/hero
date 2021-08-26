@@ -6,4 +6,5 @@ export default interface IViewport {
   screenHeight?: number;
   positionX?: number;
   positionY?: number;
+  isDefault?: boolean;
 }

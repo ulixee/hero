@@ -155,17 +155,7 @@ export default class Session extends TypedEventEmitter<{
     this.plugins.configure(options);
     this.timezoneId = options.timezoneId || '';
     this.locale = options.locale;
-    this.viewport =
-      options.viewport ||
-      ({
-        positionX: 0,
-        positionY: 0,
-        screenWidth: 1440,
-        screenHeight: 900,
-        width: 1440,
-        height: 900,
-        deviceScaleFactor: 1,
-      } as IViewport);
+    this.viewport = options.viewport;
 
     this.sessionState = new SessionState(
       this.id,
@@ -582,9 +572,7 @@ export default class Session extends TypedEventEmitter<{
     return false;
   }
 
-  public static sessionsWithBrowserEngine(
-    isEngineMatch: (engine: IBrowserEngine) => boolean,
-  ): Session[] {
-    return Object.values(this.byId).filter(x => isEngineMatch(x.browserEngine));
+  public static sessionsWithBrowserId(browserId: string): Session[] {
+    return Object.values(this.byId).filter(x => x.browserContext?.browserId === browserId);
   }
 }
