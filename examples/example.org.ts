@@ -1,4 +1,5 @@
 import Hero from '@ulixee/hero-fullstack';
+import { LocationTrigger } from '@ulixee/hero-interfaces/Location';
 
 async function run() {
   const hero = new Hero();
@@ -9,13 +10,21 @@ async function run() {
   console.log(await hero.url);
 
   const outerHtml = await hero.document.documentElement.outerHTML;
-  console.log('-- PRINTING outerHTML ---------------');
+  const linkElement = hero.document.querySelector('a');
+
+  console.log('-- PRINTING outerHTML of link ---------------');
   console.log(outerHtml);
   console.log('OUTPUT from https://example.org', {
     outerHtml,
     title: await hero.document.title,
     intro: await hero.document.querySelector('p').textContent,
+    linkTag: await linkElement.outerHTML,
   });
+  console.log('-------------------------------------');
+
+  await linkElement.$.click();
+  await hero.waitForLocation(LocationTrigger.change);
+  console.log('NEW LOCATION: ', await hero.document.location.href);
   console.log('-------------------------------------');
 
   await hero.close();

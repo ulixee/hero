@@ -58,6 +58,7 @@ import FrozenTab from './FrozenTab';
 import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import ConnectionManager from './ConnectionManager';
+import './$xtends';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
