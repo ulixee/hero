@@ -116,7 +116,7 @@ export default class GlobalPool {
     if (existing) return Promise.resolve(existing);
 
     this.puppets.push(puppet);
-    puppet.once('close', this.onEngineClosed.bind(this, browserEngine));
+    puppet.once('close', this.onEngineClosed.bind(this, puppet));
     const browserDir = browserEngine.executablePath.split(browserEngine.fullVersion).shift();
 
     const preferencesInterceptor = new DevtoolsPreferences(
@@ -172,16 +172,17 @@ export default class GlobalPool {
     }
   }
 
-  private static async onEngineClosed(engine: IBrowserEngine): Promise<void> {
+  private static async onEngineClosed(puppet: Puppet): Promise<void> {
     if (this.isClosing) return;
-    for (const session of Session.sessionsWithBrowserEngine(this.isSameEngine.bind(this, engine))) {
+    for (const session of Session.sessionsWithBrowserId(puppet.browserId)) {
       await session.close();
     }
     log.info('PuppetEngine.closed', {
-      engine,
+      engine: puppet.browserEngine,
+      browserId: puppet.browserId,
       sessionId: null,
     });
-    const idx = this.puppets.findIndex(x => this.isSameEngine(engine, x.browserEngine));
+    const idx = this.puppets.indexOf(puppet);
     if (idx >= 0) this.puppets.splice(idx, 1);
     if (this.puppets.length === 0) {
       this.events.emit('all-browsers-closed');
@@ -189,9 +190,8 @@ export default class GlobalPool {
   }
 
   private static checkForInactiveBrowserEngine(session: Session): void {
-    const sessionsUsingEngine = Session.sessionsWithBrowserEngine(
-      this.isSameEngine.bind(this, session.browserEngine),
-    );
+    const browserId = session.browserContext.browserId;
+    const sessionsUsingEngine = Session.sessionsWithBrowserId(browserId);
     const hasWindows = sessionsUsingEngine.some(x => x.tabsById.size > 0);
 
     log.info('Session.allTabsClosed', {

@@ -7,6 +7,7 @@ import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import {
   BrowserEmulatorClassDecorator,
   IBrowserEmulatorConfig,
+  ISessionSummary,
 } from '@ulixee/hero-interfaces/ICorePlugin';
 import { IPuppetWorker } from '@ulixee/hero-interfaces/IPuppetWorker';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
@@ -71,14 +72,11 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
   configure(config: IBrowserEmulatorConfig): void {
     if (!config) return;
 
-    config.locale = config.locale || this.locale || this.data.browserConfig.defaultLocale;
-    config.viewport =
-      config.viewport ||
-      this.viewport ||
-      Viewports.getDefault(this.data.windowBaseFraming, this.data.windowFraming);
-    config.timezoneId =
-      config.timezoneId || this.timezoneId || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    config.geolocation = config.geolocation || this.geolocation;
+    config.locale ??= this.locale ?? this.data.browserConfig.defaultLocale;
+    config.viewport ??=
+      this.viewport ?? Viewports.getDefault(this.data.windowBaseFraming, this.data.windowFraming);
+    config.timezoneId ??= this.timezoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+    config.geolocation ??= this.geolocation;
 
     this.locale = config.locale;
     this.viewport = config.viewport;
@@ -109,14 +107,14 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     configureHttp2Session(this, this.data, request, settings);
   }
 
-  public onNewPuppetPage(page: IPuppetPage): Promise<any> {
+  public onNewPuppetPage(page: IPuppetPage, sessionMeta: ISessionSummary): Promise<any> {
     // Don't await here! we want to queue all these up to run before the debugger resumes
     const devtools = page.devtoolsSession;
     return Promise.all([
       setUserAgent(this, devtools),
       setTimezone(this, devtools),
       setLocale(this, devtools),
-      setScreensize(this, page, devtools),
+      setScreensize(this, page, devtools, sessionMeta),
       setActiveAndFocused(this, devtools),
       setPageDomOverrides(this.domOverridesBuilder, this.data, page),
       setGeolocation(this, page),
@@ -131,9 +129,10 @@ export default class DefaultBrowserEmulator extends BrowserEmulator {
     ]);
   }
 
-  public static selectBrowserMeta(
-    userAgentSelector?: string,
-  ): { browserEngine: BrowserEngine; userAgentOption: IUserAgentOption } {
+  public static selectBrowserMeta(userAgentSelector?: string): {
+    browserEngine: BrowserEngine;
+    userAgentOption: IUserAgentOption;
+  } {
     const userAgentOption = selectUserAgentOption(userAgentSelector, dataLoader.userAgentOptions);
 
     const { browserName, browserVersion } = userAgentOption;

@@ -109,10 +109,7 @@ export interface IBrowserEmulator extends ICorePlugin {
 }
 
 export interface IBrowserEmulatorMethods {
-  configure?(
-    options: IBrowserEmulatorConfig,
-    sessionSummary?: ISessionSummary,
-  ): Promise<any> | void;
+  configure?(options: IBrowserEmulatorConfig, sessionSummary?: ISessionSummary): void;
 
   onBrowserLaunchConfiguration?(launchArguments: string[]): Promise<any> | void;
 
