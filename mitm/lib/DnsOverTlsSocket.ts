@@ -4,7 +4,7 @@ import IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import MitmSocket from '@ulixee/hero-mitm-socket/index';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import IDnsSettings from "@ulixee/hero-interfaces/IDnsSettings";
+import IDnsSettings from '@ulixee/hero-interfaces/IDnsSettings';
 import { addTypedEventListener, removeEventListeners } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
@@ -70,12 +70,7 @@ export default class DnsOverTlsSocket {
       keepAlive: true,
       debug: true,
     });
-    if (this.dnsSettings.useUpstreamProxy) {
-      const upstreamProxy = this.requestSession.upstreamProxyUrl;
-      if (upstreamProxy) {
-        this.mitmSocket.setProxyUrl(upstreamProxy);
-      }
-    }
+
     await this.mitmSocket.connect(this.requestSession.requestAgent.socketSession, 10e3);
 
     this.mitmSocket.socket.on('data', this.onData.bind(this));
