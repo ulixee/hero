@@ -21,7 +21,7 @@ func Dial(addr string, connectArgs ConnectArgs, sessionArgs SessionArgs) (net.Co
 			return nil, err
 		}
 
-		if proxyUrl.Scheme == "socks5" {
+		if proxyUrl.Scheme == "socks5" || proxyUrl.Scheme == "socks5h" {
 			return DialAddrViaSock5Proxy(dialer, addr, proxyUrl)
 		}
 
