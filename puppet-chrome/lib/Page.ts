@@ -361,7 +361,7 @@ export class Page extends TypedEventEmitter<IPuppetPageEvents> implements IPuppe
           flatten: true,
         })
         .catch(err => err),
-      this.browserContext.initializePage(this),
+      this.browserContext.initializePage(this).catch(err => err),
       this.devtoolsSession
         .send('Page.setInterceptFileChooserDialog', { enabled: true })
         .catch(err => err),

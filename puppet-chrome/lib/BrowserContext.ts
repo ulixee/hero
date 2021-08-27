@@ -123,11 +123,13 @@ export class BrowserContext
   }
 
   initializePage(page: Page): Promise<any> {
-    if (this.pageOptionsByTargetId.get(page.targetId)?.runPageScripts === false) return;
+    if (this.pageOptionsByTargetId.get(page.targetId)?.runPageScripts === false)
+      return Promise.resolve();
 
-    const promises = [this.defaultPageInitializationFn(page).catch(err => err)];
-    promises.push(this.plugins.onNewPuppetPage(page).catch(err => err));
-    return Promise.all(promises);
+    return Promise.all([
+      this.defaultPageInitializationFn(page),
+      this.plugins.onNewPuppetPage(page),
+    ]);
   }
 
   async onPageAttached(devtoolsSession: DevtoolsSession, targetInfo: TargetInfo): Promise<Page> {
