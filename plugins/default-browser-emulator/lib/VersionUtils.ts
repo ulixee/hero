@@ -1,4 +1,4 @@
-import * as macOsVersionAliasMap from "../data/macOsVersionAliasMap.json";
+import * as macOsVersionAliasMap from '../data/macOsVersionAliasMap.json';
 
 export function convertMacOsVersionString(versionString: string) {
   let newVersionString = macOsVersionAliasMap[versionString];
@@ -36,7 +36,7 @@ export function findClosestVersionMatch(versionToMatch: string, versions: string
 }
 
 export function getClosestNumberMatch(numToMatch: number, nums: number[]) {
-  const sortedNums = nums.sort();
+  const sortedNums = nums.sort((a, b) => a - b);
   let closest = sortedNums[0];
   for (const num of sortedNums) {
     if (num === numToMatch) {
@@ -55,7 +55,7 @@ export function convertVersionsToTree(versions: string[]): IVersionTree {
   return versions.reduce((tree: any, version: string) => {
     const [major, minor, build] = version.split(/\.|-/);
     tree[major] = tree[major] || {};
-    if(minor === undefined) return tree;
+    if (minor === undefined) return tree;
     tree[major][minor] = tree[major][minor] || [];
     if (build) tree[major][minor].push(build);
     return tree;
@@ -65,5 +65,5 @@ export function convertVersionsToTree(versions: string[]): IVersionTree {
 export interface IVersionTree {
   [major: number]: {
     [minor: number]: number[];
-  }
+  };
 }

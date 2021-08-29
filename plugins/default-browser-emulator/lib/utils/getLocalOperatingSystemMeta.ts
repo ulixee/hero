@@ -1,11 +1,16 @@
 import * as Os from 'os';
-import { convertMacOsVersionString, convertVersionsToTree, getClosestNumberMatch } from "../VersionUtils";
+import {
+  convertMacOsVersionString,
+  convertVersionsToTree,
+  getClosestNumberMatch,
+} from '../VersionUtils';
 import * as darwinToMacOsVersionMap from '../../data/darwinToMacOsVersionMap.json';
 import * as windowsToWindowsVersionMap from '../../data/windowsToWindowsVersionMap.json';
 
-export default function getLocalOperatingSystemMeta() {
-  const platform = Os.platform();
-  const release = Os.release();
+export default function getLocalOperatingSystemMeta(
+  platform = Os.platform(),
+  release = Os.release(),
+) {
   const name = extractOsName(platform);
   const version = extractOsVersion(platform, release);
   return { name, version };
