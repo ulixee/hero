@@ -394,6 +394,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
           if (!waitForVisible) isValid = isNodeVisible.value?.nodeExists;
           if (isValid) return true;
         } catch (err) {
+          if (String(err).includes('not a valid selector')) throw err;
           // don't log during loop
         }
 

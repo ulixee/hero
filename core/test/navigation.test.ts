@@ -346,6 +346,43 @@ setTimeout(function() {
 
   it.todo('handles going to about:blank');
 
+  it('can wait for another tab', async () => {
+    let userAgentString1: string;
+    let userAgentString2: string;
+    koaServer.get('/tabTest', ctx => {
+      userAgentString1 = ctx.get('user-agent');
+      ctx.body = `<body>
+<a target="_blank" href="/tabTestDest">Nothing really here</a>
+</body>`;
+    });
+    koaServer.get('/tabTestDest', ctx => {
+      userAgentString2 = ctx.get('user-agent');
+      ctx.body = `<body><h1 id="newTabHeader">You are here</h1></body>`;
+    });
+    const { tab } = await createSession();
+    await tab.goto(`${koaServer.baseUrl}/tabTest`);
+    await tab.interact([
+      {
+        command: InteractionCommand.click,
+        mousePosition: ['window', 'document', ['querySelector', 'a']],
+      },
+    ]);
+
+    const session = tab.session;
+
+    const newTab = await tab.waitForNewTab();
+    expect(session.tabsById.size).toBe(2);
+    await newTab.waitForLoad('PaintingStable');
+    const header = await newTab.execJsPath([
+      'document',
+      ['querySelector', '#newTabHeader'],
+      'textContent',
+    ]);
+    expect(header.value).toBe('You are here');
+    expect(userAgentString1).toBe(userAgentString2);
+    await newTab.close();
+  });
+
   it('should not trigger location change for first navigation of new tabs', async () => {
     const { tab } = await createSession();
 
