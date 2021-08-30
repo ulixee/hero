@@ -1,7 +1,9 @@
 import { Http2Session } from 'http2';
-import { Log } from '@ulixee/commons/lib/Logger';
+import logger from '@ulixee/commons/lib/Logger';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { bindFunctions } from '@ulixee/commons/lib/utils';
+
+const { log } = logger(module);
 
 export default class Http2SessionBinding {
   private logger: IBoundLog;
@@ -11,7 +13,7 @@ export default class Http2SessionBinding {
     readonly serverSession: Http2Session,
     logData: { sessionId: string } & any,
   ) {
-    this.logger = new Log(module, logData) as IBoundLog;
+    this.logger = log.createChild(module, logData);
     bindFunctions(this);
     this.bind();
   }
@@ -80,7 +82,7 @@ export default class Http2SessionBinding {
     this.logger.stats('Http2.goaway', {
       code,
       lastStreamID,
-      opaqueData,
+      opaqueData: opaqueData ? Buffer.from(opaqueData).toString() : undefined,
     });
     if (!this.clientSession || this.clientSession.destroyed) return;
     this.clientSession.goaway(code);

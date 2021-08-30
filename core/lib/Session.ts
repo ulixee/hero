@@ -40,7 +40,7 @@ export default class Session extends TypedEventEmitter<{
   closing: void;
   closed: void;
   resumed: void;
-  'kept-alive': void;
+  'kept-alive': { message: string };
   'tab-created': { tab: Tab };
   'all-tabs-closed': void;
   'awaited-event': ICoreEventPayload;

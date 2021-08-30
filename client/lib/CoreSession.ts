@@ -5,6 +5,8 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
+import * as readline from 'readline';
+import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -38,7 +40,10 @@ export default class CoreSession implements IJsPathEventTarget {
   private readonly connectionToCore: ConnectionToCore;
   private commandId = 0;
 
-  constructor(sessionMeta: ISessionMeta & { sessionName: string }, connectionToCore: ConnectionToCore) {
+  constructor(
+    sessionMeta: ISessionMeta & { sessionName: string },
+    connectionToCore: ConnectionToCore,
+  ) {
     const { sessionId, sessionName } = sessionMeta;
     this.sessionId = sessionId;
     this.sessionName = sessionName;
@@ -100,7 +105,11 @@ export default class CoreSession implements IJsPathEventTarget {
       meta: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
     }>('Session.detachTab', tab.tabId, callSitePath, key);
-    const coreTab = new CoreTab({ ...meta, sessionName: this.sessionName }, this.connectionToCore, this);
+    const coreTab = new CoreTab(
+      { ...meta, sessionName: this.sessionName },
+      this.connectionToCore,
+      this,
+    );
     this.frozenTabsById.set(meta.tabId, coreTab);
     return {
       coreTab,
@@ -117,7 +126,12 @@ export default class CoreSession implements IJsPathEventTarget {
       for (const tab of this.frozenTabsById.values()) {
         await tab.flush();
       }
-      await this.commandQueue.run('Session.close');
+      const result = await this.commandQueue.run<{ didKeepAlive: boolean; message: string }>(
+        'Session.close',
+      );
+      if (result?.didKeepAlive === true) {
+        await this.showSessionKeepAlivePrompt(result.message);
+      }
     } finally {
       process.nextTick(() => this.connectionToCore.closeSession(this));
       loggerSessionIdNames.delete(this.sessionId);
@@ -147,5 +161,40 @@ export default class CoreSession implements IJsPathEventTarget {
     } else {
       await this.eventHeap.removeListener(jsPath, eventType, listenerFn);
     }
+  }
+
+  private showSessionKeepAlivePrompt(message: string): Promise<void> {
+    if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
+
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setEncoding('utf8');
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+    process.stdout.write(`\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:`);
+
+    ShutdownHandler.register(() => this.terminate());
+
+    return new Promise<void>(resolve => {
+      process.stdin.on('keypress', async (chunk, key) => {
+        if (key.name.toLowerCase() === 'q') {
+          await this.terminate();
+          rl.close();
+          resolve();
+        }
+      });
+      process.once('beforeExit', () => {
+        rl.close();
+        resolve();
+      });
+    });
+  }
+
+  private terminate(): Promise<void> {
+    return this.commandQueue.run('Session.terminate');
   }
 }
