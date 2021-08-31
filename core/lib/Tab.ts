@@ -441,7 +441,9 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async waitForNewTab(options: IWaitForOptions = {}): Promise<Tab> {
     // last command is the one running right now
-    const startCommandId = options?.sinceCommandId ?? this.lastCommandId - 1;
+    const startCommandId = Number.isInteger(options.sinceCommandId)
+      ? options.sinceCommandId
+      : this.lastCommandId - 1;
     let newTab: Tab;
     const startTime = new Date();
     if (startCommandId >= 0) {
@@ -468,11 +470,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public async waitForResource(
     filter: IResourceFilterProperties,
-    opts?: IWaitForResourceOptions,
+    options?: IWaitForResourceOptions,
   ): Promise<IResourceMeta[]> {
-    const timer = new Timer(opts?.timeoutMs ?? 60e3, this.waitTimeouts);
+    const timer = new Timer(options?.timeoutMs ?? 60e3, this.waitTimeouts);
     const resourceMetas: IResourceMeta[] = [];
     const promise = createPromise();
+    const sinceCommandId =
+      options?.sinceCommandId && Number.isInteger(options.sinceCommandId)
+        ? options.sinceCommandId
+        : -1;
 
     const onResource = (resourceMeta: IResourceMeta) => {
       if (resourceMeta.tabId !== this.id) return;
@@ -481,7 +487,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
         // need to set directly since passed in object is a copy
         this.sessionState.getResourceMeta(resourceMeta.id).seenAtCommandId = this.lastCommandId;
       }
-      if (resourceMeta.seenAtCommandId <= opts?.sinceCommandId ?? -1) return;
+      if (resourceMeta.seenAtCommandId <= sinceCommandId) return;
       if (filter.type && resourceMeta.type !== filter.type) return;
       if (filter.url) {
         if (typeof filter.url === 'string') {
@@ -508,7 +514,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       await timer.waitForPromise(promise.promise, 'Timeout waiting for DomContentLoaded');
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      if (isTimeout && opts?.throwIfTimeout === false) {
+      if (isTimeout && options?.throwIfTimeout === false) {
         return resourceMetas;
       }
       throw err;
@@ -521,7 +527,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
   }
 
   public async waitForFileChooser(options?: IWaitForOptions): Promise<IFileChooserPrompt> {
-    let startCommandId = options?.sinceCommandId;
+    let startCommandId =
+      options?.sinceCommandId && Number.isInteger(options.sinceCommandId)
+        ? options.sinceCommandId
+        : null;
 
     if (!startCommandId && this.sessionState.commands.length >= 2) {
       startCommandId = this.sessionState.commands[this.sessionState.commands.length - 2]?.id;

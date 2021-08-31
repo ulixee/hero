@@ -60,7 +60,10 @@ export default class FrameNavigationsObserver {
     assert(LocationTrigger[status], `Invalid location status: ${status}`);
 
     // determine if this location trigger has already been satisfied
-    const sinceCommandId = Number(options.sinceCommandId ?? this.defaultWaitForLocationCommandId);
+    const sinceCommandId = Number.isInteger(options.sinceCommandId)
+      ? options.sinceCommandId
+      : this.defaultWaitForLocationCommandId;
+
     if (this.hasLocationTrigger(status, sinceCommandId)) {
       return Promise.resolve();
     }
