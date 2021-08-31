@@ -26,7 +26,7 @@ class JsPath {
       top = maxScrollY;
     }
 
-    const endTime = Date.now() + (timeoutMillis ?? 50);
+    const endTime = new Date().getTime() + (timeoutMillis ?? 50);
     let count = 0;
     do {
       if (Math.abs(window.scrollX - left) <= 1 && Math.abs(window.scrollY - top) <= 1) {
@@ -37,7 +37,7 @@ class JsPath {
       }
       await new Promise(requestAnimationFrame);
       count += 1;
-    } while (Date.now() < endTime);
+    } while (new Date().getTime() < endTime);
 
     return false;
   }
@@ -164,42 +164,41 @@ class JsPath {
   ): Promise<IExecJsPathResult<INodeVisibility>> {
     const objectAtPath = new ObjectAtPath(jsPath, containerOffset);
     try {
-      return await new Promise<IExecJsPathResult<INodeVisibility>>(async resolve => {
-        const end = new Date();
-        end.setTime(end.getTime() + timeoutMillis);
+      const end = new Date();
+      end.setTime(end.getTime() + (timeoutMillis || 0));
 
-        while (new Date() < end) {
-          try {
-            if (!objectAtPath.objectAtPath) objectAtPath.lookup();
+      while (new Date() < end) {
+        try {
+          if (!objectAtPath.objectAtPath) objectAtPath.lookup();
 
-            let isElementValid = !!objectAtPath.objectAtPath;
-            let visibility: INodeVisibility = {
-              nodeExists: isElementValid,
-            };
-            if (isElementValid && waitForVisible) {
-              visibility = objectAtPath.getComputedVisibility();
-              isElementValid = visibility.isVisible;
-            }
-
-            if (isElementValid) {
-              return resolve({
-                nodePointer: objectAtPath.extractNodePointer(),
-                value: visibility,
-              });
-            }
-          } catch (err) {
-            // can happen if lookup path is bad
+          let isElementValid = !!objectAtPath.objectAtPath;
+          let visibility: INodeVisibility = {
+            nodeExists: isElementValid,
+          };
+          if (isElementValid && waitForVisible) {
+            visibility = objectAtPath.getComputedVisibility();
+            isElementValid = visibility.isVisible;
           }
-          // eslint-disable-next-line promise/param-names
-          await new Promise(resolve1 => setTimeout(resolve1, 20));
-          await new Promise(requestAnimationFrame);
-        }
 
-        resolve(<IExecJsPathResult>{
-          nodePointer: objectAtPath.extractNodePointer(),
-          value: objectAtPath.getComputedVisibility(),
-        });
-      });
+          if (isElementValid) {
+            return {
+              nodePointer: objectAtPath.extractNodePointer(),
+              value: visibility,
+            };
+          }
+        } catch (err) {
+          if (String(err).includes('not a valid selector')) throw err;
+          // can also happen if lookup path doesn't exist yet... in which case we want to keep trying
+        }
+        // eslint-disable-next-line promise/param-names
+        await new Promise(resolve1 => setTimeout(resolve1, 20));
+        await new Promise(requestAnimationFrame);
+      }
+
+      return {
+        nodePointer: objectAtPath.extractNodePointer(),
+        value: objectAtPath.getComputedVisibility(),
+      };
     } catch (error) {
       return objectAtPath.toReturnError(error);
     }
@@ -248,8 +247,8 @@ class ObjectAtPath {
     const element = this.closestElement;
     if (!element) return null;
     const { x, y, width, height } = element.getBoundingClientRect();
-    const centerX = Math.floor(100 * x + width / 2) / 100;
-    const centerY = Math.floor(100 * y + height / 2) / 100;
+    const centerX = round(x + width / 2);
+    const centerY = round(y + height / 2);
 
     this._obstructedByElement = document.elementFromPoint(centerX, centerY);
     return this._obstructedByElement;
@@ -349,38 +348,48 @@ class ObjectAtPath {
   }
 
   public lookup() {
-    this.objectAtPath = window;
-    if (this.jsPath[0] === 'window') this.jsPath.shift();
-    this.lookupStepIndex = 0;
-    for (const step of this.jsPath) {
-      this.lookupStep = step;
-      if (Array.isArray(step)) {
-        const [methodName, ...args] = step;
-        // extract node ids as args
-        const finalArgs = args.map(x => {
-          if (typeof x !== 'string') return x;
-          if (!x.startsWith('$$jsPath=')) return x;
-          const innerPath = JSON.parse(x.split('$$jsPath=').pop());
-          const sub = new ObjectAtPath(innerPath, this.containerOffset).lookup();
-          return sub.objectAtPath;
-        });
-        // handlers for getComputedStyle/Visibility/getNodeId/getBoundingRect
-        if (methodName.startsWith('__') && methodName.endsWith('__')) {
-          this.hasCustomMethodLookup = true;
-          this.objectAtPath = this[`${methodName.replace(/__/g, '')}`](...finalArgs);
-        } else {
-          const methodProperty = propertyName(methodName);
-          this.objectAtPath = this.objectAtPath[methodProperty](...finalArgs);
-        }
-      } else if (typeof step === 'number') {
-        this.objectAtPath = NodeTracker.getWatchedNodeWithId(step);
-      } else if (typeof step === 'string') {
-        const prop = propertyName(step);
-        this.objectAtPath = this.objectAtPath[prop];
-      } else {
-        throw new Error('unknown JsPathStep');
+    try {
+      // track object as we navigate so we can extract properties along the way
+      this.objectAtPath = window;
+      this.lookupStepIndex = 0;
+      if (this.jsPath[0] === 'window') {
+        this.jsPath.shift();
+        this.lookupStepIndex = 1;
       }
-      this.lookupStepIndex += 1;
+      for (const step of this.jsPath) {
+        this.lookupStep = step;
+        if (Array.isArray(step)) {
+          const [methodName, ...args] = step;
+          // extract node ids as args
+          const finalArgs = args.map(x => {
+            if (typeof x !== 'string') return x;
+            if (!x.startsWith('$$jsPath=')) return x;
+            const innerPath = JSON.parse(x.split('$$jsPath=').pop());
+            const sub = new ObjectAtPath(innerPath, this.containerOffset).lookup();
+            return sub.objectAtPath;
+          });
+          // handlers for getComputedStyle/Visibility/getNodeId/getBoundingRect
+          if (methodName.startsWith('__') && methodName.endsWith('__')) {
+            this.hasCustomMethodLookup = true;
+            this.objectAtPath = this[`${methodName.replace(/__/g, '')}`](...finalArgs);
+          } else {
+            const methodProperty = propertyName(methodName);
+            this.objectAtPath = this.objectAtPath[methodProperty](...finalArgs);
+          }
+        } else if (typeof step === 'number') {
+          this.objectAtPath = NodeTracker.getWatchedNodeWithId(step);
+        } else if (typeof step === 'string') {
+          const prop = propertyName(step);
+          this.objectAtPath = this.objectAtPath[prop];
+        } else {
+          throw new Error('unknown JsPathStep');
+        }
+        this.lookupStepIndex += 1;
+      }
+    } catch (err) {
+      // don't store the invalid path if we failed at a step
+      this.objectAtPath = null;
+      throw err;
     }
 
     return this;
@@ -431,20 +440,13 @@ class ObjectAtPath {
       preview: generateNodePreview(objectAtPath),
     } as INodePointer;
 
-    const ids = [nodeId];
-
     if (isIterableOrArray(objectAtPath)) {
       state.iterableItems = Array.from(objectAtPath);
 
       if (state.iterableItems.length && isCustomType(state.iterableItems[0])) {
         state.iterableIsState = true;
         state.iterableItems = state.iterableItems.map(x => this.createNodePointer(x));
-        ids.push(...(state.iterableItems as any).map(x => x.id));
       }
-    }
-
-    if ('replayInteractions' in window) {
-      window.replayInteractions({ frameIdPath: '', nodeIds: ids });
     }
 
     return state;
@@ -561,4 +563,8 @@ function isIterableOrArray(object) {
   // don't iterate on strings
   if (!object || typeof object === 'string' || object instanceof String) return false;
   return !!object[Symbol.iterator] || Array.isArray(object);
+}
+
+function round(num: number): number {
+  return Math.floor(100 * num) / 100;
 }

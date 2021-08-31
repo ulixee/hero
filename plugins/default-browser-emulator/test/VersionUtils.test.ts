@@ -1,7 +1,8 @@
 import * as Path from 'path';
 import { findClosestVersionMatch } from '../lib/VersionUtils';
 import DefaultBrowserEmulator from '../index';
-import DataLoader from "../lib/DataLoader";
+import DataLoader from '../lib/DataLoader';
+import getLocalOperatingSystemMeta from '../lib/utils/getLocalOperatingSystemMeta';
 
 test('it should findClosestVersionMatch even if minor is not matched', async () => {
   const versionMatch1 = findClosestVersionMatch('10-16', ['11']);
@@ -23,4 +24,9 @@ test('it should find correct browser meta', async () => {
   const data = dataLoader.as(browserMeta.userAgentOption) as any;
   const asOsId = data.osDataDir.split('/').pop();
   expect(asOsId).toEqual('as-mac-os-11');
+});
+
+test('it should work with monteray', async () => {
+  const OsMeta = getLocalOperatingSystemMeta('darwin', '500.0.0');
+  expect(OsMeta.version.split('-').map(Number)[0]).toBeGreaterThanOrEqual(11);
 });
