@@ -71,10 +71,13 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       );
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
       await connectionToClient.closeSession({ sessionId });
+      if (i === 4) {
+        await connectionToClient.terminateSession({ sessionId });
+      }
     }
 
     expect(sessionCreatedFn).toHaveBeenCalledTimes(1);
-    expect(sessionClosedFn).toHaveBeenCalledTimes(0);
+    expect(sessionClosedFn).toHaveBeenCalledTimes(1);
     expect(sessionKeptAliveFn).toHaveBeenCalledTimes(5);
     expect(sessionResumedFn).toHaveBeenCalledTimes(4);
 

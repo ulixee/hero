@@ -47,6 +47,7 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     ['Core.logUnhandledError', 'logUnhandledError'],
     ['Session.create', 'createSession'],
     ['Session.close', 'closeSession'],
+    ['Session.terminate', 'terminateSession'],
     ['Session.configure', 'configure'],
     ['Session.detachTab', 'detachTab'],
     ['Session.flush', 'flush'],
@@ -232,16 +233,28 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     return this.getSessionMeta(tab);
   }
 
-  public async closeSession(sessionMeta: ISessionMeta): Promise<void> {
+  public async closeSession(
+    sessionMeta: ISessionMeta,
+  ): Promise<{ didKeepAlive: boolean; message?: string }> {
+    const result = { didKeepAlive: false, message: null };
     const session = Session.get(sessionMeta.sessionId);
-    if (!session) return;
+    if (!session) return result;
 
     // if this session is set to keep alive and core is closing,
     if (session.options.sessionKeepAlive && !Core.isClosing) {
-      session.emit('kept-alive');
+      result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
+      result.didKeepAlive = true;
+      session.emit('kept-alive', result);
       removeEventListeners(this.sessionIds.get(session.id) ?? []);
-      return;
+    } else {
+      await session.close();
     }
+    return result;
+  }
+
+  public async terminateSession(sessionMeta: ISessionMeta): Promise<void> {
+    const session = Session.get(sessionMeta.sessionId);
+    if (!session) return;
 
     await session.close();
   }

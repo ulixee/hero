@@ -27,7 +27,7 @@ export default async function setScreensize(
             left: viewport.positionX,
             top: viewport.positionY,
             width: viewport.screenWidth,
-            height: viewport.screenHeight + 20,
+            height: viewport.screenHeight,
             windowState: 'normal',
           },
         });
@@ -48,6 +48,16 @@ export default async function setScreensize(
         screenWidth: viewport.screenWidth,
         screenHeight: viewport.screenHeight,
         mobile: false,
+      }),
+    );
+  }
+  if (viewport.width === 0 || viewport.height === 0) {
+    promises.push(
+      devtools.send('Page.getLayoutMetrics').then(x => {
+        viewport.height = x.visualViewport.clientHeight;
+        viewport.width = x.visualViewport.clientWidth;
+        viewport.deviceScaleFactor = x.visualViewport.scale;
+        return viewport;
       }),
     );
   }
