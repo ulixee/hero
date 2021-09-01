@@ -1,10 +1,12 @@
 import * as Fs from 'fs';
 import { Helpers } from '@ulixee/hero-testing';
-import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { LocationStatus, LocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import { InteractionCommand } from '@ulixee/hero-interfaces/IInteractions';
 import { getLogo, ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import HumanEmulator from '@ulixee/hero-plugin-utils/lib/HumanEmulator';
+
+import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import Core, { Tab } from '../index';
 import ConnectionToClient from '../connections/ConnectionToClient';
 import Session from '../lib/Session';
@@ -33,7 +35,7 @@ describe('basic Navigation tests', () => {
     const unformattedUrl = koaServer.baseUrl;
     const { tab } = await createSession();
     await tab.goto(unformattedUrl);
-    const formattedUrl = await tab.getLocationHref();
+    const formattedUrl = await tab.getUrl();
 
     expect(formattedUrl).toBe(`${unformattedUrl}/`);
   });
@@ -182,10 +184,10 @@ describe('basic Navigation tests', () => {
 
     await tab.goto(`${koaServer.baseUrl}/`);
 
-    expect(await tab.getLocationHref()).toBe(`${koaServer.baseUrl}/`);
+    expect(await tab.getUrl()).toBe(`${koaServer.baseUrl}/`);
 
     await tab.goto(`${koaServer.baseUrl}/backAndForth`);
-    expect(await tab.getLocationHref()).toBe(`${koaServer.baseUrl}/backAndForth`);
+    expect(await tab.getUrl()).toBe(`${koaServer.baseUrl}/backAndForth`);
     // @ts-ignore
     const pages = tab.navigations;
     expect(pages.history).toHaveLength(2);
@@ -197,9 +199,10 @@ describe('basic Navigation tests', () => {
 
     await tab.goForward();
     expect(pages.history).toHaveLength(4);
-    expect(pages.top.stateChanges.has('Load') || pages.top.stateChanges.has('ContentPaint')).toBe(
-      true,
-    );
+    expect(
+      pages.top.statusChanges.has(LoadStatus.AllContentLoaded) ||
+        pages.top.statusChanges.has(ContentPaint),
+    ).toBe(true);
     expect(pages.currentUrl).toBe(`${koaServer.baseUrl}/backAndForth`);
   });
 
@@ -215,7 +218,7 @@ describe('basic Navigation tests', () => {
     await tab.goto(startingUrl);
     await tab.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await tab.getLocationHref();
+    const currentUrl = await tab.getUrl();
 
     expect(currentUrl).toBe(navigateToUrl);
   });
@@ -241,7 +244,7 @@ describe('basic Navigation tests', () => {
 
     await tab.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await tab.getLocationHref();
+    const currentUrl = await tab.getUrl();
 
     expect(currentUrl).toBe(navigateToUrl);
   }, 60e3);
@@ -267,7 +270,7 @@ describe('basic Navigation tests', () => {
 
     await tab.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await tab.getLocationHref();
+    const currentUrl = await tab.getUrl();
 
     expect(currentUrl).toBe(navigateToUrl);
   });
@@ -300,7 +303,7 @@ describe('basic Navigation tests', () => {
 
     await tab.waitForLocation(LocationTrigger.change);
 
-    const currentUrl = await tab.getLocationHref();
+    const currentUrl = await tab.getUrl();
 
     expect(currentUrl).toBe(navigateToUrl);
 
@@ -340,7 +343,7 @@ setTimeout(function() {
       startingUrl,
     ]);
 
-    const currentUrl = await tab.getLocationHref();
+    const currentUrl = await tab.getUrl();
     expect(currentUrl).toBe(pages.top.finalUrl);
   });
 
@@ -458,13 +461,13 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
     const commandId = popupTab.lastCommandId;
     // if we're on serious delay, need to wait for change
-    if ((await popupTab.getLocationHref()) === `${koaServer.baseUrl}/popup`) {
+    if ((await popupTab.getUrl()) === `${koaServer.baseUrl}/popup`) {
       await popupTab.waitForLocation('change', { sinceCommandId: commandId });
     }
     await popupTab.waitForLoad(LocationStatus.PaintingStable);
 
     tab.sessionState.db.flush();
-    expect(await popupTab.getLocationHref()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
+    expect(await popupTab.getUrl()).toBe(`${koaServer.baseUrl}/popup-redirect3`);
 
     const history = popupTab.navigations.history;
     expect(history).toHaveLength(4);
@@ -481,9 +484,9 @@ perfObserver.observe({ type: 'largest-contentful-paint', buffered: true });
       `${koaServer.baseUrl}/popup-redirect3`,
     ]);
 
-    expect(history[1].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
-    expect(history[2].stateChanges.has(LocationStatus.HttpRedirected)).toBe(true);
-    expect(history[3].stateChanges.has('ContentPaint')).toBe(true);
+    expect(history[1].statusChanges.has(LocationStatus.HttpRedirected)).toBe(true);
+    expect(history[2].statusChanges.has(LocationStatus.HttpRedirected)).toBe(true);
+    expect(history[3].statusChanges.has('ContentPaint')).toBe(true);
   });
 
   it('should return the last redirected url as the "resource" when a goto redirects', async () => {
@@ -528,9 +531,11 @@ describe('PaintingStable tests', () => {
 
     await tab.goto(`${koaServer.baseUrl}/stable-paint1`);
     await tab.waitForLoad(LocationStatus.PaintingStable);
+    await expect(tab.isPaintingStable()).resolves.toBeTruthy();
+    await expect(tab.isAllContentLoaded()).resolves.not.toBeTruthy();
     if (completeLongScript) completeLongScript();
-    expect(tab.navigations.top.stateChanges.has('Load')).toBe(false);
-    expect(tab.navigations.top.stateChanges.has('ContentPaint')).toBe(true);
+    expect(tab.navigations.top.statusChanges.has(LoadStatus.AllContentLoaded)).toBe(false);
+    expect(tab.navigations.top.statusChanges.has('ContentPaint')).toBe(true);
   });
 
   it('should trigger painting stable once a single page app is loaded', async () => {

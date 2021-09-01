@@ -1,5 +1,5 @@
 import Log from '@ulixee/commons/lib/Logger';
-import { ILocationTrigger, IPipelineStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
@@ -17,13 +17,14 @@ import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import INodePointer from 'awaited-dom/base/INodePointer';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
+
 import { getNodeIdFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import * as Os from 'os';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
+import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -134,7 +135,10 @@ export default class FrameEnvironment {
       this.getChildFrameEnvironment,
       this.getCookies,
       this.getJsValue,
-      this.getLocationHref,
+      this.getUrl,
+      this.isAllContentLoaded,
+      this.isDomContentLoaded,
+      this.isPaintingStable,
       this.interact,
       this.removeCookie,
       this.setCookie,
@@ -285,8 +289,20 @@ export default class FrameEnvironment {
     );
   }
 
-  public getLocationHref(): Promise<string> {
-    return Promise.resolve(this.navigations.currentUrl || this.puppetFrame.url);
+  public getUrl(): string {
+    return this.navigations.currentUrl || this.puppetFrame.url;
+  }
+
+  public isPaintingStable(): boolean {
+    return this.navigations.hasLoadStatus(LoadStatus.PaintingStable);
+  }
+
+  public isDomContentLoaded(): boolean {
+    return this.navigations.hasLoadStatus(LoadStatus.DomContentLoaded);
+  }
+
+  public isAllContentLoaded(): boolean {
+    return this.navigations.hasLoadStatus(LoadStatus.AllContentLoaded);
   }
 
   public async getCookies(): Promise<ICookie[]> {
@@ -356,7 +372,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     return this.waitForDom(jsPath, options);
   }
 
-  public waitForLoad(status: IPipelineStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
     return this.navigationsObserver.waitForLoad(status, options);
   }
 
@@ -443,7 +459,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
     for (const [event, url, timestamp] of loadEvents) {
       const incomingStatus = pageStateToLoadStatus[event];
 
-      this.navigations.onLoadStateChanged(incomingStatus, url, null, new Date(timestamp));
+      this.navigations.onLoadStatusChanged(incomingStatus, url, null, new Date(timestamp));
     }
 
     this.sessionState.captureDomEvents(
@@ -565,13 +581,13 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 
   private onFrameLifecycle(event: IPuppetFrameEvents['frame-lifecycle']): void {
     const lowerEventName = event.name.toLowerCase();
-    let status: LoadStatus.Load | LoadStatus.DomContentLoaded;
+    let status: LoadStatus.AllContentLoaded | LoadStatus.DomContentLoaded;
 
-    if (lowerEventName === 'load') status = LoadStatus.Load;
+    if (lowerEventName === 'load') status = LoadStatus.AllContentLoaded;
     else if (lowerEventName === 'domcontentloaded') status = LoadStatus.DomContentLoaded;
 
     if (status) {
-      this.navigations.onLoadStateChanged(status, event.frame.url, event.loaderId);
+      this.navigations.onLoadStatusChanged(status, event.frame.url, event.loaderId);
     }
   }
 
@@ -602,7 +618,7 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
 }
 
 const pageStateToLoadStatus = {
-  LargestContentfulPaint: LoadStatus.ContentPaint,
+  LargestContentfulPaint: ContentPaint,
   DOMContentLoaded: LoadStatus.DomContentLoaded,
-  load: LoadStatus.Load,
+  load: LoadStatus.AllContentLoaded,
 };

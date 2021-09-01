@@ -362,12 +362,13 @@ export default class ConnectionToClient extends TypedEventEmitter<{
 
     /////// Frame Functions
     if (target === 'FrameEnvironment') {
-      const frameEnvironment =
-        tab.frameEnvironmentsById.get(meta.frameId) ?? tab.mainFrameEnvironment;
+      const frameEnvironment = meta.frameId
+        ? tab.frameEnvironmentsById.get(meta.frameId)
+        : tab.mainFrameEnvironment;
 
       if (!frameEnvironment || (meta.frameId && !tab.frameEnvironmentsById.has(meta.frameId))) {
         return new Error(
-          `The requested frame environment for this command (${command}) is not longer available`,
+          `The requested frame environment for this command (${command}) is no longer available`,
         );
       }
 

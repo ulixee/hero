@@ -32,6 +32,38 @@ Returns a list of [Frames](/docs/basic-interfaces/frame-environment) loaded for 
 
 #### **Type**: [`Promise<Frame[]>`](/docs/basic-interfaces/frame-environment).
 
+### tab.isAllContentLoaded {#is-all-content-loaded}
+
+`True` if the "load" event has triggered in the mainFrameEnvironment.
+
+NOTE: this event does not fire in some circumstances (such as a long-loading asset). You frequently just want to know if the page has loaded for a user (see [isPaintingStable](#is-painting-stable)). 
+
+Wait for this event to trigger with [waitForLoad(AllContentLoaded)](#wait-for-load).
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [tab.mainFrameEnvironment.isAllContentLoaded](/docs/basic-interfaces/frame-environment#is-all-content-loaded)
+
+### tab.isDomContentLoaded {#is-dom-content-loaded}
+
+`True` if the "DOMContentLoaded" event has triggered in the mainFrameEnvironment.
+
+Wait for this event to trigger with [waitForLoad(DomContentLoaded)](#wait-for-load)
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [tab.mainFrameEnvironment.isDomContentLoaded](/docs/basic-interfaces/frame-environment#is-dom-content-loaded)
+
+### tab.isPaintingStable {#is-painting-stable}
+
+`True` if the page has loaded the main content in the mainFrameEnvironment above the fold. Works on javascript-rendered pages. 
+
+Wait for this event to trigger with [waitForPaintingStable()](#wait-for-painting-stable)
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [tab.mainFrameEnvironment.isPaintingStable](/docs/basic-interfaces/frame-environment#is-painting-stable)
+
 ### tab.lastCommandId {#lastCommandId}
 
 An execution point that refers to a command run on this Hero instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.

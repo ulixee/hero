@@ -14,7 +14,7 @@ import {
   createSuperDocument,
 } from 'awaited-dom/impl/create';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
 import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
@@ -51,6 +51,9 @@ export interface IState {
 const propertyKeys: (keyof FrameEnvironment)[] = [
   'frameId',
   'url',
+  'isPaintingStable',
+  'isAllContentLoaded',
+  'isDomContentLoaded',
   'name',
   'parentFrameId',
   'cookieStorage',
@@ -79,6 +82,18 @@ export default class FrameEnvironment {
 
   public get url(): Promise<string> {
     return getCoreFrameEnvironment(this).then(x => x.getUrl());
+  }
+
+  public get isPaintingStable(): Promise<boolean> {
+    return getCoreFrameEnvironment(this).then(x => x.isPaintingStable());
+  }
+
+  public get isDomContentLoaded(): Promise<boolean> {
+    return getCoreFrameEnvironment(this).then(x => x.isDomContentLoaded());
+  }
+
+  public get isAllContentLoaded(): Promise<boolean> {
+    return getCoreFrameEnvironment(this).then(x => x.isAllContentLoaded());
   }
 
   public get name(): Promise<string> {
@@ -160,7 +175,7 @@ export default class FrameEnvironment {
     await coreFrame.waitForLoad(LocationStatus.PaintingStable, options);
   }
 
-  public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {
+  public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
     const coreFrame = await getCoreFrameEnvironment(this);
     await coreFrame.waitForLoad(status, options);
   }

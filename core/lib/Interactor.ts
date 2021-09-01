@@ -103,7 +103,7 @@ export default class Interactor implements IInteractionsHelper {
   public play(interactions: IInteractionGroups, resolvablePromise: IResolvablePromise<any>): void {
     const finalInteractions = Interactor.injectScrollToPositions(interactions);
 
-    this.preInteractionPaintStableStatus = this.frameEnvironment.navigationsObserver.getPaintStableStatus();
+    this.preInteractionPaintStableStatus = this.frameEnvironment.navigations.getPaintStableStatus();
     this.plugins
       .playInteractions(finalInteractions, this.playInteraction.bind(this, resolvablePromise), this)
       .then(resolvablePromise.resolve)
@@ -159,9 +159,7 @@ export default class Interactor implements IInteractionsHelper {
     };
   }
 
-  public async createMouseupTrigger(
-    nodeId: number,
-  ): Promise<{
+  public async createMouseupTrigger(nodeId: number): Promise<{
     didTrigger: (mousePosition: IMousePosition, throwOnFail?: boolean) => Promise<IMouseUpResult>;
   }> {
     assert(nodeId, 'nodeId should not be null');

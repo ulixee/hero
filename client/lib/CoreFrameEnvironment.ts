@@ -1,6 +1,6 @@
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { ILocationStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
 import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { ICookie } from '@ulixee/hero-interfaces/ICookie';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
@@ -65,7 +65,19 @@ export default class CoreFrameEnvironment {
   }
 
   public async getUrl(): Promise<string> {
-    return await this.commandQueue.run('FrameEnvironment.getLocationHref');
+    return await this.commandQueue.run('FrameEnvironment.getUrl');
+  }
+
+  public async isPaintingStable(): Promise<boolean> {
+    return await this.commandQueue.run('FrameEnvironment.isPaintingStable');
+  }
+
+  public async isDomContentLoaded(): Promise<boolean> {
+    return await this.commandQueue.run('FrameEnvironment.isDomContentLoaded');
+  }
+
+  public async isAllContentLoaded(): Promise<boolean> {
+    return await this.commandQueue.run('FrameEnvironment.isAllContentLoaded');
   }
 
   public async interact(interactionGroups: IInteractionGroups): Promise<void> {
@@ -99,7 +111,7 @@ export default class CoreFrameEnvironment {
     await this.commandQueue.run('FrameEnvironment.waitForElement', jsPath, opts);
   }
 
-  public async waitForLoad(status: ILocationStatus, opts: IWaitForOptions): Promise<void> {
+  public async waitForLoad(status: ILoadStatus, opts: IWaitForOptions): Promise<void> {
     await this.commandQueue.run('FrameEnvironment.waitForLoad', status, opts);
   }
 

@@ -6,7 +6,7 @@ import SuperDocument from 'awaited-dom/impl/super-klasses/SuperDocument';
 import Storage from 'awaited-dom/impl/official-klasses/Storage';
 import CSSStyleDeclaration from 'awaited-dom/impl/official-klasses/CSSStyleDeclaration';
 import Request from 'awaited-dom/impl/official-klasses/Request';
-import { ILocationTrigger, LocationStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger } from '@ulixee/hero-interfaces/Location';
 import IWaitForResourceOptions from '@ulixee/hero-interfaces/IWaitForResourceOptions';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
 import Response from 'awaited-dom/impl/official-klasses/Response';
@@ -59,6 +59,9 @@ const propertyKeys: (keyof Tab)[] = [
   'lastCommandId',
   'tabId',
   'url',
+  'isPaintingStable',
+  'isAllContentLoaded',
+  'isDomContentLoaded',
   'cookieStorage',
   'localStorage',
   'sessionStorage',
@@ -104,6 +107,18 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
 
   public get url(): Promise<string> {
     return this.mainFrameEnvironment.url;
+  }
+
+  public get isPaintingStable(): Promise<boolean> {
+    return this.mainFrameEnvironment.isPaintingStable;
+  }
+
+  public get isDomContentLoaded(): Promise<boolean> {
+    return this.mainFrameEnvironment.isDomContentLoaded;
+  }
+
+  public get isAllContentLoaded(): Promise<boolean> {
+    return this.mainFrameEnvironment.isAllContentLoaded;
   }
 
   public get mainFrameEnvironment(): FrameEnvironment {
@@ -206,7 +221,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
     return await this.mainFrameEnvironment.waitForPaintingStable(options);
   }
 
-  public async waitForLoad(status: LocationStatus, options?: IWaitForOptions): Promise<void> {
+  public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
     return await this.mainFrameEnvironment.waitForLoad(status, options);
   }
 

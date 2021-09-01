@@ -10,7 +10,7 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log, { ILogEntry, LogEvents, loggerSessionIdNames } from '@ulixee/commons/lib/Logger';
 import IViewport from '@ulixee/hero-interfaces/IViewport';
-import INavigation, { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
+import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import IScriptInstanceMeta from '@ulixee/hero-interfaces/IScriptInstanceMeta';
 import IWebsocketResourceMessage from '@ulixee/hero-interfaces/IWebsocketResourceMessage';
 import type { IPuppetContextEvents } from '@ulixee/hero-interfaces/IPuppetContext';
@@ -22,6 +22,7 @@ import { IDomChangeEvent } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import injectedSourceUrl from '@ulixee/hero-interfaces/injectedSourceUrl';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IDeviceProfile from '@ulixee/hero-interfaces/IDeviceProfile';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import ResourcesTable from '../models/ResourcesTable';
 import SessionsDb from '../dbs/SessionsDb';
 import SessionDb from '../dbs/SessionDb';
@@ -60,9 +61,9 @@ export default class SessionState {
     [browserRequestId: string]: { resourceId: number; url: string }[];
   } = {};
 
-  private lastErrorTime?: Date;
+  private lastErrorTime?: number;
   private closeDate?: Date;
-  private lastNavigationTime?: Date;
+  private lastNavigationTime?: number;
   private hasLoadedAnyPage = false;
 
   private isClosing = false;
@@ -163,7 +164,7 @@ export default class SessionState {
   }
 
   public stopWebsocketMessages(
-    resourceId: string,
+    resourceId: number,
     listenerFn: (message: IWebsocketMessage) => any,
   ): void {
     const listeners = this.websocketListeners[resourceId];
@@ -444,7 +445,7 @@ export default class SessionState {
       if (entry.action === 'Window.runCommand') entry.data = { id: entry.data.id };
       if (entry.action === 'Window.ranCommand') entry.data = null;
       if (entry.level === 'error') {
-        this.lastErrorTime = entry.timestamp;
+        this.lastErrorTime = entry.timestamp.getTime();
       }
       this.db.sessionLogs.insert(entry);
     }
@@ -466,12 +467,12 @@ export default class SessionState {
   public recordNavigation(navigation: INavigation) {
     this.db.frameNavigations.insert(navigation);
     if (
-      navigation.stateChanges.has(LoadStatus.Load) ||
-      navigation.stateChanges.has(LoadStatus.ContentPaint)
+      navigation.statusChanges.has(LoadStatus.AllContentLoaded) ||
+      navigation.statusChanges.has(ContentPaint)
     ) {
       this.hasLoadedAnyPage = true;
     }
-    for (const date of navigation.stateChanges.values()) {
+    for (const date of navigation.statusChanges.values()) {
       if (date > this.lastNavigationTime) this.lastNavigationTime = date;
     }
     if (navigation.initiatedTime) this.lastNavigationTime = navigation.initiatedTime;
@@ -483,16 +484,16 @@ export default class SessionState {
     lastCommandName: string;
     closeDate: Date | null;
   } {
-    let lastSuccessDate = this.createDate;
+    let lastSuccessDate = this.createDate?.getTime();
 
     if (!this.lastNavigationTime) {
       const lastNavigation = this.db.frameNavigations.last();
       if (lastNavigation && lastNavigation.initiatedTime) {
-        this.lastNavigationTime = new Date(
+        this.lastNavigationTime =
           lastNavigation.loadTime ??
-            lastNavigation.contentPaintedTime ??
-            lastNavigation.initiatedTime,
-        );
+          lastNavigation.contentPaintedTime ??
+          lastNavigation.initiatedTime;
+
         this.hasLoadedAnyPage = !!lastNavigation.initiatedTime || !!lastNavigation.loadTime;
       }
     }
@@ -504,7 +505,7 @@ export default class SessionState {
     for (let i = this.commands.length - 1; i >= 0; i -= 1) {
       const command = this.commands[i];
       if (!command.endDate) continue;
-      const endDate = new Date(command.endDate);
+      const endDate = command.endDate;
       if (
         this.hasLoadedAnyPage &&
         endDate > lastSuccessDate &&

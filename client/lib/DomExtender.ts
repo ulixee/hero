@@ -12,9 +12,9 @@ const { getState } = StateMachine<ISuperElement, ISuperElementProperties>();
 interface IBaseExtend {
   $: {
     click: () => Promise<void>;
-    type: () => Promise<void>;
+    type: (...typeInteractions: ITypeInteraction[]) => Promise<void>;
     waitForVisible: () => Promise<void>;
-  }
+  };
 }
 
 declare module 'awaited-dom/base/interfaces/super' {
@@ -28,12 +28,12 @@ for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
     get: function $() {
       const click = async (): Promise<void> => {
         const { awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame
+        const coreFrame = await awaitedOptions?.coreFrame;
         await Interactor.run(coreFrame, [{ click: this }]);
       };
       const type = async (...typeInteractions: ITypeInteraction[]): Promise<void> => {
         const { awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame
+        const coreFrame = await awaitedOptions?.coreFrame;
         await click();
         await Interactor.run(
           coreFrame,
@@ -42,11 +42,11 @@ for (const Super of [SuperElement, SuperNode, SuperHTMLElement]) {
       };
       const waitForVisible = async (): Promise<void> => {
         const { awaitedPath, awaitedOptions } = getState(this);
-        const coreFrame = await awaitedOptions?.coreFrame
+        const coreFrame = await awaitedOptions?.coreFrame;
         await coreFrame.waitForElement(awaitedPath.toJSON(), { waitForVisible: true });
       };
 
       return { click, type, waitForVisible };
-    }
+    },
   });
 }
