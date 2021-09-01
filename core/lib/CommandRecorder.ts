@@ -7,7 +7,7 @@ import Tab from './Tab';
 import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
-type AsyncFunc = (...args: any[]) => Promise<any>;
+type AsyncFunc = (...args: any[]) => Promise<any> | any;
 
 export default class CommandRecorder {
   public readonly fnNames = new Set<string>();

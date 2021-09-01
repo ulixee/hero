@@ -1,13 +1,14 @@
 import INavigation, {
-  LoadStatus,
+  ContentPaint,
   NavigationReason,
-  NavigationState,
+  NavigationStatus,
 } from '@ulixee/hero-interfaces/INavigation';
-import { LocationStatus } from '@ulixee/hero-interfaces/Location';
 import { createPromise } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
+import { ILoadStatus, LoadStatus, LoadStatusPipeline } from '@ulixee/hero-interfaces/Location';
+import * as moment from 'moment';
 import SessionState from './SessionState';
 
 export interface IFrameNavigationEvents {
@@ -15,8 +16,8 @@ export interface IFrameNavigationEvents {
   'status-change': {
     id: number;
     url: string;
-    stateChanges: { [state: string]: Date };
-    newStatus: NavigationState;
+    statusChanges: { [status: string]: Date };
+    newStatus: NavigationStatus;
   };
 }
 
@@ -54,6 +55,48 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     return this.history.some(x => x.requestedUrl === url && x.navigationReason === 'goto');
   }
 
+  public hasLoadStatus(status: ILoadStatus): boolean {
+    if (!this.top) return false;
+
+    const statuses = this.top.statusChanges;
+
+    if (statuses.has(status)) {
+      return true;
+    }
+
+    if (status === LoadStatus.DomContentLoaded) {
+      return statuses.has(LoadStatus.DomContentLoaded) || statuses.has(LoadStatus.AllContentLoaded);
+    }
+
+    if (status === LoadStatus.PaintingStable) {
+      return this.getPaintStableStatus().isStable;
+    }
+
+    return false;
+  }
+
+  public getPaintStableStatus(): { isStable: boolean; timeUntilReadyMs?: number } {
+    const top = this.top;
+    if (!top) return { isStable: false };
+
+    // need to wait for both load + painting stable, or wait 3 seconds after either one
+    const loadDate = top.statusChanges.get(LoadStatus.AllContentLoaded);
+    const contentPaintedDate = top.statusChanges.get(ContentPaint);
+
+    if (contentPaintedDate) return { isStable: true };
+    if (!loadDate && !contentPaintedDate) return { isStable: false };
+
+    // NOTE: LargestContentfulPaint, which currently drives PaintingStable will NOT trigger if the page
+    // doesn't have any "contentful" items that are eligible (image, headers, divs, paragraphs that fill the page)
+
+    // have contentPaintedDate date, but no load
+    const timeUntilReadyMs = moment().diff(contentPaintedDate ?? loadDate, 'milliseconds');
+    return {
+      isStable: timeUntilReadyMs >= 3e3,
+      timeUntilReadyMs: Math.min(3e3, 3e3 - timeUntilReadyMs),
+    };
+  }
+
   public onNavigationRequested(
     reason: NavigationReason,
     url: string,
@@ -68,8 +111,8 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       loaderId,
       startCommandId: commandId,
       navigationReason: reason,
-      initiatedTime: new Date(),
-      stateChanges: new Map(),
+      initiatedTime: Date.now(),
+      statusChanges: new Map(),
       resourceId: createPromise(),
       browserRequestId,
     };
@@ -84,15 +127,15 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       if (currentTop) {
         if (url === currentTop.finalUrl) return;
 
-        for (const state of currentTop.stateChanges.keys()) {
-          if (isLoadState(state)) {
-            nextTop.stateChanges.set(state, new Date());
+        for (const state of currentTop.statusChanges.keys()) {
+          if (isPageLoadedStatus(state)) {
+            nextTop.statusChanges.set(state, Date.now());
           }
         }
         nextTop.resourceId.resolve(currentTop.resourceId.promise);
       } else {
-        nextTop.stateChanges.set(LoadStatus.Load, nextTop.initiatedTime);
-        nextTop.stateChanges.set(LoadStatus.ContentPaint, nextTop.initiatedTime);
+        nextTop.statusChanges.set(LoadStatus.AllContentLoaded, nextTop.initiatedTime);
+        nextTop.statusChanges.set(ContentPaint, nextTop.initiatedTime);
         nextTop.resourceId.resolve(-1);
       }
       shouldPublishLocationChange = true;
@@ -105,10 +148,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     if (shouldPublishLocationChange) {
       this.emit('status-change', {
         id: nextTop.id,
-        newStatus: LoadStatus.ContentPaint,
+        newStatus: ContentPaint,
         url,
         // @ts-ignore
-        stateChanges: Object.fromEntries(nextTop.stateChanges),
+        statusChanges: Object.fromEntries(nextTop.statusChanges),
       });
     }
     return nextTop;
@@ -147,14 +190,14 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     }
     // if we already have this status at top level, this is a new nav
     else if (
-      top.stateChanges.has(LocationStatus.HttpRequested) === true &&
+      top.statusChanges.has(LoadStatus.HttpRequested) === true &&
       // add new entries for redirects
       (!this.loaderIds.has(loaderId) || redirectedFromUrl)
     ) {
       this.onNavigationRequested(reason, url, lastCommandId, loaderId, browserRequestId);
     }
 
-    this.changeNavigationState(LocationStatus.HttpRequested, loaderId);
+    this.changeNavigationStatus(LoadStatus.HttpRequested, loaderId);
   }
 
   public onHttpResponded(browserRequestId: string, url: string, loaderId: string): void {
@@ -163,7 +206,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     const navigation = this.findMatchingNavigation(loaderId);
     navigation.finalUrl = url;
 
-    this.recordStatusChange(navigation, LocationStatus.HttpResponded);
+    this.recordStatusChange(navigation, LoadStatus.HttpResponded);
   }
 
   public onResourceLoaded(resourceId: number, statusCode: number, error?: Error): void {
@@ -183,14 +226,14 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     top.resourceId.resolve(resourceId);
   }
 
-  public onLoadStateChanged(
-    incomingStatus: LoadStatus.DomContentLoaded | LoadStatus.Load,
+  public onLoadStatusChanged(
+    incomingStatus: LoadStatus.DomContentLoaded | LoadStatus.AllContentLoaded,
     url: string,
     loaderId: string,
     statusChangeDate?: Date,
   ): void {
     if (url === 'about:blank') return;
-    this.changeNavigationState(incomingStatus, loaderId, statusChangeDate);
+    this.changeNavigationStatus(incomingStatus, loaderId, statusChangeDate?.getTime());
   }
 
   public updateNavigationReason(url: string, reason: NavigationReason): void {
@@ -225,7 +268,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     for (let i = this.history.length - 1; i >= 0; i -= 1) {
       navigation = this.history[i];
       if (
-        navigation.stateChanges.has(LoadStatus.DomContentLoaded) &&
+        navigation.statusChanges.has(LoadStatus.DomContentLoaded) &&
         navigation.navigationReason !== 'inPage' &&
         !!navigation.finalUrl
       ) {
@@ -266,7 +309,7 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
     if (top.requestedUrl === requestedUrl && !top.finalUrl && !top.loaderId) {
       top.loaderId = loaderId;
       top.finalUrl = finalUrl;
-      this.recordStatusChange(top, LocationStatus.HttpRedirected);
+      this.recordStatusChange(top, LoadStatus.HttpRedirected);
       return top;
     }
 
@@ -275,25 +318,25 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
       const navigation = this.history[i];
       if (navigation && navigation.loaderId === loaderId) {
         if (
-          !navigation.stateChanges.has(LocationStatus.HttpRedirected) &&
+          !navigation.statusChanges.has(LoadStatus.HttpRedirected) &&
           navigation.requestedUrl === requestedUrl
         ) {
           navigation.finalUrl = finalUrl;
-          this.recordStatusChange(navigation, LocationStatus.HttpRedirected);
+          this.recordStatusChange(navigation, LoadStatus.HttpRedirected);
           return navigation;
         }
       }
     }
   }
 
-  private changeNavigationState(
-    newStatus: NavigationState,
+  private changeNavigationStatus(
+    newStatus: NavigationStatus,
     loaderId?: string,
-    statusChangeDate?: Date,
+    statusChangeDate?: number,
   ): void {
     const navigation = this.findMatchingNavigation(loaderId);
     if (!navigation) return;
-    if (navigation.stateChanges.has(newStatus)) return;
+    if (navigation.statusChanges.has(newStatus)) return;
 
     this.recordStatusChange(navigation, newStatus, statusChangeDate);
     if (loaderId) this.loaderIds.add(loaderId);
@@ -301,16 +344,16 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
 
   private recordStatusChange(
     navigation: INavigation,
-    newStatus: NavigationState,
-    statusChangeDate?: Date,
+    newStatus: NavigationStatus,
+    statusChangeDate?: number,
   ): void {
-    navigation.stateChanges.set(newStatus, statusChangeDate ?? new Date());
+    navigation.statusChanges.set(newStatus, statusChangeDate ?? Date.now());
 
     this.emit('status-change', {
       id: navigation.id,
       url: navigation.finalUrl ?? navigation.requestedUrl,
       // @ts-ignore - Typescript refuses to recognize this function
-      stateChanges: Object.fromEntries(navigation.stateChanges),
+      statusChanges: Object.fromEntries(navigation.statusChanges),
       newStatus,
     });
     this.captureNavigationUpdate(navigation);
@@ -321,10 +364,10 @@ export default class FrameNavigations extends TypedEventEmitter<IFrameNavigation
   }
 }
 
-function isLoadState(status: NavigationState): boolean {
+function isPageLoadedStatus(status: NavigationStatus): boolean {
   return (
-    status === LoadStatus.ContentPaint ||
-    status === LoadStatus.Load ||
+    status === ContentPaint ||
+    status === LoadStatus.AllContentLoaded ||
     status === LoadStatus.DomContentLoaded
   );
 }

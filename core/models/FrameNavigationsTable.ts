@@ -1,6 +1,7 @@
 import { Database as SqliteDatabase } from 'better-sqlite3';
-import INavigation, { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
+import INavigation, { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
 import SqliteTable from '@ulixee/commons/lib/SqliteTable';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 
 export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationRecord> {
   private idCounter = 0;
@@ -43,13 +44,13 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
       navigation.finalUrl,
       navigation.navigationReason,
       navigation.loaderId,
-      navigation.initiatedTime.getTime(),
-      navigation.stateChanges.get(LoadStatus.HttpRequested)?.getTime(),
-      navigation.stateChanges.get(LoadStatus.HttpResponded)?.getTime(),
-      navigation.stateChanges.get(LoadStatus.HttpRedirected)?.getTime(),
-      navigation.stateChanges.get(LoadStatus.DomContentLoaded)?.getTime(),
-      navigation.stateChanges.get(LoadStatus.Load)?.getTime(),
-      navigation.stateChanges.get(LoadStatus.ContentPaint)?.getTime(),
+      navigation.initiatedTime,
+      navigation.statusChanges.get(LoadStatus.HttpRequested),
+      navigation.statusChanges.get(LoadStatus.HttpResponded),
+      navigation.statusChanges.get(LoadStatus.HttpRedirected),
+      navigation.statusChanges.get(LoadStatus.DomContentLoaded),
+      navigation.statusChanges.get(LoadStatus.AllContentLoaded),
+      navigation.statusChanges.get(ContentPaint),
     ];
     this.queuePendingInsert(record);
   }
@@ -69,7 +70,7 @@ export interface IFrameNavigationRecord {
   loaderId: string;
   startCommandId: number;
   navigationReason: string;
-  initiatedTime: Date;
+  initiatedTime: number;
   httpRequestedTime: number;
   httpRespondedTime: number;
   httpRedirectedTime?: number;

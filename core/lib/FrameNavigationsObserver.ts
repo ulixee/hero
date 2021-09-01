@@ -1,16 +1,18 @@
 import { assert, createPromise } from '@ulixee/commons/lib/utils';
-import type {
-  ILocationStatus,
+import {
+  ILoadStatus,
   ILocationTrigger,
-  IPipelineStatus,
+  LoadStatus,
+  LoadStatusPipeline,
+  LocationStatus,
+  LocationTrigger,
 } from '@ulixee/hero-interfaces/Location';
-import { LocationStatus, LocationTrigger, PipelineStatus } from '@ulixee/hero-interfaces/Location';
-import { LoadStatus, NavigationReason } from '@ulixee/hero-interfaces/INavigation';
+
+import { ContentPaint, NavigationReason } from '@ulixee/hero-interfaces/INavigation';
 import type ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import type IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
 import type IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import * as moment from 'moment';
 import type { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import type FrameNavigations from './FrameNavigations';
 
@@ -23,7 +25,7 @@ export default class FrameNavigationsObserver {
   private waitingForLoadTimeout: NodeJS.Timeout;
   private resourceIdResolvable: IResolvablePromise<number>;
   private statusTriggerResolvable: IResolvablePromise<void>;
-  private statusTrigger: ILocationStatus;
+  private statusTrigger: LocationStatus;
   private statusTriggerStartCommandId: number;
   private logger: IBoundLog;
 
@@ -71,25 +73,16 @@ export default class FrameNavigationsObserver {
     return this.createStatusTriggeredPromise(status, options.timeoutMs, sinceCommandId);
   }
 
-  public waitForLoad(status: IPipelineStatus, options: IWaitForOptions = {}): Promise<void> {
-    assert(PipelineStatus[status], `Invalid load status: ${status}`);
+  public waitForLoad(status: ILoadStatus, options: IWaitForOptions = {}): Promise<void> {
+    assert(LoadStatus[status], `Invalid load status: ${status}`);
 
     if (options.sinceCommandId) {
       throw new Error('Not implemented');
     }
 
     const top = this.navigations.top;
-    if (top) {
-      if (top.stateChanges.has(status as LoadStatus)) {
-        return;
-      }
-      if (status === LocationStatus.DomContentLoaded && top.stateChanges.has(LoadStatus.Load)) {
-        return;
-      }
-      if (status === LocationStatus.PaintingStable && this.getPaintStableStatus().isStable) {
-        return;
-      }
-    }
+    if (this.navigations.hasLoadStatus(status)) return;
+
     const promise = this.createStatusTriggeredPromise(status, options.timeoutMs);
 
     if (top) this.onLoadStatusChange();
@@ -97,7 +90,7 @@ export default class FrameNavigationsObserver {
   }
 
   public waitForReady(): Promise<void> {
-    return this.waitForLoad(LocationStatus.DomContentLoaded);
+    return this.waitForLoad(LoadStatus.DomContentLoaded);
   }
 
   public async waitForNavigationResourceId(): Promise<number> {
@@ -122,28 +115,6 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  public getPaintStableStatus(): { isStable: boolean; timeUntilReadyMs?: number } {
-    const top = this.navigations.top;
-    if (!top) return { isStable: false };
-
-    // need to wait for both load + painting stable, or wait 3 seconds after either one
-    const loadDate = top.stateChanges.get(LoadStatus.Load);
-    const contentPaintedDate = top.stateChanges.get(LoadStatus.ContentPaint);
-
-    if (contentPaintedDate) return { isStable: true };
-    if (!loadDate && !contentPaintedDate) return { isStable: false };
-
-    // NOTE: LargestContentfulPaint, which currently drives PaintingStable will NOT trigger if the page
-    // doesn't have any "contentful" items that are eligible (image, headers, divs, paragraphs that fill the page)
-
-    // have contentPaintedDate date, but no load
-    const timeUntilReadyMs = moment().diff(contentPaintedDate ?? loadDate, 'milliseconds');
-    return {
-      isStable: timeUntilReadyMs >= 3e3,
-      timeUntilReadyMs: Math.min(3e3, 3e3 - timeUntilReadyMs),
-    };
-  }
-
   private onLoadStatusChange(): void {
     if (
       this.statusTrigger === LocationTrigger.change ||
@@ -155,25 +126,25 @@ export default class FrameNavigationsObserver {
       return;
     }
 
-    const loadTrigger = PipelineStatus[this.statusTrigger];
+    const loadTrigger = LoadStatusPipeline[this.statusTrigger];
     if (!this.statusTriggerResolvable || this.statusTriggerResolvable.isResolved || !loadTrigger)
       return;
 
-    if (this.statusTrigger === LocationStatus.PaintingStable) {
+    if (this.statusTrigger === LoadStatus.PaintingStable) {
       this.waitForPageLoaded();
       return;
     }
 
     // otherwise just look for state changes > the trigger
-    for (const state of this.navigations.top.stateChanges.keys()) {
+    for (const status of this.navigations.top.statusChanges.keys()) {
       // don't resolve states for redirected
-      if (state === LocationStatus.HttpRedirected) continue;
-      let pipelineStatus = PipelineStatus[state as IPipelineStatus];
-      if (state === LoadStatus.Load) {
-        pipelineStatus = PipelineStatus.AllContentLoaded;
+      if (status === LoadStatus.HttpRedirected) continue;
+      let pipelineStatus: number = LoadStatusPipeline[status];
+      if (status === LoadStatus.AllContentLoaded) {
+        pipelineStatus = LoadStatusPipeline.AllContentLoaded;
       }
       if (pipelineStatus >= loadTrigger) {
-        this.resolvePendingStatus(state);
+        this.resolvePendingStatus(status);
         return;
       }
     }
@@ -182,13 +153,13 @@ export default class FrameNavigationsObserver {
   private waitForPageLoaded(): void {
     clearTimeout(this.waitingForLoadTimeout);
 
-    const { isStable, timeUntilReadyMs } = this.getPaintStableStatus();
+    const { isStable, timeUntilReadyMs } = this.navigations.getPaintStableStatus();
 
     if (isStable) this.resolvePendingStatus('PaintingStable + Load');
 
     if (!isStable && timeUntilReadyMs) {
-      const loadDate = this.navigations.top.stateChanges.get(LoadStatus.Load);
-      const contentPaintDate = this.navigations.top.stateChanges.get(LoadStatus.ContentPaint);
+      const loadDate = this.navigations.top.statusChanges.get(LoadStatus.AllContentLoaded);
+      const contentPaintDate = this.navigations.top.statusChanges.get(ContentPaint);
       this.waitingForLoadTimeout = setTimeout(
         () =>
           this.resolvePendingStatus(
@@ -199,7 +170,7 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  private resolvePendingStatus(resolvedWithStatus: string): void {
+  private resolvePendingStatus(resolvedWithStatus: LoadStatus | string): void {
     if (this.statusTriggerResolvable && !this.statusTriggerResolvable?.isResolved) {
       this.logger.info(`Resolving pending "${this.statusTrigger}" with trigger`, {
         resolvedWithStatus,
@@ -249,9 +220,9 @@ export default class FrameNavigationsObserver {
       }
 
       if (
-        (history.stateChanges.has(LoadStatus.HttpResponded) ||
-          history.stateChanges.has(LoadStatus.DomContentLoaded)) &&
-        !history.stateChanges.has(LoadStatus.HttpRedirected)
+        (history.statusChanges.has(LoadStatus.HttpResponded) ||
+          history.statusChanges.has(LoadStatus.DomContentLoaded)) &&
+        !history.statusChanges.has(LoadStatus.HttpRedirected)
       ) {
         previousLoadedUrl = history.finalUrl;
       }
@@ -260,7 +231,7 @@ export default class FrameNavigationsObserver {
   }
 
   private createStatusTriggeredPromise(
-    status: ILocationStatus,
+    status: LocationStatus,
     timeoutMs: number,
     sinceCommandId?: number,
   ): Promise<void> {

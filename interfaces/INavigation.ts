@@ -1,4 +1,5 @@
-import type IResolvablePromise from '@ulixee/commons/interfaces//IResolvablePromise';
+import type IResolvablePromise from '@ulixee/commons/interfaces/IResolvablePromise';
+import { ILoadStatus } from './Location';
 
 export default interface INavigation {
   id: number;
@@ -9,24 +10,14 @@ export default interface INavigation {
   navigationError?: Error;
   startCommandId: number;
   requestedUrl: string;
-  initiatedTime: Date;
+  initiatedTime: number;
   navigationReason: NavigationReason;
   finalUrl?: string;
-  stateChanges: Map<NavigationState, Date>;
+  statusChanges: Map<NavigationStatus, number>;
 }
 
-export enum LoadStatus {
-  NavigationRequested = 'NavigationRequested',
-  HttpRequested = 'HttpRequested',
-  HttpRedirected = 'HttpRedirected',
-  HttpResponded = 'HttpResponded',
-
-  DomContentLoaded = 'DomContentLoaded',
-  Load = 'Load',
-  ContentPaint = 'ContentPaint',
-}
-
-export type NavigationState = keyof typeof LoadStatus;
+export const ContentPaint = 'ContentPaint';
+export type NavigationStatus = ILoadStatus | 'ContentPaint';
 
 export type NavigationReason =
   | DevToolsNavigationReason

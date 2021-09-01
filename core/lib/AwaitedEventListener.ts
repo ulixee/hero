@@ -71,7 +71,7 @@ export default class AwaitedEventListener {
       tab.off(type as any, listenFn);
 
       if (isWebsocketListener(listener)) {
-        tab.sessionState.stopWebsocketMessages(jsPath[1] as string, listenFn);
+        tab.sessionState.stopWebsocketMessages(Number(jsPath[1]), listenFn);
       }
     }
 

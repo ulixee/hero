@@ -137,6 +137,38 @@ NOTE: if using the default hero, this object will be populated with command line
 
 #### **Type**: Object
 
+### hero.isAllContentLoaded {#is-all-content-loaded}
+
+`True` if the "load" event has triggered on the active tab. 
+
+NOTE: this event does not fire in some circumstances (such as a long-loading asset). You frequently just want to know if the page has loaded for a user (see [isPaintingStable](#is-painting-stable)). 
+
+Wait for this event to trigger with [Tab.waitForLoad(AllContentLoaded)](/docs/basic-interfaces/tab#wait-for-load).
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [Tab.isAllContentLoaded](/docs/basic-interfaces/tab#is-all-content-loaded)
+
+### hero.isDomContentLoaded {#is-dom-content-loaded}
+
+`True` if the "DOMContentLoaded" event has triggered on the active tab.
+ 
+Wait for this event to trigger with [Tab.waitForLoad(DomContentLoaded)](/docs/basic-interfaces/tab#wait-for-load)
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [Tab.isDomContentLoaded](/docs/basic-interfaces/tab#is-dom-content-loaded)
+
+### hero.isPaintingStable {#is-painting-stable}
+
+`True` if the page has loaded the main content above the fold. Works on javascript-rendered pages. 
+
+Wait for this event to trigger with [Hero.waitForPaintingStable()](#wait-for-painting-stable)
+
+#### **Type**: `Promise<boolean>`
+
+Alias for [Tab.isPaintingStable](/docs/basic-interfaces/tab#is-painting-stable)
+
 ### hero.lastCommandId {#lastCommandId}
 
 An execution point that refers to a command run on this instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` methods to indicate a starting point to listen for changes.

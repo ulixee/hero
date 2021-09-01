@@ -18,9 +18,8 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import { IInteractionGroups } from '@ulixee/hero-interfaces/IInteractions';
 import IExecJsPathResult from '@ulixee/hero-interfaces/IExecJsPathResult';
 import IWaitForElementOptions from '@ulixee/hero-interfaces/IWaitForElementOptions';
-import { ILocationTrigger, IPipelineStatus } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, ILocationTrigger, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
-import { LoadStatus } from '@ulixee/hero-interfaces/INavigation';
 import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
@@ -323,6 +322,18 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.mainFrameEnvironment.interact(...interactionGroups);
   }
 
+  public isPaintingStable(): boolean {
+    return this.mainFrameEnvironment.isPaintingStable();
+  }
+
+  public isDomContentLoaded(): boolean {
+    return this.mainFrameEnvironment.isDomContentLoaded();
+  }
+
+  public isAllContentLoaded(): boolean {
+    return this.mainFrameEnvironment.isAllContentLoaded();
+  }
+
   public getJsValue<T>(path: string): Promise<{ value: T; type: string }> {
     return this.mainFrameEnvironment.getJsValue(path);
   }
@@ -331,15 +342,15 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return this.mainFrameEnvironment.execJsPath<T>(jsPath);
   }
 
-  public getLocationHref(): Promise<string> {
-    return this.mainFrameEnvironment.getLocationHref();
+  public getUrl(): string {
+    return this.mainFrameEnvironment.getUrl();
   }
 
   public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {
     return this.mainFrameEnvironment.waitForElement(jsPath, options);
   }
 
-  public waitForLoad(status: IPipelineStatus, options?: IWaitForOptions): Promise<void> {
+  public waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
     return this.mainFrameEnvironment.waitForLoad(status, options);
   }
 
@@ -388,7 +399,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     const backUrl = await this.puppetPage.goBack();
     this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId, backUrl);
 
-    await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
+    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, { timeoutMs });
     return this.url;
   }
 
@@ -401,7 +412,7 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     );
     const url = await this.puppetPage.goForward();
     this.navigations.assignLoaderId(navigation, this.puppetPage.mainFrame.activeLoaderId, url);
-    await this.navigationsObserver.waitForLoad('PaintingStable', { timeoutMs });
+    await this.navigationsObserver.waitForLoad(LoadStatus.PaintingStable, { timeoutMs });
     return this.url;
   }
 

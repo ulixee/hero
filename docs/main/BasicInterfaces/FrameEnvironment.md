@@ -26,6 +26,34 @@ An identifier for the frameEnvironment.
 
 #### **Type**: `Promise<string>`
 
+
+### frameEnvironment.isAllContentLoaded {#is-all-content-loaded}
+`True` if the "load" event has triggered in this frame.
+
+Wait for this event to trigger with [waitForLoad(AllContentLoaded)](#wait-for-load)
+
+#### **Type**: `Promise<boolean>`
+
+
+### frameEnvironment.isDomContentLoaded {#is-dom-content-loaded}
+
+`True` if the "DOMContentLoaded" event has triggered in this frame.
+
+Wait for this event to trigger with [waitForLoad(DomContentLoaded)](#wait-for-load)
+
+#### **Type**: `Promise<boolean>`
+
+### frameEnvironment.isPaintingStable {#is-painting-stable}
+
+`True` if this frame has loaded visible content above the fold. Works on javascript-rendered pages.
+
+NOTE: if a frame has no visible content, this property will never return true. 
+
+Wait for this event to trigger with [waitForPaintingStable()](#wait-for-painting-stable)
+
+#### **Type**: `Promise<boolean>`
+
+
 ### frameEnvironment.lastCommandId {#lastCommandId}
 
 An execution point that refers to a command run on this Hero instance (`waitForElement`, `click`, `type`, etc). Command ids can be passed to select `waitFor*` functions to indicate a starting point to listen for changes.
