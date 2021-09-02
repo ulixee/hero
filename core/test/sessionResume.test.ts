@@ -64,15 +64,16 @@ describe('sessionResume tests when resume location is currentLocation', () => {
       ]);
 
       sessionId = session.id;
-      expect(session.sessionState.commands).toHaveLength(2 * (i + 1));
+      const keepAlives = i;
+      expect(session.sessionState.commands).toHaveLength(2 * (i + 1) + keepAlives);
       // should reuse the commands from the first 2
       expect(session.sessionState.commands.filter(x => x.reusedCommandFromRun === 0)).toHaveLength(
-        session.sessionState.commands.length - 2,
+        session.sessionState.commands.length - 2 - keepAlives,
       );
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
-      await connectionToClient.closeSession({ sessionId });
+      await session.close();
       if (i === 4) {
-        await connectionToClient.terminateSession({ sessionId });
+        await session.close(true);
       }
     }
 
@@ -506,7 +507,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
       expect(playInteractionSpy).toHaveBeenCalledTimes(1);
       profile = await session.exportUserProfile();
       expect(profile.cookies).toHaveLength(2);
-      await session.close();
+      await session.close(true);
     }
     {
       playInteractionSpy.mockClear();
@@ -536,7 +537,7 @@ describe('sessionResume tests when resume location is sessionStart', () => {
         session.sessionState.commands.filter(x => x.reusedCommandFromRun !== undefined),
       ).toHaveLength(0);
 
-      const meta = await connectionToClient.getHeroMeta({ sessionId: session.id });
+      const meta = await session.getHeroMeta();
       expect(meta.locale).toBe('de');
 
       const newProfile = await session.exportUserProfile();

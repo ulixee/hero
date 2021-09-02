@@ -181,7 +181,7 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
           options.externalIds[key] = await value;
         }
       }
-      const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.create', options);
+      const sessionMeta = await this.commandQueue.run<ISessionMeta>('Core.createSession', options);
       const session = new CoreSession({ ...sessionMeta, sessionName: options.sessionName }, this);
       this.coreSessions.track(session);
       return session;

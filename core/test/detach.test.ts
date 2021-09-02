@@ -73,7 +73,7 @@ describe('basic Detach tests', () => {
 
     const bodyAfterLoad = await tab.puppetPage.evaluate(getContentScript);
 
-    const { detachedTab } = await session.detachTab(tab, 'callsite2');
+    const { detachedTab } = await session.detachTab(tab.id, 'callsite2');
     const detachedContent = await detachedTab.puppetPage.evaluate(getContentScript);
 
     expect(detachedContent).toBe(bodyAfterLoad);
@@ -110,7 +110,7 @@ describe('basic Detach tests', () => {
     const tab = Session.getTab(meta);
     await tab.goto(`${koaServer.baseUrl}/nested-detach`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
-    const { detachedTab } = await session.detachTab(tab, 'callsite1');
+    const { detachedTab } = await session.detachTab(tab.id, 'callsite1');
 
     const execJsPath = jest.spyOn(detachedTab.mainFrameEnvironment.jsPath, 'exec');
     const qsAllResult = await detachedTab.execJsPath([
@@ -156,7 +156,7 @@ describe('basic Detach tests', () => {
     const jsPaths = detachedTab.mainFrameEnvironment.jsPath.execHistory;
 
     // now should be able to create a second detached tab and replay the paths with same result
-    const { detachedTab: secondDetached } = await session.detachTab(tab, 'callsite3');
+    const { detachedTab: secondDetached } = await session.detachTab(tab.id, 'callsite3');
     const prefetch = await secondDetached.mainFrameEnvironment.jsPath.runJsPaths(jsPaths, {
       x: 0,
       y: 0,

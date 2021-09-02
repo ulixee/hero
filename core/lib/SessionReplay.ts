@@ -68,7 +68,7 @@ export default class SessionReplay {
       this.resourceLookup[key].push(resource);
     }
 
-    const options = Session.restoreOptionsFromSessionRecord({}, this.session);
+    const options = Session.restoreOptionsFromSessionRecord({}, this.session.id);
     options.sessionResume = null;
     options.showBrowserInteractions = true;
     options.showBrowser = true;

@@ -213,7 +213,7 @@ export default class GlobalPool {
     this._activeSessionCount -= 1;
 
     const wasTransferred = this.resolveWaitingConnection();
-    if (wasTransferred) {
+    if (!wasTransferred) {
       log.info('ReleasingChrome', {
         sessionId: null,
         activeSessionCount: this.activeSessionCount,

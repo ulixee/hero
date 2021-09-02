@@ -8,7 +8,7 @@ ADVICE: Unless you have access to the exact data that a browser resembles, it's 
 
 ## Special Class Properties
 
-BrowserEmulators have all the same class properties as core plugins, with one significant change, the type property` must always be set to `CorePlugin:BrowserEmulator` instead of just `CorePlugin`: 
+BrowserEmulators have all the same class properties as core plugins, with one significant change, the type property must always be set to `CorePlugin:BrowserEmulator` instead of just `CorePlugin`: 
 
 ### BrowserEmulator.type *required*
 This tells Hero the plugin is a special BrowserEmulator.
@@ -28,10 +28,12 @@ See @ulixee/default-browser-emulator for an implementation example.
 
 This is called every time a new browser engine is started, which may not be every session. A single browser engine is used across multiple sessions through isolated tabs.
 
-#### **Returns** `Promise<Object>`
-- showBrowser: boolean
-- disableGpu: boolean
-- disableDevtools: boolean
+#### **Arguments**:
+
+ - launchSettings: `object`
+    - showBrowser: `boolean` - has the user requested to show the browser
+    - disableGpu: `boolean` - has the user requested to disable the gpu
+    - disableDevtools: `boolean` - has the user requested to disable automatically showing devtools
 
 ## Special Instance Properties
 

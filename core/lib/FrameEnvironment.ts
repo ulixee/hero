@@ -37,10 +37,11 @@ import InjectedScriptError from './InjectedScriptError';
 import { IJsPathHistory, JsPath } from './JsPath';
 import InjectedScripts from './InjectedScripts';
 import { PageRecorderResultSet } from '../injected-scripts/pageEventsRecorder';
+import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
 
-export default class FrameEnvironment {
+export default class FrameEnvironment implements ICommandableTarget {
   public get session(): Session {
     return this.tab.session;
   }

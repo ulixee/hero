@@ -6,23 +6,21 @@ import Hero from '../index';
 import ConnectionToCore from '../connections/ConnectionToCore';
 
 let payloadHandler: (payload: ICoreRequestPayload) => ICoreResponsePayload = () => null;
-const outgoing = jest.fn(
-  async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-    const { command } = payload;
-    const response = payloadHandler(payload);
-    if (response) return response;
-    if (command === 'Session.create') {
-      return {
-        data: { tabId: 'tab-id', sessionId: 'session-id' },
-      };
-    }
-    if (command === 'Session.addEventListener') {
-      return {
-        data: { listenerId: 1 },
-      };
-    }
-  },
-);
+const outgoing = jest.fn(async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
+  const { command } = payload;
+  const response = payloadHandler(payload);
+  if (response) return response;
+  if (command === 'Core.createSession') {
+    return {
+      data: { tabId: 'tab-id', sessionId: 'session-id' },
+    };
+  }
+  if (command === 'Events.addEventListener') {
+    return {
+      data: { listenerId: 1 },
+    };
+  }
+});
 class Piper extends ConnectionToCore {
   async internalSendRequest(payload: ICoreRequestPayload): Promise<void> {
     const responsePayload = await outgoing(payload);

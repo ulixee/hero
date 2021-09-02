@@ -47,6 +47,7 @@ test('records a single resource for failed mitm requests', async () => {
   const tab = Session.getTab(meta);
 
   const resolvable = new Resolvable<void>();
+  const didEmit = new Resolvable<void>();
   const originalEmit = tab.puppetPage.emit.bind(tab.puppetPage);
   // @ts-ignore
   jest.spyOn(tab.puppetPage.networkManager, 'emit').mockImplementation((evt, args) => {
@@ -54,6 +55,7 @@ test('records a single resource for failed mitm requests', async () => {
     resolvable.promise.then(() => {
       originalEmit(evt as any, args);
     });
+    if (evt === 'resource-loaded') didEmit.resolve();
     return true;
   });
   const goToPromise = tab.goto(`http://localhost:2344/not-there`);
@@ -64,7 +66,8 @@ test('records a single resource for failed mitm requests', async () => {
   // @ts-ignore
   expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(0);
   resolvable.resolve();
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await didEmit.promise;
+  await new Promise(setImmediate);
   expect(session.sessionState.getResources(meta.tabId)).toHaveLength(1);
   // @ts-ignore
   expect(Object.keys(session.sessionState.browserRequestIdToResources)).toHaveLength(1);

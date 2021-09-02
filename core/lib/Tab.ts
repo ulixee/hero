@@ -23,6 +23,7 @@ import IFrameMeta from '@ulixee/hero-interfaces/IFrameMeta';
 import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
+import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -37,10 +38,14 @@ import DomChangesTable, {
 } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import CommandFormatter from './CommandFormatter';
+import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
 
-export default class Tab extends TypedEventEmitter<ITabEventParams> {
+export default class Tab
+  extends TypedEventEmitter<ITabEventParams>
+  implements ISessionMeta, ICommandableTarget
+{
   public readonly id: number;
   public readonly parentTabId?: number;
   public readonly session: Session;
@@ -86,6 +91,11 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
 
   public get lastCommandId(): number | undefined {
     return this.sessionState.lastCommand?.id;
+  }
+
+  // need to implement ISessionMeta for serialization
+  public get tabId(): number {
+    return this.id;
   }
 
   public get sessionId(): string {
@@ -153,6 +163,10 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
       this.runPluginCommand,
       // DO NOT ADD waitForReady
     ]);
+  }
+
+  public getFrameEnvironment(frameId?: number): FrameEnvironment {
+    return frameId ? this.frameEnvironmentsById.get(frameId) : this.mainFrameEnvironment;
   }
 
   public isAllowedCommand(method: string): boolean {
@@ -665,17 +679,58 @@ export default class Tab extends TypedEventEmitter<ITabEventParams> {
     return new DetachedTabState(this.session, lastLoadedNavigation, domChanges, resources);
   }
 
+  /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
+
+  public addJsPathEventListener(
+    type: 'message' | 'page-state',
+    jsPath: IJsPath,
+    options: any,
+    listenFn: (...args) => void,
+  ): void {
+    if (type === 'message') {
+      const [domain, resourceId] = jsPath;
+      if (domain !== 'resources') {
+        throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
+      }
+      // need to give client time to register function sending events
+      process.nextTick(() => this.sessionState.onWebsocketMessages(Number(resourceId), listenFn));
+    }
+
+    if (type === 'page-state') {
+      // do stuff
+    }
+  }
+
+  public removeJsPathEventListener(
+    type: 'message' | 'page-state',
+    jsPath: IJsPath,
+    listenFn: (...args) => void,
+  ): void {
+    if (type === 'message') {
+      const [domain, resourceId] = jsPath;
+      if (domain !== 'resources') {
+        throw new Error(`Unknown "message" type requested in JsPath - ${domain}`);
+      }
+      this.sessionState.stopWebsocketMessages(Number(resourceId), listenFn);
+    }
+
+    if (type === 'page-state') {
+      // remove event
+    }
+  }
+
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   public toJSON() {
     return {
-      id: this.id,
+      tabId: this.id,
+      frameId: this.mainFrameId,
       parentTabId: this.parentTabId,
       sessionId: this.sessionId,
       url: this.url,
       createdAtCommandId: this.createdAtCommandId,
       isDetached: this.isDetached,
-    };
+    } as ISessionMeta; // must adhere to session meta spec
   }
 
   private async waitForReady(): Promise<void> {

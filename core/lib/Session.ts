@@ -13,7 +13,6 @@ import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import IBrowserEngine from '@ulixee/hero-interfaces/IBrowserEngine';
 import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
-import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import { MitmProxy } from '@ulixee/hero-mitm/index';
@@ -22,32 +21,33 @@ import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
+import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import SessionState from './SessionState';
-import AwaitedEventListener from './AwaitedEventListener';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
 import UserProfile from './UserProfile';
 import InjectedScripts from './InjectedScripts';
 import CommandRecorder from './CommandRecorder';
-import DetachedTabState from './DetachedTabState';
 import CorePlugins from './CorePlugins';
-import { ISessionRecord } from '../models/SessionTable';
 import Core from '../index';
+import SessionDb from '../dbs/SessionDb';
+import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
 
-export default class Session extends TypedEventEmitter<{
-  closing: void;
-  closed: void;
-  resumed: void;
-  'kept-alive': { message: string };
-  'tab-created': { tab: Tab };
-  'all-tabs-closed': void;
-  'awaited-event': ICoreEventPayload;
-}> {
+export default class Session
+  extends TypedEventEmitter<{
+    closing: void;
+    closed: void;
+    resumed: void;
+    'kept-alive': { message: string };
+    'tab-created': { tab: Tab };
+    'all-tabs-closed': void;
+  }>
+  implements ICommandableTarget
+{
   private static readonly byId: { [id: string]: Session } = {};
 
-  public awaitedEventListener: AwaitedEventListener;
   public readonly id: string;
   public readonly baseDir: string;
   public browserEngine: IBrowserEngine;
@@ -115,7 +115,6 @@ export default class Session extends TypedEventEmitter<{
     Session.byId[this.id] = this;
     const providedOptions = { ...options };
     this.logger = log.createChild(module, { sessionId: this.id });
-    this.awaitedEventListener = new AwaitedEventListener(this);
 
     const {
       browserEmulatorId,
@@ -177,12 +176,48 @@ export default class Session extends TypedEventEmitter<{
     this.commandRecorder = new CommandRecorder(this, this, null, null, [
       this.configure,
       this.detachTab,
+      this.close,
+      this.flush,
       this.exportUserProfile,
+      this.getTabs,
+      this.getHeroMeta,
     ]);
+  }
+
+  public isAllowedCommand(method: string): boolean {
+    return this.commandRecorder.fnNames.has(method);
   }
 
   public getTab(id: number): Tab {
     return this.tabsById.get(id) ?? this.detachedTabsById.get(id);
+  }
+
+  public getTabs(): Tab[] {
+    return [...this.tabsById.values()].filter(x => !x.isClosing);
+  }
+
+  public flush(): void {
+    this.logger.info('SessionFlushing');
+  }
+
+  public getHeroMeta(): IHeroMeta {
+    const { plugins, viewport, locale, timezoneId, geolocation } = this;
+
+    const { userAgentString, operatingSystemPlatform } = this.plugins.browserEmulator;
+
+    return {
+      sessionId: this.id,
+      ...this.options,
+      browserEmulatorId: plugins.browserEmulator.id,
+      humanEmulatorId: plugins.humanEmulator.id,
+      upstreamProxyUrl: this.upstreamProxyUrl,
+      viewport,
+      locale,
+      timezoneId,
+      geolocation,
+      userAgentString,
+      operatingSystemPlatform,
+    };
   }
 
   public async configure(options: IConfigureSessionOptions) {
@@ -203,14 +238,15 @@ export default class Session extends TypedEventEmitter<{
   }
 
   public async detachTab(
-    sourceTab: Tab,
+    sourceTabId: number,
     callsite: string,
     key?: string,
   ): Promise<{
     detachedTab: Tab;
-    detachedState: DetachedTabState;
     prefetchedJsPaths: IJsPathResult[];
   }> {
+    const sourceTab = this.getTab(sourceTabId);
+
     const [detachedState, page] = await Promise.all([
       sourceTab.createDetachedState(),
       this.browserContext.newPage({
@@ -248,7 +284,7 @@ export default class Session extends TypedEventEmitter<{
     });
 
     const prefetches = await newTab.mainFrameEnvironment.prefetchExecJsPaths(jsPathCalls);
-    return { detachedTab: newTab, detachedState, prefetchedJsPaths: prefetches };
+    return { detachedTab: newTab, prefetchedJsPaths: prefetches };
   }
 
   public getMitmProxy(): { address: string; password?: string } {
@@ -333,17 +369,6 @@ export default class Session extends TypedEventEmitter<{
     return null;
   }
 
-  public async resume(options: ISessionCreateOptions): Promise<void> {
-    const { sessionResume } = options;
-    if (sessionResume.startLocation === 'sessionStart') {
-      await this.resetStorage();
-      // create a new tab
-    }
-    Object.assign(this.options, options);
-    this.resumeCounter += 1;
-    this.emit('resumed');
-  }
-
   public async resetStorage(): Promise<void> {
     const securityOrigins = new Set<string>();
     this.isResettingState = true;
@@ -377,9 +402,20 @@ export default class Session extends TypedEventEmitter<{
     }
   }
 
-  public async close() {
+  public async close(force = false): Promise<{ didKeepAlive: boolean; message?: string }> {
+    // if this session is set to keep alive and core is closing,
+    if (!force && this.options.sessionKeepAlive && !Core.isClosing) {
+      const result = { didKeepAlive: false, message: null };
+      result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
+      result.didKeepAlive = true;
+      this.emit('kept-alive', result);
+      return result;
+    }
+
     delete Session.byId[this.id];
     if (this._isClosing) return;
+    // client events are listening to "close"
+    this.emit('close' as any);
     this.emit('closing');
     this._isClosing = true;
     const start = log.info('Session.Closing', {
@@ -387,7 +423,6 @@ export default class Session extends TypedEventEmitter<{
     });
 
     try {
-      this.awaitedEventListener.close();
       const promises: Promise<any>[] = [];
       for (const tab of this.tabsById.values()) {
         promises.push(tab.close());
@@ -416,8 +451,15 @@ export default class Session extends TypedEventEmitter<{
     this.sessionState.close();
   }
 
-  public onAwaitedEvent(payload: ICoreEventPayload) {
-    this.emit('awaited-event', payload);
+  private async resume(options: ISessionCreateOptions): Promise<void> {
+    const { sessionResume } = options;
+    if (sessionResume.startLocation === 'sessionStart') {
+      await this.resetStorage();
+      // create a new tab
+    }
+    Object.assign(this.options, options);
+    this.resumeCounter += 1;
+    this.emit('resumed');
   }
 
   private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
@@ -539,8 +581,31 @@ export default class Session extends TypedEventEmitter<{
 
   public static restoreOptionsFromSessionRecord(
     options: ISessionCreateOptions,
-    record: ISessionRecord,
+    resumeSessionId: string,
   ): ISessionCreateOptions {
+    // if session not active, re-create
+    let db: SessionDb;
+    try {
+      db = SessionDb.getCached(resumeSessionId, true);
+    } catch (err) {
+      // not found
+    }
+    if (!db) {
+      const data = [
+        ''.padEnd(50, '-'),
+        `------HERO SESSION ID`.padEnd(50, '-'),
+        `------${Core.dataDir}`.padEnd(50, '-'),
+        `------${resumeSessionId ?? ''}`.padEnd(50, '-'),
+        ''.padEnd(50, '-'),
+      ].join('\n');
+
+      throw new Error(
+        `You're trying to resume a Hero session that could not be located.
+${data}`,
+      );
+    }
+
+    const record = db.session.get();
     options.userAgent = record.userAgentString;
     options.locale = record.locale;
     options.timezoneId = record.timezoneId;
@@ -551,6 +616,34 @@ export default class Session extends TypedEventEmitter<{
     options.userProfile ??= {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
     return options;
+  }
+
+  public static async create(
+    options: ISessionCreateOptions,
+  ): Promise<{ session: Session; tab: Tab; isSessionResume: boolean }> {
+    let session: Session;
+    let tab: Tab;
+    let isSessionResume = false;
+
+    // try to resume session. Modify options to match if not active.
+    const resumeSessionId = options?.sessionResume?.sessionId;
+    if (resumeSessionId) {
+      session = Session.get(resumeSessionId);
+      if (session) {
+        await session.resume(options);
+        tab = session.getLastActiveTab();
+        isSessionResume = true;
+      } else {
+        Session.restoreOptionsFromSessionRecord(options, resumeSessionId);
+      }
+    }
+
+    if (!session) {
+      session = await GlobalPool.createSession(options);
+    }
+    tab ??= await session.createTab();
+
+    return { session, tab, isSessionResume };
   }
 
   public static get(sessionId: string): Session {

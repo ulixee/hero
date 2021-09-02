@@ -459,9 +459,17 @@ export default class SessionState {
     this.db.session.close(this.sessionId, this.closeDate);
     LogEvents.unsubscribe(this.logSubscriptionId);
     loggerSessionIdNames.delete(this.sessionId);
-    this.db.flush();
-    this.db.close();
     SessionState.registry.delete(this.sessionId);
+    this.db.flush();
+
+    // give the system a second to write to db before clearing
+    setImmediate(() => {
+      try {
+        this.db.close();
+      } catch (err) {
+        // drown
+      }
+    });
   }
 
   public recordNavigation(navigation: INavigation) {
