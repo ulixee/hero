@@ -45,7 +45,7 @@ export default class CoreEventHeap {
     const subscriptionPromise = this.connection.sendRequest({
       meta: this.meta,
       startDate: new Date(),
-      command: 'Session.addEventListener',
+      command: 'Events.addEventListener',
       args: [jsPath, type, options],
     });
 
@@ -84,7 +84,7 @@ export default class CoreEventHeap {
       .sendRequest({
         meta: this.meta,
         startDate: new Date(),
-        command: 'Session.removeEventListener',
+        command: 'Events.removeEventListener',
         args: [listenerId],
       })
       .catch(error => {

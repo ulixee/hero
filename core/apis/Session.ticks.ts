@@ -19,7 +19,6 @@ export default function sessionTicksApi(args: ISessionTicksArgs): ISessionTicksR
   const { domChangesByTabId } = sessionDomChangesApi(args);
   const interactions = sessionInteractionsApi(args);
   const { tabs } = sessionTabsApi(args);
-
   const state = createSessionState(session, tabs);
 
   createCommandTicks(state, commands);
@@ -73,7 +72,9 @@ function createSessionState(session: ISessionRecord, tabs: ISessionTab[]): ISess
 
 function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]) {
   for (let i = 0; i < commands.length; i += 1) {
-    const { startDate: timestamp, label, id: commandId, tabId, endDate } = commands[i];
+    const { startDate: timestamp, label, id: commandId, endDate } = commands[i];
+    const tabId = commands[i].tabId ?? Number(Object.keys(state.tabsById)[0]);
+
     addTick(state, 'command', i, { timestamp, commandId, label, tabId });
 
     const tabDetails = state.tabsById[tabId];
@@ -341,7 +342,6 @@ function addTick(
   tick: { commandId?: number; timestamp: number; label?: string; tabId: number },
 ): ITick {
   const { commandId, timestamp, label, tabId } = tick;
-  const tabDetails = state.tabsById[tabId];
 
   const newTick = {
     eventType,
@@ -352,10 +352,10 @@ function addTick(
     isMajor: eventType === 'command',
   } as ITick;
 
+  const tabDetails = tabId ? state.tabsById[tabId] : Object.values(state.tabsById)[0];
   if (timestamp > tabDetails.lastActivityTimestamp) {
     tabDetails.lastActivityTimestamp = timestamp;
   }
-
   tabDetails.ticks.push(newTick);
   return newTick;
 }

@@ -27,7 +27,11 @@ afterEach(Helpers.afterEach);
 describe('Core events tests', () => {
   it('receives close event when closed', async () => {
     const meta = await connection.createSession();
-    await connection.addEventListener(meta, null, 'close');
+    // @ts-ignore
+    const events = connection.sessionIdToRemoteEvents
+      .get(meta.sessionId)
+      .get({ sessionId: meta.sessionId });
+    await events.addEventListener(null, 'close');
     await Session.get(meta.sessionId).close();
 
     expect(onEventFn.mock.calls).toHaveLength(1);
@@ -37,7 +41,12 @@ describe('Core events tests', () => {
     onEventFn.mockClear();
 
     const meta = await connection.createSession();
-    await connection.addEventListener(meta, null, 'resource');
+    // @ts-ignore
+    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).get({
+      tabId: meta.tabId,
+      sessionId: meta.sessionId,
+    });
+    await events.addEventListener(null, 'resource');
 
     koaServer.get('/page1', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
     koaServer.get('/page2', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
@@ -57,7 +66,13 @@ describe('Core events tests', () => {
     onEventFn.mockClear();
 
     const meta = await connection.createSession();
-    const { listenerId } = await connection.addEventListener(meta, null, 'resource');
+    // @ts-ignore
+    const events = connection.sessionIdToRemoteEvents.get(meta.sessionId).get({
+      tabId: meta.tabId,
+      sessionId: meta.sessionId,
+    });
+
+    const { listenerId } = events.addEventListener(null, 'resource');
 
     koaServer.get('/page1', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
     koaServer.get('/page2', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
@@ -66,7 +81,7 @@ describe('Core events tests', () => {
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
 
-    await connection.removeEventListener(meta, listenerId);
+    events.removeEventListener(listenerId);
 
     await tab.goto(`${koaServer.baseUrl}/page2`);
     await tab.waitForLoad(LocationStatus.PaintingStable);

@@ -39,7 +39,7 @@ describe('UserProfile cookie tests', () => {
     await tab.goto(`${koaServer.baseUrl}/cookie`);
     await tab.waitForLoad('PaintingStable');
 
-    const profile = await connection.exportUserProfile(meta);
+    const profile = await tab.session.exportUserProfile();
     expect(profile.cookies).toHaveLength(1);
     expect(profile.cookies[0].name).toBe('cookietest');
     expect(profile.cookies[0].value).toBe('Is Set');
@@ -48,7 +48,7 @@ describe('UserProfile cookie tests', () => {
     const meta2 = await connection.createSession();
     const tab2 = Session.getTab(meta2);
     Helpers.needsClosing.push(tab2.session);
-    const core2Cookies = await connection.exportUserProfile(meta2);
+    const core2Cookies = await tab2.session.exportUserProfile();
     expect(core2Cookies.cookies).toHaveLength(0);
 
     await tab2.goto(`${koaServer.baseUrl}/cookie2`);
@@ -62,7 +62,7 @@ describe('UserProfile cookie tests', () => {
     });
     const tab3 = Session.getTab(meta3);
     Helpers.needsClosing.push(tab3.session);
-    const cookiesBefore = await connection.exportUserProfile(meta3);
+    const cookiesBefore = await tab3.session.exportUserProfile();
     expect(cookiesBefore.cookies).toHaveLength(1);
     expect(cookiesBefore.userAgentString).toBe(profile.userAgentString);
     expect(tab3.session.plugins.browserEmulator.userAgentString).toBe(profile.userAgentString);
@@ -101,7 +101,7 @@ describe('UserProfile cookie tests', () => {
       await tab.waitForLoad('PaintingStable');
       await tab.puppetPage.frames[1].waitForLoad();
 
-      profile = await connection.exportUserProfile(meta);
+      profile = await tab.session.exportUserProfile();
       expect(profile.cookies).toHaveLength(3);
       expect(profile.cookies[0].name).toBe('cookietest');
       expect(profile.cookies[0].value).toBe('mainsite');
@@ -187,7 +187,7 @@ document.querySelector('#session').innerHTML = [session1,session2,session3].join
     await tab.goto(`${koaServer.baseUrl}/local`);
     await tab.waitForLoad('PaintingStable');
 
-    const profile = await connection.exportUserProfile(meta);
+    const profile = await tab.session.exportUserProfile();
     expect(profile.cookies).toHaveLength(0);
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(2);
     expect(profile.storage[koaServer.baseUrl]?.sessionStorage).toHaveLength(2);
@@ -278,7 +278,7 @@ document.querySelector('#local').innerHTML = localStorage.getItem('test');
     await tab.goto(`${koaServer.baseUrl}/local-change-pre`);
     await tab.waitForLoad('PaintingStable');
 
-    const profile = await connection.exportUserProfile(meta);
+    const profile = await tab.session.exportUserProfile();
     expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
     expect(profile.storage[koaServer.baseUrl]?.localStorage[0][1]).toBe('changed');
 
@@ -333,7 +333,7 @@ localStorage.setItem('cross', '1');
       await tab.goto(`${koaServer.baseUrl}/cross-storage`);
       await tab.waitForLoad('PaintingStable');
       await tab.puppetPage.frames[1].waitForLoad();
-      profile = await connection.exportUserProfile(meta);
+      profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.localStorage).toHaveLength(1);
       expect(profile.storage['http://dataliberationfoundation.org']?.localStorage).toHaveLength(1);
       await session.close();
@@ -495,7 +495,7 @@ describe('UserProfile IndexedDb tests', () => {
       await tab.waitForLoad('PaintingStable');
       await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
 
-      profile = await connection.exportUserProfile(meta);
+      profile = await tab.session.exportUserProfile();
       expect(profile.storage[koaServer.baseUrl]?.indexedDB).toHaveLength(1);
       const db = profile.storage[koaServer.baseUrl]?.indexedDB[0];
       expect(db.name).toBe('db1');

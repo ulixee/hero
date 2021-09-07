@@ -111,7 +111,7 @@ export default class CommandRecorder {
     if (sessionResume.startLocation === 'sessionStart') return;
 
     const startAtPageStart = sessionResume.startLocation === 'pageStart';
-    const currentUrl = session.tabsById.get(tabId).frameEnvironmentsById.get(frameId)?.url;
+    const currentUrl = session.tabsById.get(tabId)?.frameEnvironmentsById.get(frameId)?.url;
 
     // make sure last command reused a command run
     const lastCommand = sessionState.lastCommand;

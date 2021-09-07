@@ -9,7 +9,7 @@ afterAll(Helpers.afterAll);
 class MockedConnectionToCore extends ConnectionToCore {
   public outgoing = jest.fn(
     async ({ command }: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
-      if (command === 'Session.create') {
+      if (command === 'Core.createSession') {
         return {
           data: { tabId: 'tab-id', sessionId: 'session-id' },
         };
@@ -39,7 +39,7 @@ describe('basic Hero tests', () => {
     const outgoingCommands = connectionToCore.outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
-      'Session.create',
+      'Core.createSession',
       'Session.close',
     ]);
   });
@@ -58,14 +58,16 @@ describe('basic Hero tests', () => {
     const outgoingCommands = connectionToCore.outgoing.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
-      'Session.create',
+      'Core.createSession',
       'Session.close',
     ]);
 
-    expect(events).toMatchObject([{
-      command: 'Session.close',
-      commandId: 1,
-      args: [],
-    }]);
+    expect(events).toMatchObject([
+      {
+        command: 'Session.close',
+        commandId: 1,
+        args: [false],
+      },
+    ]);
   });
 });

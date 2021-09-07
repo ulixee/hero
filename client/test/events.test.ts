@@ -14,9 +14,9 @@ let spy: jest.SpyInstance;
 beforeEach(() => {
   class TestConnection extends ConnectionToCore {
     async internalSendRequest({ command, messageId }: ICoreRequestPayload): Promise<void> {
-      if (command === 'Session.create') {
+      if (command === 'Core.createSession') {
         this.onMessage({ data: sessionMeta, responseId: messageId });
-      } else if (command === 'Session.addEventListener') {
+      } else if (command === 'Events.addEventListener') {
         this.onMessage({ data: { listenerId: 'listener-id' }, responseId: messageId });
       } else {
         this.onMessage({ data: {}, responseId: messageId });
@@ -49,8 +49,8 @@ describe('events', () => {
     const outgoingCommands = spy.mock.calls;
     expect(outgoingCommands.map(c => c[0].command)).toMatchObject([
       'Core.connect',
-      'Session.create',
-      'Session.addEventListener', // user added close listener
+      'Core.createSession',
+      'Events.addEventListener', // user added close listener
       'Session.close',
     ]);
     expect(isClosed).toBe(true);

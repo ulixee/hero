@@ -7,7 +7,7 @@ import { createPromise } from '@ulixee/commons/lib/utils';
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import { IBoundLog } from '@ulixee/commons/interfaces/ILog';
 import Log from '@ulixee/commons/lib/Logger';
-import { ILoadStatus, LoadStatus, LoadStatusPipeline } from '@ulixee/hero-interfaces/Location';
+import { ILoadStatus, LoadStatus } from '@ulixee/hero-interfaces/Location';
 import * as moment from 'moment';
 import SessionState from './SessionState';
 

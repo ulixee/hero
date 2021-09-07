@@ -18,7 +18,7 @@ describe('document tests', () => {
       async (payload: ICoreRequestPayload): Promise<ICoreResponsePayload> => {
         const { command, args } = payload;
         await new Promise(resolve => setTimeout(resolve, 5));
-        if (command === 'Session.create') {
+        if (command === 'Core.createSession') {
           return {
             data: { tabId: 'tab-id', sessionId: 'session-id' },
           };
@@ -69,7 +69,7 @@ describe('document tests', () => {
     const outgoingCommands = outgoing.mock.calls;
     expect(outgoingCommands.map(x => x[0].command)).toMatchObject([
       'Core.connect',
-      'Session.create',
+      'Core.createSession',
       'FrameEnvironment.execJsPath',
       'FrameEnvironment.execJsPath',
       'Session.close',

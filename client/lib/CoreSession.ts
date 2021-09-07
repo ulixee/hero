@@ -101,23 +101,23 @@ export default class CoreSession implements IJsPathEventTarget {
     callSitePath: string,
     key?: string,
   ): Promise<{ coreTab: CoreTab; prefetchedJsPaths: IJsPathResult[] }> {
-    const { meta, prefetchedJsPaths } = await this.commandQueue.run<{
-      meta: ISessionMeta;
+    const { detachedTab, prefetchedJsPaths } = await this.commandQueue.run<{
+      detachedTab: ISessionMeta;
       prefetchedJsPaths: IJsPathResult[];
     }>('Session.detachTab', tab.tabId, callSitePath, key);
     const coreTab = new CoreTab(
-      { ...meta, sessionName: this.sessionName },
+      { ...detachedTab, sessionName: this.sessionName },
       this.connectionToCore,
       this,
     );
-    this.frozenTabsById.set(meta.tabId, coreTab);
+    this.frozenTabsById.set(detachedTab.tabId, coreTab);
     return {
       coreTab,
       prefetchedJsPaths,
     };
   }
 
-  public async close(): Promise<void> {
+  public async close(force = false): Promise<void> {
     try {
       await this.commandQueue.flush();
       for (const tab of this.tabsById.values()) {
@@ -128,6 +128,7 @@ export default class CoreSession implements IJsPathEventTarget {
       }
       const result = await this.commandQueue.run<{ didKeepAlive: boolean; message: string }>(
         'Session.close',
+        force,
       );
       if (result?.didKeepAlive === true) {
         await this.showSessionKeepAlivePrompt(result.message);
@@ -177,12 +178,12 @@ export default class CoreSession implements IJsPathEventTarget {
 
     process.stdout.write(`\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:`);
 
-    ShutdownHandler.register(() => this.terminate());
+    ShutdownHandler.register(() => this.close(true));
 
     return new Promise<void>(resolve => {
       process.stdin.on('keypress', async (chunk, key) => {
         if (key.name.toLowerCase() === 'q') {
-          await this.terminate();
+          await this.close(true);
           rl.close();
           resolve();
         }
@@ -192,9 +193,5 @@ export default class CoreSession implements IJsPathEventTarget {
         resolve();
       });
     });
-  }
-
-  private terminate(): Promise<void> {
-    return this.commandQueue.run('Session.terminate');
   }
 }

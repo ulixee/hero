@@ -74,7 +74,7 @@ describe('basic Apis tests', () => {
 
     const result = await connection.run({
       api: 'Session.tabs',
-      args: { sessionId, },
+      args: { sessionId },
     });
     expect(result.tabs).toHaveLength(1);
   });
@@ -88,7 +88,7 @@ describe('basic Apis tests', () => {
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].ticks.length).toBeGreaterThanOrEqual(2);
-    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(5); // 1 for init
+    expect(result.tabDetails[0].ticks.filter(x => x.isMajor)).toHaveLength(6); // 1 for init
     expect(result.tabDetails[0].ticks.filter(x => x.isNewDocumentTick)).toHaveLength(1);
     // only should be returned if asked for
     expect(result.tabDetails[0].mouse).not.toBeTruthy();
@@ -108,7 +108,7 @@ describe('basic Apis tests', () => {
     });
     expect(result.tabDetails).toHaveLength(1);
     expect(result.tabDetails[0].paintEvents.length).toBeGreaterThanOrEqual(1);
-    expect(result.tabDetails[0].commands).toHaveLength(4);
+    expect(result.tabDetails[0].commands).toHaveLength(5);
     expect(result.tabDetails[0].mouse.length).toBeGreaterThanOrEqual(1);
   });
 });

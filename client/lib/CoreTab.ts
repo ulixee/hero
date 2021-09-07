@@ -128,7 +128,7 @@ export default class CoreTab implements IJsPathEventTarget {
   }
 
   public async waitForNewTab(opts: IWaitForOptions): Promise<CoreTab> {
-    const sessionMeta = await this.commandQueue.run<ISessionMeta>('Session.waitForNewTab', opts);
+    const sessionMeta = await this.commandQueue.run<ISessionMeta>('Tab.waitForNewTab', opts);
     const session = this.connection.getSession(sessionMeta.sessionId);
     session.addTab(sessionMeta);
     return new CoreTab(

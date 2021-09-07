@@ -1,63 +1,38 @@
-import IConfigureSessionOptions from '@ulixee/hero-interfaces/IConfigureSessionOptions';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
-import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions';
-import {
-  addTypedEventListeners,
-  removeEventListeners,
-  TypedEventEmitter,
-} from '@ulixee/commons/lib/eventUtils';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import ICoreRequestPayload from '@ulixee/hero-interfaces/ICoreRequestPayload';
 import ICoreResponsePayload from '@ulixee/hero-interfaces/ICoreResponsePayload';
 import ICoreConfigureOptions from '@ulixee/hero-interfaces/ICoreConfigureOptions';
 import ICoreEventPayload from '@ulixee/hero-interfaces/ICoreEventPayload';
-import IWaitForOptions from '@ulixee/hero-interfaces/IWaitForOptions';
-import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import Log from '@ulixee/commons/lib/Logger';
 import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import PuppetLaunchError from '@ulixee/hero-puppet/lib/PuppetLaunchError';
-import IUserProfile from '@ulixee/hero-interfaces/IUserProfile';
-import SessionClosedOrMissingError from '@ulixee/commons/lib/SessionClosedOrMissingError';
 import TimeoutError from '@ulixee/commons/interfaces/TimeoutError';
-import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
-import IRegisteredEventListener from '@ulixee/commons/interfaces/IRegisteredEventListener';
 import Session from '../lib/Session';
 import Tab from '../lib/Tab';
 import GlobalPool from '../lib/GlobalPool';
 import Core from '../index';
-import SessionDb from '../dbs/SessionDb';
+import FrameEnvironment from '../lib/FrameEnvironment';
+import CommandRunner, { ICommandableTarget } from '../lib/CommandRunner';
+import RemoteEvents from '../lib/RemoteEvents';
 
 const { log } = Log(module);
 
-export default class ConnectionToClient extends TypedEventEmitter<{
-  close: { fatalError?: Error };
-  message: ICoreResponsePayload | ICoreEventPayload;
-}> {
+export default class ConnectionToClient
+  extends TypedEventEmitter<{
+    close: { fatalError?: Error };
+    message: ICoreResponsePayload | ICoreEventPayload;
+  }>
+  implements ICommandableTarget
+{
   public isClosing = false;
   public isPersistent = true;
   public autoShutdownMillis = 500;
 
   private autoShutdownTimer: NodeJS.Timer;
-  private readonly sessionIds = new Map<string, IRegisteredEventListener[]>();
+  private readonly sessionIdToRemoteEvents = new Map<string, RemoteEvents>();
   private hasActiveCommand = false;
-
-  private clientExposedMethods = new Map<string, keyof this & string>([
-    ['Core.connect', 'connect'],
-    ['Core.disconnect', 'disconnect'],
-    ['Core.logUnhandledError', 'logUnhandledError'],
-    ['Session.create', 'createSession'],
-    ['Session.close', 'closeSession'],
-    ['Session.terminate', 'terminateSession'],
-    ['Session.configure', 'configure'],
-    ['Session.detachTab', 'detachTab'],
-    ['Session.flush', 'flush'],
-    ['Session.getHeroMeta', 'getHeroMeta'],
-    ['Session.exportUserProfile', 'exportUserProfile'],
-    ['Session.getTabs', 'getTabs'],
-    ['Session.waitForNewTab', 'waitForNewTab'],
-    ['Session.addEventListener', 'addEventListener'],
-    ['Session.removeEventListener', 'removeEventListener'],
-  ]);
 
   ///////  CORE SERVER CONNECTION  /////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,6 +48,9 @@ export default class ConnectionToClient extends TypedEventEmitter<{
       this.hasActiveCommand = true;
       if (recordCommands) await this.recordCommands(meta, sendDate, recordCommands);
       data = await this.executeCommand(command, args, meta, { commandId, startDate, sendDate });
+
+      // make sure to get tab metadata
+      data = this.serializeToMetadata(data);
     } catch (error) {
       const isClosing = session?.isClosing || this.isClosing;
       // if we're closing, don't emit errors
@@ -140,8 +118,10 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     const logId = log.stats('ConnectionToClient.Disconnecting', { sessionId: null, fatalError });
     clearTimeout(this.autoShutdownTimer);
     const closeAll: Promise<any>[] = [];
-    for (const id of this.sessionIds.keys()) {
-      closeAll.push(this.closeSession({ sessionId: id }).catch(err => err));
+    for (const [id, listeners] of this.sessionIdToRemoteEvents) {
+      listeners.close();
+      const session = Session.get(id);
+      if (session) closeAll.push(session.close().catch(err => err));
     }
     await Promise.all(closeAll);
     this.isPersistent = false;
@@ -150,141 +130,35 @@ export default class ConnectionToClient extends TypedEventEmitter<{
   }
 
   public isActive(): boolean {
-    return this.sessionIds.size > 0 || this.isPersistent || this.hasActiveCommand;
+    return this.sessionIdToRemoteEvents.size > 0 || this.isPersistent || this.hasActiveCommand;
+  }
+
+  public isAllowedCommand(method: string): boolean {
+    return (
+      method === 'connect' ||
+      method === 'disconnect' ||
+      method === 'logUnhandledError' ||
+      method === 'createSession'
+    );
   }
 
   ///////  SESSION /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public flush(meta: ISessionMeta): void {
-    log.info('SessionFlushing', { sessionId: meta.sessionId });
-  }
-
-  public getTabs(meta: ISessionMeta): ISessionMeta[] {
-    const session = Session.get(meta.sessionId);
-    return [...session.tabsById.values()]
-      .filter(x => !x.isClosing)
-      .map(x => this.getSessionMeta(x));
-  }
-
-  public async detachTab(
-    meta: ISessionMeta,
-    tabId: number,
-    callsite: string,
-  ): Promise<{ meta: ISessionMeta; prefetchedJsPaths: IJsPathResult[] }> {
-    const session = Session.get(meta.sessionId);
-    const tab = session.getTab(tabId);
-    const { detachedTab, prefetchedJsPaths } = await session.detachTab(tab, callsite);
-    return {
-      meta: this.getSessionMeta(detachedTab),
-      prefetchedJsPaths,
-    };
-  }
-
-  public getHeroMeta(meta: ISessionMeta): IHeroMeta {
-    const session = Session.get(meta.sessionId);
-    const { plugins, viewport, locale, timezoneId, geolocation, options } = session;
-    const { externalIds } = options;
-    const { userAgentString, operatingSystemPlatform } = plugins.browserEmulator;
-    return <IHeroMeta>{
-      sessionId: session.id,
-      sessionName: session.options.sessionName,
-      browserEmulatorId: plugins.browserEmulator.id,
-      humanEmulatorId: plugins.humanEmulator.id,
-      blockedResourceTypes: session.options.blockedResourceTypes,
-      upstreamProxyUrl: session.upstreamProxyUrl,
-      externalIds,
-      viewport,
-      locale,
-      timezoneId,
-      geolocation,
-      userAgentString,
-      operatingSystemPlatform,
-    };
-  }
-
-  public exportUserProfile(meta: ISessionMeta): Promise<IUserProfile> {
-    const session = Session.get(meta.sessionId);
-    return session.exportUserProfile();
-  }
-
   public async createSession(options: ISessionCreateOptions = {}): Promise<ISessionMeta> {
     if (this.isClosing) throw new Error('Connection closed');
     clearTimeout(this.autoShutdownTimer);
-    let session: Session;
-    let tab: Tab;
-    if (options.sessionResume?.sessionId) {
-      session = await this.resumeSession(options);
-      tab = session?.getLastActiveTab();
+
+    const { session, tab, isSessionResume } = await Session.create(options);
+    if (!isSessionResume) {
+      const sessionId = session.id;
+      this.sessionIdToRemoteEvents.set(
+        sessionId,
+        new RemoteEvents(this.emit.bind(this, 'message')),
+      );
+      session.once('closing', () => this.sessionIdToRemoteEvents.delete(sessionId));
+      session.once('closed', () => this.checkForAutoShutdown());
     }
-
-    if (!session) {
-      session = await GlobalPool.createSession(options);
-    }
-    this.sessionIds.set(
-      session.id,
-      addTypedEventListeners(session, [
-        ['awaited-event', this.emit.bind(this, 'message')],
-        ['closing', () => this.sessionIds.delete(session.id)],
-        ['closed', this.checkForAutoShutdown.bind(this)],
-      ]),
-    );
-
-    tab ??= await session.createTab();
-    return this.getSessionMeta(tab);
-  }
-
-  public async closeSession(
-    sessionMeta: ISessionMeta,
-  ): Promise<{ didKeepAlive: boolean; message?: string }> {
-    const result = { didKeepAlive: false, message: null };
-    const session = Session.get(sessionMeta.sessionId);
-    if (!session) return result;
-
-    // if this session is set to keep alive and core is closing,
-    if (session.options.sessionKeepAlive && !Core.isClosing) {
-      result.message = `This session has the "sessionKeepAlive" variable active. Your Chrome session will remain open until you terminate this Hero instance.`;
-      result.didKeepAlive = true;
-      session.emit('kept-alive', result);
-      removeEventListeners(this.sessionIds.get(session.id) ?? []);
-    } else {
-      await session.close();
-    }
-    return result;
-  }
-
-  public async terminateSession(sessionMeta: ISessionMeta): Promise<void> {
-    const session = Session.get(sessionMeta.sessionId);
-    if (!session) return;
-
-    await session.close();
-  }
-
-  public configure(sessionMeta: ISessionMeta, options: IConfigureSessionOptions): Promise<void> {
-    const session = Session.get(sessionMeta.sessionId);
-    return session.configure(options);
-  }
-
-  public async waitForNewTab(
-    sessionMeta: ISessionMeta,
-    opts: IWaitForOptions,
-  ): Promise<ISessionMeta> {
-    const tab = Session.getTab(sessionMeta);
-    const newTab = await tab.waitForNewTab(opts);
-    return this.getSessionMeta(newTab);
-  }
-
-  public addEventListener(
-    sessionMeta: ISessionMeta,
-    jsPath: IJsPath,
-    type: string,
-  ): { listenerId: string } {
-    const session = Session.get(sessionMeta.sessionId);
-    return session.awaitedEventListener.listen(sessionMeta, jsPath, type);
-  }
-
-  public removeEventListener(sessionMeta: ISessionMeta, id: string): void {
-    const session = Session.get(sessionMeta.sessionId);
-    session.awaitedEventListener.remove(id);
+    return { tabId: tab.id, sessionId: session.id, frameId: tab.mainFrameId };
   }
 
   /////// INTERNAL FUNCTIONS /////////////////////////////////////////////////////////////////////////////
@@ -318,102 +192,23 @@ export default class ConnectionToClient extends TypedEventEmitter<{
     meta: ISessionMeta,
     commandMeta: { commandId: number; startDate: Date; sendDate: Date },
   ): Promise<any> {
-    const target = command.split('.').shift();
-    if (target === 'Core' || target === 'Session') {
-      if (!this.clientExposedMethods.has(command)) {
-        return new Error(`Command not allowed (${command})`);
-      }
-
-      const method = this.clientExposedMethods.get(command) as string;
-      if (target === 'Core' || command === 'Session.create') {
-        return await this[method](...args);
-      }
-
-      const session = Session.get(meta.sessionId);
-      session.sessionState.nextCommandMeta = commandMeta;
-      if (!session) {
-        return new SessionClosedOrMissingError(
-          `The requested command (${command}) references a session that is closed or invalid.`,
-        );
-      }
-
-      return await this[method](meta, ...args);
-    }
-
-    // if not on this function, assume we're sending on to tab
+    const session = Session.get(meta?.sessionId);
     const tab = Session.getTab(meta);
-    if (!tab) {
-      return new SessionClosedOrMissingError(
-        `The requested command (${command}) references a tab that is no longer part of session or has been closed.`,
-      );
-    }
-    tab.session.sessionState.nextCommandMeta = commandMeta;
+    const frame = tab?.getFrameEnvironment(meta?.frameId);
 
-    const method = command.split('.').pop();
+    const commandRunner = new CommandRunner(command, args, {
+      Session: session,
+      Events: this.sessionIdToRemoteEvents.get(meta?.sessionId)?.get(meta),
+      Core: this,
+      Tab: tab,
+      FrameEnvironment: frame,
+    });
 
-    /////// Tab Functions
-    if (target === 'Tab') {
-      if (!tab.isAllowedCommand(method)) {
-        return new Error(`Command not allowed (${command})`);
-      }
-
-      return await tab[method](...args);
+    if (session && commandMeta) {
+      session.sessionState.nextCommandMeta = commandMeta;
     }
 
-    /////// Frame Functions
-    if (target === 'FrameEnvironment') {
-      const frameEnvironment = meta.frameId
-        ? tab.frameEnvironmentsById.get(meta.frameId)
-        : tab.mainFrameEnvironment;
-
-      if (!frameEnvironment || (meta.frameId && !tab.frameEnvironmentsById.has(meta.frameId))) {
-        return new Error(
-          `The requested frame environment for this command (${command}) is no longer available`,
-        );
-      }
-
-      if (!frameEnvironment.isAllowedCommand(method)) {
-        return new Error(`Command not allowed (${command})`);
-      }
-
-      return await frameEnvironment[method](...args);
-    }
-  }
-
-  private async resumeSession(options: ISessionCreateOptions): Promise<Session> {
-    const { sessionResume } = options;
-    const session = Session.get(sessionResume.sessionId);
-    if (session) {
-      await session.resume(options);
-      return session;
-    }
-
-    // if session not active, re-create
-    let db: SessionDb;
-    try {
-      db = SessionDb.getCached(sessionResume.sessionId, true);
-    } catch (err) {
-      // not found
-    }
-    if (!db) {
-      const data = [
-        ''.padEnd(50, '-'),
-        `------HERO SESSION ID`.padEnd(50, '-'),
-        `------${Core.dataDir}`.padEnd(50, '-'),
-        `------${sessionResume.sessionId ?? ''}`.padEnd(50, '-'),
-        ''.padEnd(50, '-'),
-      ].join('\n');
-
-      throw new Error(
-        `You're trying to resume a Hero session that could not be located.
-${data}`,
-      );
-    }
-
-    const sessionDb = db.session.get();
-    Session.restoreOptionsFromSessionRecord(options, sessionDb);
-
-    return GlobalPool.createSession(options);
+    return await commandRunner.runFn();
   }
 
   private checkForAutoShutdown(): void {
@@ -424,17 +219,25 @@ ${data}`,
     }, this.autoShutdownMillis).unref();
   }
 
-  private getSessionMeta(tab: Tab): ISessionMeta {
-    const session = tab.session;
-    return {
-      sessionId: session.id,
-      frameId: tab.mainFrameId,
-      tabId: tab.id,
-    };
-  }
-
   private isLaunchError(error: Error): boolean {
     return error instanceof PuppetLaunchError || error.name === 'DependenciesMissingError';
+  }
+
+  private serializeToMetadata(data: any): any {
+    if (!data || typeof data !== 'object') return data;
+    if (data instanceof Tab || data instanceof FrameEnvironment) {
+      return data.toJSON();
+    }
+
+    if (Array.isArray(data)) {
+      return data.map(x => this.serializeToMetadata(x));
+    }
+
+    for (const [key, value] of Object.entries(data)) {
+      if (value instanceof Tab || value instanceof FrameEnvironment) data[key] = value.toJSON();
+    }
+
+    return data;
   }
 
   private serializeError(error: Error): object {
