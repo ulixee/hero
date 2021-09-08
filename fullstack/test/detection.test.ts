@@ -62,37 +62,6 @@ beforeAll(async () => {
 afterAll(Helpers.afterAll, 30e3);
 afterEach(Helpers.afterEach, 30e3);
 
-test('widevine detection', async () => {
-  const hero = new Hero();
-  Helpers.needsClosing.push(hero);
-  await hero.goto(koaServer.baseUrl);
-
-  const accessKey = await hero
-    .getJsValue(
-      `navigator.requestMediaKeySystemAccess('com.widevine.alpha', [{
-      initDataTypes: ['cenc'],
-      audioCapabilities: [
-        {
-          contentType: 'audio/mp4;codecs="mp4a.40.2"',
-        },
-      ],
-      videoCapabilities: [
-        {
-          contentType: 'video/mp4;codecs="avc1.42E01E"',
-        },
-      ],
-    },
-  ]).then(x => {
-    if (x.keySystem !== 'com.widevine.alpha') throw new Error('Wrong keysystem ' + x.keySystem);
-    return x.createMediaKeys();
-  }).then(x => {
-    return x.constructor.name
-  })`,
-    )
-    .catch(err => err);
-  expect(accessKey).toBe('MediaKeys');
-});
-
 test('should pass FpScanner', async () => {
   const analyzePromise = new Promise(resolve => {
     koaServer.post('/analyze', async ctx => {
