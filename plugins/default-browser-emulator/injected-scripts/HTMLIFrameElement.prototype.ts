@@ -13,7 +13,7 @@ proxySetter(HTMLIFrameElement.prototype, 'srcdoc', function (_, iframe) {
   if (!frameWindowProxies.has(iframe)) {
     const proxy = new Proxy(self, {
       get(target, key) {
-        if (key === 'self') {
+        if (key === 'self' || key === 'contentWindow') {
           return iframe.contentWindow;
         }
         if (key === 'document') {
