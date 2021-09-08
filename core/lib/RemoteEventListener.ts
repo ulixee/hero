@@ -4,6 +4,8 @@ import { assert } from '@ulixee/commons/lib/utils';
 import Session from './Session';
 import { ICommandableTarget } from './CommandRunner';
 import Tab from './Tab';
+import CommandRecorder from './CommandRecorder';
+import FrameEnvironment from './FrameEnvironment';
 
 export interface ITrigger {
   meta: ISessionMeta;
@@ -20,14 +22,33 @@ export interface IListenerObject {
 export default class RemoteEventListener implements ICommandableTarget {
   private readonly listenersById = new Map<string, IListenerObject>();
   private listenerId = 0;
+  private commandRecorder: CommandRecorder;
 
   constructor(
-    readonly target: Session | Tab,
+    readonly target: Session | Tab | FrameEnvironment,
     readonly emitEvent: (listenerId: string, ...eventArgs: any[]) => void,
-  ) {}
+  ) {
+    let session: Session;
+    let tabId: number;
+    let frameId: number;
+    if (target instanceof Session) {
+      session = target;
+    } else if (target instanceof Tab) {
+      session = target.session;
+      tabId = target.tabId;
+    } else if (target instanceof FrameEnvironment) {
+      session = target.session;
+      tabId = target.tab.id;
+      frameId = target.id;
+    }
+    this.commandRecorder = new CommandRecorder(this, session, tabId, frameId, [
+      this.addEventListener,
+      this.removeEventListener,
+    ]);
+  }
 
   public isAllowedCommand(method: string): boolean {
-    return method === 'addEventListener' || method === 'removeEventListener';
+    return this.commandRecorder.fnNames.has(method);
   }
 
   public close() {
@@ -42,7 +63,7 @@ export default class RemoteEventListener implements ICommandableTarget {
     jsPath: IJsPath | null,
     type: string,
     options?: any,
-  ): { listenerId: string } {
+  ): Promise<{ listenerId: string }> {
     assert(type, 'Must provide a listener type');
     const listenerId = String((this.listenerId += 1));
     const listener: IListenerObject = {
@@ -62,16 +83,16 @@ export default class RemoteEventListener implements ICommandableTarget {
       fn(type, listener.listenFn);
     }
 
-    return { listenerId };
+    return Promise.resolve({ listenerId });
   }
 
-  public removeEventListener(id: string): void {
+  public removeEventListener(id: string): Promise<void> {
     const listener = this.listenersById.get(id);
     this.listenersById.delete(id);
 
     const { type, listenFn, jsPath } = listener;
     const target = this.target;
-    if (!type) return;
+    if (!type) return Promise.resolve();
 
     if (jsPath && 'removeJsPathEventListener' in target) {
       const fn = target.removeJsPathEventListener.bind(target);
@@ -80,5 +101,6 @@ export default class RemoteEventListener implements ICommandableTarget {
       const fn = target.off.bind(target) as any;
       fn(type, listenFn);
     }
+    return Promise.resolve();
   }
 }

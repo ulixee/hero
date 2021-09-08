@@ -269,9 +269,9 @@ export default abstract class ConnectionToCore extends TypedEventEmitter<{
   }
 
   protected onEvent(payload: ICoreEventPayload): void {
-    const { meta, listenerId, eventArgs } = payload as ICoreEventPayload;
+    const { meta, listenerId, eventArgs, lastCommandId } = payload as ICoreEventPayload;
     const session = this.getSession(meta.sessionId);
-    session?.onEvent(meta, listenerId, eventArgs);
+    session?.onEvent(meta, listenerId, eventArgs, lastCommandId);
   }
 
   protected onResponse(id: string, message: ICoreResponsePayload): void {

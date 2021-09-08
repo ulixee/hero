@@ -24,6 +24,7 @@ import IPuppetDialog from '@ulixee/hero-interfaces/IPuppetDialog';
 import IFileChooserPrompt from '@ulixee/hero-interfaces/IFileChooserPrompt';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
+import IPageStateResult from '@ulixee/hero-interfaces/IPageStateResult';
 import FrameNavigations from './FrameNavigations';
 import CommandRecorder from './CommandRecorder';
 import FrameEnvironment from './FrameEnvironment';
@@ -38,7 +39,7 @@ import DomChangesTable, {
 } from '../models/DomChangesTable';
 import DetachedTabState from './DetachedTabState';
 import CommandFormatter from './CommandFormatter';
-import { ICommandableTarget } from './CommandRunner';
+import CommandRunner, { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
 
@@ -65,6 +66,8 @@ export default class Tab
     event: IPuppetPageEvents['filechooser'];
     atCommandId: number;
   };
+
+  private pageStateListeners: { [pageStateId: string]: (() => any)[] } = {};
 
   private onFrameCreatedResourceEventsByFrameId: {
     [frameId: string]: {
@@ -119,7 +122,7 @@ export default class Tab
     windowOpenParams?: { url: string; windowName: string; loaderId: string },
   ) {
     super();
-    this.setEventsToLog(['child-tab-created', 'close']);
+    this.setEventsToLog(['child-tab-created', 'close', 'dialog', 'websocket-message']);
     this.id = session.nextTabId();
     this.logger = log.createChild(module, {
       tabId: this.id,
@@ -605,29 +608,25 @@ export default class Tab
         )
         .catch(() => null);
 
-      if (command.frameId) {
-        const frame = this.frameEnvironmentsById.get(command.frameId);
-        const trackMouse = true;
-        const hideMouse = false;
-        const hideOverlays = false;
+      const frameId = command.frameId ?? this.mainFrameId;
+      const frame = this.frameEnvironmentsById.get(frameId);
+      const trackMouse = true;
+      const hideMouse = false;
+      const hideOverlays = false;
 
-        const prevFrameId = this.sessionState.lastCommand?.frameId;
-        if (prevFrameId && prevFrameId !== frame.id) {
-          const prevPuppetFrame = this.frameEnvironmentsById.get(prevFrameId)?.puppetFrame;
-          if (prevPuppetFrame) {
-            prevPuppetFrame
-              .evaluate(`window.toggleCommandActive(false, true, true);`)
-              .catch(() => null);
-          }
+      const lastCommand = this.sessionState.lastCommand;
+      const prevFrameId = lastCommand?.frameId ?? this.mainFrameId;
+      if (lastCommand && prevFrameId !== frame.id) {
+        const prevPuppetFrame = this.frameEnvironmentsById.get(prevFrameId)?.puppetFrame;
+        if (prevPuppetFrame) {
+          prevPuppetFrame
+            .evaluate(`window.toggleCommandActive(false, true, true);`)
+            .catch(() => null);
         }
-
-        frame.puppetFrame
-          .evaluate(`window.toggleCommandActive(${trackMouse}, ${hideMouse}, ${hideOverlays});`)
-          .catch(() => null);
       }
-    } else {
-      this.mainFrameEnvironment.puppetFrame
-        .evaluate(`window.toggleCommandActive(false)`)
+
+      frame.puppetFrame
+        .evaluate(`window.toggleCommandActive(${trackMouse}, ${hideMouse}, ${hideOverlays});`)
         .catch(() => null);
     }
   }
@@ -681,6 +680,84 @@ export default class Tab
 
   /////// CLIENT EVENTS ////////////////////////////////////////////////////////////////////////////////////////////////
 
+  public addPageStateListener(
+    pageStateId: string,
+    commands: { [id: string]: () => Promise<any> },
+    frames: FrameEnvironment[],
+    listenFn: (results: IPageStateResult) => void,
+  ): { stop: () => void } {
+    let lastResults: string = null;
+    let isRunning = false;
+    let runAgain = false;
+    const shouldStop = (): boolean => {
+      return this.isClosing || !this.pageStateListeners[pageStateId];
+    };
+
+    const sessionState = this.sessionState;
+
+    async function checkState() {
+      if (shouldStop()) return;
+      if (isRunning) {
+        runAgain = true;
+        return;
+      }
+
+      try {
+        isRunning = true;
+        runAgain = false;
+
+        const results: IPageStateResult = {};
+
+        // make sure to clear out any meta
+        sessionState.nextCommandMeta = null;
+        await Promise.all(
+          Object.entries(commands).map(async ([id, runFn]) => {
+            results[id] = await runFn().catch(err => err);
+          }),
+        );
+
+        if (shouldStop()) return;
+
+        const stringifiedResults = JSON.stringify(results);
+        if (lastResults !== stringifiedResults) {
+          listenFn(results);
+        }
+        lastResults = stringifiedResults;
+      } finally {
+        isRunning = false;
+        if (runAgain) process.nextTick(checkState);
+      }
+    }
+
+    this.pageStateListeners[pageStateId] = [];
+
+    for (const frame of frames) {
+      frame.on('paint', checkState);
+      frame.navigations.on('status-change', checkState);
+      const interval = setInterval(checkState, 2e3).unref();
+      setImmediate(checkState);
+
+      this.pageStateListeners[pageStateId].push(() => {
+        clearInterval(interval);
+        frame.off('paint', checkState);
+        frame.navigations.off('status-change', checkState);
+      });
+    }
+
+    const stop = this.clearPageStateListener.bind(this, pageStateId);
+    this.on('close', stop);
+
+    return { stop };
+  }
+
+  public clearPageStateListener(id: string): void {
+    const unsubscribes = this.pageStateListeners[id];
+    delete this.pageStateListeners[id];
+    if (unsubscribes) {
+      for (const fn of unsubscribes) fn();
+    }
+  }
+
   public addJsPathEventListener(
     type: 'message' | 'page-state',
     jsPath: IJsPath,
@@ -697,7 +774,21 @@ export default class Tab
     }
 
     if (type === 'page-state') {
-      // do stuff
+      const commandFunctions: { [id: string]: () => Promise<any> } = {};
+      const frames: FrameEnvironment[] = [];
+      for (const [id, rawCommand] of Object.entries(options.commands)) {
+        const [frameId, command, args] = rawCommand as any[];
+        const frame = this.getFrameEnvironment(frameId);
+        if (!frames.includes(frame)) frames.push(frame);
+
+        const commandRunner = new CommandRunner(command, args, {
+          FrameEnvironment: frame,
+          Tab: this,
+          Session: this.session,
+        });
+        commandFunctions[id] = commandRunner.runFn;
+      }
+      this.addPageStateListener(JSON.stringify(jsPath), commandFunctions, frames, listenFn);
     }
   }
 
@@ -715,7 +806,7 @@ export default class Tab
     }
 
     if (type === 'page-state') {
-      // remove event
+      this.clearPageStateListener(JSON.stringify(jsPath));
     }
   }
 

@@ -12,6 +12,7 @@ import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
 import IJsPathEventTarget from '../interfaces/IJsPathEventTarget';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import ICommandCounter from '../interfaces/ICommandCounter';
 
 export default class CoreSession implements IJsPathEventTarget {
   public tabsById = new Map<number, CoreTab>();
@@ -52,13 +53,26 @@ export default class CoreSession implements IJsPathEventTarget {
     };
     this.connectionToCore = connectionToCore;
     loggerSessionIdNames.set(sessionId, sessionName);
-    this.commandQueue = new CoreCommandQueue({ sessionId, sessionName }, connectionToCore, this);
-    this.eventHeap = new CoreEventHeap(this.meta, connectionToCore);
+    this.commandQueue = new CoreCommandQueue(
+      { sessionId, sessionName },
+      connectionToCore,
+      this as ICommandCounter,
+    );
+    this.eventHeap = new CoreEventHeap(this.meta, connectionToCore, this as ICommandCounter);
 
     this.addTab(sessionMeta);
   }
 
-  public onEvent(meta: ISessionMeta, listenerId: string, eventData: any): void {
+  public onEvent(
+    meta: ISessionMeta,
+    listenerId: string,
+    eventData: any,
+    lastCommandId?: number,
+  ): void {
+    if (lastCommandId && lastCommandId > this.commandId) {
+      this.commandId = lastCommandId;
+    }
+
     if (meta.tabId) {
       const coreTab = this.tabsById.get(meta.tabId);
       coreTab?.eventHeap?.incomingEvent(meta, listenerId, eventData);

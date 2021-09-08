@@ -34,7 +34,7 @@ export default class CookieStorage {
 
   public async getItem(key: string): Promise<ICookie> {
     const cookies = await this.getItems();
-    return cookies.find(x => x.name === key);
+    return cookies?.find(x => x.name === key);
   }
 
   public async setItem(key: string, value: string, options?: ISetCookieOptions): Promise<boolean> {

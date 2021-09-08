@@ -77,6 +77,7 @@ class PageEventsRecorder {
   private scrollEvents: IScrollEvent[] = [];
   private loadEvents: ILoadEvent[] = [];
   private location = window.self.location.href;
+  private uploadOnDelay: number;
 
   private isListeningForInteractionEvents = false;
 
@@ -351,6 +352,11 @@ class PageEventsRecorder {
   private onMutation(mutations: MutationRecord[]) {
     const changes = this.convertMutationsToChanges(mutations);
     this.domChanges.push(...changes);
+    // debounce uploads
+    if (document.readyState === 'complete') {
+      clearTimeout(this.uploadOnDelay);
+      this.uploadOnDelay = setTimeout(this.uploadChanges.bind(this), 50) as any;
+    }
   }
 
   private convertMutationsToChanges(mutations: MutationRecord[]) {

@@ -59,6 +59,7 @@ import FileChooser from './FileChooser';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import ConnectionManager from './ConnectionManager';
 import './DomExtender';
+import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 
 export const DefaultOptions = {
   defaultBlockedResourceTypes: [BlockedResourceType.None],
@@ -84,6 +85,9 @@ const propertyKeys: (keyof Hero)[] = [
   'meta',
   'tabs',
   'frameEnvironments',
+  'isAllContentLoaded',
+  'isDomContentLoaded',
+  'isPaintingStable',
   'mainFrameEnvironment',
   'coreHost',
   'activeTab',
@@ -156,6 +160,18 @@ export default class Hero
 
   public get frameEnvironments(): Promise<FrameEnvironment[]> {
     return this.activeTab.frameEnvironments;
+  }
+
+  public get isAllContentLoaded(): Promise<boolean> {
+    return this.activeTab.isAllContentLoaded;
+  }
+
+  public get isDomContentLoaded(): Promise<boolean> {
+    return this.activeTab.isDomContentLoaded;
+  }
+
+  public get isPaintingStable(): Promise<boolean> {
+    return this.activeTab.isPaintingStable;
   }
 
   public get lastCommandId(): Promise<number> {
@@ -391,6 +407,12 @@ export default class Hero
     return this.activeTab.waitForMillis(millis);
   }
 
+  public async waitForPageState<T extends IPageStateDefinitions>(
+    states: T,
+    options?: Pick<IWaitForOptions, 'timeoutMs'>,
+  ): Promise<keyof T> {
+    return await this.activeTab.waitForPageState(states, options);
+  }
   /////// THENABLE ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   public async then<TResult1 = Hero, TResult2 = never>(

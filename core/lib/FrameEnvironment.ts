@@ -25,6 +25,7 @@ import * as Os from 'os';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import IPoint from '@ulixee/hero-interfaces/IPoint';
 import { ContentPaint } from '@ulixee/hero-interfaces/INavigation';
+import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import SessionState from './SessionState';
 import TabNavigationObserver from './FrameNavigationsObserver';
 import Session from './Session';
@@ -41,7 +42,10 @@ import { ICommandableTarget } from './CommandRunner';
 
 const { log } = Log(module);
 
-export default class FrameEnvironment implements ICommandableTarget {
+export default class FrameEnvironment
+  extends TypedEventEmitter<{ paint: void }>
+  implements ICommandableTarget
+{
   public get session(): Session {
     return this.tab.session;
   }
@@ -111,6 +115,7 @@ export default class FrameEnvironment implements ICommandableTarget {
   }
 
   constructor(tab: Tab, frame: IPuppetFrame) {
+    super();
     this.puppetFrame = frame;
     this.tab = tab;
     this.createdTime = new Date();
@@ -461,6 +466,10 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
       const incomingStatus = pageStateToLoadStatus[event];
 
       this.navigations.onLoadStatusChanged(incomingStatus, url, null, new Date(timestamp));
+    }
+
+    if (domChanges.length) {
+      this.emit('paint');
     }
 
     this.sessionState.captureDomEvents(

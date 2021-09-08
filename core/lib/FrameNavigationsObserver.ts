@@ -235,7 +235,12 @@ export default class FrameNavigationsObserver {
     timeoutMs: number,
     sinceCommandId?: number,
   ): Promise<void> {
-    if (this.statusTriggerResolvable) this.cancelWaiting('New location trigger created');
+    if (this.statusTriggerResolvable) {
+      if (status === this.statusTrigger && sinceCommandId === this.statusTriggerStartCommandId) {
+        return this.statusTriggerResolvable.promise;
+      }
+      this.cancelWaiting('New location trigger created');
+    }
 
     this.statusTrigger = status;
     this.statusTriggerStartCommandId = sinceCommandId;

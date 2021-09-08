@@ -17,6 +17,7 @@ import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import { createDialog } from './Dialog';
 import CoreSession from './CoreSession';
+import ICommandCounter from '../interfaces/ICommandCounter';
 
 export default class CoreTab implements IJsPathEventTarget {
   public tabId: number;
@@ -48,9 +49,9 @@ export default class CoreTab implements IJsPathEventTarget {
       sessionName,
     };
     this.connection = connection;
-    this.commandQueue = new CoreCommandQueue(meta, connection, coreSession);
+    this.commandQueue = new CoreCommandQueue(meta, connection, coreSession as ICommandCounter);
     this.coreSession = coreSession;
-    this.eventHeap = new CoreEventHeap(this.meta, connection);
+    this.eventHeap = new CoreEventHeap(this.meta, connection, coreSession as ICommandCounter);
     this.frameEnvironmentsById.set(frameId, new CoreFrameEnvironment(meta, this.commandQueue));
 
     const resolvedThis = Promise.resolve(this);
