@@ -7,6 +7,7 @@ import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as readline from 'readline';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
+import { ReadLine } from 'readline';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -39,6 +40,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   private readonly connectionToCore: ConnectionToCore;
   private commandId = 0;
+  private cliPrompt: ReadLine;
 
   constructor(
     sessionMeta: ISessionMeta & { sessionName: string },
@@ -119,6 +121,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   public async close(force = false): Promise<void> {
     try {
+      if (this.cliPrompt) this.cliPrompt.close();
       await this.commandQueue.flush();
       for (const tab of this.tabsById.values()) {
         await tab.flush();
@@ -167,7 +170,7 @@ export default class CoreSession implements IJsPathEventTarget {
   private showSessionKeepAlivePrompt(message: string): Promise<void> {
     if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
 
-    const rl = readline.createInterface({
+    this.cliPrompt = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
@@ -176,7 +179,7 @@ export default class CoreSession implements IJsPathEventTarget {
     process.stdin.setEncoding('utf8');
     if (process.stdin.isTTY) process.stdin.setRawMode(true);
 
-    process.stdout.write(`\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:`);
+    process.stdout.write(`\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`);
 
     ShutdownHandler.register(() => this.close(true));
 
@@ -184,12 +187,11 @@ export default class CoreSession implements IJsPathEventTarget {
       process.stdin.on('keypress', async (chunk, key) => {
         if (key.name.toLowerCase() === 'q') {
           await this.close(true);
-          rl.close();
           resolve();
         }
       });
       process.once('beforeExit', () => {
-        rl.close();
+        this.cliPrompt.close();
         resolve();
       });
     });
