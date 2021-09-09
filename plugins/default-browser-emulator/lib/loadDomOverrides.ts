@@ -76,23 +76,5 @@ export default function loadDomOverrides(
     frameBorderHeight: data.windowFraming.frameBorderHeight,
   });
 
-  const codecs = data.codecs;
-  if (codecs) {
-    domOverrides.add('HTMLMediaElement.prototype.canPlayType', {
-      audioCodecs: codecs.audioSupport,
-      videoCodecs: codecs.videoSupport,
-    });
-    domOverrides.add('MediaRecorder.isTypeSupported', {
-      supportedCodecs: [
-        ...codecs.audioSupport.recordingFormats,
-        ...codecs.videoSupport.recordingFormats,
-      ],
-    });
-    domOverrides.add('RTCRtpSender.getCapabilities', {
-      videoCodecs: codecs.webRtcVideoCodecs,
-      audioCodecs: codecs.webRtcAudioCodecs,
-    });
-  }
-
   return domOverrides;
 }
