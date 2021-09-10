@@ -541,6 +541,10 @@ Alias for [Tab.waitForLocation](/docs/basic-interfaces/tab#wait-for-location)
 
 Alias for [Tab.waitForMillis](/docs/basic-interfaces/tab#wait-for-millis)
 
+### hero.waitForPageState*(states, options)* {#wait-for-page-state}
+
+Alias for [Tab.waitForPageState](/docs/basic-interfaces/tab#wait-for-page-state)
+
 ### hero.waitForPaintingStable*()* {#wait-for-painting-stable}
 
 Alias for [Tab.waitForLoad(PaintingStable)](/docs/basic-interfaces/tab#wait-for-load)

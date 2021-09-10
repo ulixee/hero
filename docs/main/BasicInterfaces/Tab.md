@@ -342,6 +342,72 @@ await activeTab.waitForElement(elem, {
 });
 ```
 
+### tab.waitForPageState*(states, options)* {#wait-for-page-state}
+
+Wait for one of many possible states to be loaded. This feature allows you to detect which page has been loaded based on a series of states, each containing one or more assertions that test for a particular page or template.
+
+#### Why? 
+A common scraping challenge is to identify "which" page has loaded - which template? Is it a captcha? Is it the desired url? Am I redirecting through ad networks? 
+
+Hero normally operates by running each command in order. This makes it a challenge to check for many possible states concurrently. `waitForPageState` runs the underlying commands for all state assertions in one round-trip to Chrome. This client-side can then synchronously evaluate a series of assertions to determine the currently loaded `Page State`.
+
+Each Page State receives `assertion` functions (`assert` and `assertAny`) as parameters. The `assert` function can be run one or more times - if all assertions return true, the given state will be resolved as the active `Page State`. 
+
+The `assert(statePromise, assertionCallbackFn)` function takes in a state "Promise" and will call the provided "assertion" callback function each time new state is available. Each assertionCallbackFn simply returns true/false if it's given a valid state. 
+
+NOTE: Null access exceptions are ignored, so you don't need to worry about individual assertion data being present in the assertion callbacks.
+
+```
+ const state = await hero.waitForPageState({
+  ulixee({ assert }) {
+    assert(hero.url, url => url === 'https://ulixee.org'); // once the url is resolved, it will be checked against https://ulixee.org
+    assert(hero.isPaintingStable); // the default function evaluates if the result is true
+  },
+  dlf({ assert }) {
+    assert(hero.url, 'https://dataliberationfoundation.org'); // a value will be tested for equality
+    assert(hero.isPaintingStable);
+    assert(hero.document.querySelector('h1').textContent, text => text === "It's Time to Open the Data Economy");
+  }
+ });
+``` 
+
+#### Advanced:
+ 
+The provided `assertAny` function passed into each assertion has a function that will allow you to match on some portion of assertions `assertAny(minimumValid: number, assertions: assert()[])`.
+
+This can be useful if you know of a few cases that might be true, but some cases are flaky. For instance, if a loading indicator might be present, or a modal window, and you'd like to treat those as one state.
+
+```
+ const state = await hero.waitForPageState({
+  ulixee({ assert, assertAny }) {
+    assertAny(2, [
+       assert(hero.document.querySelectorAll('[placeholder="Search datasets..."]').length, x => x === 3),
+       assert(hero.document.querySelectorAll('.terms > li').length, x => x > 4),
+       assert(hero.url, 'https://ulixee.org'),
+    ]);
+  },
+  dlf({ assert }) {
+    ...
+  }
+ });
+``` 
+
+#### **Arguments**:
+
+- states `object { [StateName: string]: (function(assertions) => void) }`
+  - [StateName] `string`. The key of the object is the name of the state to wait for.
+  - `function((assertions: IPageStateAssert)): void`. A synchronous function that will be true if all assertions evaluate to true. 
+    - assertions `object`. An object will be passed to each function with the following properties:
+        - assert `function(statePromise: Promise<T>, assertionValueOrCallbackFn: (result: T) => boolean): void`. A function that takes a Promise as a first parameter, and a callback that will be checked when new state is available. 
+            - statePromise `Promise<T>` A Hero Promise that issues a command against this tab (url, isPaintingStable, domElement, isVisible, etc).
+            - assertionValueOrCallbackFn `value: T | function(state: T): boolean`. A function that will receive updated state as it becomes available. You should synchronously evaluate to true/false. If this parameter is a non-function, it will be compared for equality.
+        - assertAny `function(minimumValidAssertions: number, assertions: assert()[]`. A function that can be used to match `minimumValidAssertions` of `assertions.length`. Assertions are functions as described above (`assert(statePromise, assertionValueOrCallbackFn)`)
+- options `object` Optional
+  - timeoutMs `number`. Timeout in milliseconds. Default `30,000`.
+
+#### **Returns**: `Promise<StateName>`
+
+
 ### tab.waitForFileChooser*(options)* {#wait-for-file-chooser}
 
 Wait for a `file chooser` dialog to be prompted on the page. This is usually triggered by clicking on an `input` element with `type=file`.

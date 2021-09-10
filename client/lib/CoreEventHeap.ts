@@ -2,6 +2,7 @@ import { IJsPath } from 'awaited-dom/base/AwaitedPath';
 import ISessionMeta from '@ulixee/hero-interfaces/ISessionMeta';
 import Log from '@ulixee/commons/lib/Logger';
 import ConnectionToCore from '../connections/ConnectionToCore';
+import ICommandCounter from '../interfaces/ICommandCounter';
 
 const { log } = Log(module);
 
@@ -14,11 +15,17 @@ export default class CoreEventHeap {
   private readonly listenerIdByHandle: Map<string, string> = new Map();
   private readonly eventInterceptors: Map<string, IInterceptorFn[]> = new Map();
   private readonly meta: ISessionMeta;
+  private readonly commandCounter: ICommandCounter;
   private pendingRegistrations: Promise<any> = Promise.resolve();
 
-  constructor(meta: ISessionMeta | null, connection: ConnectionToCore) {
+  constructor(
+    meta: ISessionMeta | null,
+    connection: ConnectionToCore,
+    commandCounter: ICommandCounter,
+  ) {
     this.meta = meta;
     this.connection = connection;
+    this.commandCounter = commandCounter;
   }
 
   public hasEventInterceptors(type: string): boolean {
@@ -43,6 +50,7 @@ export default class CoreEventHeap {
     if (this.listenerIdByHandle.has(handle)) return;
 
     const subscriptionPromise = this.connection.sendRequest({
+      commandId: this.commandCounter.nextCommandId,
       meta: this.meta,
       startDate: new Date(),
       command: 'Events.addEventListener',
@@ -82,6 +90,7 @@ export default class CoreEventHeap {
 
     this.connection
       .sendRequest({
+        commandId: this.commandCounter.nextCommandId,
         meta: this.meta,
         startDate: new Date(),
         command: 'Events.removeEventListener',

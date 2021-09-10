@@ -35,6 +35,8 @@ import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
 import FileChooser from './FileChooser';
+import PageState from './PageState';
+import IPageStateDefinitions from '../interfaces/IPageStateDefinitions';
 
 const awaitedPathState = StateMachine<
   any,
@@ -223,6 +225,15 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
 
   public async waitForLoad(status: ILoadStatus, options?: IWaitForOptions): Promise<void> {
     return await this.mainFrameEnvironment.waitForLoad(status, options);
+  }
+
+  public async waitForPageState<T extends IPageStateDefinitions>(
+    states: T,
+    options: Pick<IWaitForOptions, 'timeoutMs'> = { timeoutMs: 30e3 },
+  ): Promise<keyof T> {
+    const coreTab = await getCoreTab(this);
+    const pageState = new PageState(this, coreTab, states);
+    return await pageState.waitFor(options.timeoutMs);
   }
 
   public waitForResource(

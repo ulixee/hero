@@ -72,7 +72,7 @@ describe('Core events tests', () => {
       sessionId: meta.sessionId,
     });
 
-    const { listenerId } = events.addEventListener(null, 'resource');
+    const { listenerId } = await events.addEventListener(null, 'resource');
 
     koaServer.get('/page1', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
     koaServer.get('/page2', ctx => (ctx.body = '<body><img src="/resource.png"></body>'));
@@ -81,7 +81,7 @@ describe('Core events tests', () => {
     await tab.goto(`${koaServer.baseUrl}/page1`);
     await tab.waitForLoad(LocationStatus.AllContentLoaded);
 
-    events.removeEventListener(listenerId);
+    await events.removeEventListener(listenerId);
 
     await tab.goto(`${koaServer.baseUrl}/page2`);
     await tab.waitForLoad(LocationStatus.PaintingStable);

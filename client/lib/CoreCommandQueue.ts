@@ -18,6 +18,7 @@ export default class CoreCommandQueue {
   private readonly internalState: {
     queue: Queue;
     commandsToRecord: ICoreRequestPayload['recordCommands'];
+    interceptFn?: (meta: ISessionMeta, command: string, ...args: any[]) => any;
   };
 
   private readonly commandCounter?: ICommandCounter;
@@ -53,6 +54,12 @@ export default class CoreCommandQueue {
       queue: new Queue('CORE COMMANDS', 1),
       commandsToRecord: [],
     };
+  }
+
+  public intercept(
+    interceptFn: (meta: ISessionMeta, command: string, ...args: any[]) => any,
+  ): void {
+    this.internalState.interceptFn = interceptFn;
   }
 
   public record(command: { command: string; args: any[]; commandId?: number }): void {
@@ -95,8 +102,19 @@ export default class CoreCommandQueue {
         convertJsPathArgs(arg);
       }
     }
+
+    if (this.internalState.interceptFn) {
+      const result = this.internalState.interceptFn(this.meta, command, ...args);
+      if (result && result instanceof Error) {
+        result.stack += `${this.sessionMarker}`;
+        throw result;
+      }
+      return Promise.resolve(result as T);
+    }
+
     const startTime = new Date();
     const commandId = this.nextCommandId;
+
     return this.internalQueue
       .run<T>(async () => {
         const recordCommands = [...this.internalState.commandsToRecord];

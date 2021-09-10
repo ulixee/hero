@@ -41,6 +41,7 @@ export default class RemoteEvents {
       meta,
       listenerId,
       eventArgs,
+      lastCommandId: Session.get(meta.sessionId)?.sessionState.commands.length,
     });
   }
 }
