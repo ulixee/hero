@@ -1,12 +1,12 @@
+import type { Tab } from '@ulixee/hero';
+import type { Hero } from '@ulixee/hero/lib/Hero';
 import { PluginTypes } from './IPluginTypes';
-import IHero from './IHero';
-import ITab from './ITab';
 
 export default interface IClientPlugin {
   id: string;
 
-  onHero?(hero: IHero, sendToCore: ISendToCoreFn): void;
-  onTab?(hero: IHero, tab: ITab, sendToCore: ISendToCoreFn): void;
+  onHero?(hero: Hero, sendToCore: ISendToCoreFn): void;
+  onTab?(hero: Hero, tab: Tab, sendToCore: ISendToCoreFn): void;
 }
 
 export interface IClientPluginClass {

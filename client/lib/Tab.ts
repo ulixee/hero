@@ -21,7 +21,6 @@ import {
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import AwaitedPath from 'awaited-dom/base/AwaitedPath';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
-import ITab from '@ulixee/hero-interfaces/ITab';
 import * as Util from 'util';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
@@ -29,8 +28,8 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import Hero, { IState as IHeroState } from './Hero';
-import FrameEnvironment from './FrameEnvironment';
+import { Hero, IState as IHeroState } from './Hero';
+import { FrameEnvironment } from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
@@ -73,7 +72,7 @@ const propertyKeys: (keyof Tab)[] = [
   'Request',
 ];
 
-export default class Tab extends AwaitedEventTarget<IEventType> implements ITab {
+export class Tab extends AwaitedEventTarget<IEventType> {
   constructor(hero: Hero, coreTab: Promise<CoreTab>) {
     super(() => {
       return { target: coreTab };
@@ -95,7 +94,7 @@ export default class Tab extends AwaitedEventTarget<IEventType> implements ITab 
     }
 
     for (const clientPlugin of heroState.getState(hero).clientPlugins) {
-      clientPlugin.onTab(hero, this, sendToTab);
+      if (clientPlugin.onTab) clientPlugin.onTab(hero, this, sendToTab);
     }
   }
 

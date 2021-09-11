@@ -70,14 +70,14 @@ Use this property to specify a list of core pluginIds that your ClientPlugin nee
 The following methods are all optional. Use them when you want to hook into a specific Hero flow:
 
 ### onHero<em>(hero, sendToCore)</em> *optional*
-This method is called every time a new Hero in initialized.
+This method is called every time a new Hero is initialized.
 #### **Arguments**:
 - hero `Hero`
 - sendToCore: `(toPluginId: string, ...args: any[]) => Promise<any>`
 #### **Returns** `void`
 
 ### onTab<em>(hero, tab, sendToCore)</em> *optional*
-This method is called every time a new Tab in initialized.
+This method is called every time a new Tab is initialized.
 #### **Arguments**:
 - hero `Hero`
 - tab `Tab`

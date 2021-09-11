@@ -28,7 +28,6 @@ import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
 import IScreenshotOptions from '@ulixee/hero-interfaces/IScreenshotOptions';
 import { INodeVisibility } from '@ulixee/hero-interfaces/INodeVisibility';
 import IClientPlugin, { IClientPluginClass } from '@ulixee/hero-interfaces/IClientPlugin';
-import IHero from '@ulixee/hero-interfaces/IHero';
 import { PluginTypes } from '@ulixee/hero-interfaces/IPluginTypes';
 import requirePlugins from '@ulixee/hero-plugin-utils/lib/utils/requirePlugins';
 import filterPlugins from '@ulixee/hero-plugin-utils/lib/utils/filterPlugins';
@@ -43,14 +42,15 @@ import IInteractions, {
   IMousePosition,
   ITypeInteraction,
 } from '../interfaces/IInteractions';
-import Tab, { createTab, getCoreTab } from './Tab';
+import { Tab, createTab, getCoreTab } from './Tab';
 import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
-import FrameEnvironment, {
+import {
+  FrameEnvironment,
   getCoreFrameEnvironment,
   getCoreFrameEnvironmentForPosition,
 } from './FrameEnvironment';
@@ -101,13 +101,10 @@ type IClassEvents = {
   new: (heroInstance: Hero, heroCreateOptions: IHeroCreateOptions) => void;
 };
 
-export default class Hero
-  extends AwaitedEventTarget<{
-    close: () => void;
-    command: (name: string, commandId: number, args: any[]) => void;
-  }>
-  implements IHero
-{
+export class Hero extends AwaitedEventTarget<{
+  close: () => void;
+  command: (name: string, commandId: number, args: any[]) => void;
+}> {
   public static createConnectionToCore: ICreateConnectionToCoreFn;
   protected static options: IHeroDefaults = { ...DefaultOptions };
   private static emitter = new EventEmitter();
@@ -309,7 +306,7 @@ export default class Hero
   // PLUGINS
 
   public use(PluginObject: string | IClientPluginClass | { [name: string]: IPluginClass }): Hero {
-    const { clientPlugins, options } = getState(this);
+    const { clientPlugins, options, connection } = getState(this);
     const ClientPluginsById: { [id: string]: IClientPluginClass } = {};
 
     if (typeof PluginObject === 'string') {
@@ -331,6 +328,10 @@ export default class Hero
     Object.values(ClientPluginsById).forEach(ClientPlugin => {
       const clientPlugin = new ClientPlugin();
       clientPlugins.push(clientPlugin);
+      if (connection.hasConnected && clientPlugin.onHero) {
+        clientPlugin.onHero(this, connection.sendToActiveTab);
+      }
+
       options.dependencyMap[ClientPlugin.id] = ClientPlugin.coreDependencyIds || [];
     });
 

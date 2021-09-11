@@ -1,9 +1,9 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import Tab, { createTab } from './Tab';
+import { Tab, createTab } from './Tab';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import ConnectionFactory from '../connections/ConnectionFactory';
-import Hero, { IState, IStateOptions } from './Hero';
+import { Hero, IState, IStateOptions } from './Hero';
 
 const { getState } = StateMachine<Hero, IState>();
 
@@ -44,6 +44,7 @@ export default class ConnectionManager {
     if (this.#connectionToCore !== connectionToCore) {
       this.#didCreateConnection = true;
     }
+    this.sendToActiveTab = this.sendToActiveTab.bind(this);
 
     this.#coreSession = this.#connectionToCore.createSession(options).catch(err => err);
   }
@@ -85,11 +86,12 @@ export default class ConnectionManager {
     this.#tabs.push(tab);
   }
 
-  public async getConnectedCoreSessionOrReject(): Promise<CoreSession> {
+  public getConnectedCoreSessionOrReject(): Promise<CoreSession> {
     if (this.hasConnected) {
-      const coreSession = await this.#coreSession;
-      if (coreSession instanceof CoreSession) return coreSession;
-      throw coreSession;
+      return this.#coreSession.then(coreSession => {
+        if (coreSession instanceof CoreSession) return coreSession;
+        throw coreSession;
+      });
     }
     this.hasConnected = true;
 
@@ -105,13 +107,13 @@ export default class ConnectionManager {
     this.#tabs = [this.#activeTab];
 
     for (const clientPlugin of clientPlugins) {
-      await clientPlugin.onHero(this.hero, this.sendToActiveTab.bind(this));
+      if (clientPlugin.onHero) clientPlugin.onHero(this.hero, this.sendToActiveTab.bind(this));
     }
 
-    return await coreSession;
+    return coreSession;
   }
 
-  private async sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
+  public async sendToActiveTab(toPluginId: string, ...args: any[]): Promise<any> {
     const coreSession = (await this.#coreSession) as CoreSession;
     const coreTab = coreSession.tabsById.get(await this.#activeTab.tabId);
     return coreTab.commandQueue.run('Tab.runPluginCommand', toPluginId, args);

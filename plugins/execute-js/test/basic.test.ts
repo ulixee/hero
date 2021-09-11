@@ -36,7 +36,6 @@ test('it should run function in browser and return response', async () => {
 
   await hero.goto(`${koaServer.baseUrl}/test1`);
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-  // @ts-ignore
   const response = await hero.executeJs(() => {
     // @ts-ignore
     return window.testRun();
@@ -44,7 +43,6 @@ test('it should run function in browser and return response', async () => {
   expect(response).toEqual('ItWorks');
   await hero.close();
 });
-
 
 test('it should run function in browser and return incr', async () => {
   koaServer.get('/test2', ctx => {
@@ -65,8 +63,7 @@ test('it should run function in browser and return incr', async () => {
 
   await hero.goto(`${koaServer.baseUrl}/test2`);
   await hero.activeTab.waitForLoad(LocationStatus.DomContentLoaded);
-  // @ts-ignore
-  const response = await hero.executeJs((num) => {
+  const response = await hero.executeJs(num => {
     // @ts-ignore
     return window.testRun(num);
   }, 1);
