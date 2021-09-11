@@ -400,6 +400,34 @@ document.querySelector('#local').innerHTML = localStorage.getItem('local');
 });
 
 describe('UserProfile IndexedDb tests', () => {
+  it('should not fail on an empty db', async () => {
+    koaServer.get('/dbfail', ctx => {
+      ctx.body = `<body>
+<h1>db page</h1>
+<script>
+    const openDBRequest = indexedDB.open('dbfail', 1);
+    openDBRequest.onupgradeneeded = function() {
+
+         document.body.classList.add('ready');
+
+
+    }
+</script>
+</body>`;
+    });
+
+    {
+      const meta = await connection.createSession();
+      const tab = Session.getTab(meta);
+      Helpers.needsClosing.push(tab.session);
+      await tab.goto(`${koaServer.baseUrl}/dbfail`);
+      await tab.waitForLoad('PaintingStable');
+      await tab.waitForElement(['document', ['querySelector', 'body.ready']]);
+
+      await expect(tab.session.exportUserProfile()).resolves.toBeTruthy();
+    }
+  });
+
   it('should be able to save and restore an indexed db', async () => {
     koaServer.get('/db', ctx => {
       ctx.body = `<body>

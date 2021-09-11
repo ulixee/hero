@@ -32,6 +32,7 @@ async function exportIndexedDbs(dbNames: string[]) {
         };
       });
       const objectStoreNames = Array.from(idbDatabase.objectStoreNames);
+      if (!objectStoreNames.length) return;
 
       const transaction = idbDatabase.transaction(objectStoreNames, 'readonly');
       // eslint-disable-next-line promise/param-names
