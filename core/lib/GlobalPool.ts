@@ -158,6 +158,7 @@ export default class GlobalPool {
           sessionId: session.id,
         }),
         session.getMitmProxy(),
+        session.useIncognitoContext(),
       );
       await session.initialize(browserContext);
 

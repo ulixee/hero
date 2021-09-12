@@ -33,6 +33,7 @@ export interface IPuppetPageOptions {
 export interface IPuppetContextEvents {
   page: { page: IPuppetPage };
   worker: { worker: IPuppetWorker };
+  close: void;
   'devtools-message': {
     direction: 'send' | 'receive';
     timestamp: Date;

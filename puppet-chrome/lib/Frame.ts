@@ -342,12 +342,12 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
 
   public removeContextId(executionContextId: number): void {
     if (this.defaultContextId === executionContextId) this.defaultContextId = null;
-    if (this.isolatedContextId === executionContextId) this.defaultContextId = null;
+    if (this.isolatedContextId === executionContextId) this.isolatedContextId = null;
   }
 
   public clearContextIds(): void {
     this.defaultContextId = null;
-    this.defaultContextId = null;
+    this.isolatedContextId = null;
   }
 
   public addContextId(executionContextId: number, isDefault: boolean): void {

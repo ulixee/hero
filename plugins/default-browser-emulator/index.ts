@@ -41,8 +41,8 @@ import configureDeviceProfile from './lib/helpers/configureDeviceProfile';
 import configureHttp2Session from './lib/helpers/configureHttp2Session';
 
 const dataLoader = new DataLoader(__dirname);
-export const latestBrowserEngineId = 'chrome-88-0';
-export const latestChromeBrowserVersion = { major: '88', minor: '0' };
+export const latestBrowserEngineId = 'chrome-89-0';
+export const latestChromeBrowserVersion = { major: '89', minor: '0' };
 
 @BrowserEmulatorClassDecorator
 export default class DefaultBrowserEmulator extends BrowserEmulator {
