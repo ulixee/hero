@@ -11,7 +11,7 @@ import ResourceRequest, { createResourceRequest } from './ResourceRequest';
 import ResourceResponse, { createResourceResponse } from './ResourceResponse';
 import { createWebsocketResource } from './WebsocketResource';
 import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
-import Tab, { getCoreTab } from './Tab';
+import { Tab, getCoreTab } from './Tab';
 
 const { getState, setState } = StateMachine<Resource, IState>();
 

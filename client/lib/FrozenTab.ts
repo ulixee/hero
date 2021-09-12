@@ -13,7 +13,7 @@ import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import CoreTab from './CoreTab';
 import Resource, { createResource } from './Resource';
 import CookieStorage from './CookieStorage';
-import Hero from './Hero';
+import { Hero } from './Hero';
 import FrozenFrameEnvironment from './FrozenFrameEnvironment';
 
 const { getState, setState } = StateMachine<FrozenTab, IState>();

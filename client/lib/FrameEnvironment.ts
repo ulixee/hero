@@ -30,10 +30,10 @@ import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNam
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
-import Hero from './Hero';
+import { Hero } from './Hero';
 import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
-import Tab from './Tab';
+import { Tab } from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
@@ -63,7 +63,7 @@ const propertyKeys: (keyof FrameEnvironment)[] = [
   'Request',
 ];
 
-export default class FrameEnvironment {
+export class FrameEnvironment {
   constructor(hero: Hero, tab: Tab, coreFrame: Promise<CoreFrameEnvironment>) {
     setState(this, {
       hero,

@@ -8,9 +8,9 @@ import { Node, XPathResult } from '@ulixee/hero-interfaces/AwaitedDom';
 import { LocationStatus, LocationTrigger } from '@ulixee/hero-interfaces/Location';
 import IHeroCreateOptions from './interfaces/IHeroCreateOptions';
 import IConnectionToCoreOptions from './interfaces/IConnectionToCoreOptions';
-import Hero from './lib/Hero';
-import type Tab from './lib/Tab';
-import type FrameEnvironment from './lib/FrameEnvironment';
+import { Hero } from './lib/Hero';
+import { Tab } from './lib/Tab';
+import { FrameEnvironment } from './lib/FrameEnvironment';
 import ConnectionToRemoteCoreServer from './connections/ConnectionToRemoteCoreServer';
 import ConnectionToCore from './connections/ConnectionToCore';
 

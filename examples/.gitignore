@@ -11,3 +11,4 @@
 !server.ts
 !api-server.ts
 !sessionReplay.ts
+!plugins*
