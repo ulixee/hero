@@ -1,5 +1,5 @@
 import type { Tab } from '@ulixee/hero';
-import type { Hero } from '@ulixee/hero/lib/Hero';
+import type Hero from '@ulixee/hero/lib/Hero';
 import { PluginTypes } from './IPluginTypes';
 
 export default interface IClientPlugin {

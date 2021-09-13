@@ -9,7 +9,7 @@ import IPageStateDefinitions, {
   IPageStateDefinitionFn,
   IStateAndAssertion,
 } from '../interfaces/IPageStateDefinitions';
-import { Tab } from './Tab';
+import Tab from './Tab';
 
 let counter = 0;
 

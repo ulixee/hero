@@ -28,8 +28,8 @@ import IWaitForResourceFilter from '../interfaces/IWaitForResourceFilter';
 import WebsocketResource from './WebsocketResource';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import CookieStorage from './CookieStorage';
-import { Hero, IState as IHeroState } from './Hero';
-import { FrameEnvironment } from './FrameEnvironment';
+import Hero, { IState as IHeroState } from './Hero';
+import FrameEnvironment from './FrameEnvironment';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import Dialog from './Dialog';
@@ -72,7 +72,7 @@ const propertyKeys: (keyof Tab)[] = [
   'Request',
 ];
 
-export class Tab extends AwaitedEventTarget<IEventType> {
+export default class Tab extends AwaitedEventTarget<IEventType> {
   constructor(hero: Hero, coreTab: Promise<CoreTab>) {
     super(() => {
       return { target: coreTab };

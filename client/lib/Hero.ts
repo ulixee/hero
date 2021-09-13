@@ -42,15 +42,14 @@ import IInteractions, {
   IMousePosition,
   ITypeInteraction,
 } from '../interfaces/IInteractions';
-import { Tab, createTab, getCoreTab } from './Tab';
+import Tab, { createTab, getCoreTab } from './Tab';
 import IHeroCreateOptions from '../interfaces/IHeroCreateOptions';
 import ScriptInstance from './ScriptInstance';
 import AwaitedEventTarget from './AwaitedEventTarget';
 import IHeroDefaults from '../interfaces/IHeroDefaults';
 import { ICreateConnectionToCoreFn } from '../connections/ConnectionFactory';
 import DisconnectedFromCoreError from '../connections/DisconnectedFromCoreError';
-import {
-  FrameEnvironment,
+import FrameEnvironment, {
   getCoreFrameEnvironment,
   getCoreFrameEnvironmentForPosition,
 } from './FrameEnvironment';
@@ -101,7 +100,7 @@ type IClassEvents = {
   new: (heroInstance: Hero, heroCreateOptions: IHeroCreateOptions) => void;
 };
 
-export class Hero extends AwaitedEventTarget<{
+export default class Hero extends AwaitedEventTarget<{
   close: () => void;
   command: (name: string, commandId: number, args: any[]) => void;
 }> {
