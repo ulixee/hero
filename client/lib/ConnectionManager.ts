@@ -1,9 +1,9 @@
 import StateMachine from 'awaited-dom/base/StateMachine';
-import { Tab, createTab } from './Tab';
+import Tab, { createTab } from './Tab';
 import ConnectionToCore from '../connections/ConnectionToCore';
 import CoreSession from './CoreSession';
 import ConnectionFactory from '../connections/ConnectionFactory';
-import { Hero, IState, IStateOptions } from './Hero';
+import Hero, { IState, IStateOptions } from './Hero';
 
 const { getState } = StateMachine<Hero, IState>();
 
