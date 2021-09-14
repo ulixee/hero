@@ -47,10 +47,6 @@ export default function launchProcess(
     stdio,
   });
 
-  const dataDir = processArguments
-    .find(x => x.startsWith('--user-data-dir='))
-    ?.split('--user-data-dir=')
-    ?.pop();
   // Prevent Unhandled 'error' event.
   launchedProcess.on('error', () => {});
 
@@ -83,6 +79,11 @@ export default function launchProcess(
     if (onClose) onClose();
     hasRunOnClose = true;
   };
+  const dataDir = processArguments
+    .find(x => x.startsWith('--user-data-dir='))
+    ?.split('--user-data-dir=')
+    ?.pop();
+
   let processKilled = false;
   let transport: PipeTransport;
   launchedProcess.once('exit', (exitCode, signal) => {
@@ -100,7 +101,8 @@ export default function launchProcess(
     if (dataDir) cleanDataDir(dataDir);
   });
 
-  process.on('uncaughtExceptionMonitor', () => close());
+  process.once('exit', close);
+  process.once('uncaughtExceptionMonitor', close);
   ShutdownHandler.register(close);
   const { 3: pipeWrite, 4: pipeRead } = launchedProcess.stdio;
   transport = new PipeTransport(
@@ -120,6 +122,11 @@ export default function launchProcess(
       if (transport) {
         transport.end(JSON.stringify({ method: 'Browser.close', id: -1 }));
       }
+    } catch (error) {
+      // this might fail, we want to keep going
+    }
+
+    try {
       if (!launchedProcess.killed && !processKilled) {
         const closed = new Promise<void>(resolve => launchedProcess.once('exit', resolve));
         if (process.platform === 'win32') {

@@ -98,6 +98,16 @@ describe('BrowserContext', () => {
       await Promise.all([context.close(), context.close()]);
       await expect(context.close()).resolves.toBe(undefined);
     });
+
+    it('can create a page with the default context', async () => {
+      const plugins = new CorePlugins({ browserEmulatorId }, log as IBoundLog);
+      const context = await puppet.newContext(plugins, log, null, true);
+      needsClosing.push(context);
+      const page = await context.newPage();
+      needsClosing.push(page);
+      await expect(page.navigate(server.emptyPage)).resolves.toBeTruthy();
+      await expect(context.close()).resolves.toBe(undefined);
+    });
   });
 
   describe('emulator', () => {
@@ -297,18 +307,16 @@ describe('BrowserContext', () => {
           value: 'GRID',
         },
       ]);
-      expect(await context.getCookies()).toStrictEqual([
-        {
-          name: 'gridcookie',
-          value: 'GRID',
-          domain: 'localhost',
-          path: '/grid.html',
-          expires: '-1',
-          secure: false,
-          httpOnly: false,
-          sameSite: 'None',
-        },
-      ]);
+      expect((await context.getCookies())[0]).toMatchObject({
+        name: 'gridcookie',
+        value: 'GRID',
+        domain: 'localhost',
+        path: '/grid.html',
+        expires: '-1',
+        secure: false,
+        httpOnly: false,
+        sameSite: 'None',
+      });
       expect(await page.evaluate('document.cookie')).toBe('gridcookie=GRID');
       await page.goto(server.emptyPage);
       expect(await page.evaluate('document.cookie')).toBe('');
@@ -370,18 +378,18 @@ describe('BrowserContext', () => {
     return document.cookie;
 })()`);
       expect(documentCookie).toBe('username=John Doe');
-      expect(await context.getCookies()).toEqual([
-        {
-          name: 'username',
-          value: 'John Doe',
-          domain: 'localhost',
-          path: '/',
-          expires: '-1',
-          httpOnly: false,
-          secure: false,
-          sameSite: 'None',
-        },
-      ]);
+      const cookies = await context.getCookies();
+      expect(cookies).toHaveLength(1);
+      expect(cookies[0]).toMatchObject({
+        name: 'username',
+        value: 'John Doe',
+        domain: 'localhost',
+        path: '/',
+        expires: '-1',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'None',
+      });
     });
 
     it('should get a non-session cookie', async () => {
@@ -394,18 +402,18 @@ describe('BrowserContext', () => {
     return document.cookie;
   })()`);
       expect(documentCookie).toBe('username=John Doe');
-      expect(await context.getCookies()).toEqual([
-        {
-          name: 'username',
-          value: 'John Doe',
-          domain: 'localhost',
-          path: '/',
-          expires: String(date / 1000),
-          httpOnly: false,
-          secure: false,
-          sameSite: 'None',
-        },
-      ]);
+      const cookies = await context.getCookies();
+      expect(cookies).toHaveLength(1);
+      expect(cookies[0]).toMatchObject({
+        name: 'username',
+        value: 'John Doe',
+        domain: 'localhost',
+        path: '/',
+        expires: String(date / 1000),
+        httpOnly: false,
+        secure: false,
+        sameSite: 'None',
+      });
     });
 
     it('should properly report "Strict" sameSite cookie', async () => {
@@ -450,18 +458,17 @@ describe('BrowserContext', () => {
       ]);
       const cookies = await context.getCookies(new URL('https://foo.com'));
       cookies.sort((a, b) => a.name.localeCompare(b.name));
-      expect(cookies).toEqual([
-        {
-          name: 'doggo',
-          value: 'woofs',
-          domain: 'foo.com',
-          path: '/',
-          expires: '-1',
-          httpOnly: false,
-          secure: true,
-          sameSite: 'None',
-        },
-      ]);
+      expect(cookies).toHaveLength(1);
+      expect(cookies[0]).toMatchObject({
+        name: 'doggo',
+        value: 'woofs',
+        domain: 'foo.com',
+        path: '/',
+        expires: '-1',
+        httpOnly: false,
+        secure: true,
+        sameSite: 'None',
+      });
     });
   });
 });

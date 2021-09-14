@@ -4,10 +4,10 @@ import * as http from 'http';
 import { Log } from '@ulixee/commons/lib/Logger';
 import BrowserEmulator from '@ulixee/default-browser-emulator';
 import { DependenciesMissingError } from '@ulixee/chrome-app/lib/DependenciesMissingError';
-import { DependencyInstaller } from '@ulixee/chrome-app/lib/DependencyInstaller';
 import ChromeApp from '@ulixee/chrome-app/index';
+import BrowserEngine from '@ulixee/hero-plugin-utils/lib/BrowserEngine';
 
-const validate = jest.spyOn(DependencyInstaller.prototype, 'validate');
+const validate = jest.spyOn(BrowserEngine.prototype, 'verifyLaunchable');
 const logError = jest.spyOn(Log.prototype, 'error');
 
 let httpServer: Helpers.ITestHttpServer<http.Server>;
@@ -80,7 +80,7 @@ describe('basic connection tests', () => {
 
     logError.mockClear();
     validate.mockClear();
-    validate.mockImplementationOnce(() => {
+    validate.mockImplementationOnce(async () => {
       throw new DependenciesMissingError(
         `You can resolve this by running the apt dependency installer at:${ChromeApp.aptScriptPath}`,
         'Chrome',
