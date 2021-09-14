@@ -8,6 +8,8 @@ import IJsPathResult from '@ulixee/hero-interfaces/IJsPathResult';
 import * as readline from 'readline';
 import ShutdownHandler from '@ulixee/commons/lib/ShutdownHandler';
 import { ReadLine } from 'readline';
+import Resolvable from '@ulixee/commons/lib/Resolvable';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import CoreCommandQueue from './CoreCommandQueue';
 import CoreEventHeap from './CoreEventHeap';
 import CoreTab from './CoreTab';
@@ -135,7 +137,7 @@ export default class CoreSession implements IJsPathEventTarget {
 
   public async close(force = false): Promise<void> {
     try {
-      if (this.cliPrompt) this.cliPrompt.close();
+      this.closeCliPrompt();
       await this.commandQueue.flush();
       for (const tab of this.tabsById.values()) {
         await tab.flush();
@@ -148,7 +150,10 @@ export default class CoreSession implements IJsPathEventTarget {
         force,
       );
       if (result?.didKeepAlive === true) {
+        const closedResolvable = new Resolvable();
+        await this.addEventListener(null, 'close', closedResolvable.resolve);
         await this.showSessionKeepAlivePrompt(result.message);
+        await closedResolvable.promise;
       }
     } finally {
       process.nextTick(() => this.connectionToCore.closeSession(this));
@@ -181,6 +186,13 @@ export default class CoreSession implements IJsPathEventTarget {
     }
   }
 
+  private closeCliPrompt(): void {
+    if (this.cliPrompt) {
+      this.cliPrompt.close();
+      this.cliPrompt = null;
+    }
+  }
+
   private showSessionKeepAlivePrompt(message: string): Promise<void> {
     if (/yes|1|true/i.test(process.env.HERO_CLI_NOPROMPT)) return;
 
@@ -193,21 +205,22 @@ export default class CoreSession implements IJsPathEventTarget {
     process.stdin.setEncoding('utf8');
     if (process.stdin.isTTY) process.stdin.setRawMode(true);
 
-    process.stdout.write(`\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`);
+    this.cliPrompt.setPrompt(
+      `\n\n${message}\n\nPress Q or kill the CLI to exit and close Chrome:\n\n`,
+    );
 
     ShutdownHandler.register(() => this.close(true));
-
-    return new Promise<void>(resolve => {
-      process.stdin.on('keypress', async (chunk, key) => {
-        if (key.name.toLowerCase() === 'q') {
+    process.stdin.on('keypress', async (chunk, key) => {
+      if (key.name.toLowerCase() === 'q') {
+        try {
           await this.close(true);
-          resolve();
+        } catch (error) {
+          if (error instanceof CanceledPromiseError) return;
+          throw error;
         }
-      });
-      process.once('beforeExit', () => {
-        this.cliPrompt.close();
-        resolve();
-      });
+      }
     });
+    process.once('beforeExit', () => this.closeCliPrompt());
+    this.cliPrompt.prompt(true);
   }
 }
