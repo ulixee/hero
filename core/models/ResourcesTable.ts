@@ -128,7 +128,7 @@ export default class ResourcesTable extends SqliteTable<IResourcesRecord> {
       browserCanceled?: boolean;
     },
     error?: Error,
-  ) {
+  ): void {
     const errorString = ResourcesTable.getErrorString(error);
 
     let contentEncoding: string;

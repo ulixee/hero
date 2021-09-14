@@ -31,7 +31,7 @@ interface IDbOptions {
 export default class SessionDb {
   private static byId = new Map<string, SessionDb>();
 
-  public get readonly() {
+  public get readonly(): boolean {
     return this.db?.readonly;
   }
 
@@ -124,7 +124,7 @@ export default class SessionDb {
     }
   }
 
-  public close() {
+  public close(): void {
     clearInterval(this.saveInterval);
     if (this.db) {
       this.flush();
@@ -133,7 +133,7 @@ export default class SessionDb {
     this.db = null;
   }
 
-  public flush() {
+  public flush(): void {
     if (this.batchInsert) {
       try {
         this.batchInsert.immediate();
@@ -146,11 +146,11 @@ export default class SessionDb {
     }
   }
 
-  public unsubscribeToChanges() {
+  public unsubscribeToChanges(): void {
     for (const table of this.tables) table.unsubscribe();
   }
 
-  public static getCached(sessionId: string, fileMustExist = false) {
+  public static getCached(sessionId: string, fileMustExist = false): SessionDb {
     if (!this.byId.get(sessionId)?.db?.open) {
       this.byId.set(
         sessionId,
@@ -182,7 +182,7 @@ export default class SessionDb {
     };
   }
 
-  public static get databaseDir() {
+  public static get databaseDir(): string {
     return `${Core.dataDir}/hero-sessions`;
   }
 }

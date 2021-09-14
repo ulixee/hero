@@ -15,7 +15,7 @@ export default class WebsocketMessagesTable extends SqliteTable<IWebsocketMessag
     ]);
   }
 
-  public insert(lastCommandId: number, resourceMessage: IWebsocketResourceMessage) {
+  public insert(lastCommandId: number, resourceMessage: IWebsocketResourceMessage): void {
     return this.queuePendingInsert([
       resourceMessage.messageId,
       resourceMessage.resourceId,

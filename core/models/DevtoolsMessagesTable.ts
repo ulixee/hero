@@ -34,7 +34,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
     ]);
   }
 
-  public insert(event: IPuppetContextEvents['devtools-message']) {
+  public insert(event: IPuppetContextEvents['devtools-message']): void {
     if (filteredEventMethods.has(event.method)) return;
     const params = event.params;
     let frameId = event.frameId;
@@ -74,7 +74,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       }
     }
 
-    function paramsStringifyFilter(key: string, value: any) {
+    function paramsStringifyFilter(key: string, value: any): any {
       if (
         key === 'payload' &&
         event.method === 'Runtime.bindingCalled' &&

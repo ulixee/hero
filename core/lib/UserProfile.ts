@@ -9,7 +9,7 @@ import InjectedScripts from './InjectedScripts';
 const { log } = Log(module);
 
 export default class UserProfile {
-  public static async export(session: Session) {
+  public static async export(session: Session): Promise<IUserProfile> {
     const cookies = await session.browserContext.getCookies();
 
     const storage: IDomStorage = {};
@@ -35,7 +35,7 @@ export default class UserProfile {
     } as IUserProfile;
   }
 
-  public static async install(session: Session) {
+  public static async install(session: Session): Promise<UserProfile> {
     const { userProfile } = session;
     assert(userProfile, 'UserProfile exists');
     const sessionId = session.id;
@@ -89,7 +89,7 @@ export default class UserProfile {
     return this;
   }
 
-  public static async installSessionStorage(session: Session, page: IPuppetPage) {
+  public static async installSessionStorage(session: Session, page: IPuppetPage): Promise<void> {
     const { userProfile } = session;
 
     try {

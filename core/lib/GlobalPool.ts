@@ -20,11 +20,11 @@ const disableMitm = Boolean(JSON.parse(process.env.HERO_DISABLE_MITM ?? 'false')
 export default class GlobalPool {
   public static maxConcurrentClientCount = 10;
   public static localProxyPortStart = 0;
-  public static get activeSessionCount() {
+  public static get activeSessionCount(): number {
     return this._activeSessionCount;
   }
 
-  public static get hasAvailability() {
+  public static get hasAvailability(): boolean {
     return this.activeSessionCount < GlobalPool.maxConcurrentClientCount;
   }
 

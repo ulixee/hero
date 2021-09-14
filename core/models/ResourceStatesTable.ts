@@ -21,7 +21,7 @@ export default class ResourceStatesTable extends SqliteTable<IResourceStatesReco
     );
   }
 
-  public insert(resourceId: number, stateChanges: Map<ResourceState, Date>) {
+  public insert(resourceId: number, stateChanges: Map<ResourceState, Date>): void {
     const states = resourceStates.map(x => stateChanges.get(ResourceState[x])?.getTime());
     return this.queuePendingInsert([resourceId, ...states]);
   }

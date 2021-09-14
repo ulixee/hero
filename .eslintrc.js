@@ -57,7 +57,13 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*client/**/*.ts', '*interfaces/**/*.ts', 'commons/**/*.ts', 'mitm*/**/*.ts'],
+      files: [
+        '*client/**/*.ts',
+        '*interfaces/**/*.ts',
+        'commons/**/*.ts',
+        'core/**/*.ts',
+        'mitm*/**/*.ts',
+      ],
       rules: {
         '@typescript-eslint/explicit-function-return-type': [
           'error',

@@ -20,7 +20,7 @@ export default class SessionsTable extends SqliteTable<ISessionsRecord> {
     scriptInstanceId: string,
     scriptEntrypoint: string,
     scriptStartDate: number,
-  ) {
+  ): void {
     const record = [
       id,
       name,

@@ -20,7 +20,7 @@ export default class PageLogsTable extends SqliteTable<IPageLogRecord> {
     message: string,
     date: Date,
     location?: string,
-  ) {
+  ): void {
     return this.queuePendingInsert([tabId, frameId, type, message, date.getTime(), location]);
   }
 }

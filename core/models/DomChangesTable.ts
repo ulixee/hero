@@ -32,7 +32,7 @@ export default class DomChangesTable extends SqliteTable<IDomChangeRecord> {
     this.defaultSortOrder = 'timestamp ASC';
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, change: IDomChangeEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, change: IDomChangeEvent): void {
     const [action, nodeData, timestamp, eventIndex] = change;
     const record = [
       frameId,

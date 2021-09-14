@@ -26,7 +26,7 @@ export default abstract class ConnectionToCoreApi {
     return await resolvable.promise;
   }
 
-  public onMessage(event: ICoreApiResponse<any>) {
+  public onMessage(event: ICoreApiResponse<any>): void {
     const resolvable = this.pendingMessagesById.get(event.responseId);
     this.pendingMessagesById.delete(event.responseId);
 

@@ -117,7 +117,7 @@ export default class SessionState {
     locale?: string;
     deviceProfile?: IDeviceProfile;
     sessionOptions: ISessionCreateOptions;
-  }) {
+  }): void {
     const { sessionName, scriptInstanceMeta, ...optionsToStore } = options.sessionOptions;
     this.db.session.insert(
       this.sessionId,
@@ -138,12 +138,12 @@ export default class SessionState {
     );
   }
 
-  public recordCommandStart(commandMeta: ICommandMeta) {
+  public recordCommandStart(commandMeta: ICommandMeta): void {
     this.commands.push(commandMeta);
     this.db.commands.insert(commandMeta);
   }
 
-  public recordCommandFinished(commandMeta: ICommandMeta) {
+  public recordCommandFinished(commandMeta: ICommandMeta): void {
     this.db.commands.insert(commandMeta);
   }
 
@@ -472,7 +472,7 @@ export default class SessionState {
     });
   }
 
-  public recordNavigation(navigation: INavigation) {
+  public recordNavigation(navigation: INavigation): void {
     this.db.frameNavigations.insert(navigation);
     if (
       navigation.statusChanges.has(LoadStatus.AllContentLoaded) ||
@@ -551,7 +551,7 @@ export default class SessionState {
     mouseEvents: IMouseEvent[],
     focusEvents: IFocusEvent[],
     scrollEvents: IScrollEvent[],
-  ) {
+  ): void {
     let lastCommand = this.lastCommand;
     if (!lastCommand) return; // nothing to store yet
     for (const domChange of domChanges) {

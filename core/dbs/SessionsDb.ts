@@ -76,7 +76,7 @@ export default class SessionsDb {
     };
   }
 
-  public close() {
+  public close(): void {
     if (this.db) {
       this.db.close();
     }
@@ -84,21 +84,21 @@ export default class SessionsDb {
     SessionsDb.instance = undefined;
   }
 
-  public static shutdown() {
+  public static shutdown(): void {
     this.instance?.close();
     this.instance = undefined;
   }
 
-  public static find() {
+  public static find(): SessionsDb {
     this.instance = this.instance || new SessionsDb();
     return this.instance;
   }
 
-  public static get databaseDir() {
+  public static get databaseDir(): string {
     return `${Core.dataDir}`;
   }
 
-  public static get databasePath() {
+  public static get databasePath(): string {
     return `${this.databaseDir}/hero-sessions.db`;
   }
 }

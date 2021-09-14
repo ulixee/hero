@@ -25,7 +25,7 @@ export default class SocketsTable extends SqliteTable<ISocketRecord> {
     );
   }
 
-  public insert(record: ISocketRecord) {
+  public insert(record: ISocketRecord): void {
     const {
       id,
       localAddress,

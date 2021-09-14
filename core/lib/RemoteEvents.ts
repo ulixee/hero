@@ -8,7 +8,7 @@ export default class RemoteEvents {
 
   constructor(readonly onCoreEvent: (event: ICoreEventPayload) => void) {}
 
-  public close() {
+  public close(): void {
     for (const listener of this.childListenersByMetaKey.values()) {
       listener.close();
     }
@@ -36,7 +36,7 @@ export default class RemoteEvents {
     return this.childListenersByMetaKey.get(key);
   }
 
-  private emitCoreEvent(meta: ISessionMeta, listenerId: string, ...eventArgs: any[]) {
+  private emitCoreEvent(meta: ISessionMeta, listenerId: string, ...eventArgs: any[]): void {
     this.onCoreEvent({
       meta,
       listenerId,

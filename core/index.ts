@@ -61,7 +61,9 @@ export default class Core {
     return connection;
   }
 
-  public static use(PluginObject: string | ICorePluginClass | { [name: string]: IPluginClass }) {
+  public static use(
+    PluginObject: string | ICorePluginClass | { [name: string]: IPluginClass },
+  ): void {
     let Plugins: IPluginClass[];
     if (typeof PluginObject === 'string') {
       Plugins = requirePlugins(PluginObject as string);
