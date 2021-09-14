@@ -20,7 +20,7 @@ export default class MouseEventsTable extends SqliteTable<IMouseEventRecord> {
     ]);
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, mouseEvent: IMouseEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, mouseEvent: IMouseEvent): void {
     const [
       event,
       pageX,

@@ -9,7 +9,7 @@ export default function sessionInteractionsApi(
 ): ISessionInteractionsResult {
   const sessionDb = SessionDb.getCached(args.sessionId, true);
 
-  function sort(a: { timestamp: number }, b: { timestamp: number }) {
+  function sort(a: { timestamp: number }, b: { timestamp: number }): number {
     return a.timestamp - b.timestamp;
   }
 

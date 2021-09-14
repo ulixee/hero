@@ -70,7 +70,7 @@ function createSessionState(session: ISessionRecord, tabs: ISessionTab[]): ISess
   return state;
 }
 
-function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]) {
+function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]): void {
   for (let i = 0; i < commands.length; i += 1) {
     const { startDate: timestamp, label, id: commandId, endDate } = commands[i];
     const tabId = commands[i].tabId ?? Number(Object.keys(state.tabsById)[0]);
@@ -86,7 +86,10 @@ function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]
   }
 }
 
-function createInteractionTicks(state: ISessionState, interactions: ISessionInteractionsResult) {
+function createInteractionTicks(
+  state: ISessionState,
+  interactions: ISessionInteractionsResult,
+): void {
   for (const type of ['mouse', 'focus', 'scroll']) {
     const events = interactions[type];
     for (let i = 0; i < events.length; i += 1) {

@@ -200,7 +200,7 @@ export default class FrameEnvironment
     });
 
     const cancelForNavigation = new CanceledPromiseError('Frame navigated');
-    const cancelOnNavigate = () => {
+    const cancelOnNavigate = (): void => {
       interactionResolvable.reject(cancelForNavigation);
     };
     try {

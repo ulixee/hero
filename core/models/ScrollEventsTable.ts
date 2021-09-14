@@ -14,7 +14,12 @@ export default class ScrollEventsTable extends SqliteTable<IScrollRecord> {
     ]);
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, scrollEvent: IScrollEvent) {
+  public insert(
+    tabId: number,
+    frameId: number,
+    commandId: number,
+    scrollEvent: IScrollEvent,
+  ): void {
     const [scrollX, scrollY, timestamp] = scrollEvent;
     const record = [tabId, frameId, scrollX, scrollY, commandId, timestamp];
     this.queuePendingInsert(record);

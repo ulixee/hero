@@ -31,7 +31,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     this.defaultSortOrder = 'initiatedTime ASC';
   }
 
-  public insert(navigation: INavigation) {
+  public insert(navigation: INavigation): void {
     if (!navigation.id) {
       this.idCounter += 1;
       navigation.id = this.idCounter;
@@ -55,7 +55,7 @@ export default class FrameNavigationsTable extends SqliteTable<IFrameNavigationR
     this.queuePendingInsert(record);
   }
 
-  public last() {
+  public last(): IFrameNavigationRecord {
     return this.db
       .prepare(`select * from ${this.tableName} order by initiatedTime desc limit 1`)
       .get() as IFrameNavigationRecord;

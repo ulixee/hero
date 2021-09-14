@@ -67,7 +67,7 @@ export default class Session
 
   public tabsById = new Map<number, Tab>();
 
-  public get isClosing() {
+  public get isClosing(): boolean {
     return this._isClosing;
   }
 
@@ -220,7 +220,7 @@ export default class Session
     };
   }
 
-  public async configure(options: IConfigureSessionOptions) {
+  public async configure(options: IConfigureSessionOptions): Promise<void> {
     if (options.upstreamProxyUrl !== undefined) {
       this.upstreamProxyUrl = options.upstreamProxyUrl;
       this.mitmRequestSession.upstreamProxyUrl = options.upstreamProxyUrl;
@@ -307,7 +307,7 @@ export default class Session
     mitmProxy.registerSession(this.mitmRequestSession, !!this.isolatedMitmProxy);
   }
 
-  public async initialize(context: IPuppetContext) {
+  public async initialize(context: IPuppetContext): Promise<void> {
     this.browserContext = context;
     context.on('devtools-message', this.onDevtoolsMessage.bind(this));
     if (this.userProfile) {
@@ -338,7 +338,7 @@ export default class Session
     return UserProfile.export(this);
   }
 
-  public async createTab() {
+  public async createTab(): Promise<Tab> {
     const page = await this.newPage();
 
     // if first tab, install session storage
@@ -462,16 +462,16 @@ export default class Session
     this.emit('resumed');
   }
 
-  private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']) {
+  private onDevtoolsMessage(event: IPuppetContextEvents['devtools-message']): void {
     this.sessionState.captureDevtoolsMessage(event);
   }
 
-  private onMitmRequest(event: IRequestSessionRequestEvent) {
+  private onMitmRequest(event: IRequestSessionRequestEvent): void {
     // don't know the tab id at this point
     this.sessionState.captureResource(null, event, false);
   }
 
-  private onMitmResponse(event: IRequestSessionResponseEvent) {
+  private onMitmResponse(event: IRequestSessionResponseEvent): void {
     const tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
       event.browserRequestId,
     );
@@ -491,7 +491,7 @@ export default class Session
     tab?.checkForResolvedNavigation(event.browserRequestId, resource);
   }
 
-  private onMitmError(event: IRequestSessionHttpErrorEvent) {
+  private onMitmError(event: IRequestSessionHttpErrorEvent): void {
     const { request } = event;
     let tabId = this.mitmRequestSession.browserRequestMatcher.requestIdToTabId.get(
       request.browserRequestId,
@@ -530,15 +530,15 @@ export default class Session
     }
   }
 
-  private onResourceStates(event: IResourceStateChangeEvent) {
+  private onResourceStates(event: IResourceStateChangeEvent): void {
     this.sessionState.captureResourceState(event.context.id, event.context.stateChanges);
   }
 
-  private onSocketClose(event: ISocketEvent) {
+  private onSocketClose(event: ISocketEvent): void {
     this.sessionState.captureSocketEvent(event);
   }
 
-  private onSocketConnect(event: ISocketEvent) {
+  private onSocketConnect(event: ISocketEvent): void {
     this.sessionState.captureSocketEvent(event);
   }
 
@@ -546,7 +546,7 @@ export default class Session
     parentTab: Tab,
     page: IPuppetPage,
     openParams: { url: string; windowName: string } | null,
-  ) {
+  ): Promise<Tab> {
     const tab = Tab.create(this, page, false, parentTab, {
       ...openParams,
       loaderId: page.mainFrame.isDefaultUrl ? null : page.mainFrame.activeLoaderId,
@@ -560,7 +560,7 @@ export default class Session
     return tab;
   }
 
-  private registerTab(tab: Tab, page: IPuppetPage) {
+  private registerTab(tab: Tab, page: IPuppetPage): Tab {
     const id = tab.id;
     this.tabsById.set(id, tab);
     tab.on('close', () => {
@@ -574,7 +574,7 @@ export default class Session
     return tab;
   }
 
-  private async newPage() {
+  private async newPage(): Promise<IPuppetPage> {
     if (this._isClosing) throw new Error('Cannot create tab, shutting down');
     return await this.browserContext.newPage();
   }

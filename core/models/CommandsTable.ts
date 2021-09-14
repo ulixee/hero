@@ -31,7 +31,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     this.defaultSortOrder = 'id ASC';
   }
 
-  public insert(commandMeta: ICommandMeta) {
+  public insert(commandMeta: ICommandMeta): void {
     commandMeta.resultType = commandMeta.result?.constructor?.name ?? typeof commandMeta.result;
 
     this.queuePendingInsert([
@@ -52,7 +52,7 @@ export default class CommandsTable extends SqliteTable<ICommandMeta> {
     ]);
   }
 
-  public get(id: number) {
+  public get(id: number): ICommandMeta {
     return this.getQuery.get(id) as ICommandMeta;
   }
 }

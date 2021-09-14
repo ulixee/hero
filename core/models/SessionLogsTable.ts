@@ -16,7 +16,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
     ]);
   }
 
-  public insert(log: ILogEntry) {
+  public insert(log: ILogEntry): void {
     // ignore logging these to the db - they're in the Commands table
     if (log.action === 'Command.run' || log.action === 'Command.done') return;
     if (log.data instanceof Error) {
@@ -64,7 +64,7 @@ export default class SessionLogsTable extends SqliteTable<ISessionLogRecord> {
     ]);
   }
 
-  public allErrors() {
+  public allErrors(): ISessionLogRecord[] {
     return this.db
       .prepare(`select * from ${this.tableName} where level = 'error'`)
       .all() as ISessionLogRecord[];

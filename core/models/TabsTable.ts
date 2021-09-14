@@ -25,7 +25,7 @@ export default class TabsTable extends SqliteTable<ITabsRecord> {
     viewPort: IViewport,
     parentTabId?: number,
     detachedAtCommandId?: number,
-  ) {
+  ): void {
     return this.queuePendingInsert([
       tabId,
       parentTabId,

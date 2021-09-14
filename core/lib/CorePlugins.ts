@@ -265,12 +265,12 @@ export default class CorePlugins implements ICorePlugins {
 
   // ADDING PLUGINS TO THE STACK
 
-  public use(CorePlugin: ICorePluginClass) {
+  public use(CorePlugin: ICorePluginClass): void {
     if (this.instanceById[CorePlugin.id]) return;
     this.addPluginInstance(new CorePlugin(this.createOptions));
   }
 
-  private addPluginInstance(corePlugin: ICorePlugin) {
+  private addPluginInstance(corePlugin: ICorePlugin): void {
     this.instances.push(corePlugin);
     this.instanceById[corePlugin.id] = corePlugin;
   }
@@ -289,7 +289,7 @@ export default class CorePlugins implements ICorePlugins {
     return CorePlugins.corePluginClassesById[corePluginId];
   }
 
-  private loadDependencies(dependencyMap: IDependencyMap) {
+  private loadDependencies(dependencyMap: IDependencyMap): void {
     Object.entries(dependencyMap).forEach(([clientPluginId, corePluginIds]) => {
       corePluginIds.forEach(corePluginId => {
         if (this.instanceById[corePluginId]) return;
@@ -303,7 +303,7 @@ export default class CorePlugins implements ICorePlugins {
     });
   }
 
-  private loadCorePluginPaths(corePluginPaths: string[]) {
+  private loadCorePluginPaths(corePluginPaths: string[]): void {
     for (const corePluginPath of corePluginPaths) {
       if (Core.pluginMap.corePluginsById[corePluginPath]) return;
       const Plugins = requirePlugins<ICorePluginClass>(corePluginPath, PluginTypes.CorePlugin);

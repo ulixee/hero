@@ -508,7 +508,7 @@ export default class Tab
         ? options.sinceCommandId
         : -1;
 
-    const onResource = (resourceMeta: IResourceMeta) => {
+    const onResource = (resourceMeta: IResourceMeta): void => {
       if (resourceMeta.tabId !== this.id) return;
       if (resourceMeta.seenAtCommandId === undefined) {
         resourceMeta.seenAtCommandId = this.lastCommandId;
@@ -695,7 +695,7 @@ export default class Tab
 
     const sessionState = this.sessionState;
 
-    async function checkState() {
+    async function checkState(): Promise<void> {
       if (shouldStop()) return;
       if (isRunning) {
         runAgain = true;
@@ -812,7 +812,7 @@ export default class Tab
 
   /////// UTILITIES ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  public toJSON() {
+  public toJSON(): ISessionMeta {
     return {
       tabId: this.id,
       frameId: this.mainFrameId,

@@ -23,7 +23,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
     );
   }
 
-  public insert(frame: IFrameRecord) {
+  public insert(frame: IFrameRecord): void {
     this.recordDomNodePath(frame);
     return this.queuePendingInsert([
       frame.id,
@@ -46,7 +46,7 @@ export default class FramesTable extends SqliteTable<IFrameRecord> {
     return all;
   }
 
-  private recordDomNodePath(frame: IFrameRecord) {
+  private recordDomNodePath(frame: IFrameRecord): void {
     if (!frame.parentId) {
       this.frameDomNodePathsById.set(frame.id, 'main');
     }

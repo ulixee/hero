@@ -36,7 +36,7 @@ export default class FrameNavigationsObserver {
   }
 
   // this function will find the "starting command" to look for waitForLocation(change/reload)
-  public willRunCommand(newCommand: ICommandMeta, previousCommands: ICommandMeta[]) {
+  public willRunCommand(newCommand: ICommandMeta, previousCommands: ICommandMeta[]): void {
     let last: ICommandMeta;
     for (const command of previousCommands) {
       // if this is a goto, set this to the "waitForLocation(change/reload)" command marker
@@ -185,7 +185,7 @@ export default class FrameNavigationsObserver {
     }
   }
 
-  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number) {
+  private hasLocationTrigger(trigger: ILocationTrigger, sinceCommandId: number): boolean {
     let previousLoadedUrl: string;
     for (const history of this.navigations.history) {
       const isMatch = history.startCommandId >= sinceCommandId;

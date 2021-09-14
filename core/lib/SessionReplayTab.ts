@@ -30,11 +30,11 @@ export default class SessionReplayTab {
 
   public mainFrameId: number;
 
-  public get currentTick() {
+  public get currentTick(): ITick {
     return this.ticks[this.currentTickIndex];
   }
 
-  public get nextTick() {
+  public get nextTick(): ITick {
     return this.ticks[this.currentTickIndex + 1];
   }
 
@@ -92,17 +92,17 @@ export default class SessionReplayTab {
     }
   }
 
-  public pause() {
+  public pause(): void {
     this.isPlaying = false;
   }
 
-  public goBack() {
+  public goBack(): Promise<void> {
     const prevTickIdx =
       this.currentTickIndex > 0 ? this.currentTickIndex - 1 : this.currentTickIndex;
     return this.loadTick(prevTickIdx);
   }
 
-  public goForward() {
+  public goForward(): Promise<void> {
     const result = this.loadTick(this.currentTickIndex + 1);
     if (this.currentTickIndex === this.ticks.length - 1) {
       this.currentPlaybarOffsetPct = 100;
@@ -114,7 +114,11 @@ export default class SessionReplayTab {
     await this.page.close();
   }
 
-  public getTickState() {
+  public getTickState(): {
+    currentPlaybarOffsetPct: number;
+    currentTickIndex: number;
+    ticks: number[];
+  } {
     return {
       currentPlaybarOffsetPct: this.currentPlaybarOffsetPct,
       currentTickIndex: this.currentTickIndex,
@@ -251,7 +255,7 @@ export default class SessionReplayTab {
     highlightedNodes?: { frameId: number; nodeIds: number[] },
     mouse?: IMouseEventRecord,
     scroll?: IScrollRecord,
-  ) {
+  ): Promise<void> {
     if (domChanges?.length) {
       const { action, frameId } = domChanges[0];
       const hasNewUrlToLoad = action === DomActionType.newDocument && frameId === this.mainFrameId;
@@ -282,7 +286,7 @@ export default class SessionReplayTab {
     return result;
   }
 
-  private async goto(url: string) {
+  private async goto(url: string): Promise<void> {
     const page = this.page;
     const loader = await page.navigate(url);
 

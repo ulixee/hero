@@ -51,7 +51,7 @@ export default class RemoteEventListener implements ICommandableTarget {
     return this.commandRecorder.fnNames.has(method);
   }
 
-  public close() {
+  public close(): void {
     for (const [id, entry] of this.listenersById) {
       if (entry.type !== 'close') {
         this.removeEventListener(id);

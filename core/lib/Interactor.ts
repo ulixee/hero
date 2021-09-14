@@ -459,7 +459,7 @@ export default class Interactor implements IInteractionsHelper {
     nodeId: number,
     mouseUpResult: IMouseUpResult,
     mousePosition: IMousePosition,
-  ) {
+  ): void {
     let extras = '';
     const isNodeHidden = mouseUpResult.expectedNodeVisibility.isVisible === false;
     if (isNodeHidden && nodeId) {

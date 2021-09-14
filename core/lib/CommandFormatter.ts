@@ -6,7 +6,7 @@ import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 
 export default class CommandFormatter {
-  public static toString(command: ICommandMeta) {
+  public static toString(command: ICommandMeta): string {
     if (!command.args) {
       return `${command.name}()`;
     }
@@ -165,7 +165,7 @@ export default class CommandFormatter {
   }
 }
 
-export function formatJsPath(path: any) {
+export function formatJsPath(path: any): string {
   const jsPath = (path ?? [])
     .map((x, i) => {
       if (i === 0 && typeof x === 'number') {

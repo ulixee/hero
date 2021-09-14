@@ -14,7 +14,7 @@ export default class FocusEventsTable extends SqliteTable<IFocusRecord> {
     ]);
   }
 
-  public insert(tabId: number, frameId: number, commandId: number, focusEvent: IFocusEvent) {
+  public insert(tabId: number, frameId: number, commandId: number, focusEvent: IFocusEvent): void {
     const [type, targetNodeId, relatedTargetNodeId, timestamp] = focusEvent;
     const record = [tabId, frameId, type, targetNodeId, relatedTargetNodeId, timestamp];
     this.queuePendingInsert(record);
