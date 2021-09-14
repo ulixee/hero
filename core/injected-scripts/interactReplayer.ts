@@ -166,7 +166,7 @@ function clearHighlights() {
 
 function highlightNodes(nodes: IHighlightedNodes) {
   if (nodes === undefined) return;
-  if (nodes && nodes?.frameIdPath !== window.selfFrameIdPath) {
+  if (nodes && nodes.frameIdPath && nodes.frameIdPath !== window.selfFrameIdPath) {
     clearHighlights();
     // delegate to subframe
     delegateInteractToSubframe(nodes, 'highlight');

@@ -2,12 +2,27 @@ const Fs = require('fs');
 const Path = require('path');
 const pkg = require('./package.json');
 
-const workspaces = pkg.workspaces.packages
-  .filter(x => {
-    if (x.startsWith('../')) return false;
-    return (Fs.existsSync(Path.resolve(__dirname, x)));
-  })
-  .map(x => x.replace('/*', ''));
+const workspaces = [];
+for (const packageGlob of pkg.workspaces.packages) {
+  if (packageGlob.startsWith('../')) continue;
+
+  let workspacePath = packageGlob;
+  // if we're not in build already, need to add build
+  if (!__dirname.includes('build') && !workspacePath.includes('build')) {
+    workspacePath = `build/${workspacePath}`;
+  }
+  if (workspacePath.endsWith('/*')) {
+    workspacePath = workspacePath.replace('/*', '');
+    for (const subdir of Fs.readdirSync(Path.resolve(__dirname, workspacePath))) {
+      if (subdir === 'node_modules') continue;
+      if (!Fs.statSync(Path.resolve(__dirname, workspacePath, subdir)).isDirectory()) continue;
+      if (!Fs.existsSync(Path.resolve(__dirname, workspacePath, subdir, 'package.json'))) continue;
+      workspaces.push(`${workspacePath}/${subdir}`);
+    }
+  } else {
+    workspaces.push(workspacePath);
+  }
+}
 
 module.exports = {
   verbose: false,

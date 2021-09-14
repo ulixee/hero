@@ -74,7 +74,6 @@ export class BrowserContext
       browserContextId: contextId,
     });
     this.proxy = proxy;
-    this.browser.browserContextsById.set(this.id, this);
 
     this.subscribeToDevtoolsMessages(this.browser.devtoolsSession, {
       sessionType: 'browser',
@@ -227,15 +226,17 @@ export class BrowserContext
 
     if (this.browser.devtoolsSession.isConnected()) {
       await Promise.all([...this.pagesById.values()].map(x => x.close()));
-      await this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
-        browserContextId: this.id,
-      }).catch(err => {
-        if (err instanceof CanceledPromiseError) return;
-        throw err;
-      });
+      if (this.id) {
+        await this.sendWithBrowserDevtoolsSession('Target.disposeBrowserContext', {
+          browserContextId: this.id,
+        }).catch(err => {
+          if (err instanceof CanceledPromiseError) return;
+          throw err;
+        });
+      }
     }
     removeEventListeners(this.eventListeners);
-    this.browser.browserContextsById.delete(this.id);
+    this.emit('close');
   }
 
   async getCookies(url?: URL): Promise<ICookie[]> {

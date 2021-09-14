@@ -14,6 +14,7 @@ export default interface IPuppetBrowser {
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
+    isIncognito?: boolean,
   ): Promise<IPuppetContext>;
   close(): Promise<void>;
 }

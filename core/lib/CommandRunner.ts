@@ -7,6 +7,11 @@ export default class CommandRunner {
     const [targetName, method] = command.split('.');
 
     if (!targets[targetName]) {
+      if (method === 'close' || (targetName === 'Events' && args[1] === 'close')) {
+        this.runFn = () => Promise.resolve({});
+        return;
+      }
+
       throw new Error(`Target for command not available (${targetName})`);
     }
 

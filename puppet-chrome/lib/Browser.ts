@@ -20,10 +20,8 @@ const { log } = Log(module);
 let browserIdCounter = 0;
 
 export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppetBrowser {
-  public readonly browserContextsById = new Map<string, BrowserContext>();
   public readonly devtoolsSession: DevtoolsSession;
   public onDevtoolsAttached?: (session: DevtoolsSession) => Promise<any>;
-
   public id: string;
 
   public get name(): string {
@@ -38,11 +36,16 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     return this.fullVersion?.split('.').map(Number).shift();
   }
 
+  private readonly browserContextsById = new Map<string, BrowserContext>();
+
   private readonly connection: Connection;
 
   private readonly closeCallback: () => void;
 
   private version: GetVersionResponse;
+  private get defaultBrowserContext(): BrowserContext {
+    return this.browserContextsById.get(undefined);
+  }
 
   constructor(connection: Connection, closeCallback: () => void) {
     super();
@@ -63,6 +66,7 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
+    isIncognito = true,
   ): Promise<BrowserContext> {
     const proxySettings = proxy?.address
       ? {
@@ -70,13 +74,25 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
           proxyServer: proxy.address,
         }
       : {};
+    if (!isIncognito) {
+      if (!this.browserContextsById.has(undefined)) {
+        this.createBrowserContext(undefined, plugins, logger, proxy);
+      }
+      const context = this.browserContextsById.get(undefined);
+      context.proxy = proxy;
+      return context;
+    }
+
     // Creates a new incognito browser context. This won't share cookies/cache with other browser contexts.
     const { browserContextId } = await this.devtoolsSession.send('Target.createBrowserContext', {
       disposeOnDetach: true,
       ...proxySettings,
     });
+    return this.createBrowserContext(browserContextId, plugins, logger, proxy);
+  }
 
-    return new BrowserContext(this, plugins, browserContextId, logger, proxy);
+  public getBrowserContext(id: string) {
+    return this.browserContextsById.get(id) ?? this.defaultBrowserContext;
   }
 
   public async close(): Promise<void> {
@@ -108,20 +124,18 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   private onAttachedToTarget(event: Protocol.Target.AttachedToTargetEvent) {
     const { targetInfo, sessionId } = event;
 
-    if (!targetInfo.browserContextId) {
-      assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
-    }
+    assert(targetInfo.browserContextId, `targetInfo: ${JSON.stringify(targetInfo, null, 2)}`);
 
     if (targetInfo.type === 'page') {
       const devtoolsSession = this.connection.getSession(sessionId);
-      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      const context = this.getBrowserContext(targetInfo.browserContextId);
       context?.onPageAttached(devtoolsSession, targetInfo).catch(() => null);
       return;
     }
 
     if (targetInfo.type === 'shared_worker') {
       const devtoolsSession = this.connection.getSession(sessionId);
-      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      const context = this.getBrowserContext(targetInfo.browserContextId);
       context?.onSharedWorkerAttached(devtoolsSession, targetInfo).catch(() => null);
     }
 
@@ -156,11 +170,11 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
   private async onTargetCreated(event: Protocol.Target.TargetCreatedEvent) {
     const { targetInfo } = event;
     if (targetInfo.type === 'page' && !targetInfo.attached) {
-      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      const context = this.getBrowserContext(targetInfo.browserContextId);
       await context?.attachToTarget(targetInfo.targetId);
     }
     if (targetInfo.type === 'shared_worker') {
-      const context = this.browserContextsById.get(targetInfo.browserContextId);
+      const context = this.getBrowserContext(targetInfo.browserContextId);
       await context?.attachToWorker(targetInfo);
     }
   }
@@ -186,6 +200,19 @@ export class Browser extends TypedEventEmitter<IBrowserEvents> implements IPuppe
     for (const [, context] of this.browserContextsById) {
       context.onPageDetached(targetId);
     }
+  }
+
+  private createBrowserContext(
+    browserContextId: string,
+    plugins: ICorePlugins,
+    logger: IBoundLog,
+    proxy?: IProxyConnectionOptions,
+  ) {
+    const context = new BrowserContext(this, plugins, browserContextId, logger, proxy);
+    this.browserContextsById.set(browserContextId, context);
+    context.on('close', () => this.browserContextsById.delete(browserContextId));
+
+    return context;
   }
 
   public static async create(

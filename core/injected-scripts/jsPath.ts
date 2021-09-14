@@ -98,6 +98,16 @@ class JsPath {
         result.nodePointer = objectAtPath.extractNodePointer();
       }
 
+      if (!result.nodePointer && objectAtPath.nodePath?.length) {
+        const nodePath = [...objectAtPath.nodePath].reverse();
+        for (const node of nodePath) {
+          if (node instanceof HTMLElement) {
+            ObjectAtPath.createNodePointer(node);
+            break;
+          }
+        }
+      }
+
       if (
         !objectAtPath.hasCustomMethodLookup &&
         (result.nodePointer?.iterableIsState || result.value instanceof Node)
@@ -209,6 +219,7 @@ class JsPath {
 
 class ObjectAtPath {
   public objectAtPath: Node | any;
+  public nodePath: (Node | any)[];
   public hasNodePointerLoad: boolean;
   public hasCustomMethodLookup = false;
 
@@ -351,6 +362,7 @@ class ObjectAtPath {
     try {
       // track object as we navigate so we can extract properties along the way
       this.objectAtPath = window;
+      this.nodePath = [window];
       this.lookupStepIndex = 0;
       if (this.jsPath[0] === 'window') {
         this.jsPath.shift();
@@ -384,6 +396,7 @@ class ObjectAtPath {
         } else {
           throw new Error('unknown JsPathStep');
         }
+        this.nodePath.push(this.objectAtPath);
         this.lookupStepIndex += 1;
       }
     } catch (err) {
@@ -430,7 +443,7 @@ class ObjectAtPath {
     return window.getComputedStyle(this.objectAtPath, pseudoElement);
   }
 
-  public static createNodePointer(objectAtPath: any): INodePointer {
+  public static createNodePointer(objectAtPath: any, isNested = false): INodePointer {
     if (!objectAtPath) return null;
 
     const nodeId = NodeTracker.watchNode(objectAtPath);
@@ -440,13 +453,27 @@ class ObjectAtPath {
       preview: generateNodePreview(objectAtPath),
     } as INodePointer;
 
+    const ids = objectAtPath instanceof HTMLElement ? [nodeId] : [];
+
     if (isIterableOrArray(objectAtPath)) {
       state.iterableItems = Array.from(objectAtPath);
 
       if (state.iterableItems.length && isCustomType(state.iterableItems[0])) {
         state.iterableIsState = true;
-        state.iterableItems = state.iterableItems.map(x => this.createNodePointer(x));
+        const items = state.iterableItems;
+        state.iterableItems = [];
+        for (const item of items) {
+          const nodePointer = this.createNodePointer(item, true);
+          state.iterableItems.push(nodePointer);
+          if (item instanceof HTMLElement) {
+            ids.push(nodePointer.id);
+          }
+        }
       }
+    }
+
+    if (!isNested && 'replayInteractions' in window) {
+      window.replayInteractions({ frameIdPath: '', nodeIds: ids });
     }
 
     return state;

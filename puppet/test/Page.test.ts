@@ -22,7 +22,7 @@ describe('Pages', () => {
 
   beforeAll(async () => {
     Core.use(CustomBrowserEmulator);
-    const  { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
+    const { browserEngine } = CustomBrowserEmulator.selectBrowserMeta();
     server = await TestServer.create(0);
     puppet = new Puppet(browserEngine);
     await puppet.start();
@@ -78,14 +78,14 @@ describe('Pages', () => {
       await expect(message.frameId).toBe(page.mainFrame.id);
     });
 
-    it('should set the page close state', async () => {
+    it('page.close should set the page close state', async () => {
       const newPage = await context.newPage();
       expect(newPage.isClosed).toBe(false);
       await newPage.close();
       expect(newPage.isClosed).toBe(true);
     });
 
-    it('should be callable twice', async () => {
+    it('page.close should be callable twice', async () => {
       const newPage = await context.newPage();
       await Promise.all([newPage.close(), newPage.close()]);
       await expect(newPage.close()).resolves.not.toBeTruthy();

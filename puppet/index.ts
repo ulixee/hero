@@ -18,7 +18,7 @@ const { log } = Log(module);
 let puppBrowserCounter = 1;
 export default class Puppet extends TypedEventEmitter<{ close: void }> {
   public get browserId(): string {
-    return this.browser.id;
+    return this.browser?.id;
   }
 
   public readonly id: number;
@@ -79,12 +79,13 @@ export default class Puppet extends TypedEventEmitter<{ close: void }> {
     plugins: ICorePlugins,
     logger: IBoundLog,
     proxy?: IProxyConnectionOptions,
+    isIncognito = true,
   ): Promise<IPuppetContext> {
     if (!this.isStarted || !this.browser) {
       throw new Error('This Puppet instance has not had start() called on it');
     }
     if (this.isShuttingDown) throw new Error('Shutting down');
-    return this.browser.newContext(plugins, logger, proxy);
+    return this.browser.newContext(plugins, logger, proxy, isIncognito);
   }
 
   public async close() {

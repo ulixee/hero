@@ -4,7 +4,10 @@ import { GlobalPool } from '@ulixee/hero-core';
 import { ITestKoaServer } from '@ulixee/hero-testing/helpers';
 import Resolvable from '@ulixee/commons/lib/Resolvable';
 import Viewports from '@ulixee/default-browser-emulator/lib/Viewports';
+import { latestChromeBrowserVersion } from '@ulixee/default-browser-emulator';
 import Hero from '../index';
+
+const chromeVersion = latestChromeBrowserVersion.major;
 
 let koaServer: ITestKoaServer;
 beforeAll(async () => {
@@ -190,7 +193,8 @@ describe('geolocation', () => {
     Helpers.needsClosing.push(hero);
     await hero.goto(koaServer.baseUrl);
 
-    const geolocation = await hero.getJsValue(`new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
+    const geolocation =
+      await hero.getJsValue(`new Promise(resolve => navigator.geolocation.getCurrentPosition(position => {
         resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude });
       }))`);
     expect(geolocation).toEqual({
@@ -204,8 +208,7 @@ describe('user hero and platform', () => {
   const propsToGet = `appVersion, platform, userAgent, deviceMemory`.split(',').map(x => x.trim());
 
   it('should be able to configure a userAgent', async () => {
-    const userAgent =
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4472.124 Safari/537.36';
+    const userAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersion}.0.4389.114 Safari/537.36`;
     const hero = new Hero({
       userAgent,
     });
@@ -217,7 +220,7 @@ describe('user hero and platform', () => {
 
   it('should be able to configure a userAgent with a range', async () => {
     const hero = new Hero({
-      userAgent: '~ chrome >= 88 && chrome < 89',
+      userAgent: `~ chrome >= ${chromeVersion} && chrome < ${Number(chromeVersion) + 1}`,
     });
     Helpers.needsClosing.push(hero);
 
@@ -225,12 +228,12 @@ describe('user hero and platform', () => {
     const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
-    expect(version).toBe(88);
+    expect(version).toBe(89);
   });
 
   it('should be able to configure a userAgent with a wildcard', async () => {
     const hero = new Hero({
-      userAgent: '~ chrome = 88.x',
+      userAgent: `~ chrome = ${chromeVersion}.x`,
     });
     Helpers.needsClosing.push(hero);
 
@@ -238,7 +241,7 @@ describe('user hero and platform', () => {
     const chromeMatch = heroMeta.userAgentString.match(/Chrome\/(\d+)/);
     expect(chromeMatch).toBeTruthy();
     const version = Number(chromeMatch[1]);
-    expect(version).toBe(88);
+    expect(version).toBe(89);
   });
 
   it('should add user hero and platform to window & frames', async () => {

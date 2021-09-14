@@ -294,12 +294,17 @@ export default class Session
     };
   }
 
+  public useIncognitoContext(): boolean {
+    const options = this.options;
+    return !(options.showBrowser === true && options.sessionKeepAlive === true);
+  }
+
   public async registerWithMitm(
     sharedMitmProxy: MitmProxy,
     doesPuppetSupportBrowserContextProxy: boolean,
   ): Promise<void> {
     let mitmProxy = sharedMitmProxy;
-    if (doesPuppetSupportBrowserContextProxy) {
+    if (doesPuppetSupportBrowserContextProxy && this.useIncognitoContext()) {
       this.isolatedMitmProxy = await MitmProxy.start(GlobalPool.localProxyPortStart, Core.dataDir);
       mitmProxy = this.isolatedMitmProxy;
     }

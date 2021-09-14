@@ -17,15 +17,13 @@ export default async function setScreensize(
   if (emulator.browserEngine.isHeaded && viewport.screenWidth) {
     promises.push(
       page.devtoolsSession.send('Browser.getWindowForTarget').then(({ windowId, bounds }) => {
-        if (bounds.width === viewport.width && bounds.height === viewport.height) {
+        if (bounds.width === viewport.screenWidth && bounds.height === viewport.screenHeight) {
           return null;
         }
 
         return devtools.send('Browser.setWindowBounds', {
           windowId,
           bounds: {
-            left: viewport.positionX,
-            top: viewport.positionY,
             width: viewport.screenWidth,
             height: viewport.screenHeight,
             windowState: 'normal',
@@ -35,8 +33,7 @@ export default async function setScreensize(
     );
   }
 
-  const ignoreViewport =
-    sessionMeta.options?.showBrowserInteractions === true && viewport.isDefault;
+  const ignoreViewport = sessionMeta.options?.showBrowserInteractions === true;
   if (!ignoreViewport) {
     promises.push(
       devtools.send('Emulation.setDeviceMetricsOverride', {
