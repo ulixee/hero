@@ -1,11 +1,12 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
-import { IScrollRecord } from '../models/ScrollEventsTable';
-import { IMouseEventRecord } from '../models/MouseEventsTable';
+import Log from '@ulixee/commons/lib/Logger';
+import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IPaintEvent, ITabDetails, ITick } from '../apis/Session.ticks';
 import InjectedScripts from './InjectedScripts';
-import SessionReplay from './SessionReplay';
+
+const { log } = Log(module);
 
 export default class SessionReplayTab {
   public get ticks(): ITick[] {
@@ -38,33 +39,47 @@ export default class SessionReplayTab {
     return this.ticks[this.currentTickIndex + 1];
   }
 
+  public get isOpen(): boolean {
+    return !!this.page && !!this.pageId;
+  }
+
   public readonly commandsById = new Map<number, ICommandWithResult>();
 
-  public currentUrl: string;
   public currentPlaybarOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
+
+  private pageId: string;
+  private page: Promise<IPuppetPage>;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
-  private page: IPuppetPage;
-  private domNodePathByFrameId = new Map<number, string>();
+  private domNodePathByFrameId: { [frameId: number]: string } = {};
 
   constructor(
     private readonly tabDetails: ITabDetails,
-    private readonly sessionReplay: SessionReplay,
+    private readonly pageCreator: () => Promise<IPuppetPage>,
+    private readonly sessionId: string,
+    private readonly debugLogging: boolean = false,
   ) {
     for (const command of tabDetails.commands) {
       this.commandsById.set(command.id, command);
     }
     for (const frame of this.tabDetails.tab.frames) {
       if (frame.isMainFrame) this.mainFrameId = frame.id;
-      this.domNodePathByFrameId.set(frame.id, frame.domNodePath);
+      this.domNodePathByFrameId[frame.id] = frame.domNodePath;
     }
   }
 
-  public async openTab(): Promise<void> {
-    this.page = await this.sessionReplay.createNewPage();
-    await this.goto(this.tabDetails.tab.startUrl);
+  public async open(): Promise<void> {
+    if (!this.page) {
+      this.page = this.pageCreator();
+      const page = await this.page;
+      page.on('close', () => {
+        this.page = null;
+        this.pageId = null;
+      });
+      this.pageId = page.id;
+    }
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -111,28 +126,11 @@ export default class SessionReplayTab {
   }
 
   public async close(): Promise<void> {
-    await this.page.close();
+    await this.page?.then(x => x.close());
   }
 
-  public getTickState(): {
-    currentPlaybarOffsetPct: number;
-    currentTickIndex: number;
-    ticks: number[];
-  } {
-    return {
-      currentPlaybarOffsetPct: this.currentPlaybarOffsetPct,
-      currentTickIndex: this.currentTickIndex,
-      ticks: this.ticks.filter(x => x.isMajor).map(x => x.playbarOffsetPercent),
-    };
-  }
-
-  public async setPlaybarOffset(playbarOffset: number, isReset = false): Promise<void> {
+  public async setPlaybarOffset(playbarOffset: number): Promise<void> {
     const ticks = this.ticks;
-    if (isReset) {
-      this.currentPlaybarOffsetPct = 0;
-      this.currentTickIndex = -1;
-      this.paintEventsLoadedIdx = -1;
-    }
     if (!ticks.length || this.currentPlaybarOffsetPct === playbarOffset) return;
 
     let newTickIdx = this.currentTickIndex;
@@ -153,6 +151,10 @@ export default class SessionReplayTab {
     await this.loadTick(newTickIdx, playbarOffset);
   }
 
+  public async loadEndState(): Promise<void> {
+    await this.loadTick(this.ticks.length - 1);
+  }
+
   public async loadTick(newTickIdx: number, specificPlaybarOffset?: number): Promise<void> {
     if (newTickIdx === this.currentTickIndex) {
       return;
@@ -164,19 +166,40 @@ export default class SessionReplayTab {
       return;
     }
 
-    const playbarOffset = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
     this.currentTickIndex = newTickIdx;
-    this.currentPlaybarOffsetPct = playbarOffset;
+    this.currentPlaybarOffsetPct = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
 
-    const paintEvents = this.getPaintEventsForNewTick(newTick);
+    const newPaintIndex = newTick.paintEventIndex;
+    if (newPaintIndex !== undefined && newPaintIndex !== this.paintEventsLoadedIdx) {
+      const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
+
+      let startIndex = newTick.documentLoadPaintIndex;
+      if ((isBackwards && newPaintIndex === -1) || newTick.eventType === 'init') {
+        await this.goto(this.firstDocumentUrl);
+        return;
+      }
+
+      // if going forward and past document load, start at currently loaded index
+      if (!isBackwards && this.paintEventsLoadedIdx > newTick.documentLoadPaintIndex) {
+        startIndex = this.paintEventsLoadedIdx + 1;
+      }
+
+      this.paintEventsLoadedIdx = newPaintIndex;
+      await this.loadPaintEvents([startIndex, newPaintIndex]);
+    }
+
     const mouseEvent = this.tabDetails.mouse[newTick.mouseEventIndex];
     const scrollEvent = this.tabDetails.scroll[newTick.scrollEventIndex];
     const nodesToHighlight = newTick.highlightNodeIds;
 
-    this.currentUrl = newTick.documentUrl;
-    this.paintEventsLoadedIdx = newTick.paintEventIndex;
-
-    await this.loadDomState(paintEvents, nodesToHighlight, mouseEvent, scrollEvent);
+    if (nodesToHighlight || mouseEvent || scrollEvent) {
+      await InjectedScripts.replayInteractions(
+        await this.page,
+        this.applyFrameNodePath(nodesToHighlight),
+        this.applyFrameNodePath(mouseEvent),
+        this.applyFrameNodePath(scrollEvent),
+      );
+    }
   }
 
   public loadDetachedState(
@@ -201,98 +224,64 @@ export default class SessionReplayTab {
     this.ticks.unshift(tick);
   }
 
-  private getPaintEventsForNewTick(newTick: ITick): IPaintEvent['changeEvents'] {
-    if (
-      newTick.paintEventIndex === this.paintEventsLoadedIdx ||
-      newTick.paintEventIndex === undefined
-    ) {
-      return;
+  private async loadPaintEvents(paintIndexRange: [number, number]): Promise<void> {
+    const page = await this.page;
+    const startIndex = paintIndexRange[0];
+    let loadUrl: string = null;
+    const { action, frameId, textContent } =
+      this.tabDetails.paintEvents[startIndex].changeEvents[0] ?? {};
+
+    if (action === DomActionType.newDocument && frameId === this.mainFrameId) {
+      loadUrl = textContent;
     }
 
-    const isBackwards = newTick.paintEventIndex < this.paintEventsLoadedIdx;
-
-    let startIndex = this.paintEventsLoadedIdx + 1;
-    if (isBackwards) {
-      startIndex = newTick.documentLoadPaintIndex;
+    if (loadUrl && loadUrl !== page.mainFrame.url) {
+      await this.goto(loadUrl);
     }
-
-    const changeEvents: IPaintEvent['changeEvents'] = [];
-    if ((newTick.paintEventIndex === -1 && isBackwards) || newTick.eventType === 'init') {
-      startIndex = -1;
-      changeEvents.push({
-        action: DomActionType.newDocument,
-        textContent: this.firstDocumentUrl,
-        commandId: newTick.commandId,
-      } as any);
-    } else {
-      for (let i = startIndex; i <= newTick.paintEventIndex; i += 1) {
-        const paints = this.tabDetails.paintEvents[i];
-        const first = paints.changeEvents[0];
-        // find last newDocument change
-        if (first.frameId === this.mainFrameId && first.action === DomActionType.newDocument) {
-          changeEvents.length = 0;
-        }
-        changeEvents.push(...paints.changeEvents);
+    if (startIndex >= 0) {
+      if (this.debugLogging) {
+        log.info('Replay.loadPaintEvents', {
+          sessionId: this.sessionId,
+          paintIndexRange,
+        });
       }
-    }
+      try {
+        await InjectedScripts.setPaintIndexRange(page, startIndex, paintIndexRange[1]);
+      } catch (err) {
+        // -32000 means ContextNotFound. ie, page has navigated
+        if (err.code === -32000) throw new CanceledPromiseError('Context not found');
 
-    if (this.sessionReplay.debugLogging) {
-      // eslint-disable-next-line no-console
-      console.log(
-        'Paint load. Current Idx=%s, Loading [%s->%s] (paints: %s, back? %s)',
-        this.paintEventsLoadedIdx,
-        startIndex,
-        newTick.paintEventIndex,
-        changeEvents.length,
-        isBackwards,
-      );
-    }
-    return changeEvents;
-  }
-
-  private async loadDomState(
-    domChanges: IPaintEvent['changeEvents'],
-    highlightedNodes?: { frameId: number; nodeIds: number[] },
-    mouse?: IMouseEventRecord,
-    scroll?: IScrollRecord,
-  ): Promise<void> {
-    if (domChanges?.length) {
-      const { action, frameId } = domChanges[0];
-      const hasNewUrlToLoad = action === DomActionType.newDocument && frameId === this.mainFrameId;
-      if (hasNewUrlToLoad) {
-        const nav = domChanges.shift();
-        await this.goto(nav.textContent);
+        throw err;
       }
-      await InjectedScripts.restoreDom(
-        this.page,
-        domChanges.map(this.applyFrameNodePath.bind(this)),
-      );
-    }
-
-    if (highlightedNodes || mouse || scroll) {
-      await InjectedScripts.replayInteractions(
-        this.page,
-        this.applyFrameNodePath(highlightedNodes),
-        this.applyFrameNodePath(mouse),
-        this.applyFrameNodePath(scroll),
-      );
     }
   }
 
   private applyFrameNodePath<T extends { frameId: number }>(item: T): T & { frameIdPath: string } {
     if (!item) return undefined;
     const result = item as T & { frameIdPath: string };
-    result.frameIdPath = this.domNodePathByFrameId.get(item.frameId);
+    result.frameIdPath = this.domNodePathByFrameId[item.frameId];
     return result;
   }
 
   private async goto(url: string): Promise<void> {
-    const page = this.page;
+    if (this.debugLogging) {
+      log.info('Replay.goto', {
+        sessionId: this.sessionId,
+        url,
+      });
+    }
+
+    const page = await this.page;
     const loader = await page.navigate(url);
 
     await Promise.all([
       page.mainFrame.waitForLoader(loader.loaderId),
       page.mainFrame.waitForLoad('DOMContentLoaded'),
     ]);
+    await InjectedScripts.injectPaintEvents(
+      page,
+      this.tabDetails.paintEvents,
+      this.domNodePathByFrameId,
+    );
   }
 }

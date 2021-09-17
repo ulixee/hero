@@ -8,6 +8,7 @@ import {
   IFrontendScrollEvent,
   IHighlightedNodes,
 } from '../injected-scripts/interactReplayer';
+import { IPaintEvent } from '../apis/Session.ticks';
 
 const pageScripts = {
   domStorage: fs.readFileSync(`${__dirname}/../injected-scripts/domStorage.js`, 'utf8'),
@@ -114,8 +115,32 @@ export default class InjectedScripts {
 
   public static async restoreDom(
     puppetPage: IPuppetPage,
-    domChanges: IFrontendDomChangeEvent[],
+    changeEvents: IFrontendDomChangeEvent[],
   ): Promise<void> {
+    await InjectedScripts.injectPaintEvents(puppetPage, [{ changeEvents } as any]);
+    await InjectedScripts.setPaintIndexRange(puppetPage, 0, 0);
+  }
+
+  public static async setPaintIndexRange(
+    puppetPage: IPuppetPage,
+    startIndex: number,
+    endIndex: number,
+  ): Promise<void> {
+    await puppetPage.mainFrame.evaluate(
+      `window.setPaintIndexRange(${startIndex}, ${endIndex});`,
+      true,
+    );
+  }
+
+  public static async injectPaintEvents(
+    puppetPage: IPuppetPage,
+    paintEvents: IPaintEvent[],
+    domNodePathByFrameId?: { [frameId: number]: string },
+  ): Promise<void> {
+    if (!puppetPage[installedSymbol]) {
+      await this.installDetachedScripts(puppetPage);
+    }
+
     const columns = [
       'action',
       'nodeId',
@@ -128,11 +153,30 @@ export default class InjectedScripts {
       'attributeNamespaces',
       'attributes',
       'properties',
-      'frameIdPath',
-    ];
-    const records = domChanges.map(x => columns.map(col => x[col]));
-    if (!puppetPage[installedSymbol]) {
-      await this.installDetachedScripts(puppetPage);
+      'frameId',
+    ] as const;
+
+    const tagNames: { [tagName: string]: number } = {};
+    const tagNamesById: { [tagId: number]: string } = {};
+    let tagCounter = 0;
+
+    const events: IFrontendDomChangeEvent[][] = [];
+    for (const event of paintEvents) {
+      const changes = [];
+      events.push(changes);
+      for (const change of event.changeEvents) {
+        if (change.tagName && tagNames[change.tagName] === undefined) {
+          tagCounter += 1;
+          tagNamesById[tagCounter] = change.tagName;
+          tagNames[change.tagName] = tagCounter;
+        }
+        const record = columns.map(col => {
+          const prop = change[col];
+          if (col === 'tagName') return tagNames[prop as string];
+          return prop;
+        });
+        changes.push(record);
+      }
     }
 
     await puppetPage.mainFrame.evaluate(
@@ -140,14 +184,23 @@ export default class InjectedScripts {
     const exports = {};
     window.isMainFrame = true;
 
-    const records = ${JSON.stringify(records).replace(/,null/g, ',')};
-    const events = [];
-    for (const [${columns.join(',')}] of records) {
-      const event = {${columns.join(',')}};
-      events.push(event);
+    const records = ${JSON.stringify(events).replace(/,null/g, ',')};
+    const tagNamesById = ${JSON.stringify(tagNamesById)};
+    const domNodePathsByFrameId = ${JSON.stringify(domNodePathByFrameId ?? {})};
+    window.records=  { records,tagNamesById, domNodePathsByFrameId};
+    const paintEvents = [];
+    for (const event of records) {
+      const changeEvents = [];
+      paintEvents.push(changeEvents);
+      for (const [${columns.join(',')}] of event) {
+        const event = { ${columns.join(',')} };
+        event.frameIdPath = domNodePathsByFrameId[frameId];
+        if (event.tagName !== undefined) event.tagName = tagNamesById[event.tagName];
+        changeEvents.push(event);
+      }
     }
 
-    window.replayDomChanges(events);
+    window.loadPaintEvents(paintEvents);
 })()
 //# sourceURL=${injectedSourceUrl}`,
       true,

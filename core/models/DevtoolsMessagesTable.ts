@@ -10,12 +10,13 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
   private frameIds = new IdAssigner();
   private requestIds = new IdAssigner();
 
-  private sentMessageIds: {
-    id: number;
-    sessionId: string;
-    frameId?: string;
-    requestId?: string;
-  }[] = [];
+  private sentMessagesById: {
+    [id: number]: {
+      method: string;
+      frameId?: string;
+      requestId?: string;
+    };
+  } = {};
 
   constructor(readonly db: SqliteDatabase) {
     super(db, 'DevtoolsMessages', [
@@ -55,29 +56,39 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       }
     }
 
-    if ((requestId || frameId) && event.direction === 'send') {
-      this.sentMessageIds.push({
-        id: event.id,
-        sessionId: event.sessionId,
+    let method = event.method;
+
+    if (event.direction === 'send') {
+      this.sentMessagesById[event.id] = {
+        method: event.method,
         frameId,
-      });
+        requestId,
+      };
+    } else if (event.id) {
+      const sentMessage = this.sentMessagesById[event.id];
+      delete this.sentMessagesById[event.id];
+      if (sentMessage) {
+        method = sentMessage.method;
+        frameId ??= sentMessage.frameId;
+        requestId ??= sentMessage.requestId;
+      }
     }
 
-    if ((!requestId || !frameId) && event.direction === 'receive' && event.id) {
-      const match = this.sentMessageIds.find(
-        x => x.id === event.id && x.sessionId === event.sessionId,
-      );
-      if (match) {
-        this.sentMessageIds.splice(this.sentMessageIds.indexOf(match), 1);
-        if (!frameId) frameId = match.frameId;
-        if (!requestId) requestId = match.requestId;
+    let result = event.result;
+
+    if (result) {
+      if (method === 'Page.captureScreenshot') {
+        result = { data: `[truncated ${result.data.length} chars]` };
+      }
+      if (method === 'Network.getResponseBody') {
+        result = { ...result, body: '[truncated]' };
       }
     }
 
     function paramsStringifyFilter(key: string, value: any): any {
       if (
         key === 'payload' &&
-        event.method === 'Runtime.bindingCalled' &&
+        method === 'Runtime.bindingCalled' &&
         params.name === '__heroPageListenerCallback' &&
         value?.length > 250
       ) {
@@ -86,7 +97,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
       if (
         key === 'source' &&
-        event.method === 'Page.addScriptToEvaluateOnNewDocument' &&
+        method === 'Page.addScriptToEvaluateOnNewDocument' &&
         value?.length > 50
       ) {
         return `${value.substr(0, 50)}... [truncated ${value.length - 50} chars]`;
@@ -111,7 +122,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
       event.id,
       params ? JSON.stringify(params, paramsStringifyFilter) : undefined,
       event.error ? JSON.stringify(event.error) : undefined,
-      event.result ? JSON.stringify(event.result) : undefined,
+      result ? JSON.stringify(result) : undefined,
       event.timestamp.getTime(),
     ];
     this.queuePendingInsert(record);

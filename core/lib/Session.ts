@@ -620,6 +620,8 @@ ${data}`,
     options.userProfile ??= record.createSessionOptions?.userProfile;
     options.userProfile ??= {};
     options.userProfile.deviceProfile ??= record.deviceProfile;
+    options.browserEmulatorId = record.browserEmulatorId;
+    options.humanEmulatorId = record.humanEmulatorId;
     return options;
   }
 

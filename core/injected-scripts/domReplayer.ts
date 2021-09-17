@@ -4,7 +4,8 @@ import type { IFrontendDomChangeEvent } from '@ulixee/hero-core/models/DomChange
 
 declare global {
   interface Window {
-    replayDomChanges(...args: any[]);
+    loadPaintEvents(paintEvents: IFrontendDomChangeEvent[][]);
+    setPaintIndexRange(startIndex: number, endIndex: number);
     replayInteractions(...args: any[]);
     getIsMainFrame?: () => boolean;
     debugLogs: any[];
@@ -25,119 +26,147 @@ enum DomActionType {
   property = 6,
 }
 
-const SHADOW_NODE_TYPE = 40;
+class DomReplayer {
+  private paintEvents: IFrontendDomChangeEvent[][] = [];
+  private loadedIndex = -1;
 
-const domChangeList = [];
+  private pendingDelegatedEventsByPath: { [frameIdPath: string]: IFrontendDomChangeEvent[] } = {};
+  private pendingDomChanges: IFrontendDomChangeEvent[] = [];
 
-if (!window.debugLogs) window.debugLogs = [];
-
-function isMainFrame() {
-  if ('isMainFrame' in window) return (window as any).isMainFrame;
-  if ('getIsMainFrame' in window) return window.getIsMainFrame();
-  return true;
-}
-
-function debugLog(message: string, ...args: any[]) {
-  if (window.debugToConsole) {
-    // eslint-disable-next-line prefer-rest-params,no-console
-    console.log(...arguments);
+  public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
+    this.paintEvents = newPaintEvents;
+    debugLog('Loaded PaintEvents', newPaintEvents);
   }
-  window.debugLogs.push({ message, args });
-}
 
-window.replayDomChanges = function replayDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
-  if (changeEvents) applyDomChanges(changeEvents);
-};
+  public setPaintIndexRange(startIndex: number, endIndex: number): void {
+    if (endIndex === this.loadedIndex) return;
+    debugLog('Setting paint index range', startIndex, endIndex, document.readyState);
 
-window.addEventListener('message', ev => {
-  if (ev.data.action !== 'replayDomChanges') return;
-  if (ev.data.recipientFrameIdPath && !window.selfFrameIdPath) {
-    window.selfFrameIdPath = ev.data.recipientFrameIdPath;
-  }
-  domChangeList.push(ev.data.event);
-  if (document.readyState !== 'loading') applyDomChanges([]);
-});
-
-function applyDomChanges(changeEvents: IFrontendDomChangeEvent[]) {
-  const toProcess = domChangeList.concat(changeEvents);
-  domChangeList.length = 0;
-
-  for (const changeEvent of toProcess) {
-    try {
-      replayDomEvent(changeEvent);
-    } catch (err) {
-      debugLog('ERROR applying change', changeEvent, err);
+    for (let i = startIndex; i <= endIndex; i += 1) {
+      this.applyDomChanges(this.paintEvents[i]);
     }
-  }
-}
 
-/////// DOM REPLAYER ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-function replayDomEvent(event: IFrontendDomChangeEvent) {
-  if (!window.selfFrameIdPath && isMainFrame()) {
-    window.selfFrameIdPath = 'main';
+    this.loadedIndex = endIndex;
   }
 
-  const { action, textContent, frameIdPath } = event;
-  if (frameIdPath && frameIdPath !== window.selfFrameIdPath) {
-    delegateToSubframe(event);
-    return;
-  }
-
-  if (action === DomActionType.newDocument) {
-    onNewDocument(event);
-    return;
-  }
-
-  if (action === DomActionType.location) {
-    debugLog('Location: href=%s', event.textContent);
-    window.history.replaceState({}, 'Replay', textContent);
-    return;
-  }
-
-  if (isPreservedElement(event)) return;
-  const { parentNodeId } = event;
-
-  let node: Node;
-  let parentNode: Node;
-  try {
-    parentNode = getNode(parentNodeId);
-    node = deserializeNode(event, parentNode as Element);
-
-    if (!parentNode && (action === DomActionType.added || action === DomActionType.removed)) {
-      debugLog('WARN: parent node id not found', event);
+  private applyDomChanges(changeEvents: IFrontendDomChangeEvent[]): void {
+    this.pendingDomChanges.push(...changeEvents);
+    if (document.readyState !== 'complete') {
+      document.onreadystatechange = () => this.applyDomChanges([]);
       return;
     }
 
-    switch (action) {
-      case DomActionType.added:
-        if (!event.previousSiblingId) {
-          (parentNode as Element).prepend(node);
-        } else if (getNode(event.previousSiblingId)) {
-          const next = getNode(event.previousSiblingId).nextSibling;
-
-          if (next) parentNode.insertBefore(node, next);
-          else parentNode.appendChild(node);
-        }
-
-        break;
-      case DomActionType.removed:
-        if (parentNode.contains(node)) parentNode.removeChild(node);
-        break;
-      case DomActionType.attribute:
-        setNodeAttributes(node as Element, event);
-        break;
-      case DomActionType.property:
-        setNodeProperties(node as Element, event);
-        break;
-      case DomActionType.text:
-        node.textContent = textContent;
-        break;
+    document.onreadystatechange = null;
+    for (const changeEvent of this.pendingDomChanges) {
+      try {
+        this.replayDomEvent(changeEvent);
+      } catch (err) {
+        debugLog('ERROR applying change', changeEvent, err);
+      }
     }
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('ERROR: applying action', error.stack, parentNode, node, event);
+    this.pendingDomChanges.length = 0;
   }
+
+  private replayDomEvent(event: IFrontendDomChangeEvent): void {
+    if (!window.selfFrameIdPath && isMainFrame()) {
+      window.selfFrameIdPath = 'main';
+    }
+
+    const { action, frameIdPath } = event;
+    if (frameIdPath && frameIdPath !== window.selfFrameIdPath) {
+      this.delegateToSubframe(event);
+      return;
+    }
+
+    if (action === DomActionType.newDocument) return onNewDocument(event);
+    if (action === DomActionType.location) return onLocation(event);
+
+    if (isPreservedElement(event)) return;
+
+    let node: Node;
+    let parentNode: Node;
+    try {
+      parentNode = getNode(event.parentNodeId);
+      node = deserializeNode(event, parentNode as Element);
+
+      if (action === DomActionType.added) onNodeAdded(node, parentNode, event);
+      if (action === DomActionType.removed) onNodeRemoved(node, parentNode, event);
+      if (action === DomActionType.attribute) setNodeAttributes(node as Element, event);
+      if (action === DomActionType.property) setNodeProperties(node as Element, event);
+      if (action === DomActionType.text) node.textContent = event.textContent;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('ERROR: applying action', error.stack, { parentNode, node, event });
+    }
+  }
+
+  private delegateToSubframe(event: IFrontendDomChangeEvent) {
+    const { node, frameIdPath } = getDelegatedFrameRecipient(event.frameIdPath);
+    if (!node) {
+      // queue for pending events
+      this.pendingDelegatedEventsByPath[frameIdPath] ??= [];
+      this.pendingDelegatedEventsByPath[frameIdPath].push(event);
+      debugLog('Frame: not loaded yet, queuing pending', frameIdPath);
+      return;
+    }
+
+    const frame = this.getDelegatableFrame(event.action, node);
+    if (!frame) return;
+
+    const events = this.pendingDelegatedEventsByPath[frameIdPath] ?? [];
+    events.push(event);
+    delete this.pendingDelegatedEventsByPath[frameIdPath];
+
+    frame.contentWindow.postMessage({ recipientFrameIdPath: frameIdPath, events }, '*');
+  }
+
+  private getDelegatableFrame(
+    action: IFrontendDomChangeEvent['action'],
+    node: Node,
+  ): HTMLIFrameElement {
+    const isNavigation = action === DomActionType.location || action === DomActionType.newDocument;
+
+    if (isNavigation && node instanceof HTMLObjectElement) {
+      return;
+    }
+
+    const frame = node as HTMLIFrameElement;
+    if (!frame.contentWindow) {
+      debugLog('Frame: without window', frame);
+      return;
+    }
+    return frame;
+  }
+
+  static load() {
+    const replayer = new DomReplayer();
+    window.loadPaintEvents = replayer.loadPaintEvents.bind(replayer);
+    window.setPaintIndexRange = replayer.setPaintIndexRange.bind(replayer);
+
+    window.addEventListener('message', ev => {
+      if (ev.data.recipientFrameIdPath && !window.selfFrameIdPath) {
+        window.selfFrameIdPath = ev.data.recipientFrameIdPath;
+      }
+      replayer.applyDomChanges(ev.data.events);
+    });
+  }
+}
+
+DomReplayer.load();
+
+/////// DELEGATION BETWEEN FRAMES   ////////////////////////////////////////////////////////////////////////////////////
+
+function getDelegatedFrameRecipient(eventFrameIdPath: string): { node: Node; frameIdPath: string } {
+  const childPath = eventFrameIdPath
+    .replace(window.selfFrameIdPath, '')
+    .split('_')
+    .filter(Boolean)
+    .map(Number);
+
+  const childId = childPath.shift();
+  const frameIdPath = `${window.selfFrameIdPath}_${childId}`;
+  const node = getNode(childId);
+  return { frameIdPath, node };
 }
 
 /////// PRESERVE HTML, BODY, HEAD ELEMS ////////////////////////////////////////////////////////////////////////////////
@@ -146,12 +175,12 @@ const preserveElements = new Set<string>(['HTML', 'HEAD', 'BODY']);
 function isPreservedElement(event: IFrontendDomChangeEvent) {
   const { action, nodeId, nodeType } = event;
 
-  if (nodeType === document.DOCUMENT_NODE) {
+  if (nodeId && nodeType === document.DOCUMENT_NODE) {
     NodeTracker.restore(nodeId, document);
     return true;
   }
 
-  if (nodeType === document.DOCUMENT_TYPE_NODE) {
+  if (nodeId && nodeType === document.DOCUMENT_TYPE_NODE) {
     NodeTracker.restore(nodeId, document.doctype);
     return true;
   }
@@ -192,61 +221,38 @@ function isPreservedElement(event: IFrontendDomChangeEvent) {
   return true;
 }
 
-/////// DELEGATION BETWEEN FRAMES   ////////////////////////////////////////////////////////////////////////////////////
+/////// APPLY PAINT CHANGES   //////////////////////////////////////////////////////////////////////////////////////////
 
-const pendingFrameCreationEvents = new Map<
-  string,
-  { recipientFrameIdPath: string; event: IFrontendDomChangeEvent; action: string }[]
->();
-(window as any).pendingFrameCreationEvents = pendingFrameCreationEvents;
-function delegateToSubframe(event: IFrontendDomChangeEvent) {
-  const childPath = event.frameIdPath
-    .replace(window.selfFrameIdPath, '')
-    .split('_')
-    .filter(Boolean)
-    .map(Number);
+function onNodeAdded(node: Node, parentNode: Node, event: IFrontendDomChangeEvent) {
+  if (!parentNode) {
+    debugLog('WARN: parent node id not found', event);
+    return;
+  }
 
-  const childId = childPath.shift();
-  const recipientFrameIdPath = `${window.selfFrameIdPath}_${childId}`;
+  if (!event.previousSiblingId) {
+    (parentNode as Element).prepend(node);
+  } else {
+    const previous = getNode(event.previousSiblingId);
+    if (previous) {
+      const next = previous.nextSibling;
 
-  const node = getNode(childId);
-  if (!node) {
-    if (!pendingFrameCreationEvents.has(recipientFrameIdPath)) {
-      pendingFrameCreationEvents.set(recipientFrameIdPath, []);
+      if (next) parentNode.insertBefore(node, next);
+      else parentNode.appendChild(node);
     }
-    // queue for pending events
-    pendingFrameCreationEvents
-      .get(recipientFrameIdPath)
-      .push({ recipientFrameIdPath, event, action: 'replayDomChanges' });
-    debugLog('Frame: not loaded yet, queuing pending', recipientFrameIdPath);
-    return;
-  }
-
-  if (
-    (event.action === DomActionType.location || event.action === DomActionType.newDocument) &&
-    node instanceof HTMLObjectElement
-  ) {
-    return;
-  }
-
-  const frame = node as HTMLIFrameElement;
-  if (!frame.contentWindow) {
-    debugLog('Frame: without window', frame);
-    return;
-  }
-  const events = [{ recipientFrameIdPath, event, action: 'replayDomChanges' }];
-
-  if (pendingFrameCreationEvents.has(recipientFrameIdPath)) {
-    events.unshift(...pendingFrameCreationEvents.get(recipientFrameIdPath));
-    pendingFrameCreationEvents.delete(recipientFrameIdPath);
-  }
-
-  for (const message of events) {
-    frame.contentWindow.postMessage(message, '*');
   }
 }
 
+function onNodeRemoved(node: Node, parentNode: Node, event: IFrontendDomChangeEvent) {
+  if (!parentNode) {
+    debugLog('WARN: parent node id not found', event);
+    return;
+  }
+  if (parentNode.contains(node)) parentNode.removeChild(node);
+}
+
 function onNewDocument(event: IFrontendDomChangeEvent) {
+  if (isMainFrame()) return;
+
   const { textContent } = event;
   const href = textContent;
   const newUrl = new URL(href);
@@ -279,6 +285,11 @@ function onNewDocument(event: IFrontendDomChangeEvent) {
   if (window.location.origin === newUrl.origin) {
     window.history.replaceState({}, 'Replay', href);
   }
+}
+
+function onLocation(event: IFrontendDomChangeEvent) {
+  debugLog('Location: href=%s', event.textContent);
+  window.history.replaceState({}, 'Replay', event.textContent);
 }
 
 function getNode(id: number) {
@@ -349,6 +360,7 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
     return node;
   }
 
+  const SHADOW_NODE_TYPE = 40;
   if (parent && typeof parent.attachShadow === 'function' && data.nodeType === SHADOW_NODE_TYPE) {
     // NOTE: we just make all shadows open in replay
     node = parent.attachShadow({ mode: 'open' });
@@ -402,4 +414,21 @@ function deserializeNode(data: IFrontendDomChangeEvent, parent: Element): Node {
   NodeTracker.restore(data.nodeId, node);
 
   return node;
+}
+
+function isMainFrame() {
+  if ('isMainFrame' in window) return (window as any).isMainFrame;
+  if ('getIsMainFrame' in window) return window.getIsMainFrame();
+  return true;
+}
+
+/////// DEBUG LOGS   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+function debugLog(message: string, ...args: any[]) {
+  if (window.debugToConsole) {
+    // eslint-disable-next-line prefer-rest-params,no-console
+    console.log(...arguments);
+  }
+  window.debugLogs ??= [];
+  window.debugLogs.push({ message, args });
 }
