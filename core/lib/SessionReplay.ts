@@ -50,15 +50,28 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
 
   public async open(
     browserContext: IPuppetContext,
-    sessionOffsetPercent?: number,
+    timelineOffsetPercent?: number,
   ): Promise<SessionReplayTab> {
     this.browserContext = browserContext;
     this.isReady ??= this.load();
-    return await this.goto(sessionOffsetPercent);
+    return await this.goto(timelineOffsetPercent);
   }
 
   public isReplayPage(pageId: string): boolean {
     return this.pageIds.has(pageId);
+  }
+
+  public async step(direction: 'forward' | 'back'): Promise<number> {
+    const tab = [...this.tabsById.values()][0];
+    if (!tab.isOpen) {
+      await tab.open();
+    }
+    if (direction === 'forward') {
+      await tab.goForward();
+    } else {
+      await tab.goBack();
+    }
+    return tab.currentTimelineOffsetPct;
   }
 
   public async goto(sessionOffsetPercent: number): Promise<SessionReplayTab> {
@@ -73,7 +86,7 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
       await tab.open();
     }
     if (sessionOffsetPercent !== undefined) {
-      await tab.setPlaybarOffset(sessionOffsetPercent);
+      await tab.setTimelineOffset(sessionOffsetPercent);
     } else {
       await tab.loadEndState();
     }

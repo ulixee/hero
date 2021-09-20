@@ -45,7 +45,7 @@ export default class SessionReplayTab {
 
   public readonly commandsById = new Map<number, ICommandWithResult>();
 
-  public currentPlaybarOffsetPct = 0;
+  public currentTimelineOffsetPct = 0;
   public isPlaying = false;
   public currentTickIndex = -1;
 
@@ -120,7 +120,7 @@ export default class SessionReplayTab {
   public goForward(): Promise<void> {
     const result = this.loadTick(this.currentTickIndex + 1);
     if (this.currentTickIndex === this.ticks.length - 1) {
-      this.currentPlaybarOffsetPct = 100;
+      this.currentTimelineOffsetPct = 100;
     }
     return result;
   }
@@ -129,33 +129,33 @@ export default class SessionReplayTab {
     await this.page?.then(x => x.close());
   }
 
-  public async setPlaybarOffset(playbarOffset: number): Promise<void> {
+  public async setTimelineOffset(timelineOffset: number): Promise<void> {
     const ticks = this.ticks;
-    if (!ticks.length || this.currentPlaybarOffsetPct === playbarOffset) return;
+    if (!ticks.length || this.currentTimelineOffsetPct === timelineOffset) return;
 
     let newTickIdx = this.currentTickIndex;
     // if going forward, load next ticks
-    if (playbarOffset > this.currentPlaybarOffsetPct) {
+    if (timelineOffset > this.currentTimelineOffsetPct) {
       for (let i = this.currentTickIndex; i < ticks.length; i += 1) {
         if (i < 0) continue;
-        if (ticks[i].playbarOffsetPercent > playbarOffset) break;
+        if (ticks[i].timelineOffsetPercent > timelineOffset) break;
         newTickIdx = i;
       }
     } else {
       for (let i = this.currentTickIndex - 1; i >= 0; i -= 1) {
-        if (ticks[i].playbarOffsetPercent < playbarOffset) break;
+        if (ticks[i].timelineOffsetPercent < timelineOffset) break;
         newTickIdx = i;
       }
     }
 
-    await this.loadTick(newTickIdx, playbarOffset);
+    await this.loadTick(newTickIdx, timelineOffset);
   }
 
   public async loadEndState(): Promise<void> {
     await this.loadTick(this.ticks.length - 1);
   }
 
-  public async loadTick(newTickIdx: number, specificPlaybarOffset?: number): Promise<void> {
+  public async loadTick(newTickIdx: number, specificTimelineOffset?: number): Promise<void> {
     if (newTickIdx === this.currentTickIndex) {
       return;
     }
@@ -167,19 +167,20 @@ export default class SessionReplayTab {
     }
 
     this.currentTickIndex = newTickIdx;
-    this.currentPlaybarOffsetPct = specificPlaybarOffset ?? newTick.playbarOffsetPercent;
+    this.currentTimelineOffsetPct = specificTimelineOffset ?? newTick.timelineOffsetPercent;
 
     const newPaintIndex = newTick.paintEventIndex;
     if (newPaintIndex !== undefined && newPaintIndex !== this.paintEventsLoadedIdx) {
       const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
 
-      let startIndex = newTick.documentLoadPaintIndex;
       if ((isBackwards && newPaintIndex === -1) || newTick.eventType === 'init') {
+        this.paintEventsLoadedIdx = newPaintIndex;
         await this.goto(this.firstDocumentUrl);
         return;
       }
 
       // if going forward and past document load, start at currently loaded index
+      let startIndex = newTick.documentLoadPaintIndex;
       if (!isBackwards && this.paintEventsLoadedIdx > newTick.documentLoadPaintIndex) {
         startIndex = this.paintEventsLoadedIdx + 1;
       }

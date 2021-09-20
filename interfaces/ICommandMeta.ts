@@ -13,5 +13,6 @@ export default interface ICommandMeta {
   resultType?: string;
   run: number;
   reusedCommandFromRun?: number;
-  url?: string; // url at time of command
+  startNavigationId?: number;
+  endNavigationId?: number;
 }

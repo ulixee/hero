@@ -4,7 +4,6 @@ import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import Session from './Session';
 import Tab from './Tab';
-import FrameEnvironment from './FrameEnvironment';
 
 const { log } = Log(module);
 type AsyncFunc = (...args: any[]) => Promise<any> | any;
@@ -44,6 +43,10 @@ export default class CommandRecorder {
       tabId = args[0].id;
     }
 
+    const tab = session.getTab(tabId);
+    const frame =
+      tab?.getFrameEnvironment(frameId) ?? this.session.getLastActiveTab()?.mainFrameEnvironment;
+
     const commandMeta = {
       id: commandHistory.length + 1,
       tabId,
@@ -51,10 +54,7 @@ export default class CommandRecorder {
       name: commandFn.name,
       args: args.length ? TypeSerializer.stringify(args) : undefined,
       run: session.resumeCounter,
-      url: (
-        session.getTab(tabId)?.frameEnvironmentsById.get(frameId) ??
-        this.session.getLastActiveTab()?.mainFrameEnvironment
-      )?.url,
+      startNavigationId: frame?.navigations?.top?.id,
     } as ICommandMeta;
 
     if (sessionState.nextCommandMeta) {
@@ -69,12 +69,9 @@ export default class CommandRecorder {
       return commandMeta.result;
     }
 
-    const tab = session.getTab(tabId);
     tab?.willRunCommand(commandMeta);
 
-    let frame: FrameEnvironment;
-    if (frameId) {
-      frame = tab.frameEnvironmentsById.get(frameId);
+    if (frame) {
       frame.navigationsObserver.willRunCommand(commandMeta, commandHistory);
     }
     const id = this.logger.info('Command.run', commandMeta);
@@ -92,6 +89,9 @@ export default class CommandRecorder {
     } finally {
       commandMeta.endDate = Date.now();
       commandMeta.result = result;
+      commandMeta.endNavigationId = (
+        frame ?? (tab ?? this.session.getLastActiveTab())?.mainFrameEnvironment
+      )?.navigations.top?.id;
       // NOTE: second insert on purpose -- it will do an update
       sessionState.recordCommandFinished(commandMeta);
       tab?.didRunCommand(commandMeta);
@@ -111,7 +111,8 @@ export default class CommandRecorder {
     if (sessionResume.startLocation === 'sessionStart') return;
 
     const startAtPageStart = sessionResume.startLocation === 'pageStart';
-    const currentUrl = session.tabsById.get(tabId)?.frameEnvironmentsById.get(frameId)?.url;
+    const currentNavigation = session.tabsById.get(tabId)?.getFrameEnvironment(frameId)
+      ?.navigations?.top;
 
     // make sure last command reused a command run
     const lastCommand = sessionState.lastCommand;
@@ -137,10 +138,9 @@ export default class CommandRecorder {
         !previous.resultType?.includes('Error')
       ) {
         // if page start, we should break if url is the same.
-        // NOTE: this will not handle a flow that goes to the same url multiple times
         if (
           startAtPageStart &&
-          currentUrl === previous.url &&
+          currentNavigation?.id === previous.endNavigationId &&
           commandMeta.name !== 'waitForLocation' // can't wait for location again here
         ) {
           break;
@@ -150,7 +150,8 @@ export default class CommandRecorder {
         commandMeta.runStartDate = previous.runStartDate;
         commandMeta.endDate = previous.endDate;
         commandMeta.reusedCommandFromRun = previous.reusedCommandFromRun ?? previous.run;
-        commandMeta.url = previous.url;
+        commandMeta.startNavigationId = previous.startNavigationId;
+        commandMeta.endNavigationId = previous.endNavigationId;
         sessionState.recordCommandStart(commandMeta);
         return true;
       }

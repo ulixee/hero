@@ -2,17 +2,33 @@ import SessionDb from '../dbs/SessionDb';
 import CommandFormatter from '../lib/CommandFormatter';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
 import ICoreApi from '../interfaces/ICoreApi';
+import CommandTimeline from '../lib/CommandTimeline';
+import FrameNavigationsTable from '../models/FrameNavigationsTable';
 
 export default function sessionCommandsApi(args: ISessionCommandsArgs): ISessionCommandsResult {
-  const sessionDb = SessionDb.getCached(args.sessionId, true);
+  const timeline = loadCommandTimeline(args);
 
-  // sort in case they got out of order (like saving in batch)
-  const commands = sessionDb.commands.all().sort((a, b) => a.id - b.id);
-  const commandsWithResults = commands.map(CommandFormatter.parseResult);
+  const commandsWithResults = timeline.commands.map(CommandFormatter.parseResult);
 
   return {
     commands: commandsWithResults,
   };
+}
+
+export function loadCommandTimeline(args: ISessionCommandsArgs): CommandTimeline {
+  const sessionDb = SessionDb.getCached(args.sessionId, true);
+
+  // sort in case they got out of order (like saving in batch)
+  const commands = sessionDb.commands.all().sort((a, b) => {
+    if (a.run === b.run) return a.id - b.id;
+    return a.run - b.run;
+  });
+
+  return new CommandTimeline(
+    commands,
+    commands[commands.length - 1].run,
+    sessionDb.frameNavigations.all().map(x => FrameNavigationsTable.toNavigation(x)),
+  );
 }
 
 export interface ISessionCommandsApi extends ICoreApi {

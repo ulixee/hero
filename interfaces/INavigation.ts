@@ -4,7 +4,9 @@ import { ILoadStatus } from './Location';
 export default interface INavigation {
   id: number;
   frameId: number;
-  resourceId: IResolvablePromise<number>;
+  tabId: number;
+  resourceId: number;
+  resourceIdResolvable: IResolvablePromise<number>;
   browserRequestId: string;
   loaderId: string;
   navigationError?: Error;

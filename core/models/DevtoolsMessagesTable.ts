@@ -78,7 +78,7 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
 
     if (result) {
       if (method === 'Page.captureScreenshot') {
-        result = { data: `[truncated ${result.data.length} chars]` };
+        result = { ...result, data: `[truncated ${result.data.length} chars]` };
       }
       if (method === 'Network.getResponseBody') {
         result = { ...result, body: '[truncated]' };
@@ -93,6 +93,10 @@ export default class DevtoolsMessagesTable extends SqliteTable<IDevtoolsMessageR
         value?.length > 250
       ) {
         return `${value.substr(0, 250)}... [truncated ${value.length - 250} chars]`;
+      }
+
+      if (key === 'data' && method === 'Page.screencastFrame') {
+        return `[truncated ${value.length} chars]`;
       }
 
       if (
