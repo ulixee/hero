@@ -22,6 +22,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import IGeolocation from '@ulixee/hero-interfaces/IGeolocation';
 import { ISessionSummary } from '@ulixee/hero-interfaces/ICorePlugin';
 import IHeroMeta from '@ulixee/hero-interfaces/IHeroMeta';
+import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import SessionState from './SessionState';
 import GlobalPool from './GlobalPool';
 import Tab from './Tab';
@@ -186,6 +187,11 @@ export default class Session
 
   public isAllowedCommand(method: string): boolean {
     return this.commandRecorder.fnNames.has(method);
+  }
+
+  public canReuseCommand(command: ICommandMeta): boolean {
+    if (command.name === 'close') return false;
+    return true;
   }
 
   public getTab(id: number): Tab {

@@ -1,8 +1,6 @@
 import { DomActionType } from '@ulixee/hero-interfaces/IDomChangeEvent';
 import { IPuppetPage } from '@ulixee/hero-interfaces/IPuppetPage';
 import Log from '@ulixee/commons/lib/Logger';
-import { CanceledPromiseError } from '@ulixee/commons/interfaces/IPendingWaitEvent';
-import ICommandWithResult from '../interfaces/ICommandWithResult';
 import { IPaintEvent, ITabDetails, ITick } from '../apis/Session.ticks';
 import InjectedScripts from './InjectedScripts';
 
@@ -13,24 +11,6 @@ export default class SessionReplayTab {
     return this.tabDetails.ticks;
   }
 
-  public get tabId(): number {
-    return this.tabDetails.tab.id;
-  }
-
-  public get detachedFromTabId(): number {
-    return this.tabDetails.tab.detachedFromTabId;
-  }
-
-  public get firstDocumentUrl(): string {
-    return this.tabDetails.tab.startUrl;
-  }
-
-  public get tabCreatedTime(): number {
-    return this.tabDetails.tab.createdTime;
-  }
-
-  public mainFrameId: number;
-
   public get currentTick(): ITick {
     return this.ticks[this.currentTickIndex];
   }
@@ -39,11 +19,13 @@ export default class SessionReplayTab {
     return this.ticks[this.currentTickIndex + 1];
   }
 
+  public get previousTick(): ITick {
+    return this.ticks[this.currentTickIndex - 1];
+  }
+
   public get isOpen(): boolean {
     return !!this.page && !!this.pageId;
   }
-
-  public readonly commandsById = new Map<number, ICommandWithResult>();
 
   public currentTimelineOffsetPct = 0;
   public isPlaying = false;
@@ -53,7 +35,8 @@ export default class SessionReplayTab {
   private page: Promise<IPuppetPage>;
   // put in placeholder
   private paintEventsLoadedIdx = -1;
-  private domNodePathByFrameId: { [frameId: number]: string } = {};
+  private readonly mainFrameId: number;
+  private readonly domNodePathByFrameId: { [frameId: number]: string } = {};
 
   constructor(
     private readonly tabDetails: ITabDetails,
@@ -61,9 +44,6 @@ export default class SessionReplayTab {
     private readonly sessionId: string,
     private readonly debugLogging: boolean = false,
   ) {
-    for (const command of tabDetails.commands) {
-      this.commandsById.set(command.id, command);
-    }
     for (const frame of this.tabDetails.tab.frames) {
       if (frame.isMainFrame) this.mainFrameId = frame.id;
       this.domNodePathByFrameId[frame.id] = frame.domNodePath;
@@ -71,15 +51,21 @@ export default class SessionReplayTab {
   }
 
   public async open(): Promise<void> {
-    if (!this.page) {
-      this.page = this.pageCreator();
-      const page = await this.page;
-      page.on('close', () => {
-        this.page = null;
-        this.pageId = null;
-      });
-      this.pageId = page.id;
+    if (this.page) {
+      await this.page;
+      return;
     }
+    this.page = this.pageCreator();
+    const page = await this.page;
+    page.on('close', () => {
+      this.page = null;
+      this.pageId = null;
+      this.paintEventsLoadedIdx = -1;
+      this.isPlaying = false;
+      this.currentTickIndex = -1;
+      this.currentTimelineOffsetPct = 0;
+    });
+    this.pageId = page.id;
   }
 
   public async play(onTick?: (tick: ITick) => void): Promise<void> {
@@ -111,22 +97,15 @@ export default class SessionReplayTab {
     this.isPlaying = false;
   }
 
-  public goBack(): Promise<void> {
-    const prevTickIdx =
-      this.currentTickIndex > 0 ? this.currentTickIndex - 1 : this.currentTickIndex;
-    return this.loadTick(prevTickIdx);
-  }
-
-  public goForward(): Promise<void> {
-    const result = this.loadTick(this.currentTickIndex + 1);
-    if (this.currentTickIndex === this.ticks.length - 1) {
-      this.currentTimelineOffsetPct = 100;
-    }
-    return result;
-  }
-
   public async close(): Promise<void> {
-    await this.page?.then(x => x.close());
+    const pagePromise = this.page;
+    this.page = null;
+    if (pagePromise) {
+      const page = await pagePromise;
+      // go ahead and say this is closed
+      page.emit('close');
+      await page?.close();
+    }
   }
 
   public async setTimelineOffset(timelineOffset: number): Promise<void> {
@@ -155,32 +134,34 @@ export default class SessionReplayTab {
     await this.loadTick(this.ticks.length - 1);
   }
 
-  public async loadTick(newTickIdx: number, specificTimelineOffset?: number): Promise<void> {
-    if (newTickIdx === this.currentTickIndex) {
+  public async loadTick(
+    newTickOrIdx: number | ITick,
+    specificTimelineOffset?: number,
+  ): Promise<void> {
+    if (newTickOrIdx === this.currentTickIndex || newTickOrIdx === this.currentTick) {
       return;
     }
-    const newTick = this.ticks[newTickIdx];
 
-    // need to wait for load
-    if (!newTick) {
-      return;
+    let newTick = newTickOrIdx as ITick;
+    let newTickIdx = newTickOrIdx as number;
+    if (typeof newTickOrIdx === 'number') {
+      newTick = this.ticks[newTickOrIdx];
+    } else {
+      newTickIdx = this.ticks.indexOf(newTickOrIdx);
     }
 
     this.currentTickIndex = newTickIdx;
     this.currentTimelineOffsetPct = specificTimelineOffset ?? newTick.timelineOffsetPercent;
 
     const newPaintIndex = newTick.paintEventIndex;
-    if (newPaintIndex !== undefined && newPaintIndex !== this.paintEventsLoadedIdx) {
+    if (newPaintIndex === -1 && newTick.documentUrl) {
+      this.paintEventsLoadedIdx = newPaintIndex;
+      await this.goto(newTick.documentUrl);
+    } else if (newPaintIndex !== this.paintEventsLoadedIdx) {
       const isBackwards = newPaintIndex < this.paintEventsLoadedIdx;
 
-      if ((isBackwards && newPaintIndex === -1) || newTick.eventType === 'init') {
-        this.paintEventsLoadedIdx = newPaintIndex;
-        await this.goto(this.firstDocumentUrl);
-        return;
-      }
-
-      // if going forward and past document load, start at currently loaded index
       let startIndex = newTick.documentLoadPaintIndex;
+      // is document loaded and moving forward? yes - no need to reload old ticks
       if (!isBackwards && this.paintEventsLoadedIdx > newTick.documentLoadPaintIndex) {
         startIndex = this.paintEventsLoadedIdx + 1;
       }
@@ -201,6 +182,10 @@ export default class SessionReplayTab {
         this.applyFrameNodePath(scrollEvent),
       );
     }
+  }
+
+  public async showStatusText(text: string): Promise<void> {
+    await InjectedScripts.showStatusText(await this.page, text);
   }
 
   public loadDetachedState(
@@ -246,14 +231,7 @@ export default class SessionReplayTab {
           paintIndexRange,
         });
       }
-      try {
-        await InjectedScripts.setPaintIndexRange(page, startIndex, paintIndexRange[1]);
-      } catch (err) {
-        // -32000 means ContextNotFound. ie, page has navigated
-        if (err.code === -32000) throw new CanceledPromiseError('Context not found');
-
-        throw err;
-      }
+      await InjectedScripts.setPaintIndexRange(page, startIndex, paintIndexRange[1], !!loadUrl);
     }
   }
 

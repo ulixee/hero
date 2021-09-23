@@ -79,13 +79,18 @@ function createSessionState(
 
 function createCommandTicks(state: ISessionState, commands: ICommandWithResult[]): void {
   for (let i = 0; i < commands.length; i += 1) {
-    const { startDate: timestamp, label, id: commandId } = commands[i];
-    const tabId = commands[i].tabId ?? Number(Object.keys(state.tabsById)[0]);
+    const command = commands[i];
+    const tabId = command.tabId ?? Number(Object.keys(state.tabsById)[0]);
 
-    addTick(state, 'command', i, { timestamp, commandId, label, tabId });
+    addTick(state, 'command', i, {
+      timestamp: command.startTime,
+      commandId: command.id,
+      label: command.label,
+      tabId,
+    });
 
     const tabDetails = state.tabsById[tabId];
-    tabDetails.commands.push(commands[i]);
+    tabDetails.commands.push(command);
   }
 }
 
@@ -231,24 +236,7 @@ function copyDetachedPaintEvents(state: ISessionState, commands: ICommandWithRes
 
 function sortTicks(state: ISessionState): void {
   for (const tabDetails of Object.values(state.tabsById)) {
-    const { ticks, focus, mouse, commands, tab } = tabDetails;
-    ticks.sort((a, b) => {
-      if (a.timestamp === b.timestamp) {
-        if (a.eventType === b.eventType) return a.eventTypeIndex - b.eventTypeIndex;
-        return a.eventType.localeCompare(b.eventType);
-      }
-      return a.timestamp - b.timestamp;
-    });
-    ticks.unshift({
-      timelineOffsetPercent: 0,
-      isMajor: true,
-      eventType: 'init',
-      timestamp: tab.createdTime,
-      eventTypeIndex: -1,
-      commandId: -1,
-      label: 'Session Created',
-    } as any);
-
+    const { focus, mouse, commands, tab } = tabDetails;
     const startUrl = tab.startUrl;
 
     let lastEvents: Pick<
@@ -271,9 +259,16 @@ function sortTicks(state: ISessionState): void {
       }
     }
 
-    tabDetails.ticks = ticks.filter(tick => {
+    tabDetails.ticks = tabDetails.ticks.filter(tick => {
       tick.timelineOffsetPercent ??= state.timeline.getTimelineOffsetForTimestamp(tick.timestamp);
       return tick.timelineOffsetPercent <= 100 && tick.timelineOffsetPercent >= 0;
+    });
+    tabDetails.ticks.sort((a, b) => {
+      if (a.timelineOffsetPercent === b.timelineOffsetPercent) {
+        if (a.eventType === b.eventType) return a.eventTypeIndex - b.eventTypeIndex;
+        return a.eventType.localeCompare(b.eventType);
+      }
+      return a.timelineOffsetPercent - b.timelineOffsetPercent;
     });
 
     for (const tick of tabDetails.ticks) {

@@ -121,15 +121,23 @@ export default class InjectedScripts {
     await InjectedScripts.setPaintIndexRange(puppetPage, 0, 0);
   }
 
+  public static async showStatusText(puppetPage: IPuppetPage, status: string): Promise<void> {
+    await puppetPage.mainFrame.evaluate(`window.showReplayStatus("${status}");`, true);
+  }
+
   public static async setPaintIndexRange(
     puppetPage: IPuppetPage,
     startIndex: number,
     endIndex: number,
+    showOverlay = false,
   ): Promise<void> {
+    if (showOverlay) await puppetPage.mainFrame.evaluate(`window.showReplayOverlay();`, true);
+
     await puppetPage.mainFrame.evaluate(
       `window.setPaintIndexRange(${startIndex}, ${endIndex});`,
       true,
     );
+    if (showOverlay) await puppetPage.mainFrame.evaluate(`window.hideReplayOverlay();`, true);
   }
 
   public static async injectPaintEvents(

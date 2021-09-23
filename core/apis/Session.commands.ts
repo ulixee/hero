@@ -4,6 +4,7 @@ import ICommandWithResult from '../interfaces/ICommandWithResult';
 import ICoreApi from '../interfaces/ICoreApi';
 import CommandTimeline from '../lib/CommandTimeline';
 import FrameNavigationsTable from '../models/FrameNavigationsTable';
+import Session from '../lib/Session';
 
 export default function sessionCommandsApi(args: ISessionCommandsArgs): ISessionCommandsResult {
   const timeline = loadCommandTimeline(args);
@@ -16,6 +17,7 @@ export default function sessionCommandsApi(args: ISessionCommandsArgs): ISession
 }
 
 export function loadCommandTimeline(args: ISessionCommandsArgs): CommandTimeline {
+  Session.get(args.sessionId)?.sessionState?.db?.flush();
   const sessionDb = SessionDb.getCached(args.sessionId, true);
 
   // sort in case they got out of order (like saving in batch)

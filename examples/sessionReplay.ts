@@ -78,11 +78,13 @@ inspect.defaultOptions.depth = null;
     }
     if (key.name === 'right') {
       startTab.pause();
-      await startTab.goForward();
+      const nextTick = startTab.nextTick;
+      if (nextTick) await startTab.loadTick(nextTick);
     }
     if (key.name === 'left') {
       startTab.pause();
-      await startTab.goBack();
+      const prevTick = startTab.previousTick;
+      if (prevTick) await startTab.loadTick(prevTick);
     }
     render();
   });

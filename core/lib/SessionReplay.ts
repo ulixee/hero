@@ -8,7 +8,7 @@ import ISessionCreateOptions from '@ulixee/hero-interfaces/ISessionCreateOptions
 import { TypedEventEmitter } from '@ulixee/commons/lib/eventUtils';
 import SessionReplayTab from './SessionReplayTab';
 import ConnectionToCoreApi from '../connections/ConnectionToCoreApi';
-import { IDocument } from '../apis/Session.ticks';
+import { IDocument, ITick } from '../apis/Session.ticks';
 import { ISessionResource } from '../apis/Session.resources';
 import { ISessionResourceDetails } from '../apis/Session.resource';
 import CorePlugins from './CorePlugins';
@@ -20,8 +20,7 @@ import Fetch = Protocol.Fetch;
 const { log } = Log(module);
 
 export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed': void }> {
-  public tabsById = new Map<number, SessionReplayTab>();
-
+  public activeTab: SessionReplayTab;
   public get isOpen(): boolean {
     for (const tab of this.tabsById.values()) {
       if (tab.isOpen) return true;
@@ -29,6 +28,7 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
     return false;
   }
 
+  private tabsById = new Map<number, SessionReplayTab>();
   private resourceLookup: { [method_url: string]: ISessionResource[] } = {};
   private readonly documents: IDocument[] = [];
   private readonly sessionOptions: ISessionCreateOptions;
@@ -61,17 +61,12 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
     return this.pageIds.has(pageId);
   }
 
-  public async step(direction: 'forward' | 'back'): Promise<number> {
-    const tab = [...this.tabsById.values()][0];
-    if (!tab.isOpen) {
-      await tab.open();
-    }
-    if (direction === 'forward') {
-      await tab.goForward();
-    } else {
-      await tab.goBack();
-    }
-    return tab.currentTimelineOffsetPct;
+  public async loadTick(tick: ITick): Promise<void> {
+    await this.isReady;
+    const tab = this.activeTab;
+    if (!tab.isOpen) await tab.open();
+
+    await tab.loadTick(tick);
   }
 
   public async goto(sessionOffsetPercent: number): Promise<SessionReplayTab> {
@@ -81,7 +76,7 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
      * TODO: eventually this playbar needs to know which tab is active in the timeline at this offset
      *       If 1 tab is active, switch to it, otherwise, need to show the multi-timeline view and pick one tab to show
      */
-    const tab = [...this.tabsById.values()][0];
+    const tab = this.activeTab;
     if (!tab.isOpen) {
       await tab.open();
     }
@@ -93,12 +88,22 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
     return tab;
   }
 
+  public async showStatusText(text: string): Promise<void> {
+    await this.isReady;
+    const tab = this.activeTab;
+    if (!tab.isOpen) {
+      await tab.open();
+    }
+    await tab.showStatusText(text);
+  }
+
   public async close(closeContext = false): Promise<void> {
     this.isReady = null;
     if (!closeContext) {
       for (const tab of this.tabsById.values()) {
         await tab.close();
       }
+      this.activeTab = null;
     } else {
       await this.browserContext?.close();
       this.browserContext = null;
@@ -157,6 +162,10 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
       responseHeaders: headers,
       responseCode: resource.statusCode,
     };
+  }
+
+  public activateTab(sessionReplayTab: SessionReplayTab): void {
+    this.activeTab = sessionReplayTab;
   }
 
   private async createNewPage(): Promise<IPuppetPage> {
@@ -253,6 +262,7 @@ export default class SessionReplay extends TypedEventEmitter<{ 'all-tabs-closed'
         this.sessionId,
         this.debugLogging,
       );
+      this.activeTab ??= tab;
       this.tabsById.set(tabDetails.tab.id, tab);
       this.documents.push(...tabDetails.documents);
     }

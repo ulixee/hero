@@ -1,6 +1,7 @@
 import { Helpers } from '@ulixee/hero-testing';
 import ICommandMeta from '@ulixee/hero-interfaces/ICommandMeta';
 import INavigation from '@ulixee/hero-interfaces/INavigation';
+import { LoadStatus } from '@ulixee/hero-interfaces/Location';
 import CommandTimeline from '../lib/CommandTimeline';
 
 afterAll(Helpers.afterAll);
@@ -11,7 +12,7 @@ test('should process commands into a timeline', async () => {
     { id: 1, run: 0, runStartDate: 500, endDate: 600 } as ICommandMeta,
     { id: 2, run: 0, runStartDate: 601, endDate: 610 } as ICommandMeta,
   ] as ICommandMeta[];
-  const navigations = [{ id: 1, url: '1' } as any] as INavigation[];
+  const navigations = [{ id: 1, url: '1', statusChanges: new Map() } as any] as INavigation[];
   const commandTimeline = new CommandTimeline(commands, 0, navigations);
   expect(commandTimeline.startTime).toBe(500);
   expect(commandTimeline.runtimeMs).toBe(110);
@@ -29,7 +30,7 @@ test('should handle a second run', async () => {
     { id: 2, run: 1, runStartDate: 601, endDate: 610, reusedCommandFromRun: 0 } as ICommandMeta,
     { id: 3, run: 1, runStartDate: 1500, endDate: 1510 } as ICommandMeta,
   ] as ICommandMeta[];
-  const navigations = [{ id: 1, url: '1' } as any] as INavigation[];
+  const navigations = [{ id: 1, url: '1', statusChanges: new Map() } as any] as INavigation[];
 
   const commandTimeline = new CommandTimeline(commands, 1, navigations);
   expect(commandTimeline.startTime).toBe(500);
@@ -49,12 +50,33 @@ test('should be able to calculate offsets', async () => {
     { id: 2, run: 1, runStartDate: 601, endDate: 610, reusedCommandFromRun: 0 } as ICommandMeta,
     { id: 3, run: 1, runStartDate: 1500, endDate: 1510 } as ICommandMeta,
   ] as ICommandMeta[];
-  const navigations = [{ id: 1, url: '1' } as any] as INavigation[];
+  const navigations = [{ id: 1, url: '1', statusChanges: new Map() } as any] as INavigation[];
 
   const commandTimeline = new CommandTimeline(commands, 1, navigations);
   expect(commandTimeline.getTimelineOffset(60)).toBe(50.0);
   // if timestamp is in the gap, we shouldn't include it
   expect(commandTimeline.getTimelineOffsetForTimestamp(1000)).toBe(-1);
-  expect(commandTimeline.getTimelineOffsetForTimestamp(1500)).toBe(91.66);
+  expect(commandTimeline.getTimelineOffsetForTimestamp(1500)).toBe(91.6);
   expect(commandTimeline.getTimelineOffsetForTimestamp(1510)).toBe(100);
+});
+
+test('should start at the first http request', async () => {
+  const commands = [
+    { id: 1, run: 0, runStartDate: 500, endDate: 600 } as ICommandMeta,
+    { id: 2, run: 0, runStartDate: 601, endDate: 610 } as ICommandMeta,
+  ] as ICommandMeta[];
+  const navigations = [
+    {
+      id: 1,
+      url: '1',
+      statusChanges: new Map([
+        [LoadStatus.HttpRequested, 550],
+        [LoadStatus.DomContentLoaded, 555],
+      ]),
+    } as any,
+  ] as INavigation[];
+
+  const commandTimeline = new CommandTimeline(commands, 0, navigations);
+  expect(commandTimeline.runtimeMs).toBe(60);
+  expect(commandTimeline.getTimelineOffset(30)).toBe(50);
 });

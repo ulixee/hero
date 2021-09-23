@@ -151,12 +151,15 @@ export default class Frame extends TypedEventEmitter<IPuppetFrameEvents> impleme
       const isNotFoundError =
         err.code === ContextNotFoundCode ||
         (err as ProtocolError).remoteError?.code === ContextNotFoundCode;
-      if (isNotFoundError && retries > 0) {
-        // Cannot find context with specified id (ie, could be reloading or unloading)
-        return this.evaluate(expression, isolateFromWebPageEnvironment, {
-          shouldAwaitExpression: options?.shouldAwaitExpression,
-          retriesWaitingForLoad: retries - 1,
-        });
+      if (isNotFoundError) {
+        if (retries > 0) {
+          // Cannot find context with specified id (ie, could be reloading or unloading)
+          return this.evaluate(expression, isolateFromWebPageEnvironment, {
+            shouldAwaitExpression: options?.shouldAwaitExpression,
+            retriesWaitingForLoad: retries - 1,
+          });
+        }
+        throw new CanceledPromiseError('The page context to evaluate javascript was not found');
       }
       throw err;
     }

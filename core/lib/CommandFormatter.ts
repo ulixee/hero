@@ -4,6 +4,7 @@ import { getKeyboardKey } from '@ulixee/hero-interfaces/IKeyboardLayoutUS';
 import { getNodePointerFnName } from '@ulixee/hero-interfaces/jsPathFnNames';
 import TypeSerializer from '@ulixee/commons/lib/TypeSerializer';
 import ICommandWithResult from '../interfaces/ICommandWithResult';
+import { ICommandTimelineOffset } from './CommandTimeline';
 
 export default class CommandFormatter {
   public static toString(command: ICommandMeta): string {
@@ -74,17 +75,10 @@ export default class CommandFormatter {
     return `${command.name}(${args.map(JSON.stringify).join(', ')})`;
   }
 
-  public static parseResult(meta: ICommandMeta): ICommandWithResult {
-    const duration = meta.endDate
-      ? new Date(meta.endDate).getTime() -
-        new Date(meta.clientStartDate ?? meta.runStartDate).getTime()
-      : null;
-
+  public static parseResult(meta: ICommandMeta & ICommandTimelineOffset): ICommandWithResult {
     const command: ICommandWithResult = {
       ...meta,
       label: CommandFormatter.toString(meta),
-      duration,
-      startDate: meta.clientStartDate ?? meta.runStartDate,
       isError: false,
       result: undefined,
     };
