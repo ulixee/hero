@@ -31,7 +31,7 @@ test('it should run function in browser and return response', async () => {
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
   const hero = new Hero({ userAgent });
-  Helpers.onClose(() => hero.close(), true);
+  Helpers.onClose(() => hero.close());
   hero.use(ExecuteJsPlugin);
 
   await hero.goto(`${koaServer.baseUrl}/test1`);
@@ -58,7 +58,7 @@ test('it should run function in browser and return incr', async () => {
   const userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_16_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.165 Safari/537.36';
   const hero = new Hero({ userAgent });
-  Helpers.onClose(() => hero.close(), true);
+  Helpers.onClose(() => hero.close());
   hero.use(ExecuteJsPlugin);
 
   await hero.goto(`${koaServer.baseUrl}/test2`);
@@ -68,5 +68,58 @@ test('it should run function in browser and return incr', async () => {
     return window.testRun(num);
   }, 1);
   expect(response).toEqual(2);
+  await hero.close();
+});
+
+test('it should run function in iframe', async () => {
+  koaServer.get('/iframe-host', ctx => {
+    ctx.body = `<body>
+<h1>Iframe page</h1>
+<iframe src="/iframe" id="iframe"></iframe>
+<script>
+    window.testFunc = function() {
+      return "page";
+    }
+</script>
+</body>`;
+  });
+  koaServer.get('/iframe', ctx => {
+    ctx.body = `<body>
+<script>
+    window.testFunc = function() {
+      return "iframe";
+    }
+</script>
+</body>`;
+  });
+
+  const hero = new Hero();
+  Helpers.onClose(() => hero.close());
+  hero.use(ExecuteJsPlugin);
+
+  await hero.goto(`${koaServer.baseUrl}/iframe-host`);
+  await hero.waitForPaintingStable();
+
+  const iframe = await hero.getFrameEnvironment(hero.document.querySelector('iframe'));
+  await iframe.waitForLoad(LocationStatus.DomContentLoaded);
+
+  await expect(
+    iframe.executeJs(() => {
+      // @ts-ignore
+      return window.testFunc();
+    }),
+  ).resolves.toBe('iframe');
+  await expect(
+    hero.activeTab.executeJs(() => {
+      // @ts-ignore
+      return window.testFunc();
+    }),
+  ).resolves.toBe('page');
+  await expect(
+    hero.executeJs(() => {
+      // @ts-ignore
+      return window.testFunc();
+    }),
+  ).resolves.toBe('page');
   await hero.close();
 });

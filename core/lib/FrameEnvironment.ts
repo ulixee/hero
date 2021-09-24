@@ -149,6 +149,7 @@ export default class FrameEnvironment
       this.removeCookie,
       this.setCookie,
       this.setFileInputFiles,
+      this.runPluginCommand,
       this.waitForElement,
       this.waitForLoad,
       this.waitForLocation,
@@ -372,6 +373,14 @@ b) Use the UserProfile feature to set cookies for 1 or more domains before they'
         return frame.toJSON();
       }
     }
+  }
+
+  public async runPluginCommand(toPluginId: string, args: any[]): Promise<any> {
+    const commandMeta = {
+      puppetPage: this.tab.puppetPage,
+      puppetFrame: this.puppetFrame,
+    };
+    return await this.session.plugins.onPluginCommand(toPluginId, commandMeta, args);
   }
 
   public waitForElement(jsPath: IJsPath, options?: IWaitForElementOptions): Promise<boolean> {

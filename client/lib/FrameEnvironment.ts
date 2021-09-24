@@ -30,13 +30,14 @@ import { getComputedVisibilityFnName } from '@ulixee/hero-interfaces/jsPathFnNam
 import IAwaitedOptions from '../interfaces/IAwaitedOptions';
 import RequestGenerator, { getRequestIdOrUrl } from './Request';
 import CookieStorage, { createCookieStorage } from './CookieStorage';
-import Hero from './Hero';
+import Hero, { IState as IHeroState } from './Hero';
 import { delegate as AwaitedHandler, getAwaitedPathAsMethodArg } from './SetupAwaitedHandler';
 import CoreFrameEnvironment from './CoreFrameEnvironment';
 import Tab from './Tab';
 import { IMousePosition } from '../interfaces/IInteractions';
 
 const { getState, setState } = StateMachine<FrameEnvironment, IState>();
+const heroState = StateMachine<Hero, IHeroState>();
 const awaitedPathState = StateMachine<
   any,
   { awaitedPath: AwaitedPath; awaitedOptions: IAwaitedOptions }
@@ -70,6 +71,19 @@ export default class FrameEnvironment {
       tab,
       coreFrame,
     });
+
+    async function sendToFrameEnvironment(pluginId: string, ...args: any[]): Promise<any> {
+      return (await coreFrame).commandQueue.run(
+        'FrameEnvironment.runPluginCommand',
+        pluginId,
+        args,
+      );
+    }
+
+    for (const clientPlugin of heroState.getState(hero).clientPlugins) {
+      if (clientPlugin.onFrameEnvironment)
+        clientPlugin.onFrameEnvironment(hero, this, sendToFrameEnvironment);
+    }
   }
 
   public get isMainFrame(): Promise<boolean> {

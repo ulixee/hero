@@ -17,6 +17,7 @@ import IGeolocation from './IGeolocation';
 import IDeviceProfile from './IDeviceProfile';
 import IHttp2ConnectSettings from './IHttp2ConnectSettings';
 import ISessionCreateOptions from './ISessionCreateOptions';
+import { IPuppetFrame } from './IPuppetFrame';
 
 export default interface ICorePlugin
   extends ICorePluginMethods,
@@ -37,6 +38,7 @@ export interface ICorePluginMethods {
 
 export interface IOnClientCommandMeta {
   puppetPage: IPuppetPage;
+  puppetFrame?: IPuppetFrame;
   sessionSummary: ISessionSummary;
 }
 
