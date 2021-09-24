@@ -1,5 +1,6 @@
 import * as net from 'net';
 import { Socket } from 'net';
+import * as Fs from 'fs';
 import * as http from 'http';
 import { IncomingMessage } from 'http';
 import * as https from 'https';
@@ -20,9 +21,7 @@ const { log } = Log(module);
 const emptyResponse = `<html lang="en"><body>Empty</body></html>`;
 
 const defaultStorageDirectory =
-  process.env.HERO_NETWORK_DIR ??
-  process.env.HERO_DATA_DIR ??
-  Path.join(Os.tmpdir(), '.ulixee');
+  process.env.HERO_NETWORK_DIR ?? process.env.HERO_DATA_DIR ?? Path.join(Os.tmpdir(), '.ulixee');
 
 /**
  * This module is heavily inspired by 'https://github.com/joeferner/node-http-mitm-proxy'
@@ -460,6 +459,9 @@ export default class MitmProxy {
   public static async start(startingPort?: number, sslCaDir?: string): Promise<MitmProxy> {
     if (this.certificateGenerator == null) {
       const baseDir = sslCaDir ?? defaultStorageDirectory;
+      if (!Fs.existsSync(baseDir)) {
+        Fs.mkdirSync(baseDir, { recursive: true });
+      }
 
       this.networkDb = new NetworkDb(baseDir);
       this.certificateGenerator = new CertificateGenerator({ storageDir: baseDir });

@@ -25,6 +25,13 @@ export default class NetworkDb {
         try {
           table.runPendingInserts();
         } catch (error) {
+          if (
+            String(error).match(/attempt to write a readonly database/) ||
+            String(error).match(/database is locked/)
+          ) {
+            clearInterval(this.saveInterval);
+            this.db = null;
+          }
           log.error('NetworkDb.flushError', {
             sessionId: null,
             error,
