@@ -335,6 +335,9 @@ function createReplayItems() {
   isInitialized = true;
 
   replayNode = document.createElement('hero-replay');
+  if ('doNotTrackElement' in window) {
+    window.doNotTrackElement(replayNode);
+  }
   replayNode.style.zIndex = '2147483647';
 
   replayShadow = replayNode.attachShadow({ mode: 'closed' });

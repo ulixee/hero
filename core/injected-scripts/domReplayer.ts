@@ -38,6 +38,7 @@ class DomReplayer {
 
   public loadPaintEvents(newPaintEvents: IFrontendDomChangeEvent[][]): void {
     this.paintEvents = newPaintEvents;
+    this.loadedIndex = -1;
     debugLog('Loaded PaintEvents', newPaintEvents);
   }
 

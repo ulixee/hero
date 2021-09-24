@@ -99,6 +99,10 @@ export default class InjectedScripts {
     ]);
   }
 
+  public static installInteractionScript(puppetPage: IPuppetPage): Promise<void> {
+    return puppetPage.addNewDocumentScript(showInteractionScript, true);
+  }
+
   public static async installDetachedScripts(
     puppetPage: IPuppetPage,
     showInteractions = false,
@@ -108,7 +112,7 @@ export default class InjectedScripts {
 
     await Promise.all([
       puppetPage.addNewDocumentScript(detachedInjectedScript, true),
-      showInteractions ? puppetPage.addNewDocumentScript(showInteractionScript, true) : null,
+      showInteractions ? InjectedScripts.installDetachedScripts(puppetPage) : null,
       puppetPage.addNewDocumentScript(`window.blockClickAndSubmit = true;`, true),
     ]);
   }
