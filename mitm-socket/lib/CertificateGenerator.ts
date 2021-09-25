@@ -35,14 +35,16 @@ export default class CertificateGenerator extends BaseIpcHandler {
     await this.waitForConnected;
     certRequestId += 1;
     const id = certRequestId;
+
+    const resolvable = new Resolvable<{ cert: string; expireDate: Date }>(10e3);
+    this.pendingCertsById.set(id, resolvable);
+
     try {
       await this.sendIpcMessage({ id, host });
     } catch (error) {
       if (this.isClosing) return;
       throw error;
     }
-    const resolvable = new Resolvable<{ cert: string; expireDate: Date }>(10e3);
-    this.pendingCertsById.set(id, resolvable);
 
     this.hasWaitForInitListeners = true;
     await this.waitForInit;
