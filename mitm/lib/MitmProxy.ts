@@ -322,7 +322,15 @@ export default class MitmProxy {
         });
       }
 
-      await this.secureContexts[hostname];
+      try {
+        await this.secureContexts[hostname];
+      } catch (error) {
+        if (error instanceof CanceledPromiseError) return;
+        this.onConnectError(request.url, 'ClientToProxy.GenerateCertError', error);
+        this.serverConnects.delete(socket);
+        return;
+      }
+
       if (isHttp2) {
         proxyToProxyPort = this.http2Port;
       } else {
